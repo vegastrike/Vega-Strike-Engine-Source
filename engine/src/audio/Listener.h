@@ -70,9 +70,8 @@ protected:
     struct Dirty {
         Dirty()
                 : location(0),
-                  attributes(0),
-                  gain(0)
-        {
+                attributes(0),
+                gain(0) {
         }
 
         /** position, velocity & direction */
@@ -84,15 +83,13 @@ protected:
         /** min/max angle, radius, pf radius ratios, reference freqs */
         int gain: 1;
 
-        void reset()
-        {
+        void reset() {
             location = 0;
             attributes = 0;
             gain = 0;
         }
 
-        void setAll()
-        {
+        void setAll() {
             location = 1;
             attributes = 1;
             gain = 1;
@@ -106,47 +103,40 @@ public:
     virtual ~Listener();
 
     /** Return the listener's central position in 3D space */
-    LVector3 getPosition() const
-    {
+    LVector3 getPosition() const {
         return position;
     }
 
     /** Set the listener's central position in 3D space */
-    void setPosition(LVector3 x)
-    {
+    void setPosition(LVector3 x) {
         position = x;
         dirty.location = 1;
     }
 
     /** Return the listener's front direction */
-    Vector3 getAtDirection() const
-    {
+    Vector3 getAtDirection() const {
         return atDirection;
     }
 
     /** Return the listener's up direction */
-    Vector3 getUpDirection() const
-    {
+    Vector3 getUpDirection() const {
         return upDirection;
     }
 
     /** Set the listener's orientation */
-    void setOrientation(Vector3 at, Vector3 up)
-    {
+    void setOrientation(Vector3 at, Vector3 up) {
         atDirection = at;
         upDirection = up;
         dirty.location = 1;
     }
 
     /** Return the listener's velocity */
-    Vector3 getVelocity() const
-    {
+    Vector3 getVelocity() const {
         return velocity;
     }
 
     /** Set the listener's velocity */
-    void setVelocity(Vector3 x)
-    {
+    void setVelocity(Vector3 x) {
         velocity = x;
         dirty.location = 1;
     }
@@ -163,67 +153,57 @@ public:
     void setAngleRange(Range<Scalar> r);
 
     /** @see getAngleRange @remarks This version returns cosine-angles rather than radians, much quicker */
-    Range<Scalar> getCosAngleRange() const
-    {
+    Range<Scalar> getCosAngleRange() const {
         return cosAngleRange;
     }
 
     /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
-    void setCosAngleRange(Range<Scalar> r)
-    {
+    void setCosAngleRange(Range<Scalar> r) {
         cosAngleRange = r;
         dirty.attributes = 1;
     }
 
     /** Get the listener's radius */
-    Scalar getRadius() const
-    {
+    Scalar getRadius() const {
         return radius;
     }
 
     /** Set the listener's radius */
-    void setRadius(Scalar r)
-    {
+    void setRadius(Scalar r) {
         radius = r;
         dirty.attributes = 1;
     }
 
     /** Get the listener's gain */
-    Scalar getGain() const
-    {
+    Scalar getGain() const {
         return gain;
     }
 
     /** Set the listener's gain */
-    void setGain(Scalar g)
-    {
+    void setGain(Scalar g) {
         gain = g;
         dirty.gain = 1;
     }
 
 
     /** Get renderer-specific data associated (and destroyed) with this sound source */
-    SharedPtr<RenderableListener> getRenderable() const
-    {
+    SharedPtr<RenderableListener> getRenderable() const {
         return rendererDataPtr;
     }
 
     /** Set renderer-specific data to be associated (and destroyed) with this sound source */
-    void setRenderable(SharedPtr<RenderableListener> ptr)
-    {
+    void setRenderable(SharedPtr<RenderableListener> ptr) {
         rendererDataPtr = ptr;
         dirty.setAll();
     }
 
     /** Get user-specific data associated (and destroyed) with this listener */
-    SharedPtr<UserData> getUserData() const
-    {
+    SharedPtr<UserData> getUserData() const {
         return userDataPtr;
     }
 
     /** Set user-specific data to be associated (and destroyed) with this listener */
-    void setUserData(SharedPtr<UserData> ptr)
-    {
+    void setUserData(SharedPtr<UserData> ptr) {
         userDataPtr = ptr;
     }
 

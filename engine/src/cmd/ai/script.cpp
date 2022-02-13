@@ -46,8 +46,7 @@ using namespace XMLSupport;
 
 typedef vsUMap<string, CCScript *> HardCodedMap;
 
-static HardCodedMap MakeHardCodedScripts()
-{
+static HardCodedMap MakeHardCodedScripts() {
     HardCodedMap tmp;
     typedef std::pair<std::string, CCScript *> MyPair;
     tmp.insert(MyPair("loop around fast", &LoopAroundFast));
@@ -111,8 +110,7 @@ static HardCodedMap MakeHardCodedScripts()
 
 static HardCodedMap hard_coded_scripts = MakeHardCodedScripts();
 
-bool validateHardCodedScript(std::string s)
-{
+bool validateHardCodedScript(std::string s) {
     if (s.length() == 0) {
         return true;
     }
@@ -134,8 +132,7 @@ struct AIScriptXML {
     std::vector<Order *> orders;
 };
 
-float &AIScript::topf()
-{
+float &AIScript::topf() {
     if (!xml->floats.size()) {
         xml->floats.push(xml->defaultf);
         VS_LOG(error, (boost::format("ERROR: Float stack is empty... Will return %1%") % xml->defaultf));
@@ -143,8 +140,7 @@ float &AIScript::topf()
     return xml->floats.top();
 }
 
-void AIScript::popf()
-{
+void AIScript::popf() {
     if (xml->floats.size() <= 0) {
         VS_LOG(error, "ERROR: Float stack is empty... Will not delete");
         return;
@@ -152,8 +148,7 @@ void AIScript::popf()
     xml->floats.pop();
 }
 
-QVector &AIScript::topv()
-{
+QVector &AIScript::topv() {
     if (!xml->vectors.size()) {
         xml->vectors.push(xml->defaultvec);
         VS_LOG(error, (boost::format(
@@ -165,8 +160,7 @@ QVector &AIScript::topv()
     return xml->vectors.top();
 }
 
-void AIScript::popv()
-{
+void AIScript::popv() {
     if (xml->vectors.size() <= 0) {
         VS_LOG(error, "ERROR: Vector stack is empty... Will not delete");
         return;
@@ -174,13 +168,11 @@ void AIScript::popv()
     xml->vectors.pop();
 }
 
-void AIScript::beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void AIScript::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     ((AIScript *) userData)->beginElement(name, AttributeList(atts));
 }
 
-void AIScript::endElement(void *userData, const XML_Char *name)
-{
+void AIScript::endElement(void *userData, const XML_Char *name) {
     ((AIScript *) userData)->endElement(name);
 }
 
@@ -298,8 +290,7 @@ const EnumMap element_map(element_names, 32);
 const EnumMap attribute_map(attribute_names, 19);
 }
 
-void AIScript::beginElement(const string &name, const AttributeList &attributes)
-{
+void AIScript::beginElement(const string &name, const AttributeList &attributes) {
     using namespace AiXml;
     xml->itts = false;
     Unit *tmp;
@@ -568,8 +559,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     }
 }
 
-void AIScript::endElement(const string &name)
-{
+void AIScript::endElement(const string &name) {
     using namespace AiXml;
     QVector temp(0, 0, 0);
     Names elem = (Names) element_map.lookup(name);
@@ -712,26 +702,26 @@ void AIScript::endElement(const string &name)
         case MATCHANG:
             xml->unitlevel--;
             xml->orders.push_back(new Orders::MatchAngularVelocity(parent->ClampAngVel(topv()), ((bool) xml->acc),
-                                                                   xml->terminate));
+                    xml->terminate));
             popv();
             break;
         case FACETARGET:
             xml->unitlevel--;
             if (xml->itts || parent->GetComputerData().itts) {
                 xml->orders.push_back(new Orders::FaceTargetITTS(xml->terminate,
-                                                                 (bool) xml->acc));
+                        (bool) xml->acc));
             } else {
                 xml->orders.push_back(new Orders::FaceTarget(xml->terminate,
-                                                             (bool) xml->acc));
+                        (bool) xml->acc));
             }
             break;
         case MATCHLIN:
             xml->unitlevel--;
             xml->orders.push_back(new Orders::MatchLinearVelocity(parent->ClampVelocity(topv(),
-                                                                                        xml->afterburn),
-                                                                  ((bool) xml->acc),
-                                                                  xml->afterburn,
-                                                                  xml->terminate));
+                            xml->afterburn),
+                    ((bool) xml->acc),
+                    xml->afterburn,
+                    xml->terminate));
             popv();
             break;
         case MATCHVEL:
@@ -740,16 +730,16 @@ void AIScript::endElement(const string &name)
             popv();
             if (xml->lin == 1) {
                 xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(topv(),
-                                                                                      xml->afterburn),
-                                                                parent->ClampAngVel(temp),
-                                                                ((bool) xml->acc),
-                                                                xml->afterburn,
-                                                                xml->terminate));
+                                xml->afterburn),
+                        parent->ClampAngVel(temp),
+                        ((bool) xml->acc),
+                        xml->afterburn,
+                        xml->terminate));
             } else {
                 xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(temp,
-                                                                                      xml->afterburn),
-                                                                parent->ClampAngVel(topv()), ((bool) xml->acc),
-                                                                xml->afterburn, xml->terminate));
+                                xml->afterburn),
+                        parent->ClampAngVel(topv()), ((bool) xml->acc),
+                        xml->afterburn, xml->terminate));
             }
             xml->lin = 0;
             popv();
@@ -784,8 +774,7 @@ void AIScript::endElement(const string &name)
     }
 }
 
-void AIScript::LoadXML()
-{
+void AIScript::LoadXML() {
     static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI", "debug_level", "0"));
     using namespace AiXml;
     using namespace VSFileSystem;
@@ -927,14 +916,12 @@ void AIScript::LoadXML()
 #endif
 }
 
-AIScript::AIScript(const char *scriptname) : Order(Order::MOVEMENT | Order::FACING, STARGET)
-{
+AIScript::AIScript(const char *scriptname) : Order(Order::MOVEMENT | Order::FACING, STARGET) {
     filename = new char[strlen(scriptname) + 1];
     strcpy(filename, scriptname);
 }
 
-AIScript::~AIScript()
-{
+AIScript::~AIScript() {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(debug, (boost::format("sc%1$x") % this));
 #endif
@@ -947,8 +934,7 @@ AIScript::~AIScript()
 #endif
 }
 
-void AIScript::Execute()
-{
+void AIScript::Execute() {
     if (filename) {
         LoadXML();
 #ifdef ORDERDEBUG

@@ -25,8 +25,7 @@
 
 extern VegaConfig *vs_config;
 
-void vs_options::init()
-{
+void vs_options::init() {
     /* General Options */
     write_savegame_on_exit =
             XMLSupport::parse_bool(vs_config->getVariable("general", "write_savegame_on_exit", "true"));
@@ -51,20 +50,20 @@ void vs_options::init()
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
     load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
     intro1 = vs_config->getVariable("general",
-                                    "intro1",
-                                    "Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
+            "intro1",
+            "Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
     intro2 = vs_config->getVariable("general",
-                                    "intro2",
-                                    "The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive. To");
+            "intro2",
+            "The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive. To");
     intro3 = vs_config->getVariable("general",
-                                    "intro3",
-                                    "go to another star system, buy a jump drive for about 10000 credits, fly to a");
+            "intro3",
+            "go to another star system, buy a jump drive for about 10000 credits, fly to a");
     intro4 = vs_config->getVariable("general",
-                                    "intro4",
-                                    "wireframe jump-point and press #8080FFj#000000 to warp to a near star. Target a base or planet;");
+            "intro4",
+            "wireframe jump-point and press #8080FFj#000000 to warp to a near star. Target a base or planet;");
     intro5 = vs_config->getVariable("general",
-                                    "intro5",
-                                    "When you get close a green box will appear. Inside the box, #8080FFd#000000 will land.");
+            "intro5",
+            "When you get close a green box will appear. Inside the box, #8080FFd#000000 will land.");
     debug_fs = XMLSupport::parse_int(vs_config->getVariable("general", "debug_fs", "0"));
     simulation_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "simulation_atom", "0.1"));
     audio_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "audio_atom", "0.05555555556"));
@@ -135,8 +134,8 @@ void vs_options::init()
     reflectivity = XMLSupport::parse_float(vs_config->getVariable("graphics", "reflectivity", ".2"));
     hardware_cursor = XMLSupport::parse_bool(vs_config->getVariable("physics", "hardware_cursor", "false"));
     always_make_smooth_cam = XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                           "always_make_smooth_cam",
-                                                                           "false"));     //Not used yet
+            "always_make_smooth_cam",
+            "false"));     //Not used yet
     precull_dist = XMLSupport::parse_float(vs_config->getVariable("graphics", "precull_dist", "500000000"));
     draw_near_stars_in_front_of_planets =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_near_stars_in_front_of_planets", "false"));
@@ -306,8 +305,8 @@ void vs_options::init()
     auto_pilot_planet_radius_percent =
             XMLSupport::parse_floatf(vs_config->getVariable("physics", "auto_pilot_planet_radius_percent", ".75"));
     campaigns = vs_config->getVariable("physics",
-                                       "campaigns",
-                                       "privateer_campaign vegastrike_campaign");     //WRONG SECTION   change after 0.5
+            "campaigns",
+            "privateer_campaign vegastrike_campaign");     //WRONG SECTION   change after 0.5
     NumRunningSystems = XMLSupport::parse_int(vs_config->getVariable("physics", "NumRunningSystems", "4"));
     InactiveSystemTime = XMLSupport::parse_floatf(vs_config->getVariable("physics", "InactiveSystemTime", "0.3"));
     jump_radius_scale = XMLSupport::parse_floatf(vs_config->getVariable("physics", "jump_radius_scale", "2"));
@@ -379,8 +378,8 @@ void vs_options::init()
     server_ip = vs_config->getVariable("network", "server_ip", "");
     server_port = vs_config->getVariable("network", "server_port", "6777");
     account_server_url = vs_config->getVariable("network",
-                                                "account_server_url",
-                                                "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?");
+            "account_server_url",
+            "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?");
     chat_only_in_network = XMLSupport::parse_bool(vs_config->getVariable("network", "chat_only_in_network", "false"));
 
     /* Cargo Options */
@@ -395,23 +394,20 @@ void vs_options::init()
 
 }
 
-string vs_options::getCallsign(int squadnum)
-{
+string vs_options::getCallsign(int squadnum) {
     return vs_config->getVariable(std::string("player")
-                                          + ((squadnum > 0) ? XMLSupport::tostring(squadnum + 1) : std::string(
-                                                  "")), "callsign", "pilot");
+            + ((squadnum > 0) ? XMLSupport::tostring(squadnum + 1) : std::string(
+                    "")), "callsign", "pilot");
 }
 
-string vs_options::getPlayer(int playernum)
-{
+string vs_options::getPlayer(int playernum) {
     return (vs_config->getVariable("player" + ((playernum > 0) ? XMLSupport::tostring(playernum + 1) : string("")),
-                                   "callsign",
-                                   ""));
+            "callsign",
+            ""));
 }
 
-string vs_options::getPassword(int playernum)
-{
+string vs_options::getPassword(int playernum) {
     return (vs_config->getVariable("player" + ((playernum > 0) ? XMLSupport::tostring(playernum + 1) : string("")),
-                                   "password",
-                                   ""));
+            "password",
+            ""));
 }

@@ -30,8 +30,7 @@ namespace CS {
  * Swap two elements
  */
 template<class T>
-CS_FORCEINLINE_TEMPLATEMETHOD void Swap(T &a, T &b)
-{
+CS_FORCEINLINE_TEMPLATEMETHOD void Swap(T &a, T &b) {
     T tmp = a;
     a = b;
     b = tmp;

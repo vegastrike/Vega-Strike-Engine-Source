@@ -74,17 +74,16 @@ public:
 ///After it has achieved its time to live max it has to slowly fade out and die
     float TTD;
 
-    MeshFX() : GFXLight()
-    {
+    MeshFX() : GFXLight() {
         TTL = TTD = delta = 0;
     }
 
 ///Makes a meshFX given TTL and delta values.
     MeshFX(const float TTL, const float delta, const bool enabled, const GFXColor &vect,
-           const GFXColor &diffuse = GFXColor(0, 0, 0, 1),
-           const GFXColor &specular = GFXColor(0, 0, 0, 1),
-           const GFXColor &ambient = GFXColor(0, 0, 0, 1),
-           const GFXColor &attenuate = GFXColor(1, 0, 0));
+            const GFXColor &diffuse = GFXColor(0, 0, 0, 1),
+            const GFXColor &specular = GFXColor(0, 0, 0, 1),
+            const GFXColor &ambient = GFXColor(0, 0, 0, 1),
+            const GFXColor &attenuate = GFXColor(1, 0, 0));
 ///Merges two MeshFX in a given way to seamlessly blend multiple hits on a shield
     void MergeLights(const MeshFX &other);
 ///updates the growth and death of the FX. Returns false if dead
@@ -105,8 +104,7 @@ struct MeshDrawContext {
     char cloaked;
     char mesh_seq;
     unsigned char damage;     //0 is perfect 255 is dead
-    MeshDrawContext(const Matrix &m) : mat(m), CloakFX(1, 1, 1, 1), cloaked(NONE), damage(0)
-    {
+    MeshDrawContext(const Matrix &m) : mat(m), CloakFX(1, 1, 1, 1), cloaked(NONE), damage(0) {
         useXtraFX = false;
     }
 };
@@ -138,17 +136,17 @@ private:
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
 ///Loads XML data into this mesh.
     void LoadXML(const char *filename,
-                 const Vector &scale,
-                 int faction,
-                 class Flightgroup *fg,
-                 bool orig,
-                 const vector<string> &overrideTexture);
+            const Vector &scale,
+            int faction,
+            class Flightgroup *fg,
+            bool orig,
+            const vector<string> &overrideTexture);
     void LoadXML(VSFileSystem::VSFile &f,
-                 const Vector &scale,
-                 int faction,
-                 class Flightgroup *fg,
-                 bool orig,
-                 const vector<string> &overrideTexture);
+            const Vector &scale,
+            int faction,
+            class Flightgroup *fg,
+            bool orig,
+            const vector<string> &overrideTexture);
 ///loads binary data into this mesh
     void LoadBinary(const char *filename, int faction);
 ///Creates all logos with given XML data info
@@ -166,19 +164,17 @@ public:
     void initTechnique(const string &technique);
 
     // Low-level access to the technique
-    TechniquePtr getTechnique() const
-    {
+    TechniquePtr getTechnique() const {
         return technique;
     }
 
-    void setTechnique(TechniquePtr tech)
-    {
+    void setTechnique(TechniquePtr tech) {
         technique = tech;
     }
 
 private:
     Mesh(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg, bool orig,
-         const std::vector<std::string> &textureOverride = std::vector<std::string>());
+            const std::vector<std::string> &textureOverride = std::vector<std::string>());
 
 protected:
 //only may be called from subclass. orig request may be denied if unit was in past usage. (not likely in the case where a unit must be constructed in orig)
@@ -275,25 +271,21 @@ public:
     double getTextureCumulativeTime() const;
     void setTextureCumulativeTime(double);
 
-    bool getConvex() const
-    {
+    bool getConvex() const {
         return this->convex;
     }
 
     void setConvex(bool b);
 
-    virtual int MeshType() const
-    {
+    virtual int MeshType() const {
         return 0;
     }
 
-    BLENDFUNC getBlendSrc() const
-    {
+    BLENDFUNC getBlendSrc() const {
         return blendSrc;
     }
 
-    BLENDFUNC getBlendDst() const
-    {
+    BLENDFUNC getBlendDst() const {
         return blendDst;
     }
 
@@ -301,12 +293,12 @@ public:
 //private:
 //public:
     static Mesh *LoadMesh(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg,
-                          const std::vector<std::string> &textureOverride = std::vector<std::string>());
+            const std::vector<std::string> &textureOverride = std::vector<std::string>());
     static vector<Mesh *> LoadMeshes(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg,
-                                     const std::vector<std::string> &textureOverride = std::vector<std::string>());
+            const std::vector<std::string> &textureOverride = std::vector<std::string>());
     static vector<Mesh *> LoadMeshes(VSFileSystem::VSFile &f, const Vector &scalex, int faction, class Flightgroup *fg,
-                                     std::string hash_name,
-                                     const std::vector<std::string> &textureOverride = std::vector<std::string>());
+            std::string hash_name,
+            const std::vector<std::string> &textureOverride = std::vector<std::string>());
 
 ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
     void Fork(Mesh *&one, Mesh *&two, float a, float b, float c, float d);
@@ -314,21 +306,18 @@ public:
     virtual ~Mesh();
 
 ///Gets number of specialFX
-    unsigned int numFX() const
-    {
+    unsigned int numFX() const {
         return LocalFX.size();
     }
 
 ///Turns on SpecialFX
     void EnableSpecialFX();
 
-    unsigned int numTextures() const
-    {
+    unsigned int numTextures() const {
         return Decal.size();
     }
 
-    Texture *texture(int i) const
-    {
+    Texture *texture(int i) const {
         return Decal[i];
     }
 
@@ -340,38 +329,35 @@ public:
 //Gets the material back from the mesh.
     const GFXMaterial &GetMaterial() const;
 ///If it has already been drawn this frame
-    GFXBOOL HasBeenDrawn() const
-    {
+    GFXBOOL HasBeenDrawn() const {
         return will_be_drawn;
     }
 
 ///so one can query if it has or not been drawn
-    void UnDraw()
-    {
+    void UnDraw() {
         will_be_drawn = GFXFALSE;
     }
 
 ///Returns center of this mesh
-    Vector const &Position() const
-    {
+    Vector const &Position() const {
         return local_pos;
     }
 
 ///Draws lod pixel wide mesh at Transformation LATER
     void Draw(float lod,
-              const Matrix &m = identity_matrix,
-              float toofar = 1,
-              int cloak = -1,
-              float nebdist = 0,
-              unsigned char damage = 0,
-              bool renormalize_normals = false,
-              const MeshFX *mfx = NULL);  //short fix
+            const Matrix &m = identity_matrix,
+            float toofar = 1,
+            int cloak = -1,
+            float nebdist = 0,
+            unsigned char damage = 0,
+            bool renormalize_normals = false,
+            const MeshFX *mfx = NULL);  //short fix
 ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
     void DrawNow(float lod,
-                 bool centered,
-                 const Matrix &m = identity_matrix,
-                 int cloak = -1,
-                 float nebdist = 0); //short fix
+            bool centered,
+            const Matrix &m = identity_matrix,
+            int cloak = -1,
+            float nebdist = 0); //short fix
 ///Will draw all undrawn meshes of this type
     virtual void ProcessDrawQueue(size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr);
 ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
@@ -382,8 +368,7 @@ public:
     static void ProcessUndrawnMeshes(bool pushSpecialEffects = false, bool nocamerasetup = false);
 
 ///Sets whether or not this unit should be environment mapped
-    void forceCullFace(GFXBOOL newValue)
-    {
+    void forceCullFace(GFXBOOL newValue) {
         if (newValue) {
             envMapAndLit = (envMapAndLit & ~(0x8 | 0x4));
         }
@@ -392,18 +377,15 @@ public:
         }
     }
 
-    GFXBOOL getCullFaceForcedOn() const
-    {
+    GFXBOOL getCullFaceForcedOn() const {
         return (envMapAndLit & 0x4) != 0;
     }
 
-    GFXBOOL getCullFaceForcedOff() const
-    {
+    GFXBOOL getCullFaceForcedOff() const {
         return (envMapAndLit & 0x8) != 0;
     }
 
-    void setEnvMap(GFXBOOL newValue, bool lodcascade = false)
-    {
+    void setEnvMap(GFXBOOL newValue, bool lodcascade = false) {
         envMapAndLit = (newValue ? (envMapAndLit | 0x1) : (envMapAndLit & (~0x1)));
         if (lodcascade && orig) {
             for (int i = 0; i < numlods; i++) {
@@ -412,13 +394,11 @@ public:
         }
     }
 
-    GFXBOOL getEnvMap() const
-    {
+    GFXBOOL getEnvMap() const {
         return (envMapAndLit & 0x1) != 0;
     }
 
-    void setLighting(GFXBOOL newValue, bool lodcascade = false)
-    {
+    void setLighting(GFXBOOL newValue, bool lodcascade = false) {
         envMapAndLit = (newValue ? (envMapAndLit | 0x2) : (envMapAndLit & (~0x2)));
         if (lodcascade && orig) {
             for (int i = 0; i < numlods; i++) {
@@ -427,19 +407,16 @@ public:
         }
     }
 
-    GFXBOOL getLighting() const
-    {
+    GFXBOOL getLighting() const {
         return (envMapAndLit & 0x2) != 0;
     }
 
 ///Returns bounding box values
-    Vector corner_min()
-    {
+    Vector corner_min() {
         return mn;
     }
 
-    Vector corner_max()
-    {
+    Vector corner_max() {
         return mx;
     }
 
@@ -451,13 +428,11 @@ public:
     bool queryBoundingBox(const QVector &start, const QVector &end, const float err) const;
 
 ///returns the radial size of this
-    float rSize() const
-    {
+    float rSize() const {
         return radialSize;
     }
 
-    virtual float clipRadialSize() const
-    {
+    virtual float clipRadialSize() const {
         return radialSize;
     }
 
@@ -465,16 +440,15 @@ public:
     void UpdateFX(float ttime);
 ///Adds a new damage effect with %age damage to the part of the unit. Color specifies the shield oclor
     void AddDamageFX(const Vector &LocalPos,
-                     const Vector &LocalNorm,
-                     const float percentage,
-                     const GFXColor &color = GFXColor(
-                             1,
-                             1,
-                             1,
-                             1));
+            const Vector &LocalNorm,
+            const float percentage,
+            const GFXColor &color = GFXColor(
+                    1,
+                    1,
+                    1,
+                    1));
 
-    void setVirtualBoundingBox(const Vector &mn, const Vector &mx, float rsize)
-    {
+    void setVirtualBoundingBox(const Vector &mn, const Vector &mx, float rsize) {
         radialSize = rsize;
         this->mn = mn;
         this->mx = mx;

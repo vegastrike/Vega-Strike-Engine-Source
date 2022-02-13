@@ -33,8 +33,7 @@
 #include "gfx/animation.h"
 #include "cmd/planet.h"
 
-bool PlanetHasLights(Unit *un)
-{
+bool PlanetHasLights(Unit *un) {
     return ((Planet *) un)->hasLights();
 }
 

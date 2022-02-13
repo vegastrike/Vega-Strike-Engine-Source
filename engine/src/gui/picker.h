@@ -39,8 +39,7 @@ class Scroller;
 //cells in a Picker.
 class PickerCell {
 public:
-    virtual ~PickerCell()
-    {
+    virtual ~PickerCell() {
     }
 
 //The text to be displayed.
@@ -55,19 +54,16 @@ public:
     virtual int tag(void) const = 0;
 
 //Whether to hide or show child cells.
-    virtual bool hideChildren(void) const
-    {
+    virtual bool hideChildren(void) const {
         return m_hideChildren;
     }
 
 //Set whether to hide or show child cells.
-    virtual void setHideChildren(bool f)
-    {
+    virtual void setHideChildren(bool f) {
         m_hideChildren = f;
     }
 
-    PickerCell(bool hideChildren = true) : m_hideChildren(hideChildren)
-    {
+    PickerCell(bool hideChildren = true) : m_hideChildren(hideChildren) {
     }
 
 protected:
@@ -79,8 +75,7 @@ protected:
 //cells in a Picker.
 class PickerCells {
 public:
-    virtual ~PickerCells()
-    {
+    virtual ~PickerCells() {
     }
 
 //Number of cells in this list.
@@ -96,8 +91,8 @@ public:
 //Saves all open children categories in a list.
 //Returns true if this list directly contains the selectedCell.
     bool saveOpenCategories(std::list<std::list<std::string> > &masterList,
-                            const std::list<std::string> &parentHier,
-                            PickerCell *selectedCell) const;
+            const std::list<std::string> &parentHier,
+            PickerCell *selectedCell) const;
 };
 
 //The Picker class supports a list of items that can be
@@ -114,13 +109,11 @@ public:
     virtual void draw(void);
 
 //Get cell collection.
-    virtual PickerCells *cells(void)
-    {
+    virtual PickerCells *cells(void) {
         return m_cells;
     }
 
-    virtual const PickerCells *cells(void) const
-    {
+    virtual const PickerCells *cells(void) const {
         return m_cells;
     }
 
@@ -128,8 +121,7 @@ public:
     virtual void selectCell(PickerCell *cell, bool scroll = false);
 
 //Return the cell that is currently selected.  Can be NULL.
-    virtual PickerCell *selectedCell(void)
-    {
+    virtual PickerCell *selectedCell(void) {
         return m_selectedCell;
     }
 
@@ -147,8 +139,7 @@ public:
 //in some way -- added to, "hide children" changed, etc.
 //It causes this object to figure out from the cell lists which
 //cells are actually being displayed in the control.
-    virtual void setMustRecalc(void)
-    {
+    virtual void setMustRecalc(void) {
         m_needRecalcDisplay = true;
     }
 
@@ -157,68 +148,56 @@ public:
 //Cells are vertically centered in the height alloted.
 //This can be negative, which will remove space, but text
 //quality may be affected.
-    virtual float extraCellHeight(void)
-    {
+    virtual float extraCellHeight(void) {
         return m_extraCellHeight;
     }
 
-    virtual void setExtraCellHeight(float f)
-    {
+    virtual void setExtraCellHeight(float f) {
         m_extraCellHeight = f;
     }
 
 //Background color when cell is selected.
-    virtual GFXColor selectionColor(void)
-    {
+    virtual GFXColor selectionColor(void) {
         return m_selectionColor;
     }
 
-    virtual void setSelectionColor(const GFXColor &c)
-    {
+    virtual void setSelectionColor(const GFXColor &c) {
         m_selectionColor = c;
     }
 
 //Text color when mouse is over button.
-    virtual GFXColor selectionTextColor(void)
-    {
+    virtual GFXColor selectionTextColor(void) {
         return m_selectionTextColor;
     }
 
-    virtual void setSelectionTextColor(const GFXColor &c)
-    {
+    virtual void setSelectionTextColor(const GFXColor &c) {
         m_selectionTextColor = c;
     }
 
 //Background color when mouse is over button.
-    virtual GFXColor highlightColor(void)
-    {
+    virtual GFXColor highlightColor(void) {
         return m_highlightColor;
     }
 
-    virtual void setHighlightColor(const GFXColor &c)
-    {
+    virtual void setHighlightColor(const GFXColor &c) {
         m_highlightColor = c;
     }
 
 //Text color when mouse is over button.
-    virtual GFXColor highlightTextColor(void)
-    {
+    virtual GFXColor highlightTextColor(void) {
         return m_highlightTextColor;
     }
 
-    virtual void setHighlightTextColor(const GFXColor &c)
-    {
+    virtual void setHighlightTextColor(const GFXColor &c) {
         m_highlightTextColor = c;
     }
 
 //Text margins.
-    virtual Size textMargins(void)
-    {
+    virtual Size textMargins(void) {
         return m_textMargins;
     }
 
-    virtual void setTextMargins(const Size &s)
-    {
+    virtual void setTextMargins(const Size &s) {
         m_textMargins = s;
     }
 
@@ -241,8 +220,7 @@ public:
 protected:
 //INTERNAL IMPLEMENTATION
 //The total vertical space between displayed cells.
-    float totalCellHeight(void)
-    {
+    float totalCellHeight(void) {
         return m_font.size() + m_extraCellHeight;
     }
 
@@ -268,8 +246,7 @@ protected:
         int level;              //How much indent for this cell.  0 = no indent.
         PaintText paintText;  //Object containing drawn text.
 
-        DisplayCell(PickerCell *c = NULL, int l = 0) : cell(c), level(l), paintText()
-        {
+        DisplayCell(PickerCell *c = NULL, int l = 0) : cell(c), level(l), paintText() {
         }
     };
 

@@ -28,8 +28,7 @@
 
 using namespace Opcode;
 
-float Segment::SquareDistance(const Point &point, float *t) const
-{
+float Segment::SquareDistance(const Point &point, float *t) const {
     Point Diff = point - mP0;
     Point Dir = mP1 - mP0;
     float fT = Diff | Dir;

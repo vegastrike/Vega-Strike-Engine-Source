@@ -40,13 +40,12 @@
 const float size = 100;
 
 Background::Background(const char *file,
-                       int numstars,
-                       float spread,
-                       const std::string &filename,
-                       const GFXColor &color_,
-                       bool degamma_)
-        : Enabled(true), degamma(degamma_), color(color_), stars(NULL)
-{
+        int numstars,
+        float spread,
+        const std::string &filename,
+        const GFXColor &color_,
+        bool degamma_)
+        : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
     static string starspritetextures = vs_config->getVariable("graphics", "far_stars_sprite_texture", "");
     static float starspritesize =
@@ -54,18 +53,18 @@ Background::Background(const char *file,
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
-                                   XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                                 "use_star_coords",
-                                                                                 "true")) ? filename : "");
+                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
+                                "use_star_coords",
+                                "true")) ? filename : "");
     } else {
         stars =
                 new SpriteStarVlist(numstars,
-                                    200 /*spread*/,
-                                    XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                                  "use_star_coords",
-                                                                                  "true")) ? filename : "",
-                                    starspritetextures,
-                                    starspritesize);
+                        200 /*spread*/,
+                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
+                                "use_star_coords",
+                                "true")) ? filename : "",
+                        starspritetextures,
+                        starspritesize);
     }
     up = left = down = front = right = back = NULL;
 
@@ -129,13 +128,11 @@ Background::Background(const char *file,
 #endif
 }
 
-void Background::EnableBG(bool tf)
-{
+void Background::EnableBG(bool tf) {
     Enabled = tf;
 }
 
-Background::~Background()
-{
+Background::~Background() {
 #ifndef NV_CUBE_MAP
     if (up != nullptr) {
         delete up;
@@ -172,8 +169,7 @@ Background::~Background()
     }
 }
 
-Background::BackgroundClone Background::Cache()
-{
+Background::BackgroundClone Background::Cache() {
     BackgroundClone ret;
 #ifndef NV_CUBE_MAP
     ret.backups[0] = up ? up->Clone() : NULL;
@@ -190,8 +186,7 @@ Background::BackgroundClone Background::Cache()
     return ret;
 }
 
-void Background::BackgroundClone::FreeClone()
-{
+void Background::BackgroundClone::FreeClone() {
 #ifndef NV_CUBE_MAP
     for (int i = 0; i < 7; ++i)
         if (backups[i]) {
@@ -203,8 +198,7 @@ void Background::BackgroundClone::FreeClone()
 
 }
 
-void Background::Draw()
-{
+void Background::Draw() {
     GFXClear(Enabled ? GFXFALSE : GFXTRUE);
     if (Enabled) {
         if (degamma) {
@@ -368,7 +362,7 @@ void Background::Draw()
             skybox_rendering_sequence[4].tex = back;
             skybox_rendering_sequence[5].tex = down;
             for (size_t skr = 0; skr < sizeof(skybox_rendering_sequence) / sizeof(skybox_rendering_sequence[0]);
-                 skr++) {
+                    skr++) {
                 Texture *tex = skybox_rendering_sequence[skr].tex;
 
 #ifdef NV_CUBE_MAP

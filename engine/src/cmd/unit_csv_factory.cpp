@@ -35,8 +35,7 @@ std::map<std::string, std::map<std::string, std::string>> UnitCSVFactory::units;
 // This is probably unique enough to ensure no collision
 std::string UnitCSVFactory::DEFAULT_ERROR_VALUE = "UnitCSVFactory::_GetVariable DEFAULT_ERROR_VALUE";
 
-void ExtractColumns(std::string &line)
-{
+void ExtractColumns(std::string &line) {
     std::string data(line);
     std::string delimiter = ",";
     size_t pos = 0;
@@ -56,8 +55,7 @@ int line_num = 1;
  * This code won't work if there are quotes within quotes.
  * @param line - the input string
  */
-std::vector<std::string> ProcessLine(std::string &line)
-{
+std::vector<std::string> ProcessLine(std::string &line) {
     std::string data(line);
     std::vector<std::string> cells;
 
@@ -95,8 +93,7 @@ std::vector<std::string> ProcessLine(std::string &line)
     return cells;
 }
 
-void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game)
-{
+void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game) {
     std::vector<std::string> columns;
     std::string data(d);
     std::string delimiter = "\n";

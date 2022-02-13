@@ -44,8 +44,7 @@
 #include "mission.h"
 #include "easydom.h"
 
-void Mission::checkStatement(missionNode *node, int mode)
-{
+void Mission::checkStatement(missionNode *node, int mode) {
     //no difference
     if (node->tag == DTAG_IF) {
         doIf(node, mode);
@@ -71,8 +70,7 @@ void Mission::checkStatement(missionNode *node, int mode)
     }
 }
 
-void Mission::doIf(missionNode *node, int mode)
-{
+void Mission::doIf(missionNode *node, int mode) {
     if (mode == SCRIPT_PARSE) {
         vector<easyDomNode *>::const_iterator siter;
 
@@ -113,8 +111,7 @@ void Mission::doIf(missionNode *node, int mode)
     }
 }
 
-void Mission::doWhile(missionNode *node, int mode)
-{
+void Mission::doWhile(missionNode *node, int mode) {
     if (mode == SCRIPT_PARSE) {
         int len = node->subnodes.size();
         if (len != 2) {

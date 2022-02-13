@@ -42,8 +42,7 @@ struct GFXVertex {
     float i, j, k;
     float s, t;
 
-    GFXVertex operator*(float s)
-    {
+    GFXVertex operator*(float s) {
         GFXVertex ret(*this);
         ret.x *= s;
         ret.y *= s;
@@ -508,8 +507,7 @@ const EnumMap attribute_map(attribute_names, 94);
 typedef pair<float, std::string> fs;
 typedef vector<fs> lookuptable;
 
-lookuptable shieldLookup()
-{
+lookuptable shieldLookup() {
     lookuptable r;
     r.push_back(fs(5, ""));
     r.push_back(fs(100, "_Level1"));
@@ -525,8 +523,7 @@ lookuptable shieldLookup()
     return r;
 }
 
-lookuptable hullLookup()
-{
+lookuptable hullLookup() {
     lookuptable r;
     r.push_back(fs(120, "hull"));
     r.push_back(fs(200, "polymer_hull"));
@@ -534,8 +531,7 @@ lookuptable hullLookup()
     return r;
 }
 
-lookuptable engineLookup()
-{
+lookuptable engineLookup() {
     lookuptable r;
     r.push_back(fs(41, "_level_1"));
     r.push_back(fs(71, "_level_2"));
@@ -550,8 +546,7 @@ lookuptable engineLookup()
     return r;
 }
 
-lookuptable engineLimitLookup()
-{
+lookuptable engineLimitLookup() {
     lookuptable r;
     r.push_back(fs(41, "100"));
     r.push_back(fs(71, "300"));
@@ -566,8 +561,7 @@ lookuptable engineLimitLookup()
     return r;
 }
 
-std::string LookUp(const lookuptable &a, float x)
-{
+std::string LookUp(const lookuptable &a, float x) {
     for (unsigned int i = 0; i < a.size(); i++) {
         if (x < (a[i].first) || i == a.size() - 1) {
             return a[i].second;
@@ -584,25 +578,21 @@ float globalmassrescale = 1; //go go... ok, at this point, it's obvious I'm not 
 #define strcasecmp stricmp
 #endif
 
-bool xeq(std::string s, std::string t)
-{
+bool xeq(std::string s, std::string t) {
     return strtoupper(s) == strtoupper(t);
 }
 
-float xpf(std::string s)
-{
+float xpf(std::string s) {
     return XMLSupport::parse_float(s);
 }
 
-int xpi(std::string s)
-{
+int xpi(std::string s) {
     return XMLSupport::parse_int(s);
 }
 
 #define xts(s) ( XMLSupport::tostring( s ) )
 
-std::string RemoveAutotracking(std::string s)
-{
+std::string RemoveAutotracking(std::string s) {
     s = strtoupper(s);
     int pos;
     int len = strlen("AUTOTRACKING");
@@ -612,8 +602,7 @@ std::string RemoveAutotracking(std::string s)
     return s;
 }
 
-void Tokenize(const string &str, vector<string> &tokens, const string &delimiters = " ")
-{
+void Tokenize(const string &str, vector<string> &tokens, const string &delimiters = " ") {
     //Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiters, 0);
     //Find first "non-delimiter".
@@ -628,8 +617,7 @@ void Tokenize(const string &str, vector<string> &tokens, const string &delimiter
     }
 }
 
-std::string CheckBasicSizes(const std::string tokens)
-{
+std::string CheckBasicSizes(const std::string tokens) {
     if (tokens.find("small") != string::npos) {
         return "small";
     }
@@ -650,17 +638,14 @@ std::string CheckBasicSizes(const std::string tokens)
 
 class VCString : public std::string {
 public:
-    VCString()
-    {
+    VCString() {
     }
 
-    VCString(const string &s) : string(s)
-    {
+    VCString(const string &s) : string(s) {
     }
 };
 
-std::map<VCString, VCString> parseTurretSizes()
-{
+std::map<VCString, VCString> parseTurretSizes() {
     std::map<VCString, VCString> t;
     FILE *fp = fopen("turretsize.txt", "r");
     if (fp) {
@@ -690,8 +675,7 @@ std::map<VCString, VCString> parseTurretSizes()
     return t;
 }
 
-std::string getTurretSize(const std::string &size)
-{
+std::string getTurretSize(const std::string &size) {
     static std::map<VCString, VCString> turretmap = parseTurretSizes();
     std::map<VCString, VCString>::iterator h = turretmap.find(size);
     if (h != turretmap.end()) {
@@ -712,8 +696,7 @@ std::string getTurretSize(const std::string &size)
     return "capitol";
 }
 
-void UnitBeginElement(const string &name, const AttributeList &attributes, XML *xml)
-{
+void UnitBeginElement(const string &name, const AttributeList &attributes, XML *xml) {
     AttributeList::const_iterator iter;
     UnitNS::Names elem = (UnitNS::Names) UnitNS::element_map.lookup(name);
     UnitNS::Names top;
@@ -846,8 +829,7 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
     }
 }
 
-void UnitEndElement(const string &name, XML *xml)
-{
+void UnitEndElement(const string &name, XML *xml) {
     if (xeq(name, "unit")) {
         fprintf(xml->bfp, "<Upgrade file=\"mult_general_downgrade\"/>\n");
         fprintf(xml->tfp, "<Upgrade file=\"mult_general_upgrade\"/>\n");
@@ -900,8 +882,7 @@ void UnitEndElement(const string &name, XML *xml)
     }
 }
 
-void beginElement(const string &name, const AttributeList &attributes, XML *xml)
-{
+void beginElement(const string &name, const AttributeList &attributes, XML *xml) {
     AttributeList::const_iterator iter;
     XML::Names elem = (XML::Names) XML::element_map.lookup(name);
     XML::Names top;
@@ -1020,8 +1001,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
     }
 }
 
-void endElement(const string &name, XML *xml)
-{
+void endElement(const string &name, XML *xml) {
     xml->state_stack.pop_back();
     XML::Names elem = (XML::Names) XML::element_map.lookup(name);
 
@@ -1071,28 +1051,23 @@ void endElement(const string &name, XML *xml)
     }
 }
 
-void beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     beginElement(name, AttributeList(atts), (XML *) userData);
 }
 
-void endElement(void *userData, const XML_Char *name)
-{
+void endElement(void *userData, const XML_Char *name) {
     endElement(name, (XML *) userData);
 }
 
-void unitBeginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void unitBeginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     UnitBeginElement(name, AttributeList(atts), (XML *) userData);
 }
 
-void unitEndElement(void *userData, const XML_Char *name)
-{
+void unitEndElement(void *userData, const XML_Char *name) {
     UnitEndElement(name, (XML *) userData);
 }
 
-void LoadXML(const char *filename, XML &xml)
-{
+void LoadXML(const char *filename, XML &xml) {
     const int chunk_size = 16384;
     FILE *inFile = fopen(filename, "r");
     if (!inFile) {
@@ -1115,8 +1090,7 @@ void LoadXML(const char *filename, XML &xml)
     //Now, copy everything into the mesh data structures
 }
 
-void UnitLoadXML(const char *filename, XML &xml)
-{
+void UnitLoadXML(const char *filename, XML &xml) {
     const int chunk_size = 16384;
     FILE *inFile = fopen(filename, "r");
     if (!inFile) {
@@ -1139,8 +1113,7 @@ void UnitLoadXML(const char *filename, XML &xml)
     //Now, copy everything into the mesh data structures
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         XML blah;
         blah.maxhull = 100;

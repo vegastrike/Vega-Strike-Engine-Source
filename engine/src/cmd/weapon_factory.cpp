@@ -60,8 +60,7 @@ bool gamma_needed(int gamma, int count, int depth)
                 -100);
 }*/
 
-WeaponFactory::WeaponFactory(std::string filename)
-{
+WeaponFactory::WeaponFactory(std::string filename) {
     pt::ptree tree;
     pt::read_xml(filename, tree);
 
@@ -74,8 +73,7 @@ WeaponFactory::WeaponFactory(std::string filename)
     }
 }
 
-void WeaponFactory::parse(ptree tree)
-{
+void WeaponFactory::parse(ptree tree) {
     static float gun_speed =
             game_options.gun_speed * (game_options.gun_speed_adjusted_game_speed ? game_options.game_speed : 1);
     static int gamma = (int) (20 * game_options.weapon_gamma);

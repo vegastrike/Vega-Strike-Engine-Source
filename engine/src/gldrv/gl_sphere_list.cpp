@@ -26,8 +26,7 @@
 #include "gl_globals.h"
 #include <assert.h>
 
-void GFXSphereVertexList::Draw()
-{
+void GFXSphereVertexList::Draw() {
     glEnable(GL_NORMALIZE);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -37,8 +36,7 @@ void GFXSphereVertexList::Draw()
     glDisable(GL_NORMALIZE);
 }
 
-void GFXSphereVertexList::Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets)
-{
+void GFXSphereVertexList::Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets) {
     glEnable(GL_NORMALIZE);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -48,15 +46,13 @@ void GFXSphereVertexList::Draw(enum POLYTYPE *poly, const INDEX index, const int
     glDisable(GL_NORMALIZE);
 }
 
-void GFXSphereVertexList::BeginDrawState(GFXBOOL lock)
-{
+void GFXSphereVertexList::BeginDrawState(GFXBOOL lock) {
     //
 
     sphere->BeginDrawState(lock);
 }
 
-void GFXSphereVertexList::GetPolys(GFXVertex **RESTRICT vert, int *RESTRICT numPolys, int *RESTRICT numTris)
-{
+void GFXSphereVertexList::GetPolys(GFXVertex **RESTRICT vert, int *RESTRICT numPolys, int *RESTRICT numTris) {
     sphere->GetPolys(vert, numPolys, numTris);
     int numt = *numTris;
     int numq = *numPolys - numt;
@@ -68,24 +64,20 @@ void GFXSphereVertexList::GetPolys(GFXVertex **RESTRICT vert, int *RESTRICT numP
     }
 }
 
-void GFXSphereVertexList::EndDrawState(GFXBOOL lock)
-{
+void GFXSphereVertexList::EndDrawState(GFXBOOL lock) {
     //
     sphere->EndDrawState(lock);
 }
 
-GFXVertexList::VDAT *GFXSphereVertexList::BeginMutate(int offset)
-{
+GFXVertexList::VDAT *GFXSphereVertexList::BeginMutate(int offset) {
     return NULL;
 }
 
-void GFXSphereVertexList::EndMutate(int newsize)
-{
+void GFXSphereVertexList::EndMutate(int newsize) {
     assert(0);
 }
 
-GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideout, bool reverse_normals)
-{
+GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideout, bool reverse_normals) {
     this->radius = radius;
     radius = 100000.0f;
     static vector<GFXVertexList *> vlists[4];
@@ -237,8 +229,7 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
     offsets = sphere->offsets;
 }
 
-GFXSphereVertexList::~GFXSphereVertexList()
-{
+GFXSphereVertexList::~GFXSphereVertexList() {
     numVertices = 0;
     data.vertices = 0;
     data.colors = 0;

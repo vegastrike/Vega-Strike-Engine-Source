@@ -41,13 +41,11 @@ void ClickButton(GtkWidget *w, struct catagory *CUR);
 
 static GtkWidget *window, *main_vbox;
 
-void exit_0(GtkWidget *w, void *arg)
-{
+void exit_0(GtkWidget *w, void *arg) {
     exit(0);
 }
 
-void InitGraphics(int *argc, char ***argv)
-{
+void InitGraphics(int *argc, char ***argv) {
     gtk_init(argc, argv);
     GET_TITLE; // sets title; uses sprintf, not snprintf -- //[MSVC-Warn]
     GET_STATIC_TEXT;
@@ -73,8 +71,7 @@ void InitGraphics(int *argc, char ***argv)
     gtk_widget_show(window);
 }
 
-void myexit(int exitval)
-{
+void myexit(int exitval) {
     std::string readme_path(CONFIG.data_path);
 
 #ifdef _WIN32
@@ -87,8 +84,7 @@ void myexit(int exitval)
     exit(0);//exitval);
 }
 
-void ShowMain(void)
-{
+void ShowMain(void) {
     struct group *CURRENT;
     int count = 1;
     int column = 1;
@@ -162,8 +158,7 @@ void ShowMain(void)
 
 }
 
-void AddCats(GtkWidget *vbox, char *group, char *def)
-{
+void AddCats(GtkWidget *vbox, char *group, char *def) {
     struct catagory *CUR;
     char *info = NULL;
 #ifdef USE_RADIO
@@ -215,8 +210,7 @@ void AddCats(GtkWidget *vbox, char *group, char *def)
     } while ((CUR = CUR->next) != nullptr);
 }
 
-void ClickButton(GtkWidget *w, struct catagory *CUR)
-{
+void ClickButton(GtkWidget *w, struct catagory *CUR) {
     struct catagory *OLD;
     struct group *NEW;
     char *new_value, *new_text, *old;

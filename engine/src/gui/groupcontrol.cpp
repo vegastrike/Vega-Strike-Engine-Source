@@ -29,15 +29,13 @@
 #include "window.h"
 
 //Add a new control to this collection.
-void GroupControl::addChild(Control *child)
-{
+void GroupControl::addChild(Control *child) {
     m_controls.push_back(child);
 }
 
 //Delete a control that is in this collection.
 //Returns true if successful.
-bool GroupControl::deleteControl(Control *c)
-{
+bool GroupControl::deleteControl(Control *c) {
     std::vector<Control *>::iterator iter;
     for (iter = m_controls.begin(); iter != m_controls.end(); iter++) {
         Control *currentControl = *iter;
@@ -59,8 +57,7 @@ bool GroupControl::deleteControl(Control *c)
 }
 
 //Take a control away from this collection and save it elsewhere.
-Control *GroupControl::removeControlFromGroup(Control *c)
-{
+Control *GroupControl::removeControlFromGroup(Control *c) {
     std::vector<Control *>::iterator iter;
     for (iter = m_controls.begin(); iter != m_controls.end(); iter++) {
         Control *currentControl = *iter;
@@ -83,8 +80,7 @@ Control *GroupControl::removeControlFromGroup(Control *c)
 
 //Find a control using its id.  NULL returned if none found.
 //Note that the control may be hidden.
-Control *GroupControl::findControlById(const std::string &id)
-{
+Control *GroupControl::findControlById(const std::string &id) {
     std::vector<Control *>::iterator iter;
     for (iter = m_controls.begin(); iter != m_controls.end(); iter++) {
         Control *currentControl = *iter;
@@ -106,8 +102,7 @@ Control *GroupControl::findControlById(const std::string &id)
 
 //Draw the control.
 //This should not draw outside its rectangle!
-void GroupControl::draw(void)
-{
+void GroupControl::draw(void) {
     std::vector<Control *>::iterator iter;
     for (iter = m_controls.begin(); iter != m_controls.end(); iter++) {
         Control *currentControl = *iter;
@@ -119,8 +114,7 @@ void GroupControl::draw(void)
 }
 
 //OVERRIDES
-bool GroupControl::processMouseDown(const InputEvent &event)
-{
+bool GroupControl::processMouseDown(const InputEvent &event) {
     std::vector<Control *>::reverse_iterator iter;
     bool retval = false;
     //Give this to the appropriate control.
@@ -142,8 +136,7 @@ bool GroupControl::processMouseDown(const InputEvent &event)
     return retval;
 }
 
-bool GroupControl::processMouseUp(const InputEvent &event)
-{
+bool GroupControl::processMouseUp(const InputEvent &event) {
     std::vector<Control *>::reverse_iterator iter;
     //Give this to the appropriate control.
     for (iter = m_controls.rbegin(); iter != m_controls.rend(); iter++) {
@@ -164,8 +157,7 @@ bool GroupControl::processMouseUp(const InputEvent &event)
     return false;
 }
 
-bool GroupControl::processMouseMove(const InputEvent &event)
-{
+bool GroupControl::processMouseMove(const InputEvent &event) {
     std::vector<Control *>::reverse_iterator iter;
     //Give this to the appropriate control.
     for (iter = m_controls.rbegin(); iter != m_controls.rend(); iter++) {
@@ -186,8 +178,7 @@ bool GroupControl::processMouseMove(const InputEvent &event)
     return false;
 }
 
-bool GroupControl::processMouseDrag(const InputEvent &event)
-{
+bool GroupControl::processMouseDrag(const InputEvent &event) {
     std::vector<Control *>::reverse_iterator iter;
     //Give this to the appropriate control.
     for (iter = m_controls.rbegin(); iter != m_controls.rend(); iter++) {
@@ -208,8 +199,7 @@ bool GroupControl::processMouseDrag(const InputEvent &event)
     return false;
 }
 
-GroupControl::~GroupControl()
-{
+GroupControl::~GroupControl() {
     for (vector<Control *>::size_type i = 0; i < m_controls.size(); ++i) {
         EventManager::addToDeleteQueue(m_controls[i]);
     }

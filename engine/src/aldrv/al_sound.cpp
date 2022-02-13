@@ -91,21 +91,18 @@ typedef struct                                   /* WAV Chunk-header */
     ALuint Size;
 } WAVChunkHdr_Struct;
 
-void SwapWords(unsigned int *puint)
-{
+void SwapWords(unsigned int *puint) {
     unsigned int tempint = POSH_LittleU32(*puint);
     *puint = tempint;
 }
 
-void SwapBytes(unsigned short *pshort)
-{
+void SwapBytes(unsigned short *pshort) {
     unsigned short tempshort = POSH_LittleU16(*pshort);
     *pshort = tempshort;
 }
 
 void blutLoadWAVMemory(ALbyte *memory, ALenum
-*format, ALvoid **data, ALsizei *size, ALsizei *freq, ALboolean *loop)
-{
+*format, ALvoid **data, ALsizei *size, ALsizei *freq, ALboolean *loop) {
     WAVChunkHdr_Struct ChunkHdr;
     WAVFmtExHdr_Struct FmtExHdr;
     WAVFileHdr_Struct FileHdr;
@@ -139,8 +136,8 @@ void blutLoadWAVMemory(ALbyte *memory, ALenum
                         SwapBytes(&FmtHdr.BlockAlign);
 
                         *format = (FmtHdr.Channels == 1
-                                   ? (FmtHdr.BitsPerSample == 8 ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16)
-                                   : (FmtHdr.BitsPerSample == 8 ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16));
+                                ? (FmtHdr.BitsPerSample == 8 ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16)
+                                : (FmtHdr.BitsPerSample == 8 ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16));
                         *freq = FmtHdr.SamplesPerSec;
                         Stream += ChunkHdr.Size;
                     } else {
@@ -214,8 +211,7 @@ std::vector<unsigned int> dirtysounds;
 std::vector<OurSound> sounds;
 std::vector<ALuint> buffers;
 
-static void convertToLittle(unsigned int tmp, char *data)
-{
+static void convertToLittle(unsigned int tmp, char *data) {
     data[0] = (char) (tmp % 256);
     data[1] = (char) ((tmp / 256) % 256);
     data[2] = (char) ((tmp / 65536) % 256);
@@ -229,8 +225,7 @@ struct fake_file {
     size_t loc;
 };
 
-size_t mem_read(void *ptr, size_t size, size_t nmemb, void *datasource)
-{
+size_t mem_read(void *ptr, size_t size, size_t nmemb, void *datasource) {
     fake_file *fp = (fake_file *) datasource;
     if (fp->loc + size > fp->size) {
         size_t tmp = fp->size - fp->loc;
@@ -246,24 +241,20 @@ size_t mem_read(void *ptr, size_t size, size_t nmemb, void *datasource)
     }
 }
 
-int mem_close(void *)
-{
+int mem_close(void *) {
     return 0;
 }
 
-long mem_tell(void *datasource)
-{
+long mem_tell(void *datasource) {
     fake_file *fp = (fake_file *) datasource;
     return (long) fp->loc;
 }
 
-int cant_seek(void *datasource, ogg_int64_t offset, int whence)
-{
+int cant_seek(void *datasource, ogg_int64_t offset, int whence) {
     return -1;
 }
 
-int mem_seek(void *datasource, ogg_int64_t offset, int whence)
-{
+int mem_seek(void *datasource, ogg_int64_t offset, int whence) {
     fake_file *fp = (fake_file *) datasource;
     if (whence == SEEK_END) {
         if (offset < 0) {
@@ -306,8 +297,7 @@ int mem_seek(void *datasource, ogg_int64_t offset, int whence)
 
 #endif
 
-static void ConvertFormat(vector<char> &ogg)
-{
+static void ConvertFormat(vector<char> &ogg) {
     vector<char> converted;
     if (ogg.size() > 4) {
         if (ogg[0] == 'O' && ogg[1] == 'g' && ogg[2] == 'g' && ogg[3] == 'S') {
@@ -395,13 +385,13 @@ static void ConvertFormat(vector<char> &ogg)
                 int signedvalue = 1;
                 int bitstream = 0;
                 while ((bytesread =
-                                ov_read(&vf,
-                                        &converted[converted.size() - segmentsize],
-                                        segmentsize,
-                                        0,
-                                        samples / 8,
-                                        signedvalue,
-                                        &bitstream)) > 0) {
+                        ov_read(&vf,
+                                &converted[converted.size() - segmentsize],
+                                segmentsize,
+                                0,
+                                samples / 8,
+                                signedvalue,
+                                &bitstream)) > 0) {
                     int numtoerase = 0;
                     if (bytesread < segmentsize) {
                         numtoerase = segmentsize - bytesread;
@@ -423,8 +413,7 @@ static void ConvertFormat(vector<char> &ogg)
     }
 }
 
-static int LoadSound(ALuint buffer, bool looping, bool music)
-{
+static int LoadSound(ALuint buffer, bool looping, bool music) {
     unsigned int i;
     if (!dirtysounds.empty()) {
         i = dirtysounds.back();
@@ -455,8 +444,7 @@ static int LoadSound(ALuint buffer, bool looping, bool music)
 
 using namespace VSFileSystem;
 
-bool AUDLoadSoundFile(const char *s, struct AUDSoundProperties *info, bool use_fileptr)
-{
+bool AUDLoadSoundFile(const char *s, struct AUDSoundProperties *info, bool use_fileptr) {
     VS_LOG(trace, (boost::format("Loading sound file %1%") % s));
 
     info->success = false;
@@ -527,8 +515,7 @@ bool AUDLoadSoundFile(const char *s, struct AUDSoundProperties *info, bool use_f
 #endif
 }
 
-int AUDBufferSound(const struct AUDSoundProperties *info, bool music)
-{
+int AUDBufferSound(const struct AUDSoundProperties *info, bool music) {
 #ifdef HAVE_AL
     ALuint wavbuf = 0;
     alGenBuffers(1, &wavbuf);
@@ -549,8 +536,7 @@ unsigned int
 #endif
         nil_wavebuf = 0;
 
-int AUDCreateSoundWAV(const std::string &s, const bool music, const bool LOOP)
-{
+int AUDCreateSoundWAV(const std::string &s, const bool music, const bool LOOP) {
 #ifdef HAVE_AL
 #ifdef SOUND_DEBUG
     VS_LOG(trace, "AUDCreateSoundWAV:: ");
@@ -595,18 +581,15 @@ int AUDCreateSoundWAV(const std::string &s, const bool music, const bool LOOP)
     return -1;
 }
 
-int AUDCreateSoundWAV(const std::string &s, const bool LOOP)
-{
+int AUDCreateSoundWAV(const std::string &s, const bool LOOP) {
     return AUDCreateSoundWAV(s, false, LOOP);
 }
 
-int AUDCreateMusicWAV(const std::string &s, const bool LOOP)
-{
+int AUDCreateMusicWAV(const std::string &s, const bool LOOP) {
     return AUDCreateSoundWAV(s, true, LOOP);
 }
 
-int AUDCreateSoundMP3(const std::string &s, const bool music, const bool LOOP)
-{
+int AUDCreateSoundMP3(const std::string &s, const bool music, const bool LOOP) {
 #ifdef HAVE_AL
     assert(0);
     if ((game_options.Music && !music) || (game_options.Music && music)) {
@@ -650,18 +633,15 @@ int AUDCreateSoundMP3(const std::string &s, const bool music, const bool LOOP)
     return -1;
 }
 
-int AUDCreateSoundMP3(const std::string &s, const bool LOOP)
-{
+int AUDCreateSoundMP3(const std::string &s, const bool LOOP) {
     return AUDCreateSoundMP3(s, false, LOOP);
 }
 
-int AUDCreateMusicMP3(const std::string &s, const bool LOOP)
-{
+int AUDCreateMusicMP3(const std::string &s, const bool LOOP) {
     return AUDCreateSoundMP3(s, true, LOOP);
 }
 
-int AUDCreateSound(const std::string &s, const bool LOOP)
-{
+int AUDCreateSound(const std::string &s, const bool LOOP) {
     if (s.end() - 1 >= s.begin()) {
         if (*(s.end() - 1) == '3') {
             return AUDCreateSoundMP3(s, LOOP);
@@ -672,8 +652,7 @@ int AUDCreateSound(const std::string &s, const bool LOOP)
     return -1;
 }
 
-int AUDCreateMusic(const std::string &s, const bool LOOP)
-{
+int AUDCreateMusic(const std::string &s, const bool LOOP) {
     if (s.end() - 1 >= s.begin()) {
         if (*(s.end() - 1) == 'v') {
             return AUDCreateMusicWAV(s, LOOP);
@@ -685,8 +664,7 @@ int AUDCreateMusic(const std::string &s, const bool LOOP)
 }
 
 ///copies other sound loaded through AUDCreateSound
-int AUDCreateSound(int sound, const bool LOOP /*=false*/ )
-{
+int AUDCreateSound(int sound, const bool LOOP /*=false*/ ) {
 #ifdef HAVE_AL
     if (AUDIsPlaying(sound)) {
         AUDStopPlaying(sound);
@@ -700,8 +678,7 @@ int AUDCreateSound(int sound, const bool LOOP /*=false*/ )
 
 extern std::vector<int> soundstodelete;
 
-void AUDDeleteSound(int sound, bool music)
-{
+void AUDDeleteSound(int sound, bool music) {
 #ifdef HAVE_AL
     if (sound >= 0 && sound < (int) sounds.size()) {
         if (AUDIsPlaying(sound)) {
@@ -745,8 +722,7 @@ void AUDDeleteSound(int sound, bool music)
 #endif
 }
 
-void AUDAdjustSound(const int sound, const QVector &pos, const Vector &vel)
-{
+void AUDAdjustSound(const int sound, const QVector &pos, const Vector &vel) {
 
 #ifdef HAVE_AL
     if (sound >= 0 && sound < (int) sounds.size()) {
@@ -776,8 +752,7 @@ void AUDAdjustSound(const int sound, const QVector &pos, const Vector &vel)
 #endif
 }
 
-void AUDStreamingSound(const int sound)
-{
+void AUDStreamingSound(const int sound) {
 #ifdef HAVE_AL
     if (sound >= 0 && sound < (int) sounds.size() && sounds[sound].source) {
         alSource3f(sounds[sound].source, AL_POSITION, 0.0, 0.0, 0.0);
@@ -789,8 +764,7 @@ void AUDStreamingSound(const int sound)
 #endif
 }
 
-bool starSystemOK()
-{
+bool starSystemOK() {
     if (!_Universe || !_Universe->AccessCockpit(0)) {
         return true;
     }          //No Universe yet, so game is loading.
@@ -802,8 +776,7 @@ bool starSystemOK()
     return playa->getStarSystem() == _Universe->activeStarSystem();
 }
 
-int AUDHighestSoundPlaying()
-{
+int AUDHighestSoundPlaying() {
     int retval = -1;
 #ifdef HAVE_AL
     unsigned int s = ::sounds.size();
@@ -816,8 +789,7 @@ int AUDHighestSoundPlaying()
     return retval;
 }
 
-void AUDStopAllSounds(int except_this_one)
-{
+void AUDStopAllSounds(int except_this_one) {
 #ifdef HAVE_AL
     unsigned int s = ::sounds.size();
     for (unsigned int i = 0; i < s; ++i) {
@@ -828,8 +800,7 @@ void AUDStopAllSounds(int except_this_one)
 #endif
 }
 
-bool AUDIsPlaying(const int sound)
-{
+bool AUDIsPlaying(const int sound) {
 #ifdef HAVE_AL
     if (sound >= 0 && sound < (int) sounds.size()) {
         if (!sounds[sound].source) {
@@ -848,8 +819,7 @@ bool AUDIsPlaying(const int sound)
     return false;
 }
 
-void AUDStopPlaying(const int sound)
-{
+void AUDStopPlaying(const int sound) {
 #ifdef HAVE_AL
     if (sound >= 0 && sound < (int) sounds.size()) {
 #ifdef SOUND_DEBUG
@@ -866,8 +836,7 @@ void AUDStopPlaying(const int sound)
 #endif
 }
 
-static bool AUDReclaimSource(const int sound, bool high_priority = false)
-{
+static bool AUDReclaimSource(const int sound, bool high_priority = false) {
 #ifdef HAVE_AL
     if (sounds[sound].source == (ALuint) 0) {
         if (!sounds[sound].buffer) {
@@ -915,8 +884,7 @@ static bool AUDReclaimSource(const int sound, bool high_priority = false)
     return false;     //silly
 }
 
-void AUDStartPlaying(const int sound)
-{
+void AUDStartPlaying(const int sound) {
 #ifdef SOUND_DEBUG
     VS_LOG(trace, (boost::format("AUDStartPlaying(%1$d)") % sound));
 #endif
@@ -938,8 +906,7 @@ void AUDStartPlaying(const int sound)
 #endif
 }
 
-void AUDPlay(const int sound, const QVector &pos, const Vector &vel, const float gain)
-{
+void AUDPlay(const int sound, const QVector &pos, const Vector &vel, const float gain) {
 #ifdef HAVE_AL
     char tmp;
     if (sound < 0) {
@@ -963,7 +930,7 @@ void AUDPlay(const int sound, const QVector &pos, const Vector &vel, const float
                 AUDAddWatchedPlayed(sound, pos.Cast());
             } else {
                 VS_LOG(trace,
-                       (boost::format("AUDPlay stole sound %1% %2%") % sounds[sound].source % sounds[sound].buffer));
+                        (boost::format("AUDPlay stole sound %1% %2%") % sounds[sound].source % sounds[sound].buffer));
                 alSourceStop(sounds[sound].source);
             }
             alSourcePlay(sounds[sound].source);
@@ -977,8 +944,7 @@ void AUDPlay(const int sound, const QVector &pos, const Vector &vel, const float
 #define AL_SEC_OFFSET 0x1024
 #endif
 
-float AUDGetCurrentPosition(const int sound)
-{
+float AUDGetCurrentPosition(const int sound) {
 #ifdef HAVE_AL
     ALfloat rv;
     alGetSourcef(sound, AL_SEC_OFFSET, &rv);
@@ -988,8 +954,7 @@ float AUDGetCurrentPosition(const int sound)
 #endif
 }
 
-void AUDPausePlaying(const int sound)
-{
+void AUDPausePlaying(const int sound) {
 #ifdef HAVE_AL
     if (sound >= 0 && sound < (int) sounds.size()) {
         //alSourcePlay( sounds[sound].source() );

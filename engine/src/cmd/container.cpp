@@ -29,19 +29,16 @@
 #include "container.h"
 #include "unit_generic.h"
 
-UnitContainer::UnitContainer() : unit(nullptr)
-{
+UnitContainer::UnitContainer() : unit(nullptr) {
     VSCONSTRUCT1('U')
 }
 
-UnitContainer::UnitContainer(Unit *un) : unit(nullptr)
-{
+UnitContainer::UnitContainer(Unit *un) : unit(nullptr) {
     SetUnit(un);
     VSCONSTRUCT1('U');
 }
 
-UnitContainer::~UnitContainer()
-{
+UnitContainer::~UnitContainer() {
     VSDESTRUCT1
     if (unit) {
         unit->UnRef();
@@ -49,8 +46,7 @@ UnitContainer::~UnitContainer()
     //bad idea...arrgh!
 }
 
-void UnitContainer::SetUnit(Unit *un)
-{
+void UnitContainer::SetUnit(Unit *un) {
     //if the unit is null then go here otherwise if the unit is killed then go here
     if (un != NULL ? un->Killed() == true : true) {
         if (unit) {

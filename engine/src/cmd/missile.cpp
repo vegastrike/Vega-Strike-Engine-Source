@@ -46,8 +46,7 @@
 /// MissileEffect
 ////////////////////////////////////////////////////////////////
 MissileEffect::MissileEffect(const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner) : pos(
-        pos)
-{
+        pos) {
     damage = dam;
     phasedamage = pdam;
     this->radius = radius;
@@ -55,8 +54,7 @@ MissileEffect::MissileEffect(const QVector &pos, float dam, float pdam, float ra
     this->ownerDoNotDereference = owner;
 }
 
-void MissileEffect::ApplyDamage(Unit *smaller)
-{
+void MissileEffect::ApplyDamage(Unit *smaller) {
     QVector norm = pos - smaller->Position();
     float smaller_rsize = smaller->rSize();
     float distance = norm.Magnitude() - smaller_rsize;            // no better check than the bounding sphere for now
@@ -90,18 +88,15 @@ void MissileEffect::ApplyDamage(Unit *smaller)
     }
 }
 
-const QVector &MissileEffect::GetCenter() const
-{
+const QVector &MissileEffect::GetCenter() const {
     return pos;
 }
 
-float MissileEffect::GetRadius() const
-{
+float MissileEffect::GetRadius() const {
     return radius;
 }
 
-void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction)
-{
+void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
     QVector norm = pos - un->Position();
     norm.Normalize();
     float damage_left = 1.f;
@@ -155,16 +150,16 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
     }
     if (damage_left > 0) {
         VS_LOG(info,
-               (boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
-                       % parent->name.get()
-                       % ((un == parent) ? "." : un->name.get())
-                       % distance
-                       % radius
-                       % (damage * damage_fraction * damage_left)));
+                (boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
+                        % parent->name.get()
+                        % ((un == parent) ? "." : un->name.get())
+                        % distance
+                        % radius
+                        % (damage * damage_fraction * damage_left)));
         Damage damage(this->damage * damage_fraction * damage_left,
-                      phasedamage * damage_fraction * damage_left);
+                phasedamage * damage_fraction * damage_left);
         parent->ApplyDamage(pos.Cast(), norm, damage, un, GFXColor(1, 1, 1, 1),
-                            ownerDoNotDereference);
+                ownerDoNotDereference);
     }
 }
 
@@ -175,14 +170,14 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
 ////////////////////////////////////////////////////////////////
 
 Missile::Missile(const char *filename,
-                 int faction,
-                 const string &modifications,
-                 const float damage,
-                 float phasedamage,
-                 float time,
-                 float radialeffect,
-                 float radmult,
-                 float detonation_radius) :
+        int faction,
+        const string &modifications,
+        const float damage,
+        float phasedamage,
+        float time,
+        float radialeffect,
+        float radmult,
+        float detonation_radius) :
         Unit(filename, false, faction, modifications),
         time(time),
         damage(damage),
@@ -192,8 +187,7 @@ Missile::Missile(const char *filename,
         detonation_radius(detonation_radius),
         discharged(false),
         retarget(-1),
-        had_target(false)
-{
+        had_target(false) {
     // TODO: why would a sparkling missile be four times as hard to kill???
     static bool missilesparkle = XMLSupport::parse_bool(vs_config->getVariable("graphics", "missilesparkle", "false"));
     if (missilesparkle) {
@@ -201,42 +195,38 @@ Missile::Missile(const char *filename,
     }
 }
 
-void Missile::Discharge()
-{
+void Missile::Discharge() {
     if ((damage != 0 || phasedamage != 0) && !discharged) {
         Unit *target = Unit::Target();
         VS_LOG(info, (boost::format("Missile discharged (target %1%)")
                 % ((target != NULL) ? target->name.get() : "NULL")));
         _Universe->activeStarSystem()->AddMissileToQueue(
                 new MissileEffect(Position(), damage, phasedamage,
-                                  radial_effect, radial_multiplier, owner));
+                        radial_effect, radial_multiplier, owner));
         discharged = true;
     }
 }
 
-float Missile::ExplosionRadius()
-{
+float Missile::ExplosionRadius() {
     static float missile_multiplier =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "missile_explosion_radius_mult", "1"));
 
     return radial_effect * (missile_multiplier);
 }
 
-void Missile::Kill(bool erase)
-{
+void Missile::Kill(bool erase) {
     Discharge();
     Unit::Kill(erase);
 }
 
 void Missile::UpdatePhysics2(const Transformation &trans,
-                             const Transformation &old_physical_state,
-                             const Vector &accel,
-                             float difficulty,
-                             const Matrix &transmat,
-                             const Vector &CumulativeVelocity,
-                             bool ResolveLast,
-                             UnitCollection *uc)
-{
+        const Transformation &old_physical_state,
+        const Vector &accel,
+        float difficulty,
+        const Matrix &transmat,
+        const Vector &CumulativeVelocity,
+        bool ResolveLast,
+        UnitCollection *uc) {
     // First we move the missile by calling the super
     Unit::UpdatePhysics2(trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc);
 
@@ -303,8 +293,7 @@ void Missile::UpdatePhysics2(const Transformation &trans,
     }
 }
 
-Unit *Missile::breakECMLock(Unit *target)
-{
+Unit *Missile::breakECMLock(Unit *target) {
     if (target == nullptr) {
         return nullptr;
     }
@@ -331,8 +320,7 @@ Unit *Missile::breakECMLock(Unit *target)
     return target;
 }
 
-bool Missile::proximityFuse(Unit *target)
-{
+bool Missile::proximityFuse(Unit *target) {
     // Don't explode if have no lock or already exploded/exploding
     if (target == nullptr || discharged) {
         return false;
@@ -361,8 +349,7 @@ bool Missile::proximityFuse(Unit *target)
     return false;
 }
 
-bool Missile::useFuel(Unit *target, bool had_target)
-{
+bool Missile::useFuel(Unit *target, bool had_target) {
     static float max_lost_target_live_time =
             GameConfig::GetVariable("physics", "max_lost_target_live_time", 30);
 

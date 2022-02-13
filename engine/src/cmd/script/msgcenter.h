@@ -66,7 +66,7 @@ public:
 class MessageCenter {
 public:
     bool last(unsigned int n, gameMessage &m,
-              const std::vector<std::string> &who = std::vector<std::string>(), const std::vector<std::string> &whoNOT =
+            const std::vector<std::string> &who = std::vector<std::string>(), const std::vector<std::string> &whoNOT =
     std::vector<std::string>());
     void add(std::string from, std::string to, std::string message, double delay = 0.0);
     void clear(

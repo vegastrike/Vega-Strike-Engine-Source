@@ -38,42 +38,35 @@
  */
 class IdentityTransform {
 public:
-    virtual ~IdentityTransform()
-    {
+    virtual ~IdentityTransform() {
         // dtor
     }
 
 ///Transforms in a possibly nonlinear way the point to some new space
-    virtual QVector Transform(const QVector &v) const
-    {
+    virtual QVector Transform(const QVector &v) const {
         return v;
     }
 
 ///transforms a direction to some new space
-    virtual QVector TransformNormal(const QVector &v, const QVector &n) const
-    {
+    virtual QVector TransformNormal(const QVector &v, const QVector &n) const {
         return n;
     }
 
 ///Transforms in reverse the vector into quadsquare space
-    virtual QVector InvTransform(const QVector &v) const
-    {
+    virtual QVector InvTransform(const QVector &v) const {
         return v;
     }
 
 ///Transforms a min and a max vector and figures out what is bigger
-    virtual CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const
-    {
+    virtual CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const {
         return GFXBoxInFrustum(min, max);
     }
 
-    float TransformS(float x, float scale) const
-    {
+    float TransformS(float x, float scale) const {
         return x * scale;
     }
 
-    float TransformT(float y, float scale) const
-    {
+    float TransformT(float y, float scale) const {
         return y * scale;
     }
 };
@@ -83,58 +76,48 @@ class SphericalTransform : public IdentityTransform {
 protected:
     float scalex, scalez, r;
 public:
-    SphericalTransform(float a, float b, float c) : IdentityTransform()
-    {
+    SphericalTransform(float a, float b, float c) : IdentityTransform() {
         SetXZ(a, c);
         SetR(b);
     }
 
-    void SetXZ(float x, float z)
-    {
+    void SetXZ(float x, float z) {
         this->scalex = 2 * M_PI / x;
         this->scalez = M_PI / z;
     }                                                                         //x ranges from 0 to 2PI x ranges from -PI/2 to PI/2
-    void SetR(float rr)
-    {
+    void SetR(float rr) {
         r = rr;
     }
 
-    float GetR() const
-    {
+    float GetR() const {
         return r;
     }
 
-    float GetX() const
-    {
+    float GetX() const {
         return 2 * M_PI / scalex;
     }
 
-    float GetZ() const
-    {
+    float GetZ() const {
         return M_PI / scalez;
     }
 
-    QVector Transform(const QVector &v) const
-    {
+    QVector Transform(const QVector &v) const {
         Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
         float cosphi = cos(T.k);
         return QVector(T.j * cosphi * cos(T.i), T.j * sin(T.k), T.j * cosphi * sin(T.i));
     }
 
-    QVector TransformNormal(const QVector &point, const QVector &n) const
-    {
+    QVector TransformNormal(const QVector &point, const QVector &n) const {
         return SphericalTransform::Transform(n + point) - Transform(point);
     }
 
-    QVector InvTransform(const QVector &v) const
-    {
+    QVector InvTransform(const QVector &v) const {
         float rplusy = v.Magnitude();
         //float lengthxypln = sqrtf (rplusy*rplusy-v.j*v.j);//pythagorus
         return QVector((atan2(-v.k, -v.i) + M_PI) / scalex, rplusy - r, (asin(v.j / rplusy) + M_PI * .5) / scalez);
     }
 
-    CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const
-    {
+    CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const {
         const float rendermin = 3;
         /*
          *  float tmpx = fabs(campos.i-min.i);float maxx = fabs(campos.i-max.i);

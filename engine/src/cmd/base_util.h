@@ -76,75 +76,75 @@ void SetVideoCallback(int room, std::string index, std::string callback);
 void SetDJEnabled(bool enabled);
 void Ship(int room, std::string index, QVector pos, Vector R, Vector Q);
 void LinkPython(int room,
-                std::string index,
-                std::string pythonfile,
-                float x,
-                float y,
-                float wid,
-                float hei,
-                std::string text,
-                int to);
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text,
+        int to);
 void LaunchPython(int room,
-                  std::string index,
-                  std::string pythonfile,
-                  float x,
-                  float y,
-                  float wid,
-                  float hei,
-                  std::string text);
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text);
 void EjectPython(int room,
-                 std::string index,
-                 std::string pythonfile,
-                 float x,
-                 float y,
-                 float wid,
-                 float hei,
-                 std::string text);
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text);
 void CompPython(int room,
-                std::string index,
-                std::string pythonfile,
-                float x,
-                float y,
-                float wid,
-                float hei,
-                std::string text,
-                std::string modes);
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text,
+        std::string modes);
 void GlobalKeyPython(std::string pythonfile);
 
 void Link(int room, std::string index, float x, float y, float wid, float hei, std::string text, int to);
 void Launch(int room, std::string index, float x, float y, float wid, float hei, std::string text);
 void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes);
 void Python(int room,
-            std::string index,
-            float x,
-            float y,
-            float wid,
-            float hei,
-            std::string text,
-            std::string pythonfile,
-            bool front = false);
+        std::string index,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text,
+        std::string pythonfile,
+        bool front = false);
 void MessageToRoom(int room, std::string text);
 void EnqueueMessageToRoom(int room, std::string text);
 void Message(std::string text);
 void EnqueueMessage(std::string text);
 void RunScript(int room, std::string ind, std::string pythonfile, float time);
 void TextBox(int room,
-             std::string ind,
-             std::string text,
-             float x,
-             float y,
-             Vector widheimult,
-             Vector backcol,
-             float backalp,
-             Vector forecol);
+        std::string ind,
+        std::string text,
+        float x,
+        float y,
+        Vector widheimult,
+        Vector backcol,
+        float backalp,
+        Vector forecol);
 void SetTextBoxText(int room, std::string ind, std::string text);
 void SetLinkArea(int room, std::string index, float x, float y, float wid, float hei);
 void SetLinkText(int room, std::string index, std::string text);
 void SetLinkPython(int room, std::string index, std::string python);
 void SetLinkRoom(int room, std::string index, int to);
 void SetLinkEventMask(int room,
-                      std::string index,
-                      std::string maskdef);         //c=click, u=up, d=down, e=enter, l=leave, m=move
+        std::string index,
+        std::string maskdef);         //c=click, u=up, d=down, e=enter, l=leave, m=move
 void EraseLink(int room, std::string index);
 void EraseObj(int room, std::string index);
 int GetCurRoom();
@@ -161,9 +161,9 @@ void DestroyVideoSoundStream(SharedPtr<Audio::Source> source, const std::string 
 //GUI events
 void SetEventData(Dictionary data);
 void SetMouseEventData(std::string type,
-                       float x,
-                       float y,
-                       int buttonMask);         //[type], [mousex], [mousey], [mousebuttons]
+        float x,
+        float y,
+        int buttonMask);         //[type], [mousex], [mousey], [mousebuttons]
 void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask = ~0);
 void SetKeyStatusEventData(unsigned int modmask = ~0);
 const Dictionary &GetEventData();

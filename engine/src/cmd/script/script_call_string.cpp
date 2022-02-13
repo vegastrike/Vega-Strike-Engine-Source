@@ -45,8 +45,7 @@
 #include "mission.h"
 #include "easydom.h"
 
-varInst *Mission::call_string(missionNode *node, int mode)
-{
+varInst *Mission::call_string(missionNode *node, int mode) {
     varInst *viret = NULL;
     if (mode == SCRIPT_PARSE) {
         string cmd = node->attr_value("name");
@@ -116,8 +115,7 @@ varInst *Mission::call_string(missionNode *node, int mode)
     return NULL;     //never reach
 }
 
-string Mission::getStringArgument(missionNode *node, int mode, int arg_nr)
-{
+string Mission::getStringArgument(missionNode *node, int mode, int arg_nr) {
     missionNode *arg_node = getArgument(node, mode, arg_nr);
     varInst *arg_vi = checkObjectExpr(arg_node, mode);
 
@@ -128,8 +126,7 @@ string Mission::getStringArgument(missionNode *node, int mode, int arg_nr)
     return retstr;
 }
 
-string Mission::call_string_getstring(missionNode *node, int mode, varInst *ovi)
-{
+string Mission::call_string_getstring(missionNode *node, int mode, varInst *ovi) {
     if (ovi->type != VAR_OBJECT || (ovi->type == VAR_OBJECT && ovi->objectname != "string")) {
         fatalError(node, mode, "call_string_getstring needs string object as arg");
         assert(0);
@@ -141,15 +138,13 @@ string Mission::call_string_getstring(missionNode *node, int mode, varInst *ovi)
     return ret;
 }
 
-void Mission::call_string_print(missionNode *node, int mode, varInst *ovi)
-{
+void Mission::call_string_print(missionNode *node, int mode, varInst *ovi) {
     string *my_string = getStringObject(node, mode, ovi);
 
     std::cout << *my_string;
 }
 
-varInst *Mission::call_string_new(missionNode *node, int mode, string initstring)
-{
+varInst *Mission::call_string_new(missionNode *node, int mode, string initstring) {
     debug(10, node, mode, "call_string");
 
     varInst *viret = newVarInst(VI_TEMP);
@@ -164,8 +159,7 @@ varInst *Mission::call_string_new(missionNode *node, int mode, string initstring
     return viret;
 }
 
-string *Mission::getStringObject(missionNode *node, int mode, varInst *ovi)
-{
+string *Mission::getStringObject(missionNode *node, int mode, varInst *ovi) {
     string *my_object = NULL;
     if (mode == SCRIPT_RUN) {
         my_object = (string *) ovi->object;

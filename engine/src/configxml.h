@@ -71,8 +71,7 @@ public:
     GFXColor getColor(configNode *node, string name, GFXColor default_color = GFXColor(1, 1, 1, 1));
     GFXColor getColor(string section, string name, GFXColor default_color = GFXColor(1, 1, 1, 1));
 
-    inline GFXColor getColor(string name, GFXColor default_color = GFXColor(1, 1, 1, 1))
-    {
+    inline GFXColor getColor(string name, GFXColor default_color = GFXColor(1, 1, 1, 1)) {
         return getColor("default", name, default_color);
     }
 
@@ -84,13 +83,11 @@ public:
     bool setVariable(string section, string name, string value);
     bool setVariable(string section, string subsection, string name, string value);
 
-    easyDomNode *Variables()
-    {
+    easyDomNode *Variables() {
         return variables;
     }
 
-    virtual void bindKeys()
-    {
+    virtual void bindKeys() {
     }
 
 protected:
@@ -111,20 +108,16 @@ protected:
     void doColors(configNode *node);
     bool checkColor(string prefix, configNode *node);
 
-    virtual void doBindings(configNode *node)
-    {
+    virtual void doBindings(configNode *node) {
     }
 
-    virtual void checkBind(configNode *node)
-    {
+    virtual void checkBind(configNode *node) {
     }
 
-    virtual void doAxis(configNode *node)
-    {
+    virtual void doAxis(configNode *node) {
     }
 
-    virtual void checkHatswitch(int nr, configNode *node)
-    {
+    virtual void checkHatswitch(int nr, configNode *node) {
     }
 };
 

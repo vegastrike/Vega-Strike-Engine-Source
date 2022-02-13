@@ -27,8 +27,7 @@
 
 #include "quaternion.h"
 
-Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Vector &v3)
-{
+Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Vector &v3) {
     float T = v1.i + v2.j + v3.k + 1, S, W, X, Y, Z;
     if (T > 0) {
         S = 0.5 / sqrtf(T);
@@ -111,12 +110,11 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
     return Quaternion(W, Vector(X, Y, Z));
 }
 
-Quaternion Quaternion::from_axis_angle(const Vector &axis, float angle)
-{
+Quaternion Quaternion::from_axis_angle(const Vector &axis, float angle) {
     float sin_a = sin(angle / 2);
     float cos_a = cos(angle / 2);
     return Quaternion(cos_a, Vector(axis.i * sin_a,
-                                    axis.j * sin_a,
-                                    axis.k * sin_a));
+            axis.j * sin_a,
+            axis.k * sin_a));
 }
 

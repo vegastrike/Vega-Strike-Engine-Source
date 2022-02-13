@@ -39,20 +39,18 @@ static const double GLUT_WIDTH_HACK = 0.6;
 //The width of the space character in the outline font is too big, so we make it a special case.
 static const char SPACE_CHAR = ' ';
 
-bool useStroke()
-{
+bool useStroke() {
     static bool tmp =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font_computer",
-                                                          vs_config->getVariable("graphics",
-                                                                                 "high_quality_font",
-                                                                                 "false")));
+                    vs_config->getVariable("graphics",
+                            "high_quality_font",
+                            "false")));
     return !tmp;
 }
 
 //Calculate the metrics for this font.
 //This does the real work, and doesn't check whether it needs to be done.
-void Font::calcMetrics(void)
-{
+void Font::calcMetrics(void) {
     //This is a hack to adjust the font stroke width as the font size goes up.
     //Since the stroke width is in pixels, we scale the width up as the screen resolution gets
     //higher.  (Currently, this is linear, which doesn't work well at small sizes.)
@@ -98,8 +96,7 @@ void Font::calcMetrics(void)
 }
 
 //Check whether we need to recalc the metrics, and do it in const object.
-void Font::calcMetricsIfNeeded(void) const
-{
+void Font::calcMetricsIfNeeded(void) const {
     if (m_needMetrics) {
         //calcmetrics is a cache.  Doesn't change the "real" state of the object.
         Font *s = const_cast< Font * > (this);
@@ -108,8 +105,7 @@ void Font::calcMetricsIfNeeded(void) const
 }
 
 //Draw a character.
-float Font::drawChar(char c) const
-{
+float Font::drawChar(char c) const {
     calcMetricsIfNeeded();
     if (useStroke()) {
         glutStrokeCharacter(GLUT_STROKE_ROMAN, c);
@@ -127,8 +123,7 @@ float Font::drawChar(char c) const
 }
 
 //The width of a character in reference units.
-double Font::charWidth(char c) const
-{
+double Font::charWidth(char c) const {
     calcMetricsIfNeeded();
     if (useStroke()) {
         if (c == SPACE_CHAR) {
@@ -145,8 +140,7 @@ double Font::charWidth(char c) const
 }
 
 //The width of a string in reference units.
-double Font::stringWidth(const std::string &str) const
-{
+double Font::stringWidth(const std::string &str) const {
     calcMetricsIfNeeded();
 
     double result = 0.0;
@@ -158,24 +152,21 @@ double Font::stringWidth(const std::string &str) const
 
 //Calculate the OpenGL stroke width for a font size+weight.
 //This value is cached in the font object.
-double Font::strokeWidth(void) const
-{
+double Font::strokeWidth(void) const {
     calcMetricsIfNeeded();
 
     return m_strokeWidth;
 }
 
 //Vertical scaling factor to be used to image this font.
-double Font::verticalScaling(void) const
-{
+double Font::verticalScaling(void) const {
     calcMetricsIfNeeded();
 
     return m_verticalScaling;
 }
 
 //Horizontal scaling factor to be used to image this font.
-double Font::horizontalScaling(void) const
-{
+double Font::horizontalScaling(void) const {
     calcMetricsIfNeeded();
 
     return m_horizontalScaling;

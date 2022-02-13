@@ -57,8 +57,7 @@
 
 /* *********************************************************** */
 
-varInst *Mission::call_order(missionNode *node, int mode)
-{
+varInst *Mission::call_order(missionNode *node, int mode) {
     varInst *viret = NULL;
     if (mode == SCRIPT_PARSE) {
         string cmd = node->attr_value("name");
@@ -480,8 +479,7 @@ varInst *Mission::call_order(missionNode *node, int mode)
     return NULL;     //never reach
 }
 
-Order *Mission::getOrderObject(missionNode *node, int mode, varInst *ovi)
-{
+Order *Mission::getOrderObject(missionNode *node, int mode, varInst *ovi) {
     Order *my_object = NULL;
     if (mode == SCRIPT_RUN) {
         my_object = (Order *) ovi->object;

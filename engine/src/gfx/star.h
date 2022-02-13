@@ -42,38 +42,32 @@ protected:
     Vector camq;
     double lasttime;
 public:
-    virtual void Draw(bool, int whichtex)
-    {
+    virtual void Draw(bool, int whichtex) {
     }
 
     StarVlist(float spread);
     void UpdateGraphics();
 
-    virtual ~StarVlist()
-    {
+    virtual ~StarVlist() {
     }
 
     virtual bool BeginDrawState(const QVector &center,
-                                const Vector &vel,
-                                const Vector &angular_vel,
-                                bool rotate,
-                                bool yawpitch,
-                                int whichTexture)
-    {
+            const Vector &vel,
+            const Vector &angular_vel,
+            bool rotate,
+            bool yawpitch,
+            int whichTexture) {
         return false;
     }
 
-    virtual void EndDrawState(bool, int whichtex)
-    {
+    virtual void EndDrawState(bool, int whichtex) {
     }
 
-    virtual int NumTextures()
-    {
+    virtual int NumTextures() {
         return 1;
     }
 
-    void DrawAll(const QVector &center, const Vector &vel, const Vector &ang_vel, bool rot, bool yawpitch)
-    {
+    void DrawAll(const QVector &center, const Vector &vel, const Vector &ang_vel, bool rot, bool yawpitch) {
         int LC = 0, LN = NumTextures();
         for (LC = 0; LC < LN; ++LC) {
             bool tmp = this->BeginDrawState(center, vel, ang_vel, rot, yawpitch, LC);
@@ -91,11 +85,11 @@ public:
     PointStarVlist(int num, float spread, const std::string &our_system_name);
     ~PointStarVlist();
     bool BeginDrawState(const QVector &center,
-                        const Vector &vel,
-                        const Vector &angular_vel,
-                        bool rotate,
-                        bool yawpitch,
-                        int whichTexture);
+            const Vector &vel,
+            const Vector &angular_vel,
+            bool rotate,
+            bool yawpitch,
+            int whichTexture);
     void Draw(bool, int whichTexture);
     void EndDrawState(bool, int whichTexture);
 };
@@ -110,11 +104,11 @@ public:
     ~SpriteStarVlist();
     int NumTextures();
     bool BeginDrawState(const QVector &center,
-                        const Vector &vel,
-                        const Vector &angular_vel,
-                        bool rotate,
-                        bool yawpitch,
-                        int whichTexture);
+            const Vector &vel,
+            const Vector &angular_vel,
+            bool rotate,
+            bool yawpitch,
+            int whichTexture);
     void Draw(bool, int whichTexture);
     void EndDrawState(bool, int whichTexture);
 };

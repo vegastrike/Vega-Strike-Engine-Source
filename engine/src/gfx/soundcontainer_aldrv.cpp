@@ -29,23 +29,19 @@
 #include "audiolib.h"
 
 AldrvSoundContainer::AldrvSoundContainer(const SoundContainer &other)
-        : GameSoundContainer(other), sound(-2)
-{
+        : GameSoundContainer(other), sound(-2) {
 }
 
-AldrvSoundContainer::~AldrvSoundContainer()
-{
+AldrvSoundContainer::~AldrvSoundContainer() {
     // unload already takes care
 }
 
-void AldrvSoundContainer::loadImpl()
-{
+void AldrvSoundContainer::loadImpl() {
     sound = AUDCreateSoundWAV(getSoundFile(), isLooping());
     AUDSoundGain(sound, getGain());
 }
 
-void AldrvSoundContainer::unloadImpl()
-{
+void AldrvSoundContainer::unloadImpl() {
     if (sound >= 0) {
         stopImpl();
         AUDDeleteSound(sound, false);
@@ -53,18 +49,15 @@ void AldrvSoundContainer::unloadImpl()
     }
 }
 
-void AldrvSoundContainer::playImpl()
-{
+void AldrvSoundContainer::playImpl() {
     AUDStartPlaying(sound);
 }
 
-void AldrvSoundContainer::stopImpl()
-{
+void AldrvSoundContainer::stopImpl() {
     AUDStopPlaying(sound);
 }
 
-bool AldrvSoundContainer::isPlayingImpl() const
-{
+bool AldrvSoundContainer::isPlayingImpl() const {
     return AUDIsPlaying(sound);
 }
 

@@ -33,14 +33,13 @@
 //X(T) Y(T), where X(0) = X0, and X(1) = X1. <same for y>, hence no need for X calculations concernign Y return. but here just for kicks.
 //***************************************************
 int get_alpha(int _query,
-              int _maxrez_x,
-              int _min,
-              int _max,
-              double _focus,
-              double _concavity,
-              int _tail_mode_start,
-              int _tail_mode_end)
-{
+        int _maxrez_x,
+        int _min,
+        int _max,
+        double _focus,
+        double _concavity,
+        int _tail_mode_start,
+        int _tail_mode_end) {
     //INPUT
     int query = _query;
     int min = _min;
@@ -144,16 +143,16 @@ int get_alpha(int _query,
 //+	( ((2*(x0-x1))+(vx0+vx1) ) * pow(_t0,3));
 
         yt = int(y0 + (vy0 * _t0)
-                         + (((3 * (y1 - y0)) - ((2 * vy0) + vy1)) * pow(_t0, 2))
-                         + (((2 * (y0 - y1)) + (vy0 + vy1)) * pow(_t0, 3)));
+                + (((3 * (y1 - y0)) - ((2 * vy0) + vy1)) * pow(_t0, 2))
+                + (((2 * (y0 - y1)) + (vy0 + vy1)) * pow(_t0, 3)));
     } else {
         double _t1 = _t;
 //xt = x1	+	(vx1 * _t1)
 //+	(( (3*(x2-x1)) - ((2*vx1) + vx2) ) * pow(_t1,2))
 //+	(( (2*(x1-x2))+(vx1+vx2) ) * pow(_t1,3));
         yt = int(y1 + (vy1 * _t1)
-                         + (((3 * (y2 - y1)) - ((2 * vy1) + vy2)) * pow(_t1, 2))
-                         + (((2 * (y1 - y2)) + (vy1 + vy2)) * pow(_t1, 3)));
+                + (((3 * (y2 - y1)) - ((2 * vy1) + vy2)) * pow(_t1, 2))
+                + (((2 * (y1 - y2)) + (vy1 + vy2)) * pow(_t1, 3)));
     }
     int return_alpha = yt;
     if (return_alpha < min) {

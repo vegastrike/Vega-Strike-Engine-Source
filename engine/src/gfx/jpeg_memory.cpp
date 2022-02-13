@@ -36,8 +36,7 @@
 //Moved the following three functions here from the .h file
 /*----------------------------------------------------------------------------
  *  /  Initialize destination --- called by jpeg_start_compress before any data is actually written. */
-void init_destination(j_compress_ptr cinfo)
-{
+void init_destination(j_compress_ptr cinfo) {
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
     dest->pub.next_output_byte = dest->buffer;
     dest->pub.free_in_buffer = dest->bufsize;
@@ -46,8 +45,7 @@ void init_destination(j_compress_ptr cinfo)
 
 /*----------------------------------------------------------------------------
  *  /  Empty the output buffer --- called whenever buffer fills up. */
-jpeg_bool empty_output_buffer(j_compress_ptr cinfo)
-{
+jpeg_bool empty_output_buffer(j_compress_ptr cinfo) {
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
     dest->pub.next_output_byte = dest->buffer;
     dest->pub.free_in_buffer = dest->bufsize;
@@ -58,8 +56,7 @@ jpeg_bool empty_output_buffer(j_compress_ptr cinfo)
 /*----------------------------------------------------------------------------
  *  /  Terminate destination --- called by jpeg_finish_compress
  *  /  after all data has been written.  Usually needs to flush buffer. */
-void term_destination(j_compress_ptr cinfo)
-{
+void term_destination(j_compress_ptr cinfo) {
     /* expose the finale compressed image size */
 
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
@@ -67,13 +64,12 @@ void term_destination(j_compress_ptr cinfo)
 }
 
 GLOBAL(void)
-jpeg_memory_dest(j_compress_ptr cinfo, JOCTET *buffer, int bufsize)
-{
+jpeg_memory_dest(j_compress_ptr cinfo, JOCTET *buffer, int bufsize) {
     mem_dest_ptr dest;
     if (cinfo->dest == NULL) {      /* first time for this JPEG object? */
         cinfo->dest = (struct jpeg_destination_mgr *)
                 (*cinfo->mem->alloc_small)((j_common_ptr) cinfo, JPOOL_PERMANENT,
-                                           sizeof(memory_destination_mgr));
+                        sizeof(memory_destination_mgr));
     }
     dest = (mem_dest_ptr) cinfo->dest;
     dest->bufsize = bufsize;
@@ -83,8 +79,7 @@ jpeg_memory_dest(j_compress_ptr cinfo, JOCTET *buffer, int bufsize)
     dest->pub.term_destination = term_destination;
 }
 
-int jpeg_compress(char *dst, char *src, int width, int height, int dstsize, int quality)
-{
+int jpeg_compress(char *dst, char *src, int width, int height, int dstsize, int quality) {
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
     unsigned char *dataRGB = (unsigned char *) src;
@@ -125,8 +120,7 @@ int jpeg_compress(char *dst, char *src, int width, int height, int dstsize, int 
     return csize;
 }
 
-int jpeg_compress_to_file(char *src, char *file, int width, int height, int quality)
-{
+int jpeg_compress_to_file(char *src, char *file, int width, int height, int quality) {
     FILE *outfile;
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -165,19 +159,16 @@ int jpeg_compress_to_file(char *src, char *file, int width, int height, int qual
     return 0;
 }
 
-static void init_source(j_decompress_ptr cinfo)
-{
+static void init_source(j_decompress_ptr cinfo) {
     /* nothing to do */
 }
 
-static jpeg_bool fill_input_buffer(j_decompress_ptr cinfo)
-{
+static jpeg_bool fill_input_buffer(j_decompress_ptr cinfo) {
     /* can't fill */
     return FALSE;
 }
 
-static void skip_input_data(j_decompress_ptr cinfo, long num_bytes)
-{
+static void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
     if ((size_t) num_bytes > cinfo->src->bytes_in_buffer) {
         cinfo->src->next_input_byte = NULL;
         cinfo->src->bytes_in_buffer = 0;
@@ -187,8 +178,7 @@ static void skip_input_data(j_decompress_ptr cinfo, long num_bytes)
     }
 }
 
-static void term_source(j_decompress_ptr cinfo)
-{
+static void term_source(j_decompress_ptr cinfo) {
     /* nothing to do */
 }
 
@@ -198,13 +188,12 @@ static void term_source(j_decompress_ptr cinfo)
  * @param ptr    JPEG image
  * @param size   JPEG image size
  */
-extern void jpeg_memory_src(j_decompress_ptr cinfo, unsigned char *ptr, size_t size)
-{
+extern void jpeg_memory_src(j_decompress_ptr cinfo, unsigned char *ptr, size_t size) {
     struct jpeg_source_mgr *src;
     src = cinfo->src = (struct jpeg_source_mgr *)
             (*cinfo->mem->alloc_small)((j_common_ptr) cinfo,
-                                       JPOOL_PERMANENT,
-                                       sizeof(*src));
+                    JPOOL_PERMANENT,
+                    sizeof(*src));
     src->init_source = init_source;
     src->fill_input_buffer = fill_input_buffer;
     src->skip_input_data = skip_input_data;
@@ -214,8 +203,7 @@ extern void jpeg_memory_src(j_decompress_ptr cinfo, unsigned char *ptr, size_t s
     src->bytes_in_buffer = size;
 }
 
-void jpeg_decompress(unsigned char *dst, unsigned char *src, int size, int *w, int *h)
-{
+void jpeg_decompress(unsigned char *dst, unsigned char *src, int size, int *w, int *h) {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
     size_t line_size, y;
@@ -240,8 +228,7 @@ void jpeg_decompress(unsigned char *dst, unsigned char *src, int size, int *w, i
     jpeg_destroy_decompress(&cinfo);
 }
 
-void jpeg_decompress_from_file(unsigned char *dst, char *file, int size, int *w, int *h)
-{
+void jpeg_decompress_from_file(unsigned char *dst, char *file, int size, int *w, int *h) {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
     int line_size;

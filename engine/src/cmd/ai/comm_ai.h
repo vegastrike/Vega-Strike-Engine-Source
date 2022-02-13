@@ -48,8 +48,7 @@ protected:
 public:
     virtual void Destroy();
 
-    virtual float getMood()
-    {
+    virtual float getMood() {
         return mood;
     }
 
@@ -59,12 +58,12 @@ public:
     void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
     void UpdateContrabandSearch();
     CommunicatingAI(int ttype,
-                    int stype,
-                    float mood = 0,
-                    float anger = -666 /*-.5*/,
-                    float appeasement = 666,
-                    float moodswingyness = 666 /*.2*/,
-                    float randomnessresponse = 666 /*.8*/ );
+            int stype,
+            float mood = 0,
+            float anger = -666 /*-.5*/,
+            float appeasement = 666,
+            float moodswingyness = 666 /*.2*/,
+            float randomnessresponse = 666 /*.8*/ );
     virtual void ProcessCommMessage(class CommunicationMessage &c);
     virtual void AdjustRelationTo(Unit *un, float factor);
     virtual ~CommunicatingAI();

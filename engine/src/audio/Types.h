@@ -75,8 +75,7 @@ struct PerFrequency {
     T lf;
     T hf;
 
-    PerFrequency(T _lf, T _hf) : lf(_lf), hf(_hf)
-    {
+    PerFrequency(T _lf, T _hf) : lf(_lf), hf(_hf) {
     }
 };
 
@@ -86,17 +85,14 @@ struct Range {
     T min;
     T max;
 
-    Range(T mn, T mx) : min(mn), max(mx)
-    {
+    Range(T mn, T mx) : min(mn), max(mx) {
     }
 
-    T span() const
-    {
+    T span() const {
         return max - min;
     }
 
-    float phase(T x) const
-    {
+    float phase(T x) const {
         if (min < max) {
             if (x <= min) {
                 return 0.f;
@@ -120,8 +116,7 @@ struct Range {
 /** Generic user data container interface */
 class UserData {
 public:
-    virtual ~UserData()
-    {
+    virtual ~UserData() {
     };
 };
 

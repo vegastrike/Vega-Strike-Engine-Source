@@ -187,66 +187,54 @@ protected:
      */
     float cockpit_offset, viewport_offset;
 
-    virtual void LoadXML(const char *file)
-    {
+    virtual void LoadXML(const char *file) {
     }
 
-    virtual void LoadXML(VSFileSystem::VSFile &f)
-    {
+    virtual void LoadXML(VSFileSystem::VSFile &f) {
     }
 
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
     static void endElement(void *userData, const XML_Char *name);
 
-    virtual void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes)
-    {
+    virtual void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes) {
     }
 
-    virtual void endElement(const std::string &name)
-    {
+    virtual void endElement(const std::string &name) {
     }
 
     ///Destructs cockpit info for new loading
     virtual void Delete();
 
     ///draws the navigation symbol around targetted location
-    virtual void DrawNavigationSymbol(const Vector &loc, const Vector &p, const Vector &q, float size)
-    {
+    virtual void DrawNavigationSymbol(const Vector &loc, const Vector &p, const Vector &q, float size) {
     }
 
     ///draws the target box around targetted unit
-    virtual float computeLockingSymbol(Unit *par)
-    {
+    virtual float computeLockingSymbol(Unit *par) {
         return 1;
     }
 
-    virtual void DrawTargetBox()
-    {
+    virtual void DrawTargetBox() {
     }
 
     ///draws the target box around all units
-    virtual void DrawTargetBoxes(const Radar::Sensor &)
-    {
+    virtual void DrawTargetBoxes(const Radar::Sensor &) {
     }
 
     ///draws a target cross around all units targeted by your turrets // ** jay
-    virtual void DrawTurretTargetBoxes()
-    {
+    virtual void DrawTurretTargetBoxes() {
     }
 
     ///Shows the flightgroup's target, if any.
-    virtual void DrawTacticalTargetBox()
-    {
+    virtual void DrawTacticalTargetBox() {
     }
 
     ///Draws all the tracks on the radar.
-    virtual void DrawRadar(const Radar::Sensor &)
-    {
+    virtual void DrawRadar(const Radar::Sensor &) {
     }
 
     ///Draws gauges
-    virtual void DrawGauges(Unit *un)
-    {
+    virtual void DrawGauges(Unit *un) {
     }
 
     float cockpit_time;
@@ -267,43 +255,36 @@ public:
     double TimeOfLastCollision;
     char jumpok;
 
-    virtual void setTargetLabel(const std::string &msg)
-    {
+    virtual void setTargetLabel(const std::string &msg) {
     }
 
-    virtual std::string getTargetLabel()
-    {
+    virtual std::string getTargetLabel() {
         return std::string();
     }
 
     void updateAttackers();
     static bool tooManyAttackers(); //checks config file and declares if too many folks are attacking any of the players (to avoid expensive tests where unnecessary).
-    virtual void ReceivedTargetInfo()
-    {
+    virtual void ReceivedTargetInfo() {
     }
 
-    bool autoInProgress()
-    {
+    bool autoInProgress() {
         return autopilot_time > 0;
     }
 
     bool unitInAutoRegion(Unit *un);
 
     ///Sets the current viewstyle
-    void SetView(const enum VIEWSTYLE tmp)
-    {
+    void SetView(const enum VIEWSTYLE tmp) {
         view = tmp;
     }
 
-    enum VIEWSTYLE GetView()
-    {
+    enum VIEWSTYLE GetView() {
         return view;
     }
 
     virtual void InitStatic();
 
-    virtual void Shake(float amt, int level /*0 = shield, 1 = armor 2 = hull*/ )
-    {
+    virtual void Shake(float amt, int level /*0 = shield, 1 = armor 2 = hull*/ ) {
     }
 
     float godliness;
@@ -311,28 +292,24 @@ public:
     void RestoreGodliness();
 
     ///Restores the view from the IDentity Matrix needed to draw sprites
-    virtual void RestoreViewPort()
-    {
+    virtual void RestoreViewPort() {
     }
 
-    std::string &GetUnitFileName(unsigned int which = 0)
-    {
+    std::string &GetUnitFileName(unsigned int which = 0) {
         while (which >= unitfilename.size()) {
             unitfilename.push_back("");
         }
         return unitfilename[which];
     }
 
-    std::string &GetUnitSystemName(unsigned int which = 0)
-    {
+    std::string &GetUnitSystemName(unsigned int which = 0) {
         while (which >= unitsystemname.size()) {
             unitsystemname.push_back("");
         }
         return unitsystemname[which];
     }
 
-    std::string &GetUnitBaseName(unsigned int which = 0)
-    {
+    std::string &GetUnitBaseName(unsigned int which = 0) {
         while (which >= unitbasename.size()) {
             unitbasename.push_back("");
         }
@@ -347,13 +324,11 @@ public:
 
     static std::string MakeBaseName(const Unit *base);
 
-    std::string GetUnitModifications()
-    {
+    std::string GetUnitModifications() {
         return unitmodname;
     }
 
-    size_t GetNumUnits() const
-    {
+    size_t GetNumUnits() const {
         return unitfilename.size();
     }
 
@@ -370,8 +345,7 @@ public:
     virtual ~Cockpit();
 
     ///Looks up a particular Gauge stat on target unit
-    virtual float LookupTargetStat(int stat, Unit *target)
-    {
+    virtual float LookupTargetStat(int stat, Unit *target) {
         return 1;
     }
 
@@ -385,50 +359,41 @@ public:
     class StarSystem *activeStarSystem; //used for context switch in Universe
     virtual void SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc);
 
-    Unit *GetParent()
-    {
+    Unit *GetParent() {
         return parent.GetUnit();
     }
 
     Unit *GetSaveParent();
 
     ///Draws Cockpit then restores viewport
-    virtual void Draw()
-    {
+    virtual void Draw() {
     }
 
     bool Update(); //respawns and the like. Returns true if starsystem was reloaded
     virtual void UpdAutoPilot();
 
     ///Sets up the world for rendering...call before draw
-    virtual void SetupViewPort(bool clip = true)
-    {
+    virtual void SetupViewPort(bool clip = true) {
     }
 
-    virtual int getVDUMode(int vdunum)
-    {
+    virtual int getVDUMode(int vdunum) {
         return 0;
     }
 
-    virtual void VDUSwitch(int vdunum)
-    {
+    virtual void VDUSwitch(int vdunum) {
     }
 
-    virtual void ScrollVDU(int vdunum, int howmuch)
-    {
+    virtual void ScrollVDU(int vdunum, int howmuch) {
     }
 
-    virtual void ScrollAllVDU(int howmuch)
-    {
+    virtual void ScrollAllVDU(int howmuch) {
     }
 
-    virtual int getScrollOffset(unsigned int whichtype)
-    {
+    virtual int getScrollOffset(unsigned int whichtype) {
         return 1;
     }
 
-    virtual void SelectProperCamera()
-    {
+    virtual void SelectProperCamera() {
     }
 
     virtual void Eject();
@@ -436,28 +401,22 @@ public:
     virtual void SetInsidePanYawSpeed(float speed);
     virtual void SetInsidePanPitchSpeed(float speed);
 
-    static void Respawn(const KBData &, KBSTATE)
-    {
+    static void Respawn(const KBData &, KBSTATE) {
     }
 
-    static void SwitchControl(const KBData &, KBSTATE)
-    {
+    static void SwitchControl(const KBData &, KBSTATE) {
     }
 
-    static void ForceSwitchControl(const KBData &, KBSTATE)
-    {
+    static void ForceSwitchControl(const KBData &, KBSTATE) {
     }
 
-    static void TurretControl(const KBData &, KBSTATE)
-    {
+    static void TurretControl(const KBData &, KBSTATE) {
     }
 
-    virtual void SetCommAnimation(Animation *ani, Unit *un)
-    {
+    virtual void SetCommAnimation(Animation *ani, Unit *un) {
     }
 
-    virtual void SetStaticAnimation()
-    {
+    virtual void SetStaticAnimation() {
     }
 
     /**
@@ -475,79 +434,64 @@ public:
     class SaveGame *savegame;
 
     ///Accesses the current navigationsystem
-    virtual NavigationSystem *AccessNavSystem()
-    {
+    virtual NavigationSystem *AccessNavSystem() {
         return NULL;
     }
 
-    virtual std::string GetNavSelectedSystem()
-    {
+    virtual std::string GetNavSelectedSystem() {
         return "";
     }
 
     ///Accesses the current camera
-    virtual Camera *AccessCamera()
-    {
+    virtual Camera *AccessCamera() {
         return NULL;
     }
 
     ///Returns the passed in cam
-    virtual Camera *AccessCamera(int)
-    {
+    virtual Camera *AccessCamera(int) {
         return NULL;
     }
 
     ///Changes current camera to selected camera
-    virtual void SelectCamera(int)
-    {
+    virtual void SelectCamera(int) {
     }
 
     ///GFXLoadMatrix proper camera
-    virtual void SetViewport()
-    {
+    virtual void SetViewport() {
     }
 
     virtual void visitSystem(std::string systemName);
 
-    virtual bool SetDrawNavSystem(bool)
-    {
+    virtual bool SetDrawNavSystem(bool) {
         return false;
     }
 
-    virtual bool CanDrawNavSystem()
-    {
+    virtual bool CanDrawNavSystem() {
         return false;
     }
 
-    virtual bool DrawNavSystem()
-    {
+    virtual bool DrawNavSystem() {
         return false;
     }
 
-    virtual bool CheckCommAnimation(Unit *un)
-    {
+    virtual bool CheckCommAnimation(Unit *un) {
         return false;
     }
 
     // Cockpit events
-    virtual void OnPauseBegin()
-    {
+    virtual void OnPauseBegin() {
     }
 
-    virtual void OnPauseEnd()
-    {
+    virtual void OnPauseEnd() {
     }
 
-    virtual void OnDockEnd(Unit *, Unit *)
-    {
+    virtual void OnDockEnd(Unit *, Unit *) {
     }
 
-    virtual void OnJumpBegin(Unit *)
-    {
+    virtual void OnJumpBegin(Unit *) {
     }
 
-    virtual void OnJumpEnd(Unit *)
-    {
+    virtual void OnJumpEnd(Unit *) {
     }
 
 protected:

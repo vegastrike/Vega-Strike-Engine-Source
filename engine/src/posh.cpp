@@ -68,8 +68,7 @@
 #endif
 
 static
-int s_testBigEndian(void)
-{
+int s_testBigEndian(void) {
     union {
         posh_byte_t c[4];
         posh_u32_t i;
@@ -84,8 +83,7 @@ int s_testBigEndian(void)
 }
 
 static
-const char *s_testSerialization(void)
-{
+const char *s_testSerialization(void) {
     posh_byte_t serbuf[8];
     posh_u16_t tmp16;
     posh_u32_t tmp32;
@@ -131,8 +129,7 @@ const char *s_testSerialization(void)
 #if !defined POSH_NO_FLOAT
 
 static
-const char *s_testFloatingPoint(void)
-{
+const char *s_testFloatingPoint(void) {
     float fRef = 10.0f / 30.0f;
     double dRef = 10.0 / 30.0;
     posh_byte_t dbuf[8];
@@ -160,8 +157,7 @@ const char *s_testFloatingPoint(void)
 #endif /* !defined POSH_NO_FLOAT */
 
 static
-const char *s_testEndianess(void)
-{
+const char *s_testEndianess(void) {
     /* check endianess */
     if (s_testBigEndian() != IS_BIG_ENDIAN) {
         return
@@ -191,8 +187,7 @@ const char *s_testEndianess(void)
  *          form "*ERROR: [text]" on failure.  You can simply check to see if
  *          the first character returned is '*' to verify an error condition.
  */
-const char *POSH_GetArchString(void)
-{
+const char *POSH_GetArchString(void) {
     const char *err;
     const char *s = "OS:.............." POSH_OS_STRING "\n"
                     "CPU:............." POSH_CPU_STRING "\n"
@@ -233,8 +228,7 @@ const char *POSH_GetArchString(void)
  *  @param v[in] unsigned 16-bit input value to swap
  *  @returns a byte swapped version of v
  */
-posh_u16_t POSH_SwapU16(posh_u16_t v)
-{
+posh_u16_t POSH_SwapU16(posh_u16_t v) {
     posh_u16_t swapped;
 
     swapped = v << 8;
@@ -252,8 +246,7 @@ posh_u16_t POSH_SwapU16(posh_u16_t v)
  *           is independent of sign.  However, we still provide this function to
  *           avoid signed/unsigned mismatch compiler warnings.
  */
-posh_s16_t POSH_SwapS16(posh_s16_t v)
-{
+posh_s16_t POSH_SwapS16(posh_s16_t v) {
     return (posh_s16_t) POSH_SwapU16(v);
 }
 
@@ -263,8 +256,7 @@ posh_s16_t POSH_SwapS16(posh_s16_t v)
  *  @param v[in] unsigned 32-bit input value to swap
  *  @returns a byte swapped version of v
  */
-posh_u32_t POSH_SwapU32(posh_u32_t v)
-{
+posh_u32_t POSH_SwapU32(posh_u32_t v) {
     posh_u32_t swapped;
 
     swapped = (v & 0xFF) << 24;
@@ -284,8 +276,7 @@ posh_u32_t POSH_SwapU32(posh_u32_t v)
  *           is independent of sign.  However, we still provide this function to
  *           avoid signed/unsigned mismatch compiler warnings.
  */
-posh_s32_t POSH_SwapS32(posh_s32_t v)
-{
+posh_s32_t POSH_SwapS32(posh_s32_t v) {
     return (posh_s32_t) POSH_SwapU32((posh_u32_t) v);
 }
 
@@ -298,8 +289,7 @@ posh_s32_t POSH_SwapS32(posh_s32_t v)
  *  @ingroup SixtyFourBit
  *  @returns a byte swapped version of v
  */
-posh_u64_t POSH_SwapU64(posh_u64_t v)
-{
+posh_u64_t POSH_SwapU64(posh_u64_t v) {
     posh_byte_t tmp;
     union {
         posh_byte_t bytes[8];
@@ -332,8 +322,7 @@ posh_u64_t POSH_SwapU64(posh_u64_t v)
  *  @ingroup SixtyFourBit
  *  @returns a byte swapped version of v
  */
-posh_s64_t POSH_SwapS64(posh_s64_t v)
-{
+posh_s64_t POSH_SwapS64(posh_s64_t v) {
     return (posh_s64_t) POSH_SwapU64((posh_u64_t) v);
 }
 
@@ -353,8 +342,7 @@ posh_s64_t POSH_SwapS64(posh_s64_t v)
  *  @returns a pointer to the location two bytes after dst
  *  @remarks does no validation of the inputs
  */
-posh_u16_t *POSH_WriteU16ToLittle(void *dst, posh_u16_t value)
-{
+posh_u16_t *POSH_WriteU16ToLittle(void *dst, posh_u16_t value) {
     posh_u16_t *p16 = (posh_u16_t *) dst;
 
     *p16 = POSH_LittleU16(value);
@@ -371,8 +359,7 @@ posh_u16_t *POSH_WriteU16ToLittle(void *dst, posh_u16_t value)
  *  @remarks does no validation of the inputs.  This simply calls
  *         POSH_WriteU16ToLittle() with appropriate casting.
  */
-posh_s16_t *POSH_WriteS16ToLittle(void *dst, posh_s16_t value)
-{
+posh_s16_t *POSH_WriteS16ToLittle(void *dst, posh_s16_t value) {
     return (posh_s16_t *) POSH_WriteU16ToLittle(dst, (posh_u16_t) value);
 }
 
@@ -384,8 +371,7 @@ posh_s16_t *POSH_WriteS16ToLittle(void *dst, posh_s16_t value)
  *  @returns a pointer to the location four bytes after dst
  *  @remarks does no validation of the inputs.
  */
-posh_u32_t *POSH_WriteU32ToLittle(void *dst, posh_u32_t value)
-{
+posh_u32_t *POSH_WriteU32ToLittle(void *dst, posh_u32_t value) {
     posh_u32_t *p32 = (posh_u32_t *) dst;
 
     *p32 = POSH_LittleU32(value);
@@ -402,8 +388,7 @@ posh_u32_t *POSH_WriteU32ToLittle(void *dst, posh_u32_t value)
  *  @remarks does no validation of the inputs.  This simply calls
  *         POSH_WriteU32ToLittle() with appropriate casting.
  */
-posh_s32_t *POSH_WriteS32ToLittle(void *dst, posh_s32_t value)
-{
+posh_s32_t *POSH_WriteS32ToLittle(void *dst, posh_s32_t value) {
     return (posh_s32_t *) POSH_WriteU32ToLittle(dst, (posh_u32_t) value);
 }
 
@@ -415,8 +400,7 @@ posh_s32_t *POSH_WriteS32ToLittle(void *dst, posh_s32_t value)
  *  @returns a pointer to the location two bytes after dst
  *  @remarks does no validation of the inputs
  */
-posh_u16_t *POSH_WriteU16ToBig(void *dst, posh_u16_t value)
-{
+posh_u16_t *POSH_WriteU16ToBig(void *dst, posh_u16_t value) {
     posh_u16_t *p16 = (posh_u16_t *) dst;
 
     *p16 = POSH_BigU16(value);
@@ -433,8 +417,7 @@ posh_u16_t *POSH_WriteU16ToBig(void *dst, posh_u16_t value)
  *  @remarks does no validation of the inputs.  This simply calls
  *         POSH_WriteU16ToLittle() with appropriate casting.
  */
-posh_s16_t *POSH_WriteS16ToBig(void *dst, posh_s16_t value)
-{
+posh_s16_t *POSH_WriteS16ToBig(void *dst, posh_s16_t value) {
     return (posh_s16_t *) POSH_WriteU16ToBig(dst, (posh_u16_t) value);
 }
 
@@ -446,8 +429,7 @@ posh_s16_t *POSH_WriteS16ToBig(void *dst, posh_s16_t value)
  *  @returns a pointer to the location four bytes after dst
  *  @remarks does no validation of the inputs.
  */
-posh_u32_t *POSH_WriteU32ToBig(void *dst, posh_u32_t value)
-{
+posh_u32_t *POSH_WriteU32ToBig(void *dst, posh_u32_t value) {
     posh_u32_t *p32 = (posh_u32_t *) dst;
 
     *p32 = POSH_BigU32(value);
@@ -464,8 +446,7 @@ posh_u32_t *POSH_WriteU32ToBig(void *dst, posh_u32_t value)
  *  @remarks does no validation of the inputs.  This simply calls
  *         POSH_WriteU32ToBig() with appropriate casting.
  */
-posh_s32_t *POSH_WriteS32ToBig(void *dst, posh_s32_t value)
-{
+posh_s32_t *POSH_WriteS32ToBig(void *dst, posh_s32_t value) {
     return (posh_s32_t *) POSH_WriteU32ToBig(dst, (posh_u32_t) value);
 }
 
@@ -480,8 +461,7 @@ posh_s32_t *POSH_WriteS32ToBig(void *dst, posh_s32_t value)
  *  @returns a pointer to the location eight bytes after dst
  *  @remarks does no validation of the inputs.
  */
-posh_u64_t *POSH_WriteU64ToLittle(void *dst, posh_u64_t value)
-{
+posh_u64_t *POSH_WriteU64ToLittle(void *dst, posh_u64_t value) {
     posh_u64_t *p64 = (posh_u64_t *) dst;
 
     *p64 = POSH_LittleU64(value);
@@ -498,8 +478,7 @@ posh_u64_t *POSH_WriteU64ToLittle(void *dst, posh_u64_t value)
  *  @returns a pointer to the location eight bytes after dst
  *  @remarks does no validation of the inputs.
  */
-posh_s64_t *POSH_WriteS64ToLittle(void *dst, posh_s64_t value)
-{
+posh_s64_t *POSH_WriteS64ToLittle(void *dst, posh_s64_t value) {
     return (posh_s64_t *) POSH_WriteU64ToLittle(dst, (posh_u64_t) value);
 }
 
@@ -512,8 +491,7 @@ posh_s64_t *POSH_WriteS64ToLittle(void *dst, posh_s64_t value)
  *  @returns a pointer to the location eight bytes after dst
  *  @remarks does no validation of the inputs.
  */
-posh_u64_t *POSH_WriteU64ToBig(void *dst, posh_u64_t value)
-{
+posh_u64_t *POSH_WriteU64ToBig(void *dst, posh_u64_t value) {
     posh_u64_t *p64 = (posh_u64_t *) dst;
 
     *p64 = POSH_BigU64(value);
@@ -530,8 +508,7 @@ posh_u64_t *POSH_WriteU64ToBig(void *dst, posh_u64_t value)
  *  @returns a pointer to the location eight bytes after dst
  *  @remarks does no validation of the inputs.
  */
-posh_s64_t *POSH_WriteS64ToBig(void *dst, posh_s64_t value)
-{
+posh_s64_t *POSH_WriteS64ToBig(void *dst, posh_s64_t value) {
     return (posh_s64_t *) POSH_WriteU64ToBig(dst, (posh_s64_t) value);
 }
 
@@ -548,8 +525,7 @@ posh_s64_t *POSH_WriteS64ToBig(void *dst, posh_s64_t value)
  *  @param src[in] source buffer
  *  @returns host-endian unsigned 16-bit value
  */
-posh_u16_t POSH_ReadU16FromLittle(const void *src)
-{
+posh_u16_t POSH_ReadU16FromLittle(const void *src) {
     return POSH_LittleU16((*(const posh_u16_t *) src));
 }
 
@@ -558,8 +534,7 @@ posh_u16_t POSH_ReadU16FromLittle(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian signed 16-bit value
  */
-posh_s16_t POSH_ReadS16FromLittle(const void *src)
-{
+posh_s16_t POSH_ReadS16FromLittle(const void *src) {
     return POSH_LittleS16((*(const posh_s16_t *) src));
 }
 
@@ -568,8 +543,7 @@ posh_s16_t POSH_ReadS16FromLittle(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian unsigned 32-bit value
  */
-posh_u32_t POSH_ReadU32FromLittle(const void *src)
-{
+posh_u32_t POSH_ReadU32FromLittle(const void *src) {
     return POSH_LittleU32((*(const posh_u32_t *) src));
 }
 
@@ -578,8 +552,7 @@ posh_u32_t POSH_ReadU32FromLittle(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian signed 32-bit value
  */
-posh_s32_t POSH_ReadS32FromLittle(const void *src)
-{
+posh_s32_t POSH_ReadS32FromLittle(const void *src) {
     return POSH_LittleS32((*(const posh_s32_t *) src));
 }
 
@@ -588,8 +561,7 @@ posh_s32_t POSH_ReadS32FromLittle(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian unsigned 16-bit value
  */
-posh_u16_t POSH_ReadU16FromBig(const void *src)
-{
+posh_u16_t POSH_ReadU16FromBig(const void *src) {
     return POSH_BigU16((*(const posh_u16_t *) src));
 }
 
@@ -598,8 +570,7 @@ posh_u16_t POSH_ReadU16FromBig(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian signed 16-bit value
  */
-posh_s16_t POSH_ReadS16FromBig(const void *src)
-{
+posh_s16_t POSH_ReadS16FromBig(const void *src) {
     return POSH_BigS16((*(const posh_s16_t *) src));
 }
 
@@ -608,8 +579,7 @@ posh_s16_t POSH_ReadS16FromBig(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian unsigned 32-bit value
  */
-posh_u32_t POSH_ReadU32FromBig(const void *src)
-{
+posh_u32_t POSH_ReadU32FromBig(const void *src) {
     return POSH_BigU32((*(const posh_u32_t *) src));
 }
 
@@ -618,8 +588,7 @@ posh_u32_t POSH_ReadU32FromBig(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian signed 32-bit value
  */
-posh_s32_t POSH_ReadS32FromBig(const void *src)
-{
+posh_s32_t POSH_ReadS32FromBig(const void *src) {
     return POSH_BigS32((*(const posh_s32_t *) src));
 }
 
@@ -630,8 +599,7 @@ posh_s32_t POSH_ReadS32FromBig(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian unsigned 32-bit value
  */
-posh_u64_t POSH_ReadU64FromLittle(const void *src)
-{
+posh_u64_t POSH_ReadU64FromLittle(const void *src) {
     return POSH_LittleU64((*(const posh_u64_t *) src));
 }
 
@@ -640,8 +608,7 @@ posh_u64_t POSH_ReadU64FromLittle(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian signed 32-bit value
  */
-posh_s64_t POSH_ReadS64FromLittle(const void *src)
-{
+posh_s64_t POSH_ReadS64FromLittle(const void *src) {
     return POSH_LittleS64((*(const posh_s64_t *) src));
 }
 
@@ -650,8 +617,7 @@ posh_s64_t POSH_ReadS64FromLittle(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian unsigned 32-bit value
  */
-posh_u64_t POSH_ReadU64FromBig(const void *src)
-{
+posh_u64_t POSH_ReadU64FromBig(const void *src) {
     return POSH_BigU64((*(const posh_u64_t *) src));
 }
 
@@ -660,8 +626,7 @@ posh_u64_t POSH_ReadU64FromBig(const void *src)
  *  @param src[in] source buffer
  *  @returns host-endian signed 32-bit value
  */
-posh_s64_t POSH_ReadS64FromBig(const void *src)
-{
+posh_s64_t POSH_ReadS64FromBig(const void *src) {
     return POSH_BigS64((*(const posh_s64_t *) src));
 }
 
@@ -682,8 +647,7 @@ posh_s64_t POSH_ReadS64FromBig(const void *src)
  *  @param f[in] floating point value
  *  @returns a little-endian bit representation of f
  */
-posh_u32_t POSH_LittleFloatBits(float f)
-{
+posh_u32_t POSH_LittleFloatBits(float f) {
     union {
         float f32;
         posh_u32_t u32;
@@ -707,8 +671,7 @@ posh_u32_t POSH_LittleFloatBits(float f)
  *  @param   f[in] floating point value
  *  @returns a big-endian bit representation of f
  */
-posh_u32_t POSH_BigFloatBits(float f)
-{
+posh_u32_t POSH_BigFloatBits(float f) {
     union {
         float f32;
         posh_u32_t u32;
@@ -733,8 +696,7 @@ posh_u32_t POSH_BigFloatBits(float f)
  *  @ingroup FloatingPoint
  *  @returns the raw bits used to represent the value 'd', in the form dst[0]=LSB
  */
-void POSH_DoubleBits(double d, posh_byte_t dst[8])
-{
+void POSH_DoubleBits(double d, posh_byte_t dst[8]) {
     union {
         double d64;
         posh_byte_t bytes[8];
@@ -776,8 +738,7 @@ void POSH_DoubleBits(double d, posh_byte_t dst[8])
  *           result is a valid number, nor is there any check to ensure that src is
  *           non-NULL.  BE CAREFUL USING THIS.
  */
-double POSH_DoubleFromBits(const posh_byte_t src[8])
-{
+double POSH_DoubleFromBits(const posh_byte_t src[8]) {
     union {
         double d64;
         posh_byte_t bytes[8];
@@ -816,8 +777,7 @@ double POSH_DoubleFromBits(const posh_byte_t src[8])
  *  @remarks No error checking is performed, so there are no guarantees that the
  *           result is a valid number.  BE CAREFUL USING THIS.
  */
-float POSH_FloatFromLittleBits(posh_u32_t bits)
-{
+float POSH_FloatFromLittleBits(posh_u32_t bits) {
     union {
         float f32;
         posh_u32_t u32;
@@ -841,8 +801,7 @@ float POSH_FloatFromLittleBits(posh_u32_t bits)
  *  @remarks No error checking is performed, so there are no guarantees that the
  *           result is a valid number.  BE CAREFUL USING THIS.
  */
-float POSH_FloatFromBigBits(posh_u32_t bits)
-{
+float POSH_FloatFromBigBits(posh_u32_t bits) {
     union {
         float f32;
         posh_u32_t u32;

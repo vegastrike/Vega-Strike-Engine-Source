@@ -35,32 +35,27 @@
 using namespace std;
 static unsigned int starsysrandom = time(NULL);
 
-static void seedrand(int seed)
-{
+static void seedrand(int seed) {
     starsysrandom = seed;
 }
 
-static unsigned int ssrand()
-{
+static unsigned int ssrand() {
     starsysrandom = (starsysrandom * 1103515245 + 12345) % ((unsigned long) RAND_MAX + 1);
     return starsysrandom;
 }
 
 namespace StarSystemGent {
-float mmax(float a, float b)
-{
+float mmax(float a, float b) {
     return (a > b) ? a : b;
 }
 
-int rnd(int lower, int upper)
-{
+int rnd(int lower, int upper) {
     return (int) (lower + (((float(upper - lower)) * ssrand()) / (float(RAND_MAX) + 1.)));
 }
 
 const char nada[1] = "";
 
-string getRandName(vector<string> &s)
-{
+string getRandName(vector<string> &s) {
     if (s.empty()) {
         return string(nada);
     }
@@ -70,8 +65,7 @@ string getRandName(vector<string> &s)
     return k;
 }
 
-string getGenericName(vector<string> &s)
-{
+string getGenericName(vector<string> &s) {
     if (s.empty()) {
         return string(nada);
     }
@@ -82,8 +76,7 @@ struct Color {
     float r, g, b, a;
     float nr, ng, nb, na;
 
-    Color(float rr, float gg, float bb)
-    {
+    Color(float rr, float gg, float bb) {
         r = rr;
         b = bb;
         g = gg;
@@ -97,20 +90,17 @@ public:
     float s;
     float t;
 
-    Vector()
-    {
+    Vector() {
         i = j = k = 0;
     }
 
-    Vector(float x, float y, float z)
-    {
+    Vector(float x, float y, float z) {
         i = x;
         j = y;
         k = z;
     }
 
-    Vector(float x, float y, float z, float s, float t)
-    {
+    Vector(float x, float y, float z, float s, float t) {
         i = x;
         j = y;
         k = z;
@@ -118,16 +108,14 @@ public:
         this->t = t;
     }
 
-    float Mag()
-    {
+    float Mag() {
         return sqrtf(i * i + j * j + k * k);
     }
 
-    Vector Cross(const Vector &v) const
-    {
+    Vector Cross(const Vector &v) const {
         return Vector(this->j * v.k - this->k * v.j,
-                      this->k * v.i - this->i * v.k,
-                      this->i * v.j - this->j * v.i);
+                this->k * v.i - this->i * v.k,
+                this->i * v.j - this->j * v.i);
     }
 
     void Yaw(float rad) //only works with unit vector
@@ -148,8 +136,7 @@ public:
         k = m * sinf(theta);
     }
 
-    void Roll(float rad)
-    {
+    void Roll(float rad) {
         float theta = 0.0f;
         float m = Mag();
         if (i > 0) {
@@ -166,8 +153,7 @@ public:
         j = m * sinf(theta);
     }
 
-    void Pitch(float rad)
-    {
+    void Pitch(float rad) {
         float theta = 0.0f;
         float m = Mag();
         if (k > 0) {
@@ -185,21 +171,18 @@ public:
     }
 };
 
-float grand()
-{
+float grand() {
     return float(ssrand()) / RAND_MAX;
 }
 
 vector<Color> lights;
 FILE *fp = NULL;
 
-float difffunc(float inputdiffuse)
-{
+float difffunc(float inputdiffuse) {
     return sqrt(((inputdiffuse)));
 }
 
-void WriteLight(unsigned int i)
-{
+void WriteLight(unsigned int i) {
     float ambient = (lights[i].r + lights[i].g + lights[i].b);
     ambient /= 12;
     fprintf(
@@ -234,8 +217,7 @@ vector<float> radii;
 const float minspeed = .001;
 const float maxspeed = 8;
 
-void Tab()
-{
+void Tab() {
     for (unsigned int i = 0; i < radii.size(); i++) {
         fprintf(fp, "\t");
     }
@@ -254,8 +236,7 @@ struct GradColor {
 
 vector<GradColor> colorGradiant;
 
-void readColorGrads(vector<string> &entity, const char *file)
-{
+void readColorGrads(vector<string> &entity, const char *file) {
     FILE *fp = fopen(file, "r");
     if (!fp) {
         return;
@@ -273,8 +254,7 @@ void readColorGrads(vector<string> &entity, const char *file)
     fclose(fp);
 }
 
-float clamp01(float a)
-{
+float clamp01(float a) {
     if (a > 1) {
         a = 1;
     }
@@ -284,13 +264,11 @@ float clamp01(float a)
     return a;
 }
 
-float getcolor(float c, float var)
-{
+float getcolor(float c, float var) {
     return clamp01(c - var + 2 * var * grand());
 }
 
-GradColor whichGradColor(float r, unsigned int &j)
-{
+GradColor whichGradColor(float r, unsigned int &j) {
     unsigned int i;
     for (i = 1; i < colorGradiant.size(); i++) {
         if (colorGradiant[i].minrad > r) {
@@ -301,8 +279,7 @@ GradColor whichGradColor(float r, unsigned int &j)
     return colorGradiant[i - 1];
 }
 
-Color StarColor(float radius, unsigned int &entityindex)
-{
+Color StarColor(float radius, unsigned int &entityindex) {
     GradColor gc = whichGradColor(radius, entityindex);
     float r = getcolor(gc.r, gc.variance);
     float g = getcolor(gc.g, gc.variance);
@@ -310,15 +287,13 @@ Color StarColor(float radius, unsigned int &entityindex)
     return Color(r, g, b);
 }
 
-float LengthOfYear(Vector r, Vector s)
-{
+float LengthOfYear(Vector r, Vector s) {
     float a = 2 * M_PI * mmax(r.Mag(), s.Mag());
     float speed = minspeed + (maxspeed - minspeed) * grand();
     return a / speed;
 }
 
-void CreateLight(unsigned int i)
-{
+void CreateLight(unsigned int i) {
     if (i == 0) {
         assert(!starradius.empty());
         assert(starradius[0]);
@@ -347,8 +322,7 @@ void CreateLight(unsigned int i)
     WriteLight(i);
 }
 
-Vector generateCenter(float minradii)
-{
+Vector generateCenter(float minradii) {
     Vector r;
     r = Vector(3 * grand() + 1, 3 * grand() + 1, 3 * grand() + 1);
     r.i *= minradii;
@@ -361,8 +335,7 @@ Vector generateCenter(float minradii)
     return r;
 }
 
-float makeRS(Vector &r, Vector &s, float minradii)
-{
+float makeRS(Vector &r, Vector &s, float minradii) {
     r = Vector(grand(), grand(), grand());
     int i = (rnd(0, 8));
     r.i = (i & 1) ? -r.i : r.i;
@@ -409,16 +382,14 @@ float makeRS(Vector &r, Vector &s, float minradii)
     return mmax(rm, sm);
 }
 
-void Updateradii(float orbitsize, float thisplanetradius)
-{
+void Updateradii(float orbitsize, float thisplanetradius) {
 #ifdef HUGE_SYSTEMS
     orbitsize   += thisplanetradius;
     radii.back() = orbitsize;
 #endif
 }
 
-Vector generateAndUpdateRS(Vector &r, Vector &s, float thisplanetradius)
-{
+Vector generateAndUpdateRS(Vector &r, Vector &s, float thisplanetradius) {
     if (radii.empty()) {
         r = Vector(0, 0, 0);
         s = Vector(0, 0, 0);
@@ -429,8 +400,7 @@ Vector generateAndUpdateRS(Vector &r, Vector &s, float thisplanetradius)
     return generateCenter(tmp);
 }
 
-vector<string> parseBigUnit(string input)
-{
+vector<string> parseBigUnit(string input) {
     char *mystr = strdup(input.c_str());
     char *ptr = mystr;
     char *oldptr = mystr;
@@ -451,15 +421,14 @@ vector<string> parseBigUnit(string input)
 }
 
 void WriteUnit(string tag,
-               string name,
-               string filename,
-               Vector r,
-               Vector s,
-               Vector center,
-               string nebfile,
-               string destination,
-               bool faction)
-{
+        string name,
+        string filename,
+        Vector r,
+        Vector s,
+        Vector center,
+        string nebfile,
+        string destination,
+        bool faction) {
     Tab();
     fprintf(fp, "<%s name=\"%s\" file=\"%s\" ", tag.c_str(), name.c_str(), filename.c_str());
     if (nebfile.length() > 0) {
@@ -479,8 +448,7 @@ void WriteUnit(string tag,
     fprintf(fp, " />\n");
 }
 
-string getJumpTo(string s)
-{
+string getJumpTo(string s) {
     char tmp[1000] = "";
     if (1 == sscanf(s.c_str(), "JumpTo%s", tmp)) {
         tmp[0] = tolower(tmp[0]);
@@ -490,8 +458,7 @@ string getJumpTo(string s)
     return string(tmp);
 }
 
-string starin(string input)
-{
+string starin(string input) {
     char *tmp = strdup(input.c_str());
     for (unsigned int i = 0; tmp[i] != '\0'; i++) {
         if (tmp[i] == '*') {
@@ -505,8 +472,7 @@ string starin(string input)
     return string("");
 }
 
-string GetNebFile(string &input)
-{
+string GetNebFile(string &input) {
     string ip = input.c_str();
     char *ptr = strdup(ip.c_str());
     for (unsigned int i = 0; ptr[i] != '\0'; i++) {
@@ -522,8 +488,7 @@ string GetNebFile(string &input)
     return string("");
 }
 
-string AnalyzeType(string &input, string &nebfile, float &radius)
-{
+string AnalyzeType(string &input, string &nebfile, float &radius) {
     if (input.empty()) {
         return "";
     }
@@ -554,8 +519,7 @@ string AnalyzeType(string &input, string &nebfile, float &radius)
     return retval;
 }
 
-void MakeSmallUnit()
-{
+void MakeSmallUnit() {
     Vector r, S;
 
     string nam;
@@ -581,12 +545,11 @@ void MakeSmallUnit()
 }
 
 void MakePlanet(float radius, int entitytype, bool forceRS = false, Vector R = Vector(0, 0, 0), Vector S = Vector(0,
-                                                                                                                  0,
-                                                                                                                  0),
-                Vector center = Vector(0, 0, 0));
+        0,
+        0),
+        Vector center = Vector(0, 0, 0));
 
-void MakeBigUnit(string name = string(""), float orbitalradius = 0)
-{
+void MakeBigUnit(string name = string(""), float orbitalradius = 0) {
     vector<string> fullname;
     if (name.length() == 0) {
         string s = getRandName(units[0]);
@@ -650,8 +613,7 @@ void MakeBigUnit(string name = string(""), float orbitalradius = 0)
 
 void MakeMoons(float radius, int entitytype, int callingentitytype, bool forceone = false);
 
-void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, Vector center)
-{
+void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, Vector center) {
     string s = getRandName(entities[entitytype]);
     if (s.length() == 0) {
         return;
@@ -689,7 +651,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     }
     if ((entitytype != JUMP && entitytype != MOON) || grand() < moonofmoonprob) {
         int numu = numun[1] / (nument[PLANET] + nument[GAS]) + grand() * (nument[PLANET] + nument[GAS])
-                           > (numun[1] % (nument[PLANET] + nument[GAS])) ? 1 : 0;
+                > (numun[1] % (nument[PLANET] + nument[GAS])) ? 1 : 0;
         if (entitytype == MOON) {
             if (numu > 1) {
                 numu = 1;
@@ -699,7 +661,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
             MakeSmallUnit();
         }
         MakeMoons((entitytype != JUMP && entitytype != MOON) ? .4 * radius : .8 * radius, MOON, entitytype,
-                  entitytype == JUMP || entitytype == MOON);
+                entitytype == JUMP || entitytype == MOON);
     }
     radii.pop_back();
     Tab();
@@ -707,11 +669,10 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     ///writes out some pretty planet tags
 }
 
-void MakeMoons(float radius, int entitytype, int callingentitytype, bool forceone)
-{
+void MakeMoons(float radius, int entitytype, int callingentitytype, bool forceone) {
     unsigned int nummoon = nument[entitytype] / nument[callingentitytype]
-                                   + (grand() * nument[callingentitytype]
-                                           < (nument[entitytype] % nument[callingentitytype])) ? 1 : 0;
+            + (grand() * nument[callingentitytype]
+                    < (nument[entitytype] % nument[callingentitytype])) ? 1 : 0;
     if (forceone) {
         nummoon = 1;
     }
@@ -720,8 +681,7 @@ void MakeMoons(float radius, int entitytype, int callingentitytype, bool forceon
     }
 }
 
-void beginStar(float radius, unsigned int which)
-{
+void beginStar(float radius, unsigned int which) {
     Vector r, s;
     Vector center = generateAndUpdateRS(r, s, radius);
 
@@ -766,21 +726,18 @@ void beginStar(float radius, unsigned int which)
     }
 }
 
-void endStar()
-{
+void endStar() {
     radii.pop_back();
     Tab();
     fprintf(fp, "</Planet>\n");
 }
 
-void CreateStar(float radius, unsigned int which)
-{
+void CreateStar(float radius, unsigned int which) {
     beginStar(radius, which);
     endStar();
 }
 
-void CreateFirstStar(float radius, unsigned int which)
-{
+void CreateFirstStar(float radius, unsigned int which) {
     beginStar(radius, which);
     for (unsigned int i = which + 1; i < nument[0]; i++) {
         if (grand() > .5) {
@@ -793,8 +750,7 @@ void CreateFirstStar(float radius, unsigned int which)
     endStar();
 }
 
-void CreatePrimaries(float starradius)
-{
+void CreatePrimaries(float starradius) {
     unsigned int numprimaryunits = rnd(0, 1 + numun[0]);
     numun[0] -= numprimaryunits;
     for (unsigned int i = 0; i < nument[0]; i++) {
@@ -806,8 +762,7 @@ void CreatePrimaries(float starradius)
     CreateFirstStar(starradius, 0);
 }
 
-void CreateStarSystem()
-{
+void CreateStarSystem() {
     assert(!starradius.empty());
     assert(starradius[0]);
     fprintf(fp, "<system name=\"%s\" background=\"%s\" nearstars=\"%d\" stars=\"%d\" starspread=\"150\">\n",
@@ -816,8 +771,7 @@ void CreateStarSystem()
     fprintf(fp, "</system>\n");
 }
 
-void readentity(vector<string> &entity, const char *filename)
-{
+void readentity(vector<string> &entity, const char *filename) {
     FILE *fp = fopen(filename, "r");
     if (!fp) {
         return;
@@ -830,8 +784,7 @@ void readentity(vector<string> &entity, const char *filename)
     fclose(fp);
 }
 
-void readnames(vector<string> &entity, const char *filename)
-{
+void readnames(vector<string> &entity, const char *filename) {
     FILE *fp = fopen(filename, "r");
     if (!fp) {
         return;
@@ -857,8 +810,7 @@ void readnames(vector<string> &entity, const char *filename)
     fclose(fp);
 }
 
-const char *noslash(const char *in)
-{
+const char *noslash(const char *in) {
     const char *tmp = in;
     while (*tmp != '\0' && *tmp != '/') {
         tmp++;
@@ -879,13 +831,11 @@ const char *noslash(const char *in)
 }
 using namespace StarSystemGent;
 
-string getStarSystemFileName(string input)
-{
+string getStarSystemFileName(string input) {
     return input + string(".system");
 }
 
-string getStarSystemName(string in)
-{
+string getStarSystemName(string in) {
     char *tmp = strdup(noslash(in.c_str()));
     tmp[0] = toupper(tmp[0]);
     string tmP(tmp);
@@ -893,8 +843,7 @@ string getStarSystemName(string in)
     return tmP;
 }
 
-string getStarSystemSector(string in)
-{
+string getStarSystemSector(string in) {
     char *tmp = strdup(in.c_str());
     char *freer = tmp;
     while (*tmp++) {
@@ -911,23 +860,22 @@ string getStarSystemSector(string in)
 }
 
 void generateStarSystem(string datapath,
-                        int seed,
-                        string sector,
-                        string system,
-                        string outputfile,
-                        float sunradius,
-                        int numstars,
-                        int numgasgiants,
-                        int numrockyplanets,
-                        int nummoons,
-                        bool nebulae,
-                        bool asteroids,
-                        int numnaturalphenomena,
-                        int numstarbases,
-                        string factions,
-                        string namelist,
-                        const vector<string> &jumplocations)
-{
+        int seed,
+        string sector,
+        string system,
+        string outputfile,
+        float sunradius,
+        int numstars,
+        int numgasgiants,
+        int numrockyplanets,
+        int nummoons,
+        bool nebulae,
+        bool asteroids,
+        int numnaturalphenomena,
+        int numstarbases,
+        string factions,
+        string namelist,
+        const vector<string> &jumplocations) {
     if (seed) {
         seedrand(seed);
     } else {
@@ -967,8 +915,7 @@ void generateStarSystem(string datapath,
 #define CONSOLE_APP
 #ifdef CONSOLE_APP
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc < 9) {
         fprintf(
                 stderr,
@@ -1001,22 +948,22 @@ int main(int argc, char **argv)
         return -1;
     }
     generateStarSystem("./",
-                       seed,
-                       sectorname,
-                       systemname,
-                       filen,
-                       strtol(argv[3], NULL, 10),
-                       strtol(argv[4], NULL, 10),
-                       strtol(argv[5], NULL, 10),
-                       strtol(argv[6], NULL, 10),
-                       strtol(argv[7], NULL, 10),
-                       nebula,
-                       asteroid,
-                       numbigthings,
-                       strtol(argv[9], NULL, 10),
-                       argv[10],
-                       argv[11],
-                       jumps);
+            seed,
+            sectorname,
+            systemname,
+            filen,
+            strtol(argv[3], NULL, 10),
+            strtol(argv[4], NULL, 10),
+            strtol(argv[5], NULL, 10),
+            strtol(argv[6], NULL, 10),
+            strtol(argv[7], NULL, 10),
+            nebula,
+            asteroid,
+            numbigthings,
+            strtol(argv[9], NULL, 10),
+            argv[10],
+            argv[11],
+            jumps);
 
     return 0;
 }

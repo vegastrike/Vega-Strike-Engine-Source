@@ -27,12 +27,18 @@ class Quat;
 class ICEMATHS_API Matrix3x3 {
 public:
     //! Empty constructor
-    inline_ Matrix3x3()
-    {
+    inline_ Matrix3x3() {
     }
     //! Constructor from 9 values
-    inline_ Matrix3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
-    {
+    inline_ Matrix3x3(float m00,
+            float m01,
+            float m02,
+            float m10,
+            float m11,
+            float m12,
+            float m20,
+            float m21,
+            float m22) {
         m[0][0] = m00;
         m[0][1] = m01;
         m[0][2] = m02;
@@ -44,26 +50,23 @@ public:
         m[2][2] = m22;
     }
     //! Copy constructor
-    inline_ Matrix3x3(const Matrix3x3 &mat)
-    {
+    inline_ Matrix3x3(const Matrix3x3 &mat) {
         CopyMemory(m, &mat.m, 9 * sizeof(float));
     }
     //! Destructor
-    inline_                    ~Matrix3x3()
-    {
+    inline_                    ~Matrix3x3() {
     }
 
     //! Assign values
     inline_    void Set(float m00,
-                        float m01,
-                        float m02,
-                        float m10,
-                        float m11,
-                        float m12,
-                        float m20,
-                        float m21,
-                        float m22)
-    {
+            float m01,
+            float m02,
+            float m10,
+            float m11,
+            float m12,
+            float m20,
+            float m21,
+            float m22) {
         m[0][0] = m00;
         m[0][1] = m01;
         m[0][2] = m02;
@@ -76,24 +79,21 @@ public:
     }
 
     //! Sets the scale from a Point. The point is put on the diagonal.
-    inline_    void SetScale(const Point &p)
-    {
+    inline_    void SetScale(const Point &p) {
         m[0][0] = p.x;
         m[1][1] = p.y;
         m[2][2] = p.z;
     }
 
     //! Sets the scale from floats. Values are put on the diagonal.
-    inline_    void SetScale(float sx, float sy, float sz)
-    {
+    inline_    void SetScale(float sx, float sy, float sz) {
         m[0][0] = sx;
         m[1][1] = sy;
         m[2][2] = sz;
     }
 
     //! Scales from a Point. Each row is multiplied by a component.
-    inline_    void Scale(const Point &p)
-    {
+    inline_    void Scale(const Point &p) {
         m[0][0] *= p.x;
         m[0][1] *= p.x;
         m[0][2] *= p.x;
@@ -106,8 +106,7 @@ public:
     }
 
     //! Scales from floats. Each row is multiplied by a value.
-    inline_    void Scale(float sx, float sy, float sz)
-    {
+    inline_    void Scale(float sx, float sy, float sz) {
         m[0][0] *= sx;
         m[0][1] *= sx;
         m[0][2] *= sx;
@@ -120,70 +119,59 @@ public:
     }
 
     //! Copy from a Matrix3x3
-    inline_    void Copy(const Matrix3x3 &source)
-    {
+    inline_    void Copy(const Matrix3x3 &source) {
         CopyMemory(m, source.m, 9 * sizeof(float));
     }
 
     // Row-column access
     //! Returns a row.
-    inline_    void GetRow(const uint32_t r, Point &p) const
-    {
+    inline_    void GetRow(const uint32_t r, Point &p) const {
         p.x = m[r][0];
         p.y = m[r][1];
         p.z = m[r][2];
     }
     //! Returns a row.
-    inline_    const Point &GetRow(const uint32_t r) const
-    {
+    inline_    const Point &GetRow(const uint32_t r) const {
         return *(const Point *) &m[r][0];
     }
     //! Returns a row.
-    inline_    Point &GetRow(const uint32_t r)
-    {
+    inline_    Point &GetRow(const uint32_t r) {
         return *(Point *) &m[r][0];
     }
     //! Sets a row.
-    inline_    void SetRow(const uint32_t r, const Point &p)
-    {
+    inline_    void SetRow(const uint32_t r, const Point &p) {
         m[r][0] = p.x;
         m[r][1] = p.y;
         m[r][2] = p.z;
     }
     //! Returns a column.
-    inline_    void GetCol(const uint32_t c, Point &p) const
-    {
+    inline_    void GetCol(const uint32_t c, Point &p) const {
         p.x = m[0][c];
         p.y = m[1][c];
         p.z = m[2][c];
     }
     //! Sets a column.
-    inline_    void SetCol(const uint32_t c, const Point &p)
-    {
+    inline_    void SetCol(const uint32_t c, const Point &p) {
         m[0][c] = p.x;
         m[1][c] = p.y;
         m[2][c] = p.z;
     }
 
     //! Computes the trace. The trace is the sum of the 3 diagonal components.
-    inline_    float Trace() const
-    {
+    inline_    float Trace() const {
         return m[0][0] + m[1][1] + m[2][2];
     }
     //! Clears the matrix.
-    inline_    void Zero()
-    {
+    inline_    void Zero() {
         ZeroMemory(&m, sizeof(m));
     }
     //! Sets the identity matrix.
-    inline_    void Identity()
-    {
+    inline_    void Identity() {
         Zero();
         m[0][0] = m[1][1] = m[2][2] = 1.0f;
     }
     //! Checks for identity
-    inline_    bool IsIdentity() const
-    {
+    inline_    bool IsIdentity() const {
         if (IR(m[0][0]) != IEEE_1_0) {
             return false;
         }
@@ -218,8 +206,7 @@ public:
     }
 
     //! Checks matrix validity
-    inline_    BOOL IsValid() const
-    {
+    inline_    BOOL IsValid() const {
         for (uint32_t j = 0; j < 3; j++) {
             for (uint32_t i = 0; i < 3; i++) {
                 if (!IsValidFloat(m[j][i])) {
@@ -236,8 +223,7 @@ public:
     //!	[ -a.y   a.x   0.0 ]
     //! This is also called a "cross matrix" since for any vectors A and B,
     //! A^B = Skew(A) * B = - B * Skew(A);
-    inline_    void SkewSymmetric(const Point &a)
-    {
+    inline_    void SkewSymmetric(const Point &a) {
         m[0][0] = 0.0f;
         m[0][1] = -a.z;
         m[0][2] = a.y;
@@ -252,8 +238,7 @@ public:
     }
 
     //! Negates the matrix
-    inline_    void Neg()
-    {
+    inline_    void Neg() {
         m[0][0] = -m[0][0];
         m[0][1] = -m[0][1];
         m[0][2] = -m[0][2];
@@ -266,8 +251,7 @@ public:
     }
 
     //! Neg from another matrix
-    inline_    void Neg(const Matrix3x3 &mat)
-    {
+    inline_    void Neg(const Matrix3x3 &mat) {
         m[0][0] = -mat.m[0][0];
         m[0][1] = -mat.m[0][1];
         m[0][2] = -mat.m[0][2];
@@ -280,8 +264,7 @@ public:
     }
 
     //! Add another matrix
-    inline_    void Add(const Matrix3x3 &mat)
-    {
+    inline_    void Add(const Matrix3x3 &mat) {
         m[0][0] += mat.m[0][0];
         m[0][1] += mat.m[0][1];
         m[0][2] += mat.m[0][2];
@@ -294,8 +277,7 @@ public:
     }
 
     //! Sub another matrix
-    inline_    void Sub(const Matrix3x3 &mat)
-    {
+    inline_    void Sub(const Matrix3x3 &mat) {
         m[0][0] -= mat.m[0][0];
         m[0][1] -= mat.m[0][1];
         m[0][2] -= mat.m[0][2];
@@ -307,8 +289,7 @@ public:
         m[2][2] -= mat.m[2][2];
     }
     //! Mac
-    inline_    void Mac(const Matrix3x3 &a, const Matrix3x3 &b, float s)
-    {
+    inline_    void Mac(const Matrix3x3 &a, const Matrix3x3 &b, float s) {
         m[0][0] = a.m[0][0] + b.m[0][0] * s;
         m[0][1] = a.m[0][1] + b.m[0][1] * s;
         m[0][2] = a.m[0][2] + b.m[0][2] * s;
@@ -322,8 +303,7 @@ public:
         m[2][2] = a.m[2][2] + b.m[2][2] * s;
     }
     //! Mac
-    inline_    void Mac(const Matrix3x3 &a, float s)
-    {
+    inline_    void Mac(const Matrix3x3 &a, float s) {
         m[0][0] += a.m[0][0] * s;
         m[0][1] += a.m[0][1] * s;
         m[0][2] += a.m[0][2] * s;
@@ -336,8 +316,7 @@ public:
     }
 
     //! this = A * s
-    inline_    void Mult(const Matrix3x3 &a, float s)
-    {
+    inline_    void Mult(const Matrix3x3 &a, float s) {
         m[0][0] = a.m[0][0] * s;
         m[0][1] = a.m[0][1] * s;
         m[0][2] = a.m[0][2] * s;
@@ -349,8 +328,7 @@ public:
         m[2][2] = a.m[2][2] * s;
     }
 
-    inline_    void Add(const Matrix3x3 &a, const Matrix3x3 &b)
-    {
+    inline_    void Add(const Matrix3x3 &a, const Matrix3x3 &b) {
         m[0][0] = a.m[0][0] + b.m[0][0];
         m[0][1] = a.m[0][1] + b.m[0][1];
         m[0][2] = a.m[0][2] + b.m[0][2];
@@ -362,8 +340,7 @@ public:
         m[2][2] = a.m[2][2] + b.m[2][2];
     }
 
-    inline_    void Sub(const Matrix3x3 &a, const Matrix3x3 &b)
-    {
+    inline_    void Sub(const Matrix3x3 &a, const Matrix3x3 &b) {
         m[0][0] = a.m[0][0] - b.m[0][0];
         m[0][1] = a.m[0][1] - b.m[0][1];
         m[0][2] = a.m[0][2] - b.m[0][2];
@@ -376,8 +353,7 @@ public:
     }
 
     //! this = a * b
-    inline_    void Mult(const Matrix3x3 &a, const Matrix3x3 &b)
-    {
+    inline_    void Mult(const Matrix3x3 &a, const Matrix3x3 &b) {
         m[0][0] = a.m[0][0] * b.m[0][0] + a.m[0][1] * b.m[1][0] + a.m[0][2] * b.m[2][0];
         m[0][1] = a.m[0][0] * b.m[0][1] + a.m[0][1] * b.m[1][1] + a.m[0][2] * b.m[2][1];
         m[0][2] = a.m[0][0] * b.m[0][2] + a.m[0][1] * b.m[1][2] + a.m[0][2] * b.m[2][2];
@@ -390,8 +366,7 @@ public:
     }
 
     //! this = transpose(a) * b
-    inline_    void MultAtB(const Matrix3x3 &a, const Matrix3x3 &b)
-    {
+    inline_    void MultAtB(const Matrix3x3 &a, const Matrix3x3 &b) {
         m[0][0] = a.m[0][0] * b.m[0][0] + a.m[1][0] * b.m[1][0] + a.m[2][0] * b.m[2][0];
         m[0][1] = a.m[0][0] * b.m[0][1] + a.m[1][0] * b.m[1][1] + a.m[2][0] * b.m[2][1];
         m[0][2] = a.m[0][0] * b.m[0][2] + a.m[1][0] * b.m[1][2] + a.m[2][0] * b.m[2][2];
@@ -404,8 +379,7 @@ public:
     }
 
     //! this = a * transpose(b)
-    inline_    void MultABt(const Matrix3x3 &a, const Matrix3x3 &b)
-    {
+    inline_    void MultABt(const Matrix3x3 &a, const Matrix3x3 &b) {
         m[0][0] = a.m[0][0] * b.m[0][0] + a.m[0][1] * b.m[0][1] + a.m[0][2] * b.m[0][2];
         m[0][1] = a.m[0][0] * b.m[1][0] + a.m[0][1] * b.m[1][1] + a.m[0][2] * b.m[1][2];
         m[0][2] = a.m[0][0] * b.m[2][0] + a.m[0][1] * b.m[2][1] + a.m[0][2] * b.m[2][2];
@@ -444,8 +418,7 @@ public:
     Matrix3x3 &Rot(float angle, const Point &axis);
 
     //! Transpose the matrix.
-    void Transpose()
-    {
+    void Transpose() {
         IR(m[1][0]) ^= IR(m[0][1]);
         IR(m[0][1]) ^= IR(m[1][0]);
         IR(m[1][0]) ^= IR(m[0][1]);
@@ -458,8 +431,7 @@ public:
     }
 
     //! this = Transpose(a)
-    void Transpose(const Matrix3x3 &a)
-    {
+    void Transpose(const Matrix3x3 &a) {
         m[0][0] = a.m[0][0];
         m[0][1] = a.m[1][0];
         m[0][2] = a.m[2][0];
@@ -472,8 +444,7 @@ public:
     }
 
     //! Compute the determinant of the matrix. We use the rule of Sarrus.
-    float Determinant() const
-    {
+    float Determinant() const {
         return (m[0][0] * m[1][1] * m[2][2] + m[0][1] * m[1][2] * m[2][0] + m[0][2] * m[1][0] * m[2][1])
                 - (m[2][0] * m[1][1] * m[0][2] + m[2][1] * m[1][2] * m[0][0] + m[2][2] * m[1][0] * m[0][1]);
     }
@@ -486,8 +457,7 @@ public:
 				}
 */
     //! Invert the matrix. Determinant must be different from zero, else matrix can't be inverted.
-    Matrix3x3 &Invert()
-    {
+    Matrix3x3 &Invert() {
         float Det = Determinant();    // Must be !=0
         float OneOverDet = 1.0f / Det;
 
@@ -517,8 +487,7 @@ public:
 
     // Arithmetic operators
     //! Operator for Matrix3x3 Plus = Matrix3x3 + Matrix3x3;
-    inline_    Matrix3x3 operator+(const Matrix3x3 &mat) const
-    {
+    inline_    Matrix3x3 operator+(const Matrix3x3 &mat) const {
         return Matrix3x3(
                 m[0][0] + mat.m[0][0], m[0][1] + mat.m[0][1], m[0][2] + mat.m[0][2],
                 m[1][0] + mat.m[1][0], m[1][1] + mat.m[1][1], m[1][2] + mat.m[1][2],
@@ -526,8 +495,7 @@ public:
     }
 
     //! Operator for Matrix3x3 Minus = Matrix3x3 - Matrix3x3;
-    inline_    Matrix3x3 operator-(const Matrix3x3 &mat) const
-    {
+    inline_    Matrix3x3 operator-(const Matrix3x3 &mat) const {
         return Matrix3x3(
                 m[0][0] - mat.m[0][0], m[0][1] - mat.m[0][1], m[0][2] - mat.m[0][2],
                 m[1][0] - mat.m[1][0], m[1][1] - mat.m[1][1], m[1][2] - mat.m[1][2],
@@ -535,8 +503,7 @@ public:
     }
 
     //! Operator for Matrix3x3 Mul = Matrix3x3 * Matrix3x3;
-    inline_    Matrix3x3 operator*(const Matrix3x3 &mat) const
-    {
+    inline_    Matrix3x3 operator*(const Matrix3x3 &mat) const {
         return Matrix3x3(
                 m[0][0] * mat.m[0][0] + m[0][1] * mat.m[1][0] + m[0][2] * mat.m[2][0],
                 m[0][0] * mat.m[0][1] + m[0][1] * mat.m[1][1] + m[0][2] * mat.m[2][1],
@@ -552,14 +519,12 @@ public:
     }
 
     //! Operator for Point Mul = Matrix3x3 * Point;
-    inline_    Point operator*(const Point &v) const
-    {
+    inline_    Point operator*(const Point &v) const {
         return Point(GetRow(0) | v, GetRow(1) | v, GetRow(2) | v);
     }
 
     //! Operator for Matrix3x3 Mul = Matrix3x3 * float;
-    inline_    Matrix3x3 operator*(float s) const
-    {
+    inline_    Matrix3x3 operator*(float s) const {
         return Matrix3x3(
                 m[0][0] * s, m[0][1] * s, m[0][2] * s,
                 m[1][0] * s, m[1][1] * s, m[1][2] * s,
@@ -567,8 +532,7 @@ public:
     }
 
     //! Operator for Matrix3x3 Mul = float * Matrix3x3;
-    inline_    friend Matrix3x3 operator*(float s, const Matrix3x3 &mat)
-    {
+    inline_    friend Matrix3x3 operator*(float s, const Matrix3x3 &mat) {
         return Matrix3x3(
                 s * mat.m[0][0], s * mat.m[0][1], s * mat.m[0][2],
                 s * mat.m[1][0], s * mat.m[1][1], s * mat.m[1][2],
@@ -576,8 +540,7 @@ public:
     }
 
     //! Operator for Matrix3x3 Div = Matrix3x3 / float;
-    inline_    Matrix3x3 operator/(float s) const
-    {
+    inline_    Matrix3x3 operator/(float s) const {
         if (s) {
             s = 1.0f / s;
         }
@@ -588,8 +551,7 @@ public:
     }
 
     //! Operator for Matrix3x3 Div = float / Matrix3x3;
-    inline_    friend Matrix3x3 operator/(float s, const Matrix3x3 &mat)
-    {
+    inline_    friend Matrix3x3 operator/(float s, const Matrix3x3 &mat) {
         return Matrix3x3(
                 s / mat.m[0][0], s / mat.m[0][1], s / mat.m[0][2],
                 s / mat.m[1][0], s / mat.m[1][1], s / mat.m[1][2],
@@ -597,8 +559,7 @@ public:
     }
 
     //! Operator for Matrix3x3 += Matrix3x3
-    inline_    Matrix3x3 &operator+=(const Matrix3x3 &mat)
-    {
+    inline_    Matrix3x3 &operator+=(const Matrix3x3 &mat) {
         m[0][0] += mat.m[0][0];
         m[0][1] += mat.m[0][1];
         m[0][2] += mat.m[0][2];
@@ -612,8 +573,7 @@ public:
     }
 
     //! Operator for Matrix3x3 -= Matrix3x3
-    inline_    Matrix3x3 &operator-=(const Matrix3x3 &mat)
-    {
+    inline_    Matrix3x3 &operator-=(const Matrix3x3 &mat) {
         m[0][0] -= mat.m[0][0];
         m[0][1] -= mat.m[0][1];
         m[0][2] -= mat.m[0][2];
@@ -627,8 +587,7 @@ public:
     }
 
     //! Operator for Matrix3x3 *= Matrix3x3
-    inline_    Matrix3x3 &operator*=(const Matrix3x3 &mat)
-    {
+    inline_    Matrix3x3 &operator*=(const Matrix3x3 &mat) {
         Point TempRow;
 
         GetRow(0, TempRow);
@@ -649,8 +608,7 @@ public:
     }
 
     //! Operator for Matrix3x3 *= float
-    inline_    Matrix3x3 &operator*=(float s)
-    {
+    inline_    Matrix3x3 &operator*=(float s) {
         m[0][0] *= s;
         m[0][1] *= s;
         m[0][2] *= s;
@@ -664,8 +622,7 @@ public:
     }
 
     //! Operator for Matrix3x3 /= float
-    inline_    Matrix3x3 &operator/=(float s)
-    {
+    inline_    Matrix3x3 &operator/=(float s) {
         if (s) {
             s = 1.0f / s;
         }
@@ -687,13 +644,11 @@ public:
     //! Cast a Matrix3x3 to a Quat.
     operator Quat() const;
 
-    inline_    const Point &operator[](int row) const
-    {
+    inline_    const Point &operator[](int row) const {
         return *(const Point *) &m[row][0];
     }
 
-    inline_    Point &operator[](int row)
-    {
+    inline_    Point &operator[](int row) {
         return *(Point *) &m[row][0];
     }
 

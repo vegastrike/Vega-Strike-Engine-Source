@@ -54,53 +54,43 @@ class Exception : public std::exception {
 private:
     std::string _message;
 public:
-    virtual ~Exception()
-    {
+    virtual ~Exception() {
     }
 
-    Exception()
-    {
+    Exception() {
     }
 
-    Exception(const Exception &other) : _message(other._message)
-    {
+    Exception(const Exception &other) : _message(other._message) {
     }
 
-    explicit Exception(const std::string &message) : _message(message)
-    {
+    explicit Exception(const std::string &message) : _message(message) {
     }
 
-    virtual const char *what() const noexcept
-    {
+    virtual const char *what() const noexcept {
         return _message.c_str();
     }
 };
 
 class InvalidParameters : public Exception {
 public:
-    InvalidParameters()
-    {
+    InvalidParameters() {
     }
 
-    InvalidParameters(const string &msg) : Exception(msg)
-    {
+    InvalidParameters(const string &msg) : Exception(msg) {
     }
 };
 
 class ProgramCompileError : public Exception {
 public:
-    ProgramCompileError()
-    {
+    ProgramCompileError() {
     }
 
-    ProgramCompileError(const string &msg) : Exception(msg)
-    {
+    ProgramCompileError(const string &msg) : Exception(msg) {
     }
 };
 
 template<typename T>
-static T parseEnum(const string &s, const map<string, T> &enumMap)
-{
+static T parseEnum(const string &s, const map<string, T> &enumMap) {
     typename map<string, T>::const_iterator it = enumMap.find(s);
     if (it != enumMap.end()) {
         return it->second;
@@ -110,8 +100,7 @@ static T parseEnum(const string &s, const map<string, T> &enumMap)
 }
 
 template<typename T>
-static T parseEnum(const string &s, const map<string, T> &enumMap, T deflt)
-{
+static T parseEnum(const string &s, const map<string, T> &enumMap, T deflt) {
     typename map<string, T>::const_iterator it = enumMap.find(s);
     if (it != enumMap.end()) {
         return it->second;
@@ -120,8 +109,7 @@ static T parseEnum(const string &s, const map<string, T> &enumMap, T deflt)
     }
 }
 
-static Pass::TextureUnit::SourceType parseSourceType(const string &s, string::size_type &sep)
-{
+static Pass::TextureUnit::SourceType parseSourceType(const string &s, string::size_type &sep) {
     static map<string, Pass::TextureUnit::SourceType> enumMap;
     if (enumMap.empty()) {
         enumMap["decal"] = Pass::TextureUnit::Decal;
@@ -132,8 +120,7 @@ static Pass::TextureUnit::SourceType parseSourceType(const string &s, string::si
     return parseEnum(s.substr(0, sep = s.find_first_of(':')), enumMap, Pass::TextureUnit::None);
 }
 
-Pass::Type parsePassType(const std::string &s)
-{
+Pass::Type parsePassType(const std::string &s) {
     static map<string, Pass::Type> enumMap;
     if (enumMap.empty()) {
         enumMap["fixed"] = Pass::FixedPass;
@@ -142,8 +129,7 @@ Pass::Type parsePassType(const std::string &s)
     return parseEnum(s, enumMap);
 }
 
-Pass::Tristate parseTristate(const std::string &s)
-{
+Pass::Tristate parseTristate(const std::string &s) {
     static map<string, Pass::Tristate> enumMap;
     if (enumMap.empty()) {
         enumMap["true"] = Pass::True;
@@ -153,8 +139,7 @@ Pass::Tristate parseTristate(const std::string &s)
     return parseEnum(s, enumMap);
 }
 
-Pass::BlendMode parseBlendMode(const std::string &s)
-{
+Pass::BlendMode parseBlendMode(const std::string &s) {
     static map<string, Pass::BlendMode> enumMap;
     if (enumMap.empty()) {
         enumMap["default"] = Pass::Default;
@@ -177,19 +162,17 @@ Pass::BlendMode parseBlendMode(const std::string &s)
 
 using namespace __impl;
 
-void Pass::setProgram(const string &vertex, const string &fragment)
-{
+void Pass::setProgram(const string &vertex, const string &fragment) {
     vertexProgram = vertex;
     fragmentProgram = fragment;
     program = 0;
 }
 
 void Pass::addTextureUnit(const string &source,
-                          int target,
-                          const string &deflt,
-                          const string &paramName,
-                          Pass::TextureUnit::Kind texKind)
-{
+        int target,
+        const string &deflt,
+        const string &paramName,
+        Pass::TextureUnit::Kind texKind) {
     textureUnits.resize(textureUnits.size() + 1);
     TextureUnit &newTU = textureUnits.back();
 
@@ -197,7 +180,7 @@ void Pass::addTextureUnit(const string &source,
     newTU.sourceType = parseSourceType(source, ssep);
     newTU.defaultType = parseSourceType(deflt, dsep);
     newTU.targetIndex =
-    newTU.origTargetIndex = target;
+            newTU.origTargetIndex = target;
     newTU.targetParamName = paramName;
     newTU.targetParamId = -1;
     newTU.texKind = texKind;
@@ -241,8 +224,7 @@ void Pass::addTextureUnit(const string &source,
     }
 }
 
-void Pass::addShaderParam(const string &name, float value[4], bool optional)
-{
+void Pass::addShaderParam(const string &name, float value[4], bool optional) {
     shaderParams.resize(shaderParams.size() + 1);
     ShaderParam &newSP = shaderParams.back();
 
@@ -255,8 +237,7 @@ void Pass::addShaderParam(const string &name, float value[4], bool optional)
     }
 }
 
-void Pass::addShaderParam(const string &name, ShaderParam::Semantic semantic, bool optional)
-{
+void Pass::addShaderParam(const string &name, ShaderParam::Semantic semantic, bool optional) {
     shaderParams.resize(shaderParams.size() + 1);
     ShaderParam &newSP = shaderParams.back();
 
@@ -267,8 +248,7 @@ void Pass::addShaderParam(const string &name, ShaderParam::Semantic semantic, bo
 }
 
 /** Compile the pass (shaders, fetch shader params, etc...) */
-void Pass::compile()
-{
+void Pass::compile() {
     if (type == ShaderPass) {
         int prog = program; // BEGIN TRANSACTION
 
@@ -294,7 +274,7 @@ void Pass::compile()
 
             // Compile program
             prog = GFXCreateProgram(vertexProgram.c_str(), fragmentProgram.c_str(),
-                                    (defines.empty() ? nullptr : defines.c_str()));
+                    (defines.empty() ? nullptr : defines.c_str()));
             if (prog == 0) {
                 throw ProgramCompileError("Error compiling program vp:\"" + vertexProgram +
                         "\" fp:\"" + fragmentProgram + "\"");
@@ -363,20 +343,17 @@ void Pass::compile()
 }
 
 /** Return whether the pass has been compiled or not */
-bool Pass::isCompiled() const
-{
+bool Pass::isCompiled() const {
     return (type != ShaderPass) || (program != 0);
 }
 
 /** Return whether the pass has been compiled or not with a matching program version */
-bool Pass::isCompiled(int programVersion) const
-{
+bool Pass::isCompiled(int programVersion) const {
     return (type != ShaderPass) || (program != 0 && this->programVersion == programVersion);
 }
 
 Technique::Technique(const string &name) :
-        name(name), compiled(false), programVersion(0)
-{
+        name(name), compiled(false), programVersion(0) {
     string root_technique_filename =
             game_options.techniquesBasePath + "/"
                     + name + ".technique";
@@ -401,8 +378,7 @@ Technique::Technique(const string &name) :
     }
 }
 
-void Technique::parseTechniqueXML(pt::ptree tree)
-{
+void Technique::parseTechniqueXML(pt::ptree tree) {
     fallback = tree.get("<xmlattr>.fallback", "");
     int nextSequence = 0;
 
@@ -423,20 +399,17 @@ void Technique::parseTechniqueXML(pt::ptree tree)
 }
 
 Technique::Technique(const Technique &src) :
-        name(src.name), fallback(src.fallback), compiled(false), programVersion(0), passes(src.passes)
-{
+        name(src.name), fallback(src.fallback), compiled(false), programVersion(0), passes(src.passes) {
     // Not much else to do
     // Compiled techniques are still valid, and setting any parameter
     // that would invalidate it would result in recompilation
     // FIXME: should result in recompilation, not necessarily true now
 }
 
-Technique::~Technique()
-{
+Technique::~Technique() {
 }
 
-void Technique::compile()
-{
+void Technique::compile() {
     if (!compiled || (GFXGetProgramVersion() != programVersion)) {
         //for (PassList::iterator it = passes.begin(); it != passes.end(); ++it)
         for (auto &pass : passes) {
@@ -451,8 +424,7 @@ void Technique::compile()
 typedef map<string, TechniquePtr> TechniqueMap;
 static TechniqueMap techniqueCache;
 
-TechniquePtr Technique::getTechnique(const std::string &name)
-{
+TechniquePtr Technique::getTechnique(const std::string &name) {
     TechniqueMap::const_iterator it = techniqueCache.find(name);
     if (it != techniqueCache.end()) {
         return it->second;

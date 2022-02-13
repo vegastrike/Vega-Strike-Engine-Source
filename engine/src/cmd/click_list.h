@@ -45,8 +45,7 @@ public:
     bool queryShip(int mouseX, int mouseY, Unit *); //returns if the ship's in iterator utilizes
     ClickList(StarSystem *parSystem, UnitCollection *parentIter);
 
-    ~ClickList()
-    {
+    ~ClickList() {
     }
 
     UnitCollection *requestIterator(int mouseX, int mouseY);

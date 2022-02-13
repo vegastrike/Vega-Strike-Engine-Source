@@ -28,13 +28,11 @@
 
 //---------------------------------------------------------------------------
 
-float csVector3::Norm() const
-{
+float csVector3::Norm() const {
     return qsqrt (x * x + y * y + z * z);
 }
 
-void csVector3::Normalize()
-{
+void csVector3::Normalize() {
     float sqlen = x * x + y * y + z * z;
     if (sqlen < SMALL_EPSILON) {
         return;

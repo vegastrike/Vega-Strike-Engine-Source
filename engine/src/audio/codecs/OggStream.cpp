@@ -49,8 +49,7 @@
 namespace Audio {
 
 OggStream::OggStream(const std::string &path, VSFileSystem::VSFileType type)
-        : Stream(path)
-{
+        : Stream(path) {
     if (file.OpenReadOnly(path, type) <= VSFileSystem::Ok) {
         throw FileOpenException("Error opening file \"" + path + "\"");
     }
@@ -65,24 +64,20 @@ OggStream::OggStream(const std::string &path, VSFileSystem::VSFileType type)
     readBuffer = malloc(readBufferSize);
 }
 
-OggStream::~OggStream()
-{
+OggStream::~OggStream() {
     // destructor closes the file already
     delete oggData;
 }
 
-double OggStream::getLengthImpl() const
-{
+double OggStream::getLengthImpl() const {
     return duration;
 }
 
-double OggStream::getPositionImpl() const
-{
+double OggStream::getPositionImpl() const {
     return ov_time_tell(&oggData->vorbisFile);
 }
 
-void OggStream::seekImpl(double position)
-{
+void OggStream::seekImpl(double position) {
     if (position >= duration) {
         throw EndOfStreamException();
     }
@@ -107,8 +102,7 @@ void OggStream::seekImpl(double position)
     }
 }
 
-void OggStream::getBufferImpl(void *&buffer, unsigned int &bufferSize)
-{
+void OggStream::getBufferImpl(void *&buffer, unsigned int &bufferSize) {
     if (readBufferAvail == 0) {
         throw NoBufferException();
     }
@@ -117,13 +111,12 @@ void OggStream::getBufferImpl(void *&buffer, unsigned int &bufferSize)
     bufferSize = readBufferAvail;
 }
 
-void OggStream::nextBufferImpl()
-{
+void OggStream::nextBufferImpl() {
     int curStream = oggData->streamIndex;
     long ovr;
     switch (ovr = ov_read(&oggData->vorbisFile,
-                          (char *) readBuffer, readBufferSize,
-                          0, 2, 1, &curStream)) {
+            (char *) readBuffer, readBufferSize,
+            0, 2, 1, &curStream)) {
         case OV_HOLE:
             throw CorruptStreamException(false);
         case OV_EBADLINK:

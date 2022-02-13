@@ -58,8 +58,7 @@ public:
     void sendCommand(const EventCommandId &id, Control *control);
 
 //Get the current mouse position.
-    Point mouseLoc(void)
-    {
+    Point mouseLoc(void) {
         return m_mouseLoc;
     }
 

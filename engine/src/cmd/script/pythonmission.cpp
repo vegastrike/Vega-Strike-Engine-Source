@@ -35,17 +35,14 @@
 #include "vs_logging.h"
 #include "cmd/container.h"
 
-PythonMissionBaseClass::PythonMissionBaseClass()
-{
+PythonMissionBaseClass::PythonMissionBaseClass() {
 }
 
-void PythonMissionBaseClass::Destructor()
-{
+void PythonMissionBaseClass::Destructor() {
     delete this;
 }
 
-PythonMissionBaseClass::~PythonMissionBaseClass()
-{
+PythonMissionBaseClass::~PythonMissionBaseClass() {
     for (unsigned int i = 0; i < relevant_units.size(); ++i) {
         relevant_units[i]->SetUnit(NULL);
         delete relevant_units[i];
@@ -54,20 +51,16 @@ PythonMissionBaseClass::~PythonMissionBaseClass()
     VS_LOG(warning, (boost::format("BASE Destruct called. If called from C++ this is death %x") % this));
 }
 
-void PythonMissionBaseClass::Execute()
-{
+void PythonMissionBaseClass::Execute() {
 }
 
-void PythonMissionBaseClass::callFunction(std::string)
-{
+void PythonMissionBaseClass::callFunction(std::string) {
 }
 
-std::string PythonMissionBaseClass::Pickle()
-{
+std::string PythonMissionBaseClass::Pickle() {
     return std::string();
 }
 
-void PythonMissionBaseClass::UnPickle(std::string s)
-{
+void PythonMissionBaseClass::UnPickle(std::string s) {
 }
 

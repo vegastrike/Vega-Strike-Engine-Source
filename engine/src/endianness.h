@@ -89,8 +89,7 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
     #endif
 #endif
 
-inline float VSSwapHostFloatToLittle(float x)
-{
+inline float VSSwapHostFloatToLittle(float x) {
     union LILfloat {
         float f;
         unsigned int i;
@@ -101,23 +100,19 @@ inline float VSSwapHostFloatToLittle(float x)
     return l.f;
 }
 
-inline double VSSwapHostDoubleToLittle(double x)
-{
+inline double VSSwapHostDoubleToLittle(double x) {
     return le64_to_cpu(x);
 }
 
-inline unsigned int VSSwapHostIntToLittle(unsigned int x)
-{
+inline unsigned int VSSwapHostIntToLittle(unsigned int x) {
     return le32_to_cpu(x);
 }
 
-inline unsigned short VSSwapHostShortToLittle(unsigned short x)
-{
+inline unsigned short VSSwapHostShortToLittle(unsigned short x) {
     return le16_to_cpu(x);
 }
 
-inline double DONTUSE__NXSwapBigDoubleToLittleEndian(double x)
-{
+inline double DONTUSE__NXSwapBigDoubleToLittleEndian(double x) {
     union LILdubl {
         double d;
         unsigned int i[2];

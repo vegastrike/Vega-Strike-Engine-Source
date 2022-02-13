@@ -34,8 +34,7 @@
 class GroupControl : public Control {
 public:
 //Whether this control has children.
-    virtual bool hasGroupChildren(void)
-    {
+    virtual bool hasGroupChildren(void) {
         return true;
     }
 
@@ -54,14 +53,12 @@ public:
     Control *findControlById(const std::string &id);
 
 //Number of child controls.
-    int childCount(void)
-    {
+    int childCount(void) {
         return m_controls.size();
     }
 
 //A control in this group.
-    Control *childAt(int index)
-    {
+    Control *childAt(int index) {
         return m_controls[index];
     }
 
@@ -77,8 +74,7 @@ public:
 
 //CONSTRUCTION
 public:
-    GroupControl(void)
-    {
+    GroupControl(void) {
     }
 
     virtual ~GroupControl(void);

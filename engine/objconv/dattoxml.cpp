@@ -59,22 +59,19 @@ struct V {
     float x, y, z, i, j, k, s, t;
 };
 
-short readf(FILE *fp)
-{
+short readf(FILE *fp) {
     short int n;
     fread(&n, sizeof(n), 1, fp);
     return n;
 }
 
-int readi(FILE *fp)
-{
+int readi(FILE *fp) {
     int n;
     fread(&n, sizeof(n), 1, fp);
     return n;
 }
 
-float rf(FILE *fp)
-{
+float rf(FILE *fp) {
     float n;
     fread(&n, sizeof(n), 1, fp);
     return n;
@@ -117,8 +114,7 @@ struct point {
     V Vertex;
     LVector Normal;
 
-    void init(float x, float y, float z)
-    {
+    void init(float x, float y, float z) {
         this->x = this->Vertex.x = x;
         this->y = this->Vertex.y = y;
         this->z = this->Vertex.z = z;
@@ -160,67 +156,56 @@ struct drawdata {
 FILE *fp = NULL;
 const bool writenormals = true;
 
-void wrtc(char c)
-{
+void wrtc(char c) {
     fwrite(&c, sizeof(char), 1, fp);
 }
 
-void wrts(short s)
-{
+void wrts(short s) {
     fwrite(&s, sizeof(short), 1, fp);
 }
 
-void wrti(int i)
-{
+void wrti(int i) {
     fwrite(&i, sizeof(int), 1, fp);
 }
 
-void wrtf(float f)
-{
+void wrtf(float f) {
     fwrite(&f, sizeof(float), 1, fp);
 }
 
-void wrtd(double d)
-{
+void wrtd(double d) {
     fwrite(&d, sizeof(double), 1, fp);
 }
 
-void Tab(int i = 1)
-{
+void Tab(int i = 1) {
     for (int j = 0; j < i; j++) {
         wrtc('\t');
     }
 }
 
-void StrWrite(char *x)
-{
+void StrWrite(char *x) {
     fwrite(x, strlen(x), 1, fp);
 }
 
-void TextI(int i)
-{
+void TextI(int i) {
     char intt[256];
     sprintf(intt, "\"%d\"", i);
     StrWrite(intt);
 }
 
-void TextF(float f)
-{
+void TextF(float f) {
     char flt[256];
     sprintf(flt, "\"%f\"", f);
     StrWrite(flt);
 }
 
-void Tag(char *t)
-{
+void Tag(char *t) {
     wrtc('<');
     StrWrite(t);
     wrtc('>');
     wrtc('\n');
 }
 
-void ETag(char *t)
-{
+void ETag(char *t) {
     wrtc('<');
     wrtc('/');
     StrWrite(t);
@@ -228,8 +213,7 @@ void ETag(char *t)
     wrtc('\n');
 }
 
-void TextP(float x, float y, float z)
-{
+void TextP(float x, float y, float z) {
     StrWrite("<Location x=");
     TextF(x);
     StrWrite(" y=");
@@ -239,8 +223,7 @@ void TextP(float x, float y, float z)
     StrWrite("/>\n");
 }
 
-void TextN(float x, float y, float z)
-{
+void TextN(float x, float y, float z) {
     StrWrite("<Normal i=");
     TextF(x);
     StrWrite(" j=");
@@ -250,8 +233,7 @@ void TextN(float x, float y, float z)
     StrWrite("/>\n");
 }
 
-void Vert(int point, float s, float t)
-{
+void Vert(int point, float s, float t) {
     StrWrite("<Vertex point=");
     TextI(point);
     StrWrite(" s=");
@@ -261,8 +243,7 @@ void Vert(int point, float s, float t)
     StrWrite("/>\n");
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int i;
     int *revpnts = NULL;
     drawdata DrawDat;
@@ -639,194 +620,194 @@ int main(int argc, char **argv)
     for (i = 0; i < DrawDat.NumTris; i++) {
         Tag("Tri");
         Vert(DrawDat.Tris[i][2],
-             DrawDat.TriTexture[i][4] * oo255,
-             DrawDat.TriTexture[i][5] * oo255);
+                DrawDat.TriTexture[i][4] * oo255,
+                DrawDat.TriTexture[i][5] * oo255);
         Vert(DrawDat.Tris[i][1],
-             DrawDat.TriTexture[i][2] * oo255,
-             DrawDat.TriTexture[i][3] * oo255);
+                DrawDat.TriTexture[i][2] * oo255,
+                DrawDat.TriTexture[i][3] * oo255);
         Vert(DrawDat.Tris[i][0],
-             DrawDat.TriTexture[i][0] * oo255,
-             DrawDat.TriTexture[i][1] * oo255);
+                DrawDat.TriTexture[i][0] * oo255,
+                DrawDat.TriTexture[i][1] * oo255);
 
         ETag("Tri");
     }
     for (i = 0; i < DrawDat.NumRevTris; i++) {
         Tag("Tri");
         Vert(revpnts[DrawDat.RevTris[i][2]] + DrawDat.NumPoints,
-             DrawDat.TriTexture[i + DrawDat.NumTris][4] * oo255,
-             DrawDat.TriTexture[i + DrawDat.NumTris][5] * oo255);
+                DrawDat.TriTexture[i + DrawDat.NumTris][4] * oo255,
+                DrawDat.TriTexture[i + DrawDat.NumTris][5] * oo255);
         Vert(revpnts[DrawDat.RevTris[i][1]] + DrawDat.NumPoints,
-             DrawDat.TriTexture[i + DrawDat.NumTris][2] * oo255,
-             DrawDat.TriTexture[i + DrawDat.NumTris][3] * oo255);
+                DrawDat.TriTexture[i + DrawDat.NumTris][2] * oo255,
+                DrawDat.TriTexture[i + DrawDat.NumTris][3] * oo255);
         Vert(revpnts[DrawDat.RevTris[i][0]] + DrawDat.NumPoints,
-             DrawDat.TriTexture[i + DrawDat.NumTris][0] * oo255,
-             DrawDat.TriTexture[i + DrawDat.NumTris][1] * oo255);
+                DrawDat.TriTexture[i + DrawDat.NumTris][0] * oo255,
+                DrawDat.TriTexture[i + DrawDat.NumTris][1] * oo255);
 
         ETag("Tri");
     }
     for (i = 0; i < DrawDat.NumPents; i++) {
         Tag("Tri");
         Vert(DrawDat.Pents[i][2],
-             DrawDat.PentTexture[i][4] * oo255,
-             DrawDat.PentTexture[i][5] * oo255);
+                DrawDat.PentTexture[i][4] * oo255,
+                DrawDat.PentTexture[i][5] * oo255);
         Vert(DrawDat.Pents[i][1],
-             DrawDat.PentTexture[i][2] * oo255,
-             DrawDat.PentTexture[i][3] * oo255);
+                DrawDat.PentTexture[i][2] * oo255,
+                DrawDat.PentTexture[i][3] * oo255);
         Vert(DrawDat.Pents[i][0],
-             DrawDat.PentTexture[i][0] * oo255,
-             DrawDat.PentTexture[i][1] * oo255);
+                DrawDat.PentTexture[i][0] * oo255,
+                DrawDat.PentTexture[i][1] * oo255);
 
         ETag("Tri");
     }
     for (i = 0; i < DrawDat.NumRevPents; i++) {
         Tag("Tri");
         Vert(revpnts[DrawDat.RevPents[i][2]] + DrawDat.NumPoints,
-             DrawDat.PentTexture[i + DrawDat.NumPents][4] * oo255,
-             DrawDat.PentTexture[i + DrawDat.NumPents][5] * oo255);
+                DrawDat.PentTexture[i + DrawDat.NumPents][4] * oo255,
+                DrawDat.PentTexture[i + DrawDat.NumPents][5] * oo255);
         Vert(revpnts[DrawDat.RevPents[i][1]] + DrawDat.NumPoints,
-             DrawDat.PentTexture[i + DrawDat.NumPents][2] * oo255,
-             DrawDat.PentTexture[i + DrawDat.NumPents][3] * oo255);
+                DrawDat.PentTexture[i + DrawDat.NumPents][2] * oo255,
+                DrawDat.PentTexture[i + DrawDat.NumPents][3] * oo255);
         Vert(revpnts[DrawDat.RevPents[i][0]] + DrawDat.NumPoints,
-             DrawDat.PentTexture[i + DrawDat.NumPents][0] * oo255,
-             DrawDat.PentTexture[i + DrawDat.NumPents][1] * oo255);
+                DrawDat.PentTexture[i + DrawDat.NumPents][0] * oo255,
+                DrawDat.PentTexture[i + DrawDat.NumPents][1] * oo255);
 
         ETag("Tri");
     }
     for (i = 0; i < DrawDat.NumQuads; i++) {
         Tag("Quad");
         Vert(DrawDat.Quads[i][3],
-             DrawDat.QuadTexture[i][6] * oo255,
-             DrawDat.QuadTexture[i][7] * oo255);
+                DrawDat.QuadTexture[i][6] * oo255,
+                DrawDat.QuadTexture[i][7] * oo255);
         Vert(DrawDat.Quads[i][2],
-             DrawDat.QuadTexture[i][4] * oo255,
-             DrawDat.QuadTexture[i][5] * oo255);
+                DrawDat.QuadTexture[i][4] * oo255,
+                DrawDat.QuadTexture[i][5] * oo255);
         Vert(DrawDat.Quads[i][1],
-             DrawDat.QuadTexture[i][2] * oo255,
-             DrawDat.QuadTexture[i][3] * oo255);
+                DrawDat.QuadTexture[i][2] * oo255,
+                DrawDat.QuadTexture[i][3] * oo255);
         Vert(DrawDat.Quads[i][0],
-             DrawDat.QuadTexture[i][0] * oo255,
-             DrawDat.QuadTexture[i][1] * oo255);
+                DrawDat.QuadTexture[i][0] * oo255,
+                DrawDat.QuadTexture[i][1] * oo255);
 
         ETag("Quad");
     }
     for (i = 0; i < DrawDat.NumRevQuads; i++) {
         Tag("Quad");
         Vert(revpnts[DrawDat.RevQuads[i][3]] + DrawDat.NumPoints,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][6] * oo255,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][7] * oo255);
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][6] * oo255,
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][7] * oo255);
         Vert(revpnts[DrawDat.RevQuads[i][2]] + DrawDat.NumPoints,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][4] * oo255,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][5] * oo255);
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][4] * oo255,
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][5] * oo255);
         Vert(revpnts[DrawDat.RevQuads[i][1]] + DrawDat.NumPoints,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][2] * oo255,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][3] * oo255);
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][2] * oo255,
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][3] * oo255);
         Vert(revpnts[DrawDat.RevQuads[i][0]] + DrawDat.NumPoints,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][0] * oo255,
-             DrawDat.QuadTexture[i + DrawDat.NumQuads][1] * oo255);
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][0] * oo255,
+                DrawDat.QuadTexture[i + DrawDat.NumQuads][1] * oo255);
 
         ETag("Quad");
     }
     for (i = 0; i < DrawDat.NumPents; i++) {
         Tag("Quad");
         Vert(DrawDat.Pents[i][4],
-             DrawDat.PentTexture[i][8] * oo255,
-             DrawDat.PentTexture[i][9] * oo255);
+                DrawDat.PentTexture[i][8] * oo255,
+                DrawDat.PentTexture[i][9] * oo255);
 
         Vert(DrawDat.Pents[i][3],
-             DrawDat.PentTexture[i][6] * oo255,
-             DrawDat.PentTexture[i][7] * oo255);
+                DrawDat.PentTexture[i][6] * oo255,
+                DrawDat.PentTexture[i][7] * oo255);
 
         Vert(DrawDat.Pents[i][2],
-             DrawDat.PentTexture[i][4] * oo255,
-             DrawDat.PentTexture[i][5] * oo255);
+                DrawDat.PentTexture[i][4] * oo255,
+                DrawDat.PentTexture[i][5] * oo255);
 
         Vert(DrawDat.Pents[i][0],
-             DrawDat.PentTexture[i][0] * oo255,
-             DrawDat.PentTexture[i][1] * oo255);
+                DrawDat.PentTexture[i][0] * oo255,
+                DrawDat.PentTexture[i][1] * oo255);
 
         ETag("Quad");
     }
     for (i = 0; i < DrawDat.NumRevPents; i++) {
         Tag("Quad");
         Vert(revpnts[DrawDat.RevPents[i][4]] + DrawDat.NumPoints,
-             DrawDat.PentTexture[i + DrawDat.NumPents][8] * oo255,
-             DrawDat.PentTexture[i + DrawDat.NumPents][9] * oo255);
+                DrawDat.PentTexture[i + DrawDat.NumPents][8] * oo255,
+                DrawDat.PentTexture[i + DrawDat.NumPents][9] * oo255);
         Vert(revpnts[DrawDat.RevPents[i][3]] + DrawDat.NumPoints,
-             DrawDat.PentTexture[i + DrawDat.NumPents][6] * oo255,
-             DrawDat.PentTexture[i + DrawDat.NumPents][7] * oo255);
+                DrawDat.PentTexture[i + DrawDat.NumPents][6] * oo255,
+                DrawDat.PentTexture[i + DrawDat.NumPents][7] * oo255);
         Vert(revpnts[DrawDat.RevPents[i][2]] + DrawDat.NumPoints,
-             DrawDat.PentTexture[i + DrawDat.NumPents][4] * oo255,
-             DrawDat.PentTexture[i + DrawDat.NumPents][5] * oo255);
+                DrawDat.PentTexture[i + DrawDat.NumPents][4] * oo255,
+                DrawDat.PentTexture[i + DrawDat.NumPents][5] * oo255);
         Vert(revpnts[DrawDat.RevPents[i][0]] + DrawDat.NumPoints,
-             DrawDat.PentTexture[i + DrawDat.NumPents][0] * oo255,
-             DrawDat.PentTexture[i + DrawDat.NumPents][1] * oo255);
+                DrawDat.PentTexture[i + DrawDat.NumPents][0] * oo255,
+                DrawDat.PentTexture[i + DrawDat.NumPents][1] * oo255);
 
         ETag("Quad");
     }
     for (i = 0; i < DrawDat.NumHexs; i++) {
         Tag("Quad");
         Vert(DrawDat.Hexs[i][3],
-             DrawDat.HexTexture[i][6] * oo255,
-             DrawDat.HexTexture[i][7] * oo255);
+                DrawDat.HexTexture[i][6] * oo255,
+                DrawDat.HexTexture[i][7] * oo255);
 
         Vert(DrawDat.Hexs[i][2],
-             DrawDat.HexTexture[i][4] * oo255,
-             DrawDat.HexTexture[i][5] * oo255);
+                DrawDat.HexTexture[i][4] * oo255,
+                DrawDat.HexTexture[i][5] * oo255);
 
         Vert(DrawDat.Hexs[i][1],
-             DrawDat.HexTexture[i][2] * oo255,
-             DrawDat.HexTexture[i][3] * oo255);
+                DrawDat.HexTexture[i][2] * oo255,
+                DrawDat.HexTexture[i][3] * oo255);
 
         Vert(DrawDat.Hexs[i][0],
-             DrawDat.HexTexture[i][0] * oo255,
-             DrawDat.HexTexture[i][1] * oo255);
+                DrawDat.HexTexture[i][0] * oo255,
+                DrawDat.HexTexture[i][1] * oo255);
 
         ETag("Quad");
         Tag("Quad");
         Vert(DrawDat.Hexs[i][5],
-             DrawDat.HexTexture[i][10] * oo255,
-             DrawDat.HexTexture[i][11] * oo255);
+                DrawDat.HexTexture[i][10] * oo255,
+                DrawDat.HexTexture[i][11] * oo255);
         Vert(DrawDat.Hexs[i][4],
-             DrawDat.HexTexture[i][8] * oo255,
-             DrawDat.HexTexture[i][9] * oo255);
+                DrawDat.HexTexture[i][8] * oo255,
+                DrawDat.HexTexture[i][9] * oo255);
         Vert(DrawDat.Hexs[i][3],
-             DrawDat.HexTexture[i][6] * oo255,
-             DrawDat.HexTexture[i][7] * oo255);
+                DrawDat.HexTexture[i][6] * oo255,
+                DrawDat.HexTexture[i][7] * oo255);
         Vert(DrawDat.Hexs[i][0],
-             DrawDat.HexTexture[i][0] * oo255,
-             DrawDat.HexTexture[i][1] * oo255);
+                DrawDat.HexTexture[i][0] * oo255,
+                DrawDat.HexTexture[i][1] * oo255);
 
         ETag("Quad");
     }
     for (i = 0; i < DrawDat.NumRevHexs; i++) {
         Tag("Quad");
         Vert(revpnts[DrawDat.RevHexs[i][3]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][6] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][7] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][6] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][7] * oo255);
         Vert(revpnts[DrawDat.RevHexs[i][2]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][4] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][5] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][4] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][5] * oo255);
         Vert(revpnts[DrawDat.RevHexs[i][1]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][2] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][3] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][2] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][3] * oo255);
         Vert(revpnts[DrawDat.RevHexs[i][0]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][0] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][1] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][0] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][1] * oo255);
 
         ETag("Quad");
         Tag("Quad");
         Vert(revpnts[DrawDat.RevHexs[i][5]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][10] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][11] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][10] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][11] * oo255);
         Vert(revpnts[DrawDat.RevHexs[i][4]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][8] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][9] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][8] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][9] * oo255);
         Vert(revpnts[DrawDat.RevHexs[i][3]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][6] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][7] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][6] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][7] * oo255);
         Vert(revpnts[DrawDat.RevHexs[i][0]] + DrawDat.NumPoints,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][0] * oo255,
-             DrawDat.HexTexture[i + DrawDat.NumHexs][1] * oo255);
+                DrawDat.HexTexture[i + DrawDat.NumHexs][0] * oo255,
+                DrawDat.HexTexture[i + DrawDat.NumHexs][1] * oo255);
 
         ETag("Quad");
     }
@@ -908,8 +889,9 @@ int main(int argc, char **argv)
             Stat.MaxShield[i] = Stat.Shield[i];
         }              //*.1
         Stat.ShieldRecharge = readf(shp);
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < 4; i++) {
             Stat.MaxArmor[i] = Stat.Armor[i] = readf(shp);
+        }
         Stat.MaxHull = Stat.Hull = readf(shp);
         Stat.HullResistance = readf(shp);
         Stat.MaxSpeed = readf(shp) * .75;

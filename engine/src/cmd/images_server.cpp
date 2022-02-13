@@ -28,8 +28,7 @@
 #include "cmd/images.h"
 
 template<typename BOGUS>
-UnitImages<BOGUS>::~UnitImages()
-{
+UnitImages<BOGUS>::~UnitImages() {
     if (pExplosion != nullptr) {
         delete pExplosion;
         pExplosion = nullptr;

@@ -38,12 +38,10 @@ protected:
 public:
     static void MouseMoveHandle(KBSTATE, int, int, int, int, int);
     CoordinateSelect(QVector); //wish I could warp mouse pointer there
-    ~CoordinateSelect()
-    {
+    ~CoordinateSelect() {
     }
 
-    inline QVector GetVector()
-    {
+    inline QVector GetVector() {
         return LocalPosition;
     }
 

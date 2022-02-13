@@ -29,8 +29,7 @@
 #include "core_vector.h"
 
 // Demonstrate some basic assertions.
-TEST(Layer, Sanity)
-{
+TEST(Layer, Sanity) {
     Health health(10, 10, 0);
     DamageableLayer layer = DamageableLayer(0, FacetConfiguration::four, health, true);
 

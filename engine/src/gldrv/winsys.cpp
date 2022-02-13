@@ -88,8 +88,7 @@ static bool keepRunning = true;
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_post_redisplay()
-{
+void winsys_post_redisplay() {
     redisplay = true;
 }
 
@@ -100,8 +99,7 @@ void winsys_post_redisplay()
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_set_display_func(winsys_display_func_t func)
-{
+void winsys_set_display_func(winsys_display_func_t func) {
     display_func = func;
 }
 
@@ -112,8 +110,7 @@ void winsys_set_display_func(winsys_display_func_t func)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_set_idle_func(winsys_idle_func_t func)
-{
+void winsys_set_idle_func(winsys_idle_func_t func) {
     idle_func = func;
 }
 
@@ -124,8 +121,7 @@ void winsys_set_idle_func(winsys_idle_func_t func)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_set_reshape_func(winsys_reshape_func_t func)
-{
+void winsys_set_reshape_func(winsys_reshape_func_t func) {
     reshape_func = func;
 }
 
@@ -136,8 +132,7 @@ void winsys_set_reshape_func(winsys_reshape_func_t func)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_set_keyboard_func(winsys_keyboard_func_t func)
-{
+void winsys_set_keyboard_func(winsys_keyboard_func_t func) {
     keyboard_func = func;
 }
 
@@ -148,8 +143,7 @@ void winsys_set_keyboard_func(winsys_keyboard_func_t func)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_set_mouse_func(winsys_mouse_func_t func)
-{
+void winsys_set_mouse_func(winsys_mouse_func_t func) {
     mouse_func = func;
 }
 
@@ -160,8 +154,7 @@ void winsys_set_mouse_func(winsys_mouse_func_t func)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_set_motion_func(winsys_motion_func_t func)
-{
+void winsys_set_motion_func(winsys_motion_func_t func) {
     motion_func = func;
 }
 
@@ -172,8 +165,7 @@ void winsys_set_motion_func(winsys_motion_func_t func)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_set_passive_motion_func(winsys_motion_func_t func)
-{
+void winsys_set_passive_motion_func(winsys_motion_func_t func) {
     passive_motion_func = func;
 }
 
@@ -184,8 +176,7 @@ void winsys_set_passive_motion_func(winsys_motion_func_t func)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_swap_buffers()
-{
+void winsys_swap_buffers() {
     SDL_GL_SwapBuffers();
 }
 
@@ -196,8 +187,7 @@ void winsys_swap_buffers()
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_warp_pointer(int x, int y)
-{
+void winsys_warp_pointer(int x, int y) {
     SDL_WarpMouse(x, y);
 }
 
@@ -208,8 +198,7 @@ void winsys_warp_pointer(int x, int y)
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2021-09-07 - stephengtuggy
  */
-static bool setup_sdl_video_mode()
-{
+static bool setup_sdl_video_mode() {
     Uint32 video_flags = SDL_OPENGL;
     int bpp = 0;
     int width, height;
@@ -267,10 +256,10 @@ static bool setup_sdl_video_mode()
                 if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags | SDL_ANYFORMAT))
                         == NULL) {
                     VS_LOG_AND_FLUSH(error,
-                                     (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
-                                             % bpp
-                                             % (bpd * 8)
-                                             % SDL_GetError()));
+                            (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
+                                    % bpp
+                                    % (bpd * 8)
+                                    % SDL_GetError()));
                 } else {
                     break;
                 }
@@ -302,12 +291,12 @@ static bool setup_sdl_video_mode()
     }
 
     VS_LOG(trace,
-           (boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode")
-                   % screen->w
-                   % screen->h
-                   % screen->pitch
-                   % screen->format->BitsPerPixel
-                   % screen->format->BytesPerPixel));
+            (boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode")
+                    % screen->w
+                    % screen->h
+                    % screen->pitch
+                    % screen->format->BitsPerPixel
+                    % screen->format->BytesPerPixel));
 
     return true;
 }
@@ -321,8 +310,7 @@ static bool setup_sdl_video_mode()
  *  \date    Modified: 2020-07-27 stephengtuggy
  */
 
-void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title)
-{
+void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
 
     //SDL_INIT_AUDIO|
@@ -379,8 +367,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_cleanup()
-{
+void winsys_cleanup() {
     static bool cleanup = false;
     if (!cleanup) {
         cleanup = true;
@@ -388,8 +375,7 @@ void winsys_cleanup()
     }
 }
 
-void winsys_shutdown()
-{
+void winsys_shutdown() {
     keepRunning = false;
 }
 
@@ -401,11 +387,10 @@ void winsys_shutdown()
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_enable_key_repeat(bool enabled)
-{
+void winsys_enable_key_repeat(bool enabled) {
     if (enabled) {
         SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
-                            SDL_DEFAULT_REPEAT_INTERVAL);
+                SDL_DEFAULT_REPEAT_INTERVAL);
     } else {
         SDL_EnableKeyRepeat(0, 0);
     }
@@ -418,8 +403,7 @@ void winsys_enable_key_repeat(bool enabled)
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_show_cursor(bool visible)
-{
+void winsys_show_cursor(bool visible) {
     static bool vis = true;
     if (visible != vis) {
         SDL_ShowCursor(visible);
@@ -441,8 +425,7 @@ void winsys_show_cursor(bool visible)
 extern int shiftdown(int);
 extern int shiftup(int);
 
-void winsys_process_events()
-{
+void winsys_process_events() {
     SDL_Event event;
     unsigned int key;
     int x, y;
@@ -510,15 +493,15 @@ void winsys_process_events()
                         //(unicode codes must be postprocessed to make sure application of the shiftup
                         //modifier does not destroy it)
                         key = is_unicode
-                              ? ((shifton)
-                                 ? shiftdown(event.key.keysym.unicode)
-                                 : event.key.keysym.unicode
-                              ) : event.key.keysym.sym;
+                                ? ((shifton)
+                                        ? shiftdown(event.key.keysym.unicode)
+                                        : event.key.keysym.unicode
+                                ) : event.key.keysym.sym;
                         //Send the event
                         (*keyboard_func)(key,
-                                         event.key.keysym.mod,
-                                         state,
-                                         x, y);
+                                event.key.keysym.mod,
+                                state,
+                                x, y);
                     }
                     break;
 
@@ -526,9 +509,9 @@ void winsys_process_events()
                 case SDL_MOUSEBUTTONUP:
                     if (mouse_func) {
                         (*mouse_func)(event.button.button,
-                                      event.button.state,
-                                      event.button.x,
-                                      event.button.y);
+                                event.button.state,
+                                event.button.x,
+                                event.button.y);
                     }
                     break;
 
@@ -537,13 +520,13 @@ void winsys_process_events()
                         /* buttons are down */
                         if (motion_func) {
                             (*motion_func)(event.motion.x,
-                                           event.motion.y);
+                                    event.motion.y);
                         }
                     } else
                         /* no buttons are down */
                     if (passive_motion_func) {
                         (*passive_motion_func)(event.motion.x,
-                                               event.motion.y);
+                                event.motion.y);
                     }
                     break;
 
@@ -554,7 +537,7 @@ void winsys_process_events()
                     setup_sdl_video_mode();
                     if (reshape_func) {
                         (*reshape_func)(event.resize.w,
-                                        event.resize.h);
+                                event.resize.h);
                     }
 #endif
                     break;
@@ -583,8 +566,7 @@ void winsys_process_events()
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2021-09-06 - stephengtuggy
  */
-void winsys_atexit(winsys_atexit_func_t func)
-{
+void winsys_atexit(winsys_atexit_func_t func) {
     static bool called = false;
     if (called != false) {
         VS_LOG_AND_FLUSH(error, "winsys_atexit called twice");
@@ -599,8 +581,7 @@ void winsys_atexit(winsys_atexit_func_t func)
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2000-10-20
  */
-void winsys_exit(int code)
-{
+void winsys_exit(int code) {
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();

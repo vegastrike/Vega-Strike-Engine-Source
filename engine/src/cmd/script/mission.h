@@ -297,15 +297,13 @@ enum scope_type { VI_GLOBAL, VI_MODULE, VI_LOCAL, VI_TEMP, VI_IN_OBJECT, VI_ERRO
 
 class varInst {
 public:
-    varInst(scope_type sctype)
-    {
+    varInst(scope_type sctype) {
         scopetype = sctype;
         objectname = std::string();
         object = NULL;
     }
 
-    varInst()
-    {
+    varInst() {
         VS_LOG_AND_FLUSH(fatal, "varInst() obsolete");
         assert(0);
     }
@@ -332,8 +330,7 @@ public:
 
 class varInstVec : public vector<varInst *> {
 public:
-    unsigned int addVar(varInst *vi)
-    {
+    unsigned int addVar(varInst *vi) {
         push_back(vi);
         int index = size() - 1;
         vi->varId = index;
@@ -352,8 +349,7 @@ public:
     varInstMap *varinsts;
     missionNode *block_node;
 
-    scriptContext()
-    {
+    scriptContext() {
         varinsts = NULL;
         block_node = NULL;
     }
@@ -378,8 +374,7 @@ public:
 class missionThread {
 protected:
 public:
-    virtual ~missionThread()
-    {
+    virtual ~missionThread() {
     }
 
     std::vector<contextStack *> exec_stack;
@@ -434,28 +429,24 @@ public:
         std::string objective;
         Unit *getOwner();
 
-        void setOwner(Unit *u)
-        {
+        void setOwner(Unit *u) {
             Owner.SetUnit(u);
         }
 
         UnitContainer Owner;
 
-        Objective()
-        {
+        Objective() {
             completeness = 0;
         }
 
-        Objective(float complete, std::string obj)
-        {
+        Objective(float complete, std::string obj) {
             completeness = complete;
             objective = obj;
         }
     };
     std::vector<Objective> objectives;
 
-    void SetUnpickleData(std::string dat)
-    {
+    void SetUnpickleData(std::string dat) {
         unpickleData = dat;
     }
 
@@ -515,13 +506,11 @@ public:
     void RunDirectorScript(const std::string &);
     unsigned int createClassInstance(std::string modulename);
 
-    void setCurrentAIUnit(Unit *unit)
-    {
+    void setCurrentAIUnit(Unit *unit) {
         current_ai_unit = unit;
     }
 
-    void setCurrentAIOrder(Order *order)
-    {
+    void setCurrentAIOrder(Order *order) {
         current_ai_order = order;
     }
 

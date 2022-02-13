@@ -32,23 +32,20 @@
 #include "eventmanager.h"
 
 //The class that gets called when the window closes.
-void ModalDialog::setCallback(ModalDialogCallback *cb, const std::string &id)
-{
+void ModalDialog::setCallback(ModalDialogCallback *cb, const std::string &id) {
     m_callback = cb;
     m_callbackId = id;
 }
 
 //Make everything happen.
-void ModalDialog::run(void)
-{
+void ModalDialog::run(void) {
     if (window()) {
         window()->setModal(true);
     }
     WindowController::run();
 }
 
-void ModalDialog::modalFinished()
-{
+void ModalDialog::modalFinished() {
     globalEventManager().removeResponder(window());
     //One of our buttons was clicked.  We're done.
     m_deleteOnWindowClose = false;     //Prevent deleting until we are done.
@@ -60,21 +57,18 @@ void ModalDialog::modalFinished()
 }
 
 //Process a command from the window.
-bool ModalDialog::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool ModalDialog::processWindowCommand(const EventCommandId &command, Control *control) {
     return WindowController::processWindowCommand(command, control);
 }
 
 //CONSTRUCTOR
-ModalDialog::ModalDialog() : m_callbackId(), m_callback(NULL), m_result(0)
-{
+ModalDialog::ModalDialog() : m_callbackId(), m_callback(NULL), m_result(0) {
 }
 
 //////////////  SUPPORT FOR SHOWQUESTION() FUNCTIONS ////////////////////////
 
 //Hack for creating the alert window.
-static void CreateControlsForAlertWindow(Window *window)
-{
+static void CreateControlsForAlertWindow(Window *window) {
     window->setSizeAndCenter(Size(1, .8));
     window->setTexture("basecomputer.png");
     window->setColor(SaturatedColor(1, 0, 0, .1));
@@ -109,8 +103,7 @@ static void CreateControlsForAlertWindow(Window *window)
 }
 
 //Hack for creating the Yes/No window.
-static void CreateControlsForYesNoWindow(Window *window)
-{
+static void CreateControlsForYesNoWindow(Window *window) {
     window->setSizeAndCenter(Size(1, .8));
     window->setTexture("basecomputer.png");
     window->setColor(SaturatedColor(1, 0, 0, .1));
@@ -159,8 +152,7 @@ static void CreateControlsForYesNoWindow(Window *window)
 }
 
 //Hack for creating the List Question window.
-void ListQuestionDialog::CreateControlsForListWindow(Window *window)
-{
+void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     window->setSizeAndCenter(Size(1.2, 1.2));
     window->setTexture("basecomputer.png");
     window->setColor(SaturatedColor(0, 0, 1, .1));
@@ -239,8 +231,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window)
 
 //Initialization of our Question Dialog class.
 //Create a window, load controls, and set the title.
-void QuestionDialog::init(const std::string &title)
-{
+void QuestionDialog::init(const std::string &title) {
     setWindow(new Window);
     initControls();
 
@@ -260,8 +251,7 @@ void QuestionDialog::init(const std::string &title)
 }
 
 //Make everything happen.
-void QuestionDialog::run(void)
-{
+void QuestionDialog::run(void) {
     //We need to delete the Window we created until the Window is opened.
     m_deleteWindow = false;
 
@@ -271,16 +261,14 @@ void QuestionDialog::run(void)
 //Class that will handle Alert correctly.
 class AlertDialog : public QuestionDialog {
 //Load the controls for this dialog into the window.
-    virtual void initControls(void)
-    {
+    virtual void initControls(void) {
         CreateControlsForAlertWindow(window());
     }
 };
 
 //Display a modal message to the user.  The message will be shown until the user
 //hits the OK button.
-void showAlert(const std::string &title)
-{
+void showAlert(const std::string &title) {
     AlertDialog *dialog = new AlertDialog;
     dialog->init(title);
     dialog->run();
@@ -289,8 +277,7 @@ void showAlert(const std::string &title)
 //Class that will handle Yes/No dialog correctly.
 class YesNoDialog : public QuestionDialog {
 //Load the controls for this dialog into the window.
-    virtual void initControls(void)
-    {
+    virtual void initControls(void) {
         CreateControlsForYesNoWindow(window());
     }
 
@@ -299,8 +286,7 @@ class YesNoDialog : public QuestionDialog {
 };
 
 //Process a command from the window.
-bool YesNoDialog::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool YesNoDialog::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Yes") {
         m_result = YES_ANSWER;
         modalFinished();
@@ -316,8 +302,7 @@ bool YesNoDialog::processWindowCommand(const EventCommandId &command, Control *c
 
 //Display a modal yes/no question.
 //The result is supplied in the callback.
-void showYesNoQuestion(const std::string &title, ModalDialogCallback *cb, const std::string &id)
-{
+void showYesNoQuestion(const std::string &title, ModalDialogCallback *cb, const std::string &id) {
     YesNoDialog *dialog = new YesNoDialog;
     dialog->init(title);
     dialog->setCallback(cb, id);
@@ -325,8 +310,7 @@ void showYesNoQuestion(const std::string &title, ModalDialogCallback *cb, const 
 }
 
 //Process a command from the window.
-bool ListQuestionDialog::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool ListQuestionDialog::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Cancel") {
         //Just close down, with the result  unknown.
         m_result = (-1);
@@ -352,18 +336,16 @@ bool ListQuestionDialog::processWindowCommand(const EventCommandId &command, Con
     assert(false);     //Should never get here.
 }
 
-SimplePicker *ListQuestionDialog::getPicker()
-{
+SimplePicker *ListQuestionDialog::getPicker() {
     return static_cast< SimplePicker * > ( window()->findControlById("Picker"));
 }
 
 //Display a modal list of options.
 //The result is supplied in the callback.
 void showListQuestion(const std::string &title,
-                      const std::vector<std::string> &options,
-                      ModalDialogCallback *cb,
-                      const std::string &id)
-{
+        const std::vector<std::string> &options,
+        ModalDialogCallback *cb,
+        const std::string &id) {
     ListQuestionDialog *dialog = new ListQuestionDialog;
     dialog->init(title);
     dialog->setCallback(cb, id);

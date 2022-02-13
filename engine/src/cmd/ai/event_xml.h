@@ -52,15 +52,14 @@ struct AIEvresult {
     ///The string indicating what type of thing this event evaluates
     std::string script;
     AIEvresult(int type,
-               float const min,
-               const float max,
-               float timetofinish,
-               float timetointerrupt,
-               float priority,
-               const std::string &aiscript);
+            float const min,
+            const float max,
+            float timetofinish,
+            float timetointerrupt,
+            float priority,
+            const std::string &aiscript);
 
-    bool Eval(const float eval) const
-    {
+    bool Eval(const float eval) const {
         if (eval >= min) {
             if (eval < max) {
                 if (type > 0) {
@@ -87,8 +86,7 @@ struct ElemAttrMap {
     std::vector<std::list<AIEvresult> > result;
 
     ElemAttrMap(const XMLSupport::EnumMap &el) :
-            element_map(el), level(0)
-    {
+            element_map(el), level(0) {
     }
 };
 void LoadAI(const char *filename, ElemAttrMap &result, const std::string &faction);  //num seconds

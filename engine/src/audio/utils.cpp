@@ -39,18 +39,15 @@
 
 namespace Audio {
 
-Timestamp getGameTime()
-{
+Timestamp getGameTime() {
     return Timestamp(UniverseUtil::GetGameTime());
 }
 
-Timestamp getRealTime()
-{
+Timestamp getRealTime() {
     return Timestamp(realTime());
 }
 
-Scalar estimateGain(const Source &src, const Listener &listener)
-{
+Scalar estimateGain(const Source &src, const Listener &listener) {
     // Base priority is source gain
     Scalar gain = src.getGain();
 
@@ -74,8 +71,7 @@ Scalar estimateGain(const Source &src, const Listener &listener)
     return gain;
 }
 
-void sleep(unsigned int ms)
-{
+void sleep(unsigned int ms) {
     micro_sleep(ms * 1000);
 }
 };

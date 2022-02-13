@@ -35,8 +35,7 @@ using std::deque;
 #define NUM_BUTTONS 15
 
 /** Gets the button number of the function used to draw the mouse*/
-int getMouseDrawFunc()
-{
+int getMouseDrawFunc() {
     return NUM_BUTTONS;
 }
 
@@ -46,14 +45,12 @@ static MouseHandler mouseBindings[NUM_BUTTONS + 1];
 int mousex = 0;
 int mousey = 0;
 
-void GetMouseXY(int &mx, int &my)
-{
+void GetMouseXY(int &mx, int &my) {
     mx = mousex;
     my = mousey;
 }
 
-int getMouseButtonStatus()
-{
+int getMouseButtonStatus() {
     int ret = 0;
     for (int i = 0; i < NUM_BUTTONS; i++) {
         ret |= (MouseState[i] == PRESS || MouseState[i] == DOWN) ? (1 << i) : 0;
@@ -70,15 +67,13 @@ struct MouseEvent {
     int y;
 
     MouseEvent(EventType type, int button, int state, int mod, int x, int y)
-            : type(type), button(button), state(state), mod(mod), x(x), y(y)
-    {
+            : type(type), button(button), state(state), mod(mod), x(x), y(y) {
     }
 };
 
 static deque<MouseEvent> eventQueue;
 
-void mouseClickQueue(int button, int state, int x, int y)
-{
+void mouseClickQueue(int button, int state, int x, int y) {
     int mod = 0;
     eventQueue.push_back(MouseEvent(MouseEvent::CLICK, button, state, mod, x, y));
 }
@@ -86,16 +81,14 @@ void mouseClickQueue(int button, int state, int x, int y)
 int delx = 0;
 int dely = 0;
 
-void AddDelta(int dx, int dy)
-{
+void AddDelta(int dx, int dy) {
     delx += dx;
     dely += dy;
 }
 
 int warpallowage = 2;
 
-void DealWithWarp(int x, int y)
-{
+void DealWithWarp(int x, int y) {
     if (game_options.warp_mouse) {
         if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
             if (x < game_options.warp_mouse_zone || y < game_options.warp_mouse_zone
@@ -119,20 +112,17 @@ void DealWithWarp(int x, int y)
     }
 }
 
-void mouseDragQueue(int x, int y)
-{
+void mouseDragQueue(int x, int y) {
     eventQueue.push_back(MouseEvent(MouseEvent::DRAG, -1, -1, -1, x, y));
     DealWithWarp(x, y);
 }
 
-void mouseMotionQueue(int x, int y)
-{
+void mouseMotionQueue(int x, int y) {
     eventQueue.push_back(MouseEvent(MouseEvent::MOTION, -1, -1, -1, x, y));
     DealWithWarp(x, y);
 }
 
-int lookupMouseButton(int b)
-{
+int lookupMouseButton(int b) {
     static int adj = 0;
     if (b + adj < WS_LEFT_BUTTON) {
         adj = WS_LEFT_BUTTON - b;
@@ -160,8 +150,7 @@ int lookupMouseButton(int b)
     return 0;
 }
 
-void mouseClick0(int button, int state, int mod, int x, int y)
-{
+void mouseClick0(int button, int state, int mod, int x, int y) {
     button = lookupMouseButton(button);
     if (button >= NUM_BUTTONS) {
         return;
@@ -173,21 +162,18 @@ void mouseClick0(int button, int state, int mod, int x, int y)
     MouseState[button] = (state == WS_MOUSE_DOWN) ? DOWN : UP;
 }
 
-void SetDelta(int dx, int dy)
-{
+void SetDelta(int dx, int dy) {
     delx = dx;
     dely = dy;
 }
 
-void GetMouseDelta(int &dx, int &dy)
-{
+void GetMouseDelta(int &dx, int &dy) {
     dx = delx;
     dy = dely;
     delx = dely = 0;
 }
 
-void mouseDrag(int x, int y)
-{
+void mouseDrag(int x, int y) {
     for (int i = 0; i < NUM_BUTTONS + 1; i++) {
         mouseBindings[i](MouseState[i], x, y, x - mousex, y - mousey, 0);
     }
@@ -196,8 +182,7 @@ void mouseDrag(int x, int y)
     mousey = y;
 }
 
-void mouseMotion(int x, int y)
-{
+void mouseMotion(int x, int y) {
     for (int i = 0; i < NUM_BUTTONS + 1; i++) {
         mouseBindings[i](MouseState[i], x, y, x - mousex, y - mousey, 0);
     }
@@ -206,38 +191,32 @@ void mouseMotion(int x, int y)
     mousey = y;
 }
 
-static void DefaultMouseHandler(KBSTATE, int x, int y, int delx, int dely, int mod)
-{
+static void DefaultMouseHandler(KBSTATE, int x, int y, int delx, int dely, int mod) {
 }
 
-void UnbindMouse(int key)
-{
+void UnbindMouse(int key) {
     mouseBindings[key] = DefaultMouseHandler;
 }
 
-void BindKey(int key, MouseHandler handler)
-{
+void BindKey(int key, MouseHandler handler) {
     mouseBindings[key] = handler;
     handler(RESET, mousex, mousey, 0, 0, 0);
 }
 
-void RestoreMouse()
-{
+void RestoreMouse() {
     winsys_set_mouse_func(mouseClickQueue);
     winsys_set_motion_func(mouseDragQueue);
     winsys_set_passive_motion_func(mouseMotionQueue);
 }
 
-void InitMouse()
-{
+void InitMouse() {
     for (int a = 0; a < NUM_BUTTONS + 1; a++) {
         UnbindMouse(a);
     }
     RestoreMouse();
 }
 
-void ProcessMouse()
-{
+void ProcessMouse() {
     warpallowage = 2;
     while (eventQueue.size()) {
         MouseEvent e = eventQueue.front();

@@ -38,8 +38,7 @@ public:
     void UnMap(bool changed = true);
     void MakeActive(int stage);
 
-    void MakeActive()
-    {
+    void MakeActive() {
         MakeActive(this->stage);
     }
 

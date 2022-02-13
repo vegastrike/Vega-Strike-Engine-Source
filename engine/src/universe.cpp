@@ -87,8 +87,7 @@ extern StarSystem *GetLoadedStarSystem(const char *file);
 vector<StarSystem *> deleteQueue;
 
 // Local Functions
-void CalculateCoords(unsigned int i, unsigned int size, float &x, float &y, float &w, float &h)
-{
+void CalculateCoords(unsigned int i, unsigned int size, float &x, float &y, float &w, float &h) {
     if (size <= 1) {
         x = y = 0;
         w = h = 1;
@@ -113,8 +112,7 @@ void CalculateCoords(unsigned int i, unsigned int size, float &x, float &y, floa
     }
 }
 
-inline void loadsounds(const string &str, const int max, soundArray &snds, bool loop = false)
-{
+inline void loadsounds(const string &str, const int max, soundArray &snds, bool loop = false) {
     char addstr[2] = {'\0'};
     snds.allocate(max);
     for (int i = 0; i < max; ++i) {
@@ -132,8 +130,7 @@ inline void loadsounds(const string &str, const int max, soundArray &snds, bool 
     }
 }
 
-static void UpdateTimeCompressionSounds()
-{
+static void UpdateTimeCompressionSounds() {
     static int lasttimecompress = 0;
     if ((timecount != lasttimecompress) && (game_options.compress_max > 0)) {
         static bool inittimecompresssounds = false;
@@ -175,8 +172,7 @@ static void UpdateTimeCompressionSounds()
     }
 }
 
-Unit *DockToSavedBases(int playernum, QVector &safevec)
-{
+Unit *DockToSavedBases(int playernum, QVector &safevec) {
     string str = game_options.startDockedTo;
     Unit *plr = _Universe->AccessCockpit(playernum)->GetParent();
     if (!plr || !plr->getStarSystem()) {
@@ -234,8 +230,7 @@ Unit *DockToSavedBases(int playernum, QVector &safevec)
     return (closestUnit && closestUnit->isDocked(plr)) ? closestUnit : NULL;
 }
 
-void SortStarSystems(std::vector<StarSystem *> &ss, StarSystem *drawn)
-{
+void SortStarSystems(std::vector<StarSystem *> &ss, StarSystem *drawn) {
     if ((*ss.begin()) == drawn) {
         return;
     }
@@ -252,8 +247,7 @@ void SortStarSystems(std::vector<StarSystem *> &ss, StarSystem *drawn)
     }
 }
 
-static void ss_generating(bool enable)
-{
+static void ss_generating(bool enable) {
     static bool ss_generating_active = false;
     if (enable) {
         if (!UniverseUtil::isSplashScreenShowing()) {
@@ -267,22 +261,19 @@ static void ss_generating(bool enable)
     }
 }
 
-static void AppendUnitTables(const string &csvfiles)
-{
+static void AppendUnitTables(const string &csvfiles) {
     CSVTable *table = loadCSVTableList(csvfiles, VSFileSystem::UnitFile, true);
     if (table != NULL) {
         unitTables.push_back(table);
     }
 }
 
-void InitUnitTables()
-{
+void InitUnitTables() {
     AppendUnitTables(game_options.modUnitCSV);
     AppendUnitTables(game_options.unitCSV);
 }
 
-void CleanupUnitTables()
-{
+void CleanupUnitTables() {
     for (std::vector<CSVTable *>::iterator it = unitTables.begin(); it != unitTables.end(); ++it) {
         delete *it;
     }
@@ -290,8 +281,7 @@ void CleanupUnitTables()
 }
 
 // Constructors and Init
-Universe::Universe(int argc, char **argv, const char *galaxy_str)
-{
+Universe::Universe(int argc, char **argv, const char *galaxy_str) {
     //Select drivers
 #if defined (__APPLE__)
     //get the current working directory so when glut trashes it we can restore.
@@ -326,22 +316,19 @@ Universe::Universe(int argc, char **argv, const char *galaxy_str)
     _script_system = nullptr;
 }
 
-Universe::Universe()
-{
+Universe::Universe() {
     _current_cockpit = 0;
     _script_system = nullptr;
 }
 
-Universe::~Universe()
-{
+Universe::~Universe() {
     factions.clear();
     _cockpits.clear();
     DeInitInput();
     GFXShutdown();
 }
 
-StarSystem *Universe::Init(string systemfile, const Vector &centr, const string planetname)
-{
+StarSystem *Universe::Init(string systemfile, const Vector &centr, const string planetname) {
     static bool js = true;
     if (js) {
         js = false;
@@ -356,13 +343,11 @@ StarSystem *Universe::Init(string systemfile, const Vector &centr, const string 
 }
 
 // Gameplay Methods
-void Universe::Loop(void main_loop())
-{
+void Universe::Loop(void main_loop()) {
     GFXLoop(main_loop);
 }
 
-void Universe::WriteSaveGame(bool auto_save)
-{
+void Universe::WriteSaveGame(bool auto_save) {
     for (unsigned int i = 0; i < _cockpits.size(); ++i) {
         if (AccessCockpit(i)) {
             ::WriteSaveGame(AccessCockpit(i), auto_save);
@@ -382,8 +367,7 @@ void Universe::WriteSaveGame(bool auto_save)
     }
 }
 
-void Universe::StartDraw()
-{
+void Universe::StartDraw() {
 #ifndef WIN32
     RESETTIME();
 #endif
@@ -441,7 +425,7 @@ void Universe::StartDraw()
                 SortStarSystems(star_system, _active_star_systems.back());
                 if (star_system.size() > game_options.numoldsystems && game_options.deleteoldsystems) {
                     if (std::find(_active_star_systems.begin(), _active_star_systems.end(),
-                                  star_system.back()) == _active_star_systems.end()) {
+                            star_system.back()) == _active_star_systems.end()) {
                         delete star_system.back();
                         star_system.pop_back();
                     } else {
@@ -453,8 +437,7 @@ void Universe::StartDraw()
     }
 }
 
-void Universe::StartGFX()
-{
+void Universe::StartGFX() {
     GFXBeginScene();
     GFXMaterial mat;
     setMaterialAmbient(mat, 1.0, 1.0, 1.0, 1.0);
@@ -474,8 +457,7 @@ void Universe::StartGFX()
 
 // Missing startGL!
 
-void Universe::Update()
-{
+void Universe::Update() {
     for (unsigned int i = 0; i < star_system.size(); ++i) {
         //Calls the update function for server
         star_system[i]->Update((i == 0) ? 1 : game_options.InactiveSystemTime / i);
@@ -483,53 +465,44 @@ void Universe::Update()
 }
 
 // Camera
-Camera *Universe::AccessCamera(int num)
-{
+Camera *Universe::AccessCamera(int num) {
     return AccessCockpit()->AccessCamera(num);
 }
 
-Camera *Universe::AccessCamera()
-{
+Camera *Universe::AccessCamera() {
     return AccessCockpit()->AccessCamera();
 }
 
-Camera *Universe::AccessHudCamera()
-{
+Camera *Universe::AccessHudCamera() {
     return &hud_camera;
 }
 
-void Universe::SelectCamera(int cam)
-{
+void Universe::SelectCamera(int cam) {
     AccessCockpit()->SelectCamera(cam);
 }
 
 // Cockpit
 // TODO: candidate for deletion
-void Universe::SetupCockpits(std::vector<std::string> players)
-{
+void Universe::SetupCockpits(std::vector<std::string> players) {
     for (unsigned int i = 0; i < players.size(); ++i) {
         _cockpits.push_back(NULL);
         _cockpits.back() = new GameCockpit("", NULL, players[i]);
     }
 }
 
-Cockpit *Universe::AccessCockpit()
-{
+Cockpit *Universe::AccessCockpit() {
     return _cockpits[_current_cockpit];
 }
 
-Cockpit *Universe::AccessCockpit(int i)
-{
+Cockpit *Universe::AccessCockpit(int i) {
     return _cockpits[i];
 }
 
-unsigned int Universe::CurrentCockpit()
-{
+unsigned int Universe::CurrentCockpit() {
     return _current_cockpit;
 }
 
-void Universe::SetActiveCockpit(int i)
-{
+void Universe::SetActiveCockpit(int i) {
 #ifdef VS_DEBUG
     if ( i < 0 || i >= cockpit.size() ) {
         VS_LOG(error, (boost::format("ouch invalid cockpit %1$d") % i));
@@ -538,8 +511,7 @@ void Universe::SetActiveCockpit(int i)
     _current_cockpit = i;
 }
 
-void Universe::SetActiveCockpit(Cockpit *cp)
-{
+void Universe::SetActiveCockpit(Cockpit *cp) {
     for (unsigned int i = 0; i < _cockpits.size(); i++) {
         if (_cockpits[i] == cp) {
             SetActiveCockpit(i);
@@ -548,33 +520,28 @@ void Universe::SetActiveCockpit(Cockpit *cp)
     }
 }
 
-Cockpit *Universe::createCockpit(std::string player)
-{
+Cockpit *Universe::createCockpit(std::string player) {
     Cockpit *cp = new Cockpit("", NULL, player);
     _cockpits.push_back(cp);
     return cp;
 }
 
 // Galaxy
-GalaxyXML::Galaxy *Universe::getGalaxy()
-{
+GalaxyXML::Galaxy *Universe::getGalaxy() {
     return galaxy.get();
 }
 
 // Light Map
-void Universe::activateLightMap(int stage)
-{
+void Universe::activateLightMap(int stage) {
     getActiveStarSystem(0)->activateLightMap(stage);
 }
 
-Texture *Universe::getLightMap()
-{
+Texture *Universe::getLightMap() {
     return getActiveStarSystem(0)->getLightMap();
 }
 
 // Player Ship
-Cockpit *Universe::isPlayerStarship(const Unit *doNotDereference)
-{
+Cockpit *Universe::isPlayerStarship(const Unit *doNotDereference) {
     using std::vector;
     if (!doNotDereference) {
         return NULL;
@@ -587,8 +554,7 @@ Cockpit *Universe::isPlayerStarship(const Unit *doNotDereference)
     return NULL;
 }
 
-int Universe::whichPlayerStarship(const Unit *doNotDereference)
-{
+int Universe::whichPlayerStarship(const Unit *doNotDereference) {
     if (!doNotDereference) {
         return -1;
     }
@@ -601,8 +567,7 @@ int Universe::whichPlayerStarship(const Unit *doNotDereference)
 }
 
 // Script System
-StarSystem *Universe::scriptStarSystem()
-{
+StarSystem *Universe::scriptStarSystem() {
     if (_script_system != NULL) {
         return _script_system;
     } else {
@@ -610,8 +575,7 @@ StarSystem *Universe::scriptStarSystem()
     };
 }
 
-bool Universe::setScriptSystem(string name)
-{
+bool Universe::setScriptSystem(string name) {
     if (name == "-active-") {
         _script_system = NULL;
         return true;
@@ -625,15 +589,13 @@ bool Universe::setScriptSystem(string name)
 }
 
 // Star System
-StarSystem *Universe::activeStarSystem()
-{
+StarSystem *Universe::activeStarSystem() {
     return _active_star_systems.empty() ? NULL
-                                        : _active_star_systems.back();
+            : _active_star_systems.back();
 }
 
 // Missing bool StillExists( StarSystem *ss );
-void Universe::setActiveStarSystem(StarSystem *ss)
-{
+void Universe::setActiveStarSystem(StarSystem *ss) {
     if (_active_star_systems.empty()) {
         pushActiveStarSystem(ss);
     } else {
@@ -641,20 +603,17 @@ void Universe::setActiveStarSystem(StarSystem *ss)
     }
 }
 
-void Universe::pushActiveStarSystem(StarSystem *ss)
-{
+void Universe::pushActiveStarSystem(StarSystem *ss) {
     _active_star_systems.push_back(ss);
 }
 
-void Universe::popActiveStarSystem()
-{
+void Universe::popActiveStarSystem() {
     if (!_active_star_systems.empty()) {
         _active_star_systems.pop_back();
     }
 }
 
-StarSystem *Universe::GenerateStarSystem(const char *file, const char *jumpback, Vector center)
-{
+StarSystem *Universe::GenerateStarSystem(const char *file, const char *jumpback, Vector center) {
     StarSystem *tmpcache;
     if ((tmpcache = GetLoadedStarSystem(file))) {
         return tmpcache;
@@ -665,25 +624,21 @@ StarSystem *Universe::GenerateStarSystem(const char *file, const char *jumpback,
     return ss;
 }
 
-void Universe::LoadStarSystem(StarSystem *s)
-{
+void Universe::LoadStarSystem(StarSystem *s) {
     VS_LOG(info, "Loading a starsystem");
     star_system.push_back(s);
     SortStarSystems(star_system, s);     //dont' want instadie
 }
 
-bool Universe::StillExists(StarSystem *s)
-{
+bool Universe::StillExists(StarSystem *s) {
     return std::find(star_system.begin(), star_system.end(), s) != star_system.end();
 }
 
-void Universe::UnloadStarSystem(StarSystem *s)
-{
+void Universe::UnloadStarSystem(StarSystem *s) {
     //not sure what to do here? serialize?
 }
 
-void Universe::Generate1(const char *file, const char *jumpback)
-{
+void Universe::Generate1(const char *file, const char *jumpback) {
     int count = 0;
     if (game_options.while_loading_starsystem) {
         ss_generating(true);
@@ -696,13 +651,12 @@ void Universe::Generate1(const char *file, const char *jumpback)
     }
 }
 
-void Universe::Generate2(StarSystem *ss)
-{
+void Universe::Generate2(StarSystem *ss) {
     static bool firsttime = true;
     LoadStarSystem(ss);
     pushActiveStarSystem(ss);
     for (unsigned int tume = 0; tume <= game_options.num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
-         ++tume) {
+            ++tume) {
         ss->UpdateUnitsPhysics(true);
     }
     //notify the director that a new system is loaded (gotta have at least one active star system)
@@ -733,8 +687,7 @@ void Universe::Generate2(StarSystem *ss)
     ss_generating(false);
 }
 
-void Universe::clearAllSystems()
-{
+void Universe::clearAllSystems() {
     while (star_system.size()) {
         star_system.back()->RemoveStarsystemFromUniverse();
         delete star_system.back();
@@ -744,18 +697,15 @@ void Universe::clearAllSystems()
     _script_system = NULL;
 }
 
-StarSystem *Universe::getActiveStarSystem(unsigned int size)
-{
+StarSystem *Universe::getActiveStarSystem(unsigned int size) {
     return size >= _active_star_systems.size() ? NULL : _active_star_systems[size];
 }
 
-unsigned int Universe::getNumActiveStarSystem()
-{
+unsigned int Universe::getNumActiveStarSystem() {
     return _active_star_systems.size();
 }
 
-StarSystem *Universe::getStarSystem(string name)
-{
+StarSystem *Universe::getStarSystem(string name) {
     vector<StarSystem *>::iterator iter;
     for (iter = star_system.begin(); iter != star_system.end(); iter++) {
         StarSystem *ss = *iter;
@@ -766,8 +716,7 @@ StarSystem *Universe::getStarSystem(string name)
     return NULL;
 }
 
-int Universe::StarSystemIndex(StarSystem *ss)
-{
+int Universe::StarSystemIndex(StarSystem *ss) {
     for (unsigned int i = 0; i < star_system.size(); i++) {
         if (star_system[i] == ss) {
             return i;
@@ -777,18 +726,15 @@ int Universe::StarSystemIndex(StarSystem *ss)
 }
 
 // Misc. Methods
-void Universe::LoadFactionXML(const char *factfile)
-{
+void Universe::LoadFactionXML(const char *factfile) {
     Faction::LoadXML(factfile);
 }
 
-UnitCollection &Universe::getActiveStarSystemUnitList()
-{
+UnitCollection &Universe::getActiveStarSystemUnitList() {
     return activeStarSystem()->getUnitList();
 }
 
-unsigned int Universe::numPlayers()
-{
+unsigned int Universe::numPlayers() {
     return _cockpits.size();
 }
 

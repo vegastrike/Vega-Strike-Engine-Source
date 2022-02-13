@@ -38,13 +38,11 @@
 /* to build:
  *       g++  -pipe -O2 -DLIST_TESTING=1 -I. -I..  -o testcol ../collection.cpp ./main.cpp
  */
-Unit *createUnit()
-{
+Unit *createUnit() {
     return new Unit(false);
 }
 
-void Iteration(UnitCollection *c, int *levels2)
-{
+void Iteration(UnitCollection *c, int *levels2) {
     Unit *unit = NULL;
     ++(*levels2);
     for (un_iter iter = c->createIterator(); unit = *iter;) {
@@ -61,8 +59,7 @@ void Iteration(UnitCollection *c, int *levels2)
     }
 }
 
-int main()
-{
+int main() {
     Unit *unit;
     srand(time(NULL));
     UnitCollection *c = new UnitCollection;

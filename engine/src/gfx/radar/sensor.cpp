@@ -40,93 +40,79 @@ namespace Radar {
 
 Sensor::Sensor(Unit *player)
         : player(player),
-          closeRange(30000.0),
-          useThreatAssessment(false)
-{
+        closeRange(30000.0),
+        useThreatAssessment(false) {
 }
 
-Unit *Sensor::GetPlayer() const
-{
+Unit *Sensor::GetPlayer() const {
     return player;
 }
 
-bool Sensor::UseFriendFoe() const
-{
+bool Sensor::UseFriendFoe() const {
     assert(player);
 
     return player->GetComputerData().radar.UseFriendFoe();
 }
 
-bool Sensor::UseObjectRecognition() const
-{
+bool Sensor::UseObjectRecognition() const {
     assert(player);
 
     return player->GetComputerData().radar.UseObjectRecognition();
 }
 
-bool Sensor::UseThreatAssessment() const
-{
+bool Sensor::UseThreatAssessment() const {
     assert(player);
 
     return player->GetComputerData().radar.UseThreatAssessment();
 }
 
-float Sensor::GetCloseRange() const
-{
+float Sensor::GetCloseRange() const {
     return closeRange;
 }
 
-float Sensor::GetMaxRange() const
-{
+float Sensor::GetMaxRange() const {
     assert(player);
 
     return player->GetComputerData().radar.maxrange;
 }
 
-float Sensor::GetMaxCone() const
-{
+float Sensor::GetMaxCone() const {
     assert(player);
 
     return player->GetComputerData().radar.maxcone;
 }
 
-float Sensor::GetLockCone() const
-{
+float Sensor::GetLockCone() const {
     assert(player);
 
     return player->GetComputerData().radar.lockcone;
 }
 
-Track Sensor::CreateTrack(const Unit *target) const
-{
+Track Sensor::CreateTrack(const Unit *target) const {
     assert(player);
 
     return Track(player, target);
 }
 
-Track Sensor::CreateTrack(const Unit *target, const Vector &position) const
-{
+Track Sensor::CreateTrack(const Unit *target, const Vector &position) const {
     assert(player);
 
     return Track(player, target, position);
 }
 
-bool Sensor::IsTracking(const Track &track) const
-{
+bool Sensor::IsTracking(const Track &track) const {
     assert(player);
 
     return (track.target == player->Target());
 }
 
-bool Sensor::InsideNebula() const
-{
+bool Sensor::InsideNebula() const {
     assert(player);
 
     return (player->GetNebula() != NULL);
 }
 
-bool Sensor::InRange(const Track &track) const
-{
+bool Sensor::InRange(const Track &track) const {
     return (track.GetDistance() <= GetMaxRange());
 }
 
@@ -136,20 +122,17 @@ class CollectRadarTracks {
 public:
     CollectRadarTracks()
             : sensor(NULL),
-              player(NULL),
-              collection(NULL)
-    {
+            player(NULL),
+            collection(NULL) {
     }
 
-    void init(const Sensor *sensor, Sensor::TrackCollection *collection, Unit *player)
-    {
+    void init(const Sensor *sensor, Sensor::TrackCollection *collection, Unit *player) {
         this->sensor = sensor;
         this->collection = collection;
         this->player = player;
     }
 
-    bool acquire(const Unit *target, float distance)
-    {
+    bool acquire(const Unit *target, float distance) {
         assert(sensor);
         assert(collection);
         assert(player);
@@ -201,8 +184,7 @@ private:
 };
 
 // FIXME: Scale objects according to distance and ignore those below a given threshold (which improves with better sensors)
-const Sensor::TrackCollection &Sensor::FindTracksInRange() const
-{
+const Sensor::TrackCollection &Sensor::FindTracksInRange() const {
     assert(player);
 
     collection.clear();
@@ -217,16 +199,16 @@ const Sensor::TrackCollection &Sensor::FindTracksInRange() const
     unitLocator.action.init(this, &collection, player);
     if (!is_null(player->location[Unit::UNIT_ONLY])) {
         findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
-                    player->location[Unit::UNIT_ONLY],
-                    &unitLocator);
+                player->location[Unit::UNIT_ONLY],
+                &unitLocator);
     }
     if (allGravUnits) {
         Unit *target = player->Target();
         const Unit *gravUnit;
         bool foundtarget = false;
         for (un_kiter i = _Universe->activeStarSystem()->gravitationalUnits().constIterator();
-             (gravUnit = *i) != NULL;
-             ++i) {
+                (gravUnit = *i) != NULL;
+                ++i) {
             unitLocator.action.acquire(gravUnit, UnitUtil::getDistance(player, gravUnit));
             if (gravUnit == target) {
                 foundtarget = true;
@@ -239,8 +221,7 @@ const Sensor::TrackCollection &Sensor::FindTracksInRange() const
     return collection;
 }
 
-Sensor::ThreatLevel::Value Sensor::IdentifyThreat(const Track &track) const
-{
+Sensor::ThreatLevel::Value Sensor::IdentifyThreat(const Track &track) const {
     assert(player);
 
     if (!UseThreatAssessment()) {
@@ -282,8 +263,7 @@ Sensor::ThreatLevel::Value Sensor::IdentifyThreat(const Track &track) const
     return ThreatLevel::None;
 }
 
-GFXColor Sensor::GetColor(const Track &track) const
-{
+GFXColor Sensor::GetColor(const Track &track) const {
     assert(player);
 
     static GFXColor friendColor = vs_config->getColor("friend", GFXColor(-1, -1, -1, -1));

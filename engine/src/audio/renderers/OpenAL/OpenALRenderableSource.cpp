@@ -41,31 +41,26 @@
 
 namespace Audio {
 
-static inline void alSource3f(ALuint source, ALenum param, const Vector3 &v)
-{
+static inline void alSource3f(ALuint source, ALenum param, const Vector3 &v) {
     ::alSource3f(source, param, ALfloat(v.x), ALfloat(v.y), ALfloat(v.z));
 }
 
-static inline void alSource3f(ALuint source, ALenum param, const LVector3 &v)
-{
+static inline void alSource3f(ALuint source, ALenum param, const LVector3 &v) {
     ::alSource3f(source, param, ALfloat(v.x), ALfloat(v.y), ALfloat(v.z));
 }
 
 OpenALRenderableSource::OpenALRenderableSource(Source *source)
         : RenderableSource(source),
-          alSource(0),
-          alBuffersAttached(false)
-{
+        alSource(0),
+        alBuffersAttached(false) {
     alGenSources(1, &alSource);
 }
 
-OpenALRenderableSource::~OpenALRenderableSource()
-{
+OpenALRenderableSource::~OpenALRenderableSource() {
     alDeleteSources(1, &alSource);
 }
 
-void OpenALRenderableSource::startPlayingImpl(Timestamp start)
-{
+void OpenALRenderableSource::startPlayingImpl(Timestamp start) {
     if (!isPlayingImpl()) {
         // Make sure we have an attached sound
         attachALBuffers();
@@ -82,20 +77,17 @@ void OpenALRenderableSource::startPlayingImpl(Timestamp start)
     }
 }
 
-void OpenALRenderableSource::stopPlayingImpl()
-{
+void OpenALRenderableSource::stopPlayingImpl() {
     alSourceStop(alSource);
 }
 
-bool OpenALRenderableSource::isPlayingImpl() const
-{
+bool OpenALRenderableSource::isPlayingImpl() const {
     ALint state = 0;
     alGetSourcei(getALSource(), AL_SOURCE_STATE, &state);
     return (state == AL_PLAYING);
 }
 
-Timestamp OpenALRenderableSource::getPlayingTimeImpl() const
-{
+Timestamp OpenALRenderableSource::getPlayingTimeImpl() const {
     ALfloat offs = -1.f;
     alGetSourcef(getALSource(), AL_SEC_OFFSET, &offs);
 
@@ -106,8 +98,7 @@ Timestamp OpenALRenderableSource::getPlayingTimeImpl() const
     return Timestamp(offs);
 }
 
-void OpenALRenderableSource::updateImpl(int flags, const Listener &sceneListener)
-{
+void OpenALRenderableSource::updateImpl(int flags, const Listener &sceneListener) {
     Source *source = getSource();
     ALSourceHandle als = getALSource();
 
@@ -144,23 +135,22 @@ void OpenALRenderableSource::updateImpl(int flags, const Listener &sceneListener
             alSource3f(als, AL_DIRECTION, source->getDirection());
         } else {
             alSource3f(als, AL_POSITION,
-                       source->getPosition() - sceneListener.getPosition());
+                    source->getPosition() - sceneListener.getPosition());
             alSource3f(als, AL_VELOCITY,
-                       sceneListener.toLocalDirection(
-                               source->getVelocity() - sceneListener.getVelocity()
-                       ));
+                    sceneListener.toLocalDirection(
+                            source->getVelocity() - sceneListener.getVelocity()
+                    ));
             alSource3f(als, AL_DIRECTION,
-                       sceneListener.toLocalDirection(
-                               source->getDirection()
-                       ));
+                    sceneListener.toLocalDirection(
+                            source->getDirection()
+                    ));
         }
     }
 
     checkAlError();
 }
 
-void OpenALRenderableSource::attachALBuffers()
-{
+void OpenALRenderableSource::attachALBuffers() {
     if (!alBuffersAttached) {
         SharedPtr<Sound> sound = getSource()->getSound();
 
@@ -180,8 +170,7 @@ void OpenALRenderableSource::attachALBuffers()
     }
 }
 
-void OpenALRenderableSource::seekImpl(Timestamp time)
-{
+void OpenALRenderableSource::seekImpl(Timestamp time) {
     // Tell the AL to jump to the specified position
     // NOTE: lots of implementations don't support it
     //      but according to OpenAL 1.1 specs they should

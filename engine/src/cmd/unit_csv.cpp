@@ -47,8 +47,7 @@
 #include "resource/resource.h"
 #include "unit_csv_factory.h"
 
-CSVRow LookupUnitRow(const string &unitname, const string &faction)
-{
+CSVRow LookupUnitRow(const string &unitname, const string &faction) {
     string hashname = unitname + "__" + faction;
     for (vector<CSVTable *>::reverse_iterator i = unitTables.rbegin(); i != unitTables.rend(); ++i) {
         unsigned int where;
@@ -63,19 +62,18 @@ CSVRow LookupUnitRow(const string &unitname, const string &faction)
 
 extern int GetModeFromName(const char *input_buffer);
 extern void pushMesh(std::vector<Mesh *> &mesh,
-                     float &randomstartframe,
-                     float &randomstartseconds,
-                     const char *filename,
-                     const float scale,
-                     int faction,
-                     class Flightgroup *fg,
-                     int startframe,
-                     double texturestarttime);
+        float &randomstartframe,
+        float &randomstartseconds,
+        const char *filename,
+        const float scale,
+        int faction,
+        class Flightgroup *fg,
+        int startframe,
+        double texturestarttime);
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-static void UpgradeUnit(Unit *un, const std::string &upgrades)
-{
+static void UpgradeUnit(Unit *un, const std::string &upgrades) {
     string::size_type when;
     string::size_type ofs = 0;
     while ((when = upgrades.find('{', ofs)) != string::npos) {
@@ -101,27 +99,26 @@ static void UpgradeUnit(Unit *un, const std::string &upgrades)
         const Unit *upgradee = UnitConstCache::getCachedConst(StringIntKey(upgrade, FactionUtil::GetUpgradeFaction()));
         if (!upgradee) {
             upgradee = UnitConstCache::setCachedConst(StringIntKey(upgrade, FactionUtil::GetUpgradeFaction()),
-                                                      new Unit(upgrade.c_str(),
-                                                               true,
-                                                               FactionUtil::GetUpgradeFaction()));
+                    new Unit(upgrade.c_str(),
+                            true,
+                            FactionUtil::GetUpgradeFaction()));
         }
         double percent = 1.0;
         un->Unit::Upgrade(upgradee,
-                          mountoffset,
-                          subunitoffset,
-                          GetModeFromName(upgrade.c_str()), true, percent, NULL);
+                mountoffset,
+                subunitoffset,
+                GetModeFromName(upgrade.c_str()), true, percent, NULL);
     }
 }
 
 void AddMeshes(std::vector<Mesh *> &xmeshes,
-               float &randomstartframe,
-               float &randomstartseconds,
-               float unitscale,
-               const std::string &meshes,
-               int faction,
-               Flightgroup *fg,
-               vector<unsigned int> *counts)
-{
+        float &randomstartframe,
+        float &randomstartseconds,
+        float unitscale,
+        const std::string &meshes,
+        int faction,
+        Flightgroup *fg,
+        vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
     if (counts) {
         counts->clear();
@@ -158,14 +155,14 @@ void AddMeshes(std::vector<Mesh *> &xmeshes,
         float starttime = startt == "RANDOM" ? -1.0f : atof(startt.c_str());
         unsigned int s = xmeshes.size();
         pushMesh(xmeshes,
-                 randomstartframe,
-                 randomstartseconds,
-                 mesh.c_str(),
-                 unitscale,
-                 faction,
-                 fg,
-                 startframe,
-                 starttime);
+                randomstartframe,
+                randomstartseconds,
+                mesh.c_str(),
+                unitscale,
+                faction,
+                fg,
+                startframe,
+                starttime);
         if (counts) {
             counts->push_back(xmeshes.size() - s);
         }
@@ -173,9 +170,8 @@ void AddMeshes(std::vector<Mesh *> &xmeshes,
 }
 
 static std::pair<string::size_type, string::size_type> nextElementRange(const string &inp,
-                                                                        string::size_type &start,
-                                                                        string::size_type end)
-{
+        string::size_type &start,
+        string::size_type end) {
     string::size_type ostart = start;
     start = inp.find(';', start);
     if (start != string::npos && (start != end && (end == string::npos || start < end))) {
@@ -187,8 +183,7 @@ static std::pair<string::size_type, string::size_type> nextElementRange(const st
     }
 }
 
-static string nextElementString(const string &inp, string::size_type &start, string::size_type end)
-{
+static string nextElementString(const string &inp, string::size_type &start, string::size_type end) {
     std::pair<string::size_type, string::size_type> rng = nextElementRange(inp, start, end);
     if (rng.second == string::npos) {
         return inp.substr(rng.first);
@@ -197,8 +192,7 @@ static string nextElementString(const string &inp, string::size_type &start, str
     }
 }
 
-static int nextElementInt(const string &inp, string::size_type &start, string::size_type end, int def = 0)
-{
+static int nextElementInt(const string &inp, string::size_type &start, string::size_type end, int def = 0) {
     std::pair<string::size_type, string::size_type> rng = nextElementRange(inp, start, end);
     if (rng.second == string::npos && rng.first >= inp.length()) {
         return def;
@@ -209,8 +203,7 @@ static int nextElementInt(const string &inp, string::size_type &start, string::s
     }
 }
 
-static double nextElementFloat(const string &inp, string::size_type &start, string::size_type end, double def = 0)
-{
+static double nextElementFloat(const string &inp, string::size_type &start, string::size_type end, double def = 0) {
     std::pair<string::size_type, string::size_type> rng = nextElementRange(inp, start, end);
     if (rng.second == string::npos && rng.first >= inp.length()) {
         return def;
@@ -221,8 +214,7 @@ static double nextElementFloat(const string &inp, string::size_type &start, stri
     }
 }
 
-static double nextElementBool(const string &inp, string::size_type &start, string::size_type end, bool def = false)
-{
+static double nextElementBool(const string &inp, string::size_type &start, string::size_type end, bool def = false) {
     std::pair<string::size_type, string::size_type> rng = nextElementRange(inp, start, end);
     if (rng.second == string::npos && rng.first >= inp.length()) {
         return def;
@@ -235,8 +227,7 @@ static double nextElementBool(const string &inp, string::size_type &start, strin
     }
 }
 
-static string nextElement(string &inp)
-{
+static string nextElement(string &inp) {
     string::size_type start = 0;
     std::pair<string::size_type, string::size_type> rng = nextElementRange(inp, start, string::npos);
     string ret = inp.substr(rng.first, ((rng.second == string::npos) ? string::npos : (rng.second - rng.first)));
@@ -244,24 +235,21 @@ static string nextElement(string &inp)
     return ret;
 }
 
-static bool stob(const string &inp, bool defaul)
-{
+static bool stob(const string &inp, bool defaul) {
     if (inp.length() != 0) {
         return XMLSupport::parse_bool(inp);
     }
     return defaul;
 }
 
-static double stof(const string &inp, double def = 0)
-{
+static double stof(const string &inp, double def = 0) {
     if (inp.length() != 0) {
         return XMLSupport::parse_float(inp);
     }
     return def;
 }
 
-static int stoi(const string &inp, int def = 0)
-{
+static int stoi(const string &inp, int def = 0) {
     if (inp.length() != 0) {
         return XMLSupport::parse_int(inp);
     }
@@ -272,8 +260,7 @@ extern bool CheckAccessory(Unit *);
 
 extern int parseMountSizes(const char *str);
 
-static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts)
-{
+static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
     string::size_type where, when, ofs = 0;
     unsigned int first_new_mount = thus->mounts.size();
     {
@@ -368,8 +355,7 @@ struct SubUnitStruct {
     QVector R;
     double restricted;
 
-    SubUnitStruct(string fn, QVector POS, QVector q, QVector r, double res)
-    {
+    SubUnitStruct(string fn, QVector POS, QVector q, QVector r, double res) {
         filename = fn;
         pos = POS;
         Q = q;
@@ -378,8 +364,7 @@ struct SubUnitStruct {
     }
 };
 
-static vector<SubUnitStruct> GetSubUnits(const std::string &subunits)
-{
+static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
     string::size_type where, when, ofs = 0;
     vector<SubUnitStruct> ret;
     {
@@ -418,11 +403,10 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits)
 }
 
 static void AddSubUnits(Unit *thus,
-                        Unit::XML &xml,
-                        const std::string &subunits,
-                        int faction,
-                        const std::string &modification)
-{
+        Unit::XML &xml,
+        const std::string &subunits,
+        int faction,
+        const std::string &modification) {
     vector<SubUnitStruct> su = GetSubUnits(subunits);
     xml.units.reserve(subunits.size() + xml.units.size());
     for (vector<SubUnitStruct>::iterator i = su.begin(); i != su.end(); ++i) {
@@ -432,17 +416,17 @@ static void AddSubUnits(Unit *thus,
         QVector R = (*i).R;
         double restricted = (*i).restricted;
         xml.units
-           .push_back(new Unit(filename.c_str(),
-                               true,
-                               faction,
-                               modification,
-                               NULL));         //I set here the fg arg to NULL
+                .push_back(new Unit(filename.c_str(),
+                        true,
+                        faction,
+                        modification,
+                        NULL));         //I set here the fg arg to NULL
         if (xml.units.back()->name == "LOAD_FAILED") {
             xml.units.back()->limits.yaw = 0;
             xml.units.back()->limits.pitch = 0;
             xml.units.back()->limits.roll = 0;
             xml.units.back()->limits.lateral = xml.units.back()->limits.retro = xml.units.back()->limits.forward =
-            xml.units.back()->limits.afterburn = 0.0;
+                    xml.units.back()->limits.afterburn = 0.0;
         }
         if (!thus->isSubUnit()) {         //Useless to set recursive owner in subunits - as parent will do the same
             xml.units.back()->SetRecursiveOwner(thus);
@@ -474,8 +458,7 @@ static void AddSubUnits(Unit *thus,
     }
 }
 
-void AddDocks(Unit *thus, Unit::XML &xml, const string &docks)
-{
+void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
     string::size_type where, when;
     string::size_type ofs = 0;
     int overlap = 1;
@@ -503,9 +486,9 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks)
             double minsize = nextElementFloat(docks, elemstart, elemend);
             for (int i = 0; i < overlap; i++) {
                 thus->pImage
-                    ->dockingports
-                    .push_back(DockingPorts(pos.Cast() * xml.unitscale, size * xml.unitscale, minsize
-                            * xml.unitscale, DockingPorts::Type::Value(type)));
+                        ->dockingports
+                        .push_back(DockingPorts(pos.Cast() * xml.unitscale, size * xml.unitscale, minsize
+                                * xml.unitscale, DockingPorts::Type::Value(type)));
             }
         } else {
             ofs = string::npos;
@@ -513,8 +496,7 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks)
     }
 }
 
-void AddLights(Unit *thus, Unit::XML &xml, const string &lights)
-{
+void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
     static float default_halo_activation =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "default_engine_activation", ".00048828125"));
     string::size_type where, when;
@@ -562,8 +544,7 @@ void AddLights(Unit *thus, Unit::XML &xml, const string &lights)
     }
 }
 
-static void ImportCargo(Unit *thus, const string &imports)
-{
+static void ImportCargo(Unit *thus, const string &imports) {
     string::size_type where, when, ofs = 0;
     {
         int nelem = 0;
@@ -591,8 +572,7 @@ static void ImportCargo(Unit *thus, const string &imports)
     }
 }
 
-static void AddCarg(Unit *thus, const string &cargos)
-{
+static void AddCarg(Unit *thus, const string &cargos) {
     string::size_type where, when, ofs = 0;
     {
         int nelem = 0;
@@ -619,7 +599,7 @@ static void AddCarg(Unit *thus, const string &cargos)
             carg.description = nextElementString(cargos, elemstart, elemend);
             carg.mission = nextElementBool(cargos, elemstart, elemend, false);
             carg.installed = nextElementBool(cargos, elemstart, elemend,
-                                             carg.category.get().find("upgrades/") == 0);
+                    carg.category.get().find("upgrades/") == 0);
 
             thus->AddCargo(carg, false);
         } else {
@@ -628,8 +608,7 @@ static void AddCarg(Unit *thus, const string &cargos)
     }
 }
 
-void HudDamage(float *dam, const string &damages)
-{
+void HudDamage(float *dam, const string &damages) {
     if (dam) {
         string::size_type elemstart = 0, elemend = string::npos;
         for (int i = 0; i < 1 + MAXVDUS + UnitImages<void>::NUMGAUGES; ++i) {
@@ -638,8 +617,7 @@ void HudDamage(float *dam, const string &damages)
     }
 }
 
-string WriteHudDamage(Unit *un)
-{
+string WriteHudDamage(Unit *un) {
     string ret;
     const string semi = ";";
     if (un->pImage->cockpit_damage) {
@@ -651,8 +629,7 @@ string WriteHudDamage(Unit *un)
     return ret;
 }
 
-string WriteHudDamageFunc(Unit *un)
-{
+string WriteHudDamageFunc(Unit *un) {
     string ret;
     const string semi = ";";
     if (un->pImage->cockpit_damage) {
@@ -665,8 +642,7 @@ string WriteHudDamageFunc(Unit *un)
     return ret;
 }
 
-void LoadCockpit(Unit *thus, const string &cockpit)
-{
+void LoadCockpit(Unit *thus, const string &cockpit) {
     string::size_type elemstart = 0, elemend = string::npos;
     thus->pImage->cockpitImage = nextElementString(cockpit, elemstart, elemend);
     thus->pImage->CockpitCenter.i = nextElementFloat(cockpit, elemstart, elemend);
@@ -674,8 +650,7 @@ void LoadCockpit(Unit *thus, const string &cockpit)
     thus->pImage->CockpitCenter.k = nextElementFloat(cockpit, elemstart, elemend);
 }
 
-float getFuelConversion()
-{
+float getFuelConversion() {
     static float
             fuel_conversion = XMLSupport::parse_float(vs_config->getVariable("physics", "FuelConversion", ".00144"));
     return fuel_conversion;
@@ -684,12 +659,11 @@ float getFuelConversion()
 const std::string EMPTY_STRING("");
 
 void YawPitchRollParser(std::string unit_key,
-                        std::string main_string,
-                        std::string left_string,
-                        std::string right_string,
-                        float &left_pointer,
-                        float &right_pointer)
-{
+        std::string main_string,
+        std::string left_string,
+        std::string right_string,
+        float &left_pointer,
+        float &right_pointer) {
     float main_value = UnitCSVFactory::GetVariable(unit_key, main_string, 0.0f);
     float right_value = UnitCSVFactory::GetVariable(unit_key, right_string, 0.0f);
     float left_value = UnitCSVFactory::GetVariable(unit_key, left_string, 0.0f);
@@ -697,8 +671,7 @@ void YawPitchRollParser(std::string unit_key,
     left_pointer = (left_value > 0 ? left_value : main_value) * VS_PI / 180.;
 }
 
-void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
-{
+void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
     CSVTable *table = row.getParent();
     Unit::XML xml;
     xml.unitModifications = modification.c_str();
@@ -778,8 +751,8 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
 
     std::string mesh_string = UnitCSVFactory::GetVariable(unit_key, "Mesh", std::string());
     AddMeshes(xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale,
-              mesh_string, faction,
-              getFlightgroup());
+            mesh_string, faction,
+            getFlightgroup());
 
     std::string dock_string = UnitCSVFactory::GetVariable(unit_key, "Dock", std::string());
     AddDocks(this, xml, UnitCSVFactory::GetVariable(unit_key, "Dock", std::string()));
@@ -824,9 +797,9 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
 
     // Init armor
     std::string armor_keys[] = {"Armor_Front_Top_Left", "Armor_Front_Top_Right",
-                                "Armor_Front_Bottom_Left", "Armor_Front_Bottom_Right",
-                                "Armor_Back_Top_Left", "Armor_Back_Top_Right",
-                                "Armor_Back_Bottom_Left", "Armor_Back_Bottom_Right"};
+            "Armor_Front_Bottom_Left", "Armor_Front_Bottom_Right",
+            "Armor_Back_Top_Left", "Armor_Back_Top_Right",
+            "Armor_Back_Bottom_Left", "Armor_Back_Bottom_Right"};
     float armor_values[8];
     for (int i = 0; i < 8; i++) {
         float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
@@ -904,9 +877,9 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
     jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
     graphicOptions.RecurseIntoSubUnitsOnCollision = UnitCSVFactory::GetVariable(unit_key,
-                                                                                "Collide_Subunits",
-                                                                                graphicOptions.RecurseIntoSubUnitsOnCollision
-                                                                                ? true : false) ? 1 : 0;
+            "Collide_Subunits",
+            graphicOptions.RecurseIntoSubUnitsOnCollision
+                    ? true : false) ? 1 : 0;
     jump.energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     jump.insysenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
     if (WCfuelhack) {
@@ -915,30 +888,30 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
     }       //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
     afterburnenergy = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
     afterburntype = UnitCSVFactory::GetVariable(unit_key,
-                                                "Afterburner_Type",
-                                                0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
+            "Afterburner_Type",
+            0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
     limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) * VS_PI / 180.0;
     limits.pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) * VS_PI / 180.0;
     limits.roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) * VS_PI / 180.0;
 
     YawPitchRollParser(unit_key,
-                       "Yaw_Governor",
-                       "Yaw_Governor",
-                       "Yaw_Governor",
-                       computer.max_yaw_right,
-                       computer.max_yaw_left);
+            "Yaw_Governor",
+            "Yaw_Governor",
+            "Yaw_Governor",
+            computer.max_yaw_right,
+            computer.max_yaw_left);
     YawPitchRollParser(unit_key,
-                       "Pitch_Governor",
-                       "Pitch_Governor_Up",
-                       "Pitch_Governor_Down",
-                       computer.max_pitch_up,
-                       computer.max_pitch_down);
+            "Pitch_Governor",
+            "Pitch_Governor_Up",
+            "Pitch_Governor_Down",
+            computer.max_pitch_up,
+            computer.max_pitch_down);
     YawPitchRollParser(unit_key,
-                       "Roll_Governor",
-                       "Roll_Governor_Right",
-                       "Roll_Governor_Left",
-                       computer.max_roll_right,
-                       computer.max_roll_left);
+            "Roll_Governor",
+            "Roll_Governor_Right",
+            "Roll_Governor_Left",
+            computer.max_roll_right,
+            computer.max_roll_left);
 
     static float game_accel = GameConfig::GetVariable("physics", "game_accel", 1.0f);
     static float game_speed = GameConfig::GetVariable("physics", "game_speed", 1.0f);
@@ -1084,14 +1057,14 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
         static std::string shieldtex = vs_config->getVariable("graphics", "shield_texture", "shield.bmp");
         static std::string shieldtechnique = vs_config->getVariable("graphics", "shield_technique", "");
         meshdata.back() = new SphereMesh(rSize(),
-                                         shieldstacks,
-                                         shieldstacks,
-                                         shieldtex.c_str(),
-                                         shieldtechnique,
-                                         NULL,
-                                         false,
-                                         ONE,
-                                         ONE);
+                shieldstacks,
+                shieldstacks,
+                shieldtex.c_str(),
+                shieldtechnique,
+                NULL,
+                false,
+                ONE,
+                ONE);
     }
     meshdata.back()->EnableSpecialFX();
     //Begin the Pow-w-w-war Zone Collide Tree Generation
@@ -1130,12 +1103,12 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
             csOPCODECollider *csrc = NULL;
             if (xml.hasColTree) {
                 csrc = getCollideTree(Vector(1, 1, 1),
-                                      xml.rapidmesh
-                                      ? &polies : NULL);
+                        xml.rapidmesh
+                                ? &polies : NULL);
             }
             this->colTrees = new collideTrees(collideTreeHash,
-                                              csrc,
-                                              colShield);
+                    csrc,
+                    colShield);
             if (xml.rapidmesh && xml.hasColTree) {
                 //if we have a special rapid mesh we need to generate things now
                 for (unsigned int i = 1; i < collideTreesMaxTrees; ++i) {
@@ -1143,7 +1116,7 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
                         unsigned int which = 1 << i;
                         this->colTrees->rapidColliders[i] =
                                 getCollideTree(Vector(1, 1, which),
-                                               &polies);
+                                        &polies);
                     }
                 }
             }
@@ -1157,8 +1130,7 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
     this->setAverageGunSpeed();
 }
 
-CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread)
-{
+CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
     std::string hashname = filename + "__" + FactionUtil::GetFactionName(faction);
     for (int i = ((int) unitTables.size()) - (readlast ? 1 : 2); i >= 0; --i) {
         unsigned int where;
@@ -1174,8 +1146,7 @@ CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &
     return CSVRow();
 }
 
-void Unit::WriteUnit(const char *modifications)
-{
+void Unit::WriteUnit(const char *modifications) {
     static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
     if (UNITTAB) {
         bool bad = false;
@@ -1189,8 +1160,8 @@ void Unit::WriteUnit(const char *modifications)
         }
         if (bad) {
             VS_LOG(error,
-                   (boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str()
-                           % csvRow.get().c_str()));
+                    (boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str()
+                            % csvRow.get().c_str()));
             return;
         }
         std::string savedir = modifications;
@@ -1216,31 +1187,26 @@ void Unit::WriteUnit(const char *modifications)
 
 using XMLSupport::tostring;
 
-static void mapToStringVec(vsUMap<string, string> a, vector<string> &key, vector<string> &value)
-{
+static void mapToStringVec(vsUMap<string, string> a, vector<string> &key, vector<string> &value) {
     for (vsUMap<string, string>::iterator i = a.begin(); i != a.end(); ++i) {
         key.push_back(i->first);
         value.push_back(i->second);
     }
 }
 
-static string tos(double val)
-{
+static string tos(double val) {
     return XMLSupport::tostring((float) val);
 }
 
-static string tos(bool val)
-{
+static string tos(bool val) {
     return XMLSupport::tostring((int) val);
 }
 
-static string tos(int val)
-{
+static string tos(int val) {
     return XMLSupport::tostring(val);
 }
 
-string Unit::WriteUnitString()
-{
+string Unit::WriteUnitString() {
     static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
     string ret = "";
     if (UNITTAB) {
@@ -1270,7 +1236,7 @@ string Unit::WriteUnitString()
                         char mnt[1024];
                         Matrix m;
                         Transformation tr(mounts[j].GetMountOrientation(),
-                                          mounts[j].GetMountLocation().Cast());
+                                mounts[j].GetMountLocation().Cast());
                         tr.to_matrix(m);
                         string printedname = mounts[j].type->name;
                         if (mounts[j].status == Mount::DESTROYED || mounts[j].status == Mount::UNCHOSEN) {
@@ -1509,8 +1475,8 @@ string Unit::WriteUnitString()
             }
         }
         VS_LOG(error,
-               (boost::format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str()
-                       % fullname.c_str()));
+                (boost::format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str()
+                        % fullname.c_str()));
     } else {
         if (pImage->unitwriter) {
             ret = pImage->unitwriter->WriteString();
@@ -1522,8 +1488,7 @@ string Unit::WriteUnitString()
     return ret;
 }
 
-void UpdateMasterPartList(Unit *ret)
-{
+void UpdateMasterPartList(Unit *ret) {
     for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
         Cockpit *cp = _Universe->AccessCockpit(i);
         std::vector<std::string> *addedcargoname = &cp->savegame->getMissionStringData("master_part_list_content");

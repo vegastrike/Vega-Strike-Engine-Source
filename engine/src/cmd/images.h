@@ -56,8 +56,7 @@ struct DockingPorts {
             DEFAULT = OUTSIDE
         };
 
-        static bool IsConnected(const Value &type)
-        {
+        static bool IsConnected(const Value &type) {
             switch (type) {
                 case OUTSIDE:
                 case INSIDE:
@@ -67,8 +66,7 @@ struct DockingPorts {
             }
         }
 
-        static bool IsInside(const Value &type)
-        {
+        static bool IsInside(const Value &type) {
             switch (type) {
                 case INSIDE:
                 case CONNECTED_INSIDE:
@@ -79,8 +77,7 @@ struct DockingPorts {
             }
         }
 
-        static bool IsWaypoint(const Value &type)
-        {
+        static bool IsWaypoint(const Value &type) {
             switch (type) {
                 case WAYPOINT_OUTSIDE:
                 case WAYPOINT_INSIDE:
@@ -93,68 +90,60 @@ struct DockingPorts {
 
     DockingPorts()
             : radius(0),
-              isInside(false),
-              isConnected(false),
-              isWaypoint(false),
-              isOccupied(false)
-    {
+            isInside(false),
+            isConnected(false),
+            isWaypoint(false),
+            isOccupied(false) {
     }
 
     DockingPorts(const Vector &center, float radius, float minradius, const Type::Value &type)
             : center(center),
-              radius(radius),
-              isInside(Type::IsInside(type)),
-              isConnected(Type::IsConnected(type)),
-              isWaypoint(Type::IsWaypoint(type)),
-              isOccupied(isWaypoint) // Waypoints are always occupied
+            radius(radius),
+            isInside(Type::IsInside(type)),
+            isConnected(Type::IsConnected(type)),
+            isWaypoint(Type::IsWaypoint(type)),
+            isOccupied(isWaypoint) // Waypoints are always occupied
     {
     }
 
     DockingPorts(const Vector &min, const Vector &max, float minradius, const Type::Value &type)
             : center((min + max) / 2.0f),
-              radius((max - min).Magnitude() / 2.0f),
-              isInside(Type::IsInside(type)),
-              isConnected(Type::IsConnected(type)),
-              isWaypoint(Type::IsWaypoint(type)),
-              isOccupied(isWaypoint) // Waypoints are always occupied
+            radius((max - min).Magnitude() / 2.0f),
+            isInside(Type::IsInside(type)),
+            isConnected(Type::IsConnected(type)),
+            isWaypoint(Type::IsWaypoint(type)),
+            isOccupied(isWaypoint) // Waypoints are always occupied
     {
     }
 
-    float GetRadius() const
-    {
+    float GetRadius() const {
         return radius;
     }
 
-    const Vector &GetPosition() const
-    {
+    const Vector &GetPosition() const {
         return center;
     }
 
     // Waypoints are always marked as occupied.
-    bool IsOccupied() const
-    {
+    bool IsOccupied() const {
         return isOccupied;
     }
 
-    void Occupy(bool yes)
-    {
+    void Occupy(bool yes) {
         isOccupied = yes;
     }
 
     // Does port have connecting waypoints?
-    bool IsConnected() const
-    {
+    bool IsConnected() const {
         return isConnected;
     }
 
     // Port is located inside or outside the station
-    bool IsInside() const
-    {
+    bool IsInside() const {
         return isInside;
     }
 
-    bool IsDockable() const
-    {
+    bool IsDockable() const {
         return !isWaypoint;
     }
 
@@ -171,8 +160,7 @@ struct DockedUnits {
     UnitContainer uc;
     unsigned int whichdock;
 
-    DockedUnits(Unit *un, unsigned int w) : uc(un), whichdock(w)
-    {
+    DockedUnits(Unit *un, unsigned int w) : uc(un), whichdock(w) {
     }
 };
 
@@ -304,23 +292,22 @@ struct unorigdest {
     QVector final_location;
 
     unorigdest(Unit *un,
-               Unit *jumppoint,
-               StarSystem *orig,
-               StarSystem *dest,
-               float delay,
-               int ani,
-               bool justloaded,
-               QVector use_coordinates /*set to 0,0,0 for crap*/ )
+            Unit *jumppoint,
+            StarSystem *orig,
+            StarSystem *dest,
+            float delay,
+            int ani,
+            bool justloaded,
+            QVector use_coordinates /*set to 0,0,0 for crap*/ )
             : un(un),
-              jumppoint(jumppoint),
-              orig(orig),
-              dest(dest),
-              delay(delay),
-              animation(ani),
-              justloaded(justloaded),
-              ready(true),
-              final_location(use_coordinates)
-    {
+            jumppoint(jumppoint),
+            orig(orig),
+            dest(dest),
+            delay(delay),
+            animation(ani),
+            justloaded(justloaded),
+            ready(true),
+            final_location(use_coordinates) {
     }
 };
 

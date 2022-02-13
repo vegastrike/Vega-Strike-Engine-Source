@@ -76,8 +76,7 @@ protected:
     virtual void seekImpl(Timestamp time);
 
     /** Derived classes may use the underlying AL source handle to set additional attributes */
-    ALuint getALSource() const
-    {
+    ALuint getALSource() const {
         return alSource;
     }
 

@@ -38,8 +38,7 @@
 
 namespace Radar {
 
-std::unique_ptr<Display> Factory(Type::Value type)
-{
+std::unique_ptr<Display> Factory(Type::Value type) {
     switch (type) {
         case Type::NullDisplay:
             return std::unique_ptr<Display>(new NullDisplay);

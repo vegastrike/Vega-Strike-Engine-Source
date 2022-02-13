@@ -34,8 +34,7 @@ public:
     typedef std::vector<std::string> NameList;
 
 /** Standard virtual destructor */
-    virtual ~Module()
-    {
+    virtual ~Module() {
     }
 
 /** Returns the command names - each must start with '-' or '--'. @see execute for details. */
@@ -104,8 +103,7 @@ int parseParams(const ParameterList &params);
 template<class _Module, bool _Default>
 class ModuleDeclaration {
 public:
-    ModuleDeclaration()
-    {
+    ModuleDeclaration() {
         registerModule(new _Module, _Default);
     }
 };
@@ -116,8 +114,7 @@ public:
 class ConversionImpl {
 public:
 /** Standard virtual destructor */
-    ~ConversionImpl()
-    {
+    ~ConversionImpl() {
     }
 
     typedef std::vector<std::string> FormatList;
@@ -151,7 +148,7 @@ public:
  *       a specific task (so, the one that actually can handle the task gets used).
  */
     virtual RetCodeEnum convert(const std::string &inputFormat, const std::string &outputFormat,
-                                const std::string &opCode) = 0;
+            const std::string &opCode) = 0;
 
 /** Show help message, enumerating supported conversions and operations.
  *  @remarks
@@ -164,7 +161,7 @@ public:
  *       Remember: if you don't support the conversion, don't print anything.
  */
     virtual void conversionHelp(const std::string &inputFormat, const std::string &outputFormat,
-                                const std::string &opCode) const = 0;
+            const std::string &opCode) const = 0;
 };
 
 /** Add this conversion module to the implementation list, extending the --convert
@@ -184,25 +181,21 @@ std::map<std::string, std::string> &getNamedOptions();
 std::string &getNamedOption(const std::string &name, const std::string &defValue = std::string());
 
 /** Get the executable's directory @note you may modify it */
-inline std::string &getRootPath()
-{
+inline std::string &getRootPath() {
     return getNamedOption("rootPath");
 }
 
 /** Get the user-specified input path @note you may modify it */
-inline std::string &getInputPath()
-{
+inline std::string &getInputPath() {
     return getNamedOption("inputPath");
 }
 
 /** Get the user-specified output path @note you may modify it */
-inline std::string &getOutputPath()
-{
+inline std::string &getOutputPath() {
     return getNamedOption("outputPath");
 }
 
-inline bool hasNamedOption(const std::string &name)
-{
+inline bool hasNamedOption(const std::string &name) {
     return getNamedOptions().find(name) != getNamedOptions().end();
 }
 
@@ -210,8 +203,7 @@ inline bool hasNamedOption(const std::string &name)
 template<class _Impl, int _Priority = 0>
 class ConversionImplDeclaration {
 public:
-    ConversionImplDeclaration()
-    {
+    ConversionImplDeclaration() {
         registerConversionImplementation(new _Impl, _Priority);
     }
 };

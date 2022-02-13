@@ -60,13 +60,11 @@ public:
     //default ctor & dtor ok
     icoords(ucoords const &uc, size_t texture_size);
 
-    float get_u() const
-    {
+    float get_u() const {
         return u_;
     }
 
-    float get_v() const
-    {
+    float get_v() const {
         return v_;
     }
 };
@@ -77,13 +75,11 @@ public:
     explicit ucoords(scoords const &sc);
     ucoords(icoords const &ic, size_t texture_size);
 
-    float get_u() const
-    {
+    float get_u() const {
         return u_;
     }
 
-    float get_v() const
-    {
+    float get_v() const {
         return v_;
     }
 };
@@ -93,13 +89,11 @@ public:
     //default ctor & dtor ok
     explicit scoords(ucoords const &uc);
 
-    float get_u() const
-    {
+    float get_u() const {
         return u_;
     }
 
-    float get_v() const
-    {
+    float get_v() const {
         return v_;
     }
 };
@@ -110,19 +104,16 @@ class side_and_coords {
     scoords scoords_;
 public:
     //default ctor & dtor ok
-    side_and_coords(side const &s, scoords const &c) : side_(s), scoords_(c)
-    {
+    side_and_coords(side const &s, scoords const &c) : side_(s), scoords_(c) {
     }
 
     explicit side_and_coords(ccoords const *cc);
 
-    side const &get_side() const
-    {
+    side const &get_side() const {
         return side_;
     }
 
-    scoords const &get_scoords() const
-    {
+    scoords const &get_scoords() const {
         return scoords_;
     }
 };
@@ -135,26 +126,22 @@ class ccoords {
     void check_invariants();
 public:
     //default ctor & dtor ok
-    ccoords(float x, float y, float z) : x_(x), y_(y), z_(z)
-    {
+    ccoords(float x, float y, float z) : x_(x), y_(y), z_(z) {
         check_invariants();
     }
 
     explicit ccoords(fvector const &v);
     explicit ccoords(side_and_coords const &snc);
 
-    float get_x() const
-    {
+    float get_x() const {
         return x_;
     }
 
-    float get_y() const
-    {
+    float get_y() const {
         return y_;
     }
 
-    float get_z() const
-    {
+    float get_z() const {
         return z_;
     }
 };

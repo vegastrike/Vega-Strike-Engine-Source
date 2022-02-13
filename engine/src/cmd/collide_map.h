@@ -48,13 +48,11 @@ public:
     }
             ref;
 
-    QVector GetPosition() const
-    {
+    QVector GetPosition() const {
         return position;
     }
 
-    void SetPosition(const QVector &bpos)
-    {
+    void SetPosition(const QVector &bpos) {
         //in case we want to drop in an xtra radius parameter when we get performance testing
         this->position = bpos;
 #ifdef __APPLE__
@@ -68,28 +66,23 @@ public:
 #endif
     }
 
-    Collidable &operator*()
-    {
+    Collidable &operator*() {
         return *this;
     }
 
-    Collidable *operator->()
-    {
+    Collidable *operator->() {
         return this;
     }
 
-    double getKey() const
-    {
+    double getKey() const {
         return position.i;
     }
 
-    bool operator<(const Collidable &other) const
-    {
+    bool operator<(const Collidable &other) const {
         return getKey() < other.getKey();
     }
 
-    Collidable &get()
-    {
+    Collidable &get() {
         return *this;
     }
 
@@ -99,14 +92,12 @@ public:
 #else
             1.0f/1024.0f/1024.0f/1024.0f
 #endif
-    )
-    {
+    ) {
     }
 
     Collidable(Unit *un);
 
-    Collidable(unsigned int bolt_index, float speed, const QVector &p)
-    {
+    Collidable(unsigned int bolt_index, float speed, const QVector &p) {
         ref.bolt_index = bolt_index;
         radius = -speed * SIMULATION_ATOM;
         if (
@@ -133,26 +124,21 @@ public:
 
         size_t toflattenhints_offset;
 
-        CollidableBackref() : Collidable()
-        {
+        CollidableBackref() : Collidable() {
         }
 
-        CollidableBackref(Unit *un) : Collidable(un)
-        {
+        CollidableBackref(Unit *un) : Collidable(un) {
         }
 
-        CollidableBackref(unsigned int bolt_index, float speed, const QVector &p) : Collidable(bolt_index, speed, p)
-        {
+        CollidableBackref(unsigned int bolt_index, float speed, const QVector &p) : Collidable(bolt_index, speed, p) {
         }
 
-        CollidableBackref(const Collidable &b, size_t offset) : Collidable(b)
-        {
+        CollidableBackref(const Collidable &b, size_t offset) : Collidable(b) {
             toflattenhints_offset = offset;
         }
     };
 
-    void SetLocationIndex(unsigned int li)
-    {
+    void SetLocationIndex(unsigned int li) {
         location_index = li;
     }
 
@@ -171,13 +157,11 @@ public:
     iterator changeKey(iterator iter, const Collidable &newKey);
     iterator changeKey(iterator iter, const Collidable &newKey, iterator tless, iterator tmore);
 
-    iterator begin()
-    {
+    iterator begin() {
         return sorted.size() != 0 ? &*sorted.begin() : NULL;
     }
 
-    iterator end()
-    {
+    iterator end() {
         return this->begin() + sorted.size();
     }
 
@@ -185,8 +169,7 @@ public:
     void erase(iterator iter);
     void checkSet();
 
-    CollideArray(unsigned int location_index) : toflattenhints(1), count(0)
-    {
+    CollideArray(unsigned int location_index) : toflattenhints(1), count(0) {
         this->location_index = location_index;
     }
 };
@@ -203,17 +186,16 @@ class CollideMap : public CollideArray {
 #endif
 #endif
 public:
-    CollideMap(unsigned int location_offset) : CollideArray(location_offset)
-    {
+    CollideMap(unsigned int location_offset) : CollideArray(location_offset) {
     }
 
 //Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
     bool CheckCollisions(Bolt *bol, const Collidable &updated);
     bool CheckUnitCollisions(Bolt *bol,
-                             const Collidable &updated); //DANGER must be used on lists that are only populated with Units, not bolts
+            const Collidable &updated); //DANGER must be used on lists that are only populated with Units, not bolts
     bool CheckCollisions(Unit *un, const Collidable &updated); //will be handed off to a templated function
     bool CheckUnitCollisions(Unit *un,
-                             const Collidable &updated); //DANGER must be used on lists that are only populated with Units, not bolts
+            const Collidable &updated); //DANGER must be used on lists that are only populated with Units, not bolts
 };
 
 #if defined (VS_ENABLE_COLLIDE_LIST) || defined (VS_ENABLE_COLLIDE_KEY)
@@ -242,17 +224,14 @@ inline void set_null( CollideMap::iterator &it )
 }
 #else
 
-inline void init_null_collide_iter()
-{
+inline void init_null_collide_iter() {
 }
 
-inline bool is_null(const CollideMap::iterator &it)
-{
+inline bool is_null(const CollideMap::iterator &it) {
     return it == NULL;
 }
 
-inline void set_null(CollideMap::iterator &it)
-{
+inline void set_null(CollideMap::iterator &it) {
     it = NULL;
 }
 

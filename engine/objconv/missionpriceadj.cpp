@@ -28,16 +28,14 @@
 #include <math.h>
 using namespace std;
 
-bool feq(double a, double b)
-{
+bool feq(double a, double b) {
     if (fabs(a - b) < .0001) {
         return true;
     }
     return false;
 }
 
-bool match(char *item, long len, string mymatch, int &finlen)
-{
+bool match(char *item, long len, string mymatch, int &finlen) {
     if (len <= 0) {
         return false;
     }
@@ -55,8 +53,7 @@ bool match(char *item, long len, string mymatch, int &finlen)
     return false;
 }
 
-double bestNumber(vector<double> instances)
-{
+double bestNumber(vector<double> instances) {
     std::sort(instances.begin(), instances.end());
     unsigned int bestindex = 0;
     unsigned int bestcount = 1;
@@ -85,8 +82,7 @@ double bestNumber(vector<double> instances)
     return 399218092148029;
 }
 
-void replaceAll(FILE *fp, char *content, long len, string myname, string myreplacement)
-{
+void replaceAll(FILE *fp, char *content, long len, string myname, string myreplacement) {
     for (long i = 0; i < len;) {
         int ammt = 0;
         if (match(content + i, len - i, myname, ammt)) {
@@ -99,8 +95,7 @@ void replaceAll(FILE *fp, char *content, long len, string myname, string myrepla
     }
 }
 
-vector<double> findNumbers(FILE *fp)
-{
+vector<double> findNumbers(FILE *fp) {
     double mynum = 0;
     char mychar;
     vector<double> retval;
@@ -116,8 +111,7 @@ vector<double> findNumbers(FILE *fp)
     return retval;
 }
 
-void findNReplace(char *argv, double adjustment)
-{
+void findNReplace(char *argv, double adjustment) {
     FILE *fp = fopen(argv, "rb");
     vector<double> instances = findNumbers(fp);
     double mynum = bestNumber(instances);
@@ -140,8 +134,7 @@ void findNReplace(char *argv, double adjustment)
     delete[] myfile;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc <= 1) {
         return -1;
     }

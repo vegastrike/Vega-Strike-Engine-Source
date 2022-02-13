@@ -104,19 +104,19 @@ struct my_builtin_to_python {
     BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE( T, expr )
 #endif
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(Vector,
-                                boost::python::to_python_value<boost::python::tuple>()(boost::python::make_tuple((double)
-                                                                                                                         x.i,
-                                                                                                                 (double)
-                                                                                                                         x.j,
-                                                                                                                 (double)
-                                                                                                                         x.k)));
+        boost::python::to_python_value<boost::python::tuple>()(boost::python::make_tuple((double)
+                        x.i,
+                (double)
+                        x.j,
+                (double)
+                        x.k)));
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(QVector,
-                                boost::python::to_python_value<boost::python::tuple>()(boost::python::make_tuple((double)
-                                                                                                                         x.i,
-                                                                                                                 (double)
-                                                                                                                         x.j,
-                                                                                                                 (double)
-                                                                                                                         x.k)));
+        boost::python::to_python_value<boost::python::tuple>()(boost::python::make_tuple((double)
+                        x.i,
+                (double)
+                        x.j,
+                (double)
+                        x.k)));
 #else
 inline PyObject * to_python( Vector vec )
 {

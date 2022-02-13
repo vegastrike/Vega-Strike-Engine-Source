@@ -76,8 +76,7 @@ public:
     std::vector<std::string> stak;
 };
 
-void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts)
-{
+void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts) {
     AttributeList::const_iterator iter;
     XML *xml = (XML *) userdata;
     string tname(nam);
@@ -134,8 +133,7 @@ void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts)
     }
 }
 
-void endElement(void *userdata, const XML_Char *nam)
-{
+void endElement(void *userdata, const XML_Char *nam) {
     XML *xml = (XML *) userdata;
     string name(nam);
     GalaxyNames elem = (GalaxyNames) element_map.lookup(name);
@@ -159,16 +157,14 @@ void endElement(void *userdata, const XML_Char *nam)
 
 using namespace GalaxyXML;
 
-SGalaxy::~SGalaxy()
-{
+SGalaxy::~SGalaxy() {
     if (subheirarchy != nullptr) {
         delete subheirarchy;
         subheirarchy = nullptr;
     }
 }
 
-SGalaxy &SGalaxy::operator=(const SGalaxy &g)
-{
+SGalaxy &SGalaxy::operator=(const SGalaxy &g) {
     if (g.subheirarchy) {
         SubHeirarchy *temp = new SubHeirarchy(*g.subheirarchy);
         if (subheirarchy != nullptr) {
@@ -183,8 +179,7 @@ SGalaxy &SGalaxy::operator=(const SGalaxy &g)
     return *this;
 }
 
-SGalaxy::SGalaxy(const SGalaxy &g) : data(g.data)
-{
+SGalaxy::SGalaxy(const SGalaxy &g) : data(g.data) {
     if (g.subheirarchy) {
         subheirarchy = new SubHeirarchy(*g.subheirarchy);
     } else {
@@ -192,8 +187,7 @@ SGalaxy::SGalaxy(const SGalaxy &g) : data(g.data)
     }
 }
 
-void SGalaxy::processSystem(const string &sys, const QVector &coords)
-{
+void SGalaxy::processSystem(const string &sys, const QVector &coords) {
     string sector = getStarSystemSector(sys);
     string sys2 = getStarSystemName(sys);
     char coord[65536];
@@ -204,8 +198,7 @@ void SGalaxy::processSystem(const string &sys, const QVector &coords)
     }
 }
 
-void SGalaxy::processGalaxy(const string &sys)
-{
+void SGalaxy::processGalaxy(const string &sys) {
 #ifdef WRITEGALAXYCOORDS
     NavigationSystem::SystemIterator si( sys, 256000 );
     while ( !si.done() ) {
@@ -216,15 +209,13 @@ void SGalaxy::processGalaxy(const string &sys)
 #endif
 }
 
-void dotabs(VSFileSystem::VSFile &f, unsigned int tabs)
-{
+void dotabs(VSFileSystem::VSFile &f, unsigned int tabs) {
     for (unsigned int i = 0; i < tabs; ++i) {
         f.Fprintf("\t");
     }
 }
 
-void SGalaxy::writeSector(VSFileSystem::VSFile &f, int tabs, const string &sectorType, SGalaxy *planet_types) const
-{
+void SGalaxy::writeSector(VSFileSystem::VSFile &f, int tabs, const string &sectorType, SGalaxy *planet_types) const {
     StringMap::const_iterator dat;
     for (dat = data.begin(); dat != data.end(); ++dat) {
         if ((*dat).first != "jumps") {
@@ -250,16 +241,14 @@ void SGalaxy::writeSector(VSFileSystem::VSFile &f, int tabs, const string &secto
     }
 }
 
-void SGalaxy::writeGalaxy(VSFile &f) const
-{
+void SGalaxy::writeGalaxy(VSFile &f) const {
     f.Fprintf("<galaxy>\n<systems>\n");
     writeSector(f, 1, "sector", NULL);
     f.Fprintf("</systems>\n");
     f.Fprintf("</galaxy>\n");
 }
 
-void Galaxy::writeGalaxy(VSFile &f) const
-{
+void Galaxy::writeGalaxy(VSFile &f) const {
     f.Fprintf("<galaxy>\n<systems>\n");
     writeSector(f, 1, "sector", planet_types);
     f.Fprintf("</systems>\n");
@@ -271,8 +260,7 @@ void Galaxy::writeGalaxy(VSFile &f) const
     f.Fprintf("</galaxy>\n");
 }
 
-SGalaxy::SGalaxy(const char *configfile)
-{
+SGalaxy::SGalaxy(const char *configfile) {
     using namespace VSFileSystem;
     subheirarchy = NULL;
     VSFile f;
@@ -291,8 +279,7 @@ SGalaxy::SGalaxy(const char *configfile)
     }
 }
 
-SubHeirarchy &SGalaxy::getHeirarchy()
-{
+SubHeirarchy &SGalaxy::getHeirarchy() {
     if (!subheirarchy) {
         subheirarchy = new SubHeirarchy;
     }
@@ -302,8 +289,7 @@ SubHeirarchy &SGalaxy::getHeirarchy()
 
 /* *********************************************************** */
 const string &SGalaxy::getVariable(const std::vector<string> &section, const string &name,
-                                   const string &default_value) const
-{
+        const string &default_value) const {
     const SGalaxy *g = this;
     for (unsigned int i = 0; i < section.size(); ++i) {
         if (g->subheirarchy) {
@@ -324,21 +310,18 @@ const string &SGalaxy::getVariable(const std::vector<string> &section, const str
     return default_value;
 }
 
-SGalaxy *Galaxy::getPlanetTypes()
-{
+SGalaxy *Galaxy::getPlanetTypes() {
     return planet_types;
 }
 
-void SGalaxy::addSection(const std::vector<string> &section)
-{
+void SGalaxy::addSection(const std::vector<string> &section) {
     SubHeirarchy *temp = &getHeirarchy();
     for (unsigned int i = 0; i < section.size(); ++i) {
         temp = &((*temp)[section[i]].getHeirarchy());
     }
 }
 
-void SGalaxy::setVariable(const std::vector<string> &section, const string &name, const string &value)
-{
+void SGalaxy::setVariable(const std::vector<string> &section, const string &name, const string &value) {
     SGalaxy *g = this;
     for (unsigned int i = 0; i < section.size(); ++i) {
         g = &g->getHeirarchy()[section[i]];
@@ -348,20 +331,17 @@ void SGalaxy::setVariable(const std::vector<string> &section, const string &name
 
 /* *********************************************************** */
 
-bool SGalaxy::setVariable(const string &section, const string &name, const string &value)
-{
+bool SGalaxy::setVariable(const string &section, const string &name, const string &value) {
     getHeirarchy()[section].data[name] = value;
     return true;
 }
 
-bool SGalaxy::setVariable(const string &section, const string &subsection, const string &name, const string &value)
-{
+bool SGalaxy::setVariable(const string &section, const string &subsection, const string &name, const string &value) {
     getHeirarchy()[section].getHeirarchy()[subsection].data[name] = value;
     return true;
 }
 
-const string &SGalaxy::getRandSystem(const string &sect, const string &def) const
-{
+const string &SGalaxy::getRandSystem(const string &sect, const string &def) const {
     if (subheirarchy) {
         const SGalaxy &sector = (*subheirarchy)[sect];
         if (sector.subheirarchy) {
@@ -381,10 +361,9 @@ const string &SGalaxy::getRandSystem(const string &sect, const string &def) cons
 }
 
 const string &SGalaxy::getVariable(const string &section,
-                                   const string &subsection,
-                                   const string &name,
-                                   const string &defaultvalue) const
-{
+        const string &subsection,
+        const string &name,
+        const string &defaultvalue) const {
 #ifdef WRITEGALAXYCOORDS
     static bool blah = false;
     if (!blah) {
@@ -414,8 +393,7 @@ const string &SGalaxy::getVariable(const string &section,
     return defaultvalue;
 }
 
-const string &SGalaxy::getVariable(const string &section, const string &name, const string &defaultvalue) const
-{
+const string &SGalaxy::getVariable(const string &section, const string &name, const string &defaultvalue) const {
     SubHeirarchy *s = subheirarchy;
     SubHeirarchy::const_iterator i;
     if (s) {
@@ -431,8 +409,7 @@ const string &SGalaxy::getVariable(const string &section, const string &name, co
     return defaultvalue;
 }
 
-bool Galaxy::setPlanetVariable(const string &name, const string &value)
-{
+bool Galaxy::setPlanetVariable(const string &name, const string &value) {
     if (!planet_types) {
         return false;
     }
@@ -440,8 +417,7 @@ bool Galaxy::setPlanetVariable(const string &name, const string &value)
     return true;
 }
 
-bool Galaxy::setPlanetVariable(const string &section, const string &name, const string &value)
-{
+bool Galaxy::setPlanetVariable(const string &section, const string &name, const string &value) {
     if (!planet_types) {
         return false;
     }
@@ -449,8 +425,7 @@ bool Galaxy::setPlanetVariable(const string &section, const string &name, const 
     return true;
 }
 
-const string &Galaxy::getPlanetVariable(const string &section, const string &name, const string &defaultvalue) const
-{
+const string &Galaxy::getPlanetVariable(const string &section, const string &name, const string &defaultvalue) const {
     SGalaxy *planet_types = &((*subheirarchy->find("<planets>")).second);
     if (planet_types) {
         SubHeirarchy::const_iterator i;
@@ -470,8 +445,7 @@ const string &Galaxy::getPlanetVariable(const string &section, const string &nam
     return defaultvalue;
 }
 
-const string &Galaxy::getPlanetVariable(const string &name, const string &defaultvalue) const
-{
+const string &Galaxy::getPlanetVariable(const string &name, const string &defaultvalue) const {
     if (planet_types) {
         StringMap::const_iterator j = planet_types->data.find(name);
         if (j != planet_types->data.end()) {
@@ -481,8 +455,7 @@ const string &Galaxy::getPlanetVariable(const string &name, const string &defaul
     return defaultvalue;
 }
 
-SGalaxy *Galaxy::getInitialPlanetTypes()
-{
+SGalaxy *Galaxy::getInitialPlanetTypes() {
     if (subheirarchy) {
         SubHeirarchy::iterator iter = subheirarchy->find("<planets>");
         if (iter == subheirarchy->end()) {
@@ -494,8 +467,7 @@ SGalaxy *Galaxy::getInitialPlanetTypes()
     return NULL;
 }
 
-void Galaxy::setupPlanetTypeMaps()
-{
+void Galaxy::setupPlanetTypeMaps() {
     if (planet_types) {
         SubHeirarchy::iterator i = planet_types->getHeirarchy().begin();
         for (; i != planet_types->getHeirarchy().end(); ++i) {
@@ -543,22 +515,22 @@ void Galaxy::setupPlanetTypeMaps()
 
             if (texture2name.find(val) != texture2name.end()) {
                 VS_LOG(warning,
-                       (boost::format("name conflict %1% has texture %2% and %3% has texture %4%")
-                               % name.c_str()
-                               % val.c_str()
-                               % texture2name[val].c_str()
-                               % val.c_str()));
+                        (boost::format("name conflict %1% has texture %2% and %3% has texture %4%")
+                                % name.c_str()
+                                % val.c_str()
+                                % texture2name[val].c_str()
+                                % val.c_str()));
             } else {
                 texture2name[val] = name;
             }
             val = (*i).second["initial"];
             if (initial2name.find(val) != initial2name.end()) {
                 VS_LOG(warning,
-                       (boost::format("name conflict %1% has initial %2% and %3% has initial %4%")
-                               % name.c_str()
-                               % val.c_str()
-                               % initial2name[val].c_str()
-                               % val.c_str()));
+                        (boost::format("name conflict %1% has initial %2% and %3% has initial %4%")
+                                % name.c_str()
+                                % val.c_str()
+                                % initial2name[val].c_str()
+                                % val.c_str()));
             } else {
                 initial2name[val] = name;
             }
@@ -569,14 +541,12 @@ void Galaxy::setupPlanetTypeMaps()
     }
 }
 
-Galaxy::Galaxy(const SGalaxy &g) : SGalaxy(g)
-{
+Galaxy::Galaxy(const SGalaxy &g) : SGalaxy(g) {
     planet_types = getInitialPlanetTypes();
     setupPlanetTypeMaps();
 }
 
-Galaxy::Galaxy(const char *configfile) : SGalaxy(configfile)
-{
+Galaxy::Galaxy(const char *configfile) : SGalaxy(configfile) {
     planet_types = getInitialPlanetTypes();
     setupPlanetTypeMaps();
 }

@@ -37,8 +37,7 @@
 
 using namespace VSFileSystem;
 
-void Screenshot(const KBData &, KBSTATE state)
-{
+void Screenshot(const KBData &, KBSTATE state) {
     if (state == PRESS) {
         GLint xywh[4] = {0, 0, 0, 0};
         xywh[2] = g_game.x_resolution;

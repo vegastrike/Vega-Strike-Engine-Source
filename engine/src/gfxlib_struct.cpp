@@ -35,8 +35,7 @@
 
 #include <vector>
 
-GLenum PolyLookup(POLYTYPE poly)
-{
+GLenum PolyLookup(POLYTYPE poly) {
     switch (poly) {
         case GFXTRI:
             return GL_TRIANGLES;
@@ -70,21 +69,18 @@ GLenum PolyLookup(POLYTYPE poly)
     }
 }
 
-static void clear_gl_error()
-{
+static void clear_gl_error() {
     glGetError();
 }
 
-static void print_gl_error(const char *fmt)
-{
+static void print_gl_error(const char *fmt) {
     GLenum gl_error = glGetError();
     if (!!gl_error) {
         VS_LOG(error, (boost::format(fmt) % gl_error));
     }
 }
 
-static void EnableArrays(const GFXColorVertex *data)
-{
+static void EnableArrays(const GFXColorVertex *data) {
     if (gl_options.Multitexture) {
         glClientActiveTextureARB_p(GL_TEXTURE0);
     }
@@ -100,8 +96,7 @@ static void EnableArrays(const GFXColorVertex *data)
     }
 }
 
-static void EnableArrays(const GFXVertex *data)
-{
+static void EnableArrays(const GFXVertex *data) {
     if (gl_options.Multitexture) {
         glClientActiveTextureARB_p(GL_TEXTURE0);
     }
@@ -117,8 +112,7 @@ static void EnableArrays(const GFXVertex *data)
     }
 }
 
-void GFXVertexList::RefreshDisplayList()
-{
+void GFXVertexList::RefreshDisplayList() {
 #ifndef NO_VBO_SUPPORT
     if (game_options.vbo && !vbo_data) {
         if (glGenBuffersARB_p == 0 || glBindBufferARB_p == 0 || glBufferDataARB_p == 0 || glMapBufferARB_p == 0
@@ -134,8 +128,8 @@ void GFXVertexList::RefreshDisplayList()
     if (vbo_data) {
         GFXBindBuffer(vbo_data);
         (*glBufferDataARB_p)(GL_ARRAY_BUFFER_ARB, numVertices
-                                     * ((changed & HAS_COLOR) ? sizeof(GFXColorVertex) : sizeof(GFXVertex)), data.vertices,
-                             (changed & CHANGE_MUTABLE) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
+                        * ((changed & HAS_COLOR) ? sizeof(GFXColorVertex) : sizeof(GFXVertex)), data.vertices,
+                (changed & CHANGE_MUTABLE) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
         if (changed & HAS_INDEX) {
             GFXBindElementBuffer(display_list);
             unsigned int tot = 0;
@@ -143,12 +137,12 @@ void GFXVertexList::RefreshDisplayList()
                 tot += offsets[i];
             }
             unsigned int indexsize = (changed & INDEX_BYTE)
-                                     ? sizeof(char)
-                                     : ((changed & INDEX_SHORT)
-                                        ? sizeof(unsigned short)
-                                        : sizeof(unsigned int));
+                    ? sizeof(char)
+                    : ((changed & INDEX_SHORT)
+                            ? sizeof(unsigned short)
+                            : sizeof(unsigned int));
             (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, tot * indexsize, &index.b[0],
-                                 (changed & CHANGE_MUTABLE) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
+                    (changed & CHANGE_MUTABLE) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
         }
         return;
     }
@@ -193,8 +187,7 @@ void GFXVertexList::RefreshDisplayList()
     }
 }
 
-void GFXVertexList::BeginDrawState(GFXBOOL lock)
-{
+void GFXVertexList::BeginDrawState(GFXBOOL lock) {
     if (!numVertices) {
         return;
     }          //don't do anything if there are no vertices
@@ -234,8 +227,7 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock)
 
 extern void /*GFXDRVAPI*/ GFXColor4f(const float r, const float g, const float b, const float a);
 
-void GFXVertexList::EndDrawState(GFXBOOL lock)
-{
+void GFXVertexList::EndDrawState(GFXBOOL lock) {
     if (vbo_data) {
 #ifndef NO_VBO_SUPPORT
         if (gl_options.Multitexture) {
@@ -265,15 +257,13 @@ void GFXVertexList::EndDrawState(GFXBOOL lock)
 
 extern GLenum PolyLookup(POLYTYPE poly);
 
-void GFXVertexList::Draw(enum POLYTYPE poly, int numV)
-{
+void GFXVertexList::Draw(enum POLYTYPE poly, int numV) {
     INDEX index;
     index.b = NULL;
     Draw(&poly, index, 1, &numV);
 }
 
-void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned char *index)
-{
+void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned char *index) {
     char tmpchanged = changed;
     changed = sizeof(unsigned char) | ((~HAS_INDEX) & changed);
     INDEX tmp;
@@ -282,8 +272,7 @@ void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned char *index)
     changed = tmpchanged;
 }
 
-void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned short *index)
-{
+void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned short *index) {
     char tmpchanged = changed;
     changed = sizeof(unsigned short) | ((~HAS_INDEX) & changed);
     INDEX tmp;
@@ -292,8 +281,7 @@ void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned short *index)
     changed = tmpchanged;
 }
 
-void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned int *index)
-{
+void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned int *index) {
     char tmpchanged = changed;
     changed = sizeof(unsigned int) | ((~HAS_INDEX) & changed);
     INDEX tmp;
@@ -302,23 +290,20 @@ void GFXVertexList::Draw(enum POLYTYPE poly, int numV, unsigned int *index)
     changed = tmpchanged;
 }
 
-void GFXVertexList::DrawOnce()
-{
+void GFXVertexList::DrawOnce() {
     LoadDrawState();
     BeginDrawState(GFXFALSE);
     Draw();
     EndDrawState(GFXFALSE);
 }
 
-void GFXVertexList::Draw()
-{
+void GFXVertexList::Draw() {
     Draw(mode, index, numlists, offsets);
 }
 
 extern void GFXCallList(int list);
 
-void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numlists, const int *offsets)
-{
+void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numlists, const int *offsets) {
     //Hardware support for this seems... sketchy
     if (vbo_data == 0 && display_list != 0) {
         //Big issue: display lists cannot discriminate between lines/points/triangles,
@@ -359,10 +344,10 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
         if (changed & HAS_INDEX) {
             long stride = changed & HAS_INDEX;
             GLenum indextype = (changed & INDEX_BYTE)
-                               ? GL_UNSIGNED_BYTE
-                               : ((changed & INDEX_SHORT)
-                                  ? GL_UNSIGNED_SHORT
-                                  : GL_UNSIGNED_INT);
+                    ? GL_UNSIGNED_BYTE
+                    : ((changed & INDEX_SHORT)
+                            ? GL_UNSIGNED_SHORT
+                            : GL_UNSIGNED_INT);
             bool use_vbo = vbo_data != 0;
             use_vbo = use_vbo && memcmp(&index, &this->index, sizeof(INDEX)) == 0;
             if (use_vbo) {
@@ -394,7 +379,7 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                             totcount += offsets[j];
                             if (!drawn[j] && (mode[j] == mode[i])) {
                                 glindices.push_back(use_vbo ? (GLvoid *) (stride * offs)
-                                                            : (GLvoid *) &index.b[stride * offs]);
+                                        : (GLvoid *) &index.b[stride * offs]);
                                 glcounts.push_back(offsets[j]);
                                 drawn[j] = true;
                             }
@@ -412,9 +397,9 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
             } else {
                 for (int i = 0; i < numlists; i++) {
                     glDrawElements(PolyLookup(mode[i]), offsets[i], indextype,
-                                   use_vbo ? (GLvoid *) (stride * totoffset)
-                                           : (GLvoid *) &index.b[stride
-                                           * totoffset]);                     //changed&INDEX_BYTE == stride!
+                            use_vbo ? (GLvoid *) (stride * totoffset)
+                                    : (GLvoid *) &index.b[stride
+                                    * totoffset]);                     //changed&INDEX_BYTE == stride!
                     totoffset += offsets[i];
                     ++gl_batches_this_frame;
                     gl_vertices_this_frame += offsets[i];
@@ -514,8 +499,7 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
     }
 }
 
-GFXVertexList::~GFXVertexList()
-{
+GFXVertexList::~GFXVertexList() {
 // #ifndef NO_VBO_SUPPORT
 //     if (vbo_data) {
 //         (*glDeleteBuffersARB_p)(1, (GLuint*) &vbo_data);
@@ -551,8 +535,7 @@ GFXVertexList::~GFXVertexList()
     }
 }
 
-union GFXVertexList::VDAT *GFXVertexList::Map(bool read, bool write)
-{
+union GFXVertexList::VDAT *GFXVertexList::Map(bool read, bool write) {
 #ifndef NO_VBO_SUPPORT
     if (GFX_BUFFER_MAP_UNMAP) {
         if (vbo_data) {
@@ -560,13 +543,13 @@ union GFXVertexList::VDAT *GFXVertexList::Map(bool read, bool write)
                 GFXBindElementBuffer(display_list);
                 index.b =
                         (unsigned char *) (*glMapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                                                              read ? (write ? GL_READ_WRITE_ARB : GL_READ_ONLY_ARB)
-                                                                   : GL_WRITE_ONLY_ARB);
+                                read ? (write ? GL_READ_WRITE_ARB : GL_READ_ONLY_ARB)
+                                        : GL_WRITE_ONLY_ARB);
             }
             GFXBindBuffer(vbo_data);
             void *ret =
                     (*glMapBufferARB_p)(GL_ARRAY_BUFFER_ARB,
-                                        read ? (write ? GL_READ_WRITE_ARB : GL_READ_ONLY_ARB) : GL_WRITE_ONLY_ARB);
+                            read ? (write ? GL_READ_WRITE_ARB : GL_READ_ONLY_ARB) : GL_WRITE_ONLY_ARB);
             if (changed & HAS_COLOR) {
                 data.colors = (GFXColorVertex *) ret;
             } else {
@@ -580,8 +563,7 @@ union GFXVertexList::VDAT *GFXVertexList::Map(bool read, bool write)
     return &data;
 }
 
-void GFXVertexList::UnMap()
-{
+void GFXVertexList::UnMap() {
 #ifndef NO_VBO_SUPPORT
     if (GFX_BUFFER_MAP_UNMAP) {
         if (vbo_data) {
@@ -601,14 +583,12 @@ void GFXVertexList::UnMap()
 }
 
 ///Returns the array of vertices to be mutated
-union GFXVertexList::VDAT *GFXVertexList::BeginMutate(int offset)
-{
+union GFXVertexList::VDAT *GFXVertexList::BeginMutate(int offset) {
     return this->Map(false, true);
 }
 
 ///Ends mutation and refreshes display list
-void GFXVertexList::EndMutate(int newvertexsize)
-{
+void GFXVertexList::EndMutate(int newvertexsize) {
     this->UnMap();
     if (!(changed & CHANGE_MUTABLE)) {
         changed |= CHANGE_CHANGE;
@@ -640,36 +620,30 @@ GFXVertexList::GFXVertexList() :
         vbo_data(0),
         numlists(0),
         offsets(0),
-        changed(0)
-{
+        changed(0) {
     // ctor
 }
 
-POLYTYPE *GFXVertexList::GetPolyType() const
-{
+POLYTYPE *GFXVertexList::GetPolyType() const {
     return mode;
 }
 
-int *GFXVertexList::GetOffsets() const
-{
+int *GFXVertexList::GetOffsets() const {
     return offsets;
 }
 
-int GFXVertexList::GetNumLists() const
-{
+int GFXVertexList::GetNumLists() const {
     return numlists;
 }
 
 ///local helper funcs for procedural Modification
-void SetVector(const double factor, Vector *pv)
-{
+void SetVector(const double factor, Vector *pv) {
     pv->i = pv->i * factor;
     pv->j = pv->j * factor;
     pv->k = pv->k * factor;
 }
 
-void GFXSphereVertexList::ProceduralModification()
-{
+void GFXSphereVertexList::ProceduralModification() {
     GFXVertex *v = sphere->BeginMutate(0)->vertices;
     const int ROWS = 28;
     int row[ROWS];

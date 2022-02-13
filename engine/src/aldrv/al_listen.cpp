@@ -49,8 +49,7 @@ struct Listener {
     float gain;
     float rsize;
 
-    Listener() : pos(0, 0, 0), vel(0, 0, 0), p(1, 0, 0), q(0, 1, 0), r(0, 0, 1), gain(1), rsize(1)
-    {
+    Listener() : pos(0, 0, 0), vel(0, 0, 0), p(1, 0, 0), q(0, 1, 0), r(0, 0, 1), gain(1), rsize(1) {
     }
 }
         mylistener;
@@ -65,13 +64,11 @@ struct ApproxSound {
 typedef std::vector<ApproxSound> ApproxSoundVec;
 static ApproxSoundVec playingbuffers[hashsize];
 
-unsigned int hash_sound(unsigned int buffer)
-{
+unsigned int hash_sound(unsigned int buffer) {
     return buffer % hashsize;
 }
 
-float AUDDistanceSquared(const int sound)
-{
+float AUDDistanceSquared(const int sound) {
 #ifdef HAVE_AL
     return (sounds[sound].pos - mylistener.pos).MagnitudeSquared();
 
@@ -80,13 +77,11 @@ float AUDDistanceSquared(const int sound)
 #endif
 }
 
-QVector AUDListenerLocation()
-{
+QVector AUDListenerLocation() {
     return mylistener.pos.Cast();
 }
 
-static float EstimateGain(const Vector &pos, const float gain)
-{
+static float EstimateGain(const Vector &pos, const float gain) {
     // Base priority is source gain
     float final_gain = gain;
 
@@ -102,8 +97,7 @@ static float EstimateGain(const Vector &pos, const float gain)
     return final_gain;
 }
 
-char AUDQueryAudability(const int sound, const Vector &pos, const Vector &vel, const float gain)
-{
+char AUDQueryAudability(const int sound, const Vector &pos, const Vector &vel, const float gain) {
 #ifdef HAVE_AL
     if (sounds[sound].buffer == (ALuint) 0) {
         return 0;
@@ -181,8 +175,7 @@ char AUDQueryAudability(const int sound, const Vector &pos, const Vector &vel, c
     return 1;
 }
 
-void AUDAddWatchedPlayed(const int sound, const Vector &pos)
-{
+void AUDAddWatchedPlayed(const int sound, const Vector &pos) {
 #ifdef HAVE_AL
     totalplaying++;
     if (sounds[sound].buffer != (ALuint) 0) {
@@ -199,8 +192,7 @@ void AUDAddWatchedPlayed(const int sound, const Vector &pos)
 typedef std::vector<int> vecint;
 vecint soundstodelete;
 
-void AUDRefreshSounds()
-{
+void AUDRefreshSounds() {
 #ifdef HAVE_AL
     static unsigned int i = 0;
     if (i >= hashsize) {
@@ -236,8 +228,7 @@ void AUDRefreshSounds()
 #endif
 }
 
-void AUDListener(const QVector &pos, const Vector &vel)
-{
+void AUDListener(const QVector &pos, const Vector &vel) {
 #ifdef HAVE_AL
     mylistener.pos = pos.Cast();
     mylistener.vel = vel;
@@ -252,15 +243,13 @@ void AUDListener(const QVector &pos, const Vector &vel)
 #endif
 }
 
-void AUDListenerSize(const float rSize)
-{
+void AUDListenerSize(const float rSize) {
 #ifdef HAVE_AL
     mylistener.rsize = rSize * rSize;
 #endif
 }
 
-void AUDListenerOrientation(const Vector &p, const Vector &q, const Vector &r)
-{
+void AUDListenerOrientation(const Vector &p, const Vector &q, const Vector &r) {
 #ifdef HAVE_AL
     mylistener.p = p;
     mylistener.q = q;
@@ -272,8 +261,7 @@ void AUDListenerOrientation(const Vector &p, const Vector &q, const Vector &r)
 #endif
 }
 
-void AUDSoundGain(int sound, float gain, bool music)
-{
+void AUDSoundGain(int sound, float gain, bool music) {
 #ifdef HAVE_AL
     if (sound >= 0 && sound < (int) sounds.size()) {
         sounds[sound].music = music;
@@ -287,8 +275,7 @@ void AUDSoundGain(int sound, float gain, bool music)
 #endif
 }
 
-void AUDListenerGain(const float ggain)
-{
+void AUDListenerGain(const float ggain) {
 #ifdef HAVE_AL
     float gain = ggain;
     if (gain <= 0) {
@@ -306,8 +293,7 @@ void AUDListenerGain(const float ggain)
 #endif
 }
 
-float AUDGetListenerGain()
-{
+float AUDGetListenerGain() {
 #ifdef HAVE_AL
     return mylistener.gain;
 

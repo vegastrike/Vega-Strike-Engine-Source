@@ -33,29 +33,24 @@
 
 namespace Audio {
 
-SimpleSource::~SimpleSource()
-{
+SimpleSource::~SimpleSource() {
 }
 
 SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) :
         Source(sound, looping),
         playing(false),
-        scene(0)
-{
+        scene(0) {
 }
 
-void SimpleSource::notifySceneAttached(SimpleScene *scn)
-{
+void SimpleSource::notifySceneAttached(SimpleScene *scn) {
     scene = scn;
 }
 
-SimpleScene *SimpleSource::getScene() const
-{
+SimpleScene *SimpleSource::getScene() const {
     return scene;
 }
 
-void SimpleSource::startPlayingImpl(Timestamp start)
-{
+void SimpleSource::startPlayingImpl(Timestamp start) {
     // If it's playing, must stop and restart - cannot simply play again.
     if (isPlaying()) {
         stopPlaying();
@@ -69,8 +64,7 @@ void SimpleSource::startPlayingImpl(Timestamp start)
     }
 }
 
-void SimpleSource::stopPlayingImpl()
-{
+void SimpleSource::stopPlayingImpl() {
     if (isPlaying()) {
         playing = false;
 
@@ -80,8 +74,7 @@ void SimpleSource::stopPlayingImpl()
     }
 }
 
-bool SimpleSource::isPlayingImpl() const
-{
+bool SimpleSource::isPlayingImpl() const {
     return playing;
 }
 

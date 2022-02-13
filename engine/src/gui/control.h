@@ -36,13 +36,11 @@ class Control : public EventResponder {
 public:
 
 //The outside boundaries of the control.
-    virtual Rect rect(void)
-    {
+    virtual Rect rect(void) {
         return m_rect;
     }
 
-    virtual void setRect(const Rect &r)
-    {
+    virtual void setRect(const Rect &r) {
         m_rect = r;
     }
 
@@ -50,76 +48,63 @@ public:
     virtual bool hitTest(const Point &p);
 
 //Whether to show the control or not.
-    virtual bool hidden(void)
-    {
+    virtual bool hidden(void) {
         return m_hidden;
     }
 
-    virtual void setHidden(bool h = true)
-    {
+    virtual void setHidden(bool h = true) {
         m_hidden = h;
     }
 
 //Control have id's.  This makes it easy to find them programmatically.
 //See window::findControlById.
-    virtual const std::string &id(void)
-    {
+    virtual const std::string &id(void) {
         return m_id;
     }
 
-    virtual void setId(const std::string &newId)
-    {
+    virtual void setId(const std::string &newId) {
         m_id = newId;
     }
 
 //The color of the control.
 //Meaning depends on control.  Often background color.
-    virtual GFXColor color(void)
-    {
+    virtual GFXColor color(void) {
         return m_color;
     }
 
-    virtual void setColor(const GFXColor &c)
-    {
+    virtual void setColor(const GFXColor &c) {
         m_color = c;
     }
 
 //The color of the outline around the control.
-    virtual GFXColor outlineColor(void)
-    {
+    virtual GFXColor outlineColor(void) {
         return m_outlineColor;
     }
 
-    virtual void setOutlineColor(const GFXColor &c)
-    {
+    virtual void setOutlineColor(const GFXColor &c) {
         m_outlineColor = c;
     }
 
 //Color of text in control.
-    virtual GFXColor textColor(void)
-    {
+    virtual GFXColor textColor(void) {
         return m_textColor;
     }
 
-    virtual void setTextColor(const GFXColor &c)
-    {
+    virtual void setTextColor(const GFXColor &c) {
         m_textColor = c;
     }
 
 //Font for text in control.
-    virtual Font font(void)
-    {
+    virtual Font font(void) {
         return m_font;
     }
 
-    virtual void setFont(const Font &f)
-    {
+    virtual void setFont(const Font &f) {
         m_font = f;
     }
 
 //The list of controls "grouped" into this control.
-    virtual bool hasGroupChildren(void)
-    {
+    virtual bool hasGroupChildren(void) {
         return false;
     }
 
@@ -131,8 +116,7 @@ public:
 public:
     Control(void);
 
-    virtual ~Control(void)
-    {
+    virtual ~Control(void) {
     }
 
 protected:

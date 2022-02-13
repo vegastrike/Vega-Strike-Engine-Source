@@ -30,8 +30,7 @@ std::map<string, string> GameConfig::variables;
 // This is probably unique enough to ensure no collision
 string GameConfig::DEFAULT_ERROR_VALUE = "GameConfig::_GetVariable DEFAULT_ERROR_VALUE";
 
-void GameConfig::LoadGameConfig(const string &filename)
-{
+void GameConfig::LoadGameConfig(const string &filename) {
     ptree tree;
     pt::read_xml(filename, tree);
 

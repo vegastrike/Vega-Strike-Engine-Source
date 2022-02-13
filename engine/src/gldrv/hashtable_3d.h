@@ -49,31 +49,27 @@ class Hashtable3d {
     std::vector<T> table[COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
 
 ///hashes 3 values into the appropriate spot in the hash table
-    static void hash_vec(double i, double j, double k, int &x, int &y, int &z)
-    {
+    static void hash_vec(double i, double j, double k, int &x, int &y, int &z) {
         x = hash_int(i);
         y = hash_int(j);
         z = hash_int(k);
     }
 
 ///hashes 3 vals into the appropriate place in hash table
-    static void hash_vec(const QVector &t, int &x, int &y, int &z)
-    {
+    static void hash_vec(const QVector &t, int &x, int &y, int &z) {
         hash_vec(t.i, t.j, t.k, x, y, z);
     }
 
 public:
 ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
-    static int hash_int(const double aye)
-    {
+    static int hash_int(const double aye) {
         return ((int) (((aye < 0) ? (aye
                 - COLLIDETABLEACCURACY) : aye)
                 / COLLIDETABLEACCURACY)) % (COLLIDETABLESIZE / 2) + (COLLIDETABLESIZE / 2);
     }
 
 ///clears entire table
-    void Clear()
-    {
+    void Clear() {
         hugeobjects.clear();
         for (int i = 0; i <= COLLIDETABLESIZE - 1; i++) {
             for (int j = 0; j <= COLLIDETABLESIZE - 1; j++) {
@@ -87,8 +83,7 @@ public:
     }
 
 ///returns any objects residing in the sector occupied by Exact
-    int Get(const QVector &Exact, std::vector<T> *retval[])
-    {
+    int Get(const QVector &Exact, std::vector<T> *retval[]) {
         retval[1] = &table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
         //retval+=hugeobjects;
         //blah = blooh;
@@ -97,14 +92,12 @@ public:
     }
 
 ///Returns all objects too big to be conveniently fit in the array
-    std::vector<T> &GetHuge()
-    {
+    std::vector<T> &GetHuge() {
         return hugeobjects;
     }
 
 ///Returns all objects within sector(s) occupied by target
-    int Get(const LineCollide *target, std::vector<T> *retval[])
-    {
+    int Get(const LineCollide *target, std::vector<T> *retval[]) {
         unsigned int sizer = 1;
         //int minx,miny,minz,maxx,maxy,maxz;
         //hash_vec(Min,minx,miny,minz);
@@ -147,8 +140,7 @@ public:
     }
 
 ///Adds objectToPut into collide table with limits specified by target.
-    void Put(LineCollide *target, const T objectToPut)
-    {
+    void Put(LineCollide *target, const T objectToPut) {
         int x, y, z;
         double maxx = (ceil(target->Maxi.i / COLLIDETABLEACCURACY)) * COLLIDETABLEACCURACY;
         double maxy = (ceil(target->Maxi.j / COLLIDETABLEACCURACY)) * COLLIDETABLEACCURACY;
@@ -168,10 +160,10 @@ public:
         }
         if (fabs((maxx
                 - minx)
-                         * (maxy
-                                 - miny)
-                         * (maxz
-                                 - minz)) > ((double) COLLIDETABLEACCURACY) * ((double) COLLIDETABLEACCURACY)
+                * (maxy
+                        - miny)
+                * (maxz
+                        - minz)) > ((double) COLLIDETABLEACCURACY) * ((double) COLLIDETABLEACCURACY)
                 * ((double) COLLIDETABLEACCURACY)
                 * ((double) HUGEOBJECT)) {
             target->hhuge = true;
@@ -192,8 +184,7 @@ public:
         }
     }
 
-    static bool removeFromVector(std::vector<T> &myvector, T &objectToKill)
-    {
+    static bool removeFromVector(std::vector<T> &myvector, T &objectToKill) {
         bool ret = false;
         typename std::vector<T>::iterator removal = myvector.begin();
         while (removal != myvector.end()) {
@@ -209,8 +200,7 @@ public:
         return ret;
     }
 
-    bool Eradicate(T objectToKill)
-    {
+    bool Eradicate(T objectToKill) {
         bool ret = removeFromVector(hugeobjects, objectToKill);
         for (unsigned int i = 0; i <= COLLIDETABLESIZE - 1; i++) {
             for (unsigned int j = 0; j <= COLLIDETABLESIZE - 1; j++) {
@@ -223,8 +213,7 @@ public:
     }
 
 ///Removes objectToKill from collide table with span of Target
-    bool Remove(const LineCollide *target, T &objectToKill)
-    {
+    bool Remove(const LineCollide *target, T &objectToKill) {
         //int minx,miny,minz,maxx,maxy,maxz;
         //hash_vec(target->Mini,minx,miny,minz);
         //hash_vec(target->Maxi,maxx,maxy,maxz);

@@ -44,8 +44,7 @@ class Logo {
     Texture *Decal;
     static Hashtable<int, Logo, 257> decalHash;
 
-    Logo()
-    {
+    Logo() {
     }
 
 protected:
@@ -60,16 +59,15 @@ protected:
 
 public:
     Logo(int numberlogos,
-         Vector *center,
-         Vector *normal,
-         float *sizes,
-         float *rotations,
-         float offset,
-         Texture *Dec,
-         Vector *Ref);
+            Vector *center,
+            Vector *normal,
+            float *sizes,
+            float *rotations,
+            float offset,
+            Texture *Dec,
+            Vector *Ref);
 
-    Logo(const Logo &rval)
-    {
+    Logo(const Logo &rval) {
         *this = rval;
     }
 

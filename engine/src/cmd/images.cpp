@@ -29,8 +29,7 @@
 #include "gfx/cockpit_generic.h"
 
 template<typename BOGUS>
-UnitImages<BOGUS>::UnitImages()
-{
+UnitImages<BOGUS>::UnitImages() {
     VSCONSTRUCT1('i');
 
     //No cockpit reference here
@@ -45,8 +44,7 @@ UnitImages<BOGUS>::UnitImages()
 
 template<typename BOGUS>
 //added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
-UnitImages<BOGUS>::~UnitImages()
-{
+UnitImages<BOGUS>::~UnitImages() {
     if (pExplosion != nullptr) {
         delete pExplosion;
         pExplosion = nullptr;

@@ -160,8 +160,7 @@ void av_free_packet( AVPacket *pkt )
 #else //No FFMPEG
 
 namespace FFMpeg {
-void initLibraries()
-{
+void initLibraries() {
     //No-op stub
 }
 };

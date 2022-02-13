@@ -67,8 +67,7 @@ void sleep(unsigned int ms);
  * @remarks Returns enumMap[s] raising an exception on error.
  */
 template<typename T>
-T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap)
-{
+T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap) {
     typename std::map<std::string, T>::const_iterator it = enumMap.find(s);
     if (it != enumMap.end()) {
         return it->second;
@@ -84,8 +83,7 @@ T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap)
  * @remarks Returns enumMap[s] or the default, no exceptions raised.
  */
 template<typename T>
-T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap, T deflt)
-{
+T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap, T deflt) {
     typename std::map<std::string, T>::const_iterator it = enumMap.find(s);
     if (it != enumMap.end()) {
         return it->second;

@@ -20,8 +20,7 @@
 
 class csTerrainSegmentCellCollider {
 private:
-    int sign(float val)
-    {
+    int sign(float val) {
         return val > 0 ? 1 : val < 0 ? -1 : 0;
     }
 
@@ -51,8 +50,7 @@ public:
     csTerrainSegmentCellCollider(iTerrainCell *cell, const csVector3 &
     start, const csVector3 &end)
             : start(start), end(end), pos(cell->GetPosition()), size(cell->GetSize()),
-              vertical(false), verticalhit(false)
-    {
+            vertical(false), verticalhit(false) {
         // Constants
         const float rootOf2 = 1.414213f;
         const float halfRoot2 = rootOf2 / 2;
@@ -67,9 +65,9 @@ public:
 
         // Offset from grid 0,0
         const csVector2 gridOffsetStart = csVector2(start.x - pos.x,
-                                                    -(start.z - (pos.y + size.z)));
+                -(start.z - (pos.y + size.z)));
         const csVector2 gridOffsetEnd = csVector2(end.x - pos.x,
-                                                  -(end.z - (pos.y + size.z)));
+                -(end.z - (pos.y + size.z)));
 
         // U, V and height of segment start in cell space
         u0 = (gridOffsetStart.x) / scale_u;
@@ -143,8 +141,7 @@ public:
     // 0 - nothing happened
     // 1 - collision
     // -1 - loop stop
-    int GetIntersection(csVector3 &result, csVector2 &cell_result)
-    {
+    int GetIntersection(csVector3 &result, csVector2 &cell_result) {
         // Constants
         const float rootOf2 = 1.414213f;
         const float halfRoot2 = rootOf2 / 2;
@@ -250,7 +247,7 @@ public:
         float h_h0 = cell_height;
 
         csVector2 uv = csVector2((u0 + du * t) * scale_u,
-                                 (v0 + dv * t) * scale_v);
+                (v0 + dv * t) * scale_v);
         float h_h1 = cell->GetHeight(uv);
 
         // Remember height value

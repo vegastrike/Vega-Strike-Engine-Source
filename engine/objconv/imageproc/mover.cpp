@@ -41,8 +41,7 @@ int PNG_HAS_ALPHA = 4;
  *  }
  */
 
-static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
-{
+static void png_cexcept_error(png_structp png_ptr, png_const_charp msg) {
     if (png_ptr) {
     }
 #ifndef PNG_NO_CONSOLE_IO
@@ -51,21 +50,20 @@ static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 }
 
 unsigned char *ReadPNG(FILE *fp,
-                       unsigned int &sizeX,
-                       unsigned int &sizeY,
-                       int &img_depth,
-                       int &img_color_type,
-                       unsigned char ***row_pointer_ptr)
-{
+        unsigned int &sizeX,
+        unsigned int &sizeY,
+        int &img_depth,
+        int &img_color_type,
+        unsigned char ***row_pointer_ptr) {
     png_structp png_ptr;
     png_bytepp row_pointers;
     png_infop info_ptr;
     int interlace_type;
 
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                     NULL,
-                                     (png_error_ptr) png_cexcept_error,
-                                     (png_error_ptr) NULL);
+            NULL,
+            (png_error_ptr) png_cexcept_error,
+            (png_error_ptr) NULL);
     if (png_ptr == NULL) {
         exit(1);
         return NULL;
@@ -89,14 +87,14 @@ unsigned char *ReadPNG(FILE *fp,
     //png_set_sig_bytes(png_ptr, 8);
     png_read_info(png_ptr, info_ptr);     /* read all PNG info up to image data */
     png_get_IHDR(png_ptr,
-                 info_ptr,
-                 (png_uint_32 *) &sizeX,
-                 (png_uint_32 *) &sizeY,
-                 &img_depth,
-                 &img_color_type,
-                 &interlace_type,
-                 NULL,
-                 NULL);
+            info_ptr,
+            (png_uint_32 *) &sizeX,
+            (png_uint_32 *) &sizeY,
+            &img_depth,
+            &img_color_type,
+            &interlace_type,
+            NULL,
+            NULL);
 
 # if __BYTE_ORDER != __BIG_ENDIAN
     if (img_depth == 16) {
@@ -115,14 +113,14 @@ unsigned char *ReadPNG(FILE *fp,
     png_set_expand(png_ptr);
     png_read_update_info(png_ptr, info_ptr);
     png_get_IHDR(png_ptr,
-                 info_ptr,
-                 (png_uint_32 *) &sizeX,
-                 (png_uint_32 *) &sizeY,
-                 &img_depth,
-                 &img_color_type,
-                 &interlace_type,
-                 NULL,
-                 NULL);
+            info_ptr,
+            (png_uint_32 *) &sizeX,
+            (png_uint_32 *) &sizeY,
+            &img_depth,
+            &img_color_type,
+            &interlace_type,
+            NULL,
+            NULL);
     row_pointers = (unsigned char **) malloc(sizeof(unsigned char *) * sizeY);
     int numchan = 1;
     if (img_color_type & PNG_COLOR_MASK_COLOR) {
@@ -155,8 +153,7 @@ enum errort {
     Ok
 };
 
-errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int sizeY, int img_depth, int img_alpha)
-{
+errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int sizeY, int img_depth, int img_alpha) {
     png_structp png_ptr = png_create_write_struct
             (PNG_LIBPNG_VER_STRING, (png_voidp) NULL, NULL, NULL);
     if (!png_ptr) {
@@ -183,14 +180,14 @@ errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int 
     png_set_compression_method(png_ptr, 8);
 
     png_set_IHDR(png_ptr,
-                 info_ptr,
-                 sizeX,
-                 sizeY,
-                 img_depth,
-                 img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT,
-                 PNG_FILTER_TYPE_DEFAULT);
+            info_ptr,
+            sizeX,
+            sizeY,
+            img_depth,
+            img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
+            PNG_INTERLACE_NONE,
+            PNG_COMPRESSION_TYPE_DEFAULT,
+            PNG_FILTER_TYPE_DEFAULT);
 
     png_write_info(png_ptr, info_ptr);
 # if __BYTE_ORDER != __BIG_ENDIAN
@@ -214,14 +211,13 @@ errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int 
 }
 
 void ModifyImage(unsigned int sizex,
-                 unsigned int sizey,
-                 int img_depth,
-                 int img_alpha,
-                 unsigned char **row_pointers,
-                 unsigned char output[FINAL_HEIGHT][FINAL_WIDTH][4],
-                 int offsetx,
-                 int offsety)
-{
+        unsigned int sizey,
+        int img_depth,
+        int img_alpha,
+        unsigned char **row_pointers,
+        unsigned char output[FINAL_HEIGHT][FINAL_WIDTH][4],
+        int offsetx,
+        int offsety) {
     memset(output, 0, sizeof(unsigned char) * FINAL_WIDTH * FINAL_HEIGHT * 4);
     int stride = (img_depth / 8) * (img_alpha ? 4 : 3);
     for (unsigned int i = 0; i < sizey; ++i) {
@@ -238,8 +234,7 @@ void ModifyImage(unsigned int sizex,
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc == 5) {
         FILE *fp = fopen(argv[3], "rb");
         if (fp) {

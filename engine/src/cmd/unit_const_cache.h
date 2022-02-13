@@ -39,8 +39,7 @@ public:
     std::string key;
     int fac;
 public:
-    StringIntKey(std::string k, int f)
-    {
+    StringIntKey(std::string k, int f) {
         key = k;
         fac = f;
     }
@@ -53,8 +52,7 @@ extern bool operator<(const StringIntKey &a, const StringIntKey &b);
 namespace std {
 template<>
 struct hash<StringIntKey> {
-    std::size_t operator()(StringIntKey const &s) const noexcept
-    {
+    std::size_t operator()(StringIntKey const &s) const noexcept {
         return (std::hash<std::string>{}(s.key)) ^ s.fac;
     }
 };
@@ -64,13 +62,11 @@ struct hash<StringIntKey> {
 class ConstHasher {
 public:
     template<class T>
-    size_t operator()(const T &key) const
-    {
+    size_t operator()(const T &key) const {
         return vsHash<T>()(key);
     }
 
-    size_t operator()(const StringIntKey &key) const
-    {
+    size_t operator()(const StringIntKey &key) const {
         return vsHash<std::string>()(key.key) ^ vsHash<size_t>()((size_t) key.fac);
     }
 };
@@ -85,13 +81,11 @@ class ClassCache {
 #endif
     static cache_map unit_cache;
 public:
-    static const Typ *getCachedConst(Key k)
-    {
+    static const Typ *getCachedConst(Key k) {
         return getCachedMutable(k);
     }
 
-    static Typ *getCachedMutable(const Key &k)
-    {
+    static Typ *getCachedMutable(const Key &k) {
         typename cache_map::iterator i = unit_cache.find(k);
         if (i != unit_cache.end()) {
             return (*i).second;
@@ -99,19 +93,16 @@ public:
         return NULL;
     }
 
-    static Typ *setCachedMutable(const Key &k, Typ *un)
-    {
+    static Typ *setCachedMutable(const Key &k, Typ *un) {
         unit_cache.insert(std::pair<Key, Typ *>(k, un));
         return un;
     }
 
-    static const Typ *setCachedConst(const Key &k, Typ *un)
-    {
+    static const Typ *setCachedConst(const Key &k, Typ *un) {
         return setCachedMutable(k, un);
     }
 
-    static void purgeCache(void (*Kill)(Typ *un))
-    {
+    static void purgeCache(void (*Kill)(Typ *un)) {
         typename cache_map::iterator i = unit_cache.begin();
         for (; i != unit_cache.end(); ++i) {
             (*Kill)((*i).second);

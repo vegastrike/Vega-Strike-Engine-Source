@@ -36,13 +36,11 @@ struct JSHandlerCall {
     KBHandler function;
     KBData data;
 
-    JSHandlerCall()
-    {
+    JSHandlerCall() {
         function = DefaultJoyHandler;
     }
 
-    JSHandlerCall(KBHandler function, const KBData &data)
-    {
+    JSHandlerCall(KBHandler function, const KBData &data) {
         this->function = function;
         this->data = data;
     }
@@ -55,65 +53,56 @@ enum JSSwitches {
 };
 #define MAXOR(A, B) ( ( (A) < (B) ) ? (B) : (A) )
 JSHandlerCall JoystickBindings[NUMSWITCHES][MAXOR(MAX_HATSWITCHES, MAX_JOYSTICKS)][MAXOR(NUMJBUTTONS,
-                                                                                         MAXOR(MAX_VALUES,
-                                                                                               MAX_DIGITAL_HATSWITCHES
-                                                                                                       * MAX_DIGITAL_VALUES))
+        MAXOR(MAX_VALUES,
+                MAX_DIGITAL_HATSWITCHES
+                        * MAX_DIGITAL_VALUES))
 ];
 KBSTATE JoystickState[NUMSWITCHES][MAXOR(MAX_HATSWITCHES, MAX_JOYSTICKS)][MAXOR(MAX_VALUES,
-                                                                                MAXOR(NUMJBUTTONS,
-                                                                                      MAX_DIGITAL_HATSWITCHES
-                                                                                              * MAX_DIGITAL_VALUES))];
+        MAXOR(NUMJBUTTONS,
+                MAX_DIGITAL_HATSWITCHES
+                        * MAX_DIGITAL_VALUES))];
 
-static void GenUnbindJoyKey(JSSwitches whichswitch, int joystick, int key)
-{
+static void GenUnbindJoyKey(JSSwitches whichswitch, int joystick, int key) {
     assert(key
-                   < MAXOR(NUMJBUTTONS,
-                           MAXOR(MAX_VALUES,
-                                 MAX_DIGITAL_HATSWITCHES * MAX_DIGITAL_VALUES))
-                   && joystick < MAXOR(MAX_JOYSTICKS, MAX_HATSWITCHES));
+            < MAXOR(NUMJBUTTONS,
+                    MAXOR(MAX_VALUES,
+                            MAX_DIGITAL_HATSWITCHES * MAX_DIGITAL_VALUES))
+            && joystick < MAXOR(MAX_JOYSTICKS, MAX_HATSWITCHES));
     JoystickBindings[whichswitch][joystick][key] = JSHandlerCall();
     JoystickState[whichswitch][joystick][key] = UP;
 }
 
-static void GenBindJoyKey(JSSwitches whichswitch, int joystick, int key, KBHandler handler, const KBData &data)
-{
+static void GenBindJoyKey(JSSwitches whichswitch, int joystick, int key, KBHandler handler, const KBData &data) {
     assert(key < NUMJBUTTONS && joystick < MAX_JOYSTICKS);
     JoystickBindings[whichswitch][joystick][key] = JSHandlerCall(handler, data);
     handler(KBData(), RESET);
 }
 
-void UnbindJoyKey(int joystick, int key)
-{
+void UnbindJoyKey(int joystick, int key) {
     GenUnbindJoyKey(JOYSTICK_SWITCH, joystick, key);
 }
 
-void BindJoyKey(int joystick, int key, KBHandler handler, const KBData &data)
-{
+void BindJoyKey(int joystick, int key, KBHandler handler, const KBData &data) {
     GenBindJoyKey(JOYSTICK_SWITCH, joystick, key, handler, data);
 }
 
-void UnbindHatswitchKey(int joystick, int key)
-{
+void UnbindHatswitchKey(int joystick, int key) {
     GenUnbindJoyKey(HATSWITCH, joystick, key);
 }
 
-void BindHatswitchKey(int joystick, int key, KBHandler handler, const KBData &data)
-{
+void BindHatswitchKey(int joystick, int key, KBHandler handler, const KBData &data) {
     GenBindJoyKey(HATSWITCH, joystick, key, handler, data);
 }
 
-void UnbindDigitalHatswitchKey(int joystick, int key, int dir)
-{
+void UnbindDigitalHatswitchKey(int joystick, int key, int dir) {
     GenUnbindJoyKey(DIGHATSWITCH, joystick, key * MAX_DIGITAL_VALUES + dir);
 }
 
-void BindDigitalHatswitchKey(int joystick, int key, int dir, KBHandler handler, const KBData &data)
-{
+void BindDigitalHatswitchKey(int joystick, int key, int dir, KBHandler handler, const KBData &data) {
     GenBindJoyKey(DIGHATSWITCH, joystick, key * MAX_DIGITAL_VALUES + dir, handler, data);
 }
 
-void ProcessJoystick(int whichplayer)
-{
+void ProcessJoystick(int whichplayer) {
     float x, y, z;
     int buttons;
 #ifdef HAVE_SDL

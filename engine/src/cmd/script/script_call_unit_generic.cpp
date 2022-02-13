@@ -89,8 +89,7 @@ _Universe->AccessCockpit()->GetParent();
 
 static Unit *getIthUnit(un_iter uiter, int i);
 
-varInst *Mission::call_unit(missionNode *node, int mode)
-{
+varInst *Mission::call_unit(missionNode *node, int mode) {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("callun%1$x") % this));
 #endif
@@ -177,8 +176,8 @@ varInst *Mission::call_unit(missionNode *node, int mode)
             }
         }
         QVector pos(getFloatArg(node, mode, 6),
-                    getFloatArg(node, mode, 7),
-                    getFloatArg(node, mode, 8));
+                getFloatArg(node, mode, 7),
+                getFloatArg(node, mode, 8));
         if (node->subnodes.size() > 9) {
             logo_tex = getStringArgument(node, mode, 9);
             if (node->subnodes.size() > 10) {
@@ -199,14 +198,14 @@ varInst *Mission::call_unit(missionNode *node, int mode)
             string ai_string = *((string *) ai_vi->object);
             CreateFlightgroup cf;
             cf.fg = Flightgroup::newFlightgroup(name_string,
-                                                type_string,
-                                                faction_string,
-                                                ai_string,
-                                                nr_of_ships,
-                                                nr_of_waves,
-                                                logo_tex,
-                                                logo_alp,
-                                                this);
+                    type_string,
+                    faction_string,
+                    ai_string,
+                    nr_of_ships,
+                    nr_of_waves,
+                    logo_tex,
+                    logo_alp,
+                    this);
             cf.unittype = CreateFlightgroup::UNIT;
             cf.terrain_nr = -1;
             cf.waves = nr_of_waves;
@@ -853,7 +852,7 @@ varInst *Mission::call_unit(missionNode *node, int mode)
             }
             if (mode == SCRIPT_RUN) {
                 printf("upgrading %s %s %d %d %s\n", my_unit->name.get().c_str(),
-                       file.c_str(), mountoffset, subunitoffset, loop_through_mounts ? "true" : "false");
+                        file.c_str(), mountoffset, subunitoffset, loop_through_mounts ? "true" : "false");
                 fflush(stdout);
                 percentage = my_unit->Upgrade(file, mountoffset, subunitoffset, force, loop_through_mounts);
                 my_unit->SetTurretAI();
@@ -986,8 +985,7 @@ varInst *Mission::call_unit(missionNode *node, int mode)
 
 extern BLENDFUNC parse_alpha(const char *);
 
-Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations)
-{
+Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations) {
     int faction_nr = FactionUtil::GetFactionIndex(fg->fg->faction);
     Unit **units = new Unit *[fg->nr_ships];
     int u;
@@ -1025,10 +1023,10 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
                 s = parse_alpha(bsrc);
             }
             my_unit = new Planet(QVector(0, 0, 0), QVector(0, 0, 0), 0, Vector(0, 0, 0),
-                                 0, 0, radius, tex, "", "", s,
-                                 d, ParseDestinations(destinations),
-                                 QVector(0, 0, 0), NULL, mat,
-                                 vector<GFXLightLocal>(), faction_nr, nam);
+                    0, 0, radius, tex, "", "", s,
+                    d, ParseDestinations(destinations),
+                    QVector(0, 0, 0), NULL, mat,
+                    vector<GFXLightLocal>(), faction_nr, nam);
             free(bsrc);
             free(bdst);
             free(tex);
@@ -1076,8 +1074,7 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
     return my_unit;
 }
 
-void Mission::findNextEnemyTarget(Unit *my_unit)
-{
+void Mission::findNextEnemyTarget(Unit *my_unit) {
     StarSystem *ssystem = _Universe->scriptStarSystem();
     un_iter uiter(ssystem->getUnitList().createIterator());
     Unit *unit;
@@ -1093,8 +1090,7 @@ void Mission::findNextEnemyTarget(Unit *my_unit)
     }
 }
 
-static Unit *getIthUnit(un_iter uiter, int unit_nr)
-{
+static Unit *getIthUnit(un_iter uiter, int unit_nr) {
     Unit *unit = NULL;
     for (int i = 0; (unit = *uiter); ++uiter, ++i) {
         if (i == unit_nr) {

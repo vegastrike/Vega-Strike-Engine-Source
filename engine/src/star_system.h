@@ -146,14 +146,12 @@ public:
     void RemoveStarsystemFromUniverse();
     void LoadXML(const string, const Vector &centroid, const float timeofyear);
 
-    void SetZone(unsigned int zonenum)
-    {
+    void SetZone(unsigned int zonenum) {
         //short fix
         this->zone = zonenum;
     }
 
-    unsigned int GetZone()
-    {
+    unsigned int GetZone() {
         //short fix
         return this->zone;
     }
@@ -172,8 +170,7 @@ public:
     void Update(float priority);
 
     ///Gets the current simulation frame
-    unsigned int getCurrentSimFrame() const
-    {
+    unsigned int getCurrentSimFrame() const {
         return current_sim_location;
     }
 
@@ -185,13 +182,11 @@ public:
     std::string getName();
 
     ///Loads the star system from an XML file
-    UnitCollection &getUnitList()
-    {
+    UnitCollection &getUnitList() {
         return draw_list;
     }
 
-    UnitCollection &gravitationalUnits()
-    {
+    UnitCollection &gravitationalUnits() {
         return gravitational_units;
     }
 
@@ -202,10 +197,10 @@ public:
     ///Removes from draw list
     bool RemoveUnit(Unit *unit);
     bool JumpTo(Unit *unit,
-                Unit *jumppoint,
-                const std::string &system,
-                bool force = false,
-                bool save_coordinates = false /*for intersystem transit the long way*/ );
+            Unit *jumppoint,
+            const std::string &system,
+            bool force = false,
+            bool save_coordinates = false /*for intersystem transit the long way*/ );
     static void ProcessPendingJumps();
 
     Background *getBackground();

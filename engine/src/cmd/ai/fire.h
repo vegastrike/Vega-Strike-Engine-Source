@@ -45,14 +45,13 @@ protected:
     bool had_target;
     void FireWeapons(bool shouldfire, bool lockmissile);
     virtual void ChooseTargets(int num,
-                               bool force = false); //chooses n targets and puts the best to attack in unit's target container
+            bool force = false); //chooses n targets and puts the best to attack in unit's target container
     bool isJumpablePlanet(Unit *);
     void ReInit(float agglevel);
     virtual void SignalChosenTarget();
 public:
 //Other new Order functions that can be called from Python.
-    virtual void ChooseTarget()
-    {
+    virtual void ChooseTarget() {
         ChooseTargets(1, true);
     }
 
@@ -75,13 +74,11 @@ public:
     void XMLScript(std::string script);
     void LastPythonScript();
 
-    virtual void SetParent(Unit *parent)
-    {
+    virtual void SetParent(Unit *parent) {
         CommunicatingAI::SetParent(parent);
     }
 
-    Unit *GetParent()
-    {
+    Unit *GetParent() {
         return CommunicatingAI::GetParent();
     }
 
@@ -89,12 +86,10 @@ public:
     FireAt();
     virtual void Execute();
 
-    virtual std::string Pickle()
-    {
+    virtual std::string Pickle() {
         return std::string();
     }                                                 //these are to serialize this AI
-    virtual void UnPickle(std::string)
-    {
+    virtual void UnPickle(std::string) {
     }
 
     virtual ~FireAt();

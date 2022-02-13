@@ -167,8 +167,7 @@ CG_Cloak *cloak_cg = new CG_Cloak();
 #endif
 
 /* CENTRY */
-int vsExtensionSupported(const char *extension)
-{
+int vsExtensionSupported(const char *extension) {
     static const GLubyte *extensions = NULL;
     const GLubyte *start;
     GLubyte *where, *terminator;
@@ -206,8 +205,7 @@ int vsExtensionSupported(const char *extension)
     return 0;
 }
 
-bool vsVendorMatch(const char *vendor)
-{
+bool vsVendorMatch(const char *vendor) {
     static const GLubyte *_glvendor = NULL;
 
     if (_glvendor == NULL) {
@@ -245,8 +243,7 @@ bool vsVendorMatch(const char *vendor)
     }
 }
 
-void init_opengl_extensions()
-{
+void init_opengl_extensions() {
     const unsigned char *extensions = glGetString(GL_EXTENSIONS);
 
     VS_LOG(trace, (boost::format("OpenGL Extensions supported: %1%") % extensions));
@@ -548,8 +545,7 @@ void init_opengl_extensions()
     VS_LOG(info, (boost::format("Max vertex array vertices: %1%") % gl_options.max_array_vertices));
 }
 
-static void initfov()
-{
+static void initfov() {
     g_game.fov = game_options.fov;
     g_game.aspect = game_options.aspect;
     g_game.znear = game_options.znear;
@@ -575,8 +571,7 @@ static void initfov()
      */
 }
 
-static void Reshape(int x, int y)
-{
+static void Reshape(int x, int y) {
     g_game.x_resolution = x;
     g_game.y_resolution = y;
     VS_LOG(trace, (boost::format("Reshaping %1% %2%") % x % y));
@@ -584,8 +579,7 @@ static void Reshape(int x, int y)
 
 extern void GFXInitTextureManager();
 
-void GFXInit(int argc, char **argv)
-{
+void GFXInit(int argc, char **argv) {
     char vsname[12] = "Vega Strike";
     char vsicon[9] = "vega.ico";
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
@@ -783,8 +777,7 @@ void GFXLoop( void (*main_loop)( void ) )
 }
 #else
 
-void GFXLoop(void main_loop())
-{
+void GFXLoop(void main_loop()) {
     winsys_set_display_func(main_loop);
     winsys_set_idle_func(main_loop);
 
@@ -800,8 +793,7 @@ void GFXLoop(void main_loop())
 
 #endif
 
-void GFXShutdown()
-{
+void GFXShutdown() {
     extern void GFXDestroyAllLights();
 
     GFXDestroyAllTextures();

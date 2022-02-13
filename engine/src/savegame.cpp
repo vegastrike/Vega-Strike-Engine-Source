@@ -57,8 +57,7 @@ using std::allocator;
 
 std::string CurrentSaveGameName = "";
 
-std::string GetHelperPlayerSaveGame(int num)
-{
+std::string GetHelperPlayerSaveGame(int num) {
     if (CurrentSaveGameName.length() > 0) {
         if (game_options.remember_savegame) {
             VSFile f;
@@ -89,8 +88,8 @@ std::string GetHelperPlayerSaveGame(int num)
                 f.Close();
             } else {
                 VS_LOG_AND_FLUSH(fatal,
-                                 (boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%")
-                                         % f.GetFullPath()));
+                        (boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%")
+                                % f.GetFullPath()));
                 VSExit(1);
             }
             err = f.OpenReadOnly("save.4.x.txt", UnknownFile);
@@ -143,8 +142,7 @@ std::string GetHelperPlayerSaveGame(int num)
     return (*res) + XMLSupport::tostring(num);
 }
 
-std::string GetWritePlayerSaveGame(int num)
-{
+std::string GetWritePlayerSaveGame(int num) {
     string ret = GetHelperPlayerSaveGame(num);
     if (!ret.empty()) {
         if (*ret.begin() == '~') {
@@ -154,8 +152,7 @@ std::string GetWritePlayerSaveGame(int num)
     return ret;
 }
 
-std::string GetReadPlayerSaveGame(int num)
-{
+std::string GetReadPlayerSaveGame(int num) {
     string ret = GetHelperPlayerSaveGame(num);
     if (!ret.empty()) {
         if (*ret.begin() == '~') {
@@ -166,8 +163,7 @@ std::string GetReadPlayerSaveGame(int num)
 }
 
 //Used only to copy a savegame to a different named one
-void SaveFileCopy(const char *src, const char *dst)
-{
+void SaveFileCopy(const char *src, const char *dst) {
     if (dst[0] != '\0' && src[0] != '\0') {
         VSFile f;
         VSError err = f.OpenReadOnly(src, SaveFile);
@@ -192,8 +188,7 @@ public:
     /*
      * From https://helloacm.com/how-to-validate-utf-8-encoding-the-simple-utf-8-validation-algorithm/
      */
-    bool validUtf8(const std::vector<BYTE> &data)
-    {
+    bool validUtf8(const std::vector<BYTE> &data) {
         for (long unsigned int i = 0; i < data.size(); ++i) {
             // 0xxxxxxx
             int bit1 = (data[i] >> 7) & 1;
@@ -249,8 +244,7 @@ public:
     }
 
 private:
-    inline bool is10x(int a)
-    {
+    inline bool is10x(int a) {
         int bit1 = (a >> 7) & 1;
         int bit2 = (a >> 6) & 1;
         return (bit1 == 1) && (bit2 == 0);
@@ -274,16 +268,15 @@ std::vector<BYTE> readFile(std::string filename)
     vec.reserve(fileSize);
 
     std::copy(std::istream_iterator<BYTE>(file),
-              std::istream_iterator<BYTE>(),
-              std::back_inserter(vec));
+            std::istream_iterator<BYTE>(),
+            std::back_inserter(vec));
 
     file.close();
 
     return vec;
 }
 
-bool isUtf8SaveGame(std::string filename)
-{
+bool isUtf8SaveGame(std::string filename) {
     boost::filesystem::path filename_path{filename};
     boost::filesystem::path save_dir_path{GetSaveDir()};
     boost::filesystem::path complete_path{boost::filesystem::absolute(filename_path, save_dir_path)};
@@ -310,8 +303,7 @@ public:
     MFD m;
 };
 
-SaveGame::SaveGame(const std::string &pilot)
-{
+SaveGame::SaveGame(const std::string &pilot) {
     callsign = pilot;
     ForceStarSystem = string("");
     PlayerLocation.Set(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -319,29 +311,24 @@ SaveGame::SaveGame(const std::string &pilot)
     missiondata = new MissionFloatDat;
 }
 
-SaveGame::~SaveGame()
-{
+SaveGame::~SaveGame() {
     delete missionstringdata;
     delete missiondata;
 }
 
-void SaveGame::SetStarSystem(string sys)
-{
+void SaveGame::SetStarSystem(string sys) {
     ForceStarSystem = sys;
 }
 
-string SaveGame::GetStarSystem()
-{
+string SaveGame::GetStarSystem() {
     return ForceStarSystem;
 }
 
-string SaveGame::GetOldStarSystem()
-{
+string SaveGame::GetOldStarSystem() {
     return ForceStarSystem;
 }
 
-void SaveGame::SetPlayerLocation(const QVector &v)
-{
+void SaveGame::SetPlayerLocation(const QVector &v) {
     if ((FINITE(v.i) && FINITE(v.j) && FINITE(v.k))) {
         PlayerLocation = v;
     } else {
@@ -351,8 +338,7 @@ void SaveGame::SetPlayerLocation(const QVector &v)
     }
 }
 
-QVector SaveGame::GetPlayerLocation()
-{
+QVector SaveGame::GetPlayerLocation() {
     return PlayerLocation;
 }
 
@@ -360,8 +346,7 @@ void SaveGame::RemoveUnitFromSave(long address) // DELETE ? unused function?
 {
 }
 
-string SaveGame::WriteNewsData()
-{
+string SaveGame::WriteNewsData() {
     string ret("");
     gameMessage last;
     vector<gameMessage> tmp;
@@ -390,8 +375,7 @@ string SaveGame::WriteNewsData()
     return ret;
 }
 
-vector<string> parsePipedString(string s)
-{
+vector<string> parsePipedString(string s) {
     string::size_type loc;
     vector<string> ret;
     while ((loc = s.find("|")) != string::npos) {
@@ -406,8 +390,7 @@ vector<string> parsePipedString(string s)
     return ret;
 }
 
-string createPipedString(vector<string> s)
-{
+string createPipedString(vector<string> s) {
     string ret;
     for (unsigned int i = 0; i < s.size() - 1; i++) {
         ret += s[i] + "|";
@@ -418,8 +401,7 @@ string createPipedString(vector<string> s)
     return ret;
 }
 
-void CopySavedShips(std::string filename, int player_num, const std::vector<std::string> &starships, bool load)
-{
+void CopySavedShips(std::string filename, int player_num, const std::vector<std::string> &starships, bool load) {
     for (unsigned int i = 0; i < starships.size(); i += 2) {
         if (i == 2) {
             i = 1;
@@ -442,22 +424,21 @@ void CopySavedShips(std::string filename, int player_num, const std::vector<std:
                 dst.Write(srcdata);
             } else {
                 VS_LOG(error,
-                       (boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
-                               % starships[i]
-                               % srcnam
-                               % dstnam));
+                        (boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
+                                % starships[i]
+                                % srcnam
+                                % dstnam));
             }
         } else {
             VS_LOG(error,
-                   (boost::format("Error: Cannot Open Unit %1% from save file %2%.")
-                           % starships[i]
-                           % srcnam));
+                    (boost::format("Error: Cannot Open Unit %1% from save file %2%.")
+                            % starships[i]
+                            % srcnam));
         }
     }
 }
 
-void WriteSaveGame(Cockpit *cp, bool auto_save)
-{
+void WriteSaveGame(Cockpit *cp, bool auto_save) {
     int player_num = 0;
     for (unsigned int kk = 0; kk < _Universe->numPlayers(); ++kk) {
         if (_Universe->AccessCockpit(kk) == cp) {
@@ -473,7 +454,7 @@ void WriteSaveGame(Cockpit *cp, bool auto_save)
         cp->PackUnitInfo(packedInfo);
 
         cp->savegame->WriteSaveGame(cp->activeStarSystem->getFileName().c_str(),
-                                    un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num);
+                un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num);
         un->WriteUnit(cp->GetUnitModifications().c_str());
         if (GetWritePlayerSaveGame(player_num).length() && !auto_save) {
             cp->savegame->SetSavedCredits(_Universe->AccessCockpit()->credits);
@@ -484,8 +465,7 @@ void WriteSaveGame(Cockpit *cp, bool auto_save)
     }
 }
 
-int hopto(char *buf, char endln, char endln2, int readlen)
-{
+int hopto(char *buf, char endln, char endln2, int readlen) {
     if (endln == ' ' || endln2 == ' ') {
         while (buf[readlen] && buf[readlen] == ' ') {
             readlen++;
@@ -499,8 +479,7 @@ int hopto(char *buf, char endln, char endln2, int readlen)
     return readlen;
 }
 
-void SaveGame::ReadNewsData(char *&buf, bool just_skip)
-{
+void SaveGame::ReadNewsData(char *&buf, bool just_skip) {
     int numnews;
     int i = 0;
     vector<string> n00s;
@@ -530,52 +509,44 @@ void SaveGame::ReadNewsData(char *&buf, bool just_skip)
     }
 }
 
-void SaveGame::AddUnitToSave(const char *filename, int type, const char *faction, long address)
-{
+void SaveGame::AddUnitToSave(const char *filename, int type, const char *faction, long address) {
     if (game_options.Drone.compare(filename)) {
         RemoveUnitFromSave(address);
     }
 }
 
-std::vector<float> &SaveGame::getMissionData(const std::string &magic_number)
-{
+std::vector<float> &SaveGame::getMissionData(const std::string &magic_number) {
     return missiondata->m[magic_number];
 }
 
-const std::vector<float> &SaveGame::readMissionData(const std::string &magic_number) const
-{
+const std::vector<float> &SaveGame::readMissionData(const std::string &magic_number) const {
     static const std::vector<float> empty;
     MissionFloatDat::MFD::const_iterator it = missiondata->m.find(magic_number);
     return (it == missiondata->m.end()) ? empty : it->second;
 }
 
-unsigned int SaveGame::getMissionDataLength(const std::string &magic_number) const
-{
+unsigned int SaveGame::getMissionDataLength(const std::string &magic_number) const {
     MissionFloatDat::MFD::const_iterator it = missiondata->m.find(magic_number);
     return (it == missiondata->m.end()) ? 0 : it->second.size();
 }
 
-const std::vector<string> &SaveGame::readMissionStringData(const std::string &magic_number) const
-{
+const std::vector<string> &SaveGame::readMissionStringData(const std::string &magic_number) const {
     static const std::vector<string> empty;
     MissionStringDat::MSD::const_iterator it = missionstringdata->m.find(magic_number);
     return (it == missionstringdata->m.end()) ? empty : it->second;
 }
 
-std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_number)
-{
+std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_number) {
     return missionstringdata->m[magic_number];
 }
 
-unsigned int SaveGame::getMissionStringDataLength(const std::string &magic_number) const
-{
+unsigned int SaveGame::getMissionStringDataLength(const std::string &magic_number) const {
     MissionStringDat::MSD::const_iterator it = missionstringdata->m.find(magic_number);
     return (it == missionstringdata->m.end()) ? 0 : it->second.size();
 }
 
 template<class MContainerType>
-void RemoveEmpty(MContainerType &t)
-{
+void RemoveEmpty(MContainerType &t) {
     typename MContainerType::iterator i;
     for (i = t.begin(); i != t.end();) {
         if (i->second.empty()) {
@@ -586,8 +557,7 @@ void RemoveEmpty(MContainerType &t)
     }
 }
 
-string SaveGame::WriteMissionData()
-{
+string SaveGame::WriteMissionData() {
     string ret(" ");
     RemoveEmpty<MissionFloatDat::MFD>(missiondata->m);
     ret += XMLSupport::tostring((int) missiondata->m.size());
@@ -612,8 +582,7 @@ string SaveGame::WriteMissionData()
     return ret;
 }
 
-std::string scanInString(char *&buf)
-{
+std::string scanInString(char *&buf) {
     std::string str;
     while (*buf && isspace(*buf)) {
         buf++;
@@ -629,8 +598,7 @@ std::string scanInString(char *&buf)
     return str;
 }
 
-void SaveGame::ReadMissionData(char *&buf, bool select_data, const std::set<std::string> &select_data_filter)
-{
+void SaveGame::ReadMissionData(char *&buf, bool select_data, const std::set<std::string> &select_data_filter) {
     missiondata->m.clear();
     int mdsize;
     char *buf2 = buf;
@@ -673,8 +641,7 @@ void SaveGame::ReadMissionData(char *&buf, bool select_data, const std::set<std:
     buf = buf2;
 }
 
-string AnyStringScanInString(char *&buf)
-{
+string AnyStringScanInString(char *&buf) {
     unsigned int size = 0;
     bool found = false;
     while ((*buf) && ((*buf) != ' ' || (!found))) {
@@ -697,8 +664,7 @@ string AnyStringScanInString(char *&buf)
     return ret;
 }
 
-void AnyStringSkipInString(char *&buf)
-{
+void AnyStringSkipInString(char *&buf) {
     unsigned int size = 0;
     bool found = false;
     while ((*buf) && ((*buf) != ' ' || (!found))) {
@@ -718,13 +684,11 @@ void AnyStringSkipInString(char *&buf)
     }
 }
 
-string AnyStringWriteString(string input)
-{
+string AnyStringWriteString(string input) {
     return XMLSupport::tostring((int) input.length()) + " " + input;
 }
 
-void SaveGame::ReadMissionStringData(char *&buf, bool select_data, const std::set<std::string> &select_data_filter)
-{
+void SaveGame::ReadMissionStringData(char *&buf, bool select_data, const std::set<std::string> &select_data_filter) {
     missionstringdata->m.clear();
     int mdsize;
     char *buf2 = buf;
@@ -752,9 +716,9 @@ void SaveGame::ReadMissionStringData(char *&buf, bool select_data, const std::se
         } else {
             // debugging attempt -- show why the allocation would fail
             VS_LOG(info,
-                   (boost::format(
-                           " SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)")
-                           % md_i_size % i));
+                    (boost::format(
+                            " SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)")
+                            % md_i_size % i));
         }
         for (int j = 0; j < md_i_size; j++) {
             if (skip) {
@@ -771,7 +735,7 @@ void SaveGame::ReadMissionStringData(char *&buf, bool select_data, const std::se
 void SaveGame::PurgeZeroStarships() // DELETE unused function?
 {
     for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(), ie = missionstringdata->m.end(); i != ie;
-         ++i) {
+            ++i) {
         if (fg_util::IsFGKey(i->first)) {
             if (fg_util::CheckFG(i->second)) {
                 // VS_LOG(info, (boost::format("correcting flightgroup %1% to have right landed ships") % i->first.c_str()));
@@ -780,8 +744,7 @@ void SaveGame::PurgeZeroStarships() // DELETE unused function?
     }
 }
 
-static inline void PushBackUInt(unsigned int i, vector<char> &ret)
-{
+static inline void PushBackUInt(unsigned int i, vector<char> &ret) {
     char tmp[32];
     if (!i) {
         ret.push_back('0');
@@ -798,8 +761,7 @@ static inline void PushBackUInt(unsigned int i, vector<char> &ret)
     }
 }
 
-static inline void PushBackChars(const char *c, vector<char> &ret)
-{
+static inline void PushBackChars(const char *c, vector<char> &ret) {
     int ini = ret.size();
     ret.resize(ret.size() + strlen(c));
     while (*c) {
@@ -807,15 +769,13 @@ static inline void PushBackChars(const char *c, vector<char> &ret)
     }
 }
 
-static inline void PushBackString(const string &input, vector<char> &ret)
-{
+static inline void PushBackString(const string &input, vector<char> &ret) {
     PushBackUInt(input.length(), ret);
     PushBackChars(" ", ret);
     PushBackChars(input.c_str(), ret);
 }
 
-void SaveGame::WriteMissionStringData(std::vector<char> &ret)
-{
+void SaveGame::WriteMissionStringData(std::vector<char> &ret) {
     RemoveEmpty<MissionStringDat::MSD>(missionstringdata->m);
     PushBackUInt(missionstringdata->m.size(), ret);
     for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(); i != missionstringdata->m.end(); i++) {
@@ -837,19 +797,17 @@ void SaveGame::WriteMissionStringData(std::vector<char> &ret)
     }
 }
 
-void SaveGame::ReadStardate(char *&buf)
-{
+void SaveGame::ReadStardate(char *&buf) {
     string stardate(AnyStringScanInString(buf));
     VS_LOG(info, (boost::format("Read stardate: %1%") % stardate));
     _Universe->current_stardate.InitTrek(stardate);
 }
 
 void SaveGame::ReadSavedPackets(char *&buf,
-                                bool commitfactions,
-                                bool skip_news,
-                                bool select_data,
-                                const std::set<std::string> &select_data_filter)
-{
+        bool commitfactions,
+        bool skip_news,
+        bool select_data,
+        const std::set<std::string> &select_data_filter) {
     int a = 0;
     char unitname[1024];
     char factname[1024];
@@ -891,8 +849,7 @@ void SaveGame::ReadSavedPackets(char *&buf,
     }
 }
 
-void SaveGame::LoadSavedMissions()
-{
+void SaveGame::LoadSavedMissions() {
     unsigned int i;
     vector<string> scripts = getMissionStringData("active_scripts");
     vector<string> missions = getMissionStringData("active_missions");
@@ -928,15 +885,13 @@ void SaveGame::LoadSavedMissions()
     getMissionStringData("active_missions") = missions;
 }
 
-string SaveGame::WriteSavedUnit(SavedUnits *su)
-{
+string SaveGame::WriteSavedUnit(SavedUnits *su) {
     return string("\n") + XMLSupport::tostring(su->type) + string(" ") + su->filename + " " + su->faction;
 }
 
 extern bool STATIC_VARS_DESTROYED;
 
-static char *tmprealloc(char *var, int &oldlength, int newlength)
-{
+static char *tmprealloc(char *var, int &oldlength, int newlength) {
     if (oldlength < newlength) {
         oldlength = newlength;
         var = (char *) realloc(var, newlength);
@@ -949,11 +904,10 @@ static char *tmprealloc(char *var, int &oldlength, int newlength)
 #define MAXBUFFER 16384
 
 string SaveGame::WritePlayerData(const QVector &FP,
-                                 std::vector<std::string> unitname,
-                                 const char *systemname,
-                                 float credits,
-                                 std::string fact)
-{
+        std::vector<std::string> unitname,
+        const char *systemname,
+        float credits,
+        std::string fact) {
     string playerdata("");
     int MB = MAXBUFFER;
     char *tmp = (char *) malloc(MB);
@@ -986,8 +940,7 @@ string SaveGame::WritePlayerData(const QVector &FP,
     return playerdata;
 }
 
-string SaveGame::WriteDynamicUniverse()
-{
+string SaveGame::WriteDynamicUniverse() {
     string dyn_univ("");
     int MB = MAXBUFFER;
     char *tmp = (char *) malloc(MB);
@@ -1035,13 +988,12 @@ string SaveGame::WriteDynamicUniverse()
 using namespace VSFileSystem;
 
 string SaveGame::WriteSaveGame(const char *systemname,
-                               const QVector &FP,
-                               float credits,
-                               std::vector<std::string> unitname,
-                               int player_num,
-                               std::string fact,
-                               bool write)
-{
+        const QVector &FP,
+        float credits,
+        std::vector<std::string> unitname,
+        int player_num,
+        std::string fact,
+        bool write) {
     savestring = string("");
     VS_LOG(info, (boost::format("Writing Save Game %1%") % outputsavegame));
     savestring += WritePlayerData(FP, unitname, systemname, credits, fact);
@@ -1072,18 +1024,15 @@ string SaveGame::WriteSaveGame(const char *systemname,
 
 static float savedcredits = 0;
 
-float SaveGame::GetSavedCredits()
-{
+float SaveGame::GetSavedCredits() {
     return savedcredits;
 }
 
-void SaveGame::SetSavedCredits(float c)
-{
+void SaveGame::SetSavedCredits(float c) {
     savedcredits = c;
 }
 
-void SaveGame::SetOutputFileName(const string &filename)
-{
+void SaveGame::SetOutputFileName(const string &filename) {
     if (!filename.empty()) {
         outputsavegame = string("Autosave-") + filename;
     } else {
@@ -1092,21 +1041,20 @@ void SaveGame::SetOutputFileName(const string &filename)
 }
 
 void SaveGame::ParseSaveGame(const string &filename_p,
-                             string &FSS,
-                             const string &originalstarsystem,
-                             QVector &PP,
-                             bool &shouldupdatepos,
-                             float &credits,
-                             vector<string> &savedstarship,
-                             int player_num,
-                             const string &save_contents,
-                             bool read,
-                             bool commitfaction,
-                             bool quick_read,
-                             bool skip_news,
-                             bool select_data,
-                             const std::set<std::string> &select_data_filter)
-{
+        string &FSS,
+        const string &originalstarsystem,
+        QVector &PP,
+        bool &shouldupdatepos,
+        float &credits,
+        vector<string> &savedstarship,
+        int player_num,
+        const string &save_contents,
+        bool read,
+        bool commitfaction,
+        bool quick_read,
+        bool skip_news,
+        bool select_data,
+        const std::set<std::string> &select_data_filter) {
     const string &str = save_contents;     //alias
     string filename;
     //Now leave filename empty, use the default name regardless...
@@ -1222,20 +1170,17 @@ void SaveGame::ParseSaveGame(const string &filename_p,
     SetSavedCredits(credits);
 }
 
-const string &GetCurrentSaveGame()
-{
+const string &GetCurrentSaveGame() {
     return CurrentSaveGameName;
 }
 
-string SetCurrentSaveGame(string newname)
-{
+string SetCurrentSaveGame(string newname) {
     string oldname = CurrentSaveGameName;
     CurrentSaveGameName = newname;
     return oldname;
 }
 
-const string &GetSaveDir()
-{
+const string &GetSaveDir() {
     static string ret_val{VSFileSystem::GetSavePath().string()};
     if (ret_val.back() != '/') {
         ret_val += '/';

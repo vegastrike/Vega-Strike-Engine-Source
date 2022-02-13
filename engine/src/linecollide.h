@@ -65,25 +65,21 @@ public:
     bool hhuge;
 
     LineCollide() :
-            Mini(0, 0, 0), Maxi(0, 0, 0), lastchecked(NULL), type(UNIT), hhuge(false)
-    {
+            Mini(0, 0, 0), Maxi(0, 0, 0), lastchecked(NULL), type(UNIT), hhuge(false) {
         object.u = NULL;
     }
 
     LineCollide(void *objec, collidables typ, const QVector &st, const QVector &en) :
-            Mini(st), Maxi(en), lastchecked(NULL), type(typ), hhuge(false)
-    {
+            Mini(st), Maxi(en), lastchecked(NULL), type(typ), hhuge(false) {
         this->object.u = (Unit *) objec;
     }
 
     LineCollide(const LineCollide &l) :
-            Mini(l.Mini), Maxi(l.Maxi), lastchecked(NULL), type(l.type), hhuge(l.hhuge)
-    {
+            Mini(l.Mini), Maxi(l.Maxi), lastchecked(NULL), type(l.type), hhuge(l.hhuge) {
         object = l.object;
     }
 
-    LineCollide &operator=(const LineCollide &l)
-    {
+    LineCollide &operator=(const LineCollide &l) {
         object = l.object;
         type = l.type;
         Mini = l.Mini;

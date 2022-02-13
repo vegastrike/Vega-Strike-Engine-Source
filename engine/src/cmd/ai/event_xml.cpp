@@ -48,13 +48,12 @@ using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace AIEvents {
 AIEvresult::AIEvresult(int type,
-                       float const min,
-                       const float max,
-                       float timetofinish,
-                       float timeuntilinterrupts,
-                       float priority,
-                       const std::string &aiscript)
-{
+        float const min,
+        const float max,
+        float timetofinish,
+        float timeuntilinterrupts,
+        float priority,
+        const std::string &aiscript) {
     this->timetointerrupt = timeuntilinterrupts;
     this->timetofinish = timetofinish;
     this->type = type;
@@ -104,8 +103,7 @@ const XMLSupport::EnumMap::Pair AIattribute_names[] = {
 };
 const XMLSupport::EnumMap attr_map(AIattribute_names, 9);
 
-void GeneralAIEventBegin(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void GeneralAIEventBegin(void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes(atts);
     string aiscriptname("");
     float min = -FLT_MAX;
@@ -167,8 +165,7 @@ void GeneralAIEventBegin(void *userData, const XML_Char *name, const XML_Char **
     }
 }
 
-void GeneralAIEventEnd(void *userData, const XML_Char *name)
-{
+void GeneralAIEventEnd(void *userData, const XML_Char *name) {
     ElemAttrMap *eam = ((ElemAttrMap *) userData);
     eam->level--;
     if (eam->result.back().size() == 0) {
@@ -179,14 +176,13 @@ void GeneralAIEventEnd(void *userData, const XML_Char *name)
     }
 }
 
-void LoadAI(const char *filename, ElemAttrMap &result, const string &faction)
-{
+void LoadAI(const char *filename, ElemAttrMap &result, const string &faction) {
     //returns obedience
     using namespace VSFileSystem;
     static float cfg_obedience = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                                "Targetting",
-                                                                                "obedience",
-                                                                                ".99"));
+            "Targetting",
+            "obedience",
+            ".99"));
     result.obedience = cfg_obedience;
     result.maxtime = 10;
     VSFile f;
@@ -226,8 +222,8 @@ void LoadAI(const char *filename, ElemAttrMap &result, const string &faction)
     XML_ParserFree(parser);
     if (result.level != 0) {
         VS_LOG(error,
-               (boost::format("Error loading AI script %1% for faction %2%. Final count not zero.") % filename
-                       % faction.c_str()));
+                (boost::format("Error loading AI script %1% for faction %2%. Final count not zero.") % filename
+                        % faction.c_str()));
     }
     result.level = 0;
 }

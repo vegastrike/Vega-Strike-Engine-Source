@@ -49,7 +49,7 @@ const std::string &getRole(unsigned char role);
 unsigned int readBitmask(const std::string &s);
 unsigned int getCapitalRoles();
 const std::string &getRoleEvents(unsigned char ourrole,
-                                 unsigned char theirs);        //get AI ervent associated with this
+        unsigned char theirs);        //get AI ervent associated with this
 }
 #endif
 

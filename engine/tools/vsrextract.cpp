@@ -72,8 +72,7 @@ static char usage[] =
         "Syntax:\tpkgopen <pkgfile>\n"
         "\t<pkgfile> The package file to open.\n";
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     if (argc != 2) {
         fprintf(stderr, "%s", usage);
         exit(0);
@@ -92,8 +91,7 @@ int main(int argc, char *argv[])
 }
 
 PackageFileExtractor::PackageFileExtractor(const string &fname)
-        : pkg(fname, "rb")
-{
+        : pkg(fname, "rb") {
     VSRHeader hdr;
 
     if ((fread(&hdr, sizeof(VSRHeader), 1, pkg) != 1)
@@ -126,8 +124,7 @@ PackageFileExtractor::PackageFileExtractor(const string &fname)
 }
 
 void
-PackageFileExtractor::extractFile(const VSRMember &file) const
-{
+PackageFileExtractor::extractFile(const VSRMember &file) const {
     if (fseek(pkg, file.offset, SEEK_SET)) {
         throw errno;
     }
@@ -158,19 +155,17 @@ PackageFileExtractor::extractFile(const VSRMember &file) const
 }
 
 void
-PackageFileExtractor::extract(const VSRMember &member) const
-{
+PackageFileExtractor::extract(const VSRMember &member) const {
     size_t last_sep = member.filename.rfind('/');
     if (last_sep != string::npos) {
         makePathExist(string(member.filename.begin(),
-                             member.filename.begin() + last_sep));
+                member.filename.begin() + last_sep));
     }
     extractFile(member);
 }
 
 void
-PackageFileExtractor::extract(const string &targetpath) const
-{
+PackageFileExtractor::extract(const string &targetpath) const {
     if (chdir(targetpath.c_str())) {
         int tmp = errno;
         fprintf(stdout, "%s:%d Unable to change directory to '%s'.\n",
@@ -178,19 +173,18 @@ PackageFileExtractor::extract(const string &targetpath) const
         throw tmp;
     }
     for (vector<VSRMember>::const_iterator ii = pkg_index.begin();
-         ii != pkg_index.end(); ++ii) {
+            ii != pkg_index.end(); ++ii) {
         extract(*ii);
     }
 }
 
 void
-PackageFileExtractor::makePathExist(const string &path) const
-{
+PackageFileExtractor::makePathExist(const string &path) const {
     fprintf(stdout, "Trying to make '%s'\n", path.c_str());
     size_t last_sep = path.rfind('/');
     if (last_sep != string::npos) {
         makePathExist(string(path.begin(),
-                             path.begin() + last_sep));
+                path.begin() + last_sep));
     }
     mkdir(path.c_str()
 #ifndef WIN32

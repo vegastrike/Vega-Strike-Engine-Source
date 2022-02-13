@@ -50,8 +50,7 @@ map<string, map<string, int> > numsecfactions;
 
 set<string> allnames;
 
-std::string readfiledata(const char *name)
-{
+std::string readfiledata(const char *name) {
     FILE *fp = fopen(name, "r");
     if (!fp) {
         printf("unable to open %s\n", name);
@@ -73,20 +72,17 @@ std::string readfiledata(const char *name)
     return std::string(line, line + len);
 }
 
-double sqr(double x)
-{
+double sqr(double x) {
     return x * x;
 }
 
-std::string itostr(int i)
-{
+std::string itostr(int i) {
     char test[256];
     sprintf(test, "%d", i);
     return test;
 }
 
-std::string ftostr(double i)
-{
+std::string ftostr(double i) {
     char test[256];
     sprintf(test, "%lf", i);
     return test;
@@ -98,89 +94,74 @@ class vec3 {
 public:
     double x, y, z;
 
-    vec3()
-    {
+    vec3() {
     }
 
-    vec3(double x, double y, double z) : x(x), y(y), z(z)
-    {
+    vec3(double x, double y, double z) : x(x), y(y), z(z) {
     }
 
-    vec3 max(const vec3 &in) const
-    {
+    vec3 max(const vec3 &in) const {
         return vec3(in.x > x ? in.x : x,
-                    in.y > y ? in.y : y,
-                    in.z > z ? in.z : z);
+                in.y > y ? in.y : y,
+                in.z > z ? in.z : z);
     }
 
-    vec3 min(const vec3 &in) const
-    {
+    vec3 min(const vec3 &in) const {
         return vec3(in.x < x ? in.x : x,
-                    in.y < y ? in.y : y,
-                    in.z < z ? in.z : z);
+                in.y < y ? in.y : y,
+                in.z < z ? in.z : z);
     }
 
-    vec3 operator+(const vec3 &oth) const
-    {
+    vec3 operator+(const vec3 &oth) const {
         return vec3(x + oth.x, y + oth.y, z + oth.z);
     }
 
-    vec3 operator-(const vec3 &oth) const
-    {
+    vec3 operator-(const vec3 &oth) const {
         return vec3(x - oth.x, y - oth.y, z - oth.z);
     }
 
-    vec3 &operator+=(const vec3 &oth)
-    {
+    vec3 &operator+=(const vec3 &oth) {
         x += oth.x;
         y += oth.y;
         z += oth.z;
         return *this;
     }
 
-    vec3 &operator-=(const vec3 &oth)
-    {
+    vec3 &operator-=(const vec3 &oth) {
         x -= oth.x;
         y -= oth.y;
         z -= oth.z;
         return *this;
     }
 
-    bool operator<(const vec3 &oth) const
-    {
+    bool operator<(const vec3 &oth) const {
         return x < oth.x && y < oth.y && z < oth.z;
     }
 
-    bool operator>(const vec3 &oth) const
-    {
+    bool operator>(const vec3 &oth) const {
         return x > oth.x && y > oth.y && z > oth.z;
     }
 
-    bool operator<=(const vec3 &oth) const
-    {
+    bool operator<=(const vec3 &oth) const {
         return x <= oth.x && y <= oth.y && z <= oth.z;
     }
 
-    bool operator>=(const vec3 &oth) const
-    {
+    bool operator>=(const vec3 &oth) const {
         return x >= oth.x && y >= oth.y && z >= oth.z;
     }
 
-    bool operator==(const vec3 &oth) const
-    {
+    bool operator==(const vec3 &oth) const {
         return x == oth.x && y == oth.y && z == oth.z;
     }
 
-    bool operator!=(const vec3 &oth) const
-    {
+    bool operator!=(const vec3 &oth) const {
         return x != oth.x || y != oth.y || z != oth.z;
     }
 };
 
 class System : public map<string, string> {
 public:
-    static System *findSystem(vector<System> &s, string outgoing)
-    {
+    static System *findSystem(vector<System> &s, string outgoing) {
         int slash = outgoing.find("/");
         if (slash == std::string::npos) {
             std::vector<System *> habitableSystems;
@@ -227,8 +208,7 @@ public:
         }
     }
 
-    System()
-    {
+    System() {
     }
 
     bool habitable;
@@ -246,21 +226,18 @@ public:
     int
             type;  //0 = 1O blue (-2000)  B = 20 blue(2000-4000) // A = 30 Bluish-white (4000-8000) F = 40 White G = 50 (13500-15000) yellow  (15000-43000) K = 60 Orange (36500-80000) M = Red 70 (giant 80,000 dwarf 8,000-13500 )
     int size;  //0 dwwarf 1 normal 2 giant
-    bool operator<(const System &a) const
-    {
+    bool operator<(const System &a) const {
         if (sector == a.sector) {
             return name < a.name;
         }
         return sector < a.sector;
     }
 
-    string fullName()
-    {
+    string fullName() {
         return sector + "/" + name;
     }
 
-    void computeProperties(bool interestingname, const vector<string> homeworlds)
-    {
+    void computeProperties(bool interestingname, const vector<string> homeworlds) {
         //make sure to propogate changes to wcSystemReader.py
         this->interesting = interestingname;
         double rad = 16000;
@@ -389,8 +366,7 @@ public:
         }
     }
 
-    void computeXYZ()
-    {
+    void computeXYZ() {
         xyz.z = distance * sin(declination);
         float xy = distance * cos(declination);
         xyz.y = xy * cos(ascension);
@@ -401,8 +377,7 @@ public:
     }
 };
 
-vector<std::string> readCSV(std::string s)
-{
+vector<std::string> readCSV(std::string s) {
     vector<std::string> v;
     int loc;
     int sub1 = s.find("\r");
@@ -420,8 +395,7 @@ vector<std::string> readCSV(std::string s)
     return v;
 }
 
-void computeminmax(vector<System> sys, vec3 &min, vec3 &max)
-{
+void computeminmax(vector<System> sys, vec3 &min, vec3 &max) {
     min = vec3(DBL_MAX, DBL_MAX, DBL_MAX);
     max = vec3(-DBL_MAX, -DBL_MAX, -DBL_MAX);
     const vec3 fudgeFactor(0.001, 0.001, 0.001);
@@ -431,16 +405,14 @@ void computeminmax(vector<System> sys, vec3 &min, vec3 &max)
     }
 }
 
-std::string strtoupper(std::string s)
-{
+std::string strtoupper(std::string s) {
     for (string::iterator i = s.begin(); i != s.end(); ++i) {
         *i = toupper(*i);
     }
     return s;
 }
 
-std::string unpretty(std::string s)
-{
+std::string unpretty(std::string s) {
     for (string::iterator i = s.begin(); i != s.end(); ++i) {
         if (isspace(*i)) {
             *i = '_';
@@ -452,8 +424,7 @@ std::string unpretty(std::string s)
     return s;
 }
 
-std::string alphaOnly(std::string s)
-{
+std::string alphaOnly(std::string s) {
     std::string out = s;
     int count = 0;
     for (string::iterator i = s.begin(); i != s.end(); ++i) {
@@ -467,14 +438,12 @@ std::string alphaOnly(std::string s)
 
 class AlphaOnlySort {
 public:
-    bool operator()(const System &a, const System &b)
-    {
+    bool operator()(const System &a, const System &b) {
         return a.alphaonlyname < b.alphaonlyname;
     }
 };
 
-std::vector<string> readMilkyWayNames()
-{
+std::vector<string> readMilkyWayNames() {
     string s = readfiledata(milky_way);
     vector<string> retval;
     unsigned int where = string::npos;
@@ -516,18 +485,15 @@ class FactionInfo {
     std::set<System *> systems; //for quick access.
 
 public:
-    System *getHomeworld()
-    {
+    System *getHomeworld() {
         return homeworld;
     }
 
-    const System *getHomeworld() const
-    {
+    const System *getHomeworld() const {
         return homeworld;
     }
 
-    void developBorderSystems()
-    {
+    void developBorderSystems() {
         //reserve memory to increse speed.
         for (int i = borderSystems.size() - 1; i >= 0; i--) {
             developingSystems.insert(borderSystems[i]);
@@ -536,8 +502,7 @@ public:
         //DANNY RUINEDborderSystems.clear();
     }
 
-    void addNewSystems(const vector<System *> &newSystems)
-    {
+    void addNewSystems(const vector<System *> &newSystems) {
         developBorderSystems();
 //DANNY RUINED		borderSystems=newSystems;
         for (int i = 0; i < newSystems.size(); i++) {
@@ -563,8 +528,7 @@ public:
             takeneutralprob(1 - takeoverprob),
             maxsystems(atoi(stuff[2].c_str())),
             startingyear(atoi(stuff[3].c_str())),
-            homeworld(System::findSystem(s, stuff[4]))
-    {
+            homeworld(System::findSystem(s, stuff[4])) {
         if (!homeworld) {
             fprintf(stderr, "Fatal error: homeworld \"%s\" not found!!!\n", stuff[4].c_str());
         } else if (homeworld->jumps.empty()) {
@@ -588,8 +552,7 @@ public:
             takeoverprob(prob),
             takeneutralprob(1 - takeoverprob),
             maxsystems(max),
-            homeworld(homeworld)
-    {
+            homeworld(homeworld) {
     }
 
 /*
@@ -607,8 +570,7 @@ public:
  *       return *this;
  *  }
  */
-    void simulateTurn(unsigned int totalturn, bool allowTakeover, vector<System> &s)
-    {
+    void simulateTurn(unsigned int totalturn, bool allowTakeover, vector<System> &s) {
         allowTakeover = false;
         ++turn;
         if (turn < startingyear) {
@@ -646,14 +608,12 @@ public:
         addNewSystems(systemsToAdd);
     }
 
-    bool active()
-    {
+    bool active() {
         return numsystems < maxsystems;
     }
 };
 
-std::vector<FactionInfo> readFactions(vector<System> &s)
-{
+std::vector<FactionInfo> readFactions(vector<System> &s) {
     std::vector<FactionInfo> ret;
     std::string file = readfiledata("factions.csv");
     while (true) {
@@ -680,8 +640,7 @@ std::vector<FactionInfo> readFactions(vector<System> &s)
     return ret;
 }
 
-void simulateFactionTurns(vector<System> &s)
-{
+void simulateFactionTurns(vector<System> &s) {
     std::vector<FactionInfo> factions = readFactions(s);
     unsigned turn;
     for (turn = 0;; turn++) {
@@ -709,28 +668,23 @@ private:
     vec3 max;
 public:
     SectorInfo(std::string nam, vec3 min, vec3 max) :
-            nam(nam), min(min), max(max)
-    {
+            nam(nam), min(min), max(max) {
     }
 
-    vec3 &minimum()
-    {
+    vec3 &minimum() {
         return min;
     }
 
-    vec3 &maximum()
-    {
+    vec3 &maximum() {
         return max;
     }
 
-    std::string &name()
-    {
+    std::string &name() {
         return nam;
     }
 };
 
-void stripwhitespace(std::string &str)
-{
+void stripwhitespace(std::string &str) {
     unsigned int i;
     //Strip whitespace from a string.
     for (i = str.size() - 1; i >= 0; i--) {
@@ -749,8 +703,7 @@ void stripwhitespace(std::string &str)
     }
 }
 
-void computeCoord(vec3 &lo, vec3 &hi, int wid, int hei, int x, int y)
-{
+void computeCoord(vec3 &lo, vec3 &hi, int wid, int hei, int x, int y) {
     vec3 min(lo);
     vec3 max(hi);
 //lo.z=min.z; // Already equal!
@@ -761,8 +714,7 @@ void computeCoord(vec3 &lo, vec3 &hi, int wid, int hei, int x, int y)
     hi.y = (((max.y - min.y) / hei) * (y + 1)) + min.y;
 }
 
-std::vector<SectorInfo> readSectors(vec3 min, vec3 max)
-{
+std::vector<SectorInfo> readSectors(vec3 min, vec3 max) {
     //Uncomment if you have problems.
 //printf("\n\n--MINIMUM-- <%f,%f,%f>\n--MAXIMUM-- <%f,%f,%f>\n\n",min.x,min.y,min.z,max.x,max.y,max.z);
     std::vector<SectorInfo> ret;
@@ -791,8 +743,7 @@ std::vector<SectorInfo> readSectors(vec3 min, vec3 max)
     return ret;
 }
 
-std::string getSector(const System &s, vec3 min, vec3 max)
-{
+std::string getSector(const System &s, vec3 min, vec3 max) {
     static std::vector<SectorInfo> sectors(readSectors(min, max));
     for (int i = 0; i < sectors.size(); i++) {
         if (s.xyz >= sectors[i].minimum() && s.xyz <= sectors[i].maximum()) {
@@ -808,16 +759,14 @@ std::string getSector(const System &s, vec3 min, vec3 max)
     }
 }
 
-string dodad(int which)
-{
+string dodad(int which) {
     if (which == 0) {
         return "";
     }
     return "_" + itostr(which);
 }
 
-vector<string> shuffle(const vector<string> &inp)
-{
+vector<string> shuffle(const vector<string> &inp) {
     vector<string> retval;
     for (unsigned int i = 0; i < inp.size(); ++i) {
         int index = rand() % (retval.size() + 1);
@@ -828,8 +777,7 @@ vector<string> shuffle(const vector<string> &inp)
     return retval;
 }
 
-string recomputeName()
-{
+string recomputeName() {
     static int which = -1;
     static std::vector<string> genericnames = shuffle(readMilkyWayNames());
     string newname;
@@ -841,8 +789,7 @@ string recomputeName()
     return newname;
 }
 
-vector<System> readfile(const char *name)
-{
+vector<System> readfile(const char *name) {
     vector<System> systems;
     std::string line = readfiledata(name);
     if (line.empty()) {
@@ -978,8 +925,7 @@ vector<System> readfile(const char *name)
     return systems;
 }
 
-void writesystems(FILE *fp, std::vector<System> s)
-{
+void writesystems(FILE *fp, std::vector<System> s) {
     std::sort(s.begin(), s.end());     //sort into sector categories
     string cursector;
     fprintf(fp, "<galaxy><systems>\n");
@@ -1021,8 +967,7 @@ void writesystems(FILE *fp, std::vector<System> s)
     fprintf(fp, "\t</sector>\n</systems></galaxy>\n");
 }
 
-string getNameForFaction(std::string faction)
-{
+string getNameForFaction(std::string faction) {
     if (faction.empty()) {
         return "";
     }
@@ -1060,8 +1005,7 @@ string getNameForFaction(std::string faction)
     return "";
 }
 
-void planetsIn(System &which, std::string faction)
-{
+void planetsIn(System &which, std::string faction) {
     if (which["planetlist"].empty()) {
         string filename = string(path_to_universe) + "/planets." + faction + ".txt";
         FILE *fp = fopen(filename.c_str(), "r");
@@ -1075,8 +1019,7 @@ void planetsIn(System &which, std::string faction)
     }
 }
 
-void reName(std::vector<System> &s, System &which, std::string newname)
-{
+void reName(std::vector<System> &s, System &which, std::string newname) {
     if (newname.empty()) {
         if (which.interesting == false && which.habitable && which["faction"] != "unknown") {
             string rec = recomputeName();
@@ -1104,8 +1047,7 @@ void reName(std::vector<System> &s, System &which, std::string newname)
     }
 }
 
-void processsystems(std::vector<System> &s)
-{
+void processsystems(std::vector<System> &s) {
     vec3 min, max;
     computeminmax(s, min, max);
     unsigned int i;
@@ -1225,8 +1167,8 @@ void processsystems(std::vector<System> &s)
         fprintf(stderr, "\nOwnership\n");
         if (1) {
             for (std::map<string, std::map<string, int> >::iterator i = numsecfactions.begin();
-                 i != numsecfactions.end();
-                 ++i) {
+                    i != numsecfactions.end();
+                    ++i) {
                 fprintf(stdout, "Sector %s\n", (*i).first.c_str());
                 for (std::map<string, int>::iterator j = (*i).second.begin(); j != (*i).second.end(); ++j) {
                     fprintf(stdout, "\t%s owns %d systems\n", (*j).first.c_str(), (*j).second);
@@ -1239,8 +1181,7 @@ void processsystems(std::vector<System> &s)
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc < 3) {
         printf("not enough args. Usage %s <input> <output>\n", argv[0]);
         return 1;
@@ -1310,8 +1251,7 @@ int main(int argc, char **argv)
 static unsigned long mt[N]; /* the array for the state vector  */
 static int mti = N + 1; /* mti==N+1 means mt[N] is not initialized */
 /* initializes mt[N] with a seed */
-void init_genrand(unsigned long s)
-{
+void init_genrand(unsigned long s) {
     mt[0] = s & 0xffffffffUL;
     for (mti = 1; mti < N; mti++) {
         mt[mti] =
@@ -1332,8 +1272,7 @@ void init_genrand(unsigned long s)
  * init_key is the array for initializing keys
  * key_length is its length
  */
-void init_by_array(unsigned long init_key[], unsigned int key_length)
-{
+void init_by_array(unsigned long init_key[], unsigned int key_length) {
     int i, j, k;
     init_genrand(19650218UL);
     i = 1;
@@ -1367,8 +1306,7 @@ void init_by_array(unsigned long init_key[], unsigned int key_length)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-unsigned long genrand_int32(void)
-{
+unsigned long genrand_int32(void) {
     unsigned long y;
     static unsigned long mag01[2] = {0x0UL, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
@@ -1400,35 +1338,30 @@ unsigned long genrand_int32(void)
 }
 
 /* generates a random number on [0,0x7fffffff]-interval */
-long genrand_int31(void)
-{
+long genrand_int31(void) {
     return (long) (genrand_int32() >> 1);
 }
 
 /* generates a random number on [0,1]-real-interval */
-double genrand_real1(void)
-{
+double genrand_real1(void) {
     return genrand_int32() * (1.0 / 4294967295.0);
     /* divided by 2^32-1 */
 }
 
 /* generates a random number on [0,1)-real-interval */
-double genrand_real2(void)
-{
+double genrand_real2(void) {
     return genrand_int32() * (1.0 / 4294967296.0);
     /* divided by 2^32 */
 }
 
 /* generates a random number on (0,1)-real-interval */
-double genrand_real3(void)
-{
+double genrand_real3(void) {
     return (((double) genrand_int32()) + 0.5) * (1.0 / 4294967296.0);
     /* divided by 2^32 */
 }
 
 /* generates a random number on [0,1) with 53-bit resolution*/
-double genrand_res53(void)
-{
+double genrand_res53(void) {
     unsigned long a = genrand_int32() >> 5, b = genrand_int32() >> 6;
     return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
 }

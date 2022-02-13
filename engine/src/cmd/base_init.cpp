@@ -48,13 +48,11 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "base_util.h"
 #include "vsfilesystem.h"
 
-static BoostPythonDictionary GetEventDataPython()
-{
+static BoostPythonDictionary GetEventDataPython() {
     return BaseUtil::GetEventData();
 }
 
-static boost::python::tuple GetRandomBarMessage()
-{
+static boost::python::tuple GetRandomBarMessage() {
     gameMessage last;
     int i = 0;
     vector<std::string> who;
@@ -140,13 +138,11 @@ PYTHON_BEGIN_MODULE(Base)
 
 PYTHON_END_MODULE(Base)
 
-void InitBase()
-{
+void InitBase() {
     PyImport_AppendInittab("Base", PYTHON_MODULE_INIT_FUNCTION(Base));
 }
 
-void InitBase2()
-{
+void InitBase2() {
     Python::reseterrors();
     PYTHON_INIT_MODULE(Base);
     Python::reseterrors();

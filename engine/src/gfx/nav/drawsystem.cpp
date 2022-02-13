@@ -70,8 +70,7 @@
 //draws the draw lists, with the mouse lists cycled 'n' times (according to kliks)
 //**********************************
 
-void NavigationSystem::DrawSystem()
-{
+void NavigationSystem::DrawSystem() {
     UniverseUtil::PythonUnitIter bleh = UniverseUtil::getUnitList();
     if (!(*bleh)) {
         return;
@@ -259,18 +258,18 @@ void NavigationSystem::DrawSystem()
 
         float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
         TranslateCoordinates(pos,
-                             pos_flat,
-                             center_nav_x,
-                             center_nav_y,
-                             themaxvalue,
-                             zscale,
-                             zdistance,
-                             the_x,
-                             the_y,
-                             the_x_flat,
-                             the_y_flat,
-                             system_item_scale_temp,
-                             1);
+                pos_flat,
+                center_nav_x,
+                center_nav_y,
+                themaxvalue,
+                zscale,
+                zdistance,
+                the_x,
+                the_y,
+                the_x_flat,
+                the_y_flat,
+                system_item_scale_temp,
+                1);
         //IGNORE OFF SCREEN
         //**********************************
         if (!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)) {
@@ -399,15 +398,15 @@ void NavigationSystem::DrawSystem()
             mouselist.insert(insert_type, insert_size, the_x, the_y, myunit);
         } else {
             drawlistitem(insert_type,
-                         insert_size,
-                         the_x,
-                         the_y,
-                         myunit,
-                         screenoccupation,
-                         false,
-                         (*blah) ? true : false,
-                         unselectedalpha,
-                         factioncolours);
+                    insert_size,
+                    the_x,
+                    the_y,
+                    myunit,
+                    screenoccupation,
+                    false,
+                    (*blah) ? true : false,
+                    unselectedalpha,
+                    factioncolours);
         }
     }
     //**********************************	//	done enlisting items and attributes

@@ -28,8 +28,7 @@
 #define __OPC_PLANESCOLLIDER_H__
 
 struct OPCODE_API PlanesCache : VolumeCache {
-    PlanesCache()
-    {
+    PlanesCache() {
     }
 };
 
@@ -56,18 +55,17 @@ public:
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     bool Collide(PlanesCache &cache,
-                 const Plane *planes,
-                 uint32_t nb_planes,
-                 const Model &model,
-                 const Matrix4x4 *worldm = nullptr);
+            const Plane *planes,
+            uint32_t nb_planes,
+            const Model &model,
+            const Matrix4x4 *worldm = nullptr);
 
     // Mutant box-with-planes collision queries
     inline_                bool Collide(PlanesCache &cache,
-                                        const OBB &box,
-                                        const Model &model,
-                                        const Matrix4x4 *worldb = nullptr,
-                                        const Matrix4x4 *worldm = nullptr)
-    {
+            const OBB &box,
+            const Model &model,
+            const Matrix4x4 *worldb = nullptr,
+            const Matrix4x4 *worldm = nullptr) {
         Plane PL[6];
 
         if (worldb) {
@@ -111,9 +109,9 @@ protected:
     void _CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node, uint32_t clip_mask);
     // Overlap tests
     inline_                bool PlanesAABBOverlap(const Point &center,
-                                                  const Point &extents,
-                                                  uint32_t &out_clip_mask,
-                                                  uint32_t in_clip_mask);
+            const Point &extents,
+            uint32_t &out_clip_mask,
+            uint32_t in_clip_mask);
     inline_                bool PlanesTriOverlap(uint32_t in_clip_mask);
     // Init methods
     bool InitQuery(PlanesCache &cache, const Plane *planes, uint32_t nb_planes, const Matrix4x4 *worldm = nullptr);
@@ -126,10 +124,10 @@ public:
     virtual                                ~HybridPlanesCollider();
 
     bool Collide(PlanesCache &cache,
-                 const Plane *planes,
-                 uint32_t nb_planes,
-                 const HybridModel &model,
-                 const Matrix4x4 *worldm = nullptr);
+            const Plane *planes,
+            uint32_t nb_planes,
+            const HybridModel &model,
+            const Matrix4x4 *worldm = nullptr);
 protected:
     Container mTouchedBoxes;
 };

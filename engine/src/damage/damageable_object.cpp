@@ -28,8 +28,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <iostream>
 
-DamageableObject::DamageableObject()
-{
+DamageableObject::DamageableObject() {
     Health hull_health = Health(1, 1, 0);
     Health armor_health = Health(0, 0, 0);
     Health shield_health = Health(0, 0, 5);
@@ -43,8 +42,7 @@ DamageableObject::DamageableObject()
 }
 
 DamageableObject::DamageableObject(std::vector<DamageableLayer> layers,
-                                   std::vector<DamageableObject> components)
-{
+        std::vector<DamageableObject> components) {
     number_of_layers = layers.size();
     this->layers = layers;
     this->components = components;
@@ -56,8 +54,7 @@ DamageableObject::DamageableObject(std::vector<DamageableLayer> layers,
 }*/
 
 
-InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Damage &damage)
-{
+InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Damage &damage) {
     InflictedDamage inflicted_damage(3); // Currently hard-coded default is 3!
 
     // Higher index layers are outer layers. We therefore need to reverse the order.
@@ -79,8 +76,7 @@ InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Da
     return inflicted_damage;
 }
 
-void DamageableObject::Destroy()
-{
+void DamageableObject::Destroy() {
     for (DamageableLayer layer : layers) {
         layer.Destroy();
     }
@@ -90,8 +86,7 @@ void DamageableObject::Destroy()
 // 1. The last layer is THE layer
 // 2. There's only one facet in the last layer
 // 3. Destroying it destroys the unit
-bool DamageableObject::Destroyed()
-{
+bool DamageableObject::Destroyed() {
     if (layers.empty()) {
         return true;
     }

@@ -52,8 +52,7 @@ using namespace std;
 namespace Audio {
 namespace Test {
 
-void initSceneManager()
-{
+void initSceneManager() {
     cerr << "Creating scene manager..." << flush;
     new SceneManager();
 
@@ -64,8 +63,7 @@ void initSceneManager()
     cerr << "OK" << endl;
 }
 
-void clearScene()
-{
+void clearScene() {
     cerr << "  Clearing Scene" << endl;
 
     SceneManager *sm = SceneManager::getSingleton();
@@ -84,21 +82,18 @@ void clearScene()
 
 }
 
-void smTick()
-{
+void smTick() {
     cerr << "t" << flush;
     SceneManager::getSingleton()->commit();
     sleep(100);
 }
 
-void smQuickTick()
-{
+void smQuickTick() {
     SceneManager::getSingleton()->commit();
     sleep(10);
 }
 
-void testRendererless()
-{
+void testRendererless() {
     // Test clearing and creating scenes repeatedly
     //   (tests management structures)
     clearScene();
@@ -119,8 +114,7 @@ void testRendererless()
     clearScene();
 }
 
-void testSimpleScene()
-{
+void testSimpleScene() {
     cerr << " Simple scene (low level services only)" << endl;
 
     clearScene();
@@ -193,8 +187,7 @@ void testSimpleScene()
     cerr << " ok" << endl;
 }
 
-void testSimpleSceneWDynTemplates()
-{
+void testSimpleSceneWDynTemplates() {
     cerr << " Simple scene (dynamic templates)" << endl;
 
     SharedPtr<SourceTemplate> abtpl(
@@ -204,8 +197,7 @@ void testSimpleSceneWDynTemplates()
     beamtpl->setGain(0.5f);
 }
 
-void testSimpleSceneWFileTemplates()
-{
+void testSimpleSceneWFileTemplates() {
     cerr << " Simple scene (persistent templates)" << endl;
 }
 
@@ -217,12 +209,10 @@ public:
 
 public:
     EngParticleListener(const vector<LVector3> &engpaths, double worldsize) :
-            engPaths(engpaths)
-    {
+            engPaths(engpaths) {
     }
 
-    LVector3 computePosition(long which, double phaseOffset = 0.0) const
-    {
+    LVector3 computePosition(long which, double phaseOffset = 0.0) const {
         assert(which >= 0 && which < (long) engPaths.size());
 
         double phase = engPaths[which].x + phaseOffset;
@@ -238,8 +228,7 @@ public:
         return vBase;
     }
 
-    LVector3 computeVelocity(long which, double phaseOffset = 0.0) const
-    {
+    LVector3 computeVelocity(long which, double phaseOffset = 0.0) const {
         assert(which >= 0 && which < (long) engPaths.size());
 
         double phase = engPaths[which].x + phaseOffset;
@@ -262,8 +251,7 @@ public:
     *      receive. See RenderableSource::UpdateFlags
     * @see SourceListener::onUpdate
     */
-    virtual void onUpdate(Source &source, int updateFlags)
-    {
+    virtual void onUpdate(Source &source, int updateFlags) {
         if (updateFlags & RenderableSource::UPDATE_LOCATION) {
             long which = source.getUserDataLong();
 
@@ -274,8 +262,7 @@ public:
     }
 };
 
-void testComplexScene(bool doppler)
-{
+void testComplexScene(bool doppler) {
     cerr << " Complex scene" << endl;
 
     clearScene();
@@ -395,8 +382,7 @@ void testComplexScene(bool doppler)
     cerr << " ok" << endl;
 }
 
-void testStreaming()
-{
+void testStreaming() {
     cerr << " Simple streaming (stream a music track)" << endl;
 
     clearScene();
@@ -472,8 +458,7 @@ void testStreaming()
     cerr << " ok" << endl;
 }
 
-void testMultiStreaming()
-{
+void testMultiStreaming() {
     cerr << " Multiple streaming (stream two music tracks)" << endl;
 
     clearScene();
@@ -568,8 +553,7 @@ void testMultiStreaming()
     cerr << " ok" << endl;
 }
 
-void testMultiStreaming2()
-{
+void testMultiStreaming2() {
     cerr << " Multiple streaming (stream one music track - twice - from different positions)" << endl;
 
     clearScene();
@@ -664,8 +648,7 @@ void testMultiStreaming2()
     cerr << " ok" << endl;
 }
 
-void initALRenderer()
-{
+void initALRenderer() {
     cerr << "  Initializing renderer..." << endl;
     SceneManager *sm = SceneManager::getSingleton();
 
@@ -675,14 +658,12 @@ void initALRenderer()
     sm->setRenderer(renderer);
 }
 
-void closeRenderer()
-{
+void closeRenderer() {
     cerr << "Shutting down renderer..." << endl;
     SceneManager::getSingleton()->setRenderer(SharedPtr<Renderer>());
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int rv = 0;
     try {
         initSceneManager();
@@ -715,8 +696,8 @@ int main(int argc, char **argv)
 
     } catch (const Exception &e) {
         cerr << "Uncaught exception: "
-             << e.what()
-             << endl;
+                << e.what()
+                << endl;
         rv = 1;
     };
     if (rv) {

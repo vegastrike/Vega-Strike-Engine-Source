@@ -41,8 +41,7 @@
 
 using namespace Opcode;
 
-inline_ void FindRunningIndex(uint32_t &index, float *array, uint32_t *sorted, int last, float max)
-{
+inline_ void FindRunningIndex(uint32_t &index, float *array, uint32_t *sorted, int last, float max) {
     int First = index;
     while (First <= last) {
         index = (First + last) >> 1;
@@ -66,32 +65,28 @@ static PRUNING_SORTER *gCompletePruningSorter = nullptr;
 static PRUNING_SORTER *gBipartitePruningSorter0 = nullptr;
 static PRUNING_SORTER *gBipartitePruningSorter1 = nullptr;
 
-inline_ PRUNING_SORTER *GetCompletePruningSorter()
-{
+inline_ PRUNING_SORTER *GetCompletePruningSorter() {
     if (!gCompletePruningSorter) {
         gCompletePruningSorter = new PRUNING_SORTER;
     }
     return gCompletePruningSorter;
 }
 
-inline_ PRUNING_SORTER *GetBipartitePruningSorter0()
-{
+inline_ PRUNING_SORTER *GetBipartitePruningSorter0() {
     if (!gBipartitePruningSorter0) {
         gBipartitePruningSorter0 = new PRUNING_SORTER;
     }
     return gBipartitePruningSorter0;
 }
 
-inline_ PRUNING_SORTER *GetBipartitePruningSorter1()
-{
+inline_ PRUNING_SORTER *GetBipartitePruningSorter1() {
     if (!gBipartitePruningSorter1) {
         gBipartitePruningSorter1 = new PRUNING_SORTER;
     }
     return gBipartitePruningSorter1;
 }
 
-void ReleasePruningSorters()
-{
+void ReleasePruningSorters() {
     DELETESINGLE(gBipartitePruningSorter1);
     DELETESINGLE(gBipartitePruningSorter0);
     DELETESINGLE(gCompletePruningSorter);
@@ -111,12 +106,11 @@ void ReleasePruningSorters()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Opcode::BipartiteBoxPruning(uint32_t nb0,
-                                 const AABB **array0,
-                                 uint32_t nb1,
-                                 const AABB **array1,
-                                 Pairs &pairs,
-                                 const Axes &axes)
-{
+        const AABB **array0,
+        uint32_t nb1,
+        const AABB **array1,
+        Pairs &pairs,
+        const Axes &axes) {
     // Checkings
     if (!nb0 || !array0 || !nb1 || !array1) {
         return false;
@@ -214,8 +208,7 @@ bool Opcode::BipartiteBoxPruning(uint32_t nb0,
  *	\return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, const Axes &axes)
-{
+bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, const Axes &axes) {
     // Checkings
     if (!nb || !array) {
         return false;
@@ -355,11 +348,10 @@ bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, c
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Opcode::BruteForceBipartiteBoxTest(uint32_t nb0,
-                                        const AABB **array0,
-                                        uint32_t nb1,
-                                        const AABB **array1,
-                                        Pairs &pairs)
-{
+        const AABB **array0,
+        uint32_t nb1,
+        const AABB **array1,
+        Pairs &pairs) {
     // Checkings
     if (!nb0 || !array0 || !nb1 || !array1) {
         return false;
@@ -385,8 +377,7 @@ bool Opcode::BruteForceBipartiteBoxTest(uint32_t nb0,
  *	\return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Opcode::BruteForceCompleteBoxTest(uint32_t nb, const AABB **array, Pairs &pairs)
-{
+bool Opcode::BruteForceCompleteBoxTest(uint32_t nb, const AABB **array, Pairs &pairs) {
     // Checkings
     if (!nb || !array) {
         return false;

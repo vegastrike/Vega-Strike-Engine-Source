@@ -44,8 +44,7 @@
 #include "mission.h"
 #include "easydom.h"
 
-varInst *Mission::call_omap(missionNode *node, int mode)
-{
+varInst *Mission::call_omap(missionNode *node, int mode) {
     varInst *viret = NULL;
     if (mode == SCRIPT_PARSE) {
         string cmd = node->attr_value("name");
@@ -138,8 +137,7 @@ varInst *Mission::call_omap(missionNode *node, int mode)
     return NULL;     //never reach
 }
 
-omap_t *Mission::getOMapObject(missionNode *node, int mode, varInst *ovi)
-{
+omap_t *Mission::getOMapObject(missionNode *node, int mode, varInst *ovi) {
     omap_t *my_object = NULL;
     if (mode == SCRIPT_RUN) {
         my_object = (omap_t *) ovi->object;
@@ -151,8 +149,7 @@ omap_t *Mission::getOMapObject(missionNode *node, int mode, varInst *ovi)
     return my_object;
 }
 
-varInst *Mission::call_omap_new(missionNode *node, int mode)
-{
+varInst *Mission::call_omap_new(missionNode *node, int mode) {
     varInst *viret = newVarInst(VI_TEMP);
 
     omap_t *my_object = new omap_t;

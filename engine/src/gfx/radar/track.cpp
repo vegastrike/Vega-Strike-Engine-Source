@@ -38,9 +38,8 @@ namespace Radar {
 
 Track::Track(Unit *player, const Unit *target)
         : player(player),
-          target(target),
-          distance(0.0)
-{
+        target(target),
+        distance(0.0) {
     position = player->LocalCoordinates(target);
     distance = UnitUtil::getDistance(player, target);
     type = IdentifyType();
@@ -48,97 +47,83 @@ Track::Track(Unit *player, const Unit *target)
 
 Track::Track(Unit *player, const Unit *target, const Vector &position)
         : player(player),
-          target(target),
-          position(position)
-{
+        target(target),
+        position(position) {
     distance = UnitUtil::getDistance(player, target);
     type = IdentifyType();
 }
 
 Track::Track(Unit *player, const Unit *target, const Vector &position, float distance)
         : player(player),
-          target(target),
-          position(position),
-          distance(distance)
-{
+        target(target),
+        position(position),
+        distance(distance) {
     type = IdentifyType();
 }
 
-const Vector &Track::GetPosition() const
-{
+const Vector &Track::GetPosition() const {
     return position;
 }
 
-float Track::GetDistance() const
-{
+float Track::GetDistance() const {
     return distance;
 }
 
-Track::Type::Value Track::GetType() const
-{
+Track::Type::Value Track::GetType() const {
     return type;
 }
 
-float Track::GetSize() const
-{
+float Track::GetSize() const {
     assert(target);
 
     return target->rSize();
 }
 
-bool Track::IsExploding() const
-{
+bool Track::IsExploding() const {
     assert(target);
 
     return target->IsExploding();
 }
 
-float Track::ExplodingProgress() const
-{
+float Track::ExplodingProgress() const {
     assert(IsExploding());
 
     return target->ExplodingProgress();
 }
 
-bool Track::HasWeapons() const
-{
+bool Track::HasWeapons() const {
     assert(target);
 
     return (target->getNumMounts() > 0);
 }
 
-bool Track::HasTurrets() const
-{
+bool Track::HasTurrets() const {
     assert(target);
 
     return !(target->SubUnits.empty());
 }
 
-bool Track::HasActiveECM() const
-{
+bool Track::HasActiveECM() const {
     assert(target);
 
     return (UnitUtil::getECM(target) > 0);
 }
 
-bool Track::HasLock() const
-{
+bool Track::HasLock() const {
     assert(player);
     assert(target);
 
     return (player == target->Target());
 }
 
-bool Track::HasWeaponLock() const
-{
+bool Track::HasWeaponLock() const {
     assert(player);
     assert(target);
 
     return (target->TargetLocked(player));
 }
 
-Track::Type::Value Track::IdentifyType() const
-{
+Track::Type::Value Track::IdentifyType() const {
     assert(target);
 
     switch (target->isUnit()) {
@@ -199,8 +184,7 @@ Track::Type::Value Track::IdentifyType() const
     }
 }
 
-Track::Relation::Value Track::GetRelation() const
-{
+Track::Relation::Value Track::GetRelation() const {
     assert(player);
     assert(target);
 

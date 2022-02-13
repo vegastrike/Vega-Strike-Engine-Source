@@ -68,20 +68,20 @@ class Collision {
     bool crashLand(Unit *base);
 public:
     static void collide(Unit *unit1,
-                        const QVector &location1,
-                        const Vector &normal1,
-                        Unit *unit2,
-                        const QVector &location2,
-                        const Vector &normal2,
-                        float distance);
+            const QVector &location1,
+            const Vector &normal1,
+            Unit *unit2,
+            const QVector &location2,
+            const Vector &normal2,
+            float distance);
     static void validateCollision(const QVector &relative_velocity,
-                                  const Vector &normal1,
-                                  const QVector &location1_local,
-                                  const QVector &location2_local,
-                                  const QVector &v1_new,
-                                  const QVector &v2_new,
-                                  const QVector &w1_new,
-                                  const QVector &w2_new);
+            const Vector &normal1,
+            const QVector &location1_local,
+            const QVector &location2_local,
+            const QVector &v1_new,
+            const QVector &v2_new,
+            const QVector &w1_new,
+            const QVector &w2_new);
 
 };
 

@@ -50,18 +50,15 @@ public:
     // TODO: subclass with return Mass+fuel;
     float Mass;
 
-    float getMass()
-    {
+    float getMass() {
         return Mass;
     }
 
-    float getMass() const
-    {
+    float getMass() const {
         return Mass;
     }
 
-    void setMass(float mass)
-    {
+    void setMass(float mass) {
         Mass = mass;
     }
 
@@ -195,13 +192,11 @@ public:
     Vector GetNetAngularAcceleration() const;
 
 //acceleration, retrieved from NetForce - not stable (partial during simulation), use GetAcceleration()
-    Vector GetAcceleration() const
-    {
+    Vector GetAcceleration() const {
         return SavedAccel;
     }
 
-    Vector GetAngularAcceleration() const
-    {
+    Vector GetAngularAcceleration() const {
         return SavedAngAccel;
     }
 
@@ -216,50 +211,45 @@ public:
 //Transforms a orientation vector to world space. Does not take position into account
     Vector ToWorldCoordinates(const Vector &v) const;
 
-    virtual bool isPlayerShip()
-    {
+    virtual bool isPlayerShip() {
         return false;
     };
 
     //Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
     //Not needed here, so only in NetUnit and Unit classes
     void UpdatePhysics(const Transformation &trans,
-                       const Matrix &transmat,
-                       const Vector &CumulativeVelocity,
-                       bool ResolveLast,
-                       UnitCollection *uc,
-                       Unit *superunit);
+            const Matrix &transmat,
+            const Vector &CumulativeVelocity,
+            bool ResolveLast,
+            UnitCollection *uc,
+            Unit *superunit);
     virtual void UpdatePhysics2(const Transformation &trans,
-                                const Transformation &old_physical_state,
-                                const Vector &accel,
-                                float difficulty,
-                                const Matrix &transmat,
-                                const Vector &CumulativeVelocity,
-                                bool ResolveLast,
-                                UnitCollection *uc = NULL);
+            const Transformation &old_physical_state,
+            const Vector &accel,
+            float difficulty,
+            const Matrix &transmat,
+            const Vector &CumulativeVelocity,
+            bool ResolveLast,
+            UnitCollection *uc = NULL);
 
     //Returns unit-space ang velocity
-    const Vector &GetAngularVelocity() const
-    {
+    const Vector &GetAngularVelocity() const {
         return AngularVelocity;
     }
 
     //Return unit-space velocity
-    const Vector &GetVelocity() const
-    {
+    const Vector &GetVelocity() const {
         return cumulative_velocity;
     }
 
     void SetVelocity(const Vector &);
     void SetAngularVelocity(const Vector &);
 
-    float GetMoment() const
-    {
+    float GetMoment() const {
         return Momentofinertia; // TODO: subclass with return Momentofinertia+fuel;
     }
 
-    float GetMass() const
-    {
+    float GetMass() const {
         return Mass; // TODO: subclass with return Mass+fuel;
     }
 
@@ -274,10 +264,10 @@ public:
 
     virtual QVector realPosition() = 0;
     virtual void UpdatePhysics3(const Transformation &trans,
-                                const Matrix &transmat,
-                                bool lastframe,
-                                UnitCollection *uc,
-                                Unit *superunit) = 0;
+            const Matrix &transmat,
+            bool lastframe,
+            UnitCollection *uc,
+            Unit *superunit) = 0;
 };
 
 #endif // MOVABLE_H

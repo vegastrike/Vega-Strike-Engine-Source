@@ -35,8 +35,7 @@ struct GFXVertex {
     float i, j, k;
     float s, t;
 
-    GFXVertex operator*(float s)
-    {
+    GFXVertex operator*(float s) {
         GFXVertex ret(*this);
         ret.x *= s;
         ret.y *= s;
@@ -252,8 +251,7 @@ int globalfileout = 0; //go go gadget kludge!
 int globallasttab = 0; //go go uber kludge!
 float globalmassrescale = 1; //go go... ok, at this point, it's obvious I'm not trying
 
-void UnitBeginElement(const string &name, const AttributeList &attributes, XML *xml)
-{
+void UnitBeginElement(const string &name, const AttributeList &attributes, XML *xml) {
     AttributeList::const_iterator iter;
     Unit::Names elem = (Unit::Names) Unit::element_map.lookup(name);
     Unit::Names top;
@@ -271,11 +269,11 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
             if ((*iter).name == "mass" || (*iter).name == "momentofinertia" || name == "Engine" || name == "Maneuver") {
                 if ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale) > 100) {
                     cout << (*iter).name << " = \""
-                         << (unsigned long int) ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale))
-                         << "\" ";
+                            << (unsigned long int) ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale))
+                            << "\" ";
                 } else {
                     cout << (*iter).name << " = \""
-                         << ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale)) << "\" ";
+                            << ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale)) << "\" ";
                 }
             } else {
                 cout << (*iter).name << " = \"" << (*iter).value << "\" ";
@@ -303,8 +301,7 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
     }
 }
 
-void UnitEndElement(const string &name, XML *xml)
-{
+void UnitEndElement(const string &name, XML *xml) {
     --globaltab;
     if (globalfileout) {
         if (globaltab == globallasttab) {
@@ -319,8 +316,7 @@ void UnitEndElement(const string &name, XML *xml)
     }
 }
 
-void beginElement(const string &name, const AttributeList &attributes, XML *xml)
-{
+void beginElement(const string &name, const AttributeList &attributes, XML *xml) {
     AttributeList::const_iterator iter;
     XML::Names elem = (XML::Names) XML::element_map.lookup(name);
     XML::Names top;
@@ -439,8 +435,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
     }
 }
 
-void endElement(const string &name, XML *xml)
-{
+void endElement(const string &name, XML *xml) {
     xml->state_stack.pop_back();
     XML::Names elem = (XML::Names) XML::element_map.lookup(name);
 
@@ -490,28 +485,23 @@ void endElement(const string &name, XML *xml)
     }
 }
 
-void beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     beginElement(name, AttributeList(atts), (XML *) userData);
 }
 
-void endElement(void *userData, const XML_Char *name)
-{
+void endElement(void *userData, const XML_Char *name) {
     endElement(name, (XML *) userData);
 }
 
-void unitBeginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void unitBeginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     UnitBeginElement(name, AttributeList(atts), (XML *) userData);
 }
 
-void unitEndElement(void *userData, const XML_Char *name)
-{
+void unitEndElement(void *userData, const XML_Char *name) {
     UnitEndElement(name, (XML *) userData);
 }
 
-void LoadXML(const char *filename, XML &xml)
-{
+void LoadXML(const char *filename, XML &xml) {
     const int chunk_size = 16384;
     FILE *inFile = fopen(filename, "r");
     if (!inFile) {
@@ -534,8 +524,7 @@ void LoadXML(const char *filename, XML &xml)
     //Now, copy everything into the mesh data structures
 }
 
-void UnitLoadXML(const char *filename, XML &xml)
-{
+void UnitLoadXML(const char *filename, XML &xml) {
     const int chunk_size = 16384;
     FILE *inFile = fopen(filename, "r");
     if (!inFile) {
@@ -558,8 +547,7 @@ void UnitLoadXML(const char *filename, XML &xml)
     //Now, copy everything into the mesh data structures
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     XML blah;
     blah.unitscale = 1;
     if (argc < 2) {

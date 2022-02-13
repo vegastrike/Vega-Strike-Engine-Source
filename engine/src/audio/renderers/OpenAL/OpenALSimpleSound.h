@@ -57,8 +57,7 @@ public:
     OpenALSimpleSound(const std::string &name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
 
     /** Package-private: the OpenAL renderer package uses this, YOU DON'T */
-    ALBufferHandle getAlBuffer() const
-    {
+    ALBufferHandle getAlBuffer() const {
         return bufferHandle;
     }
 

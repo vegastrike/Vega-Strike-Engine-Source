@@ -39,36 +39,30 @@ public:
     UnitContainer();
     UnitContainer(Unit *);
 
-    UnitContainer(const UnitContainer &un)
-    {
+    UnitContainer(const UnitContainer &un) {
         VSCONSTRUCT1('U')
         unit = 0;
         SetUnit(un.unit);
     }
 
-    const UnitContainer &operator=(const UnitContainer &a)
-    {
+    const UnitContainer &operator=(const UnitContainer &a) {
         SetUnit(a.unit);
         return a;
     }
 
-    bool operator==(const Unit *oth) const
-    {
+    bool operator==(const Unit *oth) const {
         return unit == oth;
     }
 
-    bool operator!=(const Unit *oth) const
-    {
+    bool operator!=(const Unit *oth) const {
         return unit != oth;
     }
 
-    bool operator==(const UnitContainer &oth) const
-    {
+    bool operator==(const UnitContainer &oth) const {
         return unit == oth.unit;
     }
 
-    bool operator!=(const UnitContainer &oth) const
-    {
+    bool operator!=(const UnitContainer &oth) const {
         return unit != oth.unit;
     }
 
@@ -76,8 +70,7 @@ public:
     void SetUnit(Unit *);
     Unit *GetUnit();
 
-    const Unit *GetConstUnit() const
-    {
+    const Unit *GetConstUnit() const {
         return unit;
     }
 };

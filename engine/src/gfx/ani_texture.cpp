@@ -41,18 +41,15 @@
 using std::set;
 static set<AnimatedTexture *> anis;
 
-static inline unsigned int intmin(unsigned int a, unsigned int b)
-{
+static inline unsigned int intmin(unsigned int a, unsigned int b) {
     return a < b ? a : b;
 }
 
-static inline unsigned int intmax(unsigned int a, unsigned int b)
-{
+static inline unsigned int intmax(unsigned int a, unsigned int b) {
     return a < b ? b : a;
 }
 
-static enum ADDRESSMODE parseAddressMode(const string &addrmodestr, ADDRESSMODE defaultAddressMode)
-{
+static enum ADDRESSMODE parseAddressMode(const string &addrmodestr, ADDRESSMODE defaultAddressMode) {
     enum ADDRESSMODE addrmode = defaultAddressMode;
     if (addrmodestr == "wrap") {
         addrmode = WRAP;
@@ -66,16 +63,14 @@ static enum ADDRESSMODE parseAddressMode(const string &addrmodestr, ADDRESSMODE 
     return addrmode;
 }
 
-static void ActivateWhite(int stage)
-{
+static void ActivateWhite(int stage) {
     static Texture *white = new Texture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
     if (white->LoadSuccess()) {
         white->MakeActive(stage);
     }
 }
 
-void AnimatedTexture::MakeActive(int stage, int pass)
-{
+void AnimatedTexture::MakeActive(int stage, int pass) {
     // Set active frame and texture coordinates
     if (timeperframe && !vidSource) {
         unsigned int numframes = numFrames();
@@ -219,8 +214,7 @@ void AnimatedTexture::MakeActive(int stage, int pass)
     }
 }
 
-bool AnimatedTexture::SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst)
-{
+bool AnimatedTexture::SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst) {
     switch (pass) {
         case -1:
             if (!vidMode && GetInterpolateFrames()) {
@@ -239,15 +233,13 @@ bool AnimatedTexture::SetupPass(int pass, int stage, const enum BLENDFUNC src, c
     }
 }
 
-void AnimatedTexture::UpdateAllPhysics()
-{
+void AnimatedTexture::UpdateAllPhysics() {
     for (set<AnimatedTexture *>::iterator iter = anis.begin(); iter != anis.end(); iter++) {
         (*iter)->physicsactive -= SIMULATION_ATOM;
     }                      // simulation_atom_var?
 }
 
-void AnimatedTexture::UpdateAllFrame()
-{
+void AnimatedTexture::UpdateAllFrame() {
     double elapsed = GetElapsedTime();
     double realtime = realTime();
     for (set<AnimatedTexture *>::iterator iter = anis.begin(); iter != anis.end(); iter++) {
@@ -278,8 +270,7 @@ void AnimatedTexture::UpdateAllFrame()
     }
 }
 
-bool AnimatedTexture::Done() const
-{
+bool AnimatedTexture::Done() const {
     //return physicsactive<0;
     //Explosions aren't working right, and this would fix them.
     //I don't see the reason for using physics frames as reference, all AnimatedTextures
@@ -288,15 +279,13 @@ bool AnimatedTexture::Done() const
     return vidSource ? done : curtime >= numframes * timeperframe;
 }
 
-void AnimatedTexture::setTime(double tim)
-{
+void AnimatedTexture::setTime(double tim) {
     curtime = tim;
 }
 
 using namespace VSFileSystem;
 
-AnimatedTexture::AnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtex)
-{
+AnimatedTexture::AnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtex) {
     AniInit();
     VSFile f;
     VSError err = f.OpenReadOnly(file, AnimFile);
@@ -319,8 +308,7 @@ AnimatedTexture::AnimatedTexture(const char *file, int stage, enum FILTER imm, b
     }
 }
 
-void AnimatedTexture::AniInit()
-{
+void AnimatedTexture::AniInit() {
     Texture::InitTexture();
 
     Decal = NULL;
@@ -352,30 +340,25 @@ void AnimatedTexture::AniInit()
 //Load (fp,stage,imm,detailtex);
 //}
 
-AnimatedTexture::AnimatedTexture(VSFileSystem::VSFile &fp, int stage, enum FILTER imm, bool detailtex)
-{
+AnimatedTexture::AnimatedTexture(VSFileSystem::VSFile &fp, int stage, enum FILTER imm, bool detailtex) {
     AniInit();
     Load(fp, stage, imm, detailtex);
 }
 
 AnimatedTexture::AnimatedTexture(int stage, enum FILTER imm, bool detailtex) :
-        Texture(stage, imm)
-{
+        Texture(stage, imm) {
     AniInit();
 }
 
-Texture *AnimatedTexture::Original()
-{
+Texture *AnimatedTexture::Original() {
     return Decal ? Decal[active]->Original() : this;
 }
 
-const Texture *AnimatedTexture::Original() const
-{
+const Texture *AnimatedTexture::Original() const {
     return Decal ? Decal[active]->Original() : this;
 }
 
-Texture *AnimatedTexture::Clone()
-{
+Texture *AnimatedTexture::Clone() {
     AnimatedTexture *retval = new AnimatedTexture();
     if (Decal) {
         *retval = *this;
@@ -400,21 +383,18 @@ Texture *AnimatedTexture::Clone()
     return retval;
 }
 
-AnimatedTexture::~AnimatedTexture()
-{
+AnimatedTexture::~AnimatedTexture() {
     Destroy();
     data = NULL;
     active = 0;
     palette = NULL;
 }
 
-AnimatedTexture::AnimatedTexture()
-{
+AnimatedTexture::AnimatedTexture() {
     AniInit();
 }
 
-void AnimatedTexture::Destroy()
-{
+void AnimatedTexture::Destroy() {
     anis.erase(this);
     if (vidSource) {
         delete vidSource;
@@ -431,8 +411,7 @@ void AnimatedTexture::Destroy()
     }
 }
 
-void AnimatedTexture::Reset()
-{
+void AnimatedTexture::Reset() {
     curtime = 0;
     active = 0;
     activebound = -1;
@@ -441,8 +420,7 @@ void AnimatedTexture::Reset()
     done = false;
 }
 
-static void alltrim(string &str)
-{
+static void alltrim(string &str) {
     string::size_type ltrim = str.find_first_not_of(" \t\r\n");
     string::size_type rtrim = str.find_last_not_of(" \t\r\n");
     if (rtrim != string::npos) {
@@ -451,15 +429,13 @@ static void alltrim(string &str)
     str.erase(0, ltrim);
 }
 
-static void alltrim(char *_str)
-{
+static void alltrim(char *_str) {
     string str = _str;
     alltrim(str);
     strcpy(_str, str.c_str());
 }
 
-void AnimatedTexture::Load(VSFileSystem::VSFile &f, int stage, enum FILTER ismipmapped, bool detailtex)
-{
+void AnimatedTexture::Load(VSFileSystem::VSFile &f, int stage, enum FILTER ismipmapped, bool detailtex) {
     curtime = 0;
     frames.clear();
     frames_maxtc.clear();
@@ -471,8 +447,7 @@ void AnimatedTexture::Load(VSFileSystem::VSFile &f, int stage, enum FILTER ismip
     }
 }
 
-void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f)
-{
+void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
     wrapper_file_path = f.GetFilename();
     wrapper_file_type = f.GetType();
     f.Close();
@@ -523,10 +498,9 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f)
 }
 
 AnimatedTexture *AnimatedTexture::CreateVideoTexture(const std::string &fname,
-                                                     int stage,
-                                                     enum FILTER ismipmapped,
-                                                     bool detailtex)
-{
+        int stage,
+        enum FILTER ismipmapped,
+        bool detailtex) {
     AnimatedTexture *rv = new AnimatedTexture(stage, ismipmapped, detailtex);
     VSFileSystem::VSFile f;
     VSError err = f.OpenReadOnly(fname, VSFileSystem::VideoFile);
@@ -542,8 +516,7 @@ AnimatedTexture *AnimatedTexture::CreateVideoTexture(const std::string &fname,
     return rv;
 }
 
-void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER ismipmapped, bool detailtex)
-{
+void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER ismipmapped, bool detailtex) {
     char options[1024];
     f.Fscanf("%d %f", &numframes, &timeperframe);
     f.ReadLine(options, sizeof(options) - sizeof(*options));
@@ -639,34 +612,34 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
                         XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "maxr", defMr))));
             } else {
                 enum ADDRESSMODE addrmode = parseAddressMode(XMLSupport::parse_option_value(opt,
-                                                                                            "addressMode",
-                                                                                            ""), defaultAddressMode);
+                        "addressMode",
+                        ""), defaultAddressMode);
                 if (alp[0] != '\0') {
                     Decal[j++] =
                             new Texture(file,
-                                        alp,
-                                        stage,
-                                        ismipmapped,
-                                        TEXTURE2D,
-                                        TEXTURE_2D,
-                                        1,
-                                        0,
-                                        (g_game.use_animations) ? GFXTRUE : GFXFALSE,
-                                        65536,
-                                        (detailtex ? GFXTRUE : GFXFALSE),
-                                        GFXFALSE,
-                                        addrmode);
+                                    alp,
+                                    stage,
+                                    ismipmapped,
+                                    TEXTURE2D,
+                                    TEXTURE_2D,
+                                    1,
+                                    0,
+                                    (g_game.use_animations) ? GFXTRUE : GFXFALSE,
+                                    65536,
+                                    (detailtex ? GFXTRUE : GFXFALSE),
+                                    GFXFALSE,
+                                    addrmode);
                 } else {
                     Decal[j++] = new Texture(file,
-                                             stage,
-                                             ismipmapped,
-                                             TEXTURE2D,
-                                             TEXTURE_2D,
-                                             (g_game.use_animations) ? GFXTRUE : GFXFALSE,
-                                             65536,
-                                             (detailtex ? GFXTRUE : GFXFALSE),
-                                             GFXFALSE,
-                                             addrmode);
+                            stage,
+                            ismipmapped,
+                            TEXTURE2D,
+                            TEXTURE_2D,
+                            (g_game.use_animations) ? GFXTRUE : GFXFALSE,
+                            65536,
+                            (detailtex ? GFXTRUE : GFXFALSE),
+                            GFXFALSE,
+                            addrmode);
                 }
                 if (Decal[j - 1]) {
                     Decal[j - 1]->mintcoord = Vector(
@@ -697,8 +670,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
     setTime(curtime);
 }
 
-void AnimatedTexture::LoadFrame(int frame)
-{
+void AnimatedTexture::LoadFrame(int frame) {
     if (!vidMode || (Decal == NULL) || (*Decal == NULL)) {
         return;
     }
@@ -736,21 +708,21 @@ void AnimatedTexture::LoadFrame(int frame)
     loadSuccess = true;
     if (alp[0] != '\0') {
         (*Decal)->Load(file,
-                       alp,
-                       texstage,
-                       ismip2,
-                       TEXTURE2D,
-                       TEXTURE_2D,
-                       1,
-                       0,
-                       (g_game.use_videos) ? GFXTRUE : GFXFALSE,
-                       65536,
-                       (detailTex ? GFXTRUE : GFXFALSE),
-                       GFXTRUE,
-                       addrmode);
+                alp,
+                texstage,
+                ismip2,
+                TEXTURE2D,
+                TEXTURE_2D,
+                1,
+                0,
+                (g_game.use_videos) ? GFXTRUE : GFXFALSE,
+                65536,
+                (detailTex ? GFXTRUE : GFXFALSE),
+                GFXTRUE,
+                addrmode);
     } else if (numgets == 1) {
         (*Decal)->Load(file, texstage, ismip2, TEXTURE2D, TEXTURE_2D, (g_game.use_videos) ? GFXTRUE : GFXFALSE, 65536,
-                       (detailTex ? GFXTRUE : GFXFALSE), GFXTRUE, addrmode);
+                (detailTex ? GFXTRUE : GFXFALSE), GFXTRUE, addrmode);
     } else {
         loadSuccess = false;
     }
@@ -766,13 +738,11 @@ void AnimatedTexture::LoadFrame(int frame)
     }
 }
 
-bool AnimatedTexture::LoadSuccess()
-{
+bool AnimatedTexture::LoadSuccess() {
     return loadSuccess != false;
 }
 
-unsigned int AnimatedTexture::numLayers() const
-{
+unsigned int AnimatedTexture::numLayers() const {
     if (GetInterpolateFrames() && (active != nextactive) && gl_options.Multitexture
             && ((texstage + 1) < static_cast<int>(gl_options.Multitexture))) {
         return 2;
@@ -781,8 +751,7 @@ unsigned int AnimatedTexture::numLayers() const
     }
 }
 
-unsigned int AnimatedTexture::numPasses() const
-{
+unsigned int AnimatedTexture::numPasses() const {
     if (GetInterpolateFrames() && (active != nextactive)) {
         if (gl_options.Multitexture && ((texstage + 1) < static_cast<int>(gl_options.Multitexture))) {
             return 1;
@@ -794,8 +763,7 @@ unsigned int AnimatedTexture::numPasses() const
     }
 }
 
-void AnimatedTexture::SetTimeSource(SharedPtr<Audio::Source> source)
-{
+void AnimatedTexture::SetTimeSource(SharedPtr<Audio::Source> source) {
     timeSource = source;
     if (source) {
         options |= optSoundTiming;
@@ -804,8 +772,7 @@ void AnimatedTexture::SetTimeSource(SharedPtr<Audio::Source> source)
     }
 }
 
-void AnimatedTexture::ClearTimeSource()
-{
+void AnimatedTexture::ClearTimeSource() {
     timeSource.reset();
     options &= ~optSoundTiming;
 }

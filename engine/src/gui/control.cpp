@@ -28,8 +28,7 @@
 static const float DEFAULT_OUTLINE_LINE_WIDTH = 1.0;
 
 //Whether the specified point is inside this control.
-bool Control::hitTest(const Point &p)
-{
+bool Control::hitTest(const Point &p) {
     const float maxX = m_rect.origin.x + m_rect.size.width;
     const float maxY = m_rect.origin.y + m_rect.size.height;
 
@@ -37,8 +36,7 @@ bool Control::hitTest(const Point &p)
 }
 
 //Draw window background.
-void Control::drawBackground(void)
-{
+void Control::drawBackground(void) {
     if (!isClear(m_color)) {
         drawRect(m_rect, m_color);
     }
@@ -55,7 +53,6 @@ Control::Control(void) :
         m_outlineColor(GUI_CLEAR),
         m_textColor(GUI_OPAQUE_BLACK()),
         m_font(0.1),
-        m_hidden(false)
-{
+        m_hidden(false) {
 }
 

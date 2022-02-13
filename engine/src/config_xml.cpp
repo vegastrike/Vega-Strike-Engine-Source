@@ -45,8 +45,7 @@
 
 /* *********************************************************** */
 
-GameVegaConfig::GameVegaConfig(const char *configfile) : VegaConfig(configfile)
-{
+GameVegaConfig::GameVegaConfig(const char *configfile) : VegaConfig(configfile) {
     initCommandMap();
     initKeyMap();
     //set hatswitches to off
@@ -76,22 +75,19 @@ void incmusicvol(const KBData &, KBSTATE a);
 void decmusicvol(const KBData &, KBSTATE a);
 bool screenshotkey = false;
 
-void doReloadShader(const KBData &, KBSTATE a)
-{
+void doReloadShader(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         GFXReloadDefaultShader();
     }
 }
 
-void doScreenshot(const KBData &, KBSTATE a)
-{
+void doScreenshot(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         screenshotkey = true;
     }
 }
 
-void incvol(const KBData &, KBSTATE a)
-{
+void incvol(const KBData &, KBSTATE a) {
 #ifdef HAVE_AL
     if (a == DOWN) {
         AUDChangeVolume(AUDGetVolume() + volinc);
@@ -99,8 +95,7 @@ void incvol(const KBData &, KBSTATE a)
 #endif
 }
 
-void decvol(const KBData &, KBSTATE a)
-{
+void decvol(const KBData &, KBSTATE a) {
 #ifdef HAVE_AL
     if (a == DOWN) {
         AUDChangeVolume(AUDGetVolume() - volinc);
@@ -108,14 +103,12 @@ void decvol(const KBData &, KBSTATE a)
 #endif
 }
 
-void mute(const KBData &, KBSTATE a)
-{
+void mute(const KBData &, KBSTATE a) {
 #ifdef HAVE_AL
 #endif
 }
 
-void incdop(const KBData &, KBSTATE a)
-{
+void incdop(const KBData &, KBSTATE a) {
 #ifdef HAVE_AL
     if (a == DOWN) {
         AUDChangeDoppler(AUDGetDoppler() + dopinc);
@@ -123,8 +116,7 @@ void incdop(const KBData &, KBSTATE a)
 #endif
 }
 
-void decdop(const KBData &, KBSTATE a)
-{
+void decdop(const KBData &, KBSTATE a) {
 #ifdef HAVE_AL
     if (a == DOWN) {
         AUDChangeDoppler(AUDGetDoppler() - dopinc);
@@ -136,8 +128,7 @@ void decdop(const KBData &, KBSTATE a)
 
 /* *********************************************************** */
 
-void GameVegaConfig::initKeyMap()
-{
+void GameVegaConfig::initKeyMap() {
     //mapping from special key string to glut key
     key_map["space"] = ' ';
     key_map["return"] = WSK_RETURN;
@@ -218,8 +209,7 @@ using namespace CockpitKeys;
 CommandMap initGlobalCommandMap();
 static CommandMap commandMap = initGlobalCommandMap();
 
-static void ComposeFunctions(const KBData &composition, KBSTATE k)
-{
+static void ComposeFunctions(const KBData &composition, KBSTATE k) {
     std::string s = composition.data;
     while (s.length()) {
         std::string::size_type where = s.find(" ");
@@ -246,8 +236,7 @@ static void ComposeFunctions(const KBData &composition, KBSTATE k)
     }
 }
 
-static void ComposeFunctionsToggle(const KBData &composition, KBSTATE k)
-{
+static void ComposeFunctionsToggle(const KBData &composition, KBSTATE k) {
     if (k == PRESS || k == RELEASE) {
         ComposeFunctions(composition, k);
     }
@@ -259,8 +248,7 @@ void GameVegaConfig::initCommandMap() // DELETE ME
 
 /* *********************************************************** */
 
-void GameVegaConfig::doBindings(configNode *node)
-{
+void GameVegaConfig::doBindings(configNode *node) {
     vector<easyDomNode *>::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
         configNode *cnode = (configNode *) (*siter);
@@ -276,8 +264,7 @@ void GameVegaConfig::doBindings(configNode *node)
 
 /* *********************************************************** */
 
-void GameVegaConfig::doAxis(configNode *node)
-{
+void GameVegaConfig::doAxis(configNode *node) {
     string name = node->attr_value("name");
     string myjoystick = node->attr_value("joystick");
     string axis = node->attr_value("axis");
@@ -345,8 +332,7 @@ void GameVegaConfig::doAxis(configNode *node)
 
 /* *********************************************************** */
 
-void GameVegaConfig::checkHatswitch(int nr, configNode *node)
-{
+void GameVegaConfig::checkHatswitch(int nr, configNode *node) {
     if (node->Name() != "hatswitch") {
         VS_LOG(warning, "not a hatswitch node ");
         return;
@@ -364,8 +350,7 @@ void GameVegaConfig::checkHatswitch(int nr, configNode *node)
 
 /* *********************************************************** */
 
-void GameVegaConfig::checkBind(configNode *node)
-{
+void GameVegaConfig::checkBind(configNode *node) {
     if (node->Name() != "bind") {
         VS_LOG(warning, "not a bind node ");
         return;
@@ -493,8 +478,8 @@ void GameVegaConfig::checkBind(configNode *node)
         }
         BindDigitalHatswitchKey(joy_nr, hsw_nr, dir_index, handler, KBData(additional_data));
         VS_LOG(info,
-               (boost::format("Bound joy %1% hatswitch %2% dir_index %3% to command %4%") % joy_nr % hsw_nr % dir_index
-                       % cmdstr));
+                (boost::format("Bound joy %1% hatswitch %2% dir_index %3% to command %4%") % joy_nr % hsw_nr % dir_index
+                        % cmdstr));
     } else {
         return;
     }
@@ -502,14 +487,12 @@ void GameVegaConfig::checkBind(configNode *node)
 
 /* *********************************************************** */
 
-void GameVegaConfig::bindKeys()
-{
+void GameVegaConfig::bindKeys() {
     doBindings(bindings);
 }
 
 /* *********************************************************** */
-CommandMap initGlobalCommandMap()
-{
+CommandMap initGlobalCommandMap() {
     //I don't knwo why this gives linker errors!
     CommandMap commandMap;
     commandMap["NoPositionalKey"] = mute;

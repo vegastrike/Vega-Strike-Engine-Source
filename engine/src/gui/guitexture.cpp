@@ -37,8 +37,7 @@
 using namespace VSFileSystem;
 
 //Read a texture from a file and bind it.
-bool GuiTexture::read(const std::string &fileName)
-{
+bool GuiTexture::read(const std::string &fileName) {
     Texture *oldTexture(m_texture);
     m_texture = new Texture(fileName.c_str(), 0, BILINEAR);
     if (m_texture && !m_texture->LoadSuccess() && oldTexture) {
@@ -51,8 +50,7 @@ bool GuiTexture::read(const std::string &fileName)
 }
 
 //Draw this texture, stretching to fit the rect.
-void GuiTexture::draw(const Rect &rect) const
-{
+void GuiTexture::draw(const Rect &rect) const {
     //Don't draw unless there is something usable.
     if (m_texture == NULL || !m_texture->LoadSuccess()) {
         return;
@@ -70,12 +68,10 @@ void GuiTexture::draw(const Rect &rect) const
 
 //CONSTRUCTION
 GuiTexture::GuiTexture(void) :
-        m_texture(nullptr)
-{
+        m_texture(nullptr) {
 }
 
-GuiTexture::~GuiTexture(void)
-{
+GuiTexture::~GuiTexture(void) {
     if (m_texture != nullptr) {
         delete m_texture;
         m_texture = nullptr;

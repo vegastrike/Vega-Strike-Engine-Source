@@ -46,8 +46,7 @@ vs_options game_options;
 float SIMULATION_ATOM = 0.0f;
 float AUDIO_ATOM = 0.0f;
 
-void VSExit(int code)
-{
+void VSExit(int code) {
     VSServer->closeAllSockets();
     exit(1);
 }
@@ -55,8 +54,7 @@ void VSExit(int code)
 // I dont think vegaserver makes use of this but it has to be defined.  
 Unit *TheTopLevelUnit = NULL;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
     //#ifndef _WIN32
     //feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)

@@ -27,12 +27,10 @@ class KBData {
 public:
     std::string data;
 
-    KBData()
-    {
+    KBData() {
     }
 
-    KBData(const std::string &s)
-    {
+    KBData(const std::string &s) {
         this->data = s;
     }
 };

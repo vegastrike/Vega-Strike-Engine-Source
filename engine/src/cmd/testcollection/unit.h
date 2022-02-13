@@ -35,38 +35,33 @@ public:
     bool zapped;
     int ucref;
 
-    Unit(bool kill) : killed(kill)
-    {
+    Unit(bool kill) : killed(kill) {
         ucref = 0;
         zapped = false;
     }
 
-    void Kill()
-    {
+    void Kill() {
         if (zapped == true) {
             printf("segfault");
         }
         killed = true;
     }
 
-    bool Killed()
-    {
+    bool Killed() {
         if (zapped == true) {
             printf("segfault");
         }
         return killed;
     }
 
-    void Ref()
-    {
+    void Ref() {
         if (zapped == true) {
             printf("segfault");
         }
         ucref += 1;
     }
 
-    void UnRef()
-    {
+    void UnRef() {
         if (zapped == true) {
             printf("segfault");
         }

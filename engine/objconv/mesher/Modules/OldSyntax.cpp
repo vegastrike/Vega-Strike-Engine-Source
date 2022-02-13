@@ -37,8 +37,7 @@ class OldSyntaxHandler : public Module {
     string mMode;
 
 public:
-    OldSyntaxHandler()
-    {
+    OldSyntaxHandler() {
         mSequence.push_back("--input");
         mSequence.push_back("--output");
         mSequence.push_back("--oldmode");
@@ -46,18 +45,15 @@ public:
         mSequencePos = mSequence.begin();
     }
 
-    virtual const NameList &getNames() const
-    {
+    virtual const NameList &getNames() const {
         return mNames;
     }
 
-    virtual void help(const std::string &command, ParameterList &params) const
-    {
+    virtual void help(const std::string &command, ParameterList &params) const {
         cout << "No help associated with " << command << endl;
     }
 
-    virtual int execute(const std::string &command, ParameterList &params, unsigned int phase)
-    {
+    virtual int execute(const std::string &command, ParameterList &params, unsigned int phase) {
         if (command == "--oldmode") {
             if (params.size()) {
                 mMode = params[0];

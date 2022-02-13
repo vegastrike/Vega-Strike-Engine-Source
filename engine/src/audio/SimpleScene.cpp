@@ -37,12 +37,10 @@
 namespace Audio {
 
 SimpleScene::SimpleScene(const std::string &name) :
-        Scene(name)
-{
+        Scene(name) {
 }
 
-SimpleScene::~SimpleScene()
-{
+SimpleScene::~SimpleScene() {
     SourceSet::iterator it;
 
     for (it = activeSources.begin(); it != activeSources.end(); ++it) {
@@ -51,23 +49,19 @@ SimpleScene::~SimpleScene()
     }
 }
 
-void SimpleScene::add(SharedPtr<Source> source)
-{
+void SimpleScene::add(SharedPtr<Source> source) {
     attach(dynamic_cast<SimpleSource *>(source.get()));
 }
 
-void SimpleScene::remove(SharedPtr<Source> source)
-{
+void SimpleScene::remove(SharedPtr<Source> source) {
     detach(dynamic_cast<SimpleSource *>(source.get()));
 }
 
-Listener &SimpleScene::getListener()
-{
+Listener &SimpleScene::getListener() {
     return listener;
 }
 
-void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing)
-{
+void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing) {
     if (playing) {
         activeSources.insert(source);
     } else {
@@ -77,25 +71,21 @@ void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing)
     SceneManager::getSingleton()->notifySourcePlaying(source, shared_from_this(), playing);
 }
 
-void SimpleScene::attach(SimpleSource *source)
-{
+void SimpleScene::attach(SimpleSource *source) {
     source->notifySceneAttached(this);
 }
 
-void SimpleScene::detach(SimpleSource *source)
-{
+void SimpleScene::detach(SimpleSource *source) {
     source->notifySceneAttached(0);
 }
 
 /** Gets an iterator over active sources */
-SimpleScene::SourceIterator SimpleScene::getActiveSources()
-{
+SimpleScene::SourceIterator SimpleScene::getActiveSources() {
     return activeSources.begin();
 }
 
 /** Gets the ending iterator of active sources */
-SimpleScene::SourceIterator SimpleScene::getActiveSourcesEnd()
-{
+SimpleScene::SourceIterator SimpleScene::getActiveSourcesEnd() {
     return activeSources.end();
 }
 

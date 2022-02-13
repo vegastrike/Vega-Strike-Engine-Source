@@ -23,8 +23,7 @@ ICECORE_API void SRand(uint32_t seed);
 uint32_t Rand();
 
 //! Returns a unit random floating-point value
-inline_ float UnitRandomFloat()
-{
+inline_ float UnitRandomFloat() {
     return float(Rand()) * ONE_OVER_RAND_MAX;
 }
 
@@ -35,26 +34,21 @@ class ICECORE_API BasicRandom {
 public:
 
     //! Constructor
-    inline_ BasicRandom(uint32_t seed = 0) : mRnd(seed)
-    {
+    inline_ BasicRandom(uint32_t seed = 0) : mRnd(seed) {
     }
     //! Destructor
-    inline_                ~BasicRandom()
-    {
+    inline_                ~BasicRandom() {
     }
 
-    inline_    void SetSeed(uint32_t seed)
-    {
+    inline_    void SetSeed(uint32_t seed) {
         mRnd = seed;
     }
 
-    inline_    uint32_t GetCurrentValue() const
-    {
+    inline_    uint32_t GetCurrentValue() const {
         return mRnd;
     }
 
-    inline_    uint32_t Randomize()
-    {
+    inline_    uint32_t Randomize() {
         mRnd = mRnd * 2147001325 + 715136305;
         return mRnd;
     }

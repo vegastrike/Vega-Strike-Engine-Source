@@ -79,12 +79,10 @@ protected:
 
     public:
 //CONSTRUCTION.
-        RenameConfirm(NavComputer *player) : m_parent(player)
-        {
+        RenameConfirm(NavComputer *player) : m_parent(player) {
         }
 
-        virtual ~RenameConfirm(void)
-        {
+        virtual ~RenameConfirm(void) {
         }
 
 //Set up the window and get everything ready.
@@ -188,8 +186,7 @@ protected:
         WCtlHandler function;
 
         WctlTableEntry(const EventCommandId &cmd, const std::string &cid, const WCtlHandler &func) :
-                command(cmd), controlId(cid), function(func)
-        {
+                command(cmd), controlId(cid), function(func) {
         }
     };
     static const WctlTableEntry WctlCommandTable[];

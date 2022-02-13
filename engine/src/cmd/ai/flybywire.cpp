@@ -83,8 +83,7 @@ using Orders::MatchAngularVelocity;
  *
  */
 
-void MatchLinearVelocity::Execute()
-{
+void MatchLinearVelocity::Execute() {
     if (!suborders.empty()) {
         static int i = 0;
         if (i++ % 1000 == 0) {
@@ -103,15 +102,13 @@ void MatchLinearVelocity::Execute()
     MATCHLINVELEXECUTE();
 }
 
-MatchLinearVelocity::~MatchLinearVelocity()
-{
+MatchLinearVelocity::~MatchLinearVelocity() {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(debug, (boost::format("mlv%1$x") % this));
 #endif
 }
 
-void Orders::MatchRoll::Execute()
-{
+void Orders::MatchRoll::Execute() {
     bool temp = done;
     Order::Execute();
     done = temp;
@@ -126,8 +123,7 @@ void Orders::MatchRoll::Execute()
     parent->ApplyLocalTorque(parent->GetMoment() * Vector(0, 0, desired_roll - angvel.k) / simulation_atom_var);
 }
 
-void MatchAngularVelocity::Execute()
-{
+void MatchAngularVelocity::Execute() {
     bool temp = done;
     Order::Execute();
     done = temp;
@@ -147,15 +143,13 @@ void MatchAngularVelocity::Execute()
             parent->GetAngularVelocity())) / simulation_atom_var);
 }
 
-MatchAngularVelocity::~MatchAngularVelocity()
-{
+MatchAngularVelocity::~MatchAngularVelocity() {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(debug, (boost::format("mav%1$x") % this));
 #endif
 }
 
-void MatchVelocity::Execute()
-{
+void MatchVelocity::Execute() {
     MatchAngularVelocity::Execute();
 
     MATCHLINVELSETUP();
@@ -168,25 +162,22 @@ void MatchVelocity::Execute()
     MATCHLINVELEXECUTE();
 }
 
-MatchVelocity::~MatchVelocity()
-{
+MatchVelocity::~MatchVelocity() {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(debug, (boost::format("mv%1$x") % this));
 #endif
 }
 
-static bool getControlType()
-{
+static bool getControlType() {
     static bool control = XMLSupport::parse_bool(vs_config->getVariable("physics", "CarControl",
-                                                                        "false"
+            "false"
     ));
     return control;
 }
 
 FlyByWire::FlyByWire() : MatchVelocity(Vector(0, 0, 0), Vector(0, 0, 0), true, false, false),
-                         sheltonslide(false),
-                         controltype(!getControlType())
-{
+        sheltonslide(false),
+        controltype(!getControlType()) {
     DesiredShiftVelocity = Vector(0, 0, 0);
     DirectThrust = Vector(0, 0, 0);
     stolen_setspeed = false;
@@ -200,51 +191,46 @@ FlyByWire::FlyByWire() : MatchVelocity(Vector(0, 0, 0), Vector(0, 0, 0), true, f
     inertial_flight_enable = static_inertial_flight_enable;
 }
 
-void FlyByWire::Stop(float per)
-{
+void FlyByWire::Stop(float per) {
     SetDesiredVelocity(Vector(0, 0, per * parent->GetComputerData().max_speed()), true);
 
     parent->GetComputerData().set_speed = per * parent->GetComputerData().max_speed();
 }
 
-void FlyByWire::Right(float per)
-{
+void FlyByWire::Right(float per) {
     desired_ang_velocity +=
             (-per
                     * (per
-                               > 0 ? parent->GetComputerData().max_yaw_left : parent->GetComputerData().max_yaw_right)
+                            > 0 ? parent->GetComputerData().max_yaw_left : parent->GetComputerData().max_yaw_right)
                     / getTimeCompression()) * Vector(
                     0,
                     1,
                     0);
 }
 
-void FlyByWire::Up(float per)
-{
+void FlyByWire::Up(float per) {
     desired_ang_velocity +=
             (-per
                     * (per
-                               > 0 ? parent->GetComputerData().max_pitch_down : parent->GetComputerData().max_pitch_up)
+                            > 0 ? parent->GetComputerData().max_pitch_down : parent->GetComputerData().max_pitch_up)
                     / getTimeCompression()) * Vector(
                     1,
                     0,
                     0);
 }
 
-void FlyByWire::RollRight(float per)
-{
+void FlyByWire::RollRight(float per) {
     desired_ang_velocity +=
             (-per
                     * (per
-                               > 0 ? parent->GetComputerData().max_roll_left : parent->GetComputerData().max_roll_right)
+                            > 0 ? parent->GetComputerData().max_roll_left : parent->GetComputerData().max_roll_right)
                     / getTimeCompression()) * Vector(
                     0,
                     0,
                     1);
 }
 
-void FlyByWire::Afterburn(float per)
-{
+void FlyByWire::Afterburn(float per) {
     Computer *cpu = &parent->GetComputerData();
 
     afterburn = (per > .1);
@@ -260,13 +246,11 @@ void FlyByWire::Afterburn(float per)
     }
 }
 
-void FlyByWire::SheltonSlide(bool onoff)
-{
+void FlyByWire::SheltonSlide(bool onoff) {
     sheltonslide = onoff;
 }
 
-void FlyByWire::MatchSpeed(const Vector &vec)
-{
+void FlyByWire::MatchSpeed(const Vector &vec) {
     Computer *cpu = &parent->GetComputerData();
 
     cpu->set_speed = (vec).Magnitude();
@@ -275,8 +259,7 @@ void FlyByWire::MatchSpeed(const Vector &vec)
     }
 }
 
-void FlyByWire::Accel(float per)
-{
+void FlyByWire::Accel(float per) {
     Computer *cpu = &parent->GetComputerData();
 
     cpu->set_speed += per * cpu->max_speed() * simulation_atom_var; //SIMULATION_ATOM?
@@ -295,33 +278,27 @@ void FlyByWire::Accel(float per)
 
 #define FBWABS(m) (m >= 0 ? m : -m)
 
-void FlyByWire::ThrustRight(float percent)
-{
+void FlyByWire::ThrustRight(float percent) {
     DesiredShiftVelocity.i = parent->GetComputerData().max_speed() * percent;
 }
 
-void FlyByWire::ThrustUp(float percent)
-{
+void FlyByWire::ThrustUp(float percent) {
     DesiredShiftVelocity.j = parent->GetComputerData().max_speed() * percent;
 }
 
-void FlyByWire::ThrustFront(float percent)
-{
+void FlyByWire::ThrustFront(float percent) {
     DesiredShiftVelocity.k = parent->GetComputerData().max_speed() * percent;
 }
 
-void FlyByWire::DirectThrustRight(float percent)
-{
+void FlyByWire::DirectThrustRight(float percent) {
     DirectThrust.i = parent->limits.lateral * percent;
 }
 
-void FlyByWire::DirectThrustUp(float percent)
-{
+void FlyByWire::DirectThrustUp(float percent) {
     DirectThrust.j = parent->limits.vertical * percent;
 }
 
-void FlyByWire::DirectThrustFront(float percent)
-{
+void FlyByWire::DirectThrustFront(float percent) {
     if (percent > 0) {
         DirectThrust.k = parent->limits.forward * percent;
     } else {
@@ -329,8 +306,7 @@ void FlyByWire::DirectThrustFront(float percent)
     }
 }
 
-void FlyByWire::Execute()
-{
+void FlyByWire::Execute() {
     bool desireThrust = false;
     Vector des_vel_bak(desired_velocity);
     if (!inertial_flight_model) {
@@ -396,25 +372,21 @@ void FlyByWire::Execute()
     desired_velocity = des_vel_bak;
 }
 
-FlyByWire::~FlyByWire()
-{
+FlyByWire::~FlyByWire() {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(debug, (boost::format("fbw%1$x") % this));
 #endif
 }
 
-void FlyByWire::InertialFlight(bool onoff)
-{
+void FlyByWire::InertialFlight(bool onoff) {
     inertial_flight_model = onoff;
     parent->inertialmode = onoff;
 }
 
-bool FlyByWire::InertialFlight() const
-{
+bool FlyByWire::InertialFlight() const {
     return inertial_flight_model;
 }
 
-bool FlyByWire::InertialFlightEnable() const
-{
+bool FlyByWire::InertialFlightEnable() const {
     return inertial_flight_enable;
 }

@@ -23,15 +23,13 @@
 #include "../../first.h"
 #include "../filter_one_texel.h"
 
-void filter_one_texel::init_constants()
-{
+void filter_one_texel::init_constants() {
     cosa_ = ::cosf(max_radius_);
     sina_ = ::sinf(max_radius_);
 }
 
 //very important for this function to be inlined; otherwise the branches are not predictable
-inline void clip_to_square(float &x, float &y)
-{
+inline void clip_to_square(float &x, float &y) {
     if (x * x > y * y) {
         //either left or right sides
         if (x > 0.0f) {
@@ -90,13 +88,12 @@ inline void clip_to_square(float &x, float &y)
 //treated differently from cases in which they intersect adjacent, or opposite sides...
 //Very important for this function to be inlined; otherwise the branches are not predictable
 inline void filter_one_texel::plane_min_max(float len_sqr,
-                                            float x,
-                                            float y,
-                                            float &minx,
-                                            float &maxx,
-                                            float &miny,
-                                            float &maxy)
-{
+        float x,
+        float y,
+        float &minx,
+        float &maxx,
+        float &miny,
+        float &maxy) {
     float inv_len = 1.0f / ::sqrtf(len_sqr);
     x *= inv_len;
     y *= inv_len;
@@ -219,8 +216,7 @@ inline void filter_one_texel::plane_min_max(float len_sqr,
 #undef UPD_MIN_Y
 #undef UPD_MIN_X
 
-fRGBAcol filter_one_texel::operator()(fvector const *ray /*normalized*/ )
-{
+fRGBAcol filter_one_texel::operator()(fvector const *ray /*normalized*/ ) {
     //FIRST WE NEED TO ESTABLISH ITERATION BOUNDARIES FOR THE SOURCE CUBE
     //If we establish the 2-coord min and max on two planes, that's enough; and the best two planes to
     //do this are those whose ray projections are largest

@@ -28,8 +28,7 @@ using std::string;
 extern char origpath[65536];
 bool origconfig = false;
 
-void LoadMainConfig(void)
-{
+void LoadMainConfig(void) {
     FILE *fp;
     char line[MAX_READ + 1];
     char *p, *n_parm, *parm;
@@ -137,13 +136,11 @@ void LoadMainConfig(void)
 //Reads the config file to get the header information
 //The program segfaults with incorrect header information
 //I should add error checking for that
-string mangle_config(string config)
-{
+string mangle_config(string config) {
     return string(origpath) + string("/") + config;
 }
 
-bool useGameConfig(void)
-{
+bool useGameConfig(void) {
     struct stat st1, st2;
     if (stat(CONFIG.config_file, &st1) == 0 && stat(mangle_config(CONFIG.config_file).c_str(), &st2) == 0) {
         if (st2.st_mtime > st1.st_mtime) {
@@ -153,8 +150,7 @@ bool useGameConfig(void)
     return false;
 }
 
-void LoadConfig(void)
-{
+void LoadConfig(void) {
     FILE *fp;
     char line[MAX_READ + 1];
     char *p, *n_parm, *parm, *group;
@@ -175,8 +171,9 @@ void LoadConfig(void)
         if (parm[0] == '<') {
             parm += 5;
         }                  //Line might start with '<!-- '. Our code is inside these comments
-        if (parm[0] != '#')
-            continue;                   //A line not starting with # can't be a config setting
+        if (parm[0] != '#') {
+            continue;
+        }                   //A line not starting with # can't be a config setting
         if (parm[1] == '#')
             continue;                   //A line with a 2nd # is an ignored line
         chomp(parm);                                  //Get rid of the \n at the end of the line
@@ -243,8 +240,7 @@ void LoadConfig(void)
     }
 }
 
-void Modconfig(int setting, const char *name, const char *group)
-{
+void Modconfig(int setting, const char *name, const char *group) {
     FILE *rp, *wp;              //read and write
     char line[MAX_READ + 1], write[MAX_READ + 1], mid[MAX_READ + 1];
     char *p, *parm, *n_parm, *start_write, *end_write;
@@ -413,12 +409,10 @@ void Modconfig(int setting, const char *name, const char *group)
     fclose(wp);
 }
 
-void EnableSetting(const char *name, const char *group)
-{
+void EnableSetting(const char *name, const char *group) {
     Modconfig(2, name, group);
 }
 
-void DisableSetting(const char *name, const char *group)
-{
+void DisableSetting(const char *name, const char *group) {
     Modconfig(1, name, group);
 }

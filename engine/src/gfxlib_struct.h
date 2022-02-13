@@ -74,26 +74,22 @@ struct GFXVertex {
     float tz;
     float tw;
 
-    GFXVertex()
-    {
+    GFXVertex() {
     }
 
-    GFXVertex(const QVector &vert, const Vector &norm, float s, float t)
-    {
+    GFXVertex(const QVector &vert, const Vector &norm, float s, float t) {
         SetVertex(vert.Cast());
         SetNormal(norm);
         SetTexCoord(s, t);
     }
 
-    GFXVertex(const Vector &vert, const Vector &norm, float s, float t)
-    {
+    GFXVertex(const Vector &vert, const Vector &norm, float s, float t) {
         SetVertex(vert);
         SetNormal(norm);
         SetTexCoord(s, t);
     }
 
-    GFXVertex(float x, float y, float z, float i, float j, float k, float s, float t)
-    {
+    GFXVertex(float x, float y, float z, float i, float j, float k, float s, float t) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -104,31 +100,27 @@ struct GFXVertex {
         this->t = t;
     }
 
-    GFXVertex &SetTexCoord(float s, float t)
-    {
+    GFXVertex &SetTexCoord(float s, float t) {
         this->s = s;
         this->t = t;
         return *this;
     }
 
-    GFXVertex &SetNormal(const Vector &norm)
-    {
+    GFXVertex &SetNormal(const Vector &norm) {
         i = norm.i;
         j = norm.j;
         k = norm.k;
         return *this;
     }
 
-    GFXVertex &SetVertex(const Vector &vert)
-    {
+    GFXVertex &SetVertex(const Vector &vert) {
         x = vert.i;
         y = vert.j;
         z = vert.k;
         return *this;
     }
 
-    GFXVertex &SetTangent(const Vector &tgt, float parity = 1.f)
-    {
+    GFXVertex &SetTangent(const Vector &tgt, float parity = 1.f) {
         tx = tgt.x;
         ty = tgt.y;
         tz = tgt.z;
@@ -136,33 +128,27 @@ struct GFXVertex {
         return *this;
     }
 
-    Vector GetVertex() const
-    {
+    Vector GetVertex() const {
         return Vector(x, y, z);
     }
 
-    const Vector &GetConstVertex() const
-    {
+    const Vector &GetConstVertex() const {
         return *((Vector *) &x);
     }
 
-    Vector GetNormal() const
-    {
+    Vector GetNormal() const {
         return Vector(i, j, k);
     }
 
-    Vector GetPosition() const
-    {
+    Vector GetPosition() const {
         return Vector(x, y, z);
     }
 
-    Vector GetTangent() const
-    {
+    Vector GetTangent() const {
         return Vector(tx, ty, tz);
     }
 
-    float GetTangentParity() const
-    {
+    float GetTangentParity() const {
         return tw;
     }
 };
@@ -174,86 +160,73 @@ struct GFXColor {
     float b = 0;
     float a = 0;
 
-    GFXColor()
-    {
+    GFXColor() {
     }
 
-    GFXColor(const Vector &v, float a = 1.0)
-    {
+    GFXColor(const Vector &v, float a = 1.0) {
         this->r = v.i;
         this->g = v.j;
         this->b = v.k;
         this->a = a;
     }
 
-    GFXColor(float r, float g, float b)
-    {
+    GFXColor(float r, float g, float b) {
         this->r = r;
         this->g = g;
         this->b = b;
         this->a = 1.0;
     }
 
-    GFXColor(float r, float g, float b, float a)
-    {
+    GFXColor(float r, float g, float b, float a) {
         this->r = r;
         this->g = g;
         this->b = b;
         this->a = a;
     }
 
-    void netswap()
-    {
+    void netswap() {
         this->r = VSSwapHostFloatToLittle(this->r);
         this->g = VSSwapHostFloatToLittle(this->g);
         this->b = VSSwapHostFloatToLittle(this->b);
         this->a = VSSwapHostFloatToLittle(this->a);
     }
 
-    GFXColor clamp() const
-    {
+    GFXColor clamp() const {
         return GFXColor(((r < 0) ? 0 : ((r > 1) ? 1 : r)), ((g < 0) ? 0 : ((g > 1) ? 1 : g)),
-                        ((b < 0) ? 0 : ((b > 1) ? 1 : b)), ((a < 0) ? 0 : ((a > 1) ? 1 : a)));
+                ((b < 0) ? 0 : ((b > 1) ? 1 : b)), ((a < 0) ? 0 : ((a > 1) ? 1 : a)));
     }
 };
 
-inline GFXColor operator*(float s, const GFXColor &c)
-{
+inline GFXColor operator*(float s, const GFXColor &c) {
     return GFXColor(s * c.r, s * c.g, s * c.b, s * c.a);
 }
 
-inline GFXColor operator*(const GFXColor &c, float s)
-{
+inline GFXColor operator*(const GFXColor &c, float s) {
     return GFXColor(s * c.r, s * c.g, s * c.b, s * c.a);
 }
 
-inline GFXColor operator+(const GFXColor &c0, const GFXColor &c1)
-{
+inline GFXColor operator+(const GFXColor &c0, const GFXColor &c1) {
     return GFXColor(c0.r + c1.r, c0.g + c1.g, c0.b + c1.b, c0.a + c1.a);
 }
 
-inline GFXColor operator-(const GFXColor &c0, const GFXColor &c1)
-{
+inline GFXColor operator-(const GFXColor &c0, const GFXColor &c1) {
     return GFXColor(c0.r - c1.r, c0.g - c1.g, c0.b - c1.b, c0.a - c1.a);
 }
 
-inline GFXColor operator-(GFXColor &c0, const GFXColor &c1)
-{
+inline GFXColor operator-(GFXColor &c0, const GFXColor &c1) {
     return GFXColor(c0.r - c1.r, c0.g - c1.g, c0.b - c1.b, c0.a - c1.a);
 }
 
-inline bool operator==(const GFXColor &c0, const GFXColor &c1)
-{
+inline bool operator==(const GFXColor &c0, const GFXColor &c1) {
     return (c0.r == c1.r) && (c0.g == c1.g) && (c0.b == c1.b) && (c0.a == c1.a);
 }
 
-inline GFXColor colLerp(GFXColor a, GFXColor b, float bweight)
-{
+inline GFXColor colLerp(GFXColor a, GFXColor b, float bweight) {
     float aweight = 1.0f - bweight;
     return GFXColor(a.r * aweight + b.r * bweight,
-                    a.g * aweight + b.g * bweight,
-                    a.b * aweight + b.b * bweight,
-                    a.a * aweight + b.a * bweight);
+            a.g * aweight + b.g * bweight,
+            a.b * aweight + b.b * bweight,
+            a.a * aweight + b.a * bweight);
 }
 
 ///This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F
@@ -284,8 +257,7 @@ struct GFXColorVertex {
     float tz;
     float tw;
 
-    GFXColorVertex()
-    {
+    GFXColorVertex() {
         this->x = 0.f;
         this->y = 0.f;
         this->z = 0.f;
@@ -304,40 +276,36 @@ struct GFXColorVertex {
         this->tw = 1.f;
     }
 
-    GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t)
-    {
+    GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t) {
         SetVertex(vert);
         SetNormal(norm);
         SetColor(rgba);
         SetTexCoord(s, t);
     }
 
-    GFXColorVertex(const Vector &vert, const GFXColor &rgba, float s, float t)
-    {
+    GFXColorVertex(const Vector &vert, const GFXColor &rgba, float s, float t) {
         SetVertex(vert);
         SetColor(rgba);
         SetTexCoord(s, t);
     }
 
-    GFXColorVertex(const Vector &vert, const GFXColor &rgba)
-    {
+    GFXColorVertex(const Vector &vert, const GFXColor &rgba) {
         SetVertex(vert);
         SetColor(rgba);
     }
 
     GFXColorVertex(float x,
-                   float y,
-                   float z,
-                   float i,
-                   float j,
-                   float k,
-                   float r,
-                   float g,
-                   float b,
-                   float a,
-                   float s,
-                   float t)
-    {
+            float y,
+            float z,
+            float i,
+            float j,
+            float k,
+            float r,
+            float g,
+            float b,
+            float a,
+            float s,
+            float t) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -352,31 +320,27 @@ struct GFXColorVertex {
         this->t = t;
     }
 
-    GFXColorVertex &SetTexCoord(float s, float t)
-    {
+    GFXColorVertex &SetTexCoord(float s, float t) {
         this->s = s;
         this->t = t;
         return *this;
     }
 
-    GFXColorVertex &SetNormal(const Vector &norm)
-    {
+    GFXColorVertex &SetNormal(const Vector &norm) {
         i = norm.i;
         j = norm.j;
         k = norm.k;
         return *this;
     }
 
-    GFXColorVertex &SetVertex(const Vector &vert)
-    {
+    GFXColorVertex &SetVertex(const Vector &vert) {
         x = vert.i;
         y = vert.j;
         z = vert.k;
         return *this;
     }
 
-    GFXColorVertex &SetColor(const GFXColor &col)
-    {
+    GFXColorVertex &SetColor(const GFXColor &col) {
         r = col.r;
         g = col.g;
         b = col.b;
@@ -384,8 +348,7 @@ struct GFXColorVertex {
         return *this;
     }
 
-    GFXColorVertex &SetTangent(const Vector &tgt, float parity = 1.f)
-    {
+    GFXColorVertex &SetTangent(const Vector &tgt, float parity = 1.f) {
         tx = tgt.x;
         ty = tgt.y;
         tz = tgt.z;
@@ -393,18 +356,15 @@ struct GFXColorVertex {
         return *this;
     }
 
-    Vector GetNormal() const
-    {
+    Vector GetNormal() const {
         return Vector(i, j, k);
     }
 
-    Vector GetPosition() const
-    {
+    Vector GetPosition() const {
         return Vector(x, y, z);
     }
 
-    void SetVtx(const GFXVertex &vv)
-    {
+    void SetVtx(const GFXVertex &vv) {
         s = vv.s;
         t = vv.t;
         i = vv.i;
@@ -415,13 +375,11 @@ struct GFXColorVertex {
         z = vv.z;
     }
 
-    Vector GetTangent() const
-    {
+    Vector GetTangent() const {
         return Vector(tx, ty, tz);
     }
 
-    float GetTangentParity() const
-    {
+    float GetTangentParity() const {
         return tw;
     }
 };
@@ -445,17 +403,14 @@ public:
         typename BufferType::size_type where;
 
         back_insert_iterator(BufferType &_buffer, typename BufferType::size_type _where)
-                : buffer(_buffer), where(_where)
-        {
+                : buffer(_buffer), where(_where) {
         }
 
-        back_insert_iterator(const back_insert_iterator &other) : buffer(other.buffer), where(other.where)
-        {
+        back_insert_iterator(const back_insert_iterator &other) : buffer(other.buffer), where(other.where) {
         }
 
         template<typename IT>
-        void _set_at(const GFXVertex &vtx, IT where)
-        {
+        void _set_at(const GFXVertex &vtx, IT where) {
             if (VSIZE >= 1) {
                 *where = vtx.x;
                 ++where;
@@ -527,8 +482,7 @@ public:
         }
 
         template<typename IT>
-        void _set_at(const GFXColorVertex &vtx, IT where)
-        {
+        void _set_at(const GFXColorVertex &vtx, IT where) {
             if (VSIZE >= 1) {
                 *where = vtx.x;
                 ++where;
@@ -604,26 +558,22 @@ public:
         }
 
     public:
-        back_insert_iterator &operator++(int)
-        {
+        back_insert_iterator &operator++(int) {
             where += ESIZE;
             return this;
         }
 
-        back_insert_iterator operator++()
-        {
+        back_insert_iterator operator++() {
             back_insert_iterator rv(this);
             ++*this;
             return rv;
         }
 
-        back_insert_iterator &operator*()
-        {
+        back_insert_iterator &operator*() {
             return *this;
         }
 
-        const GFXVertex &operator=(const GFXVertex &vtx)
-        {
+        const GFXVertex &operator=(const GFXVertex &vtx) {
             if ((where + ESIZE) > buffer.size()) {
                 buffer.resize(where + ESIZE);
             }
@@ -631,8 +581,7 @@ public:
             return vtx;
         }
 
-        const GFXColorVertex &operator=(const GFXColorVertex &vtx)
-        {
+        const GFXColorVertex &operator=(const GFXColorVertex &vtx) {
             if ((where + ESIZE) > buffer.size()) {
                 buffer.resize(where + ESIZE);
             }
@@ -645,82 +594,66 @@ private:
     BufferType buffer;
 
 public:
-    VertexBuilder()
-    {
+    VertexBuilder() {
     };
 
-    explicit VertexBuilder(size_type size)
-    {
+    explicit VertexBuilder(size_type size) {
         reserve(size);
     }
 
-    const ElementType *buffer_pointer() const
-    {
+    const ElementType *buffer_pointer() const {
         return &buffer[0];
     }
 
-    const_iterator begin() const
-    {
+    const_iterator begin() const {
         return buffer.begin();
     }
 
-    const_iterator end() const
-    {
+    const_iterator end() const {
         return buffer.end();
     }
 
-    iterator begin()
-    {
+    iterator begin() {
         return buffer.begin();
     }
 
-    iterator end()
-    {
+    iterator end() {
         return buffer.end();
     }
 
-    back_insert_iterator insertor()
-    {
+    back_insert_iterator insertor() {
         return back_insert_iterator(buffer, buffer.size());
     }
 
-    size_type size() const
-    {
+    size_type size() const {
         return buffer.size() / ESIZE;
     }
 
-    void clear()
-    {
+    void clear() {
         buffer.clear();
     }
 
-    void reserve(size_type size)
-    {
+    void reserve(size_type size) {
         buffer.reserve(size * ESIZE);
     }
 
-    void insert(const GFXVertex &vtx)
-    {
+    void insert(const GFXVertex &vtx) {
         *(insertor()) = vtx;
     }
 
-    void insert(const GFXColorVertex &vtx)
-    {
+    void insert(const GFXColorVertex &vtx) {
         *(insertor()) = vtx;
     }
 
-    void insert(const QVector &v)
-    {
+    void insert(const QVector &v) {
         insert(v.x, v.y, v.z);
     }
 
-    void insert(const Vector &v)
-    {
+    void insert(const Vector &v) {
         insert(v.x, v.y, v.z);
     }
 
-    void insert(float x, float y, float z)
-    {
+    void insert(float x, float y, float z) {
         GFXVertex vtx;
         vtx.x = x;
         vtx.y = y;
@@ -728,8 +661,7 @@ public:
         insert(vtx);
     }
 
-    void insert(float x, float y, float z, const GFXColor &color)
-    {
+    void insert(float x, float y, float z, const GFXColor &color) {
         GFXColorVertex vtx;
         vtx.x = x;
         vtx.y = y;
@@ -741,8 +673,7 @@ public:
         insert(vtx);
     }
 
-    void insert(float x, float y, float z, float s, float t)
-    {
+    void insert(float x, float y, float z, float s, float t) {
         GFXVertex vtx;
         vtx.x = x;
         vtx.y = y;
@@ -782,8 +713,7 @@ public:
     float occlusion;
 
 public:
-    GFXLight()
-    {
+    GFXLight() {
         //vect[0]=vect[1]=vect[2]=vect[3]=0;
         vect[0] = vect[1] = vect[2] = 0;
         attenuate[0] = 1;
@@ -804,17 +734,16 @@ public:
     }
 
     GFXLight(const bool enabled, const GFXColor &vect,
-             const GFXColor &diffuse = GFXColor(0, 0, 0, 1),
-             const GFXColor &specular = GFXColor(0, 0, 0, 1),
-             const GFXColor &ambient = GFXColor(0, 0, 0, 1),
-             const GFXColor &attenuate = GFXColor(1, 0, 0),
-             const GFXColor &direction = GFXColor(0, 0, 0),
-             float exp = 0.0f,
-             float cutoff = 180.0f,
-             float size = 0.0f);
+            const GFXColor &diffuse = GFXColor(0, 0, 0, 1),
+            const GFXColor &specular = GFXColor(0, 0, 0, 1),
+            const GFXColor &ambient = GFXColor(0, 0, 0, 1),
+            const GFXColor &attenuate = GFXColor(1, 0, 0),
+            const GFXColor &direction = GFXColor(0, 0, 0),
+            float exp = 0.0f,
+            float cutoff = 180.0f,
+            float size = 0.0f);
 
-    GFXLight(const GFXLight &other)
-    {
+    GFXLight(const GFXLight &other) {
         vect[0] = other.vect[0];
         vect[1] = other.vect[1];
         vect[2] = other.vect[2];
@@ -847,18 +776,15 @@ public:
     void SetProperties(enum LIGHT_TARGET, const GFXColor &color);
     GFXColor GetProperties(enum LIGHT_TARGET) const;
 
-    void setSize(float size_)
-    {
+    void setSize(float size_) {
         size = size_;
     }
 
-    float getSize() const
-    {
+    float getSize() const {
         return size;
     }
 
-    Vector getPosition() const
-    {
+    Vector getPosition() const {
         return Vector(vect[0], vect[1], vect[2]);
     }
 
@@ -966,8 +892,7 @@ protected:
         ///Or has color data
         GFXColorVertex *colors;
 
-        VDAT() : vertices(0)
-        {
+        VDAT() : vertices(0) {
         };
     }
             data;
@@ -975,8 +900,7 @@ protected:
         unsigned char *b; //stride 1
         unsigned short *s; //stride 2
         unsigned int *i; //stride 4
-        INDEX() : i(0)
-        {
+        INDEX() : i(0) {
         };
     }
             index;
@@ -1006,13 +930,13 @@ protected:
     static void IndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
 ///Init function (call from construtor)
     void Init(enum POLYTYPE *poly,
-              int numVertices,
-              const GFXVertex *vert,
-              const GFXColorVertex *colors,
-              int numlists,
-              int *offsets,
-              bool Mutable,
-              unsigned int *indices);
+            int numVertices,
+            const GFXVertex *vert,
+            const GFXColorVertex *colors,
+            int numlists,
+            int *offsets,
+            bool Mutable,
+            unsigned int *indices);
 ///Propagates modifications to the display list
 public:
     void RefreshDisplayList();
@@ -1023,47 +947,43 @@ protected:
 public:
 ///creates a vertex list with 1 polytype and a given number of vertices
     inline GFXVertexList(enum POLYTYPE poly,
-                         int numVertices,
-                         const GFXVertex *vertices,
-                         int numindices,
-                         bool Mutable = false,
-                         unsigned int *index = 0)
-    {
+            int numVertices,
+            const GFXVertex *vertices,
+            int numindices,
+            bool Mutable = false,
+            unsigned int *index = 0) {
         Init(&poly, numVertices, vertices, 0, 1, &numindices, Mutable, index);
     }
 
 ///Creates a vertex list with an arbitrary number of poly types and given vertices, num list and offsets (see above)
     inline GFXVertexList(enum POLYTYPE *poly,
-                         int numVertices,
-                         const GFXVertex *vertices,
-                         int numlists,
-                         int *offsets,
-                         bool Mutable = false,
-                         unsigned int *index = 0)
-    {
+            int numVertices,
+            const GFXVertex *vertices,
+            int numlists,
+            int *offsets,
+            bool Mutable = false,
+            unsigned int *index = 0) {
         Init(poly, numVertices, vertices, 0, numlists, offsets, Mutable, index);
     }
 
 ///Creates a vertex list with 1 poly type and color information to boot
     inline GFXVertexList(enum POLYTYPE poly,
-                         int numVertices,
-                         const GFXColorVertex *colors,
-                         int numindices,
-                         bool Mutable = false,
-                         unsigned int *index = 0)
-    {
+            int numVertices,
+            const GFXColorVertex *colors,
+            int numindices,
+            bool Mutable = false,
+            unsigned int *index = 0) {
         Init(&poly, numVertices, 0, colors, 1, &numindices, Mutable, index);
     }
 
 ///Creates a vertex list with an arbitrary number of poly types and color
     inline GFXVertexList(enum POLYTYPE *poly,
-                         int numVertices,
-                         const GFXColorVertex *colors,
-                         int numlists,
-                         int *offsets,
-                         bool Mutable = false,
-                         unsigned int *index = 0)
-    {
+            int numVertices,
+            const GFXColorVertex *colors,
+            int numlists,
+            int *offsets,
+            bool Mutable = false,
+            unsigned int *index = 0) {
         Init(poly, numVertices, 0, colors, numlists, offsets, Mutable, index);
     }
 
@@ -1079,8 +999,7 @@ public:
     int GetNumLists() const;
     bool hasColor() const;
 
-    int GetNumVertices() const
-    {
+    int GetNumVertices() const {
         return numVertices;
     }
 
@@ -1167,107 +1086,91 @@ struct GFXMaterial {
     float power;
 };
 
-inline void setMaterialAmbient(GFXMaterial &mat, float r, float g, float b, float a)
-{
+inline void setMaterialAmbient(GFXMaterial &mat, float r, float g, float b, float a) {
     mat.ar = r;
     mat.ag = g;
     mat.ab = b;
     mat.aa = a;
 }
 
-inline void setMaterialDiffuse(GFXMaterial &mat, float r, float g, float b, float a)
-{
+inline void setMaterialDiffuse(GFXMaterial &mat, float r, float g, float b, float a) {
     mat.dr = r;
     mat.dg = g;
     mat.db = b;
     mat.da = a;
 }
 
-inline void setMaterialSpecular(GFXMaterial &mat, float r, float g, float b, float a)
-{
+inline void setMaterialSpecular(GFXMaterial &mat, float r, float g, float b, float a) {
     mat.sr = r;
     mat.sg = g;
     mat.sb = b;
     mat.sa = a;
 }
 
-inline void setMaterialEmissive(GFXMaterial &mat, float r, float g, float b, float a)
-{
+inline void setMaterialEmissive(GFXMaterial &mat, float r, float g, float b, float a) {
     mat.er = r;
     mat.eg = g;
     mat.eb = b;
     mat.ea = a;
 }
 
-inline void setMaterialAmbient(GFXMaterial &mat, float rgba)
-{
+inline void setMaterialAmbient(GFXMaterial &mat, float rgba) {
     mat.ar = mat.ag = mat.ab = mat.aa = rgba;
 }
 
-inline void setMaterialDiffuse(GFXMaterial &mat, float rgba)
-{
+inline void setMaterialDiffuse(GFXMaterial &mat, float rgba) {
     mat.dr = mat.dg = mat.db = mat.da = rgba;
 }
 
-inline void setMaterialSpecular(GFXMaterial &mat, float rgba)
-{
+inline void setMaterialSpecular(GFXMaterial &mat, float rgba) {
     mat.sr = mat.sg = mat.sb = mat.sa = rgba;
 }
 
-inline void setMaterialEmissive(GFXMaterial &mat, float rgba)
-{
+inline void setMaterialEmissive(GFXMaterial &mat, float rgba) {
     mat.er = mat.eg = mat.eb = mat.ea = rgba;
 }
 
-inline void setMaterialAmbient(GFXMaterial &mat, const GFXColor &col)
-{
+inline void setMaterialAmbient(GFXMaterial &mat, const GFXColor &col) {
     mat.ar = col.r;
     mat.ag = col.g;
     mat.ab = col.b;
     mat.aa = col.a;
 }
 
-inline void setMaterialDiffuse(GFXMaterial &mat, const GFXColor &col)
-{
+inline void setMaterialDiffuse(GFXMaterial &mat, const GFXColor &col) {
     mat.dr = col.r;
     mat.dg = col.g;
     mat.db = col.b;
     mat.da = col.a;
 }
 
-inline void setMaterialSpecular(GFXMaterial &mat, const GFXColor &col)
-{
+inline void setMaterialSpecular(GFXMaterial &mat, const GFXColor &col) {
     mat.sr = col.r;
     mat.sg = col.g;
     mat.sb = col.b;
     mat.sa = col.a;
 }
 
-inline void setMaterialEmissive(GFXMaterial &mat, const GFXColor &col)
-{
+inline void setMaterialEmissive(GFXMaterial &mat, const GFXColor &col) {
     mat.er = col.r;
     mat.eg = col.g;
     mat.eb = col.b;
     mat.ea = col.a;
 }
 
-inline GFXColor getMaterialAmbient(const GFXMaterial &mat)
-{
+inline GFXColor getMaterialAmbient(const GFXMaterial &mat) {
     return GFXColor(mat.ar, mat.ag, mat.ab, mat.aa);
 }
 
-inline GFXColor getMaterialDiffuse(const GFXMaterial &mat)
-{
+inline GFXColor getMaterialDiffuse(const GFXMaterial &mat) {
     return GFXColor(mat.dr, mat.dg, mat.db, mat.da);
 }
 
-inline GFXColor getMaterialSpecular(const GFXMaterial &mat)
-{
+inline GFXColor getMaterialSpecular(const GFXMaterial &mat) {
     return GFXColor(mat.sr, mat.sg, mat.sb, mat.sa);
 }
 
-inline GFXColor getMaterialEmissive(const GFXMaterial &mat)
-{
+inline GFXColor getMaterialEmissive(const GFXMaterial &mat) {
     return GFXColor(mat.er, mat.eg, mat.eb, mat.ea);
 }
 
@@ -1412,8 +1315,7 @@ struct PickData {
     int zmin;
     int zmax;
 
-    PickData(int name, int zmin, int zmax) : name(name), zmin(zmin), zmax(zmax)
-    {
+    PickData(int name, int zmin, int zmax) : name(name), zmin(zmin), zmax(zmax) {
     }
 };
 

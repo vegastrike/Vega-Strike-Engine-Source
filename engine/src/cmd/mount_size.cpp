@@ -45,20 +45,18 @@ static const std::map<std::string, MOUNT_SIZE> mount_map = {
         {"AUTOTRACKING", MOUNT_SIZE::AUTOTRACKING}
 };
 
-MountSize::MountSize()
-{
+MountSize::MountSize() {
 
 }
 
-MOUNT_SIZE getMountSizeFromItsValue(int value)
-{
+MOUNT_SIZE getMountSizeFromItsValue(int value) {
     MOUNT_SIZE mount_sizes[] = {MOUNT_SIZE::NOWEAP,
-                                MOUNT_SIZE::LIGHT, MOUNT_SIZE::MEDIUM, MOUNT_SIZE::HEAVY,
-                                MOUNT_SIZE::CAPSHIPLIGHT, MOUNT_SIZE::CAPSHIPHEAVY, MOUNT_SIZE::SPECIAL,
-                                MOUNT_SIZE::LIGHTMISSILE, MOUNT_SIZE::MEDIUMMISSILE, MOUNT_SIZE::HEAVYMISSILE,
-                                MOUNT_SIZE::CAPSHIPLIGHTMISSILE, MOUNT_SIZE::CAPSHIPHEAVYMISSILE,
-                                MOUNT_SIZE::SPECIALMISSILE,
-                                MOUNT_SIZE::AUTOTRACKING};
+            MOUNT_SIZE::LIGHT, MOUNT_SIZE::MEDIUM, MOUNT_SIZE::HEAVY,
+            MOUNT_SIZE::CAPSHIPLIGHT, MOUNT_SIZE::CAPSHIPHEAVY, MOUNT_SIZE::SPECIAL,
+            MOUNT_SIZE::LIGHTMISSILE, MOUNT_SIZE::MEDIUMMISSILE, MOUNT_SIZE::HEAVYMISSILE,
+            MOUNT_SIZE::CAPSHIPLIGHTMISSILE, MOUNT_SIZE::CAPSHIPHEAVYMISSILE,
+            MOUNT_SIZE::SPECIALMISSILE,
+            MOUNT_SIZE::AUTOTRACKING};
 
     for (auto &&mount_size : mount_sizes) {
         if (value == as_integer(mount_size)) {
@@ -69,8 +67,7 @@ MOUNT_SIZE getMountSizeFromItsValue(int value)
     return MOUNT_SIZE::NOWEAP;
 }
 
-MOUNT_SIZE getMountSize(const std::string &mount_string)
-{
+MOUNT_SIZE getMountSize(const std::string &mount_string) {
     // TODO: just use map here?! but then need to do something about case sensitivity
     for (const auto &key_value : mount_map) {
         if (boost::iequals(mount_string, key_value.first)) {
@@ -81,8 +78,7 @@ MOUNT_SIZE getMountSize(const std::string &mount_string)
     return MOUNT_SIZE::NOWEAP;
 }
 
-int getMountSizes(const std::string &mounts_string)
-{
+int getMountSizes(const std::string &mounts_string) {
     std::vector<std::string> mounts_vector;
     boost::split(mounts_vector, mounts_string, boost::is_any_of(" "));
     int mountSize = 0;
@@ -94,8 +90,7 @@ int getMountSizes(const std::string &mounts_string)
     return mountSize;
 }
 
-std::string getMountSizeString(const int mount)
-{
+std::string getMountSizeString(const int mount) {
     std::string mount_string;
 
     for (const auto &key_value : mount_map) {
@@ -109,8 +104,7 @@ std::string getMountSizeString(const int mount)
     return mount_string;
 }
 
-bool isNormalGunMount(const int mount)
-{
+bool isNormalGunMount(const int mount) {
     return (mount & (
             as_integer(MOUNT_SIZE::LIGHT) |
                     as_integer(MOUNT_SIZE::MEDIUM) |
@@ -119,8 +113,7 @@ bool isNormalGunMount(const int mount)
                     as_integer(MOUNT_SIZE::CAPSHIPHEAVY))) != 0;
 }
 
-bool isNormalMissileMount(const int mount)
-{
+bool isNormalMissileMount(const int mount) {
     return (mount & (
             as_integer(MOUNT_SIZE::LIGHTMISSILE) |
                     as_integer(MOUNT_SIZE::MEDIUMMISSILE) |
@@ -129,34 +122,28 @@ bool isNormalMissileMount(const int mount)
                     as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE))) != 0;
 }
 
-bool isNormalMount(const int mount)
-{
+bool isNormalMount(const int mount) {
     return isNormalGunMount(mount) || isNormalMissileMount(mount);
 }
 
-bool isSpecialMount(const int mount)
-{
+bool isSpecialMount(const int mount) {
     return mount & (as_integer(MOUNT_SIZE::SPECIAL) ||
             as_integer(MOUNT_SIZE::SPECIALMISSILE));
 }
 
-bool isSpecialGunMount(const int mount)
-{
+bool isSpecialGunMount(const int mount) {
     return mount & as_integer(MOUNT_SIZE::SPECIAL);
 }
 
-bool isSpecialMissileMount(const int mount)
-{
+bool isSpecialMissileMount(const int mount) {
     return mount & as_integer(MOUNT_SIZE::SPECIALMISSILE);
 }
 
-bool isAutoTrackingMount(const int mount)
-{
+bool isAutoTrackingMount(const int mount) {
     return mount & as_integer(MOUNT_SIZE::AUTOTRACKING);
 }
 
-bool isGunMount(const int mount)
-{
+bool isGunMount(const int mount) {
     return (mount & (
             as_integer(MOUNT_SIZE::LIGHT) |
                     as_integer(MOUNT_SIZE::MEDIUM) |
@@ -166,8 +153,7 @@ bool isGunMount(const int mount)
                     as_integer(MOUNT_SIZE::SPECIAL))) != 0;
 }
 
-bool isMissileMount(const int mount)
-{
+bool isMissileMount(const int mount) {
     return (mount & (
             as_integer(MOUNT_SIZE::LIGHTMISSILE) |
                     as_integer(MOUNT_SIZE::MEDIUMMISSILE) |

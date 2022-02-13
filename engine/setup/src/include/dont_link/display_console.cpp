@@ -23,14 +23,12 @@
 #include "display_console.h"
 //#ifdef CONSOLE
 
-void InitGraphics(void)
-{
+void InitGraphics(void) {
     //Nothing to do. This function is here so the installer can easily switch display libraries
     cout << "Welcome to " << CONFIG.program_name << " Configuration\n";
 }
 
-void ShowMain(void)
-{
+void ShowMain(void) {
     struct group *CURRENT;
     int count = 1;
     char choice = '\0';
@@ -66,8 +64,7 @@ void ShowMain(void)
     ShowMain();
 }
 
-void ShowChoices(int val)
-{
+void ShowChoices(int val) {
     struct group *CURRENT, *CHOICE;
     struct catagory *CUR, *CHOICE_CAT;
     int count = 1;

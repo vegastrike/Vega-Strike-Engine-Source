@@ -65,8 +65,7 @@ public:
      *      By keeping track of the desired state, rather than querying
      *      the underlying AL source, we can overcome this problem.
      */
-    bool shouldBePlaying() const
-    {
+    bool shouldBePlaying() const {
         return shouldPlay && !atEos;
     }
 
@@ -90,8 +89,7 @@ protected:
     virtual void seekImpl(Timestamp time);
 
     /** Derived classes may use the underlying AL source handle to set additional attributes */
-    ALuint getALSource() const
-    {
+    ALuint getALSource() const {
         return alSource;
     }
 

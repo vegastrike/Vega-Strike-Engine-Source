@@ -57,8 +57,7 @@ struct GFXMaterial /// ambient rgba, if you don't like these things, ask me to r
     /// specular power
     float power;
 
-    GFXMaterial()
-    {
+    GFXMaterial() {
         dr = dg = db = da = sr = sg = sb = sa = ea = aa = 1.0f;
         er = eg = eb = ar = ag = ab = 0.0f;
         power = 60.0f;
@@ -70,8 +69,7 @@ struct GFXVertex {
     float x, y, z;     //Location
     float i, j, k;     //Normal
     float s, t;     //U,V coords
-    GFXVertex operator*(float s)
-    {
+    GFXVertex operator*(float s) {
         GFXVertex ret(*this);
         ret.x *= s;
         ret.y *= s;
@@ -85,13 +83,11 @@ struct line {
     int indexref[2];   //Index into Points
     float s[2];     //U
     float t[2];     //V
-    line()
-    {
+    line() {
         flatshade = 0;
     }
 
-    line(int i1, int i2, float s1, float t1, float s2, float t2, bool fs = 0)
-    {
+    line(int i1, int i2, float s1, float t1, float s2, float t2, bool fs = 0) {
         indexref[0] = i1;
         indexref[1] = i2;
         s[0] = s1;
@@ -101,8 +97,7 @@ struct line {
         flatshade = fs;
     }
 
-    void clear()
-    {
+    void clear() {
         flatshade = false;
         indexref[0] = {0};
         indexref[1] = {0};
@@ -118,13 +113,11 @@ struct triangle {
     int indexref[3];   //Index into Points
     float s[3];     //U
     float t[3];     //V
-    triangle()
-    {
+    triangle() {
         flatshade = 0;
     }
 
-    triangle(int i1, int i2, int i3, float s1, float t1, float s2, float t2, float s3, float t3, bool fs = 0)
-    {
+    triangle(int i1, int i2, int i3, float s1, float t1, float s2, float t2, float s3, float t3, bool fs = 0) {
         indexref[0] = i1;
         indexref[1] = i2;
         indexref[2] = i3;
@@ -137,8 +130,7 @@ struct triangle {
         flatshade = fs;
     }
 
-    void clear()
-    {
+    void clear() {
         flatshade = false;
         indexref[0] = {0};
         indexref[1] = {0};
@@ -157,25 +149,23 @@ struct quad {
     int indexref[4];   //Index into Points
     float s[4];     //U
     float t[4];     //V
-    quad()
-    {
+    quad() {
         flatshade = 0;
     }
 
     quad(int i1,
-         int i2,
-         int i3,
-         int i4,
-         float s1,
-         float t1,
-         float s2,
-         float t2,
-         float s3,
-         float t3,
-         float s4,
-         float t4,
-         bool fs = 0)
-    {
+            int i2,
+            int i3,
+            int i4,
+            float s1,
+            float t1,
+            float s2,
+            float t2,
+            float s3,
+            float t3,
+            float s4,
+            float t4,
+            bool fs = 0) {
         indexref[0] = i1;
         indexref[1] = i2;
         indexref[2] = i3;
@@ -191,8 +181,7 @@ struct quad {
         flatshade = fs;
     }
 
-    void clear()
-    {
+    void clear() {
         flatshade = false;
         indexref[0] = {0};
         indexref[1] = {0};
@@ -219,8 +208,7 @@ struct strip {
     bool flatshade;
     vector<stripelement> points;
 
-    strip()
-    {
+    strip() {
         flatshade = false;
         points = vector<stripelement>();
     }
@@ -231,8 +219,7 @@ struct LODholder   //Holds 1 LOD entry
     float size;
     vector<unsigned char> name;
 
-    LODholder()
-    {
+    LODholder() {
         name = vector<unsigned char>();
         size = 0;
     }
@@ -242,8 +229,7 @@ struct animframe   //Holds one animation frame
 {
     vector<unsigned char> name;
 
-    animframe()
-    {
+    animframe() {
         name = vector<unsigned char>();
     }
 };
@@ -254,8 +240,7 @@ struct animdef   //Holds animation definition
     float FPS;
     vector<int> meshoffsets;
 
-    animdef()
-    {
+    animdef() {
         name = vector<unsigned char>();
         FPS = 0;
         meshoffsets = vector<int>();
@@ -268,12 +253,10 @@ struct textureholder   //Holds 1 texture entry
     int index;
     vector<unsigned char> name;
 
-    textureholder() : type(-1), index(0)
-    {
+    textureholder() : type(-1), index(0) {
     }
 
-    textureholder(int _index, int _type = TEXTURE) : type(_type), index(_index)
-    {
+    textureholder(int _index, int _type = TEXTURE) : type(_type), index(_index) {
     }
 };
 
@@ -378,8 +361,7 @@ struct XML {
         ///the weight of the points in weighted average of refpnts
         vector<float> refweight;
 
-        ZeLogo()
-        {
+        ZeLogo() {
             refpnt = vector<int>();
             refweight = vector<float>();
             size = 0;
@@ -452,8 +434,7 @@ struct XML {
     GFXMaterial material;
     float scale;
 
-    XML()
-    {
+    XML() {
         //FIXME make defaults appear here.
         alphatest = 0.0f;
         scale = 1.0;
@@ -472,16 +453,16 @@ struct XML {
 
 XML LoadXML(const char *filename, float unitscale);
 void xmeshToBFXM(XML memfile,
-                 FILE *Outputfile,
-                 char mode,
-                 bool forcenormals); //converts input file to BFXM creates new, or appends record based on mode
+        FILE *Outputfile,
+        char mode,
+        bool forcenormals); //converts input file to BFXM creates new, or appends record based on mode
 unsigned int writesuperheader(XML memfile, FILE *Outputfile); //Writes superheader to file Outputfile
 unsigned int appendrecordfromxml(XML memfile,
-                                 FILE *Outputfile,
-                                 bool forcenormals); //Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
+        FILE *Outputfile,
+        bool forcenormals); //Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 unsigned int appendmeshfromxml(XML memfile,
-                               FILE *Outputfile,
-                               bool forcenormals); //Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
+        FILE *Outputfile,
+        bool forcenormals); //Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 void AddNormal(GFXVertex &outp, const GFXVertex &inp);
 void SetNormal(GFXVertex &outp, const GFXVertex &a, const GFXVertex &b, const GFXVertex &c);
 

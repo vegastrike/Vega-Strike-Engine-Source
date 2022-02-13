@@ -38,8 +38,7 @@
 
 #include "xml_support.h"
 
-string strtoupper(const string &foo)
-{
+string strtoupper(const string &foo) {
 
     string rval;
 
@@ -75,8 +74,7 @@ string tostring(float num) {
 
 
 
-EnumMap::EnumMap(const Pair *data, unsigned int num)
-{
+EnumMap::EnumMap(const Pair *data, unsigned int num) {
 
     for (unsigned int a = 0; a < num; a++) {
 
@@ -88,8 +86,7 @@ EnumMap::EnumMap(const Pair *data, unsigned int num)
 
 }
 
-int EnumMap::lookup(const string &str) const
-{
+int EnumMap::lookup(const string &str) const {
 
     const int *result = forward.Get(strtoupper(str));
 
@@ -101,8 +98,7 @@ int EnumMap::lookup(const string &str) const
 
 }
 
-const string &EnumMap::lookup(int val) const
-{
+const string &EnumMap::lookup(int val) const {
 
     const string *result = reverse.Get(tostring(val));
 
@@ -112,8 +108,7 @@ const string &EnumMap::lookup(int val) const
 
 }
 
-AttributeList::AttributeList(const XML_Char **atts)
-{
+AttributeList::AttributeList(const XML_Char **atts) {
 
     for (; *atts != NULL; atts += 2) {
 
@@ -123,8 +118,7 @@ AttributeList::AttributeList(const XML_Char **atts)
 
 }
 
-bool parse_bool(const string &str)
-{
+bool parse_bool(const string &str) {
 
     if (str == "true" || str == "yes" || str == "1") {
 
@@ -138,8 +132,7 @@ bool parse_bool(const string &str)
 
 }
 
-double parse_float(const string &str)
-{
+double parse_float(const string &str) {
 
     double result;
 
@@ -153,8 +146,7 @@ double parse_float(const string &str)
 
 }
 
-int parse_int(const string &str)
-{
+int parse_int(const string &str) {
 
     int result;
 

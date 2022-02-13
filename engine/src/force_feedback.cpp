@@ -36,8 +36,7 @@
 
 #define FF_DOIT 1
 
-ForceFeedback::ForceFeedback()
-{
+ForceFeedback::ForceFeedback() {
 #if HAVE_FORCE_FEEDBACK
     init();
 #else
@@ -46,8 +45,7 @@ ForceFeedback::ForceFeedback()
 #endif
 }
 
-ForceFeedback::~ForceFeedback()
-{
+ForceFeedback::~ForceFeedback() {
     if (!have_ff) {
         return;
     }
@@ -61,28 +59,23 @@ ForceFeedback::~ForceFeedback()
 #endif
 }
 
-bool ForceFeedback::haveFF()
-{
+bool ForceFeedback::haveFF() {
     return have_ff;
 }
 
-void ForceFeedback::updateForce(float angle, float strength)
-{
+void ForceFeedback::updateForce(float angle, float strength) {
     VS_LOG(info, (boost::format("update force %1% degrees %2%") % angle % strength));
 }
 
-void ForceFeedback::updateSpeedEffect(float strength)
-{
+void ForceFeedback::updateSpeedEffect(float strength) {
     VS_LOG(info, (boost::format("speed effect %1%") % strength));
 }
 
-void ForceFeedback::playHit(float angle, float strength)
-{
+void ForceFeedback::playHit(float angle, float strength) {
     VS_LOG(info, (boost::format("shield hit %1% degrees %2%") % angle % strength));
 }
 
-void ForceFeedback::playAfterburner(bool activate)
-{
+void ForceFeedback::playAfterburner(bool activate) {
     if (!have_ff) {
         return;
     }
@@ -114,8 +107,7 @@ void ForceFeedback::playAfterburner(bool activate)
 #endif
 }
 
-void ForceFeedback::playLaser()
-{
+void ForceFeedback::playLaser() {
     if (!have_ff) {
         return;
     }
@@ -134,8 +126,7 @@ void ForceFeedback::playLaser()
 #endif
 }
 
-void ForceFeedback::playDurationEffect(unsigned int eff_nr, bool activate)
-{
+void ForceFeedback::playDurationEffect(unsigned int eff_nr, bool activate) {
     if (!have_ff) {
         return;
     }
@@ -152,8 +143,7 @@ void ForceFeedback::playDurationEffect(unsigned int eff_nr, bool activate)
 #endif
 }
 
-void ForceFeedback::playShortEffect(unsigned int eff_nr)
-{
+void ForceFeedback::playShortEffect(unsigned int eff_nr) {
     if (!have_ff) {
         return;
     }

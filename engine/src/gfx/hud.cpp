@@ -43,16 +43,14 @@
 
 #include "gldrv/gl_globals.h"
 
-static bool isInside()
-{
+static bool isInside() {
     if (BaseInterface::CurrentBase) {
         return true;
     }
     return false;
 }
 
-const std::string &getStringFont(bool &changed, bool force_inside = false, bool whatinside = false)
-{
+const std::string &getStringFont(bool &changed, bool force_inside = false, bool whatinside = false) {
     static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
     static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
     bool inside = isInside();
@@ -69,8 +67,7 @@ const std::string &getStringFont(bool &changed, bool force_inside = false, bool 
     return inside ? whichdockedfont : whichfont;
 }
 
-const std::string &getStringFontForHeight(bool &changed)
-{
+const std::string &getStringFontForHeight(bool &changed) {
     static std::string whichfont = vs_config->getVariable("graphics", "font", "helvetica12");
     static std::string whichdockedfont = vs_config->getVariable("graphics", "basefont", "helvetica12");
     bool inside = isInside();
@@ -84,8 +81,7 @@ const std::string &getStringFontForHeight(bool &changed)
     return inside ? whichdockedfont : whichfont;
 }
 
-void *getFont(bool forceinside = false, bool whichinside = false)
-{
+void *getFont(bool forceinside = false, bool whichinside = false) {
     bool changed = false;
     std::string whichfont = getStringFont(changed, forceinside, whichinside);
     static void *retval = NULL;
@@ -112,8 +108,7 @@ void *getFont(bool forceinside = false, bool whichinside = false)
     return retval;
 }
 
-float getFontHeight()
-{
+float getFontHeight() {
     bool changed = false;
     std::string whichfont = getStringFontForHeight(changed);
     static float point = 0;
@@ -140,8 +135,7 @@ float getFontHeight()
     return point / g_game.y_resolution;
 }
 
-TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol)
-{
+TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
     col = c;
     this->bgcol = bgcol;
     myDims.i = 2;
@@ -150,17 +144,14 @@ TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol)
     SetPos(0, 0);
 }
 
-TextPlane::~TextPlane()
-{
+TextPlane::~TextPlane() {
 }
 
-int TextPlane::Draw(int offset)
-{
+int TextPlane::Draw(int offset) {
     return Draw(myText, offset, true, false, true);
 }
 
-static unsigned int *CreateLists()
-{
+static unsigned int *CreateLists() {
     static unsigned int lists[256] = {0};
     void *fnt0 = getFont(true, false);
     void *fnt1 = getFont(true, true);
@@ -185,8 +176,7 @@ static unsigned int *CreateLists()
     return lists;
 }
 
-static unsigned char HexToChar(char a)
-{
+static unsigned char HexToChar(char a) {
     if (a >= '0' && a <= '9') {
         return a - '0';
     } else if (a >= 'a' && a <= 'f') {
@@ -197,18 +187,15 @@ static unsigned char HexToChar(char a)
     return 0;
 }
 
-static unsigned char TwoCharToByte(char a, char b)
-{
+static unsigned char TwoCharToByte(char a, char b) {
     return 16 * HexToChar(a) + HexToChar(b);
 }
 
-static float TwoCharToFloat(char a, char b)
-{
+static float TwoCharToFloat(char a, char b) {
     return TwoCharToByte(a, b) / 255.;
 }
 
-void DrawSquare(float left, float right, float top, float bot)
-{
+void DrawSquare(float left, float right, float top, float bot) {
     float verts[8 * 3] = {
             left, top, 0,
             left, bot, 0,
@@ -222,8 +209,7 @@ void DrawSquare(float left, float right, float top, float bot)
     GFXDraw(GFXQUAD, verts, 8);
 }
 
-float charWidth(char c, float myFontMetrics)
-{
+float charWidth(char c, float myFontMetrics) {
     static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
     void *fnt = use_bit ? getFont() : GLUT_STROKE_ROMAN;
     float charwid = use_bit ? glutBitmapWidth(fnt, c) : glutStrokeWidth(fnt, c);
@@ -232,12 +218,11 @@ float charWidth(char c, float myFontMetrics)
 }
 
 bool doNewLine(string::const_iterator begin,
-               string::const_iterator end,
-               float cur_pos,
-               float end_pos,
-               float metrics,
-               bool last_row)
-{
+        string::const_iterator end,
+        float cur_pos,
+        float end_pos,
+        float metrics,
+        bool last_row) {
     if (*begin == '\n') {
         return true;
     }
@@ -251,8 +236,7 @@ bool doNewLine(string::const_iterator begin,
     return cur_pos + ((begin + 1 != end) ? charWidth(*begin, metrics) : 0) >= end_pos;
 }
 
-int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte)
-{
+int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte) {
     int retval = 1;
     bool drawbg = (bgcol.a != 0);
     static unsigned int *display_lists = CreateLists();
@@ -321,7 +305,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         int numplayers = 1;
         if (_Universe) {          //_Universe can be NULL during bootstrap.
             numplayers = (_Universe->numPlayers() > 3 ? _Universe->numPlayers() / 2
-                                                      : _Universe->numPlayers());
+                    : _Universe->numPlayers());
         }
         scalex = numplayers * myFontMetrics.i / std_wid;
         scaley = myFontMetrics.j / (119.05 + 33.33);
@@ -373,9 +357,9 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
             if (automatte) {
                 GFXColorf(this->bgcol);
                 DrawSquare(col - origcol,
-                           col - origcol + shadowlen / scalex,
-                           -rowheight * .25 / scaley,
-                           rowheight * .75 / scaley);
+                        col - origcol + shadowlen / scalex,
+                        -rowheight * .25 / scaley,
+                        rowheight * .75 / scaley);
                 GFXColorf(currentCol);
             }
             //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
@@ -396,9 +380,9 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
             if (automatte) {
                 GFXColorf(this->bgcol);
                 DrawSquare(col - origcol,
-                           col - origcol + shadowlen * 5 / (.5 * g_game.x_resolution),
-                           -rowheight * .25 / scaley,
-                           rowheight * .75 / scaley);
+                        col - origcol + shadowlen * 5 / (.5 * g_game.x_resolution),
+                        -rowheight * .25 / scaley,
+                        rowheight * .75 / scaley);
                 GFXColorf(currentCol);
             }
             col += shadowlen;

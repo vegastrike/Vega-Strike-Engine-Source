@@ -33,9 +33,8 @@ public:
      */
 
     virtual RetCodeEnum convert(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode)
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) {
         if (inputFormat == "BFXM" && outputFormat == "Wavefront") {
             if (opCode == "create") {
                 string input = getNamedOption("inputPath");
@@ -57,18 +56,17 @@ public:
     }
 
     virtual void conversionHelp(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode) const
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) const {
         if ((inputFormat.empty() || inputFormat == "BFXM")
                 && (outputFormat.empty() || outputFormat == "Wavefront")
                 && (opCode.empty() || (opCode == "create"))) {
             std::cout << "BFXM -> Wavefront\n"
-                      << "\tSupported operations: create\n"
-                      << "\nNotes: Wavefront files usually come in pairs, with an .obj and a .mtl\n"
-                      << "\tfile. So, two files will be created: the output file, and another with\n"
-                      << "\tthe same name but .mtl extension.\n"
-                      << std::endl;
+                    << "\tSupported operations: create\n"
+                    << "\nNotes: Wavefront files usually come in pairs, with an .obj and a .mtl\n"
+                    << "\tfile. So, two files will be created: the output file, and another with\n"
+                    << "\tthe same name but .mtl extension.\n"
+                    << std::endl;
         }
     }
 

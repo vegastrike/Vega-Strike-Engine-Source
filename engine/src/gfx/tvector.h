@@ -61,8 +61,7 @@ public:
     };
 
 // Constructors
-    TVector() : i(0), j(0), k(0)
-    {
+    TVector() : i(0), j(0), k(0) {
     }
 
     TVector(const TVector<T, S> &a);

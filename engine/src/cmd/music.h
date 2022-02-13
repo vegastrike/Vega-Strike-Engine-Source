@@ -68,43 +68,35 @@ class Music {
 
         unsigned int counter;
 
-        PlayList()
-        {
+        PlayList() {
             counter = 0;
         }
 
-        bool empty() const
-        {
+        bool empty() const {
             return songs.empty();
         }
 
-        size_t size() const
-        {
+        size_t size() const {
             return songs.size();
         }
 
-        std::string &operator[](size_t index)
-        {
+        std::string &operator[](size_t index) {
             return songs[index];
         }
 
-        const std::string &operator[](size_t index) const
-        {
+        const std::string &operator[](size_t index) const {
             return songs[index];
         }
 
-        void push_back(const std::string &s)
-        {
+        void push_back(const std::string &s) {
             songs.push_back(s);
         }
 
-        bool haspragma(const std::string &name) const
-        {
+        bool haspragma(const std::string &name) const {
             return pragmas.find(name) != pragmas.end();
         }
 
-        const std::string &pragma(const std::string &name, const std::string &def) const
-        {
+        const std::string &pragma(const std::string &name, const std::string &def) const {
             PragmaList::const_iterator it = pragmas.find(name);
             if (it != pragmas.end()) {
                 return it->second;

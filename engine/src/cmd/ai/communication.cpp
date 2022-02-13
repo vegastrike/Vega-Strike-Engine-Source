@@ -35,8 +35,7 @@
 
 using namespace XMLSupport;
 
-FSM::FSM(const std::string &filename)
-{
+FSM::FSM(const std::string &filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
     if (filename.empty()) {
         nodes.push_back(Node::MakeNode("welcome to cachunkcachunk.com", 0));
@@ -74,98 +73,79 @@ FSM::FSM(const std::string &filename)
     }
 }
 
-int FSM::GetUnDockNode() const
-{
+int FSM::GetUnDockNode() const {
     return nodes.size() - 16;
 }
 
-int FSM::GetFailDockNode() const
-{
+int FSM::GetFailDockNode() const {
     return nodes.size() - 15;
 }
 
-int FSM::GetDockNode() const
-{
+int FSM::GetDockNode() const {
     return nodes.size() - 14;
 }
 
-int FSM::GetUnAbleToDockNode() const
-{
+int FSM::GetUnAbleToDockNode() const {
     return nodes.size() - 13;
 }
 
-int FSM::GetAbleToDockNode() const
-{
+int FSM::GetAbleToDockNode() const {
     return nodes.size() - 12;
 }
 
-int FSM::GetNoNode() const
-{
+int FSM::GetNoNode() const {
     return nodes.size() - 11;
 }
 
-int FSM::GetYesNode() const
-{
+int FSM::GetYesNode() const {
     return nodes.size() - 10;
 }
 
-int FSM::GetContrabandInitiateNode() const
-{
+int FSM::GetContrabandInitiateNode() const {
     return nodes.size() - 9;
 }
 
-int FSM::GetContrabandUnDetectedNode() const
-{
+int FSM::GetContrabandUnDetectedNode() const {
     return nodes.size() - 8;
 }
 
-int FSM::GetContrabandDetectedNode() const
-{
+int FSM::GetContrabandDetectedNode() const {
     return nodes.size() - 7;
 }
 
-int FSM::GetContrabandWobblyNode() const
-{
+int FSM::GetContrabandWobblyNode() const {
     return nodes.size() - 6;
 }
 
-int FSM::GetRequestLandNode() const
-{
+int FSM::GetRequestLandNode() const {
     return nodes.size() - 5;
 }
 
-int FSM::GetHitNode() const
-{
+int FSM::GetHitNode() const {
     return nodes.size() - 1;
 }
 
-int FSM::GetDamagedNode() const
-{
+int FSM::GetDamagedNode() const {
     return nodes.size() - 2;
 }
 
-int FSM::GetDealtDamageNode() const
-{
+int FSM::GetDealtDamageNode() const {
     return nodes.size() - 3;
 }
 
-int FSM::GetScoreKillNode() const
-{
+int FSM::GetScoreKillNode() const {
     return nodes.size() - 4;
 }
 
-static float sq(float i)
-{
+static float sq(float i) {
     return i * i;
 }
 
-bool nonneg(float i)
-{
+bool nonneg(float i) {
     return i >= 0;
 }
 
-std::string FSM::Node::GetMessage(unsigned int &multiple) const
-{
+std::string FSM::Node::GetMessage(unsigned int &multiple) const {
     multiple = rand() % messages.size();
     return messages[multiple];
 }
@@ -174,8 +154,7 @@ std::string FSM::Node::GetMessage(unsigned int &multiple) const
 // FIXME: this variability makes it hard to use proper include files
 extern int createSound(std::string file, bool val);
 
-int FSM::Node::GetSound(unsigned char sex, unsigned int multiple, float &gain)
-{
+int FSM::Node::GetSound(unsigned char sex, unsigned int multiple, float &gain) {
     unsigned int index = multiple + ((unsigned int) sex) * messages.size();
     if (index < sounds.size()) {
         gain = gains[index];
@@ -192,8 +171,7 @@ int FSM::Node::GetSound(unsigned char sex, unsigned int multiple, float &gain)
     }
 }
 
-bool FSM::Node::StopSound(unsigned char sex)
-{
+bool FSM::Node::StopSound(unsigned char sex) {
     unsigned int index = ((unsigned int) sex) * messages.size();
     bool ret = false;
     for (unsigned int i = index; i < index + messages.size() && i < sounds.size(); ++i) {
@@ -205,8 +183,7 @@ bool FSM::Node::StopSound(unsigned char sex)
     return ret;
 }
 
-bool FSM::StopAllSounds(unsigned char sex)
-{
+bool FSM::StopAllSounds(unsigned char sex) {
     bool ret = false;
     for (unsigned int i = 0; i < nodes.size(); ++i) {
         if (nodes[i].StopSound(sex)) {
@@ -216,8 +193,7 @@ bool FSM::StopAllSounds(unsigned char sex)
     return ret;
 }
 
-void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain)
-{
+void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain) {
     static std::string emptystr;
 
     for (int multiple = 0;; ++multiple) {
@@ -242,10 +218,9 @@ void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain)
     }
 }
 
-int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, float relationship) const
-{
+int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, float relationship) const {
     const FSM::Node *n = (unsigned int) curstate
-                                 < nodes.size() ? (&nodes[curstate]) : (&nodes[getDefaultState(relationship)]);
+            < nodes.size() ? (&nodes[curstate]) : (&nodes[getDefaultState(relationship)]);
     mood += -randomresponse + 2 * randomresponse * ((float) rand()) / RAND_MAX;
 
     int choice = 0;
@@ -270,11 +245,11 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
     vector<unsigned int> g;
     vector<unsigned int> b;
     static float pos_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                            "LowestPositiveCommChoice",
-                                                                            "0"));
+            "LowestPositiveCommChoice",
+            "0"));
     static float neg_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                            "LowestNegativeCommChoice",
-                                                                            "-.00001"));
+            "LowestNegativeCommChoice",
+            "-.00001"));
     for (unsigned int i = 0; i < n->edges.size(); i++) {
         float md = nodes[n->edges[i]].messagedelta;
         if (md >= pos_limit) {
@@ -292,8 +267,7 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
     return choice;
 }
 
-int FSM::getDefaultState(float relationship) const
-{
+int FSM::getDefaultState(float relationship) const {
     if (relationship < -1) {
         relationship = -1;
     }
@@ -328,12 +302,12 @@ int FSM::getDefaultState(float relationship) const
     return nodes[0].edges[choice];
 }
 
-std::string FSM::GetEdgesString(unsigned int curstate)
-{
+std::string FSM::GetEdgesString(unsigned int curstate) {
     std::string retval = "\n";
     if (nodes.size() <= curstate) {
         VS_LOG(error,
-               (boost::format("Error with faction relationship due to %1$d not being in range of faction") % curstate));
+                (boost::format("Error with faction relationship due to %1$d not being in range of faction")
+                        % curstate));
         return "\n1. Transmit Error\n2. Transmit Error\n3. Transmit Error\n";
     }
     for (unsigned int i = 0; i < nodes[curstate].edges.size(); i++) {
@@ -347,19 +321,17 @@ std::string FSM::GetEdgesString(unsigned int curstate)
     return retval;
 }
 
-float FSM::getDeltaRelation(int prevstate, unsigned int current_state) const
-{
+float FSM::getDeltaRelation(int prevstate, unsigned int current_state) const {
     if (nodes.size() <= current_state) {
         VS_LOG(error,
-               (boost::format("Error with faction relationship due to %1$d not being in range of faction")
-                       % current_state));
+                (boost::format("Error with faction relationship due to %1$d not being in range of faction")
+                        % current_state));
         return 0;
     }
     return nodes[current_state].messagedelta;
 }
 
-void CommunicationMessage::Init(Unit *send, Unit *recv)
-{
+void CommunicationMessage::Init(Unit *send, Unit *recv) {
     if (send == NULL) {
         return;
     }
@@ -369,8 +341,7 @@ void CommunicationMessage::Init(Unit *send, Unit *recv)
     this->edgenum = -1;
 }
 
-float myround(float i)
-{
+float myround(float i) {
     float j = floor(i);
     if (i - j >= .5) {
         return j + 1;
@@ -378,8 +349,7 @@ float myround(float i)
     return j;
 }
 
-float myroundclamp(float i)
-{
+float myroundclamp(float i) {
     float j = myround(i);
     if (j < 0) {
         j = 0;
@@ -387,8 +357,7 @@ float myroundclamp(float i)
     return j;
 }
 
-void CommunicationMessage::SetAnimation(std::vector<Animation *> *ani, unsigned char sex)
-{
+void CommunicationMessage::SetAnimation(std::vector<Animation *> *ani, unsigned char sex) {
     this->sex = sex;     //for audio
     if (ani) {
         if (ani->size() > 0) {
@@ -408,19 +377,17 @@ void CommunicationMessage::SetAnimation(std::vector<Animation *> *ani, unsigned 
     }
 }
 
-void CommunicationMessage::SetCurrentState(int msg, std::vector<Animation *> *ani, unsigned char sex)
-{
+void CommunicationMessage::SetCurrentState(int msg, std::vector<Animation *> *ani, unsigned char sex) {
     curstate = msg;
     SetAnimation(ani, sex);
     assert(this->curstate >= 0);
 }
 
 CommunicationMessage::CommunicationMessage(Unit *send,
-                                           Unit *recv,
-                                           int messagechoice,
-                                           std::vector<Animation *> *ani,
-                                           unsigned char sex)
-{
+        Unit *recv,
+        int messagechoice,
+        std::vector<Animation *> *ani,
+        unsigned char sex) {
     Init(send, recv);
     prevstate = fsm->getDefaultState(send->getRelation(recv));
     if (fsm->nodes[prevstate].edges.size()) {
@@ -432,12 +399,11 @@ CommunicationMessage::CommunicationMessage(Unit *send,
 }
 
 CommunicationMessage::CommunicationMessage(Unit *send,
-                                           Unit *recv,
-                                           int laststate,
-                                           int thisstate,
-                                           std::vector<Animation *> *ani,
-                                           unsigned char sex)
-{
+        Unit *recv,
+        int laststate,
+        int thisstate,
+        std::vector<Animation *> *ani,
+        unsigned char sex) {
     Init(send, recv);
     prevstate = laststate;
     curstate = thisstate;
@@ -445,20 +411,18 @@ CommunicationMessage::CommunicationMessage(Unit *send,
     assert(this->curstate >= 0);
 }
 
-CommunicationMessage::CommunicationMessage(Unit *send, Unit *recv, std::vector<Animation *> *ani, unsigned char sex)
-{
+CommunicationMessage::CommunicationMessage(Unit *send, Unit *recv, std::vector<Animation *> *ani, unsigned char sex) {
     Init(send, recv);
     SetAnimation(ani, sex);
     assert(this->curstate >= 0);
 }
 
 CommunicationMessage::CommunicationMessage(Unit *send,
-                                           Unit *recv,
-                                           const CommunicationMessage &prevstate,
-                                           int curstate,
-                                           std::vector<Animation *> *ani,
-                                           unsigned char sex)
-{
+        Unit *recv,
+        const CommunicationMessage &prevstate,
+        int curstate,
+        std::vector<Animation *> *ani,
+        unsigned char sex) {
     Init(send, recv);
     this->prevstate = prevstate.curstate;
     if (fsm->nodes[this->prevstate].edges.size()) {
@@ -469,8 +433,7 @@ CommunicationMessage::CommunicationMessage(Unit *send,
     assert(this->curstate >= 0);
 }
 
-char tohexdigit(int x)
-{
+char tohexdigit(int x) {
     if (x <= 9 && x >= 0) {
         return (char) (x + '0');
     } else {
@@ -478,8 +441,7 @@ char tohexdigit(int x)
     }
 }
 
-RGBstring colToString(GFXColor col)
-{
+RGBstring colToString(GFXColor col) {
     unsigned char r = (unsigned char) (col.r * 255);
     unsigned char g = (unsigned char) (col.g * 255);
     unsigned char b = (unsigned char) (col.b * 255);
@@ -495,23 +457,22 @@ RGBstring colToString(GFXColor col)
     return ret;
 }
 
-RGBstring GetRelationshipRGBstring(float rel)
-{
+RGBstring GetRelationshipRGBstring(float rel) {
     static GFXColor col_enemy = vs_config->getColor("relation_enemy", vs_config->getColor("enemy",
-                                                                                          GFXColor(1.0,
-                                                                                                   0.0,
-                                                                                                   0.0,
-                                                                                                   1.0))); // red   - like target
+            GFXColor(1.0,
+                    0.0,
+                    0.0,
+                    1.0))); // red   - like target
     static GFXColor col_friend = vs_config->getColor("relation_friend", vs_config->getColor("friend",
-                                                                                            GFXColor(0.0,
-                                                                                                     1.0,
-                                                                                                     0.0,
-                                                                                                     1.0))); // green - like target
+            GFXColor(0.0,
+                    1.0,
+                    0.0,
+                    1.0))); // green - like target
     static GFXColor col_neutral = vs_config->getColor("relation_neutral", vs_config->getColor("black_and_white",
-                                                                                              GFXColor(1.0,
-                                                                                                       1.0,
-                                                                                                       1.0,
-                                                                                                       1.0))); // white - NOT like target
+            GFXColor(1.0,
+                    1.0,
+                    1.0,
+                    1.0))); // white - NOT like target
     GFXColor col;
     if (rel == 0) {
         col = col_neutral;
@@ -529,8 +490,7 @@ RGBstring GetRelationshipRGBstring(float rel)
     return colToString(col);
 }
 
-unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node)
-{
+unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
     static float scale_rel_color =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "scale_relationship_color", "10.0"));
     static std::string
@@ -556,13 +516,12 @@ unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node)
         }
     }
     mission->msgcenter->add(myname, "all",
-                            GetRelationshipColorString(node.messagedelta * scale_rel_color) + speech
-                                    + "#000000");     //multiply by 2 so colors are easier to tell
+            GetRelationshipColorString(node.messagedelta * scale_rel_color) + speech
+                    + "#000000");     //multiply by 2 so colors are easier to tell
     return dummy;
 }
 
-void LeadMe(Unit *un, string directive, string speech, bool changetarget)
-{
+void LeadMe(Unit *un, string directive, string speech, bool changetarget) {
     if (un != NULL) {
         for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
             Unit *pun = _Universe->AccessCockpit(i)->GetParent();

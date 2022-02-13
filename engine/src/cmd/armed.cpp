@@ -52,12 +52,11 @@ typedef std::set<int> WeaponGroup;
 template<bool FORWARD>
 class WeaponComparator {
 public:
-    bool operator()(const WeaponGroup &a, const WeaponGroup &b) const
-    {
+    bool operator()(const WeaponGroup &a, const WeaponGroup &b) const {
         if (a.size() == b.size()) {
             for (WeaponGroup::const_iterator iterA = a.begin(), iterB = b.begin();
-                 iterA != a.end() && iterB != b.end();
-                 ++iterA, ++iterB) {
+                    iterA != a.end() && iterB != b.end();
+                    ++iterA, ++iterB) {
                 if ((*iterA) < (*iterB)) {
                     return FORWARD;
                 } else if ((*iterB) < (*iterA)) {
@@ -74,24 +73,20 @@ public:
 
     typedef std::set<WeaponGroup, WeaponComparator<FORWARD> > WeaponGroupSet;
 
-    static bool checkmount(Unit *un, int i, bool missile)
-    {
+    static bool checkmount(Unit *un, int i, bool missile) {
         return un->mounts[i].status < Mount::DESTROYED && (un->mounts[i].type->isMissile() == missile)
                 && un->mounts[i].ammo != 0;
     }
 
-    static bool isSpecial(const Mount &mount)
-    {
+    static bool isSpecial(const Mount &mount) {
         return mount.type->size == MOUNT_SIZE::SPECIAL || mount.type->size == MOUNT_SIZE::SPECIALMISSILE;
     }
 
-    static bool notSpecial(const Mount &mount)
-    {
+    static bool notSpecial(const Mount &mount) {
         return !isSpecial(mount);
     }
 
-    static void ToggleWeaponSet(Unit *un, bool missile)
-    {
+    static void ToggleWeaponSet(Unit *un, bool missile) {
         if (un->mounts.size() == 0) {
             Unit *tur = NULL;
             for (un_iter i = un->getSubUnits(); (tur = *i) != NULL; ++i) {
@@ -134,7 +129,7 @@ public:
                     if ((*iter2).size() && notSpecial(un->mounts[(*((*iter2).begin()))])) {
                         WeaponGroup myGroup;
                         set_union((*iter).begin(), (*iter).end(), (*iter2).begin(), (*iter2).end(),
-                                  inserter(myGroup, myGroup.begin()));
+                                inserter(myGroup, myGroup.begin()));
                         myset.insert(myGroup);
                     }
                 }
@@ -182,14 +177,12 @@ public:
 /**********************************************************************
  * Armed
  * ********************************************************************/
-Armed::Armed()
-{
+Armed::Armed() {
     turretstatus = 0;
 }
 
 ///cycles through the loop twice turning on all matching to ms weapons of size or after size
-void Armed::ActivateGuns(const WeaponInfo *sz, bool ms)
-{
+void Armed::ActivateGuns(const WeaponInfo *sz, bool ms) {
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < getNumMounts(); ++i) {
             if (mounts[i].type == sz) {
@@ -204,8 +197,7 @@ void Armed::ActivateGuns(const WeaponInfo *sz, bool ms)
     }
 }
 
-void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner)
-{
+void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
     Unit *unit = static_cast<Unit *>(this);
 
     if ((unit->cloaking >= 0 && configuration.weapons.can_fire_in_cloak == false) ||
@@ -308,20 +300,17 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner)
     }
 }
 
-void Armed::getAverageGunSpeed(float &speed, float &range, float &mmrange) const
-{
+void Armed::getAverageGunSpeed(float &speed, float &range, float &mmrange) const {
     speed = gunspeed;
     range = gunrange;
     mmrange = missilerange;
 }
 
-int Armed::getNumMounts() const
-{
+int Armed::getNumMounts() const {
     return mounts.size();
 }
 
-int Armed::LockMissile() const
-{
+int Armed::LockMissile() const {
     bool missilelock = false;
     bool dumblock = false;
     for (int i = 0; i < getNumMounts(); ++i) {
@@ -336,8 +325,7 @@ int Armed::LockMissile() const
     return missilelock ? 1 : (dumblock ? -1 : 0);
 }
 
-void Armed::LockTarget(bool myboo)
-{
+void Armed::LockTarget(bool myboo) {
     Unit *unit = static_cast<Unit *>(this);
     unit->computer.radar.locked = myboo;
     if (myboo && unit->computer.radar.canlock == false && false == UnitUtil::isSignificant(unit->Target())) {
@@ -345,8 +333,7 @@ void Armed::LockTarget(bool myboo)
     }
 }
 
-QVector Armed::PositionITTS(const QVector &absposit, Vector velocity, float speed, bool steady_itts) const
-{
+QVector Armed::PositionITTS(const QVector &absposit, Vector velocity, float speed, bool steady_itts) const {
     const Unit *unit = static_cast<const Unit *>(this);
     if (speed == FLT_MAX) {
         return unit->Position();
@@ -373,8 +360,7 @@ QVector Armed::PositionITTS(const QVector &absposit, Vector velocity, float spee
     return curguess + absposit;
 }
 
-void Armed::SelectAllWeapon(bool Missile)
-{
+void Armed::SelectAllWeapon(bool Missile) {
     for (int i = 0; i < getNumMounts(); ++i) {
         if (mounts[i].status < Mount::DESTROYED) {
             if (!isSpecialGunMount(as_integer(mounts[i].type->size))) {
@@ -384,8 +370,7 @@ void Armed::SelectAllWeapon(bool Missile)
     }
 }
 
-void Armed::setAverageGunSpeed()
-{
+void Armed::setAverageGunSpeed() {
     float mrange = -1;
     float grange = -1;
     float speed = -1;
@@ -427,8 +412,7 @@ void Armed::setAverageGunSpeed()
     this->gunspeed = speed;
 }
 
-bool Armed::TargetLocked(const Unit *checktarget) const
-{
+bool Armed::TargetLocked(const Unit *checktarget) const {
     const Unit *unit = static_cast<const Unit *>(this);
     if (!unit->computer.radar.locked) {
         return false;
@@ -436,8 +420,7 @@ bool Armed::TargetLocked(const Unit *checktarget) const
     return (checktarget == NULL) || (unit->computer.target == checktarget);
 }
 
-bool Armed::TargetTracked(const Unit *checktarget)
-{
+bool Armed::TargetTracked(const Unit *checktarget) {
     Unit *unit = static_cast<Unit *>(this);
     static bool must_lock_to_autotrack = XMLSupport::parse_bool(
             vs_config->getVariable("physics", "must_lock_to_autotrack", "true"));
@@ -457,8 +440,7 @@ bool Armed::TargetTracked(const Unit *checktarget)
     return we_do_track;
 }
 
-void Armed::ToggleWeapon(bool missile, bool forward)
-{
+void Armed::ToggleWeapon(bool missile, bool forward) {
     Unit *unit = static_cast<Unit *>(this);
     if (forward) {
         WeaponComparator<true>::ToggleWeaponSet(unit, missile);
@@ -467,8 +449,7 @@ void Armed::ToggleWeapon(bool missile, bool forward)
     }
 }
 
-float Armed::TrackingGuns(bool &missilelock)
-{
+float Armed::TrackingGuns(bool &missilelock) {
     const Unit *unit = static_cast<const Unit *>(this);
     float trackingcone = 0;
     missilelock = false;
@@ -483,8 +464,7 @@ float Armed::TrackingGuns(bool &missilelock)
     return trackingcone;
 }
 
-void Armed::UnFire()
-{
+void Armed::UnFire() {
     Unit *unit = static_cast<Unit *>(this);
 
     if (this->getNumMounts() == 0) {

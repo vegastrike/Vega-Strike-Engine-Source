@@ -33,8 +33,7 @@
 namespace fg_util {
 //
 
-void itoa(unsigned int dat, char *output)
-{
+void itoa(unsigned int dat, char *output) {
     if (dat == 0) {
         *output++ = '0';
         *output = '\0';
@@ -49,8 +48,7 @@ void itoa(unsigned int dat, char *output)
     }
 }
 
-std::string MakeFactionKey(int faction)
-{
+std::string MakeFactionKey(int faction) {
     char output[16];
     output[0] = 'F';
     output[1] = 'F';
@@ -59,8 +57,7 @@ std::string MakeFactionKey(int faction)
     return std::string(output);
 }
 
-bool IsFGKey(const std::string &fgcandidate)
-{
+bool IsFGKey(const std::string &fgcandidate) {
     if (fgcandidate.length() > 3 && fgcandidate[0] == 'F' && fgcandidate[1] == 'G' && fgcandidate[2] == ':') {
         return true;
     }
@@ -69,8 +66,7 @@ bool IsFGKey(const std::string &fgcandidate)
 
 static std::string gFG = "FG:";
 
-std::string MakeFGKey(const std::string &fgname, int faction)
-{
+std::string MakeFGKey(const std::string &fgname, int faction) {
     char tmp[16];
     tmp[0] = '|';
     itoa(faction, tmp + 1);
@@ -79,23 +75,19 @@ std::string MakeFGKey(const std::string &fgname, int faction)
 
 static std::string gSS = "SS:";
 
-std::string MakeStarSystemFGKey(const std::string &starsystem)
-{
+std::string MakeStarSystemFGKey(const std::string &starsystem) {
     return gSS + starsystem;
 }
 
-unsigned int ShipListOffset()
-{
+unsigned int ShipListOffset() {
     return 3;
 }
 
-unsigned int PerShipDataSize()
-{
+unsigned int PerShipDataSize() {
     return 3;
 }
 
-bool CheckFG(std::vector<std::string> &data)
-{
+bool CheckFG(std::vector<std::string> &data) {
     bool retval = false;
     unsigned int leg = data.size();
     unsigned int inc = PerShipDataSize();
@@ -110,14 +102,12 @@ bool CheckFG(std::vector<std::string> &data)
     return retval;
 }
 
-bool CheckFG(SaveGame *sg, const std::string &fgname, unsigned int faction)
-{
+bool CheckFG(SaveGame *sg, const std::string &fgname, unsigned int faction) {
     std::string key = MakeFGKey(fgname, faction);
     return CheckFG(sg->getMissionStringData(key));
 }
 
-void PurgeZeroShips(SaveGame *sg, unsigned int faction)
-{
+void PurgeZeroShips(SaveGame *sg, unsigned int faction) {
     std::string key = MakeFactionKey(faction);
     unsigned int len = sg->getMissionStringDataLength(key);
     unsigned int i = 0;
@@ -127,8 +117,7 @@ void PurgeZeroShips(SaveGame *sg, unsigned int faction)
     }
 }
 
-void PurgeZeroShips(SaveGame *sg)
-{
+void PurgeZeroShips(SaveGame *sg) {
     for (unsigned int i = 0; i < factions.size(); ++i) {
         fg_util::PurgeZeroShips(sg, i);
     }

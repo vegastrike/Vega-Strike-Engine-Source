@@ -71,8 +71,7 @@ public:
     void Collide(Unit *un);
     void Collide();
 
-    void GetTotalSize(float &X, float &Z)
-    {
+    void GetTotalSize(float &X, float &Z) {
         X = sizeX;
         Z = sizeZ;
     }

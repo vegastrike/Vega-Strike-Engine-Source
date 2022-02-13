@@ -66,18 +66,15 @@ vector<int> respawnunit;
 vector<int> switchunit;
 vector<int> turretcontrol;
 
-void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     ((Cockpit *) userData)->beginElement(name, AttributeList(atts));
 }
 
-void Cockpit::endElement(void *userData, const XML_Char *name)
-{
+void Cockpit::endElement(void *userData, const XML_Char *name) {
     ((Cockpit *) userData)->endElement(name);
 }
 
-float Unit::computeLockingPercent()
-{
+float Unit::computeLockingPercent() {
     float most = -1024;
     for (int i = 0; i < getNumMounts(); i++) {
         if (mounts[i].type->type == WEAPON_TYPE::PROJECTILE
@@ -102,22 +99,19 @@ float Unit::computeLockingPercent()
     return (most == -1024) ? 1 : most;
 }
 
-void Cockpit::Eject()
-{
+void Cockpit::Eject() {
     ejecting = true;
     going_to_dock_screen = false;
 }
 
-void Cockpit::EjectDock()
-{
+void Cockpit::EjectDock() {
     ejecting = true;
     going_to_dock_screen = true;
 }
 
 using namespace VSFileSystem;
 
-void Cockpit::Init(const char *file, bool isDisabled)
-{
+void Cockpit::Init(const char *file, bool isDisabled) {
     retry_dock = 0;
     shakin = 0;
     autopilot_time = 0;
@@ -151,8 +145,7 @@ void Cockpit::Init(const char *file, bool isDisabled)
     f.Close();
 }
 
-Unit *Cockpit::GetSaveParent()
-{
+Unit *Cockpit::GetSaveParent() {
     Unit *un = parentturret.GetUnit();
     if (!un) {
         un = parent.GetUnit();
@@ -160,8 +153,7 @@ Unit *Cockpit::GetSaveParent()
     return un;
 }
 
-void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &pos)
-{
+void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &pos) {
     if (unit->getFlightgroup() != NULL) {
         fg = unit->getFlightgroup();
     }
@@ -204,14 +196,12 @@ void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodnam
     }
 }
 
-void Cockpit::Delete()
-{
+void Cockpit::Delete() {
     //int i;
     viewport_offset = cockpit_offset = 0;
 }
 
-void Cockpit::RestoreGodliness()
-{
+void Cockpit::RestoreGodliness() {
     static float maxgodliness = XMLSupport::parse_float(vs_config->getVariable("physics", "player_godliness", "0"));
     godliness = maxgodliness;
     if (godliness > maxgodliness) {
@@ -219,14 +209,12 @@ void Cockpit::RestoreGodliness()
     }
 }
 
-void Cockpit::InitStatic()
-{
+void Cockpit::InitStatic() {
     radar_time = 0;
     cockpit_time = 0;
 }
 
-bool Cockpit::unitInAutoRegion(Unit *un)
-{
+bool Cockpit::unitInAutoRegion(Unit *un) {
     static float autopilot_term_distance =
             XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
     Unit *targ = autopilot_target.GetUnit();
@@ -238,20 +226,18 @@ bool Cockpit::unitInAutoRegion(Unit *un)
     }
 }
 
-static float getInitialZoomFactor()
-{
+static float getInitialZoomFactor() {
     static float inizoom = XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
     return inizoom;
 }
 
 Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
         : view(CP_FRONT),
-          parent(parent),
-          cockpit_offset(0),
-          viewport_offset(0),
-          zoomfactor(getInitialZoomFactor()),
-          savegame(new SaveGame(pilot_name))
-{
+        parent(parent),
+        cockpit_offset(0),
+        viewport_offset(0),
+        zoomfactor(getInitialZoomFactor()),
+        savegame(new SaveGame(pilot_name)) {
     //static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
     //int i;
     partial_number_of_attackers = -1;
@@ -337,14 +323,12 @@ Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
  *  }
  */
 
-void Cockpit::recreate(const std::string &pilot_name)
-{
+void Cockpit::recreate(const std::string &pilot_name) {
     savegame->SetCallsign(pilot_name);
     Init("");
 }
 
-static void FaceTarget(Unit *un)
-{
+static void FaceTarget(Unit *un) {
     Unit *targ = un->Target();
     if (targ) {
         QVector dir(targ->Position() - un->Position());
@@ -357,8 +341,7 @@ static void FaceTarget(Unit *un)
     }
 }
 
-int Cockpit::Autopilot(Unit *target)
-{
+int Cockpit::Autopilot(Unit *target) {
     int retauto = 0;
     if (target) {
         Unit *un = NULL;
@@ -387,8 +370,8 @@ int Cockpit::Autopilot(Unit *target)
                         XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
                 zoomfactor = initialzoom;
                 static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                                                       "autotime",
-                                                                                       "10"));                 //10 seconds for auto to kick in;
+                        "autotime",
+                        "10"));                 //10 seconds for auto to kick in;
 
                 autopilot_time = autotime;
                 autopilot_target.SetUnit(target);
@@ -400,8 +383,7 @@ int Cockpit::Autopilot(Unit *target)
 
 extern void SwitchUnits2(Unit *nw);
 
-void SwitchUnits(Unit *ol, Unit *nw)
-{
+void SwitchUnits(Unit *ol, Unit *nw) {
     bool pointingtool = false;
     for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
         if (i != _Universe->CurrentCockpit()) {
@@ -424,8 +406,7 @@ void SwitchUnits(Unit *ol, Unit *nw)
     SwitchUnits2(nw);
 }
 
-static void SwitchUnitsTurret(Unit *ol, Unit *nw)
-{
+static void SwitchUnitsTurret(Unit *ol, Unit *nw) {
     static bool FlyStraightInTurret =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "ai_pilot_when_in_turret", "true"));
     if (FlyStraightInTurret) {
@@ -436,8 +417,7 @@ static void SwitchUnitsTurret(Unit *ol, Unit *nw)
     }
 }
 
-Unit *GetFinalTurret(Unit *baseTurret)
-{
+Unit *GetFinalTurret(Unit *baseTurret) {
     Unit *un = baseTurret;
     Unit *tur;
     for (un_iter uj = un->getSubUnits(); (tur = *uj); ++uj) {
@@ -447,8 +427,7 @@ Unit *GetFinalTurret(Unit *baseTurret)
     return un;
 }
 
-void Cockpit::UpdAutoPilot()
-{
+void Cockpit::UpdAutoPilot() {
     if (autopilot_time != 0) {
         autopilot_time -= SIMULATION_ATOM;
         if (autopilot_time <= 0) {
@@ -467,8 +446,7 @@ void Cockpit::UpdAutoPilot()
 
 extern void DoCockpitKeys();
 
-static float dockingdistance(Unit *port, Unit *un)
-{
+static float dockingdistance(Unit *port, Unit *un) {
     vector<DockingPorts>::const_iterator i = port->GetImageInformation().dockingports.begin();
     vector<DockingPorts>::const_iterator end = port->GetImageInformation().dockingports.end();
     QVector pos(InvTransform(port->cumulative_transformation_matrix, un->Position()));
@@ -487,13 +465,11 @@ static float dockingdistance(Unit *port, Unit *un)
 
 static bool too_many_attackers = false;
 
-bool Cockpit::tooManyAttackers()
-{
+bool Cockpit::tooManyAttackers() {
     return too_many_attackers;
 }
 
-void Cockpit::updateAttackers()
-{
+void Cockpit::updateAttackers() {
     static int max_attackers = XMLSupport::parse_int(vs_config->getVariable("AI", "max_player_attackers", "0"));
     if (max_attackers == 0) {
         return;
@@ -539,8 +515,7 @@ void Cockpit::updateAttackers()
     }
 }
 
-bool Cockpit::Update()
-{
+bool Cockpit::Update() {
     if (retry_dock) {
         QVector vec;
         DockToSavedBases(_Universe->CurrentCockpit(), vec);
@@ -560,8 +535,8 @@ bool Cockpit::Update()
                 XMLSupport::parse_float(vs_config->getVariable("physics", "shield_energy_downpower_time", "5"));
         static float minEnergyShieldPercent =
                 XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                               "shield_energy_downpower_percent",
-                                                               ".66666666666666"));
+                        "shield_energy_downpower_percent",
+                        ".66666666666666"));
 
         bool toolittleenergy = (par->energyData() <= minEnergyForShieldDownpower);
         if (toolittleenergy) {
@@ -590,9 +565,9 @@ bool Cockpit::Update()
                     if (temp) {
                         SwitchUnits(NULL, temp);
                         this->SetParent(temp,
-                                        GetUnitFileName().c_str(),
-                                        this->unitmodname.c_str(),
-                                        temp->Position());                         //this warps back to the parent unit if we're eject-docking. causes badness upon loading a game.
+                                GetUnitFileName().c_str(),
+                                this->unitmodname.c_str(),
+                                temp->Position());                         //this warps back to the parent unit if we're eject-docking. causes badness upon loading a game.
                     }
                     par->Kill();
                 }
@@ -619,7 +594,7 @@ bool Cockpit::Update()
                                 parentturret.SetUnit(par);
                                 Unit *finalunit = GetFinalTurret(un);
                                 this->SetParent(finalunit, GetUnitFileName().c_str(),
-                                                this->unitmodname.c_str(), savegame->GetPlayerLocation());
+                                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
                                 break;
                             }
                         }
@@ -633,9 +608,9 @@ bool Cockpit::Update()
                     Unit *un = parentturret.GetUnit();
                     if (un && (!_Universe->isPlayerStarship(un))) {
                         SetParent(un,
-                                  GetUnitFileName().c_str(),
-                                  this->unitmodname.c_str(),
-                                  savegame->GetPlayerLocation());
+                                GetUnitFileName().c_str(),
+                                this->unitmodname.c_str(),
+                                savegame->GetPlayerLocation());
                         SwitchUnits(NULL, un);
                         parentturret.SetUnit(NULL);
                         un->SetTurretAI();
@@ -651,13 +626,13 @@ bool Cockpit::Update()
         if (targ) {
             static float autopilot_term_distance =
                     XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                                   "auto_pilot_termination_distance",
-                                                                   "6000"));
+                            "auto_pilot_termination_distance",
+                            "6000"));
             float doubled = dockingdistance(targ, par);
             if (((targ->isUnit() != _UnitType::planet
                     && doubled < autopilot_term_distance)
                     || (UnitUtil::getSignificantDistance(targ,
-                                                         par) <= 0))
+                            par) <= 0))
                     && (!(par->IsCleared(targ) || targ->IsCleared(par) || par->isDocked(targ)
                             || targ->isDocked(par))) && (par->getRelation(targ) >= 0)
                     && (targ->getRelation(par) >= 0)) {
@@ -732,7 +707,7 @@ bool Cockpit::Update()
                             //this refers to cockpit
                             if (!(k->name == "return_to_cockpit")) {
                                 this->SetParent(un, GetUnitFileName().c_str(),
-                                                this->unitmodname.c_str(), savegame->GetPlayerLocation());
+                                        this->unitmodname.c_str(), savegame->GetPlayerLocation());
                             }
                             if (!(k->name == "return_to_cockpit")) {
                                 k->Kill();
@@ -754,7 +729,7 @@ bool Cockpit::Update()
 //}
                             SwitchUnits(k, un);
                             this->SetParent(un, GetUnitFileName().c_str(),
-                                            this->unitmodname.c_str(), savegame->GetPlayerLocation());
+                                    this->unitmodname.c_str(), savegame->GetPlayerLocation());
                             //un->SetAI(new FireKeyboard ())
                         }
                         break;
@@ -803,7 +778,7 @@ bool Cockpit::Update()
                 }
                 if (active_missions.size() > 1) {
                     for (int i = active_missions.size() - 1; i > 0;
-                         --i) {                          //don't terminate zeroth mission
+                            --i) {                          //don't terminate zeroth mission
                         if (active_missions[i]->player_num == k) {
                             active_missions[i]->terminateMission();
                         }
@@ -818,13 +793,13 @@ bool Cockpit::Update()
                 savegame->SetPlayerLocation(QVector(FLT_MAX, FLT_MAX, FLT_MAX));
                 vector<string> packedInfo;
                 savegame->ParseSaveGame(savegamefile,
-                                        newsystem,
-                                        newsystem,
-                                        pos,
-                                        setplayerXloc,
-                                        this->credits,
-                                        packedInfo,
-                                        k);
+                        newsystem,
+                        newsystem,
+                        pos,
+                        setplayerXloc,
+                        this->credits,
+                        packedInfo,
+                        k);
                 UnpackUnitInfo(packedInfo);
                 if (pos.i == FLT_MAX && pos.j == FLT_MAX && pos.k == FLT_MAX) {
                     pos = tmpoldpos;
@@ -910,8 +885,7 @@ bool Cockpit::Update()
     return false;
 }
 
-void visitSystemHelp(Cockpit *cp, string systemname, float num)
-{
+void visitSystemHelp(Cockpit *cp, string systemname, float num) {
     string key(string("visited_") + systemname);
     vector<float> *v = &cp->savegame->getMissionData(key);
     if (v->empty()) {
@@ -921,8 +895,7 @@ void visitSystemHelp(Cockpit *cp, string systemname, float num)
     }
 }
 
-void Cockpit::visitSystem(string systemname)
-{
+void Cockpit::visitSystem(string systemname) {
     visitSystemHelp(this, systemname, 1.0);
     int adj = UniverseUtil::GetNumAdjacentSystems(systemname);
     for (int i = 0; i < adj; ++i) {
@@ -930,8 +903,7 @@ void Cockpit::visitSystem(string systemname)
     }
 }
 
-Cockpit::~Cockpit()
-{
+Cockpit::~Cockpit() {
     Delete();
     if (savegame != nullptr) {
         delete savegame;
@@ -939,18 +911,15 @@ Cockpit::~Cockpit()
     }
 }
 
-void Cockpit::SetInsidePanYawSpeed(float)
-{
+void Cockpit::SetInsidePanYawSpeed(float) {
     // No-op in generic cockpits
 }
 
-void Cockpit::SetInsidePanPitchSpeed(float)
-{
+void Cockpit::SetInsidePanPitchSpeed(float) {
     // No-op in generic cockpits
 }
 
-void Cockpit::PackUnitInfo(vector<std::string> &info) const
-{
+void Cockpit::PackUnitInfo(vector<std::string> &info) const {
     info.clear();
 
     // First entry, current ship
@@ -965,8 +934,7 @@ void Cockpit::PackUnitInfo(vector<std::string> &info) const
     }
 }
 
-void Cockpit::UnpackUnitInfo(vector<std::string> &info)
-{
+void Cockpit::UnpackUnitInfo(vector<std::string> &info) {
     vector<string> filenames, systemnames, basenames;
 
     // First entry, current ship
@@ -994,8 +962,7 @@ void Cockpit::UnpackUnitInfo(vector<std::string> &info)
 
 static const std::string emptystring;
 
-const std::string &Cockpit::GetUnitFileName(unsigned int which) const
-{
+const std::string &Cockpit::GetUnitFileName(unsigned int which) const {
     if (which >= unitfilename.size()) {
         return emptystring;
     } else {
@@ -1003,8 +970,7 @@ const std::string &Cockpit::GetUnitFileName(unsigned int which) const
     }
 }
 
-const std::string &Cockpit::GetUnitSystemName(unsigned int which) const
-{
+const std::string &Cockpit::GetUnitSystemName(unsigned int which) const {
     if (which >= unitsystemname.size()) {
         return emptystring;
     } else {
@@ -1012,8 +978,7 @@ const std::string &Cockpit::GetUnitSystemName(unsigned int which) const
     }
 }
 
-const std::string &Cockpit::GetUnitBaseName(unsigned int which) const
-{
+const std::string &Cockpit::GetUnitBaseName(unsigned int which) const {
     if (which >= unitbasename.size()) {
         return emptystring;
     } else {
@@ -1021,8 +986,7 @@ const std::string &Cockpit::GetUnitBaseName(unsigned int which) const
     }
 }
 
-void Cockpit::RemoveUnit(unsigned int which)
-{
+void Cockpit::RemoveUnit(unsigned int which) {
     if (which < unitfilename.size()) {
         unitfilename.erase(unitfilename.begin() + which);
     }
@@ -1034,8 +998,7 @@ void Cockpit::RemoveUnit(unsigned int which)
     }
 }
 
-string Cockpit::MakeBaseName(const Unit *base)
-{
+string Cockpit::MakeBaseName(const Unit *base) {
     string name;
     if (base != NULL) {
         if (base->getFlightgroup() != NULL) {
@@ -1053,8 +1016,7 @@ string Cockpit::MakeBaseName(const Unit *base)
     return name;
 }
 
-SoundContainer *Cockpit::GetSoundForEvent(Cockpit::EVENTID eventId) const
-{
+SoundContainer *Cockpit::GetSoundForEvent(Cockpit::EVENTID eventId) const {
     if (eventId < sounds.size()) {
         return sounds[eventId];
     } else {
@@ -1062,16 +1024,14 @@ SoundContainer *Cockpit::GetSoundForEvent(Cockpit::EVENTID eventId) const
     }
 }
 
-void Cockpit::SetSoundForEvent(Cockpit::EVENTID eventId, const SoundContainer &soundSpecs)
-{
+void Cockpit::SetSoundForEvent(Cockpit::EVENTID eventId, const SoundContainer &soundSpecs) {
     while (eventId >= sounds.size()) {
         sounds.push_back(NULL);
     }
     sounds[eventId] = soundImpl(soundSpecs);
 }
 
-SoundContainer *Cockpit::soundImpl(const SoundContainer &specs)
-{
+SoundContainer *Cockpit::soundImpl(const SoundContainer &specs) {
     return new SoundContainer(specs);
 }
 

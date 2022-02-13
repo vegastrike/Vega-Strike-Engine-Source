@@ -28,8 +28,8 @@
 
 #include "init.h"
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,
-                                                                        ::boost::python::to_python_value<UnitWrapper>()(
-                                                                                UnitWrapper(x)));
+        ::boost::python::to_python_value<UnitWrapper>()(
+                UnitWrapper(x)));
 template<>
 struct default_result_converter::apply<Unit *> {
 //typedef boost::python::to_python_value<Unit *> type;

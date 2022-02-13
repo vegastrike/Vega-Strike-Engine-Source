@@ -37,36 +37,29 @@ class MutableShell {
     mutable T t;
 public:
 //flatten restores sortedness--in this case it does nothing
-    void flatten()
-    {
+    void flatten() {
     }
 
-    MutableShell(const T &t) : t(t)
-    {
+    MutableShell(const T &t) : t(t) {
     }
 
-    T &get() const
-    {
+    T &get() const {
         return t;
     }
 
-    T &operator*() const
-    {
+    T &operator*() const {
         return t;
     }
 
-    T *operator->() const
-    {
+    T *operator->() const {
         return &t;
     }
 
-    operator T &() const
-    {
+    operator T &() const {
         return t;
     }
 
-    bool operator<(const MutableShell<T> &other) const
-    {
+    bool operator<(const MutableShell<T> &other) const {
         return t < other.t;
     }
 };
@@ -79,12 +72,11 @@ class KeyMutableSet : public std::multiset<MutableShell<T>, _Compare> {
     typedef std::multiset<MutableShell<T>, _Compare> SUPER;
 public:
 /// This just checks the order of the set for testing purposes..
-    void checkSet()
-    {
+    void checkSet() {
         _Compare comparator;
         if (this->begin() != this->end()) {
             for (typename SUPER::iterator newiter = this->begin(), iter = newiter++; newiter != this->end();
-                 iter = newiter++)
+                    iter = newiter++)
                 assert(!comparator(*newiter, *iter));
         }
     }
@@ -94,10 +86,9 @@ public:
  */
 
     void changeKey(typename SUPER::iterator &iter,
-                   const T &newKey,
-                   typename SUPER::iterator &templess,
-                   typename SUPER::iterator &rettempmore)
-    {
+            const T &newKey,
+            typename SUPER::iterator &templess,
+            typename SUPER::iterator &rettempmore) {
         MutableShell<T> newKeyShell(newKey);
         templess = rettempmore = iter;
         ++rettempmore;
@@ -131,18 +122,15 @@ public:
         }
     }
 
-    typename SUPER::iterator insert(const T &newKey, typename SUPER::iterator hint)
-    {
+    typename SUPER::iterator insert(const T &newKey, typename SUPER::iterator hint) {
         return this->SUPER::insert(hint, newKey);
     }
 
-    typename SUPER::iterator insert(const T &newKey)
-    {
+    typename SUPER::iterator insert(const T &newKey) {
         return this->SUPER::insert(newKey);
     }
 
-    typename SUPER::iterator changeKey(typename SUPER::iterator iter, const T &newKey)
-    {
+    typename SUPER::iterator changeKey(typename SUPER::iterator iter, const T &newKey) {
         typename SUPER::iterator templess = iter, tempmore = iter;
         changeKey(iter, newKey, templess, tempmore);
         return iter;
@@ -154,17 +142,15 @@ class ListMutableSet : public std::list<T> {
     typedef std::list<T> SUPER;
 public:
 //flatten restores sortedness--in this case it does nothing
-    void flatten()
-    {
+    void flatten() {
     }
 
 /// This just checks the order of the set for testing purposes..
-    void checkSet()
-    {
+    void checkSet() {
         _Compare comparator;
         if (this->begin() != this->end()) {
             for (typename SUPER::iterator newiter = this->begin(), iter = newiter++; newiter != this->end();
-                 iter = newiter++)
+                    iter = newiter++)
                 assert(!comparator(*newiter, *iter));
         }
     }
@@ -173,10 +159,9 @@ public:
  *       changes its key to the specified new key.
  */
     void changeKey(typename SUPER::iterator &iter,
-                   const T &newKey,
-                   typename SUPER::iterator &templess,
-                   typename SUPER::iterator &rettempmore)
-    {
+            const T &newKey,
+            typename SUPER::iterator &templess,
+            typename SUPER::iterator &rettempmore) {
         MutableShell<T> newKeyShell(newKey);
         templess = rettempmore = iter;
         ++rettempmore;
@@ -200,15 +185,13 @@ public:
         }
     }
 
-    typename SUPER::iterator changeKey(typename SUPER::iterator iter, const T &newKey)
-    {
+    typename SUPER::iterator changeKey(typename SUPER::iterator iter, const T &newKey) {
         typename SUPER::iterator templess = iter, tempmore = iter;
         changeKey(iter, newKey, templess, tempmore);
         return iter;
     }
 
-    typename SUPER::iterator insert(const T &newKey, typename SUPER::iterator hint)
-    {
+    typename SUPER::iterator insert(const T &newKey, typename SUPER::iterator hint) {
         bool gequal = false, lequal = false;
         _Compare comparator;
         while (1) {
@@ -242,8 +225,7 @@ public:
         }
     }
 
-    typename SUPER::iterator insert(const T &newKey)
-    {
+    typename SUPER::iterator insert(const T &newKey) {
         return this->insert(newKey, this->begin());
     }
 };

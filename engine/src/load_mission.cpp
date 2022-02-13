@@ -41,8 +41,7 @@
 #include "universe.h"
 #include "options.h"
 
-std::string PickledDataSansMissionName(std::string pickled)
-{
+std::string PickledDataSansMissionName(std::string pickled) {
     string::size_type newline = pickled.find("\n");
     if (newline != string::npos) {
         return pickled.substr(newline + 1, pickled.length() - (newline + 1));
@@ -51,14 +50,12 @@ std::string PickledDataSansMissionName(std::string pickled)
     }
 }
 
-std::string PickledDataOnlyMissionName(std::string pickled)
-{
+std::string PickledDataOnlyMissionName(std::string pickled) {
     string::size_type newline = pickled.find("\n");
     return pickled.substr(0, newline);
 }
 
-int ReadIntSpace(std::string &str)
-{
+int ReadIntSpace(std::string &str) {
     std::string myint;
     bool toggle = false;
     int i = 0;
@@ -81,8 +78,7 @@ struct delayed_mission {
     std::string script;
     unsigned int player;
 
-    delayed_mission(std::string str, std::string script)
-    {
+    delayed_mission(std::string str, std::string script) {
         this->str = str;
         this->script = script;
         player = _Universe->CurrentCockpit();
@@ -90,8 +86,7 @@ struct delayed_mission {
 };
 vector<delayed_mission> delayed_missions;
 
-int num_delayed_missions()
-{
+int num_delayed_missions() {
     unsigned int cp = _Universe->CurrentCockpit();
     int number = 0;
     for (unsigned int i = 0; i < delayed_missions.size(); ++i) {
@@ -102,8 +97,7 @@ int num_delayed_missions()
     return number;
 }
 
-void processDelayedMissions()
-{
+void processDelayedMissions() {
     while (!delayed_missions.empty()) {
         if (delayed_missions.back().player < (unsigned int) _Universe->numPlayers()) {
             int i = _Universe->CurrentCockpit();
@@ -121,18 +115,15 @@ void processDelayedMissions()
     }
 }
 
-void delayLoadMission(std::string str)
-{
+void delayLoadMission(std::string str) {
     delayed_missions.push_back(delayed_mission(str, string("")));
 }
 
-void delayLoadMission(std::string str, std::string script)
-{
+void delayLoadMission(std::string str, std::string script) {
     delayed_missions.push_back(delayed_mission(str, script));
 }
 
-void SaveGame::ReloadPickledData()
-{
+void SaveGame::ReloadPickledData() {
     std::string lpd = last_pickled_data;
     if (_Universe->numPlayers() == 1) {
         if (!lpd.empty()) {
@@ -151,8 +142,7 @@ void SaveGame::ReloadPickledData()
     }
 }
 
-void UnpickleMission(std::string pickled)
-{
+void UnpickleMission(std::string pickled) {
     std::string file = PickledDataOnlyMissionName(pickled);
     pickled = PickledDataSansMissionName(pickled);
     if (pickled.length()) {
@@ -162,15 +152,13 @@ void UnpickleMission(std::string pickled)
     }
 }
 
-std::string lengthify(std::string tp)
-{
+std::string lengthify(std::string tp) {
     int len = tp.length();
     tp = XMLSupport::tostring(len) + " " + tp;
     return tp;
 }
 
-std::string PickleAllMissions()
-{
+std::string PickleAllMissions() {
     std::string res;
     int count = 0;
     for (unsigned int i = 0; i < active_missions.size(); i++) {
@@ -183,8 +171,7 @@ std::string PickleAllMissions()
     return XMLSupport::tostring(count) + " " + res;
 }
 
-int ReadIntSpace(FILE *fp)
-{
+int ReadIntSpace(FILE *fp) {
     std::string myint;
     bool toggle = false;
     while (!VSFileSystem::vs_feof(fp)) {
@@ -201,8 +188,7 @@ int ReadIntSpace(FILE *fp)
     return XMLSupport::parse_int(myint);
 }
 
-int ReadIntSpace(char *&buf)
-{
+int ReadIntSpace(char *&buf) {
     std::string myint;
     bool toggle = false;
     while (*buf != 0) {
@@ -220,8 +206,7 @@ int ReadIntSpace(char *&buf)
     return XMLSupport::parse_int(myint);
 }
 
-std::string UnpickleAllMissions(FILE *fp)
-{
+std::string UnpickleAllMissions(FILE *fp) {
     std::string retval;
     unsigned int nummissions = ReadIntSpace(fp);
     retval += XMLSupport::tostring((int) nummissions) + " ";
@@ -243,8 +228,7 @@ std::string UnpickleAllMissions(FILE *fp)
     return retval;
 }
 
-std::string UnpickleAllMissions(char *&buf)
-{
+std::string UnpickleAllMissions(char *&buf) {
     std::string retval;
     unsigned int nummissions = ReadIntSpace(buf);
     retval += XMLSupport::tostring((int) nummissions) + " ";
@@ -268,13 +252,11 @@ std::string UnpickleAllMissions(char *&buf)
     return retval;
 }
 
-void LoadMission(const char *mn, bool loadFirstUnit)
-{
+void LoadMission(const char *mn, bool loadFirstUnit) {
     LoadMission(mn, string(""), loadFirstUnit);
 }
 
-void LoadMission(const char *nission_name, const std::string &script, bool loadFirstUnit)
-{
+void LoadMission(const char *nission_name, const std::string &script, bool loadFirstUnit) {
     using namespace VSFileSystem;
     string mission_name(nission_name);
     const char *friendly_mission_name = nission_name;

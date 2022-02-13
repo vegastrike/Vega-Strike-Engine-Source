@@ -32,13 +32,11 @@
 using std::list;
 using std::vector;
 
-void Order::AdjustRelationTo(Unit *un, float factor)
-{
+void Order::AdjustRelationTo(Unit *un, float factor) {
     //virtual stub function
 }
 
-void Order::Communicate(const CommunicationMessage &c)
-{
+void Order::Communicate(const CommunicationMessage &c) {
     int completed = 0;
     unsigned int i = 0;
     CommunicationMessage *newC = new CommunicationMessage(c);
@@ -77,12 +75,10 @@ void Order::Communicate(const CommunicationMessage &c)
     }
 }
 
-void Order::ProcessCommMessage(CommunicationMessage &c)
-{
+void Order::ProcessCommMessage(CommunicationMessage &c) {
 }
 
-void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMessageProcessed)
-{
+void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMessageProcessed) {
     float time = AICommresponseTime / SIMULATION_ATOM;
     if (time <= .001) {
         time += .001;

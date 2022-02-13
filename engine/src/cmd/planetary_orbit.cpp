@@ -30,19 +30,18 @@
 #include "vs_logging.h"
 
 PlanetaryOrbit::PlanetaryOrbit(Unit *p,
-                               double velocity,
-                               double initpos,
-                               const QVector &x_axis,
-                               const QVector &y_axis,
-                               const QVector &centre,
-                               Unit *targetunit) : Order(MOVEMENT, 0),
-                                                   velocity(velocity),
-                                                   theta(initpos),
-                                                   inittheta(initpos),
-                                                   x_size(x_axis),
-                                                   y_size(y_axis),
-                                                   current_orbit_frame(0)
-{
+        double velocity,
+        double initpos,
+        const QVector &x_axis,
+        const QVector &y_axis,
+        const QVector &centre,
+        Unit *targetunit) : Order(MOVEMENT, 0),
+        velocity(velocity),
+        theta(initpos),
+        inittheta(initpos),
+        x_size(x_axis),
+        y_size(y_axis),
+        current_orbit_frame(0) {
     for (unsigned int t = 0; t < NUM_ORBIT_AVERAGE; ++t) {
         orbiting_average[t] = QVector(0, 0, 0);
     }
@@ -70,13 +69,11 @@ PlanetaryOrbit::PlanetaryOrbit(Unit *p,
     this->SetParent(p);
 }
 
-PlanetaryOrbit::~PlanetaryOrbit()
-{
+PlanetaryOrbit::~PlanetaryOrbit() {
     parent->SetResolveForces(true);
 }
 
-void PlanetaryOrbit::Execute()
-{
+void PlanetaryOrbit::Execute() {
     bool mining = parent->rSize() > 1444 && parent->rSize() < 1445;
     bool done = this->done;
     this->Order::Execute();
@@ -111,9 +108,9 @@ void PlanetaryOrbit::Execute()
             } else {
                 if (simulation_atom_var != orbiting_last_simatom) {
                     VS_LOG(trace,
-                           (boost::format(
-                                   "void PlanetaryOrbit::Execute(): simulation_atom_var, %1$.6f, != orbiting_last_simatom, %2$.6f, for planet %3$s")
-                                   % simulation_atom_var % orbiting_last_simatom % this->parent->name));
+                            (boost::format(
+                                    "void PlanetaryOrbit::Execute(): simulation_atom_var, %1$.6f, != orbiting_last_simatom, %2$.6f, for planet %3$s")
+                                    % simulation_atom_var % orbiting_last_simatom % this->parent->name));
                     QVector sum_diff(0, 0, 0);
                     QVector sum_position;
                     int limit;
@@ -194,9 +191,9 @@ void PlanetaryOrbit::Execute()
     float v2 = parent->Velocity.Dot(parent->Velocity);
     if (v2 > Unreasonable_value * Unreasonable_value) {
         VS_LOG(debug,
-               (boost::format(
-                       "void PlanetaryOrbit::Execute(): A velocity value considered unreasonable was calculated for planet %1%; zeroing it out")
-                       % this->parent->name));
+                (boost::format(
+                        "void PlanetaryOrbit::Execute(): A velocity value considered unreasonable was calculated for planet %1%; zeroing it out")
+                        % this->parent->name));
         parent->Velocity.Set(0, 0, 0);
         parent->cumulative_velocity.Set(0, 0, 0);
         parent->SetCurPosition(origin - focus + sum_orbiting_average + x_offset + y_offset);

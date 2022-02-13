@@ -34,40 +34,32 @@ class TObj_Vector {
 public:
     float i, j, k;
 
-    TObj_Vector()
-    {
+    TObj_Vector() {
     }
 
-    TObj_Vector(const GFXVertex &v) : i(v.x), j(v.y), k(v.z)
-    {
+    TObj_Vector(const GFXVertex &v) : i(v.x), j(v.y), k(v.z) {
     }
 
-    TObj_Vector(float _i, float _j, float _k) : i(_i), j(_j), k(_k)
-    {
+    TObj_Vector(float _i, float _j, float _k) : i(_i), j(_j), k(_k) {
     }
 
-    TObj_Vector operator+(const TObj_Vector &o) const
-    {
+    TObj_Vector operator+(const TObj_Vector &o) const {
         return TObj_Vector(i + o.i, j + o.j, k + o.k);
     }
 
-    TObj_Vector operator-(const TObj_Vector &o) const
-    {
+    TObj_Vector operator-(const TObj_Vector &o) const {
         return TObj_Vector(i - o.i, j - o.j, k - o.k);
     }
 
-    TObj_Vector Cross(const TObj_Vector &v) const
-    {
+    TObj_Vector Cross(const TObj_Vector &v) const {
         return TObj_Vector(j * v.k - k * v.j, k * v.i - i * v.k, i * v.j - j * v.i);
     }
 
-    float Dot(const TObj_Vector &b) const
-    {
+    float Dot(const TObj_Vector &b) const {
         return i * b.i + j * b.j + k * b.k;
     }
 
-    void Normalize()
-    {
+    void Normalize() {
         float f = Dot(*this);
         if (f > 0) {
             f = 1.0f / (float) sqrt(f);
@@ -77,15 +69,13 @@ public:
         k *= f;
     }
 
-    bool operator==(const TObj_Vector &o) const
-    {
+    bool operator==(const TObj_Vector &o) const {
         return i == o.i && j == o.j && k == o.k;
     }
 };
 
 struct MTL : public GFXMaterial {
-    MTL()
-    {
+    MTL() {
         blend_src = ONE;
         blend_dst = ZERO;
         reflect = false;
@@ -108,32 +98,27 @@ struct IntRef {
     int n;
     int t;
 
-    IntRef()
-    {
+    IntRef() {
         v = -1;
         n = -1;
         t = -1;
     }
 
-    IntRef(int vv, int nn, int tt)
-    {
+    IntRef(int vv, int nn, int tt) {
         v = vv;
         n = nn;
         t = tt;
     }
 
-    bool operator==(const IntRef &o) const
-    {
+    bool operator==(const IntRef &o) const {
         return v == o.v && n == o.n && t == o.t;
     }
 
-    bool operator!=(const IntRef &o) const
-    {
+    bool operator!=(const IntRef &o) const {
         return v != o.v || n != o.n || t != o.t;
     }
 
-    bool operator<(const IntRef &o) const
-    {
+    bool operator<(const IntRef &o) const {
         if (v < o.v) {
             return true;
         } else if (v == o.v) {
@@ -147,107 +132,87 @@ struct IntRef {
     }
 };
 struct VTX {
-    VTX(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {
+    VTX(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {
     }
 
-    VTX() : x(0), y(0), z(0)
-    {
+    VTX() : x(0), y(0), z(0) {
     }
 
-    bool operator==(const VTX &o) const
-    {
+    bool operator==(const VTX &o) const {
         return x == o.x && y == o.y && z == o.z;
     }
 
-    bool operator!=(const VTX &o) const
-    {
+    bool operator!=(const VTX &o) const {
         return x != o.x || y != o.y || z != o.z;
     }
 
-    bool operator<(const VTX &o) const
-    {
+    bool operator<(const VTX &o) const {
         return (x < o.x) || ((x == o.x) && ((y < o.y) || ((y == o.y) && (z < o.z))));
     }
 
     float x, y, z;
 };
 struct TEX {
-    TEX(float _s, float _t) : s(_s), t(_t)
-    {
+    TEX(float _s, float _t) : s(_s), t(_t) {
     }
 
-    TEX() : s(0), t(0)
-    {
+    TEX() : s(0), t(0) {
     }
 
-    bool operator==(const TEX &o) const
-    {
+    bool operator==(const TEX &o) const {
         return s == o.s && t == o.t;
     }
 
-    bool operator!=(const TEX &o) const
-    {
+    bool operator!=(const TEX &o) const {
         return s != o.s || t != o.t;
     }
 
-    bool operator<(const TEX &o) const
-    {
+    bool operator<(const TEX &o) const {
         return (s < o.s) || ((s == o.s) && (t < o.t));
     }
 
     float s, t;
 };
 struct NORMAL {
-    NORMAL(float _i, float _j, float _k) : i(_i), j(_j), k(_k)
-    {
+    NORMAL(float _i, float _j, float _k) : i(_i), j(_j), k(_k) {
     }
 
-    NORMAL() : i(1), j(0), k(0)
-    {
+    NORMAL() : i(1), j(0), k(0) {
     }
 
-    bool operator==(const NORMAL &o) const
-    {
+    bool operator==(const NORMAL &o) const {
         return i == o.i && j == o.j && k == o.k;
     }
 
-    bool operator!=(const NORMAL &o) const
-    {
+    bool operator!=(const NORMAL &o) const {
         return i != o.i || j != o.j || k != o.k;
     }
 
-    bool operator<(const NORMAL &o) const
-    {
+    bool operator<(const NORMAL &o) const {
         return (i < o.i) || ((i == o.i) && ((j < o.j) || ((j == o.j) && (k < o.k))));
     }
 
     float i, j, k;
 };
 struct FACE {
-    FACE() : num(0)
-    {
+    FACE() : num(0) {
     }
 
-    FACE(const IntRef &_r1, const IntRef &_r2) : num(2), r1(_r1), r2(_r2)
-    {
+    FACE(const IntRef &_r1, const IntRef &_r2) : num(2), r1(_r1), r2(_r2) {
     }
 
-    FACE(const IntRef &_r1, const IntRef &_r2, const IntRef &_r3) : num(3), r1(_r1), r2(_r2), r3(_r3)
-    {
+    FACE(const IntRef &_r1, const IntRef &_r2, const IntRef &_r3) : num(3), r1(_r1), r2(_r2), r3(_r3) {
     }
 
     FACE(const IntRef &_r1, const IntRef &_r2, const IntRef &_r3, const IntRef &_r4)
-            : num(4), r1(_r1), r2(_r2), r3(_r3), r4(_r4)
-    {
+            : num(4), r1(_r1), r2(_r2), r3(_r3), r4(_r4) {
     }
 
     int num;
     IntRef r1, r2, r3, r4;
 };
 
-vector<string> splitWhiteSpace(string inp)
-{
+vector<string> splitWhiteSpace(string inp) {
     string::size_type where;
     vector<string> ret;
     while ((where = inp.find_first_of("\t ")) != string::npos) {
@@ -262,8 +227,7 @@ vector<string> splitWhiteSpace(string inp)
     return ret;
 }
 
-IntRef parsePoly(string inp)
-{
+IntRef parsePoly(string inp) {
     IntRef ret;
     const char *st = inp.c_str();
     if (3 == sscanf(st, "%d/%d/%d", &ret.v, &ret.t, &ret.n)) {
@@ -297,24 +261,21 @@ IntRef parsePoly(string inp)
     return ret;
 }
 
-void charstoupper(char *buf)
-{
+void charstoupper(char *buf) {
     while (*buf) {
         *buf = toupper(*buf);
         ++buf;
     }
 }
 
-void wordtoupper(char *buf)
-{
+void wordtoupper(char *buf) {
     while (*buf && !isspace(*buf)) {
         *buf = toupper(*buf);
         ++buf;
     }
 }
 
-textureholder makeTextureHolder(std::string str, int which)
-{
+textureholder makeTextureHolder(std::string str, int which) {
     textureholder ret;
     ret.type = TEXTURE;
     if (str.find(".ani") != string::npos) {
@@ -327,20 +288,18 @@ textureholder makeTextureHolder(std::string str, int which)
     return ret;
 }
 
-textureholder makeTechniqueHolder(std::string str)
-{
+textureholder makeTechniqueHolder(std::string str) {
     textureholder ret = makeTextureHolder(str, 0);
     ret.type = TECHNIQUE;
     return ret;
 }
 
 static int AddElement(XML &xml,
-                      const IntRef &r,
-                      map<IntRef, int> &elements,
-                      const vector<VTX> &vtxlist,
-                      const vector<TEX> &txclist,
-                      const vector<NORMAL> &normallist)
-{
+        const IntRef &r,
+        map<IntRef, int> &elements,
+        const vector<VTX> &vtxlist,
+        const vector<TEX> &txclist,
+        const vector<NORMAL> &normallist) {
     map<IntRef, int>::iterator e = elements.find(r);
     if (e == elements.end()) {
         pair<IntRef, int> elem = pair<IntRef, int>(r, int(xml.vertices.size()));
@@ -375,11 +334,10 @@ static int AddElement(XML &xml,
 }
 
 static void ObjToXML(XML &xml,
-                     const vector<VTX> &vtxlist,
-                     const vector<TEX> &txclist,
-                     const vector<NORMAL> &normallist,
-                     const vector<FACE> &facelist)
-{
+        const vector<VTX> &vtxlist,
+        const vector<TEX> &txclist,
+        const vector<NORMAL> &normallist,
+        const vector<FACE> &facelist) {
     map<IntRef, int> elements;
     for (vector<FACE>::const_iterator fiter = facelist.begin(); fiter != facelist.end(); fiter++) {
         int e1 = (((*fiter).num >= 1) ? AddElement(xml, (*fiter).r1, elements, vtxlist, txclist, normallist) : -1);
@@ -390,30 +348,32 @@ static void ObjToXML(XML &xml,
             case 2:
                 //Line...
                 xml.lines
-                   .push_back(line(e1,
-                                   e2,
-                                   xml.vertices[e1].s,
-                                   xml.vertices[e1].t,
-                                   xml.vertices[e2].s,
-                                   xml.vertices[e2].t));
+                        .push_back(line(e1,
+                                e2,
+                                xml.vertices[e1].s,
+                                xml.vertices[e1].t,
+                                xml.vertices[e2].s,
+                                xml.vertices[e2].t));
                 break;
             case 3:
                 //Triangle...
                 xml.tris.push_back(triangle(e1, e2, e3, xml.vertices[e1].s, xml.vertices[e1].t, xml.vertices[e2].s,
-                                            xml.vertices[e2].t, xml.vertices[e3].s, xml.vertices[e3].t));
+                        xml.vertices[e2].t, xml.vertices[e3].s, xml.vertices[e3].t));
                 break;
             case 4:
                 //Quad...
                 xml.quads.push_back(quad(e1, e2, e3, e4, xml.vertices[e1].s, xml.vertices[e1].t, xml.vertices[e2].s,
-                                         xml.vertices[e2].t, xml.vertices[e3].s, xml.vertices[e3].t, xml.vertices[e4].s,
-                                         xml.vertices[e4].t));
+                        xml.vertices[e2].t, xml.vertices[e3].s, xml.vertices[e3].t, xml.vertices[e4].s,
+                        xml.vertices[e4].t));
                 break;
         }
     }
 }
 
-static FACE map_face(const FACE &f, const vector<int> &vtxmap, const vector<int> &txcmap, const vector<int> &normalmap)
-{
+static FACE map_face(const FACE &f,
+        const vector<int> &vtxmap,
+        const vector<int> &txcmap,
+        const vector<int> &normalmap) {
     FACE rf(f);
     switch (f.num) {
         case 4:
@@ -436,8 +396,7 @@ static FACE map_face(const FACE &f, const vector<int> &vtxmap, const vector<int>
     return rf;
 }
 
-string ObjGetMtl(FILE *obj, string objpath)
-{
+string ObjGetMtl(FILE *obj, string objpath) {
     fseek(obj, 0, SEEK_END);
     int osize = ftell(obj);
     fseek(obj, 0, SEEK_SET);
@@ -474,8 +433,7 @@ string ObjGetMtl(FILE *obj, string objpath)
     return ret;
 }
 
-void ObjToXMESH(FILE *obj, FILE *mtl, vector<XML> &xmllist, bool forcenormals)
-{
+void ObjToXMESH(FILE *obj, FILE *mtl, vector<XML> &xmllist, bool forcenormals) {
     bool flips = atoi(Converter::getNamedOption("flips").c_str()) != 0;
     bool flipt = atoi(Converter::getNamedOption("flipt").c_str()) != 0;
     bool flipn = atoi(Converter::getNamedOption("flipn").c_str()) != 0;
@@ -718,26 +676,26 @@ void ObjToXMESH(FILE *obj, FILE *mtl, vector<XML> &xmllist, bool forcenormals)
                     vector<string> splitwhite = splitWhiteSpace(buf + 1);
                     for (vector<string>::size_type i = 2; i < splitwhite.size(); i++) {
                         facelist.push_back(map_face(FACE(parsePoly(splitwhite[0]), parsePoly(splitwhite[i - 1]),
-                                                         parsePoly(splitwhite[i - 2])),
-                                                    vtxmap_ii,
-                                                    txcmap_ii,
-                                                    normalmap_ii));
+                                        parsePoly(splitwhite[i - 2])),
+                                vtxmap_ii,
+                                txcmap_ii,
+                                normalmap_ii));
                     }
                     break;
                 }
                 case 4:
                     facelist.push_back(map_face(FACE(parsePoly(str), parsePoly(str1), parsePoly(str2),
-                                                     parsePoly(str3)), vtxmap_ii, txcmap_ii, normalmap_ii));
+                            parsePoly(str3)), vtxmap_ii, txcmap_ii, normalmap_ii));
                     break;
                 case 3:
                     facelist.push_back(map_face(FACE(parsePoly(str), parsePoly(str1),
-                                                     parsePoly(str2)), vtxmap_ii, txcmap_ii, normalmap_ii));
+                            parsePoly(str2)), vtxmap_ii, txcmap_ii, normalmap_ii));
                     break;
                 case 2:
                     facelist.push_back(map_face(FACE(parsePoly(str), parsePoly(str1)),
-                                                vtxmap_ii,
-                                                txcmap_ii,
-                                                normalmap_ii));
+                            vtxmap_ii,
+                            txcmap_ii,
+                            normalmap_ii));
                     break;
             }
         }
@@ -786,13 +744,13 @@ void ObjToXMESH(FILE *obj, FILE *mtl, vector<XML> &xmllist, bool forcenormals)
         xmllist.push_back(xml);
 
         printf("%u_0: %u faces, %u vertices, %u lines, %u tris, %u quads, %u indices\n",
-               textnum,
-               (unsigned int) (*it).second.size(),
-               (unsigned int) xml.vertices.size(),
-               (unsigned int) xml.lines.size(),
-               (unsigned int) xml.tris.size(),
-               (unsigned int) xml.quads.size(),
-               (unsigned int) (xml.tris.size() * 3 + xml.quads.size() * 4)
+                textnum,
+                (unsigned int) (*it).second.size(),
+                (unsigned int) xml.vertices.size(),
+                (unsigned int) xml.lines.size(),
+                (unsigned int) xml.tris.size(),
+                (unsigned int) xml.quads.size(),
+                (unsigned int) (xml.tris.size() * 3 + xml.quads.size() * 4)
         );
         textnum++;
         totface += int((*it).second.size());
@@ -802,8 +760,7 @@ void ObjToXMESH(FILE *obj, FILE *mtl, vector<XML> &xmllist, bool forcenormals)
     printf("Total indices: %d\n", totindex);
 }
 
-void ObjToBFXM(FILE *obj, FILE *mtl, FILE *outputFile, bool forcenormals)
-{
+void ObjToBFXM(FILE *obj, FILE *mtl, FILE *outputFile, bool forcenormals) {
     vector<XML> xmllist;
 
     ObjToXMESH(obj, mtl, xmllist, forcenormals);

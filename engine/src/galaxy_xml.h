@@ -44,8 +44,7 @@ protected:
     SGalaxy &operator=(const SGalaxy &a);
 
 public:
-    SGalaxy()
-    {
+    SGalaxy() {
         subheirarchy = NULL;
     }
 
@@ -59,20 +58,19 @@ public:
 
     ~SGalaxy();
     const string &getVariable(const std::vector<string> &section,
-                              const string &name,
-                              const string &default_value) const;
+            const string &name,
+            const string &default_value) const;
     const string &getRandSystem(const string &section, const string &default_value) const;
     const string &getVariable(const string &section, const string &name, const string &defaultvalue) const;
     const string &getVariable(const string &section, const string &subsection, const string &name,
-                              const string &defaultvalue) const;
+            const string &defaultvalue) const;
     bool setVariable(const string &section, const string &name, const string &value);
     bool setVariable(const string &section, const string &subsection, const string &name, const string &value);
     void addSection(const std::vector<string> &section);
     void setVariable(const std::vector<string> &section, const string &name, const string &value);
     SubHeirarchy &getHeirarchy();
 
-    const std::string &operator[](const std::string &s) const
-    {
+    const std::string &operator[](const std::string &s) const {
         static std::string empty_string;
         StringMap::const_iterator it = data.find(s);
         if (it != data.end()) {
@@ -91,8 +89,7 @@ class Galaxy : public SGalaxy {
     void setupPlanetTypeMaps();
 public:
 
-    const string &getPlanetNameFromInitial(const string &abbrev) const
-    {
+    const string &getPlanetNameFromInitial(const string &abbrev) const {
         static std::string empty_string;
         StringMap::const_iterator it = initial2name.find(abbrev);
         if (it != initial2name.end()) {
@@ -102,8 +99,7 @@ public:
         }
     }
 
-    const string &getPlanetNameFromTexture(const string &tex) const
-    {
+    const string &getPlanetNameFromTexture(const string &tex) const {
         static std::string empty_string;
         StringMap::const_iterator it = texture2name.find(tex);
         if (it != texture2name.end()) {
@@ -121,8 +117,7 @@ public:
     void addPlanetSection(const std::vector<string> &section);
     bool setPlanetVariable(const string &planet, const string &name, const string &value);
 
-    Galaxy()
-    {
+    Galaxy() {
         subheirarchy = NULL;
         planet_types = NULL;
     }

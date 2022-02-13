@@ -104,10 +104,9 @@ static bool gFixQuantized = true;
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void _BuildCollisionTree(AABBCollisionNode *linear,
-                                const uint32_t box_id,
-                                uint32_t &current_id,
-                                const AABBTreeNode *current_node)
-{
+        const uint32_t box_id,
+        uint32_t &current_id,
+        const AABBTreeNode *current_node) {
     // Current node from input tree is "current_node". Must be flattened into "linear[boxid]".
 
     // Store the AABB
@@ -155,10 +154,9 @@ static void _BuildCollisionTree(AABBCollisionNode *linear,
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void _BuildNoLeafTree(AABBNoLeafNode *linear,
-                             const uint32_t box_id,
-                             uint32_t &current_id,
-                             const AABBTreeNode *current_node)
-{
+        const uint32_t box_id,
+        uint32_t &current_id,
+        const AABBTreeNode *current_node) {
     const AABBTreeNode *P = current_node->GetPos();
     const AABBTreeNode *N = current_node->GetNeg();
     // Leaf nodes here?!
@@ -210,8 +208,7 @@ static void _BuildNoLeafTree(AABBNoLeafNode *linear,
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBCollisionTree::AABBCollisionTree() : mNodes(nullptr)
-{
+AABBCollisionTree::AABBCollisionTree() : mNodes(nullptr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,8 +216,7 @@ AABBCollisionTree::AABBCollisionTree() : mNodes(nullptr)
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBCollisionTree::~AABBCollisionTree()
-{
+AABBCollisionTree::~AABBCollisionTree() {
     DELETEARRAY(mNodes);
 }
 
@@ -231,8 +227,7 @@ AABBCollisionTree::~AABBCollisionTree()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBCollisionTree::Build(AABBTree *tree)
-{
+bool AABBCollisionTree::Build(AABBTree *tree) {
     // Checkings
     if (!tree) {
         return false;
@@ -268,8 +263,7 @@ bool AABBCollisionTree::Build(AABBTree *tree)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBCollisionTree::Refit(const MeshInterface * /*mesh_interface*/)
-{
+bool AABBCollisionTree::Refit(const MeshInterface * /*mesh_interface*/) {
     OPASSERT(!"Not implemented since AABBCollisionTrees have twice as more nodes to refit as AABBNoLeafTrees!");
     return false;
 }
@@ -282,15 +276,13 @@ bool AABBCollisionTree::Refit(const MeshInterface * /*mesh_interface*/)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBCollisionTree::Walk(GenericWalkingCallback callback, void *user_data) const
-{
+bool AABBCollisionTree::Walk(GenericWalkingCallback callback, void *user_data) const {
     if (!callback) {
         return false;
     }
 
     struct Local {
-        static void _Walk(const AABBCollisionNode *current_node, GenericWalkingCallback callback, void *user_data)
-        {
+        static void _Walk(const AABBCollisionNode *current_node, GenericWalkingCallback callback, void *user_data) {
             if (!current_node || !(callback)(current_node, user_data)) {
                 return;
             }
@@ -311,8 +303,7 @@ bool AABBCollisionTree::Walk(GenericWalkingCallback callback, void *user_data) c
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBNoLeafTree::AABBNoLeafTree() : mNodes(nullptr)
-{
+AABBNoLeafTree::AABBNoLeafTree() : mNodes(nullptr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,8 +311,7 @@ AABBNoLeafTree::AABBNoLeafTree() : mNodes(nullptr)
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBNoLeafTree::~AABBNoLeafTree()
-{
+AABBNoLeafTree::~AABBNoLeafTree() {
     DELETEARRAY(mNodes);
 }
 
@@ -332,8 +322,7 @@ AABBNoLeafTree::~AABBNoLeafTree()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBNoLeafTree::Build(AABBTree *tree)
-{
+bool AABBNoLeafTree::Build(AABBTree *tree) {
     // Checkings
     if (!tree) {
         return false;
@@ -362,8 +351,7 @@ bool AABBNoLeafTree::Build(AABBTree *tree)
     return true;
 }
 
-inline_ void OPComputeMinMax(Point &min, Point &max, const VertexPointers &vp)
-{
+inline_ void OPComputeMinMax(Point &min, Point &max, const VertexPointers &vp) {
     // Compute triangle's AABB = a leaf box
 #ifdef OPC_USE_FCOMI    // a 15% speedup on my machine, not much
     min.x = FCMin3(vp.Vertex[0]->x, vp.Vertex[1]->x, vp.Vertex[2]->x);
@@ -391,8 +379,7 @@ inline_ void OPComputeMinMax(Point &min, Point &max, const VertexPointers &vp)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBNoLeafTree::Refit(const MeshInterface *mesh_interface)
-{
+bool AABBNoLeafTree::Refit(const MeshInterface *mesh_interface) {
     // Checkings
     if (!mesh_interface) {
         return false;
@@ -447,15 +434,13 @@ bool AABBNoLeafTree::Refit(const MeshInterface *mesh_interface)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBNoLeafTree::Walk(GenericWalkingCallback callback, void *user_data) const
-{
+bool AABBNoLeafTree::Walk(GenericWalkingCallback callback, void *user_data) const {
     if (!callback) {
         return false;
     }
 
     struct Local {
-        static void _Walk(const AABBNoLeafNode *current_node, GenericWalkingCallback callback, void *user_data)
-        {
+        static void _Walk(const AABBNoLeafNode *current_node, GenericWalkingCallback callback, void *user_data) {
             if (!current_node || !(callback)(current_node, user_data)) {
                 return;
             }
@@ -584,8 +569,7 @@ bool AABBNoLeafTree::Walk(GenericWalkingCallback callback, void *user_data) cons
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBQuantizedTree::AABBQuantizedTree() : mNodes(nullptr)
-{
+AABBQuantizedTree::AABBQuantizedTree() : mNodes(nullptr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -593,8 +577,7 @@ AABBQuantizedTree::AABBQuantizedTree() : mNodes(nullptr)
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBQuantizedTree::~AABBQuantizedTree()
-{
+AABBQuantizedTree::~AABBQuantizedTree() {
     DELETEARRAY(mNodes);
 }
 
@@ -605,8 +588,7 @@ AABBQuantizedTree::~AABBQuantizedTree()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBQuantizedTree::Build(AABBTree *tree)
-{
+bool AABBQuantizedTree::Build(AABBTree *tree) {
     // Checkings
     if (!tree) {
         return false;
@@ -660,8 +642,7 @@ bool AABBQuantizedTree::Build(AABBTree *tree)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBQuantizedTree::Refit(const MeshInterface * /*mesh_interface*/)
-{
+bool AABBQuantizedTree::Refit(const MeshInterface * /*mesh_interface*/) {
     OPASSERT(!"Not implemented since requantizing is painful !");
     return false;
 }
@@ -674,15 +655,13 @@ bool AABBQuantizedTree::Refit(const MeshInterface * /*mesh_interface*/)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBQuantizedTree::Walk(GenericWalkingCallback callback, void *user_data) const
-{
+bool AABBQuantizedTree::Walk(GenericWalkingCallback callback, void *user_data) const {
     if (!callback) {
         return false;
     }
 
     struct Local {
-        static void _Walk(const AABBQuantizedNode *current_node, GenericWalkingCallback callback, void *user_data)
-        {
+        static void _Walk(const AABBQuantizedNode *current_node, GenericWalkingCallback callback, void *user_data) {
             if (!current_node || !(callback)(current_node, user_data)) {
                 return;
             }
@@ -704,8 +683,7 @@ bool AABBQuantizedTree::Walk(GenericWalkingCallback callback, void *user_data) c
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBQuantizedNoLeafTree::AABBQuantizedNoLeafTree() : mNodes(nullptr)
-{
+AABBQuantizedNoLeafTree::AABBQuantizedNoLeafTree() : mNodes(nullptr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -713,8 +691,7 @@ AABBQuantizedNoLeafTree::AABBQuantizedNoLeafTree() : mNodes(nullptr)
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBQuantizedNoLeafTree::~AABBQuantizedNoLeafTree()
-{
+AABBQuantizedNoLeafTree::~AABBQuantizedNoLeafTree() {
     DELETEARRAY(mNodes);
 }
 
@@ -725,8 +702,7 @@ AABBQuantizedNoLeafTree::~AABBQuantizedNoLeafTree()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBQuantizedNoLeafTree::Build(AABBTree *tree)
-{
+bool AABBQuantizedNoLeafTree::Build(AABBTree *tree) {
     // Checkings
     if (!tree) {
         return false;
@@ -782,8 +758,7 @@ bool AABBQuantizedNoLeafTree::Build(AABBTree *tree)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBQuantizedNoLeafTree::Refit(const MeshInterface * /*mesh_interface*/)
-{
+bool AABBQuantizedNoLeafTree::Refit(const MeshInterface * /*mesh_interface*/) {
     OPASSERT(!"Not implemented since requantizing is painful !");
     return false;
 }
@@ -796,15 +771,15 @@ bool AABBQuantizedNoLeafTree::Refit(const MeshInterface * /*mesh_interface*/)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBQuantizedNoLeafTree::Walk(GenericWalkingCallback callback, void *user_data) const
-{
+bool AABBQuantizedNoLeafTree::Walk(GenericWalkingCallback callback, void *user_data) const {
     if (!callback) {
         return false;
     }
 
     struct Local {
-        static void _Walk(const AABBQuantizedNoLeafNode *current_node, GenericWalkingCallback callback, void *user_data)
-        {
+        static void _Walk(const AABBQuantizedNoLeafNode *current_node,
+                GenericWalkingCallback callback,
+                void *user_data) {
             if (!current_node || !(callback)(current_node, user_data)) {
                 return;
             }

@@ -48,24 +48,19 @@ private:
     std::string _message;
 
 public:
-    Exception()
-    {
+    Exception() {
     };
 
-    Exception(const Exception &other) : _message(other._message)
-    {
+    Exception(const Exception &other) : _message(other._message) {
     }
 
-    explicit Exception(const std::string &message) : _message(message)
-    {
+    explicit Exception(const std::string &message) : _message(message) {
     }
 
-    virtual ~Exception()
-    {
+    virtual ~Exception() {
     }
 
-    virtual const char *what() const noexcept
-    {
+    virtual const char *what() const noexcept {
         return _message.c_str();
     }
 };
@@ -76,16 +71,13 @@ public:
  */
 class FileOpenException : public Exception {
 public:
-    FileOpenException()
-    {
+    FileOpenException() {
     }
 
-    FileOpenException(const FileOpenException &other) : Exception(other)
-    {
+    FileOpenException(const FileOpenException &other) : Exception(other) {
     }
 
-    explicit FileOpenException(const std::string &message) : Exception(message)
-    {
+    explicit FileOpenException(const std::string &message) : Exception(message) {
     }
 };
 
@@ -96,16 +88,13 @@ public:
  */
 class CodecNotFoundException : public Exception {
 public:
-    CodecNotFoundException()
-    {
+    CodecNotFoundException() {
     }
 
-    CodecNotFoundException(const CodecNotFoundException &other) : Exception(other)
-    {
+    CodecNotFoundException(const CodecNotFoundException &other) : Exception(other) {
     }
 
-    explicit CodecNotFoundException(const std::string &message) : Exception(message)
-    {
+    explicit CodecNotFoundException(const std::string &message) : Exception(message) {
     }
 };
 
@@ -115,16 +104,13 @@ public:
  */
 class FileFormatException : public Exception {
 public:
-    FileFormatException()
-    {
+    FileFormatException() {
     }
 
-    FileFormatException(const FileFormatException &other) : Exception(other)
-    {
+    FileFormatException(const FileFormatException &other) : Exception(other) {
     }
 
-    explicit FileFormatException(const std::string &message) : Exception(message)
-    {
+    explicit FileFormatException(const std::string &message) : Exception(message) {
     }
 };
 
@@ -134,16 +120,13 @@ public:
  */
 class EndOfStreamException : public Exception {
 public:
-    EndOfStreamException()
-    {
+    EndOfStreamException() {
     }
 
-    EndOfStreamException(const EndOfStreamException &other) : Exception(other)
-    {
+    EndOfStreamException(const EndOfStreamException &other) : Exception(other) {
     }
 
-    explicit EndOfStreamException(const std::string &message) : Exception(message)
-    {
+    explicit EndOfStreamException(const std::string &message) : Exception(message) {
     }
 };
 
@@ -158,18 +141,15 @@ public:
 class CorruptStreamException : public Exception {
     bool fatal;
 public:
-    CorruptStreamException(const CorruptStreamException &other) : Exception(other)
-    {
+    CorruptStreamException(const CorruptStreamException &other) : Exception(other) {
     }
 
     explicit CorruptStreamException(bool _fatal)
             : Exception(_fatal ? "Fatal corruption on stream" : "Recoverable corruption on stream"),
-              fatal(_fatal)
-    {
+            fatal(_fatal) {
     }
 
-    bool isFatal() const
-    {
+    bool isFatal() const {
         return fatal;
     }
 };
@@ -181,16 +161,13 @@ public:
  */
 class ResourceNotLoadedException : public Exception {
 public:
-    ResourceNotLoadedException()
-    {
+    ResourceNotLoadedException() {
     }
 
-    ResourceNotLoadedException(const ResourceNotLoadedException &other) : Exception(other)
-    {
+    ResourceNotLoadedException(const ResourceNotLoadedException &other) : Exception(other) {
     }
 
-    explicit ResourceNotLoadedException(const std::string &message) : Exception(message)
-    {
+    explicit ResourceNotLoadedException(const std::string &message) : Exception(message) {
     }
 };
 
@@ -202,16 +179,13 @@ public:
  */
 class ResourceAlreadyLoadedException : public Exception {
 public:
-    ResourceAlreadyLoadedException()
-    {
+    ResourceAlreadyLoadedException() {
     }
 
-    ResourceAlreadyLoadedException(const ResourceAlreadyLoadedException &other) : Exception(other)
-    {
+    ResourceAlreadyLoadedException(const ResourceAlreadyLoadedException &other) : Exception(other) {
     }
 
-    explicit ResourceAlreadyLoadedException(const std::string &message) : Exception(message)
-    {
+    explicit ResourceAlreadyLoadedException(const std::string &message) : Exception(message) {
     }
 };
 
@@ -221,16 +195,13 @@ public:
  */
 class InvalidParametersException : public Exception {
 public:
-    InvalidParametersException()
-    {
+    InvalidParametersException() {
     }
 
-    InvalidParametersException(const InvalidParametersException &other) : Exception(other)
-    {
+    InvalidParametersException(const InvalidParametersException &other) : Exception(other) {
     }
 
-    explicit InvalidParametersException(const std::string &message) : Exception(message)
-    {
+    explicit InvalidParametersException(const std::string &message) : Exception(message) {
     }
 };
 
@@ -240,8 +211,7 @@ public:
 class DuplicateObjectException : public Exception {
 public:
     explicit DuplicateObjectException(const std::string &name) :
-            Exception(std::string("Object with name \"") + name + "\" already existed")
-    {
+            Exception(std::string("Object with name \"") + name + "\" already existed") {
     }
 };
 
@@ -251,8 +221,7 @@ public:
 class NotFoundException : public Exception {
 public:
     explicit NotFoundException(const std::string &name) :
-            Exception(std::string("Object with name \"") + name + "\" does not exist")
-    {
+            Exception(std::string("Object with name \"") + name + "\" does not exist") {
     }
 };
 
@@ -262,8 +231,7 @@ public:
 class NotImplementedException : public Exception {
 public:
     explicit NotImplementedException(const std::string &name) :
-            Exception(name + " has not been implemented yet")
-    {
+            Exception(name + " has not been implemented yet") {
     }
 };
 
@@ -275,12 +243,10 @@ class UnsupportedFormatException : public Exception {
 public:
     explicit UnsupportedFormatException(const std::string &where, const Format &fmt) :
             Exception(std::string("Unsupported format (" + where + ")")),
-            format(fmt)
-    {
+            format(fmt) {
     }
 
-    const Format &getFormat() const
-    {
+    const Format &getFormat() const {
         return format;
     }
 };
@@ -290,8 +256,7 @@ public:
  */
 class OutOfMemoryException : public Exception {
 public:
-    OutOfMemoryException()
-    {
+    OutOfMemoryException() {
     }
 };
 

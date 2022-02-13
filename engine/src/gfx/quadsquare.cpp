@@ -53,8 +53,7 @@ Vector quadsquare::normalscale;
 Vector quadsquare::camerapos;
 quadsquare *quadsquare::neighbor[4] = {NULL, NULL, NULL, NULL};
 
-unsigned int quadsquare::SetVertices(GFXVertex *vertexs, const quadcornerdata &pcd)
-{
+unsigned int quadsquare::SetVertices(GFXVertex *vertexs, const quadcornerdata &pcd) {
     unsigned int half = 1 << pcd.Level;
     Vector v[5];
     v[0].i = pcd.xorg + half;
@@ -70,9 +69,9 @@ unsigned int quadsquare::SetVertices(GFXVertex *vertexs, const quadcornerdata &p
     for (unsigned int i = 0; i < 5; i++) {
         v[i].j = Vertex[i].Y;
         vertexs[Vertex[i].vertindex].SetTexCoord(nonlinear_trans->TransformS(v[i].i,
-                                                                             (*textures)[Vertex[i].GetTex()].scales),
-                                                 nonlinear_trans->TransformT(v[i].k,
-                                                                             (*textures)[Vertex[i].GetTex()].scalet));
+                        (*textures)[Vertex[i].GetTex()].scales),
+                nonlinear_trans->TransformT(v[i].k,
+                        (*textures)[Vertex[i].GetTex()].scalet));
         vertexs[Vertex[i].vertindex].SetVertex(nonlinear_trans->Transform(v[i].Cast()).Cast());
     }
     return half;
@@ -89,8 +88,7 @@ unsigned int quadsquare::SetVertices(GFXVertex *vertexs, const quadcornerdata &p
 //3-0-1
 //| | |
 //+-4-+
-static void InterpolateTextures(VertInfo res[5], VertInfo in[4], const quadcornerdata &cd)
-{
+static void InterpolateTextures(VertInfo res[5], VertInfo in[4], const quadcornerdata &cd) {
     //const float epsilon;
     res[0].SetTex(0.25 * ((((float) in[0].Rem) + in[1].Rem + in[2].Rem + in[3].Rem) / 256. + in[0].Tex + in[1].Tex
             + in[2].Tex + in[3].Tex));
@@ -120,8 +118,7 @@ static void InterpolateTextures(VertInfo res[5], VertInfo in[4], const quadcorne
     res[4].Y = (unsigned short) (0.5 * (((float) in[2].Y) + in[3].Y));
 }
 
-quadsquare::quadsquare(quadcornerdata *pcd)
-{
+quadsquare::quadsquare(quadcornerdata *pcd) {
     pcd->Square = this;
     //Set static to true if/when this node contains real data, and
     //not just interpolated values.  When static == false, a node
@@ -198,8 +195,7 @@ quadsquare::quadsquare(quadcornerdata *pcd)
     //interpolate from other vertices;
 }
 
-quadsquare::~quadsquare()
-{
+quadsquare::~quadsquare() {
     //Recursively delete sub-trees.
     int i;
     for (i = 0; i < 5; i++) {
@@ -218,8 +214,7 @@ quadsquare::~quadsquare()
  * node or its children is considered to contain significant height data
  * and shouldn't be deleted.
  */
-void quadsquare::SetStatic(const quadcornerdata &cd)
-{
+void quadsquare::SetStatic(const quadcornerdata &cd) {
     if (Static == false) {
         Static = true;
         //Propagate static status to ancestor nodes.
@@ -229,8 +224,7 @@ void quadsquare::SetStatic(const quadcornerdata &cd)
     }
 }
 
-int quadsquare::CountNodes() const
-{
+int quadsquare::CountNodes() const {
 //Debugging function.  Counts the number of nodes in this subtree.
     int count = 1;              //Count ourself.
     //Count descendants.
@@ -263,8 +257,9 @@ float quadsquare::GetHeight(const quadcornerdata &cd, float x, float z, Vector &
     if (iz < 0) {
         return -FLT_MAX;
     }        //iz = 0;
-    if (iz > 1)
-        return -FLT_MAX;          ///iz = 1;
+    if (iz > 1) {
+        return -FLT_MAX;
+    }          ///iz = 1;
 
     int index = (ix ^ (iz ^ 1))
             + (iz << 1); //FIXME gcc computes ix^((iz^1)+(iz<<1)).. Was this the intent? Who can understand this code?
@@ -315,8 +310,7 @@ float quadsquare::GetHeight(const quadcornerdata &cd, float x, float z, Vector &
     return (s00 * (1 - lx) + s01 * lx) * (1 - lz) + (s10 * (1 - lx) + s11 * lx) * lz;
 }
 
-quadsquare *quadsquare::GetFarNeighbor(int dir, const quadcornerdata &cd) const
-{
+quadsquare *quadsquare::GetFarNeighbor(int dir, const quadcornerdata &cd) const {
 //Traverses the tree in search of the quadsquare neighboring this square to the
 //specified direction.  0-3 --> { E, N, W, S }.
 //Returns NULL if the neighbor is outside the bounds of the tree.
@@ -342,8 +336,7 @@ quadsquare *quadsquare::GetFarNeighbor(int dir, const quadcornerdata &cd) const
     return n;
 }
 
-quadsquare *quadsquare::GetNeighbor(int dir, const quadcornerdata &cd) const
-{
+quadsquare *quadsquare::GetNeighbor(int dir, const quadcornerdata &cd) const {
 //Traverses the tree in search of the quadsquare neighboring this square to the
 //specified direction.  0-3 --> { E, N, W, S }.
 //Returns NULL if the neighbor is outside the bounds of the tree.
@@ -369,8 +362,7 @@ quadsquare *quadsquare::GetNeighbor(int dir, const quadcornerdata &cd) const
     return n;
 }
 
-void VertInfo::SetTex(float t)
-{
+void VertInfo::SetTex(float t) {
     Tex = (unsigned char) t;
     Rem = (unsigned char) ((t - Tex) * 256);
     /*
@@ -381,14 +373,13 @@ void VertInfo::SetTex(float t)
 }
 
 void quadsquare::SetCurrentTerrain(unsigned int *VertexAllocated,
-                                   unsigned int *VertexCount,
-                                   GFXVertexList *vertices,
-                                   std::vector<unsigned int> *unvert,
-                                   IdentityTransform *nlt,
-                                   std::vector<TerrainTexture> *tex,
-                                   const Vector &NormScale,
-                                   quadsquare *neighbors[4])
-{
+        unsigned int *VertexCount,
+        GFXVertexList *vertices,
+        std::vector<unsigned int> *unvert,
+        IdentityTransform *nlt,
+        std::vector<TerrainTexture> *tex,
+        const Vector &NormScale,
+        quadsquare *neighbors[4]) {
     normalscale = NormScale;
     neighbor[0] = neighbors[0];
     neighbor[1] = neighbors[1];
@@ -413,8 +404,7 @@ void quadsquare::SetCurrentTerrain(unsigned int *VertexAllocated,
 
 static unsigned char texturelookup[256];
 
-void quadsquare::AddHeightMap(const quadcornerdata &cd, const HeightMapInfo &hm)
-{
+void quadsquare::AddHeightMap(const quadcornerdata &cd, const HeightMapInfo &hm) {
     unsigned int i;
     memset(texturelookup, 0, sizeof(unsigned char) * 256);
     for (i = 0; i < textures->size(); i++) {
@@ -423,8 +413,7 @@ void quadsquare::AddHeightMap(const quadcornerdata &cd, const HeightMapInfo &hm)
     AddHeightMapAux(cd, hm);
 }
 
-void quadsquare::AddHeightMapAux(const quadcornerdata &cd, const HeightMapInfo &hm)
-{
+void quadsquare::AddHeightMapAux(const quadcornerdata &cd, const HeightMapInfo &hm) {
 //Sets the height of all samples within the specified rectangular
 //region using the given array of floats.  Extends the tree to the
 //level of detail defined by (1 << hm.Scale) as necessary.
@@ -439,8 +428,8 @@ void quadsquare::AddHeightMapAux(const quadcornerdata &cd, const HeightMapInfo &
     }
     if (cd.Parent && cd.Parent->Square) {
         cd.Parent
-          ->Square
-          ->EnableChild(cd.ChildIndex,
+                ->Square
+                ->EnableChild(cd.ChildIndex,
                         *cd.Parent);
     }            //causes parent edge verts to be enabled, possibly causing neighbor blocks to be created.
     int i;

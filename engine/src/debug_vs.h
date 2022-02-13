@@ -30,8 +30,7 @@
 
 #ifndef VS_DEBUG
 
-inline void VS_DEBUG_ERROR()
-{
+inline void VS_DEBUG_ERROR() {
 }
 
 #define VSCONSTRUCT1(a)

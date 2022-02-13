@@ -43,8 +43,7 @@ inline float isfinite (float f) {  return (sizeof(f) == sizeof(float) ? isfinite
  * Returns bigger of a and b. If they are equal, a or b can be returned.
  */
 template<class T>
-const T &csMax(const T &a, const T &b)
-{
+const T &csMax(const T &a, const T &b) {
     if (b < a) {
         return a;
     }
@@ -55,8 +54,7 @@ const T &csMax(const T &a, const T &b)
  * Returns smaller of a and b. If they are equal, a or b can be returned.
  */
 template<class T>
-const T &csMin(const T &a, const T &b)
-{
+const T &csMin(const T &a, const T &b) {
     if (a < b) {
         return a;
     }
@@ -67,8 +65,7 @@ const T &csMin(const T &a, const T &b)
  * Sort a and b in order of size.
  */
 template<class T>
-void csSort(T &a, T &b)
-{
+void csSort(T &a, T &b) {
     if (b < a) {
         CS::Swap(a, b);
     }
@@ -79,8 +76,7 @@ void csSort(T &a, T &b)
  * If swapping them, also swap x and y
  */
 template<class T, class U>
-void csSort(T &a, T &b, U &x, U &y)
-{
+void csSort(T &a, T &b, U &x, U &y) {
     if (b < a) {
         CS::Swap(a, b);
         CS::Swap(x, y);
@@ -91,8 +87,7 @@ void csSort(T &a, T &b, U &x, U &y)
  * Clamp a between max and min.
  */
 template<class T>
-T csClamp(const T &a, T max, T min)
-{
+T csClamp(const T &a, T max, T min) {
     return csMin(csMax(a, min), max);
 }
 
@@ -102,8 +97,7 @@ T csClamp(const T &a, T max, T min)
  *  and 0 resp. 1 if \a a is smaller than \a min resp. larger than \a max.
  */
 template<class T>
-T csSmoothStep(const T &a, T max, T min)
-{
+T csSmoothStep(const T &a, T max, T min) {
     T tmp, tmp2;
     if (a <= min) {
         tmp = 0.0f;
@@ -121,8 +115,7 @@ T csSmoothStep(const T &a, T max, T min)
  * \a f.
  */
 template<class T, class Tfactor>
-T csLerp(const T &a, const T &b, const Tfactor &f)
-{
+T csLerp(const T &a, const T &b, const Tfactor &f) {
     return (a + (b - a) * f);
 }
 
@@ -130,15 +123,13 @@ T csLerp(const T &a, const T &b, const Tfactor &f)
  * Returns the square of the argument
  */
 template<class T>
-T csSquare(const T &x)
-{
+T csSquare(const T &x) {
     return x * x;
 }
 
 //@{
 /// Checks if a floating point value is finite.
-CS_FORCEINLINE bool csFinite(float f)
-{
+CS_FORCEINLINE bool csFinite(float f) {
 #if defined (HAVE_FINITEF)
     return finitef (f);
 #elif defined (HAVE_STD__ISFINITE)
@@ -155,8 +146,7 @@ CS_FORCEINLINE bool csFinite(float f)
 }
 
 /// Checks if a double-precision floating point value is finite.
-CS_FORCEINLINE bool csFinite(double d)
-{
+CS_FORCEINLINE bool csFinite(double d) {
 #if defined (HAVE_STD__ISFINITE)
     return std::isfinite (d);
 #elif defined(HAVE_ISFINITE)
@@ -171,8 +161,7 @@ CS_FORCEINLINE bool csFinite(double d)
 }
 
 /// Checks if a floating point value is not-a-number.
-CS_FORCEINLINE bool csNaN(float f)
-{
+CS_FORCEINLINE bool csNaN(float f) {
 #if defined (HAVE_NANF)
     return isnanf (f);
 #elif defined (HAVE_STD__ISNAN)
@@ -187,8 +176,7 @@ CS_FORCEINLINE bool csNaN(float f)
 }
 
 /// Checks if a double-precision floating point value is not-a-number.
-CS_FORCEINLINE bool csNaN(double d)
-{
+CS_FORCEINLINE bool csNaN(double d) {
 #if defined (HAVE_STD__ISNAN)
     return std::isnan (d);
 #elif defined(HAVE_ISNAN)
@@ -201,8 +189,7 @@ CS_FORCEINLINE bool csNaN(double d)
 }
 
 /// Checks if a floating point value is normal (not infinite or nan).
-CS_FORCEINLINE bool csNormal(float f)
-{
+CS_FORCEINLINE bool csNormal(float f) {
 #if defined (HAVE_NORMALF)
     return normalf (f);
 #elif defined (HAVE_STD__ISNORMAL)
@@ -215,8 +202,7 @@ CS_FORCEINLINE bool csNormal(float f)
 }
 
 /// Checks if a double-precision floating point value is normal.
-CS_FORCEINLINE bool csNormal(double d)
-{
+CS_FORCEINLINE bool csNormal(double d) {
 #if defined (HAVE_STD__ISNORMAL)
     return std::isnormal (d);
 #elif defined(HAVE_ISNORMAL)

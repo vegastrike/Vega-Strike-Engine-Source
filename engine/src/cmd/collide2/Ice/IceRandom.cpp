@@ -20,20 +20,17 @@
 
 using namespace Opcode;
 
-void SRand(uint32_t seed)
-{
+void SRand(uint32_t seed) {
     srand(seed);
 }
 
-uint32_t Rand()
-{
+uint32_t Rand() {
     return rand();
 }
 
 static BasicRandom gRandomGenerator(42);
 
-uint32_t GetRandomIndex(uint32_t max_index)
-{
+uint32_t GetRandomIndex(uint32_t max_index) {
     // We don't use rand() since it's limited to RAND_MAX
     uint32_t Index = gRandomGenerator.Randomize();
     return Index % max_index;

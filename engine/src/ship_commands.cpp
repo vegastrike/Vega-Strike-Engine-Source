@@ -47,14 +47,12 @@ class ShipCommands {
     bool bup;
     bool bdown;
 public:
-    virtual ~ShipCommands()
-    {
+    virtual ~ShipCommands() {
         CommandInterpretor->remCommand(cpymenu);
         CommandInterpretor->remCommand(csetkps);
     }
 
-    ShipCommands()
-    {
+    ShipCommands() {
         //create some functors, register them with the command interp {{{
         cpymenu = new Functor<ShipCommands>(this, &ShipCommands::pymenu);
         CommandInterpretor->addCommand(cpymenu, "pymenu");
@@ -82,7 +80,7 @@ public:
                 mi->func2call.append("python");
                 mi->inputbit = true;                         //set single-line input mode
                 mi->selectstring
-                  .append("Type a single line of Python");                       //call function "Display" with this string
+                        .append("Type a single line of Python");                       //call function "Display" with this string
                 CommandInterpretor->addMenuItem(mi);
             }
             {
@@ -92,10 +90,10 @@ public:
                 mi->Name.append("2");                       //argument to access menu
                 mi->display.append("(Python Multi-Line input)");                       //menu's display name
                 mi->func2call
-                  .append("python");                       //call this function when this menuitem is called and input is all recieved, user input is appened with a space, along with the action string if there is one. (string generated: "func2call action userinput")
+                        .append("python");                       //call this function when this menuitem is called and input is all recieved, user input is appened with a space, along with the action string if there is one. (string generated: "func2call action userinput")
                 mi->inputbit2 = true;                         //set single-line input mode
                 mi->selectstring
-                  .append("Type multiple lines of python input. Use <ENTER> on a line ALONE to finish");                       //Call function "Display" with this string
+                        .append("Type multiple lines of python input. Use <ENTER> on a line ALONE to finish");                       //Call function "Display" with this string
                 CommandInterpretor->addMenuItem(mi);
             }
         }
@@ -112,41 +110,34 @@ public:
 
 //these _would_ work if the physics routines polled the ship_commands object
 //for these bools..
-void ShipCommands::pymenu()
-{
+void ShipCommands::pymenu() {
     std::string response(CommandInterpretor->setMenu("python test"));
     CommandInterpretor->conoutf(response);
 }
 
-void ShipCommands::left(bool *isKeyDown)
-{
+void ShipCommands::left(bool *isKeyDown) {
     bleft = isKeyDown;
 }
 
-void ShipCommands::right(bool *isKeyDown)
-{
+void ShipCommands::right(bool *isKeyDown) {
     bright = isKeyDown;
 }
 
-void ShipCommands::up(bool *isKeyDown)
-{
+void ShipCommands::up(bool *isKeyDown) {
     bup = isKeyDown;
 }
 
-void ShipCommands::down(bool *isKeyDown)
-{
+void ShipCommands::down(bool *isKeyDown) {
     bdown = isKeyDown;
 }
 
-void ShipCommands::roll(bool *isKeyDown)
-{
+void ShipCommands::roll(bool *isKeyDown) {
     broll = isKeyDown;
 }
 
 static ShipCommands *ship_commands = NULL;
 
-void ShipCommands::setkps(const char *in)
-{
+void ShipCommands::setkps(const char *in) {
     if (in == NULL) {
         throw "What speed?";
     }
@@ -162,8 +153,7 @@ void ShipCommands::setkps(const char *in)
     }
 }
 
-void InitShipCommands()
-{
+void InitShipCommands() {
     if (ship_commands != nullptr) {
         delete ship_commands;
         ship_commands = nullptr;
@@ -171,8 +161,7 @@ void InitShipCommands()
     ship_commands = new ShipCommands;
 }
 
-void UninitShipCommands()
-{
+void UninitShipCommands() {
     if (ship_commands != nullptr) {
         delete ship_commands;
         ship_commands = nullptr;

@@ -143,7 +143,7 @@ typedef struct {
 } TPngFileBuffer;
 
 typedef unsigned char *(textureTransform)(int &bpp, int &color_type, unsigned long &width, unsigned long &height,
-                                          unsigned char **row_pointers);
+        unsigned char **row_pointers);
 textureTransform heightmapTransform;
 textureTransform terrainTransform;
 textureTransform texTransform;
@@ -245,8 +245,8 @@ public:
     //Defined for gcc which pads the size of structs
     //const static int SIZEOF_BITMAPFILEHEADER;
     LOCALCONST_DECL(int,
-                    SIZEOF_BITMAPFILEHEADER,
-                    sizeof(WORD) + sizeof(DWORD) + sizeof(WORD) + sizeof(WORD) + sizeof(DWORD))
+            SIZEOF_BITMAPFILEHEADER,
+            sizeof(WORD) + sizeof(DWORD) + sizeof(WORD) + sizeof(WORD) + sizeof(DWORD))
     //Defined for gcc which pads the size of structs
     LOCALCONST_DECL(
             int,
@@ -261,45 +261,41 @@ public:
 
 //f2 is needed for bmp loading
     unsigned char *ReadImage(VSFileSystem::VSFile *f,
-                             textureTransform *t = NULL,
-                             bool strip = false,
-                             VSFileSystem::VSFile *f2 = NULL);
+            textureTransform *t = NULL,
+            bool strip = false,
+            VSFileSystem::VSFile *f2 = NULL);
 
     VSFileSystem::VSError WriteImage(char *filename,
-                                     unsigned char *data,
-                                     VSImageType type,
-                                     unsigned int width,
-                                     unsigned int height,
-                                     bool alpha = 1,
-                                     char bpp = 16,
-                                     VSFileSystem::VSFileType ft = VSFileSystem::UnknownFile,
-                                     bool flip = false);
+            unsigned char *data,
+            VSImageType type,
+            unsigned int width,
+            unsigned int height,
+            bool alpha = 1,
+            char bpp = 16,
+            VSFileSystem::VSFileType ft = VSFileSystem::UnknownFile,
+            bool flip = false);
     VSFileSystem::VSError WriteImage(VSFileSystem::VSFile *pf,
-                                     unsigned char *data,
-                                     VSImageType type,
-                                     unsigned int width,
-                                     unsigned int height,
-                                     bool alpha = 1,
-                                     char bpp = 16,
-                                     bool flip = false);
+            unsigned char *data,
+            VSImageType type,
+            unsigned int width,
+            unsigned int height,
+            bool alpha = 1,
+            char bpp = 16,
+            bool flip = false);
 
-    int Depth() const
-    {
+    int Depth() const {
         return this->img_depth;
     }
 
-    int Format() const
-    {
+    int Format() const {
         return this->img_color_type;
     }
 
-    char Sides() const
-    {
+    char Sides() const {
         return this->img_sides;
     }
 
-    bool isCube() const
-    {
+    bool isCube() const {
         return this->img_sides != SIDE_SINGLE;
     }
 };

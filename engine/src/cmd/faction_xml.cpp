@@ -43,8 +43,7 @@ static int unitlevel;
 
 static vector<std::string> contrabandlists;
 
-void Faction::LoadXML(const char *filename, char *xmlbuffer, int buflength)
-{
+void Faction::LoadXML(const char *filename, char *xmlbuffer, int buflength) {
     using namespace VSFileSystem;
     using std::endl;
     using std::pair;
@@ -98,8 +97,8 @@ void Faction::LoadXML(const char *filename, char *xmlbuffer, int buflength)
                     cache.insert(Cache::value_type(jointCommFile, jointComm));
                 }
                 factions[i]->faction[j].conversation = jointComm
-                                                       ? jointComm
-                                                       : (myComm ? myComm : neutralComm);
+                        ? jointComm
+                        : (myComm ? myComm : neutralComm);
             }
         }
     }
@@ -108,8 +107,7 @@ void Faction::LoadXML(const char *filename, char *xmlbuffer, int buflength)
     FactionUtil::LoadSerializedFaction(munull);
 }
 
-void FactionUtil::LoadContrabandLists()
-{
+void FactionUtil::LoadContrabandLists() {
     for (unsigned int i = 0; i < factions.size() && i < contrabandlists.size(); i++) {
         if (contrabandlists[i].length() > 0) {
             factions[i]->contraband.reset(new Unit(contrabandlists[i].c_str(), true, i));

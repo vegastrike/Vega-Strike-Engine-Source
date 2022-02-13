@@ -23,8 +23,7 @@
 #define __OPC_AABBCOLLIDER_H__
 
 struct OPCODE_API AABBCache : VolumeCache {
-    AABBCache() : FatCoeff(1.1f)
-    {
+    AABBCache() : FatCoeff(1.1f) {
         FatBox.mCenter.Zero();
         FatBox.mExtents.Zero();
     }

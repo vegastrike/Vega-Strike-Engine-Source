@@ -90,8 +90,7 @@ static const float LINE_HEIGHT_EPSILON = .99;       //1% of the line height.
 static const int LINES_RESERVE = 50;
 
 //The outside boundaries to use for drawing.
-void PaintText::setRect(const Rect &r)
-{
+void PaintText::setRect(const Rect &r) {
     if (m_rect != r) {
         m_rect = r;
         m_needLayout = true;
@@ -99,8 +98,7 @@ void PaintText::setRect(const Rect &r)
 }
 
 //The text to draw.
-void PaintText::setText(const std::string &text)
-{
+void PaintText::setText(const std::string &text) {
     const string *finalText = &text;
     string conversionResult;
     if (text.find(OLD_FORMAT_NEWLINE) != string::npos) {
@@ -122,8 +120,7 @@ void PaintText::setText(const std::string &text)
 }
 
 //The initial color of the text.
-void PaintText::setColor(const GFXColor &c)
-{
+void PaintText::setColor(const GFXColor &c) {
     if (!equalColors(m_color, c)) {
         m_color = c;
         m_needLayout = true;
@@ -131,8 +128,7 @@ void PaintText::setColor(const GFXColor &c)
 }
 
 //The initial Font for text.
-void PaintText::setFont(const Font &f)
-{
+void PaintText::setFont(const Font &f) {
     if (m_font != f) {
         m_font = f;
         m_needLayout = true;
@@ -140,8 +136,7 @@ void PaintText::setFont(const Font &f)
 }
 
 //Text justification.
-void PaintText::setJustification(Justification j)
-{
+void PaintText::setJustification(Justification j) {
     if (m_justification != j) {
         m_justification = j;
         m_needLayout = true;
@@ -149,8 +144,7 @@ void PaintText::setJustification(Justification j)
 }
 
 //What to do when text width exceeds boundary rectangle.
-void PaintText::setWidthExceeded(WidthExceeded w)
-{
+void PaintText::setWidthExceeded(WidthExceeded w) {
     if (m_widthExceeded != w) {
         m_widthExceeded = w;
         m_needLayout = true;
@@ -158,15 +152,13 @@ void PaintText::setWidthExceeded(WidthExceeded w)
 }
 
 //How many lines are in the current layout.
-int PaintText::lineCount(void) const
-{
+int PaintText::lineCount(void) const {
     calcLayoutIfNeeded();
     return m_lines.size();
 }
 
 //How many lines would be painted in a vertical interval.
-int PaintText::visibleLineCountStartingWith(int lineNumber, float vertInterval) const
-{
+int PaintText::visibleLineCountStartingWith(int lineNumber, float vertInterval) const {
     calcLayoutIfNeeded();
     int result = 0;
     float currentHeight = vertInterval;
@@ -183,15 +175,13 @@ int PaintText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
 }
 
 //Layout version.  This is used to tell whether the layout has changed.
-int PaintText::layoutVersion(void) const
-{
+int PaintText::layoutVersion(void) const {
     calcLayoutIfNeeded();
     return m_layoutVersion;
 }
 
 //Check whether we need to recalc the layout, and do it in const object.
-void PaintText::calcLayoutIfNeeded(void) const
-{
+void PaintText::calcLayoutIfNeeded(void) const {
     if (m_needLayout) {
         //calcLayout is a cache.  Doesn't change the "real" state of the object.
         PaintText *s = const_cast< PaintText * > (this);
@@ -201,12 +191,11 @@ void PaintText::calcLayoutIfNeeded(void) const
 
 //Draw a fragment of text.  Assumes graphics origin and scaling are correct.
 static float drawChars(const string &str,
-                       int start,
-                       int end,
-                       const Font &font,
-                       const GFXColor &color,
-                       float inRasterPos)
-{
+        int start,
+        int end,
+        const Font &font,
+        const GFXColor &color,
+        float inRasterPos) {
     //Make sure the graphics state is right.
     GFXColorf(color);
     if (useStroke()) {
@@ -226,8 +215,7 @@ static float drawChars(const string &str,
 }
 
 //Draw specified lines of text.
-void PaintText::drawLines(size_t start, size_t count) const
-{
+void PaintText::drawLines(size_t start, size_t count) const {
     //Make sure we hav a display list.
     calcLayoutIfNeeded();
     //Make sure we have something to do.
@@ -293,14 +281,13 @@ void PaintText::drawLines(size_t start, size_t count) const
 //The argument is optional, but must be ended with a format char.
 //Examples:  #b2.35#, #b#.  #b is not allowed.
 static void parseFormatFloat(const std::string &str, //String.
-                             const string::size_type startPos, //First character to examine.
-                             const string::size_type endPos, //One past last char to consider.
-                             bool *formatSuccess, //OUT: True = It worked.
-                             float *resultValue, //OUT: Parsed value.  If no value, not changed.
-                             string::size_type *resultPos, //OUT: One past last format char.
-                             const char optionalTerminator = '\0' //Another terminator besides DT_FORMAT_CHAR
-)
-{
+        const string::size_type startPos, //First character to examine.
+        const string::size_type endPos, //One past last char to consider.
+        bool *formatSuccess, //OUT: True = It worked.
+        float *resultValue, //OUT: Parsed value.  If no value, not changed.
+        string::size_type *resultPos, //OUT: One past last format char.
+        const char optionalTerminator = '\0' //Another terminator besides DT_FORMAT_CHAR
+) {
     *formatSuccess = false;
     std::string num;
     string::size_type curPos;
@@ -333,13 +320,12 @@ static void parseFormatFloat(const std::string &str, //String.
 //This will not accept exponential format, just num-plus-decimal.
 //Examples:  #c1:.5:0.3:1.0#, #c.5:.5:.5#
 static void parseFormatColor(const string &str, //String.
-                             const string::size_type startPos, //First character to examine.
-                             const string::size_type endPos, //One past last char to consider.
-                             bool *formatSuccess, //OUT: True = It worked.
-                             GFXColor &color, //OUT: Parsed value.
-                             string::size_type *resultPos //OUT: One past last format char.
-)
-{
+        const string::size_type startPos, //First character to examine.
+        const string::size_type endPos, //One past last char to consider.
+        bool *formatSuccess, //OUT: True = It worked.
+        GFXColor &color, //OUT: Parsed value.
+        string::size_type *resultPos //OUT: One past last format char.
+) {
     *formatSuccess = false;
     string::size_type curPos = startPos;
     parseFormatFloat(str, curPos, endPos, formatSuccess, &color.r, &curPos, DT_FORMAT_COLOR_SEP);
@@ -367,10 +353,9 @@ static void parseFormatColor(const string &str, //String.
 //Parse a format string in a PaintText string.
 //The first character should be the one *after* the initial format char.
 void PaintText::parseFormat(string::size_type startPos, //Location of beginning of string to examine.
-                            string::size_type *resultPos, //OUT: Ptr to string past the format string.
-                            bool *endLine //OUT: True = Done with current line.
-)
-{
+        string::size_type *resultPos, //OUT: Ptr to string past the format string.
+        bool *endLine //OUT: True = Done with current line.
+) {
     const string::size_type endPos = m_text.size();
     //Default return value.
     *endLine = false;
@@ -465,11 +450,10 @@ void PaintText::parseFormat(string::size_type startPos, //Location of beginning 
 //The fragment is added to the specified TextLine.
 //Formatting commands should have been filtered out already.
 void PaintText::addFragment(TextLine &line, //Line descriptor.
-                            const string::size_type endPos, //One past last char to consider.
-                            string::size_type &startPos, //IN/OUT: location of string.
-                            double &width //IN/OUT: Reference width of string.
-)
-{
+        const string::size_type endPos, //One past last char to consider.
+        string::size_type &startPos, //IN/OUT: location of string.
+        double &width //IN/OUT: Reference width of string.
+) {
     string::size_type curPos = startPos;
     const Font &font = m_layout.fontStack.back();
     //Loop through the characters until we run out of room.
@@ -495,20 +479,18 @@ void PaintText::addFragment(TextLine &line, //Line descriptor.
 }
 
 //Return whether a character qualifies as a word break.
-static bool isWordBreak(char c)
-{
+static bool isWordBreak(char c) {
     return c == ' ';
 }
 
 //Parse one line of text, create fragments, end line when overflow width.
 void PaintText::parseFragmentsWithCharBreak(TextLine &line, //Line descriptor.
-                                            string::size_type startPos, //Location of beginning of string to examine.
-                                            string::size_type endPos, //Location of one past the last character to examine.
-                                            float maxWidth, //Can't go beyond this width.
-                                            bool ellipsis, //True = if line doesn't fit, append ellipsis.
-                                            string::size_type *resultPos //OUT: Ptr to string past the format string.
-)
-{
+        string::size_type startPos, //Location of beginning of string to examine.
+        string::size_type endPos, //Location of one past the last character to examine.
+        float maxWidth, //Can't go beyond this width.
+        bool ellipsis, //True = if line doesn't fit, append ellipsis.
+        string::size_type *resultPos //OUT: Ptr to string past the format string.
+) {
     string::size_type curPos = startPos;          //Beginning of current part of the string we are working on.
     double curWidth = maxWidth;     //The width left to work with.
     bool forceEndLine = false;    //True = end-of-line through format.  False = char width.
@@ -621,11 +603,10 @@ void PaintText::parseFragmentsWithCharBreak(TextLine &line, //Line descriptor.
 
 //Parse one line of text, create fragments, end line on word break when width overflows.
 void PaintText::parseFragmentsWithWordBreak(TextLine &line, //Line descriptor.
-                                            string::size_type startPos, //Location of beginning of string to examine.
-                                            float maxWidth, //Can't go beyond this width.
-                                            string::size_type *resultPos //OUT: Ptr to string past the format string.
-)
-{
+        string::size_type startPos, //Location of beginning of string to examine.
+        float maxWidth, //Can't go beyond this width.
+        string::size_type *resultPos //OUT: Ptr to string past the format string.
+) {
     string::size_type curPos = startPos;          //Beginning of current part of the string we are working on.
     double curWidth = maxWidth;     //The width left to work with.
     const string::size_type endPos = m_text.size();     //One past the end of the string.
@@ -704,8 +685,7 @@ void PaintText::parseFragmentsWithWordBreak(TextLine &line, //Line descriptor.
 }
 
 //The x-origin of a line.  Horizontal starting position.
-float PaintText::lineInset(const TextLine &line)
-{
+float PaintText::lineInset(const TextLine &line) {
     float result = 0.0;         //Assume we will RIGHT_JUSTIFY.
     if (m_justification == CENTER_JUSTIFY) {
         result = (m_rect.size.width - line.width * m_horizontalScaling) / 2.0;
@@ -717,8 +697,7 @@ float PaintText::lineInset(const TextLine &line)
 
 //Use the current attributes to create a display list for the text.
 //This does the real work, and doesn't check whether it needs to be done.
-void PaintText::calcLayout(void)
-{
+void PaintText::calcLayout(void) {
     //Clear the old layout.
     m_lines.clear();
     //Make sure the version number changes.
@@ -795,8 +774,7 @@ void PaintText::calcLayout(void)
 }
 
 //Pass in RGB values, get out a color command string for those values.
-std::string colorsToCommandString(float r, float g, float b, float a)
-{
+std::string colorsToCommandString(float r, float g, float b, float a) {
     char buf[256];
     if (a >= 1.0) {
         //Three-color string.
@@ -819,12 +797,11 @@ PaintText::PaintText(void) :
         m_needLayout(true),
         m_layoutVersion(0),
         m_verticalScaling(0.7),
-        m_horizontalScaling(0.7)
-{
+        m_horizontalScaling(0.7) {
 }
 
 PaintText::PaintText(const Rect &r, const std::string &t, const Font &f, const GFXColor &c, Justification j,
-                     WidthExceeded w) :
+        WidthExceeded w) :
         m_rect(r),
         m_text(),             //Don't set text here.
         m_color(c),
@@ -834,8 +811,7 @@ PaintText::PaintText(const Rect &r, const std::string &t, const Font &f, const G
         m_needLayout(true),
         m_layoutVersion(0),
         m_verticalScaling(0.7),
-        m_horizontalScaling(0.7)
-{
+        m_horizontalScaling(0.7) {
     setText(t);     //Do conversion if necessary.
 }
 

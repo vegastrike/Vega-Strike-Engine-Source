@@ -31,15 +31,14 @@
 #include "vs_logging.h"
 
 Flightgroup *Flightgroup::newFlightgroup(const std::string &name,
-                                         const std::string &type,
-                                         const std::string &faction,
-                                         const std::string &order,
-                                         int num_ships,
-                                         int num_waves,
-                                         const std::string &logo_tex,
-                                         const std::string &logo_alp,
-                                         Mission *mis)
-{
+        const std::string &type,
+        const std::string &faction,
+        const std::string &order,
+        int num_ships,
+        int num_waves,
+        const std::string &logo_tex,
+        const std::string &logo_alp,
+        Mission *mis) {
     Flightgroup *fg = mis->findFlightgroup(name, faction);
     Flightgroup *fgtmp = fg;
     if (fg == nullptr) {
@@ -56,16 +55,14 @@ Flightgroup *Flightgroup::newFlightgroup(const std::string &name,
     return fg;
 }
 
-Flightgroup::~Flightgroup()
-{
+Flightgroup::~Flightgroup() {
     if (squadLogo != nullptr) {
         delete squadLogo;
         squadLogo = nullptr;
     }
 }
 
-Flightgroup &Flightgroup::operator=(Flightgroup &other)
-{
+Flightgroup &Flightgroup::operator=(Flightgroup &other) {
     VS_LOG(warning, "warning: may not work properly");
     if (squadLogo) {
         squadLogo = other.squadLogo->Clone();

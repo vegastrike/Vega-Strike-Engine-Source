@@ -47,15 +47,13 @@ public:
     float s;
     float t;
 
-    Vector(float x = 0, float y = 0, float z = 0)
-    {
+    Vector(float x = 0, float y = 0, float z = 0) {
         i = x;
         j = y;
         k = z;
     }
 
-    Vector(float x, float y, float z, float s, float t)
-    {
+    Vector(float x, float y, float z, float s, float t) {
         i = x;
         j = y;
         k = z;
@@ -63,13 +61,11 @@ public:
         this->t = t;
     }
 
-    Vector operator+(Vector b)
-    {
+    Vector operator+(Vector b) {
         return Vector(i + b.i, j + b.j, k + b.k);
     }
 
-    float Mag()
-    {
+    float Mag() {
         return sqrtf(i * i + j * j + k * k);
     }
 
@@ -91,8 +87,7 @@ public:
         k = m * sinf(theta);
     }
 
-    void Roll(float rad)
-    {
+    void Roll(float rad) {
         float theta = 0.0f;
         float m = Mag();
         if (i > 0) {
@@ -109,8 +104,7 @@ public:
         j = m * sinf(theta);
     }
 
-    void Pitch(float rad)
-    {
+    void Pitch(float rad) {
         float theta = 0.0f;
         float m = Mag();
         if (k > 0) {
@@ -139,16 +133,14 @@ public:
     int d;
     float sd, td;
 
-    Tri(int x, int y, int z)
-    {
+    Tri(int x, int y, int z) {
         c = x;
         b = y;
         a = z;
         quad = false;
     }
 
-    Tri(int x, int y, int z, int w)
-    {
+    Tri(int x, int y, int z, int w) {
         d = x;
         c = y;
         b = z;
@@ -156,8 +148,7 @@ public:
         quad = true;
     }
 
-    void Write(FILE *fp)
-    {
+    void Write(FILE *fp) {
         if (!quad) {
             fprintf(fp, "<Tri>\n");
         } else {
@@ -182,12 +173,10 @@ struct asteroid {
     vector<Vector> points;
     vector<Tri> polygon;
 
-    asteroid() : center(0, 0, 0), YawPitchRoll(0, 0, 0)
-    {
+    asteroid() : center(0, 0, 0), YawPitchRoll(0, 0, 0) {
     }
 
-    void CenterAndRotate()
-    {
+    void CenterAndRotate() {
         for (unsigned int i = 0; i < points.size(); i++) {
             //points[i].Pitch (YawPitchRoll.i);
             //points[i].Yaw (YawPitchRoll.j);
@@ -203,12 +192,11 @@ char texture[100] = "Asteroid.bmp";
 float scale = 1;
 
 void determine_centers_and_radii(vector<asteroid> &field,
-                                 const Vector &cube_sides,
-                                 const float radiusmin,
-                                 const float radiusmax,
-                                 const int poly_min,
-                                 const int poly_max)
-{
+        const Vector &cube_sides,
+        const float radiusmin,
+        const float radiusmax,
+        const int poly_min,
+        const int poly_max) {
     for (unsigned int i = 0; i < field.size(); i++) {
         field[i].center.i = cube_sides.i * ((float) rand()) / RAND_MAX - cube_sides.i / 2;
         field[i].center.j = cube_sides.j * ((float) rand()) / RAND_MAX - cube_sides.j / 2;
@@ -243,13 +231,11 @@ void determine_centers_and_radii(vector<asteroid> &field,
     }
 }
 
-float getR(float minr, float maxr)
-{
+float getR(float minr, float maxr) {
     return ((maxr - minr) * ((float) rand()) / RAND_MAX) + minr;
 }
 
-void generateTet(vector<Vector> &v, vector<Tri> &p, const float minr, const float maxr)
-{
+void generateTet(vector<Vector> &v, vector<Tri> &p, const float minr, const float maxr) {
     double h = 1 / sqrt((double) 2.0);
     double r = getR(minr, maxr);
     double rA = r;
@@ -272,12 +258,11 @@ void generateTet(vector<Vector> &v, vector<Tri> &p, const float minr, const floa
 }
 
 void generateNTet(vector<Vector> &v,
-                  vector<Tri> &p,
-                  const float minr,
-                  const float maxr,
-                  unsigned int stacks,
-                  unsigned int slices)
-{
+        vector<Tri> &p,
+        const float minr,
+        const float maxr,
+        unsigned int stacks,
+        unsigned int slices) {
     for (unsigned int i = 0; i < stacks + 2; i++) {
         float tempR = getR(minr, maxr);
         for (unsigned int j = 0; j < slices; j++) {
@@ -287,40 +272,38 @@ void generateNTet(vector<Vector> &v,
             float projR = tempR * sin(M_PI * i / (stacks + 1));
             if ((i != 0 && i != stacks + 1) || j == 0) {
                 v.push_back(Vector(projR * cos(2 * M_PI * j / (slices)),                   //i
-                                   tempR * cos(M_PI * i / (stacks + 1)),                    //j
-                                   projR * sin(2 * M_PI * j / (slices)),                    //k
-                                   ((float) j) / (slices - 1)
-                                           + ((i == 0 || i == stacks + 1) ? .5 : 0),                      //s
-                                   ((float) i) / (stacks + 1)));                    //t
+                        tempR * cos(M_PI * i / (stacks + 1)),                    //j
+                        projR * sin(2 * M_PI * j / (slices)),                    //k
+                        ((float) j) / (slices - 1)
+                                + ((i == 0 || i == stacks + 1) ? .5 : 0),                      //s
+                        ((float) i) / (stacks + 1)));                    //t
             }
             if (i != 0 && i != 1 && i != stacks + 1) {
                 p.push_back(Tri(1 + (i - 2) * slices + j,
-                                1 + (i - 1) * slices + j,
-                                1 + (i - 1) * slices + ((j + 1) % slices),
-                                1 + (i - 2) * slices + ((j + 1) % slices)));
+                        1 + (i - 1) * slices + j,
+                        1 + (i - 1) * slices + ((j + 1) % slices),
+                        1 + (i - 2) * slices + ((j + 1) % slices)));
             } else if (i == 1) {
                 //do top pyr
 
                 p.push_back(Tri(0,
-                                1 + j,
-                                1 + ((j + 1) % slices)));
+                        1 + j,
+                        1 + ((j + 1) % slices)));
             } else if (i == stacks + 1) {
                 p.push_back(Tri(1 + (i - 2) * slices + j,
-                                1 + (i - 1) * slices,
-                                1 + (i - 2) * slices + ((j + 1) % slices)));
+                        1 + (i - 1) * slices,
+                        1 + (i - 2) * slices + ((j + 1) % slices)));
             }
             //do bottom pyr
         }
     }
 }
 
-void generateDoubleTet(vector<Vector> &v, vector<Tri> &p, const float minr, const float maxr, int num)
-{
+void generateDoubleTet(vector<Vector> &v, vector<Tri> &p, const float minr, const float maxr, int num) {
     generateNTet(v, p, minr, maxr, 1, num);
 }
 
-void createShapes(asteroid &a, float dev)
-{
+void createShapes(asteroid &a, float dev) {
     if (a.num_polys < 6) {
         generateTet(a.points, a.polygon, a.radius * (1 - dev), a.radius * (1 + dev));
     } else if (a.num_polys < 8) {
@@ -331,23 +314,22 @@ void createShapes(asteroid &a, float dev)
         generateDoubleTet(a.points, a.polygon, a.radius * (1 - dev), a.radius * (1 + dev), 6);
     } else if (a.num_polys < 36) {
         generateNTet(a.points,
-                     a.polygon,
-                     a.radius * (1 - dev),
-                     a.radius * (1 + dev),
-                     a.num_polys / 6,
-                     a.num_polys % 6 + 3);
+                a.polygon,
+                a.radius * (1 - dev),
+                a.radius * (1 + dev),
+                a.num_polys / 6,
+                a.num_polys % 6 + 3);
     } else {
         generateNTet(a.points,
-                     a.polygon,
-                     a.radius * (1 - dev),
-                     a.radius * (1 + dev),
-                     a.num_polys / 12,
-                     a.num_polys % 12 + 6);
+                a.polygon,
+                a.radius * (1 - dev),
+                a.radius * (1 + dev),
+                a.num_polys / 12,
+                a.num_polys % 12 + 6);
     }
 }
 
-void write_mesh(FILE *fp, vector<asteroid> &field)
-{
+void write_mesh(FILE *fp, vector<asteroid> &field) {
     fprintf(fp, "<Mesh texture=\"%s\" sharevertex=\"1\" scale=\"%f\">\n<Points>\n", texture, scale);
     unsigned int i;
     unsigned int counter = 0;
@@ -391,24 +373,21 @@ void write_mesh(FILE *fp, vector<asteroid> &field)
     //fprintf (fp,"</Polygons>\n<Material reflect=\"%d\">\n<Specular red=\"%f\" green=\"%f\" blue=\"%f\" alpha=\"%f\"/>\n</Material>\n</Mesh>\n",0,0,0,0,1);
 }
 
-void createShapes(vector<asteroid> &field, float deviation)
-{
+void createShapes(vector<asteroid> &field, float deviation) {
     for (unsigned int i = 0; i < field.size(); i++) {
         createShapes(field[i], deviation);
         field[i].CenterAndRotate();
     }
 }
 
-bool isBoxInsideOuterRadius(Vector center, float sizeofBox, float radius)
-{
+bool isBoxInsideOuterRadius(Vector center, float sizeofBox, float radius) {
     if (center.Mag() > radius) {
         return false;
     }
     return true;
 }
 
-bool isBoxOutsideInnerRadius(Vector center, float sizeofBox, float radius)
-{
+bool isBoxOutsideInnerRadius(Vector center, float sizeofBox, float radius) {
     if (radius <= 0) {
         return true;
     }
@@ -492,13 +471,11 @@ Vector randVecInCube( float radius )
 }
 #else
 
-float randRadius(float BoxSize)
-{
+float randRadius(float BoxSize) {
     return ((rand() * BoxSize) / RAND_MAX) - (BoxSize / 2);
 }
 
-Vector randVecInCube(float BoxSize, float x, float y, float z)
-{
+Vector randVecInCube(float BoxSize, float x, float y, float z) {
     return Vector(randRadius(BoxSize) + x, randRadius(BoxSize) + y, randRadius(BoxSize) + z);
 }
 
@@ -522,8 +499,7 @@ void write_unit( FILE *fp, const char *astFile, int num_cubes, float innerRadius
     }
 #else
 
-void write_unit(FILE *fp, const char *astFile, float offset, float innerRadius, float outerRadius, float BoxSize)
-{
+void write_unit(FILE *fp, const char *astFile, float offset, float innerRadius, float outerRadius, float BoxSize) {
     fprintf(fp, "<Unit>");
     for (float x = -outerRadius; x < outerRadius; x += offset) {
         for (float y = -outerRadius; y < outerRadius; y += offset) {
@@ -531,7 +507,7 @@ void write_unit(FILE *fp, const char *astFile, float offset, float innerRadius, 
                 Vector vec;
                 vec = randVecInCube(BoxSize, x, y, z);
                 if ((isBoxInsideOuterRadius(vec, BoxSize,
-                                            outerRadius) && isBoxOutsideInnerRadius(vec, BoxSize, innerRadius))) {
+                        outerRadius) && isBoxOutsideInnerRadius(vec, BoxSize, innerRadius))) {
                     fprintf(fp, "\n\t<SubUnit file=\"%s\" x=\"%f\" y=\"%f\" z=\"%f\" />", astFile, vec.i, vec.j, vec.k);
                 }
                 //printf("\nIteration with Vector <%f,%f,%f>",vec.i,vec.j,vec.k);
@@ -546,8 +522,7 @@ void write_unit(FILE *fp, const char *astFile, float offset, float innerRadius, 
             "\n\t<Thrust>\n\t\t<Engine Afterburner=\"00.000000\" Forward=\"0\" Retro=\"0\" Left=\"0\" Right=\"0\" Top=\"0\" Bottom=\"0\" />\n\t\t<Maneuver yaw=\"0\" pitch=\"0\" roll=\"0\" />\n\t</Thrust>\n\t<Defense HudImage=\"af-hud.spr\">\n\t\t<Hull strength=\"400000000\" />\n\t</Defense>\n\t<Stats mass=\"60\" momentofinertia=\"60\" fuel=\"20000\">\n\t</Stats>\n</Unit>");
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     vector<asteroid> field;
     Vector cube_sides(1024, 1024, 1024);
     float radiusmin, radiusmax;

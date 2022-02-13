@@ -35,9 +35,8 @@ public:
      */
 
     virtual RetCodeEnum convert(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode)
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) {
         if (inputFormat == "BFXM" && outputFormat == "XMesh") {
             if (opCode == "create") {
                 string input = getNamedOption("inputPath");
@@ -58,20 +57,19 @@ public:
     }
 
     virtual void conversionHelp(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode) const
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) const {
         if ((inputFormat.empty() || inputFormat == "BFXM")
                 && (outputFormat.empty() || outputFormat == "XMesh")
                 && (opCode.empty() || (opCode == "create"))) {
             cout << "BFXM -> XMesh\n"
-                 << "\tSupported operations: create\n"
-                 << "\nNotes:\n"
-                 << "\tMeshes will be created using the naming rules <submesh>_<lod>.xmesh,\n"
-                 << "\twith the exception of 0_0.xmesh, which will be the output file.\n"
-                 << "\tIt is recomended, though, that the output file be 0_0.xmesh so that\n"
-                 << "\tthe resulting names make sense ;-)\n"
-                 << endl;
+                    << "\tSupported operations: create\n"
+                    << "\nNotes:\n"
+                    << "\tMeshes will be created using the naming rules <submesh>_<lod>.xmesh,\n"
+                    << "\twith the exception of 0_0.xmesh, which will be the output file.\n"
+                    << "\tIt is recomended, though, that the output file be 0_0.xmesh so that\n"
+                    << "\tthe resulting names make sense ;-)\n"
+                    << endl;
         }
     }
 

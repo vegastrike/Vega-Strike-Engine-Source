@@ -40,8 +40,7 @@
 
 #include "options.h"
 
-void CacheJumpStar(bool destroy)
-{
+void CacheJumpStar(bool destroy) {
     static Animation *cachedani = new Animation(game_options.jumpgate.c_str(), true, .1, MIPMAP, false);
     if (destroy) {
         delete cachedani;
@@ -56,8 +55,7 @@ public:
     Animation *a;
     float percent;
 
-    ResizeAni(Animation *ani, float percent)
-    {
+    ResizeAni(Animation *ani, float percent) {
         a = ani;
         this->percent = percent;
     }
@@ -65,8 +63,7 @@ public:
 static std::vector<ResizeAni> JumpAnimations;
 static std::vector<ResizeAni> VolatileJumpAnimations;
 
-Animation *GetVolatileAni(unsigned int which)
-{
+Animation *GetVolatileAni(unsigned int which) {
     if (which < VolatileJumpAnimations.size()) {
         return VolatileJumpAnimations[which].a;
     }
@@ -74,11 +71,10 @@ Animation *GetVolatileAni(unsigned int which)
 }
 
 unsigned int AddAnimation(const QVector &pos,
-                          const float size,
-                          bool mvolatile,
-                          const std::string &name,
-                          float percentgrow)
-{
+        const float size,
+        bool mvolatile,
+        const std::string &name,
+        float percentgrow) {
     std::vector<ResizeAni> *ja = mvolatile ? &VolatileJumpAnimations : &JumpAnimations;
 
     Animation *ani = new Animation(name.c_str(), true, .1, MIPMAP, false);
@@ -97,13 +93,11 @@ unsigned int AddAnimation(const QVector &pos,
     return i;
 }
 
-static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool mvolatile = false)
-{
+static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool mvolatile = false) {
     return AddAnimation(pos, size, mvolatile, game_options.jumpgate, .95);
 }
 
-void StarSystem::VolitalizeJumpAnimation(const int ani)
-{
+void StarSystem::VolitalizeJumpAnimation(const int ani) {
     if (ani != -1) {
         VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, game_options.jumpanimationshrink));
         JumpAnimations[ani].a = NULL;
@@ -111,8 +105,7 @@ void StarSystem::VolitalizeJumpAnimation(const int ani)
     }
 }
 
-void StarSystem::DrawJumpStars()
-{
+void StarSystem::DrawJumpStars() {
     for (unsigned int kk = 0; kk < pendingjump.size(); ++kk) {
         int k = pendingjump[kk]->animation;
         if (k != -1) {
@@ -122,8 +115,8 @@ void StarSystem::DrawJumpStars()
                 un->GetOrientation(p, q, r);
 
                 JumpAnimations[k].a
-                                 ->SetPosition(
-                                         un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
+                        ->SetPosition(
+                                un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
                 float dd = un->rSize() * game_options.jumpgatesize
                         * (un->GetJumpStatus().delay - pendingjump[kk]->delay) / (float) un->GetJumpStatus().delay;
@@ -141,7 +134,7 @@ void StarSystem::DrawJumpStars()
             float hei, wid;
             VolatileJumpAnimations[i].a->GetDimensions(hei, wid);
             VolatileJumpAnimations[i].a->SetDimensions(VolatileJumpAnimations[i].percent * hei,
-                                                       VolatileJumpAnimations[i].percent * wid);
+                    VolatileJumpAnimations[i].percent * wid);
             if (VolatileJumpAnimations[i].a->Done()) {
                 delete VolatileJumpAnimations[i].a;
                 VolatileJumpAnimations[i].a = nullptr;
@@ -154,21 +147,19 @@ void StarSystem::DrawJumpStars()
     }
 }
 
-void StarSystem::DoJumpingComeSightAndSound(Unit *un)
-{
+void StarSystem::DoJumpingComeSightAndSound(Unit *un) {
     Vector p, q, r;
     un->GetOrientation(p, q, r);
     unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * game_options.jumpgatesize, true);
     VolatileJumpAnimations[myani].a->SetOrientation(p, q, r);
 }
 
-int StarSystem::DoJumpingLeaveSightAndSound(Unit *un)
-{
+int StarSystem::DoJumpingLeaveSightAndSound(Unit *un) {
     int ani;
     Vector p, q, r;
     un->GetOrientation(p, q, r);
     ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->GetJumpStatus().delay + .25),
-                           10 * un->rSize());
+            10 * un->rSize());
     static int jumpleave = AUDCreateSound(game_options.jumpleave, false);
     AUDPlay(jumpleave, un->LocalPosition(), un->GetVelocity(), 1);
     return ani;

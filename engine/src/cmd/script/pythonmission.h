@@ -37,8 +37,7 @@ public:
     std::vector<UnitContainer *> relevant_units;
     PythonMissionBaseClass();
 
-    virtual void Destroy()
-    {
+    virtual void Destroy() {
         Destructor();
     }
 

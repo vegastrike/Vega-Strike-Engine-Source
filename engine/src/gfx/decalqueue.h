@@ -45,13 +45,11 @@ class DecalQueue {
     vector<Texture *> decals;
 
 public:
-    inline Texture *GetTexture(const unsigned int reference)
-    {
+    inline Texture *GetTexture(const unsigned int reference) {
         return decals[reference];
     }
 
-    unsigned int AddTexture(std::string const &texname, enum FILTER mipmap)
-    {
+    unsigned int AddTexture(std::string const &texname, enum FILTER mipmap) {
         Texture *texture = Texture::Exists(texname);
 
         // Texture already exists

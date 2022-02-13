@@ -52,21 +52,18 @@ using namespace Audio::__impl::OpenAL;
 namespace Audio {
 
 OpenALStreamingSound::OpenALStreamingSound(const std::string &name, VSFileSystem::VSFileType type,
-                                           unsigned int _bufferSamples) :
+        unsigned int _bufferSamples) :
         SimpleSound(name, type, true),
-        bufferSamples(_bufferSamples)
-{
+        bufferSamples(_bufferSamples) {
     for (size_t i = 0; i < NUM_BUFFERS; ++i) {
         bufferHandles[i] = AL_NULL_BUFFER;
     }
 }
 
-OpenALStreamingSound::~OpenALStreamingSound()
-{
+OpenALStreamingSound::~OpenALStreamingSound() {
 }
 
-void OpenALStreamingSound::loadImpl(bool wait)
-{
+void OpenALStreamingSound::loadImpl(bool wait) {
     // just in case
     unloadImpl();
 
@@ -116,8 +113,7 @@ void OpenALStreamingSound::loadImpl(bool wait)
     }
 }
 
-void OpenALStreamingSound::flushBuffers()
-{
+void OpenALStreamingSound::flushBuffers() {
     // Mark as detached, so that readAndFlip() knows to initialize the source
     // and streaming indices
     readBufferIndex = 0;
@@ -127,8 +123,7 @@ void OpenALStreamingSound::flushBuffers()
     playBufferIndex = NUM_BUFFERS;
 }
 
-void OpenALStreamingSound::unloadImpl()
-{
+void OpenALStreamingSound::unloadImpl() {
     if (isStreamLoaded()) {
         closeStream();
     }
@@ -137,8 +132,7 @@ void OpenALStreamingSound::unloadImpl()
     }
 }
 
-ALBufferHandle OpenALStreamingSound::readAndFlip()
-{
+ALBufferHandle OpenALStreamingSound::readAndFlip() {
     if (!isLoaded()) {
         throw ResourceNotLoadedException(getName());
     }
@@ -161,9 +155,9 @@ ALBufferHandle OpenALStreamingSound::readAndFlip()
 
     clearAlError();
     alBufferData(bufferHandle,
-                 asALFormat(targetFormat),
-                 buffer.getBuffer(), buffer.getUsedBytes(),
-                 targetFormat.sampleFrequency);
+            asALFormat(targetFormat),
+            buffer.getBuffer(), buffer.getUsedBytes(),
+            targetFormat.sampleFrequency);
     checkAlError();
 
     if (playBufferIndex == NUM_BUFFERS) {
@@ -174,15 +168,13 @@ ALBufferHandle OpenALStreamingSound::readAndFlip()
     return bufferHandle;
 }
 
-void OpenALStreamingSound::unqueueBuffer(ALBufferHandle buffer)
-{
+void OpenALStreamingSound::unqueueBuffer(ALBufferHandle buffer) {
     if (playBufferIndex < NUM_BUFFERS && buffer == bufferHandles[playBufferIndex]) {
         playBufferIndex = (playBufferIndex + 1) % NUM_BUFFERS;
     }
 }
 
-void OpenALStreamingSound::seek(double position)
-{
+void OpenALStreamingSound::seek(double position) {
     if (!isLoaded()) {
         throw ResourceNotLoadedException(getName());
     }
@@ -190,8 +182,7 @@ void OpenALStreamingSound::seek(double position)
     getStream()->seek(position);
 }
 
-Timestamp OpenALStreamingSound::getTimeBase() const
-{
+Timestamp OpenALStreamingSound::getTimeBase() const {
     return bufferStarts[playBufferIndex];
 }
 

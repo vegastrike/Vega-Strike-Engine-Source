@@ -59,43 +59,57 @@ namespace Opcode {
 #include "Ice/IceAxes.h"
 
 
+
 #include "Ice/IcePoint.h"
+
 
 
 #include "Ice/IceHPoint.h"
 
 
+
 #include "Ice/IceMatrix3x3.h"
+
 
 
 #include "Ice/IceMatrix4x4.h"
 
 
+
 #include "Ice/IcePlane.h"
+
 
 
 #include "Ice/IceRay.h"
 
 
+
 #include "Ice/IceIndexedTriangle.h"
+
 
 
 #include "Ice/IceTriangle.h"
 
 
+
 #include "Ice/IceTrilist.h"
+
 
 
 #include "Ice/IceAABB.h"
 
 
+
 #include "Ice/IceOBB.h"
+
 
 
 #include "Ice/IceBoundingSphere.h"
 
 
+
 #include "Ice/IceSegment.h"
+
 
 
 #include "Ice/IceLSS.h"
@@ -104,7 +118,9 @@ namespace Opcode {
 #include "OPC_Settings.h"
 
 
+
 #include "OPC_Common.h"
+
 
 
 #include "OPC_MeshInterface.h"
@@ -114,12 +130,15 @@ namespace Opcode {
 #include "OPC_AABBTree.h"
 
 
+
 #include "OPC_OptimizedTree.h"
 // Models
 #include "OPC_BaseModel.h"
 
 
+
 #include "OPC_Model.h"
+
 
 
 #include "OPC_HybridModel.h"
@@ -127,25 +146,33 @@ namespace Opcode {
 #include "OPC_Collider.h"
 
 
+
 #include "OPC_VolumeCollider.h"
+
 
 
 #include "OPC_TreeCollider.h"
 
 
+
 #include "OPC_RayCollider.h"
+
 
 
 #include "OPC_SphereCollider.h"
 
 
+
 #include "OPC_OBBCollider.h"
+
 
 
 #include "OPC_AABBCollider.h"
 
 
+
 #include "OPC_LSSCollider.h"
+
 
 
 #include "OPC_PlanesCollider.h"
@@ -153,6 +180,7 @@ namespace Opcode {
 #include "OPC_Picking.h"
 // Sweep-and-prune
 #include "OPC_BoxPruning.h"
+
 
 
 #include "OPC_SweepAndPrune.h"

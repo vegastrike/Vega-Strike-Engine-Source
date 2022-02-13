@@ -30,15 +30,13 @@ class FILEHandle {
 public:
     FILEHandle(const std::string &name, const char perms[]);
 
-    ~FILEHandle()
-    {
+    ~FILEHandle() {
         if (file) {
             fclose(file);
         }
     }
 
-    operator FILE *const(void) const
-    {
+    operator FILE *const(void) const {
         return file;
     }
 
@@ -51,17 +49,14 @@ struct VSRMember {
     uint32_t fileLength;
     uint32_t offset;
 
-    friend bool operator<(const VSRMember &a, const VSRMember &b)
-    {
+    friend bool operator<(const VSRMember &a, const VSRMember &b) {
         return a.filename < b.filename;
     }
 
-    VSRMember()
-    {
+    VSRMember() {
     }
 
-    VSRMember &operator=(const VSRPEntry &entry)
-    {
+    VSRMember &operator=(const VSRPEntry &entry) {
         filename = entry.filename;
         fileLength = entry.fileLength;
         offset = entry.offset;
@@ -70,13 +65,11 @@ struct VSRMember {
 
     VSRMember(const VSRPEntry &entry)
             : filename(entry.filename), fileLength(entry.fileLength),
-              offset(entry.offset)
-    {
+            offset(entry.offset) {
     }
 
     VSRMember(std::string nam, uint32_t len, uint32_t offs)
-            : filename(nam), fileLength(len), offset(offs)
-    {
+            : filename(nam), fileLength(len), offset(offs) {
     }
 };
 

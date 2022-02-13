@@ -30,8 +30,7 @@
 
 float SphereTransformRenderlevel = 0;
 
-static void TerrainMakeActive(const TerrainTexture &text)
-{
+static void TerrainMakeActive(const TerrainTexture &text) {
     if (text.tex.t) {
         GFXEnable(TEXTURE0);
         text.tex.t->MakeActive();
@@ -47,14 +46,12 @@ static void TerrainMakeActive(const TerrainTexture &text)
     GFXSelectMaterial(text.material);
 }
 
-static void TerrainMakeClearActive(const TerrainTexture &text)
-{
+static void TerrainMakeClearActive(const TerrainTexture &text) {
     TerrainMakeActive(text);
     GFXBlendMode(text.blendDst != ZERO ? text.blendSrc : SRCALPHA, INVSRCALPHA);
 }
 
-static void TerrainMakeDeactive(const TerrainTexture &text)
-{
+static void TerrainMakeDeactive(const TerrainTexture &text) {
     if (text.tex.t) {
     }
 }
@@ -66,8 +63,7 @@ typedef std::vector<TerrainTexture> vecTextureStar;
  * Draws the heightfield represented by this tree
  * Returns teh number of triangles rendered (not including multipass
  */
-int quadsquare::Render(const quadcornerdata &cd, const Vector &camvec)
-{
+int quadsquare::Render(const quadcornerdata &cd, const Vector &camvec) {
     quadsquare::camerapos = camvec;
     vertices->LoadDrawState();
     vertices->BeginDrawState(GFXFALSE);
@@ -112,12 +108,11 @@ int quadsquare::Render(const quadcornerdata &cd, const Vector &camvec)
 
 //#define DONOTDRAWBLENDEDQUADS
 inline void RotateTriRight(unsigned int &aa,
-                           unsigned short &ta,
-                           unsigned int &bb,
-                           unsigned short &tb,
-                           unsigned int &cc,
-                           unsigned short &tc)
-{
+        unsigned short &ta,
+        unsigned int &bb,
+        unsigned short &tb,
+        unsigned int &cc,
+        unsigned short &tc) {
     unsigned int baki;
     unsigned short baks;
     baks = ta;
@@ -135,12 +130,11 @@ inline void RotateTriRight(unsigned int &aa,
 }
 
 inline void RotateTriLeft(unsigned int &aa,
-                          unsigned short &ta,
-                          unsigned int &bb,
-                          unsigned short &tb,
-                          unsigned int &cc,
-                          unsigned short &tc)
-{
+        unsigned short &ta,
+        unsigned int &bb,
+        unsigned short &tb,
+        unsigned int &cc,
+        unsigned short &tc) {
     unsigned int baki;
     unsigned short baks;
     baks = ta;
@@ -158,12 +152,11 @@ inline void RotateTriLeft(unsigned int &aa,
 }
 
 void quadsquare::tri(unsigned int aa,
-                     unsigned short ta,
-                     unsigned int bb,
-                     unsigned short tb,
-                     unsigned int cc,
-                     unsigned short tc)
-{
+        unsigned short ta,
+        unsigned int bb,
+        unsigned short tb,
+        unsigned int cc,
+        unsigned short tc) {
     assert(0);     //see below #if VERTEX_LIST functions... this whole contraption sorely needs a rewrite
 #ifdef DONOTDRAWBLENDEDQUADS
     if (ta == tb && tb == tc) {
@@ -211,14 +204,12 @@ void quadsquare::tri(unsigned int aa,
     indices[ta].q.push_back(aa, bb, cc);
 }
 
-unsigned short VertInfo::GetTex() const
-{
+unsigned short VertInfo::GetTex() const {
     return (Rem > 127) ? (Tex + 1) : Tex;
     //return Tex/texmultiply + (((Tex%texmultiply)>texmultiply/2)?1:0);
 }
 
-void quadsquare::RenderAux(const quadcornerdata &cd, CLIPSTATE vis)
-{
+void quadsquare::RenderAux(const quadcornerdata &cd, CLIPSTATE vis) {
 //Does the work of rendering this square.  Uses the enabled vertices only.
 //Recurses as necessary.
     unsigned int whole = 2 << cd.Level;
@@ -335,8 +326,7 @@ void quadsquare::RenderAux(const quadcornerdata &cd, CLIPSTATE vis)
 #undef T8
 }
 
-void quadsquare::SetupCornerData(quadcornerdata *q, const quadcornerdata &cd, int ChildIndex)
-{
+void quadsquare::SetupCornerData(quadcornerdata *q, const quadcornerdata &cd, int ChildIndex) {
 //Fills the given structure with the appropriate corner values for the
 //specified child block, given our own vertex data and our corner
 //vertex data from cd.

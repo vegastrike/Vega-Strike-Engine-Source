@@ -53,19 +53,16 @@
 #include "weapon_info.h"
 
 template<typename T>
-inline T mymin(T a, T b)
-{
+inline T mymin(T a, T b) {
     return (a < b) ? a : b;
 }
 
 template<typename T>
-inline T mymax(T a, T b)
-{
+inline T mymax(T a, T b) {
     return (a > b) ? a : b;
 }
 
-bool VDU::staticable() const
-{
+bool VDU::staticable() const {
     unsigned int thismode = getMode();
     static bool only_scanner_modes_static =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "only_scanner_modes_static", "true"));
@@ -79,10 +76,9 @@ bool VDU::staticable() const
 ///ALERT to change must change enum in class
 const std::string vdu_modes[] =
         {"Target", "Nav", "Objectives", "Comm", "Weapon", "Damage", "Shield", "Manifest", "TargetManifest", "View",
-         "Message"};
+                "Message"};
 
-string reformatName(string nam)
-{
+string reformatName(string nam) {
     nam = nam.substr(0, nam.find("."));
     if (nam.length()) {
         nam[0] = toupper(nam[0]);
@@ -90,8 +86,7 @@ string reformatName(string nam)
     return nam;
 }
 
-string getUnitNameAndFgNoBase(Unit *target)
-{
+string getUnitNameAndFgNoBase(Unit *target) {
     Flightgroup *fg = target->getFlightgroup();
     if (target->isUnit() == _UnitType::planet) {
         string hr = ((Planet *) target)->getHumanReadablePlanetType();
@@ -134,7 +129,7 @@ string getUnitNameAndFgNoBase(Unit *target)
                     if (reformatName(target->name) == (reformatName(target->getFullname()))) {
                         std::string retval(reformatName(
                                 target->name) + " "
-                                                   + ((confignums && ("" != fgnstring)) ? (": " + fgnstring) : ""));
+                                + ((confignums && ("" != fgnstring)) ? (": " + fgnstring) : ""));
                         return retval;
                     } else {
                         std::string retval(reformatName(target->name) + " : " + target->getFullname());
@@ -147,8 +142,7 @@ string getUnitNameAndFgNoBase(Unit *target)
     return reformatName(target->name);
 }
 
-int vdu_lookup(char *&s)
-{
+int vdu_lookup(char *&s) {
 #ifdef _MSC_VER
 #define strcasecmp stricmp
 #endif
@@ -174,8 +168,7 @@ int vdu_lookup(char *&s)
     return retval;
 }
 
-int parse_vdu_type(const char *x)
-{
+int parse_vdu_type(const char *x) {
     char *mystr = strdup(x);
     char *s = mystr;
     int retval = 0;
@@ -187,8 +180,7 @@ int parse_vdu_type(const char *x)
 }
 
 VDU::VDU(const char *file, TextPlane *textp, unsigned short modes, short rwws, short clls, float *ma,
-         float *mh) : VSSprite(file), tp(textp), posmodes(modes), rows(rwws), cols(clls), scrolloffset(0)
-{
+        float *mh) : VSSprite(file), tp(textp), posmodes(modes), rows(rwws), cols(clls), scrolloffset(0) {
     thismode.push_back(MSG);
     if (_Universe->numPlayers() > 1) {
         posmodes &= (~VIEW);
@@ -201,14 +193,13 @@ VDU::VDU(const char *file, TextPlane *textp, unsigned short modes, short rwws, s
     SwitchMode(NULL);
 }
 
-GFXColor getDamageColor(float armor, bool gradient = false)
-{
+GFXColor getDamageColor(float armor, bool gradient = false) {
     static GFXColor damaged = vs_config->getColor("default", "hud_target_damaged",
-                                                  GFXColor(1, 0, 0, 1));
+            GFXColor(1, 0, 0, 1));
     static GFXColor half_damaged = vs_config->getColor("default", "hud_target_half_damaged",
-                                                       GFXColor(1, 1, 0, 1));
+            GFXColor(1, 1, 0, 1));
     static GFXColor full = vs_config->getColor("default", "hud_target_full",
-                                               GFXColor(1, 1, 1, 1));
+            GFXColor(1, 1, 1, 1));
     if (armor >= .9) {
         return full;
     }
@@ -220,20 +211,19 @@ GFXColor getDamageColor(float armor, bool gradient = false)
 }
 
 static void DrawHUDSprite(VDU *thus,
-                          VSSprite *s,
-                          float per,
-                          float &sx,
-                          float &sy,
-                          float &w,
-                          float &h,
-                          float aup,
-                          float aright,
-                          float aleft,
-                          float adown,
-                          float hull,
-                          bool drawsprite,
-                          bool invertsprite)
-{
+        VSSprite *s,
+        float per,
+        float &sx,
+        float &sy,
+        float &w,
+        float &h,
+        float aup,
+        float aright,
+        float aleft,
+        float adown,
+        float hull,
+        bool drawsprite,
+        bool invertsprite) {
     static bool HighQTargetVSSprites =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_sprites", "false"));
     float nw, nh;
@@ -327,13 +317,11 @@ static void DrawHUDSprite(VDU *thus,
     }
 }
 
-void VDU::DrawTargetSpr(VSSprite *s, float per, float &sx, float &sy, float &w, float &h)
-{
+void VDU::DrawTargetSpr(VSSprite *s, float per, float &sx, float &sy, float &w, float &h) {
     DrawHUDSprite(this, s, per, sx, sy, w, h, 1, 1, 1, 1, 1, true, false);
 }
 
-void VDU::Scroll(int howmuch)
-{
+void VDU::Scroll(int howmuch) {
     scrolloffset += howmuch;
 }
 
@@ -363,18 +351,17 @@ static std::string MangleStrung( std::string in, float probability )
 */
 
 static void DrawShield(float fs,
-                       float rs,
-                       float ls,
-                       float bs,
-                       float x,
-                       float y,
-                       float w,
-                       float h,
-                       bool invert,
-                       GFXColor outershield,
-                       GFXColor middleshield,
-                       GFXColor innershield)
-{
+        float rs,
+        float ls,
+        float bs,
+        float x,
+        float y,
+        float w,
+        float h,
+        bool invert,
+        GFXColor outershield,
+        GFXColor middleshield,
+        GFXColor innershield) {
     //FIXME why is this static?
 
     if (invert) {
@@ -393,14 +380,14 @@ static void DrawShield(float fs,
 
     static float shthresh[3] = {
             XMLSupport::parse_floatf(vs_config->getVariable("graphics", "hud",
-                                                            "shield_vdu_thresh0",
-                                                            do_shield_fade ? "0" : ".25")),
+                    "shield_vdu_thresh0",
+                    do_shield_fade ? "0" : ".25")),
             XMLSupport::parse_floatf(vs_config->getVariable("graphics", "hud",
-                                                            "shield_vdu_thresh1",
-                                                            do_shield_fade ? ".33" : ".50")),
+                    "shield_vdu_thresh1",
+                    do_shield_fade ? ".33" : ".50")),
             XMLSupport::parse_floatf(vs_config->getVariable("graphics", "hud",
-                                                            "shield_vdu_thresh2",
-                                                            do_shield_fade ? ".66" : ".75"))
+                    "shield_vdu_thresh2",
+                    do_shield_fade ? ".66" : ".75"))
     };                                                                                                                    //PM me if you don't know why I did this.
     float shtrans[3] = {1.0f, 1.0f, 1.0f};
     if (do_shield_fade) {
@@ -527,8 +514,7 @@ static void DrawShield(float fs,
     GFXPopBlendMode();
 }
 
-void VDU::DrawVDUShield(Unit *parent)
-{
+void VDU::DrawVDUShield(Unit *parent) {
     float x, y, w, h;
     GetPosition(x, y);
     GetSize(w, h);
@@ -550,8 +536,8 @@ void VDU::DrawVDUShield(Unit *parent)
     static bool invert_friendly_sprite =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "invert_friendly_sprite", "false"));
     DrawHUDSprite(this, parent->getHudImage(), .25, x, y, w, h, parent->GetHullPercent(),
-                  parent->GetHullPercent(), parent->GetHullPercent(), parent->GetHullPercent(),
-                  parent->GetHullPercent(), true, invert_friendly_sprite);
+            parent->GetHullPercent(), parent->GetHullPercent(), parent->GetHullPercent(),
+            parent->GetHullPercent(), true, invert_friendly_sprite);
 }
 
 // TODO: make into function
@@ -566,38 +552,31 @@ void VDU::DrawVDUShield(Unit *parent)
     }                                           \
     while (0)
 
-VSSprite *getTargetQuadShield()
-{
+VSSprite *getTargetQuadShield() {
     RETURN_STATIC_SPRITE("shield_quad");
 }
 
-VSSprite *getTargetDualShield()
-{
+VSSprite *getTargetDualShield() {
     RETURN_STATIC_SPRITE("shield_dual");
 }
 
-VSSprite *getJumpImage()
-{
+VSSprite *getJumpImage() {
     RETURN_STATIC_SPRITE("jump-hud");
 }
 
-VSSprite *getSunImage()
-{
+VSSprite *getSunImage() {
     RETURN_STATIC_SPRITE("sun-hud");
 }
 
-VSSprite *getPlanetImage()
-{
+VSSprite *getPlanetImage() {
     RETURN_STATIC_SPRITE("planet-hud");
 }
 
-VSSprite *getNavImage()
-{
+VSSprite *getNavImage() {
     RETURN_STATIC_SPRITE("nav-hud");
 }
 
-double DistanceTwoTargets(Unit *parent, Unit *target)
-{
+double DistanceTwoTargets(Unit *parent, Unit *target) {
     double tmp =
             ((parent->Position() - target->Position()).Magnitude()
                     - ((target->isUnit() == _UnitType::planet) ? target->rSize() : 0));
@@ -611,8 +590,7 @@ struct retString128 {
     char str[128];
 };
 
-retString128 PrettyDistanceString(double distance)
-{
+retString128 PrettyDistanceString(double distance) {
     //OVERRUN
     struct retString128 qr;
     static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
@@ -642,8 +620,7 @@ retString128 PrettyDistanceString(double distance)
     return qr;
 }
 
-static float OneOfFour(float a, float b, float c, float d)
-{
+static float OneOfFour(float a, float b, float c, float d) {
     int aa = a != 0 ? 1 : 0;
     int bb = b != 0 ? 1 : 0;
     int cc = c != 0 ? 1 : 0;
@@ -660,8 +637,7 @@ static float OneOfFour(float a, float b, float c, float d)
     return 0;
 }
 
-static float TwoOfFour(float a, float b, float c, float d)
-{
+static float TwoOfFour(float a, float b, float c, float d) {
     int aa = a != 0 ? 1 : 0;
     int bb = b != 0 ? 1 : 0;
     int cc = c != 0 ? 1 : 0;
@@ -681,8 +657,7 @@ static float TwoOfFour(float a, float b, float c, float d)
     return 0;
 }
 
-void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target)
-{
+void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     float x, y, w, h;
     float fs = target->FShieldData();
     float rs = target->RShieldData();
@@ -710,26 +685,26 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target)
     }
 
     DrawHUDSprite(this,
-                  ((target->isUnit() != _UnitType::planet || target->getHudImage() != NULL) ? target->getHudImage()
-                                                                                            : (
-                           target->GetDestinations().size() != 0 ? getJumpImage()
-                                                                 : (((Planet *) target)->hasLights() ? getSunImage()
-                                                                                                     : (
-                                                                            target->getFullname().find(
-                                                                                    "invisible") != string::npos
-                                                                            ? getNavImage() : getPlanetImage())))),
-                  .6,
-                  x,
-                  y,
-                  w,
-                  h,
-                  au,
-                  ar,
-                  al,
-                  ad,
-                  target->GetHullPercent(),
-                  true,
-                  invert_target_sprite);
+            ((target->isUnit() != _UnitType::planet || target->getHudImage() != NULL) ? target->getHudImage()
+                    : (
+                            target->GetDestinations().size() != 0 ? getJumpImage()
+                                    : (((Planet *) target)->hasLights() ? getSunImage()
+                                    : (
+                                            target->getFullname().find(
+                                                    "invisible") != string::npos
+                                                    ? getNavImage() : getPlanetImage())))),
+            .6,
+            x,
+            y,
+            w,
+            h,
+            au,
+            ar,
+            al,
+            ad,
+            target->GetHullPercent(),
+            true,
+            invert_target_sprite);
 
     GFXDisable(TEXTURE0);
     //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
@@ -760,10 +735,10 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target)
         tp->bgcol = GFXColor(0, 0, 0, background_alpha);
     }
     tp->Draw(MangleString(unitandfg, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-             0,
-             true,
-             false,
-             automatte);
+            0,
+            true,
+            false,
+            automatte);
     tp->bgcol = tpbg;
     static float auto_message_lim =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "auto_message_time_lim", "5"));
@@ -801,10 +776,10 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target)
             tp->bgcol = GFXColor(0, 0, 0, background_alpha);
         }
         tp->Draw(MangleString(newst, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-                 0,
-                 true,
-                 false,
-                 automatte);
+                0,
+                true,
+                false,
+                automatte);
         tp->bgcol = tpbg;
         static float ishieldcolor[4] = {.4, .4, 1, 1};
         static float mshieldcolor[4] = {.4, .4, 1, 1};
@@ -814,9 +789,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target)
                 XMLSupport::parse_bool(vs_config->getVariable("graphics", "vdu_builtin_shields", "false"));
         if (builtin_shields) {
             DrawShield(fs, rs, ls, bs, x, y, w, h, invert_target_shields,
-                       GFXColor(ishieldcolor[0], ishieldcolor[1], ishieldcolor[2], ishieldcolor[3]),
-                       GFXColor(mshieldcolor[0], mshieldcolor[1], mshieldcolor[2], mshieldcolor[3]),
-                       GFXColor(oshieldcolor[0], oshieldcolor[1], oshieldcolor[2], oshieldcolor[3]));
+                    GFXColor(ishieldcolor[0], ishieldcolor[1], ishieldcolor[2], ishieldcolor[3]),
+                    GFXColor(mshieldcolor[0], mshieldcolor[1], mshieldcolor[2], mshieldcolor[3]),
+                    GFXColor(oshieldcolor[0], oshieldcolor[1], oshieldcolor[2], oshieldcolor[3]));
         }
         //this is a possibility to draw target shields but without gauging
         //the gauging method is implemented in cockpit.cpp
@@ -837,21 +812,20 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target)
         }
         if (draw_auto_message) {
             tp->Draw(MangleString(std::string("\n") + cp->autoMessage, _Universe->AccessCamera()->GetNebula()
-                                                                               != NULL ? .4 : 0),
-                     0,
-                     true,
-                     false,
-                     automatte);
+                            != NULL ? .4 : 0),
+                    0,
+                    true,
+                    false,
+                    automatte);
         } else {
             tp->Draw(MangleString("\n[OutOfRange]",
-                                  _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
+                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
         }
         tp->bgcol = tpbg;
     }
 }
 
-void VDU::DrawMessages(GameCockpit *parentcp, Unit *target)
-{
+void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     static bool draw_messages = XMLSupport::parse_bool(vs_config->getVariable("graphics", "chat_text", "true"));
 
     if (draw_messages == false) {
@@ -880,8 +854,8 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target)
     int row_lim = ((scrolloffset < 0 || num_messages > rows) ? rows : num_messages);
 
     for (int i = scrolloffset < 0 ? -scrolloffset - 1 : 0;
-         rows_used < row_lim && mc->last(i, lastmsg, message_people, whoNOT);
-         i++) {
+            rows_used < row_lim && mc->last(i, lastmsg, message_people, whoNOT);
+            i++) {
         char timebuf[100];
         double sendtime = lastmsg.time;
         if (scrolloffset >= 0 && sendtime < nowtime - oldtime * 4) {
@@ -890,8 +864,8 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target)
         if (sendtime <= nowtime && (sendtime > nowtime - oldtime || scrolloffset < 0)) {
             if (showStardate) {
                 string stardate = _Universe->current_stardate
-                                           .ConvertFullTrekDate(
-                                                   sendtime + _Universe->current_stardate.GetElapsedStarTime());
+                        .ConvertFullTrekDate(
+                                sendtime + _Universe->current_stardate.GetElapsedStarTime());
                 sprintf(timebuf, "%s", stardate.c_str());
             } else {
                 int sendtime_mins = (int) (sendtime / 60.0);
@@ -947,21 +921,19 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target)
         tp->bgcol = GFXColor(0, 0, 0, background_alpha);
     }
     tp->Draw(message_prefix + MangleString(fullstr,
-                                           _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-             0,
-             true,
-             false,
-             automatte);
+                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
+            0,
+            true,
+            false,
+            automatte);
     tp->bgcol = tpbg;
 }
 
-void VDU::DrawScanningMessage()
-{
+void VDU::DrawScanningMessage() {
     //tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
-bool VDU::SetCommAnimation(Animation *ani, Unit *un, bool force)
-{
+bool VDU::SetCommAnimation(Animation *ani, Unit *un, bool force) {
     if (comm_ani == NULL || force) {
         if (posmodes & COMM) {
             if (ani != NULL && comm_ani == NULL) {
@@ -980,8 +952,7 @@ bool VDU::SetCommAnimation(Animation *ani, Unit *un, bool force)
     return false;
 }
 
-Unit *VDU::GetCommunicating()
-{
+Unit *VDU::GetCommunicating() {
     if (comm_ani) {
         if (!comm_ani->Done()) {
             return communicating.GetUnit();
@@ -990,8 +961,7 @@ Unit *VDU::GetCommunicating()
     return NULL;
 }
 
-void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav)
-{
+void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
     //Unit * you = _Universe->AccessCockpit()->GetParent();
     //Unit * targ = you!=NULL?you->Target():NULL;
     //static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
@@ -1005,14 +975,14 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav)
     std::string navdata =
             std::string("#ff0000Sector:\n     #ffff00" + getStarSystemSector(
                     _Universe->activeStarSystem()->getFileName())
-                                + "\n\n#ff0000System:\n     #ffff00") + _Universe->activeStarSystem()->getName() + " ("
+                    + "\n\n#ff0000System:\n     #ffff00") + _Universe->activeStarSystem()->getName() + " ("
                     + FactionUtil::GetFactionName(faction)
                     + ")\n\n#ff0000Target:\n  #ffff00" + (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing"))
                     + "\n\n#ff0000Range: #ffff00"
                     + std::string(PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you,
-                                                                                           targ) : 0.0))
-                                          .
-                                                  str);
+                            targ) : 0.0))
+                            .
+                                    str);
     static float auto_message_lim =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "auto_message_time_lim", "5"));
     float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
@@ -1032,16 +1002,15 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav)
         tp->bgcol = GFXColor(0, 0, 0, background_alpha);
     }
     tp->Draw(MangleString(navdata + (draw_auto_message ? msg : std::string()), _Universe->AccessCamera()->GetNebula()
-                                                                                       != NULL ? .4 : 0),
-             scrolloffset,
-             true,
-             true,
-             automatte);
+                    != NULL ? .4 : 0),
+            scrolloffset,
+            true,
+            true,
+            automatte);
     tp->bgcol = tpbg;
 }
 
-void VDU::DrawComm()
-{
+void VDU::DrawComm() {
     if (comm_ani != NULL) {
         GFXDisable(TEXTURE1);
         GFXEnable(TEXTURE0);
@@ -1076,15 +1045,14 @@ void VDU::DrawComm()
             tp->bgcol = GFXColor(0, 0, 0, background_alpha);
         }
         tp->Draw(message_prefix
-                         + MangleString(_Universe->AccessCockpit()->communication_choices.c_str(),
-                                        _Universe->AccessCamera()->GetNebula()
-                                                != NULL ? .4 : 0), scrolloffset, true, false, automatte);
+                + MangleString(_Universe->AccessCockpit()->communication_choices.c_str(),
+                        _Universe->AccessCamera()->GetNebula()
+                                != NULL ? .4 : 0), scrolloffset, true, false, automatte);
         tp->bgcol = tpbg;
     }
 }
 
-void VDU::DrawManifest(Unit *parent, Unit *target)
-{
+void VDU::DrawManifest(Unit *parent, Unit *target) {
     //zadeVDUmanifest
     static string manifest_heading =
             XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "manifest_heading", "Manifest\n"));
@@ -1148,16 +1116,15 @@ void VDU::DrawManifest(Unit *parent, Unit *target)
         tp->bgcol = GFXColor(0, 0, 0, background_alpha);
     }
     tp->Draw(MangleString(retval,
-                          _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-             scrolloffset,
-             true,
-             false,
-             automatte);
+                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
+            scrolloffset,
+            true,
+            false,
+            automatte);
     tp->bgcol = tpbg;
 }
 
-static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz)
-{
+static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {
     w = fabs(w);
     h = fabs(h);
     float oox = 1. / g_game.x_resolution;
@@ -1270,8 +1237,7 @@ static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz)
 
 extern const char *DamagedCategory;
 
-void VDU::DrawDamage(Unit *parent)
-{
+void VDU::DrawDamage(Unit *parent) {
     //VDUdamage
     float x, y, w, h;
     //float th;
@@ -1283,15 +1249,15 @@ void VDU::DrawDamage(Unit *parent)
     static bool draw_damage_sprite =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_damage_sprite", "true"));
     DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : NULL, .6, x, y, w, h,
-                  (armor[0] + armor[2] + armor[4] + armor[6])
-                          / (float) (StartArmor[0] + StartArmor[2] + StartArmor[4] + StartArmor[6]),
-                  (armor[0] + armor[1] + armor[4] + armor[5])
-                          / (float) (StartArmor[0] + StartArmor[1] + StartArmor[4] + StartArmor[5]),
-                  (armor[2] + armor[3] + armor[6] + armor[7])
-                          / (float) (StartArmor[2] + StartArmor[3] + StartArmor[6] + StartArmor[7]),
-                  (armor[1] + armor[3] + armor[5]
-                          + armor[7]) / (float) (StartArmor[1] + StartArmor[3] + StartArmor[5] + StartArmor[7]),
-                  parent->GetHull() / (*maxhull), true, false);
+            (armor[0] + armor[2] + armor[4] + armor[6])
+                    / (float) (StartArmor[0] + StartArmor[2] + StartArmor[4] + StartArmor[6]),
+            (armor[0] + armor[1] + armor[4] + armor[5])
+                    / (float) (StartArmor[0] + StartArmor[1] + StartArmor[4] + StartArmor[5]),
+            (armor[2] + armor[3] + armor[6] + armor[7])
+                    / (float) (StartArmor[2] + StartArmor[3] + StartArmor[6] + StartArmor[7]),
+            (armor[1] + armor[3] + armor[5]
+                    + armor[7]) / (float) (StartArmor[1] + StartArmor[3] + StartArmor[5] + StartArmor[7]),
+            parent->GetHull() / (*maxhull), true, false);
     GFXDisable(TEXTURE0);
     //Unit *thr = parent->Threat();
     parent->Threat();
@@ -1330,26 +1296,26 @@ void VDU::DrawDamage(Unit *parent)
     //sprintf (hullval,"%.3f",parent->GetHull());
     //string retval (fullname+"\nHull: "+hullval+"\n");
     static GFXColor cfullpower = vs_config->getColor("default", "hud_repair_repaired",
-                                                     GFXColor(1, 1, 1, 1));
+            GFXColor(1, 1, 1, 1));
     static GFXColor chdamaged = vs_config->getColor("default", "hud_repair_half_damaged",
-                                                    GFXColor(1, 1, 0, 1));
+            GFXColor(1, 1, 0, 1));
     static GFXColor cdamaged = vs_config->getColor("default", "hud_repair_damaged",
-                                                   GFXColor(1, 0, 0, 1));
+            GFXColor(1, 0, 0, 1));
     static GFXColor cdestroyed = vs_config->getColor("default", "hud_repair_destroyed",
-                                                     GFXColor(.2, .2, .2, 1));
+            GFXColor(.2, .2, .2, 1));
 
     RGBstring fpstring = colToString(cfullpower);
     static string damage_report_heading =
             XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "damage_report_heading",
-                                                              "#00ff00DAMAGE REPORT\n\n"));
+                    "#00ff00DAMAGE REPORT\n\n"));
     string retval(damage_report_heading);
     retval += fpstring.str;
     unsigned int numCargo = parent->numCargo();
     double percent_working = 0.88;
     static std::string non_repair_screen_cargo = vs_config->getVariable("graphics",
-                                                                        "hud",
-                                                                        "not_included_in_damage_report",
-                                                                        "plasteel_hull tungsten_hull isometal_hull");
+            "hud",
+            "not_included_in_damage_report",
+            "plasteel_hull tungsten_hull isometal_hull");
     static bool print_percent_working =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "print_damage_percent", "true"));
 
@@ -1409,9 +1375,9 @@ void VDU::DrawDamage(Unit *parent)
             percent_working = UnitUtil::PercentOperational(parent, the_cargo.content, the_cargo.category, false);
             //retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
             REPORTITEM(percent_working,
-                       1.0,
-                       print_percent_working,
-                       parent->GetManifest(i, parent, parent->GetVelocity()));
+                    1.0,
+                    print_percent_working,
+                    parent->GetManifest(i, parent, parent->GetVelocity()));
         }
     }
     if (parent->pImage != NULL) {
@@ -1438,22 +1404,20 @@ void VDU::DrawDamage(Unit *parent)
         tp->bgcol = GFXColor(0, 0, 0, background_alpha);
     }
     tp->Draw(MangleString(retval,
-                          _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-             scrolloffset,
-             true,
-             false,
-             automatte);
+                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
+            scrolloffset,
+            true,
+            false,
+            automatte);
     tp->bgcol = tpbg;
     //*******************************************************
 }
 
-void VDU::SetViewingStyle(VIEWSTYLE vs)
-{
+void VDU::SetViewingStyle(VIEWSTYLE vs) {
     viewStyle = vs;
 }
 
-void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE viewStyle, Unit *parent, Unit *target)
-{
+void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE viewStyle, Unit *parent, Unit *target) {
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     VIEWSTYLE which = viewStyle;
@@ -1555,14 +1519,13 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
             tp->bgcol = GFXColor(0, 0, 0, background_alpha);
         }
         tp->Draw(MangleString("\n[OutOfRange]",
-                              _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
+                _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
         tp->bgcol = tpbg;
     }
     //_Universe->AccessCockpit()->RestoreViewPort();
 }
 
-GFXColor MountColor(Mount *mnt)
-{
+GFXColor MountColor(Mount *mnt) {
     static GFXColor col_mount_default = vs_config->getColor("mount_default", GFXColor(0.0, 1.0, 0.2, 1.0));
     static GFXColor col_mount_not_ready = vs_config->getColor("mount_not_ready", GFXColor(0.0, 1.0, 0.4, 1.0));
     static GFXColor col_mount_out_of_ammo = vs_config->getColor("mount_out_of_ammo", GFXColor(0.2, 0.2, 0.4, 1.0));
@@ -1609,15 +1572,14 @@ GFXColor MountColor(Mount *mnt)
     return mountcolor;
 }
 
-void VDU::DrawWeapon(Unit *parent)
-{
+void VDU::DrawWeapon(Unit *parent) {
     static bool drawweapsprite =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_weapon_sprite", "false"));
     static string list_empty_mounts_as =
             vs_config->getVariable("graphics",
-                                   "hud",
-                                   "mounts_list_empty",
-                                   ""); // empty string skips; " ", "n/a", "(empty)" or "-" will show an empty mount
+                    "hud",
+                    "mounts_list_empty",
+                    ""); // empty string skips; " ", "n/a", "(empty)" or "-" will show an empty mount
     static bool do_list_empty_mounts = (list_empty_mounts_as.length() != 0);
 
 //  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
@@ -1706,8 +1668,7 @@ using std::vector;
  *  }
  */
 
-char printHex(unsigned int hex)
-{
+char printHex(unsigned int hex) {
     if (hex < 10) {
         return hex + '0';
     }
@@ -1718,8 +1679,7 @@ static char suc_col_str[8] = "#000000";
 static const char suc_gt_plusone[8] = "#00FF00";
 static const char suc_gt_minusone[8] = "#FF0000";
 
-inline const char *GetColorFromSuccess(float suc)
-{
+inline const char *GetColorFromSuccess(float suc) {
     if (suc >= 1) {
         return suc_gt_plusone;
     }
@@ -1750,8 +1710,7 @@ inline const char *GetColorFromSuccess(float suc)
 }
 #endif
 
-void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent)
-{
+void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
     std::string rez("\n");
     std::string rezcompleted("");
     for (unsigned int i = 0; i < active_missions.size(); ++i) {
@@ -1761,9 +1720,9 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent)
                     XMLSupport::parse_bool(vs_config->getVariable("general", "force_anonymous_mission_names", "true"));
             static bool completed_objectives_last =
                     XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                  "hud",
-                                                                  "completed_objectives_last",
-                                                                  "true"));
+                            "hud",
+                            "completed_objectives_last",
+                            "true"));
             if (active_missions[i]->mission_name.empty() || force_anonymous_missions) {
                 rez += "Mission " + XMLSupport::tostring((int) i) + "\n";
             } else {
@@ -1801,13 +1760,11 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent)
     tp->bgcol = tpbg;
 }
 
-void VDU::DrawVDUObjectives(Unit *parent)
-{
+void VDU::DrawVDUObjectives(Unit *parent) {
     DrawObjectivesTextPlane(tp, scrolloffset, parent);
 }
 
-bool VDU::SetWebcamAnimation()
-{
+bool VDU::SetWebcamAnimation() {
     if (comm_ani == NULL) {
         if (posmodes & WEBCAM) {
             comm_ani = new Animation();
@@ -1820,16 +1777,14 @@ bool VDU::SetWebcamAnimation()
     return false;
 }
 
-void VDU::DrawWebcam(Unit *parent)
-{
+void VDU::DrawWebcam(Unit *parent) {
     using VSFileSystem::JPEGBuffer;
     tp->Draw(MangleString("No webcam to view",
-                          _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), scrolloffset, true);
+            _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), scrolloffset, true);
 
 }
 
-void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color)
-{
+void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
     tp->col = color;
     GFXDisable(LIGHTING);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -1947,8 +1902,7 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color)
     }
 }
 
-void UpdateViewstyle(VIEWSTYLE &vs)
-{
+void UpdateViewstyle(VIEWSTYLE &vs) {
     switch (vs) {
         case CP_FRONT:
             vs = CP_TARGET;
@@ -1985,8 +1939,7 @@ void UpdateViewstyle(VIEWSTYLE &vs)
     }
 }
 
-void VDU::SwitchMode(Unit *parent)
-{
+void VDU::SwitchMode(Unit *parent) {
     if (!posmodes) {
         return;
     }
@@ -2007,8 +1960,7 @@ void VDU::SwitchMode(Unit *parent)
     }
 }
 
-bool VDU::CheckCommAnimation(Unit *un) const
-{
+bool VDU::CheckCommAnimation(Unit *un) const {
     if (comm_ani && comm_ani->Done() == false) {
         if (communicating == un || communicating == NULL) {
             return true;

@@ -87,26 +87,22 @@ public:
     ~SourceTemplate();
 
     /** Get the sound resource name */
-    std::string getSoundName() const
-    {
+    std::string getSoundName() const {
         return soundName;
     }
 
     /** Set the sound resource name */
-    void setSoundName(const std::string &newName)
-    {
+    void setSoundName(const std::string &newName) {
         soundName = newName;
     }
 
     /** Get the sound file type */
-    VSFileSystem::VSFileType getSoundType() const
-    {
+    VSFileSystem::VSFileType getSoundType() const {
         return soundType;
     }
 
     /** Set the sound file type */
-    void setSoundType(VSFileSystem::VSFileType type)
-    {
+    void setSoundType(VSFileSystem::VSFileType type) {
         soundType = type;
     }
 
@@ -121,14 +117,12 @@ public:
     void setAngleRange(Range<Scalar> r);
 
     /** @see getAngleRange @remarks This version returns cosine-angles rather than radians, much quicker */
-    Range<Scalar> getCosAngleRange() const
-    {
+    Range<Scalar> getCosAngleRange() const {
         return cosAngleRange;
     }
 
     /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
-    void setCosAngleRange(Range<Scalar> r)
-    {
+    void setCosAngleRange(Range<Scalar> r) {
         cosAngleRange = r;
     }
 
@@ -138,90 +132,76 @@ public:
      *      volume that is generating high/low frequency vibrations. This will affect
      *      propagation of those frequencies over distance.
      */
-    PerFrequency<Scalar> getPerFrequencyRadiusRatios() const
-    {
+    PerFrequency<Scalar> getPerFrequencyRadiusRatios() const {
         return pfRadiusRatios;
     }
 
     /** Set the source's frequency-dependant radius ratios
      * @see getRadiusRatios
      */
-    void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val)
-    {
+    void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val) {
         pfRadiusRatios = val;
     }
 
     /** Get the source's refernece frequencies */
-    PerFrequency<Scalar> getReferenceFreqs() const
-    {
+    PerFrequency<Scalar> getReferenceFreqs() const {
         return referenceFreqs;
     }
 
     /** Set the source's reference frequencies */
-    void setReferenceFreqs(PerFrequency<Scalar> val)
-    {
+    void setReferenceFreqs(PerFrequency<Scalar> val) {
         referenceFreqs = val;
     }
 
     /** Get the source's main gain */
-    Scalar getGain() const
-    {
+    Scalar getGain() const {
         return gain;
     }
 
     /** Set the source's main gain */
-    void setGain(Scalar g)
-    {
+    void setGain(Scalar g) {
         gain = g;
     }
 
     /** Is the source in looping mode? */
-    bool isLooping() const
-    {
+    bool isLooping() const {
         return flags.looping != 0;
     }
 
     /** Set the source's looping mode */
-    void setLooping(bool loop)
-    {
+    void setLooping(bool loop) {
         flags.looping = loop ? 1 : 0;
     }
 
     /** Is the source's position always relative to the root listener?
      * @see Source::isRelative()
      */
-    bool isRelative() const
-    {
+    bool isRelative() const {
         return flags.relative != 0;
     }
 
     /** Set whether the source's position is always relative to the root listener */
-    void setRelative(bool relative)
-    {
+    void setRelative(bool relative) {
         flags.relative = relative ? 1 : 0;
     }
 
     /** Is the source using distance attenuation? */
-    bool isAttenuated() const
-    {
+    bool isAttenuated() const {
         return flags.attenuated != 0;
     }
 
     /** Set whether the source will use distance attenuation */
-    void setAttenuated(bool loop)
-    {
+    void setAttenuated(bool loop) {
         flags.attenuated = (loop ? 1 : 0);
     }
 
     /** Is the source in streaming mode? */
-    bool isStreaming() const
-    {
+    bool isStreaming() const {
         return flags.streaming != 0;
     }
 
     /** Set the source's streaming mode */
-    void setStreaming(bool stream)
-    {
+    void setStreaming(bool stream) {
         flags.streaming = stream ? 1 : 0;
     }
 

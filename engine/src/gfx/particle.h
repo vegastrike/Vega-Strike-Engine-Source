@@ -86,14 +86,13 @@ class ParticleTrail {
 
 public:
     ParticleTrail(const std::string &configPrefix,
-                  unsigned int max,
-                  BLENDFUNC blendsrc = ONE,
-                  BLENDFUNC blenddst = ONE,
-                  float alphaMask = 0,
-                  bool writeDepth = false,
-                  bool fadeColor = false)
-            : config(configPrefix)
-    {
+            unsigned int max,
+            BLENDFUNC blendsrc = ONE,
+            BLENDFUNC blenddst = ONE,
+            float alphaMask = 0,
+            bool writeDepth = false,
+            bool fadeColor = false)
+            : config(configPrefix) {
         ChangeMax(max);
         this->blendsrc = blendsrc;
         this->blenddst = blenddst;
@@ -129,12 +128,10 @@ public:
         void init(const std::string &prefix);
     } config;
 
-    explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType)
-    {
+    explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType) {
     }
 
-    explicit ParticleEmitter(ParticleTrail *particleType, const std::string &prefix) : particles(particleType)
-    {
+    explicit ParticleEmitter(ParticleTrail *particleType, const std::string &prefix) : particles(particleType) {
         config.init(prefix);
     }
 
@@ -151,12 +148,12 @@ public:
      * 
      */
     void doParticles(const QVector &pos,
-                     float rSize,
-                     float percent,
-                     const Vector &basevelocity,
-                     const Vector &velocity,
-                     float pSize,
-                     const GFXColor &color);
+            float rSize,
+            float percent,
+            const Vector &basevelocity,
+            const Vector &velocity,
+            float pSize,
+            const GFXColor &color);
 };
 
 extern ParticleTrail particleTrail;

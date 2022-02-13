@@ -45,15 +45,13 @@ public:
         std::string GetMessage(unsigned int &multiple) const;
         void AddSound(std::string soundfile, unsigned char sex, float gain = 1.0f);
 
-        Node(const vector<std::string> &message, float messagedel) : messages(message), messagedelta(messagedel)
-        {
+        Node(const vector<std::string> &message, float messagedel) : messages(message), messagedelta(messagedel) {
             if (messages.size() == 0) {
                 messages.push_back("<static>");
             }
         }
 
-        static Node MakeNode(std::string message, float messagedel)
-        {
+        static Node MakeNode(std::string message, float messagedel) {
             vector<string> tmp;
             tmp.push_back(message);
             return Node(tmp, messagedel);
@@ -102,17 +100,16 @@ public:
     CommunicationMessage(Unit *send, Unit *recv, std::vector<class Animation *> *ani, unsigned char sex);
     CommunicationMessage(Unit *send, Unit *recv, int curstate, std::vector<class Animation *> *ani, unsigned char sex);
     CommunicationMessage(Unit *send,
-                         Unit *recv,
-                         int prevvstate,
-                         int curstate,
-                         std::vector<class Animation *> *ani,
-                         unsigned char sex);
+            Unit *recv,
+            int prevvstate,
+            int curstate,
+            std::vector<class Animation *> *ani,
+            unsigned char sex);
     CommunicationMessage(Unit *send, Unit *recv, const CommunicationMessage &prevsvtate, int curstate,
-                         std::vector<class Animation *> *ani, unsigned char sex);
+            std::vector<class Animation *> *ani, unsigned char sex);
     void SetCurrentState(int message, std::vector<class Animation *> *ani, unsigned char sex);
 
-    FSM::Node *getCurrentState() const
-    {
+    FSM::Node *getCurrentState() const {
         if (curstate < (int) fsm->nodes.size()) {
             return &fsm->nodes[curstate];
         } else {
@@ -127,8 +124,7 @@ public:
 
     const vector<FSM::Node> &GetPossibleState() const;
 
-    float getDeltaRelation() const
-    {
+    float getDeltaRelation() const {
         return fsm->getDeltaRelation(prevstate, curstate);
     }
 };
@@ -140,8 +136,7 @@ struct RGBstring {
 RGBstring colToString(GFXColor col);
 RGBstring GetRelationshipRGBstring(float rel);
 
-inline std::string GetRelationshipColorString(float rel)
-{
+inline std::string GetRelationshipColorString(float rel) {
     return GetRelationshipRGBstring(rel).str;
 }
 

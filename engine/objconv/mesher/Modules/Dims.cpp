@@ -31,33 +31,29 @@ class DimsHandler : public Module {
     NameList mNames;
 
 public:
-    DimsHandler()
-    {
+    DimsHandler() {
         mNames.push_back("--dims");
         mNames.push_back("-d");
     }
 
-    virtual const NameList &getNames() const
-    {
+    virtual const NameList &getNames() const {
         return mNames;
     }
 
-    virtual void help(const std::string &command, ParameterList &params) const
-    {
+    virtual void help(const std::string &command, ParameterList &params) const {
         if (command == "--dims") {
             cout << "Show mesh's bounding box\n"
-                 << "Usage:\n"
-                 << "\tmesher (--input|-i) (path) (--dims|-d) (format)\n\n"
-                 << "Supported formats:\n"
-                 << "\tBFXM\n"
-                 << endl;
+                    << "Usage:\n"
+                    << "\tmesher (--input|-i) (path) (--dims|-d) (format)\n\n"
+                    << "Supported formats:\n"
+                    << "\tBFXM\n"
+                    << endl;
         } else {
             cerr << "Warning: DimsHandler::help() received an unrecognized command." << endl;
         }
     }
 
-    virtual int execute(const std::string &command, ParameterList &params, unsigned int phase)
-    {
+    virtual int execute(const std::string &command, ParameterList &params, unsigned int phase) {
         // Skip phase 0
         if (!phase) {
             return 0;

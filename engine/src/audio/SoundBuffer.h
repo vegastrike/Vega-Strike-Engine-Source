@@ -84,59 +84,50 @@ public:
     void reserve(unsigned int capacity, const Format &format);
 
     /** Get a buffer's byte capacity */
-    unsigned int getByteCapacity() const
-    {
+    unsigned int getByteCapacity() const {
         return byteCapacity;
     }
 
     /** Get a buffer's sample capacity
      * @remarks Frame capacity actually, which is not the same for multichannel formats.
      */
-    unsigned int getSampleCapacity() const
-    {
+    unsigned int getSampleCapacity() const {
         return byteCapacity / format.frameSize();
     }
 
     /** Get the portion of the buffer actually used for holding useful data */
-    unsigned int getUsedBytes() const
-    {
+    unsigned int getUsedBytes() const {
         return bytesUsed;
     }
 
     /** Get write access to the buffer */
-    void *getBuffer()
-    {
+    void *getBuffer() {
         return buffer;
     }
 
     /** Get read access to the buffer */
-    const void *getBuffer() const
-    {
+    const void *getBuffer() const {
         return buffer;
     }
 
     /** Get the buffer's format */
-    const Format &getFormat() const
-    {
+    const Format &getFormat() const {
         return format;
     }
 
     /** Set the format of the stream mantaining the capacity yet destroying all current data */
-    void setFormat(const Format &newFormat)
-    {
+    void setFormat(const Format &newFormat) {
         format = newFormat;
         bytesUsed = 0;
     }
 
     /** Set the portion of the buffer actually used for holding useful data */
-    void setUsedBytes(unsigned int used)
-    {
+    void setUsedBytes(unsigned int used) {
         bytesUsed = used;
     }
 
     /** Get a buffer's sample capacity for a certain format */
-    unsigned int getSampleCount() const
-    {
+    unsigned int getSampleCount() const {
         return bytesUsed / format.frameSize();
     }
 

@@ -267,8 +267,7 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace CockpitXML;
 
-string getRes(string inp)
-{
+string getRes(string inp) {
     string::size_type where = inp.rfind(".");
     int x = g_game.x_resolution;
     if (x < 700) {
@@ -292,8 +291,7 @@ string getRes(string inp)
     }
 }
 
-void GameCockpit::beginElement(const string &name, const AttributeList &attributes)
-{
+void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
     static bool cockpit_smooth =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit_smooth_texture", "false"));
     static bool panel_smooth =
@@ -692,14 +690,12 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     }
 }
 
-void GameCockpit::endElement(const string &name)
-{
+void GameCockpit::endElement(const string &name) {
 }
 
 using namespace VSFileSystem;
 
-void GameCockpit::LoadXML(const char *filename)
-{
+void GameCockpit::LoadXML(const char *filename) {
 
     VSFile f;
     if (filename[0] != '\0') {
@@ -709,8 +705,7 @@ void GameCockpit::LoadXML(const char *filename)
     }
 }
 
-void GameCockpit::LoadXML(VSFileSystem::VSFile &f)
-{
+void GameCockpit::LoadXML(VSFileSystem::VSFile &f) {
     if (!f.Valid()) {
         cockpit_offset = 0;
         viewport_offset = 0;

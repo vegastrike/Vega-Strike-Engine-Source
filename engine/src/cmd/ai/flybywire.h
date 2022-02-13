@@ -46,33 +46,29 @@ protected:
     bool afterburn;
 public:
     MatchLinearVelocity(const Vector &desired, bool Local, bool afterburner, bool fini = true) : Order(MOVEMENT,
-                                                                                                       SLOCATION),
-                                                                                                 desired_velocity(
-                                                                                                         desired),
-                                                                                                 LocalVelocity(Local),
-                                                                                                 willfinish(fini),
-                                                                                                 afterburn(afterburner)
-    {
+            SLOCATION),
+            desired_velocity(
+                    desired),
+            LocalVelocity(Local),
+            willfinish(fini),
+            afterburn(afterburner) {
         done = false;
     }
 
     void Execute();
 
-    void SetDesiredVelocity(const Vector &desired, bool Local)
-    {
+    void SetDesiredVelocity(const Vector &desired, bool Local) {
         desired_velocity = desired;
         LocalVelocity = Local;
     }
 
-    void SetAfterburn(bool use_afterburn)
-    {
+    void SetAfterburn(bool use_afterburn) {
         afterburn = use_afterburn;
     }
 
     virtual ~MatchLinearVelocity();
 
-    virtual std::string getOrderDescription()
-    {
+    virtual std::string getOrderDescription() {
         return "mlv";
     }
 };
@@ -90,25 +86,22 @@ protected:
     bool willfinish;
 public:
     MatchAngularVelocity(const Vector &desired, bool Local, bool fini = true) : Order(FACING, SLOCATION),
-                                                                                desired_ang_velocity(desired),
-                                                                                LocalAng(Local),
-                                                                                willfinish(fini)
-    {
+            desired_ang_velocity(desired),
+            LocalAng(Local),
+            willfinish(fini) {
         done = false;
     }
 
     void Execute();
 
-    void SetDesiredAngularVelocity(const Vector &desired, bool Local)
-    {
+    void SetDesiredAngularVelocity(const Vector &desired, bool Local) {
         desired_ang_velocity = desired;
         LocalAng = Local;
     }
 
     virtual ~MatchAngularVelocity();
 
-    virtual std::string getOrderDescription()
-    {
+    virtual std::string getOrderDescription() {
         return "mav";
     }
 };
@@ -117,26 +110,22 @@ class MatchRoll : public Order {
     bool willfinish;
 
 public:
-    MatchRoll(float desired, bool finish) : Order(Order::CLOAKING, SLOCATION)
-    {
+    MatchRoll(float desired, bool finish) : Order(Order::CLOAKING, SLOCATION) {
         this->desired_roll = desired;
         this->willfinish = finish;
     }
 
     virtual void Execute();
 
-    void SetRoll(float roll)
-    {
+    void SetRoll(float roll) {
         desired_roll = roll;
     }
 
-    float GetRoll()
-    {
+    float GetRoll() {
         return desired_roll;
     }
 
-    virtual std::string getOrderDescription()
-    {
+    virtual std::string getOrderDescription() {
         return "roll";
     }
 };
@@ -155,35 +144,31 @@ protected:
     bool afterburn;
 public:
     MatchVelocity(const Vector &desired,
-                  const Vector &desired_ang,
-                  const bool Local,
-                  const bool afterburner,
-                  const bool fini = true) : MatchAngularVelocity(desired_ang, Local, fini),
-                                            desired_velocity(desired),
-                                            LocalVelocity(Local),
-                                            afterburn(afterburner)
-    {
+            const Vector &desired_ang,
+            const bool Local,
+            const bool afterburner,
+            const bool fini = true) : MatchAngularVelocity(desired_ang, Local, fini),
+            desired_velocity(desired),
+            LocalVelocity(Local),
+            afterburn(afterburner) {
         type = FACING | MOVEMENT;
         subtype = SLOCATION;
     }
 
     void Execute();
 
-    void SetDesiredVelocity(const Vector &desired, const bool Local)
-    {
+    void SetDesiredVelocity(const Vector &desired, const bool Local) {
         desired_velocity = desired;
         LocalVelocity = Local;
     }
 
-    void SetAfterburn(bool use_afterburn)
-    {
+    void SetAfterburn(bool use_afterburn) {
         afterburn = use_afterburn;
     }
 
     virtual ~MatchVelocity();
 
-    virtual std::string getOrderDescription()
-    {
+    virtual std::string getOrderDescription() {
         return "mv";
     }
 };
@@ -209,8 +194,7 @@ public:
     FlyByWire();
     ~FlyByWire();
 
-    void SwitchFlightMode()
-    {
+    void SwitchFlightMode() {
         controltype = !controltype;
     }
 
@@ -240,8 +224,7 @@ public:
     void Accel(float percentage);
     void Execute();
 
-    virtual std::string getOrderDescription()
-    {
+    virtual std::string getOrderDescription() {
         return "wire";
     }
 

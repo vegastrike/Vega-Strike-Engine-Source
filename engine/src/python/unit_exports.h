@@ -48,8 +48,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 //ExportUnit3(Class);
 //}
 
-void EXP_UN(boost::python::class_builder<UnitWrapper> &Class)
-{
+void EXP_UN(boost::python::class_builder<UnitWrapper> &Class) {
 #undef CHECKME
 #undef WRAPPED0
 #undef WRAPPED1

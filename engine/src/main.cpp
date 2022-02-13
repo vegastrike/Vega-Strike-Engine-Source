@@ -95,8 +95,7 @@ static bool ignore_network = true;
 // NOTE: This is tied to the executable name. `vegastrike` -> true; `vegastrike-engine` -> false
 bool legacy_data_dir_mode;
 
-void enableNetwork(bool usenetwork)
-{
+void enableNetwork(bool usenetwork) {
     ignore_network = !usenetwork;
 }
 
@@ -104,8 +103,7 @@ void enableNetwork(bool usenetwork)
  * Function definitions
  */
 
-void setup_game_data()
-{
+void setup_game_data() {
     //pass in config file l8r??
     g_game.audio_frequency_mode = 4;     //22050/16
     g_game.sound_enabled = 1;
@@ -127,8 +125,7 @@ void setup_game_data()
     g_game.MouseSensitivityY = 4;
 }
 
-VegaConfig *createVegaConfig(const char *file)
-{
+VegaConfig *createVegaConfig(const char *file) {
     return new GameVegaConfig(file);
 }
 
@@ -140,15 +137,13 @@ std::string ParseCommandLine(int argc, char **CmdLine);
 int readCommandLineOptions(int argc, char **argv);
 
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
-void VSExit(int code)
-{
+void VSExit(int code) {
     Music::CleanupMuzak();
     ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     winsys_exit(code);
 }
 
-void cleanup(void)
-{
+void cleanup(void) {
     STATIC_VARS_DESTROYED = true;
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
@@ -190,12 +185,10 @@ void bootstrap_first_loop();
 //WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
 #endif
 
-void nothinghappens(unsigned int, unsigned int, bool, int, int)
-{
+void nothinghappens(unsigned int, unsigned int, bool, int, int) {
 }
 
-void initSceneManager()
-{
+void initSceneManager() {
     VS_LOG(info, "Creating scene manager...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
@@ -206,8 +199,7 @@ void initSceneManager()
     sm->setMaxSources(g_game.max_sound_sources);
 }
 
-void initALRenderer()
-{
+void initALRenderer() {
     VS_LOG(info, "  Initializing renderer...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
@@ -220,8 +212,7 @@ void initALRenderer()
     }
 }
 
-void initScenes()
-{
+void initScenes() {
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     sm->createScene("video");
@@ -233,8 +224,7 @@ void initScenes()
     sm->setSceneActive("video", true);
 }
 
-void closeRenderer()
-{
+void closeRenderer() {
     VS_LOG(info, "Shutting down renderer...");
     Audio::SceneManager::getSingleton()->setRenderer(SharedPtr<Audio::Renderer>());
 }
@@ -245,8 +235,7 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     // Change to program directory if not already
     // std::string program_as_called();
     const boost::filesystem::path program_path(argv[0]);
@@ -418,28 +407,23 @@ int main(int argc, char *argv[])
 static Animation *SplashScreen = NULL;
 static bool BootstrapMyStarSystemLoading = true;
 
-void SetStarSystemLoading(bool value)
-{
+void SetStarSystemLoading(bool value) {
     BootstrapMyStarSystemLoading = value;
 }
 
-bool GetStarSystemLoading()
-{
+bool GetStarSystemLoading() {
     return BootstrapMyStarSystemLoading;
 }
 
-void SetSplashScreen(Animation *ss)
-{
+void SetSplashScreen(Animation *ss) {
     SplashScreen = ss;
 }
 
-Animation *GetSplashScreen()
-{
+Animation *GetSplashScreen() {
     return SplashScreen;
 }
 
-void bootstrap_draw(const std::string &message, Animation *newSplashScreen)
-{
+void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     static Animation *ani = NULL;
     static bool reentryWatchdog = false;
     if (!BootstrapMyStarSystemLoading || reentryWatchdog) {
@@ -490,8 +474,8 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen)
         }
     }
     bs_tp->Draw(game_options.default_boot_message.length() > 0 ?
-                game_options.default_boot_message : message.length() > 0 ?
-                                                    message : game_options.initial_boot_message);
+            game_options.default_boot_message : message.length() > 0 ?
+                    message : game_options.initial_boot_message);
 
     GFXHudMode(GFXFALSE);
     GFXEndScene();
@@ -501,8 +485,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen)
 
 extern Unit **fighters;
 
-bool SetPlayerLoc(QVector &sys, bool set)
-{
+bool SetPlayerLoc(QVector &sys, bool set) {
     static QVector mysys;
     static bool isset = false;
     if (set) {
@@ -517,8 +500,7 @@ bool SetPlayerLoc(QVector &sys, bool set)
     }
 }
 
-bool SetPlayerSystem(std::string &sys, bool set)
-{
+bool SetPlayerSystem(std::string &sys, bool set) {
     static std::string mysys;
     static bool isset = false;
     if (set) {
@@ -533,8 +515,7 @@ bool SetPlayerSystem(std::string &sys, bool set)
     }
 }
 
-vector<string> parse_space_string(std::string s)
-{
+vector<string> parse_space_string(std::string s) {
     vector<string> ret;
     string::size_type index = 0;
     while ((index = s.find(" ")) != string::npos) {
@@ -545,8 +526,7 @@ vector<string> parse_space_string(std::string s)
     return ret;
 }
 
-void bootstrap_first_loop()
-{
+void bootstrap_first_loop() {
     static int i = 0;
     if (i == 0) {
         vector<string> s = parse_space_string(game_options.splash_screen);
@@ -570,17 +550,15 @@ void bootstrap_first_loop()
     }
 }
 
-void SetStartupView(Cockpit *cp)
-{
+void SetStartupView(Cockpit *cp) {
     cp->SetView(game_options.startup_cockpit_view
-                        == "view_target" ? CP_TARGET : (game_options.startup_cockpit_view
-                                                                == "back" ? CP_BACK : (game_options.startup_cockpit_view
-                                                                                               == "chase" ? CP_CHASE
-                                                                                                          : CP_FRONT)));
+            == "view_target" ? CP_TARGET : (game_options.startup_cockpit_view
+            == "back" ? CP_BACK : (game_options.startup_cockpit_view
+            == "chase" ? CP_CHASE
+            : CP_FRONT)));
 }
 
-void bootstrap_main_loop()
-{
+void bootstrap_main_loop() {
     static bool LoadMission = true;
     InitTime();
     if (LoadMission) {
@@ -653,13 +631,13 @@ void bootstrap_main_loop()
 
         if (game_options.load_last_savegame) {
             _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
-                                                                 mysystem,
-                                                                 mysystem,
-                                                                 pos,
-                                                                 setplayerXloc,
-                                                                 credits,
-                                                                 packedInfo,
-                                                                 k);
+                    mysystem,
+                    mysystem,
+                    pos,
+                    setplayerXloc,
+                    credits,
+                    packedInfo,
+                    k);
         } else {
             _Universe->AccessCockpit(k)->savegame->SetOutputFileName(savegamefile);
         }
@@ -711,7 +689,7 @@ void bootstrap_main_loop()
         }
 
         if (mission->getVariable("savegame",
-                                 "").length() != 0
+                "").length() != 0
                 && game_options.dockOnLoad) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
@@ -761,8 +739,7 @@ const char versionmessage[] =
         "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
         "\n";
 
-std::string ParseCommandLine(int argc, char **lpCmdLine)
-{
+std::string ParseCommandLine(int argc, char **lpCmdLine) {
     std::string st;
     std::string retstr;
     std::string datatmp;
@@ -824,7 +801,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine)
                         iStringStream >> PlayerLocation.k;
                     } catch (std::ios_base::failure &inputFailure) {
                         std::cout << "Error reading coordinates for player location: " << inputFailure.what()
-                                  << std::endl;
+                                << std::endl;
                         exit(1);
                     }
                     SetPlayerLoc(PlayerLocation, true);
@@ -902,8 +879,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine)
 
 #undef main
 
-int readCommandLineOptions(int argc, char **argv)
-{
+int readCommandLineOptions(int argc, char **argv) {
     for (int i = 1; i < argc; ++i) {
         if (argv[i][0] == '-') {
             if (strcmp("--test-audio", argv[i]) == 0) {

@@ -39,27 +39,23 @@ public:
     RadixSort &Sort(const float *input, uint32_t nb);
 
     //! Access to results. mRanks is a list of indices in sorted order, i.e. in the order you may further process your data
-    inline_    const uint32_t *GetRanks() const
-    {
+    inline_    const uint32_t *GetRanks() const {
         return mRanks;
     }
 
     //! mIndices2 gets trashed on calling the sort routine, but otherwise you can recycle it the way you want.
-    inline_    uint32_t *GetRecyclable() const
-    {
+    inline_    uint32_t *GetRecyclable() const {
         return mRanks2;
     }
 
     // Stats
     uint32_t GetUsedRam() const;
     //! Returns the total number of calls to the radix sorter.
-    inline_    uint32_t GetNbTotalCalls() const
-    {
+    inline_    uint32_t GetNbTotalCalls() const {
         return mTotalCalls;
     }
     //! Returns the number of eraly exits due to temporal coherence.
-    inline_    uint32_t GetNbHits() const
-    {
+    inline_    uint32_t GetNbHits() const {
         return mNbHits;
     }
 

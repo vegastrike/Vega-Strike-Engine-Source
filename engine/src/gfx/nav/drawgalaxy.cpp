@@ -72,14 +72,13 @@ static GFXColor GrayColor(.5, .5, .5, .5);
 float GrayColorArray[4] = {.5, .5, .5, .5};
 
 static void DrawNodeDescription(string text,
-                                float x_,
-                                float y_,
-                                float size_x,
-                                float size_y,
-                                bool ignore_occupied_areas,
-                                const GFXColor &col,
-                                navscreenoccupied *screenoccupation)
-{
+        float x_,
+        float y_,
+        float size_x,
+        float size_y,
+        bool ignore_occupied_areas,
+        const GFXColor &col,
+        navscreenoccupied *screenoccupation) {
     //take the head and stick it in the back
     if (text.size() == 0) {
         return;
@@ -117,8 +116,7 @@ static void DrawNodeDescription(string text,
     }
 }
 
-static char GetSystemColor(string source)
-{
+static char GetSystemColor(string source) {
     //FIXME: update me!!!
     vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData("visited_" + source);
     if (v->size()) {
@@ -131,17 +129,16 @@ static char GetSystemColor(string source)
 }
 
 static void DrawNode(int type,
-                     float size,
-                     float x,
-                     float y,
-                     std::string source,
-                     navscreenoccupied *screenoccupation,
-                     bool moused,
-                     GFXColor race,
-                     bool mouseover = false,
-                     bool willclick = false,
-                     string insector = "")
-{
+        float size,
+        float x,
+        float y,
+        std::string source,
+        navscreenoccupied *screenoccupation,
+        bool moused,
+        GFXColor race,
+        bool mouseover = false,
+        bool willclick = false,
+        string insector = "") {
     char color = GetSystemColor(source);
     if (moused) {
         return;
@@ -197,58 +194,52 @@ class systemdrawnode {
     GFXColor race;
     navscreenoccupied *screenoccupation;
 public:
-    unsigned getIndex() const
-    {
+    unsigned getIndex() const {
         return index;
     }
 
-    friend bool operator<(const systemdrawnode &a, const systemdrawnode &b)
-    {
+    friend bool operator<(const systemdrawnode &a, const systemdrawnode &b) {
         return a.source < b.source;
     }
 
-    friend bool operator==(const systemdrawnode &a, const systemdrawnode &b)
-    {
+    friend bool operator==(const systemdrawnode &a, const systemdrawnode &b) {
         return a.source == b.source;
     }
 
     systemdrawnode(int type,
-                   float size,
-                   float x,
-                   float y,
-                   std::string source,
-                   unsigned index,
-                   navscreenoccupied *so,
-                   bool moused,
-                   GFXColor race)
+            float size,
+            float x,
+            float y,
+            std::string source,
+            unsigned index,
+            navscreenoccupied *so,
+            bool moused,
+            GFXColor race)
             : type(type),
-              size(size),
-              x(x),
-              y(y),
-              index(index),
-              source(source),
-              moused(moused),
-              color(GetSystemColor(source)),
-              race(race),
-              screenoccupation(so)
-    {
+            size(size),
+            x(x),
+            y(y),
+            index(index),
+            source(source),
+            moused(moused),
+            color(GetSystemColor(source)),
+            race(race),
+            screenoccupation(so) {
     }
 
     systemdrawnode()
             : size(SYSTEM_DEFAULT_SIZE),
-              x(0),
-              y(0),
-              index(0),
-              source(),
-              moused(false),
-              color('v'),
-              race(GrayColor),
-              screenoccupation(NULL)
-    {
+            x(0),
+            y(0),
+            index(0),
+            source(),
+            moused(false),
+            color('v'),
+            race(GrayColor),
+            screenoccupation(NULL) {
     }
 
-    void draw(bool mouseover = false, bool willclick = false)
-    {
+    void draw(bool mouseover = false, bool willclick = false) {
         DrawNode(type, size, x, y, source, screenoccupation, moused, race, mouseover, willclick);
     }
 };
@@ -256,8 +247,7 @@ public:
 typedef vector<systemdrawnode> systemdrawlist;
 //typedef Hashtable <std::string, const systemdrawnode, 127> systemdrawhashtable;
 
-bool testandset(bool &b, bool val)
-{
+bool testandset(bool &b, bool val) {
     bool tmp = b;
     b = val;
     return tmp;
@@ -265,8 +255,7 @@ bool testandset(bool &b, bool val)
 
 float screensmash = 1; //arbitrary constant used in calculating position below
 
-NavigationSystem::SystemIterator::SystemIterator(string current_system, unsigned int max)
-{
+NavigationSystem::SystemIterator::SystemIterator(string current_system, unsigned int max) {
     count = 0;
     maxcount = max;
     vstack.push_back(current_system);
@@ -274,13 +263,11 @@ NavigationSystem::SystemIterator::SystemIterator(string current_system, unsigned
     which = 0;
 }
 
-bool NavigationSystem::SystemIterator::done() const
-{
+bool NavigationSystem::SystemIterator::done() const {
     return which >= vstack.size();
 }
 
-QVector NavigationSystem::SystemIterator::Position()
-{
+QVector NavigationSystem::SystemIterator::Position() {
     if (done()) {
         return QVector(0, 0, 0);
     }
@@ -306,21 +293,18 @@ QVector NavigationSystem::SystemIterator::Position()
     }
 }
 
-string NavigationSystem::SystemIterator::operator*()
-{
+string NavigationSystem::SystemIterator::operator*() {
     if (which < vstack.size()) {
         return vstack[which];
     }
     return "-";
 }
 
-NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::next()
-{
+NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::next() {
     return ++(*this);
 }
 
-bool checkedVisited(const std::string &n)
-{
+bool checkedVisited(const std::string &n) {
     static bool dontbothervisiting =
             !XMLSupport::parse_bool(vs_config->getVariable("graphics", "explore_for_map", "false"));
     if (dontbothervisiting) {
@@ -335,8 +319,7 @@ bool checkedVisited(const std::string &n)
     }
 }
 
-NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::operator++()
-{
+NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::operator++() {
     which += 1;
     if (which >= vstack.size()) {
         vector<string> newsys;
@@ -367,14 +350,13 @@ NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::operator++()
 //
 //************************************************
 
-void NavigationSystem::CachedSystemIterator::SystemInfo::UpdateColor()
-{
+void NavigationSystem::CachedSystemIterator::SystemInfo::UpdateColor() {
     const float *tcol =
             ((!name.empty())
                     && (name
                             != "-"))
-            ? FactionUtil::GetSparkColor(FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(name)))
-            : &(
+                    ? FactionUtil::GetSparkColor(FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(name)))
+                    : &(
                     GrayColorArray[0]);
     col = GFXColor(tcol[0], tcol[1], tcol[2], tcol[3]);
 }
@@ -383,11 +365,10 @@ void NavigationSystem::CachedSystemIterator::SystemInfo::UpdateColor()
 //Since links are bidirectional, one WILL have to be created before the other
 //It is recommended that placeholders are created and links updated later
 NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name,
-                                                               const QVector &position,
-                                                               const std::vector<std::string> &destinations,
-                                                               NavigationSystem::CachedSystemIterator *csi) :
-        name(name), position(position), part_of_path(false)
-{
+        const QVector &position,
+        const std::vector<std::string> &destinations,
+        NavigationSystem::CachedSystemIterator *csi) :
+        name(name), position(position), part_of_path(false) {
     //Eww... double for loop!
     UpdateColor();
     if (csi) {
@@ -396,9 +377,9 @@ NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &nam
                 if ((*csi)[j].name == destinations[i]) {
                     lowerdestinations.push_back(j);
                     if (std::find((*csi)[j].lowerdestinations.begin(), (*csi)[j].lowerdestinations.end(),
-                                  i) == (*csi)[j].lowerdestinations.end()) {
+                            i) == (*csi)[j].lowerdestinations.end()) {
                         (*csi)[j].lowerdestinations
-                                 .push_back(i);
+                                .push_back(i);
                     }                            //this is in case of asymmetric links
                     //Push the destination back.
                     //Tasty....
@@ -412,12 +393,10 @@ NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &nam
 
 //Create a placeholder to avoid the problem described above
 NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name) :
-        name(name), part_of_path(false)
-{
+        name(name), part_of_path(false) {
 }
 
-void NavigationSystem::CachedSystemIterator::SystemInfo::loadData(map<string, unsigned> *index_table)
-{
+void NavigationSystem::CachedSystemIterator::SystemInfo::loadData(map<string, unsigned> *index_table) {
     string xyz = _Universe->getGalaxyProperty(name, "xyz");
     QVector pos;
     if (xyz.size() && (sscanf(xyz.c_str(), "%lf %lf %lf", &pos.i, &pos.j, &pos.k) >= 3)) {
@@ -438,8 +417,7 @@ void NavigationSystem::CachedSystemIterator::SystemInfo::loadData(map<string, un
     }
 }
 
-void NavigationSystem::CachedSystemIterator::init(string current_system, unsigned max_systems)
-{
+void NavigationSystem::CachedSystemIterator::init(string current_system, unsigned max_systems) {
     systems.clear();
     unsigned count = 0;
     string sys;
@@ -467,22 +445,18 @@ void NavigationSystem::CachedSystemIterator::init(string current_system, unsigne
     }
 }
 
-NavigationSystem::CachedSystemIterator::CachedSystemIterator()
-{
+NavigationSystem::CachedSystemIterator::CachedSystemIterator() {
 }
 
-NavigationSystem::CachedSystemIterator::CachedSystemIterator(string current_system, unsigned max_systems)
-{
+NavigationSystem::CachedSystemIterator::CachedSystemIterator(string current_system, unsigned max_systems) {
     init(current_system, max_systems);
 }
 
 NavigationSystem::CachedSystemIterator::CachedSystemIterator(const CachedSystemIterator &other) :
-        systems(other.systems), currentPosition(other.currentPosition)
-{
+        systems(other.systems), currentPosition(other.currentPosition) {
 }
 
-bool NavigationSystem::CachedSystemIterator::seek(unsigned position)
-{
+bool NavigationSystem::CachedSystemIterator::seek(unsigned position) {
     if (position < systems.size()) {
         currentPosition = position;
         return true;
@@ -491,26 +465,22 @@ bool NavigationSystem::CachedSystemIterator::seek(unsigned position)
     }
 }
 
-unsigned NavigationSystem::CachedSystemIterator::getIndex() const
-{
+unsigned NavigationSystem::CachedSystemIterator::getIndex() const {
     return currentPosition;
 }
 
-unsigned NavigationSystem::CachedSystemIterator::size() const
-{
+unsigned NavigationSystem::CachedSystemIterator::size() const {
     return systems.size();
 }
 
-bool NavigationSystem::CachedSystemIterator::done() const
-{
+bool NavigationSystem::CachedSystemIterator::done() const {
     return currentPosition >= systems.size();
 }
 
 static NavigationSystem::CachedSystemIterator::SystemInfo nullPair("-", QVector(0, 0, 0),
-                                                                   std::vector<std::string>(), NULL);
+        std::vector<std::string>(), NULL);
 
-NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator[](unsigned pos)
-{
+NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator[](unsigned pos) {
     if (pos >= size()) {
         return nullPair;
     }
@@ -518,83 +488,70 @@ NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSyst
 }
 
 const NavigationSystem::CachedSystemIterator::SystemInfo
-&NavigationSystem::CachedSystemIterator::operator[](unsigned pos) const
-{
+&NavigationSystem::CachedSystemIterator::operator[](unsigned pos) const {
     if (pos >= size()) {
         return nullPair;
     }
     return systems[pos];
 }
 
-NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator*()
-{
+NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator*() {
     if (done()) {
         return nullPair;
     }
     return systems[currentPosition];
 }
 
-const NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator*() const
-{
+const NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator*() const {
     if (done()) {
         return nullPair;
     }
     return systems[currentPosition];
 }
 
-NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator->()
-{
+NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator->() {
     if (done()) {
         return &nullPair;
     }
     return &systems[currentPosition];
 }
 
-const NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator->() const
-{
+const NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator->() const {
     if (done()) {
         return &nullPair;
     }
     return &systems[currentPosition];
 }
 
-string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName()
-{
+string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName() {
     return name;
 }
 
-const string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName() const
-{
+const string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName() const {
     return name;
 }
 
-bool NavigationSystem::CachedSystemIterator::SystemInfo::isDrawable() const
-{
+bool NavigationSystem::CachedSystemIterator::SystemInfo::isDrawable() const {
     return checkedVisited(GetName());
 }
 
-QVector &NavigationSystem::CachedSystemIterator::SystemInfo::Position()
-{
+QVector &NavigationSystem::CachedSystemIterator::SystemInfo::Position() {
     return position;
 }
 
-const QVector &NavigationSystem::CachedSystemIterator::SystemInfo::Position() const
-{
+const QVector &NavigationSystem::CachedSystemIterator::SystemInfo::Position() const {
     return position;
 }
 
-unsigned NavigationSystem::CachedSystemIterator::SystemInfo::GetDestinationIndex(unsigned index) const
-{
+unsigned NavigationSystem::CachedSystemIterator::SystemInfo::GetDestinationIndex(unsigned index) const {
     return lowerdestinations[index];
 }
 
-unsigned NavigationSystem::CachedSystemIterator::SystemInfo::GetDestinationSize() const
-{
+unsigned NavigationSystem::CachedSystemIterator::SystemInfo::GetDestinationSize() const {
     return lowerdestinations.size();
 }
 
-GFXColor NavigationSystem::CachedSystemIterator::SystemInfo::GetColor()
-{
+GFXColor NavigationSystem::CachedSystemIterator::SystemInfo::GetColor() {
     static unsigned long lastupdate = 0;
     lastupdate += 1299811;
     lastupdate %= 104729;
@@ -604,19 +561,16 @@ GFXColor NavigationSystem::CachedSystemIterator::SystemInfo::GetColor()
     return col;
 }
 
-NavigationSystem::CachedSystemIterator &NavigationSystem::CachedSystemIterator::next()
-{
+NavigationSystem::CachedSystemIterator &NavigationSystem::CachedSystemIterator::next() {
     return ++(*this);
 }
 
-NavigationSystem::CachedSystemIterator &NavigationSystem::CachedSystemIterator::operator++()
-{
+NavigationSystem::CachedSystemIterator &NavigationSystem::CachedSystemIterator::operator++() {
     ++currentPosition;
     return *this;
 }
 
-NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::operator++(int)
-{
+NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::operator++(int) {
     NavigationSystem::CachedSystemIterator iter(*this);
     ++(*this);
     return iter;
@@ -629,46 +583,37 @@ NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::o
 //************************************************
 
 NavigationSystem::CachedSectorIterator::SectorInfo::SectorInfo(const string &name) :
-        name(name)
-{
+        name(name) {
 }
 
-string &NavigationSystem::CachedSectorIterator::SectorInfo::GetName()
-{
+string &NavigationSystem::CachedSectorIterator::SectorInfo::GetName() {
     return name;
 }
 
-const string &NavigationSystem::CachedSectorIterator::SectorInfo::GetName() const
-{
+const string &NavigationSystem::CachedSectorIterator::SectorInfo::GetName() const {
     return name;
 }
 
-unsigned NavigationSystem::CachedSectorIterator::SectorInfo::GetSubsystemIndex(unsigned index) const
-{
+unsigned NavigationSystem::CachedSectorIterator::SectorInfo::GetSubsystemIndex(unsigned index) const {
     return subsystems[index];
 }
 
-unsigned NavigationSystem::CachedSectorIterator::SectorInfo::GetSubsystemSize() const
-{
+unsigned NavigationSystem::CachedSectorIterator::SectorInfo::GetSubsystemSize() const {
     return subsystems.size();
 }
 
-void NavigationSystem::CachedSectorIterator::SectorInfo::AddSystem(unsigned index)
-{
+void NavigationSystem::CachedSectorIterator::SectorInfo::AddSystem(unsigned index) {
     subsystems.push_back(index);
 }
 
-NavigationSystem::CachedSectorIterator::CachedSectorIterator()
-{
+NavigationSystem::CachedSectorIterator::CachedSectorIterator() {
 }
 
-NavigationSystem::CachedSectorIterator::CachedSectorIterator(CachedSystemIterator &systemIter)
-{
+NavigationSystem::CachedSectorIterator::CachedSectorIterator(CachedSystemIterator &systemIter) {
     init(systemIter);
 }
 
-void NavigationSystem::CachedSectorIterator::init(CachedSystemIterator &systemIter)
-{
+void NavigationSystem::CachedSectorIterator::init(CachedSystemIterator &systemIter) {
     map<string, unsigned> index_table;
     sectors.clear();
 
@@ -690,12 +635,10 @@ void NavigationSystem::CachedSectorIterator::init(CachedSystemIterator &systemIt
 }
 
 NavigationSystem::CachedSectorIterator::CachedSectorIterator(const CachedSectorIterator &other) :
-        sectors(other.sectors), currentPosition(other.currentPosition)
-{
+        sectors(other.sectors), currentPosition(other.currentPosition) {
 }
 
-bool NavigationSystem::CachedSectorIterator::seek(unsigned position)
-{
+bool NavigationSystem::CachedSectorIterator::seek(unsigned position) {
     if (position < sectors.size()) {
         currentPosition = position;
         return true;
@@ -704,25 +647,21 @@ bool NavigationSystem::CachedSectorIterator::seek(unsigned position)
     }
 }
 
-unsigned NavigationSystem::CachedSectorIterator::getIndex() const
-{
+unsigned NavigationSystem::CachedSectorIterator::getIndex() const {
     return currentPosition;
 }
 
-unsigned NavigationSystem::CachedSectorIterator::size() const
-{
+unsigned NavigationSystem::CachedSectorIterator::size() const {
     return sectors.size();
 }
 
-bool NavigationSystem::CachedSectorIterator::done() const
-{
+bool NavigationSystem::CachedSectorIterator::done() const {
     return currentPosition >= sectors.size();
 }
 
 static NavigationSystem::CachedSectorIterator::SectorInfo nullSectorPair("-");
 
-NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator[](unsigned pos)
-{
+NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator[](unsigned pos) {
     if (pos >= size()) {
         return nullSectorPair;
     }
@@ -730,72 +669,62 @@ NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSect
 }
 
 const NavigationSystem::CachedSectorIterator::SectorInfo
-&NavigationSystem::CachedSectorIterator::operator[](unsigned pos) const
-{
+&NavigationSystem::CachedSectorIterator::operator[](unsigned pos) const {
     if (pos >= size()) {
         return nullSectorPair;
     }
     return sectors[pos];
 }
 
-NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator*()
-{
+NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator*() {
     if (done()) {
         return nullSectorPair;
     }
     return sectors[currentPosition];
 }
 
-const NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator*() const
-{
+const NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator*() const {
     if (done()) {
         return nullSectorPair;
     }
     return sectors[currentPosition];
 }
 
-NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator->()
-{
+NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator->() {
     if (done()) {
         return &nullSectorPair;
     }
     return &sectors[currentPosition];
 }
 
-const NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator->() const
-{
+const NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator->() const {
     if (done()) {
         return &nullSectorPair;
     }
     return &sectors[currentPosition];
 }
 
-NavigationSystem::CachedSectorIterator &NavigationSystem::CachedSectorIterator::next()
-{
+NavigationSystem::CachedSectorIterator &NavigationSystem::CachedSectorIterator::next() {
     return ++(*this);
 }
 
-NavigationSystem::CachedSectorIterator &NavigationSystem::CachedSectorIterator::operator++()
-{
+NavigationSystem::CachedSectorIterator &NavigationSystem::CachedSectorIterator::operator++() {
     ++currentPosition;
     return *this;
 }
 
-NavigationSystem::CachedSectorIterator NavigationSystem::CachedSectorIterator::operator++(int)
-{
+NavigationSystem::CachedSectorIterator NavigationSystem::CachedSectorIterator::operator++(int) {
     NavigationSystem::CachedSectorIterator iter(*this);
     ++(*this);
     return iter;
 }
 
 //static systemdrawhashtable jumptable;
-float vsmax(float x, float y)
-{
+float vsmax(float x, float y) {
     return x > y ? x : y;
 }
 
-void NavigationSystem::DrawGalaxy()
-{
+void NavigationSystem::DrawGalaxy() {
 //systemdrawlist mainlist;//(0, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 
     systemdrawlist
@@ -956,18 +885,18 @@ void NavigationSystem::DrawGalaxy()
         GFXColor col = systemIter->GetColor();
         float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
         TranslateCoordinates(pos,
-                             pos_flat,
-                             center_nav_x,
-                             center_nav_y,
-                             themaxvalue,
-                             zscale,
-                             zdistance,
-                             the_x,
-                             the_y,
-                             the_x_flat,
-                             the_y_flat,
-                             system_item_scale_temp,
-                             0);
+                pos_flat,
+                center_nav_x,
+                center_nav_y,
+                themaxvalue,
+                zscale,
+                zdistance,
+                the_x,
+                the_y,
+                the_x_flat,
+                the_y_flat,
+                system_item_scale_temp,
+                0);
         float alphaadd;
         {
             float tmp = (1 - (zoom / MAXZOOM));
@@ -984,11 +913,11 @@ void NavigationSystem::DrawGalaxy()
         //**********************************
         if ((col.a < .05)
                 || (!TestIfInRange(screenskipby4[0],
-                                   screenskipby4[1],
-                                   screenskipby4[2],
-                                   screenskipby4[3],
-                                   the_x,
-                                   the_y))) {
+                        screenskipby4[1],
+                        screenskipby4[2],
+                        screenskipby4[3],
+                        the_x,
+                        the_y))) {
             ++systemIter;
             continue;
         }
@@ -1000,8 +929,8 @@ void NavigationSystem::DrawGalaxy()
         if (path_view != PATH_OFF) {
             if (systemIter->part_of_path) {
                 for (std::set<NavPath *>::iterator paths = systemIter->paths.begin();
-                     paths != systemIter->paths.end();
-                     ++paths) {
+                        paths != systemIter->paths.end();
+                        ++paths) {
                     if ((*paths)->getVisible()) {
                         isPath = true;
                         break;
@@ -1035,14 +964,14 @@ void NavigationSystem::DrawGalaxy()
         }
         bool moused = false;
         DrawNode(insert_type, insert_size, the_x, the_y,
-                 (*systemIter).GetName(), screenoccupation, moused, isPath ? pathcol : col, false, false,
-                 isPath ? "" : csector);
+                (*systemIter).GetName(), screenoccupation, moused, isPath ? pathcol : col, false, false,
+                isPath ? "" : csector);
         if (std::fabs(zdistance) < 2.0f * camera_z) {
             DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
         }
         if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current)) {
             mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),
-                                               systemIter.getIndex(), screenoccupation, false, isPath ? pathcol : col));
+                    systemIter.getIndex(), screenoccupation, false, isPath ? pathcol : col));
             moused = true;
         }
         unsigned destsize = systemIter->GetDestinationSize();
@@ -1061,18 +990,18 @@ void NavigationSystem::DrawGalaxy()
                     float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
                     //WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
                     TranslateCoordinates(posoth,
-                                         pos_flat,
-                                         center_nav_x,
-                                         center_nav_y,
-                                         themaxvalue,
-                                         zscale,
-                                         zdistance,
-                                         the_new_x,
-                                         the_new_y,
-                                         the_new_x_flat,
-                                         the_new_y_flat,
-                                         new_system_item_scale_temp,
-                                         0);
+                            pos_flat,
+                            center_nav_x,
+                            center_nav_y,
+                            themaxvalue,
+                            zscale,
+                            zdistance,
+                            the_new_x,
+                            the_new_y,
+                            the_new_x_flat,
+                            the_new_y_flat,
+                            new_system_item_scale_temp,
+                            0);
                     GFXColor othcol = oth.GetColor();
                     othcol.a =
                             (new_system_item_scale_temp
@@ -1083,8 +1012,8 @@ void NavigationSystem::DrawGalaxy()
                     bool isConnectionPath = false;
                     if (path_view != PATH_OFF && systemIter->part_of_path && oth.part_of_path) {
                         for (std::set<NavPath *>::iterator paths = systemIter->paths.begin();
-                             !isConnectionPath && paths != systemIter->paths.end();
-                             ++paths) {
+                                !isConnectionPath && paths != systemIter->paths.end();
+                                ++paths) {
                             isConnectionPath = (*paths)->getVisible()
                                     && (*paths)->isNeighborPath(temp, systemIter->GetDestinationIndex(i));
                         }

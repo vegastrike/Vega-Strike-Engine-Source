@@ -47,56 +47,48 @@ public:
     TextPlane(const struct GFXColor &col = GFXColor(1, 1, 1, 1), const struct GFXColor &bgcol = GFXColor(0, 0, 0, 0));
     ~TextPlane();
 
-    void SetPos(float x, float y)
-    {
+    void SetPos(float x, float y) {
         myFontMetrics.k = y;
         myDims.k = x;
     }
 
-    void SetCharSize(float x, float y)
-    {
+    void SetCharSize(float x, float y) {
         myFontMetrics.i = x;
         myFontMetrics.j = y;
     }
 
-    void GetCharSize(float &x, float &y)
-    {
+    void GetCharSize(float &x, float &y) {
         x = myFontMetrics.i;
         y = myFontMetrics.j;
     }
 
-    void GetPos(float &y, float &x)
-    {
+    void GetPos(float &y, float &x) {
         y = myFontMetrics.k;
         x = myDims.k;
     }
 
-    void SetSize(float x, float y)
-    {
+    void SetSize(float x, float y) {
         myDims.i = x;
         myDims.j = y;
     }
 
-    void GetSize(float &x, float &y)
-    {
+    void GetSize(float &x, float &y) {
         x = myDims.i;
         y = myDims.j;
     }
 
     int Draw(int offset = 0); //returns number of lines
     int Draw(const std::string &text,
-             int offset = 0,
-             bool start_one_line_lower = false,
-             bool force_highquality = false,
-             bool automatte = false);
+            int offset = 0,
+            bool start_one_line_lower = false,
+            bool force_highquality = false,
+            bool automatte = false);
 
-    void SetText(const std::string &newText)
-    {
+    void SetText(const std::string &newText) {
         myText = newText;
     }
 
-    std::string GetText() const
-    {
+    std::string GetText() const {
         return myText;
     }
 };

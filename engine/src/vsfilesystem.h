@@ -172,38 +172,32 @@ long vs_getsize(FILE *fp);
 int vs_fprintf(FILE *fp, const char *format, ...);
 
 template<class A>
-int vs_fscanf(FILE *fp, const char *format, A *a)
-{
+int vs_fscanf(FILE *fp, const char *format, A *a) {
     return fscanf(fp, format, a);
 }
 
 template<class A, class B>
-int vs_fscanf(FILE *fp, const char *format, A *a, B *b)
-{
+int vs_fscanf(FILE *fp, const char *format, A *a, B *b) {
     return fscanf(fp, format, a, b);
 }
 
 template<class A, class B, class C>
-int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c)
-{
+int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c) {
     return fscanf(fp, format, a, b, c);
 }
 
 template<class A, class B, class C, class D>
-int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c, D *d)
-{
+int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c, D *d) {
     return fscanf(fp, format, a, b, c, d);
 }
 
 template<class A, class B, class C, class D, class E>
-int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c, D *d, E *e)
-{
+int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c, D *d, E *e) {
     return fscanf(fp, format, a, b, c, d, e);
 }
 
 template<class A, class B, class C, class D, class E, class F>
-int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c, D *d, E *e, F *f)
-{
+int vs_fscanf(FILE *fp, const char *format, A *a, B *b, C *c, D *d, E *e, F *f) {
     return fscanf(fp, format, a, b, c, d, e, f);
 }
 
@@ -295,9 +289,9 @@ bool DirectoryExists(const std::string &filename);
 //Test if a file exists (absolute path)
 int FileExists(const std::string &root, const char *filename, VSFileType type = UnknownFile, bool lookinvolume = true);
 int FileExists(const std::string &root,
-               const std::string &filename,
-               VSFileType type = UnknownFile,
-               bool lookinvolume = true);
+        const std::string &filename,
+        VSFileType type = UnknownFile,
+        bool lookinvolume = true);
 //Test if a file exists relative to home_path
 int FileExistsHome(const char *filename, VSFileType type = UnknownFile);
 int FileExistsHome(const std::string &filename, VSFileType type = UnknownFile);
@@ -347,8 +341,7 @@ private:
     bool valid;
 
 public:
-    char *get_pk3_data()
-    {
+    char *get_pk3_data() {
         return pk3_extracted_file;
     }
 
@@ -358,12 +351,10 @@ public:
     VSFile(const char *filename, VSFileType type = UnknownFile, VSFileMode = ReadOnly);
     ~VSFile();
 
-    FILE *GetFP()
-    {
+    FILE *GetFP() {
         return this->fp;
     }                                                        //This is still needed for special cases (when loading PNG files)
-    char *GetFileBuffer()
-    {
+    char *GetFileBuffer() {
         return this->pk3_extracted_file;
     }
 
@@ -373,24 +364,21 @@ public:
 //Open an existing file read only
     VSError OpenReadOnly(const char *filename, VSFileType type = UnknownFile);
 
-    VSError OpenReadOnly(const std::string &filename, VSFileType type = UnknownFile)
-    {
+    VSError OpenReadOnly(const std::string &filename, VSFileType type = UnknownFile) {
         return OpenReadOnly(filename.c_str(), type);
     }
 
 //Open an existing file read/write
     VSError OpenReadWrite(const char *filename, VSFileType type = UnknownFile);
 
-    VSError OpenReadWrite(const std::string &filename, VSFileType type = UnknownFile)
-    {
+    VSError OpenReadWrite(const std::string &filename, VSFileType type = UnknownFile) {
         return OpenReadWrite(filename.c_str(), type);
     }
 
 //Open (truncate) or create a file read/write
     VSError OpenCreateWrite(const char *filename, VSFileType type = UnknownFile);
 
-    VSError OpenCreateWrite(const std::string &filename, VSFileType type = UnknownFile)
-    {
+    VSError OpenCreateWrite(const std::string &filename, VSFileType type = UnknownFile) {
         return OpenCreateWrite(filename.c_str(), type);
     }
 
@@ -399,11 +387,11 @@ public:
 
 /********************************** READ/WRITE OPERATIONS IN A FILE *********************************/
     size_t Read(void *ptr,
-                size_t length);                                            //Read length in ptr (store read bytes number in length)
+            size_t length);                                            //Read length in ptr (store read bytes number in length)
     VSError ReadLine(void *ptr, size_t length);                               //Read a line of maximum length
     std::string ReadFull();                                                                                          //Read the entire file and returns the content in a string
     size_t Write(const void *ptr,
-                 size_t length);                             //Write length from ptr (store written bytes number in length)
+            size_t length);                             //Write length from ptr (store written bytes number in length)
     size_t Write(const std::string &content);                                              //Write a string
     VSError WriteLine(const void *ptr);                                               //Write a line
     void WriteFull(void *ptr);                                                                //Write
@@ -412,8 +400,7 @@ public:
     void GoAfterEOL();
 
     template<class A>
-    int Fscanf(const char *format, A *a)
-    {
+    int Fscanf(const char *format, A *a) {
         int ret = -1;
         if (!UseVolumes[this->alt_type]) {
             ret = fscanf(fp, format, a);
@@ -431,8 +418,9 @@ public:
                 delete[] newformat;
                 newformat = nullptr;
                 VS_LOG(info,
-                       (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%") % readbytes % offset
-                               % (*a)));
+                        (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%") % readbytes
+                                % offset
+                                % (*a)));
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {
@@ -442,8 +430,7 @@ public:
     }
 
     template<class A, class B>
-    int Fscanf(const char *format, A *a, B *b)
-    {
+    int Fscanf(const char *format, A *a, B *b) {
         int ret = -1;
         if (!UseVolumes[this->alt_type]) {
             ret = fscanf(fp, format, a, b);
@@ -461,8 +448,8 @@ public:
                 delete[] newformat;
                 newformat = nullptr;
                 VS_LOG(info,
-                       (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%, b=%4%") % readbytes
-                               % offset % (*a) % (*b)));
+                        (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%, b=%4%") % readbytes
+                                % offset % (*a) % (*b)));
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {
@@ -472,8 +459,7 @@ public:
     }
 
     template<class A, class B, class C>
-    int Fscanf(const char *format, A *a, B *b, C *c)
-    {
+    int Fscanf(const char *format, A *a, B *b, C *c) {
         int ret = -1;
         if (!UseVolumes[this->alt_type]) {
             ret = fscanf(fp, format, a, b, c);
@@ -491,8 +477,8 @@ public:
                 delete[] newformat;
                 newformat = nullptr;
                 VS_LOG(info,
-                       (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%, b=%4%, c=%5%")
-                               % readbytes % offset % (*a) % (*b) % (*c)));
+                        (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%, b=%4%, c=%5%")
+                                % readbytes % offset % (*a) % (*b) % (*c)));
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {
@@ -502,8 +488,7 @@ public:
     }
 
     template<class A, class B, class C, class D>
-    int Fscanf(const char *format, A *a, B *b, C *c, D *d)
-    {
+    int Fscanf(const char *format, A *a, B *b, C *c, D *d) {
         int ret = -1;
         if (!UseVolumes[this->alt_type]) {
             ret = fscanf(fp, format, a, b, c, d);
@@ -529,8 +514,7 @@ public:
     }
 
     template<class A, class B, class C, class D, class E>
-    int Fscanf(const char *format, A *a, B *b, C *c, D *d, E *e)
-    {
+    int Fscanf(const char *format, A *a, B *b, C *c, D *d, E *e) {
         int ret = -1;
         if (!UseVolumes[this->alt_type]) {
             ret = fscanf(fp, format, a, b, c, d, e);
@@ -556,8 +540,7 @@ public:
     }
 
     template<class A, class B, class C, class D, class E, class F>
-    int Fscanf(const char *format, A *a, B *b, C *c, D *d, E *e, F *f)
-    {
+    int Fscanf(const char *format, A *a, B *b, C *c, D *d, E *e, F *f) {
         int ret = -1;
         if (!UseVolumes[this->alt_type]) {
             ret = fscanf(fp, format, a, b, c, d, e, f);
@@ -595,43 +578,35 @@ public:
     bool Valid();                                                       //Tells wether the file is valid or not
 
 /********************************** FILE PATH *********************************/
-    const std::string &GetFilename() const
-    {
+    const std::string &GetFilename() const {
         return this->filename;
     }
 
-    const std::string &GetDirectory() const
-    {
+    const std::string &GetDirectory() const {
         return this->directoryname;
     }
 
-    const std::string &GetSubDirectory() const
-    {
+    const std::string &GetSubDirectory() const {
         return this->subdirectoryname;
     }
 
-    const std::string &GetRoot() const
-    {
+    const std::string &GetRoot() const {
         return this->rootname;
     }
 
-    void SetFilename(const std::string &filename)
-    {
+    void SetFilename(const std::string &filename) {
         this->filename = filename;
     }
 
-    void SetDirectory(const std::string &directory)
-    {
+    void SetDirectory(const std::string &directory) {
         this->directoryname = directory;
     }
 
-    void SetSubDirectory(const std::string &subdirectory)
-    {
+    void SetSubDirectory(const std::string &subdirectory) {
         this->subdirectoryname = subdirectory;
     }
 
-    void SetRoot(const std::string &root)
-    {
+    void SetRoot(const std::string &root) {
         this->rootname = root;
     }
 
@@ -641,13 +616,11 @@ public:
     void SetType(VSFileType type);
     void SetAltType(VSFileType type);
 
-    VSFileType GetType() const
-    {
+    VSFileType GetType() const {
         return file_type;
     }
 
-    VSFileType GetAltType() const
-    {
+    VSFileType GetAltType() const {
         return alt_type;
     }
 

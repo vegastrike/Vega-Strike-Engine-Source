@@ -56,13 +56,13 @@ public:
     Animation();
 
     Animation(VSFileSystem::VSFile *f, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP,
-              bool camorient =
-              false, bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-                                                                                        1));
+            bool camorient =
+            false, bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
+            1));
 
     Animation(const char *, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
-              bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-                                                                                 1));
+            bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
+            1));
 
     ~Animation();
 

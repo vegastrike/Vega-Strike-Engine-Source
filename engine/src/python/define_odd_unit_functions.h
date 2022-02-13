@@ -21,8 +21,7 @@
  */
 
 
-void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class)
-{
+void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::setNull, "setNull");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::isNull, "isNull");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::notNull, "__nonzero__");

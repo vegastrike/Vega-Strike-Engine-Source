@@ -33,8 +33,7 @@
 #include "gfx/matrix.h"
 #include "universe.h"
 
-Briefing::Ship::Ship(const char *filename, int faction, const Vector &position)
-{
+Briefing::Ship::Ship(const char *filename, int faction, const Vector &position) {
     VSCONSTRUCT2('s')
     Unit *tmp = new Unit(filename, true, faction);
     meshdata = tmp->StealMeshes();
@@ -50,8 +49,7 @@ void Briefing::SetCloak(int w, float c) //FIXME This could use better names than
     }
 }
 
-bool UpdatePosition(Vector &res, Vector cur, Vector fin, float speed)
-{
+bool UpdatePosition(Vector &res, Vector cur, Vector fin, float speed) {
     Vector direction(fin - cur);
     float dirmag = direction.Magnitude();
     bool ret = true;
@@ -63,8 +61,7 @@ bool UpdatePosition(Vector &res, Vector cur, Vector fin, float speed)
     return ret;
 }
 
-void SetDirection(Matrix &mat, Vector start, Vector end, const Matrix cam, bool updatepos)
-{
+void SetDirection(Matrix &mat, Vector start, Vector end, const Matrix cam, bool updatepos) {
     end = end - start;
     if (end.MagnitudeSquared() > .000001) {
         Vector p;
@@ -86,8 +83,7 @@ void SetDirection(Matrix &mat, Vector start, Vector end, const Matrix cam, bool 
 
 extern double interpolation_blend_factor;
 
-void Briefing::Render()
-{
+void Briefing::Render() {
     AnimatedTexture::UpdateAllFrame();
 
     cam.SetPosition(cam.GetPosition(), Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0));
@@ -105,8 +101,7 @@ void Briefing::Render()
     _Universe->AccessCamera()->UpdateGFX(GFXTRUE, GFXFALSE);
 }
 
-void Briefing::Ship::Render(const Matrix &cam, double interpol)
-{
+void Briefing::Ship::Render(const Matrix &cam, double interpol) {
     Matrix final;
     Identity(final);
     Vector pos(Position());
@@ -129,22 +124,19 @@ void Briefing::Ship::Render(const Matrix &cam, double interpol)
     }
 }
 
-Briefing::Ship::~Ship()
-{
+Briefing::Ship::~Ship() {
     Destroy();
     VSDESTRUCT2
 }
 
-void Briefing::Ship::Destroy()
-{
+void Briefing::Ship::Destroy() {
     for (unsigned int i = 0; i < meshdata.size(); i++) {
         delete meshdata[i];
     }
     meshdata.clear();
 }
 
-Briefing::Briefing()
-{
+Briefing::Briefing() {
     VSCONSTRUCT2('b')
     cam.SetPosition(QVector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0));
     cam.SetOrientation(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1));
@@ -152,8 +144,7 @@ Briefing::Briefing()
     tp.SetSize(1, -.5);
 }
 
-Briefing::~Briefing()
-{
+Briefing::~Briefing() {
     VSDESTRUCT2
     for (unsigned int i = 0; i < starships.size(); i++) {
         delete starships[i];
@@ -161,44 +152,38 @@ Briefing::~Briefing()
     starships.clear();
 }
 
-void Briefing::RemoveStarship(int which)
-{
+void Briefing::RemoveStarship(int which) {
     if (which < (int) starships.size() && which >= 0) {
         starships[which]->Destroy();
     }
 }
 
-void Briefing::EnqueueOrder(int which, const Vector &dest, float time)
-{
+void Briefing::EnqueueOrder(int which, const Vector &dest, float time) {
     if (which < (int) starships.size() && which >= 0) {
         starships[which]->EnqueueOrder(dest, time);
     }
 }
 
-void Briefing::OverrideOrder(int which, const Vector &dest, float time)
-{
+void Briefing::OverrideOrder(int which, const Vector &dest, float time) {
     if (which < (int) starships.size() && which >= 0) {
         starships[which]->OverrideOrder(dest, time);
     }
 }
 
-void Briefing::SetPosition(int which, const Vector &Position)
-{
+void Briefing::SetPosition(int which, const Vector &Position) {
     if (which < (int) starships.size() && which >= 0) {
         starships[which]->SetPosition(Position);
     }
 }
 
-Vector Briefing::GetPosition(int which)
-{
+Vector Briefing::GetPosition(int which) {
     if (which < (int) starships.size() && which >= 0) {
         return starships[which]->Position();
     }
     return Vector(0, 0, 0);
 }
 
-int Briefing::AddStarship(const char *fn, int faction, const Vector &pos)
-{
+int Briefing::AddStarship(const char *fn, int faction, const Vector &pos) {
     Ship *tmp = new Ship(fn, faction, pos);
     if (tmp->LoadFailed()) {
         delete tmp;
@@ -208,15 +193,13 @@ int Briefing::AddStarship(const char *fn, int faction, const Vector &pos)
     return starships.size() - 1;
 }
 
-void Briefing::Update()
-{
+void Briefing::Update() {
     for (unsigned int i = 0; i < starships.size(); i++) {
         starships[i]->Update();
     }
 }
 
-void Briefing::Ship::Update()
-{
+void Briefing::Ship::Update() {
     if (!orders.empty()) {
         Vector finpos;
         if (UpdatePosition(finpos, Position(), orders.front().vec, orders.front().speed)) {
@@ -226,14 +209,12 @@ void Briefing::Ship::Update()
     }
 }
 
-void Briefing::Ship::OverrideOrder(const Vector &destination, float time)
-{
+void Briefing::Ship::OverrideOrder(const Vector &destination, float time) {
     orders.clear();
     EnqueueOrder(destination, time);
 }
 
-void Briefing::Ship::EnqueueOrder(const Vector &destination, float time)
-{
+void Briefing::Ship::EnqueueOrder(const Vector &destination, float time) {
     if (time < .00001) {
         time = SIMULATION_ATOM;
     } // simulation_atom_var?

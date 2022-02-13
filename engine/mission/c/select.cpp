@@ -33,8 +33,7 @@
 #include <unistd.h>
 #endif
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int i;
     for (i = strlen(argv[0]); argv[0][i] != '\\' && argv[0][i] != '/'; i--) {
     }

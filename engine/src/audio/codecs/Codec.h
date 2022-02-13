@@ -107,8 +107,8 @@ public:
      *      success (true).
      */
     virtual bool canHandle(const std::string &path,
-                           bool canOpen,
-                           VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
+            bool canOpen,
+            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
 
     /**
      * Returns an instance of the Stream class attached to this codec and the specified

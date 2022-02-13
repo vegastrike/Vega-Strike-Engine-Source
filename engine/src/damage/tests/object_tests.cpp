@@ -28,8 +28,7 @@
 #include "damageable_object.h"
 
 // Demonstrate some basic assertions.
-TEST(DamageableObject, Sanity)
-{
+TEST(DamageableObject, Sanity) {
     CoreVector core_vector(1, 1, 1); // Left top front
 
     DamageableObject object;

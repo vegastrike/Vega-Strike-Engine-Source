@@ -95,13 +95,12 @@
 
 //! TO BE DOCUMENTED
 bool CoplanarTriTri(const Point &n,
-                    const Point &v0,
-                    const Point &v1,
-                    const Point &v2,
-                    const Point &u0,
-                    const Point &u1,
-                    const Point &u2)
-{
+        const Point &v0,
+        const Point &v1,
+        const Point &v2,
+        const Point &u0,
+        const Point &u1,
+        const Point &u2) {
     float A[3];
     short i0, i1;
     /* first project onto an axis-aligned plane, that maximizes the area */
@@ -197,12 +196,11 @@ bool CoplanarTriTri(const Point &n,
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool AABBTreeCollider::TriTriOverlap(const Point &V0,
-                                             const Point &V1,
-                                             const Point &V2,
-                                             const Point &U0,
-                                             const Point &U1,
-                                             const Point &U2)
-{
+        const Point &V1,
+        const Point &V2,
+        const Point &U0,
+        const Point &U1,
+        const Point &U2) {
     // Stats
     mNbPrimPrimTests++;
 
@@ -250,19 +248,23 @@ inline_ bool AABBTreeCollider::TriTriOverlap(const Point &V0,
     float dv2 = (N2 | V2) + d2;
 
 #ifdef OPC_TRITRI_EPSILON_TEST
-    if (fabsf(dv0) < LOCAL_EPSILON)
+    if (fabsf(dv0) < LOCAL_EPSILON) {
         dv0 = 0.0f;
-    if (fabsf(dv1) < LOCAL_EPSILON)
+    }
+    if (fabsf(dv1) < LOCAL_EPSILON) {
         dv1 = 0.0f;
-    if (fabsf(dv2) < LOCAL_EPSILON)
+    }
+    if (fabsf(dv2) < LOCAL_EPSILON) {
         dv2 = 0.0f;
+    }
 #endif
 
     const float dv0dv1 = dv0 * dv1;
     const float dv0dv2 = dv0 * dv2;
 
-    if (dv0dv1 > 0.0f && dv0dv2 > 0.0f)    // same sign on all of them + not equal 0 ?
-        return FALSE;                // no intersection occurs
+    if (dv0dv1 > 0.0f && dv0dv2 > 0.0f) {    // same sign on all of them + not equal 0 ?
+        return FALSE;
+    }                // no intersection occurs
 
     // Compute direction of intersection line
     const Point D = N1 ^ N2;

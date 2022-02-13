@@ -71,57 +71,50 @@ public:
     void Update(unsigned short numstages, unsigned short whichstage, updateparity *updateorder = identityparity);
     void SetTransformation(const Matrix &transformation);
     float GetHeight(Vector Location,
-                    Vector &normal,
-                    const Matrix &transform,
-                    float TotalTerrainSizeX = 0,
-                    float TotalTerrainSizeZ = 0) const;
+            Vector &normal,
+            const Matrix &transform,
+            float TotalTerrainSizeX = 0,
+            float TotalTerrainSizeZ = 0) const;
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
     static void endElement(void *userData, const XML_Char *name);
     void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes);
     void endElement(const std::string &name);
 
-    float getminX() const
-    {
+    float getminX() const {
         return 0;
     }
 
-    float getminZ() const
-    {
+    float getminZ() const {
         return 0;
     }
 
-    float getmaxX() const
-    {
+    float getmaxX() const {
         return minX + (float) maxX;
     }
 
-    float getmaxZ() const
-    {
+    float getmaxZ() const {
         return minZ + (float) maxZ;
     }
 
-    float getSizeX() const
-    {
+    float getSizeX() const {
         return maxX;
     }
 
-    float getSizeZ() const
-    {
+    float getSizeZ() const {
         return maxZ;
     }
 
     void StaticCullData(const float detail);
 
-    bool GetGroundPos(QVector &Location, Vector &norm, float TTSX = 0, float TTSZ = 0) const
-    {
+    bool GetGroundPos(QVector &Location, Vector &norm, float TTSX = 0, float TTSZ = 0) const {
         return GetGroundPos(Location, norm, transformation, TTSX, TTSZ);
     }
 
     bool GetGroundPos(QVector &Location,
-                      Vector &norm,
-                      const Matrix &trans,
-                      float TotalTerrainSizeX = 0,
-                      float TotalTerrainSizeZ = 0) const;
+            Vector &norm,
+            const Matrix &trans,
+            float TotalTerrainSizeX = 0,
+            float TotalTerrainSizeZ = 0) const;
     Vector GetNormal(const Vector &position, const Vector &requestednorm) const;
 };
 

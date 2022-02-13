@@ -33,8 +33,7 @@ extern std::string module_string;
 #include <iostream>
 extern void yyparse();
 
-void main(int argc, char **argv)
-{
+void main(int argc, char **argv) {
     extern FILE *yyin;
     if (argc <= 1) {
         yyin = fopen("test.c", "r");

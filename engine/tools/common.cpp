@@ -29,8 +29,7 @@
 #include <errno.h>
 #include <vector>
 
-FILEHandle::FILEHandle(const std::string &fname, const char perms[])
-{
+FILEHandle::FILEHandle(const std::string &fname, const char perms[]) {
     file = fopen(fname.c_str(), perms);
     if (!file) {
         throw errno;

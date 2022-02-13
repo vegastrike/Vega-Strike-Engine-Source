@@ -45,12 +45,11 @@
 /*	Software decompression for DDS files, helper functions */
 
 void decode_color_block(unsigned char *RESTRICT dst,
-                        unsigned char *RESTRICT src,
-                        int w,
-                        int h,
-                        int rowbytes,
-                        TEXTUREFORMAT format)
-{
+        unsigned char *RESTRICT src,
+        int w,
+        int h,
+        int rowbytes,
+        TEXTUREFORMAT format) {
     int i, x, y;
     unsigned int indexes, idx;
     unsigned char *d;
@@ -107,8 +106,7 @@ void decode_color_block(unsigned char *RESTRICT dst,
     }
 }
 
-void decode_dxt3_alpha(unsigned char *RESTRICT dst, unsigned char *RESTRICT src, int w, int h, int rowbytes)
-{
+void decode_dxt3_alpha(unsigned char *RESTRICT dst, unsigned char *RESTRICT src, int w, int h, int rowbytes) {
     int x, y;
     unsigned char *d;
     unsigned int bits;
@@ -124,8 +122,7 @@ void decode_dxt3_alpha(unsigned char *RESTRICT dst, unsigned char *RESTRICT src,
     }
 }
 
-void decode_dxt5_alpha(unsigned char *RESTRICT dst, unsigned char *RESTRICT src, int w, int h, int bpp, int rowbytes)
-{
+void decode_dxt5_alpha(unsigned char *RESTRICT dst, unsigned char *RESTRICT src, int w, int h, int bpp, int rowbytes) {
     int x, y, code;
     unsigned char *d, a0 = src[0], a1 = src[1];
     unsigned long long bits = GETL64(src) >> 16;
@@ -152,11 +149,10 @@ void decode_dxt5_alpha(unsigned char *RESTRICT dst, unsigned char *RESTRICT src,
 }
 
 void ddsDecompress(unsigned char *&RESTRICT buffer,
-                   unsigned char *&RESTRICT data,
-                   TEXTUREFORMAT internformat,
-                   int height,
-                   int width)
-{
+        unsigned char *&RESTRICT data,
+        TEXTUREFORMAT internformat,
+        int height,
+        int width) {
     unsigned char *pos_out = NULL, *pos_in = NULL;
     int bpp = 4;
     unsigned int sx, sy;

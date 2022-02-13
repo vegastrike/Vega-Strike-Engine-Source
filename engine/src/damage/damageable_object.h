@@ -39,7 +39,7 @@ struct DamageableObject {
     std::vector<DamageableObject> components;   // Propoulsion, life support,
 
     DamageableObject(std::vector<DamageableLayer> layers,
-                     std::vector<DamageableObject> components);
+            std::vector<DamageableObject> components);
     DamageableObject();
 
     InflictedDamage DealDamage(const CoreVector &attack_vector, Damage &damage);

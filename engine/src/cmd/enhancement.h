@@ -34,12 +34,11 @@
 class Enhancement : public Unit {
 public:
     Enhancement(const char *filename,
-                int faction,
-                const string &modifications,
-                Flightgroup *flightgrp = NULL,
-                int fg_subnumber = 0) :
-            Unit(filename, false, faction, modifications, flightgrp, fg_subnumber)
-    {
+            int faction,
+            const string &modifications,
+            Flightgroup *flightgrp = NULL,
+            int fg_subnumber = 0) :
+            Unit(filename, false, faction, modifications, flightgrp, fg_subnumber) {
         string file(filename);
         this->filename = filename;
     }
@@ -47,8 +46,7 @@ public:
 protected:
     std::string filename;
 
-    enum _UnitType isUnit() const
-    {
+    enum _UnitType isUnit() const {
         return _UnitType::enhancement;
     }
 

@@ -38,12 +38,10 @@
 template<> Audio::CodecRegistry *Singleton<Audio::CodecRegistry>::_singletonInstance = 0;
 
 namespace Audio {
-CodecRegistry::CodecRegistry()
-{
+CodecRegistry::CodecRegistry() {
 }
 
-CodecRegistry::~CodecRegistry()
-{
+CodecRegistry::~CodecRegistry() {
     nameCodec.clear();
     universalCodecs.clear();
     extensionCodecs.clear();
@@ -54,8 +52,7 @@ CodecRegistry::~CodecRegistry()
     codecPriority.clear();
 }
 
-void CodecRegistry::add(Codec *codec, int priority)
-{
+void CodecRegistry::add(Codec *codec, int priority) {
     if (codecPriority.find(codec) == codecPriority.end()) {
         codecPriority[codec] = priority;
         nameCodec[codec->getName()] = codec;
@@ -80,8 +77,7 @@ void CodecRegistry::add(Codec *codec, int priority)
     }
 }
 
-void CodecRegistry::remove(Codec *codec)
-{
+void CodecRegistry::remove(Codec *codec) {
     if (codecPriority.find(codec) != codecPriority.end()) {
         codecPriority.erase(codec);
         nameCodec.erase(codec->getName());
@@ -96,8 +92,7 @@ void CodecRegistry::remove(Codec *codec)
     }
 }
 
-Codec *CodecRegistry::findByName(const std::string &name) const
-{
+Codec *CodecRegistry::findByName(const std::string &name) const {
     NameCodec::const_iterator it = nameCodec.find(name);
     if (it != nameCodec.end()) {
         return it->second;
@@ -111,12 +106,10 @@ template<typename INDEX, typename T>
 class MappedComparator {
     const INDEX &_index;
 public:
-    MappedComparator(const INDEX &index) : _index(index)
-    {
+    MappedComparator(const INDEX &index) : _index(index) {
     }
 
-    bool operator()(const T &a, const T &b) const
-    {
+    bool operator()(const T &a, const T &b) const {
         typename INDEX::const_iterator ait = _index.find(a);
         typename INDEX::const_iterator bit = _index.find(b);
         if (ait == _index.end()) {
@@ -131,8 +124,7 @@ public:
     }
 };
 
-Codec *CodecRegistry::findByFile(const std::string &path, VSFileSystem::VSFileType type) const
-{
+Codec *CodecRegistry::findByFile(const std::string &path, VSFileSystem::VSFileType type) const {
     std::vector<Codec *> candidates;
 
     // NOTE: we'll assume that if they are including the specified extension, they'll return
@@ -164,7 +156,7 @@ Codec *CodecRegistry::findByFile(const std::string &path, VSFileSystem::VSFileTy
         // Why do we need an explicit cast *to* const?
         // See http://www.mpi-inf.mpg.de/~hitoshi/otherprojects/tips/cpp-memo.shtml
         for (std::vector<Codec *>::const_reverse_iterator it = candidates.rbegin();
-             it != reinterpret_cast<const std::vector<Codec *> &>(candidates).rend(); ++it) {
+                it != reinterpret_cast<const std::vector<Codec *> &>(candidates).rend(); ++it) {
             if ((*it)->canHandle(path, true, type)) {
                 return *it;
             }
@@ -176,23 +168,20 @@ Codec *CodecRegistry::findByFile(const std::string &path, VSFileSystem::VSFileTy
             std::string("No registered codec can handle the file \"") + path + "\"");
 }
 
-Stream *CodecRegistry::open(const std::string &path, VSFileSystem::VSFileType type) const
-{
+Stream *CodecRegistry::open(const std::string &path, VSFileSystem::VSFileType type) const {
     Codec *codec = findByFile(path, type);
     return codec->open(path, type);
 }
 
 CodecRegistration::CodecRegistration(Codec *_codec, int priority)
-        : codec(_codec)
-{
+        : codec(_codec) {
     if (!CodecRegistry::getSingleton()) {
         new CodecRegistry();
     }
     CodecRegistry::getSingleton()->add(codec);
 }
 
-CodecRegistration::~CodecRegistration()
-{
+CodecRegistration::~CodecRegistration() {
     CodecRegistry::getSingleton()->remove(codec);
 }
 

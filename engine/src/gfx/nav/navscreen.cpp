@@ -65,8 +65,7 @@
 //This sets up the items in the navscreen
 //**********************************
 
-NavigationSystem::NavigationSystem()
-{
+NavigationSystem::NavigationSystem() {
     draw = -1;
     whattodraw = (1 | 2);
     pathman = new PathManager();
@@ -77,8 +76,7 @@ NavigationSystem::NavigationSystem()
     factioncolours = NULL;
 }
 
-NavigationSystem::~NavigationSystem()
-{
+NavigationSystem::~NavigationSystem() {
     draw = 0;
     //delete mesh;
     delete screenoccupation;
@@ -93,20 +91,17 @@ NavigationSystem::~NavigationSystem()
     delete factioncolours;
 }
 
-void NavigationSystem::mouseDrag(int x, int y)
-{
+void NavigationSystem::mouseDrag(int x, int y) {
     mousex = x;
     mousey = y;
 }
 
-void NavigationSystem::mouseMotion(int x, int y)
-{
+void NavigationSystem::mouseMotion(int x, int y) {
     mousex = x;
     mousey = y;
 }
 
-void NavigationSystem::mouseClick(int button, int state, int x, int y)
-{
+void NavigationSystem::mouseClick(int button, int state, int x, int y) {
     mousex = x;
     mousey = y;
     if (state == WS_MOUSE_DOWN) {
@@ -116,8 +111,7 @@ void NavigationSystem::mouseClick(int button, int state, int x, int y)
     }
 }
 
-void NavigationSystem::Setup()
-{
+void NavigationSystem::Setup() {
     _Universe->AccessCockpit()->visitSystem(_Universe->activeStarSystem()->getFileName());
 
     configmode = 0;
@@ -367,13 +361,13 @@ void NavigationSystem::Setup()
 
     //Get special colors from the config
     currentcol = vs_config->getColor("nav", "current_system",
-                                     GFXColor(1, 0.3, 0.3, 1.0));
+            GFXColor(1, 0.3, 0.3, 1.0));
     destinationcol = vs_config->getColor("nav", "destination_system",
-                                         GFXColor(1, 0.77, 0.3, 1.0));
+            GFXColor(1, 0.77, 0.3, 1.0));
     selectcol = vs_config->getColor("nav", "selection_system",
-                                    GFXColor(0.3, 1, 0.3, 1.0));
+            GFXColor(0.3, 1, 0.3, 1.0));
     pathcol = vs_config->getColor("nav", "path_system",
-                                  GFXColor(1, 0.3, 0.3, 1.0));
+            GFXColor(1, 0.3, 0.3, 1.0));
     navcomp->init();
 }
 
@@ -381,8 +375,7 @@ void NavigationSystem::Setup()
 
 //This is the main draw loop for the nav screen
 //**********************************
-void NavigationSystem::Draw()
-{
+void NavigationSystem::Draw() {
     if (!CheckDraw()) {
         return;
     }
@@ -399,11 +392,11 @@ void NavigationSystem::Draw()
             XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_nav_zfloor", "0.1"));
     _Universe->AccessCamera()->GetOrientation(p, q, r);
     _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
-                                         GFXTRUE,
-                                         GFXFALSE,
-                                         GFXTRUE,
-                                         zfloor,
-                                         zfloor + zrange);
+            GFXTRUE,
+            GFXFALSE,
+            GFXTRUE,
+            zfloor,
+            zfloor + zrange);
 
     _Universe->activateLightMap();
     for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
@@ -472,35 +465,35 @@ void NavigationSystem::Draw()
         if (checkbit(whattodraw, 2)) {
             if (galaxy_view == VIEW_3D) {
                 DrawNavCircle(((screenskipby4[0] + screenskipby4[1]) / 2.0),
-                              ((screenskipby4[2] + screenskipby4[3]) / 2.0),
-                              0.6,
-                              rx,
-                              ry,
-                              GFXColor(1, 1, 1,
-                                       0.2));
+                        ((screenskipby4[2] + screenskipby4[3]) / 2.0),
+                        0.6,
+                        rx,
+                        ry,
+                        GFXColor(1, 1, 1,
+                                0.2));
             } else {
                 DrawGrid(screenskipby4[0],
-                         screenskipby4[1],
-                         screenskipby4[2],
-                         screenskipby4[3],
-                         GFXColor(1, 1, 1, 0.2));
+                        screenskipby4[1],
+                        screenskipby4[2],
+                        screenskipby4[3],
+                        GFXColor(1, 1, 1, 0.2));
             }
             DrawGalaxy();
         } else {
             if (system_view == VIEW_3D) {
                 DrawNavCircle(((screenskipby4[0] + screenskipby4[1]) / 2.0),
-                              ((screenskipby4[2] + screenskipby4[3]) / 2.0),
-                              0.6,
-                              rx_s,
-                              ry_s,
-                              GFXColor(1, 1, 1,
-                                       0.2));
+                        ((screenskipby4[2] + screenskipby4[3]) / 2.0),
+                        0.6,
+                        rx_s,
+                        ry_s,
+                        GFXColor(1, 1, 1,
+                                0.2));
             } else {
                 DrawGrid(screenskipby4[0],
-                         screenskipby4[1],
-                         screenskipby4[2],
-                         screenskipby4[3],
-                         GFXColor(1, 1, 1, 0.2));
+                        screenskipby4[1],
+                        screenskipby4[2],
+                        screenskipby4[3],
+                        GFXColor(1, 1, 1, 0.2));
             }
             DrawSystem();
         }
@@ -550,8 +543,7 @@ void NavigationSystem::Draw()
 
 //This is the mission info screen
 //**********************************
-void NavigationSystem::DrawMission()
-{
+void NavigationSystem::DrawMission() {
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -568,13 +560,13 @@ void NavigationSystem::DrawMission()
         relationskills += " | Kills";
     }
     drawdescription(relationskills,
-                    (originx + (0.1 * deltax)),
-                    (originy),
-                    1,
-                    1,
-                    0,
-                    screenoccupation,
-                    GFXColor(.3, 1, .3, 1));
+            (originx + (0.1 * deltax)),
+            (originy),
+            1,
+            1,
+            0,
+            screenoccupation,
+            GFXColor(.3, 1, .3, 1));
     drawdescription(" ", (originx + (0.1 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
 
     drawdescription(" ", (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
@@ -623,8 +615,8 @@ void NavigationSystem::DrawMission()
             //draw faction name
             const float *colors = FactionUtil::GetSparkColor(i);
             drawdescription(FactionUtil::GetFactionName(
-                                    i), (originx + (0.1 * deltax)), (originy), 1, 1, 0, screenoccupation,
-                            GFXColor(colors[0], colors[1], colors[2], 1.));
+                            i), (originx + (0.1 * deltax)), (originy), 1, 1, 0, screenoccupation,
+                    GFXColor(colors[0], colors[1], colors[2], 1.));
 
             float relation01 = relation * 0.5 + 0.5;
             relation = ((relation > 1 ? 1 : relation) < -1 ? -1 : relation);
@@ -635,7 +627,7 @@ void NavigationSystem::DrawMission()
                 relationtext += XMLSupport::tostring((int) (*killlist)[i]);
             }
             drawdescription(relationtext, (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation,
-                            GFXColor((1.0 - relation01), (relation01), (1.0 - (2.0 * Delta(relation01, 0.5))), 1));
+                    GFXColor((1.0 - relation01), (relation01), (1.0 - (2.0 * Delta(relation01, 0.5))), 1));
         }
     }
     string relationtext("Total Kills: ");
@@ -643,7 +635,7 @@ void NavigationSystem::DrawMission()
 
     relationtext += XMLSupport::tostring(totkills);
     drawdescription(relationtext, (originx + (0.2 * deltax)), (originy - (0.95 * deltay)), 1, 1, 0, screenoccupation,
-                    GFXColor((1.0 - relation), relation, (1.0 - (2.0 * Delta(relation, 0.5))), 1));
+            GFXColor((1.0 - relation), relation, (1.0 - (2.0 * Delta(relation, 0.5))), 1));
 
 //drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 //drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(1,.3,.3,1));
@@ -689,8 +681,7 @@ void NavigationSystem::DrawMission()
 //**********************************
 extern string MakeUnitXMLPretty(string str, Unit *un);
 
-void NavigationSystem::DrawShip()
-{
+void NavigationSystem::DrawShip() {
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -726,8 +717,7 @@ void NavigationSystem::DrawShip()
     GFXEnable(TEXTURE0);
 }
 
-void NavigationSystem::DrawSectorList()
-{
+void NavigationSystem::DrawSectorList() {
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -745,7 +735,7 @@ void NavigationSystem::DrawSectorList()
 
     //Draw Title of Column
     drawdescription("Sectors", originx + (0.5 * width), originy - (0.0 * deltay), 1, 1, 1, screenoccupation,
-                    GFXColor(.3, 1, .3, 1));
+            GFXColor(.3, 1, .3, 1));
 
     //Draw Scroll Pieces
     color = GFXColor(0.7, 0.3, 0.3, 1.0);
@@ -819,7 +809,7 @@ void NavigationSystem::DrawSectorList()
         ++count;
     }
     drawdescription("Systems", originx + (1.5) * width, originy - (0.0 * deltay), 1, 1, 1, screenoccupation,
-                    GFXColor(.3, 1, .3, 1));
+            GFXColor(.3, 1, .3, 1));
 
     //Draw Scroll Pieces
     color = GFXColor(0.7, 0.3, 0.3, 1.0);
@@ -899,8 +889,7 @@ void NavigationSystem::DrawSectorList()
     }
 }
 
-void NavigationSystem::DrawObjectives()
-{
+void NavigationSystem::DrawObjectives() {
     if (checkbit(whattodraw, 4)) {
         //Draw the objectives screen!
         DrawObjectivesTextPlane(&screen_objectives, scrolloffset, _Universe->AccessCockpit()->GetParent());
@@ -909,8 +898,7 @@ void NavigationSystem::DrawObjectives()
 
 //this sets weather to draw the screen or not
 //**********************************
-void NavigationSystem::SetDraw(bool n)
-{
+void NavigationSystem::SetDraw(bool n) {
     if (draw == -1) {
         Setup();
         draw = 0;
@@ -925,8 +913,7 @@ void NavigationSystem::SetDraw(bool n)
 
 //this gets rid of states that could be damaging
 //**********************************
-void NavigationSystem::ClearPriorities()
-{
+void NavigationSystem::ClearPriorities() {
     unsetbit(buttonstates, 1);
     currentselection = NULL;
 //rx = 1.0;		//	resetting rotations is up to hitting the 2d/3d button
@@ -941,8 +928,7 @@ void NavigationSystem::ClearPriorities()
 //This will set a wentdown and wentup flag just for the event of mouse button going down or up
 //this is an FF test. not a state test.
 //**********************************
-void NavigationSystem::SetMouseFlipStatus()
-{
+void NavigationSystem::SetMouseFlipStatus() {
 //getMouseButtonStatus()&1 = mouse button 1 standard = button 1 VS
 //getMouseButtonStatus()&2 = mouse button 3 standard = button 2 VS
 //getMouseButtonStatus()&4 = mouse button 2 standard = button 3 VS
@@ -980,8 +966,7 @@ void NavigationSystem::SetMouseFlipStatus()
 
 //returns a modified vector rotated by x y z radians
 //**********************************
-QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
-{
+QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_) {
 /*
  *         void Roll (QFLOAT rad){
  *               QFLOAT theta = atan2 (j,i)+rad;
@@ -1016,8 +1001,7 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 
 //**********************************
 
-void NavigationSystem::setCurrentSystem(string newSystem)
-{
+void NavigationSystem::setCurrentSystem(string newSystem) {
     for (unsigned i = 0; i < systemIter.size(); ++i) {
         if (systemIter[i].GetName() == newSystem) {
             setCurrentSystemIndex(i);
@@ -1026,8 +1010,7 @@ void NavigationSystem::setCurrentSystem(string newSystem)
     }
 }
 
-void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex)
-{
+void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
     focusedsystemindex = newSystemIndex;
     themaxvalue = 0;
     if (galaxy_view != VIEW_3D) {
@@ -1040,50 +1023,44 @@ void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex)
     camera_z = 0;     //calculate camera distance again... it may have changed.
 }
 
-void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex)
-{
+void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
     currentsystemindex = newSystemIndex;
     static bool AlwaysUpdateNavMap =
             XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                          "update_nav_after_jump",
-                                                          "false"));                          //causes occasional crash--only may have tracked it down
+                    "update_nav_after_jump",
+                    "false"));                          //causes occasional crash--only may have tracked it down
     if (AlwaysUpdateNavMap) {
         pathman->updatePaths(PathManager::CURRENT);
     }
 }
 
-void NavigationSystem::setDestinationSystemIndex(unsigned newSystemIndex)
-{
+void NavigationSystem::setDestinationSystemIndex(unsigned newSystemIndex) {
     destinationsystemindex = newSystemIndex;
     pathman->updatePaths(PathManager::TARGET);
 }
 
-std::string NavigationSystem::getCurrentSystem()
-{
+std::string NavigationSystem::getCurrentSystem() {
     if (factioncolours == NULL || focusedsystemindex >= systemIter.size()) {
         return _Universe->activeStarSystem()->getFileName();
     }
     return systemIter[currentsystemindex].GetName();
 }
 
-std::string NavigationSystem::getSelectedSystem()
-{
+std::string NavigationSystem::getSelectedSystem() {
     if (factioncolours == NULL || focusedsystemindex >= systemIter.size()) {
         return _Universe->activeStarSystem()->getFileName();
     }
     return systemIter[systemselectionindex].GetName();
 }
 
-std::string NavigationSystem::getDestinationSystem()
-{
+std::string NavigationSystem::getDestinationSystem() {
     if (factioncolours == NULL || focusedsystemindex >= systemIter.size()) {
         return _Universe->activeStarSystem()->getFileName();
     }
     return systemIter[destinationsystemindex].GetName();
 }
 
-std::string NavigationSystem::getFocusedSystem()
-{
+std::string NavigationSystem::getFocusedSystem() {
     if (factioncolours == NULL || focusedsystemindex >= systemIter.size()) {
         return _Universe->activeStarSystem()->getFileName();
     }
@@ -1103,8 +1080,7 @@ int NavigationSystem::mousey = 0;
 int NavigationSystem::mousex = 0;
 int NavigationSystem::mousestat;
 
-void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline)
-{
+void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline) {
     float mx = mouse_x_current;
     float my = mouse_y_current;
     bool inrange = TestIfInRange(x1, x2, y1, y2, mx, my);
@@ -1319,8 +1295,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 
 //Draws the actual button outline
 //**********************************
-void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col)
-{
+void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -1343,8 +1318,7 @@ void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float 
 //**********************************
 
 template<class T>
-static inline bool intersect(T x0, T y0, T x1, T y1, T sx0, T sy0, T sx1, T sy1, T &ansx, T &ansy)
-{
+static inline bool intersect(T x0, T y0, T x1, T y1, T sx0, T sy0, T sx1, T sy1, T &ansx, T &ansy) {
     bool fxy = false;
     if (((x1 == x0) && (sx1 == sx0)) || ((x1 == x0) && (y1 == y0)) || ((sx1 == sx0) && (sy1 == sy0))) {
         //If both lines are vertical, then act as if they don't intersect.
@@ -1408,41 +1382,40 @@ static inline bool intersect(T x0, T y0, T x1, T y1, T sx0, T sy0, T sx1, T sy1,
     return false;
 }
 
-void NavigationSystem::IntersectBorder(float &x, float &y, const float &x1, const float &y1) const
-{
+void NavigationSystem::IntersectBorder(float &x, float &y, const float &x1, const float &y1) const {
     float ansx;
     float ansy;
     if (intersect(x, y, x1, y1, screenskipby4[1], screenskipby4[3], screenskipby4[0], screenskipby4[3], ansx, ansy)
             || intersect(x,
-                         y,
-                         x1,
-                         y1,
-                         screenskipby4[0],
-                         screenskipby4[2],
-                         screenskipby4[0],
-                         screenskipby4[3],
-                         ansx,
-                         ansy)
+                    y,
+                    x1,
+                    y1,
+                    screenskipby4[0],
+                    screenskipby4[2],
+                    screenskipby4[0],
+                    screenskipby4[3],
+                    ansx,
+                    ansy)
             || intersect(x,
-                         y,
-                         x1,
-                         y1,
-                         screenskipby4[0],
-                         screenskipby4[2],
-                         screenskipby4[1],
-                         screenskipby4[2],
-                         ansx,
-                         ansy)
+                    y,
+                    x1,
+                    y1,
+                    screenskipby4[0],
+                    screenskipby4[2],
+                    screenskipby4[1],
+                    screenskipby4[2],
+                    ansx,
+                    ansy)
             || intersect(x,
-                         y,
-                         x1,
-                         y1,
-                         screenskipby4[1],
-                         screenskipby4[3],
-                         screenskipby4[1],
-                         screenskipby4[2],
-                         ansx,
-                         ansy)) {
+                    y,
+                    x1,
+                    y1,
+                    screenskipby4[1],
+                    screenskipby4[3],
+                    screenskipby4[1],
+                    screenskipby4[2],
+                    ansx,
+                    ansy)) {
         x = ansx;
         y = ansy;
     }
@@ -1450,8 +1423,7 @@ void NavigationSystem::IntersectBorder(float &x, float &y, const float &x1, cons
 
 //tests if given are in the range
 //**********************************
-bool NavigationSystem::TestIfInRange(float &x1, float &x2, float &y1, float &y2, float tx, float ty)
-{
+bool NavigationSystem::TestIfInRange(float &x1, float &x2, float &y1, float &y2, float tx, float ty) {
     if (((tx < x2) && (tx > x1)) && ((ty < y2) && (ty > y1))) {
         return 1;
     } else {
@@ -1462,8 +1434,7 @@ bool NavigationSystem::TestIfInRange(float &x1, float &x2, float &y1, float &y2,
 
 //tests if given are in the circle range
 //**********************************
-bool NavigationSystem::TestIfInRangeRad(float &x, float &y, float size, float tx, float ty)
-{
+bool NavigationSystem::TestIfInRangeRad(float &x, float &y, float size, float tx, float ty) {
     if ((((x - tx) * (x - tx)) + ((y - ty) * (y - ty))) < ((0.5 * size) * (0.5 * size))) {
         return 1;
     } else {
@@ -1475,8 +1446,7 @@ bool NavigationSystem::TestIfInRangeRad(float &x, float &y, float size, float tx
 
 //Tests if given are in block range
 //**********************************
-bool NavigationSystem::TestIfInRangeBlk(float &x, float &y, float size, float tx, float ty)
-{
+bool NavigationSystem::TestIfInRangeBlk(float &x, float &y, float size, float tx, float ty) {
     if ((Delta(tx, x) < (0.5 * size)) && (Delta(ty, y) < (0.5 * size))) {
         return 1;
     } else {
@@ -1502,8 +1472,7 @@ bool NavigationSystem::TestIfInRangeBlk(float &x, float &y, float size, float tx
 
 //converts the % of screen system to 0-center system
 //**********************************
-void NavigationSystem::ScreenToCoord(float &x)
-{
+void NavigationSystem::ScreenToCoord(float &x) {
     x -= .5;
     x *= 2;
 }
@@ -1511,19 +1480,17 @@ void NavigationSystem::ScreenToCoord(float &x)
 
 //checks if the draw flag is 1
 //**********************************
-bool NavigationSystem::CheckDraw()
-{
+bool NavigationSystem::CheckDraw() {
     return draw == 1;
 }
 //**********************************
 
-void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galaxy)
-{
+void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galaxy) {
     //Adjust transformation
     //**********************************
     if ((mouse_previous_state[0] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                             mouse_y_current)) {
+                    mouse_y_current)) {
         if (system_vs_galaxy) {
             if (three_d) {
                 float ndx = -1.0 * (mouse_y_current - mouse_y_previous);
@@ -1616,7 +1583,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
     //**********************************
     if (((mouse_previous_state[1] == 1)
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                             mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
+                    mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
         static float wheel_zoom_level =
                 XMLSupport::parse_float(vs_config->getVariable("graphics", "wheel_zoom_amount", "0.1"));
         if (system_vs_galaxy) {
@@ -1658,8 +1625,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
     //**********************************
 }
 
-void NavigationSystem::ReplaceAxes(QVector &pos)
-{
+void NavigationSystem::ReplaceAxes(QVector &pos) {
     //replace axes
     //*************************
     if (axis != 3) {
@@ -1685,14 +1651,13 @@ void NavigationSystem::ReplaceAxes(QVector &pos)
 }
 
 void NavigationSystem::RecordMinAndMax(const QVector &pos,
-                                       float &min_x,
-                                       float &max_x,
-                                       float &min_y,
-                                       float &max_y,
-                                       float &min_z,
-                                       float &max_z,
-                                       float &max_all)
-{
+        float &min_x,
+        float &max_x,
+        float &min_y,
+        float &max_y,
+        float &min_z,
+        float &max_z,
+        float &max_all) {
     //Record min and max
     //**********************************
     if ((float) pos.i > max_x) {
@@ -1731,8 +1696,7 @@ void NavigationSystem::RecordMinAndMax(const QVector &pos,
     //**********************************
 }
 
-void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy)
-{
+void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy) {
     //Draw Origin Orientation Tri
     //**********************************
     QVector directionx;
@@ -1825,12 +1789,11 @@ void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center
 }
 
 float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale,
-                                                       float &zdistance,
-                                                       QVector &pos,
-                                                       QVector &pos_flat,
-                                                       float &system_item_scale_temp,
-                                                       bool system_not_galaxy)
-{
+        float &zdistance,
+        QVector &pos,
+        QVector &pos_flat,
+        float &system_item_scale_temp,
+        bool system_not_galaxy) {
     pos_flat.i = pos.i;
     pos_flat.j = pos.j;
     pos_flat.k = center_z;
@@ -1928,19 +1891,18 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale,
 }
 
 void NavigationSystem::TranslateCoordinates(QVector &pos,
-                                            QVector &pos_flat,
-                                            float center_nav_x,
-                                            float center_nav_y,
-                                            float themaxvalue,
-                                            float &zscale,
-                                            float &zdistance,
-                                            float &the_x,
-                                            float &the_y,
-                                            float &the_x_flat,
-                                            float &the_y_flat,
-                                            float &system_item_scale_temp,
-                                            bool system_not_galaxy)
-{
+        QVector &pos_flat,
+        float center_nav_x,
+        float center_nav_y,
+        float themaxvalue,
+        float &zscale,
+        float &zdistance,
+        float &the_x,
+        float &the_y,
+        float &the_x_flat,
+        float &the_y_flat,
+        float &system_item_scale_temp,
+        bool system_not_galaxy) {
 
     // This code is necessary to pan and zoom the nav star map
     // as well as to display system names and make systems
@@ -1989,36 +1951,34 @@ void NavigationSystem::TranslateCoordinates(QVector &pos,
 }
 
 void NavigationSystem::TranslateAndDisplay(QVector &pos,
-                                           QVector &pos_flat,
-                                           float center_nav_x,
-                                           float center_nav_y,
-                                           float themaxvalue,
-                                           float &zscale,
-                                           float &zdistance,
-                                           float &the_x,
-                                           float &the_y,
-                                           float &system_item_scale_temp,
-                                           bool system_not_galaxy)
-{
+        QVector &pos_flat,
+        float center_nav_x,
+        float center_nav_y,
+        float themaxvalue,
+        float &zscale,
+        float &zdistance,
+        float &the_x,
+        float &the_y,
+        float &system_item_scale_temp,
+        bool system_not_galaxy) {
     float the_x_flat;
     float the_y_flat;
     if ((system_not_galaxy ? system_view : galaxy_view) == VIEW_ORTHO) {
         TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
-                             the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
+                the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
         return;
     } else {
         TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
-                             the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
+                the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
     }
     DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, system_not_galaxy);
 }
 
 void NavigationSystem::DisplayOrientationLines(float the_x,
-                                               float the_y,
-                                               float the_x_flat,
-                                               float the_y_flat,
-                                               bool system_not_galaxy)
-{
+        float the_y,
+        float the_x_flat,
+        float the_y_flat,
+        bool system_not_galaxy) {
     if ((system_not_galaxy ? system_view : galaxy_view) == VIEW_ORTHO) {
         return;
     }
@@ -2061,8 +2021,7 @@ void NavigationSystem::DisplayOrientationLines(float the_x,
     //**********************************
 }
 
-void Beautify(string systemfile, string &sector, string &system)
-{
+void Beautify(string systemfile, string &sector, string &system) {
     string::size_type slash = systemfile.find("/");
     if (slash == string::npos) {
         sector = "";

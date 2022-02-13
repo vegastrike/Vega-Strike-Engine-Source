@@ -35,12 +35,10 @@ using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 
-easyDomNode::easyDomNode()
-{
+easyDomNode::easyDomNode() {
 }
 
-void easyDomNode::set(easyDomNode *_parent, string _name, AttributeList *_attributes)
-{
+void easyDomNode::set(easyDomNode *_parent, string _name, AttributeList *_attributes) {
     parent = _parent;
     attributes = _attributes;
 
@@ -60,18 +58,15 @@ void easyDomNode::set(easyDomNode *_parent, string _name, AttributeList *_attrib
     name = _name;
 }
 
-void easyDomNode::addChild(easyDomNode *child)
-{
+void easyDomNode::addChild(easyDomNode *child) {
     subnodes.push_back(child);
 }
 
-string easyDomNode::attr_value(string search_name)
-{
+string easyDomNode::attr_value(string search_name) {
     return attribute_map[search_name];
 }
 
-void easyDomNode::printNode(ostream &out, int recurse_level, int level)
-{
+void easyDomNode::printNode(ostream &out, int recurse_level, int level) {
     map<string, string>::const_iterator iter;
     //vector<string>::const_iterator iter2;
 

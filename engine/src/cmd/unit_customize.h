@@ -48,19 +48,18 @@ extern int GetModeFromName(const char *);
 extern Unit *CreateGameTurret(std::string tur, int faction);
 
 bool Unit::UpgradeSubUnits(const Unit *up,
-                           int subunitoffset,
-                           bool touchme,
-                           bool downgrade,
-                           int &numave,
-                           double &percentage)
-{
+        int subunitoffset,
+        bool touchme,
+        bool downgrade,
+        int &numave,
+        double &percentage) {
     bool bl = this->UpgradeSubUnitsWithFactory(up,
-                                               subunitoffset,
-                                               touchme,
-                                               downgrade,
-                                               numave,
-                                               percentage,
-                                               &CreateGameTurret);
+            subunitoffset,
+            touchme,
+            downgrade,
+            numave,
+            percentage,
+            &CreateGameTurret);
     if (!up->SubUnits.empty()) {
         this->DisableTurretAI();
     }

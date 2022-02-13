@@ -30,15 +30,13 @@
 // #include "vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-06
 #include "vs_logging.h"
 
-GFXQuadList::GFXQuadList(GFXBOOL color) : numVertices(0), numQuads(0)
-{
+GFXQuadList::GFXQuadList(GFXBOOL color) : numVertices(0), numQuads(0) {
     data.vertices = NULL;
     Dirty = GFXFALSE;
     isColor = color;
 }
 
-GFXQuadList::~GFXQuadList()
-{
+GFXQuadList::~GFXQuadList() {
     if (isColor && data.colors) {
         free(data.colors);
     } else if (!isColor && data.vertices) {
@@ -46,8 +44,7 @@ GFXQuadList::~GFXQuadList()
     }
 }
 
-void GFXQuadList::Draw()
-{
+void GFXQuadList::Draw() {
     if (!numQuads) {
         return;
     }
@@ -62,8 +59,7 @@ void GFXQuadList::Draw()
     }
 }
 
-int GFXQuadList::AddQuad(const GFXVertex *vertices, const GFXColorVertex *color)
-{
+int GFXQuadList::AddQuad(const GFXVertex *vertices, const GFXColorVertex *color) {
     int cur = numQuads * 4;
     if (cur + 3 >= numVertices) {
         if (!numVertices) {
@@ -125,8 +121,7 @@ int GFXQuadList::AddQuad(const GFXVertex *vertices, const GFXColorVertex *color)
     return -1;
 }
 
-void GFXQuadList::DelQuad(int which)
-{
+void GFXQuadList::DelQuad(int which) {
     if (quadassignments[which] >= numQuads) {
         VS_LOG(error, "error del");
         return;
@@ -139,12 +134,12 @@ void GFXQuadList::DelQuad(int which)
         if (quadassignments[i] == numQuads - 1) {
             if (isColor) {
                 memcpy(data.colors + (quadassignments[which] * 4),
-                       data.colors + ((numQuads - 1) * 4),
-                       4 * sizeof(GFXColorVertex));
+                        data.colors + ((numQuads - 1) * 4),
+                        4 * sizeof(GFXColorVertex));
             } else {
                 memcpy(data.vertices + (quadassignments[which] * 4),
-                       data.vertices + ((numQuads - 1) * 4),
-                       4 * sizeof(GFXVertex));
+                        data.vertices + ((numQuads - 1) * 4),
+                        4 * sizeof(GFXVertex));
             }
             quadassignments[i] = quadassignments[which];
             quadassignments[which] = -1;
@@ -155,8 +150,7 @@ void GFXQuadList::DelQuad(int which)
     VS_LOG(info, " error deleting engine flame");
 }
 
-void GFXQuadList::ModQuad(int which, const GFXVertex *vertices, float alpha)
-{
+void GFXQuadList::ModQuad(int which, const GFXVertex *vertices, float alpha) {
     if (which < 0 || which >= numVertices / 4 || quadassignments[which] == -1) {
         return;
     }
@@ -172,12 +166,12 @@ void GFXQuadList::ModQuad(int which, const GFXVertex *vertices, float alpha)
                 alpha = .01;
             }
             float alp = (data.colors[w].r > data.colors[w].b)
-                        ? ((data.colors[w].r > data.colors[w].g) ? data.colors[w].r : data.colors[w].g)
-                        : ((data.colors[w].b > data.colors[w].g) ? data.colors[w].b : data.colors[w].g);
+                    ? ((data.colors[w].r > data.colors[w].g) ? data.colors[w].r : data.colors[w].g)
+                    : ((data.colors[w].b > data.colors[w].g) ? data.colors[w].b : data.colors[w].g);
             if (alp > .0001) {
                 float tmp[4] =
                         {alpha * data.colors[w + 0].r / alp, alpha * data.colors[w + 0].g / alp,
-                         alpha * data.colors[w + 0].b / alp, alpha};
+                                alpha * data.colors[w + 0].b / alp, alpha};
                 memcpy(&data.colors[w + 0].r, tmp, sizeof(float) * 4);
                 memcpy(&data.colors[w + 1].r, tmp, sizeof(float) * 4);
                 memcpy(&data.colors[w + 2].r, tmp, sizeof(float) * 4);
@@ -189,8 +183,7 @@ void GFXQuadList::ModQuad(int which, const GFXVertex *vertices, float alpha)
     }
 }
 
-void GFXQuadList::ModQuad(int which, const GFXColorVertex *vertices)
-{
+void GFXQuadList::ModQuad(int which, const GFXColorVertex *vertices) {
     if (which < 0 || which >= numVertices / 4 || quadassignments[which] == -1) {
         return;
     }
@@ -198,44 +191,44 @@ void GFXQuadList::ModQuad(int which, const GFXColorVertex *vertices)
         memcpy(data.vertices + (quadassignments[which] * 4), vertices, 4 * sizeof(GFXColorVertex));
     } else {
         data.vertices[(quadassignments[which] * 4) + 0].SetTexCoord(vertices[0].s,
-                                                                    vertices[0].t).SetNormal(Vector(vertices[0].i,
-                                                                                                    vertices[0].j,
-                                                                                                    vertices[0].k)).
-                                                               SetVertex(
+                vertices[0].t).SetNormal(Vector(vertices[0].i,
+                vertices[0].j,
+                vertices[0].k)).
+                SetVertex(
                 Vector(vertices[0].x,
-                       vertices
-                       [
-                               0
-                       ].y, vertices[0].z));
+                        vertices
+                        [
+                                0
+                        ].y, vertices[0].z));
         data.vertices[(quadassignments[which] * 4) + 1].SetTexCoord(vertices[1].s,
-                                                                    vertices[1].t).SetNormal(Vector(vertices[1].i,
-                                                                                                    vertices[1].j,
-                                                                                                    vertices[1].k)).
-                                                               SetVertex(
+                vertices[1].t).SetNormal(Vector(vertices[1].i,
+                vertices[1].j,
+                vertices[1].k)).
+                SetVertex(
                 Vector(vertices[1].x,
-                       vertices
-                       [
-                               1
-                       ].y, vertices[1].z));
+                        vertices
+                        [
+                                1
+                        ].y, vertices[1].z));
         data.vertices[(quadassignments[which] * 4) + 2].SetTexCoord(vertices[2].s,
-                                                                    vertices[2].t).SetNormal(Vector(vertices[2].i,
-                                                                                                    vertices[2].j,
-                                                                                                    vertices[2].k)).
-                                                               SetVertex(
+                vertices[2].t).SetNormal(Vector(vertices[2].i,
+                vertices[2].j,
+                vertices[2].k)).
+                SetVertex(
                 Vector(vertices[2].x,
-                       vertices
-                       [
-                               2
-                       ].y, vertices[2].z));
+                        vertices
+                        [
+                                2
+                        ].y, vertices[2].z));
         data.vertices[(quadassignments[which] * 4) + 3].SetTexCoord(vertices[3].s,
-                                                                    vertices[3].t).SetNormal(Vector(vertices[3].i,
-                                                                                                    vertices[3].j,
-                                                                                                    vertices[3].k)).
-                                                               SetVertex(
+                vertices[3].t).SetNormal(Vector(vertices[3].i,
+                vertices[3].j,
+                vertices[3].k)).
+                SetVertex(
                 Vector(vertices[3].x,
-                       vertices
-                       [
-                               3
-                       ].y, vertices[3].z));
+                        vertices
+                        [
+                                3
+                        ].y, vertices[3].z));
     }
 }

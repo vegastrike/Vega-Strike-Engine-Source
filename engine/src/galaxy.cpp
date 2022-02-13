@@ -37,8 +37,7 @@ using std::string;
 using std::map;
 using std::vector;
 
-Galaxy::Galaxy(string const &galaxy_file)
-{
+Galaxy::Galaxy(string const &galaxy_file) {
     pt::ptree tree;
     pt::read_xml(galaxy_file, tree);
 

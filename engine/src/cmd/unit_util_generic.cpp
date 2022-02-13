@@ -53,8 +53,7 @@ extern bool isWeapon(std::string name); //for percentoperational
 using std::string;
 extern Unit *getTopLevelOwner();
 
-static bool nameIsAsteroid(std::string name)
-{
+static bool nameIsAsteroid(std::string name) {
     if (name.length() < 8) {
         return false;
     }
@@ -72,29 +71,25 @@ namespace UnitUtil {
 //
 
 template<typename T>
-static inline T mymin(T a, T b)
-{
+static inline T mymin(T a, T b) {
     return (a < b) ? a : b;
 }
 
 template<typename T>
-static inline T mymax(T a, T b)
-{
+static inline T mymax(T a, T b) {
     return (a > b) ? a : b;
 }
 
 static const string &getFgDirectiveCR(const Unit *my_unit);
 
-bool isAsteroid(const Unit *my_unit)
-{
+bool isAsteroid(const Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
     return my_unit->isUnit() == _UnitType::asteroid || nameIsAsteroid(my_unit->name);
 }
 
-bool isCapitalShip(const Unit *my_unit)
-{
+bool isCapitalShip(const Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
@@ -102,8 +97,7 @@ bool isCapitalShip(const Unit *my_unit)
     return ((1 << (unsigned int) my_unit->getUnitRoleChar()) & capitaltypes) != 0;
 }
 
-bool hasDockingUnits(const Unit *my_unit)
-{
+bool hasDockingUnits(const Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
@@ -111,8 +105,7 @@ bool hasDockingUnits(const Unit *my_unit)
             || (my_unit->hasPendingClearanceRequests());
 }
 
-int getPhysicsPriority(Unit *un)
-{
+int getPhysicsPriority(Unit *un) {
     static bool FORCE_TOP_PRIORITY = XMLSupport::parse_bool(
             vs_config->getVariable("physics", "priorities", "force_top_priority", "false"));
     if (FORCE_TOP_PRIORITY) {
@@ -290,8 +283,8 @@ int getPhysicsPriority(Unit *un)
     if (un->graphicOptions.WarpRamping || un->graphicOptions.RampCounter != 0) {
         static float compwarprampuptime =
                 XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                               "computerwarprampuptime",
-                                                               "10")); //for the heck of it.  NOTE, variable also in unit_generic.cpp
+                        "computerwarprampuptime",
+                        "10")); //for the heck of it.  NOTE, variable also in unit_generic.cpp
         static float warprampdowntime =
                 XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
@@ -353,16 +346,15 @@ int getPhysicsPriority(Unit *un)
     }
 }
 
-void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVector center)
-{
+void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVector center) {
     if (my_unit) {
         my_unit->PrimeOrders(new PlanetaryOrbit(my_unit,
-                                                speed / (3.1415926536 * (S.Magnitude() + R.Magnitude())),
-                                                0,
-                                                R,
-                                                S,
-                                                center,
-                                                orbitee));
+                speed / (3.1415926536 * (S.Magnitude() + R.Magnitude())),
+                0,
+                R,
+                S,
+                center,
+                orbitee));
         if (orbitee) {
             if (orbitee->isUnit() == _UnitType::planet) {
                 ((Planet *) orbitee)->AddSatellite(my_unit);
@@ -377,40 +369,35 @@ void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVec
     }
 }
 
-string getFactionName(const Unit *my_unit)
-{
+string getFactionName(const Unit *my_unit) {
     if (!my_unit) {
         return "";
     }
     return FactionUtil::GetFaction(my_unit->faction);
 }
 
-int getFactionIndex(const Unit *my_unit)
-{
+int getFactionIndex(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
     return my_unit->faction;
 }
 
-void setFactionIndex(Unit *my_unit, int factionname)
-{
+void setFactionIndex(Unit *my_unit, int factionname) {
     if (!my_unit) {
         return;
     }
     my_unit->SetFaction(factionname);
 }
 
-void setFactionName(Unit *my_unit, string factionname)
-{
+void setFactionName(Unit *my_unit, string factionname) {
     if (!my_unit) {
         return;
     }
     my_unit->SetFaction(FactionUtil::GetFactionIndex(factionname));
 }
 
-float getFactionRelation(const Unit *my_unit, const Unit *their_unit)
-{
+float getFactionRelation(const Unit *my_unit, const Unit *their_unit) {
     if ((my_unit == nullptr) || (their_unit == nullptr)) {
         VS_LOG(warning, "getFactionRelation: null unit encountered!");
         return 0.0f;
@@ -426,8 +413,7 @@ float getFactionRelation(const Unit *my_unit, const Unit *their_unit)
     return relation;
 }
 
-float getRelationToFaction(const Unit *my_unit, int other_faction)
-{
+float getRelationToFaction(const Unit *my_unit, int other_faction) {
     float relation = FactionUtil::GetIntRelation(my_unit->faction, other_faction);
     int my_cp = _Universe->whichPlayerStarship(my_unit);
     if (my_cp != -1) {
@@ -436,8 +422,7 @@ float getRelationToFaction(const Unit *my_unit, int other_faction)
     return relation;
 }
 
-float getRelationFromFaction(const Unit *their_unit, int my_faction)
-{
+float getRelationFromFaction(const Unit *their_unit, int my_faction) {
     float relation = FactionUtil::GetIntRelation(my_faction, their_unit->faction);
     int their_cp = _Universe->whichPlayerStarship(their_unit);
     if (their_cp != -1) {
@@ -446,24 +431,21 @@ float getRelationFromFaction(const Unit *their_unit, int my_faction)
     return relation;
 }
 
-string getName(const Unit *my_unit)
-{
+string getName(const Unit *my_unit) {
     if (!my_unit) {
         return "";
     }
     return my_unit->name;
 }
 
-void setName(Unit *my_unit, string name)
-{
+void setName(Unit *my_unit, string name) {
     if (!my_unit) {
         return;
     }
     my_unit->name = name;
 }
 
-void SetHull(Unit *my_unit, float newhull)
-{
+void SetHull(Unit *my_unit, float newhull) {
     if (!my_unit) {
         return;
     }
@@ -472,8 +454,7 @@ void SetHull(Unit *my_unit, float newhull)
     my_unit->hull->facets[0].health = newhull;
 }
 
-float getCredits(const Unit *my_unit)
-{
+float getCredits(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
@@ -485,8 +466,7 @@ float getCredits(const Unit *my_unit)
     return viret;
 }
 
-void addCredits(const Unit *my_unit, float credits)
-{
+void addCredits(const Unit *my_unit, float credits) {
     if (!my_unit) {
         return;
     }
@@ -496,8 +476,7 @@ void addCredits(const Unit *my_unit, float credits)
     }
 }
 
-const string &getFlightgroupNameCR(const Unit *my_unit)
-{
+const string &getFlightgroupNameCR(const Unit *my_unit) {
     static const string empty_string("");
     if (!my_unit) {
         return empty_string;
@@ -510,13 +489,11 @@ const string &getFlightgroupNameCR(const Unit *my_unit)
     }
 }
 
-string getFlightgroupName(const Unit *my_unit)
-{
+string getFlightgroupName(const Unit *my_unit) {
     return getFlightgroupNameCR(my_unit);
 }
 
-Unit *getFlightgroupLeader(Unit *my_unit)
-{
+Unit *getFlightgroupLeader(Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
@@ -528,8 +505,7 @@ Unit *getFlightgroupLeader(Unit *my_unit)
     return ret_unit;
 }
 
-bool setFlightgroupLeader(Unit *my_unit, Unit *un)
-{
+bool setFlightgroupLeader(Unit *my_unit, Unit *un) {
     if (!my_unit || !un) {
         return false;
     }
@@ -541,13 +517,11 @@ bool setFlightgroupLeader(Unit *my_unit, Unit *un)
     }
 }
 
-string getFgDirective(const Unit *my_unit)
-{
+string getFgDirective(const Unit *my_unit) {
     return getFgDirectiveCR(my_unit);
 }
 
-static const string &getFgDirectiveCR(const Unit *my_unit)
-{
+static const string &getFgDirectiveCR(const Unit *my_unit) {
     static string emptystr;
     static string fgdirdef("b");
     if (!my_unit) {
@@ -560,8 +534,7 @@ static const string &getFgDirectiveCR(const Unit *my_unit)
     }
 }
 
-bool setFgDirective(Unit *my_unit, string inp)
-{
+bool setFgDirective(Unit *my_unit, string inp) {
     if (!my_unit) {
         return false;
     }
@@ -572,16 +545,14 @@ bool setFgDirective(Unit *my_unit, string inp)
     return false;
 }
 
-int getFgSubnumber(Unit *my_unit)
-{
+int getFgSubnumber(Unit *my_unit) {
     if (!my_unit) {
         return -1;
     }
     return my_unit->getFgSubnumber();
 }
 
-int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero)
-{
+int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero) {
     if (!my_unit) {
         return 0;
     }
@@ -594,8 +565,7 @@ int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero)
     return quantity;
 }
 
-void RecomputeUnitUpgrades(Unit *un)
-{
+void RecomputeUnitUpgrades(Unit *un) {
     if (un == NULL) {
         return;
     }
@@ -632,16 +602,14 @@ void RecomputeUnitUpgrades(Unit *un)
     }
 }
 
-bool repair(Unit *my_unit)
-{
+bool repair(Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
     return my_unit->RepairUpgrade();
 }
 
-float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts)
-{
+float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
     if (!my_unit) {
         return 0;
     }
@@ -651,8 +619,7 @@ float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bo
     return percentage;
 }
 
-int removeWeapon(Unit *my_unit, string name, int mountoffset, bool loop)
-{
+int removeWeapon(Unit *my_unit, string name, int mountoffset, bool loop) {
     if (!my_unit) {
         return -1;
     }
@@ -669,8 +636,7 @@ int removeWeapon(Unit *my_unit, string name, int mountoffset, bool loop)
     return -1;
 }
 
-int addCargo(Unit *my_unit, Cargo carg)
-{
+int addCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
@@ -687,8 +653,7 @@ int addCargo(Unit *my_unit, Cargo carg)
     return carg.quantity;
 }
 
-int forceAddCargo(Unit *my_unit, Cargo carg)
-{
+int forceAddCargo(Unit *my_unit, Cargo carg) {
     if (!my_unit) {
         return 0;
     }
@@ -696,8 +661,7 @@ int forceAddCargo(Unit *my_unit, Cargo carg)
     return carg.quantity;
 }
 
-int hasCargo(const Unit *my_unit, string mycarg)
-{
+int hasCargo(const Unit *my_unit, string mycarg) {
     if (!my_unit) {
         return 0;
     }
@@ -709,8 +673,7 @@ int hasCargo(const Unit *my_unit, string mycarg)
     return c->quantity;
 }
 
-bool JumpTo(Unit *unit, string system)
-{
+bool JumpTo(Unit *unit, string system) {
     if (unit != NULL) {
         return unit->getStarSystem()->JumpTo(unit, NULL, system);
     } else {
@@ -718,8 +681,7 @@ bool JumpTo(Unit *unit, string system)
     }
 }
 
-string getUnitSystemFile(const Unit *un)
-{
+string getUnitSystemFile(const Unit *un) {
     if (!un) {
         return _Universe->activeStarSystem()->getFileName();
     }
@@ -727,8 +689,7 @@ string getUnitSystemFile(const Unit *un)
     return ss->getFileName();
 }
 
-bool incrementCargo(Unit *my_unit, float percentagechange, int quantity)
-{
+bool incrementCargo(Unit *my_unit, float percentagechange, int quantity) {
     if (!my_unit) {
         return false;
     }
@@ -748,8 +709,7 @@ bool incrementCargo(Unit *my_unit, float percentagechange, int quantity)
     return false;
 }
 
-bool decrementCargo(Unit *my_unit, float percentagechange)
-{
+bool decrementCargo(Unit *my_unit, float percentagechange) {
     if (!my_unit) {
         return false;
     }
@@ -764,8 +724,7 @@ bool decrementCargo(Unit *my_unit, float percentagechange)
     return false;
 }
 
-Cargo GetCargoIndex(const Unit *my_unit, int index)
-{
+Cargo GetCargoIndex(const Unit *my_unit, int index) {
     if (my_unit) {
         if (index >= 0 && (unsigned int) index < my_unit->numCargo()) {
             return my_unit->GetCargo(index);
@@ -776,8 +735,7 @@ Cargo GetCargoIndex(const Unit *my_unit, int index)
     return ret;
 }
 
-Cargo GetCargo(const Unit *my_unit, std::string cargname)
-{
+Cargo GetCargo(const Unit *my_unit, std::string cargname) {
     if (my_unit) {
         unsigned int indx = (~(unsigned int) 0);
         const Cargo *cargptr = my_unit->GetCargo(cargname, indx);
@@ -790,8 +748,7 @@ Cargo GetCargo(const Unit *my_unit, std::string cargname)
     return ret;
 }
 
-bool isDockableUnit(const Unit *my_unit)
-{
+bool isDockableUnit(const Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
@@ -808,13 +765,12 @@ bool isDockableUnit(const Unit *my_unit)
             && (my_unit->DockingPortLocations().size() > 0);
 }
 
-bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un)
-{
+bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
     static bool
             superdock = XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_within_base_shield", "false"));
     float dis =
             (un->isUnit() == _UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
-                                                             : UnitUtil::getDistance(
+                    : UnitUtil::getDistance(
                     my_unit,
                     un);
     if (dis < un->rSize()) {
@@ -823,16 +779,14 @@ bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un)
     return false;
 }
 
-float getDistance(const Unit *my_unit, const Unit *un)
-{
+float getDistance(const Unit *my_unit, const Unit *un) {
     if (my_unit == NULL || un == NULL) {
         return FLT_MAX;
     }
     return (my_unit->Position() - un->Position()).Magnitude() - my_unit->rSize() - un->rSize();
 }
 
-float getSignificantDistance(const Unit *un, const Unit *sig)
-{
+float getSignificantDistance(const Unit *un, const Unit *sig) {
     if (un == NULL || sig == NULL) {
         return FLT_MAX;
     }
@@ -848,16 +802,14 @@ float getSignificantDistance(const Unit *un, const Unit *sig)
     return dist;
 }
 
-bool isSun(const Unit *my_unit)
-{
+bool isSun(const Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
     return my_unit->isPlanet() && ((Planet *) my_unit)->hasLights();
 }
 
-bool isSignificant(const Unit *my_unit)
-{
+bool isSignificant(const Unit *my_unit) {
     if (!my_unit) {
         return false;
     }
@@ -868,36 +820,31 @@ bool isSignificant(const Unit *my_unit)
     return res && !isSun(my_unit);
 }
 
-int isPlayerStarship(const Unit *un)
-{
+int isPlayerStarship(const Unit *un) {
     return _Universe->whichPlayerStarship(un);
 }
 
-void setSpeed(Unit *my_unit, float speed)
-{
+void setSpeed(Unit *my_unit, float speed) {
     if (my_unit) {
         my_unit->GetComputerData().set_speed = speed;
     }
 }
 
-float maxSpeed(const Unit *my_unit)
-{
+float maxSpeed(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
     return my_unit->ViewComputerData().max_speed();
 }
 
-float maxAfterburnerSpeed(const Unit *my_unit)
-{
+float maxAfterburnerSpeed(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
     return my_unit->ViewComputerData().max_ab_speed();
 }
 
-void setECM(Unit *my_unit, int NewECM)
-{
+void setECM(Unit *my_unit, int NewECM) {
     //short fix
     if (!my_unit) {
         return;
@@ -905,8 +852,7 @@ void setECM(Unit *my_unit, int NewECM)
     my_unit->ecm = NewECM;
 }
 
-int getECM(const Unit *my_unit)
-{
+int getECM(const Unit *my_unit) {
     //short fix
     if (!my_unit) {
         return 0;
@@ -914,8 +860,7 @@ int getECM(const Unit *my_unit)
     return my_unit->computer.ecmactive ? my_unit->ecm : 0;
 }
 
-static bool ishere(const Unit *par, const Unit *look)
-{
+static bool ishere(const Unit *par, const Unit *look) {
     const Unit *un;
     for (un_kiter uniter = par->viewSubUnits(); (un = *uniter); ++uniter) {
         if (un == look || (un != par && ishere(un, look))) {
@@ -925,8 +870,7 @@ static bool ishere(const Unit *par, const Unit *look)
     return false;
 }
 
-Unit *owner(const Unit *un)
-{
+Unit *owner(const Unit *un) {
     Unit *tmp;
     for (UniverseUtil::PythonUnitIter uniter = UniverseUtil::getUnitList(); (tmp = *uniter); ++uniter) {
         if (tmp == un || ishere(tmp, un)) {
@@ -936,8 +880,7 @@ Unit *owner(const Unit *un)
     return (NULL);
 }
 
-void performDockingOperations(Unit *un, Unit *unitToDockWith, int actually_dock)
-{
+void performDockingOperations(Unit *un, Unit *unitToDockWith, int actually_dock) {
     if (un && unitToDockWith) {
         Order *ai = un->aistate;
         un->aistate = NULL;
@@ -945,8 +888,7 @@ void performDockingOperations(Unit *un, Unit *unitToDockWith, int actually_dock)
     }
 }
 
-float PercentOperational(Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull)
-{
+float PercentOperational(Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
     if (!un) {
         return 0;
     }
@@ -1000,15 +942,13 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     return 1.0;
 }
 
-void setMissionRelevant(Unit *un)
-{
+void setMissionRelevant(Unit *un) {
     if (un && mission->runtime.pymissions) {
         mission->runtime.pymissions->relevant_units.push_back(new UnitContainer(un));
     }
 }
 
-void unsetMissionRelevant(Unit *un)
-{
+void unsetMissionRelevant(Unit *un) {
     if (un && mission->runtime.pymissions) {
         vector<UnitContainer *> *relevant = &mission->runtime.pymissions->relevant_units;
         auto i = relevant->begin();

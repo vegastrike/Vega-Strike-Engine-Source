@@ -42,8 +42,7 @@
 GFXVertexList *next;
 
 struct VertexCompare {
-    bool operator()(const GFXVertex *a, const GFXVertex *b) const
-    {
+    bool operator()(const GFXVertex *a, const GFXVertex *b) const {
         if ((sizeof(GFXVertex) % sizeof(unsigned int)) != 0) {
             return memcmp(a, b, sizeof(GFXVertex)) < 0;
         } else {
@@ -66,8 +65,7 @@ struct VertexCompare {
 
 #include <map>
 
-void GFXOptimizeList(GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsigned int **ind)
-{
+void GFXOptimizeList(GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsigned int **ind) {
     std::map<GFXVertex *, int, VertexCompare> vtxcache;
 
     *ind = (unsigned int *) malloc(sizeof(unsigned int) * numV);
@@ -100,14 +98,13 @@ void GFXOptimizeList(GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsig
 }
 
 void GFXVertexList::Init(enum POLYTYPE *poly,
-                         int numVertices,
-                         const GFXVertex *vertices,
-                         const GFXColorVertex *colors,
-                         int numlists,
-                         int *offsets,
-                         bool Mutable,
-                         unsigned int *indices)
-{
+        int numVertices,
+        const GFXVertex *vertices,
+        const GFXColorVertex *colors,
+        int numlists,
+        int *offsets,
+        bool Mutable,
+        unsigned int *indices) {
     vbo_data = 0;
     vbo_elements = nullptr;
 
@@ -227,8 +224,7 @@ void GFXVertexList::Init(enum POLYTYPE *poly,
     }
 }
 
-int GFXVertexList::numTris() const
-{
+int GFXVertexList::numTris() const {
     int tot = 0;
     for (int i = 0; i < numlists; i++) {
         switch (mode[i]) {
@@ -247,8 +243,7 @@ int GFXVertexList::numTris() const
     return tot;
 }
 
-int GFXVertexList::numQuads() const
-{
+int GFXVertexList::numQuads() const {
     int tot = 0;
     for (int i = 0; i < numlists; i++) {
         switch (mode[i]) {
@@ -265,30 +260,27 @@ int GFXVertexList::numQuads() const
     return tot;
 }
 
-void GFXVertexList::VtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany)
-{
+void GFXVertexList::VtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany) {
     memcpy(dst, &thus->data.vertices[offset], sizeof(GFXVertex) * howmany);
 }
 
-void GFXVertexList::ColVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany)
-{
+void GFXVertexList::ColVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany) {
     for (int i = 0; i < howmany; i++) {
         dst[i].
-                      SetTexCoord(thus->data.colors[i + offset].s, thus->data.colors[i + offset].t).
-                      SetNormal(Vector(thus->data.colors[i + offset].i,
-                                       thus->data.colors[i + offset].j,
-                                       thus->data.colors[i + offset].k)).
-                      SetVertex(Vector(thus->data.colors[i + offset].x,
-                                       thus->data.colors[i + offset].y,
-                                       thus->data.colors[i + offset].z)).
-                      SetTangent(Vector(thus->data.colors[i + offset].tx,
-                                        thus->data.colors[i + offset].ty,
-                                        thus->data.colors[i + offset].tz), thus->data.colors[i + offset].tw);
+                SetTexCoord(thus->data.colors[i + offset].s, thus->data.colors[i + offset].t).
+                SetNormal(Vector(thus->data.colors[i + offset].i,
+                thus->data.colors[i + offset].j,
+                thus->data.colors[i + offset].k)).
+                SetVertex(Vector(thus->data.colors[i + offset].x,
+                thus->data.colors[i + offset].y,
+                thus->data.colors[i + offset].z)).
+                SetTangent(Vector(thus->data.colors[i + offset].tx,
+                thus->data.colors[i + offset].ty,
+                thus->data.colors[i + offset].tz), thus->data.colors[i + offset].tw);
     }
 }
 
-void GFXVertexList::RenormalizeNormals()
-{
+void GFXVertexList::RenormalizeNormals() {
     if (data.colors == 0 && data.vertices == 0) {
         return;
     }          //
@@ -330,60 +322,53 @@ void GFXVertexList::RenormalizeNormals()
     }
 }
 
-unsigned int GFXVertexList::GetIndex(int offset) const
-{
+unsigned int GFXVertexList::GetIndex(int offset) const {
     return (changed & INDEX_BYTE)
-           ? (unsigned int) (index.b[offset])
-           : ((changed & INDEX_SHORT)
-              ? (unsigned int) (index.s[offset])
-              : index.i[offset]);
+            ? (unsigned int) (index.b[offset])
+            : ((changed & INDEX_SHORT)
+                    ? (unsigned int) (index.s[offset])
+                    : index.i[offset]);
 }
 
-void GFXVertexList::ColIndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany)
-{
+void GFXVertexList::ColIndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany) {
     for (int i = 0; i < howmany; i++) {
         unsigned int j = thus->GetIndex(i + offset);
         dst[i].
-                      SetTexCoord(thus->data.colors[j].s, thus->data.colors[j].t).
-                      SetNormal(Vector(thus->data.colors[j].i, thus->data.colors[j].j, thus->data.colors[j].k)).
-                      SetVertex(Vector(thus->data.colors[j].x, thus->data.colors[j].y, thus->data.colors[j].z)).
-                      SetTangent(Vector(thus->data.colors[j].tx,
-                                        thus->data.colors[j].ty,
-                                        thus->data.colors[j].tz), thus->data.colors[j].tw);
+                SetTexCoord(thus->data.colors[j].s, thus->data.colors[j].t).
+                SetNormal(Vector(thus->data.colors[j].i, thus->data.colors[j].j, thus->data.colors[j].k)).
+                SetVertex(Vector(thus->data.colors[j].x, thus->data.colors[j].y, thus->data.colors[j].z)).
+                SetTangent(Vector(thus->data.colors[j].tx,
+                thus->data.colors[j].ty,
+                thus->data.colors[j].tz), thus->data.colors[j].tw);
     }
 }
 
-void GFXVertexList::IndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany)
-{
+void GFXVertexList::IndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany) {
     for (int i = 0; i < howmany; i++) {
         unsigned int j = thus->GetIndex(i + offset);
         dst[i].
-                      SetTexCoord(thus->data.vertices[j].s, thus->data.vertices[j].t).
-                      SetNormal(Vector(thus->data.vertices[j].i, thus->data.vertices[j].j, thus->data.vertices[j].k)).
-                      SetVertex(Vector(thus->data.vertices[j].x, thus->data.vertices[j].y, thus->data.vertices[j].z)).
-                      SetTangent(Vector(thus->data.vertices[j].tx,
-                                        thus->data.vertices[j].ty,
-                                        thus->data.vertices[j].tz), thus->data.vertices[j].tw);
+                SetTexCoord(thus->data.vertices[j].s, thus->data.vertices[j].t).
+                SetNormal(Vector(thus->data.vertices[j].i, thus->data.vertices[j].j, thus->data.vertices[j].k)).
+                SetVertex(Vector(thus->data.vertices[j].x, thus->data.vertices[j].y, thus->data.vertices[j].z)).
+                SetTangent(Vector(thus->data.vertices[j].tx,
+                thus->data.vertices[j].ty,
+                thus->data.vertices[j].tz), thus->data.vertices[j].tw);
     }
 }
 
-bool GFXVertexList::hasColor() const
-{
+bool GFXVertexList::hasColor() const {
     return (changed & HAS_COLOR) != 0;
 }
 
-const GFXVertex *GFXVertexList::GetVertex(int index) const
-{
+const GFXVertex *GFXVertexList::GetVertex(int index) const {
     return data.vertices + index;
 }
 
-const GFXColorVertex *GFXVertexList::GetColorVertex(int index) const
-{
+const GFXColorVertex *GFXVertexList::GetColorVertex(int index) const {
     return data.colors + index;
 }
 
-void GFXVertexList::GetPolys(GFXVertex **vert, int *numpolys, int *numtris)
-{
+void GFXVertexList::GetPolys(GFXVertex **vert, int *numpolys, int *numtris) {
     if (numVertices == 0) {
         *numpolys = 0;
         *numtris = 0;
@@ -393,12 +378,12 @@ void GFXVertexList::GetPolys(GFXVertex **vert, int *numpolys, int *numtris)
     this->Map(true, false);
     void (*vtxcpy)(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
     vtxcpy = (changed & HAS_COLOR)
-             ? ((changed & HAS_INDEX)
-                ? ColIndVtxCopy
-                : ColVtxCopy)
-             : ((changed & HAS_INDEX)
-                ? IndVtxCopy
-                : VtxCopy);
+            ? ((changed & HAS_INDEX)
+                    ? ColIndVtxCopy
+                    : ColVtxCopy)
+            : ((changed & HAS_INDEX)
+                    ? IndVtxCopy
+                    : VtxCopy);
     //int offst = (changed&HAS_COLOR)?sizeof(GFXColorVertex):sizeof(GFXVertex);
     int i;
     int cur = 0;
@@ -457,6 +442,5 @@ void GFXVertexList::GetPolys(GFXVertex **vert, int *numpolys, int *numtris)
     this->UnMap();
 }
 
-void GFXVertexList::LoadDrawState()
-{
+void GFXVertexList::LoadDrawState() {
 }

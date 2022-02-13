@@ -27,8 +27,7 @@
 
 //This draws the mouse cursor
 //**********************************
-void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const GFXColor &col)
-{
+void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const GFXColor &col) {
     float sizex, sizey;
     static bool modern_nav_cursor =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "nav", "modern_mouse_cursor", "true"));
@@ -71,8 +70,7 @@ void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const 
 
 //This draws the grid over the nav screen area
 //**********************************
-void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, const GFXColor &col)
-{
+void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
     static bool draw_grid = XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_nav_grid", "true"));
     if (!draw_grid) {
         return;
@@ -105,8 +103,7 @@ void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, cons
 
 //This will draw a circle over the screen
 //**********************************
-void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -130,8 +127,7 @@ void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &
 
 //This will draw a half circle, centered at the top 1/4 center
 //**********************************
-void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -155,8 +151,7 @@ void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFX
 
 //This will draw a half circle, centered at the bottom 1/4 center
 //**********************************
-void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -180,8 +175,7 @@ void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const 
 
 //This will draw a planet icon. circle + lightning thingy
 //**********************************
-void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -215,8 +209,7 @@ void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &
 
 //This will draw a station icon. 3x3 grid
 //**********************************
-void NavigationSystem::DrawStation(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawStation(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -257,8 +250,7 @@ void NavigationSystem::DrawStation(float x, float y, float size, const GFXColor 
 
 //This will draw a jump node icon
 //**********************************
-void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -303,8 +295,7 @@ void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &co
 
 //This will draw a missile icon
 //**********************************
-void NavigationSystem::DrawMissile(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawMissile(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -332,8 +323,7 @@ void NavigationSystem::DrawMissile(float x, float y, float size, const GFXColor 
 
 //This will draw a square set of corners
 //**********************************
-void NavigationSystem::DrawTargetCorners(float x, float y, float size, const GFXColor &col)
-{
+void NavigationSystem::DrawTargetCorners(float x, float y, float size, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -365,8 +355,7 @@ void NavigationSystem::DrawTargetCorners(float x, float y, float size, const GFX
 
 //This will draw an oriented circle
 //**********************************
-void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, float rot_y, const GFXColor &col)
-{
+void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, float rot_y, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);

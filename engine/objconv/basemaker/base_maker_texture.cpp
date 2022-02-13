@@ -36,8 +36,7 @@ extern "C" {
 
 #define strip_16 true
 
-static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
-{
+static void png_cexcept_error(png_structp png_ptr, png_const_charp msg) {
     if (png_ptr) {
         //
     }
@@ -50,8 +49,7 @@ unsigned int Texture::last_handle = (unsigned int) -1;
 enum Format { FORMAT_PNG, FORMAT_BMP, FORMAT_JPG, FORMAT_OTHER };
 static size_t bogus_return; //added by chuck_starchaser, to get rid of ignored return warnings
 
-static inline bool readPng(FILE *fp, Texture::FileData *data, Texture::TextureTransform tt)
-{
+static inline bool readPng(FILE *fp, Texture::FileData *data, Texture::TextureTransform tt) {
     unsigned char sig[8];
     png_structp png_ptr;
     png_bytepp row_pointers;
@@ -64,8 +62,8 @@ static inline bool readPng(FILE *fp, Texture::FileData *data, Texture::TextureTr
  *       }*/
     //The previous check could only be false if the image was modified after being opened (such as on *nix systems).  In that case, worse things will happen anyways.
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
-                                     (png_error_ptr) png_cexcept_error,
-                                     (png_error_ptr) NULL);
+            (png_error_ptr) png_cexcept_error,
+            (png_error_ptr) NULL);
     if (png_ptr == NULL) {
         return false;
     }
@@ -88,14 +86,14 @@ static inline bool readPng(FILE *fp, Texture::FileData *data, Texture::TextureTr
     int ctype;
     png_read_info(png_ptr, info_ptr);     /* read all PNG info up to image data */
     png_get_IHDR(png_ptr,
-                 info_ptr,
-                 (png_uint_32 *) &data->width,
-                 (png_uint_32 *) &data->height,
-                 &data->bpp,
-                 &ctype,
-                 &interlace_type,
-                 NULL,
-                 NULL);
+            info_ptr,
+            (png_uint_32 *) &data->width,
+            (png_uint_32 *) &data->height,
+            &data->bpp,
+            &ctype,
+            &interlace_type,
+            NULL,
+            NULL);
 # if __BYTE_ORDER != __BIG_ENDIAN
     if (data->bpp == 16) {
         png_set_swap(png_ptr);
@@ -113,14 +111,14 @@ static inline bool readPng(FILE *fp, Texture::FileData *data, Texture::TextureTr
     png_set_expand(png_ptr);
     png_read_update_info(png_ptr, info_ptr);
     png_get_IHDR(png_ptr,
-                 info_ptr,
-                 (png_uint_32 *) &data->width,
-                 (png_uint_32 *) &data->height,
-                 &data->bpp,
-                 &ctype,
-                 &interlace_type,
-                 NULL,
-                 NULL);
+            info_ptr,
+            (png_uint_32 *) &data->width,
+            (png_uint_32 *) &data->height,
+            &data->bpp,
+            &ctype,
+            &interlace_type,
+            NULL,
+            NULL);
     row_pointers = (unsigned char **) malloc(sizeof(unsigned char *) * data->height);
     int numchan = 1;
     if (ctype & PNG_COLOR_MASK_COLOR) {
@@ -185,8 +183,7 @@ struct my_error_mgr {
     jmp_buf setjmp_buffer;     //for return to caller
 };
 
-METHODDEF(void) my_error_exit(j_common_ptr cinfo)
-{
+METHODDEF(void) my_error_exit(j_common_ptr cinfo) {
     //cinfo->err really points to a my_error_mgr struct, so coerce pointer
     my_error_mgr *myerr = (my_error_mgr *) cinfo->err;
     //Always display the message.
@@ -196,8 +193,7 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo)
     longjmp(myerr->setjmp_buffer, 1);
 }
 
-static inline bool readJpg(FILE *fp, Texture::FileData *data, Texture::TextureTransform tt)
-{
+static inline bool readJpg(FILE *fp, Texture::FileData *data, Texture::TextureTransform tt) {
     data->bpp = 8;
     jpeg_decompress_struct cinfo;
     my_error_mgr jerr;
@@ -247,16 +243,14 @@ static inline bool readJpg(FILE *fp, Texture::FileData *data, Texture::TextureTr
     return true;
 }
 
-static inline bool readBmp(FILE *fp, Texture::FileData *data, Texture::TextureTransform tt)
-{
+static inline bool readBmp(FILE *fp, Texture::FileData *data, Texture::TextureTransform tt) {
     fprintf(
             stderr,
             "Bitmap files are not supported due to lack of an alpha channel.  Use PNG files instead to get better compression.\n");
     return false;
 }
 
-static inline Format getFormat(FILE *fp)
-{
+static inline Format getFormat(FILE *fp) {
     {
         /// Check for PNG file
 
@@ -293,8 +287,7 @@ static inline Format getFormat(FILE *fp)
     return FORMAT_OTHER;
 }
 
-bool Texture::getTextureData(FILE *fp, Texture::FileData *data, TextureTransform tt)
-{
+bool Texture::getTextureData(FILE *fp, Texture::FileData *data, TextureTransform tt) {
     bool ret;
     switch (getFormat(fp)) {
         case FORMAT_PNG:
@@ -316,8 +309,7 @@ bool Texture::getTextureData(FILE *fp, Texture::FileData *data, TextureTransform
     return ret;
 }
 
-bool Texture::getTextureData(const std::string &file, Texture::FileData *data, TextureTransform tt)
-{
+bool Texture::getTextureData(const std::string &file, Texture::FileData *data, TextureTransform tt) {
     FILE *fp = fopen(file.c_str(), "rb");
     bool ret = getTextureData(fp, data, tt);
     fclose(fp);
@@ -327,8 +319,7 @@ bool Texture::getTextureData(const std::string &file, Texture::FileData *data, T
     return ret;
 }
 
-void Texture::loadTexture(FILE *file, TextureTransform tt)
-{
+void Texture::loadTexture(FILE *file, TextureTransform tt) {
     FileData data;
     if (!getTextureData(file, &data, tt)) {
         handle = (unsigned int) -1;
@@ -372,8 +363,7 @@ void Texture::loadTexture(FILE *file, TextureTransform tt)
     glTexImage2D(GL_TEXTURE_2D, 0, rgbif, data.width, data.height, 0, rgbf, GL_UNSIGNED_BYTE, data.data);
 }
 
-void Texture::loadTexture(const std::string &file, TextureTransform tt)
-{
+void Texture::loadTexture(const std::string &file, TextureTransform tt) {
     FILE *fp = fopen(file.c_str(), "rb");
     if (fp) {
         loadTexture(fp, tt);
@@ -383,24 +373,20 @@ void Texture::loadTexture(const std::string &file, TextureTransform tt)
     }
 }
 
-Texture::Texture(const std::string &file, TextureTransform tt)
-{
+Texture::Texture(const std::string &file, TextureTransform tt) {
     loadTexture(file, tt);
 }
 
-Texture::Texture(FILE *file, TextureTransform tt)
-{
+Texture::Texture(FILE *file, TextureTransform tt) {
     loadTexture(file, tt);
 }
 
-Texture::~Texture()
-{
+Texture::~Texture() {
     fprintf(stderr, "Texture %d deleted", handle);
     //glDeleteTextures(1,&handle);
 }
 
-void Texture::bind()
-{
+void Texture::bind() {
 //if (last_handle!=handle) {
     last_handle = handle;
     glBindTexture(GL_TEXTURE_2D, handle);

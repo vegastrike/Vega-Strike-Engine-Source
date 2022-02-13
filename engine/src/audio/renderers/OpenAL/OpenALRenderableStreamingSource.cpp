@@ -41,34 +41,29 @@
 
 namespace Audio {
 
-static inline void alSource3f(ALuint source, ALenum param, const Vector3 &v)
-{
+static inline void alSource3f(ALuint source, ALenum param, const Vector3 &v) {
     ::alSource3f(source, param, ALfloat(v.x), ALfloat(v.y), ALfloat(v.z));
 }
 
-static inline void alSource3f(ALuint source, ALenum param, const LVector3 &v)
-{
+static inline void alSource3f(ALuint source, ALenum param, const LVector3 &v) {
     ::alSource3f(source, param, ALfloat(v.x), ALfloat(v.y), ALfloat(v.z));
 }
 
 OpenALRenderableStreamingSource::OpenALRenderableStreamingSource(Source *source)
         : RenderableSource(source),
-          alSource(0),
-          atEos(false),
-          shouldPlay(false),
-          startedPlaying(false),
-          buffering(false)
-{
+        alSource(0),
+        atEos(false),
+        shouldPlay(false),
+        startedPlaying(false),
+        buffering(false) {
     alGenSources(1, &alSource);
 }
 
-OpenALRenderableStreamingSource::~OpenALRenderableStreamingSource()
-{
+OpenALRenderableStreamingSource::~OpenALRenderableStreamingSource() {
     alDeleteSources(1, &alSource);
 }
 
-void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start)
-{
+void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start) {
     if (!isPlayingImpl()) {
         SharedPtr<Sound> sound = getSource()->getSound();
 
@@ -97,16 +92,14 @@ void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start)
     }
 }
 
-void OpenALRenderableStreamingSource::stopPlayingImpl()
-{
+void OpenALRenderableStreamingSource::stopPlayingImpl() {
     shouldPlay = false;
     startedPlaying = false;
     buffering = false;
     alSourceStop(alSource);
 }
 
-bool OpenALRenderableStreamingSource::isPlayingImpl() const
-{
+bool OpenALRenderableStreamingSource::isPlayingImpl() const {
     // According to the AL, streaming sounds can cease to be
     // in the playing state because of buffer starvation. However,
     // we want to consider them still playing, so if we haven't
@@ -121,8 +114,7 @@ bool OpenALRenderableStreamingSource::isPlayingImpl() const
     return (state == AL_PLAYING);
 }
 
-Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const
-{
+Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const {
     ALfloat offs = -1.f;
     alGetSourcef(getALSource(), AL_SEC_OFFSET, &offs);
 
@@ -136,16 +128,14 @@ Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const
     return Timestamp(offs) + base;
 }
 
-void OpenALRenderableStreamingSource::seekImpl(Timestamp time)
-{
+void OpenALRenderableStreamingSource::seekImpl(Timestamp time) {
     // Seek the stream to the specified position
     atEos = false;
     dynamic_cast<OpenALStreamingSound *>(getSource()->getSound().get())
             ->seek(time);
 }
 
-void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &sceneListener)
-{
+void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &sceneListener) {
     Source *source = getSource();
     ALSourceHandle als = getALSource();
 
@@ -212,23 +202,22 @@ void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &scen
             alSource3f(als, AL_DIRECTION, source->getDirection());
         } else {
             alSource3f(als, AL_POSITION,
-                       source->getPosition() - sceneListener.getPosition());
+                    source->getPosition() - sceneListener.getPosition());
             alSource3f(als, AL_VELOCITY,
-                       sceneListener.toLocalDirection(
-                               source->getVelocity() - sceneListener.getVelocity()
-                       ));
+                    sceneListener.toLocalDirection(
+                            source->getVelocity() - sceneListener.getVelocity()
+                    ));
             alSource3f(als, AL_DIRECTION,
-                       sceneListener.toLocalDirection(
-                               source->getDirection()
-                       ));
+                    sceneListener.toLocalDirection(
+                            source->getDirection()
+                    ));
         }
     }
 
     checkAlError();
 }
 
-void OpenALRenderableStreamingSource::queueALBuffers()
-{
+void OpenALRenderableStreamingSource::queueALBuffers() {
     SharedPtr<Sound> sound = getSource()->getSound();
 
     if (!sound->isLoaded()) {

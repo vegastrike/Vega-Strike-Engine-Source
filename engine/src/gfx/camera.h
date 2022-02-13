@@ -47,14 +47,12 @@ class Camera {
     float cockpit_offset;
     UnitContainer nebula;
 public:
-    void setCockpitOffset(float c)
-    {
+    void setCockpitOffset(float c) {
         cockpit_offset = c;
         changed = GFXTRUE;
     }
 
-    float getCockpitOffset()
-    {
+    float getCockpitOffset() {
         return cockpit_offset;
     }
 
@@ -94,91 +92,80 @@ public:
     void UpdateCameraSounds();
     void GetView(Matrix &);
 
-    const Vector &GetR() const
-    {
+    const Vector &GetR() const {
         return R;
     }
 
     void GetPQR(Vector &p1, Vector &q1, Vector &r1) const;
     void UpdateGFX(GFXBOOL clip,
-                   GFXBOOL updateFrustum,
-                   GFXBOOL centerCamera,
-                   GFXBOOL overrideZFrustum,
-                   float overrideZNear,
-                   float overrideZFar);
+            GFXBOOL updateFrustum,
+            GFXBOOL centerCamera,
+            GFXBOOL overrideZFrustum,
+            float overrideZNear,
+            float overrideZFar);
 
-    void UpdateGFX(GFXBOOL clip = GFXTRUE, GFXBOOL updateFrustum = GFXTRUE, GFXBOOL centerCamera = GFXFALSE)
-    {
+    void UpdateGFX(GFXBOOL clip = GFXTRUE, GFXBOOL updateFrustum = GFXTRUE, GFXBOOL centerCamera = GFXFALSE) {
         UpdateGFX(clip,
-                  updateFrustum,
-                  centerCamera,
-                  lastGFXUpdate.overrideZFrustum,
-                  lastGFXUpdate.overrideZNear,
-                  lastGFXUpdate.overrideZFar);
+                updateFrustum,
+                centerCamera,
+                lastGFXUpdate.overrideZFrustum,
+                lastGFXUpdate.overrideZNear,
+                lastGFXUpdate.overrideZFar);
     }
 
-    void UpdateGFXFrustum(GFXBOOL overrideZFrustum, float overrideZNear, float overrideZFar)
-    {
+    void UpdateGFXFrustum(GFXBOOL overrideZFrustum, float overrideZNear, float overrideZFar) {
         UpdateGFX(lastGFXUpdate.clip,
-                  lastGFXUpdate.updateFrustum,
-                  lastGFXUpdate.centerCamera,
-                  overrideZFrustum,
-                  overrideZNear,
-                  overrideZFar);
+                lastGFXUpdate.updateFrustum,
+                lastGFXUpdate.centerCamera,
+                overrideZFrustum,
+                overrideZNear,
+                overrideZFar);
     }
 
-    void UpdateGFXAgain()
-    {
+    void UpdateGFXAgain() {
         UpdateGFX(lastGFXUpdate.clip,
-                  lastGFXUpdate.updateFrustum,
-                  lastGFXUpdate.centerCamera,
-                  lastGFXUpdate.overrideZFrustum,
-                  lastGFXUpdate.overrideZNear,
-                  lastGFXUpdate.overrideZFar);
+                lastGFXUpdate.updateFrustum,
+                lastGFXUpdate.centerCamera,
+                lastGFXUpdate.overrideZFrustum,
+                lastGFXUpdate.overrideZNear,
+                lastGFXUpdate.overrideZFar);
     }
 
     void UpdatePlanetGFX();    //clip true, frustum true at all times
     Matrix *GetPlanetGFX();
     void UpdateGLCenter();
     void SetPosition(const QVector &origin,
-                     const Vector &velocity,
-                     const Vector &angular_velocity,
-                     const Vector &acceleration);
+            const Vector &velocity,
+            const Vector &angular_velocity,
+            const Vector &acceleration);
 
-    void GetPosition(QVector &vect)
-    {
+    void GetPosition(QVector &vect) {
         vect = Coord;
     }
 
-    Vector GetAngularVelocity() const
-    {
+    Vector GetAngularVelocity() const {
         return angular_velocity;
     }
 
-    Vector GetVelocity() const
-    {
+    Vector GetVelocity() const {
         return velocity;
     }
 
-    Vector GetAcceleration() const
-    {
+    Vector GetAcceleration() const {
         return accel;
     }
 
-    void GetOrientation(Vector &p, Vector &q, Vector &r)
-    {
+    void GetOrientation(Vector &p, Vector &q, Vector &r) {
         p = P;
         q = Q;
         r = R;
     }
 
-    const QVector &GetPosition() const
-    {
+    const QVector &GetPosition() const {
         return Coord;
     }
 
-    float GetZDist(const Vector &v) const
-    {
+    float GetZDist(const Vector &v) const {
         return ::DotProduct(QVector(v) - Coord, QVector(R));
     }
 

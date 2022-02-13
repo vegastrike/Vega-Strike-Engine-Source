@@ -26,8 +26,7 @@
 #include <cstring>  //We are using C style string functions here
 
 //#define fprintf aprintf
-uint32bit aprintf(...)
-{
+uint32bit aprintf(...) {
     return 0;
 }
 
@@ -118,22 +117,19 @@ const EnumMap::Pair XML::attribute_names[] = {
 const EnumMap XML::element_map(XML::element_names, sizeof(element_names) / sizeof(*element_names));
 const EnumMap XML::attribute_map(XML::attribute_names, sizeof(attribute_names) / sizeof(*attribute_names));
 
-void CopyNormal(GFXVertex &outp, const GFXVertex &inp)
-{
+void CopyNormal(GFXVertex &outp, const GFXVertex &inp) {
     outp.i = inp.i;
     outp.j = inp.j;
     outp.k = inp.k;
 }
 
-void AddNormal(GFXVertex &outp, const GFXVertex &inp)
-{
+void AddNormal(GFXVertex &outp, const GFXVertex &inp) {
     outp.i += inp.i;
     outp.j += inp.j;
     outp.k += inp.k;
 }
 
-void SetNormal(GFXVertex &outp, const GFXVertex &a, const GFXVertex &b, const GFXVertex &c)
-{
+void SetNormal(GFXVertex &outp, const GFXVertex &a, const GFXVertex &b, const GFXVertex &c) {
     GFXVertex left, right;
     left.i = b.x - a.x;
     left.j = b.y - a.y;
@@ -152,8 +148,7 @@ void SetNormal(GFXVertex &outp, const GFXVertex &a, const GFXVertex &b, const GF
     }
 }
 
-void boundscheck(XML xml)
-{
+void boundscheck(XML xml) {
     float maxa = 1.0;
     float maxd = 1.0;
     float maxe = 1.0;
@@ -192,8 +187,7 @@ void boundscheck(XML xml)
     xml.material.sb /= maxs;
 }
 
-enum BLENDFUNC parse_alpha(const char *tmp)
-{
+enum BLENDFUNC parse_alpha(const char *tmp) {
     if (strcmp(tmp, "ZERO") == 0) {
         return ZERO;
     }
@@ -242,8 +236,7 @@ enum BLENDFUNC parse_alpha(const char *tmp)
     return ZERO;
 }
 
-bool shouldreflect(string r)
-{
+bool shouldreflect(string r) {
     if (strtoupper(r) == "FALSE") {
         return false;
     }
@@ -258,8 +251,7 @@ bool shouldreflect(string r)
     return false;
 }
 
-void beginElement(const string &name, const AttributeList &attributes, XML *xml)
-{
+void beginElement(const string &name, const AttributeList &attributes, XML *xml) {
     bool flips = atoi(Converter::getNamedOption("flips").c_str()) != 0;
     bool flipt = atoi(Converter::getNamedOption("flipt").c_str()) != 0;
     bool flipn = atoi(Converter::getNamedOption("flipn").c_str()) != 0;
@@ -634,15 +626,15 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
                     if (xml->curpolyindex == 2) {
                         GFXVertex temp;
                         SetNormal(temp,
-                                  xml->vertices[xml->triangletemp.indexref[2]],
-                                  xml->vertices[xml->triangletemp.indexref[1]],
-                                  xml->vertices[xml->triangletemp.indexref[0]]);
+                                xml->vertices[xml->triangletemp.indexref[2]],
+                                xml->vertices[xml->triangletemp.indexref[1]],
+                                xml->vertices[xml->triangletemp.indexref[0]]);
                         AddNormal(xml->vertices[xml->triangletemp.indexref[0]],
-                                  temp);
+                                temp);
                         AddNormal(xml->vertices[xml->triangletemp.indexref[1]],
-                                  temp);
+                                temp);
                         AddNormal(xml->vertices[xml->triangletemp.indexref[2]],
-                                  temp);
+                                temp);
                     }
                     break;
                 case QUAD:
@@ -652,17 +644,17 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
                     if (xml->curpolyindex == 3) {
                         GFXVertex temp;
                         SetNormal(temp,
-                                  xml->vertices[xml->quadtemp.indexref[2]],
-                                  xml->vertices[xml->quadtemp.indexref[1]],
-                                  xml->vertices[xml->quadtemp.indexref[0]]);
+                                xml->vertices[xml->quadtemp.indexref[2]],
+                                xml->vertices[xml->quadtemp.indexref[1]],
+                                xml->vertices[xml->quadtemp.indexref[0]]);
                         AddNormal(xml->vertices[xml->quadtemp.indexref[0]],
-                                  temp);
+                                temp);
                         AddNormal(xml->vertices[xml->quadtemp.indexref[1]],
-                                  temp);
+                                temp);
                         AddNormal(xml->vertices[xml->quadtemp.indexref[2]],
-                                  temp);
+                                temp);
                         AddNormal(xml->vertices[xml->quadtemp.indexref[3]],
-                                  temp);
+                                temp);
                     }
                     break;
                 case LINESTRIP:
@@ -682,20 +674,20 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
                                 && xml->curpolytype == TRISTRIP)
                                 || xml->curpolytype == QUADSTRIP;
                         SetNormal(temp,
-                                  xml->vertices[xml->striptemp.points[xml->striptemp.points.size()
-                                          - (rev ? 3 : 2)].indexref],
-                                  xml->vertices[xml->striptemp.points[xml->striptemp.points.size()
-                                          - (rev ? 2 : 3)].indexref],
-                                  xml->vertices[xml->striptemp.points.back().indexref]);
+                                xml->vertices[xml->striptemp.points[xml->striptemp.points.size()
+                                        - (rev ? 3 : 2)].indexref],
+                                xml->vertices[xml->striptemp.points[xml->striptemp.points.size()
+                                        - (rev ? 2 : 3)].indexref],
+                                xml->vertices[xml->striptemp.points.back().indexref]);
                         AddNormal(xml->vertices[xml->striptemp.points.back().indexref],
-                                  temp);
+                                temp);
                         AddNormal(xml->vertices[xml->striptemp.points[xml->striptemp.points.size() - 2].indexref],
-                                  temp);
+                                temp);
                         AddNormal(xml->vertices[xml->striptemp.points[xml->striptemp.points.size() - 3].indexref],
-                                  temp);
+                                temp);
                         if (xml->curpolytype == QUADSTRIP) {
                             AddNormal(xml->vertices[xml->striptemp.points[xml->striptemp.points.size() - 4].indexref],
-                                      temp);
+                                    temp);
                         }
                     }
                     break;
@@ -829,8 +821,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
     }
 }
 
-void endElement(const string &name, XML *xml)
-{
+void endElement(const string &name, XML *xml) {
     xml->state_stack.pop_back();
     XML::Names elem = (XML::Names) XML::element_map.lookup(name);
     switch (elem) {
@@ -898,18 +889,15 @@ void endElement(const string &name, XML *xml)
     }
 }
 
-void beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     beginElement(name, AttributeList(atts), (XML *) userData);
 }
 
-void endElement(void *userData, const XML_Char *name)
-{
+void endElement(void *userData, const XML_Char *name) {
     endElement(name, (XML *) userData);
 }
 
-XML LoadXML(const char *filename, float32bit unitscale)
-{
+XML LoadXML(const char *filename, float32bit unitscale) {
     const uint32bit chunk_size = 16384;
     FILE *inFile = fopen(filename, "r");
     if (!inFile) {
@@ -938,8 +926,7 @@ XML LoadXML(const char *filename, float32bit unitscale)
 
 static size_t bogus_return; //added by chuck_starchaser, to get rid of ignored return warnings
 
-void xmeshToBFXM(XML memfile, FILE *Outputfile, char mode, bool forcenormals)
-{
+void xmeshToBFXM(XML memfile, FILE *Outputfile, char mode, bool forcenormals) {
     //converts input file to BFXM creates new, or appends record based on mode
     uint32bit intbuf;
 
@@ -970,8 +957,7 @@ void xmeshToBFXM(XML memfile, FILE *Outputfile, char mode, bool forcenormals)
     fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);      //Correct number of bytes for total file
 }
 
-uint32bit writesuperheader(XML memfile, FILE *Outputfile)
-{
+uint32bit writesuperheader(XML memfile, FILE *Outputfile) {
     uint32bit intbuf;
     uint32bit versionnumber = VSSwapHostIntToLittle(20);
     uchar8bit bytebuf;
@@ -986,9 +972,9 @@ uint32bit writesuperheader(XML memfile, FILE *Outputfile)
     bytebuf = 'M';
     runningbytenum += (uint32bit) fwrite(&bytebuf, 1, 1, Outputfile);
     runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&versionnumber,
-                                                             sizeof(uint32bit),
-                                                             1,
-                                                             Outputfile);       //VERSION number for BinaryFormattedXMesh
+            sizeof(uint32bit),
+            1,
+            Outputfile);       //VERSION number for BinaryFormattedXMesh
     intbuf = VSSwapHostIntToLittle(0);     //Length of File Placeholder
     runningbytenum += sizeof(uint32bit)
             * (uint32bit) fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);       //Number of bytes in file
@@ -1012,8 +998,7 @@ uint32bit writesuperheader(XML memfile, FILE *Outputfile)
     return runningbytenum;
 }
 
-uint32bit appendrecordfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
-{
+uint32bit appendrecordfromxml(XML memfile, FILE *Outputfile, bool forcenormals) {
     uint32bit intbuf;
     uint32bit runningbytenum = 0;
     //Record Header
@@ -1055,13 +1040,11 @@ uint32bit appendrecordfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     return runningbytenum;
 }
 
-static float mymax(float a, float b)
-{
+static float mymax(float a, float b) {
     return a > b ? a : b;
 }
 
-void NormalizeProperty(float &r, float &g, float &b, float &a)
-{
+void NormalizeProperty(float &r, float &g, float &b, float &a) {
     if (r > 1 || g > 1 || b > 1 || a > 1) {
         float mx = mymax(mymax(mymax(r, g), b), a);
         r /= mx;
@@ -1073,16 +1056,14 @@ void NormalizeProperty(float &r, float &g, float &b, float &a)
     }
 }
 
-void NormalizeMaterial(GFXMaterial &m)
-{
+void NormalizeMaterial(GFXMaterial &m) {
     NormalizeProperty(m.ar, m.ag, m.ab, m.aa);
     NormalizeProperty(m.dr, m.dg, m.db, m.da);
     NormalizeProperty(m.sr, m.sg, m.sb, m.sa);
     NormalizeProperty(m.er, m.eg, m.eb, m.ea);
 }
 
-uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
-{
+uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals) {
     float transx = float(atof(Converter::getNamedOption("addx").c_str()));
     float transy = float(atof(Converter::getNamedOption("addy").c_str()));
     float transz = float(atof(Converter::getNamedOption("addz").c_str()));
@@ -1198,32 +1179,32 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     vsalengthpos = ftell(Outputfile);
     intbuf = VSSwapHostIntToLittle(0);     //Temp value will overwrite later
     runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                             sizeof(uint32bit),
-                                                             1,
-                                                             Outputfile);       //Length of Variable sized attribute section in bytes
+            sizeof(uint32bit),
+            1,
+            Outputfile);       //Length of Variable sized attribute section in bytes
     //Detail texture
     {
         uint32bit namelen = (uint32bit) memfile.detailtexture.name.size();
         intbuf = VSSwapHostIntToLittle(namelen);
         runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                 sizeof(uint32bit),
-                                                                 1,
-                                                                 Outputfile);           //Length of name of detail texture
+                sizeof(uint32bit),
+                1,
+                Outputfile);           //Length of name of detail texture
         uint32bit nametmp;
         for (nametmp = 0; nametmp < namelen; nametmp++) {
             bytebuf = memfile.detailtexture.name[nametmp];
             runningbytenum += (uint32bit) fwrite(&bytebuf,
-                                                 sizeof(uchar8bit),
-                                                 1,
-                                                 Outputfile);              //char by char name of detail texture
+                    sizeof(uchar8bit),
+                    1,
+                    Outputfile);              //char by char name of detail texture
         }
         uint32bit padlength = (sizeof(uint32bit) - (namelen % sizeof(uint32bit))) % sizeof(uint32bit);
         for (nametmp = 0; nametmp < padlength; nametmp++) {
             bytebuf = 0;
             runningbytenum += (uint32bit) fwrite(&bytebuf,
-                                                 sizeof(uchar8bit),
-                                                 1,
-                                                 Outputfile);              //Padded so that next field is word aligned
+                    sizeof(uchar8bit),
+                    1,
+                    Outputfile);              //Padded so that next field is word aligned
         }
     }
     //Detail Planes
@@ -1251,35 +1232,35 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
         for (texnum = 0; texnum < memfile.textures.size(); texnum++) {
             intbuf = VSSwapHostIntToLittle(memfile.textures[texnum].type);
             runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                     sizeof(uint32bit),
-                                                                     1,
-                                                                     Outputfile);               //texture # texnum: type
+                    sizeof(uint32bit),
+                    1,
+                    Outputfile);               //texture # texnum: type
             intbuf = VSSwapHostIntToLittle(memfile.textures[texnum].index);
             runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                     sizeof(uint32bit),
-                                                                     1,
-                                                                     Outputfile);               //texture # texnum: index
+                    sizeof(uint32bit),
+                    1,
+                    Outputfile);               //texture # texnum: index
             uint32bit namelen = (uint32bit) memfile.textures[texnum].name.size();
             intbuf = VSSwapHostIntToLittle(namelen);
             runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                     sizeof(uint32bit),
-                                                                     1,
-                                                                     Outputfile);               //Length of name of texture # texnum
+                    sizeof(uint32bit),
+                    1,
+                    Outputfile);               //Length of name of texture # texnum
             uint32bit nametmp;
             for (nametmp = 0; nametmp < namelen; nametmp++) {
                 bytebuf = memfile.textures[texnum].name[nametmp];
                 runningbytenum += (uint32bit) fwrite(&bytebuf,
-                                                     sizeof(uchar8bit),
-                                                     1,
-                                                     Outputfile);                  //Name of texture # texnum
+                        sizeof(uchar8bit),
+                        1,
+                        Outputfile);                  //Name of texture # texnum
             }
             uint32bit padlength = (sizeof(uint32bit) - (namelen % sizeof(uint32bit))) % sizeof(uint32bit);
             for (nametmp = 0; nametmp < padlength; nametmp++) {
                 bytebuf = 0;
                 runningbytenum += (uint32bit) fwrite(&bytebuf,
-                                                     sizeof(uchar8bit),
-                                                     1,
-                                                     Outputfile);                  //Padded so that next field is word aligned
+                        sizeof(uchar8bit),
+                        1,
+                        Outputfile);                  //Padded so that next field is word aligned
             }
         }
     }
@@ -1304,20 +1285,20 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
         uint32bit numrefs = (uint32bit) memfile.logos[logonum].refpnt.size();
         intbuf = VSSwapHostIntToLittle(numrefs);
         runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                 sizeof(uint32bit),
-                                                                 1,
-                                                                 Outputfile);           //logo # logonum: number of references
+                sizeof(uint32bit),
+                1,
+                Outputfile);           //logo # logonum: number of references
         for (uint32bit ref = 0; ref < numrefs; ref++) {
             intbuf = VSSwapHostIntToLittle(memfile.logos[logonum].refpnt[ref]);
             runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                     sizeof(uint32bit),
-                                                                     1,
-                                                                     Outputfile);               //logo # logonum: reference # ref
+                    sizeof(uint32bit),
+                    1,
+                    Outputfile);               //logo # logonum: reference # ref
             floatbuf = VSSwapHostFloatToLittle(memfile.logos[logonum].refweight[ref]);
             runningbytenum += sizeof(float32bit) * (uint32bit) fwrite(&floatbuf,
-                                                                      sizeof(float32bit),
-                                                                      1,
-                                                                      Outputfile);               //logo # logonum: reference # ref weight
+                    sizeof(float32bit),
+                    1,
+                    Outputfile);               //logo # logonum: reference # ref weight
         }
     }
     //LODs + Animations
@@ -1355,25 +1336,25 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
         for (nametmp = 0; nametmp < padlength; nametmp++) {
             bytebuf = 0;
             runningbytenum += (uint32bit) fwrite(&bytebuf,
-                                                 sizeof(uchar8bit),
-                                                 1,
-                                                 Outputfile);              //Padded so that next field is word aligned
+                    sizeof(uchar8bit),
+                    1,
+                    Outputfile);              //Padded so that next field is word aligned
         }
         floatbuf = VSSwapHostFloatToLittle(memfile.animdefs[anim].FPS);
         runningbytenum += sizeof(float32bit)
                 * (uint32bit) fwrite(&floatbuf, sizeof(float32bit), 1, Outputfile);           //Animdef # anim: FPS
         intbuf = VSSwapHostIntToLittle((uint32bit) memfile.animdefs[anim].meshoffsets.size());
         runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                 sizeof(uint32bit),
-                                                                 1,
-                                                                 Outputfile);           //number of animation mesh offsets
+                sizeof(uint32bit),
+                1,
+                Outputfile);           //number of animation mesh offsets
         for (size_t offset = 0; offset < memfile.animdefs[anim].meshoffsets.size(); offset++) {
             intbuf = submeshref + memfile.animdefs[anim].meshoffsets[offset];
             intbuf = VSSwapHostIntToLittle(intbuf);
             runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                     sizeof(uint32bit),
-                                                                     1,
-                                                                     Outputfile);               //animation mesh offset
+                    sizeof(uint32bit),
+                    1,
+                    Outputfile);               //animation mesh offset
         }
     }
     //End Variable sized Attributes
@@ -1385,8 +1366,8 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     for (size_t verts = 0; verts < memfile.vertices.size(); verts++) {
         floatbuf = VSSwapHostFloatToLittle(memfile.vertices[verts].x + transx);
         float normallen = sqrt(memfile.vertices[verts].i * memfile.vertices[verts].i
-                                       + memfile.vertices[verts].j * memfile.vertices[verts].j
-                                       + memfile.vertices[verts].k * memfile.vertices[verts].k);
+                + memfile.vertices[verts].j * memfile.vertices[verts].j
+                + memfile.vertices[verts].k * memfile.vertices[verts].k);
         if (normallen > .0001) {
             memfile.vertices[verts].i /= normallen;
             memfile.vertices[verts].j /= normallen;
@@ -1479,9 +1460,9 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     for (size_t ls = 0; ls < memfile.linestrips.size(); ls++) {
         intbuf = VSSwapHostIntToLittle((uint32bit) memfile.linestrips[ls].points.size());
         runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                 sizeof(uint32bit),
-                                                                 1,
-                                                                 Outputfile);           //Number of elements in current linestrip
+                sizeof(uint32bit),
+                1,
+                Outputfile);           //Number of elements in current linestrip
         intbuf = VSSwapHostIntToLittle(memfile.linestrips[ls].flatshade);
         runningbytenum += sizeof(uint32bit)
                 * (uint32bit) fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);           //Flatshade flag
@@ -1503,9 +1484,9 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     for (size_t ts = 0; ts < memfile.tristrips.size(); ts++) {
         intbuf = VSSwapHostIntToLittle((uint32bit) memfile.tristrips[ts].points.size());
         runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                 sizeof(uint32bit),
-                                                                 1,
-                                                                 Outputfile);           //Number of elements in current tristrip
+                sizeof(uint32bit),
+                1,
+                Outputfile);           //Number of elements in current tristrip
         intbuf = VSSwapHostIntToLittle(memfile.tristrips[ts].flatshade);
         runningbytenum += sizeof(uint32bit)
                 * (uint32bit) fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);           //Flatshade flag
@@ -1527,9 +1508,9 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     for (size_t tf = 0; tf < memfile.trifans.size(); tf++) {
         intbuf = VSSwapHostIntToLittle((uint32bit) memfile.trifans[tf].points.size());
         runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                 sizeof(uint32bit),
-                                                                 1,
-                                                                 Outputfile);           //Number of elements in current trifan
+                sizeof(uint32bit),
+                1,
+                Outputfile);           //Number of elements in current trifan
         intbuf = VSSwapHostIntToLittle(memfile.trifans[tf].flatshade);
         runningbytenum += sizeof(uint32bit)
                 * (uint32bit) fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);           //Flatshade flag
@@ -1551,9 +1532,9 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     for (size_t qs = 0; qs < memfile.quadstrips.size(); qs++) {
         intbuf = VSSwapHostIntToLittle((uint32bit) memfile.quadstrips[qs].points.size());
         runningbytenum += sizeof(uint32bit) * (uint32bit) fwrite(&intbuf,
-                                                                 sizeof(uint32bit),
-                                                                 1,
-                                                                 Outputfile);           //Number of elements in current quadstrip
+                sizeof(uint32bit),
+                1,
+                Outputfile);           //Number of elements in current quadstrip
         intbuf = VSSwapHostIntToLittle(memfile.quadstrips[qs].flatshade);
         runningbytenum += sizeof(uint32bit)
                 * (uint32bit) fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);           //Flatshade flag
@@ -1579,9 +1560,9 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals)
     intbuf = VSAend - VSAstart;
     intbuf = VSSwapHostIntToLittle(intbuf);
     fwrite(&intbuf,
-           sizeof(uint32bit),
-           1,
-           Outputfile);      // Correct number of bytes for Variable Sized Attribute section
+            sizeof(uint32bit),
+            1,
+            Outputfile);      // Correct number of bytes for Variable Sized Attribute section
     fseek(Outputfile, endpos, SEEK_SET);
     return runningbytenum;
 }

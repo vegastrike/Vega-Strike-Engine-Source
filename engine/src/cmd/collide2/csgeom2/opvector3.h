@@ -41,8 +41,7 @@ public:
      * initialized. This makes the code slightly faster as
      * csVector3 objects are used a lot.
      */
-    csVector3()
-    {
+    csVector3() {
     }
 
     /**
@@ -50,34 +49,28 @@ public:
      * Creates a new vector and initializes it to m*<1,1,1>.  To create
      * a vector initialized to the zero vector, use csVector3(0)
      */
-    csVector3(float m) : x(m), y(m), z(m)
-    {
+    csVector3(float m) : x(m), y(m), z(m) {
     }
 
     /// Make a new vector and initialize with the given values.
-    csVector3(float ix, float iy, float iz = 0) : x(ix), y(iy), z(iz)
-    {
+    csVector3(float ix, float iy, float iz = 0) : x(ix), y(iy), z(iz) {
     }
 
     /// Copy Constructor.
-    csVector3(const csVector3 &v) : x(v.x), y(v.y), z(v.z)
-    {
+    csVector3(const csVector3 &v) : x(v.x), y(v.y), z(v.z) {
     }
 
-    csVector3(const Vector v) : x(v.i), y(v.j), z(v.k)
-    {
+    csVector3(const Vector v) : x(v.i), y(v.j), z(v.k) {
     }
 
     /// Conversion from double precision vector to single.
     /// Add two vectors.
-    inline csVector3 operator+(const csVector3 &v2) const
-    {
+    inline csVector3 operator+(const csVector3 &v2) const {
         return csVector3(x + v2.x, y + v2.y, z + v2.z);
     }
 
     /// Subtract two vectors.
-    inline csVector3 operator-(const csVector3 &v2) const
-    {
+    inline csVector3 operator-(const csVector3 &v2) const {
         return csVector3(x - v2.x, y - v2.y, z - v2.z);
     }
 
@@ -86,123 +79,104 @@ public:
     /// Subtract two vectors of differing type, cast to double.
 
     /// Take the dot product of two vectors.
-    inline friend float operator*(const csVector3 &v1, const csVector3 &v2)
-    {
+    inline friend float operator*(const csVector3 &v1, const csVector3 &v2) {
         return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
     }
 
     /// Take the cross product of two vectors.
-    inline friend csVector3 operator%(const csVector3 &v1, const csVector3 &v2)
-    {
+    inline friend csVector3 operator%(const csVector3 &v1, const csVector3 &v2) {
         return csVector3(v1.y * v2.z - v1.z * v2.y,
-                         v1.z * v2.x - v1.x * v2.z,
-                         v1.x * v2.y - v1.y * v2.x);
+                v1.z * v2.x - v1.x * v2.z,
+                v1.x * v2.y - v1.y * v2.x);
     }
 
     /// Take cross product of two vectors and put result in this vector.
-    void Cross(const csVector3 &px, const csVector3 &py)
-    {
+    void Cross(const csVector3 &px, const csVector3 &py) {
         x = px.y * py.z - px.z * py.y;
         y = px.z * py.x - px.x * py.z;
         z = px.x * py.y - px.y * py.x;
     }
 
-    inline void Cross(const Opcode::Point &px, const Opcode::Point &py)
-    {
+    inline void Cross(const Opcode::Point &px, const Opcode::Point &py) {
         x = px.y * py.z - px.z * py.y;
         y = px.z * py.x - px.x * py.z;
         z = px.x * py.y - px.y * py.x;
     }
 
     /// Multiply a vector and a scalar.
-    inline friend csVector3 operator*(const csVector3 &v, float f)
-    {
+    inline friend csVector3 operator*(const csVector3 &v, float f) {
         return csVector3(v.x * f, v.y * f, v.z * f);
     }
 
     /// Multiply a vector and a scalar.
-    inline friend csVector3 operator*(float f, const csVector3 &v)
-    {
+    inline friend csVector3 operator*(float f, const csVector3 &v) {
         return csVector3(v.x * f, v.y * f, v.z * f);
     }
 
     /// Multiply a vector and a scalar int.
-    inline friend csVector3 operator*(const csVector3 &v, int f)
-    {
+    inline friend csVector3 operator*(const csVector3 &v, int f) {
         return csVector3(v.x * f, v.y * f, v.z * f);
     }
 
     /// Multiply a vector and a scalar int.
-    inline friend csVector3 operator*(int f, const csVector3 &v)
-    {
+    inline friend csVector3 operator*(int f, const csVector3 &v) {
         return csVector3(v.x * f, v.y * f, v.z * f);
     }
 
     /// Divide a vector by a scalar.
-    inline friend csVector3 operator/(const csVector3 &v, float f)
-    {
+    inline friend csVector3 operator/(const csVector3 &v, float f) {
         f = 1.0f / f;
         return csVector3(v.x * f, v.y * f, v.z * f);
     }
 
     /// Divide a vector by a scalar int.
-    inline friend csVector3 operator/(const csVector3 &v, int f)
-    {
+    inline friend csVector3 operator/(const csVector3 &v, int f) {
         float F = 1.0f / f;
         return csVector3(v.x * F, v.y * F, v.z * F);
     }
 
     /// Check if two vectors are equal.
-    inline friend bool operator==(const csVector3 &v1, const csVector3 &v2)
-    {
+    inline friend bool operator==(const csVector3 &v1, const csVector3 &v2) {
         return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
     }
 
     /// Check if two vectors are not equal.
-    inline friend bool operator!=(const csVector3 &v1, const csVector3 &v2)
-    {
+    inline friend bool operator!=(const csVector3 &v1, const csVector3 &v2) {
         return v1.x != v2.x || v1.y != v2.y || v1.z != v2.z;
     }
 
     /// Project one vector onto another.
-    inline friend csVector3 operator>>(const csVector3 &v1, const csVector3 &v2)
-    {
+    inline friend csVector3 operator>>(const csVector3 &v1, const csVector3 &v2) {
         return ((v1 * v2) * v2) / (v2 * v2);
     }
 
     /// Project one vector onto another.
-    inline friend csVector3 operator<<(const csVector3 &v1, const csVector3 &v2)
-    {
+    inline friend csVector3 operator<<(const csVector3 &v1, const csVector3 &v2) {
         return ((v1 * v2) * v1) / (v1 * v1);
     }
 
     /// Test if each component of a vector is less than a small epsilon value.
-    inline friend bool operator<(const csVector3 &v, float f)
-    {
+    inline friend bool operator<(const csVector3 &v, float f) {
         return ABS(v.x) < f && ABS(v.y) < f && ABS(v.z) < f;
     }
 
     /// Test if each component of a vector is less than a small epsilon value.
-    inline friend bool operator>(float f, const csVector3 &v)
-    {
+    inline friend bool operator>(float f, const csVector3 &v) {
         return ABS(v.x) < f && ABS(v.y) < f && ABS(v.z) < f;
     }
 
     /// Returns n-th component of the vector.
-    inline float operator[](int n) const
-    {
+    inline float operator[](int n) const {
         return !n ? x : n & 1 ? y : z;
     }
 
     /// Returns n-th component of the vector.
-    inline float &operator[](int n)
-    {
+    inline float &operator[](int n) {
         return !n ? x : n & 1 ? y : z;
     }
 
     /// Add another vector to this vector.
-    inline csVector3 &operator+=(const csVector3 &v)
-    {
+    inline csVector3 &operator+=(const csVector3 &v) {
         x += v.x;
         y += v.y;
         z += v.z;
@@ -211,8 +185,7 @@ public:
     }
 
     /// Subtract another vector from this vector.
-    inline csVector3 &operator-=(const csVector3 &v)
-    {
+    inline csVector3 &operator-=(const csVector3 &v) {
         x -= v.x;
         y -= v.y;
         z -= v.z;
@@ -221,8 +194,7 @@ public:
     }
 
     /// Multiply this vector by a scalar.
-    inline csVector3 &operator*=(float f)
-    {
+    inline csVector3 &operator*=(float f) {
         x *= f;
         y *= f;
         z *= f;
@@ -230,8 +202,7 @@ public:
     }
 
     /// Divide this vector by a scalar.
-    inline csVector3 &operator/=(float f)
-    {
+    inline csVector3 &operator/=(float f) {
         f = 1.0f / f;
         x *= f;
         y *= f;
@@ -240,28 +211,24 @@ public:
     }
 
     /// Unary + operator.
-    inline csVector3 operator+() const
-    {
+    inline csVector3 operator+() const {
         return *this;
     }
 
     /// Unary - operator.
-    inline csVector3 operator-() const
-    {
+    inline csVector3 operator-() const {
         return csVector3(-x, -y, -z);
     }
 
     /// Set the value of this vector.
-    inline void Set(float sx, float sy, float sz)
-    {
+    inline void Set(float sx, float sy, float sz) {
         x = sx;
         y = sy;
         z = sz;
     }
 
     /// Set the value of this vector.
-    inline void Set(const csVector3 &v)
-    {
+    inline void Set(const csVector3 &v) {
         x = v.x;
         y = v.y;
         z = v.z;
@@ -271,8 +238,7 @@ public:
     float Norm() const;
 
     /// Return the squared norm (magnitude) of this vector.
-    float SquaredNorm() const
-    {
+    float SquaredNorm() const {
         return x * x + y * y + z * z;
     }
 
@@ -281,20 +247,17 @@ public:
      * Attempting to normalize a zero-vector will result in a divide by
      * zero error.  This is as it should be... fix the calling code.
      */
-    csVector3 Unit() const
-    {
+    csVector3 Unit() const {
         return (*this) / (this->Norm());
     }
 
     /// Returns the norm (magnitude) of a vector.
-    inline static float Norm(const csVector3 &v)
-    {
+    inline static float Norm(const csVector3 &v) {
         return v.Norm();
     }
 
     /// Normalizes a vector to a unit vector.
-    inline static csVector3 Unit(const csVector3 &v)
-    {
+    inline static csVector3 Unit(const csVector3 &v) {
         return v.Unit();
     }
 
@@ -302,8 +265,7 @@ public:
     void Normalize();
 
     /// Query if the vector is zero
-    inline bool IsZero() const
-    {
+    inline bool IsZero() const {
         return (x == 0) && (y == 0) && (z == 0);
     }
 };

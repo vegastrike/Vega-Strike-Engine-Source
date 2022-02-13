@@ -44,8 +44,7 @@
 static float *mview = NULL;
 static int bogus_int; //added by chuck_starchaser to squash ignored returns warnings.
 
-VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force)
-{
+VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
     xcenter = 0;
     ycenter = 0;
     widtho2 = 0;
@@ -90,8 +89,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-void VSSprite::ReadTexture(FILE *f)
-{
+void VSSprite::ReadTexture(FILE *f) {
     if (!f) {
         widtho2 = heighto2 = 0;
         xcenter = ycenter = 0;
@@ -101,22 +99,19 @@ void VSSprite::ReadTexture(FILE *f)
     surface = new Texture(f);
 }
 
-VSSprite::~VSSprite()
-{
+VSSprite::~VSSprite() {
     if (surface != nullptr) {
         delete surface;
         surface = nullptr;
     }
 }
 
-void VSSprite::SetST(const float s, const float t)
-{
+void VSSprite::SetST(const float s, const float t) {
     maxs = s;
     maxt = t;
 }
 
-void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul)
-{
+void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
         const float cw = widtho2 * cos(rotation);
         const float sw = widtho2 * sin(rotation);
@@ -136,8 +131,7 @@ void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul)
     }
 }
 
-void VSSprite::Draw()
-{
+void VSSprite::Draw() {
     if (surface) {
         //don't do anything if no surface
         glDisable(GL_CULL_FACE);
@@ -161,37 +155,31 @@ void VSSprite::Draw()
     }
 }
 
-void VSSprite::SetPosition(const float &x1, const float &y1)
-{
+void VSSprite::SetPosition(const float &x1, const float &y1) {
     xcenter = x1;
     ycenter = y1;
 }
 
-void VSSprite::GetPosition(float &x1, float &y1)
-{
+void VSSprite::GetPosition(float &x1, float &y1) {
     x1 = xcenter;
     y1 = ycenter;
 }
 
-void VSSprite::SetSize(float x1, float y1)
-{
+void VSSprite::SetSize(float x1, float y1) {
     widtho2 = x1 / 2;
     heighto2 = y1 / 2;
 }
 
-void VSSprite::GetSize(float &x1, float &y1)
-{
+void VSSprite::GetSize(float &x1, float &y1) {
     x1 = widtho2 * 2;
     y1 = heighto2 * 2;
 }
 
-void VSSprite::SetRotation(const float &rot)
-{
+void VSSprite::SetRotation(const float &rot) {
     rotation = rot;
 }
 
-void VSSprite::GetRotation(float &rot)
-{
+void VSSprite::GetRotation(float &rot) {
     rot = rotation;
 }
 

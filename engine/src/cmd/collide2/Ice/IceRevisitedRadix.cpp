@@ -174,8 +174,7 @@ using namespace Opcode;
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadixSort::RadixSort() : mCurrentSize(0), mRanks(nullptr), mRanks2(nullptr), mTotalCalls(0), mNbHits(0)
-{
+RadixSort::RadixSort() : mCurrentSize(0), mRanks(nullptr), mRanks2(nullptr), mTotalCalls(0), mNbHits(0) {
 #ifndef RADIX_LOCAL_RAM
     // Allocate input-independent ram
     mHistogram	= new uint32_t[256*4];
@@ -190,8 +189,7 @@ RadixSort::RadixSort() : mCurrentSize(0), mRanks(nullptr), mRanks2(nullptr), mTo
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadixSort::~RadixSort()
-{
+RadixSort::~RadixSort() {
     // Release everything
 #ifndef RADIX_LOCAL_RAM
     DELETEARRAY(mOffset);
@@ -208,8 +206,7 @@ RadixSort::~RadixSort()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool RadixSort::Resize(uint32_t nb)
-{
+bool RadixSort::Resize(uint32_t nb) {
     // Free previously used ram
     DELETEARRAY(mRanks2);
     DELETEARRAY(mRanks);
@@ -223,8 +220,7 @@ bool RadixSort::Resize(uint32_t nb)
     return true;
 }
 
-inline_ void RadixSort::CheckResize(uint32_t nb)
-{
+inline_ void RadixSort::CheckResize(uint32_t nb) {
     uint32_t CurSize = CURRENT_SIZE;
     if (nb != CurSize) {
         if (nb > CurSize) {
@@ -245,8 +241,7 @@ inline_ void RadixSort::CheckResize(uint32_t nb)
  *	\return		Self-Reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadixSort &RadixSort::Sort(const uint32_t *input, uint32_t nb, RadixHint hint)
-{
+RadixSort &RadixSort::Sort(const uint32_t *input, uint32_t nb, RadixHint hint) {
     // Checkings
     if (!input || !nb || nb & 0x80000000) {
         return *this;
@@ -366,8 +361,7 @@ RadixSort &RadixSort::Sort(const uint32_t *input, uint32_t nb, RadixHint hint)
  *	\warning	only sorts IEEE floating-point values
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadixSort &RadixSort::Sort(const float *input2, uint32_t nb)
-{
+RadixSort &RadixSort::Sort(const float *input2, uint32_t nb) {
     // Checkings
     if (!input2 || !nb || nb & 0x80000000) {
         return *this;
@@ -472,8 +466,9 @@ RadixSort &RadixSort::Sort(const float *input2, uint32_t nb)
                             mLink[255 - i] + CurCount[255 - i];
                 }        // Fixing the wrong order for negative values
 //				for(i=128;i<256;i++)	mOffset[i] += CurCount[i];							// Fixing the wrong place for negative values
-                for (i = 128; i < 256; i++)
-                    mLink[i] += CurCount[i];                            // Fixing the wrong place for negative values
+                for (i = 128; i < 256; i++) {
+                    mLink[i] += CurCount[i];
+                }                            // Fixing the wrong place for negative values
 
                 // Perform Radix Sort
                 if (INVALID_RANKS) {
@@ -538,8 +533,7 @@ RadixSort &RadixSort::Sort(const float *input2, uint32_t nb)
  *	\return		memory used in bytes
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t RadixSort::GetUsedRam() const
-{
+uint32_t RadixSort::GetUsedRam() const {
     uint32_t UsedRam = sizeof(RadixSort);
 #ifndef RADIX_LOCAL_RAM
     UsedRam += 256*4*sizeof(uint32_t);			// Histograms

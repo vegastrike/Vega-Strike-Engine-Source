@@ -49,8 +49,7 @@ struct Attribute {
     std::string name;
     std::string value;
 
-    Attribute(std::string name, std::string value) : name(name), value(value)
-    {
+    Attribute(std::string name, std::string value) : name(name), value(value) {
     }
 };
 
@@ -66,14 +65,14 @@ std::string replace_space(const std::string &str);
 int parse_int(const std::string &str);
 bool parse_bool(const std::string &str);
 bool parse_option_ispresent(const std::string &str,
-                            const std::string &opt,
-                            const std::string &sep = ",\r\n",
-                            const std::string &vsep = "=");
+        const std::string &opt,
+        const std::string &sep = ",\r\n",
+        const std::string &vsep = "=");
 std::string parse_option_value(const std::string &str,
-                               const std::string &opt,
-                               const std::string &defvalue,
-                               const std::string &sep = ",\r\n",
-                               const std::string &vsep = "=");
+        const std::string &opt,
+        const std::string &defvalue,
+        const std::string &sep = ",\r\n",
+        const std::string &vsep = "=");
 std::string escaped_string(const std::string &str);
 
 class EnumMap {
@@ -86,8 +85,7 @@ public:
         std::string name;
         int val;
 
-        Pair(const std::string &c, int v)
-        {
+        Pair(const std::string &c, int v) {
             name = c;
             val = v;
         }
@@ -104,50 +102,43 @@ public:
  *  string tostring(float num);
  */
 //#ifdef WIN32
-inline std::string tostring5(unsigned short num)
-{
+inline std::string tostring5(unsigned short num) {
     char tmp[256];
     sprintf(tmp, "%.5d", num);
     return std::string(tmp);
 }
 
-inline std::string tostring(int num)
-{
+inline std::string tostring(int num) {
     char tmp[256];
     sprintf(tmp, "%d", num);
     return std::string(tmp);
 }
 
-inline std::string tostring(unsigned int num)
-{
+inline std::string tostring(unsigned int num) {
     char tmp[256];
     sprintf(tmp, "%u", num);
     return std::string(tmp);
 }
 
-inline std::string tostring(long num)
-{
+inline std::string tostring(long num) {
     char tmp[256];
     sprintf(tmp, "%ld", num);
     return std::string(tmp);
 }
 
-inline std::string tostring(float num)
-{
+inline std::string tostring(float num) {
     char tmp[256];
     sprintf(tmp, "%g", num);
     return std::string(tmp);
 }
 
-inline std::string floattostringh(float f)
-{
+inline std::string floattostringh(float f) {
     char c[128];
     sprintf(c, "%2.2f", f);
     return std::string(c);
 }
 
-inline std::string VectorToString(const Vector &v)
-{
+inline std::string VectorToString(const Vector &v) {
     std::string ret(floattostringh(v.i));
     if (v.i != v.j || v.j != v.k) {
         ret += std::string(",") + floattostringh(v.j) + std::string(",") + floattostringh(v.k);

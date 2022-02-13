@@ -44,23 +44,19 @@
 
 using namespace GFXMatrices;  //causes problems with g_game
 
-void getInverseProjection(float *&inv)
-{
+void getInverseProjection(float *&inv) {
     inv = invprojection;
 }
 
-float GFXGetXInvPerspective()
-{
+float GFXGetXInvPerspective() {
     return /*invprojection[11]*  */ invprojection[0];     //invprojection[15];//should be??  c/d == invproj[15]
 }
 
-float GFXGetYInvPerspective()
-{
+float GFXGetYInvPerspective() {
     return /*invprojection[11]*  */ invprojection[5];     //invprojection[15];//should be??  c/d == invproj[15]
 }
 
-void MatrixToDoubles(double t[], const Matrix &m)
-{
+void MatrixToDoubles(double t[], const Matrix &m) {
     t[0] = m.r[0];     //possible performance hit?!?!
     t[1] = m.r[1];
     t[2] = m.r[2];
@@ -79,8 +75,7 @@ void MatrixToDoubles(double t[], const Matrix &m)
     t[15] = 1;
 }
 
-inline void ViewToModel()
-{
+inline void ViewToModel() {
     double t[16];
     t[0] = model.r[0] * GFX_SCALE;     //possible performance hit?!?!
     t[1] = model.r[1] * GFX_SCALE;
@@ -103,14 +98,12 @@ inline void ViewToModel()
     glLoadMatrixd(t);
 }
 
-static void IdentityFloat(float id[])
-{
+static void IdentityFloat(float id[]) {
     id[0] = id[5] = id[10] = id[15] = 1;
     id[1] = id[2] = id[3] = id[4] = id[6] = id[7] = id[8] = id[9] = id[11] = id[12] = id[13] = id[14] = 0;
 }
 
-void MultFloatMatrix(float dest[], const float m1[], const Matrix &m2)
-{
+void MultFloatMatrix(float dest[], const float m1[], const Matrix &m2) {
     dest[0] = m1[0] * m2.r[0] + m1[4] * m2.r[1] + m1[8] * m2.r[2];
     dest[1] = m1[1] * m2.r[0] + m1[5] * m2.r[1] + m1[9] * m2.r[2];
     dest[2] = m1[2] * m2.r[0] + m1[6] * m2.r[1] + m1[10] * m2.r[2];
@@ -132,8 +125,7 @@ void MultFloatMatrix(float dest[], const float m1[], const Matrix &m2)
     dest[15] = m1[3] * m2.p.i + m1[7] * m2.p.j + m1[11] * m2.p.k + m1[15];
 }
 
-static void RotateFloatMatrix(float dest[], const float m1[], const Matrix &m2)
-{
+static void RotateFloatMatrix(float dest[], const float m1[], const Matrix &m2) {
     dest[0] = (m1[0] * m2.r[0] + m1[4] * m2.r[1] + m1[8] * m2.r[2]);
     dest[1] = (m1[1] * m2.r[0] + m1[5] * m2.r[1] + m1[9] * m2.r[2]);
     dest[2] = (m1[2] * m2.r[0] + m1[6] * m2.r[1] + m1[10] * m2.r[2]);
@@ -155,16 +147,14 @@ static void RotateFloatMatrix(float dest[], const float m1[], const Matrix &m2)
     dest[15] = m1[15];
 }
 
-void ConstructAndLoadProjection()
-{
+void ConstructAndLoadProjection() {
     float t[16];
     RotateFloatMatrix(t, projection, view);
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(t);
 }
 
-void /*GLDRVAPI*/ GFXTranslateView(const QVector &a)
-{
+void /*GLDRVAPI*/ GFXTranslateView(const QVector &a) {
     view.p += TransformNormal(view, a);
     //glPopMatrix();
     //glLoadIdentity();
@@ -173,22 +163,19 @@ void /*GLDRVAPI*/ GFXTranslateView(const QVector &a)
     ViewToModel();
 }
 
-void /*GFXDRVAPI*/ GFXTranslateModel(const QVector &a)
-{
+void /*GFXDRVAPI*/ GFXTranslateModel(const QVector &a) {
     model.p += TransformNormal(model, a);
     ViewToModel();
 }
 
-void /*GFXDRVAPI*/ GFXTranslateProjection(const Vector &a)
-{
+void /*GFXDRVAPI*/ GFXTranslateProjection(const Vector &a) {
     projection[12] += a.i * projection[0] + a.j * projection[4] + a.k * projection[8];
     projection[13] += a.i * projection[1] + a.j * projection[5] + a.k * projection[9];
     projection[14] += a.i * projection[2] + a.j * projection[6] + a.k * projection[10];
     ConstructAndLoadProjection();
 }
 
-void /*GFXDRVAPI*/ GFXMultMatrixModel(const Matrix &matrix)
-{
+void /*GFXDRVAPI*/ GFXMultMatrixModel(const Matrix &matrix) {
     Matrix t;
     MultMatrix(t, model, matrix);
     CopyMatrix(model, t);
@@ -198,32 +185,27 @@ void /*GFXDRVAPI*/ GFXMultMatrixModel(const Matrix &matrix)
 //Matrix *mm = model;
 //Matrix *vv = view;
 
-void GFXLoadMatrixView(const Matrix &matrix)
-{
+void GFXLoadMatrixView(const Matrix &matrix) {
     CopyMatrix(view, matrix);
     ViewToModel();
     ConstructAndLoadProjection();
 }
 
-void /*GFXDRVAPI*/ GFXLoadMatrixModel(const Matrix &matrix)
-{
+void /*GFXDRVAPI*/ GFXLoadMatrixModel(const Matrix &matrix) {
     CopyMatrix(model, matrix);
     ViewToModel();
 }
 
-void /*GFXDRVAPI*/ GFXLoadMatrixProjection(const float matrix[16])
-{
+void /*GFXDRVAPI*/ GFXLoadMatrixProjection(const float matrix[16]) {
     memcpy(projection, matrix, 16 * sizeof(float));
     ConstructAndLoadProjection();
 }
 
-void /*GFXDRVAPI*/ GFXViewPort(int minx, int miny, int maxx, int maxy)
-{
+void /*GFXDRVAPI*/ GFXViewPort(int minx, int miny, int maxx, int maxy) {
     glViewport(minx, miny, maxx, maxy);
 }
 
-void /*GFXDRVAPI*/ GFXCenterCamera(bool Enter)
-{
+void /*GFXDRVAPI*/ GFXCenterCamera(bool Enter) {
     static QVector tmp;
     if (Enter) {
         tmp = view.p;
@@ -236,16 +218,14 @@ void /*GFXDRVAPI*/ GFXCenterCamera(bool Enter)
     }
 }
 
-void GFXRestoreHudMode()
-{
+void GFXRestoreHudMode() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 }
 
-void GFXHudMode(const bool Enter)
-{
+void GFXHudMode(const bool Enter) {
     if (Enter) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
@@ -261,8 +241,7 @@ void GFXHudMode(const bool Enter)
     }
 }
 
-void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
-{
+void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode) {
     switch (mode) {
         case MODEL:
             Identity(model);
@@ -285,24 +264,20 @@ void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
     }
 }
 
-void /*GFXDRVAPI*/ GFXGetMatrixView(Matrix &matrix)
-{
+void /*GFXDRVAPI*/ GFXGetMatrixView(Matrix &matrix) {
     CopyMatrix(matrix, view);
 }
 
-void /*GFXDRVAPI*/ GFXGetMatrixModel(Matrix &matrix)
-{
+void /*GFXDRVAPI*/ GFXGetMatrixModel(Matrix &matrix) {
     CopyMatrix(matrix, model);
 }
 
-static void gl_Frustum(float left, float right, float bottom, float top, float nearval, float farval)
-{
+static void gl_Frustum(float left, float right, float bottom, float top, float nearval, float farval) {
     GFXGetFrustumVars(false, &left, &right, &bottom, &top, &nearval, &farval);
     GFXFrustum(projection, invprojection, left, right, bottom, top, nearval, farval);
 }
 
-void GFXFrustum(float *m, float *i, float left, float right, float bottom, float top, float nearval, float farval)
-{
+void GFXFrustum(float *m, float *i, float left, float right, float bottom, float top, float nearval, float farval) {
     GLfloat x, y, a, b, c, d;
     x = (((float) 2.0) * nearval) / (right - left);
     y = (((float) 2.0) * nearval) / (top - bottom);
@@ -354,8 +329,7 @@ void GFXFrustum(float *m, float *i, float left, float right, float bottom, float
 #undef M
 }
 
-void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset)
-{
+void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset) {
     znear *= GFX_SCALE;
     zfar *= GFX_SCALE;
     cockpit_offset *= GFX_SCALE;
@@ -374,8 +348,7 @@ void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
     ConstructAndLoadProjection();
 }
 
-void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval)
-{
+void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval) {
     float *m = projection, x, y, z, tx, ty, tz;
     x = 2.0 / (right - left);
     y = 2.0 / (top - bottom);
@@ -407,15 +380,14 @@ void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
 }
 
 static void LookAtHelper(float eyex,
-                         float eyey,
-                         float eyez,
-                         double centerx,
-                         double centery,
-                         double centerz,
-                         float upx,
-                         float upy,
-                         float upz)
-{
+        float eyey,
+        float eyez,
+        double centerx,
+        double centery,
+        double centerz,
+        float upx,
+        float upy,
+        float upz) {
     //Matrix m;
     double x[3], y[3], z[3];
     double mag;
@@ -493,8 +465,7 @@ static void LookAtHelper(float eyex,
     //MultMatrix(view, m, tm);
 }
 
-void /*GFXDRVAPI*/ GFXLookAt(Vector eye, QVector center, Vector up)
-{
+void /*GFXDRVAPI*/ GFXLookAt(Vector eye, QVector center, Vector up) {
     LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
     GFXLoadMatrixView(view);
 }

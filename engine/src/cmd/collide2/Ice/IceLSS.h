@@ -17,16 +17,13 @@
 class ICEMATHS_API LSS : public Segment {
 public:
     //! Constructor
-    inline_ LSS()
-    {
+    inline_ LSS() {
     }
     //! Constructor
-    inline_ LSS(const Segment &seg, float radius) : Segment(seg), mRadius(radius)
-    {
+    inline_ LSS(const Segment &seg, float radius) : Segment(seg), mRadius(radius) {
     }
     //! Destructor
-    inline_            ~LSS()
-    {
+    inline_            ~LSS() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,8 +42,7 @@ public:
      *	\warning	point and LSS must be in same space
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    bool Contains(const Point &pt) const
-    {
+    inline_    bool Contains(const Point &pt) const {
         return SquareDistance(pt) <= mRadius * mRadius;
     }
 
@@ -58,8 +54,7 @@ public:
      *	\warning	sphere and LSS must be in same space
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    bool Contains(const Sphere &sphere)
-    {
+    inline_    bool Contains(const Sphere &sphere) {
         float d = mRadius - sphere.mRadius;
         if (d >= 0.0f) {
             return SquareDistance(sphere.mCenter) <= d * d;
@@ -76,8 +71,7 @@ public:
      *	\warning	both LSS must be in same space
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    bool Contains(const LSS &lss)
-    {
+    inline_    bool Contains(const LSS &lss) {
         // We check the LSS contains the two spheres at the start and end of the sweep
         return Contains(Sphere(lss.mP0, lss.mRadius)) && Contains(Sphere(lss.mP0, lss.mRadius));
     }

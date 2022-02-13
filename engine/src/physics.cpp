@@ -34,63 +34,54 @@ PhysicsSystem::PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *
         pos(pos),
         p(p),
         q(q),
-        r(r)
-{
+        r(r) {
     NumActiveForces = 0;
     NumActiveTorques = 0;
 }
 
-void PhysicsSystem::ResistiveLiquidTorque(float ResistiveForceCoef)
-{
+void PhysicsSystem::ResistiveLiquidTorque(float ResistiveForceCoef) {
     NetTorque += ResistiveForceCoef * AngularVelocity;
 }
 
-void PhysicsSystem::ResistiveLiquidForce(float ResistiveForceCoef)
-{
+void PhysicsSystem::ResistiveLiquidForce(float ResistiveForceCoef) {
     NetForce += ResistiveForceCoef * Velocity;
 }
 
-void PhysicsSystem::ResistiveThrust(float strength)
-{
+void PhysicsSystem::ResistiveThrust(float strength) {
     Vector V1 = Velocity;
     float mag = V1.Magnitude();
     float t = mag / fabs(strength);
     ApplyForce((strength / mag) * V1, t);
 }
 
-void PhysicsSystem::ResistiveTorqueThrust(float strength, const Vector &Position)
-{
+void PhysicsSystem::ResistiveTorqueThrust(float strength, const Vector &Position) {
     Vector V1 = AngularVelocity;
     float mag = V1.Magnitude();
     float t = mag / fabs(strength);
     ApplyBalancedLocalTorque((strength / mag) * V1, Position, t);
 }
 
-void PhysicsSystem::ResistiveTorque(float ResistiveForceCoef)
-{
+void PhysicsSystem::ResistiveTorque(float ResistiveForceCoef) {
     if ((AngularVelocity.i || AngularVelocity.j || AngularVelocity.k) && ResistiveForceCoef) {
         Vector temp = AngularVelocity;
         NetTorque += (ResistiveForceCoef * AngularVelocity * AngularVelocity) * temp.Normalize();
     }
 }
 
-void PhysicsSystem::ResistiveForce(float ResistiveForceCoef)
-{
+void PhysicsSystem::ResistiveForce(float ResistiveForceCoef) {
     if ((Velocity.i || Velocity.j || Velocity.k) && ResistiveForceCoef) {
         Vector temp = Velocity;
         NetForce += (ResistiveForceCoef * Velocity * Velocity) * temp.Normalize();
     }
 }
 
-void PhysicsSystem::Update()
-{
+void PhysicsSystem::Update() {
     ApplyImpulses(GetElapsedTime() / getTimeCompression());
     NetForce = Vector(0, 0, 0);
     NetTorque = Vector(0, 0, 0);
 }
 
-void PhysicsSystem::Rotate(const Vector &axis)
-{
+void PhysicsSystem::Rotate(const Vector &axis) {
     float theta = axis.Magnitude();
     if (theta == 0.0f) {
         return;
@@ -107,19 +98,16 @@ void PhysicsSystem::Rotate(const Vector &axis)
     *r = rquat.v;
 }
 
-void PhysicsSystem::JettisonReactionMass(const Vector &Direction, float speed, float mass)
-{
+void PhysicsSystem::JettisonReactionMass(const Vector &Direction, float speed, float mass) {
     NetForce += Direction * (speed * mass / GetElapsedTime());
 }
 
-void PhysicsSystem::JettisonMass(const Vector &Direction, float speed, float jmass)
-{
+void PhysicsSystem::JettisonMass(const Vector &Direction, float speed, float jmass) {
     mass -= jmass;     //fuel is sent out
     JettisonReactionMass(Direction, speed, jmass);
 }
 
-void PhysicsSystem::ApplyForce(const Vector &Vforce, float time)
-{
+void PhysicsSystem::ApplyForce(const Vector &Vforce, float time) {
     if (NumActiveForces < forcemax) {
         ActiveForces[NumActiveForces].F = Vforce;
         ActiveForces[NumActiveForces].t = time;
@@ -127,8 +115,7 @@ void PhysicsSystem::ApplyForce(const Vector &Vforce, float time)
     }
 }
 
-void PhysicsSystem::ApplyTorque(const Vector &Vforce, const Vector &Location, float time)
-{
+void PhysicsSystem::ApplyTorque(const Vector &Vforce, const Vector &Location, float time) {
     ApplyForce(Vforce, time);
     if (NumActiveTorques < forcemax) {
         ActiveTorques[NumActiveTorques].F = (Location.Cast() - *pos).Cast().Cross(Vforce);
@@ -137,8 +124,7 @@ void PhysicsSystem::ApplyTorque(const Vector &Vforce, const Vector &Location, fl
     }
 }
 
-void PhysicsSystem::ApplyLocalTorque(const Vector &Vforce, const Vector &Location, float time)
-{
+void PhysicsSystem::ApplyLocalTorque(const Vector &Vforce, const Vector &Location, float time) {
     ApplyForce(Vforce, time);
     if (NumActiveTorques < forcemax) {
         ActiveTorques[NumActiveTorques].F = Location.Cross(Vforce);
@@ -147,8 +133,7 @@ void PhysicsSystem::ApplyLocalTorque(const Vector &Vforce, const Vector &Locatio
     }
 }
 
-void PhysicsSystem::ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location, float time)
-{
+void PhysicsSystem::ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location, float time) {
     if (NumActiveTorques < forcemax) {
         ActiveTorques[NumActiveTorques].F = Location.Cross(Vforce);
         ActiveTorques[NumActiveTorques].t = time;
@@ -156,8 +141,7 @@ void PhysicsSystem::ApplyBalancedLocalTorque(const Vector &Vforce, const Vector 
     }
 }
 
-void PhysicsSystem::ApplyImpulses(float Time)
-{
+void PhysicsSystem::ApplyImpulses(float Time) {
     Vector temptorque = Time * NetTorque;
     Vector tempforce = Time * NetForce;
     int i;

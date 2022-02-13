@@ -39,8 +39,7 @@ public:
             size_t top_lod_size        //e.g. 1024
             , size_t ambient_lod_size    //e.g.    8
     )
-            : top_lod_size_(top_lod_size), ambient_lod_size_(ambient_lod_size)
-    {
+            : top_lod_size_(top_lod_size), ambient_lod_size_(ambient_lod_size) {
     }
 
     void init();

@@ -56,8 +56,7 @@ using namespace XMLSupport;
 UNITLOADTYPE current_unit_load_mode = DEFAULT;
 extern float getFuelConversion();
 
-string KillQuadZeros(string inp)
-{
+string KillQuadZeros(string inp) {
     std::string::size_type text = 0;
     while ((text = inp.find(".000000", text)) != string::npos) {
         inp = inp.substr(0, text) + inp.substr(text + 7);
@@ -65,8 +64,7 @@ string KillQuadZeros(string inp)
     return inp;
 }
 
-string MakeUnitXMLPretty(string str, Unit *un)
-{
+string MakeUnitXMLPretty(string str, Unit *un) {
     string writestr;
     if (un) {
         writestr += "Name: " + un->name;
@@ -117,8 +115,7 @@ string MakeUnitXMLPretty(string str, Unit *un)
     return writestr;
 }
 
-int GetModeFromName(const char *input_buffer)
-{
+int GetModeFromName(const char *input_buffer) {
     if (strlen(input_buffer) > 3) {
         if (input_buffer[0] == 'a'
                 && input_buffer[1] == 'd'
@@ -136,8 +133,7 @@ int GetModeFromName(const char *input_buffer)
 
 extern bool CheckAccessory(Unit *);
 
-void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg)
-{
+void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg) {
     static bool forceit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "forceOneOneShieldBlend", "true"));
     xml->shieldmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
     if (xml->shieldmesh && forceit) {
@@ -147,21 +143,19 @@ void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int 
     }
 }
 
-void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg)
-{
+void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg) {
     xml->rapidmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
 }
 
 void pushMesh(std::vector<Mesh *> &meshes,
-              float &randomstartframe,
-              float &randomstartseconds,
-              const char *filename,
-              const float scale,
-              int faction,
-              class Flightgroup *fg,
-              int startframe,
-              double texturestarttime)
-{
+        float &randomstartframe,
+        float &randomstartseconds,
+        const char *filename,
+        const float scale,
+        int faction,
+        class Flightgroup *fg,
+        int startframe,
+        double texturestarttime) {
     vector<Mesh *> m = Mesh::LoadMeshes(filename, Vector(scale, scale, scale), faction, fg);
     for (unsigned int i = 0; i < m.size(); ++i) {
         meshes.push_back(m[i]);

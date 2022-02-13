@@ -75,13 +75,11 @@ protected:
 
 public:
 
-    virtual void ChooseTarget()
-    {
+    virtual void ChooseTarget() {
         /*not implemented see fire.cpp*/
     }
 
-    virtual bool PursueTarget(Unit *, bool isleader)
-    {
+    virtual bool PursueTarget(Unit *, bool isleader) {
         return false;
     }
 
@@ -94,22 +92,20 @@ public:
 ///The default constructor setting everything to NULL and no dependency on order
     Order()
             : parent(NULL),
-              type(0),
-              subtype(0),
-              done(false),
-              targetlocation(0, 0, 0)
-    {
+            type(0),
+            subtype(0),
+            done(false),
+            targetlocation(0, 0, 0) {
         VSCONSTRUCT1('O')
     }
 
 ///The constructor that specifies what order dependencies this order has
     Order(int type, int subtype)
             : parent(NULL),
-              type(type),
-              subtype(subtype),
-              done(false),
-              targetlocation(0, 0, 0)
-    {
+            type(type),
+            subtype(subtype),
+            done(false),
+            targetlocation(0, 0, 0) {
         VSCONSTRUCT1('O')
     }
 
@@ -135,29 +131,24 @@ public:
 ///Replaces the first order of that type in the order queue
     Order *ReplaceOrder(Order *ord);
 
-    bool Done()
-    {
+    bool Done() {
         return done;
     }
 
-    int getType()
-    {
+    int getType() {
         return type;
     }
 
-    int getSubType()
-    {
+    int getSubType() {
         return subtype;
     }
 
 ///Sets the parent of this Unit.  Any virtual functions must call this one
-    virtual void SetParent(Unit *parent1)
-    {
+    virtual void SetParent(Unit *parent1) {
         parent = parent1;
     }
 
-    Unit *GetParent() const
-    {
+    Unit *GetParent() const {
         return parent;
     }
 
@@ -175,15 +166,13 @@ public:
     Order *EnqueueOrderFirst(Order *ord);
 
 /// returns the orderlist (NULL for orders that haven't got any)
-    virtual olist_t *getOrderList()
-    {
+    virtual olist_t *getOrderList() {
         return NULL;
     }
 
     virtual void AdjustRelationTo(Unit *un, float factor);
 
-    virtual std::string getOrderDescription()
-    {
+    virtual std::string getOrderDescription() {
         return "empty";
     }
 
@@ -191,18 +180,15 @@ public:
     Order *findOrderList();
     std::string createFullOrderDescription(int level = 0);
 
-    void setActionString(std::string astring)
-    {
+    void setActionString(std::string astring) {
         actionstring = astring;
     }
 
-    std::string getActionString()
-    {
+    std::string getActionString() {
         return actionstring;
     }
 
-    virtual float getMood()
-    {
+    virtual float getMood() {
         return 0;
     }
 
@@ -212,17 +198,14 @@ protected:
 ///Convenience order factory for "clicking to create an order"
 class OrderFactory {
 public:
-    virtual int type()
-    {
+    virtual int type() {
         return 0;
     }
 
-    OrderFactory()
-    {
+    OrderFactory() {
     }
 
-    virtual Order *newOrder()
-    {
+    virtual Order *newOrder() {
         return new Order;
     }
 };
@@ -240,24 +223,21 @@ private:
 ///the total time it can execute child order
     float maxtime;
 protected:
-    virtual ~ExecuteFor()
-    {
+    virtual ~ExecuteFor() {
     }
 
 public:
     ExecuteFor(Order *chld, float seconds) : Order(chld->getType(), chld->getSubType()),
-                                             child(chld),
-                                             time(0),
-                                             maxtime(seconds)
-    {
+            child(chld),
+            time(0),
+            maxtime(seconds) {
     }
 
 ///Executes child order and then any suborders that may be pertinant
     void Execute();
 
 ///Removes this order
-    virtual void Destroy()
-    {
+    virtual void Destroy() {
         child->Destroy();
         Order::Destroy();
     }
@@ -267,8 +247,8 @@ public:
 class Join : public Order {
 public:
     Join(Unit *parent,
-         Order *firstOrder,
-         Order *secondOrder);
+            Order *firstOrder,
+            Order *secondOrder);
     void Execute();
 
 private:
@@ -280,8 +260,8 @@ private:
 class Sequence : public Order {
 public:
     Sequence(Unit *parent,
-             Order *order,
-             unsigned int excludeTypes);
+            Order *order,
+            unsigned int excludeTypes);
     void Execute();
 
 private:

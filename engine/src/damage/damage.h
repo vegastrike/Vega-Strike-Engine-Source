@@ -39,19 +39,17 @@ struct Damage {
     float propulsion_damage;    // Disables the ship's drive
     //float blast_effect;         // Add torque to the ship
 
-    bool Spent()
-    {
+    bool Spent() {
         return (normal_damage == 0 && phase_damage == 0 && propulsion_damage == 0);// && blast_effect == 0);
     }
 
     Damage(float normal_damage = 0,
-           float phase_damage = 0,
-           float propulsion_damage = 0,
-           float blast_effect = 0) :
+            float phase_damage = 0,
+            float propulsion_damage = 0,
+            float blast_effect = 0) :
             normal_damage(normal_damage),
             phase_damage(phase_damage),
-            propulsion_damage(propulsion_damage)
-    {
+            propulsion_damage(propulsion_damage) {
     }
     //blast_effect(blast_effect),
 };
@@ -67,8 +65,7 @@ struct InflictedDamage {
     // shield, armor and hull. But this makes this implementation inflexible.
     std::vector<float> inflicted_damage_by_layer;
 
-    InflictedDamage(int number_of_layers = 3)
-    {
+    InflictedDamage(int number_of_layers = 3) {
         total_damage = 0.0;
         normal_damage = 0.0;
         phase_damage = 0.0;

@@ -44,8 +44,7 @@
 #include "easydom.h"
 #include "cmd/unit_generic.h"
 
-varInst *Mission::call_olist(missionNode *node, int mode)
-{
+varInst *Mission::call_olist(missionNode *node, int mode) {
     varInst *viret = NULL;
     if (mode == SCRIPT_PARSE) {
         string cmd = node->attr_value("name");
@@ -166,8 +165,7 @@ varInst *Mission::call_olist(missionNode *node, int mode)
     return NULL; //never reach
 }
 
-olist_t *Mission::getOListObject(missionNode *node, int mode, varInst *ovi)
-{
+olist_t *Mission::getOListObject(missionNode *node, int mode, varInst *ovi) {
     olist_t *my_object = NULL;
     if (mode == SCRIPT_RUN) {
         my_object = (olist_t *) ovi->object;
@@ -179,8 +177,7 @@ olist_t *Mission::getOListObject(missionNode *node, int mode, varInst *ovi)
     return my_object;
 }
 
-void Mission::call_olist_set(missionNode *node, int mode, varInst *ovi, int index, varInst *new_vi)
-{
+void Mission::call_olist_set(missionNode *node, int mode, varInst *ovi, int index, varInst *new_vi) {
     olist_t *olist = getOListObject(node, mode, ovi);
     if (((unsigned int) index) >= olist->size()) {
         char buffer[200];
@@ -194,8 +191,7 @@ void Mission::call_olist_set(missionNode *node, int mode, varInst *ovi, int inde
     (*olist)[index] = push_vi;
 }
 
-varInst *Mission::call_olist_at(missionNode *node, int mode, varInst *ovi, int index)
-{
+varInst *Mission::call_olist_at(missionNode *node, int mode, varInst *ovi, int index) {
     olist_t *olist = getOListObject(node, mode, ovi);
     if (((unsigned int) index) >= olist->size()) {
         char buffer[200];
@@ -207,26 +203,22 @@ varInst *Mission::call_olist_at(missionNode *node, int mode, varInst *ovi, int i
     return back_vi;
 }
 
-varInst *Mission::call_olist_back(missionNode *node, int mode, varInst *ovi)
-{
+varInst *Mission::call_olist_back(missionNode *node, int mode, varInst *ovi) {
     return getOListObject(node, mode, ovi)->back();
 }
 
-void Mission::call_olist_pop_back(missionNode *node, int mode, varInst *ovi)
-{
+void Mission::call_olist_pop_back(missionNode *node, int mode, varInst *ovi) {
     getOListObject(node, mode, ovi)->pop_back();
 }
 
-void Mission::call_olist_push_back(missionNode *node, int mode, varInst *ovi, varInst *push)
-{
+void Mission::call_olist_push_back(missionNode *node, int mode, varInst *ovi, varInst *push) {
     varInst *push_vi = newVarInst(VI_IN_OBJECT);
     push_vi->type = push->type;
     assignVariable(push_vi, push);
     getOListObject(node, mode, ovi)->push_back(push_vi);
 }
 
-void Mission::call_olist_toxml(missionNode *node, int mode, varInst *ovi)
-{
+void Mission::call_olist_toxml(missionNode *node, int mode, varInst *ovi) {
     olist_t *my_object = getOListObject(node, mode, ovi);
     int len = my_object->size();
     for (int i = 0; i < len; i++) {
@@ -236,8 +228,7 @@ void Mission::call_olist_toxml(missionNode *node, int mode, varInst *ovi)
     }
 }
 
-void Mission::call_vector_into_olist(varInst *vec_vi, QVector vec3)
-{
+void Mission::call_vector_into_olist(varInst *vec_vi, QVector vec3) {
     olist_t *my_object = new olist_t;
     olist_counter++;
 
@@ -263,8 +254,7 @@ void Mission::call_vector_into_olist(varInst *vec_vi, QVector vec3)
     my_object->push_back(push_vi);
 }
 
-QVector Mission::call_olist_tovector(missionNode *node, int mode, varInst *ovi)
-{
+QVector Mission::call_olist_tovector(missionNode *node, int mode, varInst *ovi) {
     varInst *x_vi = call_olist_at(node, mode, ovi, 0);
     varInst *y_vi = call_olist_at(node, mode, ovi, 1);
     varInst *z_vi = call_olist_at(node, mode, ovi, 2);
@@ -279,8 +269,7 @@ QVector Mission::call_olist_tovector(missionNode *node, int mode, varInst *ovi)
     return pos;
 }
 
-varInst *Mission::call_olist_new(missionNode *node, int mode)
-{
+varInst *Mission::call_olist_new(missionNode *node, int mode) {
     varInst *viret = newVarInst(VI_TEMP);
     olist_t *my_object = new olist_t;
     olist_counter++;

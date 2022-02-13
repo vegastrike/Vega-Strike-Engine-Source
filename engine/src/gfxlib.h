@@ -66,8 +66,8 @@ void /*GFXDRVAPI*/ GFXBeginScene();
 void /*GFXDRVAPI*/ GFXEndScene();
 ///Clears the Z buffer. Also clears color buffer if GFXTRUE passed in
 void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer,
-                            const GFXBOOL depthbuffer = GFXTRUE,
-                            const GFXBOOL stencilbuffer = GFXTRUE);
+        const GFXBOOL depthbuffer = GFXTRUE,
+        const GFXBOOL stencilbuffer = GFXTRUE);
 
 ///creates a light context (relevant to a star system) to add lights to
 void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number);
@@ -83,10 +83,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(GFXColor &amb);
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius);
 ///picks and does not activate local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center,
-                                 const float radius,
-                                 vector<int> &lights,
-                                 const int maxlights,
-                                 const bool pickglobals);
+        const float radius,
+        vector<int> &lights,
+        const int maxlights,
+        const bool pickglobals);
 ///activates local lights picked by GFXPickLight
 void /*GFXDRVAPI*/ GFXPickLights(vector<int>::const_iterator begin, vector<int>::const_iterator end);
 ///loads "lights" with all enabled global lights, computing occlusion to the specified position too
@@ -149,10 +149,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &mat
 const GFXMaterial &GFXGetMaterial(const unsigned int number);
 ///Tells Graphics library which material to use on next polygon if lighting enabled
 void /*GFXDRVAPI*/ GFXSelectMaterialHighlights(const unsigned int number,
-                                               const GFXColor &ambient,
-                                               const GFXColor &diffuse,
-                                               const GFXColor &specular,
-                                               const GFXColor &emmissive);
+        const GFXColor &ambient,
+        const GFXColor &diffuse,
+        const GFXColor &specular,
+        const GFXColor &emmissive);
 void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number);
 
 //Matrix
@@ -234,13 +234,13 @@ CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(double f[6][4], const Vector
 
 ///Given matrices, calculates the matrix and inverse matrix of a projection matrix to go from screen to 3-space coordinates
 void /*GFXDRVAPI*/ GFXFrustum(float *mat,
-                              float *inv,
-                              float left,
-                              float right,
-                              float bottom,
-                              float top,
-                              float nearval,
-                              float farval);
+        float *inv,
+        float left,
+        float right,
+        float bottom,
+        float top,
+        float nearval,
+        float farval);
 
 //Textures
 /**
@@ -253,14 +253,14 @@ void /*GFXDRVAPI*/ GFXFrustum(float *mat,
  * Texture target defines the type of texture it is for eventual cube mapping
  */
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width,
-                                       int height,
-                                       TEXTUREFORMAT externaltextureformat,
-                                       int *handle,
-                                       char *palette = 0,
-                                       int texturestage = 0,
-                                       enum FILTER mipmap = MIPMAP,
-                                       enum TEXTURE_TARGET texture_target = TEXTURE2D,
-                                       enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE);
+        int height,
+        TEXTUREFORMAT externaltextureformat,
+        int *handle,
+        char *palette = 0,
+        int texturestage = 0,
+        enum FILTER mipmap = MIPMAP,
+        enum TEXTURE_TARGET texture_target = TEXTURE2D,
+        enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE);
 
 ///Sets the priority of the texture for memory management.
 void /*GFXDRVAPI*/ GFXPrioritizeTexture(unsigned int handle, float priority);
@@ -274,22 +274,22 @@ void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
  * Max texture sizes gotten from vid card
  */
 GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
-                                         int handle,
-                                         int inWidth,
-                                         int inHeight,
-                                         enum TEXTUREFORMAT internalformat,
-                                         enum TEXTURE_IMAGE_TARGET image2D = TEXTURE_2D,
-                                         int max_texture_dimension = 65536 /*make sure it's not bigger than this--usually maybe 65536*/,
-                                         GFXBOOL detailtexture = GFXFALSE,
-                                         unsigned int pageIndex = 0);
+        int handle,
+        int inWidth,
+        int inHeight,
+        enum TEXTUREFORMAT internalformat,
+        enum TEXTURE_IMAGE_TARGET image2D = TEXTURE_2D,
+        int max_texture_dimension = 65536 /*make sure it's not bigger than this--usually maybe 65536*/,
+        GFXBOOL detailtexture = GFXFALSE,
+        unsigned int pageIndex = 0);
 
 GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture(unsigned char *buffer,
-                                            int handle,
-                                            int x,
-                                            int y,
-                                            unsigned int width,
-                                            unsigned int height,
-                                            enum TEXTURE_IMAGE_TARGET image2D = TEXTURE_2D);
+        int handle,
+        int x,
+        int y,
+        unsigned int width,
+        unsigned int height,
+        enum TEXTURE_IMAGE_TARGET image2D = TEXTURE_2D);
 
 ///Deletes the texture from the graphics card
 void /*GFXDRVAPI*/ GFXDeleteTexture(int handle);
@@ -400,34 +400,33 @@ GFXColor /*GFXDRVAPI*/ GFXColorf();
 void /*GFXDRVAPI*/ GFXCircle(float x, float y, float r1, float r2);
 unsigned int /*GFXDRVAPI*/ PolyLookup(POLYTYPE poly);
 void /*GFXDRVAPI*/ GFXDraw(POLYTYPE type, const float data[], int vnum,
-                           int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0);
+        int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0);
 
 void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type,
-                                   const float data[],
-                                   int vnum,
-                                   const unsigned char indices[],
-                                   int nelem,
-                                   int vsize = 3,
-                                   int csize = 0,
-                                   int tsize0 = 0,
-                                   int tsize1 = 0);
+        const float data[],
+        int vnum,
+        const unsigned char indices[],
+        int nelem,
+        int vsize = 3,
+        int csize = 0,
+        int tsize0 = 0,
+        int tsize1 = 0);
 
 void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type,
-                                   const float data[],
-                                   int vnum,
-                                   const unsigned short indices[],
-                                   int nelem,
-                                   int vsize = 3,
-                                   int csize = 0,
-                                   int tsize0 = 0,
-                                   int tsize1 = 0);
+        const float data[],
+        int vnum,
+        const unsigned short indices[],
+        int nelem,
+        int vsize = 3,
+        int csize = 0,
+        int tsize0 = 0,
+        int tsize1 = 0);
 
 void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type, const float data[], int vnum, const unsigned int indices[], int nelem,
-                                   int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0);
+        int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0);
 
 template<int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
-void GFXDraw(POLYTYPE type, const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1> &buffer)
-{
+void GFXDraw(POLYTYPE type, const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1> &buffer) {
     if (buffer.size() > 0) {
         GFXDraw(type, buffer.buffer_pointer(), buffer.size(), VSIZE, CSIZE, TSIZE0, TSIZE1);
     }
@@ -435,10 +434,9 @@ void GFXDraw(POLYTYPE type, const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, 
 
 template<typename ITYPE, int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
 void GFXDrawElements(POLYTYPE type,
-                     const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1> &buffer,
-                     const ITYPE *indices,
-                     int nelements)
-{
+        const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1> &buffer,
+        const ITYPE *indices,
+        int nelements) {
     if (buffer.size() > 0 && nelements > 0) {
         GFXDrawElements(type, buffer.buffer_pointer(), buffer.size(), indices, nelements, VSIZE, CSIZE, TSIZE0, TSIZE1);
     }
@@ -446,19 +444,18 @@ void GFXDrawElements(POLYTYPE type,
 
 template<typename ITYPE, int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
 void GFXDrawElements(POLYTYPE type,
-                     const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1> &buffer,
-                     const std::vector<ITYPE> &indices)
-{
+        const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1> &buffer,
+        const std::vector<ITYPE> &indices) {
     if (buffer.size() > 0 && indices.size() > 0) {
         GFXDrawElements(type,
-                        buffer.buffer_pointer(),
-                        buffer.size(),
-                        &indices[0],
-                        indices.size(),
-                        VSIZE,
-                        CSIZE,
-                        TSIZE0,
-                        TSIZE1);
+                buffer.buffer_pointer(),
+                buffer.size(),
+                &indices[0],
+                indices.size(),
+                VSIZE,
+                CSIZE,
+                TSIZE0,
+                TSIZE1);
     }
 }
 
@@ -521,11 +518,11 @@ int GFXShaderConstantv(int name, unsigned int numvals, const int *value);
 bool GFXDefaultShaderSupported();
 void GFXReloadDefaultShader();
 void GFXUploadLightState(int max_light_location,
-                         int active_light_array,
-                         int apparent_light_size_array,
-                         bool shader,
-                         vector<int>::const_iterator begin,
-                         vector<int>::const_iterator end);
+        int active_light_array,
+        int apparent_light_size_array,
+        bool shader,
+        vector<int>::const_iterator begin,
+        vector<int>::const_iterator end);
 bool GFXShaderReloaded();
 int GFXGetProgramVersion();
 #endif

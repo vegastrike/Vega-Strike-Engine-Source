@@ -40,8 +40,7 @@ PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB_p = 0;
 
 void DrawScene();
 
-static void ReDisplay()
-{
+static void ReDisplay() {
     glutPostRedisplay();
 }
 
@@ -65,22 +64,19 @@ static GLuint indices[] = {2, 3, 4, 0, 1};
 #define shapesize 5
 unsigned int myrandmax = 1880881;
 
-unsigned int myrand()
-{
+unsigned int myrand() {
     static unsigned int seed = 31337;
     seed += 345676543;
     seed %= myrandmax;
     return seed;
 }
 
-static bool isPowTwo(unsigned int n)
-{
+static bool isPowTwo(unsigned int n) {
     return (n & (n - 1)) == 0;
 }
 
 template<class T>
-vector<T> GetIndices(T size, size_t isize, size_t *memsize)
-{
+vector<T> GetIndices(T size, size_t isize, size_t *memsize) {
     vector<T> index(isize);
     *memsize = sizeof(T);
     for (size_t i = 0; i < isize; ++i) {
@@ -96,8 +92,7 @@ class vbo {
     size_t size;
     size_t isize;
 
-    void BindBuf()
-    {
+    void BindBuf() {
         static GLuint cur_buffer = 0;
         if (1) {
             (*glBindBufferARB_p)(GL_ARRAY_BUFFER_ARB, vert);
@@ -105,8 +100,7 @@ class vbo {
         }
     }
 
-    void BindInd()
-    {
+    void BindInd() {
         static GLuint cur_buffer = 0;
         if (1) {
             (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, ind);
@@ -115,8 +109,7 @@ class vbo {
     }
 
 public:
-    vbo(size_t s, bool indexed, bool mutate)
-    {
+    vbo(size_t s, bool indexed, bool mutate) {
         vector<GLfloat> varray(s * 3);
         vert = ind = 0;
         size = s;
@@ -132,39 +125,38 @@ public:
         }
         BindBuf();
         (*glBufferDataARB_p)(GL_ARRAY_BUFFER_ARB,
-                             size * 3 * sizeof(GLfloat),
-                             &varray[0],
-                             (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
+                size * 3 * sizeof(GLfloat),
+                &varray[0],
+                (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
         if (indexed) {
             BindInd();
             size_t memsize = sizeof(GLubyte);
             if (s < 256) {
                 vector<GLubyte> indices = GetIndices((GLubyte) size, isize, &memsize);
                 (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                                     isize * memsize,
-                                     &indices[0],
-                                     (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
+                        isize * memsize,
+                        &indices[0],
+                        (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
             } else if (s < 65536) {
                 GLushort LSize = s;
                 vector<GLushort> indices = GetIndices((GLushort) size, isize, &memsize);
 
                 (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                                     isize * memsize,
-                                     &indices[0],
-                                     (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
+                        isize * memsize,
+                        &indices[0],
+                        (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
             } else {
                 GLuint LSize = s;
                 vector<GLuint> indices = GetIndices((GLuint) size, isize, &memsize);
                 (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                                     isize * memsize,
-                                     &indices[0],
-                                     (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
+                        isize * memsize,
+                        &indices[0],
+                        (mutate) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
             }
         }
     }
 
-    void Draw()
-    {
+    void Draw() {
         BindBuf();
         if (ind) {
             BindInd();
@@ -174,17 +166,16 @@ public:
             BindInd();
             char stride = (size < 256 ? sizeof(GLubyte) : (size < 65536 ? sizeof(GLushort) : sizeof(GLuint)));
             glDrawElements(GL_TRIANGLE_FAN,
-                           size,
-                           size
-                                   < 256 ? GL_UNSIGNED_BYTE : (size < 65536 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT),
-                           0);
+                    size,
+                    size
+                            < 256 ? GL_UNSIGNED_BYTE : (size < 65536 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT),
+                    0);
         } else {
             glDrawArrays(GL_TRIANGLE_FAN, 0, size);
         }
     }
 
-    void Write()
-    {
+    void Write() {
         if (ind) {
             BindInd();
             (*glMapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);         //ignored
@@ -202,8 +193,7 @@ public:
         (*glUnmapBufferARB_p)(GL_ARRAY_BUFFER_ARB);
     }
 
-    void Read()
-    {
+    void Read() {
         char const *tmpind;
         if (ind) {
             BindInd();
@@ -227,8 +217,7 @@ public:
         (*glUnmapBufferARB_p)(GL_ARRAY_BUFFER_ARB);
     }
 
-    ~vbo()
-    {
+    ~vbo() {
         (*glDeleteBuffersARB_p)(1, &vert);
         if (ind) {
             (*glDeleteBuffersARB_p)(1, &ind);
@@ -237,8 +226,7 @@ public:
 };
 vector<vbo *> varrays(33);
 
-static void keyboard(unsigned char key, int x, int y)
-{
+static void keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 27:
             exit(0);
@@ -255,8 +243,7 @@ typedef GLubyte *GET_GL_PTR_TYP;
 #define GET_GL_PROC glXGetProcAddress
 #endif
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     GLsizei width, height;
 
     glutInit(&argc, argv);
@@ -285,8 +272,7 @@ int main(int argc, char *argv[])
     return 0;     //unreachage
 }
 
-void DrawArrays()
-{
+void DrawArrays() {
     for (size_t i = 0; i < varrays.size(); ++i) {
         if (varrays[i] != NULL) {
             fprintf(stderr, "Drawing %d\n", i);
@@ -296,8 +282,7 @@ void DrawArrays()
     }
 }
 
-void DrawScene()
-{
+void DrawScene() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* draw lower left polygon without vertex arrays */
@@ -333,7 +318,7 @@ void DrawScene()
                         size = myrand() % 65536 + 65536;
                     }
                     bool useindex = myrand() < myrandmax / 2 ? true
-                                                             : false;                 //still happens (takes about 3 minutes) if useindex is false
+                            : false;                 //still happens (takes about 3 minutes) if useindex is false
                     bool muticle = myrand() < myrandmax / 2 ? true : false;
                     fprintf(stderr,
                             "Allocating %d with size %d using index %d using mutable %d \n",
@@ -342,8 +327,8 @@ void DrawScene()
                             (int) useindex,
                             (int) muticle);
                     varrays[i] = new vbo(size,
-                                         useindex,
-                                         muticle);
+                            useindex,
+                            muticle);
                     didsomething = true;
                 }
                 break;

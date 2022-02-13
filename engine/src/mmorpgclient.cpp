@@ -44,8 +44,7 @@
 //If you wish to disable this module, just comment out that single line in command.cpp,
 //and don't compile this .cpp file.
 
-mmoc::mmoc()
-{
+mmoc::mmoc() {
     //{{{
     status = false;     //used to let the thread exit
     binmode = false;
@@ -66,8 +65,7 @@ mmoc::mmoc()
     //and never call mmoc::renderconsole. I'll need to make a mutex'd function for this.
     //}}}
 }  //}}}
-void mmoc::connectTo(const char *address_in, const char *port_in)
-{
+void mmoc::connectTo(const char *address_in, const char *port_in) {
     //{{{
 //sockaddr_in m_addr;
     char *address = (char *) address_in;
@@ -121,8 +119,7 @@ void mmoc::connectTo(const char *address_in, const char *port_in)
 
     createThread();
 } //}}}
-bool mmoc::getStatus(int in)
-{
+bool mmoc::getStatus(int in) {
     //{{{
 //if in = 0, return status, else toggle status.
     SDL_mutex *m = SDL_CreateMutex();
@@ -135,8 +132,7 @@ bool mmoc::getStatus(int in)
     SDL_DestroyMutex(m);
     return returner;
 } //}}}
-void mmoc::ParseRemoteInput(char *buf)
-{
+void mmoc::ParseRemoteInput(char *buf) {
     //{{{ Main parser
 //add  binary modes here.
     if (buf != NULL) {
@@ -218,8 +214,7 @@ public:
     double x, y, z;     //the position
 };
 
-bool mmoc::listenThread()
-{
+bool mmoc::listenThread() {
     //{{{
     const int MAXBUF = 1000;
     char buffer[MAXBUF + 1];
@@ -253,18 +248,15 @@ bool mmoc::listenThread()
     /*---Clean up---*/
     return stat;
 } //}}}
-void mmoc::createThread()
-{
+void mmoc::createThread() {
     //{{{
     ::SDL_CreateThread(startThread, reinterpret_cast< void * > (this));
 } //}}}
-void mmoc::send(char *buffer, int size)
-{
+void mmoc::send(char *buffer, int size) {
     //{{{
     ::INET_Write(socket, size, buffer);     //or write(socket, buffer, size) for windwos?
 } //}}}
-void mmoc::send(std::string &instring)
-{
+void mmoc::send(std::string &instring) {
     //{{{
     unsigned int x = instring.find("send ");
     if (x == 0) {
@@ -273,8 +265,7 @@ void mmoc::send(std::string &instring)
     instring.append("\r\n");
     send((char *) instring.c_str(), instring.size());
 } //}}}
-void mmoc::negotiate(std::vector<std::string *> *d)
-{
+void mmoc::negotiate(std::vector<std::string *> *d) {
     std::vector<std::string *>::iterator iter = d->begin();
     iter++;
     if (iter >= d->end()) {
@@ -292,13 +283,11 @@ void mmoc::negotiate(std::vector<std::string *> *d)
     }
 }
 
-void mmoc::ParseMovement(POSpack &in)
-{
+void mmoc::ParseMovement(POSpack &in) {
     //.....
 }
 
-int startThread(void *mmoc2use)
-{
+int startThread(void *mmoc2use) {
     //{{{
     mmoc *looper = reinterpret_cast< mmoc * > (mmoc2use);
     if (!looper->getStatus(0)) {
@@ -316,15 +305,13 @@ int startThread(void *mmoc2use)
     }
     return 0;
 } //}}}
-void mmoc::close()
-{
+void mmoc::close() {
     if (getStatus(0)) {
         getStatus(1);
     }
 }
 
-void mmoc::conoutf(std::string &in, int x, int y, int z)
-{
+void mmoc::conoutf(std::string &in, int x, int y, int z) {
     CommandInterpretor->conoutf(in, x, y, z);
 }
 /*

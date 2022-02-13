@@ -92,17 +92,17 @@ public:
     bool getBoolAttribute(Object object, string key, bool default_value = true);
     char getCharAttribute(Object object, string key, char default_value);
     int getIntAttribute(Object object, string key, int default_value = 1,
-                        int multiplier = 1, int default_multiplier = 1);
+            int multiplier = 1, int default_multiplier = 1);
     float getFloatAttribute(Object object, string key, float default_value = 1.0f,
-                            float multiplier = 1.0f, float default_multiplier = 1.0f);
+            float multiplier = 1.0f, float default_multiplier = 1.0f);
     double getDoubleAttribute(Object object, string key, double default_value = 1.0,
-                              double multiplier = 1.0, double default_multiplier = 1.0);
+            double multiplier = 1.0, double default_multiplier = 1.0);
 
     void initializeQVector(Object object, string key_prefix, QVector &vector,
-                           double multiplier = 1.0);
+            double multiplier = 1.0);
     void initializeMaterial(Object object, GFXMaterial &material);
     void initializeAlpha(Object object, BLENDFUNC blend_source,
-                         BLENDFUNC blend_destination);
+            BLENDFUNC blend_destination);
     GFXColor initializeColor(Object object);
 };
 

@@ -59,13 +59,11 @@ struct TerraXML {
     std::vector<TerrainData> data;
 };
 
-void QuadTree::beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void QuadTree::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     ((QuadTree *) userData)->beginElement(name, XMLSupport::AttributeList(atts));
 }
 
-void QuadTree::endElement(void *userData, const XML_Char *name)
-{
+void QuadTree::endElement(void *userData, const XML_Char *name) {
     ((QuadTree *) userData)->endElement(name);
 }
 
@@ -162,8 +160,7 @@ using XMLSupport::parse_int;
 using XMLSupport::parse_float;
 using namespace TerrainXML;
 
-void QuadTree::beginElement(const std::string &name, const AttributeList &attributes)
-{
+void QuadTree::beginElement(const std::string &name, const AttributeList &attributes) {
     Names elem = (Names) element_map.lookup(name);
     AttributeList::const_iterator iter;
     char csrc[128];
@@ -340,12 +337,10 @@ void QuadTree::beginElement(const std::string &name, const AttributeList &attrib
     }
 }
 
-void QuadTree::endElement(const std::string &name)
-{
+void QuadTree::endElement(const std::string &name) {
 }
 
-void QuadTree::SetXSizes(int mX, unsigned int maxX)
-{
+void QuadTree::SetXSizes(int mX, unsigned int maxX) {
     if (mX < minX) {
         minX = mX;
     }
@@ -354,8 +349,7 @@ void QuadTree::SetXSizes(int mX, unsigned int maxX)
     }
 }
 
-void QuadTree::SetZSizes(int mZ, unsigned int maxZ)
-{
+void QuadTree::SetZSizes(int mZ, unsigned int maxZ) {
     if (mZ < minZ) {
         minZ = mZ;
     }
@@ -364,8 +358,7 @@ void QuadTree::SetZSizes(int mZ, unsigned int maxZ)
     }
 }
 
-void QuadTree::LoadXML(const char *filename, const Vector &Scales, const float Radius)
-{
+void QuadTree::LoadXML(const char *filename, const Vector &Scales, const float Radius) {
     std::vector<unsigned int> ind;
     //FILE* inFile = VSFileSystem::vs_open (filename, "r");
     VSFile f;
@@ -448,8 +441,8 @@ void QuadTree::LoadXML(const char *filename, const Vector &Scales, const float R
                 if (Radius != 0 && xml->radius != 0) {
                     nonlinear_transform =
                             new SphericalTransform(xml->SphereSizeX < 0 ? hm.XSize << hm.Scale : xml->SphereSizeX,
-                                                   Radius < 0 ? xml->radius : Radius,
-                                                   xml->SphereSizeZ < 0 ? hm.ZSize << hm.Scale : xml->SphereSizeZ);
+                                    Radius < 0 ? xml->radius : Radius,
+                                    xml->SphereSizeZ < 0 ? hm.ZSize << hm.Scale : xml->SphereSizeZ);
                 } else {
                     nonlinear_transform = new IdentityTransform();
                     //only happens the first time!
@@ -459,39 +452,39 @@ void QuadTree::LoadXML(const char *filename, const Vector &Scales, const float R
                 float zmax = (hm.ZOrigin + (hm.ZSize << hm.Scale));
                 v[0].SetVertex(nonlinear_transform->Transform(Vector(xmax, 0, hm.ZOrigin)));
                 v[0].SetTexCoord(nonlinear_transform->TransformS(xmax,
-                                                                 xml->scales),
-                                 nonlinear_transform->TransformT(hm.ZOrigin, xml->scalet));
+                                xml->scales),
+                        nonlinear_transform->TransformT(hm.ZOrigin, xml->scalet));
                 Vector Norm0(nonlinear_transform->TransformNormal(v[0].GetConstVertex(), Vector(0, 1, 0)));
                 v[0].SetNormal(Vector(Norm0.i * Scales.i, Norm0.j * Scales.j, Norm0.k * Scales.k));
                 v[1].SetVertex(nonlinear_transform->Transform(Vector(hm.XOrigin, 0, hm.ZOrigin)));
                 v[1].SetTexCoord(nonlinear_transform->TransformS(hm.XOrigin,
-                                                                 xml->scales),
-                                 nonlinear_transform->TransformT(hm.ZOrigin, xml->scalet));
+                                xml->scales),
+                        nonlinear_transform->TransformT(hm.ZOrigin, xml->scalet));
                 Norm0 = (nonlinear_transform->TransformNormal(v[1].GetConstVertex(), Vector(0, 1, 0)));
                 v[1].SetNormal(Vector(Norm0.i * Scales.i, Norm0.j * Scales.j, Norm0.k * Scales.k));
 
                 v[2].SetVertex(nonlinear_transform->Transform(Vector(hm.XOrigin, 0, zmax)));
                 v[2].SetTexCoord(nonlinear_transform->TransformS(hm.XOrigin,
-                                                                 xml->scales),
-                                 nonlinear_transform->TransformT(zmax, xml->scalet));
+                                xml->scales),
+                        nonlinear_transform->TransformT(zmax, xml->scalet));
                 Norm0 = (nonlinear_transform->TransformNormal(v[2].GetConstVertex(), Vector(0, 1, 0)));
                 v[2].SetNormal(Vector(Norm0.i * Scales.i, Norm0.j * Scales.j, Norm0.k * Scales.k));
 
                 v[3].SetVertex(nonlinear_transform->Transform(Vector(xmax, 0, zmax)));
                 v[3].SetTexCoord(nonlinear_transform->TransformS(zmax,
-                                                                 xml->scales),
-                                 nonlinear_transform->TransformT(zmax, xml->scalet));
+                                xml->scales),
+                        nonlinear_transform->TransformT(zmax, xml->scalet));
                 Norm0 = (nonlinear_transform->TransformNormal(v[3].GetConstVertex(), Vector(0, 1, 0)));
                 v[3].SetNormal(Vector(Norm0.i * Scales.i, Norm0.j * Scales.j, Norm0.k * Scales.k));
                 vertices.EndMutate();
                 quadsquare::SetCurrentTerrain(&VertexAllocated,
-                                              &VertexCount,
-                                              &vertices,
-                                              &unusedvertices,
-                                              nonlinear_transform,
-                                              &textures,
-                                              Vector(1.0F / Scales.i, 1.0F / Scales.j, 1.0F / Scales.k),
-                                              neighbors);
+                        &VertexCount,
+                        &vertices,
+                        &unusedvertices,
+                        nonlinear_transform,
+                        &textures,
+                        Vector(1.0F / Scales.i, 1.0F / Scales.j, 1.0F / Scales.k),
+                        neighbors);
                 root = new quadsquare(&RootCornerData);
             }
             root->AddHeightMap(RootCornerData, hm);
@@ -501,13 +494,13 @@ void QuadTree::LoadXML(const char *filename, const Vector &Scales, const float R
     }
     if (biggest) {
         quadsquare::SetCurrentTerrain(&VertexAllocated,
-                                      &VertexCount,
-                                      &vertices,
-                                      &unusedvertices,
-                                      nonlinear_transform,
-                                      &textures,
-                                      Vector(1.0F / Scales.i, 1.0F / Scales.j, 1.0F / Scales.k),
-                                      neighbors);
+                &VertexCount,
+                &vertices,
+                &unusedvertices,
+                nonlinear_transform,
+                &textures,
+                Vector(1.0F / Scales.i, 1.0F / Scales.j, 1.0F / Scales.k),
+                neighbors);
         root = new quadsquare(&RootCornerData);
     }
     //root->StaticCullData (RootCornerData,xml->detail);

@@ -34,8 +34,7 @@
 #include "universe_util.h"
 #include <string>
 
-static void DockedScript(Unit *docker, Unit *base)
-{
+static void DockedScript(Unit *docker, Unit *base) {
     static string script = vs_config->getVariable("AI", "DockedToScript", "");
     if (script.length() > 0) {
         Unit *targ = docker->Target();
@@ -49,14 +48,13 @@ static void DockedScript(Unit *docker, Unit *base)
 
 namespace Orders {
 DockingOps::DockingOps(Unit *unitToDockWith, Order *ai, bool physically_dock, bool keeptrying) : MoveTo(QVector(0,
-                                                                                                                0,
-                                                                                                                1),
-                                                                                                        false,
-                                                                                                        10, false),
-                                                                                                 docking(unitToDockWith),
-                                                                                                 state(GETCLEARENCE),
-                                                                                                 oldstate(ai)
-{
+                0,
+                1),
+        false,
+        10, false),
+        docking(unitToDockWith),
+        state(GETCLEARENCE),
+        oldstate(ai) {
     formerOwnerDoNotDereference = NULL;
     this->keeptrying = keeptrying;
     facedtarget = false;
@@ -66,8 +64,7 @@ DockingOps::DockingOps(Unit *unitToDockWith, Order *ai, bool physically_dock, bo
     timer = temptimer;
 }
 
-void DockingOps::SetParent(Unit *par)
-{
+void DockingOps::SetParent(Unit *par) {
     MoveTo::SetParent(par);
     if (parent) {
         formerOwnerDoNotDereference = parent->owner;
@@ -75,8 +72,7 @@ void DockingOps::SetParent(Unit *par)
     }
 }
 
-void DockingOps::Execute()
-{
+void DockingOps::Execute() {
     Unit *utdw = docking.GetUnit();
     if (parent == utdw || utdw == NULL) {
         RestoreOldAI();
@@ -117,8 +113,7 @@ void DockingOps::Execute()
     done = false;
 }
 
-void DockingOps::Destroy()
-{
+void DockingOps::Destroy() {
     if (parent) {
         if (oldstate) {
             oldstate->Destroy();
@@ -132,8 +127,7 @@ void DockingOps::Destroy()
     docking.SetUnit(NULL);
 }
 
-void DockingOps::RestoreOldAI()
-{
+void DockingOps::RestoreOldAI() {
     if (parent) {
         parent->aistate = oldstate;         //that's me!
         if (formerOwnerDoNotDereference) {
@@ -144,8 +138,7 @@ void DockingOps::RestoreOldAI()
     }
 }
 
-int SelectDockPort(Unit *utdw, Unit *parent)
-{
+int SelectDockPort(Unit *utdw, Unit *parent) {
     const vector<DockingPorts> &dp = utdw->DockingPortLocations();
     float dist = FLT_MAX;
     int num = -1;
@@ -162,8 +155,7 @@ int SelectDockPort(Unit *utdw, Unit *parent)
     return num;
 }
 
-bool DockingOps::RequestClearence(Unit *utdw)
-{
+bool DockingOps::RequestClearence(Unit *utdw) {
     if (physicallyDock && !utdw->RequestClearance(parent)) {
         return false;
     }
@@ -174,8 +166,7 @@ bool DockingOps::RequestClearence(Unit *utdw)
     return true;
 }
 
-QVector DockingOps::Movement(Unit *utdw)
-{
+QVector DockingOps::Movement(Unit *utdw) {
     const QVector loc(Transform(utdw->GetTransformation(), utdw->DockingPortLocations()[port].GetPosition().Cast()));
     SetDest(loc);
 
@@ -191,8 +182,7 @@ QVector DockingOps::Movement(Unit *utdw)
     return loc;
 }
 
-bool DockingOps::DockToTarget(Unit *utdw)
-{
+bool DockingOps::DockToTarget(Unit *utdw) {
     if (utdw->DockingPortLocations()[port].IsOccupied()) {
         if (keeptrying) {
             state = GETCLEARENCE;
@@ -209,8 +199,8 @@ bool DockingOps::DockToTarget(Unit *utdw)
     bool isplanet = utdw->isUnit() == _UnitType::planet;
     static float MinimumCapacityToRefuelOnLand =
             XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                           "MinimumWarpCapToRefuelDockeesAutomatically",
-                                                           "0"));
+                    "MinimumWarpCapToRefuelDockeesAutomatically",
+                    "0"));
     if (diss <= (isplanet ? rad * rad : parent->rSize() * parent->rSize())) {
         DockedScript(parent, utdw);
         if (physicallyDock) {
@@ -240,8 +230,7 @@ bool DockingOps::DockToTarget(Unit *utdw)
     return false;
 }
 
-bool DockingOps::PerformDockingOperations(Unit *utdw)
-{
+bool DockingOps::PerformDockingOperations(Unit *utdw) {
     timer -= SIMULATION_ATOM;
     bool isplanet = utdw->isUnit() == _UnitType::planet;
     if (timer < 0) {
@@ -270,8 +259,7 @@ bool DockingOps::PerformDockingOperations(Unit *utdw)
     return false;
 }
 
-bool DockingOps::Undock(Unit *utdw)
-{
+bool DockingOps::Undock(Unit *utdw) {
     //this is a good heuristic... find the location where you are.compare with center...then fly the fuck away
     QVector awaydir = parent->Position() - utdw->Position();
     float len = ((utdw->rSize() + parent->rSize() * 2) / awaydir.Magnitude());

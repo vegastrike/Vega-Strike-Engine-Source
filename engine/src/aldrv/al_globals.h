@@ -64,8 +64,7 @@ struct AUDSoundProperties {
     ALboolean looping;     //can be set by caller.
 #endif
 
-    AUDSoundProperties()
-    {
+    AUDSoundProperties() {
         shared = false;
         success = false;
         wave = NULL;
@@ -88,8 +87,7 @@ struct OurSound {
     ALboolean looping;
     bool music;
 
-    OurSound(ALuint source, ALuint buffername)
-    {
+    OurSound(ALuint source, ALuint buffername) {
         buffer = buffername;
         pos.Set(0, 0, 0);
         vel.Set(0, 0, 0);

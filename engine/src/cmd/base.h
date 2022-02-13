@@ -79,18 +79,15 @@ public:
             virtual void MouseEnter(::BaseInterface *base, float x, float y, int buttonmask);
             virtual void MouseLeave(::BaseInterface *base, float x, float y, int buttonmask);
 
-            void setEventMask(unsigned int mask)
-            {
+            void setEventMask(unsigned int mask) {
                 eventMask = mask;
             }
 
             explicit Link(const std::string &ind, const std::string &pfile)
-                    : pythonfile(pfile), alpha(1.0f), index(ind), eventMask(ClickEvent), clickbtn(-1)
-            {
+                    : pythonfile(pfile), alpha(1.0f), index(ind), eventMask(ClickEvent), clickbtn(-1) {
             }
 
-            virtual ~Link()
-            {
+            virtual ~Link() {
             }
 
 #ifdef BASE_MAKER
@@ -103,12 +100,10 @@ public:
             int index;
             virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
 
-            virtual ~Goto()
-            {
+            virtual ~Goto() {
             }
 
-            explicit Goto(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile)
-            {
+            explicit Goto(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -120,12 +115,10 @@ public:
             vector<BaseComputer::DisplayMode> modes;
             virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
 
-            virtual ~Comp()
-            {
+            virtual ~Comp() {
             }
 
-            explicit Comp(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile)
-            {
+            explicit Comp(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -136,12 +129,10 @@ public:
         public:
             virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
 
-            virtual ~Launch()
-            {
+            virtual ~Launch() {
             }
 
-            explicit Launch(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile)
-            {
+            explicit Launch(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -152,12 +143,10 @@ public:
         public:
             virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
 
-            virtual ~Eject()
-            {
+            virtual ~Eject() {
             }
 
-            explicit Eject(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile)
-            {
+            explicit Eject(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -174,8 +163,7 @@ public:
             virtual void Click(::BaseInterface *base, float x, float y, int button, int state);
             explicit Talk(const std::string &ind, const std::string &pythonfile);
 
-            virtual ~Talk()
-            {
+            virtual ~Talk() {
             }
 
 #ifdef BASE_MAKER
@@ -184,12 +172,10 @@ public:
         };
         class Python : public Link {
         public:
-            Python(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile)
-            {
+            Python(const std::string &ind, const std::string &pythonfile) : Link(ind, pythonfile) {
             }
 
-            virtual ~Python()
-            {
+            virtual ~Python() {
             }
 
 #ifdef BASE_MAKER
@@ -204,12 +190,10 @@ public:
             virtual void EndXML( FILE *fp );
 #endif
 
-            virtual ~BaseObj()
-            {
+            virtual ~BaseObj() {
             }
 
-            explicit BaseObj(const std::string &ind) : index(ind)
-            {
+            explicit BaseObj(const std::string &ind) : index(ind) {
             }
         };
         class BasePython : public BaseObj {
@@ -222,13 +206,11 @@ public:
             virtual void EndXML( FILE *fp );
 #endif
 
-            virtual ~BasePython()
-            {
+            virtual ~BasePython() {
             }
 
             BasePython(const std::string &ind, const std::string &python, float time)
-                    : BaseObj(ind), pythonfile(python), timeleft(0), maxtime(time)
-            {
+                    : BaseObj(ind), pythonfile(python), timeleft(0), maxtime(time) {
             }
 
             virtual void Relink(const std::string &python);
@@ -241,20 +223,18 @@ public:
             virtual void EndXML( FILE *fp );
 #endif
 
-            virtual ~BaseText()
-            {
+            virtual ~BaseText() {
             }
 
             BaseText(const std::string &texts,
-                     float posx,
-                     float posy,
-                     float wid,
-                     float hei,
-                     float charsizemult,
-                     GFXColor backcol,
-                     GFXColor forecol,
-                     const std::string &ind) : BaseObj(ind), text(forecol, backcol)
-            {
+                    float posx,
+                    float posy,
+                    float wid,
+                    float hei,
+                    float charsizemult,
+                    GFXColor backcol,
+                    GFXColor forecol,
+                    const std::string &ind) : BaseObj(ind), text(forecol, backcol) {
                 text.SetPos(posx, posy);
                 text.SetSize(wid, hei);
                 float cx = 0, cy = 0;
@@ -265,18 +245,15 @@ public:
                 text.SetText(texts);
             }
 
-            void SetText(const std::string &newtext)
-            {
+            void SetText(const std::string &newtext) {
                 text.SetText(newtext);
             }
 
-            void SetPos(float posx, float posy)
-            {
+            void SetPos(float posx, float posy) {
                 text.SetPos(posx, posy);
             }
 
-            void SetSize(float wid, float hei)
-            {
+            void SetSize(float wid, float hei) {
                 text.SetSize(wid, hei);
             }
         };
@@ -285,31 +262,28 @@ public:
             virtual void Draw(::BaseInterface *base);
             Matrix mat;
 
-            virtual ~BaseShip()
-            {
+            virtual ~BaseShip() {
             }
 
 #ifdef BASE_MAKER
             virtual void EndXML( FILE *fp );
 #endif
 
-            explicit BaseShip(const std::string &ind) : BaseObj(ind)
-            {
+            explicit BaseShip(const std::string &ind) : BaseObj(ind) {
             }
 
             BaseShip(float r0,
-                     float r1,
-                     float r2,
-                     float r3,
-                     float r4,
-                     float r5,
-                     float r6,
-                     float r7,
-                     float r8,
-                     QVector pos,
-                     const std::string &ind) :
-                    BaseObj(ind), mat(r0, r1, r2, r3, r4, r5, r6, r7, r8, QVector(pos.i / 2, pos.j / 2, pos.k))
-            {
+                    float r1,
+                    float r2,
+                    float r3,
+                    float r4,
+                    float r5,
+                    float r6,
+                    float r7,
+                    float r8,
+                    QVector pos,
+                    const std::string &ind) :
+                    BaseObj(ind), mat(r0, r1, r2, r3, r4, r5, r6, r7, r8, QVector(pos.i / 2, pos.j / 2, pos.k)) {
             }
         };
         class BaseVSSprite : public BaseObj {
@@ -327,26 +301,22 @@ public:
             BaseVSSprite(const std::string &spritefile, const std::string &ind);
             void SetSprite(const std::string &spritefile);
 
-            void SetPos(float posx, float posy)
-            {
+            void SetPos(float posx, float posy) {
                 spr.SetPosition(posx, posy);
             }
 
-            void SetSize(float wid, float hei)
-            {
+            void SetSize(float wid, float hei) {
                 spr.SetSize(wid, hei);
             }
 
-            void SetTime(float t)
-            {
+            void SetTime(float t) {
                 spr.SetTime(t);
             }
 
             bool isPlaying() const;
 
         protected:
-            BaseVSSprite(const std::string &ind, const VSSprite &sprite) : BaseObj(ind), spr(sprite)
-            {
+            BaseVSSprite(const std::string &ind, const VSSprite &sprite) : BaseObj(ind), spr(sprite) {
             }
         };
 
@@ -357,8 +327,7 @@ public:
             double hidePointerTime;
 
         public:
-            virtual ~BaseVSMovie()
-            {
+            virtual ~BaseVSMovie() {
             }
 
             BaseVSMovie(const std::string &moviefile, const std::string &ind);
@@ -367,19 +336,16 @@ public:
             float GetTime() const;
             void SetTime(float t);
 
-            bool GetHidePointer() const
-            {
+            bool GetHidePointer() const {
                 return hidePointer;
             };
             void SetHidePointer(bool hide);
 
-            const std::string &getCallback() const
-            {
+            const std::string &getCallback() const {
                 return callback;
             }
 
-            void setCallback(const std::string &callback)
-            {
+            void setCallback(const std::string &callback) {
                 this->callback = callback;
             }
 
@@ -394,8 +360,7 @@ public:
             unsigned int curchar;
             float curtime;
 
-            virtual ~BaseTalk()
-            {
+            virtual ~BaseTalk() {
             }
 
             std::string message;
@@ -450,8 +415,7 @@ public:
 
     void setDJEnabled(bool enabled);
 
-    bool isDJEnabled() const
-    {
+    bool isDJEnabled() const {
         return enabledj;
     }
 };

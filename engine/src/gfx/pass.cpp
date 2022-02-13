@@ -36,30 +36,27 @@ using boost::property_tree::ptree;
 
 Pass::Pass()
         : program(0),
-          type(FixedPass),
-          colorWrite(true),
-          zWrite(True),
-          perLightIteration(0),
-          maxIterations(0),
-          blendMode(Default),
-          depthFunction(LEqual),
-          cullMode(DefaultFace),
-          polyMode(Fill),
-          offsetFactor(0),
-          offsetUnits(0),
-          lineWidth(1),
-          sequence(0)
-{
+        type(FixedPass),
+        colorWrite(true),
+        zWrite(True),
+        perLightIteration(0),
+        maxIterations(0),
+        blendMode(Default),
+        depthFunction(LEqual),
+        cullMode(DefaultFace),
+        polyMode(Fill),
+        offsetFactor(0),
+        offsetUnits(0),
+        lineWidth(1),
+        sequence(0) {
 }
 
-Pass::~Pass()
-{
+Pass::~Pass() {
     //Should deallocate the program... but... GFX doesn't have that API.
 }
 
 // TODO: consider making this a constructor
-void Pass::parsePass(ptree tree, string techniqueName, int &nextSequence)
-{
+void Pass::parsePass(ptree tree, string techniqueName, int &nextSequence) {
     this->techniqueName = techniqueName;
     setType(tree.get("<xmlattr>.type", ""));
     colorWrite = tree.get("<xmlattr>.cwrite", true);
@@ -106,14 +103,13 @@ void Pass::parsePass(ptree tree, string techniqueName, int &nextSequence)
     }
 }
 
-void Pass::parseTextureUnit(ptree tree)
-{
+void Pass::parseTextureUnit(ptree tree) {
     int target;
     if (type == Pass::ShaderPass) {
         target = tree.get("<xmlattr>.target", -1);
     } else {
         target = tree.get("<xmlattr>.target",
-                          0); // Behavior change. This used to throw an exception and now works. Think about.
+                0); // Behavior change. This used to throw an exception and now works. Think about.
     }
 
     string source = tree.get("<xmlattr>.src", "");
@@ -139,8 +135,7 @@ void Pass::parseTextureUnit(ptree tree)
     VS_LOG(debug, (boost::format("Added texture unit #%1% \"%2%\"") % getNumTextureUnits() % name));
 }
 
-void Pass::parseParam(ptree tree)
-{
+void Pass::parseParam(ptree tree) {
     string floatsString = tree.get("<xmlattr>.value", "");
     string name = tree.get("<xmlattr>.name", "");
     bool optional = tree.get("<xmlattr>.optional", false);
@@ -170,8 +165,7 @@ void Pass::parseParam(ptree tree)
 
 }
 
-void Pass::parseAutoParam(ptree tree)
-{
+void Pass::parseAutoParam(ptree tree) {
     string name = tree.get("<xmlattr>.name", "");
     string semantic = tree.get("<xmlattr>.semantic", "");
     bool optional = tree.get("<xmlattr>.optional", false);
@@ -185,8 +179,7 @@ void Pass::parseAutoParam(ptree tree)
             % (optional ? "optional" : "required")));
 }
 
-void Pass::setType(string typeString)
-{
+void Pass::setType(string typeString) {
     if (typeString == "fixed") {
         type = FixedPass;
     } else if (typeString == "shader") {
@@ -195,8 +188,7 @@ void Pass::setType(string typeString)
     // TODO: Should we handle other cases? Throw exception?
 }
 
-void Pass::setZWrite(string zWriteString)
-{
+void Pass::setZWrite(string zWriteString) {
     if (zWriteString == "true") {
         zWrite = True;
     } else if (zWriteString == "false") {
@@ -207,8 +199,7 @@ void Pass::setZWrite(string zWriteString)
     // TODO: same as above
 }
 
-void Pass::setPerLightIteration(ptree tree, string iterationString)
-{
+void Pass::setPerLightIteration(ptree tree, string iterationString) {
     if (iterationString == "once") {
         perLightIteration = 0;
     } else if (iterationString.empty()) {
@@ -218,8 +209,7 @@ void Pass::setPerLightIteration(ptree tree, string iterationString)
     }
 }
 
-void Pass::setBlendMode(string blendModeString)
-{
+void Pass::setBlendMode(string blendModeString) {
     if (blendModeString == "default") {
         blendMode = Default;
     } else if (blendModeString == "add") {
@@ -237,8 +227,7 @@ void Pass::setBlendMode(string blendModeString)
     }
 }
 
-void Pass::setDepthFunction(string depthString)
-{
+void Pass::setDepthFunction(string depthString) {
     if (depthString == "less") {
         depthFunction = Less;
     } else if (depthString == "lequal") {
@@ -256,8 +245,7 @@ void Pass::setDepthFunction(string depthString)
     }
 }
 
-void Pass::setCullMode(string cullModeString)
-{
+void Pass::setCullMode(string cullModeString) {
     if (cullModeString == "none") {
         cullMode = None;
     } else if (cullModeString == "back") {
@@ -271,8 +259,7 @@ void Pass::setCullMode(string cullModeString)
     }
 }
 
-void Pass::setPolyMode(string polyModeString)
-{
+void Pass::setPolyMode(string polyModeString) {
     if (polyModeString == "point") {
         polyMode = Point;
     } else if (polyModeString == "line") {
@@ -282,8 +269,7 @@ void Pass::setPolyMode(string polyModeString)
     }
 }
 
-Pass::ShaderParam::Semantic Pass::getShaderParam(const string &shaderString)
-{
+Pass::ShaderParam::Semantic Pass::getShaderParam(const string &shaderString) {
     if (shaderString == "EnvColor") {
         return ShaderParam::EnvColor;
     } else if (shaderString == "CloakingPhase") {

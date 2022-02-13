@@ -33,8 +33,7 @@
 #include "vs_globals.h"
 #include "lin_time.h"
 
-float FlyByKeyboard::clamp_axis(float v)
-{
+float FlyByKeyboard::clamp_axis(float v) {
     static int axis_scale = XMLSupport::parse_int(vs_config->getVariable("physics", "slide_start", "3"));
     int as = parent->GetComputerData().slide_start;
     if (as == 0) {
@@ -52,8 +51,7 @@ float FlyByKeyboard::clamp_axis(float v)
     return v;
 }
 
-float FlyByKeyboard::reduce_axis(float v)
-{
+float FlyByKeyboard::reduce_axis(float v) {
     static int axis_scale = XMLSupport::parse_int(vs_config->getVariable("physics", "slide_end", "2"));
     int as = parent->GetComputerData().slide_end;
     if (as == 0) {
@@ -71,20 +69,17 @@ float FlyByKeyboard::reduce_axis(float v)
     return v;
 }
 
-void FlyByKeyboard::Destroy()
-{
+void FlyByKeyboard::Destroy() {
     if (autopilot) {
         autopilot->Destroy();
     }
     Order::Destroy();
 }
 
-FlyByKeyboard::~FlyByKeyboard()
-{
+FlyByKeyboard::~FlyByKeyboard() {
 }
 
-void FlyByKeyboard::KeyboardUp(float v)
-{
+void FlyByKeyboard::KeyboardUp(float v) {
     if (v == 0) {
         axis_key.i = reduce_axis(axis_key.i);
     } else {
@@ -97,8 +92,7 @@ void FlyByKeyboard::KeyboardUp(float v)
     Up(clamp_axis(axis_key.i));
 }
 
-void FlyByKeyboard::KeyboardRight(float v)
-{
+void FlyByKeyboard::KeyboardRight(float v) {
     if (v == 0) {
         axis_key.j = reduce_axis(axis_key.j);
     } else {
@@ -111,8 +105,7 @@ void FlyByKeyboard::KeyboardRight(float v)
     Right(clamp_axis(axis_key.j));
 }
 
-void FlyByKeyboard::KeyboardRollRight(float v)
-{
+void FlyByKeyboard::KeyboardRollRight(float v) {
     if (v == 0) {
         axis_key.k = reduce_axis(axis_key.k);
     } else {
@@ -125,8 +118,7 @@ void FlyByKeyboard::KeyboardRollRight(float v)
     RollRight(clamp_axis(axis_key.k));
 }
 
-void FlyByKeyboard::Execute()
-{
+void FlyByKeyboard::Execute() {
     FlyByKeyboard::Execute(true);
 }
 

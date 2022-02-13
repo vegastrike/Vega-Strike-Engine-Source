@@ -68,18 +68,15 @@ struct SceneManagerData {
         SourceRef(const SharedPtr<Source> &src, const SharedPtr<Scene> &scn) :
                 source(src),
                 scene(scn),
-                needsActivation(0)
-        {
+                needsActivation(0) {
         }
 
-        bool operator==(const SourceRef &o) const
-        {
+        bool operator==(const SourceRef &o) const {
             // Ignore scene...
             return (source == o.source);
         }
 
-        bool operator<(const SourceRef &o) const
-        {
+        bool operator<(const SourceRef &o) const {
             // Ignore scene...
             return (source < o.source);
         }
@@ -129,8 +126,7 @@ struct SceneManagerData {
             positionUpdateFrequency(1.0 / 20.0),
             attributeUpdateFrequency(1.0 / 5.0),
             listenerUpdateFrequency(1.0 / 30.0),
-            activationFrequency(1.0 / 10.0)
-    {
+            activationFrequency(1.0 / 10.0) {
     }
 };
 
@@ -139,24 +135,20 @@ struct SceneManagerData {
 using namespace __impl;
 
 SceneManager::SceneManager() :
-        data(new SceneManagerData)
-{
+        data(new SceneManagerData) {
 }
 
-SceneManager::~SceneManager()
-{
+SceneManager::~SceneManager() {
 }
 
-const SharedPtr<Renderer> &SceneManager::internalRenderer() const
-{
+const SharedPtr<Renderer> &SceneManager::internalRenderer() const {
     if (!data->renderer.get()) {
         throw Exception("No renderer");
     }
     return data->renderer;
 }
 
-SharedPtr<Source> SceneManager::createSource(SharedPtr<Sound> sound, bool looping)
-{
+SharedPtr<Source> SceneManager::createSource(SharedPtr<Sound> sound, bool looping) {
     if (!internalRenderer()->owns(sound)) {
         throw Exception("Invalid sound: incompatible renderers used");
     }
@@ -164,13 +156,11 @@ SharedPtr<Source> SceneManager::createSource(SharedPtr<Sound> sound, bool loopin
     return SharedPtr<Source>(new SimpleSource(sound, looping));
 }
 
-SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl)
-{
+SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl) {
     return createSource(tpl, tpl->getSoundName());
 }
 
-SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl, const std::string &name)
-{
+SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl, const std::string &name) {
     SharedPtr<Source> source = createSource(
             internalRenderer()->getSound(
                     name,
@@ -188,8 +178,7 @@ SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl, cons
     return source;
 }
 
-void SceneManager::destroySource(SharedPtr<Source> source)
-{
+void SceneManager::destroySource(SharedPtr<Source> source) {
     // By simply unreferencing, it should get destroyed when all references are released.
     // Which is good for multithreading - never destroy something that is being referenced.
 
@@ -209,8 +198,7 @@ void SceneManager::destroySource(SharedPtr<Source> source)
     }
 }
 
-void SceneManager::addScene(SharedPtr<Scene> scene)
-{
+void SceneManager::addScene(SharedPtr<Scene> scene) {
     if (data->activeScenes.count(scene->getName())
             || data->inactiveScenes.count(scene->getName())) {
         throw (DuplicateObjectException(scene->getName()));
@@ -219,15 +207,13 @@ void SceneManager::addScene(SharedPtr<Scene> scene)
     data->inactiveScenes[scene->getName()] = scene;
 }
 
-SharedPtr<Scene> SceneManager::createScene(const std::string &name)
-{
+SharedPtr<Scene> SceneManager::createScene(const std::string &name) {
     SharedPtr<Scene> scenePtr(new SimpleScene(name));
     addScene(scenePtr);
     return scenePtr;
 }
 
-SharedPtr<Scene> SceneManager::getScene(const std::string &name) const
-{
+SharedPtr<Scene> SceneManager::getScene(const std::string &name) const {
     SceneManagerData::SceneMap::const_iterator it;
 
     it = data->activeScenes.find(name);
@@ -243,8 +229,7 @@ SharedPtr<Scene> SceneManager::getScene(const std::string &name) const
     throw (NotFoundException(name));
 }
 
-void SceneManager::destroyScene(const std::string &name)
-{
+void SceneManager::destroyScene(const std::string &name) {
     // By simply unreferencing, it should get destroyed when all references are released.
     // Which is good for multithreading - never destroy something that is being referenced.
     // Any active sources will get deactivated in the next update since there aren't any active scenes
@@ -253,8 +238,7 @@ void SceneManager::destroyScene(const std::string &name)
     data->inactiveScenes.erase(name);
 }
 
-void SceneManager::setSceneActive(const std::string &name, bool active)
-{
+void SceneManager::setSceneActive(const std::string &name, bool active) {
     // Simply move the pointer from one map to the other.
     // The next update will take care of activating sources as necessary.
     SharedPtr<Scene> scene = getScene(name);
@@ -267,17 +251,15 @@ void SceneManager::setSceneActive(const std::string &name, bool active)
     }
 }
 
-bool SceneManager::getSceneActive(const std::string &name)
-{
+bool SceneManager::getSceneActive(const std::string &name) {
     return data->activeScenes.count(name) > 0;
 }
 
-void SceneManager::setRenderer(SharedPtr<Renderer> renderer)
-{
+void SceneManager::setRenderer(SharedPtr<Renderer> renderer) {
     if (data->renderer.get()) {
         // Detach all active sources
         for (SceneManagerData::SourceRefSet::const_iterator it = data->activeSources.begin();
-             it != data->activeSources.end(); ++it) {
+                it != data->activeSources.end(); ++it) {
             data->renderer->detach(it->source);
         }
 
@@ -294,24 +276,21 @@ void SceneManager::setRenderer(SharedPtr<Renderer> renderer)
 
         // Attach all active sources
         for (SceneManagerData::SourceRefSet::const_iterator it = data->activeSources.begin();
-             it != data->activeSources.end(); ++it) {
+                it != data->activeSources.end(); ++it) {
             data->renderer->attach(it->source);
         }
     }
 }
 
-SharedPtr<Renderer> SceneManager::getRenderer() const
-{
+SharedPtr<Renderer> SceneManager::getRenderer() const {
     return data->renderer;
 }
 
-unsigned int SceneManager::getMaxSources() const
-{
+unsigned int SceneManager::getMaxSources() const {
     return data->maxSources;
 }
 
-void SceneManager::setMaxSources(unsigned int n)
-{
+void SceneManager::setMaxSources(unsigned int n) {
     data->maxSources = n;
 }
 
@@ -321,8 +300,7 @@ void SceneManager::playSource(
         LVector3 position,
         Vector3 direction,
         Vector3 velocity,
-        Scalar radius)
-{
+        Scalar radius) {
     if (tpl->isLooping()) {
         throw (Exception("Cannot fire a looping source and forget!"));
     }
@@ -346,8 +324,7 @@ void SceneManager::playSource(
         LVector3 position,
         Vector3 direction,
         Vector3 velocity,
-        Scalar radius)
-{
+        Scalar radius) {
     if (tpl->isLooping()) {
         throw (Exception("Cannot fire a looping source and forget!"));
     }
@@ -364,30 +341,25 @@ void SceneManager::playSource(
     src->startPlaying();
 }
 
-float SceneManager::getMinGain() const
-{
+float SceneManager::getMinGain() const {
     return data->minGain;
 }
 
-void SceneManager::setMinGain(float gain)
-{
+void SceneManager::setMinGain(float gain) {
     assert(gain >= 0.f);
     data->minGain = gain;
 }
 
-double SceneManager::getMaxDistance() const
-{
+double SceneManager::getMaxDistance() const {
     return data->maxDistance;
 }
 
-void SceneManager::setMaxDistance(double distance)
-{
+void SceneManager::setMaxDistance(double distance) {
     assert(distance >= 0.f);
     data->maxDistance = distance;
 }
 
-SharedPtr<SceneManager::SceneIterator> SceneManager::getSceneIterator() const
-{
+SharedPtr<SceneManager::SceneIterator> SceneManager::getSceneIterator() const {
     return SharedPtr<SceneIterator>(
             new ChainingIterator<VirtualValuesIterator<SceneManagerData::SceneMap::iterator> >(
                     VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(
@@ -400,16 +372,14 @@ SharedPtr<SceneManager::SceneIterator> SceneManager::getSceneIterator() const
     );
 }
 
-SharedPtr<SceneManager::SceneIterator> SceneManager::getActiveSceneIterator() const
-{
+SharedPtr<SceneManager::SceneIterator> SceneManager::getActiveSceneIterator() const {
     return SharedPtr<SceneIterator>(
             new VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(
                     data->activeScenes.begin(),
                     data->activeScenes.end()));
 }
 
-void SceneManager::commit()
-{
+void SceneManager::commit() {
     Timestamp realTime = getRealTime();
     bool needActivation = ((realTime - getActivationFrequency()) >= data->lastActivationTime);
     bool needPosUpdates = ((realTime - getPositionUpdateFrequency()) >= data->lastPositionUpdateTime);
@@ -455,25 +425,21 @@ struct SourcePriorityRef {
     SimpleScene *scene;
     Scalar gain;
 
-    SourcePriorityRef()
-    {
+    SourcePriorityRef() {
     }
 
     SourcePriorityRef(SimpleScene::SourceIterator itr, const Listener &listener, SimpleScene *scn) :
             iter(itr),
             scene(scn),
-            gain(estimateGain(**iter, listener))
-    {
+            gain(estimateGain(**iter, listener)) {
     }
 
-    bool operator<(const SourcePriorityRef &o) const
-    {
+    bool operator<(const SourcePriorityRef &o) const {
         return gain > o.gain;
     }
 };
 
-void SceneManager::activationPhaseImpl()
-{
+void SceneManager::activationPhaseImpl() {
     // Just clear the active source set and recreate it from scratch.
     // Use a "source ref heap" to find the most relevant sources (using the approximated
     // intensity as priority). Since the heap will copy things all over, use cheap
@@ -489,15 +455,15 @@ void SceneManager::activationPhaseImpl()
     selection.reserve(data->maxSources + 1);
 
     for (SceneManagerData::SceneMap::iterator it = data->activeScenes.begin();
-         it != data->activeScenes.end();
-         ++it) {
+            it != data->activeScenes.end();
+            ++it) {
         SimpleScene *scene = dynamic_cast<SimpleScene *>(it->second.get());
         Listener &listener = scene->getListener();
 
         for (SimpleScene::SourceIterator sit = scene->getActiveSources(),
-                     send = scene->getActiveSourcesEnd();
-             sit != send;
-             ++sit) {
+                send = scene->getActiveSourcesEnd();
+                sit != send;
+                ++sit) {
             if ((*sit)->getSourceListener().get()) {
                 // Must invoke the listener to get updated positions
                 (*sit)->getSourceListener()->onUpdate(**sit, RenderableSource::UPDATE_LOCATION);
@@ -535,7 +501,7 @@ void SceneManager::activationPhaseImpl()
 
     // Detach deactivated sources
     for (SceneManagerData::SourceRefSet::iterator sit = data->activeSources.begin(); sit != data->activeSources.end();
-         ++sit) {
+            ++sit) {
         if (newSources.find(*sit) == newSources.end()) {
             renderer->detach(sit->source);
         }
@@ -580,17 +546,16 @@ void SceneManager::activationPhaseImpl()
     data->activeSources.swap(newSources);
 }
 
-void SceneManager::updateSourcesImpl(bool withAttributes)
-{
+void SceneManager::updateSourcesImpl(bool withAttributes) {
     // Two-pass stuff.
 
     // First, update attributes (mostly location)
     RenderableSource::UpdateFlags updateFlags =
             withAttributes ?
-            RenderableSource::UPDATE_ALL :
-            RenderableSource::UPDATE_LOCATION;
+                    RenderableSource::UPDATE_ALL :
+                    RenderableSource::UPDATE_LOCATION;
     for (SceneManagerData::SourceRefSet::const_iterator it = data->activeSources.begin();
-         it != data->activeSources.end(); ++it) {
+            it != data->activeSources.end(); ++it) {
         // Update the renderable (attributes)
         it->source->updateRenderable(
                 updateFlags | (it->needsActivation ? RenderableSource::UPDATE_ALL : 0),
@@ -605,71 +570,60 @@ void SceneManager::updateSourcesImpl(bool withAttributes)
     }
 }
 
-void SceneManager::updateListenerImpl(bool withAttributes)
-{
+void SceneManager::updateListenerImpl(bool withAttributes) {
     // Update root listener
     RenderableListener::UpdateFlags updateFlags =
             withAttributes ?
-            RenderableListener::UPDATE_ALL :
-            RenderableListener::UPDATE_LOCATION;
+                    RenderableListener::UPDATE_ALL :
+                    RenderableListener::UPDATE_LOCATION;
     if (data->rootListener.get()) {
         data->rootListener->update(updateFlags);
     }
 
     // And all scene listeners
     for (SceneManagerData::SceneMap::const_iterator i = data->activeScenes.begin(); i != data->activeScenes.end();
-         ++i) {
+            ++i) {
         i->second->getListener().update(updateFlags);
     }
 }
 
-Duration SceneManager::getPositionUpdateFrequency() const
-{
+Duration SceneManager::getPositionUpdateFrequency() const {
     return data->positionUpdateFrequency;
 }
 
-Duration SceneManager::getListenerUpdateFrequency() const
-{
+Duration SceneManager::getListenerUpdateFrequency() const {
     return data->listenerUpdateFrequency;
 }
 
-Duration SceneManager::getAttributeUpdateFrequency() const
-{
+Duration SceneManager::getAttributeUpdateFrequency() const {
     return data->attributeUpdateFrequency;
 }
 
-Duration SceneManager::getActivationFrequency() const
-{
+Duration SceneManager::getActivationFrequency() const {
     return data->activationFrequency;
 }
 
-void SceneManager::setPositionUpdateFrequency(Duration interval) const
-{
+void SceneManager::setPositionUpdateFrequency(Duration interval) const {
     data->positionUpdateFrequency = interval;
 }
 
-void SceneManager::setListenerUpdateFrequency(Duration interval) const
-{
+void SceneManager::setListenerUpdateFrequency(Duration interval) const {
     data->listenerUpdateFrequency = interval;
 }
 
-void SceneManager::setAttributeUpdateFrequency(Duration interval) const
-{
+void SceneManager::setAttributeUpdateFrequency(Duration interval) const {
     data->attributeUpdateFrequency = interval;
 }
 
-void SceneManager::setActivationFrequency(Duration interval) const
-{
+void SceneManager::setActivationFrequency(Duration interval) const {
     data->activationFrequency = interval;
 }
 
-SharedPtr<Listener> SceneManager::getRootListener() const
-{
+SharedPtr<Listener> SceneManager::getRootListener() const {
     return data->rootListener;
 }
 
-void SceneManager::notifySourcePlaying(SharedPtr<Source> source, SharedPtr<Scene> scene, bool playing)
-{
+void SceneManager::notifySourcePlaying(SharedPtr<Source> source, SharedPtr<Scene> scene, bool playing) {
     // If the source is within maxDistance from its scene's listener,
     // schedule an immediate activation phase
     double maxDistanceSq = getMaxDistance();

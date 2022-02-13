@@ -66,8 +66,7 @@ public:
     void ExecuteNoEnemies();
     void Execute();
 
-    virtual std::string getOrderDescription()
-    {
+    virtual std::string getOrderDescription() {
         return "aggressive";
     }
 

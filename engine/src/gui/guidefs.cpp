@@ -26,48 +26,41 @@
 #include "config_xml.h"
 #include "guidefs.h"
 
-GFXColor SaturatedColor(float r, float g, float b, float a)
-{
+GFXColor SaturatedColor(float r, float g, float b, float a) {
     static float Saturation = XMLSupport::parse_float(vs_config->getVariable("graphics", "base_saturation", "1.0"));
 
     return GFXColor((r * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,
-                    (g * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,
-                    (b * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3, a);
+            (g * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,
+            (b * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3, a);
 }
 
-GFXColor GUI_OPAQUE_BLACK()
-{
+GFXColor GUI_OPAQUE_BLACK() {
     static GFXColor gui_black = vs_config->getColor("base_black", GFXColor(0, 0, 0, 1));
     return gui_black;
 }
 
-GFXColor GUI_OPAQUE_WHITE()
-{
+GFXColor GUI_OPAQUE_WHITE() {
     static GFXColor gui_white = vs_config->getColor("base_white", GFXColor(1, 1, 1, 1));
     return gui_white;
 }
 
-GFXColor GUI_OPAQUE_LIGHT_GRAY()
-{
+GFXColor GUI_OPAQUE_LIGHT_GRAY() {
     static GFXColor gui_light_gray = vs_config->getColor("base_light_gray", GFXColor(.25, .25, .25, 1));
     return gui_light_gray;
 }
 
-GFXColor GUI_OPAQUE_MEDIUM_GRAY()
-{
+GFXColor GUI_OPAQUE_MEDIUM_GRAY() {
     static GFXColor gui_gray = vs_config->getColor("base_gray", GFXColor(.5, .5, .5, 1));
     return gui_gray;
 }
 
-GFXColor GUI_OPAQUE_DARK_GRAY()
-{
+GFXColor GUI_OPAQUE_DARK_GRAY() {
     static GFXColor gui_dark_gray = vs_config->getColor("base_dark_gray", GFXColor(.75, .75, .75, 1));
     return gui_dark_gray;
 }
 
 //Draw a rectangle using the specified color.
-void drawRect(const Rect &rect, const GFXColor &color)
-{
+void drawRect(const Rect &rect, const GFXColor &color) {
     GFXDisable(TEXTURE0);
 
     GFXColorf(color);
@@ -84,8 +77,7 @@ void drawRect(const Rect &rect, const GFXColor &color)
 }
 
 //Draw the outline of a rectangle using the specified color.
-void drawRectOutline(const Rect &rect, const GFXColor &color, float lineWidth)
-{
+void drawRectOutline(const Rect &rect, const GFXColor &color, float lineWidth) {
     GFXDisable(TEXTURE0);
     GFXLineWidth(lineWidth);
     GFXColorf(color);
@@ -103,8 +95,7 @@ void drawRectOutline(const Rect &rect, const GFXColor &color, float lineWidth)
 }
 
 //Draw upper-left part of rectangle's "shadow".
-void drawUpLeftShadow(const Rect &rect, const GFXColor &color, float lineWidth)
-{
+void drawUpLeftShadow(const Rect &rect, const GFXColor &color, float lineWidth) {
     GFXDisable(TEXTURE0);
     GFXLineWidth(lineWidth);
     GFXColorf(color);
@@ -120,8 +111,7 @@ void drawUpLeftShadow(const Rect &rect, const GFXColor &color, float lineWidth)
 }
 
 //Draw lower-right part of rectangle's "shadow".
-void drawLowRightShadow(const Rect &rect, const GFXColor &color, float lineWidth)
-{
+void drawLowRightShadow(const Rect &rect, const GFXColor &color, float lineWidth) {
     GFXDisable(TEXTURE0);
     GFXLineWidth(lineWidth);
     GFXColorf(color);
@@ -137,8 +127,7 @@ void drawLowRightShadow(const Rect &rect, const GFXColor &color, float lineWidth
 }
 
 //Fill a closed polygon.
-void drawFilledPolygon(const std::vector<Point> &coords, const GFXColor &color)
-{
+void drawFilledPolygon(const std::vector<Point> &coords, const GFXColor &color) {
     GFXDisable(TEXTURE0);
     GFXColorf(color);
 

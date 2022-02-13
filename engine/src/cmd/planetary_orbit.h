@@ -53,12 +53,12 @@ protected:
 
 public:
     PlanetaryOrbit(Unit *p,
-                   double velocity,
-                   double initpos,
-                   const QVector &x_axis,
-                   const QVector &y_axis,
-                   const QVector &Centre,
-                   Unit *target = NULL);
+            double velocity,
+            double initpos,
+            const QVector &x_axis,
+            const QVector &y_axis,
+            const QVector &Centre,
+            Unit *target = NULL);
     ~PlanetaryOrbit();
     void Execute();
 };

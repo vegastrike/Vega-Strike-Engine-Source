@@ -299,29 +299,25 @@ using std::exception;
 //Coms object {{{
 
 
-coms::coms(TFunctor *t_in)
-{
+coms::coms(TFunctor *t_in) {
     functor = t_in;
 }
 
-coms::coms(coms *oldCom)
-{
+coms::coms(coms *oldCom) {
     if (oldCom->Name.size() > 0) {
         Name.append(oldCom->Name);
     }
     functor = oldCom->functor;
 }
 
-coms::coms(const coms &in)
-{
+coms::coms(const coms &in) {
     if (in.Name.size() > 0) {
         Name.append(in.Name);
     }
     functor = in.functor;
 }
 
-coms::~coms()
-{
+coms::~coms() {
 //std::cout << "Destroying coms object\n";
 }
 
@@ -377,21 +373,18 @@ class HoldCommands   //Hold the commands here{{{
     bool finishmeoff;
     class procs {
     public:
-        virtual ~procs()
-        {
+        virtual ~procs() {
             while (rc.size() > 0) {
                 rc.pop_back();
             }
         }
 
-        procs(commandI *processor, coms *initcmd)
-        {
+        procs(commandI *processor, coms *initcmd) {
             proc = processor;
             rc.push_back(initcmd);
         }
 
-        procs(const procs &in)
-        {
+        procs(const procs &in) {
             procs *blah = const_cast< procs * > (&in);
             proc = blah->proc;
             for (vector<coms>::iterator iter = blah->rc.begin(); iter < blah->rc.end(); iter++) {
@@ -403,8 +396,7 @@ class HoldCommands   //Hold the commands here{{{
         vector<coms> rc;
     };
 
-    HoldCommands()
-    {
+    HoldCommands() {
         if (rcCMD != 0x0) {
             cout << "Error, there shouldn't be 2 holdCommands objects!\n";
         }
@@ -413,8 +405,7 @@ class HoldCommands   //Hold the commands here{{{
     }
 
     vector<procs> cmds;            //for multiple command processors.
-    void addCMD(coms &commandin, commandI *proc2use)
-    {
+    void addCMD(coms &commandin, commandI *proc2use) {
         bool found = false;
         for (vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
             if ((*(iter)).proc == proc2use) {
@@ -429,8 +420,7 @@ class HoldCommands   //Hold the commands here{{{
         }
     }
 
-    void popProc(commandI *proc2use)
-    {
+    void popProc(commandI *proc2use) {
         auto i = cmds.begin();
         while (i != cmds.end()) {
             if (proc2use == (*(i)).proc) {
@@ -444,8 +434,7 @@ class HoldCommands   //Hold the commands here{{{
         }
     }
 
-    procs *getProc(commandI *in)
-    {
+    procs *getProc(commandI *in) {
         for (vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
             if (in == (*(iter)).proc) {
                 return &(*(iter));
@@ -467,8 +456,7 @@ class HoldCommands   //Hold the commands here{{{
 
 //{{{ command interpretor constructor
 
-commandI::commandI()
-{
+commandI::commandI() {
     cout << "Command Interpretor Created\n\r";
     //{{{ add some base commands
 
@@ -498,8 +486,7 @@ commandI::commandI()
 //}}}
 //{{{ command interpretor destructor
 
-commandI::~commandI()
-{
+commandI::~commandI() {
     {
         HoldCommands::procs *findme = rcCMD->getProc(this);
         if (findme->rc.size() > 0) {
@@ -531,10 +518,9 @@ commandI::~commandI()
 //}}}
 //{{{ Menu object destructor
 
-menu::~menu()
-{
+menu::~menu() {
     for (mItem *iter;
-         items.size() > 0;) {
+            items.size() > 0;) {
         iter = items.back();
         delete iter;
         items.pop_back();
@@ -545,8 +531,7 @@ menu::~menu()
 
 //{{{ UNFINISHED HELP COMMAND
 
-void commandI::help(string &helponthis)
-{
+void commandI::help(string &helponthis) {
     string buf;
     buf.append("Sorry, there is no help system yet\n\r ");
     buf.append("But most commands are self supporting, just type them to see what they do.\n\r");
@@ -556,8 +541,7 @@ void commandI::help(string &helponthis)
 //}}}
 //{{{ send prompt ONLY when 0 charactors are sent with a newline
 
-void commandI::prompt()
-{
+void commandI::prompt() {
     string l;
     l.append("Wooooooooooo\n");
     conoutf(l);
@@ -567,8 +551,7 @@ void commandI::prompt()
 //}}}
 //{{{ dummy function
 
-void commandI::dummy(vector<string *> *d)
-{
+void commandI::dummy(vector<string *> *d) {
     //{{{
     string outs;
     int rand = vsrandom.genrand_int32();
@@ -584,8 +567,7 @@ void commandI::dummy(vector<string *> *d)
 //}}}
 //list all the commands {{{
 
-void commandI::pcommands()
-{
+void commandI::pcommands() {
     int x = 0;
     ostringstream cmd;
     cmd << "\n\rCommands available:\n\r";
@@ -625,8 +607,7 @@ void commandI::pcommands()
 //}}}
 //{{{ addCommand - Add a command to the interpreter
 
-void commandI::addCommand(TFunctor *com, const char *name)
-{
+void commandI::addCommand(TFunctor *com, const char *name) {
     cout << "Adding command: " << name << endl;
     coms *newOne = new coms(com);
     //See the very bottom of this file for comments about possible optimization
@@ -646,8 +627,7 @@ void commandI::addCommand(TFunctor *com, const char *name)
 //}}}
 //{{{ Remove a command remCommand(char *name)
 
-void commandI::remCommand(char *name)
-{
+void commandI::remCommand(char *name) {
     HoldCommands::procs *findme = rcCMD->getProc(this);
     if (findme->rc.size() < 1) {
         return;
@@ -661,11 +641,10 @@ void commandI::remCommand(char *name)
         }
     }
     cout << "Error, command " << name
-         << " not removed, try using the TFunctor *com version instead. Also, this is case sensitive ;)\n";
+            << " not removed, try using the TFunctor *com version instead. Also, this is case sensitive ;)\n";
 }
 
-void commandI::remCommand(TFunctor *com)
-{
+void commandI::remCommand(TFunctor *com) {
     HoldCommands::procs *findme = rcCMD->getProc(this);
     if (findme->rc.size() < 1) {
         return;
@@ -684,8 +663,7 @@ void commandI::remCommand(TFunctor *com)
 //}}}
 //{{{ Find a command in the command interpretor
 
-coms *commandI::findCommand(const char *comm, int &sock_in)
-{
+coms *commandI::findCommand(const char *comm, int &sock_in) {
     HoldCommands::procs *findme = rcCMD->getProc(this);
     if (findme->rc.size() < 1) {
         throw "Error, commands vector empty, this shouldn't happen!\n";
@@ -796,7 +774,7 @@ coms *commandI::findCommand(const char *comm, int &sock_in)
             //transform them to lowercase
             transform(temp.begin(), temp.end(), temp.begin(), static_cast< int (*)(int) > (tolower));
             transform(commandentered2.begin(), commandentered2.end(), commandentered2.begin(),
-                      static_cast< int (*)(int) > (tolower));
+                    static_cast< int (*)(int) > (tolower));
             if (temp.compare(commandentered2) == 0) {
                 //they match {{{
                 //If it is an immortal command
@@ -840,8 +818,7 @@ coms *commandI::findCommand(const char *comm, int &sock_in)
 //then tries to execute the member function.
 //If one is not found, it will call commandI::dummy() .
 //{{{ Main execute entrace, all input comes in here, this sends it to the menusystem, then in the return at the very last line executes the fexecute function which actually parses and finds commands, if the menusystem allows. This way the menusystem can manipulate user input, ie insert command names into the input to make it go to any function.
-bool commandI::execute(string *incommand, bool isDown, int sock_in)
-{
+bool commandI::execute(string *incommand, bool isDown, int sock_in) {
     int socket = sock_in;
     //use the menusystem ONLY if the sock_in is the same as socket{{{
     {
@@ -906,8 +883,7 @@ bool commandI::execute(string *incommand, bool isDown, int sock_in)
 //time
 //Main Execute Function {{{
 
-bool commandI::fexecute(string *incommand, bool isDown, int sock_in)
-{
+bool commandI::fexecute(string *incommand, bool isDown, int sock_in) {
     size_t ls, y;
     bool breaker = false;
 //************
@@ -997,8 +973,8 @@ bool commandI::fexecute(string *incommand, bool isDown, int sock_in)
         bool escape = false;
         next = incommand->find(" ");
         for (next = incommand->find("\"\"", 0);
-             (next = incommand->find("\"\"", last), (last != string::npos));
-             last = (next != string::npos) ? next + 1 : string::npos) {
+                (next = incommand->find("\"\"", last), (last != string::npos));
+                last = (next != string::npos) ? next + 1 : string::npos) {
             if (next < string::npos) {
                 incommand->replace(next, 2, "\" \"");
             }
@@ -1098,8 +1074,7 @@ bool commandI::fexecute(string *incommand, bool isDown, int sock_in)
 
 //}}}
 
-string commandI::display(string &in)
-{
+string commandI::display(string &in) {
     //If the menusystem has a value to display, eg:
     //Editing User
     //1) Change Username - Current Name: XXX
@@ -1140,8 +1115,7 @@ string commandI::display(string &in)
 *
 *************************************** */
 //add a menu {{{
-bool commandI::addMenu(menu *menu_in)
-{
+bool commandI::addMenu(menu *menu_in) {
     menus.push_back(menu_in);
     lastmenuadded = menu_in;
     return true;
@@ -1149,13 +1123,12 @@ bool commandI::addMenu(menu *menu_in)
 
 //}}}
 //{{{ display menu function
-string commandI::displaymenu()
-{
+string commandI::displaymenu() {
     if (menumode) {
         ostringstream ps;
         ps << menu_in->Display << "\n";
         for (vector<mItem *>::iterator iter = menu_in->items.begin();
-             iter < menu_in->items.end(); iter++) {
+                iter < menu_in->items.end(); iter++) {
             ps << (*(iter))->Name << " " << (*(iter))->display;
             if ((*(iter))->predisplay.size() > 0) {
                 ps << " " << display((*(iter))->predisplay);
@@ -1193,8 +1166,7 @@ string commandI::displaymenu()
 //}}}
 //menuitem to be appended to the last menu appended, or an existing menu if {{{
 //the menu2use is specified
-bool commandI::addMenuItem(mItem *mi, menu *menuin)
-{
+bool commandI::addMenuItem(mItem *mi, menu *menuin) {
     menu *menu2use;
     if (menuin == NULL) {
         menu2use = lastmenuadded;
@@ -1213,8 +1185,7 @@ bool commandI::addMenuItem(mItem *mi, menu *menuin)
 
 //}}}
 //call a menu with arguements {{{
-bool commandI::callMenu(char *name_in, char *args_in, string &d)
-{
+bool commandI::callMenu(char *name_in, char *args_in, string &d) {
     //if there is a menu operation return true;
     string name;
     if (name_in != NULL) {
@@ -1328,16 +1299,16 @@ bool commandI::callMenu(char *name_in, char *args_in, string &d)
                         size_t l = 0;
                         bool y = false;
                         for (size_t x = menu_in->iselected->menubuf.find("\r\n");
-                             x < string::npos;
-                             x = menu_in->iselected->menubuf.find("\r\n", x + 1)) {
+                                x < string::npos;
+                                x = menu_in->iselected->menubuf.find("\r\n", x + 1)) {
                             menu_in->iselected->menubuf.replace(x, 2, "<BR>");
                             l = x;
                             y = true;
                         }
                         if (y) {
                             menu_in->iselected
-                                   ->menubuf
-                                   .replace(l, 4, "");
+                                    ->menubuf
+                                    .replace(l, 4, "");
                         }                              //replace the last <BR>
                     }
                     d.append(menu_in->iselected->menubuf);
@@ -1396,7 +1367,7 @@ bool commandI::callMenu(char *name_in, char *args_in, string &d)
         //if we don't have anything selected, select one.. {{{
         if (!menu_in->selected) {
             for (vector<mItem *>::iterator iter = menu_in->items.begin();
-                 iter < menu_in->items.end(); iter++) {
+                    iter < menu_in->items.end(); iter++) {
                 if ((*(iter))->Name.compare(name) == 0) {
                     menu_in->selected = true;
                     menu_in->iselected = (*(iter));
@@ -1472,15 +1443,14 @@ bool commandI::callMenu(char *name_in, char *args_in, string &d)
 
 //set a menu {{{
 
-string commandI::setMenu(string name_in)
-{
+string commandI::setMenu(string name_in) {
     string name;
     name.append(name_in);
     if (name[0] == 32) {
         name.replace(0, 1, "");
     }
     for (vector<menu *>::iterator iter = menus.begin();
-         iter < menus.end(); iter++) {
+            iter < menus.end(); iter++) {
         if ((*(iter))->Name.compare(name) == 0) {
             if (!menumode) {
                 menumode = true;
@@ -1501,8 +1471,7 @@ string commandI::setMenu(string name_in)
 
 //}}}
 
-void commandI::breakmenu()
-{
+void commandI::breakmenu() {
     while (menustack.size() > 0) {
         menustack.pop_back();
     }
@@ -1516,16 +1485,14 @@ commandI *CommandInterpretor = NULL;
 
 //{{{ Python object
 
-RegisterPythonWithCommandInterpreter::RegisterPythonWithCommandInterpreter(commandI *addTo)
-{
+RegisterPythonWithCommandInterpreter::RegisterPythonWithCommandInterpreter(commandI *addTo) {
     Functor<RegisterPythonWithCommandInterpreter> *l = new Functor<RegisterPythonWithCommandInterpreter>
             (this, &RegisterPythonWithCommandInterpreter::runPy);
     addTo->addCommand(l, "python");
 }
 
 //run a python string
-void RegisterPythonWithCommandInterpreter::runPy(string &argsin)
-{
+void RegisterPythonWithCommandInterpreter::runPy(string &argsin) {
     string pyRunString;
     pyRunString.append(argsin);     //append the arguments in to the string to run
     size_t x = pyRunString.find("python ");     //strip out the name of the command
@@ -1559,8 +1526,7 @@ void RegisterPythonWithCommandInterpreter::runPy(string &argsin)
  */
 
 //if(!keypress(event.key.keysym.sym, event.key.state==SDL_PRESSED, event.key.keysym.unicode))
-void commandI::keypress(int code, int modifiers, bool isDown, int x, int y)
-{
+void commandI::keypress(int code, int modifiers, bool isDown, int x, int y) {
     if (CommandInterpretor && CommandInterpretor->console) {
         if (code == WSK_ESCAPE) {
             CommandInterpretor->console = false;
@@ -1635,8 +1601,7 @@ void commandI::keypress(int code, int modifiers, bool isDown, int x, int y)
 *************************************************************** */
 
 namespace ConsoleKeys {
-void BringConsole(const KBData &, KBSTATE newState)
-{
+void BringConsole(const KBData &, KBSTATE newState) {
     //this way, keyboard state stays synchronized
     if (newState == RELEASE) {
         if (CommandInterpretor) {

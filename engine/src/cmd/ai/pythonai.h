@@ -33,8 +33,7 @@ using Orders::FireAt;
 class PythonAI : public FireAt {
     PyObject *self;
 
-    PythonAI(const PythonAI &a) : FireAt(a)
-    {
+    PythonAI(const PythonAI &a) : FireAt(a) {
         assert(0);
     }
 

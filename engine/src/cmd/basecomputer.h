@@ -98,8 +98,7 @@ protected:
         vector<CargoColor> masterList;          //All the items that could be in the picker.
         Picker *picker;                         //The picker loaded with the list.
         TransactionType transaction;        //The kind of transaction these items will generate.
-        TransactionList() : picker(NULL), transaction(NULL_TRANSACTION)
-        {
+        TransactionList() : picker(NULL), transaction(NULL_TRANSACTION) {
         }
     };
 
@@ -111,12 +110,10 @@ protected:
     public:
 //CONSTRUCTION.
         LoadSaveQuitConfirm(BaseComputer *player, std::string confirmtype, std::string text)
-                : m_parent(player), type(confirmtype), text(text)
-        {
+                : m_parent(player), type(confirmtype), text(text) {
         }
 
-        virtual ~LoadSaveQuitConfirm(void)
-        {
+        virtual ~LoadSaveQuitConfirm(void) {
         }
 
 //Set up the window and get everything ready.
@@ -213,9 +210,9 @@ protected:
 
 //Load a picker with a list of items.
     void loadListPicker(TransactionList &list,
-                        SimplePicker &picker,
-                        TransactionType transType,
-                        bool skipFirstCategory = false);
+            SimplePicker &picker,
+            TransactionType transType,
+            bool skipFirstCategory = false);
 
 //Scroll to a specific item in a picker, and optionally select it.
 //Returns true if the specified item is found.
@@ -294,10 +291,10 @@ protected:
 
 //Get a filtered list of items from a unit.
     void loadMasterList(Unit *un,
-                        const vector<string> &filterthis,
-                        const vector<string> &invfilterthis,
-                        bool removezero,
-                        TransactionList &list);
+            const vector<string> &filterthis,
+            const vector<string> &invfilterthis,
+            bool removezero,
+            TransactionList &list);
 
 //Load a master list with missions.
     void loadMissionsMasterList(TransactionList &list);

@@ -28,8 +28,7 @@ using namespace FactionUtil;
 
 vector<boost::shared_ptr<Faction> > factions;  //the factions
 
-void Faction::ParseAllAllies()
-{
+void Faction::ParseAllAllies() {
     //MSVC has a bug where it won't let you reuse variables initialized in the paramater list of the for loop
     //the work around is A.) make the scope of the variable in the function level or not to re-define it in subsequent loops
     //Is this bug still valid? We are getting an GCC compile warning.
@@ -42,8 +41,7 @@ void Faction::ParseAllAllies()
     }
 }
 
-void Faction::ParseAllies(unsigned int thisfaction)
-{
+void Faction::ParseAllies(unsigned int thisfaction) {
     unsigned int i, j;
     vector<faction_stuff> tempvec;
     for (i = 0; i < faction.size(); i++) {

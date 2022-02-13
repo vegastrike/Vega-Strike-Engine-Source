@@ -27,8 +27,7 @@
 
 #include "weapon_type.h"
 
-WEAPON_TYPE getWeaponTypeFromString(std::string type)
-{
+WEAPON_TYPE getWeaponTypeFromString(std::string type) {
     if (type == "Bolt") {
         return WEAPON_TYPE::BOLT;
     }
@@ -48,8 +47,7 @@ WEAPON_TYPE getWeaponTypeFromString(std::string type)
     return WEAPON_TYPE::UNKNOWN;
 }
 
-std::string getFilenameFromWeaponType(WEAPON_TYPE type)
-{
+std::string getFilenameFromWeaponType(WEAPON_TYPE type) {
     switch (type) {
         case WEAPON_TYPE::BEAM:
             return "beamtexture.bmp";

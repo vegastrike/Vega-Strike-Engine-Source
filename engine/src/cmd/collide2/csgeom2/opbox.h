@@ -113,62 +113,52 @@ protected:
     static bFace faces[6];
 public:
     /// Get the minimum X value of the box
-    float MinX() const
-    {
+    float MinX() const {
         return minbox.x;
     }
 
     /// Get the minimum Y value of the box
-    float MinY() const
-    {
+    float MinY() const {
         return minbox.y;
     }
 
     /// Get the minimum Z value of the box
-    float MinZ() const
-    {
+    float MinZ() const {
         return minbox.z;
     }
 
     /// Get the maximum X value of the box
-    float MaxX() const
-    {
+    float MaxX() const {
         return maxbox.x;
     }
 
     /// Get the maximum Y value of the box
-    float MaxY() const
-    {
+    float MaxY() const {
         return maxbox.y;
     }
 
     /// Get the maximum Z value of the box
-    float MaxZ() const
-    {
+    float MaxZ() const {
         return maxbox.z;
     }
 
     /// Get Min component for 0 (x), 1 (y), or 2 (z).
-    float Min(int idx) const
-    {
+    float Min(int idx) const {
         return idx == 1 ? minbox.y : idx == 0 ? minbox.x : minbox.z;
     }
 
     /// Get Max component for 0 (x), 1 (y), or 2 (z).
-    float Max(int idx) const
-    {
+    float Max(int idx) const {
         return idx == 1 ? maxbox.y : idx == 0 ? maxbox.x : maxbox.z;
     }
 
     /// Get the 3d vector of minimum (x, y, z) values
-    const csVector3 &Min() const
-    {
+    const csVector3 &Min() const {
         return minbox;
     }
 
     /// Get the 3d vector of maximum (x, y, z) values
-    const csVector3 &Max() const
-    {
+    const csVector3 &Max() const {
         return maxbox;
     }
 
@@ -186,8 +176,7 @@ public:
      * Given an edge index (BOX_EDGE_???) return the two vertices
      * (index BOX_CORNER_???) and left/right faces (BOX_SIDE_???).
      */
-    void GetEdgeInfo(int edge, int &v1, int &v2, int &fleft, int &fright) const
-    {
+    void GetEdgeInfo(int edge, int &v1, int &v2, int &fleft, int &fright) const {
         v1 = edges[edge].v1;
         v2 = edges[edge].v2;
         fleft = edges[edge].fl;
@@ -198,16 +187,14 @@ public:
      * Given a face index (BOX_SIDE_???) return the four edges oriented
      * clockwise around this face (BOX_EDGE_???).
      */
-    uint8_t *GetFaceEdges(int face) const
-    {
+    uint8_t *GetFaceEdges(int face) const {
         return faces[face];
     }
 
     /**
      * Get the center of this box.
      */
-    csVector3 GetCenter() const
-    {
+    csVector3 GetCenter() const {
         return csVector3((minbox.x + maxbox.x) / 2, (minbox.y + maxbox.y) / 2, (minbox.z + maxbox.z) / 2);
     }
 
@@ -240,8 +227,7 @@ public:
      * Static function to get the 'other' side (i.e. BOX_SIDE_X
      * to BOX_SIDE_x, ...).
      */
-    static int OtherSide(int side)
-    {
+    static int OtherSide(int side) {
         return side ^ 1;
     }
 
@@ -267,8 +253,7 @@ public:
     }
     */
     /// Test if the given coordinate is in this box.
-    bool In(float x, float y, float z) const
-    {
+    bool In(float x, float y, float z) const {
         if (x < minbox.x || x > maxbox.x) {
             return false;
         }
@@ -282,14 +267,12 @@ public:
     }
 
     /// Test if the given coordinate is in this box.
-    bool In(const csVector3 &v) const
-    {
+    bool In(const csVector3 &v) const {
         return In(v.x, v.y, v.z);
     }
 
     /// Test if this box overlaps with the given box.
-    bool Overlap(const csBox3 &box) const
-    {
+    bool Overlap(const csBox3 &box) const {
         if (maxbox.x < box.minbox.x || minbox.x > box.maxbox.x) {
             return false;
         }
@@ -303,16 +286,14 @@ public:
     }
 
     /// Test if this box contains the other box.
-    bool Contains(const csBox3 &box) const
-    {
+    bool Contains(const csBox3 &box) const {
         return (box.minbox.x >= minbox.x && box.maxbox.x <= maxbox.x) &&
                 (box.minbox.y >= minbox.y && box.maxbox.y <= maxbox.y) &&
                 (box.minbox.z >= minbox.z && box.maxbox.z <= maxbox.z);
     }
 
     /// Test if this box is empty.
-    bool Empty() const
-    {
+    bool Empty() const {
         if (minbox.x > maxbox.x) {
             return true;
         }
@@ -326,8 +307,7 @@ public:
     }
 
     /// Initialize this box to empty.
-    void StartBoundingBox()
-    {
+    void StartBoundingBox() {
         minbox.x = CS_BOUNDINGBOX_MAXVALUE;
         minbox.y = CS_BOUNDINGBOX_MAXVALUE;
         minbox.z = CS_BOUNDINGBOX_MAXVALUE;
@@ -337,15 +317,13 @@ public:
     }
 
     /// Initialize this box to one vertex.
-    void StartBoundingBox(const csVector3 &v)
-    {
+    void StartBoundingBox(const csVector3 &v) {
         minbox = v;
         maxbox = v;
     }
 
     /// Add a new vertex and recalculate the bounding box.
-    void AddBoundingVertex(float x, float y, float z)
-    {
+    void AddBoundingVertex(float x, float y, float z) {
         if (x < minbox.x) {
             minbox.x = x;
         } else if (x > maxbox.x) {
@@ -364,8 +342,7 @@ public:
     }
 
     /// Add a new vertex and recalculate the bounding box.
-    void AddBoundingVertex(const csVector3 &v)
-    {
+    void AddBoundingVertex(const csVector3 &v) {
         AddBoundingVertex(v.x, v.y, v.z);
     }
 
@@ -374,8 +351,7 @@ public:
      * This version is a little more optimal. It assumes however
      * that at least one point has been added to the bounding box.
      */
-    void AddBoundingVertexSmart(float x, float y, float z)
-    {
+    void AddBoundingVertexSmart(float x, float y, float z) {
         if (x < minbox.x) {
             minbox.x = x;
         } else if (x > maxbox.x) {
@@ -398,8 +374,7 @@ public:
      * This version is a little more optimal. It assumes however
      * that at least one point has been added to the bounding box.
      */
-    void AddBoundingVertexSmart(const csVector3 &v)
-    {
+    void AddBoundingVertexSmart(const csVector3 &v) {
         AddBoundingVertexSmart(v.x, v.y, v.z);
     }
 
@@ -420,23 +395,20 @@ public:
     /// Initialize this box to empty.
     csBox3() :
             minbox(CS_BOUNDINGBOX_MAXVALUE,
-                   CS_BOUNDINGBOX_MAXVALUE,
-                   CS_BOUNDINGBOX_MAXVALUE),
+                    CS_BOUNDINGBOX_MAXVALUE,
+                    CS_BOUNDINGBOX_MAXVALUE),
             maxbox(-CS_BOUNDINGBOX_MAXVALUE,
-                   -CS_BOUNDINGBOX_MAXVALUE,
-                   -CS_BOUNDINGBOX_MAXVALUE)
-    {
+                    -CS_BOUNDINGBOX_MAXVALUE,
+                    -CS_BOUNDINGBOX_MAXVALUE) {
     }
 
     /// Initialize this box with one point.
-    csBox3(const csVector3 &v) : minbox(v), maxbox(v)
-    {
+    csBox3(const csVector3 &v) : minbox(v), maxbox(v) {
     }
 
     /// Initialize this box with two points.
     csBox3(const csVector3 &v1, const csVector3 &v2) :
-            minbox(v1), maxbox(v2)
-    {
+            minbox(v1), maxbox(v2) {
         if (Empty()) {
             StartBoundingBox();
         }
@@ -444,23 +416,20 @@ public:
 
     /// Initialize this box with the given values.
     csBox3(float x1, float y1, float z1, float x2, float y2, float z2) :
-            minbox(x1, y1, z1), maxbox(x2, y2, z2)
-    {
+            minbox(x1, y1, z1), maxbox(x2, y2, z2) {
         if (Empty()) {
             StartBoundingBox();
         }
     }
 
     /// Sets the bounds of the box with the given values.
-    void Set(const csVector3 &bmin, const csVector3 &bmax)
-    {
+    void Set(const csVector3 &bmin, const csVector3 &bmax) {
         minbox = bmin;
         maxbox = bmax;
     }
 
     /// Sets the bounds of the box with the given values.
-    void Set(float x1, float y1, float z1, float x2, float y2, float z2)
-    {
+    void Set(float x1, float y1, float z1, float x2, float y2, float z2) {
         if (x1 > x2 || y1 > y2 || z1 > z2) {
             StartBoundingBox();
         } else {
@@ -505,7 +474,7 @@ public:
      * could be up to 7.
      */
     void GetConvexOutline(const csVector3 &pos,
-                          csVector3 *array, int &num_array, bool bVisible = false) const;
+            csVector3 *array, int &num_array, bool bVisible = false) const;
 
     /**
      * Test if this box is between two others.

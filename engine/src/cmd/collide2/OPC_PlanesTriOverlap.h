@@ -13,8 +13,7 @@
  *	\warning	THIS IS A CONSERVATIVE TEST !! Some triangles will be returned as intersecting, while they're not!
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ bool PlanesCollider::PlanesTriOverlap(uint32_t in_clip_mask)
-{
+inline_ bool PlanesCollider::PlanesTriOverlap(uint32_t in_clip_mask) {
     // Stats
     mNbVolumePrimTests++;
 

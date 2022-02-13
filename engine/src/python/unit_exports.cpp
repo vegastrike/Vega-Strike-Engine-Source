@@ -48,8 +48,7 @@ extern void ExportUnitFIRST(class boost::python::class_builder<class UnitWrapper
 extern void ExportUnitSECOND(boost::python::class_builder<UnitWrapper> &Class);
 extern void ExportUnitTHIRD(boost::python::class_builder<UnitWrapper> &Class);
 
-void ExportUnit(boost::python::class_builder<UnitWrapper> &Class)
-{
+void ExportUnit(boost::python::class_builder<UnitWrapper> &Class) {
     ExportUnitFIRST(Class);
     ExportUnitSECOND(Class);
     ExportUnitTHIRD(Class);

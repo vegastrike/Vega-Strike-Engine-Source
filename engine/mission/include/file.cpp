@@ -25,14 +25,12 @@
 #endif
 #include "file.h"
 
-void FindMissions(char *path)
-{
+void FindMissions(char *path) {
     MISSIONS = FindFiles(path, EXT_MISSION);
     return;
 }
 
-void LoadMission(char *filename)
-{
+void LoadMission(char *filename) {
     char *file, *name;
     easyDomFactory<missionNode> *domf = new easyDomFactory<missionNode>();
     missionNode *top = domf->LoadXML(filename);
@@ -63,8 +61,7 @@ void LoadMission(char *filename)
     ScanNode(NULL, top, filename);
 }
 
-string ClassName(string pythonfilename)
-{
+string ClassName(string pythonfilename) {
     string::size_type where = pythonfilename.find_last_of("/");
     if (where != string::npos) {
         pythonfilename = pythonfilename.substr(where + 1, pythonfilename.length() - (where + 1));
@@ -82,8 +79,7 @@ string ClassName(string pythonfilename)
 
 using std::string;
 
-std::string PrintArg(easyDomNode *node)
-{
+std::string PrintArg(easyDomNode *node) {
     printf("%s\n", (node->Name() == "const") ? "" : "ASSERT(node->Name()==\"const\")");
     string type = node->attr_value("type");
     string def;
@@ -110,8 +106,7 @@ std::string PrintArg(easyDomNode *node)
     return retval;
 }
 
-void PrintArgs(string &pythontxt, easyDomNode *node)
-{
+void PrintArgs(string &pythontxt, easyDomNode *node) {
     for (unsigned int i = 0; i < node->subnodes.size(); i++) {
         pythontxt += PrintArg(node->subnodes[i]);
         if (i + 1 < node->subnodes.size()) {
@@ -120,8 +115,7 @@ void PrintArgs(string &pythontxt, easyDomNode *node)
     }
 }
 
-void LoadPythonModule(string fn, string pythn)
-{
+void LoadPythonModule(string fn, string pythn) {
     FILE *fp = fopen(fn.c_str(), "r");
     if (fp) {
         fseek(fp, 0, SEEK_END);
@@ -163,8 +157,7 @@ void LoadPythonModule(string fn, string pythn)
     }
 }
 
-void PrintPython(easyDomNode *node, string filename)
-{
+void PrintPython(easyDomNode *node, string filename) {
     string pythontxt;
     string module = node->attr_value("module");
     string classname = module;//ClassName (module);
@@ -183,8 +176,7 @@ void PrintPython(easyDomNode *node, string filename)
     LoadPythonModule(filename, pythontxt);
 }
 
-void ScanNode(string *parent, easyDomNode *node, string filename)
-{
+void ScanNode(string *parent, easyDomNode *node, string filename) {
     vector<easyDomNode *>::const_iterator siter;
     string scan_name, current;
 
@@ -213,8 +205,7 @@ void ScanNode(string *parent, easyDomNode *node, string filename)
 
 // If the line is  <mission><variable><var name="alpha" value="beta"/></variable></mission>, then
 // the parameters will be:  variable, var, alpha, beta
-void CheckVar(string parent, string current, string name, string value)
-{
+void CheckVar(string parent, string current, string name, string value) {
     char *param;
     int i;
     if (name.empty() || value.empty()) {

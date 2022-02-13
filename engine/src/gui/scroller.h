@@ -42,8 +42,7 @@ public:
 
 //Scroll position.
 //This is some value between min and max.
-    int scrollPosition(void)
-    {
+    int scrollPosition(void) {
         return m_scrollPosition;
     }
 
@@ -76,8 +75,7 @@ public:
 public:
     Scroller(void);
 
-    virtual ~Scroller(void)
-    {
+    virtual ~Scroller(void) {
     }
 
 protected:

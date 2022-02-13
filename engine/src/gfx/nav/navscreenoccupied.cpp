@@ -29,8 +29,7 @@
 
 #include "gfx/masks.h"
 
-navscreenoccupied::navscreenoccupied()
-{
+navscreenoccupied::navscreenoccupied() {
     sector0 = 0;
     sector1 = 0;
     sector2 = 0;
@@ -50,8 +49,7 @@ navscreenoccupied::navscreenoccupied()
     markreturned = 0;
 }
 
-navscreenoccupied::navscreenoccupied(float x_small, float x_large, float y_small, float y_large, bool _markreturned)
-{
+navscreenoccupied::navscreenoccupied(float x_small, float x_large, float y_small, float y_large, bool _markreturned) {
     sector0 = 0;
     sector1 = 0;
     sector2 = 0;
@@ -71,8 +69,7 @@ navscreenoccupied::navscreenoccupied(float x_small, float x_large, float y_small
     markreturned = _markreturned;
 }
 
-void navscreenoccupied::reset()
-{
+void navscreenoccupied::reset() {
     sector0 = 0;
     sector1 = 0;
     sector2 = 0;
@@ -85,8 +82,7 @@ void navscreenoccupied::reset()
     sector9 = 0;
 }
 
-float navscreenoccupied::findfreesector(float x, float y)
-{
+float navscreenoccupied::findfreesector(float x, float y) {
     float percent = ((x - screenskipby4[0]) / (screenskipby4[1] - screenskipby4[0]));
     float answer = 0.0;
     //strange structure, but it uses n tests for n cases, instead of 2 '(x<y)&&(x>z)'-per-case
@@ -155,8 +151,7 @@ float navscreenoccupied::findfreesector(float x, float y)
     return answer;
 }
 
-float navscreenoccupied::findfreefloat(int &sector, float &y)
-{
+float navscreenoccupied::findfreefloat(int &sector, float &y) {
     //convert the y into a height of 32
     //scan that 32 down untill a free power
     //set that power used and return its float

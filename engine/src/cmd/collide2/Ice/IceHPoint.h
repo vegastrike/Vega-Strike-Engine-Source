@@ -18,36 +18,29 @@ class ICEMATHS_API HPoint : public Point {
 public:
 
     //! Empty constructor
-    inline_ HPoint()
-    {
+    inline_ HPoint() {
     }
     //! Constructor from floats
-    inline_ HPoint(float _x, float _y, float _z, float _w = 0.0f) : Point(_x, _y, _z), w(_w)
-    {
+    inline_ HPoint(float _x, float _y, float _z, float _w = 0.0f) : Point(_x, _y, _z), w(_w) {
     }
     //! Constructor from array
-    inline_ HPoint(const float f[4]) : Point(f), w(f[3])
-    {
+    inline_ HPoint(const float f[4]) : Point(f), w(f[3]) {
     }
     //! Constructor from a Point
-    inline_ HPoint(const Point &p, float _w = 0.0f) : Point(p), w(_w)
-    {
+    inline_ HPoint(const Point &p, float _w = 0.0f) : Point(p), w(_w) {
     }
     //! Destructor
-    inline_                ~HPoint()
-    {
+    inline_                ~HPoint() {
     }
 
     //! Clear the point
-    inline_    HPoint &Zero()
-    {
+    inline_    HPoint &Zero() {
         x = y = z = w = 0.0f;
         return *this;
     }
 
     //! Assignment from values
-    inline_    HPoint &Set(float _x, float _y, float _z, float _w)
-    {
+    inline_    HPoint &Set(float _x, float _y, float _z, float _w) {
         x = _x;
         y = _y;
         z = _z;
@@ -55,8 +48,7 @@ public:
         return *this;
     }
     //! Assignment from array
-    inline_    HPoint &Set(const float f[4])
-    {
+    inline_    HPoint &Set(const float f[4]) {
         x = f[_X];
         y = f[_Y];
         z = f[_Z];
@@ -64,8 +56,7 @@ public:
         return *this;
     }
     //! Assignment from another h-point
-    inline_    HPoint &Set(const HPoint &src)
-    {
+    inline_    HPoint &Set(const HPoint &src) {
         x = src.x;
         y = src.y;
         z = src.z;
@@ -74,8 +65,7 @@ public:
     }
 
     //! Add a vector
-    inline_    HPoint &Add(float _x, float _y, float _z, float _w)
-    {
+    inline_    HPoint &Add(float _x, float _y, float _z, float _w) {
         x += _x;
         y += _y;
         z += _z;
@@ -83,8 +73,7 @@ public:
         return *this;
     }
     //! Add a vector
-    inline_    HPoint &Add(const float f[4])
-    {
+    inline_    HPoint &Add(const float f[4]) {
         x += f[_X];
         y += f[_Y];
         z += f[_Z];
@@ -93,8 +82,7 @@ public:
     }
 
     //! Subtract a vector
-    inline_    HPoint &Sub(float _x, float _y, float _z, float _w)
-    {
+    inline_    HPoint &Sub(float _x, float _y, float _z, float _w) {
         x -= _x;
         y -= _y;
         z -= _z;
@@ -102,8 +90,7 @@ public:
         return *this;
     }
     //! Subtract a vector
-    inline_    HPoint &Sub(const float f[4])
-    {
+    inline_    HPoint &Sub(const float f[4]) {
         x -= f[_X];
         y -= f[_Y];
         z -= f[_Z];
@@ -112,8 +99,7 @@ public:
     }
 
     //! Multiplies by a scalar
-    inline_    HPoint &Mul(float s)
-    {
+    inline_    HPoint &Mul(float s) {
         x *= s;
         y *= s;
         z *= s;
@@ -122,20 +108,17 @@ public:
     }
 
     //! Returns MIN(x, y, z, w);
-    float Min() const
-    {
+    float Min() const {
         return MIN(x, MIN(y, MIN(z, w)));
     }
 
     //! Returns MAX(x, y, z, w);
-    float Max() const
-    {
+    float Max() const {
         return MAX(x, MAX(y, MAX(z, w)));
     }
 
     //! Sets each element to be componentwise minimum
-    HPoint &Min(const HPoint &p)
-    {
+    HPoint &Min(const HPoint &p) {
         x = MIN(x, p.x);
         y = MIN(y, p.y);
         z = MIN(z, p.z);
@@ -144,8 +127,7 @@ public:
     }
 
     //! Sets each element to be componentwise maximum
-    HPoint &Max(const HPoint &p)
-    {
+    HPoint &Max(const HPoint &p) {
         x = MAX(x, p.x);
         y = MAX(y, p.y);
         z = MAX(z, p.z);
@@ -154,19 +136,16 @@ public:
     }
 
     //! Computes square magnitude
-    inline_    float SquareMagnitude() const
-    {
+    inline_    float SquareMagnitude() const {
         return x * x + y * y + z * z + w * w;
     }
     //! Computes magnitude
-    inline_    float Magnitude() const
-    {
+    inline_    float Magnitude() const {
         return sqrtf(x * x + y * y + z * z + w * w);
     }
 
     //! Normalize the vector
-    inline_    HPoint &Normalize()
-    {
+    inline_    HPoint &Normalize() {
         float M = Magnitude();
         if (M) {
             M = 1.0f / M;
@@ -180,65 +159,54 @@ public:
 
     // Arithmetic operators
     //! Operator for HPoint Negate = - HPoint;
-    inline_    HPoint operator-() const
-    {
+    inline_    HPoint operator-() const {
         return HPoint(-x, -y, -z, -w);
     }
 
     //! Operator for HPoint Plus  = HPoint + HPoint;
-    inline_    HPoint operator+(const HPoint &p) const
-    {
+    inline_    HPoint operator+(const HPoint &p) const {
         return HPoint(x + p.x, y + p.y, z + p.z, w + p.w);
     }
     //! Operator for HPoint Minus = HPoint - HPoint;
-    inline_    HPoint operator-(const HPoint &p) const
-    {
+    inline_    HPoint operator-(const HPoint &p) const {
         return HPoint(x - p.x, y - p.y, z - p.z, w - p.w);
     }
 
     //! Operator for HPoint Mul   = HPoint * HPoint;
-    inline_    HPoint operator*(const HPoint &p) const
-    {
+    inline_    HPoint operator*(const HPoint &p) const {
         return HPoint(x * p.x, y * p.y, z * p.z, w * p.w);
     }
     //! Operator for HPoint Scale = HPoint * float;
-    inline_    HPoint operator*(float s) const
-    {
+    inline_    HPoint operator*(float s) const {
         return HPoint(x * s, y * s, z * s, w * s);
     }
     //! Operator for HPoint Scale = float * HPoint;
-    inline_    friend HPoint operator*(float s, const HPoint &p)
-    {
+    inline_    friend HPoint operator*(float s, const HPoint &p) {
         return HPoint(s * p.x, s * p.y, s * p.z, s * p.w);
     }
 
     //! Operator for HPoint Div   = HPoint / HPoint;
-    inline_    HPoint operator/(const HPoint &p) const
-    {
+    inline_    HPoint operator/(const HPoint &p) const {
         return HPoint(x / p.x, y / p.y, z / p.z, w / p.w);
     }
     //! Operator for HPoint Scale = HPoint / float;
-    inline_    HPoint operator/(float s) const
-    {
+    inline_    HPoint operator/(float s) const {
         s = 1.0f / s;
         return HPoint(x * s, y * s, z * s, w * s);
     }
     //! Operator for HPoint Scale = float / HPoint;
-    inline_    friend HPoint operator/(float s, const HPoint &p)
-    {
+    inline_    friend HPoint operator/(float s, const HPoint &p) {
         return HPoint(s / p.x, s / p.y, s / p.z, s / p.w);
     }
 
     //! Operator for float DotProd = HPoint | HPoint;
-    inline_    float operator|(const HPoint &p) const
-    {
+    inline_    float operator|(const HPoint &p) const {
         return x * p.x + y * p.y + z * p.z + w * p.w;
     }
     // No cross-product in 4D
 
     //! Operator for HPoint += HPoint;
-    inline_    HPoint &operator+=(const HPoint &p)
-    {
+    inline_    HPoint &operator+=(const HPoint &p) {
         x += p.x;
         y += p.y;
         z += p.z;
@@ -246,8 +214,7 @@ public:
         return *this;
     }
     //! Operator for HPoint += float;
-    inline_    HPoint &operator+=(float s)
-    {
+    inline_    HPoint &operator+=(float s) {
         x += s;
         y += s;
         z += s;
@@ -256,8 +223,7 @@ public:
     }
 
     //! Operator for HPoint -= HPoint;
-    inline_    HPoint &operator-=(const HPoint &p)
-    {
+    inline_    HPoint &operator-=(const HPoint &p) {
         x -= p.x;
         y -= p.y;
         z -= p.z;
@@ -265,8 +231,7 @@ public:
         return *this;
     }
     //! Operator for HPoint -= float;
-    inline_    HPoint &operator-=(float s)
-    {
+    inline_    HPoint &operator-=(float s) {
         x -= s;
         y -= s;
         z -= s;
@@ -275,8 +240,7 @@ public:
     }
 
     //! Operator for HPoint *= HPoint;
-    inline_    HPoint &operator*=(const HPoint &p)
-    {
+    inline_    HPoint &operator*=(const HPoint &p) {
         x *= p.x;
         y *= p.y;
         z *= p.z;
@@ -284,8 +248,7 @@ public:
         return *this;
     }
     //! Operator for HPoint *= float;
-    inline_    HPoint &operator*=(float s)
-    {
+    inline_    HPoint &operator*=(float s) {
         x *= s;
         y *= s;
         z *= s;
@@ -294,8 +257,7 @@ public:
     }
 
     //! Operator for HPoint /= HPoint;
-    inline_    HPoint &operator/=(const HPoint &p)
-    {
+    inline_    HPoint &operator/=(const HPoint &p) {
         x /= p.x;
         y /= p.y;
         z /= p.z;
@@ -303,8 +265,7 @@ public:
         return *this;
     }
     //! Operator for HPoint /= float;
-    inline_    HPoint &operator/=(float s)
-    {
+    inline_    HPoint &operator/=(float s) {
         s = 1.0f / s;
         x *= s;
         y *= s;
@@ -327,13 +288,11 @@ public:
     // Logical operators
 
     //! Operator for "if(HPoint==HPoint)"
-    inline_    bool operator==(const HPoint &p) const
-    {
+    inline_    bool operator==(const HPoint &p) const {
         return ((x == p.x) && (y == p.y) && (z == p.z) && (w == p.w));
     }
     //! Operator for "if(HPoint!=HPoint)"
-    inline_    bool operator!=(const HPoint &p) const
-    {
+    inline_    bool operator!=(const HPoint &p) const {
         return ((x != p.x) || (y != p.y) || (z != p.z) || (w != p.w));
     }
 

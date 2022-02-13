@@ -97,8 +97,7 @@ public:
     Timestamp getPlayingTime() const;
 
     /** Get the attached source */
-    Source *getSource() const
-    {
+    Source *getSource() const {
         return source;
     }
 

@@ -84,8 +84,7 @@ public:
     Cargo cargo;
     GFXColor color;
 
-    CargoColor() : cargo(), color(1, 1, 1, 1)
-    {
+    CargoColor() : cargo(), color(1, 1, 1, 1) {
     }
 };
 

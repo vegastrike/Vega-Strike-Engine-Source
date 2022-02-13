@@ -2,8 +2,7 @@
 // Following code from Magic-Software (http://www.magic-software.com/)
 // A bit modified for Opcode
 
-inline_ float OPC_PointAABBSqrDist(const Point &point, const Point &center, const Point &extents)
-{
+inline_ float OPC_PointAABBSqrDist(const Point &point, const Point &center, const Point &extents) {
     // Compute coordinates of point in box coordinate system
     Point Closest = point - center;
 
@@ -36,15 +35,14 @@ inline_ float OPC_PointAABBSqrDist(const Point &point, const Point &center, cons
 }
 
 static void Face(int i0,
-                 int i1,
-                 int i2,
-                 Point &rkPnt,
-                 const Point &rkDir,
-                 const Point &extents,
-                 const Point &rkPmE,
-                 float *pfLParam,
-                 float &rfSqrDistance)
-{
+        int i1,
+        int i2,
+        Point &rkPnt,
+        const Point &rkDir,
+        const Point &extents,
+        const Point &rkPmE,
+        float *pfLParam,
+        float &rfSqrDistance) {
     Point kPpE;
     float fLSqr, fInv, fTmp, fParam, fT, fDelta;
 
@@ -212,8 +210,7 @@ static void Face(int i0,
     }
 }
 
-static void CaseNoZeros(Point &rkPnt, const Point &rkDir, const Point &extents, float *pfLParam, float &rfSqrDistance)
-{
+static void CaseNoZeros(Point &rkPnt, const Point &rkDir, const Point &extents, float *pfLParam, float &rfSqrDistance) {
     Point kPmE(rkPnt.x - extents.x, rkPnt.y - extents.y, rkPnt.z - extents.z);
 
     float fProdDxPy, fProdDyPx, fProdDzPx, fProdDxPz, fProdDzPy, fProdDyPz;
@@ -244,14 +241,13 @@ static void CaseNoZeros(Point &rkPnt, const Point &rkDir, const Point &extents, 
 }
 
 static void Case0(int i0,
-                  int i1,
-                  int i2,
-                  Point &rkPnt,
-                  const Point &rkDir,
-                  const Point &extents,
-                  float *pfLParam,
-                  float &rfSqrDistance)
-{
+        int i1,
+        int i2,
+        Point &rkPnt,
+        const Point &rkDir,
+        const Point &extents,
+        float *pfLParam,
+        float &rfSqrDistance) {
     float fPmE0 = rkPnt[i0] - extents[i0];
     float fPmE1 = rkPnt[i1] - extents[i1];
     float fProd0 = rkDir[i1] * fPmE0;
@@ -312,14 +308,13 @@ static void Case0(int i0,
 }
 
 static void Case00(int i0,
-                   int i1,
-                   int i2,
-                   Point &rkPnt,
-                   const Point &rkDir,
-                   const Point &extents,
-                   float *pfLParam,
-                   float &rfSqrDistance)
-{
+        int i1,
+        int i2,
+        Point &rkPnt,
+        const Point &rkDir,
+        const Point &extents,
+        float *pfLParam,
+        float &rfSqrDistance) {
     float fDelta;
 
     if (pfLParam) {
@@ -349,8 +344,7 @@ static void Case00(int i0,
     }
 }
 
-static void Case000(Point &rkPnt, const Point &extents, float &rfSqrDistance)
-{
+static void Case000(Point &rkPnt, const Point &extents, float &rfSqrDistance) {
     float fDelta;
 
     if (rkPnt.x < -extents.x) {
@@ -384,8 +378,7 @@ static void Case000(Point &rkPnt, const Point &extents, float &rfSqrDistance)
     }
 }
 
-static float SqrDistance(const Ray &rkLine, const Point &center, const Point &extents, float *pfLParam)
-{
+static float SqrDistance(const Ray &rkLine, const Point &center, const Point &extents, float *pfLParam) {
     // compute coordinates of line in box coordinate system
     Point kDiff = rkLine.mOrig - center;
     Point kPnt = kDiff;
@@ -436,8 +429,7 @@ static float SqrDistance(const Ray &rkLine, const Point &center, const Point &ex
     return fSqrDistance;
 }
 
-inline_ float OPC_SegmentOBBSqrDist(const Segment &segment, const Point &c0, const Point &e0)
-{
+inline_ float OPC_SegmentOBBSqrDist(const Segment &segment, const Point &c0, const Point &e0) {
     float fLP;
     float fSqrDistance = SqrDistance(Ray(segment.GetOrigin(), segment.ComputeDirection()), c0, e0, &fLP);
     if (fLP >= 0.0f) {
@@ -451,8 +443,7 @@ inline_ float OPC_SegmentOBBSqrDist(const Segment &segment, const Point &c0, con
     }
 }
 
-inline_ bool LSSCollider::LSSAABBOverlap(const Point &center, const Point &extents)
-{
+inline_ bool LSSCollider::LSSAABBOverlap(const Point &center, const Point &extents) {
     // Stats
     mNbVolumeBVTests++;
 

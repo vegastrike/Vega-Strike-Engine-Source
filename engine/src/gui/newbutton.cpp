@@ -36,8 +36,7 @@
 static const int CYCLE_STEPS_PER_SECOND = 10;
 
 //Draw the button.
-void NewButton::draw(void)
-{
+void NewButton::draw(void) {
     const float lineWidth = shadowWidth();
 
     GFXColor currentTextColor;                       //Color of label text.
@@ -105,8 +104,7 @@ void NewButton::draw(void)
 }
 
 //Draw the cycled border.  Checks time to change colors, etc.
-void NewButton::drawCycleBorder(float lineWidth)
-{
+void NewButton::drawCycleBorder(float lineWidth) {
     if (m_cycleStepCount <= 0) {
         //We need to figure out how many steps to use.
         m_cycleStepCount = float_to_int(m_variableBorderCycleTime * CYCLE_STEPS_PER_SECOND);
@@ -146,28 +144,24 @@ void NewButton::drawCycleBorder(float lineWidth)
 }
 
 //Set the button drawing state.  If the state changes, it will redraw.
-void NewButton::setDrawingState(int newState)
-{
+void NewButton::setDrawingState(int newState) {
     if (m_drawingState != newState) {
         m_drawingState = newState;
         draw();
     }
 }
 
-int NewButton::drawingState(void)
-{
+int NewButton::drawingState(void) {
     return m_drawingState;
 }
 
 //This function is called when the button is pressed.
 //Override to change the behavior.
-void NewButton::sendButtonCommand(void)
-{
+void NewButton::sendButtonCommand(void) {
     sendCommand(m_commandId, this);
 }
 
-bool NewButton::processMouseDown(const InputEvent &event)
-{
+bool NewButton::processMouseDown(const InputEvent &event) {
     if (event.code == LEFT_MOUSE_BUTTON) {
         m_leftPressed = true;             //Remember this for mouse-up.
         setModal(true);                 //Make sure we don't miss anything.
@@ -179,8 +173,7 @@ bool NewButton::processMouseDown(const InputEvent &event)
     return Control::processMouseDown(event);
 }
 
-bool NewButton::processMouseUp(const InputEvent &event)
-{
+bool NewButton::processMouseUp(const InputEvent &event) {
     if (m_leftPressed && event.code == LEFT_MOUSE_BUTTON) {
         //Send the button command if the button goes up inside the button.
         //If not, consider the button action cancelled.
@@ -219,7 +212,6 @@ NewButton::NewButton(void) :
         m_cycleStepCount(-1),
         m_cycleDirection(0),
         m_cycleColorDelta(),
-        m_lastStepTime(0.0)
-{
+        m_lastStepTime(0.0) {
 }
 

@@ -41,8 +41,7 @@ private:
 public:
     Asteroid(const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01);
 
-    enum _UnitType isUnit() const
-    {
+    enum _UnitType isUnit() const {
         return _UnitType::asteroid;
     }
 
@@ -50,8 +49,7 @@ private:
 /// default constructor forbidden
     Asteroid();
 
-    Asteroid(std::vector<Mesh *> m, bool b, int i) : Unit(m, b, i)
-    {
+    Asteroid(std::vector<Mesh *> m, bool b, int i) : Unit(m, b, i) {
     }
 
 /// copy constructor forbidden

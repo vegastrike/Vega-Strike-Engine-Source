@@ -34,8 +34,7 @@
 
 #include <vector>
 
-Pilot::Pilot(int faction)
-{
+Pilot::Pilot(int faction) {
     static float reaction = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "ReactionTime", ".2"));
     static float ran = XMLSupport::parse_float(vs_config->getVariable("AI", "DefaultRank", ".01"));
     this->rank = ran;
@@ -46,14 +45,12 @@ Pilot::Pilot(int faction)
     gender = 0;
 }
 
-void Pilot::SetComm(Unit *parent)
-{
+void Pilot::SetComm(Unit *parent) {
     this->faction = parent->faction;
     //GET BETTER REACTION TIME AND RANK HERE
 }
 
-float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float factor, int faction)
-{
+float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float factor, int faction) {
     relationmap::iterator i = effective_relationship.insert(std::pair<const void *, float>(aggressor, 0)).first;
     if (faction != FactionUtil::GetNeutralFaction()) {
         float rel = UnitUtil::getRelationToFaction(parent, faction);         /* What the bloody hell? */
@@ -83,8 +80,7 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
     return (*i).second;
 }
 
-void Pilot::DoHit(Unit *parent, void *aggressor, int faction)
-{
+void Pilot::DoHit(Unit *parent, void *aggressor, int faction) {
     static float hitcost = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationHitCost", ".01"));
     if (hitcost) {
         adjustSpecificRelationship(parent, aggressor, hitcost, faction);
@@ -107,8 +103,7 @@ void Pilot::DoHit(Unit *parent, void *aggressor, int faction)
     }
 }
 
-float Pilot::getAnger(const Unit *parent, const Unit *target) const
-{
+float Pilot::getAnger(const Unit *parent, const Unit *target) const {
     relationmap::const_iterator iter = effective_relationship.find(target);
     float rel = 0;
     if (iter != effective_relationship.end()) {
@@ -164,15 +159,13 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const
     return rel;
 }
 
-float Pilot::GetEffectiveRelationship(const Unit *parent, const Unit *target) const
-{
+float Pilot::GetEffectiveRelationship(const Unit *parent, const Unit *target) const {
     return getAnger(parent, target) + UnitUtil::getFactionRelation(parent, target);
 }
 
 extern float myroundclamp(float i);
 
-Animation *Pilot::getCommFace(Unit *parent, float mood, unsigned char &sex)
-{
+Animation *Pilot::getCommFace(Unit *parent, float mood, unsigned char &sex) {
     vector<Animation *> *ani = getCommFaces(sex);
 //this #ifndef hack below by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
     if (ani->size() == 0) {

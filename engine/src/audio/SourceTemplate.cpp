@@ -41,26 +41,22 @@ SourceTemplate::SourceTemplate(const std::string &sound, VSFileSystem::VSFileTyp
         cosAngleRange(-1, -1),
         pfRadiusRatios(1, 1),
         referenceFreqs(250, 5000),
-        gain(1)
-{
+        gain(1) {
     setLooping(_looping);
     setStreaming(false);
     setRelative(false);
     setAttenuated(true);
 }
 
-SourceTemplate::~SourceTemplate()
-{
+SourceTemplate::~SourceTemplate() {
 }
 
-Range<Scalar> SourceTemplate::getAngleRange() const
-{
+Range<Scalar> SourceTemplate::getAngleRange() const {
     return Range<Scalar>(Scalar(acos(cosAngleRange.min)),
-                         Scalar(acos(cosAngleRange.max)));
+            Scalar(acos(cosAngleRange.max)));
 }
 
-void SourceTemplate::setAngleRange(Range<Scalar> r)
-{
+void SourceTemplate::setAngleRange(Range<Scalar> r) {
     cosAngleRange.min = Scalar(cos(r.min));
     cosAngleRange.max = Scalar(cos(r.max));
 }

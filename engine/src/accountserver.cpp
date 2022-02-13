@@ -31,18 +31,15 @@ using std::string;
 #include "networking/acctserver.h"
 #include "lin_time.h"
 
-void VSExit(int code)
-{
+void VSExit(int code) {
     exit(code);
 }
 
-string getStarSystemSector(const string &in)
-{
+string getStarSystemSector(const string &in) {
     return string("");
 }
 
-string GetUnitDir(string filename)
-{
+string GetUnitDir(string filename) {
     return string("");
 }
 
@@ -52,8 +49,7 @@ float audio_atom_var = (float) 1.0 / 18.0;
 class NetClient {};
 NetClient *Network;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     InitTime();
     setNewTime(((double) time(NULL)) - VEGA_EPOCH);
     AccountServer *Server = new AccountServer;

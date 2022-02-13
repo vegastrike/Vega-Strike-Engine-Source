@@ -34,18 +34,15 @@
 namespace Audio {
 
 RenderableListener::RenderableListener(Listener *_listener) :
-        listener(_listener)
-{
+        listener(_listener) {
 }
 
-RenderableListener::~RenderableListener()
-{
+RenderableListener::~RenderableListener() {
     // Just in case.
     listener = 0;
 }
 
-void RenderableListener::update(int flags)
-{
+void RenderableListener::update(int flags) {
     try {
         updateImpl(flags);
     } catch (const Exception &e) {

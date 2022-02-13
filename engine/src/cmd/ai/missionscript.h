@@ -46,8 +46,7 @@ public:
 ///Loads the AI script from the hard drive, or executes if loaded
     void Execute();
 
-    virtual string getOrderDescription()
-    {
+    virtual string getOrderDescription() {
         char buffer[300];
         sprintf(buffer, "%s:%d:%s", modulename.c_str(), classid, getActionString().c_str());
         return buffer;
@@ -103,8 +102,7 @@ class AIOrderList : public AImissionScript {
 public:
     AIOrderList(olist_t *orderlist);
 
-    virtual olist_t *getOrderList()
-    {
+    virtual olist_t *getOrderList() {
         return my_orderlist;
     }
 

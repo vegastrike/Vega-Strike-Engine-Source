@@ -36,8 +36,8 @@
 // separator values , and ; while delimiter is listed as quote or "
 std::vector<std::string> readCSV(const std::string &line, std::string delim = ",;");
 std::string writeCSV(const std::vector<std::string> &key,
-                     const std::vector<std::string> &table,
-                     std::string delim = ",;");
+        const std::vector<std::string> &table,
+        std::string delim = ",;");
 
 class CSVTable {
 private:
@@ -75,16 +75,14 @@ class CSVRow {
 public:
     std::string getRoot();
 
-    size_t size() const
-    {
+    size_t size() const {
         return parent->key.size();
     }
 
     CSVRow(CSVTable *parent, const std::string &key);
     CSVRow(CSVTable *parent, unsigned int which);
 
-    CSVRow()
-    {
+    CSVRow() {
         parent = NULL;
         iter = std::string::npos;
     }
@@ -95,13 +93,11 @@ public:
     std::vector<std::string>::iterator begin();
     std::vector<std::string>::iterator end();
 
-    bool success() const
-    {
+    bool success() const {
         return parent != NULL;
     }
 
-    CSVTable *getParent()
-    {
+    CSVTable *getParent() {
         return parent;
     }
 };

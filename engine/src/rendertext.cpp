@@ -50,8 +50,7 @@ using std::endl;
 
 #ifdef HAVE_SDL
 
-static SDL_mutex *_rtextSDLMutex()
-{
+static SDL_mutex *_rtextSDLMutex() {
     static SDL_mutex *rv = SDL_CreateMutex();
     return rv;
 }
@@ -59,8 +58,7 @@ static SDL_mutex *_rtextSDLMutex()
 #endif
 
 //Render Text (Console) Constructor {{{
-RText::RText()
-{
+RText::RText() {
 #ifdef HAVE_SDL
     //Initialize shared mutex
     //(creation is always single-threaded, since no aliases are possible yet)
@@ -73,13 +71,11 @@ RText::RText()
     saycommand("");
 }
 
-RText::~RText()
-{
+RText::~RText() {
 }
 
 //Set the text width, not used  .. yet{{{
-int RText::text_width(char *str)
-{
+int RText::text_width(char *str) {
     return 0;
 }
 //Should be unused defines {{{
@@ -89,8 +85,7 @@ int RText::text_width(char *str)
 #define FONTH 64
 
 //Draw text, used by the console, should be private, use conoutf to print to the console {{{
-void RText::draw_text(std::string &str, float left, float top, int gl_num)
-{
+void RText::draw_text(std::string &str, float left, float top, int gl_num) {
     int x = float_to_int(left);
     int y = float_to_int(top);
 
@@ -173,14 +168,12 @@ void RText::conline(string &sf, bool highlight)        //add a line to the conso
 }
 
 //print a line to the console, broken at \n's {{{
-void RText::conoutf(char *in)
-{
+void RText::conoutf(char *in) {
     string foobar(in);
     conoutf(foobar);
 }
 
-void RText::conoutf(string &s, int a, int b, int c)
-{
+void RText::conoutf(string &s, int a, int b, int c) {
 #ifdef HAVE_SDL
     //NOTE: first call must be single-threaded!
     SDL_mutex *mymutex = _rtextSDLMutex();
@@ -229,8 +222,7 @@ void RText::conoutf(string &s, int a, int b, int c)
 }
 
 //same as above, but I think it works better {{{
-void RText::conoutn(string &s, int a, int b, int c)
-{
+void RText::conoutn(string &s, int a, int b, int c) {
     size_t x = s.find("\n");
     size_t xlast = 0;
     if (x >= string::npos) {
@@ -259,8 +251,7 @@ void RText::saycommand(const char *init) // DELETE unused
 }
 
 //Console Keyboard Input {{{
-void RText::ConsoleKeyboardI(int code, bool isdown)
-{
+void RText::ConsoleKeyboardI(int code, bool isdown) {
     if (isdown) {
         switch (code) {
 //pop teh back of commandbuf
@@ -318,8 +309,7 @@ void RText::ConsoleKeyboardI(int code, bool isdown)
 
 //}}}
 //get the current command buffer, to execute at enter {{{
-string RText::getcurcommand()
-{
+string RText::getcurcommand() {
     return commandbuf;
 }
 //footer, leave at bottom

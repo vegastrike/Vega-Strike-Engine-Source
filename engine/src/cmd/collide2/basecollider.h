@@ -40,12 +40,11 @@
 struct csCollisionPair {
     csCollisionPair()
             : a1(0.0f, 0.0f, 0.0f),
-              b1(0.0f, 0.0f, 0.0f),
-              c1(0.0f, 0.0f, 0.0f),
-              a2(0.0f, 0.0f, 0.0f),
-              b2(0.0f, 0.0f, 0.0f),
-              c2(0.0f, 0.0f, 0.0f)
-    {
+            b1(0.0f, 0.0f, 0.0f),
+            c1(0.0f, 0.0f, 0.0f),
+            a2(0.0f, 0.0f, 0.0f),
+            b2(0.0f, 0.0f, 0.0f),
+            c2(0.0f, 0.0f, 0.0f) {
     }
 
     Opcode::Point a1, b1, c1;   // First triangle

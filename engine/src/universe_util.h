@@ -38,26 +38,21 @@ class Cargo;
 namespace UniverseUtil {
 class PythonUnitIter : public un_iter {
 public:
-    PythonUnitIter() : UnitIterator()
-    {
+    PythonUnitIter() : UnitIterator() {
     }
 
 //PythonUnitIterator (UnitListNode * start):UnitIterator(start){}
-    PythonUnitIter(const UnitCollection::UnitIterator &t) : UnitIterator(t)
-    {
+    PythonUnitIter(const UnitCollection::UnitIterator &t) : UnitIterator(t) {
     }
 
-    ~PythonUnitIter()
-    {
+    ~PythonUnitIter() {
     }
 
-    inline Unit *current()
-    {
+    inline Unit *current() {
         return (**this);
     }
 
-    inline void advance()
-    {
+    inline void advance() {
         UnitIterator::advance();
     }
 
@@ -71,23 +66,19 @@ public:
     void advanceNPlanet(int n);
     void advanceNJumppoint(int n);
 
-    inline void preinsert(Unit *unit)
-    {
+    inline void preinsert(Unit *unit) {
         UnitIterator::preinsert(unit);
     }
 
-    inline bool isDone()
-    {
+    inline bool isDone() {
         return UnitIterator::isDone();
     }
 
-    inline void remove()
-    {
+    inline void remove() {
         UnitIterator::remove();
     }
 
-    inline class Unit *next()
-    {
+    inline class Unit *next() {
         advance();
         return current();
     }
@@ -134,27 +125,27 @@ void cacheAnimation(std::string anim);
 
 ///this function launches a wormhole or a jump point.
 Unit *launchJumppoint(std::string name_string,
-                      std::string faction_string,
-                      std::string type_string,
-                      std::string unittype_string,
-                      std::string ai_string,
-                      int nr_of_ships,
-                      int nr_of_waves,
-                      QVector pos,
-                      std::string squadlogo,
-                      std::string destinations);
+        std::string faction_string,
+        std::string type_string,
+        std::string unittype_string,
+        std::string ai_string,
+        int nr_of_ships,
+        int nr_of_waves,
+        QVector pos,
+        std::string squadlogo,
+        std::string destinations);
 std::string vsConfig(std::string category, std::string option, std::string def);
 
 ///this function launches a normal fighter  the name is the flightgroup name, the type is the ship type, the faction is who it belongs to, the unittype is usually "unit" unless you want to make asteroids or nebulae or jump points or planets.  the aistring is either a python filename or "default"  the nr of ships is the number of ships to be launched with this group, the number of waves is num reinforcements... the position is a tuple (x,y,z) where they appear and the squadlogo is a squadron image...you can leave this the empty string '' for the default squadron logo.
 Unit *launch(std::string name_string,
-             std::string type_string,
-             std::string faction_string,
-             std::string unittype,
-             std::string ai_string,
-             int nr_of_ships,
-             int nr_of_waves,
-             QVector pos,
-             std::string sqadlogo);
+        std::string type_string,
+        std::string faction_string,
+        std::string unittype,
+        std::string ai_string,
+        int nr_of_ships,
+        int nr_of_waves,
+        QVector pos,
+        std::string sqadlogo);
 
 ///this gets a random cargo type (useful for cargo missions) from either any category if category is '' or else from a specific category  'Contraband'  comes to mind!
 Cargo getRandCargo(int quantity, std::string category);
@@ -223,32 +214,27 @@ void musicLayerSetHardVolume(float vol, int layer);
 void musicMute(bool stopSound);
 
 ///this plays a specific song, through the crossfader construct
-inline void musicPlaySong(std::string str)
-{
+inline void musicPlaySong(std::string str) {
     musicLayerPlaySong(str, -1);
 }
 
 ///this plays msuci from a given list (where the int is what was returned by musicAddList)
-inline void musicPlayList(int which)
-{
+inline void musicPlayList(int which) {
     musicLayerPlayList(which, -1);
 }
 
 ///this plays msuci from a given list (where the int is what was returned by musicAddList)
-inline void musicLoopList(int numloops)
-{
+inline void musicLoopList(int numloops) {
     musicLayerLoopList(numloops, -1);
 }
 
 ///this skips the current music track (and goes to the next in the currently playing list)
-inline void musicSkip()
-{
+inline void musicSkip() {
     musicLayerSkip(-1);
 }
 
 ///this stops the music currently playing - with a nice fadeout
-inline void musicStop()
-{
+inline void musicStop() {
     musicLayerStop(-1);
 }
 
@@ -352,26 +338,26 @@ void cacheAnimation(std::string anim);
 
 ///this function launches a wormhole or ajump point.
 Unit *launchJumppoint(std::string name_string,
-                      std::string faction_string,
-                      std::string type_string,
-                      std::string unittype_string,
-                      std::string ai_string,
-                      int nr_of_ships,
-                      int nr_of_waves,
-                      QVector pos,
-                      std::string squadlogo,
-                      std::string destinations);
+        std::string faction_string,
+        std::string type_string,
+        std::string unittype_string,
+        std::string ai_string,
+        int nr_of_ships,
+        int nr_of_waves,
+        QVector pos,
+        std::string squadlogo,
+        std::string destinations);
 
 ///this function launches a normal fighter  the name is the flightgroup name, the type is the ship type, the faction is who it belongs to, the unittype is usually "unit" unless you want to make asteroids or nebulae or jump points or planets.  the aistring is either a python filename or "default"  the nr of ships is the number of ships to be launched with this group, the number of waves is num reinforcements... the position is a tuple (x,y,z) where they appear and the squadlogo is a squadron image...you can leave this the empty string '' for the default squadron logo.
 Unit *launch(std::string name_string,
-             std::string type_string,
-             std::string faction_string,
-             std::string unittype,
-             std::string ai_string,
-             int nr_of_ships,
-             int nr_of_waves,
-             QVector pos,
-             std::string sqadlogo);
+        std::string type_string,
+        std::string faction_string,
+        std::string unittype,
+        std::string ai_string,
+        int nr_of_ships,
+        int nr_of_waves,
+        QVector pos,
+        std::string sqadlogo);
 
 ///this gets a random cargo type (useful for cargo missions) from either any category if category is '' or else from a specific category  'Contraband'  comes to mind!
 Cargo getRandCargo(int quantity, std::string category);
@@ -454,7 +440,7 @@ bool isSplashScreenShowing();
 
 //Defined in gamemenu.cpp for vegastrike, universe_util_server.cpp for vegaserver.
 void startMenuInterface(bool firsttime,
-                        string alert = string());         //If game fails, bring it back to a common starting point.
+        string alert = string());         //If game fails, bring it back to a common starting point.
 }
 
 #undef activeSys

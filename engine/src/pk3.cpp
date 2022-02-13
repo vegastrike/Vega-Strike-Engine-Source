@@ -82,8 +82,7 @@ struct CPK3::TZipLocalHeader {
     unsigned short fnameLen;        //Filename string follows header.
     unsigned short xtraLen;         //Extra field follows filename.
 
-    void correctByteOrder()
-    {
+    void correctByteOrder() {
         sig = POSH_LittleU32(sig);
         version = POSH_LittleU16(version);
         flag = POSH_LittleU16(flag);
@@ -111,8 +110,7 @@ struct CPK3::TZipDirHeader {
     unsigned int dirOffset;
     unsigned short cmntLen;
 
-    void correctByteOrder()
-    {
+    void correctByteOrder() {
         sig = POSH_LittleU32(sig);
         nDisk = POSH_LittleU16(nDisk);
         nStartDisk = POSH_LittleU16(nStartDisk);
@@ -148,23 +146,19 @@ struct CPK3::TZipDirFileHeader {
     unsigned int extAttr;
     unsigned int hdrOffset;
 
-    char *GetName() const
-    {
+    char *GetName() const {
         return (char *) (this + 1);
     }
 
-    char *GetExtra() const
-    {
+    char *GetExtra() const {
         return GetName() + fnameLen;
     }
 
-    char *GetComment() const
-    {
+    char *GetComment() const {
         return GetExtra() + xtraLen;
     }
 
-    void correctByteOrder()
-    {
+    void correctByteOrder() {
         sig = POSH_LittleU32(sig);
         verMade = POSH_LittleU16(verMade);
         verNeeded = POSH_LittleU16(verNeeded);
@@ -187,20 +181,17 @@ struct CPK3::TZipDirFileHeader {
 
 #pragma pack()
 
-CPK3::CPK3(FILE *n_f)
-{
+CPK3::CPK3(FILE *n_f) {
     CheckPK3(n_f);
 }
 
-CPK3::CPK3(const char *filename)
-{
+CPK3::CPK3(const char *filename) {
     Open(filename);
 }
 
 static size_t bogus_sizet; //added by chuck_starchaser to squash some warnings
 
-bool CPK3::CheckPK3(FILE *f)
-{
+bool CPK3::CheckPK3(FILE *f) {
     if (f == NULL) {
         return false;
     }
@@ -269,8 +260,7 @@ bool CPK3::CheckPK3(FILE *f)
     return ret;
 }
 
-bool CPK3::Open(const char *filename)
-{
+bool CPK3::Open(const char *filename) {
     f = fopen(filename, "rb");
     if (f) {
         strcpy(pk3filename, filename);
@@ -280,13 +270,11 @@ bool CPK3::Open(const char *filename)
     }
 }
 
-bool CPK3::ExtractFile(const char *lp_name)
-{
+bool CPK3::ExtractFile(const char *lp_name) {
     return ExtractFile(lp_name, lp_name);
 }
 
-bool CPK3::ExtractFile(const char *lp_name, const char *new_filename)
-{
+bool CPK3::ExtractFile(const char *lp_name, const char *new_filename) {
     //open file tp write data
     FILE *new_f = NULL;
     int size = -1;
@@ -305,8 +293,7 @@ bool CPK3::ExtractFile(const char *lp_name, const char *new_filename)
 }
 
 //Compares 2 c-strings but do not take into account '/' or '\'
-int vsstrcmp(const char *lp, const char *str)
-{
+int vsstrcmp(const char *lp, const char *str) {
     unsigned int i, ok = 1;
     unsigned int len = strlen(lp);
     for (i = 0; ok && i < len; i++) {
@@ -317,8 +304,7 @@ int vsstrcmp(const char *lp, const char *str)
     return !ok;
 }
 
-int CPK3::FileExists(const char *lpname)
-{
+int CPK3::FileExists(const char *lpname) {
     char str[PK3LENGTH];
     int idx = -1;
 
@@ -335,8 +321,7 @@ int CPK3::FileExists(const char *lpname)
     return idx;
 }
 
-char *CPK3::ExtractFile(int index, int *file_size)
-{
+char *CPK3::ExtractFile(int index, int *file_size) {
     char *buffer;
     int flength = GetFileLen(index);
 
@@ -349,15 +334,14 @@ char *CPK3::ExtractFile(int index, int *file_size)
             //everything went well !!!
         } else {
             VS_LOG(error,
-                   "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n");
+                    "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n");
         }
     }
     *file_size = flength;
     return buffer;
 }
 
-char *CPK3::ExtractFile(const char *lpname, int *file_size)
-{
+char *CPK3::ExtractFile(const char *lpname, int *file_size) {
     char str[PK3LENGTH];
     int index = -1;
     char *buffer;
@@ -385,15 +369,14 @@ char *CPK3::ExtractFile(const char *lpname, int *file_size)
             //everything went well !!!
         } else {
             VS_LOG(error,
-                   "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n");
+                    "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n");
         }
     }
     *file_size = flength;
     return buffer;
 }
 
-bool CPK3::Close()
-{
+bool CPK3::Close() {
     fclose(f);
     delete[] m_pDirData;
     m_nEntries = 0;
@@ -401,16 +384,14 @@ bool CPK3::Close()
     return true;
 }
 
-void CPK3::PrintFileContent()
-{
+void CPK3::PrintFileContent() {
     VS_LOG(info, (boost::format("PK3 File: %1%\n") % pk3filename));
     VS_LOG(info, (boost::format("files count: %1%\n\n") % m_nEntries));
     for (int i = 0; i < m_nEntries; i++) {
     }
 }
 
-void CPK3::GetFilename(int i, char *pszDest) const
-{
+void CPK3::GetFilename(int i, char *pszDest) const {
     if (pszDest != NULL) {
         if (i < 0 || i >= m_nEntries) {
             *pszDest = '\0';
@@ -421,8 +402,7 @@ void CPK3::GetFilename(int i, char *pszDest) const
     }
 }
 
-int CPK3::GetFileLen(int i) const
-{
+int CPK3::GetFileLen(int i) const {
     if (i < 0 || i >= m_nEntries) {
         return -1;
     } else {
@@ -430,8 +410,7 @@ int CPK3::GetFileLen(int i) const
     }
 }
 
-bool CPK3::ReadFile(int i, void *pBuf)
-{
+bool CPK3::ReadFile(int i, void *pBuf) {
     if (pBuf == nullptr) {
         VS_LOG(error, "PK3ERROR :  pBuf is NULL !!!");
         return false;
@@ -465,8 +444,8 @@ bool CPK3::ReadFile(int i, void *pBuf)
         return true;
     } else if (h.compression != TZipLocalHeader::COMP_DEFLAT) {
         VS_LOG(error,
-               (boost::format("BAD Compression level, found=%1% - expected=%2%") % h.compression
-                       % TZipLocalHeader::COMP_DEFLAT));
+                (boost::format("BAD Compression level, found=%1% - expected=%2%") % h.compression
+                        % TZipLocalHeader::COMP_DEFLAT));
         return false;
     }
     //Alloc compressed data buffer and read the whole stream

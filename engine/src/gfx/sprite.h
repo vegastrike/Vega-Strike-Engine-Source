@@ -49,8 +49,7 @@ class VSSprite {
     bool isAnimation;
 
 //For private use only
-    VSSprite() : surface(0)
-    {
+    VSSprite() : surface(0) {
     }
 
 public:
@@ -59,13 +58,13 @@ public:
 //Construct a sprite out of a preloaded texture
 //@Note will take ownership of 'surface'
     VSSprite(Texture *surface,
-             float xcenter,
-             float ycenter,
-             float width,
-             float height,
-             float s = 0.f,
-             float t = 0.f,
-             bool isAnimation = false);
+            float xcenter,
+            float ycenter,
+            float width,
+            float height,
+            float s = 0.f,
+            float t = 0.f,
+            bool isAnimation = false);
     VSSprite(const VSSprite &source);
     ~VSSprite();
 //Return true if sprite was loaded successfully
@@ -83,8 +82,7 @@ public:
     void DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul);
 
 //Add specified rotation to an already-rotated sprite
-    void Rotate(const float &rad)
-    {
+    void Rotate(const float &rad) {
         rotation += rad;
     }
 
@@ -107,13 +105,11 @@ public:
     SharedPtr<Audio::Source> GetTimeSource() const;
 
 //float &Rotation(){return rotation;};
-    Texture *getTexture()
-    {
+    Texture *getTexture() {
         return surface;
     }
 
-    const Texture *getTexture() const
-    {
+    const Texture *getTexture() const {
         return surface;
     }
 };

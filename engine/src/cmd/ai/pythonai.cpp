@@ -44,44 +44,37 @@ using namespace Orders;
 
 PythonAI *PythonAI::last_ai = NULL;
 
-PythonAI::PythonAI(PyObject *self_, float reaction_time, float aggressivity) : FireAt(reaction_time, aggressivity)
-{
+PythonAI::PythonAI(PyObject *self_, float reaction_time, float aggressivity) : FireAt(reaction_time, aggressivity) {
     self = self_;
     //boost::python:
     Py_XINCREF(self);     //by passing this to whoami, we are counting on them to Destruct us
     last_ai = this;
 }
 
-void PythonAI::Destruct()
-{
+void PythonAI::Destruct() {
     Py_XDECREF(self);     //this should destroy SELF
 }
 
-void PythonAI::default_Execute(FireAt &self_)
-{
+void PythonAI::default_Execute(FireAt &self_) {
     (self_).FireAt::Execute();
 }
 
-PythonAI *PythonAI::LastAI()
-{
+PythonAI *PythonAI::LastAI() {
     PythonAI *myai = last_ai;
     last_ai = NULL;
     return myai;
 }
 
-PythonAI *PythonAI::Factory(const std::string &filename)
-{
+PythonAI *PythonAI::Factory(const std::string &filename) {
     CompileRunPython(filename);
     return LastAI();
 }
 
-void PythonAI::Execute()
-{
+void PythonAI::Execute() {
     boost::python::callback<void>::call_method(self, "Execute");
 }
 
-void PythonAI::InitModuleAI()
-{
+void PythonAI::InitModuleAI() {
     boost::python::module_builder ai_builder("AI");
     boost::python::class_builder<FireAt, PythonAI> BaseClass(ai_builder, "FireAt");
 
@@ -89,8 +82,7 @@ void PythonAI::InitModuleAI()
     BaseClass.def(&FireAt::Execute, "PythonAI", PythonAI::default_Execute);
 }
 
-PythonAI::~PythonAI()
-{
+PythonAI::~PythonAI() {
     VS_LOG(warning, (boost::format("Destruct called. If called from C++ this is death %1$x") % this));
 }
 

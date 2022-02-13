@@ -59,8 +59,7 @@ struct soundContainer   //used to contain static sounds that will only be
     //created once and will get deleted automatically
     int sound;
 
-    soundContainer()
-    {
+    soundContainer() {
         sound = -2;
     }
 
@@ -72,27 +71,23 @@ struct soundContainer   //used to contain static sounds that will only be
 struct soundArray {
     soundContainer *ptr;
 
-    soundArray()
-    {
+    soundArray() {
         ptr = NULL;
     }
 
-    void deallocate()
-    {
+    void deallocate() {
         if (ptr != NULL) {
             delete[] ptr;
             ptr = NULL;
         }
     }
 
-    void allocate(int siz)
-    {
+    void allocate(int siz) {
         deallocate();
         ptr = new soundContainer[siz];
     }
 
-    ~soundArray()
-    {
+    ~soundArray() {
         deallocate();
     }
 };
@@ -242,8 +237,7 @@ public:
     static void TurretControl(const KBData &, KBSTATE);
     void SetSoundFile(std::string sound);
 
-    int GetSoundFile()
-    {
+    int GetSoundFile() {
         return soundfile;
     }
 
@@ -251,16 +245,14 @@ public:
     void SetStaticAnimation();
 
     ///Accesses the current navigationsystem
-    NavigationSystem *AccessNavSystem()
-    {
+    NavigationSystem *AccessNavSystem() {
         return &ThisNav;
     }
 
     virtual std::string GetNavSelectedSystem();
 
     ///Accesses the current camera
-    Camera *AccessCamera()
-    {
+    Camera *AccessCamera() {
         return &cam[currentcamera];
     }
 
@@ -270,8 +262,7 @@ public:
     void SelectCamera(int);
 
     ///GFXLoadMatrix proper camera
-    void SetViewport()
-    {
+    void SetViewport() {
         cam[currentcamera].UpdateGFX();
     }
 

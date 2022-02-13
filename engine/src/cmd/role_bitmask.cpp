@@ -39,8 +39,7 @@ using namespace VSFileSystem;   // FIXME -- Shouldn't import an entire namespace
 
 namespace ROLES {
 
-int discreteLog(int bitmask)
-{
+int discreteLog(int bitmask) {
     for (unsigned char i = 0; i < sizeof(int) * 8; i++) {
         if (bitmask & (1 << i)) {
             return i;
@@ -52,14 +51,12 @@ int discreteLog(int bitmask)
 
 std::vector<std::vector<char>> buildroles();
 
-std::vector<std::vector<char>> &getAllRolePriorities()
-{
+std::vector<std::vector<char>> &getAllRolePriorities() {
     static std::vector<std::vector<char> > allrolepriority = buildroles();
     return allrolepriority;
 }
 
-std::vector<char> &getPriority(unsigned char rolerow)
-{
+std::vector<char> &getPriority(unsigned char rolerow) {
     if (rolerow > getAllRolePriorities().size()) {
         VS_LOG_AND_FLUSH(fatal, "FATAL ERROR ROLE OUT OF RANGE");
         VSExit(1);
@@ -70,8 +67,7 @@ std::vector<char> &getPriority(unsigned char rolerow)
 static vsUMap<string, int> rolemap;
 static vsUMap<int, string> irolemap;
 
-unsigned char InternalGetRole(const std::string &s)
-{
+unsigned char InternalGetRole(const std::string &s) {
     vsUMap<string, int>::const_iterator i = rolemap.find(strtoupper(s));
     if (i != rolemap.end()) {
         return (*i).second;
@@ -79,8 +75,7 @@ unsigned char InternalGetRole(const std::string &s)
     return 0;
 }
 
-const std::string &InternalGetStrRole(unsigned char c)
-{
+const std::string &InternalGetStrRole(unsigned char c) {
     static const std::string empty;
 
     vsUMap<int, string>::const_iterator i = irolemap.find(c);
@@ -90,8 +85,7 @@ const std::string &InternalGetStrRole(unsigned char c)
     return rolemap.size() ? rolemap.begin()->first : empty;
 }
 
-std::vector<std::vector<std::string> > buildscripts()
-{
+std::vector<std::vector<std::string> > buildscripts() {
     std::vector<std::vector<std::string> > scripts;
     getAllRolePriorities();
 
@@ -107,9 +101,9 @@ std::vector<std::vector<std::string> > buildscripts()
         std::vector<std::string> vec = readCSV(temp);
         if (siz && getAllRolePriorities()[0].size() != vec.size()) {
             VS_LOG_AND_FLUSH(fatal,
-                             (boost::format(
-                                     "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                                     % ((unsigned int) vec.size())));
+                    (boost::format(
+                            "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
+                            % ((unsigned int) vec.size())));
             VSExit(-5);
         }
         if (vec.size()) {
@@ -118,9 +112,9 @@ std::vector<std::vector<std::string> > buildscripts()
         for (unsigned int j = 0; j < vec.size(); j++) {
             if (getRole(vec[j]) != j) {
                 VS_LOG_AND_FLUSH(fatal,
-                                 (boost::format(
-                                         "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                                         % j));
+                        (boost::format(
+                                "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
+                                % j));
                 VSExit(-5);
             }
         }
@@ -155,8 +149,7 @@ std::vector<std::vector<std::string> > buildscripts()
     return scripts;
 }
 
-const std::string &getRoleEvents(unsigned char ourrole, unsigned char theirs)
-{
+const std::string &getRoleEvents(unsigned char ourrole, unsigned char theirs) {
     static std::vector<std::vector<std::string> > script = buildscripts();
     const static std::string def = "default";
     if (ourrole >= script.size()) {
@@ -170,8 +163,7 @@ const std::string &getRoleEvents(unsigned char ourrole, unsigned char theirs)
     return script[ourrole][theirs];
 }
 
-std::vector<std::vector<char> > buildroles()
-{
+std::vector<std::vector<char> > buildroles() {
     std::vector<std::vector<char> > rolePriorities;
     VSFile f;
     VSError err = f.OpenReadOnly("VegaPriorities.csv", AiFile);
@@ -249,19 +241,16 @@ std::vector<std::vector<char> > buildroles()
     return rolePriorities;
 }
 
-unsigned char getRole(const std::string &s)
-{
+unsigned char getRole(const std::string &s) {
     return InternalGetRole(s);
 }
 
-const std::string &getRole(unsigned char c)
-{
+const std::string &getRole(unsigned char c) {
     return InternalGetStrRole(c);
 }
 
 // TODO: remove and examine entire file
-unsigned int readBitmask(const std::string &ss)
-{
+unsigned int readBitmask(const std::string &ss) {
     string s = ss;
     std::string::size_type loc = string::npos;
     int ans = 0;
@@ -275,11 +264,10 @@ unsigned int readBitmask(const std::string &ss)
     return ans;
 }
 
-unsigned int getCapitalRoles()
-{
+unsigned int getCapitalRoles() {
     static string defaultcapshipvalues = vs_config->getVariable("data",
-                                                                "capship_roles",
-                                                                "ESCORTCAP CAPITAL CARRIER BASE TROOP");
+            "capship_roles",
+            "ESCORTCAP CAPITAL CARRIER BASE TROOP");
     unsigned int retval = 0;
     string inp = defaultcapshipvalues;
     string::size_type where;

@@ -24,8 +24,7 @@
 #include "../filter_settings.h"
 #include "filter_math.h"
 
-void filter_settings::init()
-{
+void filter_settings::init() {
     vs_assert(top_lod_size > ambient_lod_size, "lod sizes make no sense");
     vs_assert(is_POT(top_lod_size), "target texture size must be a power of two");
     vs_assert(is_POT(ambient_lod_size), "target ambient lod size must be a power of two");

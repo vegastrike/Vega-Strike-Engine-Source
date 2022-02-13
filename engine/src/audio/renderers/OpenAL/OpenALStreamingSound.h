@@ -80,7 +80,7 @@ public:
      *      samples below which a read would be triggered.
      */
     OpenALStreamingSound(const std::string &name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-                         unsigned int bufferSamples = 0);
+            unsigned int bufferSamples = 0);
 
 public:
     virtual ~OpenALStreamingSound();

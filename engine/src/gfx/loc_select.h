@@ -45,8 +45,7 @@ public:
     LocationSelect(Vector, Vector, Vector, Vector /*, Scene*   */);
     ~LocationSelect();
 
-    inline QVector GetVector()
-    {
+    inline QVector GetVector() {
         return /*Transform (cumulative_transformation_matrix,*/ LocalPosition /*)*/;
     }
 

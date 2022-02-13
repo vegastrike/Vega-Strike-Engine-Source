@@ -43,8 +43,7 @@ char origpath[65536];
 static int bogus_int; //added by chuck_starchaser to squash a warning or two
 static char *bogus_str; //added by chuck_starchaser to squash a warning or two
 
-static void changeToProgramDirectory(char *argv0)
-{
+static void changeToProgramDirectory(char *argv0) {
     int ret = -1;   /* Should it use argv[0] directly? */
     char *program = argv0;
 #ifndef _WIN32
@@ -103,8 +102,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int n
 
 #else
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 #endif
     CONFIG.data_path = NULL;
     CONFIG.config_file = NULL;

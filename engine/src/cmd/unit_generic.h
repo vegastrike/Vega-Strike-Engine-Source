@@ -136,7 +136,7 @@ struct PlanetaryOrbitData;
 
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
-             public Intelligent, public Movable, public JumpCapable, public Carrier {
+        public Intelligent, public Movable, public JumpCapable, public Carrier {
 protected:
 //How many lists are referencing us
     int ucref = 0;
@@ -248,21 +248,21 @@ public:
 
 //Uses mmm... stuff not desired here ?
     bool UpgradeSubUnitsWithFactory(const Unit *up, int subunitoffset, bool touchme, bool downgrade, int &numave,
-                                    double &percentage, Unit *(*createupgradesubunit)(std::string s,
-                                                                                      int faction));
+            double &percentage, Unit *(*createupgradesubunit)(std::string s,
+            int faction));
     bool UpgradeSubUnits(const Unit *up,
-                         int subunitoffset,
-                         bool touchme,
-                         bool downgrade,
-                         int &numave,
-                         double &percentage);
+            int subunitoffset,
+            bool touchme,
+            bool downgrade,
+            int &numave,
+            double &percentage);
     bool UpgradeMounts(const Unit *up,
-                       int subunitoffset,
-                       bool touchme,
-                       bool downgrade,
-                       int &numave,
-                       const Unit *templ,
-                       double &percentage);
+            int subunitoffset,
+            bool touchme,
+            bool downgrade,
+            int &numave,
+            const Unit *templ,
+            double &percentage);
 //the turrets and spinning parts fun fun stuff
     UnitCollection SubUnits;
 
@@ -272,8 +272,7 @@ public:
  * The ammo and the weapon type. As well as the possible weapons it may fit
  * Warning: type has a string inside... cannot be memcpy'd
  */
-    bool hasSubUnits() const
-    {
+    bool hasSubUnits() const {
         return !SubUnits.empty();
     };
     un_iter getSubUnits();
@@ -282,24 +281,23 @@ public:
     bool inertialmode = false;
     bool autopilotactive = false;
 
-    bool isSubUnit() const
-    {
+    bool isSubUnit() const {
         return graphicOptions.SubUnit ? true : false;
     }
 
     void setFaceCamera();
     bool UpAndDownGrade(const Unit *up,
-                        const Unit *templ,
-                        int mountoffset,
-                        int subunitoffset,
-                        bool touchme,
-                        bool downgrade,
-                        int additive,
-                        bool forcetransaction,
-                        double &percentage,
-                        const Unit *downgrade_min,
-                        bool force_change_on_nothing,
-                        bool gen_downgrade_list);
+            const Unit *templ,
+            int mountoffset,
+            int subunitoffset,
+            bool touchme,
+            bool downgrade,
+            int additive,
+            bool forcetransaction,
+            double &percentage,
+            const Unit *downgrade_min,
+            bool force_change_on_nothing,
+            bool gen_downgrade_list);
     void ImportPartList(const std::string &category, float price, float pricedev, float quantity, float quantdev);
 
     void ClearMounts();
@@ -308,44 +306,44 @@ public:
     virtual void UpgradeInterface(Unit *base);
 
     bool canUpgrade(const Unit *upgrador,
-                    int mountoffset,
-                    int subunitoffset,
-                    int additive,
-                    bool force,
-                    double &percentage,
-                    const Unit *templ = NULL,
-                    bool force_change_on_nothing = false,
-                    bool gen_downgrade_list = true);
+            int mountoffset,
+            int subunitoffset,
+            int additive,
+            bool force,
+            double &percentage,
+            const Unit *templ = NULL,
+            bool force_change_on_nothing = false,
+            bool gen_downgrade_list = true);
     bool Upgrade(const Unit *upgrador,
-                 int mountoffset,
-                 int subunitoffset,
-                 int additive,
-                 bool force,
-                 double &percentage,
-                 const Unit *templ = NULL,
-                 bool force_change_on_nothing = false,
-                 bool gen_downgrade_list = true);
+            int mountoffset,
+            int subunitoffset,
+            int additive,
+            bool force,
+            double &percentage,
+            const Unit *templ = NULL,
+            bool force_change_on_nothing = false,
+            bool gen_downgrade_list = true);
     int RepairCost();                            //returns how many things need to be repaired--if nothing is damaged it will return 1 for labor.  doesn't assume any given cost on such thigns.
     int RepairUpgrade();                 //returns how many things were repaired
 //returns percentOperational,maxPercentOperational,and whether mount is damaged (1 is damaged, 0 is fine, -1 is invalid mount)
     bool RepairUpgradeCargo(Cargo *item,
-                            Unit *baseUnit,
-                            float *credits);           //item must not be NULL but baseUnit/credits are only used for pricing.
+            Unit *baseUnit,
+            float *credits);           //item must not be NULL but baseUnit/credits are only used for pricing.
     Vector MountPercentOperational(int whichmount);
     bool ReduceToTemplate();
     double Upgrade(const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
     bool canDowngrade(const Unit *downgradeor,
-                      int mountoffset,
-                      int subunitoffset,
-                      double &percentage,
-                      const Unit *downgradelimit,
-                      bool gen_downgrade_list = true);
+            int mountoffset,
+            int subunitoffset,
+            double &percentage,
+            const Unit *downgradelimit,
+            bool gen_downgrade_list = true);
     bool Downgrade(const Unit *downgradeor,
-                   int mountoffset,
-                   int subunitoffset,
-                   double &percentage,
-                   const Unit *downgradelimit,
-                   bool gen_downgrade_list = true);
+            int mountoffset,
+            int subunitoffset,
+            double &percentage,
+            const Unit *downgradelimit,
+            bool gen_downgrade_list = true);
 
 protected:
 //Mount may access unit
@@ -367,23 +365,19 @@ private:
     unsigned char unit_role = ROLES::getRole("INERT");
 
 public:
-    unsigned char getAttackPreferenceChar()
-    {
+    unsigned char getAttackPreferenceChar() {
         return attack_preference;
     }
 
-    unsigned char getUnitRoleChar()
-    {
+    unsigned char getUnitRoleChar() {
         return unit_role;
     }
 
-    unsigned char getAttackPreferenceChar() const
-    {
+    unsigned char getAttackPreferenceChar() const {
         return attack_preference;
     }
 
-    unsigned char getUnitRoleChar() const
-    {
+    unsigned char getUnitRoleChar() const {
         return unit_role;
     }
 
@@ -412,8 +406,7 @@ public:
     void DamageRandSys(float dam, const Vector &vec, float randum = 1, float degrees = 1);
     void SetNebula(Nebula *);
 
-    inline Nebula *GetNebula() const
-    {
+    inline Nebula *GetNebula() const {
         return nebula;
     }
 
@@ -434,16 +427,15 @@ public:
 /* Updates the collide Queue with any possible change in sectors
  *  Split this mesh with into 2^level submeshes at arbitrary planes
  *  Uses Mesh so only in Unit and maybe in NetUnit */
-    virtual void Split(int level)
-    {
+    virtual void Split(int level) {
     }
 
     virtual void addHalo(const char *filename,
-                         const Matrix &trans,
-                         const Vector &size,
-                         const GFXColor &col,
-                         std::string halo_type,
-                         float activation);
+            const Matrix &trans,
+            const Vector &size,
+            const GFXColor &col,
+            std::string halo_type,
+            float activation);
 
 //Uses Mesh -> in NetUnit and Unit only
     std::vector<Mesh *> StealMeshes();
@@ -454,8 +446,7 @@ public:
 
 //Uses GFX so only in Unit class
     //virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
-    virtual std::string drawableGetName() override
-    {
+    virtual std::string drawableGetName() override {
         return name;
     }
 
@@ -477,8 +468,8 @@ public:
 
 public:
     bool TransferUnitToSystem(unsigned int whichJumpQueue,
-                              StarSystem *&previouslyActiveStarSystem,
-                              bool DoSightAndSound);
+            StarSystem *&previouslyActiveStarSystem,
+            bool DoSightAndSound);
 
     Computer computer;
     void SwitchCombatFlightMode();
@@ -487,13 +478,11 @@ public:
     Pilot *pilot;
     bool selected = false;
 
-    Computer &GetComputerData()
-    {
+    Computer &GetComputerData() {
         return computer;
     }
 
-    const Computer &ViewComputerData() const
-    {
+    const Computer &ViewComputerData() const {
         return computer;
     }
 
@@ -544,13 +533,13 @@ public:
 
     ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
     virtual void UpdatePhysics2(const Transformation &trans,
-                                const Transformation &old_physical_state,
-                                const Vector &accel,
-                                float difficulty,
-                                const Matrix &transmat,
-                                const Vector &CumulativeVelocity,
-                                bool ResolveLast,
-                                UnitCollection *uc = NULL);
+            const Transformation &old_physical_state,
+            const Vector &accel,
+            float difficulty,
+            const Matrix &transmat,
+            const Vector &CumulativeVelocity,
+            bool ResolveLast,
+            UnitCollection *uc = NULL);
 
     // Act out a unit's turn
     void ActTurn();
@@ -560,10 +549,10 @@ public:
 
     // TODO: move up to ship
     void UpdatePhysics3(const Transformation &trans,
-                        const Matrix &transmat,
-                        bool lastframe,
-                        UnitCollection *uc,
-                        Unit *superunit) override;
+            const Matrix &transmat,
+            bool lastframe,
+            UnitCollection *uc,
+            Unit *superunit) override;
     bool isPlayerShip() override;
 
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
@@ -589,8 +578,8 @@ public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
     float shieldtight = GameConfig::GetVariable("physics",
-                                                "default_shield_tightness",
-                                                0);
+            "default_shield_tightness",
+            0);
 
 public:
     // TODO: move cloak to Cloakable?
@@ -618,14 +607,12 @@ public:
 
 public:
 
-    Vector LocalCoordinates(const Unit *un) const
-    {
+    Vector LocalCoordinates(const Unit *un) const {
         return ToLocalCoordinates((un->Position() - Position()).Cast());
     }
 
 //how visible the ship is from 0 to 1
-    float CloakVisible() const
-    {
+    float CloakVisible() const {
         if (cloaking < 0) {
             return 1;
         }
@@ -638,13 +625,11 @@ public:
     void Kill(bool eraseFromSave = true, bool quitting = false);
 
 //Is dead yet?
-    inline bool Killed() const
-    {
+    inline bool Killed() const {
         return killed;
     }
 
-    bool IsExploding() const
-    {
+    bool IsExploding() const {
         return pImage->timeexplode > 0;
     }
 
@@ -655,36 +640,30 @@ public:
     Vector ResolveForces(const Transformation &, const Matrix &);
 
 //What's the size of this unit
-    float rSize() const
-    {
+    float rSize() const {
         return radial_size;
     }
 
 //Returns the current world space position
-    QVector Position() const
-    {
+    QVector Position() const {
         return cumulative_transformation.position;
     }
 
-    const Matrix &GetTransformation() const
-    {
+    const Matrix &GetTransformation() const {
         return cumulative_transformation_matrix;
     }
 
 //Returns the unit-space position
-    QVector LocalPosition() const
-    {
+    QVector LocalPosition() const {
         return curr_physical_state.position;
     }
 
     ///Sets the cumulative transformation matrix's position...for setting up to be out in the middle of nowhere
-    void SetCurPosition(const QVector &pos)
-    {
+    void SetCurPosition(const QVector &pos) {
         curr_physical_state.position = pos;
     }
 
-    void SetPosAndCumPos(const QVector &pos)
-    {
+    void SetPosAndCumPos(const QVector &pos) {
         SetPosition(pos);
         cumulative_transformation_matrix.p = pos;
         cumulative_transformation.position = pos;
@@ -719,10 +698,10 @@ public:
     void ApplyLocalTorque(const Vector &torque);
 //Applies damage to the local area given by pnt
     float ApplyLocalDamage(const Vector &pnt,
-                           const Vector &normal,
-                           Damage damage,
-                           Unit *affectedSubUnit,
-                           const GFXColor &);
+            const Vector &normal,
+            Damage damage,
+            Unit *affectedSubUnit,
+            const GFXColor &);
 //Applies damage from network data
     void ApplyNetDamage(Vector &pnt, Vector &normal, float amt, float ppercentage, float spercentage, GFXColor &color);
 
@@ -761,19 +740,19 @@ public:
 
 //Useful if you want to override subunit processing, but not self-processing (Asteroids, people?)
     virtual void UpdateSubunitPhysics(const Transformation &trans,
-                                      const Matrix &transmat,
-                                      const Vector &CumulativeVelocity,
-                                      bool ResolveLast,
-                                      UnitCollection *uc,
-                                      Unit *superunit);
+            const Matrix &transmat,
+            const Vector &CumulativeVelocity,
+            bool ResolveLast,
+            UnitCollection *uc,
+            Unit *superunit);
 //A helper for those who override UpdateSubunitPhysics - Process one subunit (also, an easier way of overriding subunit processing uniformly)
     virtual void UpdateSubunitPhysics(Unit *subunit,
-                                      const Transformation &trans,
-                                      const Matrix &transmat,
-                                      const Vector &CumulativeVelocity,
-                                      bool ResolveLast,
-                                      UnitCollection *uc,
-                                      Unit *superunit);
+            const Transformation &trans,
+            const Matrix &transmat,
+            const Vector &CumulativeVelocity,
+            bool ResolveLast,
+            UnitCollection *uc,
+            Unit *superunit);
 
 
 
@@ -801,8 +780,7 @@ public:
 //not used yet
     StringPool::Reference target_fgid[3];
 
-    bool InRange(const Unit *target, bool cone = true, bool cap = true) const
-    {
+    bool InRange(const Unit *target, bool cone = true, bool cap = true) const {
         double mm;
         return InRange(target, mm, cone, cap, true);
     }
@@ -820,18 +798,17 @@ public:
     void Threaten(Unit *targ, float danger);
 
 //Rekeys the threat level to zero for another turn of impending danger
-    void ResetThreatLevel()
-    {
+    void ResetThreatLevel() {
         computer.threatlevel = 0;
         graphicOptions.missilelock = 0;
     }
 
 //The cosine of the angle to the target given passed in speed and range
     float cosAngleTo(Unit *target,
-                     float &distance,
-                     float speed = 0.001,
-                     float range = 0.001,
-                     bool turnmargin = true) const;
+            float &distance,
+            float speed = 0.001,
+            float range = 0.001,
+            bool turnmargin = true) const;
 //Highest cosine from given mounts to target. Returns distance and cosine
     float cosAngleFromMountTo(Unit *target, float &distance) const;
 //how locked are we
@@ -904,12 +881,12 @@ public:
     bool querySphereClickList(int, int, float err, Camera *activeCam) const;
 
     bool InsideCollideTree(Unit *smaller,
-                           QVector &bigpos,
-                           Vector &bigNormal,
-                           QVector &smallpos,
-                           Vector &smallNormal,
-                           bool bigasteroid = false,
-                           bool smallasteroid = false);
+            QVector &bigpos,
+            Vector &bigNormal,
+            QVector &smallpos,
+            Vector &smallNormal,
+            bool bigasteroid = false,
+            bool smallasteroid = false);
 //    virtual void reactToCollision( Unit *smaller,
 //                                   const QVector &biglocation,
 //                                   const Vector &bignormal,
@@ -940,8 +917,7 @@ public:
     void FreeDockingPort(unsigned int whichport);
     const std::vector<struct DockingPorts> &DockingPortLocations() const;
 
-    char DockedOrDocking() const
-    {
+    char DockedOrDocking() const {
         return docked;
     }
 
@@ -975,14 +951,12 @@ public:
     void SetFaction(int faction);
 
 //get the flightgroup description
-    Flightgroup *getFlightgroup() const
-    {
+    Flightgroup *getFlightgroup() const {
         return flightgroup;
     }
 
 //get the subnumber
-    int getFgSubnumber() const
-    {
+    int getFgSubnumber() const {
         return flightgroup_subnumber;
     }
 
@@ -1013,24 +987,20 @@ protected:
 //if the unit is a planet, this contains the long-name 'mars-station'
     std::string fullname;
 public:
-    void setFullname(std::string name)
-    {
+    void setFullname(std::string name) {
         fullname = name;
     }
 
-    const string &getFullname() const
-    {
+    const string &getFullname() const {
         return fullname;
     }
 
-    const string &getFilename() const
-    {
+    const string &getFilename() const {
         return filename.get();
     }
 
 //Is this class a unit
-    virtual enum _UnitType isUnit() const
-    {
+    virtual enum _UnitType isUnit() const {
         return _UnitType::unit;
     }
 
@@ -1043,18 +1013,15 @@ public:
     UnitImages<void> &GetImageInformation();
 
 //sets the full name/fgid for planets
-    bool isStarShip() const
-    {
+    bool isStarShip() const {
         return isUnit() == _UnitType::unit;
     }
 
-    bool isPlanet() const
-    {
+    bool isPlanet() const {
         return isUnit() == _UnitType::planet;
     }
 
-    bool isJumppoint() const
-    {
+    bool isJumppoint() const {
         return GetDestinations().size() != 0;
     }
 
@@ -1100,8 +1067,7 @@ struct Unit::XML {
     bool calculated_role;
 };
 
-inline Unit *UnitContainer::GetUnit()
-{
+inline Unit *UnitContainer::GetUnit() {
     if (unit != NULL) {
 #ifdef CONTAINER_DEBUG
         CheckUnit( unit );

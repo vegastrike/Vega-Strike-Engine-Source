@@ -28,16 +28,14 @@ struct global_settings CONFIG;
 static char EMPTY_STR[] = "";
 
 // Primary initialization function. Sets everything up and takes care of the program
-void Start(int *argc, char ***argv)
-{
+void Start(int *argc, char ***argv) {
     LoadMainConfig();
     InitGraphics(argc, argv);
     LoadConfig();
     ShowMain();
 }
 
-void SetGroup(char *group, char *setting)
-{
+void SetGroup(char *group, char *setting) {
     struct group *CURRENT;
     CURRENT = &GROUPS;
     do {
@@ -51,8 +49,7 @@ void SetGroup(char *group, char *setting)
     } while ((CURRENT = CURRENT->next) != nullptr);
 }
 
-void SetInfo(char *catagory, char *info)
-{
+void SetInfo(char *catagory, char *info) {
     struct catagory *CURRENT;
     CURRENT = &CATS;
     do {
@@ -66,8 +63,7 @@ void SetInfo(char *catagory, char *info)
     } while ((CURRENT = CURRENT->next) != nullptr);
 }
 
-char *GetInfo(char *catagory)
-{
+char *GetInfo(char *catagory) {
     struct catagory *CURRENT;
     CURRENT = &CATS;
     do {
@@ -85,8 +81,7 @@ char *GetInfo(char *catagory)
     return catagory;
 }
 
-char *GetSetting(char *group)
-{
+char *GetSetting(char *group) {
     struct group *CUR;
     CUR = &GROUPS;
     do {
@@ -100,8 +95,7 @@ char *GetSetting(char *group)
     return EMPTY_STR;
 }
 
-struct catagory *GetCatStruct(char *name)
-{
+struct catagory *GetCatStruct(char *name) {
     struct catagory *CUR;
     CUR = &CATS;
     do {
@@ -115,8 +109,7 @@ struct catagory *GetCatStruct(char *name)
     return 0;
 }
 
-struct group *GetGroupStruct(char *name)
-{
+struct group *GetGroupStruct(char *name) {
     struct group *CUR;
     CUR = &GROUPS;
     do {
@@ -130,8 +123,7 @@ struct group *GetGroupStruct(char *name)
     return 0;
 }
 
-struct catagory *GetNameFromInfo(char *info)
-{
+struct catagory *GetNameFromInfo(char *info) {
     struct catagory *CUR;
     CUR = &CATS;
     do {

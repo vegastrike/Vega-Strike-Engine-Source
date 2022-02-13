@@ -48,8 +48,7 @@ double saved_interpolation_blend_factor;
 double interpolation_blend_factor;
 bool cam_setup_phase = false;
 
-int cloakVal(int cloak, int cloakmin, int cloakrate, bool cloakglass)
-{
+int cloakVal(int cloak, int cloakmin, int cloakrate, bool cloakglass) {
     //Short fix ?
     if (cloak < 0 && cloakrate < 0) {
         cloak = -2147483647 - 1;
@@ -66,27 +65,25 @@ int cloakVal(int cloak, int cloakmin, int cloakrate, bool cloakglass)
     return cloak;
 }
 
-const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0)
-{
+const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0) {
     const char *name = upgradeName.c_str();
     const Unit *partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetUpgradeFaction()));
     if (!partUnit) {
         partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
-                                                               FactionUtil::GetUpgradeFaction()),
-                                                  new Unit(name, true, FactionUtil::GetUpgradeFaction()));
+                        FactionUtil::GetUpgradeFaction()),
+                new Unit(name, true, FactionUtil::GetUpgradeFaction()));
     }
     if (partUnit->name == "LOAD_FAILED") {
         partUnit = UnitConstCache::getCachedConst(StringIntKey(name, myUnitFaction));
         if (!partUnit) {
             partUnit = UnitConstCache::setCachedConst(StringIntKey(name, myUnitFaction),
-                                                      new Unit(name, true, myUnitFaction));
+                    new Unit(name, true, myUnitFaction));
         }
     }
     return partUnit;
 }
 
-int SelectDockPort(Unit *utdw, Unit *parent)
-{
+int SelectDockPort(Unit *utdw, Unit *parent) {
     const vector<DockingPorts> *dp = &utdw->DockingPortLocations();
     float dist = FLT_MAX;
     int num = -1;
@@ -104,14 +101,12 @@ int SelectDockPort(Unit *utdw, Unit *parent)
 }
 
 //From unit_customize.cpp
-Unit *CreateGameTurret(std::string tur, int faction)
-{
+Unit *CreateGameTurret(std::string tur, int faction) {
     return new Unit(tur.c_str(), true, faction);
 }
 
 //un scored a faction kill
-void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit)
-{
+void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
     if (un->isUnit() != _UnitType::unit || killedUnit->isUnit() != _UnitType::unit) {
         return;
     }
@@ -173,8 +168,7 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit)
 //From unit_physics.cpp
 
 
-float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false)
-{
+float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false) {
     static float gamespeed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
 
     static float friendly_autodist =
@@ -214,8 +208,7 @@ float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false)
 }
 
 //From unit_weapon.cpp
-bool AdjustMatrix(Matrix &mat, const Vector &vel, Unit *target, float speed, bool lead, float cone)
-{
+bool AdjustMatrix(Matrix &mat, const Vector &vel, Unit *target, float speed, bool lead, float cone) {
     if (target) {
         QVector pos(mat.p);
         Vector R(mat.getR());
@@ -238,25 +231,24 @@ bool AdjustMatrix(Matrix &mat, const Vector &vel, Unit *target, float speed, boo
 }
 
 // TODO: delete
-int parseMountSizes(const char *str)
-{
+int parseMountSizes(const char *str) {
     char tmp[13][50];
     int ans = as_integer(MOUNT_SIZE::NOWEAP);
     int num = sscanf(str,
-                     "%s %s %s %s %s %s %s %s %s %s %s %s %s",
-                     tmp[0],
-                     tmp[1],
-                     tmp[2],
-                     tmp[3],
-                     tmp[4],
-                     tmp[5],
-                     tmp[6],
-                     tmp[7],
-                     tmp[8],
-                     tmp[9],
-                     tmp[10],
-                     tmp[11],
-                     tmp[12]);
+            "%s %s %s %s %s %s %s %s %s %s %s %s %s",
+            tmp[0],
+            tmp[1],
+            tmp[2],
+            tmp[3],
+            tmp[4],
+            tmp[5],
+            tmp[6],
+            tmp[7],
+            tmp[8],
+            tmp[9],
+            tmp[10],
+            tmp[11],
+            tmp[12]);
     for (int i = 0; i < num && i < 13; i++) {
         ans |= as_integer(getMountSize(tmp[i]));
     }
@@ -267,8 +259,7 @@ int parseMountSizes(const char *str)
     return ans;
 }
 
-void DealPossibleJumpDamage(Unit *un)
-{
+void DealPossibleJumpDamage(Unit *un) {
 
     float speed = un->GetVelocity().Magnitude();
     float jump_damage = un->GetJumpStatus().damage + (rand() % 100 < 1) ? (rand() % 20) : 0;
@@ -282,19 +273,18 @@ void DealPossibleJumpDamage(Unit *un)
         Damage damage;
         damage.normal_damage = jump_damage;
         un->ApplyDamage((un->Position() + un->GetVelocity().Cast()),
-                        un->GetVelocity(),
-                        damage,
-                        un,
-                        GFXColor(((float) (rand() % 100)) / 100,
-                                 ((float) (rand() % 100)) / 100,
-                                 ((float) (rand() % 100)) / 100), NULL);
+                un->GetVelocity(),
+                damage,
+                un,
+                GFXColor(((float) (rand() % 100)) / 100,
+                        ((float) (rand() % 100)) / 100,
+                        ((float) (rand() % 100)) / 100), NULL);
         un->SetCurPosition(
                 un->LocalPosition() + (((float) rand()) / RAND_MAX) * jump_damage * un->GetVelocity().Cast());
     }
 }
 
-void Enslave(Unit *parent, bool enslave)
-{
+void Enslave(Unit *parent, bool enslave) {
     unsigned int i;
     vector<Cargo> ToBeChanged;
     unsigned int numcargo = parent->numCargo();

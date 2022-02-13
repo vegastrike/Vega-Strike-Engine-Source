@@ -31,10 +31,9 @@
 #include "mount_size.h"
 
 DamageableLayer::DamageableLayer(int layer_index,
-                                 FacetConfiguration configuration,
-                                 Health health_template,
-                                 bool core_layer)
-{
+        FacetConfiguration configuration,
+        Health health_template,
+        bool core_layer) {
     health_template.layer = layer_index;
     int size = as_integer(configuration);
 
@@ -51,11 +50,10 @@ DamageableLayer::DamageableLayer(int layer_index,
 }
 
 DamageableLayer::DamageableLayer(int layer_index,
-                                 FacetConfiguration configuration,
-                                 float health_array[],
-                                 float regeneration,
-                                 bool core_layer)
-{
+        FacetConfiguration configuration,
+        float health_array[],
+        float regeneration,
+        bool core_layer) {
 
     int size = as_integer(configuration);
 
@@ -76,19 +74,16 @@ DamageableLayer::DamageableLayer(int layer_index, int number_of_facets, std::vec
         layer_index(layer_index),
         number_of_facets(number_of_facets),
         facets(facets),
-        core_layer(core_layer)
-{
+        core_layer(core_layer) {
 }
 
 DamageableLayer::DamageableLayer() :
         layer_index(0),
         number_of_facets(0),
-        core_layer(false)
-{
+        core_layer(false) {
 }
 
-void DamageableLayer::AdjustPower(const float &percent)
-{
+void DamageableLayer::AdjustPower(const float &percent) {
     float adjusted_percent = std::max(std::min(percent, 1.0f), 0.0f);
 
     for (Health &facet : facets) {
@@ -96,8 +91,7 @@ void DamageableLayer::AdjustPower(const float &percent)
     }
 }
 
-void DamageableLayer::DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage)
-{
+void DamageableLayer::DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage) {
     if (number_of_facets == 0) {
         return;
     }
@@ -106,22 +100,19 @@ void DamageableLayer::DealDamage(const CoreVector &attack_vector, Damage &damage
     facets[impacted_facet_index].DealDamage(damage, inflicted_damage);
 }
 
-void DamageableLayer::Destroy()
-{
+void DamageableLayer::Destroy() {
     for (Health &facet : facets) {
         facet.Destroy();
     }
 }
 
-void DamageableLayer::Disable()
-{
+void DamageableLayer::Disable() {
     for (Health &facet : facets) {
         facet.Disable();
     }
 }
 
-void DamageableLayer::Discharge(float discharge_rate, float minimum_discharge)
-{
+void DamageableLayer::Discharge(float discharge_rate, float minimum_discharge) {
     for (Health &facet : facets) {
         if (facet.health > minimum_discharge * facet.max_health) {
             facet.health *= discharge_rate;
@@ -130,22 +121,19 @@ void DamageableLayer::Discharge(float discharge_rate, float minimum_discharge)
 }
 
 // Used for nicer graphics when entering SPEC
-void DamageableLayer::GradualDisable()
-{
+void DamageableLayer::GradualDisable() {
     for (Health &facet : facets) {
         facet.ReduceLayerMaximumByOne();
     }
 }
 
-void DamageableLayer::Enable()
-{
+void DamageableLayer::Enable() {
     for (Health &facet : facets) {
         facet.Enable();
     }
 }
 
-bool DamageableLayer::Enabled()
-{
+bool DamageableLayer::Enabled() {
     if (number_of_facets == 0) {
         return false;
     }
@@ -155,16 +143,14 @@ bool DamageableLayer::Enabled()
 
 // TODO: test
 // Boost shields to 150%
-void DamageableLayer::Enhance()
-{
+void DamageableLayer::Enhance() {
     for (Health &facet : facets) {
         // Don't enhance armor and hull
         facet.Enhance();
     }
 }
 
-int DamageableLayer::GetFacetIndex(const CoreVector &attack_vector)
-{
+int DamageableLayer::GetFacetIndex(const CoreVector &attack_vector) {
     if (number_of_facets == 0) {
         return -1;
     }
@@ -238,8 +224,7 @@ int DamageableLayer::GetFacetIndex(const CoreVector &attack_vector)
  * model. There are too many models for damaging components and we have to settle
  * for one. */
 void DamageableLayer::ReduceLayerCapability(const float &percent,
-                                            const float &chance_to_reduce_regeneration)
-{
+        const float &chance_to_reduce_regeneration) {
     if (number_of_facets == 0) {
         return;
     }
@@ -263,8 +248,7 @@ void DamageableLayer::ReduceLayerCapability(const float &percent,
     }
 }
 
-float DamageableLayer::TotalLayerValue()
-{
+float DamageableLayer::TotalLayerValue() {
     float total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.health;
@@ -272,8 +256,7 @@ float DamageableLayer::TotalLayerValue()
     return total_value;
 }
 
-float DamageableLayer::TotalMaxLayerValue()
-{
+float DamageableLayer::TotalMaxLayerValue() {
     float total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.max_health;
@@ -281,8 +264,7 @@ float DamageableLayer::TotalMaxLayerValue()
     return total_value;
 }
 
-float DamageableLayer::AverageLayerValue()
-{
+float DamageableLayer::AverageLayerValue() {
     float total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.health;
@@ -290,8 +272,7 @@ float DamageableLayer::AverageLayerValue()
     return total_value / facets.size();
 }
 
-float DamageableLayer::AverageMaxLayerValue()
-{
+float DamageableLayer::AverageMaxLayerValue() {
     float total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.max_health;
@@ -299,8 +280,7 @@ float DamageableLayer::AverageMaxLayerValue()
     return total_value / facets.size();
 }
 
-float CalculatePercentage(float numerator, float denominator)
-{
+float CalculatePercentage(float numerator, float denominator) {
     return numerator / denominator;
 
     // All these checks potentially slow down the game
@@ -328,8 +308,7 @@ float CalculatePercentage(float numerator, float denominator)
     return percent;*/
 }
 
-float DamageableLayer::GetMaxHealth()
-{
+float DamageableLayer::GetMaxHealth() {
     if (number_of_facets == 0) {
         return 0.0f;
     }
@@ -337,8 +316,7 @@ float DamageableLayer::GetMaxHealth()
     return facets[0].max_health;
 }
 
-float DamageableLayer::GetPercent(FacetName facet_name)
-{
+float DamageableLayer::GetPercent(FacetName facet_name) {
     if (number_of_facets == 0) {
         return 0.0f;
     }
@@ -365,9 +343,9 @@ float DamageableLayer::GetPercent(FacetName facet_name)
 
     // Indices of facets for shield configuration eight
     static const int indices_array[4][4] = {{0, 2, 4, 6},    // left
-                                            {1, 3, 5, 7},    // right
-                                            {0, 1, 4, 5},    // front
-                                            {2, 3, 6, 7}};   // rear
+            {1, 3, 5, 7},    // right
+            {0, 1, 4, 5},    // front
+            {2, 3, 6, 7}};   // rear
 
     int indices_index; // An index to the top array dimension
 
@@ -403,22 +381,19 @@ float DamageableLayer::GetPercent(FacetName facet_name)
     return percent;
 }
 
-void DamageableLayer::Regenerate(float recharge_rate)
-{
+void DamageableLayer::Regenerate(float recharge_rate) {
     for (Health &facet : facets) {
         facet.Regenerate(recharge_rate);
     }
 }
 
-void DamageableLayer::RegenerateOrDischarge(float recharge_rate, bool velocity_discharge, float discharge_rate)
-{
+void DamageableLayer::RegenerateOrDischarge(float recharge_rate, bool velocity_discharge, float discharge_rate) {
     for (Health &facet : facets) {
         facet.Regenerate(recharge_rate);
     }
 }
 
-float DamageableLayer::GetRegeneration()
-{
+float DamageableLayer::GetRegeneration() {
     if (number_of_facets == 0) {
         return 0.0f;
     }
@@ -426,8 +401,7 @@ float DamageableLayer::GetRegeneration()
     return facets[0].regeneration;
 }
 
-void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_facets[4])
-{
+void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_facets[4]) {
     assert(new_size == number_of_facets);
 
     switch (number_of_facets) {
@@ -450,8 +424,7 @@ void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_
     }
 }
 
-void DamageableLayer::UpdateRegeneration(const float &new_regeneration_value)
-{
+void DamageableLayer::UpdateRegeneration(const float &new_regeneration_value) {
     for (Health &facet : facets) {
         facet.regeneration = new_regeneration_value;
         facet.max_regeneration = new_regeneration_value;

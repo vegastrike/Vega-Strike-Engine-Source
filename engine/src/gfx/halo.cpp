@@ -38,8 +38,7 @@
 static DecalQueue halodecal;
 static vector<GFXQuadList *> halodrawqueue;
 
-Halo::Halo(const char *texture, const GFXColor &col, const QVector &pos, float sizx, float sizy)
-{
+Halo::Halo(const char *texture, const GFXColor &col, const QVector &pos, float sizx, float sizy) {
     string texname(texture);
     position = pos;
     sizex = sizx;
@@ -57,15 +56,13 @@ Halo::Halo(const char *texture, const GFXColor &col, const QVector &pos, float s
     quadnum = halodrawqueue[decal]->AddQuad(NULL, coltmp);
 }
 
-Halo::~Halo()
-{
+Halo::~Halo() {
     halodrawqueue[decal]->DelQuad(quadnum);
     delete halodrawqueue[decal];         //deletes the quad
     halodrawqueue[decal] = NULL;
 }
 
-void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha)
-{
+void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
     Vector p, q, r;
     QVector pos;
     static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable("graphics", "HaloOffset", ".1"));
@@ -74,7 +71,7 @@ void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha)
     float hei = sizey;
     static bool far_shine =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_star_glow_halo",
-                                                          "false")) || XMLSupport::parse_bool(
+                    "false")) || XMLSupport::parse_bool(
                     vs_config->getVariable("graphics", "HaloFarDraw", "false"));
     CalculateOrientation(pos, p, q, r, wid, hei, HaloOffset, far_shine, NULL);
     p = p * wid;
@@ -90,8 +87,7 @@ void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha)
     halodrawqueue[decal]->ModQuad(quadnum, tmp, alpha);
 }
 
-void Halo::SetColor(const GFXColor &col)
-{
+void Halo::SetColor(const GFXColor &col) {
     GFXColorVertex coltmp[4];
     coltmp[0].SetColor(col);
     coltmp[1].SetColor(col);
@@ -101,8 +97,7 @@ void Halo::SetColor(const GFXColor &col)
     halodrawqueue[decal]->ModQuad(quadnum, coltmp);
 }
 
-void Halo::ProcessDrawQueue()
-{
+void Halo::ProcessDrawQueue() {
     GFXDisable(LIGHTING);
     GFXDisable(DEPTHWRITE);
     GFXPushBlendMode();

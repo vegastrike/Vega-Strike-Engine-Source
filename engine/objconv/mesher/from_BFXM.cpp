@@ -30,8 +30,12 @@ string inverseblend[16] = {
         "CONSTCOLOR", "INVCONSTCOLOR"
 };
 
-void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *mtl, std::string meshname, char hackfix)
-{
+void BFXMToXmeshOrOBJ(FILE *Inputfile,
+        FILE *Outputfile,
+        FILE *OutputObj,
+        FILE *mtl,
+        std::string meshname,
+        char hackfix) {
     float transx = (float) atof(Converter::getNamedOption("addx").c_str());
     float transy = (float) atof(Converter::getNamedOption("addy").c_str());
     float transz = (float) atof(Converter::getNamedOption("addz").c_str());
@@ -103,8 +107,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
         exit(-1);
     }
     rewind(Inputfile);
-    if (fread(inmemfile, 1, Inputlength, Inputfile) != Inputlength)
+    if (fread(inmemfile, 1, Inputlength, Inputfile) != Inputlength) {
         exit(-1);
+    }
     fclose(Inputfile);
     //Extract superheader fields
     word32index += 1;
@@ -123,8 +128,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             + 6].i32val);     //Number of fields per animationdef: integer (1)
     word32index = (Superheaderlength / 4);       //Go to first record
     //For each record
-    if (!isxmesh)
+    if (!isxmesh) {
         fprintf(OutputObj, "mtllib %s.mtl\n", meshname.c_str());
+    }
     int vtxcount = 1;
     int texcount = 1;
     int normcount = 1;
@@ -150,11 +156,13 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             normoffset = normcount;
             if (recordindex > 0 || meshindex > 0) {
                 char filenamebuf[56];             //Is more than enough characters - int can't be this big in decimal
-                if (sprintf(filenamebuf, "%d_%d.xmesh", recordindex, meshindex) < 0)
+                if (sprintf(filenamebuf, "%d_%d.xmesh", recordindex, meshindex) < 0) {
                     exit(-1);
+                }
                 string filename = string(filenamebuf);
-                if (isxmesh)
+                if (isxmesh) {
                     Outputfile = fopen(filename.c_str(), "w+");
+                }
             }
             //Extract Mesh Header
             uint32bit meshbeginword = word32index;
@@ -203,9 +211,10 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             uint32bit usenormals =
                     (VSSwapHostIntToLittle(inmemfile[meshbeginword + 29].i32val) != 0) ? 1 : 0;             //usenormals
             float32bit alphatest = 0;
-            if (meshheaderlength > 30 * 4)
+            if (meshheaderlength > 30 * 4) {
                 alphatest = VSSwapHostFloatToLittle(inmemfile[meshbeginword
-                        + 30].f32val);                  //Alpha Testing Values
+                        + 30].f32val);
+            }                  //Alpha Testing Values
 
             //End Header
             //Go to Arbitrary Length Attributes section
@@ -881,8 +890,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
     }
 }
 
-void BFXMtoBoxDims(FILE *Inputfile, const char *name)
-{
+void BFXMtoBoxDims(FILE *Inputfile, const char *name) {
     uint32bit intbuf;
     uchar8bit bytebuf;
     uint32bit word32index = 0;
@@ -941,8 +949,9 @@ void BFXMtoBoxDims(FILE *Inputfile, const char *name)
         exit(-1);
     }
     rewind(Inputfile);
-    if (fread(inmemfile, 1, Inputlength, Inputfile) != Inputlength)
+    if (fread(inmemfile, 1, Inputlength, Inputfile) != Inputlength) {
         exit(-1);
+    }
     fclose(Inputfile);
     //Extract superheader fields
     word32index += 1;
@@ -974,8 +983,9 @@ void BFXMtoBoxDims(FILE *Inputfile, const char *name)
         for (uint32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
             if (recordindex > 0 || meshindex > 0) {
                 char filenamebuf[56];             //Is more than enough characters - int can't be this big in decimal
-                if (sprintf(filenamebuf, "%d_%d.xmesh", recordindex, meshindex) < 0)
+                if (sprintf(filenamebuf, "%d_%d.xmesh", recordindex, meshindex) < 0) {
                     exit(-1);
+                }
                 string filename = string(filenamebuf);
             }
             //Extract Mesh Header
@@ -1001,9 +1011,11 @@ void BFXMtoBoxDims(FILE *Inputfile, const char *name)
             uint32bit stringindex = 0;
             uint32bit namebound = (detailtexturenamelen + 3) / 4;
             for (stringindex = 0; stringindex < namebound; stringindex++) {
-                for (uint32bit bytenum = 0; bytenum < 4; bytenum++)                  //Extract chars
-                    if (inmemfile[word32index].c8val[bytenum])                      //If not padding
+                for (uint32bit bytenum = 0; bytenum < 4; bytenum++) {                  //Extract chars
+                    if (inmemfile[word32index].c8val[bytenum]) {                      //If not padding
                         detailtexturename += inmemfile[word32index].c8val[bytenum];
+                    }
+                }
                 //Append char to end of string
                 word32index += 1;
             }
@@ -1033,9 +1045,11 @@ void BFXMtoBoxDims(FILE *Inputfile, const char *name)
                 string texname = "";
                 uint32bit namebound = (texnamelen + 3) / 4;
                 for (stringindex = 0; stringindex < namebound; stringindex++) {
-                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++)                      //Extract chars
-                        if (inmemfile[word32index].c8val[bytenum])                          //If not padding
+                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++) {                      //Extract chars
+                        if (inmemfile[word32index].c8val[bytenum]) {                          //If not padding
                             texname += inmemfile[word32index].c8val[bytenum];
+                        }
+                    }
                     //Append char to end of string
                     word32index += 1;
                 }
@@ -1064,9 +1078,10 @@ void BFXMtoBoxDims(FILE *Inputfile, const char *name)
             uint32bit numanimdefs =
                     VSSwapHostIntToLittle(inmemfile[word32index].i32val);             //number of animation definitions
             word32index += 1;
-            if (meshindex == 0)
+            if (meshindex == 0) {
                 for (uint32bit framecount = numLODs + 1; framecount < nummeshes; framecount++) {
                 }
+            }
             for (uint32bit anim = 0; anim < numanimdefs; anim++) {
                 uint32bit animnamelen =
                         VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //length of name
@@ -1074,9 +1089,11 @@ void BFXMtoBoxDims(FILE *Inputfile, const char *name)
                 string animname = "";
                 uint32bit namebound = (animnamelen + 3) / 4;
                 for (stringindex = 0; stringindex < namebound; stringindex++) {
-                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++)                      //Extract chars
-                        if (inmemfile[word32index].c8val[bytenum])                          //If not padding
+                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++) {                      //Extract chars
+                        if (inmemfile[word32index].c8val[bytenum]) {                          //If not padding
                             animname += inmemfile[word32index].c8val[bytenum];
+                        }
+                    }
                     //Append char to end of string
                     word32index += 1;
                 }

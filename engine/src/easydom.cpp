@@ -29,12 +29,10 @@
 
 #include <assert.h>     /// needed for assert() calls.
 
-easyDomNode::easyDomNode()
-{
+easyDomNode::easyDomNode() {
 }
 
-void easyDomNode::set(easyDomNode *_parent, std::string _name, const XML_Char **atts)
-{
+void easyDomNode::set(easyDomNode *_parent, std::string _name, const XML_Char **atts) {
     parent = _parent;
     if (atts != nullptr) {
         for (; *atts != nullptr; atts += 2) {
@@ -48,18 +46,15 @@ void easyDomNode::set(easyDomNode *_parent, std::string _name, const XML_Char **
     name = _name;
 }
 
-void easyDomNode::addChild(easyDomNode *child)
-{
+void easyDomNode::addChild(easyDomNode *child) {
     subnodes.push_back(child);
 }
 
-std::string easyDomNode::attr_value(std::string search_name)
-{
+std::string easyDomNode::attr_value(std::string search_name) {
     return attribute_map[search_name];
 }
 
-void easyDomNode::printNode(std::ostream &out, int recurse_level, int level)
-{
+void easyDomNode::printNode(std::ostream &out, int recurse_level, int level) {
     vsUMap<std::string, std::string>::const_iterator iter;
 
     out << "<" << name;

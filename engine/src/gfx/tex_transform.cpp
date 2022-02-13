@@ -30,8 +30,11 @@
 #include <string.h>
 #include <png.h>
 
-unsigned char *texTransform(int &bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char **rp)
-{
+unsigned char *texTransform(int &bpp,
+        int &color_type,
+        unsigned long &width,
+        unsigned long &height,
+        unsigned char **rp) {
     unsigned char *data;
     unsigned int row_size;
     assert(bpp == 8);
@@ -48,11 +51,10 @@ unsigned char *texTransform(int &bpp, int &color_type, unsigned long &width, uns
 }
 
 unsigned char *heightmapTransform(int &bpp,
-                                  int &color_type,
-                                  unsigned long &width,
-                                  unsigned long &height,
-                                  unsigned char **row_pointers)
-{
+        int &color_type,
+        unsigned long &width,
+        unsigned long &height,
+        unsigned char **row_pointers) {
     unsigned short *dat = (unsigned short *) malloc(sizeof(unsigned short) * width * height);
     if ((bpp == 8 && color_type
             == PNG_COLOR_TYPE_RGB_ALPHA) || color_type == PNG_COLOR_TYPE_GRAY
@@ -105,11 +107,10 @@ unsigned char *heightmapTransform(int &bpp,
 }
 
 unsigned char *terrainTransform(int &bpp,
-                                int &color_type,
-                                unsigned long &width,
-                                unsigned long &height,
-                                unsigned char **row_pointers)
-{
+        int &color_type,
+        unsigned long &width,
+        unsigned long &height,
+        unsigned char **row_pointers) {
     unsigned char *dat = (unsigned char *) malloc(sizeof(unsigned char) * width * height);
     if ((bpp == 8 && color_type
             == PNG_COLOR_TYPE_RGB_ALPHA) || color_type == PNG_COLOR_TYPE_GRAY

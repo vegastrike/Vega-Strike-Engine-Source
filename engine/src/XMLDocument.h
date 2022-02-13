@@ -107,8 +107,7 @@ protected:
 
 public:
     /** Returns the type of element - only a few types have been defined, nowhere near true DOM types */
-    Type type() const
-    {
+    Type type() const {
         return mType;
     }
 
@@ -116,32 +115,27 @@ public:
     void setType(Type newType);
 
     /** Returns the tag name of this XET_TAG element - otherwise... undefined */
-    const std::string &tagName() const
-    {
+    const std::string &tagName() const {
         return mTagName;
     }
 
     /** Returns the element containing this element, if any - NULL otherwise */
-    const XMLElement *getParent() const
-    {
+    const XMLElement *getParent() const {
         return mParent;
     }
 
     /** Returns the element containing this element, if any - NULL otherwise */
-    XMLElement *getParent()
-    {
+    XMLElement *getParent() {
         return mParent;
     }
 
     /** Returns the element containing this element, if any - NULL otherwise */
-    const XMLDocument *getDocument() const
-    {
+    const XMLDocument *getDocument() const {
         return mDocument;
     }
 
     /** Returns the element containing this element, if any - NULL otherwise */
-    XMLDocument *getDocument()
-    {
+    XMLDocument *getDocument() {
         return mDocument;
     }
 
@@ -171,20 +165,17 @@ public:
     void appendContents(const std::string &cont);
 
     /** Returns the number of children this element has attached */
-    unsigned int numChildren() const
-    {
+    unsigned int numChildren() const {
         return mChildren.size();
     }
 
     /** Returns a read-only pointer to the specified children, or NULL if idx is out of range */
-    const XMLElement *getChild(unsigned int idx) const
-    {
+    const XMLElement *getChild(unsigned int idx) const {
         return (idx < mChildren.size()) ? mChildren[idx] : 0;
     }
 
     /** Returns a pointer to the specified children, or NULL if idx is out of range */
-    XMLElement *getChild(unsigned int idx)
-    {
+    XMLElement *getChild(unsigned int idx) {
         return (idx < mChildren.size()) ? mChildren[idx] : 0;
     }
 
@@ -201,15 +192,13 @@ public:
     XMLElement *getChildByName(const std::string &name);
 
     /** Returns the "id" attribute's value - much quicker than getAttribute() */
-    const std::string &getId() const
-    {
+    const std::string &getId() const {
         static std::string empty;
         return (mIdAttribute == mAttributes.end()) ? empty : mIdAttribute->second;
     }
 
     /** Returns the "name" attribute's value - much quicker than getAttribute() */
-    const std::string &getName() const
-    {
+    const std::string &getName() const {
         static std::string empty;
         return (mNameAttribute == mAttributes.end()) ? empty : mNameAttribute->second;
     }
@@ -260,14 +249,12 @@ public:
     void removeChild(const XMLElement *which);
 
     /** @copydoc removeChild */
-    void removeChildById(const std::string &id)
-    {
+    void removeChildById(const std::string &id) {
         removeChild(getChildById(id));
     }
 
     /** @copydoc removeChild */
-    void removeChildByName(const std::string &name)
-    {
+    void removeChildByName(const std::string &name) {
         removeChild(getChildByName(name));
     }
 
@@ -275,14 +262,12 @@ public:
     void clear(bool doAttributes = true);
 
     /** Get an iterator pointing to the specified attribute */
-    const_attribute_iterator getAttribute(const std::string &name) const
-    {
+    const_attribute_iterator getAttribute(const std::string &name) const {
         return mAttributes.find(name);
     }
 
     /** Get an iterator pointing to the specified attribute */
-    attribute_iterator getAttribute(const std::string &name)
-    {
+    attribute_iterator getAttribute(const std::string &name) {
         return mAttributes.find(name);
     }
 
@@ -293,63 +278,53 @@ public:
     void setAttribute(const std::string &name, const std::string &value);
 
     /** Get the contents of the specified attribute - undefined if the attribute does not exist */
-    const std::string &getAttributeValue(const std::string &name) const
-    {
+    const std::string &getAttributeValue(const std::string &name) const {
         return getAttribute(name)->second;
     }
 
     /** Get the contents of the specified attribute - or the specified default if it does not exist */
-    const std::string &getAttributeValue(const std::string &name, const std::string &def) const
-    {
+    const std::string &getAttributeValue(const std::string &name, const std::string &def) const {
         const_attribute_iterator it = getAttribute(name);
         return (it == attributesEnd()) ? def : it->second;
     }
 
     /** Get an iterator pointing to the first attribute */
-    attribute_iterator attributesBegin()
-    {
+    attribute_iterator attributesBegin() {
         return mAttributes.begin();
     }
 
     /** Get an iterator pointing to the first attribute */
-    const_attribute_iterator attributesBegin() const
-    {
+    const_attribute_iterator attributesBegin() const {
         return mAttributes.begin();
     }
 
     /** Get an iterator pointing to the last attribute */
-    attribute_iterator attributesEnd()
-    {
+    attribute_iterator attributesEnd() {
         return mAttributes.end();
     }
 
     /** Get an iterator pointing to the last attribute */
-    const_attribute_iterator attributesEnd() const
-    {
+    const_attribute_iterator attributesEnd() const {
         return mAttributes.end();
     }
 
     /** Get an iterator pointing to the first child */
-    child_iterator childrenBegin()
-    {
+    child_iterator childrenBegin() {
         return mChildren.begin();
     }
 
     /** Get an iterator pointing to the first child */
-    const_child_iterator childrenBegin() const
-    {
+    const_child_iterator childrenBegin() const {
         return mChildren.begin();
     }
 
     /** Get an iterator pointing to the last child */
-    child_iterator childrenEnd()
-    {
+    child_iterator childrenEnd() {
         return mChildren.end();
     }
 
     /** Get an iterator pointing to the last child */
-    const_child_iterator childrenEnd() const
-    {
+    const_child_iterator childrenEnd() const {
         return mChildren.end();
     }
 
@@ -380,12 +355,10 @@ public:
     XMLElement root;
 
 public:
-    XMLDocument() : dirty(false), root(XMLElement::XET_ROOT)
-    {
+    XMLDocument() : dirty(false), root(XMLElement::XET_ROOT) {
     }
 
-    ~XMLDocument()
-    {
+    ~XMLDocument() {
     }
 
 public:
@@ -396,74 +369,62 @@ public:
     //
 
     /** @copydoc XMLElement::rebuildNamedBindings */
-    void rebuildNamedBindings(bool deepScan = true)
-    {
+    void rebuildNamedBindings(bool deepScan = true) {
         root.rebuildNamedBindings(deepScan);
     }
 
     /** @copydoc XMLElement::removeChild */
-    void removeElementById(const std::string &id)
-    {
+    void removeElementById(const std::string &id) {
         root.removeChildById(id);
     }
 
     /** @copydoc XMLElement::removeChild */
-    void removeElementByName(const std::string &name)
-    {
+    void removeElementByName(const std::string &name) {
         root.removeChildByName(name);
     }
 
     /** Remove everything in a very quick manner */
-    void clear()
-    {
+    void clear() {
         root.clear();
     }
 
     /** @copydoc XMLElement::getChildById */
-    const XMLElement *getElementById(const std::string &id) const
-    {
+    const XMLElement *getElementById(const std::string &id) const {
         return root.getChildById(id);
     }
 
     /** @copydoc XMLElement::getChildById */
-    XMLElement *getElementById(const std::string &id)
-    {
+    XMLElement *getElementById(const std::string &id) {
         return root.getChildById(id);
     }
 
     /** @copydoc XMLElement::getChildByName */
-    const XMLElement *getElementByName(const std::string &name) const
-    {
+    const XMLElement *getElementByName(const std::string &name) const {
         return root.getChildByName(name);
     }
 
     /** @copydoc XMLElement::getChildByName */
-    XMLElement *getElementByName(const std::string &name)
-    {
+    XMLElement *getElementByName(const std::string &name) {
         return root.getChildByName(name);
     }
 
     /** @copydoc XMLElement::getChildByHierarchicalId */
-    const XMLElement *getElementByHierarchicalId(const std::string &id) const
-    {
+    const XMLElement *getElementByHierarchicalId(const std::string &id) const {
         return root.getChildByHierarchicalId(id);
     }
 
     /** @copydoc XMLElement::getChildByHierarchicalId */
-    XMLElement *getElementByHierarchicalId(const std::string &id)
-    {
+    XMLElement *getElementByHierarchicalId(const std::string &id) {
         return root.getChildByHierarchicalId(id);
     }
 
     /** @copydoc XMLElement::getChildByHierarchicalName */
-    const XMLElement *getElementByHierarchicalName(const std::string &name) const
-    {
+    const XMLElement *getElementByHierarchicalName(const std::string &name) const {
         return root.getChildByHierarchicalName(name);
     }
 
     /** @copydoc XMLElement::getChildByHierarchicalName */
-    XMLElement *getElementByHierarchicalName(const std::string &name)
-    {
+    XMLElement *getElementByHierarchicalName(const std::string &name) {
         return root.getChildByHierarchicalName(name);
     }
 };
@@ -564,12 +525,10 @@ public:
 
 class XMLProcessor {
 public:
-    XMLProcessor()
-    {
+    XMLProcessor() {
     }
 
-    virtual ~XMLProcessor()
-    {
+    virtual ~XMLProcessor() {
     }
 
     /** Specify which instruction target this processor will handle */
@@ -584,9 +543,9 @@ public:
      *   Return false, and the error description, to abort parsing.
      */
     virtual std::pair<bool, std::string> execute(XMLSerializer *serializer,
-                                                 XMLDocument *doc,
-                                                 XMLElement *current,
-                                                 const std::string &data) = 0;
+            XMLDocument *doc,
+            XMLElement *current,
+            const std::string &data) = 0;
 };
 }
 

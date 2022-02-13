@@ -27,8 +27,7 @@
 //!	\see		StoreDwords
 //!	\see		CopyMemory
 //!	\see		MoveMemory
-inline_ void ZeroMemory(void *addr, size_t size)
-{
+inline_ void ZeroMemory(void *addr, size_t size) {
     memset(addr, 0, size);
 }
 
@@ -40,8 +39,7 @@ inline_ void ZeroMemory(void *addr, size_t size)
 //!	\see		ZeroMemory
 //!	\see		CopyMemory
 //!	\see		MoveMemory
-inline_ void FillMemory(void *dest, size_t size, uint8_t val)
-{
+inline_ void FillMemory(void *dest, size_t size, uint8_t val) {
     memset(dest, val, size);
 }
 
@@ -54,8 +52,7 @@ inline_ void FillMemory(void *dest, size_t size, uint8_t val)
 //!	\see		CopyMemory
 //!	\see		MoveMemory
 //!	\warning	writes nb*4 bytes !
-inline_ void StoreDwords(uint32_t *dest, uint32_t nb, uint32_t value)
-{
+inline_ void StoreDwords(uint32_t *dest, uint32_t nb, uint32_t value) {
     // The asm code below **SHOULD** be equivalent to one of those C versions
     // or the other if your compiled is good: (checked on VC++ 6.0)
     //
@@ -86,8 +83,7 @@ inline_ void StoreDwords(uint32_t *dest, uint32_t nb, uint32_t value)
 //!	\see		FillMemory
 //!	\see		StoreDwords
 //!	\see		MoveMemory
-inline_ void CopyMemory(void *dest, const void *src, size_t size)
-{
+inline_ void CopyMemory(void *dest, const void *src, size_t size) {
     memcpy(dest, src, size);
 }
 
@@ -99,8 +95,7 @@ inline_ void CopyMemory(void *dest, const void *src, size_t size)
 //!	\see		FillMemory
 //!	\see		StoreDwords
 //!	\see		CopyMemory
-inline_ void MoveMemory(void *dest, const void *src, size_t size)
-{
+inline_ void MoveMemory(void *dest, const void *src, size_t size) {
     memmove(dest, src, size);
 }
 
@@ -108,8 +103,7 @@ inline_ void MoveMemory(void *dest, const void *src, size_t size)
 //#define CLEAROBJECT		{ memset(this, 0, SIZEOFOBJECT);	}			//!< Clears current object. Laziness is my business. HANDLE WITH CARE.
 
 template<typename T>
-inline void DELETESINGLE(T *&x)
-{                                             //!< Deletes an instance of a class.
+inline void DELETESINGLE(T *&x) {                                             //!< Deletes an instance of a class.
     if (x) {
         delete x;
         x = nullptr;
@@ -117,8 +111,7 @@ inline void DELETESINGLE(T *&x)
 }
 
 template<typename T>
-inline void DELETEARRAY(T *&x)
-{                                              //!< Deletes an array.
+inline void DELETEARRAY(T *&x) {                                              //!< Deletes an array.
     if (x) {
         delete[]x;
         x = nullptr;
@@ -126,8 +119,7 @@ inline void DELETEARRAY(T *&x)
 }
 
 template<typename T>
-inline void SAFE_RELEASE(T *&x)
-{                                             //!< Safe D3D-style release
+inline void SAFE_RELEASE(T *&x) {                                             //!< Safe D3D-style release
     if (x) {
         x->Release();
         x = nullptr;
@@ -135,8 +127,7 @@ inline void SAFE_RELEASE(T *&x)
 }
 
 template<typename T>
-inline void SAFE_DESTRUCT(T *&x)
-{                                            //!< Safe ICE-style release
+inline void SAFE_DESTRUCT(T *&x) {                                            //!< Safe ICE-style release
     if (x) {
         x->SelfDestruct();
         x = nullptr;

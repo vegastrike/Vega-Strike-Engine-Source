@@ -35,8 +35,7 @@
 
 Hashtable<string, PyObject, 1023> compiled_python;
 
-char *LoadString(const char *filename)
-{
+char *LoadString(const char *filename) {
     FILE *fp = VSFileSystem::vs_open(filename, "r");
     if (!fp) {
         return NULL;
@@ -54,14 +53,12 @@ char *LoadString(const char *filename)
     return retval;
 }
 
-std::string getCompilingName(const std::string &name)
-{
+std::string getCompilingName(const std::string &name) {
     std::string compiling_name = VSFileSystem::homedir + DELIMSTR + name;
     return compiling_name;
 }
 
-void InterpretPython(const std::string &name)
-{
+void InterpretPython(const std::string &name) {
     char *temp = strdup(getCompilingName(name).c_str());
     FILE *fp = VSFileSystem::vs_open(name.c_str(), "r");
     if (fp) {
@@ -72,8 +69,7 @@ void InterpretPython(const std::string &name)
     free(temp);
 }
 
-PyObject *CompilePython(const std::string &name)
-{
+PyObject *CompilePython(const std::string &name) {
     Python::reseterrors();
     PyObject * retval = compiled_python.Get(name);
     Python::reseterrors();
@@ -99,8 +95,7 @@ PyObject *CompilePython(const std::string &name)
 
 extern PyObject *PyInit_VS;
 
-void CompileRunPython(const std::string &filename)
-{
+void CompileRunPython(const std::string &filename) {
     static bool ndebug_libs = XMLSupport::parse_bool(vs_config->getVariable("AI", "compile_python", "true"));
     if (ndebug_libs) {
         Python::reseterrors();
@@ -132,8 +127,7 @@ void CompileRunPython(const std::string &filename)
     }
 }
 
-PyObject *CreateTuple(const std::vector<PythonBasicType> &values)
-{
+PyObject *CreateTuple(const std::vector<PythonBasicType> &values) {
     PyObject * retval = PyTuple_New(values.size());
     for (unsigned int i = 0; i < values.size(); i++) {
         PyObject * val = values[i].NewObject();
@@ -143,8 +137,7 @@ PyObject *CreateTuple(const std::vector<PythonBasicType> &values)
     return retval;
 }
 
-static void pySetScratchVector(const KBSTATE k)
-{
+static void pySetScratchVector(const KBSTATE k) {
     switch (k) {
         case PRESS:
             UniverseUtil::setScratchVector(Vector(1, 1, 0));
@@ -163,8 +156,7 @@ static void pySetScratchVector(const KBSTATE k)
     }
 }
 
-void RunPythonPress(const KBData &s, KBSTATE k)
-{
+void RunPythonPress(const KBData &s, KBSTATE k) {
     if (k == PRESS && s.data.length()) {
         pySetScratchVector(k);
         CompileRunPython(s.data);
@@ -172,8 +164,7 @@ void RunPythonPress(const KBData &s, KBSTATE k)
     }
 }
 
-void RunPythonRelease(const KBData &s, KBSTATE k)
-{
+void RunPythonRelease(const KBData &s, KBSTATE k) {
     if (k == RELEASE && s.data.length()) {
         pySetScratchVector(k);
         CompileRunPython(s.data);
@@ -181,8 +172,7 @@ void RunPythonRelease(const KBData &s, KBSTATE k)
     }
 }
 
-void RunPythonToggle(const KBData &s, KBSTATE k)
-{
+void RunPythonToggle(const KBData &s, KBSTATE k) {
     if ((k == RELEASE || k == PRESS) && s.data.length()) {
         pySetScratchVector(k);
         CompileRunPython(s.data);
@@ -190,8 +180,7 @@ void RunPythonToggle(const KBData &s, KBSTATE k)
     }
 }
 
-void RunPythonPhysicsFrame(const KBData &s, KBSTATE k)
-{
+void RunPythonPhysicsFrame(const KBData &s, KBSTATE k) {
     if ((k == DOWN || k == UP) && s.data.length()) {
         pySetScratchVector(k);
         CompileRunPython(s.data);

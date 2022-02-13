@@ -106,13 +106,13 @@ public:
     void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 
     void UpdatePhysics(const Transformation &,
-                       const Matrix &,
-                       class Unit *target,
-                       float trackingcone,
-                       Unit *targetToCollideWith /*prevent AI friendly fire--speed up app*/,
-                       float HeatSink,
-                       Unit *firer,
-                       Unit *superunit);
+            const Matrix &,
+            class Unit *target,
+            float trackingcone,
+            Unit *targetToCollideWith /*prevent AI friendly fire--speed up app*/,
+            float HeatSink,
+            Unit *firer,
+            Unit *superunit);
 
 };
 #endif

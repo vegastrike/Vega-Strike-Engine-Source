@@ -76,9 +76,9 @@ public:
     ~Drawable();
 
     bool DrawableInit(const char *filename,
-                      int faction,
-                      Flightgroup *flightgrp = NULL,
-                      const char *animationExt = NULL);
+            int faction,
+            Flightgroup *flightgrp = NULL,
+            const char *animationExt = NULL);
 
     static void UpdateFrames();
 
@@ -126,7 +126,7 @@ public:
 
     //Uses GFX so only in Unit class
     virtual void Draw(const Transformation &quat = identity_transformation,
-                      const Matrix &m = identity_matrix);
+            const Matrix &m = identity_matrix);
 
     ///Draws this unit with the transformation and matrix (should be equiv) separately
     virtual void DrawNow(const Matrix &m = identity_matrix, float lod = 1000000000);
@@ -139,8 +139,7 @@ public:
     //Split this mesh with into 2^level submeshes at arbitrary planes
     void Split(int level);
 
-    unsigned int nummesh() const
-    {
+    unsigned int nummesh() const {
         // Return number of meshes except shield
         return (meshdata.size() - 1);
     }

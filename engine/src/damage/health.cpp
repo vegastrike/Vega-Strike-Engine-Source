@@ -29,8 +29,7 @@
 #include <iostream>
 #include <string>
 
-void Health::AdjustPower(const float &percent)
-{
+void Health::AdjustPower(const float &percent) {
     if (!regenerative) {
         // Not applicable for armor and hull
         return;
@@ -47,8 +46,7 @@ void Health::AdjustPower(const float &percent)
     }
 }
 
-void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage)
-{
+void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage) {
     // If this layer is destroyed, it can no longer sustain damage
     if (destroyed) {
         return;
@@ -69,8 +67,7 @@ void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage)
  * @param vulnerability - adjust for
  */
 // TODO: type is ugly hack
-void Health::DealDamageComponent(int type, float &damage, float vulnerability, InflictedDamage &inflicted_damage)
-{
+void Health::DealDamageComponent(int type, float &damage, float vulnerability, InflictedDamage &inflicted_damage) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
     // We also cap the actual damage at the current health
@@ -99,29 +96,25 @@ void Health::DealDamageComponent(int type, float &damage, float vulnerability, I
     }
 }
 
-void Health::Disable()
-{
+void Health::Disable() {
     if (regenerative && enabled) {
         enabled = false;
         health = 0.0f;
     }
 }
 
-void Health::Destroy()
-{
+void Health::Destroy() {
     health = 0;
     destroyed = true;
 }
 
-void Health::Enable()
-{
+void Health::Enable() {
     if (regenerative && !enabled) {
         enabled = true;
     }
 }
 
-void Health::Enhance(float percent)
-{
+void Health::Enhance(float percent) {
     // Don't enhance armor and hull
     if (!regenerative) {
         return;
@@ -130,31 +123,26 @@ void Health::Enhance(float percent)
     health = max_health * percent;
 }
 
-void Health::ReduceLayerMaximum(const float &percent)
-{
+void Health::ReduceLayerMaximum(const float &percent) {
     adjusted_health = std::max(0.0f, max_health * (1 - percent));
     health = std::min(health, max_health);
 }
 
-void Health::ReduceLayerMaximumByOne()
-{
+void Health::ReduceLayerMaximumByOne() {
     adjusted_health = std::max(0.0f, adjusted_health - 1);
     health = std::min(health, adjusted_health);
 }
 
-void Health::ReduceLayerMaximumByOnePercent()
-{
+void Health::ReduceLayerMaximumByOnePercent() {
     float percent = adjusted_health / max_health - 0.01f;
     max_health = std::max(0.0f, max_health * percent);
 }
 
-void Health::ReduceRegeneration(const float &percent)
-{
+void Health::ReduceRegeneration(const float &percent) {
     regeneration = std::max(0.0f, regeneration - max_regeneration * percent);
 }
 
-void Health::Regenerate()
-{
+void Health::Regenerate() {
     if (!enabled || destroyed || !regenerative) {
         return;
     }
@@ -162,8 +150,7 @@ void Health::Regenerate()
     health = std::min(adjusted_health, health + regeneration);
 }
 
-void Health::Regenerate(float recharge_rate)
-{
+void Health::Regenerate(float recharge_rate) {
     if (!enabled || destroyed || !regenerative) {
         return;
     }
@@ -171,15 +158,13 @@ void Health::Regenerate(float recharge_rate)
     health = std::min(adjusted_health, health + recharge_rate);
 }
 
-void Health::SetHealth(float health)
-{
+void Health::SetHealth(float health) {
     health = std::min(max_health, health);
     health = std::max(0.0f, health);
     this->health = health;
 }
 
-void Health::Update(float health)
-{
+void Health::Update(float health) {
     this->health = health;
     max_health = health;
     adjusted_health = health;

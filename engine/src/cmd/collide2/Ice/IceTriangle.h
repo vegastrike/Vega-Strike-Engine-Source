@@ -36,26 +36,22 @@ enum PartVal {
 class ICEMATHS_API Triangle {
 public:
     //! Constructor
-    inline_ Triangle()
-    {
+    inline_ Triangle() {
     }
     //! Constructor
-    inline_ Triangle(const Point &p0, const Point &p1, const Point &p2)
-    {
+    inline_ Triangle(const Point &p0, const Point &p1, const Point &p2) {
         mVerts[0] = p0;
         mVerts[1] = p1;
         mVerts[2] = p2;
     }
     //! Copy constructor
-    inline_ Triangle(const Triangle &triangle)
-    {
+    inline_ Triangle(const Triangle &triangle) {
         mVerts[0] = triangle.mVerts[0];
         mVerts[1] = triangle.mVerts[1];
         mVerts[2] = triangle.mVerts[2];
     }
     //! Destructor
-    inline_                    ~Triangle()
-    {
+    inline_                    ~Triangle() {
     }
 
     //! Vertices
@@ -70,8 +66,7 @@ public:
     void DenormalizedNormal(Point &normal) const;
     void Center(Point &center) const;
 
-    inline_    Plane PlaneEquation() const
-    {
+    inline_    Plane PlaneEquation() const {
         return Plane(mVerts[0], mVerts[1], mVerts[2]);
     }
 

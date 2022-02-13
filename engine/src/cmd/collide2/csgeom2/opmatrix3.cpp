@@ -28,8 +28,7 @@
 
 //---------------------------------------------------------------------------
 
-csMatrix3 &csMatrix3::operator+=(const csMatrix3 &m)
-{
+csMatrix3 &csMatrix3::operator+=(const csMatrix3 &m) {
     m11 += m.m11;
     m12 += m.m12;
     m13 += m.m13;
@@ -42,8 +41,7 @@ csMatrix3 &csMatrix3::operator+=(const csMatrix3 &m)
     return *this;
 }
 
-csMatrix3 &csMatrix3::operator-=(const csMatrix3 &m)
-{
+csMatrix3 &csMatrix3::operator-=(const csMatrix3 &m) {
     m11 -= m.m11;
     m12 -= m.m12;
     m13 -= m.m13;
@@ -56,8 +54,7 @@ csMatrix3 &csMatrix3::operator-=(const csMatrix3 &m)
     return *this;
 }
 
-csMatrix3 &csMatrix3::operator*=(const csMatrix3 &m)
-{
+csMatrix3 &csMatrix3::operator*=(const csMatrix3 &m) {
     float old_m11 = m11;
     m11 = m11 * m.m11 + m12 * m.m21 + m13 * m.m31;
     float old_m12 = m12;
@@ -76,8 +73,7 @@ csMatrix3 &csMatrix3::operator*=(const csMatrix3 &m)
     return *this;
 }
 
-csMatrix3 &csMatrix3::operator*=(float s)
-{
+csMatrix3 &csMatrix3::operator*=(float s) {
     m11 *= s;
     m12 *= s;
     m13 *= s;
@@ -90,21 +86,18 @@ csMatrix3 &csMatrix3::operator*=(float s)
     return *this;
 }
 
-void csMatrix3::Identity()
-{
+void csMatrix3::Identity() {
     m11 = m22 = m33 = 1.0;
     m12 = m13 = m21 = m23 = m31 = m32 = 0.0;
 }
 
-bool csMatrix3::IsIdentity() const
-{
+bool csMatrix3::IsIdentity() const {
     return (m11 == 1.0) && (m22 == 1.0) && (m33 == 1.0)
             && (m12 == 0.0) && (m13 == 0.0) && (m21 == 0.0)
             && (m23 == 0.0) && (m31 == 0.0) && (m32 == 0.0);
 }
 
-void csMatrix3::Transpose()
-{
+void csMatrix3::Transpose() {
     float swap;
     swap = m12;
     m12 = m21;
@@ -117,8 +110,7 @@ void csMatrix3::Transpose()
     m32 = swap;
 }
 
-csMatrix3 csMatrix3::GetTranspose() const
-{
+csMatrix3 csMatrix3::GetTranspose() const {
     csMatrix3 t;
     t.m12 = m21;
     t.m21 = m12;
@@ -132,16 +124,14 @@ csMatrix3 csMatrix3::GetTranspose() const
     return t;
 }
 
-float csMatrix3::Determinant() const
-{
+float csMatrix3::Determinant() const {
     return
             m11 * (m22 * m33 - m23 * m32)
                     - m12 * (m21 * m33 - m23 * m31)
                     + m13 * (m21 * m32 - m22 * m31);
 }
 
-void csMatrix3::Set(const Quaternion &quat)
-{
+void csMatrix3::Set(const Quaternion &quat) {
     float s;
     float xs, ys, zs;
     float wx, wy, wz;
@@ -179,22 +169,19 @@ void csMatrix3::Set(const Quaternion &quat)
     m33 = 1.0f - (xx + yy);
 }
 
-csMatrix3 operator+(const csMatrix3 &m1, const csMatrix3 &m2)
-{
+csMatrix3 operator+(const csMatrix3 &m1, const csMatrix3 &m2) {
     return csMatrix3(m1.m11 + m2.m11, m1.m12 + m2.m12, m1.m13 + m2.m13,
-                     m1.m21 + m2.m21, m1.m22 + m2.m22, m1.m23 + m2.m23,
-                     m1.m31 + m2.m31, m1.m32 + m2.m32, m1.m33 + m2.m33);
+            m1.m21 + m2.m21, m1.m22 + m2.m22, m1.m23 + m2.m23,
+            m1.m31 + m2.m31, m1.m32 + m2.m32, m1.m33 + m2.m33);
 }
 
-csMatrix3 operator-(const csMatrix3 &m1, const csMatrix3 &m2)
-{
+csMatrix3 operator-(const csMatrix3 &m1, const csMatrix3 &m2) {
     return csMatrix3(m1.m11 - m2.m11, m1.m12 - m2.m12, m1.m13 - m2.m13,
-                     m1.m21 - m2.m21, m1.m22 - m2.m22, m1.m23 - m2.m23,
-                     m1.m31 - m2.m31, m1.m32 - m2.m32, m1.m33 - m2.m33);
+            m1.m21 - m2.m21, m1.m22 - m2.m22, m1.m23 - m2.m23,
+            m1.m31 - m2.m31, m1.m32 - m2.m32, m1.m33 - m2.m33);
 }
 
-csMatrix3 operator*(const csMatrix3 &m1, const csMatrix3 &m2)
-{
+csMatrix3 operator*(const csMatrix3 &m1, const csMatrix3 &m2) {
     return csMatrix3(
             m1.m11 * m2.m11 + m1.m12 * m2.m21 + m1.m13 * m2.m31,
             m1.m11 * m2.m12 + m1.m12 * m2.m22 + m1.m13 * m2.m32,
@@ -207,30 +194,26 @@ csMatrix3 operator*(const csMatrix3 &m1, const csMatrix3 &m2)
             m1.m31 * m2.m13 + m1.m32 * m2.m23 + m1.m33 * m2.m33);
 }
 
-csMatrix3 operator*(const csMatrix3 &m, float f)
-{
+csMatrix3 operator*(const csMatrix3 &m, float f) {
     return csMatrix3(m.m11 * f, m.m12 * f, m.m13 * f,
-                     m.m21 * f, m.m22 * f, m.m23 * f,
-                     m.m31 * f, m.m32 * f, m.m33 * f);
+            m.m21 * f, m.m22 * f, m.m23 * f,
+            m.m31 * f, m.m32 * f, m.m33 * f);
 }
 
-csMatrix3 operator*(float f, const csMatrix3 &m)
-{
+csMatrix3 operator*(float f, const csMatrix3 &m) {
     return csMatrix3(m.m11 * f, m.m12 * f, m.m13 * f,
-                     m.m21 * f, m.m22 * f, m.m23 * f,
-                     m.m31 * f, m.m32 * f, m.m33 * f);
+            m.m21 * f, m.m22 * f, m.m23 * f,
+            m.m31 * f, m.m32 * f, m.m33 * f);
 }
 
-csMatrix3 operator/(const csMatrix3 &m, float f)
-{
+csMatrix3 operator/(const csMatrix3 &m, float f) {
     float inv_f = 1 / f;
     return csMatrix3(m.m11 * inv_f, m.m12 * inv_f, m.m13 * inv_f,
-                     m.m21 * inv_f, m.m22 * inv_f, m.m23 * inv_f,
-                     m.m31 * inv_f, m.m32 * inv_f, m.m33 * inv_f);
+            m.m21 * inv_f, m.m22 * inv_f, m.m23 * inv_f,
+            m.m31 * inv_f, m.m32 * inv_f, m.m33 * inv_f);
 }
 
-bool operator==(const csMatrix3 &m1, const csMatrix3 &m2)
-{
+bool operator==(const csMatrix3 &m1, const csMatrix3 &m2) {
     if (m1.m11 != m2.m11 || m1.m12 != m2.m12 || m1.m13 != m2.m13) {
         return false;
     }
@@ -243,8 +226,7 @@ bool operator==(const csMatrix3 &m1, const csMatrix3 &m2)
     return true;
 }
 
-bool operator!=(const csMatrix3 &m1, const csMatrix3 &m2)
-{
+bool operator!=(const csMatrix3 &m1, const csMatrix3 &m2) {
     if (m1.m11 != m2.m11 || m1.m12 != m2.m12 || m1.m13 != m2.m13) {
         return true;
     }
@@ -257,15 +239,13 @@ bool operator!=(const csMatrix3 &m1, const csMatrix3 &m2)
     return false;
 }
 
-bool operator<(const csMatrix3 &m, float f)
-{
+bool operator<(const csMatrix3 &m, float f) {
     return ABS(m.m11) < f && ABS(m.m12) < f && ABS(m.m13) < f &&
             ABS(m.m21) < f && ABS(m.m22) < f && ABS(m.m23) < f &&
             ABS(m.m31) < f && ABS(m.m32) < f && ABS(m.m33) < f;
 }
 
-bool operator>(float f, const csMatrix3 &m)
-{
+bool operator>(float f, const csMatrix3 &m) {
     return ABS(m.m11) < f && ABS(m.m12) < f && ABS(m.m13) < f &&
             ABS(m.m21) < f && ABS(m.m22) < f && ABS(m.m23) < f &&
             ABS(m.m31) < f && ABS(m.m32) < f && ABS(m.m33) < f;
@@ -273,8 +253,7 @@ bool operator>(float f, const csMatrix3 &m)
 
 //---------------------------------------------------------------------------
 
-csXRotMatrix3::csXRotMatrix3(float angle)
-{
+csXRotMatrix3::csXRotMatrix3(float angle) {
     m11 = 1;
     m12 = 0;
     m13 = 0;
@@ -286,8 +265,7 @@ csXRotMatrix3::csXRotMatrix3(float angle)
     m33 = cos(angle);
 }
 
-csYRotMatrix3::csYRotMatrix3(float angle)
-{
+csYRotMatrix3::csYRotMatrix3(float angle) {
     m11 = cos(angle);
     m12 = 0;
     m13 = -sin(angle);
@@ -299,8 +277,7 @@ csYRotMatrix3::csYRotMatrix3(float angle)
     m33 = cos(angle);
 }
 
-csZRotMatrix3::csZRotMatrix3(float angle)
-{
+csZRotMatrix3::csZRotMatrix3(float angle) {
     m11 = cos(angle);
     m12 = -sin(angle);
     m13 = 0;

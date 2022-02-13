@@ -43,41 +43,34 @@ public:
     virtual void draw(void);
 
 //Text that appears on the control.
-    virtual std::string text(void)
-    {
+    virtual std::string text(void) {
         return m_paintText.text();
     }
 
-    virtual void setText(std::string t)
-    {
+    virtual void setText(std::string t) {
         m_paintText.setText(t);
     }
 
 //Set justification.
-    virtual Justification justification(void)
-    {
+    virtual Justification justification(void) {
         return m_paintText.justification();
     }
 
-    virtual void setJustification(Justification j)
-    {
+    virtual void setJustification(Justification j) {
         m_paintText.setJustification(j);
     }
 
 //Whether the text is multi-line.
-    virtual bool multiLine(void)
-    {
+    virtual bool multiLine(void) {
         return m_paintText.widthExceeded() == PaintText::MULTI_LINE;
     }
 
-    virtual void setMultiLine(bool multi)
-    {
+    virtual void setMultiLine(bool multi) {
         m_paintText.setWidthExceeded(multi ? PaintText::MULTI_LINE : PaintText::ELLIPSIS);
     }
 
 //Text margins.
-    virtual Size textMargins(void)
-    {
+    virtual Size textMargins(void) {
         return m_textMargins;
     }
 
@@ -89,24 +82,20 @@ public:
 //OVERRIDES
 
 //Color of text in control.
-    virtual GFXColor textColor(void)
-    {
+    virtual GFXColor textColor(void) {
         return m_paintText.color();
     }
 
-    virtual void setTextColor(const GFXColor &c)
-    {
+    virtual void setTextColor(const GFXColor &c) {
         m_paintText.setColor(c);
     }
 
 //Font for text in control.
-    virtual Font font(void)
-    {
+    virtual Font font(void) {
         return m_paintText.font();
     }
 
-    virtual void setFont(const Font &f)
-    {
+    virtual void setFont(const Font &f) {
         m_paintText.setFont(f);
     }
 
@@ -123,8 +112,7 @@ public:
 public:
     StaticDisplay(void);
 
-    virtual ~StaticDisplay(void)
-    {
+    virtual ~StaticDisplay(void) {
     }
 
 protected:
@@ -145,28 +133,24 @@ protected:
 class StaticImageDisplay : public Control {
 public:
 //Draw the control.
-    virtual void draw(void)
-    {
+    virtual void draw(void) {
         if (texturename.length()) {
             texture.draw(m_rect);
         }
     }
 
 //Text that appears on the control.
-    virtual void setTexture(std::string t)
-    {
+    virtual void setTexture(std::string t) {
         texturename = t;
         texture.read(t);
     }
 
 //CONSTRUCTION
 public:
-    StaticImageDisplay(void)
-    {
+    StaticImageDisplay(void) {
     }
 
-    virtual ~StaticImageDisplay(void)
-    {
+    virtual ~StaticImageDisplay(void) {
     }
 
 protected:

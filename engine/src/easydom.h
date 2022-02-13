@@ -49,13 +49,11 @@ public:
 
     void addChild(easyDomNode *child);
 
-    std::string Name()
-    {
+    std::string Name() {
         return name;
     }
 
-    void set_attribute(std::string name, std::string value)
-    {
+    void set_attribute(std::string name, std::string value) {
         attribute_map[name] = value;
     }
 
@@ -78,8 +76,7 @@ class tagDomNode : public easyDomNode {
 public:
     int tag;
 
-    void Tag(tagMap *tagmap)
-    {
+    void Tag(tagMap *tagmap) {
         tag = (*tagmap)[Name()];
         std::vector<easyDomNode *>::const_iterator siter;
         for (siter = subnodes.begin(); siter != subnodes.end(); siter++) {
@@ -94,8 +91,7 @@ extern const char *textAttr;   //should be a static const inside easyDomFactory.
 template<class domNodeType>
 class easyDomFactory {
 public:
-    easyDomFactory()
-    {
+    easyDomFactory() {
     }
 
     void getColor(char *name, float color[4]);
@@ -107,16 +103,14 @@ public:
         int currentindex;
         char *buffer;
 
-        easyDomFactoryXML()
-        {
+        easyDomFactoryXML() {
             buffer = 0;
             currentindex = 0;
         }
     }
             *xml;
 
-    domNodeType *LoadXML(const char *filename)
-    {
+    domNodeType *LoadXML(const char *filename) {
         topnode = nullptr;
         //Not really nice but should do its job
         unsigned int length = strlen(filename);
@@ -182,8 +176,7 @@ public:
         return (domNodeType *) topnode;
     }
 
-    static void charHandler(void *userData, const XML_Char *s, int len)
-    {
+    static void charHandler(void *userData, const XML_Char *s, int len) {
         easyDomFactoryXML *xml = ((easyDomFactory<domNodeType> *) userData)->xml;
         if (!xml->buffer) {
             xml->buffer = (char *) malloc(sizeof(char) * (len + 1));
@@ -194,8 +187,7 @@ public:
         xml->currentindex += len;
     }
 
-    domNodeType *LoadCalike(const char *filename)
-    {
+    domNodeType *LoadCalike(const char *filename) {
         const int chunk_size = 262144;
 
         std::string module_str = parseCalike(filename);
@@ -238,19 +230,16 @@ public:
         return (domNodeType *) topnode;
     }
 
-    static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-    {
+    static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
         ((easyDomFactory *) userData)->beginElement(name, atts);
     }
 
-    static void endElement(void *userData, const XML_Char *name)
-    {
+    static void endElement(void *userData, const XML_Char *name) {
         ((easyDomFactory *) userData)->endElement(name);
     }
 
 //void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes){
-    void doTextBuffer()
-    {
+    void doTextBuffer() {
         if (!nodestack.size()) {
             return;
         }
@@ -264,8 +253,7 @@ public:
         xml->currentindex = 0;
     }
 
-    void beginElement(const std::string &name, const XML_Char **atts)
-    {
+    void beginElement(const std::string &name, const XML_Char **atts) {
         //XMLSupport::AttributeList::const_iterator iter;
 
         doTextBuffer();
@@ -287,8 +275,7 @@ public:
         nodestack.push(thisnode);
     }
 
-    void endElement(const std::string &name)
-    {
+    void endElement(const std::string &name) {
         doTextBuffer();
         domNodeType *stacktop = nodestack.top();
         if (stacktop->Name() != name) {

@@ -38,28 +38,23 @@ union ice_union {
 #define FR(x)                   (static_cast<ice_union*>(const_cast<void*>(static_cast<const void*>(&(x))))->float_member)
 
 //! Is the float valid ?
-inline_ bool IsNAN(float value)
-{
+inline_ bool IsNAN(float value) {
     return (IR(value) & 0x7f800000) == 0x7f800000;
 }
 
-inline_ bool IsIndeterminate(float value)
-{
+inline_ bool IsIndeterminate(float value) {
     return IR(value) == 0xffc00000;
 }
 
-inline_ bool IsPlusInf(float value)
-{
+inline_ bool IsPlusInf(float value) {
     return IR(value) == 0x7f800000;
 }
 
-inline_ bool IsMinusInf(float value)
-{
+inline_ bool IsMinusInf(float value) {
     return IR(value) == 0xff800000;
 }
 
-inline_    bool IsValidFloat(float value)
-{
+inline_    bool IsValidFloat(float value) {
     if (IsNAN(value)) {
         return false;
     }

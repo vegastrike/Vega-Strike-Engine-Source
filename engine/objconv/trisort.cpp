@@ -33,14 +33,12 @@
 #define sqrtf sqrt
 #endif
 
-bool nearzero(double fb)
-{
+bool nearzero(double fb) {
     const float eps = .0001;
     return fabs(fb) < eps || fb == 0;
 }
 
-POLYGON_RELATION Plane::inFront(const Vector &v) const
-{
+POLYGON_RELATION Plane::inFront(const Vector &v) const {
     double fb = frontBack(v);
     if (nearzero(fb) || nearzero(c)) {
         return UNKNOWN;
@@ -50,8 +48,7 @@ POLYGON_RELATION Plane::inFront(const Vector &v) const
 
 const int RIGHT_HANDED = 1;
 
-bool Face::Cross(Plane &result) const
-{
+bool Face::Cross(Plane &result) const {
     double size = 0;
     for (unsigned int i = 2; (!size) && i < this->p.size(); i++) {
         Vector v1(0, 0, 0);
@@ -78,8 +75,7 @@ bool Face::Cross(Plane &result) const
     return true;
 }
 
-POLYGON_RELATION Face::inFront(const Plane &p) const
-{
+POLYGON_RELATION Face::inFront(const Plane &p) const {
     POLYGON_RELATION retval = UNKNOWN;
     for (unsigned int i = 0; i < this->p.size(); i++) {
         POLYGON_RELATION pr = p.inFront(this->p[i].V);
@@ -100,8 +96,7 @@ POLYGON_RELATION Face::inFront(const Plane &p) const
     return retval;
 }
 
-Plane Face::planeEqu() const
-{
+Plane Face::planeEqu() const {
     if (p.empty()) {
         return Plane(1, 0, 0, 0);
     }
@@ -114,8 +109,7 @@ Plane Face::planeEqu() const
     return rez;
 }
 
-bool Face::operator<(const Face &b) const
-{
+bool Face::operator<(const Face &b) const {
     //printf ("comparing %d %d\n",id,b.id);
     Plane bpe(b.planeEqu());
     Plane ape(planeEqu());
@@ -136,13 +130,11 @@ bool Face::operator<(const Face &b) const
     return false;
 }
 
-void Mesh::sort()
-{
+void Mesh::sort() {
     std::sort(f.begin(), f.end());
 }
 
-void Index::write(FILE *fp) const
-{
+void Index::write(FILE *fp) const {
     printf("G: %lf\n", V.z);
     fprintf(fp, "%d/", p);
     if (n != -1) {
@@ -157,8 +149,7 @@ void Index::write(FILE *fp) const
     }
 }
 
-void Mesh::write(const char *filename) const
-{
+void Mesh::write(const char *filename) const {
     FILE *fp = fopen(filename, "w");
     if (fp) {
         unsigned int i;
@@ -186,13 +177,11 @@ void Mesh::write(const char *filename) const
     }
 }
 
-static int iswhitespace(int c)
-{
+static int iswhitespace(int c) {
     return isspace(c) || c == '\n' || c == '\r';
 }
 
-char *findspace(char *line)
-{
+char *findspace(char *line) {
     while (iswhitespace(line[0]) && line[0]) {
         line++;
     }
@@ -205,8 +194,7 @@ char *findspace(char *line)
     return line;
 }
 
-Index Mesh::processfacevertex(char *vertex) const
-{
+Index Mesh::processfacevertex(char *vertex) const {
     int a, b, c, d;
     a = 0;
     b = c = d = -1;
@@ -243,8 +231,7 @@ Index Mesh::processfacevertex(char *vertex) const
     return Index(v, a, b, c, d);
 }
 
-Face Mesh::processface(char *line) const
-{
+Face Mesh::processface(char *line) const {
     Face f;
     char *ln = line;
     while (line[0]) {
@@ -267,8 +254,7 @@ Face Mesh::processface(char *line) const
     return f;
 }
 
-void Mesh::processline(char *line)
-{
+void Mesh::processline(char *line) {
     double a = 0, b = 0, c = 0, d = 0;
     switch (line[0]) {
         case 'v':
@@ -295,8 +281,7 @@ void Mesh::processline(char *line)
     }
 }
 
-Mesh::Mesh(const char *filename)
-{
+Mesh::Mesh(const char *filename) {
     FILE *fp = fopen(filename, "r");
     char line[65536];
     line[65535] = 0;
@@ -305,8 +290,7 @@ Mesh::Mesh(const char *filename)
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         Mesh m(argv[i]);
         m.sort();

@@ -32,8 +32,7 @@ static struct _GFXFogState {
     GFXColor c;
     int index;
 
-    _GFXFogState() : c(0, 0, 0, 0)
-    {
+    _GFXFogState() : c(0, 0, 0, 0) {
         index = 0;
         nnear = 0;
         ffar = 1;
@@ -43,8 +42,7 @@ static struct _GFXFogState {
 }
         GFXFogState;
 
-void GFXFogMode(const FOGMODE fog)
-{
+void GFXFogMode(const FOGMODE fog) {
     if (GFXFogState.curmode != fog || !GFXFogState.enabled) {
         switch (fog) {
             case FOG_OFF:
@@ -73,16 +71,14 @@ void GFXFogMode(const FOGMODE fog)
     //glHint (GL_FOG_HINT,GL_NICEST );
 }
 
-void GFXFogDensity(const float fogdensity)
-{
+void GFXFogDensity(const float fogdensity) {
     if (fogdensity != GFXFogState.density) {
         glFogf(GL_FOG_DENSITY, fogdensity);
         GFXFogState.density = fogdensity;
     }
 }
 
-void GFXFogLimits(const float fognear, const float fogfar)
-{
+void GFXFogLimits(const float fognear, const float fogfar) {
     if (GFXFogState.nnear != fognear || GFXFogState.ffar != fogfar) {
         GFXFogState.nnear = fognear;
         GFXFogState.ffar = fogfar;
@@ -91,16 +87,14 @@ void GFXFogLimits(const float fognear, const float fogfar)
     }
 }
 
-void GFXFogColor(GFXColor c)
-{
+void GFXFogColor(GFXColor c) {
     if (c.r != GFXFogState.c.r || c.g != GFXFogState.c.g || c.b != GFXFogState.c.b || c.a != GFXFogState.c.a) {
         glFogfv(GL_FOG_COLOR, &c.r);
         GFXFogState.c = c;
     }
 }
 
-void GFXFogIndex(const int index)
-{
+void GFXFogIndex(const int index) {
     if (GFXFogState.index != index) {
         glFogi(GL_FOG_INDEX, index);
         GFXFogState.index = index;

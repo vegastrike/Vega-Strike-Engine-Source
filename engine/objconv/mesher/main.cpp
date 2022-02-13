@@ -29,8 +29,7 @@
     #define PATH_SEPARATORS "/"
 #endif
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     //executable's path
     std::string rootpath = argv[0];
     std::string::size_type seppos = rootpath.find_last_of(PATH_SEPARATORS);

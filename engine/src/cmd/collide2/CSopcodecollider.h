@@ -82,7 +82,7 @@ private:
 
     /* callback used to return vertex points when requested from opcode*/
     static void MeshCallback(uint32_t triangle_index,
-                             Opcode::VertexPointers &triangle, void *user_data);
+            Opcode::VertexPointers &triangle, void *user_data);
 
     /* returns face of mesh where ray collided */
     static void RayCallback(const Opcode::CollisionFace &, void *);
@@ -115,8 +115,7 @@ public:
     virtual ~csOPCODECollider();
 
     /* Not used in 0.5 */
-    int inline GetColliderType() const
-    {
+    int inline GetColliderType() const {
         return CS_MESH_COLLIDER;
     }
 
@@ -125,8 +124,8 @@ public:
 
     /* Collides the argument collider with this collider, returning true if it occurred */
     bool Collide(csOPCODECollider &pOtherCollider,
-                 const csReversibleTransform *pThisTransform = 0,
-                 const csReversibleTransform *pOtherTransform = 0);
+            const csReversibleTransform *pThisTransform = 0,
+            const csReversibleTransform *pOtherTransform = 0);
 
     /* Returns the pair array, as of 0.5 this is a global static var
     * The pair array contains the vertices that have collided as returned
@@ -147,15 +146,13 @@ public:
     * detected vertex collisions */
     void SetOneHitOnly(bool fh);
 
-    inline bool GetOneHitOnly() const
-    {
+    inline bool GetOneHitOnly() const {
         return (TreeCollider.FirstContactEnabled());
     }
 
     /* Returns the radius of our collision mesh.  This is the max radius
     * of the mesh we were initialized with */
-    inline float GetRadius() const
-    {
+    inline float GetRadius() const {
         return radius;
     };
 
@@ -164,8 +161,7 @@ public:
     Vector getVertex(unsigned int which) const;
 
     /* Returns number of vertexes in model */
-    inline unsigned int getNumVertex() const
-    {
+    inline unsigned int getNumVertex() const {
         return (m_pCollisionModel->GetMeshInterface()->GetNbVertices());
     }
 };

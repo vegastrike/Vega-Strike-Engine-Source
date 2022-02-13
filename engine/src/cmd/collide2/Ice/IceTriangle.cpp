@@ -31,8 +31,7 @@ using namespace Opcode;
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int32_t VPlaneSideEps(const Point &v, const Plane &plane, float epsilon)
-{
+static int32_t VPlaneSideEps(const Point &v, const Plane &plane, float epsilon) {
     // Compute distance from current vertex to the plane
     float Dist = plane.Distance(v);
     // Compute side:
@@ -47,8 +46,7 @@ static int32_t VPlaneSideEps(const Point &v, const Plane &plane, float epsilon)
  *	Flips the winding order.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Triangle::Flip()
-{
+void Triangle::Flip() {
     Point Tmp = mVerts[1];
     mVerts[1] = mVerts[2];
     mVerts[2] = Tmp;
@@ -60,8 +58,7 @@ void Triangle::Flip()
  *	\return		the area
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float Triangle::Area() const
-{
+float Triangle::Area() const {
     const Point &p0 = mVerts[0];
     const Point &p1 = mVerts[1];
     const Point &p2 = mVerts[2];
@@ -74,8 +71,7 @@ float Triangle::Area() const
  *	\return		the perimeter
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float Triangle::Perimeter() const
-{
+float Triangle::Perimeter() const {
     const Point &p0 = mVerts[0];
     const Point &p1 = mVerts[1];
     const Point &p2 = mVerts[2];
@@ -90,8 +86,7 @@ float Triangle::Perimeter() const
  *	\return		the compacity
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float Triangle::Compacity() const
-{
+float Triangle::Compacity() const {
     float P = Perimeter();
     if (P == 0.0f) {
         return 0.0f;
@@ -105,8 +100,7 @@ float Triangle::Compacity() const
  *	\param		normal	[out] the computed normal
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Triangle::Normal(Point &normal) const
-{
+void Triangle::Normal(Point &normal) const {
     const Point &p0 = mVerts[0];
     const Point &p1 = mVerts[1];
     const Point &p2 = mVerts[2];
@@ -119,8 +113,7 @@ void Triangle::Normal(Point &normal) const
  *	\param		normal	[out] the computed normal
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Triangle::DenormalizedNormal(Point &normal) const
-{
+void Triangle::DenormalizedNormal(Point &normal) const {
     const Point &p0 = mVerts[0];
     const Point &p1 = mVerts[1];
     const Point &p2 = mVerts[2];
@@ -133,16 +126,14 @@ void Triangle::DenormalizedNormal(Point &normal) const
  *	\param		center	[out] the computed center
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Triangle::Center(Point &center) const
-{
+void Triangle::Center(Point &center) const {
     const Point &p0 = mVerts[0];
     const Point &p1 = mVerts[1];
     const Point &p2 = mVerts[2];
     center = (p0 + p1 + p2) * INV3;
 }
 
-PartVal Triangle::TestAgainstPlane(const Plane &plane, float epsilon) const
-{
+PartVal Triangle::TestAgainstPlane(const Plane &plane, float epsilon) const {
     bool Pos = false, Neg = false;
 
     // Loop through all vertices
@@ -226,8 +217,7 @@ void Triangle::ComputeMoment(Moment& m)
  *	\return		the smallest edge length
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float Triangle::MinEdgeLength() const
-{
+float Triangle::MinEdgeLength() const {
     float Min = MAX_FLOAT;
     float Length01 = mVerts[0].Distance(mVerts[1]);
     float Length02 = mVerts[0].Distance(mVerts[2]);
@@ -250,8 +240,7 @@ float Triangle::MinEdgeLength() const
  *	\return		the largest edge length
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float Triangle::MaxEdgeLength() const
-{
+float Triangle::MaxEdgeLength() const {
     float Max = MIN_FLOAT;
     float Length01 = mVerts[0].Distance(mVerts[1]);
     float Length02 = mVerts[0].Distance(mVerts[2]);
@@ -276,8 +265,7 @@ float Triangle::MaxEdgeLength() const
  *	\param		nearvtx		[out] index of nearest vertex
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Triangle::ComputePoint(float u, float v, Point &pt, uint32_t *nearvtx) const
-{
+void Triangle::ComputePoint(float u, float v, Point &pt, uint32_t *nearvtx) const {
     // Compute point coordinates
     pt = (1.0f - u - v) * mVerts[0] + u * mVerts[1] + v * mVerts[2];
 
@@ -293,8 +281,7 @@ void Triangle::ComputePoint(float u, float v, Point &pt, uint32_t *nearvtx) cons
     }
 }
 
-void Triangle::Inflate(float fat_coeff, bool constant_border)
-{
+void Triangle::Inflate(float fat_coeff, bool constant_border) {
     // Compute triangle center
     Point TriangleCenter;
     Center(TriangleCenter);

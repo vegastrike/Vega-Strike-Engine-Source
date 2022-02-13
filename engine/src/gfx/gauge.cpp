@@ -27,16 +27,14 @@
 
 #include "gauge.h"
 
-Gauge::Gauge(const char *file, DIRECTION up) : VSSprite(file)
-{
+Gauge::Gauge(const char *file, DIRECTION up) : VSSprite(file) {
     dir = up;
     float sx, sy;
     VSSprite::GetSize(sx, sy);
     SetSize(-sx, -sy);
 }
 
-void Gauge::SetSize(float x, float y)
-{
+void Gauge::SetSize(float x, float y) {
     if (dir == GAUGE_UP) {
         y = -y;
     } else if (dir == GAUGE_LEFT) {
@@ -45,8 +43,7 @@ void Gauge::SetSize(float x, float y)
     VSSprite::SetSize(x, y);
 }
 
-void Gauge::GetSize(float &x, float &y)
-{
+void Gauge::GetSize(float &x, float &y) {
     VSSprite::GetSize(x, y);
     if (dir == GAUGE_UP) {
         y = -y;
@@ -55,8 +52,7 @@ void Gauge::GetSize(float &x, float &y)
     }
 }
 
-void Gauge::Draw(float percentage)
-{
+void Gauge::Draw(float percentage) {
     if (percentage < 0) {
         percentage = 0;
     } else if (percentage > 1) {

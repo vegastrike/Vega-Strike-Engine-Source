@@ -75,8 +75,7 @@ using Audio::Vector3;
 
 using namespace XMLSupport;
 namespace BaseUtil {
-inline BaseInterface::Room *CheckRoom(int room)
-{
+inline BaseInterface::Room *CheckRoom(int room) {
     if (!BaseInterface::CurrentBase) {
         return 0;
     }
@@ -95,39 +94,32 @@ class VideoAudioStreamListener : public SourceListener {
     std::string index;
 
 public:
-    VideoAudioStreamListener(int sourceRoom, const std::string &index)
-    {
+    VideoAudioStreamListener(int sourceRoom, const std::string &index) {
         // Just play events
         events.attach =
-        events.update = 0;
+                events.update = 0;
         events.play = 1;
 
         this->sourceRoom = sourceRoom;
         this->index = index;
     }
 
-    virtual void onPreAttach(Source &source, bool detach)
-    {
+    virtual void onPreAttach(Source &source, bool detach) {
     };
 
-    virtual void onPostAttach(Source &source, bool detach)
-    {
+    virtual void onPostAttach(Source &source, bool detach) {
     };
 
-    virtual void onPrePlay(Source &source, bool stop)
-    {
+    virtual void onPrePlay(Source &source, bool stop) {
     };
 
-    virtual void onPostPlay(Source &source, bool stop)
-    {
+    virtual void onPostPlay(Source &source, bool stop) {
     };
 
-    virtual void onUpdate(Source &source, int updateFlags)
-    {
+    virtual void onUpdate(Source &source, int updateFlags) {
     };
 
-    virtual void onEndOfStream(Source &source)
-    {
+    virtual void onEndOfStream(Source &source) {
         // Verify context before switching rooms
         if (BaseInterface::CurrentBase != NULL) {
             if (BaseUtil::GetCurRoom() == sourceRoom) {
@@ -157,8 +149,7 @@ public:
     };
 };
 
-int Room(std::string text)
-{
+int Room(std::string text) {
     if (!BaseInterface::CurrentBase) {
         return -1;
     }
@@ -167,8 +158,7 @@ int Room(std::string text)
     return BaseInterface::CurrentBase->rooms.size() - 1;
 }
 
-void Texture(int room, std::string index, std::string file, float x, float y)
-{
+void Texture(int room, std::string index, std::string file, float x, float y) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -186,8 +176,7 @@ void Texture(int room, std::string index, std::string file, float x, float y)
     dynamic_cast< BaseInterface::Room::BaseVSSprite * > ( newroom->objs.back())->spr.SetPosition(x + tx, y + ty);
 }
 
-SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene)
-{
+SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene) {
     SharedPtr<Sound> sound = SceneManager::getSingleton()->getRenderer()->getSound(
             afile,
             VSFileSystem::VideoFile,
@@ -210,16 +199,14 @@ SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::st
     return source;
 }
 
-void DestroyVideoSoundStream(SharedPtr<Source> source, const std::string &scene)
-{
+void DestroyVideoSoundStream(SharedPtr<Source> source, const std::string &scene) {
     if (source->isPlaying()) {
         source->stopPlaying();
     }
     SceneManager::getSingleton()->getScene(scene)->remove(source);
 }
 
-bool Video(int room, std::string index, std::string vfile, std::string afile, float x, float y)
-{
+bool Video(int room, std::string index, std::string vfile, std::string afile, float x, float y) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return false;
@@ -248,8 +235,7 @@ bool Video(int room, std::string index, std::string vfile, std::string afile, fl
     return true;
 }
 
-bool VideoStream(int room, std::string index, std::string streamfile, float x, float y, float w, float h)
-{
+bool VideoStream(int room, std::string index, std::string streamfile, float x, float y, float w, float h) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         VS_LOG(error, "ERROR: Room not found!!\n");
@@ -276,8 +262,7 @@ bool VideoStream(int room, std::string index, std::string streamfile, float x, f
     return true;
 }
 
-void SetVideoCallback(int room, std::string index, std::string callback)
-{
+void SetVideoCallback(int room, std::string index, std::string callback) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -301,8 +286,7 @@ void SetVideoCallback(int room, std::string index, std::string callback)
     }
 }
 
-void SetTexture(int room, std::string index, std::string file)
-{
+void SetTexture(int room, std::string index, std::string file) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -317,8 +301,7 @@ void SetTexture(int room, std::string index, std::string file)
     }
 }
 
-void SetTextureSize(int room, std::string index, float w, float h)
-{
+void SetTextureSize(int room, std::string index, float w, float h) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -333,8 +316,7 @@ void SetTextureSize(int room, std::string index, float w, float h)
     }
 }
 
-void SetTexturePos(int room, std::string index, float x, float y)
-{
+void SetTexturePos(int room, std::string index, float x, float y) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -349,8 +331,7 @@ void SetTexturePos(int room, std::string index, float x, float y)
     }
 }
 
-void PlayVideo(int room, std::string index)
-{
+void PlayVideo(int room, std::string index) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -371,8 +352,7 @@ void PlayVideo(int room, std::string index)
     }
 }
 
-void StopVideo(int room, std::string index)
-{
+void StopVideo(int room, std::string index) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -393,16 +373,14 @@ void StopVideo(int room, std::string index)
     }
 }
 
-void SetDJEnabled(bool enabled)
-{
+void SetDJEnabled(bool enabled) {
     BaseInterface::CurrentBase->setDJEnabled(enabled);
     if (!enabled) {
         Music::Stop();
     }
 }
 
-void Ship(int room, std::string index, QVector pos, Vector Q, Vector R)
-{
+void Ship(int room, std::string index, QVector pos, Vector Q, Vector R) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -412,8 +390,7 @@ void Ship(int room, std::string index, QVector pos, Vector Q, Vector R)
     newroom->objs.push_back(new BaseInterface::Room::BaseShip(P.i, P.j, P.k, Q.i, Q.j, Q.k, R.i, R.j, R.k, pos, index));
 }
 
-void RunScript(int room, std::string ind, std::string pythonfile, float time)
-{
+void RunScript(int room, std::string ind, std::string pythonfile, float time) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -422,25 +399,23 @@ void RunScript(int room, std::string ind, std::string pythonfile, float time)
 }
 
 void TextBox(int room,
-             std::string ind,
-             std::string text,
-             float x,
-             float y,
-             Vector widheimult,
-             Vector backcol,
-             float backalp,
-             Vector forecol)
-{
+        std::string ind,
+        std::string text,
+        float x,
+        float y,
+        Vector widheimult,
+        Vector backcol,
+        float backalp,
+        Vector forecol) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
     }
     newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k,
-                                                              GFXColor(backcol, backalp), GFXColor(forecol), ind));
+            GFXColor(backcol, backalp), GFXColor(forecol), ind));
 }
 
-void SetTextBoxText(int room, std::string index, std::string text)
-{
+void SetTextBoxText(int room, std::string index, std::string text) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -455,8 +430,7 @@ void SetTextBoxText(int room, std::string index, std::string text)
     }
 }
 
-void SetLinkArea(int room, std::string index, float x, float y, float wid, float hei)
-{
+void SetLinkArea(int room, std::string index, float x, float y, float wid, float hei) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -473,8 +447,7 @@ void SetLinkArea(int room, std::string index, float x, float y, float wid, float
     }
 }
 
-void SetLinkText(int room, std::string index, std::string text)
-{
+void SetLinkText(int room, std::string index, std::string text) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -488,8 +461,7 @@ void SetLinkText(int room, std::string index, std::string text)
     }
 }
 
-void SetLinkPython(int room, std::string index, std::string python)
-{
+void SetLinkPython(int room, std::string index, std::string python) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -503,8 +475,7 @@ void SetLinkPython(int room, std::string index, std::string python)
     }
 }
 
-void SetLinkRoom(int room, std::string index, int to)
-{
+void SetLinkRoom(int room, std::string index, int to) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -519,8 +490,7 @@ void SetLinkRoom(int room, std::string index, int to)
     }
 }
 
-void SetLinkEventMask(int room, std::string index, std::string maskdef)
-{
+void SetLinkEventMask(int room, std::string index, std::string maskdef) {
     size_t i;
     //c=click, u=up, d=down, e=enter, l=leave, m=move
     unsigned int mask = 0;
@@ -549,7 +519,7 @@ void SetLinkEventMask(int room, std::string index, std::string maskdef)
             case 'm':
             case 'M':
                 VS_LOG(warning,
-                       (boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__));
+                        (boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__));
                 break;
         }
     }
@@ -568,13 +538,12 @@ void SetLinkEventMask(int room, std::string index, std::string maskdef)
 }
 
 static void BaseLink(BaseInterface::Room *room,
-                     float x,
-                     float y,
-                     float wid,
-                     float hei,
-                     std::string text,
-                     bool reverse = false)
-{
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text,
+        bool reverse = false) {
     BaseInterface::Room::Link *lnk;
     if (reverse) {
         lnk = room->links.front();
@@ -588,21 +557,19 @@ static void BaseLink(BaseInterface::Room *room,
     lnk->text = text;
 }
 
-void Link(int room, std::string index, float x, float y, float wid, float hei, std::string text, int to)
-{
+void Link(int room, std::string index, float x, float y, float wid, float hei, std::string text, int to) {
     LinkPython(room, index, "", x, y, wid, hei, text, to);
 }
 
 void LinkPython(int room,
-                std::string index,
-                std::string pythonfile,
-                float x,
-                float y,
-                float wid,
-                float hei,
-                std::string text,
-                int to)
-{
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text,
+        int to) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -612,20 +579,18 @@ void LinkPython(int room,
     ((BaseInterface::Room::Goto *) newroom->links.back())->index = to;
 }
 
-void Launch(int room, std::string index, float x, float y, float wid, float hei, std::string text)
-{
+void Launch(int room, std::string index, float x, float y, float wid, float hei, std::string text) {
     LaunchPython(room, index, "", x, y, wid, hei, text);
 }
 
 void LaunchPython(int room,
-                  std::string index,
-                  std::string pythonfile,
-                  float x,
-                  float y,
-                  float wid,
-                  float hei,
-                  std::string text)
-{
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -635,14 +600,13 @@ void LaunchPython(int room,
 }
 
 void EjectPython(int room,
-                 std::string index,
-                 std::string pythonfile,
-                 float x,
-                 float y,
-                 float wid,
-                 float hei,
-                 std::string text)
-{
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -651,21 +615,19 @@ void EjectPython(int room,
     BaseLink(newroom, x, y, wid, hei, text);
 }
 
-void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes)
-{
+void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes) {
     CompPython(room, index, "", x, y, wid, hei, text, modes);
 }
 
 void CompPython(int room,
-                std::string index,
-                std::string pythonfile,
-                float x,
-                float y,
-                float wid,
-                float hei,
-                std::string text,
-                std::string modes)
-{
+        std::string index,
+        std::string pythonfile,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text,
+        std::string modes) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -707,22 +669,21 @@ void CompPython(int room,
             newcomp->modes.push_back((BaseComputer::DisplayMode) (modearg));
         } else {
             VS_LOG(warning,
-                   (boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode));
+                    (boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode));
         }
     }
     delete[] curmode;
 }
 
 void Python(int room,
-            std::string index,
-            float x,
-            float y,
-            float wid,
-            float hei,
-            std::string text,
-            std::string pythonfile,
-            bool front)
-{
+        std::string index,
+        float x,
+        float y,
+        float wid,
+        float hei,
+        std::string text,
+        std::string pythonfile,
+        bool front) {
     //instead of "Talk"/"Say" tags
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
@@ -737,49 +698,43 @@ void Python(int room,
     BaseLink(newroom, x, y, wid, hei, text, front);
 }
 
-void GlobalKeyPython(std::string pythonfile)
-{
+void GlobalKeyPython(std::string pythonfile) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->python_kbhandler = pythonfile;
     }
 }
 
-void MessageToRoom(int room, std::string text)
-{
+void MessageToRoom(int room, std::string text) {
     if (!BaseInterface::CurrentBase) {
         return;
     }
     BaseInterface::CurrentBase->rooms[room]->objs
-                                           .push_back(new BaseInterface::Room::BaseTalk(text, "currentmsg", true));
+            .push_back(new BaseInterface::Room::BaseTalk(text, "currentmsg", true));
 }
 
-void EnqueueMessageToRoom(int room, std::string text)
-{
+void EnqueueMessageToRoom(int room, std::string text) {
     if (!BaseInterface::CurrentBase) {
         return;
     }
     BaseInterface::CurrentBase->rooms[room]->objs
-                                           .push_back(new BaseInterface::Room::BaseTalk(text, "currentmsg", false));
+            .push_back(new BaseInterface::Room::BaseTalk(text, "currentmsg", false));
 }
 
-void Message(std::string text)
-{
+void Message(std::string text) {
     if (!BaseInterface::CurrentBase) {
         return;
     }
     MessageToRoom(BaseInterface::CurrentBase->curroom, text);
 }
 
-void EnqueueMessage(std::string text)
-{
+void EnqueueMessage(std::string text) {
     if (!BaseInterface::CurrentBase) {
         return;
     }
     EnqueueMessageToRoom(BaseInterface::CurrentBase->curroom, text);
 }
 
-void EraseLink(int room, std::string index)
-{
+void EraseLink(int room, std::string index) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -795,8 +750,7 @@ void EraseLink(int room, std::string index)
     }
 }
 
-void EraseObj(int room, std::string index)
-{
+void EraseObj(int room, std::string index) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -812,16 +766,14 @@ void EraseObj(int room, std::string index)
     }
 }
 
-int GetCurRoom()
-{
+int GetCurRoom() {
     if (!BaseInterface::CurrentBase) {
         return -1;
     }
     return BaseInterface::CurrentBase->curroom;
 }
 
-void SetCurRoom(int room)
-{
+void SetCurRoom(int room) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -832,41 +784,35 @@ void SetCurRoom(int room)
     BaseInterface::CurrentBase->GotoLink(room);
 }
 
-int GetNumRoom()
-{
+int GetNumRoom() {
     if (!BaseInterface::CurrentBase) {
         return -1;
     }
     return BaseInterface::CurrentBase->rooms.size();
 }
 
-bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory)
-{
+bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory) {
     Unit *base = BaseInterface::CurrentBase->baseun.GetUnit();
     Unit *un = BaseInterface::CurrentBase->caller.GetUnit();
     return ::buyShip(base, un, name, my_fleet, force_base_inventory, NULL);
 }
 
-bool SellShip(std::string name)
-{
+bool SellShip(std::string name) {
     Unit *base = BaseInterface::CurrentBase->baseun.GetUnit();
     Unit *un = BaseInterface::CurrentBase->caller.GetUnit();
     return ::sellShip(base, un, name, NULL);
 }
 
-Dictionary &_GetEventData()
-{
+Dictionary &_GetEventData() {
     static BoostPythonDictionary data;
     return data;
 }
 
-void SetEventData(BoostPythonDictionary data)
-{
+void SetEventData(BoostPythonDictionary data) {
     _GetEventData() = data;
 }
 
-void SetMouseEventData(std::string type, float x, float y, int buttonMask)
-{
+void SetMouseEventData(std::string type, float x, float y, int buttonMask) {
     BoostPythonDictionary &data = _GetEventData();
 
     //Event type
@@ -880,8 +826,7 @@ void SetMouseEventData(std::string type, float x, float y, int buttonMask)
     SetKeyStatusEventData();
 }
 
-void SetKeyStatusEventData(unsigned int modmask)
-{
+void SetKeyStatusEventData(unsigned int modmask) {
     BoostPythonDictionary &data = _GetEventData();
     //Keyboard modifiers (for kb+mouse)
     if (modmask == UINT_MAX) {
@@ -893,8 +838,7 @@ void SetKeyStatusEventData(unsigned int modmask)
     data["ctrl"] = ((modmask & KB_MOD_CTRL) != 0);
 }
 
-void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask)
-{
+void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask) {
     BoostPythonDictionary &data = _GetEventData();
 
     //Event type
@@ -910,13 +854,11 @@ void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmas
     SetKeyStatusEventData(modmask);
 }
 
-const Dictionary &GetEventData()
-{
+const Dictionary &GetEventData() {
     return _GetEventData();
 }
 
-float GetTextHeight(std::string text, Vector widheimult)
-{
+float GetTextHeight(std::string text, Vector widheimult) {
     static bool force_highquality = true;
     static bool use_bit = force_highquality
             || XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
@@ -924,19 +866,16 @@ float GetTextHeight(std::string text, Vector widheimult)
     return use_bit ? getFontHeight() : (font_point * 2 / g_game.y_resolution);
 }
 
-float GetTextWidth(std::string text, Vector widheimult)
-{
+float GetTextWidth(std::string text, Vector widheimult) {
     //Unsupported for now
     return 0;
 }
 
-void LoadBaseInterface(string name)
-{
+void LoadBaseInterface(string name) {
     LoadBaseInterfaceAtDock(name, UniverseUtil::getPlayer(), UniverseUtil::getPlayer());
 }
 
-void LoadBaseInterfaceAtDock(string name, Unit *dockat, Unit *dockee)
-{
+void LoadBaseInterfaceAtDock(string name, Unit *dockat, Unit *dockee) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->Terminate();
     }
@@ -944,8 +883,7 @@ void LoadBaseInterfaceAtDock(string name, Unit *dockat, Unit *dockee)
     base->InitCallbacks();
 }
 
-void refreshBaseComputerUI(const Cargo *carg)
-{
+void refreshBaseComputerUI(const Cargo *carg) {
     if (carg) {
         //BaseComputer::draw() used dirty to determine what to recalculate.
         BaseComputer::dirty = 1;               //everything.
@@ -954,8 +892,7 @@ void refreshBaseComputerUI(const Cargo *carg)
     }               //only title.
 }
 
-void ExitGame()
-{
+void ExitGame() {
     CockpitKeys::QuitNow();
 }
 }

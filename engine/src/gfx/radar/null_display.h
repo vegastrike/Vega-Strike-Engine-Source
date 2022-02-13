@@ -37,8 +37,7 @@ namespace Radar {
 class NullDisplay : public Display {
 public:
     // Shows nothing
-    void Draw(const Sensor &, VSSprite *, VSSprite *)
-    {
+    void Draw(const Sensor &, VSSprite *, VSSprite *) {
     }
 };
 

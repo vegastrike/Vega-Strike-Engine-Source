@@ -30,8 +30,7 @@ int RANDOMIZED = 0;
 // Gets the next parameter from the string, sorted by a space
 // Sticks a \0 at the space and returns a pointer to the right side.
 
-char *next_parm(char *string)
-{
+char *next_parm(char *string) {
     char *next;
     if (string[0] == '\0') {
         return 0;
@@ -86,8 +85,7 @@ char *split_words(char *string, int max_words) {
 
 // Better yet, use glib
 
-char *ptr_copy(const char *string)
-{
+char *ptr_copy(const char *string) {
 #if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
     return strdup(string);
 #elif defined (_WINDOWS)
@@ -111,13 +109,12 @@ char *ptr_copy(const char *string)
 /* chomp
  * This function replaces trailing \n (carriage return) with the null character
  */
-void chomp(char *line)
-{
+void chomp(char *line) {
     int
             current; //[MSVC-Warn] size_t vs (signed) int -- however, cannot convert to size_t without adding additional logic check re: strlen !=0 -- TODO -- fix this in another patch
     for (current = strlen(line) - 1;
-         current >= 0 && (line[current] == '\n' || line[current] == ' ' || line[current] == 13);
-         current--) //TODO[String Safety] -- strlen assumes null terminated string
+            current >= 0 && (line[current] == '\n' || line[current] == ' ' || line[current] == 13);
+            current--) //TODO[String Safety] -- strlen assumes null terminated string
     {
         line[current] = '\0';
     }
@@ -128,8 +125,7 @@ void chomp(char *line)
  * returns a pointer to the new starting character
  */
 
-char *pre_chomp(char *line)
-{
+char *pre_chomp(char *line) {
     while (line[0] == '=' || line[0] == ' ' || line[0] == 13 || line[0] == 9) {
         line++;
     }
@@ -182,8 +178,7 @@ char *pre_chomp(char *line)
 *	return line;
 *}
 */
-char *strmov(char *to, char *from)
-{
+char *strmov(char *to, char *from) {
     char *end;
     strcpy(to, from); //TODO[String Safety] -- uses naked strcpy and strlen ! //[MSVC-Warn]
     end = to + strlen(to);
@@ -194,8 +189,7 @@ char *strmov(char *to, char *from)
  * This function makes sure all characters are in lower case
  */
 
-void lower(char *line)
-{
+void lower(char *line) {
     int current;
     for (current = 0; line[current] != '\0'; current++) {
         if (line[current] >= 65 && line[current] <= 90) {
@@ -204,16 +198,14 @@ void lower(char *line)
     }
 }
 
-void strappend(char *dest, char *source, int length)
-{
+void strappend(char *dest, char *source, int length) {
     size_t DoLength;
     DoLength = length - strlen(dest); //TODO[String Safety] -- strlen assumes null terminated string
     strncat(dest, source, DoLength); //[MSVC-Warn]
     return;
 }
 
-int randnum(int start, int end)
-{
+int randnum(int start, int end) {
     int random, dif, min, max;
     if (RANDOMIZED == 0) {
         srand((unsigned int) time(NULL));
@@ -234,8 +226,7 @@ int randnum(int start, int end)
     return random;
 }
 
-void randcode(char *line, int length)
-{
+void randcode(char *line, int length) {
     int current, randomA, randomB, test;
     test = 2;
     for (current = 0; current < length; current++) {
@@ -259,8 +250,7 @@ void randcode(char *line, int length)
     return;
 }
 
-void vs_itoa(char *line, int number, int length)
-{
+void vs_itoa(char *line, int number, int length) {
     int current, cur, multiplier, reduce, base;
     base = number;
     cur = 0;
@@ -289,8 +279,7 @@ void vs_itoa(char *line, int number, int length)
     return;
 }
 
-int pwer(int start, int end)
-{
+int pwer(int start, int end) {
     int current, val_return;
     val_return = start;
     for (current = 2; current <= end; current++) {
@@ -299,8 +288,7 @@ int pwer(int start, int end)
     return val_return;
 }
 
-int pwr(int start, int end)
-{
+int pwr(int start, int end) {
     int current, val_return;
     val_return = 1;
     for (current = 2; current <= end; ++current) {
@@ -311,8 +299,7 @@ int pwr(int start, int end)
 
 #ifdef __cplusplus
 
-double pwer(double start, long end)
-{
+double pwer(double start, long end) {
     double current, val_return;
     val_return = start;
     for (current = 2; current <= end; current++) {
@@ -323,8 +310,7 @@ double pwer(double start, long end)
 
 #endif
 
-void btoa(char *dest, char *string)
-{
+void btoa(char *dest, char *string) {
     int max, cur, pos, new_val;
     char *ptr_char;
     char *new_string =
@@ -385,8 +371,7 @@ void SetString(GString **ptr, char *line)
 
 #endif
 
-char *NewString(const char *line)
-{
+char *NewString(const char *line) {
     char *new_str;
     size_t inLength = strlen(line); //TODO[String Safety] -- uses strlen, ergo assumes null terminated string
     new_str = (char *) malloc(inLength + 1);
@@ -401,8 +386,7 @@ char *NewString(const char *line)
 
 // Checks for a <!-- and returns a pointer to the next character
 // A \0 is placed at the < so that anything in front can be kept
-char *xml_pre_chomp_comment(char *string)
-{
+char *xml_pre_chomp_comment(char *string) {
     int length, cur;
     if (string[0] == '<' && string[1] == '!') {
         string[0] = '\0';
@@ -419,8 +403,7 @@ char *xml_pre_chomp_comment(char *string)
     return &string[length + 5];
 }
 
-char *xml_chomp_comment(char *string)
-{
+char *xml_chomp_comment(char *string) {
     int len, cur;
     if (string[0] == '\0') {
         return string;

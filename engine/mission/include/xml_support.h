@@ -48,8 +48,7 @@ struct Attribute {
     string name;
     string value;
 
-    Attribute(string name, string value) : name(name), value(value)
-    {
+    Attribute(string name, string value) : name(name), value(value) {
     };
 };
 
@@ -72,8 +71,7 @@ public:
         string name;
         int val;
 
-        Pair(const string c, int v)
-        {
+        Pair(const string c, int v) {
             name = c;
             val = v;
         }
@@ -90,15 +88,13 @@ public:
   string tostring(float num);
 */
 //#ifdef WIN32
-string inline tostring(int num)
-{
+string inline tostring(int num) {
     char tmp[256];
     sprintf(tmp, "%d", num);
     return string(tmp);
 }
 
-string inline tostring(float num)
-{
+string inline tostring(float num) {
     char tmp[256];
     sprintf(tmp, "%f", num);
     return string(tmp);

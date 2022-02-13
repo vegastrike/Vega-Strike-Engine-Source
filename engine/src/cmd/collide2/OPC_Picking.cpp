@@ -39,11 +39,9 @@ namespace Opcode {
 
 */
 
-bool SetupAllHits(RayCollider &collider, CollisionFaces &contacts)
-{
+bool SetupAllHits(RayCollider &collider, CollisionFaces &contacts) {
     struct Local {
-        static void AllContacts(const CollisionFace &hit, void *user_data)
-        {
+        static void AllContacts(const CollisionFace &hit, void *user_data) {
             CollisionFaces *CF = (CollisionFaces *) user_data;
             CF->AddFace(hit);
         }
@@ -55,11 +53,9 @@ bool SetupAllHits(RayCollider &collider, CollisionFaces &contacts)
     return true;
 }
 
-bool SetupClosestHit(RayCollider &collider, CollisionFace &closest_contact)
-{
+bool SetupClosestHit(RayCollider &collider, CollisionFace &closest_contact) {
     struct Local {
-        static void ClosestContact(const CollisionFace &hit, void *user_data)
-        {
+        static void ClosestContact(const CollisionFace &hit, void *user_data) {
             CollisionFace *CF = (CollisionFace *) user_data;
             if (hit.mDistance < CF->mDistance) {
                 *CF = hit;
@@ -74,15 +70,13 @@ bool SetupClosestHit(RayCollider &collider, CollisionFace &closest_contact)
     return true;
 }
 
-bool SetupShadowFeeler(RayCollider &collider)
-{
+bool SetupShadowFeeler(RayCollider &collider) {
     collider.SetFirstContact(true);
     collider.SetHitCallback(nullptr);
     return true;
 }
 
-bool SetupInOutTest(RayCollider &collider)
-{
+bool SetupInOutTest(RayCollider &collider) {
     collider.SetFirstContact(false);
     collider.SetHitCallback(nullptr);
     // Results with collider.GetNbIntersections()
@@ -92,8 +86,7 @@ bool SetupInOutTest(RayCollider &collider)
 bool Picking(
         CollisionFace &picked_face,
         const Ray &world_ray, const Model &model, const Matrix4x4 *world,
-        float min_dist, float max_dist, const Point &view_point, CullModeCallback callback, void *user_data)
-{
+        float min_dist, float max_dist, const Point &view_point, CullModeCallback callback, void *user_data) {
     struct Local {
         struct CullData {
             CollisionFace *Closest;
@@ -105,8 +98,7 @@ bool Picking(
         };
 
         // Called for each stabbed face
-        static void RenderCullingCallback(const CollisionFace &hit, void *user_data)
-        {
+        static void RenderCullingCallback(const CollisionFace &hit, void *user_data) {
             CullData *Data = (CullData *) user_data;
 
             // Discard face if we already have a closer hit

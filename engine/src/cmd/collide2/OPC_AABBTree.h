@@ -87,13 +87,11 @@ class OPCODE_API AABBTreeNode {
 IMPLEMENT_TREE(AABBTreeNode, AABB)
 public:
     // Data access
-    inline_    const uint32_t *GetPrimitives() const
-    {
+    inline_    const uint32_t *GetPrimitives() const {
         return mNodePrimitives;
     }
 
-    inline_    uint32_t GetNbPrimitives() const
-    {
+    inline_    uint32_t GetNbPrimitives() const {
         return mNbPrimitives;
     }
 
@@ -129,12 +127,10 @@ public:
     void Release();
 
     // Data access
-    inline_    const uint32_t *GetIndices() const
-    {
+    inline_    const uint32_t *GetIndices() const {
         return mIndices;
     }    //!< Catch the indices
-    inline_    uint32_t GetNbNodes() const
-    {
+    inline_    uint32_t GetNbNodes() const {
         return mTotalNbNodes;
     }    //!< Catch the number of nodes
 

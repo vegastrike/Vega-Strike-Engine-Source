@@ -81,8 +81,7 @@ LOCALCONST_DEF(VSImage, int, SIZEOF_BITMAPINFOHEADER, sizeof(DWORD) + sizeof(LON
         * sizeof(DWORD) + 2 * sizeof(LONG) + 2 * sizeof(DWORD))
 LOCALCONST_DEF(VSImage, int, SIZEOF_RGBQUAD, sizeof(BYTE) * 4)
 
-VSImage::VSImage()
-{
+VSImage::VSImage() {
     this->img_depth = 8;
     this->img_color_type = 8;
     this->sizeY = 1;
@@ -91,16 +90,14 @@ VSImage::VSImage()
     this->mode = _24BIT;
 }
 
-void VSImage::Init()
-{
+void VSImage::Init() {
     this->tt = NULL;
     this->img_type = Unrecognized;
     //this->tex->palette = NULL;
     this->strip_16 = false;
 }
 
-void VSImage::Init(VSFile *f, textureTransform *t, bool strip, VSFile *f2)
-{
+void VSImage::Init(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
     assert(f != NULL);
 
     this->Init();
@@ -111,19 +108,16 @@ void VSImage::Init(VSFile *f, textureTransform *t, bool strip, VSFile *f2)
     this->strip_16 = strip;
 }
 
-VSImage::VSImage(VSFile *f, textureTransform *t, bool strip, VSFile *f2)
-{
+VSImage::VSImage(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
     this->mode = _24BIT;
     this->Init(f, t, strip, f2);
 }
 
-VSImage::~VSImage()
-{
+VSImage::~VSImage() {
     //img_file? and tt should not be deleted since they are passed as args to the class
 }
 
-unsigned char *VSImage::ReadImage(VSFile *f, textureTransform *t, bool strip, VSFile *f2)
-{
+unsigned char *VSImage::ReadImage(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
     try {
         this->Init(f, t, strip, f2);
 
@@ -155,8 +149,7 @@ unsigned char *VSImage::ReadImage(VSFile *f, textureTransform *t, bool strip, VS
     }
 }
 
-VSError VSImage::CheckPNGSignature(VSFile *file)
-{
+VSError VSImage::CheckPNGSignature(VSFile *file) {
     //Do standard reading of the file
     unsigned char sig[8];
     file->Begin();
@@ -168,8 +161,7 @@ VSError VSImage::CheckPNGSignature(VSFile *file)
     }
 }
 
-VSError VSImage::CheckJPEGSignature(VSFile *file)
-{
+VSError VSImage::CheckJPEGSignature(VSFile *file) {
     VSError ret = Ok;
 
     //First 4 aren't known to me
@@ -186,8 +178,7 @@ VSError VSImage::CheckJPEGSignature(VSFile *file)
     return ret;
 }
 
-VSError VSImage::CheckBMPSignature(VSFile *file)
-{
+VSError VSImage::CheckBMPSignature(VSFile *file) {
     VSError ret = Ok;
 
     char head1;
@@ -203,8 +194,7 @@ VSError VSImage::CheckBMPSignature(VSFile *file)
     return ret;
 }
 
-VSError VSImage::CheckDDSSignature(VSFile *file)
-{
+VSError VSImage::CheckDDSSignature(VSFile *file) {
     VSError ret = Ok;
     char ddsfile[5];
     file->Begin();
@@ -216,8 +206,7 @@ VSError VSImage::CheckDDSSignature(VSFile *file)
     return ret;
 }
 
-void VSImage::CheckFormat(VSFile *file)
-{
+void VSImage::CheckFormat(VSFile *file) {
     if (this->CheckDDSSignature(file) == Ok) {
         VS_LOG(trace, "\tFound a DDS file");
         this->img_type = DdsImage;
@@ -240,16 +229,14 @@ void VSImage::CheckFormat(VSFile *file)
     }
 }
 
-void PngReadFunc(png_struct *Png, png_bytep buf, png_size_t size)
-{
+void PngReadFunc(png_struct *Png, png_bytep buf, png_size_t size) {
     VS_LOG(trace, (boost::format("Preparing to copy %1% bytes from PngFileBuffer") % size));
     TPngFileBuffer *PngFileBuffer = (TPngFileBuffer *) png_get_io_ptr(Png);
     memcpy(buf, PngFileBuffer->Buffer + PngFileBuffer->Pos, size);
     PngFileBuffer->Pos += size;
 }
 
-static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
-{
+static void png_cexcept_error(png_structp png_ptr, png_const_charp msg) {
     if (png_ptr) {
     }
 //#ifndef PNG_NO_CONSOLE_IO
@@ -257,8 +244,7 @@ static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 //#endif
 }
 
-unsigned char *VSImage::ReadPNG()
-{
+unsigned char *VSImage::ReadPNG() {
     png_bytepp row_pointers = NULL;
     unsigned char *image = NULL;
 
@@ -284,9 +270,9 @@ unsigned char *VSImage::ReadPNG()
             PngFileBuffer.Pos = 8;
         }
         png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                         NULL,
-                                         (png_error_ptr) png_cexcept_error,
-                                         (png_error_ptr) NULL);
+                NULL,
+                (png_error_ptr) png_cexcept_error,
+                (png_error_ptr) NULL);
         if (png_ptr == NULL) {
             VS_LOG(error, "VSImage ERROR : PNG ptr == NULL !!!");
             VS_LOG_AND_FLUSH(error, img_file->GetFilename());
@@ -322,14 +308,14 @@ unsigned char *VSImage::ReadPNG()
         this->img_sides = SIDE_SINGLE;
 
         png_get_IHDR(png_ptr,
-                     info_ptr,
-                     (png_uint_32 *) &this->sizeX,
-                     (png_uint_32 *) &this->sizeY,
-                     &this->img_depth,
-                     &this->img_color_type,
-                     &interlace_type,
-                     NULL,
-                     NULL);
+                info_ptr,
+                (png_uint_32 *) &this->sizeX,
+                (png_uint_32 *) &this->sizeY,
+                &this->img_depth,
+                &this->img_color_type,
+                &interlace_type,
+                NULL,
+                NULL);
         VS_LOG(trace, (boost::format("1. Loading a PNG file: width = %1% , height = %2% , depth = %3% , img "
                                      "color = %4% , interlace = %5% ")
                 % sizeX
@@ -357,14 +343,14 @@ unsigned char *VSImage::ReadPNG()
         this->sizeY = 1;
         this->img_depth = 8;
         png_get_IHDR(png_ptr,
-                     info_ptr,
-                     (png_uint_32 *) &this->sizeX,
-                     (png_uint_32 *) &this->sizeY,
-                     &this->img_depth,
-                     &this->img_color_type,
-                     &interlace_type,
-                     NULL,
-                     NULL);
+                info_ptr,
+                (png_uint_32 *) &this->sizeX,
+                (png_uint_32 *) &this->sizeY,
+                &this->img_depth,
+                &this->img_color_type,
+                &interlace_type,
+                NULL,
+                NULL);
         VS_LOG(trace, (boost::format("2. Loading a PNG file : width = %1% , height = %2% , depth = %3% , "
                                      "img_color = %4% , interlace = %5%")
                 % sizeX
@@ -395,7 +381,7 @@ unsigned char *VSImage::ReadPNG()
         }
         unsigned long stride = numchan * sizeof(unsigned char) * this->img_depth / 8;
         VS_LOG(trace,
-               (boost::format("3. Allocating image buffer of size = %1% ") % (stride * this->sizeX * this->sizeY)));
+                (boost::format("3. Allocating image buffer of size = %1% ") % (stride * this->sizeX * this->sizeY)));
         image = (unsigned char *) malloc(stride * this->sizeX * this->sizeY);
         for (unsigned int i = 0; i < this->sizeY; i++) {
             row_pointers[i] = &image[i * stride * this->sizeX];
@@ -440,8 +426,7 @@ struct my_error_mgr {
     jmp_buf setjmp_buffer;     //for return to caller
 };
 
-METHODDEF(void) my_error_exit(j_common_ptr cinfo)
-{
+METHODDEF(void) my_error_exit(j_common_ptr cinfo) {
     //cinfo->err really points to a my_error_mgr struct, so coerce pointer
     my_error_mgr *myerr = (my_error_mgr *) cinfo->err;
 
@@ -453,8 +438,7 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo)
     longjmp(myerr->setjmp_buffer, 1);
 }
 
-unsigned char *VSImage::ReadJPEG()
-{
+unsigned char *VSImage::ReadJPEG() {
     unsigned char *image = NULL;
     JSAMPARRAY row_pointers = NULL; //Output row buffer
 
@@ -559,8 +543,7 @@ unsigned char *VSImage::ReadJPEG()
     }
 }
 
-unsigned char *VSImage::ReadBMP()
-{
+unsigned char *VSImage::ReadBMP() {
     unsigned char *data = NULL;
     unsigned char *cdata = NULL;
     unsigned char *adata = NULL;
@@ -701,8 +684,7 @@ unsigned char *VSImage::ReadBMP()
 
 #define IS_POT(x) ( !( (x)& ( (x)-1 ) ) )
 
-unsigned char *VSImage::ReadDDS()
-{
+unsigned char *VSImage::ReadDDS() {
     ddsHeader header;
     unsigned int type = GL_RGB;
     int blockSize = 16;
@@ -858,8 +840,7 @@ unsigned char *VSImage::ReadDDS()
     }
 }
 
-void VSImage::AllocatePalette()
-{
+void VSImage::AllocatePalette() {
     //FIXME deal with palettes and grayscale with alpha
     if (!(img_color_type & PNG_HAS_COLOR) || (img_color_type & PNG_HAS_PALETTE)) {
         if (!(img_color_type & PNG_HAS_COLOR)) {
@@ -875,15 +856,14 @@ void VSImage::AllocatePalette()
 }
 
 VSError VSImage::WriteImage(char *filename,
-                            unsigned char *data,
-                            VSImageType type,
-                            unsigned int width,
-                            unsigned int height,
-                            bool alpha,
-                            char bpp,
-                            VSFileType ft,
-                            bool flip)
-{
+        unsigned char *data,
+        VSImageType type,
+        unsigned int width,
+        unsigned int height,
+        bool alpha,
+        char bpp,
+        VSFileType ft,
+        bool flip) {
     this->img_type = type;
     VSFile f;
     VSError err = f.OpenCreateWrite(filename, ft);
@@ -898,14 +878,13 @@ VSError VSImage::WriteImage(char *filename,
 }
 
 VSError VSImage::WriteImage(VSFile *pf,
-                            unsigned char *data,
-                            VSImageType type,
-                            unsigned int width,
-                            unsigned int height,
-                            bool alpha,
-                            char bpp,
-                            bool flip)
-{
+        unsigned char *data,
+        VSImageType type,
+        unsigned int width,
+        unsigned int height,
+        bool alpha,
+        char bpp,
+        bool flip) {
     VSError ret = BadFormat;
 
     this->img_file = pf;
@@ -937,8 +916,7 @@ VSError VSImage::WriteImage(VSFile *pf,
     return ret;
 }
 
-VSError VSImage::WritePNG(unsigned char *data)
-{
+VSError VSImage::WritePNG(unsigned char *data) {
     png_structp png_ptr = png_create_write_struct
             (PNG_LIBPNG_VER_STRING, (png_voidp) NULL, NULL, NULL);
     if (!png_ptr) {
@@ -967,14 +945,14 @@ VSError VSImage::WritePNG(unsigned char *data)
     png_set_compression_method(png_ptr, 8);
 
     png_set_IHDR(png_ptr,
-                 info_ptr,
-                 this->sizeX,
-                 this->sizeY,
-                 this->img_depth,
-                 this->img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT,
-                 PNG_FILTER_TYPE_DEFAULT);
+            info_ptr,
+            this->sizeX,
+            this->sizeY,
+            this->img_depth,
+            this->img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
+            PNG_INTERLACE_NONE,
+            PNG_COMPRESSION_TYPE_DEFAULT,
+            PNG_FILTER_TYPE_DEFAULT);
 
     png_write_info(png_ptr, info_ptr);
 # if __BYTE_ORDER != __BIG_ENDIAN
@@ -1003,12 +981,10 @@ VSError VSImage::WritePNG(unsigned char *data)
     return Ok;
 }
 
-VSError VSImage::WriteJPEG(unsigned char *data)
-{
+VSError VSImage::WriteJPEG(unsigned char *data) {
     return BadFormat;
 }
 
-VSError VSImage::WriteBMP(unsigned char *data)
-{
+VSError VSImage::WriteBMP(unsigned char *data) {
     return BadFormat;
 }

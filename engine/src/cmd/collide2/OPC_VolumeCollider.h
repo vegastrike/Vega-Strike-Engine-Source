@@ -28,12 +28,10 @@
 #define __OPC_VOLUMECOLLIDER_H__
 
 struct OPCODE_API VolumeCache {
-    VolumeCache() : Model(nullptr)
-    {
+    VolumeCache() : Model(nullptr) {
     }
 
-    ~VolumeCache()
-    {
+    ~VolumeCache() {
     }
 
     Container TouchedPrimitives;    //!< Indices of touched primitives
@@ -56,8 +54,7 @@ public:
      *	\return		the number of touched primitives
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbTouchedPrimitives() const
-    {
+    inline_                uint32_t GetNbTouchedPrimitives() const {
         return mTouchedPrimitives ? mTouchedPrimitives->GetNbEntries() : 0;
     }
 
@@ -69,8 +66,7 @@ public:
      *	\return		the list of touched primitives (primitive indices)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_        const uint32_t *GetTouchedPrimitives() const
-    {
+    inline_        const uint32_t *GetTouchedPrimitives() const {
         return mTouchedPrimitives ? mTouchedPrimitives->GetEntries() : nullptr;
     }
 
@@ -83,8 +79,7 @@ public:
      *	\return		the number of Volume-BV tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbVolumeBVTests() const
-    {
+    inline_                uint32_t GetNbVolumeBVTests() const {
         return mNbVolumeBVTests;
     }
 
@@ -95,8 +90,7 @@ public:
      *	\return		the number of Volume-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbVolumePrimTests() const
-    {
+    inline_                uint32_t GetNbVolumePrimTests() const {
         return mNbVolumePrimTests;
     }
 
@@ -131,16 +125,14 @@ protected:
      *	Initializes a query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    override(Collider) inline_    void InitQuery()
-    {
+    override(Collider) inline_    void InitQuery() {
         // Reset stats & contact status
         mNbVolumeBVTests = 0;
         mNbVolumePrimTests = 0;
         Collider::InitQuery();
     }
 
-    inline_                BOOL IsCacheValid(VolumeCache &cache)
-    {
+    inline_                BOOL IsCacheValid(VolumeCache &cache) {
         // We're going to do a volume-vs-model query.
         if (cache.Model != mCurrentModel) {
             // Cached list was for another model so we can't keep it

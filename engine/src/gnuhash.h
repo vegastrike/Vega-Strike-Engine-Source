@@ -36,8 +36,7 @@ template<>
 struct hash<void *> {
     hash<size_t> a;
 public:
-    size_t operator()(const void *key) const
-    {
+    size_t operator()(const void *key) const {
         return a((size_t) key);
     }
 };
@@ -45,8 +44,7 @@ template<>
 struct hash<const void *> {
     hash<size_t> a;
 public:
-    size_t operator()(const void *const &key) const
-    {
+    size_t operator()(const void *const &key) const {
         return a((size_t) key);
     }
 };
@@ -55,8 +53,7 @@ template<>
 struct hash<const Unit *> {
     hash<size_t> a;
 public:
-    size_t operator()(const Unit *const &key) const
-    {
+    size_t operator()(const Unit *const &key) const {
         return a((size_t) key >> 4);
     }
 };
@@ -64,8 +61,7 @@ template<>
 struct hash<std::pair<Unit *, Unit *> > {
     hash<size_t> a;
 public:
-    size_t operator()(const std::pair<Unit *, Unit *> &key) const
-    {
+    size_t operator()(const std::pair<Unit *, Unit *> &key) const {
         return (size_t) ((size_t) (a((int) (((size_t) key.first) >> 4)))
                 ^ ((size_t) a((int) (((size_t) key.second) >> 4))));
     }

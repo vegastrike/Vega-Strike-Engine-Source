@@ -94,31 +94,28 @@ public:
     TextArea(float x, float y, float wid, float hei, int scrollbar);
     ~TextArea(void);
 
-    int GetSelectedItem()
-    {
+    int GetSelectedItem() {
         return cur_selected;
     }
 
-    void SetSelectedItem(int newh)
-    {
+    void SetSelectedItem(int newh) {
         cur_selected = newh;
     }
 
     void DoHighlight(int yes);        //DoHighlight(0) to disable mouse highlighting. Also disable clicking on entries
-    void DoMultiline(int yes)
-    {
+    void DoMultiline(int yes) {
         do_multiline = yes;
     }                                                   //DoMultiline(1) to enable multi-line entries
     void Refresh(void);
     void RenderText(void);
     void AddTextItem(const char *name,
-                     const char *description,
-                     const char *parent_name = NULL,
-                     const GFXColor col = GFXColor(
-                             1,
-                             1,
-                             1,
-                             1));
+            const char *description,
+            const char *parent_name = NULL,
+            const GFXColor col = GFXColor(
+                    1,
+                    1,
+                    1,
+                    1));
     void ChangeTextItem(const char *name, const char *description, bool wrap = false);
     void ChangeTextItemColor(const char *name, const GFXColor &col);
     void SetText(const char *text);   //Sets the text. Enables Multiline and disables highlighting

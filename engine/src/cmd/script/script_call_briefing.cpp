@@ -30,8 +30,7 @@
 #include "mission.h"
 #include "cmd/briefing.h"
 
-varInst *Mission::call_briefing(missionNode *node, int mode)
-{
+varInst *Mission::call_briefing(missionNode *node, int mode) {
     varInst *viret = NULL;
 
     trace(node, mode);
@@ -51,8 +50,8 @@ varInst *Mission::call_briefing(missionNode *node, int mode)
             float z = getFloatArg(node, mode, 4);
             if (mode == SCRIPT_RUN) {
                 viret->int_val = briefing->AddStarship(name.c_str(),
-                                                       FactionUtil::GetFactionIndex(faction),
-                                                       Vector(x, y, z));
+                        FactionUtil::GetFactionIndex(faction),
+                        Vector(x, y, z));
             }
             viret->type = VAR_INT;
         } else if (method_id == CMT_BRIEFING_removeShip) {

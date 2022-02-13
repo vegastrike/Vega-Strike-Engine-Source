@@ -28,12 +28,10 @@
 #define __OPC_SPHERECOLLIDER_H__
 
 struct OPCODE_API SphereCache : VolumeCache {
-    SphereCache() : Center(0.0f, 0.0f, 0.0f), FatRadius2(0.0f), FatCoeff(1.1f)
-    {
+    SphereCache() : Center(0.0f, 0.0f, 0.0f), FatRadius2(0.0f), FatCoeff(1.1f) {
     }
 
-    ~SphereCache()
-    {
+    ~SphereCache() {
     }
 
     // Cached faces signature
@@ -66,10 +64,10 @@ public:
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     bool Collide(SphereCache &cache,
-                 const Sphere &sphere,
-                 const Model &model,
-                 const Matrix4x4 *worlds = nullptr,
-                 const Matrix4x4 *worldm = nullptr);
+            const Sphere &sphere,
+            const Model &model,
+            const Matrix4x4 *worlds = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 
     //
     bool Collide(SphereCache &cache, const Sphere &sphere, const AABBTree *tree);
@@ -93,9 +91,9 @@ protected:
     bool SphereTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
     // Init methods
     bool InitQuery(SphereCache &cache,
-                   const Sphere &sphere,
-                   const Matrix4x4 *worlds = nullptr,
-                   const Matrix4x4 *worldm = nullptr);
+            const Sphere &sphere,
+            const Matrix4x4 *worlds = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 };
 
 class OPCODE_API HybridSphereCollider : public SphereCollider {
@@ -105,10 +103,10 @@ public:
     virtual                                ~HybridSphereCollider();
 
     bool Collide(SphereCache &cache,
-                 const Sphere &sphere,
-                 const HybridModel &model,
-                 const Matrix4x4 *worlds = nullptr,
-                 const Matrix4x4 *worldm = nullptr);
+            const Sphere &sphere,
+            const HybridModel &model,
+            const Matrix4x4 *worlds = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 protected:
     Container mTouchedBoxes;
 };

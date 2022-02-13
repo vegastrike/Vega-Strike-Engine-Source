@@ -38,23 +38,20 @@ struct glVertex {
     float y;
     float z;
 
-    glVertex &SetTexCoord(float s, float t)
-    {
+    glVertex &SetTexCoord(float s, float t) {
         this->s = s;
         this->t = t;
         return *this;
     }
 
-    glVertex &SetNormal(const Vector &norm)
-    {
+    glVertex &SetNormal(const Vector &norm) {
         i = norm.i;
         j = norm.j;
         k = norm.k;
         return *this;
     }
 
-    glVertex &SetVertex(const Vector &vert)
-    {
+    glVertex &SetVertex(const Vector &vert) {
         x = vert.i;
         y = vert.j;
         z = vert.k;

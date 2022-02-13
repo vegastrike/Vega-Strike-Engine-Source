@@ -44,8 +44,7 @@ const unsigned int lighthuge = 20 * 20 * 20;
  */
 class gfx_light : public GFXLight {
 public:
-    gfx_light() : GFXLight()
-    {
+    gfx_light() : GFXLight() {
     }
 
     ///assigns a GFXLight to a gfx_light
@@ -55,20 +54,17 @@ public:
     int lightNum();
 
     ///Returns if this light was saved as a local light
-    bool LocalLight() const
-    {
+    bool LocalLight() const {
         return (options & GFX_LOCAL_LIGHT) != 0;
     }
 
     ///Retursn if this light is enabled
-    bool enabled() const
-    {
+    bool enabled() const {
         return (options & GFX_LIGHT_ENABLED) != 0;
     }
 
     ///Returns the target OpenGL light of this light. -1 is unassigned to a "real" light
-    int &Target()
-    {
+    int &Target() {
         return target;
     }
 
@@ -170,23 +166,19 @@ extern OpenGLLights *GLLights;
 struct LineCollideStar {
     LineCollide *lc;
 
-    LineCollideStar()
-    {
+    LineCollideStar() {
         lc = NULL;
     }
 
-    bool operator==(const LineCollideStar &b) const
-    {
+    bool operator==(const LineCollideStar &b) const {
         return lc->object.i == b.lc->object.i;
     }
 
-    bool operator<(const LineCollideStar &b) const
-    {
+    bool operator<(const LineCollideStar &b) const {
         return *((int *) &(lc->object.i)) < *((int *) &(b.lc->object.i));
     }
 
-    inline int GetIndex()
-    {
+    inline int GetIndex() {
         return *((int *) (&lc->object.i));
     }
 };

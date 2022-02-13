@@ -69,10 +69,10 @@ protected:
 
     void Animate();
     void PrepareAnimation(const Vector &,
-                          const Vector &,
-                          const AngleSequence &,
-                          const AngleSequence &,
-                          const AngleSequence &);
+            const Vector &,
+            const AngleSequence &,
+            const AngleSequence &,
+            const AngleSequence &);
 
     void CalculateRotation();
     Vector Projection(const ViewArea &, const Vector &);

@@ -39,13 +39,12 @@ public:
 
 public:
     class csOPCODECollider *getCollideTree(const Vector &scale = Vector(1,
-                                                                        1,
-                                                                        1), std::vector<struct mesh_polygon> * = NULL);
+            1,
+            1), std::vector<struct mesh_polygon> * = NULL);
 //Because accessing in daughter classes member function from Unit * instances
     Order *aistate = nullptr;
 
-    Order *getAIState() const
-    {
+    Order *getAIState() const {
         return aistate;
     }
 
@@ -80,18 +79,15 @@ public:
     void ExecuteAI();
 
     //Uses Universe stuff -> maybe only needed in Unit class
-    bool isEnemy(const Unit *other) const
-    {
+    bool isEnemy(const Unit *other) const {
         return getRelation(other) < 0.0;
     }
 
-    bool isFriend(const Unit *other) const
-    {
+    bool isFriend(const Unit *other) const {
         return getRelation(other) > 0.0;
     }
 
-    bool isNeutral(const Unit *other) const
-    {
+    bool isNeutral(const Unit *other) const {
         return getRelation(other) == 0.0;
     }
 

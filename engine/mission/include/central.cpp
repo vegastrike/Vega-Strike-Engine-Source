@@ -37,8 +37,7 @@ glob_t *MISSIONS;
 struct mission_data DATA;
 
 // Primary initialization function. Sets everything up and takes care of the program
-char *Start(int run_vegastrike)
-{
+char *Start(int run_vegastrike) {
     InitGraphics();
 
     DATA.name = NewString("");
@@ -53,8 +52,7 @@ char *Start(int run_vegastrike)
     return DATA.path;
 }
 
-void RunMission(void)
-{
+void RunMission(void) {
     if (DATA.path[0] == '\0') {
         cout << "No mission selected\n";
         return;
@@ -68,9 +66,9 @@ void RunMission(void)
     _spawnl(P_NOWAIT,execname,execname,(string("\"")+string(DATA.path)+string("\"")).c_str(), (string("-m")+DATA.numplayers).c_str(), NULL);
 #else
     execlp("./vegastrike",
-           "./vegastrike",
-           (string("\"") + string(DATA.path) + string("\"")).c_str(),
-           (string("-m") + DATA.numplayers).c_str(),
-           NULL);
+            "./vegastrike",
+            (string("\"") + string(DATA.path) + string("\"")).c_str(),
+            (string("-m") + DATA.numplayers).c_str(),
+            NULL);
 #endif
 }

@@ -45,14 +45,12 @@
 
 namespace {
 
-float Degree2Radian(float angle)
-{
+float Degree2Radian(float angle) {
     const float ratio = M_PI / 180.0;
     return angle * ratio;
 }
 
-float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat)
-{
+float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
     using namespace Radar;
 
     switch (threat) {
@@ -86,8 +84,7 @@ struct PlaneDisplay::Impl {
     PointBuffer heads;
     PolyBuffer areas;
 
-    PointBuffer &getHeadBuffer(float size)
-    {
+    PointBuffer &getHeadBuffer(float size) {
         int isize = int(size / POINT_SIZE_GRANULARITY);
         if (isize < 1) {
             isize = 1;
@@ -100,8 +97,7 @@ struct PlaneDisplay::Impl {
         return it->second;
     }
 
-    void clear()
-    {
+    void clear() {
         ground.clear();
         legs.clear();
         areas.clear();
@@ -113,8 +109,7 @@ struct PlaneDisplay::Impl {
         }
     }
 
-    void flush()
-    {
+    void flush() {
         GFXDraw(GFXTRI, areas);
 
         GFXLineWidth(0.2);
@@ -135,11 +130,10 @@ struct PlaneDisplay::Impl {
 
 PlaneDisplay::PlaneDisplay()
         : impl(new PlaneDisplay::Impl),
-          finalCameraAngle(Degree2Radian(30), Degree2Radian(0), Degree2Radian(0)),
-          currentCameraAngle(finalCameraAngle),
-          radarTime(0.0),
-          lastAnimationTime(0.0)
-{
+        finalCameraAngle(Degree2Radian(30), Degree2Radian(0), Degree2Radian(0)),
+        currentCameraAngle(finalCameraAngle),
+        radarTime(0.0),
+        lastAnimationTime(0.0) {
     using namespace boost::assign; // vector::operator+=
 
     CalculateRotation();
@@ -160,8 +154,7 @@ PlaneDisplay::PlaneDisplay()
             1.0, 0.999391, 0.997564, 0.994522, 0.990268, 0.984808, 0.978148, 0.970296, 0.961262, 0.951057, 0.939693, 0.927184, 0.913545, 0.898794, 0.882948, 0.866025, 0.848048, 0.829038, 0.809017, 0.788011, 0.766044, 0.743145, 0.71934, 0.694658, 0.669131, 0.642788, 0.615662, 0.587785, 0.559193, 0.529919, 0.5, 0.469472, 0.438371, 0.406737, 0.374607, 0.34202, 0.309017, 0.275637, 0.241922, 0.207911, 0.173648, 0.139173, 0.104528, 0.069756, 0.034899, 0.0;
 }
 
-void PlaneDisplay::CalculateRotation()
-{
+void PlaneDisplay::CalculateRotation() {
     const float cosx = cosf(currentCameraAngle.x);
     const float cosy = cosf(currentCameraAngle.y);
     const float cosz = cosf(currentCameraAngle.z);
@@ -170,22 +163,21 @@ void PlaneDisplay::CalculateRotation()
     const float sinz = sinf(currentCameraAngle.z);
 
     xrotation = Vector(cosy * cosz,
-                       sinx * siny * cosz - cosx * sinz,
-                       cosx * siny * cosz + sinx * sinz);
+            sinx * siny * cosz - cosx * sinz,
+            cosx * siny * cosz + sinx * sinz);
     yrotation = Vector(cosy * sinz,
-                       cosx * cosz + sinx * siny * sinz,
-                       cosx * siny * sinz - sinx * cosz);
+            cosx * cosz + sinx * siny * sinz,
+            cosx * siny * sinz - sinx * cosz);
     zrotation = Vector(-siny,
-                       sinx * cosy,
-                       cosx * cosy);
+            sinx * cosy,
+            cosx * cosy);
 }
 
 void PlaneDisplay::PrepareAnimation(const Vector &fromAngle,
-                                    const Vector &toAngle,
-                                    const AngleSequence &xsequence,
-                                    const AngleSequence &ysequence,
-                                    const AngleSequence &zsequence)
-{
+        const Vector &toAngle,
+        const AngleSequence &xsequence,
+        const AngleSequence &ysequence,
+        const AngleSequence &zsequence) {
     AnimationItem firstItem;
     firstItem.duration = 0.0;
     firstItem.position = fromAngle;
@@ -217,24 +209,21 @@ void PlaneDisplay::PrepareAnimation(const Vector &fromAngle,
     animation.push(finalItem);
 }
 
-void PlaneDisplay::OnDockEnd()
-{
+void PlaneDisplay::OnDockEnd() {
     // Bounce from upright position
     Vector undockCameraAngle(Degree2Radian(90), finalCameraAngle.y, finalCameraAngle.z);
     PrepareAnimation(undockCameraAngle, finalCameraAngle, bounceSequence, nothingSequence, nothingSequence);
 }
 
-void PlaneDisplay::OnJumpEnd()
-{
+void PlaneDisplay::OnJumpEnd() {
     // Full rotation around y-axis
     Vector jumpCameraAngle(finalCameraAngle.x, Degree2Radian(360), finalCameraAngle.z);
     PrepareAnimation(jumpCameraAngle, finalCameraAngle, nothingSequence, cosineSequence, nothingSequence);
 }
 
 void PlaneDisplay::Draw(const Sensor &sensor,
-                        VSSprite *nearSprite,
-                        VSSprite *distantSprite)
-{
+        VSSprite *nearSprite,
+        VSSprite *distantSprite) {
     assert(nearSprite || distantSprite); // There should be at least one radar display
 
     radarTime += GetElapsedTime();
@@ -266,8 +255,7 @@ void PlaneDisplay::Draw(const Sensor &sensor,
     GFXDisable(SMOOTH);
 }
 
-void PlaneDisplay::Animate()
-{
+void PlaneDisplay::Animate() {
     if (!animation.empty()) {
         if (radarTime > lastAnimationTime + animation.front().duration) {
             currentCameraAngle = animation.front().position;
@@ -278,8 +266,7 @@ void PlaneDisplay::Animate()
     }
 }
 
-Vector PlaneDisplay::Projection(const ViewArea &radarView, const Vector &position)
-{
+Vector PlaneDisplay::Projection(const ViewArea &radarView, const Vector &position) {
     // 1. Rotate
     float rx = position.Dot(xrotation);
     float ry = position.Dot(yrotation);
@@ -306,8 +293,7 @@ Vector PlaneDisplay::Projection(const ViewArea &radarView, const Vector &positio
     return radarView.Scale(Vector(x, y, z));
 }
 
-void PlaneDisplay::DrawGround(const Sensor &sensor, const ViewArea &radarView)
-{
+void PlaneDisplay::DrawGround(const Sensor &sensor, const ViewArea &radarView) {
     GFXColor groundColor = radarView.GetColor();
     const float outer = 3.0 / 3.0;
     const float middle = 2.0 / 3.0;
@@ -356,8 +342,7 @@ void PlaneDisplay::DrawGround(const Sensor &sensor, const ViewArea &radarView)
 }
 
 void PlaneDisplay::DrawNear(const Sensor &sensor,
-                            const Sensor::TrackCollection &tracks)
-{
+        const Sensor::TrackCollection &tracks) {
     // Draw all near tracks (distance scaled)
 
     if (!leftRadar.IsActive()) {
@@ -382,8 +367,7 @@ void PlaneDisplay::DrawNear(const Sensor &sensor,
 }
 
 void PlaneDisplay::DrawDistant(const Sensor &sensor,
-                               const Sensor::TrackCollection &tracks)
-{
+        const Sensor::TrackCollection &tracks) {
     // Draw all near tracks (distance scaled)
 
     if (!rightRadar.IsActive()) {
@@ -409,10 +393,9 @@ void PlaneDisplay::DrawDistant(const Sensor &sensor,
 }
 
 void PlaneDisplay::DrawTrack(const Sensor &sensor,
-                             const ViewArea &radarView,
-                             const Track &track,
-                             float maxRange)
-{
+        const ViewArea &radarView,
+        const Track &track,
+        float maxRange) {
     const Track::Type::Value unitType = track.GetType();
     GFXColor color = sensor.GetColor(track);
 
@@ -480,11 +463,10 @@ void PlaneDisplay::DrawTrack(const Sensor &sensor,
 }
 
 void PlaneDisplay::DrawTarget(Track::Type::Value unitType,
-                              const Vector &head,
-                              const Vector &ground,
-                              float trackSize,
-                              const GFXColor &color)
-{
+        const Vector &head,
+        const Vector &ground,
+        float trackSize,
+        const GFXColor &color) {
     // Draw leg
     GFXColor legColor = color;
     legColor.a /= 2;
@@ -496,12 +478,11 @@ void PlaneDisplay::DrawTarget(Track::Type::Value unitType,
 }
 
 void PlaneDisplay::DrawTargetMarker(const Vector &head,
-                                    const Vector &ground,
-                                    const Vector &center,
-                                    float trackSize,
-                                    const GFXColor &color,
-                                    bool drawArea)
-{
+        const Vector &ground,
+        const Vector &center,
+        float trackSize,
+        const GFXColor &color,
+        bool drawArea) {
     if (drawArea) {
         GFXColor areaColor = color;
         areaColor.a /= 4;

@@ -36,8 +36,7 @@ using namespace Opcode;
  *	\return		true if inside the OBB
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ContainsPoint(const Point &p) const
-{
+bool OBB::ContainsPoint(const Point &p) const {
     // Point in OBB test using lazy evaluation and early exits
 
     // Translate to box space
@@ -70,8 +69,7 @@ bool OBB::ContainsPoint(const Point &p) const
  *	\param		mat		[in] the world transform
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void OBB::Create(const AABB &aabb, const Matrix4x4 &mat)
-{
+void OBB::Create(const AABB &aabb, const Matrix4x4 &mat) {
     // Note: must be coherent with Rotate()
 
     aabb.GetCenter(mCenter);
@@ -92,8 +90,7 @@ void OBB::Create(const AABB &aabb, const Matrix4x4 &mat)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ComputePlanes(Plane *planes) const
-{
+bool OBB::ComputePlanes(Plane *planes) const {
     // Checkings
     if (!planes) {
         return false;
@@ -137,8 +134,7 @@ bool OBB::ComputePlanes(Plane *planes) const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ComputePoints(Point *pts) const
-{
+bool OBB::ComputePoints(Point *pts) const {
     // Checkings
     if (!pts) {
         return false;
@@ -180,8 +176,7 @@ bool OBB::ComputePoints(Point *pts) const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ComputeVertexNormals(Point *pts) const
-{
+bool OBB::ComputeVertexNormals(Point *pts) const {
     static float VertexNormals[] =
             {
                     -INVSQRT3, -INVSQRT3, -INVSQRT3,
@@ -212,8 +207,7 @@ bool OBB::ComputeVertexNormals(Point *pts) const
  *	\return		24 indices (12 edges) indexing the list returned by ComputePoints()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const uint32_t *OBB::GetEdges() const
-{
+const uint32_t *OBB::GetEdges() const {
     static uint32_t Indices[] = {
             0, 1, 1, 2, 2, 3, 3, 0,
             7, 6, 6, 5, 5, 4, 4, 7,
@@ -229,8 +223,7 @@ const uint32_t *OBB::GetEdges() const
  *	\return		edge normals in local space
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const Point *OBB::GetLocalEdgeNormals() const
-{
+const Point *OBB::GetLocalEdgeNormals() const {
     static float EdgeNormals[] =
             {
                     0, -INVSQRT2, -INVSQRT2,    // 0-1
@@ -258,8 +251,7 @@ const Point *OBB::GetLocalEdgeNormals() const
  *	\param		world_normal	[out] edge normal in world space
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void OBB::ComputeWorldEdgeNormal(uint32_t edge_index, Point &world_normal) const
-{
+void OBB::ComputeWorldEdgeNormal(uint32_t edge_index, Point &world_normal) const {
     OPASSERT(edge_index < 12);
     world_normal = GetLocalEdgeNormals()[edge_index] * mRot;
 }
@@ -270,8 +262,7 @@ void OBB::ComputeWorldEdgeNormal(uint32_t edge_index, Point &world_normal) const
  *	\param		lss		[out] the LSS
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void OBB::ComputeLSS(LSS &lss) const
-{
+void OBB::ComputeLSS(LSS &lss) const {
     Point Axis0 = mRot[0];
     Point Axis1 = mRot[1];
     Point Axis2 = mRot[2];
@@ -305,8 +296,7 @@ void OBB::ComputeLSS(LSS &lss) const
  *	\return		TRUE if we're inside the other box
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::IsInside(const OBB &box) const
-{
+bool OBB::IsInside(const OBB &box) const {
     // Make a 4x4 from the box & inverse it
     Matrix4x4 M0Inv;
     {

@@ -33,12 +33,12 @@
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void pushMesh(Unit::XML *xml,
-              const char *filename,
-              const float scale,
-              int faction,
-              class Flightgroup *fg,
-              int startframe /*-1 is random frame*/,
-              double texturestarttime);
+        const char *filename,
+        const float scale,
+        int faction,
+        class Flightgroup *fg,
+        int startframe /*-1 is random frame*/,
+        double texturestarttime);
 
 VSSprite *createVSSprite(const char *file);
 bool isVSSpriteLoaded(const VSSprite *);

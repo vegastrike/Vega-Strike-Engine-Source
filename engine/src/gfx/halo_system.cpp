@@ -53,24 +53,21 @@
 #define HALO_STEERING_DOWN_FACTOR (0.01)
 #define HALO_STABILIZATION_RANGE (0.25)
 
-static float mymin(float a, float b)
-{
+static float mymin(float a, float b) {
     return a > b ? b : a;
 }
 
-static float mymax(float a, float b)
-{
+static float mymax(float a, float b) {
     return a > b ? a : b;
 }
 
 void DoParticles(QVector pos,
-                 float percent,
-                 const Vector &basevelocity,
-                 const Vector &velocity,
-                 float radial_size,
-                 float particle_size,
-                 int faction)
-{
+        float percent,
+        const Vector &basevelocity,
+        const Vector &velocity,
+        float radial_size,
+        float particle_size,
+        int faction) {
     static ParticleEmitter sparkles(&particleTrail, "sparkle");
 
     const float *col = FactionUtil::GetSparkColor(faction);
@@ -81,8 +78,7 @@ void DoParticles(QVector pos,
     );
 }
 
-void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, Unit *mush, float hull, int faction)
-{
+void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, Unit *mush, float hull, int faction) {
     if (mush) {
         bool done = false;
         Vector back = vel;
@@ -99,12 +95,12 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                     QVector v(colTree->getVertex(whichvert).Cast());
                     v = Transform(mat, v);
                     DoParticles(v,
-                                hull,
-                                vel,
-                                back,
-                                0,
-                                mush->rSize() * game_options.sparkleenginesizerelativetoship,
-                                faction);
+                            hull,
+                            vel,
+                            back,
+                            0,
+                            mush->rSize() * game_options.sparkleenginesizerelativetoship,
+                            faction);
                     done = true;
                 }
             }
@@ -116,39 +112,37 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
             unsigned int siz = (unsigned int) (2 * mush->rSize());
             if (siz != 0) {
                 QVector v((seed % siz) - siz / 2,
-                          (seed % siz) - siz / 2,
-                          (seed % siz) - siz / 2);
+                        (seed % siz) - siz / 2,
+                        (seed % siz) - siz / 2);
                 DoParticles(v,
-                            hull,
-                            vel,
-                            back,
-                            0,
-                            mush->rSize() * game_options.sparkleenginesizerelativetoship,
-                            faction);
+                        hull,
+                        vel,
+                        back,
+                        0,
+                        mush->rSize() * game_options.sparkleenginesizerelativetoship,
+                        faction);
                 done = true;
             }
         }
     }
 }
 
-HaloSystem::HaloSystem()
-{
+HaloSystem::HaloSystem() {
     VSCONSTRUCT2('h')
 }
 
 unsigned int HaloSystem::AddHalo(const char *filename,
-                                 const Matrix &trans,
-                                 const Vector &size,
-                                 const GFXColor &col,
-                                 std::string type,
-                                 float activation_accel)
-{
+        const Matrix &trans,
+        const Vector &size,
+        const GFXColor &col,
+        std::string type,
+        float activation_accel) {
     int neutralfac = FactionUtil::GetNeutralFaction();
     halo.push_back(Halo());
     halo.back().trans = trans;
     halo.back().size = Vector(size.i * game_options.engine_radii_scale,
-                              size.j * game_options.engine_radii_scale,
-                              size.k * game_options.engine_length_scale);
+            size.j * game_options.engine_radii_scale,
+            size.k * game_options.engine_length_scale);
     halo.back().mesh = Mesh::LoadMesh((string(filename)).c_str(), Vector(1, 1, 1), neutralfac, NULL);
     halo.back().activation = activation_accel * game_options.game_speed;
     halo.back().oscale = 0;
@@ -157,8 +151,7 @@ unsigned int HaloSystem::AddHalo(const char *filename,
     return halo.size() - 1;
 }
 
-static float HaloAccelSmooth(float linaccel, float olinaccel, float maxlinaccel)
-{
+static float HaloAccelSmooth(float linaccel, float olinaccel, float maxlinaccel) {
     linaccel = mymax(0, mymin(maxlinaccel, linaccel));     //Clamp input, somehow, sometimes it's not clamped
     float phase =
             pow(((linaccel > olinaccel) ? HALO_SMOOTHING_UP_FACTOR : HALO_SMOOTHING_DOWN_FACTOR), GetElapsedTime());
@@ -174,17 +167,16 @@ static float HaloAccelSmooth(float linaccel, float olinaccel, float maxlinaccel)
 }
 
 void HaloSystem::Draw(const Matrix &trans,
-                      const Vector &scale,
-                      int halo_alpha,
-                      float nebdist,
-                      float hullpercent,
-                      const Vector &velocity,
-                      const Vector &linaccel,
-                      const Vector &angaccel,
-                      float maxaccel,
-                      float maxvelocity,
-                      int faction)
-{
+        const Vector &scale,
+        int halo_alpha,
+        float nebdist,
+        float hullpercent,
+        const Vector &velocity,
+        const Vector &linaccel,
+        const Vector &angaccel,
+        float maxaccel,
+        float maxvelocity,
+        int faction) {
     if (halo_alpha >= 0) {
         halo_alpha /= 2;
         halo_alpha |= 1;
@@ -230,9 +222,9 @@ void HaloSystem::Draw(const Matrix &trans,
             }
 
             GFXColor blend = GFXColor(game_options.engine_color_red,
-                                      game_options.engine_color_green,
-                                      game_options.engine_color_blue,
-                                      1);
+                    game_options.engine_color_green,
+                    game_options.engine_color_blue,
+                    1);
             if (value > maxvalue * game_options.percent_afterburner_color_change) {
                 float test = value - maxvalue * game_options.percent_afterburner_color_change;
                 test /= maxvalue * game_options.percent_afterburner_color_change;
@@ -246,11 +238,11 @@ void HaloSystem::Draw(const Matrix &trans,
             }
 
             MeshFX xtraFX = MeshFX(1.0, 1.0,
-                                   true,
-                                   GFXColor(1, 1, 1, 1),
-                                   GFXColor(1, 1, 1, 1),
-                                   GFXColor(1, 1, 1, 1),
-                                   blend);
+                    true,
+                    GFXColor(1, 1, 1, 1),
+                    GFXColor(1, 1, 1, 1),
+                    GFXColor(1, 1, 1, 1),
+                    blend);
             i->mesh->Draw(50000000000000.0, m, 1, alpha, nebdist, 0, false, &xtraFX);
 
             // If damaged, and halo is back-facing
@@ -266,12 +258,12 @@ void HaloSystem::Draw(const Matrix &trans,
                     Vector pvelocity = thrustvector * -rsize * game_options.halosparklespeed * vpercent;
 
                     DoParticles(m.p,
-                                hullpercent,
-                                velocity,
-                                pvelocity,
-                                rsize,
-                                rsize * game_options.halosparklescale,
-                                faction);
+                            hullpercent,
+                            velocity,
+                            pvelocity,
+                            rsize,
+                            rsize * game_options.halosparklescale,
+                            faction);
                 }
             } else {
                 i->sparkle_accum = 0;
@@ -282,8 +274,7 @@ void HaloSystem::Draw(const Matrix &trans,
     }
 }
 
-HaloSystem::~HaloSystem()
-{
+HaloSystem::~HaloSystem() {
     VSDESTRUCT2
     for (std::vector<Halo>::iterator i = halo.begin(); i != halo.end(); ++i) {
         if (i->mesh != nullptr) {

@@ -54,8 +54,7 @@ class NavPath {
 public:
     bool isAbsolute() const;
 
-    bool isEvaluated() const
-    {
+    bool isEvaluated() const {
         return path.size() != 0;
     }
 
@@ -75,23 +74,19 @@ public:
     bool setSourceNode(PathNode *node);
     bool setDestinationNode(PathNode *node);
 
-    PathNode *getSourceNode()
-    {
+    PathNode *getSourceNode() {
         return source;
     }
 
-    PathNode *getDestinationNode()
-    {
+    PathNode *getDestinationNode() {
         return destination;
     }
 
-    const PathNode *getSourceNode() const
-    {
+    const PathNode *getSourceNode() const {
         return source;
     }
 
-    const PathNode *getDestinationNode() const
-    {
+    const PathNode *getDestinationNode() const {
         return destination;
     }
 
@@ -180,18 +175,15 @@ public:
     virtual bool isSourceable() const = 0;
 //Desc True IFF this node can be used as a source in a path finding algorithm
 
-    virtual bool isCurrentDependant() const
-    {
+    virtual bool isCurrentDependant() const {
         return false;
     }
 
-    virtual bool isTargetDependant() const
-    {
+    virtual bool isTargetDependant() const {
         return false;
     }
 
-    virtual NavPath *getRequiredPath()
-    {
+    virtual NavPath *getRequiredPath() {
         return NULL;
     }
 
@@ -207,12 +199,10 @@ public:
 
     virtual PathNode *clone() const = 0;
 
-    PathNode()
-    {
+    PathNode() {
     }
 
-    virtual ~PathNode()
-    {
+    virtual ~PathNode() {
     }
 };
 
@@ -224,13 +214,11 @@ public:
 
 class AbsolutePathNode : public PathNode {
 public:
-    bool isAbsolute() const
-    {
+    bool isAbsolute() const {
         return true;
     }
 
-    bool isSourceable() const
-    {
+    bool isSourceable() const {
         return true;
     }
 
@@ -238,29 +226,24 @@ public:
 
     std::deque<unsigned> initSearchQueue() const;
 
-    bool isDestination(unsigned index) const
-    {
+    bool isDestination(unsigned index) const {
         return index == system;
     }
 
-    unsigned getSystemIndex()
-    {
+    unsigned getSystemIndex() {
         return system;
     }
 //Desc: Gets the system referenced by this node
 
-    PathNode *clone() const
-    {
+    PathNode *clone() const {
         return new AbsolutePathNode(system);
     }
 
-    AbsolutePathNode(unsigned index)
-    {
+    AbsolutePathNode(unsigned index) {
         system = index;
     }
 
-    ~AbsolutePathNode()
-    {
+    ~AbsolutePathNode() {
     }
 
 protected:
@@ -275,40 +258,33 @@ protected:
 
 class CurrentPathNode : public PathNode {
 public:
-    bool isAbsolute() const
-    {
+    bool isAbsolute() const {
         return true;
     }
 
-    bool isSourceable() const
-    {
+    bool isSourceable() const {
         return true;
     }
 
-    std::string getDescription() const
-    {
+    std::string getDescription() const {
         return "Current System";
     }
 
-    bool isCurrentDependant() const
-    {
+    bool isCurrentDependant() const {
         return true;
     }
 
     std::deque<unsigned> initSearchQueue() const;
     bool isDestination(unsigned index) const;
 
-    PathNode *clone() const
-    {
+    PathNode *clone() const {
         return new CurrentPathNode();
     }
 
-    CurrentPathNode()
-    {
+    CurrentPathNode() {
     }
 
-    ~CurrentPathNode()
-    {
+    ~CurrentPathNode() {
     }
 };
 
@@ -320,40 +296,33 @@ public:
 
 class TargetPathNode : public PathNode {
 public:
-    bool isAbsolute() const
-    {
+    bool isAbsolute() const {
         return true;
     }
 
-    bool isSourceable() const
-    {
+    bool isSourceable() const {
         return true;
     }
 
-    std::string getDescription() const
-    {
+    std::string getDescription() const {
         return "Target System";
     }
 
-    bool isTargetDependant() const
-    {
+    bool isTargetDependant() const {
         return true;
     }
 
     std::deque<unsigned> initSearchQueue() const;
     bool isDestination(unsigned index) const;
 
-    PathNode *clone() const
-    {
+    PathNode *clone() const {
         return new TargetPathNode();
     }
 
-    TargetPathNode()
-    {
+    TargetPathNode() {
     }
 
-    ~TargetPathNode()
-    {
+    ~TargetPathNode() {
     }
 };
 
@@ -365,28 +334,24 @@ public:
 
 class CriteriaPathNode : public PathNode {
 public:
-    bool isAbsolute() const
-    {
+    bool isAbsolute() const {
         return false;
     }
 
-    bool isSourceable() const
-    {
+    bool isSourceable() const {
         return false;
     }
 
     std::string getDescription() const;
 
-    std::deque<unsigned> initSearchQueue() const
-    {
+    std::deque<unsigned> initSearchQueue() const {
         std::deque<unsigned> temp;
         return temp;
     }
 
     bool isDestination(unsigned index) const;
 
-    CriteriaRoot *getRoot()
-    {
+    CriteriaRoot *getRoot() {
         return criteria;
     }
 
@@ -406,66 +371,55 @@ private:
 
 class ChainPathNode : public PathNode {
 public:
-    bool isAbsolute() const
-    {
+    bool isAbsolute() const {
         return type == ALL_POINTS ? false : true;
     }
 
-    bool isSourceable() const
-    {
+    bool isSourceable() const {
         return true;
     }
 
     std::string getDescription() const;
 
-    NavPath *getRequiredPath()
-    {
+    NavPath *getRequiredPath() {
         return supplierPath;
     }
 
     std::deque<unsigned> initSearchQueue() const;
     bool isDestination(unsigned index) const;
 
-    void setSupplierPath(NavPath *supplier)
-    {
+    void setSupplierPath(NavPath *supplier) {
         supplierPath = supplier;
     }
 
-    NavPath *getSupplierPath()
-    {
+    NavPath *getSupplierPath() {
         return supplierPath;
     }
 
     enum PartType { SOURCE, DESTINATION, ALL_POINTS };
 
-    void setPartType(PartType part)
-    {
+    void setPartType(PartType part) {
         type = part;
     }
 
-    PartType getPartType()
-    {
+    PartType getPartType() {
         return type;
     }
 
-    PathNode *clone() const
-    {
+    PathNode *clone() const {
         return new ChainPathNode(supplierPath, type);
     }
 
-    ChainPathNode()
-    {
+    ChainPathNode() {
         supplierPath = NULL;
     }
 
-    ChainPathNode(NavPath *supplier, PartType part)
-    {
+    ChainPathNode(NavPath *supplier, PartType part) {
         supplierPath = supplier;
         type = part;
     }
 
-    ~ChainPathNode()
-    {
+    ~ChainPathNode() {
     }
 
 private:

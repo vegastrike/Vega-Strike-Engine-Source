@@ -57,8 +57,7 @@ using std::endl;
 
 /* *********************************************************** */
 
-bool Mission::checkVarType(varInst *var, enum var_type check_type)
-{
+bool Mission::checkVarType(varInst *var, enum var_type check_type) {
     if (var->type == check_type) {
         return true;
     }
@@ -67,8 +66,7 @@ bool Mission::checkVarType(varInst *var, enum var_type check_type)
 
 /* *********************************************************** */
 
-bool Mission::doBooleanVar(missionNode *node, int mode)
-{
+bool Mission::doBooleanVar(missionNode *node, int mode) {
     varInst *var = doVariable(node, mode);
 
     bool ok = checkVarType(var, VAR_BOOL);
@@ -83,8 +81,7 @@ bool Mission::doBooleanVar(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-double Mission::doFloatVar(missionNode *node, int mode)
-{
+double Mission::doFloatVar(missionNode *node, int mode) {
     varInst *var = doVariable(node, mode);
 
     bool ok = checkVarType(var, VAR_FLOAT);
@@ -98,8 +95,7 @@ double Mission::doFloatVar(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-int Mission::doIntVar(missionNode *node, int mode)
-{
+int Mission::doIntVar(missionNode *node, int mode) {
     varInst *var = doVariable(node, mode);
 
     bool ok = checkVarType(var, VAR_INT);
@@ -113,8 +109,7 @@ int Mission::doIntVar(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-varInst *Mission::doObjectVar(missionNode *node, int mode)
-{
+varInst *Mission::doObjectVar(missionNode *node, int mode) {
     varInst *var = doVariable(node, mode);
 
     bool ok = checkVarType(var, VAR_OBJECT);
@@ -130,8 +125,7 @@ varInst *Mission::doObjectVar(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-varInst *Mission::lookupLocalVariable(missionNode *asknode)
-{
+varInst *Mission::lookupLocalVariable(missionNode *asknode) {
     contextStack *cstack = runtime.cur_thread->exec_stack.back();
     varInst *defnode = NULL;
     //slow search/name lookup
@@ -162,8 +156,7 @@ varInst *Mission::lookupLocalVariable(missionNode *asknode)
 
 /* *********************************************************** */
 
-varInst *Mission::lookupModuleVariable(string mname, missionNode *asknode)
-{
+varInst *Mission::lookupModuleVariable(string mname, missionNode *asknode) {
     //only when runtime
     missionNode *module_node = runtime.modules[mname];
     if (module_node == NULL) {
@@ -188,8 +181,7 @@ varInst *Mission::lookupModuleVariable(string mname, missionNode *asknode)
 
 /* *********************************************************** */
 
-varInst *Mission::lookupClassVariable(string modulename, string varname, unsigned int classid)
-{
+varInst *Mission::lookupClassVariable(string modulename, string varname, unsigned int classid) {
     missionNode *module = runtime.modules[modulename];
     string mname = module->script.name;
     if (classid == 0) {
@@ -206,8 +198,7 @@ varInst *Mission::lookupClassVariable(string modulename, string varname, unsigne
     return var;
 }
 
-varInst *Mission::lookupClassVariable(missionNode *asknode)
-{
+varInst *Mission::lookupClassVariable(missionNode *asknode) {
     missionNode *module = runtime.cur_thread->module_stack.back();
     unsigned int classid = runtime.cur_thread->classid_stack.back();
     string mname = module->script.name;
@@ -226,8 +217,7 @@ varInst *Mission::lookupClassVariable(missionNode *asknode)
     return var;
 }
 
-varInst *Mission::lookupModuleVariable(missionNode *asknode)
-{
+varInst *Mission::lookupModuleVariable(missionNode *asknode) {
     //only when runtime
     missionNode *module = runtime.cur_thread->module_stack.back();
 
@@ -240,8 +230,7 @@ varInst *Mission::lookupModuleVariable(missionNode *asknode)
 
 /* *********************************************************** */
 
-varInst *Mission::lookupGlobalVariable(missionNode *asknode)
-{
+varInst *Mission::lookupGlobalVariable(missionNode *asknode) {
     missionNode *varnode = runtime.global_variables[asknode->script.name];
     if (varnode == NULL) {
         return NULL;
@@ -251,8 +240,7 @@ varInst *Mission::lookupGlobalVariable(missionNode *asknode)
 
 /* *********************************************************** */
 
-void Mission::doGlobals(missionNode *node, int mode)
-{
+void Mission::doGlobals(missionNode *node, int mode) {
     if (mode == SCRIPT_RUN || (mode == SCRIPT_PARSE && parsemode == PARSE_FULL)) {
         //nothing to do
         return;
@@ -273,8 +261,7 @@ void Mission::doGlobals(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-varInst *Mission::doVariable(missionNode *node, int mode)
-{
+varInst *Mission::doVariable(missionNode *node, int mode) {
     if (mode == SCRIPT_RUN) {
         varInst *var = lookupLocalVariable(node);
         if (var == NULL) {
@@ -317,8 +304,7 @@ varInst *Mission::doVariable(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-void Mission::doDefVar(missionNode *node, int mode, bool global_var)
-{
+void Mission::doDefVar(missionNode *node, int mode, bool global_var) {
     if (mode == SCRIPT_RUN) {
         missionNode *scope = node->script.context_block_node;
         if (scope->tag == DTAG_MODULE) {
@@ -447,8 +433,7 @@ void Mission::doDefVar(missionNode *node, int mode, bool global_var)
 
 /* *********************************************************** */
 
-void Mission::doSetVar(missionNode *node, int mode)
-{
+void Mission::doSetVar(missionNode *node, int mode) {
     trace(node, mode);
     if (mode == SCRIPT_PARSE) {
         node->script.name = node->attr_value("name");
@@ -510,8 +495,7 @@ void Mission::doSetVar(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-varInst *Mission::doConst(missionNode *node, int mode)
-{
+varInst *Mission::doConst(missionNode *node, int mode) {
     if (mode == SCRIPT_PARSE) {
         string typestr = node->attr_value("type");
         string valuestr = node->attr_value("value");
@@ -564,8 +548,7 @@ varInst *Mission::doConst(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-void Mission::assignVariable(varInst *v1, varInst *v2)
-{
+void Mission::assignVariable(varInst *v1, varInst *v2) {
     if (v1->type != v2->type && v1->type != VAR_ANY) {
         fatalError(NULL, SCRIPT_RUN, "wrong types in assignvariable");
         saveVarInst(v1, cout);
@@ -580,8 +563,8 @@ void Mission::assignVariable(varInst *v1, varInst *v2)
             //printf("WARNING: assignVariable v2==empty\n");  FIXME ??
         } else if (v1->objectname != v2->objectname) {
             fatalError(NULL,
-                       SCRIPT_RUN,
-                       "wrong object types in assignment (" + v1->objectname + " , " + v2->objectname);
+                    SCRIPT_RUN,
+                    "wrong object types in assignment (" + v1->objectname + " , " + v2->objectname);
             assert(0);
         }
     }
@@ -599,8 +582,7 @@ void Mission::assignVariable(varInst *v1, varInst *v2)
 
 /* *********************************************************** */
 
-var_type Mission::vartypeFromString(string type)
-{
+var_type Mission::vartypeFromString(string type) {
     var_type vartype;
     if (type == "float") {
         vartype = VAR_FLOAT;
@@ -619,14 +601,12 @@ var_type Mission::vartypeFromString(string type)
 
 /* *********************************************************** */
 
-void Mission::saveVariables(const std::ostream &out)
-{
+void Mission::saveVariables(const std::ostream &out) {
 }
 
 /* *********************************************************** */
 
-void Mission::saveVarInst(varInst *vi, std::ostream &aa_out)
-{
+void Mission::saveVarInst(varInst *vi, std::ostream &aa_out) {
     char buffer[100];
     if (vi == NULL) {
     } else {

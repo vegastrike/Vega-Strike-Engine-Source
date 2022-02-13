@@ -58,14 +58,13 @@ public:
     // Methods
 public:
     Damageable() : hull(&layers[0]),
-                   armor(&layers[1]),
-                   shield(&layers[2]),
-                   current_hull(&hull->facets[as_integer(FacetName::single)].health),
-                   max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
-                   upgrade_hull(0),
-                   shield_regeneration(0),
-                   killed(false)
-    {
+            armor(&layers[1]),
+            shield(&layers[2]),
+            current_hull(&hull->facets[as_integer(FacetName::single)].health),
+            max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
+            upgrade_hull(0),
+            shield_regeneration(0),
+            killed(false) {
     }
 
 protected:
@@ -80,49 +79,40 @@ public:
     // because we are constrained by existing python interfaces, which cannot
     // be easily changed.
     // TODO: convert all calls to *current_hull
-    const float GetHull() const
-    {
+    const float GetHull() const {
         return *current_hull;
     }
 
     // TODO: check for valid index
-    const float GetArmor(int facet = 0) const
-    {
+    const float GetArmor(int facet = 0) const {
         return armor->facets[facet].health;
     }
 
-    const float GetShield(int facet = 0) const
-    {
+    const float GetShield(int facet = 0) const {
         return shield->facets[facet].health;
     }
 
-    DamageableLayer &GetHullLayer()
-    {
+    DamageableLayer &GetHullLayer() {
         return layers[0];
     }
 
-    DamageableLayer &GetArmorLayer()
-    {
+    DamageableLayer &GetArmorLayer() {
         return layers[1];
     }
 
-    DamageableLayer &GetShieldLayer()
-    {
+    DamageableLayer &GetShieldLayer() {
         return layers[2];
     }
 
-    const float GetShieldRegeneration() const
-    {
+    const float GetShieldRegeneration() const {
         return shield->facets[as_integer(FacetName::left_top_front)].regeneration;
     }
 
-    virtual const float GetHullPercent() const
-    {
+    virtual const float GetHullPercent() const {
         return hull->GetPercent(FacetName::single);
     }
 
-    virtual const float GetShieldPercent() const
-    {
+    virtual const float GetShieldPercent() const {
         return shield->GetPercent(FacetName::left_top_front);
     }
 
@@ -140,11 +130,11 @@ public:
 
     //Applies damage to the pre-transformed area of the ship
     void ApplyDamage(const Vector &pnt,
-                     const Vector &normal,
-                     Damage damage,
-                     Unit *affected_unit,
-                     const GFXColor &color,
-                     void *ownerDoNotDereference);
+            const Vector &normal,
+            Damage damage,
+            Unit *affected_unit,
+            const GFXColor &color,
+            void *ownerDoNotDereference);
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
     void Destroy(); //explodes then deletes

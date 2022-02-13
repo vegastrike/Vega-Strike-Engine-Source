@@ -94,44 +94,36 @@ class LeakVector {
 private:
     std::vector<MyType> *internal_vector_p_;
 public:
-    bool empty() const
-    {
+    bool empty() const {
         return internal_vector_p_->empty();
     }
 
-    void push_back(MyType mis)
-    {
+    void push_back(MyType mis) {
         internal_vector_p_->push_back(mis);
     }
 
-    MyType back()
-    {
+    MyType back() {
         return internal_vector_p_->back();
     }
 
-    LeakVector()
-    {
+    LeakVector() {
         internal_vector_p_ = new std::vector<MyType>();
     }
 
-    size_t size() const
-    {
+    size_t size() const {
         return (internal_vector_p_)->size();
     }
 
-    MyType operator[](size_t i)
-    {
+    MyType operator[](size_t i) {
         // stephengtuggy 2020-10-17: Enforce bounds checking
         return internal_vector_p_->at(i);
     }
 
-    ~LeakVector()
-    {
+    ~LeakVector() {
         /* DO NOTHING OR DIE INTENTIONAL LEAK We need this data after Exit*/
     }
 
-    std::vector<MyType> *Get()
-    {
+    std::vector<MyType> *Get() {
         return internal_vector_p_;
     }
 };

@@ -31,12 +31,10 @@ typedef unsigned int uint;
 
 class vs_options {
 public:
-    vs_options()
-    {
+    vs_options() {
     }
 
-    ~vs_options()
-    {
+    ~vs_options() {
     }
 
     void init();

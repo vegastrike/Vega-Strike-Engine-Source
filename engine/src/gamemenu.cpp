@@ -59,23 +59,19 @@ const GameMenu::WctlTableEntry WctlBase<GameMenu>::WctlCommandTable[] = {
 };
 
 GameMenu::GameMenu(bool firstTime) :
-        m_firstTime(firstTime)
-{
+        m_firstTime(firstTime) {
 }
 
-GameMenu::~GameMenu()
-{
+GameMenu::~GameMenu() {
 }
 
-void GameMenu::run()
-{
+void GameMenu::run() {
     WindowController::run();
 }
 
 int shiftup(int);
 
-void gamemenu_keyboard_handler(unsigned int ch, unsigned int mod, bool release, int x, int y)
-{
+void gamemenu_keyboard_handler(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     //Set modifiers
     unsigned int amods = 0;
     amods |= (mod & (WSK_MOD_LSHIFT | WSK_MOD_RSHIFT)) ? KB_MOD_SHIFT : 0;
@@ -89,8 +85,7 @@ void gamemenu_keyboard_handler(unsigned int ch, unsigned int mod, bool release, 
     }
 }
 
-void gamemenu_draw()
-{
+void gamemenu_draw() {
     UpdateTime();
     Music::MuzakCycle();
     GFXBeginScene();
@@ -99,8 +94,7 @@ void gamemenu_draw()
 }
 
 //static
-void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<unsigned int> *inputqueue)
-{
+void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<unsigned int> *inputqueue) {
     GFXColor color(1, .5, 0, .1);
     //Account Server button.
     NewButton *joinAcct = new NewButton;
@@ -270,8 +264,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
 }
 
 namespace UniverseUtil {
-void startMenuInterface(bool firstTime, string error)
-{
+void startMenuInterface(bool firstTime, string error) {
     winsys_set_keyboard_func(gamemenu_keyboard_handler);
     winsys_set_mouse_func(EventManager::ProcessMouseClick);
     winsys_set_passive_motion_func(EventManager::ProcessMousePassive);
@@ -289,8 +282,7 @@ void startMenuInterface(bool firstTime, string error)
 }
 }
 
-void GameMenu::init()
-{
+void GameMenu::init() {
     Window *w = new Window;
     setWindow(w);
 
@@ -301,8 +293,7 @@ void GameMenu::init()
     createControls();
 }
 
-void GameMenu::createControls()
-{
+void GameMenu::createControls() {
     //Base info title.
     StaticDisplay *baseTitle = new StaticDisplay;
     baseTitle->setRect(Rect(-.96, .83, 1.9, .1));
@@ -426,8 +417,7 @@ void GameMenu::createControls()
 extern void bootstrap_main_loop();
 extern void enableNetwork(bool usenet);
 
-bool GameMenu::processSinglePlayerButton(const EventCommandId &command, Control *control)
-{
+bool GameMenu::processSinglePlayerButton(const EventCommandId &command, Control *control) {
     enableNetwork(false);
 
     restore_main_loop();
@@ -440,8 +430,7 @@ bool GameMenu::processSinglePlayerButton(const EventCommandId &command, Control 
     return true;
 }
 
-bool GameMenu::processMultiPlayerHostButton(const EventCommandId &command, Control *control)
-{
+bool GameMenu::processMultiPlayerHostButton(const EventCommandId &command, Control *control) {
     window()->findControlById("MainMenu")->setHidden(true);
     window()->findControlById("MultiPlayerMenu")->setHidden(false);
     window()->findControlById("MultiPlayerAccountServer")->setHidden(true);
@@ -449,8 +438,7 @@ bool GameMenu::processMultiPlayerHostButton(const EventCommandId &command, Contr
     return true;
 }
 
-bool GameMenu::processMultiPlayerAcctButton(const EventCommandId &command, Control *control)
-{
+bool GameMenu::processMultiPlayerAcctButton(const EventCommandId &command, Control *control) {
     window()->findControlById("MainMenu")->setHidden(true);
     window()->findControlById("MultiPlayerMenu")->setHidden(false);
     window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
@@ -458,22 +446,19 @@ bool GameMenu::processMultiPlayerAcctButton(const EventCommandId &command, Contr
     return true;
 }
 
-bool GameMenu::processMultiPlayerButton(const EventCommandId &command, Control *control)
-{
+bool GameMenu::processMultiPlayerButton(const EventCommandId &command, Control *control) {
     window()->findControlById("MainMenu")->setHidden(true);
     window()->findControlById("MultiPlayerMenu")->setHidden(false);
     return true;
 }
 
-bool GameMenu::processMainMenuButton(const EventCommandId &command, Control *control)
-{
+bool GameMenu::processMainMenuButton(const EventCommandId &command, Control *control) {
     window()->findControlById("MainMenu")->setHidden(false);
     window()->findControlById("MultiPlayerMenu")->setHidden(true);
     return true;
 }
 
-bool GameMenu::processExitGameButton(const EventCommandId &command, Control *control)
-{
+bool GameMenu::processExitGameButton(const EventCommandId &command, Control *control) {
     VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     winsys_exit(0);
     return true;
@@ -484,12 +469,10 @@ class ShipSelectorCallback : public ModalDialogCallback {
     bool onlyMessage;
 public:
     ShipSelectorCallback(NetActionConfirm *nac, bool onlyMessage) :
-            nac(nac), onlyMessage(onlyMessage)
-    {
+            nac(nac), onlyMessage(onlyMessage) {
     }
 
-    virtual void modalDialogResult(const std::string &id, int result, WindowController &controller)
-    {
+    virtual void modalDialogResult(const std::string &id, int result, WindowController &controller) {
         if (onlyMessage) {
             //The result is slightly different (OK=1 and Cancel=0)
             if (result == YES_ANSWER) {
@@ -502,14 +485,12 @@ public:
         nac->finalizeJoinGame(result);
     }
 
-    virtual ~ShipSelectorCallback()
-    {
+    virtual ~ShipSelectorCallback() {
     }
 };
 
 //Create the window and controls for the Options Menu.
-void NetActionConfirm::init(void)
-{
+void NetActionConfirm::init(void) {
     Window *window = new Window;
     setWindow(window);
 
@@ -578,8 +559,7 @@ void NetActionConfirm::init(void)
 }
 
 //Process a command event from the Options Menu window.
-bool NetActionConfirm::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool NetActionConfirm::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Save") {
         confirmedNetSaveGame();
         window()->close();
@@ -596,34 +576,28 @@ bool NetActionConfirm::processWindowCommand(const EventCommandId &command, Contr
 }
 
 // TODO: delete
-void GameMenu::readJoinGameControls(Window *window, string &user, string &pass)
-{
+void GameMenu::readJoinGameControls(Window *window, string &user, string &pass) {
 }
 
-bool NetActionConfirm::confirmedNetSaveGame()
-{
+bool NetActionConfirm::confirmedNetSaveGame() {
     return false;
 }
 
-bool NetActionConfirm::confirmedNetDie()
-{
+bool NetActionConfirm::confirmedNetDie() {
     return false;
 }
 
-bool NetActionConfirm::confirmedJoinGame()
-{
+bool NetActionConfirm::confirmedJoinGame() {
     return true;
 }
 
 //Caller is responsible for closing the window afterwards. (?)
 //static
-bool NetActionConfirm::finalizeJoinGame(int launchShip)
-{
+bool NetActionConfirm::finalizeJoinGame(int launchShip) {
     return true;
 }
 
-bool GameMenu::processJoinGameButton(const EventCommandId &command, Control *control)
-{
+bool GameMenu::processJoinGameButton(const EventCommandId &command, Control *control) {
     return true;
 }
 

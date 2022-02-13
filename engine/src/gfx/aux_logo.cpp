@@ -37,14 +37,13 @@ vector<Logo *> undrawn_logos;
 Hashtable<int, Logo, 257>Logo::decalHash;
 
 Logo::Logo(int numberlogos,
-           Vector *center,
-           Vector *normal,
-           float *size,
-           float *rotation,
-           float offset,
-           Texture *Dec,
-           Vector *Ref)
-{
+        Vector *center,
+        Vector *normal,
+        float *size,
+        float *rotation,
+        float offset,
+        Texture *Dec,
+        Vector *Ref) {
     offset = 0;
     refcount = -1;
     draw_queue = NULL;
@@ -100,8 +99,7 @@ Logo::Logo(int numberlogos,
     SetDecal(Dec);
 }
 
-void Logo::SetDecal(Texture *decal)
-{
+void Logo::SetDecal(Texture *decal) {
     Decal = decal;
     //Check which draw_queue to use:
     Logo *l;
@@ -136,8 +134,7 @@ void Logo::SetDecal(Texture *decal)
  *
  *  }*/
 
-void Logo::Draw(const Matrix &m)
-{
+void Logo::Draw(const Matrix &m) {
     if (!numlogos) {
         return;
     }
@@ -150,8 +147,7 @@ void Logo::Draw(const Matrix &m)
     }
 }
 
-void Logo::ProcessDrawQueue()
-{
+void Logo::ProcessDrawQueue() {
     if (!g_game.use_logos || draw_queue->empty()) {
         return;
     }
@@ -181,8 +177,7 @@ void Logo::ProcessDrawQueue()
     GFXPolygonOffset(0, 0);
 }
 
-Logo::~Logo()
-{
+Logo::~Logo() {
     if (owner_of_draw_queue != this) {
         delete vlist;
     }

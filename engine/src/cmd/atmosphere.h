@@ -56,8 +56,7 @@ private:
 
     class SunBox {
     public:
-        SunBox(Mesh *m) : sunbox(m)
-        {
+        SunBox(Mesh *m) : sunbox(m) {
         }
 
         ~SunBox();

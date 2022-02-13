@@ -63,57 +63,47 @@ public:
     virtual Control *findControlById(const std::string &id);
 
 //The background color of the window.
-    virtual GFXColor color(void)
-    {
+    virtual GFXColor color(void) {
         return m_color;
     }
 
-    virtual void setColor(const GFXColor &c)
-    {
+    virtual void setColor(const GFXColor &c) {
         m_color = c;
     }
 
 //The background texture for the window.
-    virtual GuiTexture &texture(void)
-    {
+    virtual GuiTexture &texture(void) {
         return m_texture;
     }
 
-    virtual void setTexture(const std::string &textureName)
-    {
+    virtual void setTexture(const std::string &textureName) {
         m_texture.read(textureName);
     }
 
 //The color of the outline around the window.
-    virtual GFXColor outlineColor(void)
-    {
+    virtual GFXColor outlineColor(void) {
         return m_outlineColor;
     }
 
-    virtual void setOutlineColor(const GFXColor &c)
-    {
+    virtual void setOutlineColor(const GFXColor &c) {
         m_outlineColor = c;
     }
 
 //The width of the outline around the window (in pixels).
-    virtual float outlineWidth(void)
-    {
+    virtual float outlineWidth(void) {
         return m_outlineWidth;
     }
 
-    virtual void setOutlineWidth(float width)
-    {
+    virtual void setOutlineWidth(float width) {
         m_outlineWidth = width;
     }
 
 //Set up a controller object.
-    virtual WindowController *controller(void)
-    {
+    virtual WindowController *controller(void) {
         return m_controller;
     }
 
-    virtual void setController(WindowController *controller)
-    {
+    virtual void setController(WindowController *controller) {
         m_controller = controller;
     }
 
@@ -124,13 +114,11 @@ public:
     virtual void readFromXml(const std::string &fileName);
 
 //Set whether to delete this object when it closes.
-    virtual bool deleteOnClose(void)
-    {
+    virtual bool deleteOnClose(void) {
         return m_deleteOnClose;
     }
 
-    virtual void setDeleteOnClose(bool del)
-    {
+    virtual void setDeleteOnClose(bool del) {
         m_deleteOnClose = del;
     }
 

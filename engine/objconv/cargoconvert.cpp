@@ -38,18 +38,15 @@ class Averaging {
 public:
     vector<int> samples;
 
-    Averaging()
-    {
+    Averaging() {
     }
 
-    Averaging &operator+=(int a)
-    {
+    Averaging &operator+=(int a) {
         samples.push_back(a);
         return *this;
     }
 
-    float spread()
-    {
+    float spread() {
         int min = -1;
         int max = -1;
         int zerocount = 0;
@@ -79,8 +76,7 @@ public:
         }
     }
 
-    float realaverage()
-    {
+    float realaverage() {
         float ave = 0;
         for (int i = 0; i < samples.size(); ++i) {
             ave += samples[i] / (float) samples.size();
@@ -88,8 +84,7 @@ public:
         return ave;
     }
 
-    float average()
-    {
+    float average() {
         float ave = 0;
         for (int i = 0; i < samples.size(); ++i) {
             if (samples[i] == 0) {
@@ -103,8 +98,7 @@ public:
     }
 };
 
-void merge(map<string, Averaging> &inout, map<string, Averaging> in)
-{
+void merge(map<string, Averaging> &inout, map<string, Averaging> in) {
     for (map<string, Averaging>::iterator i = in.begin(); i != in.end(); ++i) {
         for (int j = 0; j < i->second.samples.size(); ++j) {
             inout[i->first] += i->second.samples[j];
@@ -115,8 +109,7 @@ void merge(map<string, Averaging> &inout, map<string, Averaging> in)
 map<string, string> basekey;
 map<string, map<string, Averaging> > total;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     std::string arg;
     if (argc < 2) {
         fprintf(stderr, "Usage: ./a.out csvfile pleasricultural_name\n");
@@ -199,16 +192,16 @@ int main(int argc, char **argv)
         if (end == string(",,\n")) {
             int maxsamples = 0;
             for (map<string, Averaging>::iterator i = base.begin();
-                 i != base.end();
-                 ++i) {
+                    i != base.end();
+                    ++i) {
                 int tmp = i->second.samples.size();
                 if (tmp > maxsamples) {
                     maxsamples = tmp;
                 }
             }
             for (map<string, Averaging>::iterator i = base.begin();
-                 i != base.end();
-                 ++i) {
+                    i != base.end();
+                    ++i) {
                 while (i->second.samples.size() < maxsamples) {
                     i->second += 0;
                 }
@@ -254,9 +247,9 @@ int main(int argc, char **argv)
         for (set<string>::iterator j = cargotypes.begin(); j != cargotypes.end(); ++j) {
             if (i->second.find(*j) != i->second.end()) {
                 cout << ","
-                     << i->second[*j].average()
-                     << ","
-                     << i->second[*j].spread() / 2;
+                        << i->second[*j].average()
+                        << ","
+                        << i->second[*j].spread() / 2;
             } else {
                 //cout << *j<<",NOTHING, NOTHING, ";
                 cout << ",,";

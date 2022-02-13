@@ -54,8 +54,7 @@ static int minz = -1;
 JoyStick *joystick[MAX_JOYSTICKS]; //until I know where I place it
 int num_joysticks = 0;
 
-void modifyDeadZone(JoyStick *j)
-{
+void modifyDeadZone(JoyStick *j) {
     for (int a = 0; a < j->nr_of_axes; a++) {
         if (fabs(j->joy_axis[a]) <= j->deadzone) {
             j->joy_axis[a] = 0.0;
@@ -70,34 +69,30 @@ void modifyDeadZone(JoyStick *j)
     }
 }
 
-void modifyExponent(JoyStick *j)
-{
+void modifyExponent(JoyStick *j) {
     if ((game_options.joystick_exponent != 1.0) && (game_options.joystick_exponent > 0)) {
         for (int a = 0; a < j->nr_of_axes; a++) {
             j->joy_axis[a] =
                     ((j->joy_axis[a] < 0) ? -pow(-j->joy_axis[a], game_options.joystick_exponent) : pow(j->joy_axis[a],
-                                                                                                        game_options.
-                                                                                                                            joystick_exponent));
+                            game_options.
+                                    joystick_exponent));
         }
     }
 }
 
 static bool JoyStickToggle = true;
 
-void JoyStickToggleDisable()
-{
+void JoyStickToggleDisable() {
     JoyStickToggle = false;
 }
 
-void JoyStickToggleKey(const KBData &key, KBSTATE a)
-{
+void JoyStickToggleKey(const KBData &key, KBSTATE a) {
     if (a == PRESS) {
         JoyStickToggle = !JoyStickToggle;
     }
 }
 
-void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z)
-{
+void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z) {
     unsigned int i;
     for (i = 0; i < MAX_AXES; i++) {
         joystick[0]->joy_axis[i] = 0.0;
@@ -139,8 +134,7 @@ void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z)
     }
 }
 
-JoyStick::JoyStick()
-{
+JoyStick::JoyStick() {
     for (int j = 0; j < MAX_AXES; ++j) {
         axis_axis[j] = -1;
         axis_inverse[j] = false;
@@ -149,13 +143,11 @@ JoyStick::JoyStick()
     joy_buttons = 0;
 }
 
-int JoystickPollingRate()
-{
+int JoystickPollingRate() {
     return game_options.polling_rate;
 }
 
-void InitJoystick()
-{
+void InitJoystick() {
     int i;
     for (i = 0; i < NUMJBUTTONS; i++) {
         for (int j = 0; j < MAX_JOYSTICKS; j++) {
@@ -204,15 +196,13 @@ void InitJoystick()
     }
 }
 
-void DeInitJoystick()
-{
+void DeInitJoystick() {
     for (int i = 0; i < MAX_JOYSTICKS; i++) {
         delete joystick[i];
     }
 }
 
-JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK)
-{
+JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
     for (int j = 0; j < MAX_AXES; ++j) {
         axis_axis[j] = -1;
         axis_inverse[j] = false;
@@ -269,8 +259,7 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK)
     VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
 }
 
-void JoyStick::InitMouse(int which)
-{
+void JoyStick::InitMouse(int which) {
     player = 0;     //default to first player
     joy_available = true;
     nr_of_axes = 2;     //x and y for mouse
@@ -278,8 +267,7 @@ void JoyStick::InitMouse(int which)
     nr_of_hats = 0;
 }
 
-bool JoyStick::isAvailable()
-{
+bool JoyStick::isAvailable() {
     return joy_available;
 }
 
@@ -288,14 +276,12 @@ struct mouseData {
     int dy;
     float time;
 
-    mouseData()
-    {
+    mouseData() {
         dx = dy = 0;
         time = 0;
     }
 
-    mouseData(int ddx, int ddy, float ttime)
-    {
+    mouseData(int ddx, int ddy, float ttime) {
         dx = ddx;
         dy = ddy;
         time = ttime;
@@ -303,8 +289,7 @@ struct mouseData {
 };
 extern void GetMouseXY(int &mousex, int &mousey);
 
-void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons)
-{
+void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     int def_mouse_sens = 1;
     int _dx, _dy;
     float fdx, fdy;
@@ -373,8 +358,7 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons)
     buttons = getMouseButtonStatus();
 }
 
-void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons)
-{
+void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons) {
     //int status;
     if (joy_available == false) {
         for (int a = 0; a < MAX_AXES; a++) {
@@ -422,8 +406,7 @@ void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons)
 #endif //we have no joystick
 }
 
-int JoyStick::NumButtons()
-{
+int JoyStick::NumButtons() {
     return nr_of_buttons;
 }
 

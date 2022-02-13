@@ -27,8 +27,7 @@
 #include <stdio.h>
 using namespace std;
 
-string FileToString(const char *argv)
-{
+string FileToString(const char *argv) {
     FILE *fp = fopen(argv, "rb");
     if (fp) {
         fseek(fp, 0, SEEK_END);
@@ -48,13 +47,11 @@ string FileToString(const char *argv)
     }
 }
 
-bool findit(const char *argv, string replace)
-{
+bool findit(const char *argv, string replace) {
     return FileToString(argv).find(replace) != string::npos;
 }
 
-void replaceit(const char *argv, string fin, string rep)
-{
+void replaceit(const char *argv, string fin, string rep) {
     string file = FileToString(argv);
     unsigned int curpos = 0;
     FILE *fp = fopen(argv, "wb");
@@ -77,8 +74,7 @@ void replaceit(const char *argv, string fin, string rep)
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc < 3) {
         return -1;
     }

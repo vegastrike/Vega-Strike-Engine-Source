@@ -76,8 +76,8 @@ struct XML_cp {
  */
 
 typedef void (*XML_ElementDeclHandler)(void *userData,
-                                       const XML_Char *name,
-                                       XML_Content *model);
+        const XML_Char *name,
+        XML_Content *model);
 
 void XMLPARSEAPI XML_SetElementDeclHandler(XML_Parser parser, XML_ElementDeclHandler eldecl);
 
@@ -92,11 +92,11 @@ void XMLPARSEAPI XML_SetElementDeclHandler(XML_Parser parser, XML_ElementDeclHan
  */
 
 typedef void (*XML_AttlistDeclHandler)(void *userData,
-                                       const XML_Char *elname,
-                                       const XML_Char *attname,
-                                       const XML_Char *att_type,
-                                       const XML_Char *dflt,
-                                       int isrequired);
+        const XML_Char *elname,
+        const XML_Char *attname,
+        const XML_Char *att_type,
+        const XML_Char *dflt,
+        int isrequired);
 
 void XMLPARSEAPI XML_SetAttlistDeclHandler(XML_Parser parser, XML_AttlistDeclHandler attdecl);
 
@@ -109,9 +109,9 @@ void XMLPARSEAPI XML_SetAttlistDeclHandler(XML_Parser parser, XML_AttlistDeclHan
  */
 
 typedef void (*XML_XmlDeclHandler)(void *userData,
-                                   const XML_Char *version,
-                                   const XML_Char *encoding,
-                                   int standalone);
+        const XML_Char *version,
+        const XML_Char *encoding,
+        int standalone);
 
 void XMLPARSEAPI XML_SetXmlDeclHandler(XML_Parser parser, XML_XmlDeclHandler xmldecl);
 
@@ -149,28 +149,28 @@ XML_Parser XMLPARSEAPI XML_ParserCreateNS(const XML_Char *encoding, XML_Char nam
  */
 
 XML_Parser XMLPARSEAPI XML_ParserCreate_MM(const XML_Char *encoding,
-                                           const XML_Memory_Handling_Suite *memsuite,
-                                           const XML_Char *namespaceSeparator);
+        const XML_Memory_Handling_Suite *memsuite,
+        const XML_Char *namespaceSeparator);
 
 /* atts is array of name/value pairs, terminated by 0;
  *  names and values are 0 terminated. */
 
 typedef void (*XML_StartElementHandler)(void *userData,
-                                        const XML_Char *name,
-                                        const XML_Char **atts);
+        const XML_Char *name,
+        const XML_Char **atts);
 
 typedef void (*XML_EndElementHandler)(void *userData,
-                                      const XML_Char *name);
+        const XML_Char *name);
 
 /* s is not 0 terminated. */
 typedef void (*XML_CharacterDataHandler)(void *userData,
-                                         const XML_Char *s,
-                                         int len);
+        const XML_Char *s,
+        int len);
 
 /* target and data are 0 terminated */
 typedef void (*XML_ProcessingInstructionHandler)(void *userData,
-                                                 const XML_Char *target,
-                                                 const XML_Char *data);
+        const XML_Char *target,
+        const XML_Char *data);
 
 /* data is 0 terminated */
 typedef void (*XML_CommentHandler)(void *userData, const XML_Char *data);
@@ -192,17 +192,17 @@ typedef void (*XML_EndCdataSectionHandler)(void *userData);
  *  multiple calls. */
 
 typedef void (*XML_DefaultHandler)(void *userData,
-                                   const XML_Char *s,
-                                   int len);
+        const XML_Char *s,
+        int len);
 
 /* This is called for the start of the DOCTYPE declaration, before
  *  any DTD or internal subset is parsed. */
 
 typedef void (*XML_StartDoctypeDeclHandler)(void *userData,
-                                            const XML_Char *doctypeName,
-                                            const XML_Char *sysid,
-                                            const XML_Char *pubid,
-                                            int has_internal_subset
+        const XML_Char *doctypeName,
+        const XML_Char *sysid,
+        const XML_Char *pubid,
+        int has_internal_subset
 );
 
 /* This is called for the start of the DOCTYPE declaration when the
@@ -226,14 +226,14 @@ typedef void (*XML_EndDoctypeDeclHandler)(void *userData);
  */
 
 typedef void (*XML_EntityDeclHandler)(void *userData,
-                                      const XML_Char *entityName,
-                                      int is_parameter_entity,
-                                      const XML_Char *value,
-                                      int value_length,
-                                      const XML_Char *base,
-                                      const XML_Char *systemId,
-                                      const XML_Char *publicId,
-                                      const XML_Char *notationName);
+        const XML_Char *entityName,
+        int is_parameter_entity,
+        const XML_Char *value,
+        int value_length,
+        const XML_Char *base,
+        const XML_Char *systemId,
+        const XML_Char *publicId,
+        const XML_Char *notationName);
 
 void XMLPARSEAPI XML_SetEntityDeclHandler(XML_Parser parser, XML_EntityDeclHandler handler);
 
@@ -246,21 +246,21 @@ void XMLPARSEAPI XML_SetEntityDeclHandler(XML_Parser parser, XML_EntityDeclHandl
  *  The other arguments may be. */
 
 typedef void (*XML_UnparsedEntityDeclHandler)(void *userData,
-                                              const XML_Char *entityName,
-                                              const XML_Char *base,
-                                              const XML_Char *systemId,
-                                              const XML_Char *publicId,
-                                              const XML_Char *notationName);
+        const XML_Char *entityName,
+        const XML_Char *base,
+        const XML_Char *systemId,
+        const XML_Char *publicId,
+        const XML_Char *notationName);
 
 /* This is called for a declaration of notation.
  *  The base argument is whatever was set by XML_SetBase.
  *  The notationName will never be null.  The other arguments can be. */
 
 typedef void (*XML_NotationDeclHandler)(void *userData,
-                                        const XML_Char *notationName,
-                                        const XML_Char *base,
-                                        const XML_Char *systemId,
-                                        const XML_Char *publicId);
+        const XML_Char *notationName,
+        const XML_Char *base,
+        const XML_Char *systemId,
+        const XML_Char *publicId);
 
 /* When namespace processing is enabled, these are called once for
  *  each namespace declaration. The call to the start and end element
@@ -269,11 +269,11 @@ typedef void (*XML_NotationDeclHandler)(void *userData,
  *  For an xmlns="" attribute, uri will be null. */
 
 typedef void (*XML_StartNamespaceDeclHandler)(void *userData,
-                                              const XML_Char *prefix,
-                                              const XML_Char *uri);
+        const XML_Char *prefix,
+        const XML_Char *uri);
 
 typedef void (*XML_EndNamespaceDeclHandler)(void *userData,
-                                            const XML_Char *prefix);
+        const XML_Char *prefix);
 
 /* This is called if the document is not standalone (it has an
  *  external subset or a reference to a parameter entity, but does not
@@ -308,10 +308,10 @@ typedef int (*XML_NotStandaloneHandler)(void *userData);
  *  Note that unlike other handlers the first argument is the parser, not userData. */
 
 typedef int (*XML_ExternalEntityRefHandler)(XML_Parser parser,
-                                            const XML_Char *context,
-                                            const XML_Char *base,
-                                            const XML_Char *systemId,
-                                            const XML_Char *publicId);
+        const XML_Char *context,
+        const XML_Char *base,
+        const XML_Char *systemId,
+        const XML_Char *publicId);
 
 /* This structure is filled in by the XML_UnknownEncodingHandler
  *  to provide information to the parser about encodings that are unknown
@@ -373,8 +373,8 @@ typedef struct {
 *  then the parser will return an XML_UNKNOWN_ENCODING error. */
 
 typedef int (*XML_UnknownEncodingHandler)(void *encodingHandlerData,
-                                          const XML_Char *name,
-                                          XML_Encoding *info);
+        const XML_Char *name,
+        XML_Encoding *info);
 
 void XMLPARSEAPI XML_SetElementHandler(XML_Parser parser, XML_StartElementHandler start, XML_EndElementHandler end);
 
@@ -390,8 +390,8 @@ void XMLPARSEAPI XML_SetProcessingInstructionHandler(XML_Parser parser, XML_Proc
 void XMLPARSEAPI XML_SetCommentHandler(XML_Parser parser, XML_CommentHandler handler);
 
 void XMLPARSEAPI XML_SetCdataSectionHandler(XML_Parser parser,
-                                            XML_StartCdataSectionHandler start,
-                                            XML_EndCdataSectionHandler end);
+        XML_StartCdataSectionHandler start,
+        XML_EndCdataSectionHandler end);
 
 void XMLPARSEAPI XML_SetStartCdataSectionHandler(XML_Parser parser, XML_StartCdataSectionHandler start);
 
@@ -408,8 +408,8 @@ void XMLPARSEAPI XML_SetDefaultHandler(XML_Parser parser, XML_DefaultHandler han
 void XMLPARSEAPI XML_SetDefaultHandlerExpand(XML_Parser parser, XML_DefaultHandler handler);
 
 void XMLPARSEAPI XML_SetDoctypeDeclHandler(XML_Parser parser,
-                                           XML_StartDoctypeDeclHandler start,
-                                           XML_EndDoctypeDeclHandler end);
+        XML_StartDoctypeDeclHandler start,
+        XML_EndDoctypeDeclHandler end);
 
 void XMLPARSEAPI XML_SetStartDoctypeDeclHandler(XML_Parser parser, XML_StartDoctypeDeclHandler start);
 
@@ -420,8 +420,8 @@ void XMLPARSEAPI XML_SetUnparsedEntityDeclHandler(XML_Parser parser, XML_Unparse
 void XMLPARSEAPI XML_SetNotationDeclHandler(XML_Parser parser, XML_NotationDeclHandler handler);
 
 void XMLPARSEAPI XML_SetNamespaceDeclHandler(XML_Parser parser,
-                                             XML_StartNamespaceDeclHandler start,
-                                             XML_EndNamespaceDeclHandler end);
+        XML_StartNamespaceDeclHandler start,
+        XML_EndNamespaceDeclHandler end);
 
 void XMLPARSEAPI XML_SetStartNamespaceDeclHandler(XML_Parser parser, XML_StartNamespaceDeclHandler start);
 
@@ -438,8 +438,8 @@ void XMLPARSEAPI
 XML_SetExternalEntityRefHandlerArg(XML_Parser, void *arg);
 
 void XMLPARSEAPI XML_SetUnknownEncodingHandler(XML_Parser parser,
-                                               XML_UnknownEncodingHandler handler,
-                                               void *encodingHandlerData);
+        XML_UnknownEncodingHandler handler,
+        void *encodingHandlerData);
 
 /* This can be called within a handler for a start element, end element,
  *  processing instruction or character data.  It causes the corresponding
@@ -526,8 +526,8 @@ int XMLPARSEAPI XML_ParseBuffer(XML_Parser parser, int len, int isFinal);
  *   The handlers and userData are initialized from the parser argument.
  *   Returns 0 if out of memory.  Otherwise returns a new XML_Parser object. */
 XML_Parser XMLPARSEAPI XML_ExternalEntityParserCreate(XML_Parser parser,
-                                                      const XML_Char *context,
-                                                      const XML_Char *encoding);
+        const XML_Char *context,
+        const XML_Char *encoding);
 
 enum XML_ParamEntityParsing {
     XML_PARAM_ENTITY_PARSING_NEVER,

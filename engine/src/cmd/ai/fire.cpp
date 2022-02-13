@@ -44,8 +44,7 @@
 extern int numprocessed;
 extern double targetpick;
 
-static bool NoDockWithClear()
-{
+static bool NoDockWithClear() {
     static bool nodockwithclear =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_with_clear_planets", "true"));
     return nodockwithclear;
@@ -53,13 +52,12 @@ static bool NoDockWithClear()
 
 VSRandom targrand(time(NULL));
 
-Unit *getAtmospheric(Unit *targ)
-{
+Unit *getAtmospheric(Unit *targ) {
     if (targ) {
         Unit *un;
         for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-             (un = *i) != NULL;
-             ++i) {
+                (un = *i) != NULL;
+                ++i) {
             if (un->isUnit() == _UnitType::planet) {
                 if ((targ->Position() - un->Position()).Magnitude() < targ->rSize() * .5) {
                     if (!(((Planet *) un)->isAtmospheric())) {
@@ -72,8 +70,7 @@ Unit *getAtmospheric(Unit *targ)
     return NULL;
 }
 
-bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex)
-{
+bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
     if (!targ->DockingPortLocations().size()) {
         return false;
     }
@@ -98,8 +95,7 @@ bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex)
 
 using Orders::FireAt;
 
-bool FireAt::PursueTarget(Unit *un, bool leader)
-{
+bool FireAt::PursueTarget(Unit *un, bool leader) {
     if (leader) {
         return true;
     }
@@ -112,8 +108,7 @@ bool FireAt::PursueTarget(Unit *un, bool leader)
     return false;
 }
 
-bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix)
-{
+bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
     return true;
 
     float limitmin = su->limits.limitmin;
@@ -128,8 +123,8 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix)
     }
     Unit *ssu;
     for (un_iter i = su->getSubUnits();
-         (ssu = *i) != NULL;
-         ++i) {
+            (ssu = *i) != NULL;
+            ++i) {
         if (!CanFaceTarget(ssu, targ, su->cumulative_transformation_matrix)) {
             return false;
         }
@@ -137,8 +132,7 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix)
     return true;
 }
 
-void FireAt::ReInit(float aggressivitylevel)
-{
+void FireAt::ReInit(float aggressivitylevel) {
     static float
             missileprob = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "MissileProbability", ".01"));
     static float mintimetoswitch =
@@ -153,19 +147,16 @@ void FireAt::ReInit(float aggressivitylevel)
     had_target = false;
 }
 
-FireAt::FireAt(float aggressivitylevel) : CommunicatingAI(WEAPON, STARGET)
-{
+FireAt::FireAt(float aggressivitylevel) : CommunicatingAI(WEAPON, STARGET) {
     ReInit(aggressivitylevel);
 }
 
-FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET)
-{
+FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET) {
     static float aggr = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "Aggressivity", "15"));
     ReInit(aggr);
 }
 
-void FireAt::SignalChosenTarget()
-{
+void FireAt::SignalChosenTarget() {
 }
 
 //temporary way of choosing
@@ -174,8 +165,7 @@ struct TargetAndRange {
     float range;
     float relation;
 
-    TargetAndRange(Unit *tt, float r, float rel)
-    {
+    TargetAndRange(Unit *tt, float r, float rel) {
         t = tt;
         range = r;
         this->relation = rel;
@@ -186,14 +176,12 @@ struct RangeSortedTurrets {
     Unit *tur;
     float gunrange;
 
-    RangeSortedTurrets(Unit *t, float r)
-    {
+    RangeSortedTurrets(Unit *t, float r) {
         tur = t;
         gunrange = r;
     }
 
-    bool operator<(const RangeSortedTurrets &o) const
-    {
+    bool operator<(const RangeSortedTurrets &o) const {
         return gunrange < o.gunrange;
     }
 };
@@ -202,18 +190,15 @@ struct TurretBin {
     float maxrange;
     vector<RangeSortedTurrets> turret;
     vector<TargetAndRange> listOfTargets[2];     //we have the over (and eq) 16 crowd and the under 16
-    TurretBin()
-    {
+    TurretBin() {
         maxrange = 0;
     }
 
-    bool operator<(const TurretBin &o) const
-    {
+    bool operator<(const TurretBin &o) const {
         return maxrange > o.maxrange;
     }
 
-    void AssignTargets(const TargetAndRange &finalChoice, const Matrix &pos)
-    {
+    void AssignTargets(const TargetAndRange &finalChoice, const Matrix &pos) {
         //go through modularly assigning as you go;
         int count = 0;
         const unsigned long lotsize[2] = {listOfTargets[0].size(), listOfTargets[1].size()};
@@ -252,8 +237,7 @@ struct TurretBin {
     }
 };
 
-void AssignTBin(Unit *su, vector<TurretBin> &tbin)
-{
+void AssignTBin(Unit *su, vector<TurretBin> &tbin) {
     unsigned int bnum = 0;
     for (; bnum < tbin.size(); bnum++) {
         if (su->getAttackPreferenceChar() == tbin[bnum].turret[0].tur->getAttackPreferenceChar()) {
@@ -288,8 +272,7 @@ void AssignTBin(Unit *su, vector<TurretBin> &tbin)
     tbin[bnum].turret.push_back(RangeSortedTurrets(su, grange));
 }
 
-float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float relationship, char *rolepriority)
-{
+float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float relationship, char *rolepriority) {
     if (relationship >= 0) {
         return -1;
     }
@@ -319,15 +302,15 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
     {
         static float mass_inertial_priority_cutoff =
                 XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                               "Targetting",
-                                                               "MassInertialPriorityCutoff",
-                                                               "5000"));
+                        "Targetting",
+                        "MassInertialPriorityCutoff",
+                        "5000"));
         if (me->getMass() > mass_inertial_priority_cutoff) {
             static float mass_inertial_priority_scale =
                     XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                   "Targetting",
-                                                                   "MassInertialPriorityScale",
-                                                                   ".0000001"));
+                            "Targetting",
+                            "MassInertialPriorityScale",
+                            ".0000001"));
             Vector normv(me->GetVelocity());
             float Speed = me->GetVelocity().Magnitude();
             normv *= Speed ? 1.0f / Speed : 1.0f;
@@ -346,8 +329,7 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
     return range_priority01 * role_priority01 + inertial_priority + threat_priority;
 }
 
-float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float relationship)
-{
+float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float relationship) {
     char rolepriority = 0;
     return Priority(me, targ, gunrange, rangetotarget, relationship, &rolepriority);
 }
@@ -357,18 +339,15 @@ class StaticTuple {
 public:
     T vec[n];
 
-    size_t size()
-    {
+    size_t size() {
         return n;
     }
 
-    T &operator[](size_t index)
-    {
+    T &operator[](size_t index) {
         return vec[index];
     }
 
-    const T &operator[](size_t index) const
-    {
+    const T &operator[](size_t index) const {
         return vec[index];
     }
 };
@@ -392,18 +371,16 @@ class ChooseTargetClass {
 public:
     Unit *mytarg;
 
-    ChooseTargetClass()
-    {
+    ChooseTargetClass() {
     }
 
     void init(FireAt *fireat,
-              Unit *un,
-              float gunrange,
-              vector<TurretBin> *tbin,
-              const StaticTuple<float, numTuple> &innermaxrange,
-              char maxrolepriority,
-              int maxtargets)
-    {
+            Unit *un,
+            float gunrange,
+            vector<TurretBin> *tbin,
+            const StaticTuple<float, numTuple> &innermaxrange,
+            char maxrolepriority,
+            int maxtargets) {
         this->fireat = fireat;
         this->tbin = tbin;
         this->parent = un;
@@ -429,8 +406,7 @@ public:
         this->maxtargets = maxtargets;
     }
 
-    bool acquire(Unit *un, float distance)
-    {
+    bool acquire(Unit *un, float distance) {
         double unkey = un->location[Unit::UNIT_ONLY]->getKey();
         bool lesscheck = unkey < maxinnerrangeless[0];
         bool morecheck = unkey > maxinnerrangemore[0];
@@ -459,8 +435,7 @@ public:
         return ShouldTargetUnit(un, distance);
     }
 
-    bool ShouldTargetUnit(Unit *un, float distance)
-    {
+    bool ShouldTargetUnit(Unit *un, float distance) {
         if (un->CloakVisible() > .8) {
             float rangetotarget = distance;
             float rel0 = parent->getRelation(un);
@@ -507,10 +482,9 @@ int numpolled[2] = {0, 0};   //number of units that searched for a target
 int prevpollindex[2] = {10000, 10000};   //previous number of units touched (doesn't need to be precise)
 
 int pollindex[2] = {1,
-                    1};   //current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
+        1};   //current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
 
-void FireAt::ChooseTargets(int numtargs, bool force)
-{
+void FireAt::ChooseTargets(int numtargs, bool force) {
     float gunspeed, gunrange, missilerange;
     parent->getAverageGunSpeed(gunspeed, gunrange, missilerange);
     static float targettimer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
@@ -520,14 +494,14 @@ void FireAt::ChooseTargets(int numtargs, bool force)
             XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinNullTimeToSwitchTargets", "5"));
     static int minnumpollers =
             float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                        "Targetting",
-                                                                        "MinNumberofpollersperframe",
-                                                                        "5")));                    //maximum number of vessels allowed to search for a target in a given physics frame
+                    "Targetting",
+                    "MinNumberofpollersperframe",
+                    "5")));                    //maximum number of vessels allowed to search for a target in a given physics frame
     static int maxnumpollers =
             float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                        "Targetting",
-                                                                        "MaxNumberofpollersperframe",
-                                                                        "49")));                    //maximum number of vessels allowed to search for a target in a given physics frame
+                    "Targetting",
+                    "MaxNumberofpollersperframe",
+                    "49")));                    //maximum number of vessels allowed to search for a target in a given physics frame
     static int numpollers[2] = {maxnumpollers, maxnumpollers};
 
     static int nextframenumpollers[2] = {maxnumpollers, maxnumpollers};
@@ -600,15 +574,15 @@ void FireAt::ChooseTargets(int numtargs, bool force)
     float mytargrange = FLT_MAX;
     static float unitRad =
             XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                           "Targetting",
-                                                           "search_extra_radius",
-                                                           "1000"));                 //Maximum target radius that is guaranteed to be detected
+                    "Targetting",
+                    "search_extra_radius",
+                    "1000"));                 //Maximum target radius that is guaranteed to be detected
     static char maxrolepriority =
             XMLSupport::parse_int(vs_config->getVariable("AI", "Targetting", "search_max_role_priority", "16"));
     static int maxtargets = XMLSupport::parse_int(vs_config->getVariable("AI",
-                                                                         "Targetting",
-                                                                         "search_max_candidates",
-                                                                         "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
+            "Targetting",
+            "search_max_candidates",
+            "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
     UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->GetComputerData().radar.maxrange, unitRad);
     StaticTuple<float, 2> maxranges;
 
@@ -693,8 +667,7 @@ void FireAt::ChooseTargets(int numtargs, bool force)
     SignalChosenTarget();
 }
 
-bool FireAt::ShouldFire(Unit *targ, bool &missilelock)
-{
+bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     float dist;
     if (!targ) {
         return false;
@@ -715,16 +688,16 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock)
     static float firewhen = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "InWeaponRange", "1.2"));
     static float fireangle_minagg =
             (float) cos(M_PI * XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                              "Firing",
-                                                                              "MaximumFiringAngle.minagg",
-                                                                              "10"))
-                                / 180.);                                                                      //Roughly 10 degrees
+                    "Firing",
+                    "MaximumFiringAngle.minagg",
+                    "10"))
+                    / 180.);                                                                      //Roughly 10 degrees
     static float fireangle_maxagg =
             (float) cos(M_PI * XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                              "Firing",
-                                                                              "MaximumFiringAngle.maxagg",
-                                                                              "18"))
-                                / 180.);                                                                      //Roughly 18 degrees
+                    "Firing",
+                    "MaximumFiringAngle.maxagg",
+                    "18"))
+                    / 180.);                                                                      //Roughly 18 degrees
     float temp = parent->TrackingGuns(missilelock);
     bool isjumppoint = targ->isUnit() == _UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
     float fangle = (fireangle_minagg + fireangle_maxagg * agg) / (1.0f + agg);
@@ -756,15 +729,13 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock)
     return retval;
 }
 
-FireAt::~FireAt()
-{
+FireAt::~FireAt() {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("fire%1$x") % this));
 #endif
 }
 
-unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile)
-{
+unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
     unsigned int firebitm = ROLES::EVERYTHING_ELSE;
     Unit *un = parent->Target();
     if (un) {
@@ -786,8 +757,7 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile)
     return firebitm;
 }
 
-void FireAt::FireWeapons(bool shouldfire, bool lockmissile)
-{
+void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     static float missiledelay = XMLSupport::parse_float(vs_config->getVariable("AI", "MissileGunDelay", "4"));
     //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
     bool fire_missile = lockmissile && rand() < RAND_MAX * missileprobability * SIMULATION_ATOM;
@@ -805,8 +775,7 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile)
     parent->Fire(FireBitmask(parent, shouldfire, fire_missile), true);
 }
 
-bool FireAt::isJumpablePlanet(Unit *targ)
-{
+bool FireAt::isJumpablePlanet(Unit *targ) {
     bool istargetjumpableplanet = targ->isUnit() == _UnitType::planet;
     if (istargetjumpableplanet) {
         istargetjumpableplanet =
@@ -817,8 +786,7 @@ bool FireAt::isJumpablePlanet(Unit *targ)
 
 using std::string;
 
-void FireAt::PossiblySwitchTarget(bool unused)
-{
+void FireAt::PossiblySwitchTarget(bool unused) {
     static float
             targettime = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "TimeUntilSwitch", "20"));
     if ((targettime <= 0) || (vsrandom.uniformInc(0, 1) < simulation_atom_var / targettime)) {
@@ -835,8 +803,7 @@ void FireAt::PossiblySwitchTarget(bool unused)
     }
 }
 
-void FireAt::Execute()
-{
+void FireAt::Execute() {
     lastchangedtarg -= SIMULATION_ATOM;
     bool missilelock = false;
     bool tmp = done;

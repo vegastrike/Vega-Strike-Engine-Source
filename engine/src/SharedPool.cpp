@@ -42,8 +42,7 @@ SharedPool<T, RT>::SharedPool()
 }
 
 template<typename T, typename RT>
-SharedPool<T, RT>::~SharedPool()
-{
+SharedPool<T, RT>::~SharedPool() {
     if (ms_singleton == this) {
         ms_singleton = 0;
     }

@@ -25,8 +25,7 @@
 #define FUNCTORS_INC 1
 class Attributes {
 public:
-    Attributes()
-    {
+    Attributes() {
         hidden = false;
         webbcmd = false;
         immcmd = false;
@@ -39,12 +38,10 @@ public:
 //nothing returns yet anyway, strings may be the most useful?
     class returnType {
     public:
-        returnType()
-        {
+        returnType() {
         }
 
-        returnType(const returnType &in)
-        {
+        returnType(const returnType &in) {
             if (in.s.size() > 0) {
                 s.append(in.s);
             }
@@ -59,8 +56,7 @@ class TFunctor {
 public:
     Attributes attribs;
 
-    virtual ~TFunctor()
-    {
+    virtual ~TFunctor() {
     }
 
     virtual void *Call(std::vector<std::string> &d, int &sock_in, bool *isDown) = 0;
@@ -86,8 +82,7 @@ private:
     TClass *pt2Object;             //pointer to object
 public:
 //New singularlized call method {{{:
-    virtual void *Call(std::vector<std::string> &d, int &sock_in, bool *isDown)
-    {
+    virtual void *Call(std::vector<std::string> &d, int &sock_in, bool *isDown) {
         //Comments {{{
         //ok, d[0] == command typed
         //d[1] == arg1
@@ -205,8 +200,7 @@ public:
 
         return NULL;
     }             //}}}
-    void nullify()
-    {
+    void nullify() {
         //Set all the fpt's to null {{{
         fpt1 = NULL;
         fpt2 = NULL;
@@ -222,94 +216,81 @@ public:
         fpt12 = NULL;
     }              //Nullify }}}
     //Constructors, call nullify, set pt2object and function pointer {{{
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)())
-    {
+    Functor(TClass *_pt2Object, void(TClass::*_fpt)()) {
         nullify();
         pt2Object = _pt2Object;
         fpt1 = _fpt;
     }
 
 //1 std::string
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(std::string &))
-    {
+    Functor(TClass *_pt2Object, void(TClass::*_fpt)(std::string &)) {
         nullify();
         pt2Object = _pt2Object;
         fpt2 = _fpt;
     }
 
 //1 c string
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(const char *))
-    {
+    Functor(TClass *_pt2Object, void(TClass::*_fpt)(const char *)) {
         nullify();
         pt2Object = _pt2Object;
         fpt3 = _fpt;
     }
 
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(const char *array[]))
-    {
+    Functor(TClass *_pt2Object, void(TClass::*_fpt)(const char *array[])) {
         nullify();
         pt2Object = _pt2Object;
         fpt4 = _fpt;
     }
 
 //2 c strings
-    Functor(TClass *_Obj, void(TClass::*_fpt)(const char *, const char *))
-    {
+    Functor(TClass *_Obj, void(TClass::*_fpt)(const char *, const char *)) {
         nullify();
         pt2Object = _Obj;
         fpt5 = _fpt;
     }
 
 //1 bool
-    Functor(TClass *_Obj, void(TClass::*_fpt)(bool *))
-    {
+    Functor(TClass *_Obj, void(TClass::*_fpt)(bool *)) {
         nullify();
         pt2Object = _Obj;
         fpt6 = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(int))
-    {
+    Functor(TClass *_Obj, void(TClass::*_fpt)(int)) {
         nullify();
         pt2Object = _Obj;
         fpt7 = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(char))
-    {
+    Functor(TClass *_Obj, void(TClass::*_fpt)(char)) {
         nullify();
         pt2Object = _Obj;
         fpt8 = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d))
-    {
+    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d)) {
         nullify();
         pt2Object = _Obj, fpt9 = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d, int &))
-    {
+    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d, int &)) {
         nullify();
         pt2Object = _Obj, fpt10 = _fpt;
     }
 
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(std::string &, int &))
-    {
+    Functor(TClass *_pt2Object, void(TClass::*_fpt)(std::string &, int &)) {
         nullify();
         pt2Object = _pt2Object;
         fpt11 = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d, int &, bool))
-    {
+    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d, int &, bool)) {
         nullify();
         pt2Object = _Obj, fpt12 = _fpt;
     }
 //}}}
 
-    virtual ~Functor()
-    {
+    virtual ~Functor() {
     }
 };
 

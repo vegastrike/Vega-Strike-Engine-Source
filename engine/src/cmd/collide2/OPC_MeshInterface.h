@@ -30,8 +30,7 @@
 struct VertexPointers {
     const Point *Vertex[3];
 
-    bool BackfaceCulling(const Point &source)
-    {
+    bool BackfaceCulling(const Point &source) {
         const Point &p0 = *Vertex[0];
         const Point &p1 = *Vertex[1];
         const Point &p2 = *Vertex[2];
@@ -62,23 +61,19 @@ public:
     MeshInterface();
     ~MeshInterface();
     // Common settings
-    inline_            uint32_t GetNbTriangles() const
-    {
+    inline_            uint32_t GetNbTriangles() const {
         return mNbTris;
     }
 
-    inline_            uint32_t GetNbVertices() const
-    {
+    inline_            uint32_t GetNbVertices() const {
         return mNbVerts;
     }
 
-    inline_            void SetNbTriangles(uint32_t nb)
-    {
+    inline_            void SetNbTriangles(uint32_t nb) {
         mNbTris = nb;
     }
 
-    inline_            void SetNbVertices(uint32_t nb)
-    {
+    inline_            void SetNbVertices(uint32_t nb) {
         mNbVerts = nb;
     }
 
@@ -95,13 +90,11 @@ public:
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     bool SetCallback(RequestCallback callback, void *user_data);
 
-    inline_            void *GetUserData() const
-    {
+    inline_            void *GetUserData() const {
         return mUserData;
     }
 
-    inline_            RequestCallback GetCallback() const
-    {
+    inline_            RequestCallback GetCallback() const {
         return mObjCallback;
     }
 
@@ -144,8 +137,7 @@ public:
      *	\param		index	[in] triangle index
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            void GetTriangle(VertexPointers &vp, uint32_t index) const
-    {
+    inline_            void GetTriangle(VertexPointers &vp, uint32_t index) const {
 #ifdef OPC_USE_CALLBACKS
         (mObjCallback)(index, vp, mUserData);
 #else

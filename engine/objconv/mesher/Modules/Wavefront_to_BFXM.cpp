@@ -35,9 +35,8 @@ public:
      */
 
     virtual RetCodeEnum convert(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode)
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) {
         if (inputFormat == "Wavefront" && outputFormat == "BFXM") {
             if (opCode == "create") {
                 bool forcenormals = atoi(getNamedOption("forcenormals").c_str()) != 0;
@@ -51,7 +50,7 @@ public:
                 FILE *InputMtl = fopen(mtl.c_str(), "r");
                 if (!InputMtl) {
                     cerr << "Warning: material file \"" << mtl.c_str()
-                         << "\" not found. Using neutral material." << endl;
+                            << "\" not found. Using neutral material." << endl;
                 }
                 FILE *Outputfile = fopen(output.c_str(), "wb+");
                 if (!Outputfile) {
@@ -70,24 +69,23 @@ public:
     }
 
     virtual void conversionHelp(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode) const
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) const {
         if ((inputFormat.empty() || inputFormat == "Wavefront")
                 && (outputFormat.empty() || outputFormat == "BFXM")
                 && (opCode.empty() || (opCode == "create"))) {
             cout << "Wavefront -> BFXM\n"
-                 << "\tSupported operations: create\n"
-                 << "\tSupported options: standard, plus:\n"
-                 << "\t\t-no-optimize: disables optimization (useful if it has already\n"
-                 << "\t\t\tbeen optimized, but make sure the file contains accurate normal\n"
-                 << "\t\t\tinformation (disabling optimization will impair autosmooth)\n"
-                 << "\nNotes: Wavefront files usually come in pairs, with an .obj and a .mtl\n"
-                 << "\tfile. The .mtl file is presumed to have the same base name, but .mtl\n"
-                 << "\textension, when the .obj file does not reference it. Otherwise, the\n"
-                 << "\tfilename is taken from the .obj file.\n"
-                 << "\tSimplifying: have your .mtl file in the same directory as your .obj file.\n"
-                 << endl;
+                    << "\tSupported operations: create\n"
+                    << "\tSupported options: standard, plus:\n"
+                    << "\t\t-no-optimize: disables optimization (useful if it has already\n"
+                    << "\t\t\tbeen optimized, but make sure the file contains accurate normal\n"
+                    << "\t\t\tinformation (disabling optimization will impair autosmooth)\n"
+                    << "\nNotes: Wavefront files usually come in pairs, with an .obj and a .mtl\n"
+                    << "\tfile. The .mtl file is presumed to have the same base name, but .mtl\n"
+                    << "\textension, when the .obj file does not reference it. Otherwise, the\n"
+                    << "\tfilename is taken from the .obj file.\n"
+                    << "\tSimplifying: have your .mtl file in the same directory as your .obj file.\n"
+                    << endl;
         }
     }
 

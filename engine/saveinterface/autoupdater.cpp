@@ -50,13 +50,11 @@ void LoadAutoDialog(char *, int);
 
 std::vector<std::string> buttonvec;
 
-int win_close(GtkWidget *w, void *)
-{
+int win_close(GtkWidget *w, void *) {
     return FALSE;
 }
 
-GdkWindow *Help(const char *title, const char *text)
-{
+GdkWindow *Help(const char *title, const char *text) {
     GtkWidget *window;
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 300, 0);
@@ -72,8 +70,7 @@ GdkWindow *Help(const char *title, const char *text)
 bool checked = false;
 bool progress = true;
 
-void toggle_button_callback(GtkWidget *widget, gpointer data)
-{
+void toggle_button_callback(GtkWidget *widget, gpointer data) {
     checked = (GTK_TOGGLE_BUTTON(widget)->active);
 }
 
@@ -97,8 +94,7 @@ spawnl (P_WAIT,
 return 0;
 }
 
-void CvsUpdate(int index)
-{
+void CvsUpdate(int index) {
     if (progress) {
         char *str = strdup(buttonvec[index].c_str());
         printf("cvs update -kb -r %s\n", str);
@@ -108,14 +104,12 @@ void CvsUpdate(int index)
     }
 }
 
-void hello(GtkWidget *widget, gpointer data)
-{
+void hello(GtkWidget *widget, gpointer data) {
     int i = (int) data;
     CvsUpdate(i);
 }
 
-std::string scanInString(FILE *fp)
-{
+std::string scanInString(FILE *fp) {
     std::string str;
     char c[2] = {'\n', '\0'};
     while ((isspace(c[0])) && (!(feof(fp)))) {
@@ -132,8 +126,7 @@ std::string scanInString(FILE *fp)
     return str;
 }
 
-std::vector<std::string> GetButtons()
-{
+std::vector<std::string> GetButtons() {
     std::vector<std::string> vec;
     FILE *fp = fopen("update_list.txt", "rt");
 
@@ -150,8 +143,7 @@ std::vector<std::string> GetButtons()
     return vec;
 }
 
-void main2()
-{
+void main2() {
     GtkWidget *window;
     GtkWidget *button;
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -171,7 +163,7 @@ void main2()
     buttonvec = GetButtons();
     button = gtk_button_new_with_label("Update to: Recent experimental data");
     gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(hello), (void *) 0);
+            GTK_SIGNAL_FUNC(hello), (void *) 0);
     gtk_container_add(GTK_CONTAINER(vbox), button);
     gtk_widget_show(button);
     for (int i = 1; i < buttonvec.size(); i++) {
@@ -181,7 +173,7 @@ void main2()
          * function hello() passing it NULL as its argument.  The hello()
          * function is defined above. */
         gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                           GTK_SIGNAL_FUNC(hello), (void *) i);
+                GTK_SIGNAL_FUNC(hello), (void *) i);
         gtk_container_add(GTK_CONTAINER(vbox), button);
         gtk_widget_show(button);
     }
@@ -192,8 +184,7 @@ void main2()
     /* and the window */
 }
 
-void CvsUpdateList()
-{
+void CvsUpdateList() {
     char *str = "HEAD";
     printf("cvs update -kb -r %s update_list.txt\n", str);
     fflush(stdout);
@@ -204,24 +195,21 @@ void CvsUpdateList()
     main2();
 }
 
-void bCvsUpdateList(GtkWidget *widget, gpointer data)
-{
+void bCvsUpdateList(GtkWidget *widget, gpointer data) {
     GdkWindow *win;
     win = gtk_widget_get_parent_window(GTK_WIDGET(data));
     gdk_window_destroy(win);
     CvsUpdateList();
 }
 
-void bmain2(GtkWidget *widget, gpointer data)
-{
+void bmain2(GtkWidget *widget, gpointer data) {
     GdkWindow *win;
     win = gtk_widget_get_parent_window(GTK_WIDGET(data));
     gdk_window_destroy(win);
     main2();
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     gtk_init(&argc, &argv);
 #if defined(WITH_MACOSX_BUNDLE) || defined(_WIN32)
     // We need to set the path back 2 to make everything ok.
@@ -268,7 +256,7 @@ int main(int argc, char **argv)
      * function hello() passing it NULL as its argument.  The hello()
      * function is defined above. */
     gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(bCvsUpdateList), vbox);
+            GTK_SIGNAL_FUNC(bCvsUpdateList), vbox);
     gtk_container_add(GTK_CONTAINER(hbox), button);
     gtk_widget_show(button);
     button = gtk_button_new_with_label("Do Not Update");
@@ -277,7 +265,7 @@ int main(int argc, char **argv)
      * function hello() passing it NULL as its argument.  The hello()
      * function is defined above. */
     gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                       GTK_SIGNAL_FUNC(bmain2), vbox);
+            GTK_SIGNAL_FUNC(bmain2), vbox);
     gtk_container_add(GTK_CONTAINER(hbox), button);
     gtk_widget_show(button);
     gtk_container_add(GTK_CONTAINER(vbox), label);

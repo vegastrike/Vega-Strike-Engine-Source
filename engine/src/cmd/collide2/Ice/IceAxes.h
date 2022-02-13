@@ -42,15 +42,13 @@ enum AxisOrder {
 class ICEMATHS_API Axes {
 public:
 
-    inline_ Axes(AxisOrder order)
-    {
+    inline_ Axes(AxisOrder order) {
         mAxis0 = (order) & 3;
         mAxis1 = (order >> 2) & 3;
         mAxis2 = (order >> 4) & 3;
     }
 
-    inline_            ~Axes()
-    {
+    inline_            ~Axes() {
     }
 
     uint32_t mAxis0;

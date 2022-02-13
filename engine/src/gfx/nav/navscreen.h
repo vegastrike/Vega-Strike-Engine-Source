@@ -82,9 +82,9 @@ public:
             GFXColor GetColor();
             SystemInfo(const string &name);
             SystemInfo(const string &name,
-                       const QVector &position,
-                       const std::vector<std::string> &destinations,
-                       CachedSystemIterator *csi);
+                    const QVector &position,
+                    const std::vector<std::string> &destinations,
+                    CachedSystemIterator *csi);
             void loadData(std::map<string, unsigned> *index_table);
         };
 
@@ -261,47 +261,47 @@ private:
     void Adjust3dTransformation(bool three_d, bool is_system_not_galaxy);
     void ReplaceAxes(QVector &pos);
     void RecordMinAndMax(const QVector &pos,
-                         float &min_x,
-                         float &max_x,
-                         float &min_y,
-                         float &max_y,
-                         float &min_z,
-                         float &max_z,
-                         float &max_all);
+            float &min_x,
+            float &max_x,
+            float &min_y,
+            float &max_y,
+            float &min_z,
+            float &max_z,
+            float &max_all);
     void DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy);
 
     float CalculatePerspectiveAdjustment(float &zscale,
-                                         float &zdistance,
-                                         QVector &pos,
-                                         QVector &pos_flat,
-                                         float &system_item_scale_temp,
-                                         bool system_not_galaxy);
+            float &zdistance,
+            QVector &pos,
+            QVector &pos_flat,
+            float &system_item_scale_temp,
+            bool system_not_galaxy);
 
     void TranslateCoordinates(QVector &pos,
-                              QVector &pos_flat,
-                              float center_nav_x,
-                              float center_nav_y,
-                              float themaxvalue,
-                              float &zscale,
-                              float &zdistance,
-                              float &the_x,
-                              float &the_y,
-                              float &the_x_flat,
-                              float &the_y_flat,
-                              float &system_item_scale_temp,
-                              bool system_not_galaxy);
+            QVector &pos_flat,
+            float center_nav_x,
+            float center_nav_y,
+            float themaxvalue,
+            float &zscale,
+            float &zdistance,
+            float &the_x,
+            float &the_y,
+            float &the_x_flat,
+            float &the_y_flat,
+            float &system_item_scale_temp,
+            bool system_not_galaxy);
 
     void TranslateAndDisplay(QVector &pos,
-                             QVector &pos_flat,
-                             float center_nav_x,
-                             float center_nav_y,
-                             float themaxvalue,
-                             float &zscale,
-                             float &zdistance,
-                             float &the_x,
-                             float &the_y,
-                             float &system_item_scale_temp,
-                             bool system_not_galaxy);
+            QVector &pos_flat,
+            float center_nav_x,
+            float center_nav_y,
+            float themaxvalue,
+            float &zscale,
+            float &zdistance,
+            float &the_x,
+            float &the_y,
+            float &system_item_scale_temp,
+            bool system_not_galaxy);
 
     void DisplayOrientationLines(float the_x, float the_y, float the_x_flat, float the_y_flat, bool system_not_galaxy);
 
@@ -357,8 +357,7 @@ public:
     void ClearPriorities();
     void updatePath();
 
-    void scroll(signed int scrollamt)
-    {
+    void scroll(signed int scrollamt) {
         scrolloffset += scrollamt;
     }
 
@@ -369,8 +368,7 @@ public:
     static void mouseMotion(int x, int y);
     static void mouseClick(int button, int state, int x, int y);
 
-    static int getMouseButtonStatus()
-    {
+    static int getMouseButtonStatus() {
         return mousestat;
     }
 

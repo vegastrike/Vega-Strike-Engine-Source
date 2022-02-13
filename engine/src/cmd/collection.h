@@ -64,16 +64,14 @@ public:
      */
     class UnitIterator {
     public:
-        UnitIterator() : col(NULL)
-        {
+        UnitIterator() : col(NULL) {
         }
 
         UnitIterator(const UnitIterator &);
         UnitIterator(UnitCollection *);
         virtual ~UnitIterator();
 
-        inline bool isDone()
-        {
+        inline bool isDone() {
             if (col && it != col->u.end()) {
                 return false;
             }
@@ -98,28 +96,24 @@ public:
         /* same as advance, only it returns the unit at the same time */
         Unit *next();
 
-        int size() const
-        {
+        int size() const {
             return (col->size());
         }
 
         UnitIterator &operator=(const UnitIterator &);
 
-        inline const UnitIterator operator++(int)
-        {
+        inline const UnitIterator operator++(int) {
             UnitCollection::UnitIterator tmp(*this);
             advance();
             return tmp;
         }
 
-        inline const UnitIterator &operator++()
-        {
+        inline const UnitIterator &operator++() {
             advance();
             return *this;
         }
 
-        inline Unit *operator*()
-        {
+        inline Unit *operator*() {
             if (col && it != col->u.end()) {
                 return *it;
             }
@@ -142,8 +136,7 @@ public:
      */
     class ConstIterator {
     public:
-        ConstIterator() : col(NULL)
-        {
+        ConstIterator() : col(NULL) {
         }
 
         ConstIterator(const ConstIterator &);
@@ -152,13 +145,11 @@ public:
         ConstIterator &operator=(const ConstIterator &orig);
         Unit *next();
 
-        int size() const
-        {
+        int size() const {
             return (col->size());
         }
 
-        inline bool isDone()
-        {
+        inline bool isDone() {
             if (col && it != col->u.end()) {
                 return false;
             }
@@ -169,8 +160,7 @@ public:
         const ConstIterator &operator++();
         const ConstIterator operator++(int);
 
-        inline Unit *operator*() const
-        {
+        inline Unit *operator*() const {
             if (it != col->u.end() && !col->empty()) {
                 return *it;
             }
@@ -190,29 +180,24 @@ public:
     UnitCollection();
     UnitCollection(const UnitCollection &);
 
-    inline ~UnitCollection()
-    {
+    inline ~UnitCollection() {
         destr();
     }
 
     /* Iterator creation functions. We use this to set the col pointer */
-    inline UnitIterator createIterator()
-    {
+    inline UnitIterator createIterator() {
         return UnitIterator(this);
     }
 
-    inline FastIterator fastIterator()
-    {
+    inline FastIterator fastIterator() {
         return FastIterator(this);
     }
 
-    inline ConstIterator constIterator() const
-    {
+    inline ConstIterator constIterator() const {
         return ConstIterator(this);
     }
 
-    inline ConstFastIterator constFastIterator() const
-    {
+    inline ConstFastIterator constFastIterator() const {
         return ConstFastIterator(this);
     }
 
@@ -220,8 +205,7 @@ public:
      * Do not use in any fast-code paths */
     void insert_unique(Unit *);
 
-    inline bool empty() const
-    {
+    inline bool empty() const {
         if (u.empty()) {
             return true;
         } else if (removedIters.empty() || u.size() > removedIters.size()) {
@@ -264,14 +248,12 @@ public:
     bool remove(const class Unit *);
 
     /* Returns number of non-null units in list */
-    inline const int size() const
-    {
+    inline const int size() const {
         return u.size() - removedIters.size();
     }
 
     /* Returns last non-null unit in list. May be Killed() */
-    inline Unit *back()
-    {
+    inline Unit *back() {
         for (std::list<Unit *>::reverse_iterator it = u.rbegin(); it != u.rend(); ++it) {
             if (*it) {
                 return *it;
@@ -281,8 +263,7 @@ public:
     }
 
     /* Returns first non-null unit in list. May be Killed() */
-    inline Unit *front()
-    {
+    inline Unit *front() {
         for (std::list<Unit *>::iterator it = u.begin(); it != u.end(); ++it) {
             if (*it) {
                 return *it;

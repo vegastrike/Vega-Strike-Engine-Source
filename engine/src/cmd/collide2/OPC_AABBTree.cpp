@@ -83,8 +83,7 @@ AABBTreeNode::AABBTreeNode() :
         mNeg			(0),
 #endif
         mNodePrimitives(nullptr),
-        mNbPrimitives(0)
-{
+        mNbPrimitives(0) {
 #ifdef OPC_USE_TREE_COHERENCE
     mBitmask = 0;
 #endif
@@ -95,8 +94,7 @@ AABBTreeNode::AABBTreeNode() :
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBTreeNode::~AABBTreeNode()
-{
+AABBTreeNode::~AABBTreeNode() {
     // Opcode 1.3:
     const AABBTreeNode *Pos = GetPos();
 #ifndef OPC_NO_NEG_VANILLA_TREE
@@ -122,8 +120,7 @@ AABBTreeNode::~AABBTreeNode()
  *	\warning	this method reorganizes the internal list of primitives
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t AABBTreeNode::Split(uint32_t axis, AABBTreeBuilder *builder)
-{
+uint32_t AABBTreeNode::Split(uint32_t axis, AABBTreeBuilder *builder) {
     // Get node split value
     float SplitValue = builder->GetSplittingValue(mNodePrimitives, mNbPrimitives, mBV, axis);
 
@@ -171,8 +168,7 @@ uint32_t AABBTreeNode::Split(uint32_t axis, AABBTreeBuilder *builder)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTreeNode::Subdivide(AABBTreeBuilder *builder)
-{
+bool AABBTreeNode::Subdivide(AABBTreeBuilder *builder) {
     // Checkings
     if (!builder) {
         return false;
@@ -364,8 +360,7 @@ bool AABBTreeNode::Subdivide(AABBTreeBuilder *builder)
  *	\param		builder		[in] the tree builder
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBTreeNode::_BuildHierarchy(AABBTreeBuilder *builder)
-{
+void AABBTreeNode::_BuildHierarchy(AABBTreeBuilder *builder) {
     // 1) Compute the global box for current node. The box is stored in mBV.
     builder->ComputeGlobalBox(mNodePrimitives, mNbPrimitives, mBV);
 
@@ -389,8 +384,7 @@ void AABBTreeNode::_BuildHierarchy(AABBTreeBuilder *builder)
  *	\param		builder		[in] the tree builder
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBTreeNode::_Refit(AABBTreeBuilder *builder)
-{
+void AABBTreeNode::_Refit(AABBTreeBuilder *builder) {
     // 1) Recompute the new global box for current node
     builder->ComputeGlobalBox(mNodePrimitives, mNbPrimitives, mBV);
 
@@ -412,8 +406,7 @@ void AABBTreeNode::_Refit(AABBTreeBuilder *builder)
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBTree::AABBTree() : mIndices(nullptr), mPool(nullptr), mTotalNbNodes(0)
-{
+AABBTree::AABBTree() : mIndices(nullptr), mPool(nullptr), mTotalNbNodes(0) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -421,8 +414,7 @@ AABBTree::AABBTree() : mIndices(nullptr), mPool(nullptr), mTotalNbNodes(0)
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBTree::~AABBTree()
-{
+AABBTree::~AABBTree() {
     Release();
 }
 
@@ -431,8 +423,7 @@ AABBTree::~AABBTree()
  *	Releases the tree.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBTree::Release()
-{
+void AABBTree::Release() {
     DELETEARRAY(mPool);
     DELETEARRAY(mIndices);
 }
@@ -444,8 +435,7 @@ void AABBTree::Release()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTree::Build(AABBTreeBuilder *builder)
-{
+bool AABBTree::Build(AABBTreeBuilder *builder) {
     // Checkings
     if (!builder || !builder->mNbPrimitives) {
         return false;
@@ -498,8 +488,7 @@ bool AABBTree::Build(AABBTreeBuilder *builder)
  *	\return		depth of the tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t AABBTree::ComputeDepth() const
-{
+uint32_t AABBTree::ComputeDepth() const {
     return Walk(nullptr, nullptr);    // Use the walking code without callback
 }
 
@@ -508,19 +497,17 @@ uint32_t AABBTree::ComputeDepth() const
  *	Walks the tree, calling the user back for each node.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t AABBTree::Walk(WalkingCallback callback, void *user_data) const
-{
+uint32_t AABBTree::Walk(WalkingCallback callback, void *user_data) const {
     // Call it without callback to compute max depth
     uint32_t MaxDepth = 0;
     uint32_t CurrentDepth = 0;
 
     struct Local {
         static void _Walk(const AABBTreeNode *current_node,
-                          uint32_t &max_depth,
-                          uint32_t &current_depth,
-                          WalkingCallback callback,
-                          void *user_data)
-        {
+                uint32_t &max_depth,
+                uint32_t &current_depth,
+                WalkingCallback callback,
+                void *user_data) {
             // Checkings
             if (!current_node) {
                 return;
@@ -558,8 +545,7 @@ uint32_t AABBTree::Walk(WalkingCallback callback, void *user_data) const
  *	\param		builder		[in] the tree builder
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTree::Refit(AABBTreeBuilder *builder)
-{
+bool AABBTree::Refit(AABBTreeBuilder *builder) {
     if (!builder) {
         return false;
     }
@@ -573,8 +559,7 @@ bool AABBTree::Refit(AABBTreeBuilder *builder)
  *	\param		builder		[in] the tree builder
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTree::Refit2(AABBTreeBuilder *builder)
-{
+bool AABBTree::Refit2(AABBTreeBuilder *builder) {
     // Checkings
     if (!builder) {
         return false;
@@ -613,8 +598,7 @@ bool AABBTree::Refit2(AABBTreeBuilder *builder)
  *	\return		number of bytes used
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-size_t AABBTree::GetUsedBytes() const
-{
+size_t AABBTree::GetUsedBytes() const {
     // return SIZEOFOBJECT;
     size_t TotalSize = mTotalNbNodes * GetNodeSize();
     if (mIndices) {
@@ -630,8 +614,7 @@ size_t AABBTree::GetUsedBytes() const
  *	\return		true for complete trees
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTree::IsComplete() const
-{
+bool AABBTree::IsComplete() const {
     return (GetNbNodes() == GetNbPrimitives() * 2 - 1);
 }
 

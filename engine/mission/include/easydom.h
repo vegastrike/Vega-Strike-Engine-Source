@@ -54,13 +54,11 @@ public:
 
     void addChild(easyDomNode *child);
 
-    string Name()
-    {
+    string Name() {
         return name;
     }
 
-    void set_attribute(string name, string value)
-    {
+    void set_attribute(string name, string value) {
         attribute_map[name] = value;
     };
 
@@ -85,8 +83,7 @@ class tagDomNode : public easyDomNode {
 public:
     int tag;
 
-    void Tag(tagMap *tagmap)
-    {
+    void Tag(tagMap *tagmap) {
         tag = (*tagmap)[Name()];
         if (tag == 0) {
             VS_LOG(trace, (boost::format("cannot translate tag %1%") % Name()));
@@ -104,8 +101,7 @@ public:
 template<class domNodeType>
 class easyDomFactory {
 public:
-    easyDomFactory()
-    {
+    easyDomFactory() {
     };
 
     void getColor(char *name, float color[4]);
@@ -116,8 +112,7 @@ public:
     struct easyDomFactoryXML {
     } *xml;
 
-    domNodeType *LoadXML(const char *filename)
-    {
+    domNodeType *LoadXML(const char *filename) {
 
         const int chunk_size = 16384;
 
@@ -150,15 +145,13 @@ public:
         return (domNodeType *) topnode;
     };
 
-    static void charHandler(void *userData, const XML_Char *s, int len)
-    {
+    static void charHandler(void *userData, const XML_Char *s, int len) {
         char buffer[2048];
         strncpy(buffer, s, len);
         // printf("XML-text: %s\n",buffer);
     };
 
-    domNodeType *LoadCalike(const char *filename)
-    {
+    domNodeType *LoadCalike(const char *filename) {
 
         const int chunk_size = 16384;
 
@@ -216,18 +209,15 @@ public:
         return (domNodeType *) topnode;
     };
 
-    static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-    {
+    static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
         ((easyDomFactory *) userData)->beginElement(name, AttributeList(atts));
     };
 
-    static void endElement(void *userData, const XML_Char *name)
-    {
+    static void endElement(void *userData, const XML_Char *name) {
         ((easyDomFactory *) userData)->endElement(name);
     };
 
-    void beginElement(const string &name, const AttributeList &attributes)
-    {
+    void beginElement(const string &name, const AttributeList &attributes) {
         AttributeList::const_iterator iter;
 
         domNodeType *parent;
@@ -253,8 +243,7 @@ public:
         nodestack.push(thisnode);
     };
 
-    void endElement(const string &name)
-    {
+    void endElement(const string &name) {
 
         domNodeType *stacktop = nodestack.top();
 

@@ -27,8 +27,7 @@
 
 #include "quadsquare.h"
 
-void quadsquare::ResetTree()
-{
+void quadsquare::ResetTree() {
 //Clear all enabled flags, and delete all non-static child nodes.
     int i;
     for (i = 0; i < 4; i++) {
@@ -46,8 +45,7 @@ void quadsquare::ResetTree()
     Dirty = true;
 }
 
-void quadsquare::StaticCullData(const quadcornerdata &cd, float ThresholdDetail)
-{
+void quadsquare::StaticCullData(const quadcornerdata &cd, float ThresholdDetail) {
 //Examine the tree and remove nodes which don't contain necessary
 //detail.  Necessary detail is defined as vertex data with a
 //edge-length to height ratio less than ThresholdDetail.
@@ -67,8 +65,7 @@ void quadsquare::StaticCullData(const quadcornerdata &cd, float ThresholdDetail)
     }
 }
 
-void quadsquare::StaticCullAux(const quadcornerdata &cd, float ThresholdDetail, int TargetLevel)
-{
+void quadsquare::StaticCullAux(const quadcornerdata &cd, float ThresholdDetail, int TargetLevel) {
 //Check this node and its descendents, and remove nodes which don't contain
 //necessary detail.
     int i, j;

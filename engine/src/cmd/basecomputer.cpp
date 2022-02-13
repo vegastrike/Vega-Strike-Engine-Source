@@ -94,8 +94,7 @@ extern const char *DamagedCategory;
 
 int BaseComputer::dirty = 0;
 
-static GFXColor UnsaturatedColor(float r, float g, float b, float a = 1.0f)
-{
+static GFXColor UnsaturatedColor(float r, float g, float b, float a = 1.0f) {
     GFXColor ret(r, g, b, a);
     return ret;
 }
@@ -103,8 +102,7 @@ static GFXColor UnsaturatedColor(float r, float g, float b, float a = 1.0f)
 std::string emergency_downgrade_mode;
 extern std::string CurrentSaveGameName;
 
-std::vector<std::string> getWeapFilterVec()
-{
+std::vector<std::string> getWeapFilterVec() {
     std::vector<std::string> weapfiltervec;
     ///// FIXME: the following may change in the future if we ever redo the master part list.
     weapfiltervec.push_back("upgrades/Weapon");
@@ -115,8 +113,7 @@ std::vector<std::string> getWeapFilterVec()
 
 std::vector<std::string> weapfiltervec = getWeapFilterVec();
 
-bool upgradeNotAddedToCargo(std::string category)
-{
+bool upgradeNotAddedToCargo(std::string category) {
     for (unsigned int i = 0; i < weapfiltervec.size(); ++i) {
         if (weapfiltervec[i].find(category) == 0) {
             return true;
@@ -127,8 +124,7 @@ bool upgradeNotAddedToCargo(std::string category)
 
 extern vector<unsigned int> base_keyboard_queue;
 
-std::string getDisplayCategory(const Cargo &cargo)
-{
+std::string getDisplayCategory(const Cargo &cargo) {
     std::string::size_type where = cargo.GetDescription().find("<");
     if (where != string::npos) {
         std::string category = cargo.GetDescription().substr(where + 1);
@@ -150,46 +146,39 @@ static bool color_downgrade_or_noncompatible_flag = false;
 static bool color_insufficient_space_flag = false;
 static bool color_insufficient_money_flag = false;
 
-static GFXColor NO_MONEY_COLOR()
-{
+static GFXColor NO_MONEY_COLOR() {
     static GFXColor NMC = vs_config->getColor("no_money", GFXColor(1, 1, .3, 1));
     return NMC;       //Start out with bogus color.
 }
 
 //Make the variable static, so it won't print so many annoying messages!
-static GFXColor PROHIBITED_COLOR()
-{
+static GFXColor PROHIBITED_COLOR() {
     static GFXColor PU = vs_config->getColor("prohibited_upgrade", GFXColor(1, .1, 0, 1));
     return PU;
 }
 
-static GFXColor DOWNGRADE_OR_NONCOMPAT_COLOR()
-{
+static GFXColor DOWNGRADE_OR_NONCOMPAT_COLOR() {
     static GFXColor DNC = vs_config->getColor("downgrade_or_noncompatible", GFXColor(.75, .5, .5, 1));
     return DNC;
 }
 
-static GFXColor NO_ROOM_COLOR()
-{
+static GFXColor NO_ROOM_COLOR() {
     static GFXColor NRFU = vs_config->getColor("no_room_for_upgrade", GFXColor(1, 0, 1, 1));
     return NRFU;
 }
 
-static GFXColor ITEM_DESTROYED_COLOR()
-{
+static GFXColor ITEM_DESTROYED_COLOR() {
     static GFXColor IDC = vs_config->getColor("upgrade_item_destroyed", GFXColor(0.2, 0.2, 0.2, 1));
     return IDC;
 }
 
 //Color of the text of a category.
-static GFXColor CATEGORY_TEXT_COLOR()
-{
+static GFXColor CATEGORY_TEXT_COLOR() {
     static GFXColor CTC = vs_config->getColor("base_category_color", GFXColor(0, .75, 0, 1));
     return CTC;
 }
 
-static GFXColor MISSION_COLOR()
-{
+static GFXColor MISSION_COLOR() {
     static GFXColor MiC = vs_config->getColor("base_mission_color", GFXColor(.66, .2, 0, 1));
     return MiC;
 }
@@ -198,28 +187,24 @@ static GFXColor MISSION_COLOR()
 static const float MODE_BUTTON_SPACE = 0.03;
 
 //Default color in CargoColor.
-static GFXColor DEFAULT_UPGRADE_COLOR()
-{
+static GFXColor DEFAULT_UPGRADE_COLOR() {
     static GFXColor DuC = vs_config->getColor("base_upgrade_color", GFXColor(1, 1, 1, 1));
     return DuC;
 }
 
 //MOUNT ENTRY COLORS
 //Mount point that cannot be selected.
-static GFXColor MOUNT_POINT_NO_SELECT()
-{
+static GFXColor MOUNT_POINT_NO_SELECT() {
     return GFXColor(1, .7, .7);
 }
 
 //Empty mount point.
-static GFXColor MOUNT_POINT_EMPTY()
-{
+static GFXColor MOUNT_POINT_EMPTY() {
     return GFXColor(.2, 1, .2);
 }
 
 //Mount point that contains weapon.
-static GFXColor MOUNT_POINT_FULL()
-{
+static GFXColor MOUNT_POINT_FULL() {
     return GFXColor(1, 1, 0);
 }
 
@@ -267,8 +252,7 @@ int basecargoassets(Unit *base, string cargoname);
 //"Basic Repair" item that is added to Buy UPGRADE mode.
 const string BASIC_REPAIR_NAME = "Basic Repair & Refuel";
 
-const GFXColor BASIC_REPAIR_TEXT_COLOR()
-{
+const GFXColor BASIC_REPAIR_TEXT_COLOR() {
     return GFXColor(0, 1, 1);
 }
 
@@ -284,8 +268,7 @@ struct ModeInfo {
     string groupId;
 
     ModeInfo(string t = "", string b = "", string c = "", string g = "") :
-            title(t), button(b), command(c), groupId(g)
-    {
+            title(t), button(b), command(c), groupId(g) {
     }
 };
 
@@ -300,8 +283,7 @@ static const ModeInfo modeInfo[] = {
         ModeInfo("Network ", "Network", "NetworkMode", "NetworkGroup")
 };
 
-bool BaseComputer::actionDone(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionDone(const EventCommandId &command, Control *control) {
     AUDStopAllSounds();
     window()->close();
     return true;
@@ -315,19 +297,19 @@ bool BaseComputer::actionDone(const EventCommandId &command, Control *control)
 template<>
 const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = {
         BaseComputer::WctlTableEntry("Picker::NewSelection",
-                                     "NewsPicker",
-                                     &BaseComputer::newsPickerChangedSelection),
+                "NewsPicker",
+                &BaseComputer::newsPickerChangedSelection),
         BaseComputer::WctlTableEntry("Picker::NewSelection",
-                                     "LoadSavePicker",
-                                     &BaseComputer::loadSavePickerChangedSelection),
+                "LoadSavePicker",
+                &BaseComputer::loadSavePickerChangedSelection),
         BaseComputer::WctlTableEntry("Picker::NewSelection",
-                                     "",
-                                     &BaseComputer::pickerChangedSelection),
+                "",
+                &BaseComputer::pickerChangedSelection),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::CARGO].command, "", &BaseComputer::changeToCargoMode),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::UPGRADE].command, "", &BaseComputer::changeToUpgradeMode),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::SHIP_DEALER].command,
-                                     "",
-                                     &BaseComputer::changeToShipDealerMode),
+                "",
+                &BaseComputer::changeToShipDealerMode),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::NEWS].command, "", &BaseComputer::changeToNewsMode),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::MISSIONS].command, "", &BaseComputer::changeToMissionsMode),
         BaseComputer::WctlTableEntry(modeInfo[BaseComputer::INFO].command, "", &BaseComputer::changeToInfoMode),
@@ -366,20 +348,17 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
 };
 
 template<typename T>
-inline T mymin(T a, T b)
-{
+inline T mymin(T a, T b) {
     return (a < b) ? a : b;
 }
 
 template<typename T>
-inline T mymax(T a, T b)
-{
+inline T mymax(T a, T b) {
     return (a > b) ? a : b;
 }
 
 //Take underscores out of a string and capitalize letters after spaces.
-static std::string beautify(const string &input)
-{
+static std::string beautify(const string &input) {
     std::string result;
 
     bool wordStart = true;
@@ -401,21 +380,18 @@ static std::string beautify(const string &input)
 }
 
 //The "used" value of an item.
-static double usedValue(double originalValue)
-{
+static double usedValue(double originalValue) {
     return .5 * originalValue;
 }
 
 extern float RepairPrice(float operational, float price);
 
-static float basicRepairPrice(void)
-{
+static float basicRepairPrice(void) {
     static float price = XMLSupport::parse_float(vs_config->getVariable("physics", "repair_price", "5000"));
     return price * g_game.difficulty;
 }
 
-static float SellPrice(float operational, float price)
-{
+static float SellPrice(float operational, float price) {
     return usedValue(price) - RepairPrice(operational, price);
 }
 
@@ -472,8 +448,7 @@ BaseComputer::BaseComputer(Unit *player, Unit *base, const std::vector<DisplayMo
         m_base(base),
         m_currentDisplay(NULL_DISPLAY),
         m_selectedList(NULL),
-        m_playingMuzak(false)
-{
+        m_playingMuzak(false) {
     //Make sure we get this color loaded.
     //Initialize mode group controls array.
     for (int i = 0; i < DISPLAY_MODE_COUNT; i++) {
@@ -482,8 +457,7 @@ BaseComputer::BaseComputer(Unit *player, Unit *base, const std::vector<DisplayMo
 }
 
 //Destructor.
-BaseComputer::~BaseComputer(void)
-{
+BaseComputer::~BaseComputer(void) {
     m_player.SetUnit(NULL);
     m_base.SetUnit(NULL);
     //Delete any group controls that the window doesn't "own".
@@ -499,8 +473,7 @@ BaseComputer::~BaseComputer(void)
     }
 }
 
-GFXColor BaseComputer::getColorForGroup(std::string id)
-{
+GFXColor BaseComputer::getColorForGroup(std::string id) {
     static bool use_faction_background =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_faction_gui_background_color", "true"));
     static float faction_color_darkness =
@@ -513,8 +486,8 @@ GFXColor BaseComputer::getColorForGroup(std::string id)
         const float *stuff = FactionUtil::GetSparkColor(fac);
 
         return GFXColor(stuff[0] * faction_color_darkness,
-                        stuff[1] * faction_color_darkness,
-                        stuff[2] * faction_color_darkness);
+                stuff[1] * faction_color_darkness,
+                stuff[2] * faction_color_darkness);
     } else {
         if (id == "CargoGroup") {
             return GFXColor(0, 0, faction_color_darkness);
@@ -539,8 +512,7 @@ GFXColor BaseComputer::getColorForGroup(std::string id)
 }
 
 //Hack that constructs controls in code.
-void BaseComputer::constructControls(void)
-{
+void BaseComputer::constructControls(void) {
     if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
         //Base info title.
         StaticDisplay *baseTitle = new StaticDisplay;
@@ -1031,7 +1003,7 @@ void BaseComputer::constructControls(void)
         inputTextScroller->setRect(Rect(.61, -0.95, .05, .2));
         inputTextScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
         inputTextScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4),
-                                         GUI_OPAQUE_WHITE());
+                GUI_OPAQUE_WHITE());
         inputTextScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
         inputTextScroller->setTextColor(GUI_OPAQUE_WHITE());
         inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
@@ -1404,8 +1376,7 @@ void BaseComputer::constructControls(void)
 }
 
 //Create the controls that will be used for this window.
-void BaseComputer::createControls(void)
-{
+void BaseComputer::createControls(void) {
     //Set up the window.
     window()->setFullScreen();
     window()->setColor(GUI_CLEAR);
@@ -1425,8 +1396,7 @@ void BaseComputer::createControls(void)
 }
 
 //Create the mode buttons.
-void BaseComputer::createModeButtons(void)
-{
+void BaseComputer::createModeButtons(void) {
     NewButton *originalButton = static_cast< NewButton * > ( window()->findControlById("ModeButton"));
     assert(originalButton != NULL);
     if (m_displayModes.size() > 1) {
@@ -1447,15 +1417,13 @@ void BaseComputer::createModeButtons(void)
 }
 
 //Make sure the info in the transaction lists is gone.
-void BaseComputer::resetTransactionLists(void)
-{
+void BaseComputer::resetTransactionLists(void) {
     m_transList1 = TransactionList();
     m_transList2 = TransactionList();
 }
 
 //Switch to the set of controls used for the specified mode.
-void BaseComputer::switchToControls(DisplayMode mode)
-{
+void BaseComputer::switchToControls(DisplayMode mode) {
     if (m_currentDisplay != mode) {
         assert(m_modeGroups[mode] != NULL);         //We should have controls for this mode.
         if (mode == CARGO) {
@@ -1505,8 +1473,7 @@ void BaseComputer::switchToControls(DisplayMode mode)
 }
 
 //Change controls to CARGO mode.
-bool BaseComputer::changeToCargoMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToCargoMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != CARGO) {
         switchToControls(CARGO);
     }
@@ -1515,8 +1482,7 @@ bool BaseComputer::changeToCargoMode(const EventCommandId &command, Control *con
     return true;
 }
 
-bool BaseComputer::changeToLoadSaveMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToLoadSaveMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != LOADSAVE) {
         switchToControls(LOADSAVE);
     }
@@ -1524,8 +1490,7 @@ bool BaseComputer::changeToLoadSaveMode(const EventCommandId &command, Control *
     return true;
 }
 
-void BaseComputer::showNetworkStatus(bool show)
-{
+void BaseComputer::showNetworkStatus(bool show) {
     Control *group = window()->findControlById("NetworkJoinGroup");
     if (group) {
         group->setHidden(show);
@@ -1536,14 +1501,12 @@ void BaseComputer::showNetworkStatus(bool show)
     }
 }
 
-bool BaseComputer::hideNetworkStatus(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::hideNetworkStatus(const EventCommandId &command, Control *control) {
     showNetworkStatus(false);
     return true;
 }
 
-bool BaseComputer::changeToNetworkMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToNetworkMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != NETWORK) {
         switchToControls(NETWORK);
     }
@@ -1553,8 +1516,7 @@ bool BaseComputer::changeToNetworkMode(const EventCommandId &command, Control *c
 }
 
 //Set up the window and get everything ready.
-void BaseComputer::init(void)
-{
+void BaseComputer::init(void) {
     //Create a new window.
     Window *w = new Window;
     setWindow(w);
@@ -1564,8 +1526,7 @@ void BaseComputer::init(void)
 }
 
 //Open the window, etc.
-void BaseComputer::run(void)
-{
+void BaseComputer::run(void) {
     //Simulate clicking the leftmost mode button.
     //We don't actually use the button because there isn't a button if there's only one mode.
     processWindowCommand(modeInfo[m_displayModes[0]].command, NULL);
@@ -1574,8 +1535,7 @@ void BaseComputer::run(void)
 }
 
 //Redo the title strings for the display.
-void BaseComputer::recalcTitle()
-{
+void BaseComputer::recalcTitle() {
     //Generic base title for the display.
     string baseTitle = modeInfo[m_currentDisplay].title;
 
@@ -1650,11 +1610,11 @@ void BaseComputer::recalcTitle()
             Unit *playerUnit = m_player.GetUnit();
             if (playerUnit) {
                 const float emptyVolume = m_currentDisplay
-                                                  == CARGO ? playerUnit->getEmptyCargoVolume()
-                                                           : playerUnit->getEmptyUpgradeVolume();
+                        == CARGO ? playerUnit->getEmptyCargoVolume()
+                        : playerUnit->getEmptyUpgradeVolume();
                 const float volumeLeft = emptyVolume
                         - (m_currentDisplay
-                                   == CARGO ? playerUnit->getCargoVolume() : playerUnit->getUpgradeVolume());
+                                == CARGO ? playerUnit->getCargoVolume() : playerUnit->getUpgradeVolume());
                 // Cargo weight may render your ship hard to manoeuver, display its effects
                 const float basemass = atof(UniverseUtil::LookupUnitStat(playerUnit->name, "", "Mass").c_str());
                 float massEffect = 0.0;
@@ -1691,8 +1651,7 @@ void BaseComputer::recalcTitle()
 
 //Scroll to a specific item in a picker, and optionally select it.
 //Returns true if we selected an item.
-bool BaseComputer::scrollToItem(Picker *picker, const Cargo &item, bool select, bool skipFirstCategory)
-{
+bool BaseComputer::scrollToItem(Picker *picker, const Cargo &item, bool select, bool skipFirstCategory) {
     PickerCells *cells = picker->cells();
     if (!cells) {
         return false;
@@ -1782,8 +1741,7 @@ bool BaseComputer::scrollToItem(Picker *picker, const Cargo &item, bool select, 
 }
 
 //Hide the controls that commit transactions.
-void BaseComputer::hideCommitControls(void)
-{
+void BaseComputer::hideCommitControls(void) {
     //The three buy/sell buttons.
     NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
     commitButton->setHidden(true);
@@ -1811,8 +1769,7 @@ void BaseComputer::hideCommitControls(void)
 }
 
 //Update the commit controls in the Cargo screen, since we have three of them.
-void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionType trans)
-{
+void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionType trans) {
     if (trans == BUY_CARGO) {
         //"Buy 1" button.
         NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
@@ -1893,8 +1850,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionTy
 }
 
 //Update the commit controls in the Cargo screen, since we have three of them.
-bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, TransactionType trans)
-{
+bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, TransactionType trans) {
     bool damaged_mode = false;
     if (trans == BUY_UPGRADE) {
         //base inventory
@@ -1926,8 +1882,8 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                         if (po > .02 && po < .98) {
                             static bool must_fix_first =
                                     XMLSupport::parse_bool(vs_config->getVariable("physics",
-                                                                                  "must_repair_to_sell",
-                                                                                  "true"));
+                                            "must_repair_to_sell",
+                                            "true"));
 
                             CanDoSell = (emergency_downgrade_mode.length() != 0 || must_fix_first == false);
                         }
@@ -1951,8 +1907,8 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                 && UnitUtil::PercentOperational(m_player.GetUnit(), item.content, item.category, false) < 1) {
             if (m_base.GetUnit()) {
                 if (RepairPrice(UnitUtil::PercentOperational(m_player.GetUnit(),
-                                                             item.content, item.category, false),
-                                m_base.GetUnit()->PriceCargo(item.content))
+                                item.content, item.category, false),
+                        m_base.GetUnit()->PriceCargo(item.content))
                         <= _Universe->AccessCockpit()->credits) {
                     assert(commitFixButton != NULL);
                     if (commitFixButton) {
@@ -1973,8 +1929,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
 
 //string buildShipDescription(Cargo &item,string & descriptiontexture); //Redundant definition
 //Update the controls when the selection for a transaction changes.
-void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
-{
+void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist) {
     //Get the controls we need.
     NewButton *commitButton = static_cast< NewButton * > ( window()->findControlById("Commit"));
     assert(commitButton != NULL);
@@ -2124,8 +2079,8 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                         UniverseUtil::playSound("sales/salespitch" + tmp + ".wav", QVector(0, 0, 0), Vector(0, 0, 0));
                     } else {
                         UniverseUtil::playSound("sales/salespitchnotenoughmoney.wav",
-                                                QVector(0, 0, 0),
-                                                Vector(0, 0, 0));
+                                QVector(0, 0, 0),
+                                Vector(0, 0, 0));
                     }
                 }
                 if (item.description == "" || item.GetDescription()[0] != '@') {
@@ -2140,8 +2095,8 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
                     static bool printvolume =
                             XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                          "base_print_cargo_volume",
-                                                                          "true"));
+                                    "base_print_cargo_volume",
+                                    "true"));
                     if (printvolume) {
                         descString += tempString;
                         tempString = (boost::format("Vessel volume: %1$.2f cubic meters;  "
@@ -2257,8 +2212,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
 }
 
 //Something in a Picker was selected.
-bool BaseComputer::pickerChangedSelection(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::pickerChangedSelection(const EventCommandId &command, Control *control) {
     assert(control != NULL);
     Picker *picker = static_cast< Picker * > (control);
     PickerCell *cell = picker->selectedCell();
@@ -2287,8 +2241,7 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId &command, Control
     return true;
 }
 
-bool UpgradeAllowed(const Cargo &item, Unit *playerUnit)
-{
+bool UpgradeAllowed(const Cargo &item, Unit *playerUnit) {
     std::string prohibited_upgrades =
             UniverseUtil::LookupUnitStat(playerUnit->name, FactionUtil::GetFactionName(
                     playerUnit->faction), "Prohibited_Upgrades");
@@ -2342,8 +2295,7 @@ bool UpgradeAllowed(const Cargo &item, Unit *playerUnit)
 }
 
 //Return whether or not the current item and quantity can be "transacted".
-bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType transType, int quantity)
-{
+bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType transType, int quantity) {
     if (originalItem.mission && transType != SELL_CARGO) {
         color_downgrade_or_noncompatible_flag = true;
         return false;
@@ -2447,9 +2399,8 @@ bool BaseComputer::isTransactionOK(const Cargo &originalItem, TransactionType tr
 
 //Create whatever cells are needed to add a category to the picker.
 SimplePickerCell *BaseComputer::createCategoryCell(SimplePickerCells &cells,
-                                                   const string &origCategory,
-                                                   bool skipFirstCategory)
-{
+        const string &origCategory,
+        bool skipFirstCategory) {
     string category = origCategory;
     if (skipFirstCategory) {
         //Skip over the first category piece.
@@ -2474,9 +2425,9 @@ SimplePickerCell *BaseComputer::createCategoryCell(SimplePickerCells &cells,
     } else {
         //Need to make a new cell for this.
         cells.addCell(new SimplePickerCell(beautify(currentCategory),
-                                           currentCategory,
-                                           CATEGORY_TEXT_COLOR(),
-                                           CATEGORY_TAG));
+                currentCategory,
+                CATEGORY_TEXT_COLOR(),
+                CATEGORY_TAG));
     }
     SimplePickerCell
             *parentCell = static_cast< SimplePickerCell * > ( cells.cellAt(cells.count() - 1));     //Last cell in list.
@@ -2503,10 +2454,9 @@ SimplePickerCell *BaseComputer::createCategoryCell(SimplePickerCells &cells,
 
 //Load a picker with a list of items.
 void BaseComputer::loadListPicker(TransactionList &tlist,
-                                  SimplePicker &picker,
-                                  TransactionType transType,
-                                  bool skipFirstCategory)
-{
+        SimplePicker &picker,
+        TransactionType transType,
+        bool skipFirstCategory) {
     //Make sure the transactionList has the correct info.
     tlist.picker = &picker;
     tlist.transaction = transType;
@@ -2596,8 +2546,7 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
 
 extern int SelectDockPort(Unit *utdw, Unit *parent);
 
-void BaseComputer::loadCargoControls(void)
-{
+void BaseComputer::loadCargoControls(void) {
     //Make sure there's nothing in the transaction lists.
     resetTransactionLists();
     static bool requireportforlaunch =
@@ -2628,10 +2577,10 @@ void BaseComputer::loadCargoControls(void)
 
     //Set up the player's transaction list.
     loadMasterList(m_player.GetUnit(),
-                   vector<string>(),
-                   donttakethis,
-                   true,
-                   m_transList2);     //Anything but a mission.
+            vector<string>(),
+            donttakethis,
+            true,
+            m_transList2);     //Anything but a mission.
     SimplePicker *inventoryPicker = static_cast< SimplePicker * > ( window()->findControlById("PlayerCargo"));
     assert(inventoryPicker != NULL);
     loadListPicker(m_transList2, *inventoryPicker, SELL_CARGO);
@@ -2643,8 +2592,7 @@ void BaseComputer::loadCargoControls(void)
 //Need this class to sort CargoColor's.
 class CargoColorSort {
 public:
-    bool operator()(const CargoColor &a, const CargoColor &b)
-    {
+    bool operator()(const CargoColor &a, const CargoColor &b) {
         std::string acategory(a.cargo.category);
         std::string bcategory(b.cargo.category);
         std::string::size_type aless = a.cargo.GetDescription().find("<");
@@ -2666,11 +2614,10 @@ public:
 
 //Get a filtered list of items from a unit.
 void BaseComputer::loadMasterList(Unit *un,
-                                  const vector<string> &filtervec,
-                                  const vector<string> &invfiltervec,
-                                  bool removezero,
-                                  TransactionList &tlist)
-{
+        const vector<string> &filtervec,
+        const vector<string> &invfiltervec,
+        bool removezero,
+        TransactionList &tlist) {
     vector<CargoColor> *items = &tlist.masterList;
     for (size_t i = 0; i < un->numCargo(); i++) {
         bool filter = filtervec.empty();
@@ -2701,8 +2648,7 @@ void BaseComputer::loadMasterList(Unit *un,
 }
 
 //Return a pointer to the selected item in the picker with the selection.
-Cargo *BaseComputer::selectedItem(void)
-{
+Cargo *BaseComputer::selectedItem(void) {
     Cargo *result = NULL;
     if (m_selectedList) {
         assert(m_selectedList->picker);
@@ -2715,8 +2661,7 @@ Cargo *BaseComputer::selectedItem(void)
 }
 
 //Update the transaction controls after a transaction.
-void BaseComputer::updateTransactionControls(const Cargo &item, bool skipFirstCategory)
-{
+void BaseComputer::updateTransactionControls(const Cargo &item, bool skipFirstCategory) {
     //Go reselect the item.
     if (m_selectedList == NULL) {
         return;
@@ -2738,8 +2683,7 @@ void BaseComputer::updateTransactionControls(const Cargo &item, bool skipFirstCa
 }
 
 //The max number of a particular item this player can buy.  Limits by price, cargo space, etc.
-int BaseComputer::maxQuantityForPlayer(const Cargo &item, int suggestedQuantity)
-{
+int BaseComputer::maxQuantityForPlayer(const Cargo &item, int suggestedQuantity) {
     int result = 0;
 
     Unit *playerUnit = m_player.GetUnit();
@@ -2755,8 +2699,7 @@ int BaseComputer::maxQuantityForPlayer(const Cargo &item, int suggestedQuantity)
     return result;
 }
 
-static void eliminateZeroCargo(Unit *un)
-{
+static void eliminateZeroCargo(Unit *un) {
     for (int i = un->numCargo() - 1; i >= 0; --i) {
         if (un->GetCargo(i).quantity == 0) {
             un->RemoveCargo(i, 1, true);
@@ -2764,8 +2707,7 @@ static void eliminateZeroCargo(Unit *un)
     }
 }
 
-void BaseComputer::refresh()
-{
+void BaseComputer::refresh() {
     if (m_player.GetUnit()) {
         eliminateZeroCargo(m_player.GetUnit());
         //Reload the UI -- inventory has changed.  Because we reload the UI, we need to
@@ -2789,8 +2731,7 @@ void BaseComputer::refresh()
     }
 }
 
-void BaseComputer::draw()
-{
+void BaseComputer::draw() {
     if ((!m_player.GetUnit()) || m_player.GetUnit()->Destroyed()) {
         globalWindowManager().shutDown();
         TerminateCurrentBase();
@@ -2802,8 +2743,7 @@ void BaseComputer::draw()
 }
 
 //Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
-bool BaseComputer::buySelectedCargo(int requestedQuantity)
-{
+bool BaseComputer::buySelectedCargo(int requestedQuantity) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     if (!(playerUnit && baseUnit)) {
@@ -2824,26 +2764,22 @@ bool BaseComputer::buySelectedCargo(int requestedQuantity)
 }
 
 //Buy an item from the cargo list.
-bool BaseComputer::buyCargo(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::buyCargo(const EventCommandId &command, Control *control) {
     return buySelectedCargo(1);
 }
 
 //Buy an item (quantity 10) from the cargo list.
-bool BaseComputer::buy10Cargo(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::buy10Cargo(const EventCommandId &command, Control *control) {
     return buySelectedCargo(10);
 }
 
 //Buy all of an item from the cargo list.
-bool BaseComputer::buyAllCargo(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::buyAllCargo(const EventCommandId &command, Control *control) {
     return buySelectedCargo(-1);
 }
 
 //Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
-bool BaseComputer::sellSelectedCargo(int requestedQuantity)
-{
+bool BaseComputer::sellSelectedCargo(int requestedQuantity) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     if (!(playerUnit && baseUnit)) {
@@ -2856,7 +2792,7 @@ bool BaseComputer::sellSelectedCargo(int requestedQuantity)
         const int quantity = (requestedQuantity <= 0 ? item->quantity : requestedQuantity);
         if (item->mission) {
             vector<Cargo>::iterator mycargo = std::find(playerUnit->cargo.begin(),
-                                                        playerUnit->cargo.end(), *item);
+                    playerUnit->cargo.end(), *item);
             if (mycargo != playerUnit->cargo.end()) {
                 playerUnit->RemoveCargo(mycargo - playerUnit->cargo.begin(), quantity, true);
             }
@@ -2873,26 +2809,22 @@ bool BaseComputer::sellSelectedCargo(int requestedQuantity)
 }
 
 //Sell an item from ship's cargo.
-bool BaseComputer::sellCargo(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::sellCargo(const EventCommandId &command, Control *control) {
     return sellSelectedCargo(1);
 }
 
 //Sell an item (quantity 10) from the cargo list.
-bool BaseComputer::sell10Cargo(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::sell10Cargo(const EventCommandId &command, Control *control) {
     return sellSelectedCargo(10);
 }
 
 //Sell all of an item from the cargo list.
-bool BaseComputer::sellAllCargo(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::sellAllCargo(const EventCommandId &command, Control *control) {
     return sellSelectedCargo(-1);
 }
 
 //Change controls to NEWS mode.
-bool BaseComputer::changeToNewsMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToNewsMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != NEWS) {
         switchToControls(NEWS);
     }
@@ -2901,8 +2833,7 @@ bool BaseComputer::changeToNewsMode(const EventCommandId &command, Control *cont
 }
 
 //The selection in the News picker changed.
-bool BaseComputer::newsPickerChangedSelection(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::newsPickerChangedSelection(const EventCommandId &command, Control *control) {
     assert(control != NULL);
     Picker *picker = static_cast< Picker * > (control);
     PickerCell *cell = picker->selectedCell();
@@ -2922,14 +2853,12 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId &command, Con
     return true;
 }
 
-static std::string GarnerInfoFromSaveGame(const string &filename)
-{
+static std::string GarnerInfoFromSaveGame(const string &filename) {
     return UniverseUtil::getSaveInfo(filename, true);
 }
 
 //The selection in the News picker changed.
-bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId &command, Control *control) {
     assert(control != NULL);
     Picker *picker = static_cast< Picker * > (control);
     PickerCell *cell = picker->selectedCell();
@@ -2950,8 +2879,7 @@ bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId &command,
 }
 
 //Load the controls for the News display.
-void BaseComputer::loadNewsControls(void)
-{
+void BaseComputer::loadNewsControls(void) {
     SimplePicker *picker = static_cast< SimplePicker * > ( window()->findControlById("NewsPicker"));
     assert(picker != NULL);
     picker->clear();
@@ -2987,8 +2915,7 @@ void BaseComputer::loadNewsControls(void)
     recalcTitle();
 }
 
-static int nodirs(const struct dirent *entry)
-{
+static int nodirs(const struct dirent *entry) {
 #if defined (_WIN32) || defined(__HAIKU__)
                                                                                                                             //Have to check if we have the full path or just relative (which would be a problem)
     std::string tmp = VSFileSystem::homedir + "/save/" + entry->d_name;
@@ -3007,8 +2934,7 @@ static int nodirs(const struct dirent *entry)
     return 0;
 }
 
-static int datesort(const void *v1, const void *v2)
-{
+static int datesort(const void *v1, const void *v2) {
     const struct dirent *d1 = *(const struct dirent **) v1;
     const struct dirent *d2 = *(const struct dirent **) v2;
     struct stat s1, s2;
@@ -3030,8 +2956,7 @@ typedef int (*scancompare)(const struct dirent **v1, const struct dirent **v2);
 // #endif
 
 //Load the controls for the News display.
-void BaseComputer::loadLoadSaveControls(void)
-{
+void BaseComputer::loadLoadSaveControls(void) {
     SimplePicker *picker = static_cast< SimplePicker * > ( window()->findControlById("LoadSavePicker"));
     assert(picker != NULL);
     picker->clear();
@@ -3056,8 +2981,7 @@ void BaseComputer::loadLoadSaveControls(void)
 }
 
 //Change display mode to MISSIONS.
-bool BaseComputer::changeToMissionsMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToMissionsMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != MISSIONS) {
         switchToControls(MISSIONS);
     }
@@ -3067,8 +2991,7 @@ bool BaseComputer::changeToMissionsMode(const EventCommandId &command, Control *
 }
 
 //Load a master list with missions.
-void BaseComputer::loadMissionsMasterList(TransactionList &tlist)
-{
+void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
     //Make sure the list is clear.
     tlist.masterList.clear();
 
@@ -3095,9 +3018,9 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist)
             if (check == current) {
                 //Found identical names.  Add a "count" at the end.
                 putSaveString(playerNum,
-                              MISSION_NAMES_LABEL,
-                              current,
-                              checkName + "_" + tostring(static_cast<int>(count)));
+                        MISSION_NAMES_LABEL,
+                        current,
+                        checkName + "_" + tostring(static_cast<int>(count)));
                 ++count;
             }
         }
@@ -3154,8 +3077,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist)
 }
 
 //Load the controls for the MISSIONS display.
-void BaseComputer::loadMissionsControls(void)
-{
+void BaseComputer::loadMissionsControls(void) {
     //Make sure there's nothing in the transaction lists.
     resetTransactionLists();
 
@@ -3170,8 +3092,7 @@ void BaseComputer::loadMissionsControls(void)
 }
 
 //Accept a mission.
-bool BaseComputer::acceptMission(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::acceptMission(const EventCommandId &command, Control *control) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     if (!(playerUnit && baseUnit)) {
@@ -3224,7 +3145,7 @@ bool BaseComputer::acceptMission(const EventCommandId &command, Control *control
         return false;
     } else {
         LoadMission(("#" + item->category).c_str(),
-                    finalScript, false);
+                finalScript, false);
         refresh();
 
     }
@@ -3233,8 +3154,7 @@ bool BaseComputer::acceptMission(const EventCommandId &command, Control *control
 }
 
 //Load the all the controls for the UPGRADE display.
-void BaseComputer::loadUpgradeControls(void)
-{
+void BaseComputer::loadUpgradeControls(void) {
     //Make sure there's nothing in the transaction lists.
     resetTransactionLists();
 
@@ -3247,8 +3167,7 @@ void BaseComputer::loadUpgradeControls(void)
 }
 
 //Load the BUY controls for the UPGRADE display.
-void BaseComputer::loadBuyUpgradeControls(void)
-{
+void BaseComputer::loadBuyUpgradeControls(void) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
 
@@ -3291,8 +3210,7 @@ void BaseComputer::loadBuyUpgradeControls(void)
 }
 
 //Load the SELL controls for the UPGRADE display.
-void BaseComputer::loadSellUpgradeControls(void)
-{
+void BaseComputer::loadSellUpgradeControls(void) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     if (!(playerUnit && baseUnit)) {
@@ -3339,8 +3257,7 @@ void BaseComputer::loadSellUpgradeControls(void)
 }
 
 //Change display mode to UPGRADE.
-bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *control) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     if (!(playerUnit && baseUnit)) {
@@ -3355,8 +3272,7 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *c
 }
 
 //Actually do a repair operation.
-static void BasicRepair(Unit *parent)
-{
+static void BasicRepair(Unit *parent) {
     if (parent) {
         int repairmultiplier = parent->RepairCost();
         if (UnitUtil::getCredits(parent) < basicRepairPrice() * repairmultiplier) {
@@ -3379,12 +3295,10 @@ static void BasicRepair(Unit *parent)
 class BaseComputer::UpgradeOperation : public ModalDialogCallback {
 protected:
     UpgradeOperation(BaseComputer &p) :
-            m_parent(p), m_newPart(NULL), m_part(), m_selectedMount(0), m_selectedTurret(0), m_selectedItem()
-    {
+            m_parent(p), m_newPart(NULL), m_part(), m_selectedMount(0), m_selectedTurret(0), m_selectedItem() {
     };
 
-    virtual ~UpgradeOperation(void)
-    {
+    virtual ~UpgradeOperation(void) {
     }
 
     bool commonInit(void);            //Initialization.
@@ -3416,16 +3330,14 @@ class BaseComputer::BuyUpgradeOperation : public BaseComputer::UpgradeOperation 
 public:
     void start(void);             //Start the operation.
 
-    BuyUpgradeOperation(BaseComputer &p) : UpgradeOperation(p), m_theTemplate(NULL), m_addMultMode(0)
-    {
+    BuyUpgradeOperation(BaseComputer &p) : UpgradeOperation(p), m_theTemplate(NULL), m_addMultMode(0) {
     };
 protected:
     virtual bool checkTransaction(void);              //Check, and verify user wants transaction.
     virtual void concludeTransaction(void);   //Finish the transaction.
     virtual void selectMount(void);                           //Let the user pick a mount.
 
-    virtual ~BuyUpgradeOperation(void)
-    {
+    virtual ~BuyUpgradeOperation(void) {
     }
 
     const Unit *m_theTemplate;
@@ -3437,16 +3349,14 @@ class BaseComputer::SellUpgradeOperation : public BaseComputer::UpgradeOperation
 public:
     void start(void);             //Start the operation.
 
-    SellUpgradeOperation(BaseComputer &p) : UpgradeOperation(p), m_downgradeLimiter(NULL)
-    {
+    SellUpgradeOperation(BaseComputer &p) : UpgradeOperation(p), m_downgradeLimiter(NULL) {
     };
 protected:
     virtual bool checkTransaction(void);      //Check, and verify user wants transaction.
     virtual void concludeTransaction(void);   //Finish the transaction.
     virtual void selectMount(void);                           //Let the user pick a mount.
 
-    virtual ~SellUpgradeOperation(void)
-    {
+    virtual ~SellUpgradeOperation(void) {
     }
 
     const Unit *m_downgradeLimiter;
@@ -3458,8 +3368,7 @@ static const string GOT_TURRET_ID = "GotTurret";
 static const string CONFIRM_ID = "Confirm";
 
 //Some common initialization.
-bool BaseComputer::UpgradeOperation::commonInit(void)
-{
+bool BaseComputer::UpgradeOperation::commonInit(void) {
     Cargo *selectedItem = m_parent.selectedItem();
     if (selectedItem) {
         m_selectedItem = *selectedItem;
@@ -3470,21 +3379,18 @@ bool BaseComputer::UpgradeOperation::commonInit(void)
 }
 
 //Update the UI controls after a transaction has been concluded successfully.
-void BaseComputer::UpgradeOperation::updateUI(void)
-{
+void BaseComputer::UpgradeOperation::updateUI(void) {
     m_parent.refresh();
 }
 
 //Finish this operation.
-void BaseComputer::UpgradeOperation::finish(void)
-{
+void BaseComputer::UpgradeOperation::finish(void) {
     //Destruct us now.
     delete this;
 }
 
 //Finish initialization.  Returns true if successful.
-bool BaseComputer::UpgradeOperation::endInit(void)
-{
+bool BaseComputer::UpgradeOperation::endInit(void) {
     if (m_parent.m_player.GetUnit()) {
         m_newPart = getUnitFromUpgradeName(m_selectedItem.content, m_parent.m_player.GetUnit()->faction);
         if (m_newPart->name != LOAD_FAILED) {
@@ -3497,8 +3403,7 @@ bool BaseComputer::UpgradeOperation::endInit(void)
 }
 
 //Let the user pick a turret.
-void BaseComputer::UpgradeOperation::showTurretPicker(void)
-{
+void BaseComputer::UpgradeOperation::showTurretPicker(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     if (!playerUnit) {
         finish();
@@ -3512,8 +3417,7 @@ void BaseComputer::UpgradeOperation::showTurretPicker(void)
 }
 
 //Got the mount number.
-bool BaseComputer::UpgradeOperation::gotSelectedMount(int index)
-{
+bool BaseComputer::UpgradeOperation::gotSelectedMount(int index) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     if (index < 0 || !playerUnit) {
         //The user cancelled somehow.
@@ -3541,8 +3445,7 @@ bool BaseComputer::UpgradeOperation::gotSelectedMount(int index)
 }
 
 //Got the mount number.
-bool BaseComputer::UpgradeOperation::gotSelectedTurret(int index)
-{
+bool BaseComputer::UpgradeOperation::gotSelectedTurret(int index) {
     if (index < 0) {
         //The user cancelled somehow.
         finish();
@@ -3554,8 +3457,9 @@ bool BaseComputer::UpgradeOperation::gotSelectedTurret(int index)
 }
 
 //Dispatch to correct function after some modal UI.
-void BaseComputer::UpgradeOperation::modalDialogResult(const std::string &id, int result, WindowController &controller)
-{
+void BaseComputer::UpgradeOperation::modalDialogResult(const std::string &id,
+        int result,
+        WindowController &controller) {
     if (id == GOT_MOUNT_ID) {
         //Got the selected mount from the user.
         gotSelectedMount(result);
@@ -3575,8 +3479,7 @@ void BaseComputer::UpgradeOperation::modalDialogResult(const std::string &id, in
 }
 
 //Start the Buy Upgrade Operation.
-void BaseComputer::BuyUpgradeOperation::start(void)
-{
+void BaseComputer::BuyUpgradeOperation::start(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     Unit *baseUnit = m_parent.m_base.GetUnit();
     if (!(playerUnit && baseUnit && commonInit())) {
@@ -3606,8 +3509,7 @@ public:
 };
 
 //Process a command from the window.
-bool UpgradeOperationMountDialog::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool UpgradeOperationMountDialog::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Picker::NewSelection") {
         assert(control != NULL);
         Picker *picker = static_cast< Picker * > (control);
@@ -3623,8 +3525,7 @@ bool UpgradeOperationMountDialog::processWindowCommand(const EventCommandId &com
 }
 
 //Select the mount to use for selling.
-void BaseComputer::BuyUpgradeOperation::selectMount(void)
-{
+void BaseComputer::BuyUpgradeOperation::selectMount(void) {
     if (m_newPart->getNumMounts() <= 0) {
         //Part doesn't need a mount point.
         gotSelectedMount(0);
@@ -3647,12 +3548,12 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void)
         //Mount is selectable if we can upgrade with the new part using that mount.
         double percent;             //Temp.  Not used.
         const bool selectable = playerUnit->canUpgrade(m_newPart,
-                                                       i,
-                                                       m_selectedTurret,
-                                                       m_addMultMode,
-                                                       false,
-                                                       percent,
-                                                       m_theTemplate);
+                i,
+                m_selectedTurret,
+                m_addMultMode,
+                false,
+                percent,
+                m_theTemplate);
 
         //Figure color and label based on weapon that is in the slot.
         GFXColor mountColor = MOUNT_POINT_NO_SELECT();
@@ -3681,8 +3582,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void)
 }
 
 //Check, and verify user wants Buy Upgrade transaction.  Returns true if more input is required.
-bool BaseComputer::BuyUpgradeOperation::checkTransaction(void)
-{
+bool BaseComputer::BuyUpgradeOperation::checkTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     if (!playerUnit) {
         finish();
@@ -3690,20 +3590,19 @@ bool BaseComputer::BuyUpgradeOperation::checkTransaction(void)
     }
     double percent;         //Temp.  Not used.
     if (playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, false, percent,
-                               m_theTemplate)) {
+            m_theTemplate)) {
         //We can buy the upgrade.
         concludeTransaction();
         return false;
     } else {
         showYesNoQuestion("The item cannot fit the frame of your starship.  Do you want to buy it anyway?",
-                          this, CONFIRM_ID);
+                this, CONFIRM_ID);
         return true;
     }
 }
 
 //Finish the transaction.
-void BaseComputer::BuyUpgradeOperation::concludeTransaction(void)
-{
+void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     Unit *baseUnit = m_parent.m_base.GetUnit();
     if (!(playerUnit && baseUnit)) {
@@ -3715,7 +3614,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void)
     int numleft = basecargoassets(baseUnit, m_part.content);
     while (numleft > 0
             && playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent,
-                                      m_theTemplate)) {
+                    m_theTemplate)) {
         const float price = m_part.price;         //* (1-usedValue(percent));
         if (_Universe->AccessCockpit()->credits >= price) {
             //Have enough money.  Buy it.
@@ -3723,12 +3622,12 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void)
 
             //Upgrade the ship.
             playerUnit->Upgrade(m_newPart,
-                                m_selectedMount,
-                                m_selectedTurret,
-                                m_addMultMode,
-                                true,
-                                percent,
-                                m_theTemplate);
+                    m_selectedMount,
+                    m_selectedTurret,
+                    m_addMultMode,
+                    true,
+                    percent,
+                    m_theTemplate);
             static bool allow_special_with_weapons =
                     XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
             if (!allow_special_with_weapons) {
@@ -3754,8 +3653,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void)
     finish();
 }
 
-int basecargoassets(Unit *baseUnit, string cargoname)
-{
+int basecargoassets(Unit *baseUnit, string cargoname) {
     unsigned int dummy;
     Cargo *somecargo = baseUnit->GetCargo(cargoname, dummy);
     if (somecargo) {
@@ -3766,8 +3664,7 @@ int basecargoassets(Unit *baseUnit, string cargoname)
 }
 
 //Start the Sell Upgrade Operation.
-void BaseComputer::SellUpgradeOperation::start(void)
-{
+void BaseComputer::SellUpgradeOperation::start(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     if (!(playerUnit && commonInit())) {
         finish();
@@ -3794,8 +3691,7 @@ void BaseComputer::SellUpgradeOperation::start(void)
 
 //Try to match a mounted waepon name with the cargo name.
 //Returns true if they are the same.
-static bool matchCargoToWeapon(const std::string &cargoName, const std::string &weaponName)
-{
+static bool matchCargoToWeapon(const std::string &cargoName, const std::string &weaponName) {
     //Weapon names have capitalized words, and no spaces between the words.
     //Cargo names are lower-case, and have underscores between words.
     //Also, anything in the Ammo category ends with "_ammo" in cargo, and not in weapon.
@@ -3828,8 +3724,7 @@ static bool matchCargoToWeapon(const std::string &cargoName, const std::string &
 }
 
 //Select the mount to use for selling.
-void BaseComputer::SellUpgradeOperation::selectMount(void)
-{
+void BaseComputer::SellUpgradeOperation::selectMount(void) {
     if (m_newPart->getNumMounts() <= 0) {
         //Part doesn't need a mount point.
         gotSelectedMount(0);
@@ -3901,8 +3796,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void)
 }
 
 //Check, and verify user wants Sell Upgrade transaction.  Returns true if more input is required.
-bool BaseComputer::SellUpgradeOperation::checkTransaction(void)
-{
+bool BaseComputer::SellUpgradeOperation::checkTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     if (!playerUnit) {
         finish();
@@ -3915,14 +3809,13 @@ bool BaseComputer::SellUpgradeOperation::checkTransaction(void)
         return false;
     } else {
         showYesNoQuestion("You don't have exactly what you wish to sell.  Continue?",
-                          this, CONFIRM_ID);
+                this, CONFIRM_ID);
         return true;
     }
 }
 
 //Finish the transaction.
-void BaseComputer::SellUpgradeOperation::concludeTransaction(void)
-{
+void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     Unit *baseUnit = m_parent.m_base.GetUnit();
     if (!(playerUnit && baseUnit)) {
@@ -3950,8 +3843,7 @@ void BaseComputer::SellUpgradeOperation::concludeTransaction(void)
 extern int GetModeFromName(const char *);
 
 //Buy a ship upgrade.
-bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
     //Take care of Basic Repair, which is implemented entirely in this module.
     Cargo *item = selectedItem();
     if (item) {
@@ -3988,8 +3880,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control)
 }
 
 //Sell an upgrade on your ship.
-bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) {
     Cargo *item = selectedItem();
     if (item) {
         if (!isWeapon(item->category)) {
@@ -4013,8 +3904,7 @@ bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control)
 }
 
 //Sell an upgrade on your ship.
-bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control) {
     Cargo *item = selectedItem();
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
@@ -4035,8 +3925,7 @@ bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control)
 }
 
 //Change controls to SHIP_DEALER mode.
-bool BaseComputer::changeToShipDealerMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToShipDealerMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != SHIP_DEALER) {
         switchToControls(SHIP_DEALER);
     }
@@ -4046,8 +3935,7 @@ bool BaseComputer::changeToShipDealerMode(const EventCommandId &command, Control
 }
 
 //Create a Cargo for the specified starship.
-Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int i)
-{
+Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int i) {
     Cargo cargo;
     cargo.quantity = 1;
     cargo.volume = 1;
@@ -4091,8 +3979,7 @@ Cargo CreateCargoForOwnerStarship(const Cockpit *cockpit, const Unit *base, int 
 }
 
 //Create a Cargo for an owned starship from the name.
-Cargo CreateCargoForOwnerStarshipName(const Cockpit *cockpit, const Unit *base, std::string name, int &index)
-{
+Cargo CreateCargoForOwnerStarshipName(const Cockpit *cockpit, const Unit *base, std::string name, int &index) {
     for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
         if (cockpit->GetUnitFileName(i) == name) {
             index = i;
@@ -4103,8 +3990,7 @@ Cargo CreateCargoForOwnerStarshipName(const Cockpit *cockpit, const Unit *base, 
     return Cargo();
 }
 
-void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileName, int swappingShipsIndex)
-{
+void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileName, int swappingShipsIndex) {
     Unit *parent = cockpit->GetParent();
     if (parent) {
         size_t putpos = (swappingShipsIndex >= 0) ? swappingShipsIndex : cockpit->GetNumUnits();
@@ -4126,8 +4012,7 @@ void SwapInNewShipName(Cockpit *cockpit, Unit *base, const std::string &newFileN
     cockpit->GetUnitFileName() = newFileName;
 }
 
-string buildShipDescription(Cargo &item, std::string &texturedescription)
-{
+string buildShipDescription(Cargo &item, std::string &texturedescription) {
     VS_LOG(debug, "Entering buildShipDescription");
     //load the Unit
     string newModifications;
@@ -4151,8 +4036,8 @@ string buildShipDescription(Cargo &item, std::string &texturedescription)
             if (delim != string::npos) {
                 sImage = sHudImage.substr(delim + 1);
                 sHudImage = sHudImage.substr(0,
-                                             delim
-                                                     - sImage.length());                 //assumes RGBname == Alphaname for ships
+                        delim
+                                - sImage.length());                 //assumes RGBname == Alphaname for ships
             }
             delim = sHudImage.rfind('.');             //cut off mangled base directory
             if (delim != string::npos) {
@@ -4178,15 +4063,14 @@ string buildShipDescription(Cargo &item, std::string &texturedescription)
 }
 
 //UNDER CONSTRUCTION
-string buildUpgradeDescription(Cargo &item)
-{
+string buildUpgradeDescription(Cargo &item) {
     //load the Unit
     string blnk;     //modifications to an upgrade item???
     Flightgroup *flightGroup = new Flightgroup();     //sigh
     int fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
     Unit *newPart = new Unit(item.GetContent().c_str(), false,
-                             FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber);
+            FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber);
     current_unit_load_mode = DEFAULT;
     string str = "";
     str += item.description;
@@ -4202,12 +4086,10 @@ class PriceSort {
 
 public:
     PriceSort(const vector<float> &_price, bool _reverse)
-            : price(_price), reverse(_reverse)
-    {
+            : price(_price), reverse(_reverse) {
     }
 
-    bool operator()(size_t a, size_t b)
-    {
+    bool operator()(size_t a, size_t b) {
         if (reverse) {
             return price[a] > price[b];
         } else {
@@ -4217,8 +4099,7 @@ public:
 };
 
 void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName,
-        /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest)
-{
+        /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest) {
     static size_t toprank = (size_t)
             XMLSupport::parse_int(vs_config->getVariable("general", "trade_interface_tracks_prices_toprank", "10"));
 
@@ -4417,8 +4298,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
     }
 }
 
-string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price)
-{
+string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price) {
     static bool trackBestPrices =
             XMLSupport::parse_bool(vs_config->getVariable("general", "trade_interface_tracks_prices", "true"));
 
@@ -4429,10 +4309,10 @@ string buildCargoDescription(const Cargo &item, BaseComputer &computer, float pr
         vector<string> highest, lowest;
 
         const string &baseName = (computer.m_base.GetUnit()->isUnit() == _UnitType::planet) ?
-                                 computer.m_base.GetUnit()->name.get()
-                                                                                            : computer.m_base
-                                                                                                      .GetUnit()
-                                                                                                      ->getFullname();
+                computer.m_base.GetUnit()->name.get()
+                : computer.m_base
+                        .GetUnit()
+                        ->getFullname();
 
         trackPrice(cp, item, price, UniverseUtil::getSystemName(), baseName, highest, lowest);
 
@@ -4455,8 +4335,7 @@ string buildCargoDescription(const Cargo &item, BaseComputer &computer, float pr
 }
 
 //Load the controls for the SHIP_DEALER display.
-void BaseComputer::loadShipDealerControls(void)
-{
+void BaseComputer::loadShipDealerControls(void) {
     //Make sure there's nothing in the transaction lists.
     resetTransactionLists();
 
@@ -4486,8 +4365,7 @@ void BaseComputer::loadShipDealerControls(void)
     recalcTitle();
 }
 
-bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComputer *bcomputer)
-{
+bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComputer *bcomputer) {
     Cockpit *cockpit = _Universe->isPlayerStarship(playerUnit);
     unsigned int tempInt = 1;
     Cargo *shipCargo = baseUnit->GetCargo(shipname, tempInt);
@@ -4503,8 +4381,8 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComput
                 if (cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName()) {
                     static float shipping_price =
                             XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                                           "sellback_shipping_price",
-                                                                           "6000"));
+                                    "sellback_shipping_price",
+                                    "6000"));
                     xtra += shipping_price;
                 }
                 cockpit->RemoveUnit(i);
@@ -4524,8 +4402,7 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComput
     return false;
 }
 
-bool BaseComputer::sellShip(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::sellShip(const EventCommandId &command, Control *control) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     Cargo *item = selectedItem();
@@ -4537,12 +4414,11 @@ bool BaseComputer::sellShip(const EventCommandId &command, Control *control)
 }
 
 bool buyShip(Unit *baseUnit,
-             Unit *playerUnit,
-             std::string content,
-             bool myfleet,
-             bool force_base_inventory,
-             BaseComputer *bcomputer)
-{
+        Unit *playerUnit,
+        std::string content,
+        bool myfleet,
+        bool force_base_inventory,
+        BaseComputer *bcomputer) {
     unsigned int tempInt;           //Not used.
     Cargo *shipCargo = baseUnit->GetCargo(content, tempInt);
     if (shipCargo == NULL && force_base_inventory) {
@@ -4589,16 +4465,16 @@ bool buyShip(Unit *baseUnit,
             WriteSaveGame(_Universe->AccessCockpit(), true);             //oops saved game last time at wrong place
             UniverseUtil::StopAllSounds();
             UniverseUtil::playSound("sales/salespitch" + content.substr(0, content.find(".")) + "accept.wav", QVector(0,
-                                                                                                                      0,
-                                                                                                                      0),
-                                    Vector(0, 0, 0));
+                            0,
+                            0),
+                    Vector(0, 0, 0));
             Unit *newPart =
                     new Unit(content.c_str(),
-                             false,
-                             baseUnit->faction,
-                             newModifications,
-                             flightGroup,
-                             fgsNumber);
+                            false,
+                            baseUnit->faction,
+                            newModifications,
+                            flightGroup,
+                            fgsNumber);
             CurrentSaveGameName = tmpnam;
             newPart->SetFaction(playerUnit->faction);
             if (newPart->name != LOAD_FAILED) {
@@ -4627,12 +4503,12 @@ bool buyShip(Unit *baseUnit,
                         }
                     }
                     WriteSaveGame(_Universe->AccessCockpit(),
-                                  true);                     //oops saved game last time at wrong place
+                            true);                     //oops saved game last time at wrong place
 
                     _Universe->AccessCockpit()->SetParent(newPart, content.c_str(),
-                                                          _Universe->AccessCockpit()->GetUnitModifications().c_str(),
-                                                          playerUnit->curr_physical_state
-                                                                    .position);                     //absolutely NO NO NO modifications...you got this baby clean off the slate
+                            _Universe->AccessCockpit()->GetUnitModifications().c_str(),
+                            playerUnit->curr_physical_state
+                                    .position);                     //absolutely NO NO NO modifications...you got this baby clean off the slate
 
                     //We now put the player in space.
                     SwitchUnits(NULL, newPart);
@@ -4650,8 +4526,8 @@ bool buyShip(Unit *baseUnit,
                     }
                     static bool persistent_missions_across_ship_switch =
                             XMLSupport::parse_bool(vs_config->getVariable("general",
-                                                                          "persistent_mission_across_ship_switch",
-                                                                          "true"));
+                                    "persistent_mission_across_ship_switch",
+                                    "true"));
                     if (persistent_missions_across_ship_switch) {
                         _Universe->AccessCockpit()->savegame->LoadSavedMissions();
                     }
@@ -4671,8 +4547,7 @@ bool buyShip(Unit *baseUnit,
 }
 
 //Buy ship from the base.
-bool BaseComputer::buyShip(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::buyShip(const EventCommandId &command, Control *control) {
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
     Cargo *item = selectedItem();
@@ -4680,17 +4555,16 @@ bool BaseComputer::buyShip(const EventCommandId &command, Control *control)
         return true;
     }
     ::buyShip(baseUnit,
-              playerUnit,
-              item->GetContent(),
-              item->GetCategory().find("My_Fleet") != string::npos,
-              true,
-              this);     //last was false BUCO
+            playerUnit,
+            item->GetContent(),
+            item->GetCategory().find("My_Fleet") != string::npos,
+            true,
+            this);     //last was false BUCO
     return true;
 }
 
 //Change controls to INFO mode.
-bool BaseComputer::changeToInfoMode(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::changeToInfoMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != INFO) {
         switchToControls(INFO);
         //Initialize description with player info.
@@ -4721,8 +4595,7 @@ bool BaseComputer::changeToInfoMode(const EventCommandId &command, Control *cont
 
 //Given a faction number, return a PaintText color command for the faction.
 //This lightens up the faction colors to make them more easily seen on the dark background.
-static std::string factionColorTextString(int faction)
-{
+static std::string factionColorTextString(int faction) {
     //The following gets the spark (faction) color.
     const float *spark = FactionUtil::GetSparkColor(faction);
 
@@ -4735,8 +4608,7 @@ static std::string factionColorTextString(int faction)
 }
 
 //Show the player's basic information.
-bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *control) {
     //Heading.
     string text = "#b#Factions:#-b#n1.7#";
 
@@ -4821,8 +4693,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
 }
 
 //does not work with negative numbers!!
-void prettyPrintFloat(char *buffer, float f, int digitsBefore, int digitsAfter, int bufferLen)
-{
+void prettyPrintFloat(char *buffer, float f, int digitsBefore, int digitsAfter, int bufferLen) {
     int bufferPos = 0;
     if (!FINITE(f) || ISNAN(f)) {
         buffer[0] = 'n';
@@ -4892,8 +4763,7 @@ static const char *WeaponTypeStrings[] = {
         "PROJECTILE"
 };
 
-void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item)
-{
+void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item) {
     static Unit *blankUnit = new Unit("upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex("upgrades"));
     static float
             warpenratio = XMLSupport::parse_float(vs_config->getVariable("physics", "warp_energy_multiplier", "0.12"));
@@ -4902,8 +4772,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             XMLSupport::parse_float(vs_config->getVariable("physics", "shield_maintenance_charge", ".25"));
     static bool shields_require_power =
             XMLSupport::parse_bool(vs_config->getVariable("physics",
-                                                          "shields_require_passive_recharge_maintenance",
-                                                          "true"));
+                    "shields_require_passive_recharge_maintenance",
+                    "true"));
     static float shieldenergycap =
             XMLSupport::parse_float(vs_config->getVariable("physics", "shield_energy_capacitance", ".2"));
 
@@ -5031,21 +4901,21 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 switch (replacement_mode) {
                     case 0:                 //Replacement or new Module
                         PRETTY_ADDU(statcolor + "Changes " + dvol[index] + " Volume to: #-c",
-                                    vol[index],
-                                    0,
-                                    "cubic meters");
+                                vol[index],
+                                0,
+                                "cubic meters");
                         break;
                     case 1:                 //Additive
                         PRETTY_ADDU(statcolor + "Adds #-c",
-                                    vol[index],
-                                    0,
-                                    "cubic meters " + statcolor + "to " + dvol[index] + " Volume #-c");
+                                vol[index],
+                                0,
+                                "cubic meters " + statcolor + "to " + dvol[index] + " Volume #-c");
                         break;
                     case 2:                 //multiplicative
                         PRETTY_ADDU(statcolor + "Increases " + dvol[index] + " Volume by #-c",
-                                    100.0 * (vol[index] - 1),
-                                    0,
-                                    "%");
+                                100.0 * (vol[index] - 1),
+                                0,
+                                "%");
                         break;
                     default:                 //Failure
                         text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5064,9 +4934,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 break;
             case 1:                 //Additive
                 PRETTY_ADDU(statcolor + "Adds #-c",
-                            playerUnit->fuelData(),
-                            2,
-                            "metric tons of Lithium-6 " /*+statcolor+"to Fuel Capacity #-c"*/ );
+                        playerUnit->fuelData(),
+                        2,
+                        "metric tons of Lithium-6 " /*+statcolor+"to Fuel Capacity #-c"*/ );
                 break;
             case 2:                 //multiplicative
                 break;
@@ -5093,17 +4963,17 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "#n#Installs maneuvering jets with turning response #-c",
-                                playerUnit->limits.yaw,
-                                0,
-                                " radians/second^2#n#" + statcolor + "  (yaw, pitch, roll)#-c");
+                            playerUnit->limits.yaw,
+                            0,
+                            " radians/second^2#n#" + statcolor + "  (yaw, pitch, roll)#-c");
                     break;
                 case 1:                     //Additive
                     break;
                 case 2:                     //multiplicative
                     PRETTY_ADDU(statcolor + "#n#Increases turning response by #-c",
-                                100.0 * ((playerUnit->limits.yaw * 180 / PI) - 1),
-                                0,
-                                "%#n#" + statcolor + "  (yaw, pitch, roll)#-c");
+                            100.0 * ((playerUnit->limits.yaw * 180 / PI) - 1),
+                            0,
+                            "%#n#" + statcolor + "  (yaw, pitch, roll)#-c");
                     break;
                 default:                     //Failure
                     text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5151,19 +5021,19 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     if (!subunitlevel) {
         if (!mode && (playerUnit->getMass() != 0)) {
             PRETTY_ADDU(statcolor + "Fore acceleration: #-c",
-                        playerUnit->limits.forward / (9.8 * playerUnit->getMass()), 2, "gravities");
+                    playerUnit->limits.forward / (9.8 * playerUnit->getMass()), 2, "gravities");
             PRETTY_ADDU(statcolor + "Aft acceleration: #-c",
-                        playerUnit->limits.retro / (9.8 * playerUnit->getMass()), 2, "gravities");
+                    playerUnit->limits.retro / (9.8 * playerUnit->getMass()), 2, "gravities");
             if (playerUnit->limits.lateral == playerUnit->limits.vertical) {
                 PRETTY_ADDU(statcolor + "Orthogonal acceleration: #-c",
-                            playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2, "gravities");
+                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2, "gravities");
                 text += expstatcolor + "#n#  (vertical and lateral axes)#-c";
             } else {
                 PRETTY_ADDN(statcolor + " Lateral acceleration #-c",
-                            playerUnit->limits.lateral / (9.8 * playerUnit->getMass()),
-                            2);
+                        playerUnit->limits.lateral / (9.8 * playerUnit->getMass()),
+                        2);
                 PRETTY_ADDN(statcolor + " Vertical acceleration #-c",
-                            playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2);
+                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2);
                 text += " gravities";
             }
             PRETTY_ADDU(statcolor + "Forward acceleration with overthrust: #-c", playerUnit->limits.afterburn
@@ -5174,97 +5044,97 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 case 0:                     //Replacement or new Module
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
                         PRETTY_ADDU(statcolor + "Provides forward thrust rated at: #-c",
-                                    playerUnit->limits.forward / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.forward / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
                         PRETTY_ADDU(statcolor + "Provides aftward thrust rated at: #-c",
-                                    playerUnit->limits.retro / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.retro / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
                         PRETTY_ADDU(statcolor + "Provides vertical thrust rated at: #-c",
-                                    playerUnit->limits.vertical / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.vertical / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
                         PRETTY_ADDU(statcolor + "Provides lateral thrust rated at: #-c",
-                                    playerUnit->limits.lateral / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.lateral / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn)) {
                         PRETTY_ADDU(statcolor + "Overdrive thrust rated at: #-c",
-                                    playerUnit->limits.afterburn / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.afterburn / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     break;
                 case 1:                     //Additive
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
                         PRETTY_ADDU(statcolor + "Increases forward thrust rating by: #-c",
-                                    playerUnit->limits.forward / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.forward / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
                         PRETTY_ADDU(statcolor + "Increases aftward thrust rating by: #-c",
-                                    playerUnit->limits.retro / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.retro / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
                         PRETTY_ADDU(statcolor + "Increases vertical thrust rating by: #-c",
-                                    playerUnit->limits.vertical / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.vertical / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
                         PRETTY_ADDU(statcolor + "Increases lateral thrust rating by: #-c",
-                                    playerUnit->limits.lateral / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.lateral / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn)) {
                         PRETTY_ADDU(statcolor + "Increases overdrive thrust rating by: #-c",
-                                    playerUnit->limits.afterburn / 1000.0,
-                                    2,
-                                    "MegaNewtons");
+                                playerUnit->limits.afterburn / 1000.0,
+                                2,
+                                "MegaNewtons");
                     }
                     break;
                 case 2:                     //multiplicative
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
                         PRETTY_ADDU(statcolor + "Increases forward thrust rating by: #-c",
-                                    (playerUnit->limits.forward - 1) * 100,
-                                    0,
-                                    "%");
+                                (playerUnit->limits.forward - 1) * 100,
+                                0,
+                                "%");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
                         PRETTY_ADDU(statcolor + "Increases aftward thrust rating by: #-c",
-                                    (playerUnit->limits.retro - 1) * 100,
-                                    0,
-                                    "%");
+                                (playerUnit->limits.retro - 1) * 100,
+                                0,
+                                "%");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
                         PRETTY_ADDU(statcolor + "Increases vertical thrust rating by: #-c",
-                                    (playerUnit->limits.vertical - 1) * 100,
-                                    0,
-                                    "%");
+                                (playerUnit->limits.vertical - 1) * 100,
+                                0,
+                                "%");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
                         PRETTY_ADDU(statcolor + "Increases lateral thrust rating by: #-c",
-                                    (playerUnit->limits.lateral - 1) * 100,
-                                    0,
-                                    "%");
+                                (playerUnit->limits.lateral - 1) * 100,
+                                0,
+                                "%");
                     }
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn))
                         PRETTY_ADDU(statcolor + "Overdrive thrust rating by: #-c",
-                                    (playerUnit->limits.afterburn - 1) * 100,
-                                    0,
-                                    "%");
+                                (playerUnit->limits.afterburn - 1) * 100,
+                                0,
+                                "%");
                     break;
                 default:                     //Failure
                     text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5283,37 +5153,37 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
                         PRETTY_ADDU(statcolor + "Sets max combat speed governor to: #-c", uc.max_speed(), 0, "m/s");
                         PRETTY_ADDU(statcolor + "Sets max non-combat speed governor to: #-c",
-                                    uc.max_speed() * non_combat_mode_mult, 0, "m/s");
+                                uc.max_speed() * non_combat_mode_mult, 0, "m/s");
                     }
                     if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
                         PRETTY_ADDU(statcolor + "Sets max overdrive combat speed governor to: #-c",
-                                    uc.max_ab_speed(),
-                                    0,
-                                    "m/s");
+                                uc.max_ab_speed(),
+                                0,
+                                "m/s");
                     break;
                 case 1:                     //Additive
                     if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
                         PRETTY_ADDU(statcolor + "Increases max combat speed governor setting by: #-c",
-                                    uc.max_speed(),
-                                    0,
-                                    "m/s");
+                                uc.max_speed(),
+                                0,
+                                "m/s");
                         PRETTY_ADDU(statcolor + "Increases max non-combat speed governor setting by: #-c",
-                                    uc.max_speed() * non_combat_mode_mult, 0, "m/s");
+                                uc.max_speed() * non_combat_mode_mult, 0, "m/s");
                     }
                     if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
                         PRETTY_ADDU(statcolor + "Increases max overdrive combat speed governor setting by: #-c",
-                                    uc.max_ab_speed(), 0, "m/s");
+                                uc.max_ab_speed(), 0, "m/s");
                     break;
                 case 2:                     //multiplicative
                     if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
                         PRETTY_ADDU(statcolor + "Increases max combat speed governor settings by: #-c",
-                                    100.0 * (uc.max_speed() - 1), 0, "%");
+                                100.0 * (uc.max_speed() - 1), 0, "%");
                         PRETTY_ADDU(statcolor + "Increases max non-combat speed governor settings by: #-c",
-                                    100.0 * (uc.max_speed() - 1), 0, "%");
+                                100.0 * (uc.max_speed() - 1), 0, "%");
                     }
                     if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
                         PRETTY_ADDU(statcolor + "Increases max overdrive combat speed governor settings by: #-c",
-                                    (uc.max_ab_speed() - 1) * 100, 0, "%");
+                                (uc.max_ab_speed() - 1) * 100, 0, "%");
                     break;
                 default:                     //Failure
                     text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5407,9 +5277,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                         text += "#n#" + prefix + statcolor + "Tracking cone: #-cOMNIDIRECTIONAL";
                     }
                     PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c",
-                                acos(uc.radar.trackingcone) * 2,
-                                2,
-                                "radians");
+                            acos(uc.radar.trackingcone) * 2,
+                            2,
+                            "radians");
                     PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(uc.radar.lockcone) * 2, 2, "radians");
                     text += "#n#" + prefix + statcolor + "ITTS (Intelligent Target Tracking System) support: #-c";
                     if (uc.itts) {
@@ -5449,29 +5319,29 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
         PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
         PRETTY_ADDU(statcolor + "Weapon capacitor bank storage: #-c",
-                    ((playerUnit->maxEnergyData() - maxshield) * RSconverter), 0, "MJ");
+                ((playerUnit->maxEnergyData() - maxshield) * RSconverter), 0, "MJ");
         //note: I found no function to get max warp energy, but since we're docked they are the same
         if (!subunitlevel) {
             PRETTY_ADDU(statcolor + "Warp capacitor bank storage: #-c",
-                        playerUnit->warpCapData() * RSconverter * Wconv,
-                        0,
-                        "MJ");
+                    playerUnit->warpCapData() * RSconverter * Wconv,
+                    0,
+                    "MJ");
 
             text += "#n##n##c0:1:.5#" + prefix + "[SPEC SUBSYSTEM]#n##-c";
 
             PRETTY_ADDU(statcolor + "Active SPEC Energy Requirements: #-c",
-                        uj.insysenergy * RSconverter * Wconv / warpbleed,
-                        0,
-                        "MJ/s");
+                    uj.insysenergy * RSconverter * Wconv / warpbleed,
+                    0,
+                    "MJ/s");
 
             text += "#n##n##c0:1:.5#" + prefix + "[JUMP SUBSYSTEM]#n##-c";
             if (uj.drive == -2) {
                 text += "#n##c1:.3:.3#No outsystem jump drive present#-c";                 //fixed??
             } else {
                 PRETTY_ADDU(statcolor + "Energy cost for jumpnode travel: #-c",
-                            uj.energy * RSconverter * Wconv,
-                            0,
-                            "MJ");
+                        uj.energy * RSconverter * Wconv,
+                        0,
+                        "MJ");
                 if (uj.delay)
                     PRETTY_ADDU(statcolor + "Delay: #-c", uj.delay, 0, "seconds");
                 if (uj.damage > 0)
@@ -5488,13 +5358,13 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             case 0:                 //Replacement or new Module
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
                     PRETTY_ADDU(statcolor + "Installs reactor with recharge rate: #-c",
-                                playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
+                            playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
                     PRETTY_ADDU(statcolor + "Installs main capacitor bank with storage capacity: #-c",
-                                (playerUnit->maxEnergyData() * RSconverter), 0, "MJ");
+                            (playerUnit->maxEnergyData() * RSconverter), 0, "MJ");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
                     PRETTY_ADDU(statcolor + "Installs warp capacitor bank with storage capacity: #-c",
-                                playerUnit->getWarpEnergy() * RSconverter * Wconv, 0, "MJ");
+                            playerUnit->getWarpEnergy() * RSconverter * Wconv, 0, "MJ");
                 if (buj.drive != uj.drive) {
                     text += statcolor +
                             "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
@@ -5503,28 +5373,28 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             case 1:                 //Additive
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
                     PRETTY_ADDU(statcolor + "Increases recharge rate by #-c",
-                                playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
+                            playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
                     PRETTY_ADDU(statcolor + "Adds #-c",
-                                (playerUnit->maxEnergyData() * RSconverter),
-                                0,
-                                "MJ of storage to main capacitor banks");
+                            (playerUnit->maxEnergyData() * RSconverter),
+                            0,
+                            "MJ of storage to main capacitor banks");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
                     PRETTY_ADDU(statcolor + "Adds #-c",
-                                playerUnit->getWarpEnergy() * RSconverter * Wconv,
-                                0,
-                                "MJ of storage to warp capacitor bank");
+                            playerUnit->getWarpEnergy() * RSconverter * Wconv,
+                            0,
+                            "MJ of storage to warp capacitor bank");
                 break;
             case 2:                 //multiplicative
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
                     PRETTY_ADDU(statcolor + "Increases reactor recharge rate by #-c",
-                                100.0 * (playerUnit->energyRechargeData() - 1), 0, "%");
+                            100.0 * (playerUnit->energyRechargeData() - 1), 0, "%");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
                     PRETTY_ADDU(statcolor + "Increases main capacitor bank storage by #-c",
-                                100.0 * (playerUnit->maxEnergyData() - 1), 0, "%");
+                            100.0 * (playerUnit->maxEnergyData() - 1), 0, "%");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
                     PRETTY_ADDU(statcolor + "Increases warp capacitor bank storage by #-c",
-                                (playerUnit->getWarpEnergy() - 1) * 100, 0, "%");
+                            (playerUnit->getWarpEnergy() - 1) * 100, 0, "%");
                 break;
             default:                 //Failure
                 text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5537,7 +5407,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
 
     if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit,
-                         armor->facets[as_integer(FacetName::left_top_front)].health)) {
+            armor->facets[as_integer(FacetName::left_top_front)].health)) {
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
                 text += "#n#" + prefix + statcolor + "Replaces existing armor, if any.#n#Armor damage resistance:#-c";
@@ -5574,7 +5444,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     substatcolor + armor_color_strings[i],
                     (mode && replacement_mode
                             == 2) ? 100.0 * (playerUnit->armor->facets[armor_indices[i]].health - 1) :
-                    playerUnit->armor->facets[2].health * VSDM,
+                            playerUnit->armor->facets[2].health * VSDM,
                     0,
                     (2 == replacement_mode) ? "%" : "MJ");
         }
@@ -5582,7 +5452,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
 
     if (!mode) {
         PRETTY_ADDU(statcolor + "Sustainable Hull Damage: #-c",
-                    playerUnit->GetHull() / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
+                playerUnit->GetHull() / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
         if (1 != playerUnit->GetHullPercent()) {
             PRETTY_ADD("  Current condition: ", playerUnit->GetHullPercent() * 100, 2);
             text += "% of normal";
@@ -5591,7 +5461,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         switch (replacement_mode) {
             case 0:                         //Replacement or new Module
                 PRETTY_ADDU(statcolor + "New Sustained Hull Damage Rating: #-c",
-                            playerUnit->GetHull() / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
+                        playerUnit->GetHull() / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
                 break;
             case 1:                         //Additive
                 PRETTY_ADDU(statcolor + "Increases sustainable hull damage by #-c", playerUnit->GetHull()
@@ -5637,7 +5507,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     std::string shield_four_strings[4] = {" - port: #-c", " - starboard: #-c", " - fore: #-c", " - aft: #-c"};
     // TODO: replace with fore aft port starboard top bottom
     std::string shield_eight_strings[8] = {" - ltf: #-c", " - rtf: #-c", " - lbf: #-c", " - rbf: #-c",
-                                           " - ltr: #-c", " - rtr: #-c", " - lbr: #-c", " - rbr: #-c"};
+            " - ltr: #-c", " - rtr: #-c", " - lbr: #-c", " - rbr: #-c"};
 
     std::string *shield_strings = nullptr;
 
@@ -5655,13 +5525,13 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
 
     if (shield_strings) {
         if (!mode || MODIFIES(replacement_mode, playerUnit,
-                              blankUnit,
-                              shield->GetMaxHealth())) {
+                blankUnit,
+                shield->GetMaxHealth())) {
             for (int i = 0; i < num_shields; i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                                                              (100.0 * (playerUnit->shield->facets[i].max_health - 1)) :
-                                                              playerUnit->shield->facets[i].max_health * VSDM, 0,
-                            (2 == replacement_mode) ? "%" : "MJ");
+                        (100.0 * (playerUnit->shield->facets[i].max_health - 1)) :
+                        playerUnit->shield->facets[i].max_health * VSDM, 0,
+                        (2 == replacement_mode) ? "%" : "MJ");
             }
         }
     }
@@ -5676,15 +5546,15 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 break;
             case 1:                         //Additive
                 PRETTY_ADDU(statcolor + "Increases shield protection recharge speed by #-c",
-                            regeneration * VSDM,
-                            0,
-                            "MJ/s");
+                        regeneration * VSDM,
+                        0,
+                        "MJ/s");
                 break;
             case 2:                         //multiplicative
                 PRETTY_ADDU(statcolor + "Shield protection recharge speed increased by #-c",
-                            100.0 * (regeneration - 1),
-                            0,
-                            "%");
+                        100.0 * (regeneration - 1),
+                        0,
+                        "%");
                 break;
             default:                         //Failure
                 text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5695,16 +5565,16 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     if (playerUnit->cloaking != -1) {
         if (!mode) {
             PRETTY_ADDU(statcolor + "Cloaking device available, energy usage: #-c",
-                        playerUnit->cloakenergy * RSconverter * Wconv,
-                        0,
-                        "MJ/s");
+                    playerUnit->cloakenergy * RSconverter * Wconv,
+                    0,
+                    "MJ/s");
         } else {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "Installs a cloaking device.#n#  Activated energy usage: #-c",
-                                playerUnit->cloakenergy * RSconverter * Wconv,
-                                0,
-                                "MJ/s");
+                            playerUnit->cloakenergy * RSconverter * Wconv,
+                            0,
+                            "MJ/s");
                     break;
                 case 1:                     //Additive
                     text += "#n#Additive Cloaking...Seems like a bug to me.#n#";
@@ -5756,27 +5626,27 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                         text += "#n#" + prefix + statcolor + "   Damage:#-c special";
                     } else {
                         PRETTY_ADDU(statcolor + "   Damage: #-c",
-                                    wi->damage * VSDM,
-                                    0,
-                                    wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ");
+                                wi->damage * VSDM,
+                                0,
+                                wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ");
                         if (wi->phase_damage > 0)
                             PRETTY_ADDU(statcolor + "   Phase damage: #-c",
-                                        wi->phase_damage * VSDM,
-                                        0,
-                                        wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ");
+                                    wi->phase_damage * VSDM,
+                                    0,
+                                    wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ");
                     }
                     PRETTY_ADDU(statcolor + "   Energy usage: #-c",
-                                wi->energy_rate * RSconverter,
-                                0,
-                                wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ/shot");
+                            wi->energy_rate * RSconverter,
+                            0,
+                            wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ/shot");
                     PRETTY_ADDU(statcolor + "   Refire delay: #-c", wi->Refire(), 2, "seconds");
                     //display info specific to some weapons type
 
                     PRETTY_ADDU(statcolor + "   Range: #-c", wi->range, 0, "meters");
                     if ((100000 * (1.0 - wi->long_range) / (wi->range)) > 0.00001) {
                         PRETTY_ADD(statcolor + "   Range attenuation factor: #-c",
-                                   100000 * (1.0 - wi->long_range) / (wi->range),
-                                   2);
+                                100000 * (1.0 - wi->long_range) / (wi->range),
+                                2);
                         text += "% per km";
                     }
 
@@ -5804,9 +5674,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                         case WEAPON_TYPE::PROJECTILE:                     //need ammo
                             if (wi->lock_time > 0) {
                                 PRETTY_ADDU(statcolor + "   'Fire and Forget' lock time: #-c",
-                                            wi->lock_time,
-                                            0,
-                                            "seconds");
+                                        wi->lock_time,
+                                        0,
+                                        "seconds");
                             } else {
                                 text += "#n#";
                                 text += prefix;
@@ -5817,10 +5687,12 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                             totalWeaponEnergyUsage += (wi->energy_rate / wi->Refire());
                             break;
                         case WEAPON_TYPE::BEAM:
-                            if (wi->damage > 0)
+                            if (wi->damage > 0) {
                                 totalWeaponDamage += wi->damage;
-                            if (wi->phase_damage > 0)
+                            }
+                            if (wi->phase_damage > 0) {
                                 totalWeaponDamage += wi->phase_damage;
+                            }
                             PRETTY_ADDU(statcolor + "   Beam stability: #-c", wi->stability, 2, "seconds");
                             if (playerUnit->mounts[i].ammo != -1)
                                 PRETTY_ADD(statcolor + "   Shots remaining: #-c", playerUnit->mounts[i].ammo, 0);
@@ -5835,20 +5707,20 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                             ((wi->damage != 0) || (wi->phase_damage != 0) || (wi->energy_rate != 0))) {
                         text += "#n##n#" + prefix + statcolor + "   Average for continuous firing:#-c";
                         float shot_cycle_mul = wi->type == WEAPON_TYPE::BEAM ?
-                                               wi->stability / (wi->Refire() + wi->stability) :
-                                               1 / wi->Refire();
+                                wi->stability / (wi->Refire() + wi->stability) :
+                                1 / wi->Refire();
                         if (wi->damage != 0)
                             PRETTY_ADDU(statcolor + "   Damage: #-c",
-                                        wi->damage * VSDM * shot_cycle_mul,
-                                        2, "MJ/s");
+                                    wi->damage * VSDM * shot_cycle_mul,
+                                    2, "MJ/s");
                         if (wi->phase_damage != 0)
                             PRETTY_ADDU(statcolor + "   Phase damage: #-c",
-                                        wi->phase_damage * VSDM * shot_cycle_mul,
-                                        2, "MJ/s");
+                                    wi->phase_damage * VSDM * shot_cycle_mul,
+                                    2, "MJ/s");
                         if (wi->energy_rate != 0)
                             PRETTY_ADDU(statcolor + "   Energy usage: #-c",
-                                        wi->energy_rate * RSconverter * shot_cycle_mul,
-                                        2, "MJ/s");
+                                    wi->energy_rate * RSconverter * shot_cycle_mul,
+                                    2, "MJ/s");
                     }
                     text += "#n#";
                 }
@@ -5868,15 +5740,15 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             maxshield = 0;
         }
         PRETTY_ADDU(statcolor + "Minimum time to reach full overthrust speed: #-c",
-                    playerUnit->getMass() * uc.max_ab_speed() / playerUnit->limits.afterburn, 2, "seconds");
+                playerUnit->getMass() * uc.max_ab_speed() / playerUnit->limits.afterburn, 2, "seconds");
         //reactor
         float avail = (playerUnit->maxEnergyData() * RSconverter - maxshield * VSDM);
 
         int num_shields = playerUnit->shield->number_of_facets;
         float regeneration = playerUnit->shield->GetRegeneration();
         float overhead = (shields_require_power) ?
-                         (regeneration / shieldenergycap * shield_maintenance_cost
-                                 * num_shields * VSDM) : 0;
+                (regeneration / shieldenergycap * shield_maintenance_cost
+                        * num_shields * VSDM) : 0;
         float nrt = avail / (playerUnit->energyRechargeData() * RSconverter); // TODO -overhead);
         PRETTY_ADDU(statcolor + "Reactor nominal replenish time: #-c", nrt, 2, "seconds");
         //shield related stuff
@@ -5928,11 +5800,11 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             text += "#n##c0:1:.2#" + prefix + "Your reactor produces more energy than your weapons can use!#-c";
         } else {
             PRETTY_ADDU(statcolor + "Reactor energy depletion time if weapons in continuous use: #-c",
-                        (playerUnit->maxEnergyData()
-                                * RSconverter) / (totalWeaponEnergyUsage
-                                - ((playerUnit->energyRechargeData() * RSconverter - maint_draw))),
-                        2,
-                        "seconds");
+                    (playerUnit->maxEnergyData()
+                            * RSconverter) / (totalWeaponEnergyUsage
+                            - ((playerUnit->energyRechargeData() * RSconverter - maint_draw))),
+                    2,
+                    "seconds");
         }
         PRETTY_ADDU(statcolor + "Combined (non-missile) weapon damage: #-c", totalWeaponDamage * VSDM, 0, "MJ/s");
     }
@@ -5954,8 +5826,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
 }
 
 //Show the stats on the player's current ship.
-bool BaseComputer::showShipStats(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::showShipStats(const EventCommandId &command, Control *control) {
     current_unit_load_mode = NO_MESH;
     Unit *playerUnit = m_player.GetUnit();
     current_unit_load_mode = DEFAULT;
@@ -6028,8 +5899,7 @@ void QuitNow();
 }
 
 //Create the window and controls for the Options Menu.
-void BaseComputer::LoadSaveQuitConfirm::init(void)
-{
+void BaseComputer::LoadSaveQuitConfirm::init(void) {
     Window *window = new Window;
     setWindow(window);
 
@@ -6084,8 +5954,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void)
 }
 
 //Process a command event from the Options Menu window.
-bool BaseComputer::LoadSaveQuitConfirm::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::LoadSaveQuitConfirm::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Save") {
         m_parent->actionConfirmedSaveGame();
         window()->close();
@@ -6102,22 +5971,19 @@ bool BaseComputer::LoadSaveQuitConfirm::processWindowCommand(const EventCommandI
 
 //Show options.
 
-bool BaseComputer::actionConfirmedQuitGame()
-{
+bool BaseComputer::actionConfirmedQuitGame() {
     CockpitKeys::QuitNow();
     return true;
 }
 
-bool BaseComputer::actionQuitGame(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionQuitGame(const EventCommandId &command, Control *control) {
     LoadSaveQuitConfirm *saver = new LoadSaveQuitConfirm(this, "Quit", "Are you sure that you want to quit?");
     saver->init();
     saver->run();
     return true;
 }
 
-bool BaseComputer::actionConfirmedSaveGame()
-{
+bool BaseComputer::actionConfirmedSaveGame() {
     Unit *player = m_player.GetUnit();
     if (player && player->name == "return_to_cockpit") {
         showAlert("Return to a base to save.");
@@ -6153,8 +6019,7 @@ bool BaseComputer::actionConfirmedSaveGame()
     return true;
 }
 
-bool BaseComputer::actionSaveGame(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionSaveGame(const EventCommandId &command, Control *control) {
     Unit *player = m_player.GetUnit();
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
     bool ok = true;
@@ -6176,8 +6041,8 @@ bool BaseComputer::actionSaveGame(const EventCommandId &command, Control *contro
                 fp.Close();
                 if (string("New_Game") != tmp) {
                     LoadSaveQuitConfirm *saver = new LoadSaveQuitConfirm(this,
-                                                                         "Save",
-                                                                         "Do you want to overwrite your old saved game?");
+                            "Save",
+                            "Do you want to overwrite your old saved game?");
                     saver->init();
                     saver->run();
                 } else {
@@ -6192,8 +6057,7 @@ bool BaseComputer::actionSaveGame(const EventCommandId &command, Control *contro
     return true;
 }
 
-bool BaseComputer::actionConfirmedLoadGame()
-{
+bool BaseComputer::actionConfirmedLoadGame() {
     Unit *player = m_player.GetUnit();
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
     if (desc) {
@@ -6224,15 +6088,13 @@ bool BaseComputer::actionConfirmedLoadGame()
     return true;
 }
 
-bool BaseComputer::actionNewGame(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionNewGame(const EventCommandId &command, Control *control) {
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
     desc->setText(UniverseUtil::getNewGameSaveName());
     return this->actionLoadGame(command, control);
 }
 
-bool BaseComputer::actionLoadGame(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionLoadGame(const EventCommandId &command, Control *control) {
     Unit *player = m_player.GetUnit();
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("InputText"));
     if (desc) {
@@ -6242,8 +6104,8 @@ bool BaseComputer::actionLoadGame(const EventCommandId &command, Control *contro
                 Cockpit *cockpit = _Universe->isPlayerStarship(player);
                 if (cockpit) {
                     LoadSaveQuitConfirm *saver = new LoadSaveQuitConfirm(this,
-                                                                         "Load",
-                                                                         "Are you sure that you want to load this game?");
+                            "Load",
+                            "Are you sure that you want to load this game?");
                     saver->init();
                     saver->run();
                     return true;
@@ -6255,36 +6117,30 @@ bool BaseComputer::actionLoadGame(const EventCommandId &command, Control *contro
     return true;
 }
 
-void BaseComputer::loadNetworkControls()
-{
+void BaseComputer::loadNetworkControls() {
 }
 
-bool BaseComputer::actionShowServerMenu(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionShowServerMenu(const EventCommandId &command, Control *control) {
     window()->findControlById("MultiPlayerAccountServer")->setHidden(true);
     window()->findControlById("MultiPlayerHostPort")->setHidden(false);
     return true;
 }
 
-bool BaseComputer::actionShowAccountMenu(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionShowAccountMenu(const EventCommandId &command, Control *control) {
     window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
     window()->findControlById("MultiPlayerHostPort")->setHidden(true);
     return true;
 }
 
-bool BaseComputer::actionNetDie(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionNetDie(const EventCommandId &command, Control *control) {
     return true;
 }
 
-bool BaseComputer::actionNetSaveGame(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionNetSaveGame(const EventCommandId &command, Control *control) {
     return true;
 }
 
-bool BaseComputer::actionJoinGame(const EventCommandId &command, Control *control)
-{
+bool BaseComputer::actionJoinGame(const EventCommandId &command, Control *control) {
     NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::JOINGAME);
     nak->confirmedJoinGame();
     return true;

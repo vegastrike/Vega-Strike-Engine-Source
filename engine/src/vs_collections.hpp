@@ -38,8 +38,7 @@ public:
     typedef typename std::vector<MyType, Allocator>::reference vs_vector_reference;
     typedef typename std::vector<MyType, Allocator>::size_type vs_vector_size_type;
 
-    inline vs_vector_reference operator[](vs_vector_size_type pos)
-    {
+    inline vs_vector_reference operator[](vs_vector_size_type pos) {
         return this->at(pos);
     }
 };

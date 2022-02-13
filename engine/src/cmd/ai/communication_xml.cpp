@@ -72,13 +72,11 @@ const EnumMap element_map(element_names, sizeof(element_names) / sizeof(element_
 const EnumMap attribute_map(attribute_names, sizeof(attribute_names) / sizeof(attribute_names[0]));
 }
 
-void FSM::beginElement(void *userData, const XML_Char *names, const XML_Char **atts)
-{
+void FSM::beginElement(void *userData, const XML_Char *names, const XML_Char **atts) {
     ((FSM *) userData)->beginElement(names, AttributeList(atts));
 }
 
-void FSM::beginElement(const string &name, const AttributeList attributes)
-{
+void FSM::beginElement(const string &name, const AttributeList attributes) {
     using namespace CommXML;
     AttributeList::const_iterator iter;
     Names elem = (Names) element_map.lookup(name);
@@ -104,9 +102,9 @@ void FSM::beginElement(const string &name, const AttributeList attributes)
             }
             if (!filename.empty()) {
                 nodes.back()
-                     .AddSound(filename,
-                               sexe,
-                               val);
+                        .AddSound(filename,
+                                sexe,
+                                val);
             } //FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
             break;
         case UNKNOWN:
@@ -139,7 +137,7 @@ void FSM::beginElement(const string &name, const AttributeList attributes)
                 }
             }
             nodes.push_back(Node(messages,
-                                 val)); //FIXME val was used uninitialized until I added = 0 --chuck_starchaser
+                    val)); //FIXME val was used uninitialized until I added = 0 --chuck_starchaser
             break;
         }
         case EDGE:
@@ -155,8 +153,7 @@ void FSM::beginElement(const string &name, const AttributeList attributes)
     }
 }
 
-void FSM::endElement(void *userData, const XML_Char *name)
-{
+void FSM::endElement(void *userData, const XML_Char *name) {
     using namespace CommXML;
     Names elem = (Names) element_map.lookup(name);
     switch (elem) {
@@ -169,8 +166,7 @@ void FSM::endElement(void *userData, const XML_Char *name)
     }
 }
 
-void FSM::LoadXML(const char *filename)
-{
+void FSM::LoadXML(const char *filename) {
     using namespace CommXML;
     using namespace VSFileSystem;
     unitlevel = 0;

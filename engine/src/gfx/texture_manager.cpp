@@ -25,19 +25,16 @@
 
 #include "texture_manager.h"
 
-TextureManager::TextureManager()
-{
+TextureManager::TextureManager() {
 
 }
 
-TextureManager &TextureManager::GetInstance()
-{
+TextureManager &TextureManager::GetInstance() {
     static TextureManager instance;     // Guaranteed to be destroyed.
     return instance;                    // Instantiated on first use.
 }
 
-Texture *TextureManager::GetTexture(std::string const &name, enum FILTER mipmap)
-{
+Texture *TextureManager::GetTexture(std::string const &name, enum FILTER mipmap) {
     // This is weird. We already store textures in a hashmap but can't rely on it.
     // TODO: figure out how to rely on it.
     Texture *texture = Texture::Exists(name);

@@ -36,13 +36,11 @@ class PipelinedTexture : public Texture {
 //clone==2 means both current and last are clones 1 means last is a clone
     char clone;
 public:
-    bool operator==(const Texture &b)
-    {
+    bool operator==(const Texture &b) {
         return false;
     }
 
-    bool operator<(const Texture &b)
-    {
+    bool operator<(const Texture &b) {
         return true;
     }
 

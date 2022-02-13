@@ -54,8 +54,7 @@ using std::endl;
 
 /* *********************************************************** */
 
-string Mission::modestring(int mode)
-{
+string Mission::modestring(int mode) {
     if (mode == SCRIPT_PARSE) {
         if (parsemode == PARSE_DECL) {
             return "parsedecl";
@@ -69,8 +68,7 @@ string Mission::modestring(int mode)
 
 /* *********************************************************** */
 
-void Mission::trace(missionNode *node, int mode)
-{
+void Mission::trace(missionNode *node, int mode) {
     if (!do_trace || mode == SCRIPT_PARSE) {
         return;
     }
@@ -80,13 +78,12 @@ void Mission::trace(missionNode *node, int mode)
         cout << module_node->script.name << ":" << node->attr_value("line");
     }
     cout << " tag " << node->Name() << "name " << node->attr_value("name") << " module " << node->attr_value("module")
-         << endl;
+            << endl;
 }
 
 /* *********************************************************** */
 
-void Mission::fatalError(missionNode *node, int mode, string message)
-{
+void Mission::fatalError(missionNode *node, int mode, string message) {
     cout << "fatal (" << modestring(mode) << ") " << message << " : ";
     printNode(node, mode);
     if (node) {
@@ -107,7 +104,7 @@ void Mission::fatalError(missionNode *node, int mode, string message)
                 missionNode *bnode = context->block_node;
                 if (bnode) {
                     cout << mnode->script.name << ":" << classid << " line " << bnode->attr_value("line") << " "
-                         << bnode->script.name << " ";
+                            << bnode->script.name << " ";
 
                     printNode(bnode, mode);
                 }
@@ -119,22 +116,19 @@ void Mission::fatalError(missionNode *node, int mode, string message)
 
 /* *********************************************************** */
 
-void Mission::runtimeFatal(string message)
-{
+void Mission::runtimeFatal(string message) {
     cout << "runtime fatalError: " << message << endl;
 }
 
 /* *********************************************************** */
 
-void Mission::warning(string message)
-{
+void Mission::warning(string message) {
     cout << "warning: " << message << endl;
 }
 
 /* *********************************************************** */
 
-void Mission::debug(int level, missionNode *node, int mode, string message)
-{
+void Mission::debug(int level, missionNode *node, int mode, string message) {
     if (level <= debuglevel) {
         debug(node, mode, message);
     }
@@ -142,16 +136,14 @@ void Mission::debug(int level, missionNode *node, int mode, string message)
 
 /* *********************************************************** */
 
-void Mission::debug(missionNode *node, int mode, string message)
-{
+void Mission::debug(missionNode *node, int mode, string message) {
     cout << "debug (" << modestring(mode) << ") " << message << " : ";
     printNode(node, mode);
 }
 
 /* *********************************************************** */
 
-void Mission::printNode(missionNode *node, int mode)
-{
+void Mission::printNode(missionNode *node, int mode) {
     if (node) {
         node->printNode(cout, 0, 0);
     }
@@ -159,8 +151,7 @@ void Mission::printNode(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-bool Mission::have_return(int mode)
-{
+bool Mission::have_return(int mode) {
     if (mode == SCRIPT_PARSE) {
         return false;
     }
@@ -173,8 +164,7 @@ bool Mission::have_return(int mode)
 
 /* *********************************************************** */
 
-void Mission::initTagMap()
-{
+void Mission::initTagMap() {
     tagmap["module"] = DTAG_MODULE;
     tagmap["script"] = DTAG_SCRIPT;
     tagmap["if"] = DTAG_IF;
@@ -200,14 +190,12 @@ void Mission::initTagMap()
 
 /* *********************************************************** */
 
-void Mission::printVarInst(varInst *vi)
-{
+void Mission::printVarInst(varInst *vi) {
 }
 
 /* *********************************************************** */
 
-void Mission::printVarInst(int dbg_level, varInst *vi)
-{
+void Mission::printVarInst(int dbg_level, varInst *vi) {
     if (dbg_level <= debuglevel) {
         saveVarInst(vi, cout);
     }
@@ -215,8 +203,7 @@ void Mission::printVarInst(int dbg_level, varInst *vi)
 
 /* *********************************************************** */
 
-void Mission::printVarmap(const varInstMap &vmap)
-{
+void Mission::printVarmap(const varInstMap &vmap) {
     vsUMap<string, varInst *>::const_iterator iter;
     for (iter = vmap.begin(); iter != vmap.end(); iter++) {
         cout << "variable " << (*iter).first;
@@ -228,8 +215,7 @@ void Mission::printVarmap(const varInstMap &vmap)
 
 /* *********************************************************** */
 
-void Mission::printModules()
-{
+void Mission::printModules() {
     vsUMap<string, missionNode *>::iterator iter;
     for (iter = runtime.modules.begin(); iter != runtime.modules.end(); iter++) {
         cout << "  module " << (*iter).first;
@@ -248,8 +234,7 @@ void Mission::printModules()
 
 /* *********************************************************** */
 
-void Mission::printRuntime()
-{
+void Mission::printRuntime() {
     return;
 
     cout << "RUNTIME" << endl;
@@ -265,8 +250,7 @@ void Mission::printRuntime()
     printThread(runtime.cur_thread);
 }
 
-void Mission::printGlobals(int dbg_level)
-{
+void Mission::printGlobals(int dbg_level) {
     if (dbg_level > debuglevel) {
         return;
     }
@@ -279,8 +263,7 @@ void Mission::printGlobals(int dbg_level)
 
 /* *********************************************************** */
 
-void Mission::printThread(missionThread *thread)
-{
+void Mission::printThread(missionThread *thread) {
     return;
 
     vector<contextStack *>::const_iterator siter;
@@ -301,8 +284,7 @@ void Mission::printThread(missionThread *thread)
 
 /* *********************************************************** */
 
-varInst *Mission::searchScopestack(string name)
-{
+varInst *Mission::searchScopestack(string name) {
     int elem = scope_stack.size() - 1;
     varInst *vi = NULL;
     while (vi == NULL && elem >= 0) {
@@ -328,8 +310,7 @@ varInst *Mission::searchScopestack(string name)
 
 /* *********************************************************** */
 
-missionNode *Mission::lookupScript(string scriptname, string modulename)
-{
+missionNode *Mission::lookupScript(string scriptname, string modulename) {
     missionNode *module = runtime.modules[modulename];
     if (module == NULL) {
         fatalError(module, SCRIPT_PARSE, "module " + modulename + " not found - maybe you forgot to import it?");

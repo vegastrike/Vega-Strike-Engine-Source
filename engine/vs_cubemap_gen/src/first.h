@@ -43,8 +43,7 @@ using std::max;
 #endif
 
 template<typename T>
-inline T operator abs(T const &t)
-{
+inline T operator abs(T const &t) {
     return t < t(0) ? -t : t;
 }
 
@@ -54,14 +53,12 @@ inline T operator abs(T const &t)
 //These handy templates save us a lot of coding operators. Just define
 //assignment arithmetic operators, and these others are auto-generated
 template<typename T>
-inline T operator+(T const &a, T const &b)
-{
+inline T operator+(T const &a, T const &b) {
     return T(a) += b;
 }
 
 template<typename T>
-inline T operator-(T const &a, T const &b)
-{
+inline T operator-(T const &a, T const &b) {
     return T(a) -= b;
 }
 

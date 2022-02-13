@@ -55,40 +55,34 @@ Source::Source(SharedPtr<Sound> sound, bool _looping) :
         gain(1),
 
         lastKnownPlayingTime(0),
-        lastKnownPlayingTimeTime(getRealTime())
-{
+        lastKnownPlayingTimeTime(getRealTime()) {
     // Some default flags
     setLooping(_looping);
     setRelative(false);
     setAttenuated(true);
 }
 
-Source::~Source()
-{
+Source::~Source() {
 }
 
-Timestamp Source::setLastKnownPlayingTime(Timestamp timestamp)
-{
+Timestamp Source::setLastKnownPlayingTime(Timestamp timestamp) {
     lastKnownPlayingTime = timestamp;
     lastKnownPlayingTimeTime = getRealTime();
     return timestamp;
 }
 
-void Source::startPlaying(Timestamp start)
-{
+void Source::startPlaying(Timestamp start) {
     dirty.setAll();
     startPlayingImpl(setLastKnownPlayingTime(start));
 }
 
-void Source::stopPlaying()
-{
+void Source::stopPlaying() {
     // Pause first to stop the renderable
     pausePlaying();
     stopPlayingImpl();
 }
 
-void Source::pausePlaying()
-{
+void Source::pausePlaying() {
     if (rendererDataPtr.get() && isActive()) {
         try {
             setLastKnownPlayingTime(getPlayingTime());
@@ -109,8 +103,7 @@ void Source::pausePlaying()
     }
 }
 
-void Source::continuePlaying()
-{
+void Source::continuePlaying() {
     if (rendererDataPtr.get() && isPlaying() && !isActive()) {
         // Must notify the listener, if any
         if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents()) {
@@ -127,8 +120,7 @@ void Source::continuePlaying()
     }
 }
 
-Timestamp Source::getPlayingTime() const
-{
+Timestamp Source::getPlayingTime() const {
     try {
         if (rendererDataPtr.get() && isActive()) {
             return rendererDataPtr->getPlayingTime();
@@ -140,8 +132,7 @@ Timestamp Source::getPlayingTime() const
     }
 }
 
-Timestamp Source::getWouldbePlayingTime() const
-{
+Timestamp Source::getWouldbePlayingTime() const {
     try {
         if (rendererDataPtr.get() && isActive()) {
             return rendererDataPtr->getPlayingTime();
@@ -151,8 +142,7 @@ Timestamp Source::getWouldbePlayingTime() const
     return lastKnownPlayingTime + getRealTime() - lastKnownPlayingTimeTime;
 }
 
-bool Source::isPlaying() const
-{
+bool Source::isPlaying() const {
     try {
         return isPlayingImpl();
     } catch (const Exception &e) {
@@ -160,8 +150,7 @@ bool Source::isPlaying() const
     }
 }
 
-bool Source::isActive() const
-{
+bool Source::isActive() const {
     try {
         return rendererDataPtr.get() && rendererDataPtr->isPlaying();
     } catch (const Exception &e) {
@@ -169,21 +158,18 @@ bool Source::isActive() const
     }
 }
 
-Range<Scalar> Source::getAngleRange() const
-{
+Range<Scalar> Source::getAngleRange() const {
     return Range<Scalar>(Scalar(acos(cosAngleRange.min)),
-                         Scalar(acos(cosAngleRange.max)));
+            Scalar(acos(cosAngleRange.max)));
 }
 
-void Source::setAngleRange(Range<Scalar> r)
-{
+void Source::setAngleRange(Range<Scalar> r) {
     cosAngleRange.min = Scalar(cos(r.min));
     cosAngleRange.max = Scalar(cos(r.max));
     dirty.attributes = 1;
 }
 
-void Source::updateRenderable(int flags, const Listener &sceneListener)
-{
+void Source::updateRenderable(int flags, const Listener &sceneListener) {
     if (rendererDataPtr.get()) {
         int oflags = flags;
 
@@ -231,8 +217,7 @@ void Source::updateRenderable(int flags, const Listener &sceneListener)
     }
 }
 
-void Source::setRenderable(SharedPtr<RenderableSource> ptr)
-{
+void Source::setRenderable(SharedPtr<RenderableSource> ptr) {
     // Notify at/detachment to listener, if any
     if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantAttachEvents()) {
         sourceListenerPtr->onPreAttach(*this, ptr.get() != 0);
@@ -246,8 +231,7 @@ void Source::setRenderable(SharedPtr<RenderableSource> ptr)
     }
 }
 
-void Source::seek(Timestamp time)
-{
+void Source::seek(Timestamp time) {
     if (rendererDataPtr.get() && isPlaying() && isActive()) {
         rendererDataPtr->seek(time);
     } else {

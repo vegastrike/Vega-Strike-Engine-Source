@@ -37,8 +37,7 @@ public:
     Vector vec;
     float speed;
 
-    BriefingOrder(const Vector &v, const float s) : vec(v)
-    {
+    BriefingOrder(const Vector &v, const float s) : vec(v) {
         speed = s;
     }
 };
@@ -54,17 +53,14 @@ public:
         ~Ship();
         void Destroy();
 
-        bool LoadFailed()
-        {
+        bool LoadFailed() {
             return meshdata.empty();
         }
 
-        Vector Position()
-        {
+        Vector Position() {
             return pos;
         }                           //return Vector (mat[12],mat[13],mat[14]);}
-        void SetPosition(const Vector &pos)
-        {
+        void SetPosition(const Vector &pos) {
             this->pos = pos;
         }                                                 //mat[12]=pos.i;mat[13]=pos.j;mat[14]=pos.k;}
         float cloak; //btw 0 and 1

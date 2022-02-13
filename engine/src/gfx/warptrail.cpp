@@ -48,8 +48,7 @@ struct WarpTrail {
     UnitContainer cur;
     float tim;
 
-    WarpTrail(Unit *un, QVector beg, float tim) : cur(un)
-    {
+    WarpTrail(Unit *un, QVector beg, float tim) : cur(un) {
         start = beg;
         this->tim = tim;
     }
@@ -79,8 +78,7 @@ struct WarpTrail {
     }
 #else
 
-    bool Draw(warptrails *w)
-    {
+    bool Draw(warptrails *w) {
         tim -= GetElapsedTime();
         Unit *un = cur.GetUnit();
         if (!un) {
@@ -116,8 +114,7 @@ struct WarpTrail {
 #endif
 };
 
-void warptrails::Draw()
-{
+void warptrails::Draw() {
     for (unsigned int i = 0; i < warps.size(); ++i) {
         if (!warps[i]->Draw(this)) {
             delete warps[i];
@@ -127,18 +124,15 @@ void warptrails::Draw()
     }
 }
 
-void AddWarp(Unit *un, QVector beg, float tim)
-{
+void AddWarp(Unit *un, QVector beg, float tim) {
     wt.warps.push_back(new WarpTrail(un, beg, tim));
 }
 
-void WarpTrailDraw()
-{
+void WarpTrailDraw() {
     wt.Draw();
 }
 
-Mesh *GetWarpMesh(int faction, warptrails *w)
-{
+Mesh *GetWarpMesh(int faction, warptrails *w) {
     using namespace VSFileSystem;
     while (faction >= static_cast<int>(w->factions.size())) {
         w->factions.push_back(NULL);

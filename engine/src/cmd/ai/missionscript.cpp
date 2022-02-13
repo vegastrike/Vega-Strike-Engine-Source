@@ -42,8 +42,7 @@
 #include "missionscript.h"
 #include "cmd/script/mission.h"
 
-AImissionScript::AImissionScript(string modname)
-{
+AImissionScript::AImissionScript(string modname) {
     actionstring = "";
 
     modulename = modname;
@@ -53,8 +52,7 @@ AImissionScript::AImissionScript(string modname)
     first_run = true;
 }
 
-AImissionScript::~AImissionScript()
-{
+AImissionScript::~AImissionScript() {
     VS_LOG(info, "destructor\n");
     VS_LOG(info, parent->getFullAIDescription().c_str());
 
@@ -66,8 +64,7 @@ AImissionScript::~AImissionScript()
 #endif
 }
 
-void AImissionScript::Execute()
-{
+void AImissionScript::Execute() {
     desired_ang_velocity = Vector(0, 0, 0);
     desired_velocity = Vector(0, 0, 0);
 
@@ -75,9 +72,9 @@ void AImissionScript::Execute()
     mission->setCurrentAIOrder(this);
     if (first_run) {
         for (unsigned int i = 0;
-             (i < active_missions.size())
-                     && (!(mission->runScript(modulename, "initai", classid)));
-             i++) {
+                (i < active_missions.size())
+                        && (!(mission->runScript(modulename, "initai", classid)));
+                i++) {
         }
         first_run = false;
     }
@@ -104,8 +101,7 @@ void AImissionScript::Execute()
 }
 
 AIFlyToWaypoint::AIFlyToWaypoint(const QVector &wp, float velo, bool afburn,
-                                 float rng) : AImissionScript("ai_flyto_waypoint")
-{
+        float rng) : AImissionScript("ai_flyto_waypoint") {
     waypoint = wp;
     vel = velo;
     range = rng;
@@ -125,8 +121,7 @@ AIFlyToWaypoint::AIFlyToWaypoint(const QVector &wp, float velo, bool afburn,
 }
 
 AIFlyToWaypointDefend::AIFlyToWaypointDefend(const QVector &wp, float velo, bool afburn, float rng,
-                                             float defend_range) : AImissionScript("ai_flyto_waypoint_defend")
-{
+        float defend_range) : AImissionScript("ai_flyto_waypoint_defend") {
     waypoint = wp;
     vel = velo;
     range = rng;
@@ -148,13 +143,11 @@ AIFlyToWaypointDefend::AIFlyToWaypointDefend(const QVector &wp, float velo, bool
     vi_aburn->bool_val = aburn;
 }
 
-AISuperiority::AISuperiority() : AImissionScript("ai_superiority")
-{
+AISuperiority::AISuperiority() : AImissionScript("ai_superiority") {
 }
 
 AIFlyToJumppoint::AIFlyToJumppoint(Unit *jumppoint_unit, float fly_speed, bool aft) : AImissionScript(
-        "ai_flyto_jumppoint")
-{
+        "ai_flyto_jumppoint") {
     varInst *vi_speed = mission->lookupClassVariable(modulename, "fly_speed", classid);
     vi_speed->float_val = fly_speed;
 
@@ -167,8 +160,7 @@ AIFlyToJumppoint::AIFlyToJumppoint(Unit *jumppoint_unit, float fly_speed, bool a
 }
 
 AIPatrol::AIPatrol(int mode, const QVector &area, float range, Unit *around_unit,
-                   float patrol_speed) : AImissionScript("ai_patrol")
-{
+        float patrol_speed) : AImissionScript("ai_patrol") {
     varInst *vi_wp = mission->lookupClassVariable(modulename, "area", classid);
     mission->call_vector_into_olist(vi_wp, area);
 
@@ -187,8 +179,7 @@ AIPatrol::AIPatrol(int mode, const QVector &area, float range, Unit *around_unit
 }
 
 AIPatrolDefend::AIPatrolDefend(int mode, const QVector &area, float range, Unit *around_unit,
-                               float patrol_speed) : AImissionScript("ai_patrol_defend")
-{
+        float patrol_speed) : AImissionScript("ai_patrol_defend") {
     varInst *vi_wp = mission->lookupClassVariable(modulename, "area", classid);
     mission->call_vector_into_olist(vi_wp, area);
 
@@ -206,8 +197,7 @@ AIPatrolDefend::AIPatrolDefend(int mode, const QVector &area, float range, Unit 
     vi_unit->object = around_unit;
 }
 
-AIOrderList::AIOrderList(olist_t *orderlist) : AImissionScript("ai_orderlist")
-{
+AIOrderList::AIOrderList(olist_t *orderlist) : AImissionScript("ai_orderlist") {
     varInst *vi_unit = mission->lookupClassVariable(modulename, "my_order_list", classid);
     vi_unit->objectname = "olist";
     vi_unit->object = orderlist;

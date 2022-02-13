@@ -27,16 +27,14 @@
 
 #include "stream_texture.h"
 
-StreamTexture *StreamTexture::Clone()
-{
+StreamTexture *StreamTexture::Clone() {
     unsigned char *x = Map();
     StreamTexture *ret = new StreamTexture(sizeX, sizeY, filtertype, x);
     UnMap(false);
     return ret;
 }
 
-StreamTexture::StreamTexture(int width, int height, enum FILTER filtertype, unsigned char *origdata)
-{
+StreamTexture::StreamTexture(int width, int height, enum FILTER filtertype, unsigned char *origdata) {
     /*
      *  img_type=Unrecognized;
      *  img_depth=8;
@@ -62,21 +60,18 @@ StreamTexture::StreamTexture(int width, int height, enum FILTER filtertype, unsi
     }
 }
 
-unsigned char *StreamTexture::Map()
-{
+unsigned char *StreamTexture::Map() {
     return mutabledata;
 }
 
-void StreamTexture::UnMap(bool changed)
-{
+void StreamTexture::UnMap(bool changed) {
     if (changed) {
         MakeActive(0);
         GFXTransferTexture(mutabledata, name, sizeX, sizeY, RGBA32);
     }
 }
 
-StreamTexture::~StreamTexture()
-{
+StreamTexture::~StreamTexture() {
     GFXDeleteTexture(name);
     name = -1;
     if (this->mutabledata != nullptr) {
@@ -85,8 +80,7 @@ StreamTexture::~StreamTexture()
     }
 }
 
-void StreamTexture::MakeActive(int stage)
-{
+void StreamTexture::MakeActive(int stage) {
     GFXSelectTexture(name, stage);
 }
 

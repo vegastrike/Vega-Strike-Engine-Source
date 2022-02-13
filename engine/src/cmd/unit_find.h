@@ -31,12 +31,11 @@
 
 template<class Locator>
 void findObjectsFromPosition(CollideMap *cm,
-                             CollideMap::iterator location,
-                             Locator *check,
-                             QVector thispos,
-                             float thisrad,
-                             bool acquire_on_location)
-{
+        CollideMap::iterator location,
+        Locator *check,
+        QVector thispos,
+        float thisrad,
+        bool acquire_on_location) {
     CollideMap::iterator cmend = cm->end();
     CollideMap::iterator cmbegin = cm->begin();
     if (cmend != cmbegin && !is_null(location)) {
@@ -111,8 +110,7 @@ void findObjectsFromPosition(CollideMap *cm,
 }
 
 template<class Locator>
-void findObjects(CollideMap *cm, CollideMap::iterator location, Locator *check)
-{
+void findObjects(CollideMap *cm, CollideMap::iterator location, Locator *check) {
     if (is_null(location)) {
         return;
     }
@@ -128,46 +126,38 @@ class NearestUnitLocator {
 public:
     Collidable::CollideRef retval;
 
-    bool BoltsOrUnits()
-    {
+    bool BoltsOrUnits() {
         return false;
     }
 
-    bool UnitsOnly()
-    {
+    bool UnitsOnly() {
         return true;
     }
 
-    bool NeedDistance()
-    {
+    bool NeedDistance() {
         return true;
     }
 
-    NearestUnitLocator()
-    {
+    NearestUnitLocator() {
         retval.unit = NULL;
     }
 
-    void init(CollideMap *cm, CollideMap::iterator parent)
-    {
+    void init(CollideMap *cm, CollideMap::iterator parent) {
         this->location = parent;
         startkey = (*location)->getKey();
         rad = FLT_MAX;
         retval.unit = NULL;
     }
 
-    bool cullless(CollideMap::iterator tless)
-    {
+    bool cullless(CollideMap::iterator tless) {
         return rad != FLT_MAX && (startkey - rad) > (*tless)->getKey();
     }
 
-    bool cullmore(CollideMap::iterator tmore)
-    {
+    bool cullmore(CollideMap::iterator tmore) {
         return rad != FLT_MAX && (startkey + rad) < (*tmore)->getKey();
     }
 
-    bool acquire(float distance, CollideMap::iterator i)
-    {
+    bool acquire(float distance, CollideMap::iterator i) {
         if (distance < rad) {
             rad = distance;
             retval = (*i)->ref;
@@ -177,8 +167,7 @@ public:
 };
 class NearestBoltLocator : public NearestUnitLocator {
 public:
-    bool UnitsOnly()
-    {
+    bool UnitsOnly() {
         return false;
     }
 };
@@ -186,18 +175,15 @@ class NearestObjectLocator : public NearestUnitLocator {
 public:
     bool isUnit;
 
-    bool UnitsOnly()
-    {
+    bool UnitsOnly() {
         return false;
     }
 
-    bool BoltsOrUnits()
-    {
+    bool BoltsOrUnits() {
         return true;
     }
 
-    bool acquire(float distance, CollideMap::iterator i)
-    {
+    bool acquire(float distance, CollideMap::iterator i) {
         Collidable::CollideRef lastret = retval;
         bool retval = NearestUnitLocator::acquire(distance, i);
         if (memcmp((void *) &retval, (void *) &lastret, sizeof(Collidable::CollideRef))) {
@@ -208,18 +194,15 @@ public:
 };
 class NearestNavLocator : public NearestUnitLocator {
 public:
-    bool BoltsOrUnits()
-    {
+    bool BoltsOrUnits() {
         return false;
     }
 
-    bool UnitsOnly()
-    {
+    bool UnitsOnly() {
         return true;
     }
 
-    bool acquire(float distance, CollideMap::iterator i)
-    {
+    bool acquire(float distance, CollideMap::iterator i) {
         if (UnitUtil::isSignificant((*i)->ref.unit)) {
             return NearestUnitLocator::acquire(distance, i);
         }
@@ -228,18 +211,15 @@ public:
 };
 class NearestNavOrCapshipLocator : public NearestUnitLocator {
 public:
-    bool BoltsOrUnits()
-    {
+    bool BoltsOrUnits() {
         return false;
     }
 
-    bool UnitsOnly()
-    {
+    bool UnitsOnly() {
         return true;
     }
 
-    bool acquire(float distance, CollideMap::iterator i)
-    {
+    bool acquire(float distance, CollideMap::iterator i) {
         if (UnitUtil::isSignificant((*i)->ref.unit) || UnitUtil::isCapitalShip((*i)->ref.unit)) {
             return NearestUnitLocator::acquire(distance, i);
         }
@@ -255,43 +235,35 @@ public:
     float maxUnitRadius;
 
     UnitWithinRangeLocator(float radius, float maxUnitRadius) :
-            startkey(0), radius(radius), maxUnitRadius(maxUnitRadius)
-    {
+            startkey(0), radius(radius), maxUnitRadius(maxUnitRadius) {
     }
 
-    bool UnitsOnly()
-    {
+    bool UnitsOnly() {
         return true;
     }
 
-    bool BoltsOrUnits()
-    {
+    bool BoltsOrUnits() {
         return false;
     }
 
-    bool NeedDistance()
-    {
+    bool NeedDistance() {
         return true;
     }
 
-    void init(CollideMap *cm, CollideMap::iterator parent)
-    {
+    void init(CollideMap *cm, CollideMap::iterator parent) {
         startkey = (*parent)->getKey();
     }
 
-    bool cullless(CollideMap::iterator tless)
-    {
+    bool cullless(CollideMap::iterator tless) {
         double tmp = startkey - radius - maxUnitRadius;
         return tmp > (*tless)->getKey();
     }
 
-    bool cullmore(CollideMap::iterator tmore)
-    {
+    bool cullmore(CollideMap::iterator tmore) {
         return startkey + radius + maxUnitRadius < (*tmore)->getKey();
     }
 
-    bool acquire(float dist, CollideMap::iterator i)
-    {
+    bool acquire(float dist, CollideMap::iterator i) {
         if (dist < radius) {
             //Inside radius...
             return action.acquire((*i)->ref.unit, dist);
@@ -303,13 +275,11 @@ template<class T>
 class UnitWithinRangeOfPosition : public UnitWithinRangeLocator<T> {
 public:
     UnitWithinRangeOfPosition(float radius, float maxUnitRadius, const Collidable &key_iterator) :
-            UnitWithinRangeLocator<T>(radius, maxUnitRadius)
-    {
+            UnitWithinRangeLocator<T>(radius, maxUnitRadius) {
         this->startkey = key_iterator.getKey();
     }
 
-    void init(CollideMap *cm, CollideMap::iterator parent)
-    {
+    void init(CollideMap *cm, CollideMap::iterator parent) {
     }
 };
 class UnitPtrLocator {
@@ -317,44 +287,36 @@ class UnitPtrLocator {
 public:
     bool retval;
 
-    bool BoltsOrUnits()
-    {
+    bool BoltsOrUnits() {
         return false;
     }
 
-    bool UnitsOnly()
-    {
+    bool UnitsOnly() {
         return true;
     }
 
-    bool NeedDistance()
-    {
+    bool NeedDistance() {
         return false;
     }
 
-    UnitPtrLocator(const void *unit)
-    {
+    UnitPtrLocator(const void *unit) {
         retval = false;
         this->unit = unit;
     }
 
-    bool cullless(CollideMap::iterator tless)
-    {
+    bool cullless(CollideMap::iterator tless) {
         return retval;
     }
 
-    bool cullmore(CollideMap::iterator tmore)
-    {
+    bool cullmore(CollideMap::iterator tmore) {
         return retval;
     }
 
-    bool acquire(float distance, CollideMap::iterator i)
-    {
+    bool acquire(float distance, CollideMap::iterator i) {
         return retval = (((const void *) ((*i)->ref.unit)) == unit);
     }
 
-    void init(CollideMap *cm, CollideMap::iterator parent)
-    {
+    void init(CollideMap *cm, CollideMap::iterator parent) {
     }
 };
 

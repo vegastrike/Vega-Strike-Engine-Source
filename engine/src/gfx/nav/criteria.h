@@ -51,21 +51,17 @@ public:
 
     virtual CriteriaNode *clone() const = 0;
 
-    CriteriaNode(CriteriaParent *parent = NULL) : m_parent(parent)
-    {
+    CriteriaNode(CriteriaParent *parent = NULL) : m_parent(parent) {
     }
 
-    virtual ~CriteriaNode()
-    {
+    virtual ~CriteriaNode() {
     }
 
-    void setParent(CriteriaParent *parent)
-    {
+    void setParent(CriteriaParent *parent) {
         m_parent = parent;
     }
 
-    CriteriaParent *getParent()
-    {
+    CriteriaParent *getParent() {
         return m_parent;
     }
 
@@ -81,12 +77,10 @@ public:
 
     virtual CriteriaNode *clone() const = 0;
 
-    CriteriaParent(CriteriaParent *parent = NULL) : CriteriaNode(parent)
-    {
+    CriteriaParent(CriteriaParent *parent = NULL) : CriteriaNode(parent) {
     }
 
-    virtual ~CriteriaParent()
-    {
+    virtual ~CriteriaParent() {
     }
 
     virtual void replaceChild(CriteriaNode *child, CriteriaNode *replacement) = 0;
@@ -104,8 +98,7 @@ public:
     virtual CriteriaNode *unhook(CriteriaNode *child);
     virtual std::vector<CriteriaNode *> getChildren() const;
 
-    CriteriaNode *getChild() const
-    {
+    CriteriaNode *getChild() const {
         return m_child;
     }
 
@@ -173,12 +166,10 @@ public:
     virtual CriteriaNode *clone() const;
 
     CriteriaAnd(CriteriaNode *child, CriteriaNode *newNode) :
-            CriteriaBinaryOperator(child, newNode)
-    {
+            CriteriaBinaryOperator(child, newNode) {
     }
 
-    virtual ~CriteriaAnd()
-    {
+    virtual ~CriteriaAnd() {
     }
 };
 
@@ -193,12 +184,10 @@ public:
     virtual CriteriaNode *clone() const;
 
     CriteriaOr(CriteriaNode *child, CriteriaNode *newNode) :
-            CriteriaBinaryOperator(child, newNode)
-    {
+            CriteriaBinaryOperator(child, newNode) {
     }
 
-    virtual ~CriteriaOr()
-    {
+    virtual ~CriteriaOr() {
     }
 };
 
@@ -212,12 +201,10 @@ public:
     virtual CriteriaNode *clone() const = 0;
 
     CriteriaLeaf(CriteriaParent *parent, std::string value) :
-            CriteriaNode(parent), m_value(value)
-    {
+            CriteriaNode(parent), m_value(value) {
     }
 
-    virtual ~CriteriaLeaf()
-    {
+    virtual ~CriteriaLeaf() {
     }
 
 protected:
@@ -235,12 +222,10 @@ public:
     virtual CriteriaNode *clone() const;
 
     CriteriaContains(std::string value, CriteriaParent *parent = NULL) :
-            CriteriaLeaf(parent, value)
-    {
+            CriteriaLeaf(parent, value) {
     }
 
-    virtual ~CriteriaContains()
-    {
+    virtual ~CriteriaContains() {
     }
 
 private:
@@ -260,12 +245,10 @@ public:
     virtual CriteriaNode *clone() const;
 
     CriteriaOwnedBy(std::string value, CriteriaParent *parent = NULL) :
-            CriteriaLeaf(parent, value)
-    {
+            CriteriaLeaf(parent, value) {
     }
 
-    virtual ~CriteriaOwnedBy()
-    {
+    virtual ~CriteriaOwnedBy() {
     }
 };
 
@@ -280,12 +263,10 @@ public:
     virtual CriteriaNode *clone() const;
 
     CriteriaSector(std::string value, CriteriaParent *parent = NULL) :
-            CriteriaLeaf(parent, value)
-    {
+            CriteriaLeaf(parent, value) {
     }
 
-    virtual ~CriteriaSector()
-    {
+    virtual ~CriteriaSector() {
     }
 };
 

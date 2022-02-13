@@ -70,8 +70,7 @@ Music *muzak = NULL;
 int muzak_count = 0;
 int muzak_cross_index = 0;
 
-static void print_check_err(int errorcode, const char *str)
-{
+static void print_check_err(int errorcode, const char *str) {
 #ifndef _WIN32
     if (errorcode) {
         static char const unknown_error[16] = "Unknown error"; //added by chuck_starchaser to get rid of warning
@@ -87,8 +86,7 @@ static void print_check_err(int errorcode, const char *str)
 //where func is the evaluation of func, and #func is the string form.
 #define checkerr(func) do{print_check_err(((func)),#func);}while(0)
 
-Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initialized(false)
-{
+Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initialized(false) {
     loopsleft = 0;
     socketw = socketr = -1;
     music_load_info = NULL;
@@ -140,8 +138,7 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
     _SetVolume(XMLSupport::parse_float(vs_config->getVariable("audio", "music_volume", ".5")), false);
 }
 
-void Music::ChangeVolume(float inc, int layer)
-{
+void Music::ChangeVolume(float inc, int layer) {
     if (!game_options.Music) {
         return;
     }
@@ -156,8 +153,7 @@ void Music::ChangeVolume(float inc, int layer)
     }
 }
 
-void Music::_SetVolume(float vol, bool hardware, float latency_override)
-{
+void Music::_SetVolume(float vol, bool hardware, float latency_override) {
     if (!game_options.Music) {
         return;
     }
@@ -172,8 +168,7 @@ void Music::_SetVolume(float vol, bool hardware, float latency_override)
 
 }
 
-bool Music::LoadMusic(const char *file)
-{
+bool Music::LoadMusic(const char *file) {
     using namespace VSFileSystem;
     if (!game_options.Music) {
         return true;
@@ -225,8 +220,7 @@ bool Music::LoadMusic(const char *file)
     return true;
 }
 
-static int randInt(int max)
-{
+static int randInt(int max) {
     int ans = int((((double) rand()) / ((double) RAND_MAX)) * max);
     if (ans == max) {
         return max - 1;
@@ -234,8 +228,7 @@ static int randInt(int max)
     return ans;
 }
 
-int Music::SelectTracks(int layer)
-{
+int Music::SelectTracks(int layer) {
     if (!game_options.Music) {
         return 0;
     }
@@ -290,8 +283,7 @@ readerThread(
 #else
         void *
 #endif
-        input)
-{
+        input) {
     Music *me = (Music *) input;
     me->threadalive = 1;
     while (!me->killthread) {
@@ -349,8 +341,7 @@ readerThread(
 }
 }
 
-void Music::_LoadLastSongAsync()
-{
+void Music::_LoadLastSongAsync() {
 
 #ifdef HAVE_AL
     if (!game_options.Music || !music_load_info || music_loading) {
@@ -389,8 +380,7 @@ void Music::_LoadLastSongAsync()
 
 }
 
-void Music::Listen()
-{
+void Music::Listen() {
     if (game_options.Music) {
         if (!music_load_list.empty()) {
             if (music_loaded) {
@@ -456,8 +446,7 @@ void Music::Listen()
     }
 }
 
-void Music::GotoSong(std::string mus, int layer)
-{
+void Music::GotoSong(std::string mus, int layer) {
     if (!game_options.Music) {
         return;
     }
@@ -481,8 +470,7 @@ void Music::GotoSong(std::string mus, int layer)
     }
 }
 
-std::vector<std::string> rsplit(std::string tmpstr, std::string splitter)
-{
+std::vector<std::string> rsplit(std::string tmpstr, std::string splitter) {
     std::string::size_type where;
     std::vector<std::string> ret;
     while ((where = tmpstr.rfind(splitter)) != std::string::npos) {
@@ -495,8 +483,7 @@ std::vector<std::string> rsplit(std::string tmpstr, std::string splitter)
     return ret;
 }
 
-void Music::_GotoSong(std::string mus)
-{
+void Music::_GotoSong(std::string mus) {
     if (game_options.Music) {
         if (mus == cur_song_file || mus.length() == 0) {
             return;
@@ -527,16 +514,15 @@ void Music::_GotoSong(std::string mus)
     }
 }
 
-void Music::GotoSong(int whichlist, int whichsong, bool skip, int layer)
-{
+void Music::GotoSong(int whichlist, int whichsong, bool skip, int layer) {
     if (game_options.Music) {
         if (whichsong != NOLIST && whichlist != NOLIST && whichlist < (int) playlist.size() && whichsong
                 < (int) playlist[whichlist].size()) {
             if (muzak[(layer >= 0) ? layer : 0].lastlist != whichlist) {
                 static bool clear =
                         XMLSupport::parse_bool(vs_config->getVariable("audio",
-                                                                      "shuffle_songs.clear_history_on_list_change",
-                                                                      "true"));
+                                "shuffle_songs.clear_history_on_list_change",
+                                "true"));
                 if (clear) {
                     std::list<std::string> &recent = muzak[(layer >= 0) ? layer : 0].recent_songs;
                     recent.clear();
@@ -554,8 +540,7 @@ void Music::GotoSong(int whichlist, int whichsong, bool skip, int layer)
     }
 }
 
-void Music::SkipRandSong(int whichlist, int layer)
-{
+void Music::SkipRandSong(int whichlist, int layer) {
     if (muzak) {
         if (layer < 0) {
             if (muzak_count >= 2) {
@@ -569,8 +554,7 @@ void Music::SkipRandSong(int whichlist, int layer)
     }
 }
 
-void Music::_SkipRandSong(int whichlist, int layer)
-{
+void Music::_SkipRandSong(int whichlist, int layer) {
     if (!game_options.Music) {
         return;
     }
@@ -587,8 +571,7 @@ void Music::_SkipRandSong(int whichlist, int layer)
     _SkipRandList(layer);
 }
 
-void Music::SkipRandList(int layer)
-{
+void Music::SkipRandList(int layer) {
     if (!game_options.Music) {
         return;
     }
@@ -605,8 +588,7 @@ void Music::SkipRandList(int layer)
     }
 }
 
-void Music::_SkipRandList(int layer)
-{
+void Music::_SkipRandList(int layer) {
     if (!game_options.Music) {
         return;
     }
@@ -614,15 +596,14 @@ void Music::_SkipRandList(int layer)
         static bool random = XMLSupport::parse_bool(vs_config->getVariable("audio", "shuffle_songs", "true"));
         if (!playlist[i].empty()) {
             GotoSong(i,
-                     random ? randInt(playlist[i].size()) : playlist[i].counter++ % playlist[i].size(),
-                     false,
-                     layer);
+                    random ? randInt(playlist[i].size()) : playlist[i].counter++ % playlist[i].size(),
+                    false,
+                    layer);
         }
     }
 }
 
-int Music::Addlist(std::string listfile)
-{
+int Music::Addlist(std::string listfile) {
     if (!game_options.Music) {
         return -1;
     }
@@ -638,8 +619,7 @@ int Music::Addlist(std::string listfile)
     return res;
 }
 
-int Music::_Addlist(std::string listfile)
-{
+int Music::_Addlist(std::string listfile) {
     if (!game_options.Music) {
         return -1;
     }
@@ -651,8 +631,7 @@ int Music::_Addlist(std::string listfile)
     }
 }
 
-void Music::Skip(int layer)
-{
+void Music::Skip(int layer) {
     if (!game_options.Music) {
         return;
     }
@@ -669,15 +648,13 @@ void Music::Skip(int layer)
     }
 }
 
-void Music::_Skip(int layer)
-{
+void Music::_Skip(int layer) {
     if (game_options.Music) {
         SelectTracks(layer);
     }
 }
 
-Music::~Music()
-{
+Music::~Music() {
     if (threadalive && thread_initialized) {
         killthread = 1;
 #ifdef _WIN32
@@ -696,33 +673,28 @@ Music::~Music()
     //Kill the thread.
 }
 
-void incmusicvol(const KBData &, KBSTATE a)
-{
+void incmusicvol(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         Music::ChangeVolume(.0625);
     }
 }
 
-void decmusicvol(const KBData &, KBSTATE a)
-{
+void decmusicvol(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         Music::ChangeVolume(-.0625);
     }
 }
 
-void Music::SetParent(Unit *parent)
-{
+void Music::SetParent(Unit *parent) {
     p = parent;
 }
 
-void Music::InitMuzak()
-{
+void Music::InitMuzak() {
     muzak_count = XMLSupport::parse_int(vs_config->getVariable("audio", "music_layers", "1"));
     muzak = new Music[muzak_count];
 }
 
-void Music::CleanupMuzak()
-{
+void Music::CleanupMuzak() {
     if (muzak) {
         //Multithreading issues... don't care to waste time here waiting to get the lock back.
         //Let the OS clean up this mess!
@@ -731,8 +703,7 @@ void Music::CleanupMuzak()
     }
 }
 
-void Music::MuzakCycle()
-{
+void Music::MuzakCycle() {
     if (muzak) {
         if (BaseInterface::CurrentBase != NULL) {
             if (!BaseInterface::CurrentBase->isDJEnabled()) {
@@ -746,8 +717,7 @@ void Music::MuzakCycle()
     }
 }
 
-void Music::Stop(int layer)
-{
+void Music::Stop(int layer) {
     if (muzak) {
         if (layer < 0) {
             if (muzak_count >= 2) {
@@ -761,8 +731,7 @@ void Music::Stop(int layer)
     }
 }
 
-void Music::_StopNow()
-{
+void Music::_StopNow() {
     if (game_options.Music) {
         for (std::vector<int>::const_iterator iter = sounds_to_stop.begin(); iter != sounds_to_stop.end(); iter++) {
             int sound = *iter;
@@ -773,8 +742,7 @@ void Music::_StopNow()
     }
 }
 
-void Music::_StopLater()
-{
+void Music::_StopLater() {
     if (game_options.Music) {
         for (std::list<int>::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++) {
             int sound = *iter;
@@ -784,8 +752,7 @@ void Music::_StopLater()
     }
 }
 
-void Music::_Stop()
-{
+void Music::_Stop() {
     if (game_options.Music) {
         for (std::list<int>::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++) {
             int sound = *iter;
@@ -796,8 +763,7 @@ void Music::_Stop()
     }
 }
 
-void Music::SetVolume(float vol, int layer, bool hardware, float latency_override)
-{
+void Music::SetVolume(float vol, int layer, bool hardware, float latency_override) {
     if (muzak) {
         if (layer < 0) {
             for (int i = 0; i < muzak_count; i++) {
@@ -809,8 +775,7 @@ void Music::SetVolume(float vol, int layer, bool hardware, float latency_overrid
     }
 }
 
-void Music::Mute(bool mute, int layer)
-{
+void Music::Mute(bool mute, int layer) {
     static vector<float> saved_vol;
     saved_vol.resize(muzak_count, -1);
     if (!game_options.Music) {
@@ -845,8 +810,7 @@ void Music::Mute(bool mute, int layer)
     }
 }
 
-void Music::SetLoops(int numloops, int layer)
-{
+void Music::SetLoops(int numloops, int layer) {
     if (!game_options.Music) {
         return;
     }

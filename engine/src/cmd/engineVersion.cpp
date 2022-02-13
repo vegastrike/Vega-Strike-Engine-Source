@@ -35,8 +35,7 @@ using namespace VegaStrike;
 
 EngineVersionData::
 
-EngineVersionData::EngineVersionData()
-{
+EngineVersionData::EngineVersionData() {
     this->major = static_cast<uint8_t>(VEGASTRIKE_VERSION_MAJOR_UINT);
     this->minor = static_cast<uint8_t>(VEGASTRIKE_VERSION_MINOR_UINT);
     this->patch = static_cast<uint8_t>(VEGASTRIKE_VERSION_PATCH_UINT);
@@ -55,12 +54,10 @@ EngineVersionData::EngineVersionData()
     this->hash = convertedBytes;
 }
 
-EngineVersionData::~EngineVersionData()
-{
+EngineVersionData::~EngineVersionData() {
 }
 
-boost::python::tuple EngineVersionData::GetVersion() const
-{
+boost::python::tuple EngineVersionData::GetVersion() const {
     return VS_BOOST_MAKE_TUPLE_4(
             this->major,
             this->minor,
@@ -69,7 +66,6 @@ boost::python::tuple EngineVersionData::GetVersion() const
     );
 }
 
-uint16_t EngineVersionData::GetAssetAPIVersion() const
-{
+uint16_t EngineVersionData::GetAssetAPIVersion() const {
     return this->assetApiVersion;
 }

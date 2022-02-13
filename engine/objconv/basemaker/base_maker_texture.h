@@ -47,14 +47,12 @@ public:
         unsigned int width;
         unsigned int height;
 
-        FileData() : bpp(8), color_type(COLOR_TYPE_UNKNOWN), data(NULL), palette(NULL), width(0), height(0)
-        {
+        FileData() : bpp(8), color_type(COLOR_TYPE_UNKNOWN), data(NULL), palette(NULL), width(0), height(0) {
         }
     };
     typedef void (*TextureTransform)(FileData *data, unsigned char **row_pointers);
 
-    static void defaultTransform(FileData *data, unsigned char **row_pointers)
-    {
+    static void defaultTransform(FileData *data, unsigned char **row_pointers) {
         //do nothing
     }
 
@@ -65,13 +63,11 @@ public:
 
 private:
 /// Private copy constructor to generate errors.
-    Texture(const Texture &)
-    {
+    Texture(const Texture &) {
     }
 
 /// Private = operator to generate errors.
-    Texture &operator=(const Texture &)
-    {
+    Texture &operator=(const Texture &) {
         return *this;
     }
 
@@ -93,20 +89,17 @@ public:
     void bind();
 
 /// Returns true if the texture is loaded correctly.
-    bool LoadSuccess()
-    {
+    bool LoadSuccess() {
         return ((unsigned int) handle) != ((unsigned int) -1);
     }
 
 /// This is used only for sorting... even though there is no real < for textures.
-    bool operator<(const Texture &oth) const
-    {
+    bool operator<(const Texture &oth) const {
         return handle < oth.handle;
     }
 
 /// Used for comparison between two textures.
-    bool operator==(const Texture &oth) const
-    {
+    bool operator==(const Texture &oth) const {
         return handle == oth.handle;
     }
 };

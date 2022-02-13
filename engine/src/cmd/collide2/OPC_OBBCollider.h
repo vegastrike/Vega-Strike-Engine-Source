@@ -28,8 +28,7 @@
 #define __OPC_OBBCOLLIDER_H__
 
 struct OPCODE_API OBBCache : VolumeCache {
-    OBBCache() : FatCoeff(1.1f)
-    {
+    OBBCache() : FatCoeff(1.1f) {
         FatBox.mCenter.Zero();
         FatBox.mExtents.Zero();
         FatBox.mRot.Identity();
@@ -64,10 +63,10 @@ public:
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     bool Collide(OBBCache &cache,
-                 const OBB &box,
-                 const Model &model,
-                 const Matrix4x4 *worldb = nullptr,
-                 const Matrix4x4 *worldm = nullptr);
+            const OBB &box,
+            const Model &model,
+            const Matrix4x4 *worldb = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 
     // Settings
 
@@ -77,8 +76,7 @@ public:
      *	\param		flag		[in] true for full tests, false for coarse tests
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetFullBoxBoxTest(bool flag)
-    {
+    inline_                void SetFullBoxBoxTest(bool flag) {
         mFullBoxBoxTest = flag;
     }
 
@@ -137,9 +135,9 @@ protected:
     inline_                bool TriBoxOverlap();
     // Init methods
     bool InitQuery(OBBCache &cache,
-                   const OBB &box,
-                   const Matrix4x4 *worldb = nullptr,
-                   const Matrix4x4 *worldm = nullptr);
+            const OBB &box,
+            const Matrix4x4 *worldb = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 };
 
 class OPCODE_API HybridOBBCollider : public OBBCollider {
@@ -149,10 +147,10 @@ public:
     virtual                                ~HybridOBBCollider();
 
     bool Collide(OBBCache &cache,
-                 const OBB &box,
-                 const HybridModel &model,
-                 const Matrix4x4 *worldb = nullptr,
-                 const Matrix4x4 *worldm = nullptr);
+            const OBB &box,
+            const HybridModel &model,
+            const Matrix4x4 *worldb = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 protected:
     Container mTouchedBoxes;
 };

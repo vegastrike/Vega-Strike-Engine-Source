@@ -27,8 +27,7 @@
 struct fvector {
     float x_, y_, z_;
     float w_; //not used; just padding for alignment, for now.
-    fvector() : x(0.0f), y(0.0f), z(0.0f)
-    {
+    fvector() : x(0.0f), y(0.0f), z(0.0f) {
     }
 
     explicit fvector(ccoords const &cc);

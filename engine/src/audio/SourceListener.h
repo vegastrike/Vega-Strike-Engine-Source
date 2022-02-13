@@ -55,31 +55,26 @@ protected:
         int update: 1;
     } events;
 
-    SourceListener()
-    {
+    SourceListener() {
         // Want everything
         events.attach =
-        events.update =
-        events.play = 1;
+                events.update =
+                        events.play = 1;
     }
 
 public:
-    virtual ~SourceListener()
-    {
+    virtual ~SourceListener() {
     }
 
-    bool wantAttachEvents() const
-    {
+    bool wantAttachEvents() const {
         return events.attach != 0;
     }
 
-    bool wantPlayEvents() const
-    {
+    bool wantPlayEvents() const {
         return events.play != 0;
     }
 
-    bool wantUpdateEvents() const
-    {
+    bool wantUpdateEvents() const {
         return events.update != 0;
     }
 
@@ -148,11 +143,10 @@ public:
  */
 class UpdateSourceListener : public SourceListener {
 public:
-    UpdateSourceListener()
-    {
+    UpdateSourceListener() {
         // Just updates
         events.attach =
-        events.play = 0;
+                events.play = 0;
         events.update = 1;
     }
 
@@ -161,8 +155,7 @@ public:
      * @remarks This will never be called since attach events will be
      *      disabled by the constructor.
      */
-    virtual void onPreAttach(Source &source, bool detach)
-    {
+    virtual void onPreAttach(Source &source, bool detach) {
     };
 
     /**
@@ -170,8 +163,7 @@ public:
      * @remarks This will never be called since attach events will be
      *      disabled by the constructor.
      */
-    virtual void onPostAttach(Source &source, bool detach)
-    {
+    virtual void onPostAttach(Source &source, bool detach) {
     };
 
     /**
@@ -179,8 +171,7 @@ public:
      * @remarks This will never be called since play events will be
      *      disabled by the constructor.
      */
-    virtual void onPrePlay(Source &source, bool stop)
-    {
+    virtual void onPrePlay(Source &source, bool stop) {
     };
 
     /**
@@ -188,8 +179,7 @@ public:
      * @remarks This will never be called since play events will be
      *      disabled by the constructor.
      */
-    virtual void onPostPlay(Source &source, bool stop)
-    {
+    virtual void onPostPlay(Source &source, bool stop) {
     };
 
     /**
@@ -197,8 +187,7 @@ public:
      * @remarks This will never be called since play events will be
      *      disabled by the constructor.
      */
-    virtual void onEndOfStream(Source &source)
-    {
+    virtual void onEndOfStream(Source &source) {
     };
 };
 

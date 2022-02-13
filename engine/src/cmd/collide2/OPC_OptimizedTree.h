@@ -69,18 +69,15 @@
 class OPCODE_API AABBCollisionNode {
 IMPLEMENT_IMPLICIT_NODE(AABBCollisionNode, CollisionAABB)
 
-    inline_            float GetVolume() const
-    {
+    inline_            float GetVolume() const {
         return mAABB.mExtents.x * mAABB.mExtents.y * mAABB.mExtents.z;
     }
 
-    inline_            float GetSize() const
-    {
+    inline_            float GetSize() const {
         return mAABB.mExtents.SquareMagnitude();
     }
 
-    inline_            uint32_t GetRadius() const
-    {
+    inline_            uint32_t GetRadius() const {
         uint32_t *Bits = (uint32_t *) &mAABB.mExtents.x;
         uint32_t Max = Bits[0];
         if (Bits[1] > Max) {
@@ -104,8 +101,7 @@ IMPLEMENT_IMPLICIT_NODE(AABBCollisionNode, CollisionAABB)
 class OPCODE_API AABBQuantizedNode {
 IMPLEMENT_IMPLICIT_NODE(AABBQuantizedNode, QuantizedAABB)
 
-    inline_            size_t GetSize() const
-    {
+    inline_            size_t GetSize() const {
         const uint16_t *Bits = mAABB.mExtents;
         uint16_t Max = Bits[0];
         if (Bits[1] > Max) {
@@ -153,12 +149,10 @@ class OPCODE_API AABBOptimizedTree {
 public:
     // Constructor / Destructor
     AABBOptimizedTree() :
-            mNbNodes(0)
-    {
+            mNbNodes(0) {
     }
 
-    virtual                                ~AABBOptimizedTree()
-    {
+    virtual                                ~AABBOptimizedTree() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,8 +186,7 @@ public:
     // Data access
     virtual size_t GetUsedBytes() const = 0;
 
-    inline_            uint32_t GetNbNodes() const
-    {
+    inline_            uint32_t GetNbNodes() const {
         return mNbNodes;
     }
 

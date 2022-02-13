@@ -75,8 +75,7 @@ protected:
     Sound(const std::string &name, bool streaming);
 
     /** Protected Write access to the sound's format, for implementations. */
-    Format &getFormat()
-    {
+    Format &getFormat() {
         return format;
     };
 
@@ -84,32 +83,27 @@ public:
     virtual ~Sound();
 
     /** Return the path of the associated file. */
-    const std::string &getName() const
-    {
+    const std::string &getName() const {
         return name;
     };
 
     /** Return the format of the sound resource. */
-    const Format &getFormat() const
-    {
+    const Format &getFormat() const {
         return format;
     };
 
     /** Return whether the resource has been loaded or not */
-    bool isLoaded() const
-    {
+    bool isLoaded() const {
         return flags.loaded;
     }
 
     /** Return whether the resource is being loaded in the background */
-    bool isLoading() const
-    {
+    bool isLoading() const {
         return flags.loading;
     }
 
     /** Return whether the resource is being loaded in the background */
-    bool isStreaming() const
-    {
+    bool isStreaming() const {
         return flags.streaming;
     }
 

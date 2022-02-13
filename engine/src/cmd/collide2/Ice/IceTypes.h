@@ -143,28 +143,24 @@ typedef void **VTABLE;                            //!< A V-Table.
 #define        MAXMAX(a, b, c)   ((a) > (b) ? MAX (a,c) : MAX (b,c))    //!<	Returns the max value between a, b and c
 
 template<class T>
-inline_ const T &TMin(const T &a, const T &b)
-{
+inline_ const T &TMin(const T &a, const T &b) {
     return b < a ? b : a;
 }
 
 template<class T>
-inline_ const T &TMax(const T &a, const T &b)
-{
+inline_ const T &TMax(const T &a, const T &b) {
     return a < b ? b : a;
 }
 
 template<class T>
-inline_ void TSetMin(T &a, const T &b)
-{
+inline_ void TSetMin(T &a, const T &b) {
     if (a > b) {
         a = b;
     }
 }
 
 template<class T>
-inline_ void TSetMax(T &a, const T &b)
-{
+inline_ void TSetMax(T &a, const T &b) {
     if (a < b) {
         a = b;
     }

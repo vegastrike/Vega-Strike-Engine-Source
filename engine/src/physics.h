@@ -65,23 +65,19 @@ public:
     virtual void ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location, float time);
     void ApplyImpulses(float Time);
 
-    void SetVelocity(Vector v)
-    {
+    void SetVelocity(Vector v) {
         Velocity = v;
     }
 
-    void SetAngularVelocity(Vector w)
-    {
+    void SetAngularVelocity(Vector w) {
         AngularVelocity = w;
     }
 
-    const Vector &GetVelocity() const
-    {
+    const Vector &GetVelocity() const {
         return Velocity;
     }
 
-    const Vector &GetAngularVelocity() const
-    {
+    const Vector &GetAngularVelocity() const {
         return AngularVelocity;
     }
 

@@ -54,8 +54,7 @@
 
 /* *********************************************************** */
 
-void Mission::doImport(missionNode *node, int mode)
-{
+void Mission::doImport(missionNode *node, int mode) {
     if (mode == SCRIPT_PARSE && parsemode == PARSE_DECL) {
         string name = node->attr_value("name");
         if (name.empty()) {
@@ -69,8 +68,7 @@ void Mission::doImport(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-void Mission::doModule(missionNode *node, int mode)
-{
+void Mission::doModule(missionNode *node, int mode) {
     if (mode == SCRIPT_PARSE) {
         string name = node->attr_value("name");
         if (parsemode == PARSE_DECL) {
@@ -132,8 +130,7 @@ void Mission::doModule(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-scriptContext *Mission::makeContext(missionNode *node)
-{
+scriptContext *Mission::makeContext(missionNode *node) {
     scriptContext *context = new scriptContext;
 
     context->varinsts = new varInstMap;
@@ -145,8 +142,7 @@ scriptContext *Mission::makeContext(missionNode *node)
 
 /* *********************************************************** */
 
-void Mission::removeContextStack()
-{
+void Mission::removeContextStack() {
     contextStack *cstack = runtime.cur_thread->exec_stack.back();
     runtime.cur_thread->exec_stack.pop_back();
     if (cstack->return_value != NULL) {
@@ -155,8 +151,7 @@ void Mission::removeContextStack()
     delete cstack;
 }
 
-void Mission::addContextStack(missionNode *node)
-{
+void Mission::addContextStack(missionNode *node) {
     contextStack *cstack = new contextStack;
 
     cstack->return_value = NULL;
@@ -164,8 +159,7 @@ void Mission::addContextStack(missionNode *node)
     runtime.cur_thread->exec_stack.push_back(cstack);
 }
 
-scriptContext *Mission::addContext(missionNode *node)
-{
+scriptContext *Mission::addContext(missionNode *node) {
     scriptContext *context = makeContext(node);
     contextStack *stack = runtime.cur_thread->exec_stack.back();
     stack->contexts.push_back(context);
@@ -178,8 +172,7 @@ scriptContext *Mission::addContext(missionNode *node)
 
 /* *********************************************************** */
 
-void Mission::removeContext()
-{
+void Mission::removeContext() {
     contextStack *stack = runtime.cur_thread->exec_stack.back();
 
     int lastelem = stack->contexts.size() - 1;
@@ -200,8 +193,7 @@ void Mission::removeContext()
 
 /* *********************************************************** */
 
-varInst *Mission::doScript(missionNode *node, int mode, varInstMap *varmap)
-{
+varInst *Mission::doScript(missionNode *node, int mode, varInstMap *varmap) {
     trace(node, mode);
     if (mode == SCRIPT_PARSE) {
         current_script = node;
@@ -282,8 +274,7 @@ varInst *Mission::doScript(missionNode *node, int mode, varInstMap *varmap)
 
 /* *********************************************************** */
 
-void Mission::doArguments(missionNode *node, int mode, varInstMap *varmap)
-{
+void Mission::doArguments(missionNode *node, int mode, varInstMap *varmap) {
     int nr_arguments = 0;
     if (mode == SCRIPT_PARSE) {
         if (parsemode == PARSE_DECL) {
@@ -340,8 +331,7 @@ void Mission::doArguments(missionNode *node, int mode, varInstMap *varmap)
 
 /* *********************************************************** */
 
-void Mission::doReturn(missionNode *node, int mode)
-{
+void Mission::doReturn(missionNode *node, int mode) {
     trace(node, mode);
     if (mode == SCRIPT_PARSE) {
         missionNode *script = current_script;
@@ -393,8 +383,7 @@ void Mission::doReturn(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-void Mission::doBlock(missionNode *node, int mode)
-{
+void Mission::doBlock(missionNode *node, int mode) {
     trace(node, mode);
     if (mode == SCRIPT_PARSE) {
         scope_stack.push_back(node);
@@ -417,8 +406,7 @@ void Mission::doBlock(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-varInst *Mission::doExec(missionNode *node, int mode)
-{
+varInst *Mission::doExec(missionNode *node, int mode) {
     trace(node, mode);
     if (mode == SCRIPT_PARSE) {
         string name = node->attr_value("name");
@@ -535,16 +523,14 @@ varInst *Mission::doExec(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::newVarInst(scope_type scopetype)
-{
+varInst *Mission::newVarInst(scope_type scopetype) {
     varInst *vi = new varInst(scopetype);
     vi_counter++;
 
     return vi;
 }
 
-void Mission::deleteVarInst(varInst *vi, bool del_local)
-{
+void Mission::deleteVarInst(varInst *vi, bool del_local) {
     if (vi == NULL) {
         return;
     }
@@ -564,8 +550,7 @@ void Mission::deleteVarInst(varInst *vi, bool del_local)
     }
 }
 
-void Mission::deleteVarMap(varInstMap *vmap)
-{
+void Mission::deleteVarMap(varInstMap *vmap) {
     vsUMap<string, varInst *>::const_iterator iter;
     for (iter = vmap->begin(); iter != vmap->end(); iter++) {
         varInst *vi = (*iter).second;
@@ -577,8 +562,7 @@ void Mission::deleteVarMap(varInstMap *vmap)
     }
 }
 
-unsigned int Mission::createClassInstance(string modulename)
-{
+unsigned int Mission::createClassInstance(string modulename) {
     missionNode *module_node = runtime.modules[modulename];
     if (module_node == NULL) {
         fatalError(NULL, SCRIPT_RUN, "module " + modulename + " not found");
@@ -610,8 +594,7 @@ unsigned int Mission::createClassInstance(string modulename)
     return module_node->script.classinst_counter;
 }
 
-void Mission::destroyClassInstance(string modulename, unsigned int classid)
-{
+void Mission::destroyClassInstance(string modulename, unsigned int classid) {
     missionNode *module = runtime.modules[modulename];
     if (module == NULL) {
         fatalError(NULL, SCRIPT_RUN, "module " + modulename + " not found");

@@ -80,13 +80,13 @@ public:
     Mount();
 //short fix
     Mount(const std::string &name,
-          int ammo,
-          int volume,
-          float xyscale,
-          float zscale,
-          float functionality,
-          float maxfunctionality,
-          bool banked);
+            int ammo,
+            int volume,
+            float xyscale,
+            float zscale,
+            float functionality,
+            float maxfunctionality,
+            bool banked);
 
     void Activate(bool Missile);
     void DeActive(bool Missile);
@@ -95,13 +95,11 @@ public:
     void SetMountOrientation(const Quaternion &);
 
 //Gets the mount's position and transform
-    const Vector &GetMountLocation() const
-    {
+    const Vector &GetMountLocation() const {
         return pos;
     }
 
-    const Quaternion &GetMountOrientation() const
-    {
+    const Quaternion &GetMountOrientation() const {
         return orient;
     }
 
@@ -115,19 +113,18 @@ public:
 //Uses Sound Forcefeedback and other stuff
     void PhysicsAlignedUnfire();
     bool PhysicsAlignedFire(Unit *caller,
-                            const Transformation &Cumulative,
-                            const Matrix &mat,
-                            const Vector &Velocity,
-                            void *owner,
-                            Unit *target,
-                            signed char autotrack,
-                            float trackingcone,
-                            CollideMap::iterator hint[]);
+            const Transformation &Cumulative,
+            const Matrix &mat,
+            const Vector &Velocity,
+            void *owner,
+            Unit *target,
+            signed char autotrack,
+            float trackingcone,
+            CollideMap::iterator hint[]);
     bool NextMountCloser(Mount *nextmount, Unit *);
     bool Fire(Unit *firer, void *owner, bool Missile = false, bool collide_only_with_target = false);
 
-    bool IsEmpty() const
-    {
+    bool IsEmpty() const {
         return !(status == ACTIVE || status == INACTIVE);
     }
 };

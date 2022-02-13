@@ -44,18 +44,15 @@ string inverseblend[16] = {
         "CONSTCOLOR", "INVCONSTCOLOR"
 };
 
-void fcloseInput(FILE *fp)
-{
+void fcloseInput(FILE *fp) {
     fclose(fp);
 }
 
-int aprintf(...)
-{
+int aprintf(...) {
     return 0;
 }
 
-FILE *aopen(...)
-{
+FILE *aopen(...) {
     return NULL;
 }
 
@@ -84,8 +81,7 @@ struct OrigMeshLoader {
     vector<float> sizes;
     unsigned int num;
 
-    OrigMeshLoader()
-    {
+    OrigMeshLoader() {
         m = 0;
         num = 0;
     }
@@ -250,8 +246,7 @@ struct OrigMeshLoader {
     while (0)
 
 template<typename T>
-void reverse_vector(vector<T> &vec)
-{
+void reverse_vector(vector<T> &vec) {
     vector<T> newvec;
     for (; (!vec.empty()); vec.pop_back()) {
         newvec.push_back(vec.back());
@@ -270,12 +265,10 @@ void Mesh::BFXMToXmesh( FILE *Inputfile, FILE *Outputfile, vector< Mesh* > &outp
 
 #else
 
-static inline void fignoref(FILE *f, ...)
-{
+static inline void fignoref(FILE *f, ...) {
 }
 
-static inline FILE *fignorefopen(const char *, const char *)
-{
+static inline FILE *fignorefopen(const char *, const char *) {
     return 0;
 }
 
@@ -283,12 +276,11 @@ static inline FILE *fignorefopen(const char *, const char *)
 #define bxmfopen fignorefopen
 
 vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
-                                const Vector &scalex,
-                                int faction,
-                                class Flightgroup *fg,
-                                std::string hash_name,
-                                const std::vector<std::string> &overrideTextures)
-{
+        const Vector &scalex,
+        int faction,
+        class Flightgroup *fg,
+        std::string hash_name,
+        const std::vector<std::string> &overrideTextures) {
     Vector overallscale = scalex;
     int fac = faction;
     FILE *Outputfile = 0;
@@ -600,12 +592,12 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             bxmfprintf(Outputfile, ">\n");
             //End Textures
             bxmfprintf(Outputfile,
-                       "<Material power=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\">\n",
-                       power,
-                       cullface,
-                       lighting,
-                       reflect,
-                       usenormals);
+                    "<Material power=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\">\n",
+                    power,
+                    cullface,
+                    lighting,
+                    reflect,
+                    usenormals);
             bxmfprintf(Outputfile, "\t<Ambient Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n", ar, ag, ab, aa);
             bxmfprintf(Outputfile, "\t<Diffuse Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n", dr, dg, db, da);
             bxmfprintf(Outputfile, "\t<Emissive Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n", er, eg, eb, ea);
@@ -639,10 +631,10 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
 #endif
             for (uint32bit detplane = 0; (unsigned int) detplane < Detailplanes.size(); detplane++) {
                 bxmfprintf(Outputfile, "<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n", Detailplanes[detplane].x,
-                           Detailplanes[detplane].y, Detailplanes[detplane].z);
+                        Detailplanes[detplane].y, Detailplanes[detplane].z);
                 mesh->detailPlanes.push_back(Vector(Detailplanes[detplane].x,
-                                                    Detailplanes[detplane].y,
-                                                    Detailplanes[detplane].z));
+                        Detailplanes[detplane].y,
+                        Detailplanes[detplane].z));
             }
             //Logos
             uint32bit numlogos =
@@ -657,11 +649,11 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                 uint32bit numrefs = VSSwapHostIntToLittle(inmemfile[word32index
                         + 4].i32val);                       //number of reference points
                 bxmfprintf(Outputfile,
-                           "<Logo type=\"%d\" rotate=\"%f\" size=\"%f\" offset=\"%f\">\n",
-                           type,
-                           rotation,
-                           size,
-                           offset);
+                        "<Logo type=\"%d\" rotate=\"%f\" size=\"%f\" offset=\"%f\">\n",
+                        type,
+                        rotation,
+                        size,
+                        offset);
                 struct MeshXML::ZeLogo l;
                 l.type = type;
                 l.rotate = rotation;
@@ -718,9 +710,9 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                 READSTRING(inmemfile, word32index, animnamelen, animname);
                 float32bit FPS = VSSwapHostFloatToLittle(inmemfile[word32index].f32val);                     //FPS
                 bxmfprintf(Outputfile,
-                           "<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",
-                           animname.c_str(),
-                           FPS);
+                        "<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",
+                        animname.c_str(),
+                        FPS);
 
                 vector<int> *framerefs = new vector<int>;
                 mesh->framespersecond = FPS;

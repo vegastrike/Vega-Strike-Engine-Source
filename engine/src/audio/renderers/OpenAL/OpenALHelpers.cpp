@@ -43,8 +43,7 @@ namespace Audio {
 namespace __impl {
 namespace OpenAL {
 
-void _checkAlErrorAt(ALenum error, const char *filename, int lineno)
-{
+void _checkAlErrorAt(ALenum error, const char *filename, int lineno) {
     switch (error) {
         case AL_NO_ERROR :
             return;
@@ -84,13 +83,11 @@ void _checkAlErrorAt(ALenum error, const char *filename, int lineno)
     }
 }
 
-void _clearAlError()
-{
+void _clearAlError() {
     alGetError();
 }
 
-ALenum asALFormat(const Format &format)
-{
+ALenum asALFormat(const Format &format) {
     ALenum alformat;
     switch (format.bitsPerSample) {
         case 8:

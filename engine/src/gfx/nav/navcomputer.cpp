@@ -58,8 +58,7 @@ struct ModeInfo {
     string groupId;
 
     ModeInfo(string t = "", string b = "", string c = "", string g = "") :
-            title(t), button(b), command(c), groupId(g)
-    {
+            title(t), button(b), command(c), groupId(g) {
     }
 };
 
@@ -81,11 +80,11 @@ static const ModeInfo selectorModeInfo[] = {
 //later have an entry with an empty control id to cover the other cases.
 const NavComputer::WctlTableEntry NavComputer::WctlCommandTable[] = {
         NavComputer::WctlTableEntry("Visible",
-                                    "",
-                                    &NavComputer::toggleVisibility),
+                "",
+                &NavComputer::toggleVisibility),
         NavComputer::WctlTableEntry("Picker::NewSelection",
-                                    "PathLister",
-                                    &NavComputer::pathListerChangedSelection),
+                "PathLister",
+                &NavComputer::pathListerChangedSelection),
         NavComputer::WctlTableEntry(displayModeInfo[LIST].command, "", &NavComputer::changeToListMode),
         NavComputer::WctlTableEntry(displayModeInfo[EDIT].command, "", &NavComputer::changeToEditMode),
         NavComputer::WctlTableEntry(selectorModeInfo[TARGET].command, "", &NavComputer::changeToTargetMode),
@@ -112,8 +111,7 @@ const NavComputer::WctlTableEntry NavComputer::WctlCommandTable[] = {
 
 //Process a command from the window.
 //This just dispatches to a handler.
-bool NavComputer::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool NavComputer::processWindowCommand(const EventCommandId &command, Control *control) {
     //Iterate through the dispatch table.
     for (const WctlTableEntry *p = &WctlCommandTable[0]; p->function; p++) {
         if (p->command == command) {
@@ -133,8 +131,7 @@ bool NavComputer::processWindowCommand(const EventCommandId &command, Control *c
 
 //CONSTRUCTOR.
 NavComputer::NavComputer(NavigationSystem *navsystem) :
-        navsys(navsystem), m_currentDisplay(NULL_DISPLAY), m_currentSelector(NULL_SELECTOR)
-{
+        navsys(navsystem), m_currentDisplay(NULL_DISPLAY), m_currentSelector(NULL_SELECTOR) {
     int i;
     pathman = navsystem->pathman;
     currentPath = NULL;
@@ -159,8 +156,7 @@ NavComputer::NavComputer(NavigationSystem *navsystem) :
 }
 
 //Destructor.
-NavComputer::~NavComputer(void)
-{
+NavComputer::~NavComputer(void) {
     //Delete any group controls that the window doesn't "own".
     for (int i = 0; i < DISPLAY_MODE_COUNT; i++) {
         if (m_displayModeGroups[i] != nullptr) {
@@ -177,8 +173,7 @@ NavComputer::~NavComputer(void)
 }
 
 //Set up the window and get everything ready.
-void NavComputer::init(void)
-{
+void NavComputer::init(void) {
     //Create a new window.
     Window *w = new Window;
     setWindow(w);
@@ -198,8 +193,7 @@ void NavComputer::init(void)
 }
 
 //Create the controls that will be used for this window.
-void NavComputer::createControls(void)
-{
+void NavComputer::createControls(void) {
     int i;
     //Set up the window.
     window()->setFullScreen();
@@ -226,8 +220,7 @@ void NavComputer::createControls(void)
     }
 }
 
-GFXColor NavComputer::getColorForGroup(std::string id)
-{
+GFXColor NavComputer::getColorForGroup(std::string id) {
     if (id == "MainGroup") {
         return GFXColor(0, 1, 1);
     } else if (id == "ListGroup") {
@@ -240,8 +233,7 @@ GFXColor NavComputer::getColorForGroup(std::string id)
 }
 
 //Hack that constructs controls in code.
-void NavComputer::constructControls(void)
-{
+void NavComputer::constructControls(void) {
     {
         GroupControl *mainGroup = new GroupControl;
         mainGroup->setId("MainGroup");
@@ -861,7 +853,7 @@ void NavComputer::constructControls(void)
         chainTypeList->clear();
         chainTypeList->addCell(new ValuedPickerCell<ChainPathNode::PartType>(ChainPathNode::SOURCE, "Source"));
         chainTypeList->addCell(new ValuedPickerCell<ChainPathNode::PartType>(ChainPathNode::DESTINATION,
-                                                                             "Destination"));
+                "Destination"));
         chainTypeList->addCell(new ValuedPickerCell<ChainPathNode::PartType>(ChainPathNode::ALL_POINTS, "All Points"));
 
         chainGroup->addChild(chainTypeScroller);         //Want scroller "over" picker.
@@ -885,8 +877,7 @@ void NavComputer::constructControls(void)
 }
 
 //Switch to the set of controls used for the specified mode.
-void NavComputer::switchToMajorControls(DisplayMode mode)
-{
+void NavComputer::switchToMajorControls(DisplayMode mode) {
     if (m_currentDisplay != mode) {
         assert(m_displayModeGroups[mode] != NULL);         //We should have controls for this mode.
         if (m_currentDisplay != NULL_DISPLAY) {
@@ -909,8 +900,7 @@ void NavComputer::switchToMajorControls(DisplayMode mode)
 }
 
 //Switch to the set of controls used for the specified mode.
-void NavComputer::switchToMinorControls(SelectorMode mode)
-{
+void NavComputer::switchToMinorControls(SelectorMode mode) {
     if (m_currentSelector != mode) {
         if (m_currentSelector != NULL_SELECTOR) {
             //Get the old controls out of the window.
@@ -932,8 +922,7 @@ void NavComputer::switchToMinorControls(SelectorMode mode)
 }
 
 //Change display mode to LIST
-bool NavComputer::changeToListMode(const EventCommandId &command, Control *control)
-{
+bool NavComputer::changeToListMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != LIST) {
         switchToMinorControls(NULL_SELECTOR);
         switchToMajorControls(LIST);
@@ -943,8 +932,7 @@ bool NavComputer::changeToListMode(const EventCommandId &command, Control *contr
 }
 
 //Change display mode to EDIT
-bool NavComputer::changeToEditMode(const EventCommandId &command, Control *control)
-{
+bool NavComputer::changeToEditMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != EDIT && currentPath != NULL) {
         switchToMinorControls(NULL_SELECTOR);
         switchToMajorControls(EDIT);
@@ -955,8 +943,7 @@ bool NavComputer::changeToEditMode(const EventCommandId &command, Control *contr
 }
 
 //Change display mode to TARGET
-bool NavComputer::changeToTargetMode(const EventCommandId &command, Control *control)
-{
+bool NavComputer::changeToTargetMode(const EventCommandId &command, Control *control) {
     assert(m_currentDisplay == EDIT);     //We should be in edit mode to have chosen a selector
     if (m_currentSelector != TARGET) {
         switchToMinorControls(TARGET);
@@ -966,8 +953,7 @@ bool NavComputer::changeToTargetMode(const EventCommandId &command, Control *con
 }
 
 //Change display mode to CRITERIA
-bool NavComputer::changeToCriteriaMode(const EventCommandId &command, Control *control)
-{
+bool NavComputer::changeToCriteriaMode(const EventCommandId &command, Control *control) {
     assert(m_currentDisplay == EDIT);     //We should be in edit mode to have chosen a selector
     if (m_currentSelector != CRITERIA) {
         switchToMinorControls(CRITERIA);
@@ -977,8 +963,7 @@ bool NavComputer::changeToCriteriaMode(const EventCommandId &command, Control *c
 }
 
 //Change display mode to CHAIN
-bool NavComputer::changeToChainMode(const EventCommandId &command, Control *control)
-{
+bool NavComputer::changeToChainMode(const EventCommandId &command, Control *control) {
     assert(m_currentDisplay == EDIT);     //We should be in edit mode to have chosen a selector
     if (m_currentSelector != CHAIN) {
         switchToMinorControls(CHAIN);
@@ -988,13 +973,11 @@ bool NavComputer::changeToChainMode(const EventCommandId &command, Control *cont
 }
 
 //Open the window, etc.
-void NavComputer::run(void)
-{
+void NavComputer::run(void) {
     toggleVisibility(EventCommandId(), NULL);
 }
 
-void nav_main_loop()
-{
+void nav_main_loop() {
     GFXBeginScene();
     globalWindowManager().draw();
     GFXEndScene();
@@ -1002,8 +985,7 @@ void nav_main_loop()
 
 int shiftup(int);
 
-static void nav_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y)
-{
+static void nav_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     if (!release) {
         nav_keyboard_queue.push_back(
                 ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) ? shiftup(
@@ -1011,8 +993,7 @@ static void nav_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int
     }
 }
 
-bool NavComputer::toggleVisibility(const EventCommandId &command, Control *control)
-{
+bool NavComputer::toggleVisibility(const EventCommandId &command, Control *control) {
     if (m_visible) {
         m_window->close();
         m_visible = false;
@@ -1043,8 +1024,7 @@ bool NavComputer::toggleVisibility(const EventCommandId &command, Control *contr
 }
 
 //Redo the title strings for the display.
-void NavComputer::recalcTitle()
-{
+void NavComputer::recalcTitle() {
     //Generic nav title for the display.
 
     string baseTitle = "Navigational Computer";
@@ -1059,8 +1039,7 @@ void NavComputer::recalcTitle()
 }
 
 //Create the window and controls for the Options Menu.
-void NavComputer::RenameConfirm::init(void)
-{
+void NavComputer::RenameConfirm::init(void) {
     Window *window = new Window;
     setWindow(window);
 
@@ -1127,8 +1106,7 @@ void NavComputer::RenameConfirm::init(void)
 }
 
 //Process a command event from the Options Menu window.
-bool NavComputer::RenameConfirm::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool NavComputer::RenameConfirm::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Rename") {
         TextInputDisplay *input = static_cast< TextInputDisplay * > ( window()->findControlById("PathNameBox"));
         assert(input != NULL);
@@ -1142,8 +1120,7 @@ bool NavComputer::RenameConfirm::processWindowCommand(const EventCommandId &comm
 }
 
 //Load the paths to be put in the lister.
-void NavComputer::loadPathLister()
-{
+void NavComputer::loadPathLister() {
     SimplePicker *listPicker = static_cast< SimplePicker * > ( window()->findControlById("PathLister"));
     assert(listPicker != NULL);
     listPicker->clear();
@@ -1159,8 +1136,7 @@ void NavComputer::loadPathLister()
 }
 
 //Load the paths to be put in the lister.
-void NavComputer::loadChainLister()
-{
+void NavComputer::loadChainLister() {
     SimplePicker *chainPicker = static_cast< SimplePicker * > ( window()->findControlById("ChainLister"));
     assert(chainPicker != NULL);
     chainPicker->clear();
@@ -1170,9 +1146,8 @@ void NavComputer::loadChainLister()
 }
 
 void NavComputer::loadCriteriaPickerCell(SimplePicker *picker,
-                                         ValuedPickerCell<CriteriaNode *> *parent,
-                                         CriteriaNode *node)
-{
+        ValuedPickerCell<CriteriaNode *> *parent,
+        CriteriaNode *node) {
     assert(node != NULL);
     ValuedPickerCell<CriteriaNode *> *cell = new ValuedPickerCell<CriteriaNode *>(node, node->getText());
     cell->setHideChildren(false);
@@ -1189,30 +1164,27 @@ void NavComputer::loadCriteriaPickerCell(SimplePicker *picker,
 }
 
 //Load the criteria to be put in the lister.
-void NavComputer::loadCriteriaLister()
-{
+void NavComputer::loadCriteriaLister() {
     SimplePicker *picker = static_cast< SimplePicker * > ( window()->findControlById("CriteriaLister"));
     assert(picker != NULL);
     picker->clear();
     if (criteria) {
         if (static_cast< CriteriaPathNode * > (currentNode)->getRoot()->getChild()) {
             loadCriteriaPickerCell(picker,
-                                   NULL,
-                                   static_cast< CriteriaPathNode * > (currentNode)->getRoot()->getChild());
+                    NULL,
+                    static_cast< CriteriaPathNode * > (currentNode)->getRoot()->getChild());
         }
     }
 }
 
 //Load the absolute button.
-void NavComputer::loadAbsoluteButton()
-{
+void NavComputer::loadAbsoluteButton() {
     NewButton *absolute = static_cast< NewButton * > ( window()->findControlById("Absolute"));
     assert(absolute != NULL);
     absolute->setLabel(navsys->systemIter[navsys->systemselectionindex].GetName());
 }
 
-bool NavComputer::setCurrentNode(PathNode *source)
-{
+bool NavComputer::setCurrentNode(PathNode *source) {
     if (currentNode != nullptr) {
         delete currentNode;
         currentNode = nullptr;
@@ -1222,8 +1194,7 @@ bool NavComputer::setCurrentNode(PathNode *source)
     return true;
 }
 
-void NavComputer::updateDescription()
-{
+void NavComputer::updateDescription() {
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
     if (currentPath) {
@@ -1233,8 +1204,7 @@ void NavComputer::updateDescription()
     }
 }
 
-void NavComputer::updateNodeDescription()
-{
+void NavComputer::updateNodeDescription() {
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("NodeDescription"));
     assert(desc != NULL);
     if (currentNode) {
@@ -1245,8 +1215,7 @@ void NavComputer::updateNodeDescription()
 }
 
 //The selection in the Path lister changed.
-bool NavComputer::pathListerChangedSelection(const EventCommandId &command, Control *control)
-{
+bool NavComputer::pathListerChangedSelection(const EventCommandId &command, Control *control) {
     assert(control != NULL);
     Picker *picker = static_cast< Picker * > (control);
     ValuedPickerCell<NavPath *> *cell = static_cast< ValuedPickerCell<NavPath *> * > ( picker->selectedCell());
@@ -1260,15 +1229,13 @@ bool NavComputer::pathListerChangedSelection(const EventCommandId &command, Cont
     return true;
 }
 
-bool NavComputer::actionAdd(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionAdd(const EventCommandId &command, Control *control) {
     pathman->addPath();
     loadPathLister();
     return true;
 }
 
-bool NavComputer::actionShowPath(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionShowPath(const EventCommandId &command, Control *control) {
     if (currentPath) {
         currentPath->setVisible(!currentPath->getVisible());
     }
@@ -1276,8 +1243,7 @@ bool NavComputer::actionShowPath(const EventCommandId &command, Control *control
     return true;
 }
 
-bool NavComputer::actionRename(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionRename(const EventCommandId &command, Control *control) {
     if (currentPath) {
         RenameConfirm *renamer = new RenameConfirm(this);
         renamer->init();
@@ -1286,8 +1252,7 @@ bool NavComputer::actionRename(const EventCommandId &command, Control *control)
     return true;
 }
 
-bool NavComputer::actionRemove(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionRemove(const EventCommandId &command, Control *control) {
     if (currentPath) {
         pathman->removePath(currentPath);
     }
@@ -1295,22 +1260,19 @@ bool NavComputer::actionRemove(const EventCommandId &command, Control *control)
     return true;
 }
 
-bool NavComputer::actionShowAll(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionShowAll(const EventCommandId &command, Control *control) {
     pathman->showAll();
     updateDescription();
     return true;
 }
 
-bool NavComputer::actionShowNone(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionShowNone(const EventCommandId &command, Control *control) {
     pathman->showNone();
     updateDescription();
     return true;
 }
 
-bool NavComputer::actionSource(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionSource(const EventCommandId &command, Control *control) {
     if (currentNode) {
         assert(currentPath);
         currentPath->setSourceNode(currentNode->clone());
@@ -1319,8 +1281,7 @@ bool NavComputer::actionSource(const EventCommandId &command, Control *control)
     return true;
 }
 
-bool NavComputer::actionDestination(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionDestination(const EventCommandId &command, Control *control) {
     if (currentNode) {
         assert(currentPath);
         currentPath->setDestinationNode(currentNode->clone());
@@ -1329,29 +1290,25 @@ bool NavComputer::actionDestination(const EventCommandId &command, Control *cont
     return true;
 }
 
-bool NavComputer::actionCurrent(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionCurrent(const EventCommandId &command, Control *control) {
     setCurrentNode(new CurrentPathNode());
     criteria = false;
     return true;
 }
 
-bool NavComputer::actionTarget(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionTarget(const EventCommandId &command, Control *control) {
     setCurrentNode(new TargetPathNode());
     criteria = false;
     return true;
 }
 
-bool NavComputer::actionAbsolute(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionAbsolute(const EventCommandId &command, Control *control) {
     setCurrentNode(new AbsolutePathNode(navsys->systemselectionindex));
     criteria = false;
     return true;
 }
 
-bool NavComputer::actionAnd(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionAnd(const EventCommandId &command, Control *control) {
     Picker *parameterPicker = static_cast< Picker * > ( window()->findControlById("ParameterLister"));
     assert(parameterPicker != NULL);
 
@@ -1395,8 +1352,7 @@ bool NavComputer::actionAnd(const EventCommandId &command, Control *control)
     return true;
 }
 
-bool NavComputer::actionOr(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionOr(const EventCommandId &command, Control *control) {
     Picker *parameterPicker = static_cast< Picker * > ( window()->findControlById("ParameterLister"));
     assert(parameterPicker != NULL);
 
@@ -1440,8 +1396,7 @@ bool NavComputer::actionOr(const EventCommandId &command, Control *control)
     return true;
 }
 
-bool NavComputer::actionNot(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionNot(const EventCommandId &command, Control *control) {
     Picker *criteriaPicker = static_cast< Picker * > ( window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
@@ -1457,8 +1412,7 @@ bool NavComputer::actionNot(const EventCommandId &command, Control *control)
     return true;
 }
 
-bool NavComputer::actionRemoveCriteria(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionRemoveCriteria(const EventCommandId &command, Control *control) {
     Picker *criteriaPicker = static_cast< Picker * > ( window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
@@ -1476,8 +1430,7 @@ bool NavComputer::actionRemoveCriteria(const EventCommandId &command, Control *c
     return true;
 }
 
-bool NavComputer::actionChain(const EventCommandId &command, Control *control)
-{
+bool NavComputer::actionChain(const EventCommandId &command, Control *control) {
     Picker *pathPicker = static_cast< Picker * > ( window()->findControlById("ChainLister"));
     assert(pathPicker != NULL);
 
@@ -1495,8 +1448,7 @@ bool NavComputer::actionChain(const EventCommandId &command, Control *control)
     return true;
 }
 
-void NavComputer::actionRenameConfirmed(std::string name)
-{
+void NavComputer::actionRenameConfirmed(std::string name) {
     assert(currentPath != NULL);
 
     currentPath->setName(name);

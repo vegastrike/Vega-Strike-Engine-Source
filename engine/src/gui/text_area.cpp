@@ -39,18 +39,15 @@
 
 static char EMPTY_STR[] = "";
 
-TextArea::~TextArea()
-{
+TextArea::~TextArea() {
 }
 
-TextArea::TextArea()
-{
+TextArea::TextArea() {
     TextArea(0, 0, 1, 1, 1);
 }
 
 //Currently, corners overlap the horizontal and vertical bars. It's only noticable with transparency
-TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar)
-{
+TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
     #ifdef DEBUG
     // stephengtuggy 2020-10-30: Leaving these here, since this library is supposed to be
     // self-sufficient, hence not depend on Vega Strike libraries
@@ -161,8 +158,7 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar)
     Refresh();
 }
 
-void TextArea::Refresh(void)
-{
+void TextArea::Refresh(void) {
     // Obscene amounts of commented code removed, check r13553 for content
 
     //Draw the bars to run across the length
@@ -179,8 +175,7 @@ void TextArea::Refresh(void)
     }
 }
 
-void TextArea::RenderText(void)
-{
+void TextArea::RenderText(void) {
     if (item_count == 0) {
         return;
     }
@@ -189,8 +184,7 @@ void TextArea::RenderText(void)
     RenderTextItem(ItemList, 0);
 }
 
-void TextArea::RenderTextItem(TextAreaItem *current, int level)
-{
+void TextArea::RenderTextItem(TextAreaItem *current, int level) {
     static int count = 0;
     float new_y = 0, new_x = 0;
     int max = 0;
@@ -224,8 +218,7 @@ void TextArea::RenderTextItem(TextAreaItem *current, int level)
     }
 }
 
-void TextArea::AddTextItem(const char *name, const char *description, const char *parent_name, const GFXColor col)
-{
+void TextArea::AddTextItem(const char *name, const char *description, const char *parent_name, const GFXColor col) {
     TextAreaItem *master;
     master = ItemList->FindChild(parent_name);
     item_count++;
@@ -236,8 +229,7 @@ void TextArea::AddTextItem(const char *name, const char *description, const char
     }
 }
 
-void TextArea::ChangeTextItem(const char *name, const char *description, bool wrap)
-{
+void TextArea::ChangeTextItem(const char *name, const char *description, bool wrap) {
     TextAreaItem *search;
     search = ItemList->FindChild(name);
     if (search == 0) {
@@ -249,8 +241,7 @@ void TextArea::ChangeTextItem(const char *name, const char *description, bool wr
     search->description = strdup(description);
 }
 
-void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col)
-{
+void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col) {
     TextAreaItem *search;
     search = ItemList->FindChild(name);
     if (search == 0) {
@@ -259,8 +250,7 @@ void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col)
     search->col = col;
 }
 
-void TextArea::ClearList(void)
-{
+void TextArea::ClearList(void) {
     //Wipe the list clean
     if (ItemList != nullptr) {
         delete ItemList;
@@ -272,26 +262,22 @@ void TextArea::ClearList(void)
     ItemList = new TextAreaItem("", "", NULL);
 }
 
-void TextArea::SetText(const char *text)
-{
+void TextArea::SetText(const char *text) {
     do_highlight = 0;
     do_multiline = 1;
     ClearList();
     ChompIntoItems(text, NULL);
 }
 
-char *TextArea::GetSelectedItemName(void)
-{
+char *TextArea::GetSelectedItemName(void) {
     return GetSelectedItem(1);
 }
 
-char *TextArea::GetSelectedItemDesc(void)
-{
+char *TextArea::GetSelectedItemDesc(void) {
     return GetSelectedItem(2);
 }
 
-char *TextArea::GetSelectedItem(int type)
-{
+char *TextArea::GetSelectedItem(int type) {
     TextAreaItem *search;
     search = ItemList->FindCount(cur_selected, 0);
     if (search == 0) {
@@ -304,15 +290,13 @@ char *TextArea::GetSelectedItem(int type)
     }
 }
 
-void TextArea::SortList(void)
-{
+void TextArea::SortList(void) {
     ItemList->Sort();
 }
 
 //The button checks assume that the scroll buttons and scrollbar are on the same x axis
 //If you change the position of the buttons, you'll need to add more checks here
-int TextArea::MouseClick(int button, int state, float x, float y)
-{
+int TextArea::MouseClick(int button, int state, float x, float y) {
     if (state == WS_MOUSE_UP && scroll_start != 0) {
         scroll_cur = 0;
         scroll_start = 0;
@@ -377,8 +361,9 @@ int TextArea::MouseClick(int button, int state, float x, float y)
         if (y > ycoord[4]) {
             //Top area
             top_item_number -= page_size;
-            if (top_item_number < 0)
+            if (top_item_number < 0) {
                 top_item_number = 0;
+            }
         } else {
             //Bottom area
             top_item_number += page_size;
@@ -400,8 +385,7 @@ int TextArea::MouseClick(int button, int state, float x, float y)
     return 1;
 }
 
-int TextArea::MouseMove(float x, float y)
-{
+int TextArea::MouseMove(float x, float y) {
     if (do_highlight == 0) {
         return 0;
     }
@@ -412,8 +396,7 @@ int TextArea::MouseMove(float x, float y)
     return 1;
 }
 
-int TextArea::MouseMoveClick(float x, float y)
-{
+int TextArea::MouseMoveClick(float x, float y) {
     if (scroll_start == 0 && Inside(x, y, 4) == 0) {
         return 0;
     }
@@ -424,8 +407,7 @@ int TextArea::MouseMoveClick(float x, float y)
     return 1;
 }
 
-int TextArea::DoMouse(int type, float x, float y, int button, int state)
-{
+int TextArea::DoMouse(int type, float x, float y, int button, int state) {
     if (type == 1) {
         return MouseClick(button, state, x, y);
     }
@@ -438,8 +420,7 @@ int TextArea::DoMouse(int type, float x, float y, int button, int state)
     return 0;
 }
 
-int TextArea::Inside(float x, float y, int group)
-{
+int TextArea::Inside(float x, float y, int group) {
     if (x < xcoord[group] || y > ycoord[group]) {
         return 0;
     }
@@ -452,8 +433,7 @@ int TextArea::Inside(float x, float y, int group)
     return 1;
 }
 
-void TextArea::LoadTextures(void)
-{
+void TextArea::LoadTextures(void) {
     /*
      *  int cur, max;
      *  static int images_loaded = 0;
@@ -476,8 +456,7 @@ void TextArea::LoadTextures(void)
 }
 
 //Assumes the mouse is in the text area
-int TextArea::LocateCount(float y)
-{
+int TextArea::LocateCount(float y) {
     float base = ycoord[5] - y - horizontal_spacer;
     if (base < 0) {
         return 0;
@@ -494,8 +473,7 @@ int TextArea::LocateCount(float y)
     #endif    //NO_WARNINGS
 }
 
-void TextArea::HighlightCount(int count, int type)
-{
+void TextArea::HighlightCount(int count, int type) {
     float x = 0, y = 0;
     if (count <= 0 || count > max_lines + 1) {
         return;
@@ -512,8 +490,7 @@ void TextArea::HighlightCount(int count, int type)
     }
 }
 
-void TextArea::DisplayScrollbar(void)
-{
+void TextArea::DisplayScrollbar(void) {
     float new_y = 0, new_height = 0, item_perc = 0, page_perc = 0, y_dist = 0;
     ShowColor(xcoord[3], ycoord[3], width[3], height[3], 0.51, 0.47, 0.79, 1);
     if (item_count <= max_lines) {
@@ -577,8 +554,7 @@ void TextArea::DisplayScrollbar(void)
     }
 }
 
-void TextArea::ChompIntoItems(const char *text, const char *parent)
-{
+void TextArea::ChompIntoItems(const char *text, const char *parent) {
     char *temp = strdup(text);
     char *cur = temp, chr = '\0';
     int i = 0, max = strlen(temp);
@@ -616,8 +592,7 @@ void TextArea::ChompIntoItems(const char *text, const char *parent)
 //#include <stdlib.h>
 //#define rnd (((float)rand())/((float)RAND_MAX))
 TextAreaItem::TextAreaItem(const char *new_name, const char *desc, TextAreaItem *parent_class) :
-        col(1, 1, 1, 1)
-{
+        col(1, 1, 1, 1) {
 //{	col = GFXColor (rnd,rnd,rnd,1);
     if (new_name != 0) {
         name = strdup(new_name);
@@ -636,8 +611,7 @@ TextAreaItem::TextAreaItem(const char *new_name, const char *desc, TextAreaItem 
 //if (parent == NULL) { expanded = 1; }
 }
 
-TextAreaItem::~TextAreaItem(void)
-{
+TextAreaItem::~TextAreaItem(void) {
     if (name != nullptr) {
         free(name);
         name = nullptr;
@@ -659,8 +633,7 @@ TextAreaItem::~TextAreaItem(void)
     }
 }
 
-TextAreaItem *TextAreaItem::FindChild(const char *search_name)
-{
+TextAreaItem *TextAreaItem::FindChild(const char *search_name) {
     int cur = 0;
     //int max = child_count_multiplier * 10;
     TextAreaItem *match;
@@ -679,8 +652,7 @@ TextAreaItem *TextAreaItem::FindChild(const char *search_name)
     return NULL;
 }
 
-void TextAreaItem::Sort(void)
-{
+void TextAreaItem::Sort(void) {
     int cur, cur2;
     TextAreaItem *temp;
     for (cur = 0; cur < child_count; cur++) {
@@ -695,8 +667,7 @@ void TextAreaItem::Sort(void)
     }
 }
 
-TextAreaItem *TextAreaItem::FindCount(int count, int cur)
-{
+TextAreaItem *TextAreaItem::FindCount(int count, int cur) {
     static int current = 0;
     if (cur == 0) {
         current = 0;
@@ -717,8 +688,7 @@ TextAreaItem *TextAreaItem::FindCount(int count, int cur)
 
 typedef TextAreaItem *TextAreaItemStr;
 
-void TextAreaItem::AddChild(const char *new_name, const char *desc, const GFXColor col)
-{
+void TextAreaItem::AddChild(const char *new_name, const char *desc, const GFXColor col) {
     TextAreaItem **newlist;
     int cur = 0;
     child_count++;

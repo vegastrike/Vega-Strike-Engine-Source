@@ -37,8 +37,7 @@ using namespace Opcode;
  *	\return		Self-Reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABB &AABB::Add(const AABB &aabb)
-{
+AABB &AABB::Add(const AABB &aabb) {
     // Compute new min & max values
     Point Min;
     GetMin(Min);
@@ -63,8 +62,7 @@ AABB &AABB::Add(const AABB &aabb)
  *	\return		cube edge length
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float AABB::MakeCube(AABB &cube) const
-{
+float AABB::MakeCube(AABB &cube) const {
     Point Ext;
     GetExtents(Ext);
     float Max = Ext.Max();
@@ -81,8 +79,7 @@ float AABB::MakeCube(AABB &cube) const
  *	\param		sphere	[out] sphere containing the AABB
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABB::MakeSphere(Sphere &sphere) const
-{
+void AABB::MakeSphere(Sphere &sphere) const {
     GetExtents(sphere.mCenter);
     sphere.mRadius = sphere.mCenter.Magnitude() * 1.00001f;    // To make sure sphere::Contains(*this)	succeeds
     GetCenter(sphere.mCenter);
@@ -95,8 +92,7 @@ void AABB::MakeSphere(Sphere &sphere) const
  *	\return		true if current box is inside input box
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABB::IsInside(const AABB &box) const
-{
+bool AABB::IsInside(const AABB &box) const {
     if (box.GetMin(0) > GetMin(0)) {
         return false;
     }
@@ -125,8 +121,7 @@ bool AABB::IsInside(const AABB &box) const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABB::ComputePlanes(Plane *planes) const
-{
+bool AABB::ComputePlanes(Plane *planes) const {
     // Checkings
     if (!planes) {
         return false;
@@ -170,8 +165,7 @@ bool AABB::ComputePlanes(Plane *planes) const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABB::ComputePoints(Point *pts) const
-{
+bool AABB::ComputePoints(Point *pts) const {
     // Checkings
     if (!pts) {
         return false;
@@ -212,8 +206,7 @@ bool AABB::ComputePoints(Point *pts) const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const Point *AABB::GetVertexNormals() const
-{
+const Point *AABB::GetVertexNormals() const {
     static float VertexNormals[] =
             {
                     -INVSQRT3, -INVSQRT3, -INVSQRT3,
@@ -234,8 +227,7 @@ const Point *AABB::GetVertexNormals() const
  *	\return		24 indices (12 edges) indexing the list returned by ComputePoints()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const uint32_t *AABB::GetEdges() const
-{
+const uint32_t *AABB::GetEdges() const {
     static uint32_t Indices[] = {
             0, 1, 1, 2, 2, 3, 3, 0,
             7, 6, 6, 5, 5, 4, 4, 7,
@@ -251,8 +243,7 @@ const uint32_t *AABB::GetEdges() const
  *	\return		edge normals in local space
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const Point *AABB::GetEdgeNormals() const
-{
+const Point *AABB::GetEdgeNormals() const {
     static float EdgeNormals[] =
             {
                     0, -INVSQRT2, -INVSQRT2,    // 0-1
@@ -382,8 +373,7 @@ static const int8_t gIndexList[64][8] =
                 {-1, -1, -1, -1, -1, -1, -1, 0}  //63 invalid
         };
 
-const int8_t *AABB::ComputeOutline(const Point &local_eye, int32_t &num) const
-{
+const int8_t *AABB::ComputeOutline(const Point &local_eye, int32_t &num) const {
     // Get box corners
     Point min;
     GetMin(min);
@@ -414,8 +404,7 @@ const int8_t *AABB::ComputeOutline(const Point &local_eye, int32_t &num) const
 //const AABB&			box,		//3d bbox
 //const Matrix4x4&	mat,		//free transformation for bbox
 //float width, float height, int& num)
-float AABB::ComputeBoxArea(const Point &eye, const Matrix4x4 &mat, float width, float height, int32_t &num) const
-{
+float AABB::ComputeBoxArea(const Point &eye, const Matrix4x4 &mat, float width, float height, int32_t &num) const {
     const int8_t *Outline = ComputeOutline(eye, num);
     if (!Outline) {
         return -1.0f;

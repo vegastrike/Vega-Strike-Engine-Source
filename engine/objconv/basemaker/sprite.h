@@ -54,16 +54,14 @@ public:
     VSSprite(const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE);
     ~VSSprite();
 
-    bool LoadSuccess()
-    {
+    bool LoadSuccess() {
         return surface != NULL;
     }
 
     void Draw();
     void DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul);
 
-    void Rotate(const float &rad)
-    {
+    void Rotate(const float &rad) {
         rotation += rad;
     }
 
@@ -77,8 +75,7 @@ public:
     void ReadTexture(FILE *f);
 
     //float &Rotation(){return rotation;};
-    Texture *getTexture()
-    {
+    Texture *getTexture() {
         return surface;
     }
 };

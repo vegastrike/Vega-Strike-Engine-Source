@@ -96,8 +96,7 @@ struct StarShipControlKeyboard {
     bool switchjoyroll;
     bool switchjoybank;
 
-    void UnDirty()
-    {
+    void UnDirty() {
         sheltonpress = sheltonrelease = uppress = uprelease = downpress = downrelease = leftpress = leftrelease = 0;
         rightpress = rightrelease = ABpress = ABrelease = accelpress = accelrelease = decelpress = decelrelease = 0;
         rollrightpress = rollrightrelease = rollleftpress = rollleftrelease = joyinertialxypress = 0;
@@ -110,16 +109,14 @@ struct StarShipControlKeyboard {
         axial = vertical = horizontal = 0;
     }
 
-    StarShipControlKeyboard()
-    {
+    StarShipControlKeyboard() {
         UnDirty();
     }
 };
 
 static vector<StarShipControlKeyboard> starshipcontrolkeys;
 
-static StarShipControlKeyboard &g()
-{
+static StarShipControlKeyboard &g() {
     while (starshipcontrolkeys.size() <= (unsigned int) _Universe->CurrentCockpit()) {
         starshipcontrolkeys.push_back(StarShipControlKeyboard());
     }
@@ -128,8 +125,7 @@ static StarShipControlKeyboard &g()
 
 extern void JoyStickToggleDisable();
 
-FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0, 0, 0)
-{
+FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0, 0, 0) {
     this->last_jumped = 0;
     this->whichplayer = whichplayer;
     while (starshipcontrolkeys.size() <= whichplayer) {
@@ -156,8 +152,7 @@ FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0
 
 #define FBWABS(m) (m >= 0 ? m : -m)
 
-void FlyByKeyboard::Execute(bool resetangvelocity)
-{
+void FlyByKeyboard::Execute(bool resetangvelocity) {
 #define SSCK (starshipcontrolkeys[whichplayer])
     if (SSCK.setunvel) {
         SSCK.setunvel = false;
@@ -300,8 +295,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity)
                 } else {
                     KeyboardUp(((float) FBWABS(SSCK.uppress)
                             - (float) FBWABS(SSCK.downpress))
-                                       / (FBWABS(SSCK.downpress) + SSCK.downrelease + FBWABS(SSCK.uppress)
-                                               + SSCK.uprelease));
+                            / (FBWABS(SSCK.downpress) + SSCK.downrelease + FBWABS(SSCK.uppress)
+                                    + SSCK.uprelease));
                 }
             }
         }
@@ -316,8 +311,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity)
                 } else {
                     KeyboardRight(((float) FBWABS(SSCK.rightpress)
                             - (float) FBWABS(SSCK.leftpress))
-                                          / (FBWABS(SSCK.leftpress) + SSCK.leftrelease + FBWABS(SSCK.rightpress)
-                                                  + SSCK.rightrelease));
+                            / (FBWABS(SSCK.leftpress) + SSCK.leftrelease + FBWABS(SSCK.rightpress)
+                                    + SSCK.rightrelease));
                 }
             }
         }
@@ -326,17 +321,17 @@ void FlyByKeyboard::Execute(bool resetangvelocity)
         } else {
             if (SSCK.rollrightpress != 0 && SSCK.rollleftpress == 0) {
                 KeyboardRollRight(((float) FBWABS(SSCK.rollrightpress))
-                                          / (FBWABS(SSCK.rollrightpress) + SSCK.rollrightrelease));
+                        / (FBWABS(SSCK.rollrightpress) + SSCK.rollrightrelease));
             } else {
                 if (SSCK.rollleftpress != 0 && SSCK.rollrightpress == 0) {
                     KeyboardRollRight(-((float) FBWABS(SSCK.rollleftpress))
-                                              / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease));
+                            / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease));
                 } else {
                     KeyboardRollRight(((float) FBWABS(SSCK.rollrightpress)
                             - (float) FBWABS(SSCK.rollleftpress))
-                                              / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease
-                                                      + FBWABS(SSCK.rollrightpress)
-                                                      + SSCK.rollrightrelease));
+                            / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease
+                                    + FBWABS(SSCK.rollrightpress)
+                                    + SSCK.rollrightrelease));
                 }
             }
         }
@@ -487,8 +482,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity)
 //Changing the frequency doesn't kill a communication anymore until the player stopped its current one
 //and starts a new one in that other frequency
 
-void FlyByKeyboard::DownFreq(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::DownFreq(const KBData &, KBSTATE k) {
     switch (k) {
         case DOWN:
             g().freq_decrease = true;
@@ -501,8 +495,7 @@ void FlyByKeyboard::DownFreq(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::UpFreq(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::UpFreq(const KBData &, KBSTATE k) {
     switch (k) {
         case DOWN:
             g().freq_increase = true;
@@ -515,8 +508,7 @@ void FlyByKeyboard::UpFreq(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::ChangeCommStatus(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::ChangeCommStatus(const KBData &, KBSTATE k) {
     switch (k) {
         case DOWN:
         case UP:
@@ -536,8 +528,7 @@ void FlyByKeyboard::ChangeCommStatus(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::SwitchWebcam(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::SwitchWebcam(const KBData &, KBSTATE k) {
     switch (k) {
         case DOWN:
         case UP:
@@ -552,8 +543,7 @@ void FlyByKeyboard::SwitchWebcam(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::SwitchSecured(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::SwitchSecured(const KBData &, KBSTATE k) {
     switch (k) {
         case DOWN:
         case UP:
@@ -568,8 +558,7 @@ void FlyByKeyboard::SwitchSecured(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::SetVelocityRefKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::SetVelocityRefKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -584,8 +573,7 @@ void FlyByKeyboard::SetVelocityRefKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::SetNullVelocityRefKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::SetNullVelocityRefKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -600,8 +588,7 @@ void FlyByKeyboard::SetNullVelocityRefKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::SheltonKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::SheltonKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -617,8 +604,7 @@ void FlyByKeyboard::SheltonKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::InertialToggleKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::InertialToggleKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -631,8 +617,7 @@ void FlyByKeyboard::InertialToggleKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::InertialPulsorKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::InertialPulsorKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -648,8 +633,7 @@ void FlyByKeyboard::InertialPulsorKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyInertialXYToggleKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyInertialXYToggleKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -662,8 +646,7 @@ void FlyByKeyboard::JoyInertialXYToggleKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyInertialXZToggleKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyInertialXZToggleKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -676,8 +659,7 @@ void FlyByKeyboard::JoyInertialXZToggleKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyRollToggleKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyRollToggleKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -690,8 +672,7 @@ void FlyByKeyboard::JoyRollToggleKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyBankToggleKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyBankToggleKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -704,8 +685,7 @@ void FlyByKeyboard::JoyBankToggleKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyInertialXYPulsorKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyInertialXYPulsorKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -721,8 +701,7 @@ void FlyByKeyboard::JoyInertialXYPulsorKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyInertialXZPulsorKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyInertialXZPulsorKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -738,8 +717,7 @@ void FlyByKeyboard::JoyInertialXZPulsorKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyRollPulsorKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyRollPulsorKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -755,8 +733,7 @@ void FlyByKeyboard::JoyRollPulsorKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JoyBankPulsorKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JoyBankPulsorKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -772,8 +749,7 @@ void FlyByKeyboard::JoyBankPulsorKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::JumpKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::JumpKey(const KBData &, KBSTATE k) {
     switch (k) {
         case PRESS:
             g().jumpkey =
@@ -788,8 +764,7 @@ void FlyByKeyboard::JumpKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::UpKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::UpKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -812,8 +787,7 @@ void FlyByKeyboard::UpKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::KThrustRight(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::KThrustRight(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -829,8 +803,7 @@ void FlyByKeyboard::KThrustRight(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::KThrustLeft(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::KThrustLeft(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -846,8 +819,7 @@ void FlyByKeyboard::KThrustLeft(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::KThrustUp(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::KThrustUp(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -863,8 +835,7 @@ void FlyByKeyboard::KThrustUp(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::KThrustDown(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::KThrustDown(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -880,8 +851,7 @@ void FlyByKeyboard::KThrustDown(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::KThrustFront(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::KThrustFront(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -897,8 +867,7 @@ void FlyByKeyboard::KThrustFront(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::KThrustBack(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::KThrustBack(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -914,8 +883,7 @@ void FlyByKeyboard::KThrustBack(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::DownKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::DownKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -938,8 +906,7 @@ void FlyByKeyboard::DownKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::LeftKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::LeftKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -962,8 +929,7 @@ void FlyByKeyboard::LeftKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::KSwitchFlightMode(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::KSwitchFlightMode(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -976,8 +942,7 @@ void FlyByKeyboard::KSwitchFlightMode(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::RightKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::RightKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1000,8 +965,7 @@ void FlyByKeyboard::RightKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::ABKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::ABKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1023,8 +987,7 @@ void FlyByKeyboard::ABKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::AutoKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::AutoKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1033,8 +996,7 @@ void FlyByKeyboard::AutoKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::EngageSpecAuto(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::EngageSpecAuto(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1043,8 +1005,7 @@ void FlyByKeyboard::EngageSpecAuto(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::SwitchCombatModeKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::SwitchCombatModeKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1053,8 +1014,7 @@ void FlyByKeyboard::SwitchCombatModeKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::StopAutoKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::StopAutoKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1063,8 +1023,7 @@ void FlyByKeyboard::StopAutoKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::StopKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::StopKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1073,8 +1032,7 @@ void FlyByKeyboard::StopKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::AccelKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::AccelKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1096,8 +1054,7 @@ void FlyByKeyboard::AccelKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::DecelKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::DecelKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1119,8 +1076,7 @@ void FlyByKeyboard::DecelKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::StartKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::StartKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1129,8 +1085,7 @@ void FlyByKeyboard::StartKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::RollRightKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::RollRightKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }
@@ -1152,8 +1107,7 @@ void FlyByKeyboard::RollRightKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::MatchSpeedKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::MatchSpeedKey(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         if (g().dirty) {
             g().UnDirty();
@@ -1162,8 +1116,7 @@ void FlyByKeyboard::MatchSpeedKey(const KBData &, KBSTATE k)
     }
 }
 
-void FlyByKeyboard::RollLeftKey(const KBData &, KBSTATE k)
-{
+void FlyByKeyboard::RollLeftKey(const KBData &, KBSTATE k) {
     if (g().dirty) {
         g().UnDirty();
     }

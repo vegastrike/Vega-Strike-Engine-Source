@@ -90,18 +90,15 @@ protected:
 public:
     virtual void setTime(double tim);
 
-    virtual double curTime() const
-    {
+    virtual double curTime() const {
         return curtime;
     }
 
-    virtual unsigned int numFrames() const
-    {
+    virtual unsigned int numFrames() const {
         return numframes;
     }
 
-    virtual float framesPerSecond() const
-    {
+    virtual float framesPerSecond() const {
         return 1 / timeperframe;
     }
 
@@ -109,13 +106,11 @@ public:
 
     virtual unsigned int numPasses() const;
 
-    virtual bool canMultiPass() const
-    {
+    virtual bool canMultiPass() const {
         return true;
     }
 
-    virtual bool constFrameRate() const
-    {
+    virtual bool constFrameRate() const {
         return constframerate;
     }
 
@@ -145,13 +140,11 @@ public:
 
     virtual Texture *Clone();
 
-    virtual void MakeActive()
-    {
+    virtual void MakeActive() {
         MakeActive(texstage, 0);
     }                                                   //MSVC bug seems to hide MakeActive() if we define MakeActive(int,int) - the suckers!
 
-    virtual void MakeActive(int stage)
-    {
+    virtual void MakeActive(int stage) {
         MakeActive(stage, 0);
     }                                                         //MSVC bug seems to hide MakeActive(int) if we define MakeActive(int,int) - the suckers!
 
@@ -159,53 +152,43 @@ public:
 
     bool SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst);
 
-    bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst)
-    {
+    bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst) {
         return SetupPass(pass, texstage, src, dst);
     }
 
-    void SetInterpolateFrames(bool set)
-    {
+    void SetInterpolateFrames(bool set) {
         options = (options & ~optInterpolateFrames) | (set ? optInterpolateFrames : 0);
     }
 
-    void SetInterpolateTCoord(bool set)
-    {
+    void SetInterpolateTCoord(bool set) {
         options = (options & ~optInterpolateTCoord) | (set ? optInterpolateTCoord : 0);
     }
 
-    void SetLoopInterp(bool set)
-    {
+    void SetLoopInterp(bool set) {
         options = (options & ~optLoopInterp) | (set ? optLoopInterp : 0);
     }
 
-    void SetLoop(bool set)
-    {
+    void SetLoop(bool set) {
         options = (options & ~optLoop) | (set ? optLoop : 0);
     }
 
-    bool GetInterpolateFrames() const
-    {
+    bool GetInterpolateFrames() const {
         return (options & optInterpolateFrames) != 0;
     }
 
-    bool GetInterpolateTCoord() const
-    {
+    bool GetInterpolateTCoord() const {
         return (options & optInterpolateTCoord) != 0;
     }
 
-    bool GetLoopInterp() const
-    {
+    bool GetLoopInterp() const {
         return (options & optLoopInterp) != 0;
     }
 
-    bool GetLoop() const
-    {
+    bool GetLoop() const {
         return (options & optLoop) != 0;
     }
 
-    SharedPtr<Audio::Source> GetTimeSource() const
-    {
+    SharedPtr<Audio::Source> GetTimeSource() const {
         return (options & optSoundTiming) ? timeSource : SharedPtr<Audio::Source>();
     }
 
@@ -226,9 +209,9 @@ public:
 
     //Some useful factory methods -- also defined in ani_texture.cpp
     static AnimatedTexture *CreateVideoTexture(const std::string &fname,
-                                               int stage = 0,
-                                               enum FILTER ismipmapped = BILINEAR,
-                                               bool detailtex = false);
+            int stage = 0,
+            enum FILTER ismipmapped = BILINEAR,
+            bool detailtex = false);
 };
 
 #endif

@@ -57,8 +57,7 @@ using namespace VSFileSystem;
 typedef vsUMap<std::string, VSSprite *> VSSpriteCache;
 static VSSpriteCache sprite_cache;
 
-static std::pair<bool, VSSprite *> cacheLookup(const char *file)
-{
+static std::pair<bool, VSSprite *> cacheLookup(const char *file) {
     std::string hashName = VSFileSystem::GetHashName(std::string(file));
     VSSpriteCache::iterator it = sprite_cache.find(hashName);
     if (it != sprite_cache.end()) {
@@ -68,20 +67,19 @@ static std::pair<bool, VSSprite *> cacheLookup(const char *file)
     }
 }
 
-static void cacheInsert(const char *file, VSSprite *spr)
-{
+static void cacheInsert(const char *file, VSSprite *spr) {
     std::string hashName = VSFileSystem::GetHashName(std::string(file));
     sprite_cache.insert(std::pair<std::string, VSSprite *>(hashName, spr));
 }
 
 VSSprite::VSSprite(Texture *_surface,
-                   float _xcenter,
-                   float _ycenter,
-                   float _width,
-                   float _height,
-                   float _s,
-                   float _t,
-                   bool _isAnimation) :
+        float _xcenter,
+        float _ycenter,
+        float _width,
+        float _height,
+        float _s,
+        float _t,
+        bool _isAnimation) :
         xcenter(_xcenter),
         ycenter(_ycenter),
         widtho2(_width / 2),
@@ -89,21 +87,18 @@ VSSprite::VSSprite(Texture *_surface,
         maxs(_s),
         maxt(_t),
         rotation(0),
-        isAnimation(_isAnimation)
-{
+        isAnimation(_isAnimation) {
     surface = _surface;
 }
 
-VSSprite::VSSprite(const VSSprite &source)
-{
+VSSprite::VSSprite(const VSSprite &source) {
     *this = source;
     if (surface != NULL) {
         surface = surface->Clone();
     }
 }
 
-VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force)
-{
+VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
     VSCONSTRUCT2('S')
     xcenter = ycenter = 0;
     widtho2 = heighto2 = 0;
@@ -155,16 +150,16 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force)
                 isAnimation = false;
             } else {
                 surface = new Texture(texture,
-                                      texturea,
-                                      0,
-                                      texturefilter,
-                                      TEXTURE2D,
-                                      TEXTURE_2D,
-                                      1,
-                                      0,
-                                      GFXTRUE,
-                                      65536,
-                                      GFXFALSE);
+                        texturea,
+                        0,
+                        texturefilter,
+                        TEXTURE2D,
+                        TEXTURE_2D,
+                        1,
+                        0,
+                        GFXTRUE,
+                        65536,
+                        GFXFALSE);
                 isAnimation = false;
             }
             if (!surface->LoadSuccess()) {
@@ -191,8 +186,7 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force)
     }
 }
 
-void VSSprite::ReadTexture(VSFileSystem::VSFile *f)
-{
+void VSSprite::ReadTexture(VSFileSystem::VSFile *f) {
     if (!f->Valid()) {
         widtho2 = heighto2 = 0;
         xcenter = ycenter = 0;
@@ -202,8 +196,7 @@ void VSSprite::ReadTexture(VSFileSystem::VSFile *f)
     surface = new Texture(f);
 }
 
-VSSprite::~VSSprite()
-{
+VSSprite::~VSSprite() {
     VSDESTRUCT2
     if (surface != nullptr) {
         delete surface;
@@ -211,27 +204,23 @@ VSSprite::~VSSprite()
     }
 }
 
-void VSSprite::SetST(const float s, const float t)
-{
+void VSSprite::SetST(const float s, const float t) {
     maxs = s;
     maxt = t;
 }
 
-void VSSprite::GetST(float &s, float &t)
-{
+void VSSprite::GetST(float &s, float &t) {
     s = maxs;
     t = maxt;
 }
 
-void VSSprite::SetTime(double newtime)
-{
+void VSSprite::SetTime(double newtime) {
     if (surface) {
         surface->setTime(newtime);
     }
 }
 
-void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul)
-{
+void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
         const float cw = widtho2 * cos(rotation);
         const float sw = widtho2 * sin(rotation);
@@ -251,8 +240,7 @@ void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul)
     }
 }
 
-void VSSprite::Draw()
-{
+void VSSprite::Draw() {
     if (surface) {
         //don't do anything if no surface
         size_t lyr;
@@ -309,49 +297,41 @@ void VSSprite::Draw()
     }
 }
 
-void VSSprite::SetPosition(const float &x1, const float &y1)
-{
+void VSSprite::SetPosition(const float &x1, const float &y1) {
     xcenter = x1;
     ycenter = y1;
 }
 
-void VSSprite::GetPosition(float &x1, float &y1)
-{
+void VSSprite::GetPosition(float &x1, float &y1) {
     x1 = xcenter;
     y1 = ycenter;
 }
 
-void VSSprite::SetSize(float x1, float y1)
-{
+void VSSprite::SetSize(float x1, float y1) {
     widtho2 = x1 / 2;
     heighto2 = y1 / 2;
 }
 
-void VSSprite::GetSize(float &x1, float &y1)
-{
+void VSSprite::GetSize(float &x1, float &y1) {
     x1 = widtho2 * 2;
     y1 = heighto2 * 2;
 }
 
-void VSSprite::SetRotation(const float &rot)
-{
+void VSSprite::SetRotation(const float &rot) {
     rotation = rot;
 }
 
-void VSSprite::GetRotation(float &rot)
-{
+void VSSprite::GetRotation(float &rot) {
     rot = rotation;
 }
 
-void VSSprite::SetTimeSource(SharedPtr<Audio::Source> source)
-{
+void VSSprite::SetTimeSource(SharedPtr<Audio::Source> source) {
     if (isAnimation) {
         ((AnimatedTexture *) surface)->SetTimeSource(source);
     }
 }
 
-SharedPtr<Audio::Source> VSSprite::GetTimeSource() const
-{
+SharedPtr<Audio::Source> VSSprite::GetTimeSource() const {
     if (isAnimation) {
         return ((AnimatedTexture *) surface)->GetTimeSource();
     } else {
@@ -359,15 +339,13 @@ SharedPtr<Audio::Source> VSSprite::GetTimeSource() const
     }
 }
 
-void VSSprite::ClearTimeSource()
-{
+void VSSprite::ClearTimeSource() {
     if (isAnimation) {
         ((AnimatedTexture *) surface)->ClearTimeSource();
     }
 }
 
-bool VSSprite::Done() const
-{
+bool VSSprite::Done() const {
     if (isAnimation) {
         return ((AnimatedTexture *) surface)->Done();
     } else {
@@ -375,15 +353,13 @@ bool VSSprite::Done() const
     }
 }
 
-void VSSprite::Reset()
-{
+void VSSprite::Reset() {
     if (isAnimation) {
         ((AnimatedTexture *) surface)->Reset();
     }
 }
 
-bool VSSprite::LoadSuccess() const
-{
+bool VSSprite::LoadSuccess() const {
     return surface != NULL && surface->LoadSuccess();
 }
 

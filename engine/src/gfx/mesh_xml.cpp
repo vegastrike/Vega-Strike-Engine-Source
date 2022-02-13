@@ -56,8 +56,7 @@
 #undef max
 #endif
 
-static inline float max(float x, float y)
-{
+static inline float max(float x, float y) {
     if (x > y) {
         return x;
     } else {
@@ -69,8 +68,7 @@ static inline float max(float x, float y)
 #undef min
 #endif
 
-static inline float min(float x, float y)
-{
+static inline float min(float x, float y) {
     if (x < y) {
         return x;
     } else {
@@ -159,24 +157,21 @@ const EnumMap::Pair MeshXML::attribute_names[] = {
 
 const EnumMap MeshXML::element_map
         (MeshXML::element_names,
-         sizeof(MeshXML::element_names) / sizeof(MeshXML::element_names[0]));
+                sizeof(MeshXML::element_names) / sizeof(MeshXML::element_names[0]));
 const EnumMap MeshXML::attribute_map(MeshXML::attribute_names,
-                                     sizeof(MeshXML::attribute_names) / sizeof(MeshXML::attribute_names[0]));
+        sizeof(MeshXML::attribute_names) / sizeof(MeshXML::attribute_names[0]));
 
-void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     MeshXML *xml = (MeshXML *) userData;
     xml->mesh->beginElement(xml, name, AttributeList(atts));
 }
 
-void Mesh::endElement(void *userData, const XML_Char *name)
-{
+void Mesh::endElement(void *userData, const XML_Char *name) {
     MeshXML *xml = (MeshXML *) userData;
     xml->mesh->endElement(xml, std::string(name));
 }
 
-enum BLENDFUNC parse_alpha(const char *tmp)
-{
+enum BLENDFUNC parse_alpha(const char *tmp) {
     if (strcmp(tmp, "ZERO") == 0) {
         return ZERO;
     }
@@ -290,8 +285,7 @@ std::string parse_alpha( enum BLENDMODE tmp )
  *  will be no need for this sort of checking
  */
 
-bool shouldreflect(string r)
-{
+bool shouldreflect(string r) {
     if (strtoupper(r) == "FALSE") {
         return false;
     }
@@ -304,8 +298,7 @@ bool shouldreflect(string r)
     return false;
 }
 
-void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes)
-{
+void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes) {
     static bool use_detail_texture =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_detail_texture", "true"));
     //static bool flatshadeit=false;
@@ -323,8 +316,8 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
         case MeshXML::DETAILPLANE:
             if (use_detail_texture) {
                 Vector vec(detailPlanes.size() >= 2 ? 1 : 0,
-                           detailPlanes.size() == 1 ? 1 : 0,
-                           detailPlanes.size() == 0 ? 1 : 0);
+                        detailPlanes.size() == 1 ? 1 : 0,
+                        detailPlanes.size() == 0 ? 1 : 0);
                 for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                     switch (MeshXML::attribute_map.lookup((*iter).name)) {
                         case MeshXML::X:
@@ -365,9 +358,9 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         break;
                     case MeshXML::LIGHTINGON:
                         setLighting(XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                                  "ForceLighting",
-                                                                                  "true"))
-                                            || XMLSupport::parse_bool((*iter).value));
+                                "ForceLighting",
+                                "true"))
+                                || XMLSupport::parse_bool((*iter).value));
                         break;
                     case MeshXML::CULLFACE:
                         forceCullFace(XMLSupport::parse_bool((*iter).value));
@@ -478,8 +471,8 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         xml->sharevert =
                                 (XMLSupport::parse_bool((*iter).value)
                                         && XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                                         "SharedVertexArrays",
-                                                                                         "true")));
+                                                "SharedVertexArrays",
+                                                "true")));
                         break;
                     case MeshXML::POLYGONOFFSET:
                         this->polygon_offset = XMLSupport::parse_float((*iter).value);
@@ -540,8 +533,8 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             }
                             static bool per_pixel_lighting =
                                     XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                                  "per_pixel_lighting",
-                                                                                  "true"));
+                                            "per_pixel_lighting",
+                                            "true"));
                             if ((texindex == 0) || per_pixel_lighting) {
                                 while (xml->decals.size() <= texindex) {
                                     xml->decals.push_back(MeshXML::ZeTexture());
@@ -594,7 +587,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                 switch (MeshXML::attribute_map.lookup((*iter).name)) {
                     case MeshXML::UNKNOWN:
                         VS_LOG(error,
-                               (boost::format("Unknown attribute '%1%' encountered in Location tag") % (*iter).name));
+                                (boost::format("Unknown attribute '%1%' encountered in Location tag") % (*iter).name));
                         break;
                     case MeshXML::X:
                         assert(!(xml->point_state & MeshXML::P_X));
@@ -627,9 +620,9 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
             assert((xml->point_state & (MeshXML::P_X
                     | MeshXML::P_Y
                     | MeshXML::P_Z))
-                           == (MeshXML::P_X
-                                   | MeshXML::P_Y
-                                   | MeshXML::P_Z));
+                    == (MeshXML::P_X
+                            | MeshXML::P_Y
+                            | MeshXML::P_Z));
             break;
         case MeshXML::NORMAL:
             assert(top == MeshXML::POINT);
@@ -637,7 +630,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                 switch (MeshXML::attribute_map.lookup((*iter).name)) {
                     case MeshXML::UNKNOWN:
                         VS_LOG(error,
-                               (boost::format("Unknown attribute '%1%' encountered in Normal tag") % (*iter).name));
+                                (boost::format("Unknown attribute '%1%' encountered in Normal tag") % (*iter).name));
                         break;
                     case MeshXML::I:
                         assert(!(xml->point_state & MeshXML::P_I));
@@ -853,11 +846,11 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         break;
                     case MeshXML::LODFILE:
                         xml->lod
-                           .push_back(new Mesh((*iter).value.c_str(),
-                                               xml->lodscale,
-                                               xml->faction,
-                                               xml->fg,
-                                               true));                   //make orig mesh
+                                .push_back(new Mesh((*iter).value.c_str(),
+                                        xml->lodscale,
+                                        xml->faction,
+                                        xml->fg,
+                                        true));                   //make orig mesh
                         break;
                     case MeshXML::SIZE:
                         flotsize = XMLSupport::parse_float((*iter).value);
@@ -906,9 +899,9 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
             assert((xml->vertex_state & (MeshXML::V_POINT
                     | MeshXML::V_S
                     | MeshXML::V_T))
-                           == (MeshXML::V_POINT
-                                   | MeshXML::V_S
-                                   | MeshXML::V_T));
+                    == (MeshXML::V_POINT
+                            | MeshXML::V_S
+                            | MeshXML::V_T));
             assert(index < xml->vertices.size()); //FIXME not all switch cases initialize index
             xml->vertex.s = 0.0;
             xml->vertex.t = 0.0;
@@ -993,10 +986,10 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                     | MeshXML::V_ROTATE
                     | MeshXML::V_SIZE
                     | MeshXML::V_OFFSET))
-                           == (MeshXML::V_TYPE
-                                   | MeshXML::V_ROTATE
-                                   | MeshXML::V_SIZE
-                                   | MeshXML::V_OFFSET));
+                    == (MeshXML::V_TYPE
+                            | MeshXML::V_ROTATE
+                            | MeshXML::V_SIZE
+                            | MeshXML::V_OFFSET));
             xml->logos.push_back(MeshXML::ZeLogo());
             xml->logos[xml->logos.size() - 1].type = typ;
             xml->logos[xml->logos.size() - 1].rotate = rot;
@@ -1048,8 +1041,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
     }
 }
 
-void Mesh::endElement(MeshXML *xml, const string &name)
-{
+void Mesh::endElement(MeshXML *xml, const string &name) {
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup(name);
     assert(*xml->state_stack.rbegin() == elem);
     xml->state_stack.pop_back();
@@ -1065,12 +1057,12 @@ void Mesh::endElement(MeshXML *xml, const string &name)
                     | MeshXML::P_I
                     | MeshXML::P_J
                     | MeshXML::P_K))
-                           == (MeshXML::P_X
-                                   | MeshXML::P_Y
-                                   | MeshXML::P_Z
-                                   | MeshXML::P_I
-                                   | MeshXML::P_J
-                                   | MeshXML::P_K));
+                    == (MeshXML::P_X
+                            | MeshXML::P_Y
+                            | MeshXML::P_Z
+                            | MeshXML::P_I
+                            | MeshXML::P_J
+                            | MeshXML::P_K));
             xml->vertices.push_back(xml->vertex);
             xml->vertexcount.push_back(0);
             break;
@@ -1171,8 +1163,7 @@ void Mesh::endElement(MeshXML *xml, const string &name)
     }
 }
 
-void updateMax(Vector &mn, Vector &mx, const GFXVertex &ver)
-{
+void updateMax(Vector &mn, Vector &mx, const GFXVertex &ver) {
     mn.i = min(ver.x, mn.i);
     mx.i = max(ver.x, mx.i);
     mn.j = min(ver.y, mn.j);
@@ -1183,8 +1174,7 @@ void updateMax(Vector &mn, Vector &mx, const GFXVertex &ver)
 
 using namespace VSFileSystem;
 
-void LaunchConverter(const char *input, const char *output, const char *args = "obc")
-{
+void LaunchConverter(const char *input, const char *output, const char *args = "obc") {
     string intmp = string("\"") + input + string("\"");
     string outtmp = string("\"") + output + string("\"");
 #ifndef _WIN32
@@ -1221,8 +1211,7 @@ void LaunchConverter(const char *input, const char *output, const char *args = "
 #endif
 }
 
-bool isBFXM(VSFile &f)
-{
+bool isBFXM(VSFile &f) {
     char bfxm[4];
     f.Read(&bfxm[0], 1);
     f.Read(&bfxm[1], 1);
@@ -1232,8 +1221,7 @@ bool isBFXM(VSFile &f)
     return bfxm[0] == 'B' && bfxm[1] == 'F' && bfxm[2] == 'X' && bfxm[3] == 'M';
 }
 
-void CopyFile(VSFile &src, VSFile &dst)
-{
+void CopyFile(VSFile &src, VSFile &dst) {
     size_t hm;
     size_t srcstruct;
     size_t *srcptr = &srcstruct;
@@ -1298,11 +1286,10 @@ const bool USE_RECALC_NORM = true;
 const bool FLAT_SHADE = true;
 
 Mesh *Mesh::LoadMesh(const char *filename,
-                     const Vector &scale,
-                     int faction,
-                     Flightgroup *fg,
-                     const std::vector<std::string> &overridetextures)
-{
+        const Vector &scale,
+        int faction,
+        Flightgroup *fg,
+        const std::vector<std::string> &overridetextures) {
     vector<Mesh *> m = LoadMeshes(filename, scale, faction, fg, overridetextures);
     if (m.empty()) {
         return 0;
@@ -1319,11 +1306,10 @@ Mesh *Mesh::LoadMesh(const char *filename,
 Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 
 vector<Mesh *> Mesh::LoadMeshes(const char *filename,
-                                const Vector &scale,
-                                int faction,
-                                Flightgroup *fg,
-                                const std::vector<std::string> &overrideTextures)
-{
+        const Vector &scale,
+        int faction,
+        Flightgroup *fg,
+        const std::vector<std::string> &overrideTextures) {
     /*
      *  if (strstr(filename,".xmesh")) {
      *  Mesh * m = new Mesh (filename,scale,faction,fg);
@@ -1369,8 +1355,8 @@ vector<Mesh *> Mesh::LoadMeshes(const char *filename,
         f.GoTo(0);
         hash_name =
                 (err == VSFileSystem::Shared) ? VSFileSystem::GetSharedMeshHashName(filename, scale,
-                                                                                    faction)
-                                              : VSFileSystem::GetHashName(
+                        faction)
+                        : VSFileSystem::GetHashName(
                         filename,
                         scale,
                         faction);
@@ -1396,12 +1382,11 @@ vector<Mesh *> Mesh::LoadMeshes(const char *filename,
 }
 
 void Mesh::LoadXML(const char *filename,
-                   const Vector &scale,
-                   int faction,
-                   Flightgroup *fg,
-                   bool origthis,
-                   const vector<string> &textureOverride)
-{
+        const Vector &scale,
+        int faction,
+        Flightgroup *fg,
+        bool origthis,
+        const vector<string> &textureOverride) {
     VSFile f;
     VSError err = f.OpenReadOnly(filename, MeshFile);
     if (err > Ok) {
@@ -1415,12 +1400,11 @@ void Mesh::LoadXML(const char *filename,
 }
 
 void Mesh::LoadXML(VSFileSystem::VSFile &f,
-                   const Vector &scale,
-                   int faction,
-                   Flightgroup *fg,
-                   bool origthis,
-                   const vector<string> &textureOverride)
-{
+        const Vector &scale,
+        int faction,
+        Flightgroup *fg,
+        bool origthis,
+        const vector<string> &textureOverride) {
     std::vector<unsigned int> ind;
     MeshXML *xml = new MeshXML;
     xml->mesh = this;
@@ -1461,14 +1445,13 @@ void Mesh::LoadXML(VSFileSystem::VSFile &f,
     delete xml;
 }
 
-static void SumNormal(vector<GFXVertex> &vertices, int i1, int i2, int i3, vector<float> &weights)
-{
+static void SumNormal(vector<GFXVertex> &vertices, int i1, int i2, int i3, vector<float> &weights) {
     Vector v1(vertices[i2].x - vertices[i1].x,
-              vertices[i2].y - vertices[i1].y,
-              vertices[i2].z - vertices[i1].z);
+            vertices[i2].y - vertices[i1].y,
+            vertices[i2].z - vertices[i1].z);
     Vector v2(vertices[i3].x - vertices[i1].x,
-              vertices[i3].y - vertices[i1].y,
-              vertices[i3].z - vertices[i1].z);
+            vertices[i3].y - vertices[i1].y,
+            vertices[i3].z - vertices[i1].z);
     v1.Normalize();
     v2.Normalize();
     Vector N = v1.Cross(v2);
@@ -1491,11 +1474,10 @@ static void SumNormal(vector<GFXVertex> &vertices, int i1, int i2, int i3, vecto
     weights[i3] += w;
 }
 
-static void SumLineNormal(vector<GFXVertex> &vertices, int i1, int i2, vector<float> &weights)
-{
+static void SumLineNormal(vector<GFXVertex> &vertices, int i1, int i2, vector<float> &weights) {
     Vector v1(vertices[i2].x - vertices[i1].x,
-              vertices[i2].y - vertices[i1].y,
-              vertices[i2].z - vertices[i1].z);
+            vertices[i2].y - vertices[i1].y,
+            vertices[i2].z - vertices[i1].z);
     static Vector v2(0.3408, 0.9401, 0.0005);
     v1.Normalize();
     Vector N = v1.Cross(v2);
@@ -1512,12 +1494,11 @@ static void SumLineNormal(vector<GFXVertex> &vertices, int i1, int i2, vector<fl
 }
 
 static void SumNormals(vector<GFXVertex> &vertices,
-                       vector<int> &indices,
-                       size_t begin,
-                       size_t end,
-                       POLYTYPE polytype,
-                       vector<float> &weights)
-{
+        vector<int> &indices,
+        size_t begin,
+        size_t end,
+        POLYTYPE polytype,
+        vector<float> &weights) {
     int flip = 0;
     size_t i;
     switch (polytype) {
@@ -1583,15 +1564,13 @@ static void SumNormals(vector<GFXVertex> &vertices,
     }
 }
 
-static void ClearTangents(vector<GFXVertex> &vertices)
-{
+static void ClearTangents(vector<GFXVertex> &vertices) {
     for (vector<GFXVertex>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
         it->SetTangent(Vector(0, 0, 0), 0);
     }
 }
 
-static float faceTSPolarity(const Vector &T, const Vector &B, const Vector &N)
-{
+static float faceTSPolarity(const Vector &T, const Vector &B, const Vector &N) {
     if (T.Cross(B).Dot(N) >= 0.f) {
         return -1.f;
     } else {
@@ -1599,25 +1578,23 @@ static float faceTSPolarity(const Vector &T, const Vector &B, const Vector &N)
     }
 }
 
-static float faceTSWeight(vector<GFXVertex> &vertices, int i1, int i2, int i3)
-{
+static float faceTSWeight(vector<GFXVertex> &vertices, int i1, int i2, int i3) {
     const GFXVertex &vtx1 = vertices[i1];
     const GFXVertex &vtx2 = vertices[i2];
     const GFXVertex &vtx3 = vertices[i3];
 
     Vector v1(vtx2.x - vtx1.x,
-              vtx2.y - vtx1.y,
-              vtx2.z - vtx1.z);
+            vtx2.y - vtx1.y,
+            vtx2.z - vtx1.z);
     Vector v2(vtx3.x - vtx1.x,
-              vtx3.y - vtx1.y,
-              vtx3.z - vtx1.z);
+            vtx3.y - vtx1.y,
+            vtx3.z - vtx1.z);
     v1.Normalize();
     v2.Normalize();
     return 1.f - fabsf(v1.Dot(v2));
 }
 
-static void computeTangentspace(vector<GFXVertex> &vertices, int i1, int i2, int i3, Vector &T, Vector &B, Vector &N)
-{
+static void computeTangentspace(vector<GFXVertex> &vertices, int i1, int i2, int i3, Vector &T, Vector &B, Vector &N) {
     const GFXVertex &v1 = vertices[i1];
     const GFXVertex &v2 = vertices[i2];
     const GFXVertex &v3 = vertices[i3];
@@ -1647,8 +1624,7 @@ static void computeTangentspace(vector<GFXVertex> &vertices, int i1, int i2, int
     N.Normalize();
 }
 
-static void SumTangent(vector<GFXVertex> &vertices, int i1, int i2, int i3, vector<float> &weights)
-{
+static void SumTangent(vector<GFXVertex> &vertices, int i1, int i2, int i3, vector<float> &weights) {
     float w = faceTSWeight(vertices, i1, i2, i3);
     Vector T, B, N;
     computeTangentspace(vertices, i1, i2, i3, T, B, N);
@@ -1680,12 +1656,11 @@ static void SumTangent(vector<GFXVertex> &vertices, int i1, int i2, int i3, vect
 }
 
 static void SumTangents(vector<GFXVertex> &vertices,
-                        vector<int> &indices,
-                        size_t begin,
-                        size_t end,
-                        POLYTYPE polytype,
-                        vector<float> &weights)
-{
+        vector<int> &indices,
+        size_t begin,
+        size_t end,
+        POLYTYPE polytype,
+        vector<float> &weights) {
     int flip = 0;
     size_t i;
     switch (polytype) {
@@ -1735,8 +1710,7 @@ static void SumTangents(vector<GFXVertex> &vertices,
     }
 }
 
-static void NormalizeTangents(vector<GFXVertex> &vertices, vector<float> &weights)
-{
+static void NormalizeTangents(vector<GFXVertex> &vertices, vector<float> &weights) {
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         GFXVertex &v = vertices[i];
         float w = weights[i];
@@ -1758,8 +1732,7 @@ static void NormalizeTangents(vector<GFXVertex> &vertices, vector<float> &weight
     }
 }
 
-static void NormalizeNormals(vector<GFXVertex> &vertices, vector<float> &weights)
-{
+static void NormalizeNormals(vector<GFXVertex> &vertices, vector<float> &weights) {
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         GFXVertex &v = vertices[i];
         float w = weights[i];
@@ -1779,8 +1752,7 @@ static void NormalizeNormals(vector<GFXVertex> &vertices, vector<float> &weights
     }
 }
 
-void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverride)
-{
+void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverride) {
     unsigned int i;
     unsigned int a = 0;
     unsigned int j;
@@ -1826,7 +1798,7 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
             ind.push_back(ix);
             xml->tris[a + j].SetNormal(xml->vertices[ix].GetNormal());
             xml->tris[a + j].SetTangent(xml->vertices[ix].GetTangent(),
-                                        xml->vertices[ix].GetTangentParity());
+                    xml->vertices[ix].GetTangentParity());
         }
     }
     a = 0;
@@ -1836,7 +1808,7 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
             ind.push_back(ix);
             xml->quads[a + j].SetNormal(xml->vertices[ix].GetNormal());
             xml->quads[a + j].SetTangent(xml->vertices[ix].GetTangent(),
-                                         xml->vertices[ix].GetTangentParity());
+                    xml->vertices[ix].GetTangentParity());
         }
     }
     a = 0;
@@ -1856,7 +1828,7 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
             ind.push_back(ix);
             xml->tristrips[a][k].SetNormal(xml->vertices[ix].GetNormal());
             xml->tristrips[a][k].SetTangent(xml->vertices[ix].GetTangent(),
-                                            xml->vertices[ix].GetTangentParity());
+                    xml->vertices[ix].GetTangentParity());
         }
     }
     for (l = a = 0; a < xml->trifans.size(); a++) {
@@ -1865,7 +1837,7 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
             ind.push_back(ix);
             xml->trifans[a][k].SetNormal(xml->vertices[ix].GetNormal());
             xml->trifans[a][k].SetTangent(xml->vertices[ix].GetTangent(),
-                                          xml->vertices[ix].GetTangentParity());
+                    xml->vertices[ix].GetTangentParity());
         }
     }
     for (l = a = 0; a < xml->quadstrips.size(); a++) {
@@ -1874,7 +1846,7 @@ void Mesh::PostProcessLoading(MeshXML *xml, const vector<string> &textureOverrid
             ind.push_back(ix);
             xml->quadstrips[a][k].SetNormal(xml->vertices[ix].GetNormal());
             xml->quadstrips[a][k].SetTangent(xml->vertices[ix].GetTangent(),
-                                             xml->vertices[ix].GetTangentParity());
+                    xml->vertices[ix].GetTangentParity());
         }
     }
     for (l = a = 0; a < xml->linestrips.size(); a++) {

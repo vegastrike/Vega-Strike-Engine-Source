@@ -61,11 +61,11 @@ navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, navdrawnode
 }
 
 navdrawnode::navdrawnode(int type_,
-                         float size_,
-                         float x_,
-                         float y_,
-                         Unit *source_,
-                         navdrawnode *nextitem_)     //new node into list
+        float size_,
+        float x_,
+        float y_,
+        Unit *source_,
+        navdrawnode *nextitem_)     //new node into list
 {
     type = type_;
     size = size_;
@@ -76,8 +76,8 @@ navdrawnode::navdrawnode(int type_,
 }
 
 navdrawlist::navdrawlist(bool mouse,
-                         navscreenoccupied *screenoccupation_,
-                         GFXColor *factioncolours_)   //start list with a 'mouselist' flag
+        navscreenoccupied *screenoccupation_,
+        GFXColor *factioncolours_)   //start list with a 'mouselist' flag
 {
     inmouserange = mouse;
     head = NULL;
@@ -156,35 +156,35 @@ void navdrawlist::rotate()      //take the head and stick it in the back
 string getUnitNameAndFgNoBase(Unit *target);
 
 void drawdescription(Unit *source,
-                     float x_,
-                     float y_,
-                     float size_x,
-                     float size_y,
-                     bool ignore_occupied_areas,
-                     navscreenoccupied *screenoccupation,
-                     const GFXColor &col)                                                                                                                                     //take the head and stick it in the back
+        float x_,
+        float y_,
+        float size_x,
+        float size_y,
+        bool ignore_occupied_areas,
+        navscreenoccupied *screenoccupation,
+        const GFXColor &col)                                                                                                                                     //take the head and stick it in the back
 {
     if (source == NULL) {
         return;
     }
     drawdescription(getUnitNameAndFgNoBase(source),
-                    x_,
-                    y_,
-                    size_x,
-                    size_y,
-                    ignore_occupied_areas,
-                    screenoccupation,
-                    col);
+            x_,
+            y_,
+            size_x,
+            size_y,
+            ignore_occupied_areas,
+            screenoccupation,
+            col);
 }
 
 void drawdescription(string text,
-                     float x_,
-                     float y_,
-                     float size_x,
-                     float size_y,
-                     bool ignore_occupied_areas,
-                     navscreenoccupied *screenoccupation,
-                     const GFXColor &col)                                                                                                                                     //take the head and stick it in the back
+        float x_,
+        float y_,
+        float size_x,
+        float size_y,
+        bool ignore_occupied_areas,
+        navscreenoccupied *screenoccupation,
+        const GFXColor &col)                                                                                                                                     //take the head and stick it in the back
 {
     if (text.size() == 0) {
         return;
@@ -216,15 +216,13 @@ void drawdescription(string text,
     displayname.bgcol = tpbg;
 }
 
-Unit *navdrawlist::gettailunit()
-{
+Unit *navdrawlist::gettailunit() {
     return tail->source;
 }
 
 //#define INIT_COL_ARRAY( col, r, g, b, a ) do{ col[0] = r; col[1] = g; col[2] = b; col[3] = a; }while(0)
 
-static GFXColor getUnitTypeColor(std::string name, bool text, GFXColor def, float unselectedalpha)
-{
+static GFXColor getUnitTypeColor(std::string name, bool text, GFXColor def, float unselectedalpha) {
     GFXColor col = vs_config->getColor("nav", (std::string("unhighlighted_") + name) + (text ? "_text" : ""), def);
     if (col.a == 0) {
         if (name != "unit" && col.r == 0 && col.g == 0 && col.b == 0) {
@@ -242,16 +240,15 @@ static GFXColor getUnitTypeColor(std::string name, bool text, GFXColor def, floa
 }
 
 void drawlistitem(int type,
-                  float size,
-                  float x,
-                  float y,
-                  Unit *source,
-                  navscreenoccupied *screenoccupation,
-                  bool inmouserange,
-                  bool currentistail,
-                  float unselectedalpha,
-                  GFXColor *factioncolours)
-{
+        float size,
+        float x,
+        float y,
+        Unit *source,
+        navscreenoccupied *screenoccupation,
+        bool inmouserange,
+        bool currentistail,
+        float unselectedalpha,
+        GFXColor *factioncolours) {
     float relation = 0.0;
 
     //Get a color from the config
@@ -464,10 +461,10 @@ void drawlistitem(int type,
     } else {
         if (!inmouserange) {
             NavigationSystem::DrawCircle(x, y, size,
-                                         GFXColor((1.0 - relation),
-                                                  relation,
-                                                  (1.0 - (2.0 * Delta(relation, 0.5))),
-                                                  .6));
+                    GFXColor((1.0 - relation),
+                            relation,
+                            (1.0 - (2.0 * Delta(relation, 0.5))),
+                            .6));
             drawdescription(source, x, y, 1.0, 1.0, false, screenoccupation, unhighlighted_unit_text);
         } else {
             if (currentistail) {
@@ -492,15 +489,15 @@ void navdrawlist::draw()        //Draw the items in the list
         navdrawnode *current = head;
         while (current != NULL) {
             drawlistitem(current->type,
-                         current->size,
-                         current->x,
-                         current->y,
-                         current->source,
-                         screenoccupation,
-                         inmouserange,
-                         current == tail,
-                         unselectedalpha,
-                         factioncolours);
+                    current->size,
+                    current->x,
+                    current->y,
+                    current->source,
+                    screenoccupation,
+                    inmouserange,
+                    current == tail,
+                    unselectedalpha,
+                    factioncolours);
 
             current = current->nextitem;
         }

@@ -46,8 +46,7 @@
 
 /* *********************************************************** */
 
-varInst *Mission::checkObjectExpr(missionNode *node, int mode)
-{
+varInst *Mission::checkObjectExpr(missionNode *node, int mode) {
     varInst *res = NULL;
     if (node->tag == DTAG_VAR_EXPR) {
         res = doObjectVar(node, mode);
@@ -89,8 +88,7 @@ varInst *Mission::checkObjectExpr(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-varInst *Mission::doMath(missionNode *node, int mode)
-{
+varInst *Mission::doMath(missionNode *node, int mode) {
     string mathname = node->attr_value("math");
 
     int len = node->subnodes.size();
@@ -154,8 +152,7 @@ varInst *Mission::doMath(missionNode *node, int mode)
     return res_vi;
 }
 
-int Mission::intMath(string mathname, int res1, int res2)
-{
+int Mission::intMath(string mathname, int res1, int res2) {
     int res = res1;
     if (mathname == "+") {
         res = res + res2;
@@ -173,8 +170,7 @@ int Mission::intMath(string mathname, int res1, int res2)
 }
 
 /* *********************************************************** */
-double Mission::floatMath(string mathname, double res1, double res2)
-{
+double Mission::floatMath(string mathname, double res1, double res2) {
     double res = res1;
     if (mathname == "+") {
         res = res + res2;
@@ -193,8 +189,7 @@ double Mission::floatMath(string mathname, double res1, double res2)
 
 /* *********************************************************** */
 
-double Mission::doFMath(missionNode *node, int mode)
-{
+double Mission::doFMath(missionNode *node, int mode) {
     varInst *math_vi = doMath(node, mode);
     if (math_vi->type != VAR_FLOAT) {
         fatalError(node, mode, "fmath expected float");
@@ -242,8 +237,7 @@ double Mission::doFMath(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-int Mission::doIMath(missionNode *node, int mode)
-{
+int Mission::doIMath(missionNode *node, int mode) {
     varInst *math_vi = doMath(node, mode);
     if (math_vi->type != VAR_INT) {
         fatalError(node, mode, "fmath expected int");
@@ -293,8 +287,7 @@ int Mission::doIMath(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-double Mission::checkFloatExpr(missionNode *node, int mode)
-{
+double Mission::checkFloatExpr(missionNode *node, int mode) {
     double res = 0.0;
     if (node->tag == DTAG_VAR_EXPR) {
         res = doFloatVar(node, mode);
@@ -341,8 +334,7 @@ double Mission::checkFloatExpr(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-int Mission::checkIntExpr(missionNode *node, int mode)
-{
+int Mission::checkIntExpr(missionNode *node, int mode) {
     int res = 0;
     if (node->tag == DTAG_VAR_EXPR) {
         res = doIntVar(node, mode);
@@ -389,8 +381,7 @@ int Mission::checkIntExpr(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-bool Mission::checkBoolExpr(missionNode *node, int mode)
-{
+bool Mission::checkBoolExpr(missionNode *node, int mode) {
     bool ok = false;
     //no difference between parse/run
     if (node->tag == DTAG_AND_EXPR) {
@@ -445,8 +436,7 @@ bool Mission::checkBoolExpr(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-bool Mission::doAndOr(missionNode *node, int mode)
-{
+bool Mission::doAndOr(missionNode *node, int mode) {
     bool ok; //FIXME !! Not all branches result in ok being initialized
     ok = true; //this line added temporarily by chuck_starchaser
     //no difference between parse/run
@@ -477,8 +467,7 @@ bool Mission::doAndOr(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-bool Mission::doNot(missionNode *node, int mode)
-{
+bool Mission::doNot(missionNode *node, int mode) {
     bool ok;
 
     //no difference between parse/run
@@ -497,8 +486,7 @@ bool Mission::doNot(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-bool Mission::doTest(missionNode *node, int mode)
-{
+bool Mission::doTest(missionNode *node, int mode) {
     if (mode == SCRIPT_PARSE) {
         string teststr = node->attr_value("test");
         if (teststr.empty()) {
@@ -625,8 +613,7 @@ bool Mission::doTest(missionNode *node, int mode)
 
 /* *********************************************************** */
 
-varInst *Mission::checkExpression(missionNode *node, int mode)
-{
+varInst *Mission::checkExpression(missionNode *node, int mode) {
     varInst *ret = NULL;
     debug(3, node, mode, "checking expression");
     switch (node->tag) {

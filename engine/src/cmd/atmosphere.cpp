@@ -37,64 +37,56 @@
 #include "cmd/unit_generic.h"
 #include "universe.h"
 
-Atmosphere::SunBox::~SunBox()
-{
+Atmosphere::SunBox::~SunBox() {
     if (sunbox != nullptr) {
         delete sunbox;
         sunbox = nullptr;
     }
 }
 
-void Atmosphere::setArray(float c0[4], const GFXColor &c1)
-{
+void Atmosphere::setArray(float c0[4], const GFXColor &c1) {
     c0[0] = c1.r;
     c0[1] = c1.g;
     c0[2] = c1.b;
     c0[3] = c1.a;
 }
 
-void Atmosphere::setArray1(float c0[3], const GFXColor &c1)
-{
+void Atmosphere::setArray1(float c0[3], const GFXColor &c1) {
     c0[0] = c1.r;
     c0[1] = c1.g;
     c0[2] = c1.b;
 }
 
-Atmosphere::Atmosphere(const Parameters &params) : user_params(params), divisions(64)
-{
+Atmosphere::Atmosphere(const Parameters &params) : user_params(params), divisions(64) {
     dome = new SphereMesh(params.radius,
-                          divisions,
-                          divisions,
-                          "white.bmp",
-                          "",
-                          NULL,
-                          true,
-                          ONE,
-                          ZERO,
-                          false,
-                          0,
-                          M_PI / 2);
+            divisions,
+            divisions,
+            "white.bmp",
+            "",
+            NULL,
+            true,
+            ONE,
+            ZERO,
+            false,
+            0,
+            M_PI / 2);
 }
 
-Atmosphere::~Atmosphere()
-{
+Atmosphere::~Atmosphere() {
     for (size_t a = 0; a < sunboxes.size(); ++a) {
         delete sunboxes[a];
     }
 }
 
-const Atmosphere::Parameters &Atmosphere::parameters()
-{
+const Atmosphere::Parameters &Atmosphere::parameters() {
     return user_params;
 }
 
-void Atmosphere::SetParameters(const Parameters &params)
-{
+void Atmosphere::SetParameters(const Parameters &params) {
     user_params = params;
 }
 
-void Atmosphere::Update(const QVector &position, const Matrix &tmatrix)
-{
+void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
     Planet *currPlanet;
     StarSystem *system = _Universe->activeStarSystem();
     for (size_t a = 0; a < sunboxes.size(); ++a) {
@@ -137,7 +129,7 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix)
         /* index 0 is the top color, index 1 is the bottom color */
         GFXLight light0 = GFXLight();
         light0.SetProperties(AMBIENT,
-                             rho * user_params.high_ambient_color[0] + (1 - rho) * user_params.low_ambient_color[0]);
+                rho * user_params.high_ambient_color[0] + (1 - rho) * user_params.low_ambient_color[0]);
         light0.SetProperties(DIFFUSE, rho * user_params.high_color[0] + (1 - rho) * user_params.low_color[0]);
         light0.SetProperties(ATTENUATE, 0.5 * GFXColor(1, 0.25 / radius, 0));
         light0.SetProperties(POSITION, GFXColor(0, 1.1 * radius, 0, 1));
@@ -146,7 +138,7 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix)
 
         GFXLight light1 = GFXLight();
         light1.SetProperties(AMBIENT,
-                             (1 - rho) * user_params.high_ambient_color[1] + rho * user_params.low_ambient_color[1]);
+                (1 - rho) * user_params.high_ambient_color[1] + rho * user_params.low_ambient_color[1]);
         light1.SetProperties(DIFFUSE, (1 - rho) * user_params.high_color[1] + rho * user_params.low_color[1]);
         light1.SetProperties(ATTENUATE, 0.5 * GFXColor(1, 0.75 / radius, 0));
         light1.SetProperties(POSITION, GFXColor(0, -1.1 * radius, 0, 1));
@@ -170,15 +162,13 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix)
 
 static std::vector<Atmosphere *> draw_queue;
 
-void Atmosphere::SetMatricesAndDraw(const QVector &pos, const Matrix mat)
-{
+void Atmosphere::SetMatricesAndDraw(const QVector &pos, const Matrix mat) {
     CopyMatrix(tmatrix, mat);
     position = pos;
     draw_queue.push_back(this);
 }
 
-void Atmosphere::ProcessDrawQueue()
-{
+void Atmosphere::ProcessDrawQueue() {
     GFXEnable(LIGHTING);
     GFXDisable(TEXTURE1);
     GFXDisable(TEXTURE0);
@@ -189,13 +179,12 @@ void Atmosphere::ProcessDrawQueue()
     }
 }
 
-void Atmosphere::Draw()
-{
+void Atmosphere::Draw() {
     GFXDisable(TEXTURE1);
     Matrix rot(1, 0, 0,
-               0, 0, -1,
-               0, 1, 0,
-               QVector(0, 0, 0));
+            0, 0, -1,
+            0, 1, 0,
+            QVector(0, 0, 0));
     Matrix rot1;
     MultMatrix(rot1, tmatrix, rot);
     CopyMatrix(rot1, tmatrix);
@@ -230,8 +219,7 @@ void Atmosphere::Draw()
     GFXDeleteLight(l1);
 }
 
-void Atmosphere::DrawAtmospheres()
-{
+void Atmosphere::DrawAtmospheres() {
     abort();
 }
 

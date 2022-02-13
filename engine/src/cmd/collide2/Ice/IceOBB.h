@@ -25,17 +25,14 @@ class LSS;
 class ICEMATHS_API OBB {
 public:
     //! Constructor
-    inline_ OBB()
-    {
+    inline_ OBB() {
     }
     //! Constructor
     inline_ OBB(const Point &center, const Point &extents, const Matrix3x3 &rot)
-            : mCenter(center), mExtents(extents), mRot(rot)
-    {
+            : mCenter(center), mExtents(extents), mRot(rot) {
     }
     //! Destructor
-    inline_                        ~OBB()
-    {
+    inline_                        ~OBB() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,8 +40,7 @@ public:
      *	Setups an empty OBB.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SetEmpty()
-    {
+    void SetEmpty() {
         mCenter.Zero();
         mExtents.Set(MIN_FLOAT, MIN_FLOAT, MIN_FLOAT);
         mRot.Identity();
@@ -75,8 +71,7 @@ public:
      *	\param		obb		[out] the transformed OBB
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    void Rotate(const Matrix4x4 &mtx, OBB &obb) const
-    {
+    inline_    void Rotate(const Matrix4x4 &mtx, OBB &obb) const {
         // The extents remain constant
         obb.mExtents = mExtents;
         // The center gets x-formed
@@ -91,8 +86,7 @@ public:
      *	\return		true if the box is valid
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    BOOL IsValid() const
-    {
+    inline_    BOOL IsValid() const {
         // Consistency condition for (Center, Extents) boxes: Extents >= 0.0f
         if (mExtents.x < 0.0f) {
             return FALSE;
@@ -175,23 +169,19 @@ public:
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     bool IsInside(const OBB &box) const;
 
-    inline_    const Point &GetCenter() const
-    {
+    inline_    const Point &GetCenter() const {
         return mCenter;
     }
 
-    inline_    const Point &GetExtents() const
-    {
+    inline_    const Point &GetExtents() const {
         return mExtents;
     }
 
-    inline_    const Matrix3x3 &GetRot() const
-    {
+    inline_    const Matrix3x3 &GetRot() const {
         return mRot;
     }
 
-    inline_    void GetRotatedExtents(Matrix3x3 &extents) const
-    {
+    inline_    void GetRotatedExtents(Matrix3x3 &extents) const {
         extents = mRot;
         extents.Scale(mExtents);
     }

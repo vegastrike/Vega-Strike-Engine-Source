@@ -39,21 +39,18 @@ class Hashtable {
         KEY key;
         VALUE *value;
 
-        HashElement(KEY k, VALUE *v)
-        {
+        HashElement(KEY k, VALUE *v) {
             key = k;
             value = v;
         }
     };
     list<HashElement> table[sizeof(SIZ)];
 
-    static int hash(const int key)
-    {
+    static int hash(const int key) {
         return key % sizeof(SIZ);
     }
 
-    static int hash(const string &key)
-    {
+    static int hash(const string &key) {
         int k = 0;
         char *start = (char *) key.c_str();
         char *end = start + strlen(start);
@@ -67,12 +64,10 @@ class Hashtable {
 
 public:
 
-    Hashtable()
-    {
+    Hashtable() {
     }
 
-    VALUE *Get(const KEY &key) const
-    {
+    VALUE *Get(const KEY &key) const {
         int hashval = hash(key);
         list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 
@@ -88,14 +83,12 @@ public:
         }
     }
 
-    void Put(const KEY &key, VALUE *value)
-    {
+    void Put(const KEY &key, VALUE *value) {
         int hashval = hash(key);
         table[hashval].push_front(HashElement(key, value));
     }
 
-    void Delete(const KEY &key)
-    {
+    void Delete(const KEY &key) {
         int hashval = hash(key);
         list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
 

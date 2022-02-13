@@ -56,14 +56,12 @@
 #include "ai/communication.h"
 #include "audio/SceneManager.h"
 
-static unsigned int &getMouseButtonMask()
-{
+static unsigned int &getMouseButtonMask() {
     static unsigned int mask = 0;
     return mask;
 }
 
-static void biModifyMouseSensitivity(int &x, int &y, bool invert)
-{
+static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
     int xrez = g_game.x_resolution;
     static int
             whentodouble = XMLSupport::parse_int(vs_config->getVariable("joystick", "double_mouse_position", "1280"));
@@ -98,8 +96,7 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert)
 static bool createdbase = false;
 static int createdmusic = -1;
 
-void ModifyMouseSensitivity(int &x, int &y)
-{
+void ModifyMouseSensitivity(int &x, int &y) {
     biModifyMouseSensitivity(x, y, false);
 }
 
@@ -126,16 +123,14 @@ bool BaseInterface::Room::BaseTalk::hastalked = false;
 using namespace VSFileSystem;
 std::vector<unsigned int> base_keyboard_queue;
 
-static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y)
-{
+static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y) {
     (*x) = (((float) (xbeforecalc * 2)) / g_game.x_resolution) - 1;
     (*y) = -(((float) (ybeforecalc * 2)) / g_game.y_resolution) + 1;
 }
 
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
-static void SetupViewport()
-{
+static void SetupViewport() {
     static int base_max_width = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_width", "0"));
     static int base_max_height = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_height", "0"));
     if (base_max_width && base_max_height) {
@@ -149,8 +144,7 @@ static void SetupViewport()
 
 #undef mymin
 
-BaseInterface::Room::~Room()
-{
+BaseInterface::Room::~Room() {
     for (size_t i = 0; i < links.size(); ++i) {
         if (links[i] != nullptr) {
             delete links[i];
@@ -165,29 +159,24 @@ BaseInterface::Room::~Room()
     }
 }
 
-BaseInterface::Room::Room()
-{
+BaseInterface::Room::Room() {
 //Do nothing...
 }
 
-void BaseInterface::Room::BaseObj::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::BaseObj::Draw(BaseInterface *base) {
 //Do nothing...
 }
 
-static FILTER BlurBases()
-{
+static FILTER BlurBases() {
     static bool blur_bases = XMLSupport::parse_bool(vs_config->getVariable("graphics", "blur_bases", "true"));
     return blur_bases ? BILINEAR : NEAREST;
 }
 
 BaseInterface::Room::BaseVSSprite::BaseVSSprite(const std::string &spritefile, const std::string &ind) :
-        BaseObj(ind), spr(spritefile.c_str(), BlurBases(), GFXTRUE)
-{
+        BaseObj(ind), spr(spritefile.c_str(), BlurBases(), GFXTRUE) {
 }
 
-BaseInterface::Room::BaseVSSprite::~BaseVSSprite()
-{
+BaseInterface::Room::BaseVSSprite::~BaseVSSprite() {
     if (soundsource.get() != NULL) {
         BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
     }
@@ -195,8 +184,7 @@ BaseInterface::Room::BaseVSSprite::~BaseVSSprite()
 }
 
 BaseInterface::Room::BaseVSMovie::BaseVSMovie(const std::string &moviefile, const std::string &ind) :
-        BaseVSSprite(ind, VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), 0, 0, 2, 2, 0, 0, true))
-{
+        BaseVSSprite(ind, VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), 0, 0, 2, 2, 0, 0, true)) {
     playing = false;
     soundscene = "video";
     if (g_game.sound_enabled && spr.LoadSuccess()) {
@@ -208,14 +196,12 @@ BaseInterface::Room::BaseVSMovie::BaseVSMovie(const std::string &moviefile, cons
     SetHidePointer(true);
 }
 
-void BaseInterface::Room::BaseVSMovie::SetHidePointer(bool hide)
-{
+void BaseInterface::Room::BaseVSMovie::SetHidePointer(bool hide) {
     hidePointer = hide;
     hidePointerTime = realTime();
 }
 
-void BaseInterface::Room::BaseVSSprite::SetSprite(const std::string &spritefile)
-{
+void BaseInterface::Room::BaseVSSprite::SetSprite(const std::string &spritefile) {
     //Destroy SPR
     spr.~VSSprite();
     //Re-create it (in case you don't know the following syntax,
@@ -226,8 +212,7 @@ void BaseInterface::Room::BaseVSSprite::SetSprite(const std::string &spritefile)
     new(&spr)VSSprite(spritefile.c_str(), BlurBases(), GFXTRUE);
 }
 
-void BaseInterface::Room::BaseVSMovie::SetMovie(const std::string &moviefile)
-{
+void BaseInterface::Room::BaseVSMovie::SetMovie(const std::string &moviefile) {
     //Get sprite position and size so that we can preserve them
     float x, y, w, h, rot;
     spr.GetPosition(x, y);
@@ -252,18 +237,15 @@ void BaseInterface::Room::BaseVSMovie::SetMovie(const std::string &moviefile)
     }
 }
 
-float BaseInterface::Room::BaseVSMovie::GetTime() const
-{
+float BaseInterface::Room::BaseVSMovie::GetTime() const {
     return spr.getTexture()->curTime();
 }
 
-void BaseInterface::Room::BaseVSMovie::SetTime(float t)
-{
+void BaseInterface::Room::BaseVSMovie::SetTime(float t) {
     spr.getTexture()->setTime(t);
 }
 
-void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
     static float AlphaTestingCutoff =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "base_alpha_test_cutoff", "0"));
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
@@ -280,8 +262,7 @@ void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base)
     }
 }
 
-void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
     if (soundsource.get() == NULL) {
         // If it's not playing, mark as playing, and reset the sprite's animation
         // (it's not automatic without a time source)
@@ -314,14 +295,12 @@ void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base)
     }
 }
 
-bool BaseInterface::Room::BaseVSSprite::isPlaying() const
-{
+bool BaseInterface::Room::BaseVSSprite::isPlaying() const {
     return soundsource.get() != NULL
             && soundsource->isPlaying();
 }
 
-void BaseInterface::Room::BaseShip::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     Unit *un = base->caller.GetUnit();
     if (un) {
         GFXHudMode(GFXFALSE);
@@ -352,15 +331,15 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base)
         GFXEnable(LIGHTING);
         int light = 0;
         GFXCreateLight(light,
-                       GFXLight(true,
-                                GFXColor(1, 1, 1, 1),
-                                GFXColor(1, 1, 1, 1),
-                                GFXColor(1, 1, 1, 1),
-                                GFXColor(0.1, 0.1, 0.1, 1),
-                                GFXColor(1, 0, 0),
-                                GFXColor(1, 1, 1, 0),
-                                24),
-                       true);
+                GFXLight(true,
+                        GFXColor(1, 1, 1, 1),
+                        GFXColor(1, 1, 1, 1),
+                        GFXColor(1, 1, 1, 1),
+                        GFXColor(0.1, 0.1, 0.1, 1),
+                        GFXColor(1, 0, 0),
+                        GFXColor(1, 1, 1, 0),
+                        24),
+                true);
 
         (un)->DrawNow(final, FLT_MAX);
         GFXDeleteLight(light);
@@ -378,8 +357,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base)
     }
 }
 
-void BaseInterface::Room::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::Draw(BaseInterface *base) {
     size_t i;
     for (i = 0; i < objs.size(); i++) {
         if (objs[i]) {
@@ -464,7 +442,7 @@ void BaseInterface::Room::Draw(BaseInterface *base)
                         TextPlane text_marker;
                         text_marker.SetText(links[i]->text);
                         text_marker.GetCharSize(text_wid,
-                                                text_hei);                           //get average charactersize
+                                text_hei);                           //get average charactersize
                         float text_pos_x = x + text_offset_x;                                  //align right ...
                         float text_pos_y = y + text_offset_y + text_hei;                         //...and on top
                         text_wid = text_wid * links[i]->text.length()
@@ -480,9 +458,10 @@ void BaseInterface::Room::Draw(BaseInterface *base)
                                     - fabs(text_offset_y));
                         }                                          //align on bottom
                         if ((text_pos_y + text_offset_y - text_hei)
-                                <= y_lower)                             //check lower screenborder
+                                <= y_lower) {                             //check lower screenborder
                             text_pos_y = (y + fabs(text_offset_y)
-                                    + text_hei);                                   //align on top
+                                    + text_hei);
+                        }                                   //align on top
                         text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
                         text_marker.SetPos(text_pos_x, text_pos_y);
                         if (links[i]->pythonfile != "#" && text_marker.GetText().find("XXX") != 0) {
@@ -539,16 +518,18 @@ void BaseInterface::Room::Draw(BaseInterface *base)
                             <= y_lower) {                         //check lower screenborder
                         text_pos_y = (y + fabs(text_offset_y) + text_hei);
                     }                               //align on top
-                    if (enable_markers)
+                    if (enable_markers) {
                         text_pos_y += text_hei;
+                    }
                     text_marker.col = GFXColor(1, 1, 1, 1);
                     text_marker.SetPos(text_pos_x, text_pos_y);
 
                     GFXDisable(TEXTURE0);
                     GFXColor tmpbg = text_marker.bgcol;
                     bool automatte = (0 == tmpbg.a);
-                    if (automatte)
+                    if (automatte) {
                         text_marker.bgcol = GFXColor(0, 0, 0, base_text_background_alpha);
+                    }
                     text_marker.Draw(text_marker.GetText(), 0, true, false, automatte);
                     text_marker.bgcol = tmpbg;
                     GFXEnable(TEXTURE0);
@@ -579,16 +560,14 @@ void BaseInterface::Room::Draw(BaseInterface *base)
 static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
 BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::string &ind, bool only_one)
-        : BaseObj(ind), curchar(0), curtime(0), message(msg)
-{
+        : BaseObj(ind), curchar(0), curtime(0), message(msg) {
     if (only_one) {
         active_talks.clear();
     }
     active_talks.push_back(this);
 }
 
-void BaseInterface::Room::BaseText::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     int tmpx = g_game.x_resolution;
     int tmpy = g_game.y_resolution;
     static int base_max_width = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_width", "0"));
@@ -629,8 +608,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base)
     g_game.y_resolution = tmpy;
 }
 
-void RunPython(const char *filnam)
-{
+void RunPython(const char *filnam) {
 #ifdef DEBUG_RUN_PYTHON
     VS_LOG(trace, "Run python:\n");
     VS_LOG(trace, (boost::format("%1%\n") % filnam));
@@ -646,8 +624,7 @@ void RunPython(const char *filnam)
     }
 }
 
-void BaseInterface::Room::BasePython::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::BasePython::Draw(BaseInterface *base) {
     timeleft += GetElapsedTime() / getTimeCompression();
     if (timeleft >= maxtime) {
         timeleft = 0;
@@ -657,13 +634,11 @@ void BaseInterface::Room::BasePython::Draw(BaseInterface *base)
     }
 }
 
-void BaseInterface::Room::BasePython::Relink(const std::string &python)
-{
+void BaseInterface::Room::BasePython::Relink(const std::string &python) {
     pythonfile = python;
 }
 
-void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base)
-{
+void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
     //FIXME: should be called from draw()
     if (hastalked) {
         return;
@@ -671,12 +646,12 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base)
     curtime += GetElapsedTime() / getTimeCompression();
     static float delay = XMLSupport::parse_float(vs_config->getVariable("graphics", "text_delay", ".05"));
     if ((std::find(active_talks.begin(), active_talks.end(),
-                   this) == active_talks.end())
+            this) == active_talks.end())
             || (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
         curtime = 0;
         std::vector<BaseObj *>::iterator ind = std::find(base->rooms[base->curroom]->objs.begin(),
-                                                         base->rooms[base->curroom]->objs.end(),
-                                                         this);
+                base->rooms[base->curroom]->objs.end(),
+                this);
         if (ind != base->rooms[base->curroom]->objs.end()) {
             *ind = NULL;
         }
@@ -698,8 +673,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base)
     hastalked = true;
 }
 
-int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y)
-{
+int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) {
     for (size_t i = 0; i < links.size(); i++) {
         if (links[i]) {
             if (x >= links[i]->x
@@ -715,8 +689,7 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y)
 
 BaseInterface *BaseInterface::CurrentBase = NULL;
 
-bool RefreshGUI(void)
-{
+bool RefreshGUI(void) {
     bool retval = false;
     if (_Universe->AccessCockpit()) {
         if (BaseInterface::CurrentBase) {
@@ -739,8 +712,7 @@ bool RefreshGUI(void)
     return retval;
 }
 
-void base_main_loop()
-{
+void base_main_loop() {
     UpdateTime();
     Music::MuzakCycle();
 
@@ -758,8 +730,7 @@ void base_main_loop()
     BaseComputer::dirty = false;
 }
 
-void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int button, int state)
-{
+void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (button == WS_LEFT_BUTTON) {
         int linknum = MouseOver(base, x, y);
         if (linknum >= 0) {
@@ -883,13 +854,12 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
     }
 }
 
-void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc)
-{
+void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
     float x, y;
     CalculateRealXAndY(xbeforecalc, ybeforecalc, &x, &y);
     int i = rooms[curroom]->MouseOver(this,
-                                      x,
-                                      y); //FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t
+            x,
+            y); //FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t
     Room::Link *link = 0;
     Room::Link *hotlink = 0;
     if (i >= 0) {
@@ -942,15 +912,13 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc)
     }
 }
 
-void BaseInterface::Click(int xint, int yint, int button, int state)
-{
+void BaseInterface::Click(int xint, int yint, int button, int state) {
     float x, y;
     CalculateRealXAndY(xint, yint, &x, &y);
     rooms[curroom]->Click(this, x, y, button, state);
 }
 
-void BaseInterface::ClickWin(int button, int state, int x, int y)
-{
+void BaseInterface::ClickWin(int button, int state, int x, int y) {
     ModifyMouseSensitivity(x, y);
     if (state == WS_MOUSE_DOWN) {
         getMouseButtonMask() |= (1 << (button - 1));
@@ -973,8 +941,7 @@ void BaseInterface::ClickWin(int button, int state, int x, int y)
     }
 }
 
-void BaseInterface::PassiveMouseOverWin(int x, int y)
-{
+void BaseInterface::PassiveMouseOverWin(int x, int y) {
     ModifyMouseSensitivity(x, y);
     SetSoftwareMousePosition(x, y);
     if (CurrentBase) {
@@ -993,8 +960,7 @@ void BaseInterface::PassiveMouseOverWin(int x, int y)
     }
 }
 
-void BaseInterface::ActiveMouseOverWin(int x, int y)
-{
+void BaseInterface::ActiveMouseOverWin(int x, int y) {
     ModifyMouseSensitivity(x, y);
     SetSoftwareMousePosition(x, y);
     if (CurrentBase) {
@@ -1013,8 +979,7 @@ void BaseInterface::ActiveMouseOverWin(int x, int y)
     }
 }
 
-void BaseInterface::Key(unsigned int ch, unsigned int mod, bool release, int x, int y)
-{
+void BaseInterface::Key(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     if (!python_kbhandler.empty()) {
         const std::string *evtype;
         if (release) {
@@ -1029,8 +994,7 @@ void BaseInterface::Key(unsigned int ch, unsigned int mod, bool release, int x, 
     }
 }
 
-void BaseInterface::GotoLink(int linknum)
-{
+void BaseInterface::GotoLink(int linknum) {
     othtext.SetText("");
     if (static_cast<int>(rooms.size()) > linknum && linknum >= 0) {
         curlinkindex = 0;
@@ -1040,8 +1004,8 @@ void BaseInterface::GotoLink(int linknum)
     } else {
 #ifndef BASE_MAKER
         VS_LOG_AND_FLUSH(fatal,
-                         (boost::format("\nWARNING: base room #%d tried to go to an invalid index: #%d") % curroom
-                                 % linknum));
+                (boost::format("\nWARNING: base room #%d tried to go to an invalid index: #%d") % curroom
+                        % linknum));
         assert(0);
 #else
         while (rooms.size() <= linknum) {
@@ -1055,8 +1019,7 @@ void BaseInterface::GotoLink(int linknum)
     }
 }
 
-BaseInterface::~BaseInterface()
-{
+BaseInterface::~BaseInterface() {
 #ifdef BASE_MAKER
     FILE *fp = VSFileSystem::vs_open( "bases/NEW_BASE" BASE_EXTENSION, "wt" );
     if (fp) {
@@ -1074,8 +1037,7 @@ BaseInterface::~BaseInterface()
 void base_main_loop();
 int shiftup(int);
 
-static void base_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y)
-{
+static void base_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     //Set modifiers
     unsigned int amods = 0;
     amods |= (mod & (WSK_MOD_LSHIFT | WSK_MOD_RSHIFT)) ? KB_MOD_SHIFT : 0;
@@ -1084,7 +1046,7 @@ static void base_keyboard_cb(unsigned int ch, unsigned int mod, bool release, in
     setActiveModifiers(amods);
     unsigned int shiftedch =
             ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) ? shiftup(ch)
-                                                                                                       : ch;
+                    : ch;
     if (BaseInterface::CurrentBase && !BaseInterface::CurrentBase->CallComp) {
         //Flush buffer
         if (base_keyboard_queue.size()) {
@@ -1099,8 +1061,7 @@ static void base_keyboard_cb(unsigned int ch, unsigned int mod, bool release, in
     }
 }
 
-void BaseInterface::InitCallbacks()
-{
+void BaseInterface::InitCallbacks() {
     winsys_set_keyboard_func(base_keyboard_cb);
     winsys_set_mouse_func(ClickWin);
     winsys_set_motion_func(ActiveMouseOverWin);
@@ -1115,8 +1076,7 @@ void BaseInterface::InitCallbacks()
 }
 
 BaseInterface::Room::Talk::Talk(const std::string &ind, const std::string &pythonfile) :
-        BaseInterface::Room::Link(ind, pythonfile), index(-1)
-{
+        BaseInterface::Room::Link(ind, pythonfile), index(-1) {
 #ifndef BASE_MAKER
     gameMessage last;
     int i = 0;
@@ -1141,8 +1101,7 @@ BaseInterface::Room::Talk::Talk(const std::string &ind, const std::string &pytho
 #endif
 }
 
-double compute_light_dot(Unit *base, Unit *un)
-{
+double compute_light_dot(Unit *base, Unit *un) {
     StarSystem *ss = base->getStarSystem();
     double ret = -1;
     Unit *st;
@@ -1185,8 +1144,7 @@ double compute_light_dot(Unit *base, Unit *un)
     }
 }
 
-const char *compute_time_of_day(Unit *base, Unit *un)
-{
+const char *compute_time_of_day(Unit *base, Unit *un) {
     if (!base || !un) {
         return "day";
     }
@@ -1206,8 +1164,7 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
         curtext(vs_config->getColor("Base_Text_Color_Foreground", GFXColor(0, 1, 0, 1)),
                 vs_config->getColor("Base_Text_Color_Background", GFXColor(0, 0, 0, 1))),
         othtext(vs_config->getColor("Fixer_Text_Color_Foreground", GFXColor(1, 1, .5, 1)),
-                vs_config->getColor("FixerTextColor_Background", GFXColor(0, 0, 0, 1)))
-{
+                vs_config->getColor("FixerTextColor_Background", GFXColor(0, 0, 0, 1))) {
     CurrentBase = this;
     CallComp = false;
     lastmouseindex = 0;
@@ -1253,7 +1210,7 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
         rooms.back()->objs.push_back(new Room::BaseShip(-1, 0, 0, 0, 0, -1, 0, 1, 0, QVector(0, 0, 2), "default room"));
         BaseUtil::Launch(0, "default room", -1, -1, 1, 2, "ERROR: No rooms specified... - Launch");
         BaseUtil::Comp(0, "default room", 0, -1, 1, 2, "ERROR: No rooms specified... - Computer",
-                       "Cargo Upgrade Info ShipDealer News Missions");
+                "Cargo Upgrade Info ShipDealer News Missions");
 #endif
     }
     GotoLink(0);
@@ -1265,31 +1222,27 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
 }
 
 //Need this for NEW_GUI.  Can't ifdef it out because it needs to link.
-void InitCallbacks(void)
-{
+void InitCallbacks(void) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->InitCallbacks();
     }
 }
 
-void TerminateCurrentBase(void)
-{
+void TerminateCurrentBase(void) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->Terminate();
         BaseInterface::CurrentBase = NULL;
     }
 }
 
-void CurrentBaseUnitSet(Unit *un)
-{
+void CurrentBaseUnitSet(Unit *un) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->caller.SetUnit(un);
     }
 }
 //end NEW_GUI.
 
-void BaseInterface::Room::Comp::Click(BaseInterface *base, float x, float y, int button, int state)
-{
+void BaseInterface::Room::Comp::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
         Unit *un = base->caller.GetUnit();
@@ -1307,8 +1260,7 @@ void BaseInterface::Room::Comp::Click(BaseInterface *base, float x, float y, int
     }
 }
 
-void BaseInterface::Terminate()
-{
+void BaseInterface::Terminate() {
     if (midloop) {
         terminate_scheduled = true;
     } else {
@@ -1327,8 +1279,7 @@ void BaseInterface::Terminate()
 
 extern void abletodock(int dock);
 
-void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, int button, int state)
-{
+void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
         static bool
@@ -1361,20 +1312,17 @@ void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, i
     }
 }
 
-inline float aynrand(float min, float max)
-{
+inline float aynrand(float min, float max) {
     return ((float) (rand()) / RAND_MAX) * (max - min) + min;
 }
 
-inline QVector randyVector(float min, float max)
-{
+inline QVector randyVector(float min, float max) {
     return QVector(aynrand(min, max),
-                   aynrand(min, max),
-                   aynrand(min, max));
+            aynrand(min, max),
+            aynrand(min, max));
 }
 
-void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, int button, int state)
-{
+void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
         XMLSupport::parse_bool(vs_config->getVariable("physics", "AutomaticUnDock", "true"));
@@ -1392,7 +1340,7 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                 }
                 tmpvel.Normalize();
                 playa->SetPosAndCumPos(bas->Position() + tmpvel * 1.5 * bas->rSize()
-                                               + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
+                        + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
                 static float
@@ -1416,16 +1364,14 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
     }
 }
 
-void BaseInterface::Room::Goto::Click(BaseInterface *base, float x, float y, int button, int state)
-{
+void BaseInterface::Room::Goto::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
         base->GotoLink(index);
     }
 }
 
-void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int button, int state)
-{
+void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
         if (index >= 0) {
@@ -1453,8 +1399,7 @@ void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int
     }
 }
 
-void BaseInterface::Room::Link::Click(BaseInterface *base, float x, float y, int button, int state)
-{
+void BaseInterface::Room::Link::Click(BaseInterface *base, float x, float y, int button, int state) {
     unsigned int buttonmask = getMouseButtonMask();
     if (state == WS_MOUSE_UP) {
         if (eventMask & UpEvent) {
@@ -1480,8 +1425,7 @@ void BaseInterface::Room::Link::Click(BaseInterface *base, float x, float y, int
     }
 }
 
-void BaseInterface::Room::Link::MouseMove(::BaseInterface *base, float x, float y, int buttonmask)
-{
+void BaseInterface::Room::Link::MouseMove(::BaseInterface *base, float x, float y, int buttonmask) {
     //Compiling Python code each mouse movement == Bad idea!!!
     //If this support is needed we will need to use Python-C++ inheritance.
     //Like the Execute() method of AI and Mission classes.
@@ -1493,8 +1437,7 @@ void BaseInterface::Room::Link::MouseMove(::BaseInterface *base, float x, float 
     }
 }
 
-void BaseInterface::Room::Link::MouseEnter(::BaseInterface *base, float x, float y, int buttonmask)
-{
+void BaseInterface::Room::Link::MouseEnter(::BaseInterface *base, float x, float y, int buttonmask) {
     if (eventMask & EnterEvent) {
         static std::string evtype("enter");
         BaseUtil::SetMouseEventData(evtype, x, y, buttonmask);
@@ -1502,8 +1445,7 @@ void BaseInterface::Room::Link::MouseEnter(::BaseInterface *base, float x, float
     }
 }
 
-void BaseInterface::Room::Link::MouseLeave(::BaseInterface *base, float x, float y, int buttonmask)
-{
+void BaseInterface::Room::Link::MouseLeave(::BaseInterface *base, float x, float y, int buttonmask) {
     if (eventMask & LeaveEvent) {
         static std::string evtype("leave");
         BaseUtil::SetMouseEventData(evtype, x, y, buttonmask);
@@ -1512,8 +1454,7 @@ void BaseInterface::Room::Link::MouseLeave(::BaseInterface *base, float x, float
     clickbtn = -1;
 }
 
-void BaseInterface::Room::Link::Relink(const std::string &pfile)
-{
+void BaseInterface::Room::Link::Relink(const std::string &pfile) {
     pythonfile = pfile;
 }
 
@@ -1521,8 +1462,7 @@ struct BaseColor {
     unsigned char r, g, b, a;
 };
 
-static void AnimationDraw()
-{
+static void AnimationDraw() {
 #ifdef RENDER_FROM_TEXTURE
     static StreamTexture T( 512, 256, NEAREST, NULL );
     BaseColor( *data )[512] = reinterpret_cast< BaseColor(*)[512] > ( T.Map() );
@@ -1551,8 +1491,7 @@ static void AnimationDraw()
 #endif
 }
 
-void BaseInterface::Draw()
-{
+void BaseInterface::Draw() {
     // Some operations cannot be performed in the middle of a Draw() loop
     midloop = true;
 
@@ -1623,12 +1562,11 @@ void BaseInterface::Draw()
     }
 }
 
-void BaseInterface::ProcessKeyboardBuffer()
-{
+void BaseInterface::ProcessKeyboardBuffer() {
     if (CurrentBase) {
         if (!CurrentBase->CallComp) {
             for (std::vector<unsigned int>::iterator it = base_keyboard_queue.begin(); it != base_keyboard_queue.end();
-                 ++it) {
+                    ++it) {
                 CurrentBase->Key(*it, 0, false, 0, 0);
                 CurrentBase->Key(*it, 0, true, 0, 0);
             }
@@ -1637,7 +1575,6 @@ void BaseInterface::ProcessKeyboardBuffer()
     }
 }
 
-void BaseInterface::setDJEnabled(bool enabled)
-{
+void BaseInterface::setDJEnabled(bool enabled) {
     enabledj = enabled;
 }

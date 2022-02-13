@@ -52,8 +52,7 @@ class mItem {
 //pointers here.
 public:
 //~mItem(){}
-    mItem()
-    {
+    mItem() {
         inputbit = false;
         inputbit2 = false;
         autoreprint = false;
@@ -82,16 +81,14 @@ class menu {
 public:
     virtual ~menu();
 
-    menu()
-    {
+    menu() {
         selected = false;
         noescape = false;
         autoselect = false;
         defaultInput = false;
     }
 
-    menu(const std::string &n_in, char const *d_in, char const *e_in)
-    {
+    menu(const std::string &n_in, char const *d_in, char const *e_in) {
         selected = false;
         noescape = false;
         autoselect = false;
@@ -140,8 +137,7 @@ public:
     bool immortal;
     static void keypress(int code, int modifiers, bool isDown, int x, int y);
 
-    bool getmenumode() const
-    {
+    bool getmenumode() const {
         return menumode;
     }
 

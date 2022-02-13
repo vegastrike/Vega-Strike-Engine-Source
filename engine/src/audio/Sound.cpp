@@ -36,20 +36,17 @@
 namespace Audio {
 
 Sound::Sound(const std::string &_name, bool streaming) :
-        name(_name)
-{
+        name(_name) {
     flags.loaded = false;
     flags.loading = false;
     flags.streaming = streaming;
 }
 
-Sound::~Sound()
-{
+Sound::~Sound() {
     unload();
 }
 
-void Sound::load(bool wait)
-{
+void Sound::load(bool wait) {
     if (!isLoaded()) {
         if (!isLoading()) {
             loadImpl(wait);
@@ -60,15 +57,13 @@ void Sound::load(bool wait)
     }
 }
 
-void Sound::waitLoad()
-{
+void Sound::waitLoad() {
     while (isLoading()) {
         Audio::sleep(10);
     }
 }
 
-void Sound::unload()
-{
+void Sound::unload() {
     if (isLoading()) {
         abortLoad();
         if (isLoading()) {
@@ -81,14 +76,12 @@ void Sound::unload()
     }
 }
 
-void Sound::onLoaded(bool success)
-{
+void Sound::onLoaded(bool success) {
     flags.loaded = success;
     flags.loading = false;
 }
 
-void Sound::abortLoad()
-{
+void Sound::abortLoad() {
     // Do nothing, there's no background load
 }
 

@@ -44,8 +44,7 @@ using namespace XMLSupport;
 using namespace GalaxyXML;
 using namespace std;
 
-string RemoveDotSystem(const char *input)
-{
+string RemoveDotSystem(const char *input) {
     int sl = strlen(input);
     if (sl == 0) {
         return string("");
@@ -74,16 +73,14 @@ string RemoveDotSystem(const char *input)
     return retval;
 }
 
-string getUniversePath()
-{
+string getUniversePath() {
     char del[] = {'/', '\0'};
     return game_options.universe_path + string(del);
 }
 
-string getVarEitherSectionOrSub(Galaxy *galaxy, string section, string subsection, string variable, string defaultst)
-{
+string getVarEitherSectionOrSub(Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
     string d3fault = galaxy->getVariable(section, subsection, variable,
-                                         galaxy->getVariable(section, variable, defaultst));
+            galaxy->getVariable(section, variable, defaultst));
     if (d3fault.length() == 0) {
         d3fault = galaxy->getVariable(section, variable, defaultst);
     }
@@ -93,8 +90,7 @@ string getVarEitherSectionOrSub(Galaxy *galaxy, string section, string subsectio
     return d3fault;     //this code will prevent the empty planet lists from interfering
 }
 
-void ClampIt(float &prop, float min, float max)
-{
+void ClampIt(float &prop, float min, float max) {
     if (prop < min) {
         prop = min;
     }
@@ -103,8 +99,7 @@ void ClampIt(float &prop, float min, float max)
     }
 }
 
-void ClampIt(int &prop, int min, int max)
-{
+void ClampIt(int &prop, int min, int max) {
     if (prop < min) {
         prop = min;
     }
@@ -113,8 +108,7 @@ void ClampIt(int &prop, int min, int max)
     }
 }
 
-static void clampSystem(SystemInfo &si, const SystemInfo &min, const SystemInfo &max)
-{
+static void clampSystem(SystemInfo &si, const SystemInfo &min, const SystemInfo &max) {
     ClampIt(si.sunradius, min.sunradius, max.sunradius);
     ClampIt(si.compactness, min.compactness, max.compactness);
     ClampIt(si.numstars, min.numstars, max.numstars);
@@ -122,8 +116,7 @@ static void clampSystem(SystemInfo &si, const SystemInfo &min, const SystemInfo 
     ClampIt(si.numun2, min.numun2, max.numun2);
 }
 
-void GetSystemXProp(Galaxy *galaxy, std::string sector, std::string minmax, SystemInfo &si)
-{
+void GetSystemXProp(Galaxy *galaxy, std::string sector, std::string minmax, SystemInfo &si) {
     si.sunradius = parse_float(getVarEitherSectionOrSub(galaxy, sector, minmax, "sun_radius", "5000"));
     si.compactness = parse_float(getVarEitherSectionOrSub(galaxy, sector, minmax, "compactness", "1.5"));
     si.numstars = parse_int(getVarEitherSectionOrSub(galaxy, sector, minmax, "num_stars", "1"));
@@ -144,53 +137,44 @@ void GetSystemXProp(Galaxy *galaxy, std::string sector, std::string minmax, Syst
     si.force = parse_bool(getVarEitherSectionOrSub(galaxy, sector, minmax, "force", "false"));
 }
 
-SystemInfo GetSystemMin(Galaxy *galaxy)
-{
+SystemInfo GetSystemMin(Galaxy *galaxy) {
     SystemInfo si;
     GetSystemXProp(galaxy, "unknown_sector", "min", si);
     return si;
 }
 
-SystemInfo GetSystemMax(Galaxy *galaxy)
-{
+SystemInfo GetSystemMax(Galaxy *galaxy) {
     SystemInfo si;
     GetSystemXProp(galaxy, "unknown_sector", "max", si);
     return si;
 }
 
-static float av01()
-{
+static float av01() {
     return (float(rand())) / ((((float) RAND_MAX) + 1));
 }
 
-static float sqav01()
-{
+static float sqav01() {
     float tmp = av01();
     return tmp * tmp;
 }
 
-static float fsqav(float in1, float in2)
-{
+static float fsqav(float in1, float in2) {
     return sqav01() * (in2 - in1) + in1;
 }
 
-static int rnd(int in1, int in2)
-{
+static int rnd(int in1, int in2) {
     return (int) (in1 + (in2 - in1) * (float(rand())) / (((float) RAND_MAX) + 1));
 }
 
-static int iav(int in1, int in2)
-{
+static int iav(int in1, int in2) {
     return rnd(in1, in2 + 1);
 }
 
-static int isqav(int in1, int in2)
-{
+static int isqav(int in1, int in2) {
     return (int) (in1 + (in2 + 1 - in1) * sqav01());
 }
 
-void AvgSystems(const SystemInfo &a, const SystemInfo &b, SystemInfo &si)
-{
+void AvgSystems(const SystemInfo &a, const SystemInfo &b, SystemInfo &si) {
     si = a;     //copy all stuff that cna't be averaged
     si.sunradius = fsqav(a.sunradius, b.sunradius);
     si.compactness = fsqav(a.compactness, b.compactness);
@@ -203,8 +187,7 @@ void AvgSystems(const SystemInfo &a, const SystemInfo &b, SystemInfo &si)
     si.force = a.force || b.force;
 }
 
-const vector<string> &ParseDestinations(const string &value)
-{
+const vector<string> &ParseDestinations(const string &value) {
     static vector<string> rv;
     rv.clear();
     string::size_type pos = 0, sep;
@@ -218,8 +201,7 @@ const vector<string> &ParseDestinations(const string &value)
     return rv;
 }
 
-void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom)
-{
+void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom) {
     SystemInfo Ave;
     SystemInfo si;
     AvgSystems(GetSystemMin(galaxy), GetSystemMax(galaxy), Ave);
@@ -237,10 +219,10 @@ void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom)
             parse_bool(getVarEitherSectionOrSub(galaxy, si.sector, si.name, "asteroids", tostring(Ave.asteroids)));
     si.numun1 =
             parse_int(getVarEitherSectionOrSub(galaxy,
-                                               si.sector,
-                                               si.name,
-                                               "num_natural_phenomena",
-                                               tostring(Ave.numun1)));
+                    si.sector,
+                    si.name,
+                    "num_natural_phenomena",
+                    tostring(Ave.numun1)));
     si.numun2 = parse_int(getVarEitherSectionOrSub(galaxy, si.sector, si.name, "num_starbases", tostring(Ave.numun2)));
     si.faction = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "faction", Ave.faction);
     si.seed = parse_int(getVarEitherSectionOrSub(galaxy, si.sector, si.name, "data", tostring(Ave.seed)));
@@ -279,32 +261,28 @@ void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom)
     generateStarSystem(si);
 }
 
-std::string Universe::getGalaxyProperty(const std::string &sys, const std::string &prop)
-{
+std::string Universe::getGalaxyProperty(const std::string &sys, const std::string &prop) {
     string sector = getStarSystemSector(sys);
     string name = RemoveDotSystem(getStarSystemName(sys).c_str());
     return galaxy->getVariable(sector, name, prop,
-                               galaxy->getVariable(sector,
-                                                   prop,
-                                                   galaxy->getVariable("unknown_sector", "min", prop, "")));
+            galaxy->getVariable(sector,
+                    prop,
+                    galaxy->getVariable("unknown_sector", "min", prop, "")));
 }
 
-std::string Universe::getGalaxyPropertyDefault(const std::string &sys, const std::string &prop, const std::string def)
-{
+std::string Universe::getGalaxyPropertyDefault(const std::string &sys, const std::string &prop, const std::string def) {
     string sector = getStarSystemSector(sys);
     string name = RemoveDotSystem(getStarSystemName(sys).c_str());
     return galaxy->getVariable(sector, name, prop, def);
 }
 
-const vector<std::string> &Universe::getAdjacentStarSystems(const std::string &file) const
-{
+const vector<std::string> &Universe::getAdjacentStarSystems(const std::string &file) const {
     string sector = getStarSystemSector(file);
     string name = RemoveDotSystem(getStarSystemName(file).c_str());
     return ParseDestinations(galaxy->getVariable(sector, name, "jumps", ""));
 }
 
-void Universe::getJumpPath(const std::string &from, const std::string &to, vector<std::string> &path) const
-{
+void Universe::getJumpPath(const std::string &from, const std::string &to, vector<std::string> &path) const {
     map<string, unsigned int> visited;
     vector<const string *> origin;
     deque<const string *> open;

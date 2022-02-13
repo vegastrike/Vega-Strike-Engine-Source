@@ -39,8 +39,7 @@ int PNG_HAS_ALPHA = 4;
  *  }
  */
 
-static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
-{
+static void png_cexcept_error(png_structp png_ptr, png_const_charp msg) {
     if (png_ptr) {
     }
 #ifndef PNG_NO_CONSOLE_IO
@@ -49,12 +48,11 @@ static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 }
 
 unsigned char *ReadPNG(FILE *fp,
-                       unsigned int &sizeX,
-                       unsigned int &sizeY,
-                       int &img_depth,
-                       int &img_color_type,
-                       unsigned char ***row_pointer_ptr)
-{
+        unsigned int &sizeX,
+        unsigned int &sizeY,
+        int &img_depth,
+        int &img_color_type,
+        unsigned char ***row_pointer_ptr) {
     png_structp png_ptr;
     png_bytepp row_pointers;
     png_infop info_ptr;
@@ -64,9 +62,9 @@ unsigned char *ReadPNG(FILE *fp,
     if (png_sig_cmp(header, 0, 8))
         assert(0);
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                     NULL,
-                                     (png_error_ptr) png_cexcept_error,
-                                     (png_error_ptr) NULL);
+            NULL,
+            (png_error_ptr) png_cexcept_error,
+            (png_error_ptr) NULL);
     if (png_ptr == NULL) {
         exit(1);
         return NULL;
@@ -142,8 +140,7 @@ enum errort {
     Ok
 };
 
-errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int sizeY, int img_depth, int img_alpha)
-{
+errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int sizeY, int img_depth, int img_alpha) {
     png_structp png_ptr = png_create_write_struct
             (PNG_LIBPNG_VER_STRING, (png_voidp) NULL, NULL, NULL);
     if (!png_ptr) {
@@ -170,14 +167,14 @@ errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int 
     png_set_compression_method(png_ptr, 8);
 
     png_set_IHDR(png_ptr,
-                 info_ptr,
-                 sizeX,
-                 sizeY,
-                 img_depth,
-                 img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT,
-                 PNG_FILTER_TYPE_DEFAULT);
+            info_ptr,
+            sizeX,
+            sizeY,
+            img_depth,
+            img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
+            PNG_INTERLACE_NONE,
+            PNG_COMPRESSION_TYPE_DEFAULT,
+            PNG_FILTER_TYPE_DEFAULT);
 
     png_write_info(png_ptr, info_ptr);
 # if __BYTE_ORDER != __BIG_ENDIAN
@@ -201,8 +198,7 @@ errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int 
 }
 
 template<typename T>
-T *readimgA(T *data, int x, int y, int width, int stride)
-{
+T *readimgA(T *data, int x, int y, int width, int stride) {
     if (x < 0) {
         printf("error\n");
     }
@@ -214,24 +210,21 @@ T *readimgA(T *data, int x, int y, int width, int stride)
     return data;
 }
 
-float *readimg(float *data, int x, int y, int width, int stride)
-{
+float *readimg(float *data, int x, int y, int width, int stride) {
     return readimgA(data, x, y, width, stride);
 }
 
-unsigned char *readimg(unsigned char *data, int x, int y, int width, int stride)
-{
+unsigned char *readimg(unsigned char *data, int x, int y, int width, int stride) {
     return readimgA(data, x, y, width, stride);
 }
 
 void ModifyImage(unsigned int sizex,
-                 unsigned int sizey,
-                 int img_depth,
-                 int img_alpha,
-                 unsigned char **row_pointers,
-                 unsigned char *output,
-                 char pattern[4])
-{
+        unsigned int sizey,
+        int img_depth,
+        int img_alpha,
+        unsigned char **row_pointers,
+        unsigned char *output,
+        char pattern[4]) {
     int stride = (img_depth / 8) * (img_alpha ? 4 : 3);
     int w = sizex;
     for (int j = 0; j < sizey; ++j) {
@@ -260,8 +253,7 @@ void ModifyImage(unsigned int sizex,
     }
 }
 
-void convert_pattern(char *pattern)
-{
+void convert_pattern(char *pattern) {
     for (int i = 0; i < 4; ++i) {
         switch (pattern[i]) {
             case 'a':
@@ -294,8 +286,7 @@ void convert_pattern(char *pattern)
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc > 3) {
         FILE *fp = fopen(argv[1], "rb");
         if (fp) {

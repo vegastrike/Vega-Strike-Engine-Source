@@ -51,8 +51,7 @@ public:
      * Returns the number of elements a vectorizable instance has.
      * Each element has components_per_element components.
      */
-    static size_t element_count(const vector_type &)
-    {
+    static size_t element_count(const vector_type &) {
         return 1;
     }
 
@@ -61,8 +60,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static const component_type *begin(const vector_type &v)
-    {
+    static const component_type *begin(const vector_type &v) {
         return &v;
     }
 
@@ -71,8 +69,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static component_type *begin(vector_type &v)
-    {
+    static component_type *begin(vector_type &v) {
         return &v;
     }
 
@@ -80,8 +77,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static const component_type *end(const vector_type &v)
-    {
+    static const component_type *end(const vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 
@@ -89,8 +85,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static component_type *end(vector_type &v)
-    {
+    static component_type *end(vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 };
@@ -111,8 +106,7 @@ public:
      * Returns the number of elements a vectorizable instance has.
      * Each element has components_per_element components.
      */
-    static size_t element_count(const vector_type &)
-    {
+    static size_t element_count(const vector_type &) {
         return 1;
     }
 
@@ -121,8 +115,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static const component_type *begin(const vector_type &v)
-    {
+    static const component_type *begin(const vector_type &v) {
         return &v;
     }
 
@@ -131,8 +124,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static component_type *begin(vector_type &v)
-    {
+    static component_type *begin(vector_type &v) {
         return &v;
     }
 
@@ -140,8 +132,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static const component_type *end(const vector_type &v)
-    {
+    static const component_type *end(const vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 
@@ -149,8 +140,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static component_type *end(vector_type &v)
-    {
+    static component_type *end(vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 };
@@ -176,8 +166,7 @@ public:
      * Returns the number of elements a vectorizable instance has.
      * Each element has components_per_element components.
      */
-    static size_t element_count(const vector_type &)
-    {
+    static size_t element_count(const vector_type &) {
         return 1;
     }
 
@@ -186,8 +175,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static const component_type *begin(const vector_type &v)
-    {
+    static const component_type *begin(const vector_type &v) {
         return &v;
     }
 
@@ -196,8 +184,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static component_type *begin(vector_type &v)
-    {
+    static component_type *begin(vector_type &v) {
         return &v;
     }
 
@@ -205,8 +192,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static const component_type *end(const vector_type &v)
-    {
+    static const component_type *end(const vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 
@@ -214,8 +200,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static component_type *end(vector_type &v)
-    {
+    static component_type *end(vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 };
@@ -257,8 +242,7 @@ public:
      * Returns the number of elements a vectorizable instance has.
      * Each element has components_per_element components.
      */
-    static size_t element_count(const vector_type &v)
-    {
+    static size_t element_count(const vector_type &v) {
         return v.size();
     }
 
@@ -267,8 +251,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static component_type *begin(vector_type &v)
-    {
+    static component_type *begin(vector_type &v) {
         return (component_type *) coll_start_pointer(v);
     }
 
@@ -277,8 +260,7 @@ public:
      * view. There will be components_per_element * element_count
      * consecutive elements.
      */
-    static const component_type *begin(const vector_type &v)
-    {
+    static const component_type *begin(const vector_type &v) {
         return (component_type *) coll_start_pointer(v);
     }
 
@@ -286,8 +268,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static component_type *end(vector_type &v)
-    {
+    static component_type *end(vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 
@@ -295,8 +276,7 @@ public:
      * Returns a pointer to the last component on the vectorized
      * view. Equivalent to begin() + be components_per_element * element_count
      */
-    static const component_type *end(const vector_type &v)
-    {
+    static const component_type *end(const vector_type &v) {
         return begin(v) + element_count(v) * components_per_element;
     }
 };

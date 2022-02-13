@@ -33,34 +33,32 @@
 #include <stdio.h>
 
 LocationSelect::LocationSelect(Vector start, Vector Plane1,
-                               Vector Plane2 /*, System * par */ ) : LocSelAni("locationselect.ani",
-                                                                               true,
-                                                                               .5,
-                                                                               MIPMAP,
-                                                                               true),
-                                                                     LocSelUpAni("locationselect_up.ani",
-                                                                                 true,
-                                                                                 .5,
-                                                                                 MIPMAP,
-                                                                                 false)
-{
+        Vector Plane2 /*, System * par */ ) : LocSelAni("locationselect.ani",
+        true,
+        .5,
+        MIPMAP,
+        true),
+        LocSelUpAni("locationselect_up.ani",
+                true,
+                .5,
+                MIPMAP,
+                false) {
     //parentScene = par;
     CrosshairSize = 2;
     MoveLocation(start, Plane1, Plane2);
 }
 
 LocationSelect::LocationSelect(Vector start, Vector Plane1, Vector Plane2,
-                               Vector Plane3 /*, Scene* par */ ) : LocSelAni("locationselect.ani",
-                                                                             true,
-                                                                             .5,
-                                                                             MIPMAP,
-                                                                             true),
-                                                                   LocSelUpAni("locationselect_up.ani",
-                                                                               true,
-                                                                               .5,
-                                                                               MIPMAP,
-                                                                               false)
-{
+        Vector Plane3 /*, Scene* par */ ) : LocSelAni("locationselect.ani",
+        true,
+        .5,
+        MIPMAP,
+        true),
+        LocSelUpAni("locationselect_up.ani",
+                true,
+                .5,
+                MIPMAP,
+                false) {
     //parentScene=par;
     CrosshairSize = 2;
     MoveLocation(start, Plane1, Plane2, Plane3);
@@ -72,8 +70,7 @@ bool changed = false;
 bool vert = false;
 #define DELTA_MOVEMENT
 
-void LocationSelect::MouseMoveHandle(KBSTATE kk, int x, int y, int delx, int dely, int mod)
-{
+void LocationSelect::MouseMoveHandle(KBSTATE kk, int x, int y, int delx, int dely, int mod) {
     if (keyState[0]['z'] == DOWN) {
 #ifdef DELTA_MOVEMENT
         if (kk == PRESS) {
@@ -99,28 +96,23 @@ void LocationSelect::MouseMoveHandle(KBSTATE kk, int x, int y, int delx, int del
     }
 }
 
-void LocationSelect::SetPosition(float x, float y, float z)
-{
+void LocationSelect::SetPosition(float x, float y, float z) {
     local_transformation.position = QVector(x, y, z);
 }
 
-void LocationSelect::SetPosition(const Vector &k)
-{
+void LocationSelect::SetPosition(const Vector &k) {
     local_transformation.position = k.Cast();
 }
 
-void LocationSelect::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
-{
+void LocationSelect::SetOrientation(const Vector &p, const Vector &q, const Vector &r) {
     local_transformation.orientation = Quaternion::from_vectors(p, q, r);
 }
 
-QVector &LocationSelect::Position()
-{
+QVector &LocationSelect::Position() {
     return local_transformation.position;
 }
 
-void LocationSelect::MoveLocation(Vector start, Vector Plane1, Vector Plane2)
-{
+void LocationSelect::MoveLocation(Vector start, Vector Plane1, Vector Plane2) {
     //BindKey (1,LocationSelect::MouseMoveHandle);
     //UnbindMouse (getMouseDrawFunc()); //don't draw the mouse
     //BindKey (']',::incConstant);
@@ -133,8 +125,7 @@ void LocationSelect::MoveLocation(Vector start, Vector Plane1, Vector Plane2)
     local_transformation.position = start.Cast();
 }
 
-void LocationSelect::MoveLocation(Vector start, Vector Plane1, Vector Plane2, Vector Plane3)
-{
+void LocationSelect::MoveLocation(Vector start, Vector Plane1, Vector Plane2, Vector Plane3) {
     //BindKey (1,::MouseMoveHandle);
     //UnbindMouse (getMouseDrawFunc());
     LocalPosition = QVector(0, 0, 0);
@@ -144,13 +135,11 @@ void LocationSelect::MoveLocation(Vector start, Vector Plane1, Vector Plane2, Ve
     local_transformation.position = start.Cast();
 }
 
-LocationSelect::~LocationSelect()
-{
+LocationSelect::~LocationSelect() {
     UnbindMouse(1);
 }
 
-void LocationSelect::Draw()
-{
+void LocationSelect::Draw() {
     Matrix transformation;
     local_transformation.to_matrix(transformation);
 

@@ -37,8 +37,7 @@ static unsigned selectbuf[SELECTBUF_SIZE];
 
 using namespace GFXMatrices;
 
-void GFXBeginPick(int x, int y, int xsize, int ysize)
-{
+void GFXBeginPick(int x, int y, int xsize, int ysize) {
     //save and change gl projection matrix
     GLint viewport[4];
 
@@ -60,16 +59,14 @@ void GFXBeginPick(int x, int y, int xsize, int ysize)
     picked_objects = new vector<PickData>();
 }
 
-void GFXSetPickName(int name)
-{
+void GFXSetPickName(int name) {
     glInitNames();
     glPushName(name);
     glLoadName(name);
     glGetError();
 }
 
-void drawRects(GLenum mode)
-{
+void drawRects(GLenum mode) {
     glLoadName(1);
     glBegin(GL_QUADS);
     glColor3f(1.0, 1.0, 0.0);
@@ -97,8 +94,7 @@ void drawRects(GLenum mode)
 }
 
 //Don't call this function
-bool GFXCheckPicked()
-{
+bool GFXCheckPicked() {
     assert(0);
     glFlush();
     int num_hits = glRenderMode(GL_RENDER);
@@ -108,8 +104,7 @@ bool GFXCheckPicked()
     return num_hits > 0;
 }
 
-vector<PickData> *GFXEndPick()
-{
+vector<PickData> *GFXEndPick() {
     int num_hits = glRenderMode(GL_RENDER);
     assert(num_hits != -1);
     //num_hits could == -1, check for this case

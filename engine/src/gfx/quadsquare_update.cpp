@@ -28,8 +28,7 @@
 #include "quadsquare.h"
 int MaxCreateDepth = 0;
 
-void quadsquare::EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata &cd)
-{
+void quadsquare::EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata &cd) {
 //Enable the specified edge vertex.  Indices go { e, n, w, s }.
 //Increments the appropriate reference-count if IncrementCount is true.
     if ((EnabledFlags & (1 << index)) && IncrementCount == false) {
@@ -88,8 +87,7 @@ void quadsquare::EnableEdgeVertex(int index, bool IncrementCount, const quadcorn
     }
 }
 
-quadsquare *quadsquare::EnableDescendant(int count, int path[], const quadcornerdata &cd)
-{
+quadsquare *quadsquare::EnableDescendant(int count, int path[], const quadcornerdata &cd) {
 //This function enables the descendant node 'count' generations below
 //us, located by following the list of child indices in path[].
 //Creates the node if necessary, and returns a pointer to it.
@@ -107,8 +105,7 @@ quadsquare *quadsquare::EnableDescendant(int count, int path[], const quadcorner
     }
 }
 
-void quadsquare::CreateChild(int index, const quadcornerdata &cd)
-{
+void quadsquare::CreateChild(int index, const quadcornerdata &cd) {
 //Creates a child square at the specified index.
     if (Child[index] == 0) {
         quadcornerdata q;
@@ -117,8 +114,7 @@ void quadsquare::CreateChild(int index, const quadcornerdata &cd)
     }
 }
 
-void quadsquare::EnableChild(int index, const quadcornerdata &cd)
-{
+void quadsquare::EnableChild(int index, const quadcornerdata &cd) {
 //Enable the indexed child node.  { ne, nw, sw, se }
 //Causes dependent edge vertices to be enabled.
 //if (Enabled[index + 4] == false) {
@@ -133,8 +129,7 @@ void quadsquare::EnableChild(int index, const quadcornerdata &cd)
     }
 }
 
-void quadsquare::NotifyChildDisable(const quadcornerdata &cd, int index)
-{
+void quadsquare::NotifyChildDisable(const quadcornerdata &cd, int index) {
 //Marks the indexed child quadrant as disabled.  Deletes the child node
 //if it isn't static.
     //Clear enabled flag for the child.
@@ -165,8 +160,7 @@ void quadsquare::NotifyChildDisable(const quadcornerdata &cd, int index)
 
 static float DetailThreshold = 100;
 
-bool VertexTest(float x, float y, float z, float error, const Vector &Viewer)
-{
+bool VertexTest(float x, float y, float z, float error, const Vector &Viewer) {
 //Returns true if the vertex at (x,z) with the given world-space error between
 //its interpolated location and its true location, should be enabled, given that
 //the viewpoint is located at Viewer[].
@@ -183,8 +177,7 @@ bool VertexTest(float x, float y, float z, float error, const Vector &Viewer)
     return (error * DetailThreshold) > d;
 }
 
-bool BoxTest(float x, float z, float size, float miny, float maxy, float error, const Vector &Viewer)
-{
+bool BoxTest(float x, float z, float size, float miny, float maxy, float error, const Vector &Viewer) {
 //Returns true if any vertex within the specified box (origin at x,z,
 //edges of length size) with the given error value could be enabled
 //based on the given viewer location.
@@ -223,8 +216,7 @@ bool BoxTest(float x, float z, float size, float miny, float maxy, float error, 
  * Stage 4 Number: 00000000000000000000000010000100
  * Stage 5 Number: 00000000000000000000000010001000
  */
-static unsigned int calculatestage(unsigned int numstages, unsigned int whichstage)
-{
+static unsigned int calculatestage(unsigned int numstages, unsigned int whichstage) {
     unsigned int stage = 0;
     int count = 0;
     numstages -= 1;
@@ -238,8 +230,7 @@ static unsigned int calculatestage(unsigned int numstages, unsigned int whichsta
 }
 
 ///transforms our stages to little endian notation so most significant half-byte is on the right :-)
-static unsigned int transformstage(unsigned int stage, updateparity *updateorder)
-{
+static unsigned int transformstage(unsigned int stage, updateparity *updateorder) {
     int tmp;
     unsigned int transformedstage = 0;
     while ((tmp = (stage & (1 | 2 | 4 | 8))) != 0) {
@@ -250,13 +241,11 @@ static unsigned int transformstage(unsigned int stage, updateparity *updateorder
     return transformedstage;
 }
 
-int identityparity(int i)
-{
+int identityparity(int i) {
     return i;
 }
 
-int sideparityodd(int i)
-{
+int sideparityodd(int i) {
     switch (i) {
         case 1:
             return 2;
@@ -273,8 +262,7 @@ int sideparityodd(int i)
     return 0;
 }
 
-int upparityodd(int i)
-{
+int upparityodd(int i) {
     switch (i) {
         case 1:
             return 4;
@@ -291,8 +279,7 @@ int upparityodd(int i)
     return 0;
 }
 
-int sideupparityodd(int i)
-{
+int sideupparityodd(int i) {
     switch (i) {
         case 8:
             return 1;
@@ -313,21 +300,19 @@ int sideupparityodd(int i)
 /// location of the viewer.  May force creation or deletion of qsquares
 /// in areas which need to be interpolated.
 void quadsquare::Update(const quadcornerdata &cd,
-                        const Vector &ViewerLocation,
-                        float Detail,
-                        unsigned short numstages,
-                        unsigned short whichstage,
-                        updateparity *par)
-{
+        const Vector &ViewerLocation,
+        float Detail,
+        unsigned short numstages,
+        unsigned short whichstage,
+        updateparity *par) {
     DetailThreshold = Detail;
     UpdateAux(cd, ViewerLocation, 0, transformstage(calculatestage(numstages, whichstage), par));
 }
 
 void quadsquare::UpdateAux(const quadcornerdata &cd,
-                           const Vector &ViewerLocation,
-                           float CenterError,
-                           unsigned int whichChildren)
-{
+        const Vector &ViewerLocation,
+        float CenterError,
+        unsigned int whichChildren) {
 //Does the actual work of updating enabled states and tree growing/shrinking.
     //Make sure error values are current.
     if (Dirty) {
@@ -438,13 +423,11 @@ void quadsquare::UpdateAux(const quadcornerdata &cd,
     }             //nb: possibly deletes 'this'.
 }
 
-inline Vector Normalise(const Vector &vec, const float scale)
-{
+inline Vector Normalise(const Vector &vec, const float scale) {
     return vec * (scale / vec.Magnitude());
 }
 
-Vector quadsquare::MakeLightness(float xslope, float zslope, const Vector &loc)
-{
+Vector quadsquare::MakeLightness(float xslope, float zslope, const Vector &loc) {
     Vector tmp(nonlinear_trans->TransformNormal(loc.Cast(), QVector(-xslope, 1, -zslope)).Cast());
     tmp.Normalize();
     return Vector(tmp.i * normalscale.i, tmp.j * normalscale.j, tmp.k * normalscale.k);
@@ -456,8 +439,7 @@ Vector quadsquare::MakeLightness(float xslope, float zslope, const Vector &loc)
  * Also updates MinY & MaxY.
  * Also computes quick & dirty vertex lighting for the demo.
  */
-float quadsquare::RecomputeErrorAndLighting(const quadcornerdata &cd)
-{
+float quadsquare::RecomputeErrorAndLighting(const quadcornerdata &cd) {
     int i;
     //Measure error of center and edge vertices.
     float maxerror = 0;
@@ -535,8 +517,8 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata &cd)
     GFXVertex *vertexs = vertices->BeginMutate(0)->vertices;
     GFXVertex *V = &vertexs[Vertex[0].vertindex];
     V->SetNormal(MakeLightness((Vertex[1].Y - Vertex[3].Y) * OneOverSize,
-                               (Vertex[4].Y - Vertex[2].Y) * OneOverSize,
-                               V->GetConstVertex()));
+            (Vertex[4].Y - Vertex[2].Y) * OneOverSize,
+            V->GetConstVertex()));
     float v;
     quadsquare *s = GetFarNeighbor(0, cd);
     if (s) {
@@ -546,8 +528,8 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata &cd)
     }
     V = &vertexs[Vertex[1].vertindex];
     V->SetNormal(MakeLightness((v - Vertex[0].Y) * OneOverSize,
-                               (cd.Verts[3].Y - cd.Verts[0].Y) * OneOverSize,
-                               V->GetConstVertex()));
+            (cd.Verts[3].Y - cd.Verts[0].Y) * OneOverSize,
+            V->GetConstVertex()));
     s = GetFarNeighbor(1, cd);
     if (s) {
         v = s->Vertex[0].Y;
@@ -556,8 +538,8 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata &cd)
     }
     V = &vertexs[Vertex[2].vertindex];
     V->SetNormal(MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
-                               (Vertex[0].Y - v) * OneOverSize,
-                               V->GetConstVertex()));
+            (Vertex[0].Y - v) * OneOverSize,
+            V->GetConstVertex()));
     s = GetFarNeighbor(2, cd);
     if (s) {
         v = s->Vertex[0].Y;
@@ -566,8 +548,8 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata &cd)
     }
     V = &vertexs[Vertex[3].vertindex];
     V->SetNormal(MakeLightness((Vertex[0].Y - v) * OneOverSize,
-                               (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize,
-                               V->GetConstVertex()));
+            (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize,
+            V->GetConstVertex()));
     s = GetFarNeighbor(3, cd);
     if (s) {
         v = s->Vertex[0].Y;
@@ -576,8 +558,8 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata &cd)
     }
     V = &vertexs[Vertex[4].vertindex];
     V->SetNormal(MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,
-                               (v - Vertex[0].Y) * OneOverSize,
-                               V->GetConstVertex()));
+            (v - Vertex[0].Y) * OneOverSize,
+            V->GetConstVertex()));
     vertices->EndMutate();
     //The error, MinY/MaxY, and lighting values for this node and descendants are correct now.
     Dirty = false;

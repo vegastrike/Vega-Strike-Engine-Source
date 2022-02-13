@@ -324,16 +324,14 @@ void VSSprite::GetRotation( float &rot )
 }
 
 */
-void VSExit(int code)
-{
+void VSExit(int code) {
     exit(code);
 }
 
 #include <ctype.h>
 #include "gfx/hud.h"
 
-TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol)
-{
+TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
     col = c;
     this->bgcol = bgcol;
     myDims.i = 2;
@@ -342,17 +340,14 @@ TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol)
     SetPos(0, 0);
 }
 
-TextPlane::~TextPlane()
-{
+TextPlane::~TextPlane() {
 }
 
-int TextPlane::Draw(int offset)
-{
+int TextPlane::Draw(int offset) {
     return Draw(myText, offset, true);
 }
 
-static char *CreateLists()
-{
+static char *CreateLists() {
     static char lists[256] = {0};
     void *fnt = g_game.x_resolution >= 800 ? GLUT_BITMAP_HELVETICA_12 : GLUT_BITMAP_HELVETICA_10;
     static bool use_bit = false;
@@ -374,8 +369,7 @@ static char *CreateLists()
     return lists;
 }
 
-static unsigned char HexToChar(char a)
-{
+static unsigned char HexToChar(char a) {
     if (a >= '0' && a <= '9') {
         return a - '0';
     } else if (a >= 'a' && a <= 'f') {
@@ -386,18 +380,15 @@ static unsigned char HexToChar(char a)
     return 0;
 }
 
-static unsigned char TwoCharToByte(char a, char b)
-{
+static unsigned char TwoCharToByte(char a, char b) {
     return 16 * HexToChar(a) + HexToChar(b);
 }
 
-static float TwoCharToFloat(char a, char b)
-{
+static float TwoCharToFloat(char a, char b) {
     return TwoCharToByte(a, b) / 255.;
 }
 
-void DrawSquare(float left, float right, float top, float bot)
-{
+void DrawSquare(float left, float right, float top, float bot) {
     glBegin(GFXQUAD);
     glVertex3f(left, top, 0);
     glVertex3f(left, bot, 0);
@@ -411,8 +402,7 @@ void DrawSquare(float left, float right, float top, float bot)
     glEnd();
 }
 
-int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte)
-{
+int TextPlane::Draw(const string &newText, int offset, bool startlower, bool force_highquality, bool automatte) {
     int retval = 1;
     bool drawbg = (bgcol.a != 0);
     static char *display_lists = CreateLists();
@@ -492,9 +482,9 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
                     glColor4f(this->col.r, this->col.g, this->col.b, this->col.a);
                 } else {
                     glColor4f(r,
-                              g,
-                              b,
-                              this->col.a);
+                            g,
+                            b,
+                            this->col.a);
                 }
                 text_it = text_it + 6;
             }
@@ -537,7 +527,7 @@ int TextPlane::Draw(const string &newText, int offset, bool startlower, bool for
         if (col
                 + ((text_it + 1
                         != newText.end()) ? (use_bit ? (glutBitmapWidth(fnt,
-                                                                        *text_it)
+                        *text_it)
                         / (float) (2 * g_game.x_resolution)) : myFontMetrics.i) : 0) >= myDims.i
                 || *text_it == '\n') {
             GetPos(tmp, col);
@@ -594,12 +584,10 @@ public:
             virtual void Click(::Base *base, float x, float y, int button, int state);
 
             explicit Link(unsigned int parind, std::string ind, std::string pfile)
-                    : parentindex(parind), pythonfile(pfile), index(ind)
-            {
+                    : parentindex(parind), pythonfile(pfile), index(ind) {
             }
 
-            virtual ~Link()
-            {
+            virtual ~Link() {
             }
 
 #ifdef BASE_MAKER
@@ -611,12 +599,12 @@ public:
             int index;
             virtual void Click(::Base *base, float x, float y, int button, int state);
 
-            virtual ~Goto()
-            {
+            virtual ~Goto() {
             }
 
-            explicit Goto(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind, pythonfile)
-            {
+            explicit Goto(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind,
+                    ind,
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -628,12 +616,12 @@ public:
             std::vector<DisplayMode> modes;
             virtual void Click(::Base *base, float x, float y, int button, int state);
 
-            virtual ~Comp()
-            {
+            virtual ~Comp() {
             }
 
-            explicit Comp(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind, pythonfile)
-            {
+            explicit Comp(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind,
+                    ind,
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -644,14 +632,12 @@ public:
         public:
             virtual void Click(::Base *base, float x, float y, int button, int state);
 
-            virtual ~Launch()
-            {
+            virtual ~Launch() {
             }
 
             explicit Launch(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind,
-                                                                                                 ind,
-                                                                                                 pythonfile)
-            {
+                    ind,
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -660,12 +646,10 @@ public:
         };
         class Bar : public Link {
         public:
-            virtual ~Bar()
-            {
+            virtual ~Bar() {
             }
 
-            explicit Bar(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind, pythonfile)
-            {
+            explicit Bar(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind, pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -674,13 +658,11 @@ public:
         };
         class Commodity : public Link {
         public:
-            virtual ~Commodity()
-            {
+            virtual ~Commodity() {
             }
 
             explicit Commodity(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,
-                                                                                                    pythonfile)
-            {
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -689,13 +671,11 @@ public:
         };
         class Merchant : public Link {
         public:
-            virtual ~Merchant()
-            {
+            virtual ~Merchant() {
             }
 
             explicit Merchant(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,
-                                                                                                   pythonfile)
-            {
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -704,13 +684,11 @@ public:
         };
         class Mercenary : public Link {
         public:
-            virtual ~Mercenary()
-            {
+            virtual ~Mercenary() {
             }
 
             explicit Mercenary(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,
-                                                                                                    pythonfile)
-            {
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -719,13 +697,11 @@ public:
         };
         class Upgrades : public Link {
         public:
-            virtual ~Upgrades()
-            {
+            virtual ~Upgrades() {
             }
 
             explicit Upgrades(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,
-                                                                                                   pythonfile)
-            {
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -735,14 +711,12 @@ public:
 
         class Weapon : public Link {
         public:
-            virtual ~Weapon()
-            {
+            virtual ~Weapon() {
             }
 
             explicit Weapon(unsigned int parind, std::string ind, std::string pythonfile) : Link(parind,
-                                                                                                 ind,
-                                                                                                 pythonfile)
-            {
+                    ind,
+                    pythonfile) {
             }
 
 #ifdef BASE_MAKER
@@ -759,8 +733,7 @@ public:
             virtual void Click(::Base *base, float x, float y, int button, int state);
             explicit Talk(unsigned int parind, std::string ind, std::string pythonfile);
 
-            virtual ~Talk()
-            {
+            virtual ~Talk() {
             }
 
 #ifdef BASE_MAKER
@@ -773,8 +746,7 @@ public:
             virtual void Click(::Base *base, float x, float y, int button, int state);
             Python(unsigned int parind, std::string ind, std::string pythonfile);
 
-            virtual ~Python()
-            {
+            virtual ~Python() {
             }
 
 #ifdef BASE_MAKER
@@ -789,12 +761,10 @@ public:
             virtual void EndXML(FILE *fp);
 #endif
 
-            virtual ~BaseObj()
-            {
+            virtual ~BaseObj() {
             }
 
-            explicit BaseObj(std::string ind) : index(ind)
-            {
+            explicit BaseObj(std::string ind) : index(ind) {
             }
         };
         class BaseShip : public BaseObj {
@@ -802,31 +772,28 @@ public:
             virtual void Draw(::Base *base);
             Matrix mat;
 
-            virtual ~BaseShip()
-            {
+            virtual ~BaseShip() {
             }
 
 #ifdef BASE_MAKER
             virtual void EndXML(FILE *fp);
 #endif
 
-            explicit BaseShip(std::string ind) : BaseObj(ind)
-            {
+            explicit BaseShip(std::string ind) : BaseObj(ind) {
             }
 
             BaseShip(float r0,
-                     float r1,
-                     float r2,
-                     float r3,
-                     float r4,
-                     float r5,
-                     float r6,
-                     float r7,
-                     float r8,
-                     QVector pos,
-                     std::string ind) :
-                    BaseObj(ind), mat(r0, r1, r2, r3, r4, r5, r6, r7, r8, QVector(pos.i / 2, pos.j / 2, pos.k))
-            {
+                    float r1,
+                    float r2,
+                    float r3,
+                    float r4,
+                    float r5,
+                    float r6,
+                    float r7,
+                    float r8,
+                    QVector pos,
+                    std::string ind) :
+                    BaseObj(ind), mat(r0, r1, r2, r3, r4, r5, r6, r7, r8, QVector(pos.i / 2, pos.j / 2, pos.k)) {
             }
         };
         class BaseVSSprite : public BaseObj {
@@ -839,13 +806,11 @@ public:
             virtual void EndXML(FILE *fp);
 #endif
 
-            virtual ~BaseVSSprite()
-            {
+            virtual ~BaseVSSprite() {
             }
 
             BaseVSSprite(const char *spritefile, std::string ind) :
-                    BaseObj(ind), spr(spritefile, BILINEAR, GFXTRUE)
-            {
+                    BaseObj(ind), spr(spritefile, BILINEAR, GFXTRUE) {
             }
         };
         class BaseTalk : public BaseObj {
@@ -857,8 +822,7 @@ public:
             int curchar;
             float curtime;
 
-            virtual ~BaseTalk()
-            {
+            virtual ~BaseTalk() {
             }
 
             std::string message;
@@ -866,8 +830,7 @@ public:
             BaseTalk(std::string msg, std::string ind, bool only_one_talk);
 #ifdef BASE_MAKER
 
-            virtual void EndXML(FILE *fp)
-            {
+            virtual void EndXML(FILE *fp) {
             }
 
 #endif
@@ -938,36 +901,31 @@ static int mmy = 0;
 static int indentlevel = 0;
 static int bogus_int; //added by chuck_starchaser to squash ignored returns warnings.
 
-static void Indent(FILE *fp)
-{
+static void Indent(FILE *fp) {
     for (int i = 0; i < indentlevel; ++i) {
         fwrite("\t", sizeof(char), 1, fp);
     }
 }
 
-void Base::Room::Link::EndXML(FILE *fp)
-{
+void Base::Room::Link::EndXML(FILE *fp) {
     fprintf(fp, "room%d, '%s', %g, %g, %g, %g, '%s'", parentindex, index.c_str(), x, y, wid, hei, text.c_str());
 }
 
-void Base::Room::Goto::EndXML(FILE *fp)
-{
+void Base::Room::Goto::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "Base.Link (");
     Link::EndXML(fp);
     fprintf(fp, ", room%d)\n", Goto::index);
 }
 
-void Base::Room::Python::EndXML(FILE *fp)
-{
+void Base::Room::Python::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "Base.Python (");
     Link::EndXML(fp);
     fprintf(fp, ", '%s')\n", file.c_str());
 }
 
-void Base::Room::Talk::EndXML(FILE *fp)
-{
+void Base::Room::Talk::EndXML(FILE *fp) {
     char randstr[100];
     sprintf(randstr, "NEW_SCRIPT_%d.py", (int) (rand()));
     Indent(fp);
@@ -993,8 +951,7 @@ void Base::Room::Talk::EndXML(FILE *fp)
     //obolete... creates a file that uses the Python function instead.
 }
 
-void Base::Room::Bar::EndXML(FILE *fp)
-{
+void Base::Room::Bar::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "import bar_lib\n");
     Indent(fp);
@@ -1005,8 +962,7 @@ void Base::Room::Bar::EndXML(FILE *fp)
     fprintf(fp, ", bar)\n");
 }
 
-void Base::Room::Commodity::EndXML(FILE *fp)
-{
+void Base::Room::Commodity::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "import commodity_lib\n");
     Indent(fp);
@@ -1017,8 +973,7 @@ void Base::Room::Commodity::EndXML(FILE *fp)
     fprintf(fp, ", commodity)\n");
 }
 
-void Base::Room::Merchant::EndXML(FILE *fp)
-{
+void Base::Room::Merchant::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "import merchant_guild\n");
     Indent(fp);
@@ -1029,8 +984,7 @@ void Base::Room::Merchant::EndXML(FILE *fp)
     fprintf(fp, ", merchant)\n");
 }
 
-void Base::Room::Mercenary::EndXML(FILE *fp)
-{
+void Base::Room::Mercenary::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "import mercenary_guild\n");
     Indent(fp);
@@ -1041,8 +995,7 @@ void Base::Room::Mercenary::EndXML(FILE *fp)
     fprintf(fp, ", merchant)\n");
 }
 
-void Base::Room::Weapon::EndXML(FILE *fp)
-{
+void Base::Room::Weapon::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "import weapons_lib\n");
     Indent(fp);
@@ -1054,8 +1007,7 @@ void Base::Room::Weapon::EndXML(FILE *fp)
     fprintf(fp, ", weap)\n");
 }
 
-void Base::Room::Launch::EndXML(FILE *fp)
-{
+void Base::Room::Launch::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "Base.LaunchPython (");
     fprintf(fp, "room%d, '%s', 'bases/launch_music.py', %g, %g, %g, %g, '%s'", parentindex,
@@ -1063,8 +1015,7 @@ void Base::Room::Launch::EndXML(FILE *fp)
     fprintf(fp, ")\n");
 }
 
-void Base::Room::Comp::EndXML(FILE *fp)
-{
+void Base::Room::Comp::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "Base.Comp (");
     Link::EndXML(fp);
@@ -1101,13 +1052,11 @@ void Base::Room::Comp::EndXML(FILE *fp)
     fprintf(fp, ")\n");
 }
 
-void Base::Room::BaseObj::EndXML(FILE *fp)
-{
+void Base::Room::BaseObj::EndXML(FILE *fp) {
 //Do nothing
 }
 
-void Base::Room::BaseShip::EndXML(FILE *fp)
-{
+void Base::Room::BaseShip::EndXML(FILE *fp) {
     Indent(fp);
     fprintf(fp, "Base.Ship (room, '%s', (%lg,%lg,%lg), (%g, %g, %g), (%g, %g, %g))\n", index.c_str(),
             mat.p.i, mat.p.j, mat.p.k,
@@ -1115,8 +1064,7 @@ void Base::Room::BaseShip::EndXML(FILE *fp)
             mat.getQ().i, mat.getQ().j, mat.getQ().k);
 }
 
-string ridExt(string inp)
-{
+string ridExt(string inp) {
     string::size_type where = inp.rfind(".");
     if (where == string::npos) {
         return inp;
@@ -1124,8 +1072,7 @@ string ridExt(string inp)
     return inp.substr(0, where);
 }
 
-void Base::Room::BaseVSSprite::EndXML(FILE *fp)
-{
+void Base::Room::BaseVSSprite::EndXML(FILE *fp) {
     float x, y;
     spr.GetPosition(x, y);
     Indent(fp);
@@ -1136,8 +1083,7 @@ void Base::Room::BaseVSSprite::EndXML(FILE *fp)
 
 bool room1 = false;
 
-void Base::Room::EndXML(FILE *fp)
-{
+void Base::Room::EndXML(FILE *fp) {
     int i;
     Indent(fp);
     fprintf(fp, "room = Base.Room ('%s')\n", deftext.c_str());
@@ -1158,8 +1104,7 @@ void Base::Room::EndXML(FILE *fp)
     fflush(fp);
 }
 
-void Base::Room::PrintLinks(FILE *fp)
-{
+void Base::Room::PrintLinks(FILE *fp) {
     for (unsigned int i = 0; i < links.size(); i++) {
         if (links[i]) {
             links[i]->EndXML(fp);
@@ -1167,8 +1112,7 @@ void Base::Room::PrintLinks(FILE *fp)
     }
 }
 
-void Base::EndXML()
-{
+void Base::EndXML() {
     bogus_int = chdir("bases");
     FILE *fp = NULL;
     if (time_of_day) {
@@ -1222,16 +1166,14 @@ void Base::EndXML()
     bogus_int = chdir("..");
 }
 
-static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y)
-{
+static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float *y) {
     (*x) = (((float) (xbeforecalc * 2)) / g_game.x_resolution) - 1;
     (*y) = -(((float) (ybeforecalc * 2)) / g_game.y_resolution) + 1;
 }
 
 /** Starts a Frame of OpenGL with proper parameters and mouse
  */
-void StartGUIFrame(GFXBOOL clr)
-{
+void StartGUIFrame(GFXBOOL clr) {
     //glutSetCursor(GLUT_CURSOR_INHERIT);
     //GFXViewPort (0,0,g_game.x_resolution,g_game.y_resolution);
 //GFXHudMode (true);
@@ -1248,8 +1190,7 @@ void StartGUIFrame(GFXBOOL clr)
     glEnable(GL_TEXTURE0);
 }
 
-void DrawGlutMouse(int mousex, int mousey)
-{
+void DrawGlutMouse(int mousex, int mousey) {
     //, VSSprite * spr) {
     /*
      *  glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -1275,13 +1216,11 @@ void DrawGlutMouse(int mousex, int mousey)
     glEnd();
 }
 
-void ConditionalCursorDraw(bool iscursor)
-{
+void ConditionalCursorDraw(bool iscursor) {
     glutSetCursor(iscursor ? GLUT_CURSOR_LEFT_ARROW : GLUT_CURSOR_NONE);
 }
 
-void EndGUIFrame(bool drawmouseover)
-{
+void EndGUIFrame(bool drawmouseover) {
 //static VSSprite MouseVSSprite ("mouseover.spr",BILINEAR,GFXTRUE);
     glDisable(GL_CULL_FACE);
     DrawGlutMouse(mmx, mmy);     //,&MouseVSSprite);
@@ -1290,8 +1229,7 @@ void EndGUIFrame(bool drawmouseover)
 //glEnable (GL_CULL_FACE);
 }
 
-void SetSoftwareMousePosition(int x, int y)
-{
+void SetSoftwareMousePosition(int x, int y) {
     mmx = x;
     mmy = y;
     float nx, ny;
@@ -1300,8 +1238,7 @@ void SetSoftwareMousePosition(int x, int y)
     fflush(stdout);
 }
 
-Base::Room::~Room()
-{
+Base::Room::~Room() {
     size_t i;
     for (i = 0; i < links.size(); ++i) {
         if (links[i] != nullptr) {
@@ -1319,7 +1256,7 @@ Base::Room::~Room()
 
 typedef bool
 (*InputFunc)(std::string input, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x,
-             float y);
+        float y);
 
 unsigned int input_base_index_dat;
 void *input_dat1;
@@ -1335,8 +1272,7 @@ bool input_cancel = true;
 std::string input_buffer;
 int NUMLINES;
 
-void Output(const char *message)
-{
+void Output(const char *message) {
     input_buffer += message + string("\n");
     unsigned int newlines = 0;
     std::string::size_type pos = 0;
@@ -1351,18 +1287,15 @@ void Output(const char *message)
     }
 }
 
-void Output(const std::string &message)
-{
+void Output(const std::string &message) {
     Output(message.c_str());
 }
 
-void Error(const std::string &message)
-{
+void Error(const std::string &message) {
     Output(string("#ff3333") + message);
 }
 
-void InputDraw()
-{
+void InputDraw() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 //static int draw=0;
 //draw++;
@@ -1385,8 +1318,7 @@ void InputDraw()
     glutSwapBuffers();
 }
 
-void InputKeyDown(unsigned char key, int x, int y)
-{
+void InputKeyDown(unsigned char key, int x, int y) {
     if (is_input) {
         if (key >= 32 && key < 127) {
             input_string += key;
@@ -1401,35 +1333,33 @@ void InputKeyDown(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
-void InputKeyUp(unsigned char key, int x, int y)
-{
+void InputKeyUp(unsigned char key, int x, int y) {
     if (is_input) {
         if (key == '\r' || key == '\n') {
             Output(input_prompt);
             Output(input_string);
             is_input =
                     !((*input_func)(input_string,
-                                    input_base_index_dat,
-                                    input_dat1,
-                                    input_dat2,
-                                    input_dat3,
-                                    input_x,
-                                    input_y));
+                            input_base_index_dat,
+                            input_dat1,
+                            input_dat2,
+                            input_dat3,
+                            input_x,
+                            input_y));
         }
     }
     glutPostRedisplay();
 }
 
 void Input(const char *prompt,
-           InputFunc myfunction,
-           bool cancancel,
-           unsigned int inputroomindex,
-           void *dat1,
-           void *dat2,
-           const void *dat3,
-           float x,
-           float y)
-{
+        InputFunc myfunction,
+        bool cancancel,
+        unsigned int inputroomindex,
+        void *dat1,
+        void *dat2,
+        const void *dat3,
+        float x,
+        float y) {
     input_dat1 = dat1;
     input_dat2 = dat2;
     input_dat3 = dat3;
@@ -1450,18 +1380,17 @@ struct MyTmpXY {
         tmp_xy;
 
 bool AddRoomSprite(std::string input,
-                   unsigned int room_index,
-                   void *dat1,
-                   void *dat2,
-                   const void *dat3,
-                   float x,
-                   float y)
-{
+        unsigned int room_index,
+        void *dat1,
+        void *dat2,
+        const void *dat3,
+        float x,
+        float y) {
     std::vector<Base::Room::BaseObj *> *objs = (std::vector<Base::Room::BaseObj *> *) dat1;
     if (input.empty()) {
         //add a ship.
         objs->push_back(new Base::Room::BaseShip(0, .34, .93, -1, 0, 0, 0, .93, -.34,
-                                                 QVector((x + tmp_xy.x) / 2, (tmp_xy.y + y) / 2, 4), "my_ship"));
+                QVector((x + tmp_xy.x) / 2, (tmp_xy.y + y) / 2, 4), "my_ship"));
     }
         //FIXME: orientation cannot be changed from editor.
     else {
@@ -1562,26 +1491,22 @@ bool AddRoomSprite(std::string input,
     return true;
 }
 
-Base::Room::Room(unsigned int index) : index(index)
-{
+Base::Room::Room(unsigned int index) : index(index) {
     tmp_xy.x = -0.97;
     tmp_xy.y = 0.97;
 }
 
-void Base::Room::BaseObj::Draw(Base *base)
-{
+void Base::Room::BaseObj::Draw(Base *base) {
 //Do nothing...
 }
 
-void Base::Room::BaseVSSprite::Draw(Base *base)
-{
+void Base::Room::BaseVSSprite::Draw(Base *base) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE0);
     spr.Draw();
 }
 
-void Base::Room::BaseShip::Draw(Base *base)
-{
+void Base::Room::BaseShip::Draw(Base *base) {
     /*
      *  Unit *un=base->caller.GetUnit();
      *  if (un) {
@@ -1626,8 +1551,7 @@ void Base::Room::BaseShip::Draw(Base *base)
     glEnd();
 }
 
-void Base::Room::Draw(Base *base)
-{
+void Base::Room::Draw(Base *base) {
     int i;
     for (i = 0; i < objs.size(); i++) {
         if (objs[i]) {
@@ -1639,15 +1563,13 @@ void Base::Room::Draw(Base *base)
 static Base::Room::BaseTalk *only_one_talk = NULL;
 
 Base::Room::BaseTalk::BaseTalk(std::string msg, std::string ind, bool only_one)
-        : BaseObj(ind), curchar(0), curtime(0), message(msg)
-{
+        : BaseObj(ind), curchar(0), curtime(0), message(msg) {
     if (only_one) {
         only_one_talk = this;
     }
 }
 
-void Base::Room::BaseTalk::Draw(Base *base)
-{
+void Base::Room::BaseTalk::Draw(Base *base) {
     if (hastalked) {
         return;
     }
@@ -1655,8 +1577,7 @@ void Base::Room::BaseTalk::Draw(Base *base)
     hastalked = true;
 }
 
-int Base::Room::MouseOver(Base *base, float x, float y)
-{
+int Base::Room::MouseOver(Base *base, float x, float y) {
     for (int i = 0; i < links.size(); i++) {
         if (links[i]) {
             if (x >= links[i]->x
@@ -1672,25 +1593,28 @@ int Base::Room::MouseOver(Base *base, float x, float y)
 
 Base *Base::CurrentBase = 0;
 
-bool RefreshGUI(void)
-{
+bool RefreshGUI(void) {
     Base::CurrentBase->Draw();
     return true;
 }
 
 bool LinkStage3Goto(std::string input,
-                    unsigned int unusedindexdat,
-                    void *dat1,
-                    void *dat2,
-                    const void *dat3,
-                    float x,
-                    float y)
-{
+        unsigned int unusedindexdat,
+        void *dat1,
+        void *dat2,
+        const void *dat3,
+        float x,
+        float y) {
     return sscanf(input.c_str(), "%d", reinterpret_cast< int * > (dat1)) >= 1;
 }
 
-bool LinkStage3Comp(std::string input, unsigned int unused, void *dat1, void *dat2, const void *dat3, float x, float y)
-{
+bool LinkStage3Comp(std::string input,
+        unsigned int unused,
+        void *dat1,
+        void *dat2,
+        const void *dat3,
+        float x,
+        float y) {
     int modearg = DISPLAY_MODE_COUNT;
     input = strtolower(input);
     if (input == "cargo") {
@@ -1714,13 +1638,12 @@ bool LinkStage3Comp(std::string input, unsigned int unused, void *dat1, void *da
 }
 
 bool LinkStage2(std::string input,
-                unsigned int inputroomindex,
-                void *dat1,
-                void *dat2,
-                const void *dat3,
-                float x,
-                float y)
-{
+        unsigned int inputroomindex,
+        void *dat1,
+        void *dat2,
+        const void *dat3,
+        float x,
+        float y) {
     std::vector<Base::Room::Link *> *links = (std::vector<Base::Room::Link *> *) dat1;
     bool ret = true;
     input = strtolower(input);
@@ -1730,7 +1653,7 @@ bool LinkStage2(std::string input,
          *  bogus_int = fscanf(fp,"%d",&((Goto*)links.back())->index);
          */
         Input("Which room should this go to?", &LinkStage3Goto, false, inputroomindex,
-              &(((Base::Room::Goto *) (links->back()))->index), NULL, NULL, 0, 0);
+                &(((Base::Room::Goto *) (links->back()))->index), NULL, NULL, 0, 0);
         ret = false;
     } else if (input == "launch") {
         links->push_back(new Base::Room::Launch(inputroomindex, "my_launch_id", "launch"));
@@ -1760,14 +1683,14 @@ bool LinkStage2(std::string input,
          *  }
          */
         Input("What modes does it have [Cargo,Upgrade,ShipDealer,Missions,News,Info] (ESC=stop)?",
-              &LinkStage3Comp,
-              true,
-              inputroomindex,
-              &(((Base::Room::Comp *) (links->back()))->modes),
-              NULL,
-              NULL,
-              0,
-              0);
+                &LinkStage3Comp,
+                true,
+                inputroomindex,
+                &(((Base::Room::Comp *) (links->back()))->modes),
+                NULL,
+                NULL,
+                0,
+                0);
         ret = false;
     } else {
         input_string = string();
@@ -1790,37 +1713,35 @@ bool LinkStage2(std::string input,
 }
 
 bool LinkStage1(std::string input,
-                unsigned int inputroomindex,
-                void *dat1,
-                void *dat2,
-                const void *dat3,
-                float x,
-                float y)
-{
+        unsigned int inputroomindex,
+        void *dat1,
+        void *dat2,
+        const void *dat3,
+        float x,
+        float y) {
     Input("What link type [comp,link,launch,bar,weapon,mercenary,merchant,commodity]? ",
-          &LinkStage2,
-          false,
-          inputroomindex,
-          dat1,
-          strdup(input.c_str()),
-          NULL,
-          x,
-          y);
+            &LinkStage2,
+            false,
+            inputroomindex,
+            dat1,
+            strdup(input.c_str()),
+            NULL,
+            x,
+            y);
     return false;
 }
 
-void Base::Room::Click(Base *base, float x, float y, int button, int state)
-{
+void Base::Room::Click(Base *base, float x, float y, int button, int state) {
     if (makingstate == 2) {
         Input("Add a sprite (ESC=cancel, blank=Ship) (No extension. file must be png or jpg format.) ",
-              &AddRoomSprite,
-              true,
-              this->index,
-              &objs,
-              NULL,
-              "texture",
-              x,
-              y);
+                &AddRoomSprite,
+                true,
+                this->index,
+                &objs,
+                NULL,
+                "texture",
+                x,
+                y);
         makingstate = 0;
         return;
     }
@@ -1903,8 +1824,7 @@ void Base::Room::Click(Base *base, float x, float y, int button, int state)
     }
 }
 
-void Base::MouseOver(int xbeforecalc, int ybeforecalc)
-{
+void Base::MouseOver(int xbeforecalc, int ybeforecalc) {
     float x, y;
     CalculateRealXAndY(xbeforecalc, ybeforecalc, &x, &y);
     int i = rooms[curroom]->MouseOver(this, x, y);
@@ -1923,15 +1843,13 @@ void Base::MouseOver(int xbeforecalc, int ybeforecalc)
     }
 }
 
-void Base::Click(int xint, int yint, int button, int state)
-{
+void Base::Click(int xint, int yint, int button, int state) {
     float x, y;
     CalculateRealXAndY(xint, yint, &x, &y);
     rooms[curroom]->Click(this, x, y, button, state);
 }
 
-void Base::ClickWin(int button, int state, int x, int y)
-{
+void Base::ClickWin(int button, int state, int x, int y) {
     if (is_input) {
         return;
     }
@@ -1940,8 +1858,7 @@ void Base::ClickWin(int button, int state, int x, int y)
     }
 }
 
-void Base::PassiveMouseOverWin(int x, int y)
-{
+void Base::PassiveMouseOverWin(int x, int y) {
     SetSoftwareMousePosition(x, y);
     if (is_input) {
         return;
@@ -1951,8 +1868,7 @@ void Base::PassiveMouseOverWin(int x, int y)
     }
 }
 
-void Base::ActiveMouseOverWin(int x, int y)
-{
+void Base::ActiveMouseOverWin(int x, int y) {
     SetSoftwareMousePosition(x, y);
     if (is_input) {
         return;
@@ -1963,13 +1879,12 @@ void Base::ActiveMouseOverWin(int x, int y)
 }
 
 bool SetRoomString(std::string input,
-                   unsigned int room_index,
-                   void *dat1,
-                   void *dat2,
-                   const void *dat3,
-                   float x,
-                   float y)
-{
+        unsigned int room_index,
+        void *dat1,
+        void *dat2,
+        const void *dat3,
+        float x,
+        float y) {
     if (input.empty()) {
         return false;
     }
@@ -1979,20 +1894,19 @@ bool SetRoomString(std::string input,
 //AddRoomSprite(Base::CurrentBase->basefile, &objs, NULL, "background", 0.97, -0.97);
 //} else {
     Input("What is the texture for this room (No extension; file must be png or jpeg format.)?",
-          &AddRoomSprite,
-          false,
-          room_index,
-          dat2,
-          NULL,
-          "background",
-          0.97,
-          -0.97);
+            &AddRoomSprite,
+            false,
+            room_index,
+            dat2,
+            NULL,
+            "background",
+            0.97,
+            -0.97);
 //}
     return false;
 }
 
-void Base::GotoLink(int linknum)
-{
+void Base::GotoLink(int linknum) {
     othtext.SetText("");
     if (rooms.size() > linknum && linknum >= 0) {
         curlinkindex = 0;
@@ -2006,15 +1920,14 @@ void Base::GotoLink(int linknum)
         while (rooms.size() <= linknum) {
             rooms.push_back(new Room(rooms.size()));
             Input("Input Name of Room (Shown at bottom of screen): ", &SetRoomString, false, linknum,
-                  &(rooms.back()->deftext), &(rooms.back()->objs), NULL, 0, 0);
+                    &(rooms.back()->deftext), &(rooms.back()->objs), NULL, 0, 0);
         }
         GotoLink(linknum);
 #endif
     }
 }
 
-Base::~Base()
-{
+Base::~Base() {
 #ifdef BASE_MAKER
     EndXML();
 #endif
@@ -2024,8 +1937,7 @@ Base::~Base()
     }
 }
 
-void Base::InitCallbacks()
-{
+void Base::InitCallbacks() {
     glutMouseFunc(ClickWin);
     glutMotionFunc(ActiveMouseOverWin);
     glutPassiveMotionFunc(PassiveMouseOverWin);
@@ -2035,8 +1947,7 @@ void Base::InitCallbacks()
 }
 
 Base::Room::Talk::Talk(unsigned int parind, std::string ind, std::string pythonfile) :
-        Base::Room::Link(parind, ind, pythonfile)
-{
+        Base::Room::Link(parind, ind, pythonfile) {
     index = -1;
 #ifndef BASE_MAKER
     gameMessage last;
@@ -2063,15 +1974,13 @@ Base::Room::Talk::Talk(unsigned int parind, std::string ind, std::string pythonf
 }
 
 Base::Room::Python::Python(unsigned int parind, std::string ind, std::string pythonfile) :
-        Base::Room::Link(parind, ind, pythonfile)
-{
+        Base::Room::Link(parind, ind, pythonfile) {
 }
 
 Base::Base(const char *basefile) :
         curtext(GFXColor(0, 1, 0, 1), GFXColor(0, 0, 0, 1)),
         othtext(GFXColor(1, 1, .5, 1), GFXColor(0, 0, 0, 1)),
-        time_of_day(false)
-{
+        time_of_day(false) {
     CurrentBase = this;
     curlinkindex = 0;
     float x, y;
@@ -2107,8 +2016,7 @@ Base::Base(const char *basefile) :
     GotoLink(0);
 }
 
-void Base::Room::Python::Click(Base *base, float x, float y, int button, int state)
-{
+void Base::Room::Python::Click(Base *base, float x, float y, int button, int state) {
     if (state == GLUT_UP) {
         Link::Click(base, x, y, button, state);
     }
@@ -2116,51 +2024,44 @@ void Base::Room::Python::Click(Base *base, float x, float y, int button, int sta
 }
 
 //Need this for NEW_GUI.  Can't ifdef it out because it needs to link.
-void InitCallbacks(void)
-{
+void InitCallbacks(void) {
     if (Base::CurrentBase) {
         Base::CurrentBase->InitCallbacks();
     }
 }
 
-void TerminateCurrentBase(void)
-{
+void TerminateCurrentBase(void) {
     Base::CurrentBase->Terminate();
 }
 
 //end NEW_GUI.
 
-void Base::Room::Comp::Click(Base *base, float x, float y, int button, int state)
-{
+void Base::Room::Comp::Click(Base *base, float x, float y, int button, int state) {
     if (state == GLUT_UP) {
         Link::Click(base, x, y, button, state);
     }
 }
 
-void Base::Terminate()
-{
+void Base::Terminate() {
     delete this;
 }
 
 extern void abletodock(int dock);
 
-void Base::Room::Launch::Click(Base *base, float x, float y, int button, int state)
-{
+void Base::Room::Launch::Click(Base *base, float x, float y, int button, int state) {
     if (state == GLUT_UP) {
         base->Terminate();
     }
 }
 
-void Base::Room::Goto::Click(Base *base, float x, float y, int button, int state)
-{
+void Base::Room::Goto::Click(Base *base, float x, float y, int button, int state) {
     if (state == GLUT_UP) {
         Link::Click(base, x, y, button, state);
         base->GotoLink(index);
     }
 }
 
-void Base::Room::Talk::Click(Base *base, float x, float y, int button, int state)
-{
+void Base::Room::Talk::Click(Base *base, float x, float y, int button, int state) {
     if (state == GLUT_UP) {
         Link::Click(base, x, y, button, state);
         if (index >= 0) {
@@ -2181,8 +2082,7 @@ void Base::Room::Talk::Click(Base *base, float x, float y, int button, int state
     }
 }
 
-void Base::Room::Link::Click(Base *base, float x, float y, int button, int state)
-{
+void Base::Room::Link::Click(Base *base, float x, float y, int button, int state) {
     if (state == GLUT_UP) {
         /*
          *  const char * filnam=this->pythonfile.c_str();
@@ -2208,8 +2108,7 @@ void Base::Room::Link::Click(Base *base, float x, float y, int button, int state
     }
 }
 
-void Base::Draw()
-{
+void Base::Draw() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 //GFXColor(0,0,0,0);
     StartGUIFrame(GFXTRUE);
@@ -2235,8 +2134,7 @@ void Base::Draw()
 
 std::queue<std::string> bases;
 
-void Base::DrawWin()
-{
+void Base::DrawWin() {
     if (is_input) {
         InputDraw();
         return;
@@ -2263,8 +2161,7 @@ void Base::DrawWin()
     glutPostRedisplay();
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     printf("Loading...\n");
     Base::CurrentBase = NULL;
     glutInit(&argc, argv);

@@ -68,42 +68,35 @@ public:
 
     ~Technique();
 
-    const string &getName() const
-    {
+    const string &getName() const {
         return name;
     }
 
-    const string &getFallback() const
-    {
+    const string &getFallback() const {
         return fallback;
     }
 
     /** returns true if the technique has been compiled */
-    bool isCompiled() const
-    {
+    bool isCompiled() const {
         return compiled;
     }
 
     /** returns true if the technique has been compiled with a matching program version */
-    bool isCompiled(int programVersion) const
-    {
+    bool isCompiled(int programVersion) const {
         return compiled && this->programVersion == programVersion;
     }
 
     void compile(); //Throws on error
 
-    int getNumPasses() const
-    {
+    int getNumPasses() const {
         return passes.size();
     }
 
-    const Pass &getPass(int idx) const
-    {
+    const Pass &getPass(int idx) const {
         return passes[idx];
     }
 
-    Pass &getPass(int idx)
-    {
+    Pass &getPass(int idx) {
         return passes[idx];
     }
 

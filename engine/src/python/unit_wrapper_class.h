@@ -117,71 +117,63 @@ public:
 
 ///////////////////////////////MANUAL WRAP//////
 //WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
-    UniverseUtil::PythonUnitIter getSubUnits()
-    {
+    UniverseUtil::PythonUnitIter getSubUnits() {
         {
         CHECKME UniverseUtil::PythonUnitIter();
         }
         return unit->getSubUnits();
     }
 
-    void Kill()
-    {
+    void Kill() {
         {
         CHECKME;
         }
         unit->Kill(true);
     }
 
-    UnitWrapper GetTarget()
-    {
+    UnitWrapper GetTarget() {
         {
         CHECKME 0;
         }
         return unit->Target();
     }
 
-    UnitWrapper GetVelocityReference()
-    {
+    UnitWrapper GetVelocityReference() {
         {
         CHECKME 0;
         }
         return unit->VelocityReference();
     }
 
-    void SetVelocityReference(UnitWrapper targ)
-    {
+    void SetVelocityReference(UnitWrapper targ) {
         {
         CHECKME;
         }
         unit->VelocityReference(targ);
     }
 
-    void SetTarget(UnitWrapper targ)
-    {
+    void SetTarget(UnitWrapper targ) {
         {
         CHECKME;
         }
         unit->Target(targ);
     }
 
-    boost::python::tuple GetOrientation()
-    {
+    boost::python::tuple GetOrientation() {
         {
         CHECKME VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0,
-                                                                                                                    0,
-                                                                                                                    0));
+                    0,
+                    0));
         }
         Vector p, q, r;
         unit->GetOrientation(p, q, r);
         return VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(p.i, p.j, p.k), VS_BOOST_MAKE_TUPLE(q.i,
-                                                                                           q.j,
-                                                                                           q.k),
-                                   VS_BOOST_MAKE_TUPLE(r.i, r.j, r.k));
+                q.j,
+                q.k),
+                VS_BOOST_MAKE_TUPLE(r.i, r.j, r.k));
     }
 
-    boost::python::tuple rayCollide(QVector st, QVector en)
-    {
+    boost::python::tuple rayCollide(QVector st, QVector en) {
         {
         CHECKME VS_BOOST_MAKE_TUPLE(0, VS_BOOST_MAKE_TUPLE(0, 0, 1), 0);
         }
@@ -193,8 +185,7 @@ public:
         return ret;
     }
 
-    boost::python::tuple cosAngleToITTS(UnitWrapper target, float speed, float range)
-    {
+    boost::python::tuple cosAngleToITTS(UnitWrapper target, float speed, float range) {
         {
         CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
         }
@@ -203,8 +194,7 @@ public:
         return VS_BOOST_MAKE_TUPLE_2(ret, dist);
     }
 
-    boost::python::tuple cosAngleTo(UnitWrapper target)
-    {
+    boost::python::tuple cosAngleTo(UnitWrapper target) {
         {
         CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
         }
@@ -213,8 +203,7 @@ public:
         return VS_BOOST_MAKE_TUPLE_2(ret, dist);
     }
 
-    boost::python::tuple cosAngleFromMountTo(UnitWrapper target)
-    {
+    boost::python::tuple cosAngleFromMountTo(UnitWrapper target) {
         {
         CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
         }
@@ -223,8 +212,7 @@ public:
         return VS_BOOST_MAKE_TUPLE_2(ret, dist);
     }
 
-    boost::python::tuple getAverageGunSpeed()
-    {
+    boost::python::tuple getAverageGunSpeed() {
         {
         CHECKME VS_BOOST_MAKE_TUPLE(1, 0, 0);
         }
@@ -233,8 +221,7 @@ public:
         return VS_BOOST_MAKE_TUPLE(speed, range, missilespeed);
     }
 
-    boost::python::tuple InsideCollideTree(UnitWrapper smaller)
-    {
+    boost::python::tuple InsideCollideTree(UnitWrapper smaller) {
         {
         CHECKME VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(
                     0,
@@ -245,30 +232,29 @@ public:
         Vector bigNormal, smallNormal;
         if (!unit->InsideCollideTree(smaller, bigpos, bigNormal, smallpos, smallNormal)) {
             bigpos = smallpos = QVector(0,
-                                        0,
-                                        0);
+                    0,
+                    0);
         }
         boost::python::tuple tup = VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(bigpos.i,
-                                                                             bigpos.j,
-                                                                             bigpos.k),
-                                                         VS_BOOST_MAKE_TUPLE(bigNormal.i,
-                                                                             bigNormal.j,
-                                                                             bigNormal.k),
-                                                         VS_BOOST_MAKE_TUPLE(smallpos.i,
-                                                                             smallpos
-                                                                                     .j,
-                                                                             smallpos
-                                                                                     .k),
-                                                         VS_BOOST_MAKE_TUPLE(smallNormal.i,
-                                                                             smallNormal.j,
-                                                                             smallNormal.k));
+                bigpos.j,
+                bigpos.k),
+                VS_BOOST_MAKE_TUPLE(bigNormal.i,
+                        bigNormal.j,
+                        bigNormal.k),
+                VS_BOOST_MAKE_TUPLE(smallpos.i,
+                        smallpos
+                                .j,
+                        smallpos
+                                .k),
+                VS_BOOST_MAKE_TUPLE(smallNormal.i,
+                        smallNormal.j,
+                        smallNormal.k));
         return tup;
     }
 
     BoostPythonDictionary GetMountInfo(int index) const;
 
-    float GetVelocityDifficultyMult()
-    {
+    float GetVelocityDifficultyMult() {
         {
         CHECKME 0;
         }
@@ -277,8 +263,7 @@ public:
         return diff;
     }
 
-    int GetJumpStatus()
-    {
+    int GetJumpStatus() {
         {
         CHECKME -1;
         }
@@ -286,14 +271,13 @@ public:
     }
 
     void ApplyDamage(Vector pnt,
-                     Vector normal,
-                     float amt,
-                     UnitWrapper dealer,
-                     float r,
-                     float g,
-                     float b,
-                     float a)
-    {
+            Vector normal,
+            float amt,
+            UnitWrapper dealer,
+            float r,
+            float g,
+            float b,
+            float a) {
         {
         CHECKME;
         }
@@ -308,21 +292,17 @@ public:
  *  //  class StarSystem * TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem * othActiveStarSystem=previouslyActiveStarSystem; unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
  */
 /////////////////////////////////NO WRAP//////
-    UnitWrapper(UnitContainer cont) : UnitContainer(cont)
-    {
+    UnitWrapper(UnitContainer cont) : UnitContainer(cont) {
     }
 
-    UnitWrapper(Unit *un = 0) : UnitContainer(un)
-    {
+    UnitWrapper(Unit *un = 0) : UnitContainer(un) {
     }
 
-    operator Unit *()
-    {
+    operator Unit *() {
         return GetUnit();
     }
 
-    bool isNull()
-    {
+    bool isNull() {
         Unit *un = GetUnit();
         if (un) {
             return (un->Destroyed());
@@ -330,23 +310,19 @@ public:
         return un == 0;
     }
 
-    bool notNull()
-    {
+    bool notNull() {
         return !isNull();
     }
 
-    void setNull()
-    {
+    void setNull() {
         SetUnit(0);
     }
 
-    bool equal(UnitWrapper oth)
-    {
+    bool equal(UnitWrapper oth) {
         return this->operator==(oth);
     }
 
-    bool notequal(UnitWrapper oth)
-    {
+    bool notequal(UnitWrapper oth) {
         return this->operator!=(oth);
     }
 };

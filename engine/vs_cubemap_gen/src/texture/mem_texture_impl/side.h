@@ -47,22 +47,18 @@ struct side {
     static char const *name_;
     static
 public:
-    side(char const *name) : name_(name)
-    {
+    side(char const *name) : name_(name) {
     }
 
-    static eSides get_eSide()
-    {
+    static eSides get_eSide() {
         return S;
     }
 
-    static size_t get_num()
-    {
+    static size_t get_num() {
         return size_t(S);
     }
 
-    static char const *get_name()
-    {
+    static char const *get_name() {
         return name_;
     }
 };

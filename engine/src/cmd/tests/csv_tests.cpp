@@ -30,8 +30,7 @@
 #include <fstream>
 #include <iterator>
 
-TEST(CSV, Sanity)
-{
+TEST(CSV, Sanity) {
     // This may not work for all deployments.
     // Consider standardizing this.
     std::ifstream ifs("../../data/units/units.csv", std::ifstream::in);

@@ -33,21 +33,18 @@ namespace Audio {
 
 SoundBuffer::SoundBuffer()
         : buffer(0),
-          byteCapacity(0),
-          bytesUsed(0)
-{
+        byteCapacity(0),
+        bytesUsed(0) {
 }
 
 SoundBuffer::SoundBuffer(unsigned int capacity, const Format &format)
         : buffer(0),
-          byteCapacity(0),
-          bytesUsed(0)
-{
+        byteCapacity(0),
+        bytesUsed(0) {
     reserve(capacity, format);
 }
 
-SoundBuffer::SoundBuffer(const SoundBuffer &other)
-{
+SoundBuffer::SoundBuffer(const SoundBuffer &other) {
     bytesUsed = byteCapacity = other.bytesUsed;
     buffer = malloc(byteCapacity);
     if (buffer == 0) {
@@ -57,8 +54,7 @@ SoundBuffer::SoundBuffer(const SoundBuffer &other)
     format = other.format;
 }
 
-SoundBuffer &SoundBuffer::operator=(const SoundBuffer &other)
-{
+SoundBuffer &SoundBuffer::operator=(const SoundBuffer &other) {
     bytesUsed = byteCapacity = other.bytesUsed;
     buffer = realloc(buffer, byteCapacity);
     if (buffer == 0) {
@@ -70,8 +66,7 @@ SoundBuffer &SoundBuffer::operator=(const SoundBuffer &other)
     return *this;
 }
 
-void SoundBuffer::reserve(unsigned int capacity)
-{
+void SoundBuffer::reserve(unsigned int capacity) {
     byteCapacity = capacity;
     bytesUsed = 0;
 
@@ -81,29 +76,25 @@ void SoundBuffer::reserve(unsigned int capacity)
     }
 }
 
-void SoundBuffer::reserve(unsigned int capacity, const Format &_format)
-{
+void SoundBuffer::reserve(unsigned int capacity, const Format &_format) {
     format = _format;
     reserve(capacity * _format.frameSize());
 }
 
-void SoundBuffer::reformat(const Format &newFormat)
-{
+void SoundBuffer::reformat(const Format &newFormat) {
     if (newFormat != format) {
         throw (NotImplementedException("Format conversion"));
     }
 }
 
-void SoundBuffer::swap(SoundBuffer &other)
-{
+void SoundBuffer::swap(SoundBuffer &other) {
     std::swap(buffer, other.buffer);
     std::swap(byteCapacity, other.byteCapacity);
     std::swap(bytesUsed, other.bytesUsed);
     std::swap(format, other.format);
 }
 
-void SoundBuffer::optimize()
-{
+void SoundBuffer::optimize() {
     if (bytesUsed == 0) {
         if (buffer) {
             free(buffer);

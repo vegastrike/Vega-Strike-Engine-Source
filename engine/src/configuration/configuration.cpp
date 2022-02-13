@@ -33,8 +33,7 @@
 // Global Variable Definition
 Configuration configuration;
 
-Configuration::Configuration()
-{
+Configuration::Configuration() {
     //logging.verbose_debug = GameConfig::GetVariable("data", "verbose_debug", false);
 }
 
@@ -43,12 +42,11 @@ Configuration::Configuration()
 * Descriptions/invariants for each variable are/will be provided in the header file and are not repeated here, except where 
 * behavior/range bounding is complicated/necessary-for-stability abd additional validation code is required for checking/adjusting user inputs
 */
-void Configuration::OverrideDefaultsWithUserConfiguration()
-{
+void Configuration::OverrideDefaultsWithUserConfiguration() {
     // collision_hacks substruct
     collision_hacks.collision_hack_distance = GameConfig::GetVariable("physics",
-                                                                      "collision_avoidance_hack_distance",
-                                                                      collision_hacks.collision_hack_distance);
+            "collision_avoidance_hack_distance",
+            collision_hacks.collision_hack_distance);
     collision_hacks.collision_damage_to_ai =
             GameConfig::GetVariable("physics", "collisionDamageToAI", collision_hacks.collision_damage_to_ai);
     collision_hacks.crash_dock_hangar =
@@ -60,11 +58,11 @@ void Configuration::OverrideDefaultsWithUserConfiguration()
             M_PI * GameConfig::GetVariable("physics", "front_collision_avoidance_hack_angle", 40)
                     / 180.0f); // uses default value - must be changed in tandem with constructor!
     collision_hacks.front_collision_hack_distance = GameConfig::GetVariable("physics",
-                                                                            "front_collision_avoidance_hack_distance",
-                                                                            collision_hacks.front_collision_hack_distance);
+            "front_collision_avoidance_hack_distance",
+            collision_hacks.front_collision_hack_distance);
     collision_hacks.cargo_deals_collide_damage = GameConfig::GetVariable("physics",
-                                                                         "cargo_deals_collide_damage",
-                                                                         collision_hacks.cargo_deals_collide_damage);
+            "cargo_deals_collide_damage",
+            collision_hacks.cargo_deals_collide_damage);
 
     // computer substruct
     computer.default_lock_cone = GameConfig::GetVariable("physics", "lock_cone", computer.default_lock_cone);
@@ -118,17 +116,15 @@ vegastrike_configuration::CollisionHacks::CollisionHacks() :
         crash_dock_hangar(false),
         crash_dock_unit(false),
         front_collision_hack_angle(std::cos(M_PI * 40.0
-                                                    / 180.0)), /* Note: Does not follow pattern of directly setting itself to user specified config value, must change default value in override as well if changing it here*/
+                / 180.0)), /* Note: Does not follow pattern of directly setting itself to user specified config value, must change default value in override as well if changing it here*/
         front_collision_hack_distance(200000.0f),
-        cargo_deals_collide_damage(false)
-{
+        cargo_deals_collide_damage(false) {
 }
 
 vegastrike_configuration::Computer::Computer() :
         default_lock_cone(0.8f),
         default_max_range(20000.0f),
-        default_tracking_cone(0.93f)
-{
+        default_tracking_cone(0.93f) {
 }
 
 vegastrike_configuration::Fuel::Fuel() :
@@ -137,13 +133,11 @@ vegastrike_configuration::Fuel::Fuel() :
         fuel_efficiency(1.0f),
         fuel_equals_warp(false),
         normal_fuel_usage(1.0f),
-        reactor_uses_fuel(false)
-{
+        reactor_uses_fuel(false) {
 }
 
 vegastrike_configuration::Logging::Logging() :
-        verbose_debug(false)
-{
+        verbose_debug(false) {
 }
 
 vegastrike_configuration::Physics::Physics() :
@@ -155,17 +149,14 @@ vegastrike_configuration::Physics::Physics() :
         max_shield_lowers_capacitance(false),
         max_torque_multiplier(0.67f),
         minimum_mass(1e-6f), /* this is actually a bit high (1 gram, in the current, non-SI, units that VS uses ), fwiw - we may want to change this some day to, say, a miligram .*/
-        minimum_time(0.1f)
-{
+        minimum_time(0.1f) {
 }
 
 vegastrike_configuration::Warp::Warp() :
-        insystem_jump_cost(0.1f)
-{
+        insystem_jump_cost(0.1f) {
 }
 
 vegastrike_configuration::Weapons::Weapons() :
         can_fire_in_cloak(false),
-        can_fire_in_spec(false)
-{
+        can_fire_in_spec(false) {
 }

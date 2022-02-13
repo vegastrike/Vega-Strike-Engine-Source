@@ -38,16 +38,13 @@
 namespace Audio {
 
 OpenALRenderableListener::OpenALRenderableListener(Listener *listener)
-        : RenderableListener(listener)
-{
+        : RenderableListener(listener) {
 }
 
-OpenALRenderableListener::~OpenALRenderableListener()
-{
+OpenALRenderableListener::~OpenALRenderableListener() {
 }
 
-void OpenALRenderableListener::updateImpl(int flags)
-{
+void OpenALRenderableListener::updateImpl(int flags) {
     if (flags & UPDATE_LOCATION) {
         const Vector3 pos(getListener()->getPosition()); // no option but to cast it down to float :(
         const Vector3 vel(getListener()->getVelocity());

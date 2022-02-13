@@ -39,8 +39,7 @@ public:
     bool getStatus(int);           //also sets it, mutex'd
     mmoc();
 
-    int getSocket()
-    {
+    int getSocket() {
         return socket;
     }
 

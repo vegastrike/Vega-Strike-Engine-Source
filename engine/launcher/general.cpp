@@ -41,8 +41,7 @@ int RANDOMIZED = 0;
 
 #ifdef _G_STRING_PARSE
 
-char *next_parm(char *string)
-{
+char *next_parm(char *string) {
     char *next;
     if (string[0] == '\0') {
         return 0;
@@ -93,8 +92,7 @@ char *split_words(char *string, int max_words) {
 
 // What about variable clean-up? Keeping track of everything allocated so it can free it up at the end.
 
-char *ptr_copy(char *string)
-{
+char *ptr_copy(char *string) {
     char *alloc;
     alloc = (char *) malloc(strlen(string) + 1);
     if (alloc == 0) {
@@ -109,11 +107,10 @@ char *ptr_copy(char *string)
 /* chomp
  * This function replaces trailing \n (carriage return) with the null character
  */
-void chomp(char *line)
-{
+void chomp(char *line) {
     int current;
     for (current = strlen(line) - 1; (line[current] == '\n' || line[current] == ' ' || line[current] == 13);
-         current--) {
+            current--) {
         line[current] = '\0';
     }
 }
@@ -123,8 +120,7 @@ void chomp(char *line)
  * returns a pointer to the new starting character
  */
 
-char *pre_chomp(char *line)
-{
+char *pre_chomp(char *line) {
     while (line[0] == '=' || line[0] == ' ' || line[0] == 13 || line[0] == 9) {
         line++;
     }
@@ -136,8 +132,7 @@ char *pre_chomp(char *line)
  * If the second parameter is found, it is replaced with the third parameter
  */
 
-char *replace(char *line, char *search, char *replace, int LENGTH)
-{
+char *replace(char *line, char *search, char *replace, int LENGTH) {
     int length, dif, calc;
     char *chr_new, *current;
     char *ptr_new, *location;
@@ -169,8 +164,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH)
     return line;
 }
 
-char *strmov(char *to, char *from)
-{
+char *strmov(char *to, char *from) {
     char *end;
     strcpy(to, from);
     end = to + strlen(to);
@@ -181,8 +175,7 @@ char *strmov(char *to, char *from)
  * This function makes sure all characters are in lower case
  */
 
-void lower(char *line)
-{
+void lower(char *line) {
     int current;
     for (current = 0; line[current] != '\0'; current++) {
         if (line[current] >= 65 && line[current] <= 90) {
@@ -191,16 +184,14 @@ void lower(char *line)
     }
 }
 
-void strappend(char *dest, char *source, int length)
-{
+void strappend(char *dest, char *source, int length) {
     int DoLength;
     DoLength = length - strlen(dest);
     strncat(dest, source, DoLength);
     return;
 }
 
-char *StripPath(char *filename)
-{
+char *StripPath(char *filename) {
     int length, cur;
     char *last = filename;
     length = strlen(filename) - 1;
@@ -218,8 +209,7 @@ char *StripPath(char *filename)
     return last;
 }
 
-char *StripExtension(char *filename)
-{
+char *StripExtension(char *filename) {
     int length, cur;
     char *last = filename;
     length = strlen(filename) - 1;
@@ -388,16 +378,14 @@ char *NewString(char *line) {
 
 #ifdef __cplusplus
 
-char *GetString(char *line)
-{
+char *GetString(char *line) {
     if (line == 0) {
         return const_cast<char *>("");
     }
     return line;
 }
 
-void SetString(char **ptr, char *line)
-{
+void SetString(char **ptr, char *line) {
     if (*ptr != nullptr) {
         delete *ptr;
         *ptr = nullptr;
@@ -405,8 +393,7 @@ void SetString(char **ptr, char *line)
     *ptr = strdup(line);
 }
 
-char *NewString(char *line)
-{
+char *NewString(char *line) {
     return strdup(line);
 }
 
@@ -417,8 +404,7 @@ char *NewString(char *line)
 
 // if _G_ERROR is defined, it will print the error message
 // if EXIT_ON_FATAL is defined, and is_fatal is greater than 0, the program will exit
-void ShowError(char *error_msg, char *error_code, int is_fatal)
-{
+void ShowError(char *error_msg, char *error_code, int is_fatal) {
 #ifdef _G_ERROR
     if (is_fatal > 0) {
         fprintf(stderr, "Fatal ");
@@ -478,8 +464,7 @@ char *xml_chomp_comment(char *string) {
 
 #ifdef _G_PATH
 
-int isdir(const char *file)
-{
+int isdir(const char *file) {
     int length = strlen(file);
     if (length == 0) {
         return -1;
@@ -504,8 +489,7 @@ int isdir(const char *file)
 // type = 0: file
 // type = 1: dirs
 
-glob_t *FindPath(char *path, int type)
-{
+glob_t *FindPath(char *path, int type) {
     glob_t *FILES = new glob_t;
     string mypath(path);
 #if defined(__APPLE__) || defined(MACOSX)
@@ -565,13 +549,11 @@ glob_t *FindPath(char *path, int type)
     return FILES;
 }
 
-glob_t *FindFiles(char *path, char *extension)
-{
+glob_t *FindFiles(char *path, char *extension) {
     return FindPath(path, 0);
 }
 
-glob_t *FindDirs(char *path)
-{
+glob_t *FindDirs(char *path) {
     return FindPath(path, 1);
 }
 

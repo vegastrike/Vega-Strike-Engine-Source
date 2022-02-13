@@ -51,13 +51,11 @@ extern bool CheckAccessory(Unit *tur);
 // TODO: remove
 using namespace Orders;
 
-Intelligent::Intelligent()
-{
+Intelligent::Intelligent() {
 
 }
 
-void Intelligent::LoadAIScript(const std::string &s)
-{
+void Intelligent::LoadAIScript(const std::string &s) {
     if (s.find(".py") != string::npos) {
         Order *ai = PythonClass<FireAt>::Factory(s);
         PrimeOrders(ai);
@@ -81,15 +79,13 @@ void Intelligent::LoadAIScript(const std::string &s)
     }
 }
 
-void Intelligent::eraseOrderType(unsigned int type)
-{
+void Intelligent::eraseOrderType(unsigned int type) {
     if (aistate) {
         aistate->eraseType(type);
     }
 }
 
-bool Intelligent::LoadLastPythonAIScript()
-{
+bool Intelligent::LoadLastPythonAIScript() {
     Order *pyai = PythonClass<Orders::FireAt>::LastPythonClass();
     if (pyai) {
         PrimeOrders(pyai);
@@ -100,8 +96,7 @@ bool Intelligent::LoadLastPythonAIScript()
     return true;
 }
 
-bool Intelligent::EnqueueLastPythonAIScript()
-{
+bool Intelligent::EnqueueLastPythonAIScript() {
     Order *pyai = PythonClass<Orders::FireAt>::LastPythonClass();
     if (pyai) {
         EnqueueAI(pyai);
@@ -111,8 +106,7 @@ bool Intelligent::EnqueueLastPythonAIScript()
     return true;
 }
 
-void Intelligent::PrimeOrders(Order *newAI)
-{
+void Intelligent::PrimeOrders(Order *newAI) {
     Unit *unit = static_cast<Unit *>(this);
 
     if (newAI) {
@@ -126,8 +120,7 @@ void Intelligent::PrimeOrders(Order *newAI)
     }
 }
 
-void Intelligent::PrimeOrders()
-{
+void Intelligent::PrimeOrders() {
     Unit *unit = static_cast<Unit *>(this);
 
     if (aistate) {
@@ -138,8 +131,7 @@ void Intelligent::PrimeOrders()
     aistate->SetParent(unit);
 }
 
-void Intelligent::PrimeOrdersLaunched()
-{
+void Intelligent::PrimeOrdersLaunched() {
     Unit *unit = static_cast<Unit *>(this);
 
     if (aistate) {
@@ -148,14 +140,13 @@ void Intelligent::PrimeOrdersLaunched()
     }
     Vector vec(0, 0, 10000);
     aistate = new ExecuteFor(new Orders::MatchVelocity(unit->ClampVelocity(vec, true), Vector(0,
-                                                                                              0,
-                                                                                              0), true, true,
-                                                       false), 4.0f);
+                    0,
+                    0), true, true,
+            false), 4.0f);
     aistate->SetParent(unit);
 }
 
-void Intelligent::SetAI(Order *newAI)
-{
+void Intelligent::SetAI(Order *newAI) {
     Unit *unit = static_cast<Unit *>(this);
 
     newAI->SetParent(unit);
@@ -166,8 +157,7 @@ void Intelligent::SetAI(Order *newAI)
     }
 }
 
-void Intelligent::EnqueueAI(Order *newAI)
-{
+void Intelligent::EnqueueAI(Order *newAI) {
     Unit *unit = static_cast<Unit *>(this);
 
     newAI->SetParent(unit);
@@ -178,8 +168,7 @@ void Intelligent::EnqueueAI(Order *newAI)
     }
 }
 
-void Intelligent::EnqueueAIFirst(Order *newAI)
-{
+void Intelligent::EnqueueAIFirst(Order *newAI) {
     Unit *unit = static_cast<Unit *>(this);
 
     newAI->SetParent(unit);
@@ -190,15 +179,14 @@ void Intelligent::EnqueueAIFirst(Order *newAI)
     }
 }
 
-void Intelligent::ExecuteAI()
-{
+void Intelligent::ExecuteAI() {
     Unit *unit = static_cast<Unit *>(this);
     Flightgroup *flightgroup = unit->flightgroup;
     if (flightgroup) {
         Unit *leader = flightgroup->leader.GetUnit();
         //no heirarchy in flight group
         if (leader ? (flightgroup->leader_decision > -1) && (leader->getFgSubnumber() >= unit->getFgSubnumber())
-                   : true) {
+                : true) {
             if (!leader) {
                 flightgroup->leader_decision = flightgroup->nr_ships;
             }
@@ -219,8 +207,7 @@ void Intelligent::ExecuteAI()
     }
 }
 
-string Intelligent::getFullAIDescription()
-{
+string Intelligent::getFullAIDescription() {
     Unit *unit = static_cast<Unit *>(this);
 
     if (getAIState()) {
@@ -230,15 +217,13 @@ string Intelligent::getFullAIDescription()
     }
 }
 
-float Intelligent::getRelation(const Unit *targ) const
-{
+float Intelligent::getRelation(const Unit *targ) const {
     const Unit *unit = static_cast<const Unit *>(this);
 
     return unit->pilot->GetEffectiveRelationship(unit, targ);
 }
 
-double Intelligent::getMinDis(const QVector &pnt) const
-{
+double Intelligent::getMinDis(const QVector &pnt) const {
     const Unit *unit = static_cast<const Unit *>(this);
 
     float minsofar = 1e+10;
@@ -271,8 +256,7 @@ double Intelligent::getMinDis(const QVector &pnt) const
     return minsofar;
 }
 
-void Intelligent::SetTurretAI()
-{
+void Intelligent::SetTurretAI() {
     Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 2;
@@ -301,8 +285,7 @@ void Intelligent::SetTurretAI()
     }
 }
 
-void Intelligent::DisableTurretAI()
-{
+void Intelligent::DisableTurretAI() {
     Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 1;
@@ -318,8 +301,7 @@ void Intelligent::DisableTurretAI()
     }
 }
 
-csOPCODECollider *Intelligent::getCollideTree(const Vector &RESTRICT scale, std::vector<mesh_polygon> *RESTRICT pol)
-{
+csOPCODECollider *Intelligent::getCollideTree(const Vector &RESTRICT scale, std::vector<mesh_polygon> *RESTRICT pol) {
     Unit *unit = static_cast<Unit *>(this);
 
     if (!pol) {

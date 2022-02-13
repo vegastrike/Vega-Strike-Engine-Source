@@ -28,8 +28,7 @@
 
 #include <string>
 
-TEST(LoadConfig, Sanity)
-{
+TEST(LoadConfig, Sanity) {
     // Test without configuration
     const bool default_bool = GameConfig::GetVariable("test", "boolean_variable", false);
     const int default_int = GameConfig::GetVariable("test", "int_variable", 1);

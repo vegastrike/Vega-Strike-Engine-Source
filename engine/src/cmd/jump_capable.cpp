@@ -37,8 +37,7 @@ extern QVector RealPosition(const Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
 extern float globQueryShell(QVector st, QVector dir, float radius);
 
-static QVector AutoSafeEntrancePoint(const QVector start, float rsize, const Unit *goal)
-{
+static QVector AutoSafeEntrancePoint(const QVector start, float rsize, const Unit *goal) {
     QVector def = UniverseUtil::SafeEntrancePoint(start, rsize);
     double bdis = (def - RealPosition(goal)).MagnitudeSquared();
     for (int i = -1; i <= 1; ++i) {
@@ -59,8 +58,7 @@ static QVector AutoSafeEntrancePoint(const QVector start, float rsize, const Uni
     return def;
 }
 
-signed char ComputeAutoGuarantee(Unit *un)
-{
+signed char ComputeAutoGuarantee(Unit *un) {
     Cockpit *cp;
     size_t cpnum = 0;
     if ((cp = _Universe->isPlayerStarship(un))) {
@@ -84,63 +82,57 @@ signed char ComputeAutoGuarantee(Unit *un)
     return Mission::AUTO_NORMAL;
 }
 
-std::string GenerateAutoError(Unit *me, Unit *targ)
-{
+std::string GenerateAutoError(Unit *me, Unit *targ) {
     if (UnitUtil::isAsteroid(targ)) {
         static std::string err =
                 XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "AsteroidsNearMessage",
-                                                                  "#ff0000Asteroids Near#000000"));
+                        "#ff0000Asteroids Near#000000"));
         return err;
     }
     if (targ->isPlanet()) {
         static std::string err =
                 XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "PlanetNearMessage",
-                                                                  "#ff0000Planetary Hazard Near#000000"));
+                        "#ff0000Planetary Hazard Near#000000"));
         return err;
     }
     if (targ->getRelation(me) < 0) {
         static std::string err =
                 XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "EnemyNearMessage",
-                                                                  "#ff0000Enemy Near#000000"));
+                        "#ff0000Enemy Near#000000"));
         return err;
     }
     static std::string err =
             XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "StarshipNearMessage",
-                                                              "#ff0000Starship Near#000000"));
+                    "#ff0000Starship Near#000000"));
     return err;
 }
 
 ///////////////////////////////////////////////
 
-JumpCapable::JumpCapable() : activeStarSystem(nullptr)
-{
+JumpCapable::JumpCapable() : activeStarSystem(nullptr) {
 };
 
-void JumpCapable::ActivateJumpDrive(int destination)
-{
+void JumpCapable::ActivateJumpDrive(int destination) {
     Unit *unit = static_cast<Unit *>(this);
     if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && unit->jump.drive != -2) {
         unit->jump.drive = destination;
     }
 }
 
-void JumpCapable::AddDestination(const std::string &dest)
-{
+void JumpCapable::AddDestination(const std::string &dest) {
     Unit *unit = static_cast<Unit *>(this);
     unit->pImage->destination.push_back(dest);
 }
 
-bool JumpCapable::AutoPilotTo(Unit *un, bool automaticenergyrealloc)
-{
+bool JumpCapable::AutoPilotTo(Unit *un, bool automaticenergyrealloc) {
     std::string tmp;
     return AutoPilotToErrorMessage(un, automaticenergyrealloc, tmp);
 }
 
 bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
-                                          bool ignore_energy_requirements,
-                                          std::string &failuremessage,
-                                          int recursive_level)
-{
+        bool ignore_energy_requirements,
+        std::string &failuremessage,
+        int recursive_level) {
     Unit *unit = static_cast<Unit *>(this);
     const Unit *const_unit = static_cast<const Unit *>(this);
 
@@ -170,13 +162,13 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
     static float atd_no_enemies =
             XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance_no_enemies",
-                                                           vs_config->getVariable("physics",
-                                                                                  "auto_pilot_termination_distance",
-                                                                                  "6000")));
+                    vs_config->getVariable("physics",
+                            "auto_pilot_termination_distance",
+                            "6000")));
     static float autopilot_no_enemies_multiplier =
             XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                           "auto_pilot_no_enemies_distance_multiplier",
-                                                           "4"));
+                    "auto_pilot_no_enemies_distance_multiplier",
+                    "4"));
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
         failuremessage = err;
@@ -254,8 +246,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                         }
                         float intersection =
                                 globQueryShell(start - un->Position(), end - start, getAutoRSize(unit,
-                                                                                                 un,
-                                                                                                 ignore_friendlies)
+                                        un,
+                                        ignore_friendlies)
                                         + un->rSize());
                         if (intersection > 0) {
                             unsafe = true;
@@ -288,7 +280,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                 < (static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
             failuremessage =
                     XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "AlreadyNearMessage",
-                                                                      "#ff0000Already Near#000000"));
+                            "#ff0000Already Near#000000"));
             return false;
         }
         unit->warpenergy -= totpercent * unit->jump.insysenergy;
@@ -339,7 +331,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             static float insys_jump_ani_growth =
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_animation_growth", ".99"));
             UniverseUtil::playAnimationGrow(insys_jump_ani, RealPosition(unit),
-                                            unit->rSize() * insys_jump_ani_size, insys_jump_ani_growth);
+                    unit->rSize() * insys_jump_ani_size, insys_jump_ani_growth);
 
             Vector v(unit->GetVelocity());
             v.Normalize();
@@ -348,14 +340,14 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             static float sec =
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_ani_second_ahead", "4"));
             UniverseUtil::playAnimationGrow(insys_jump_ani,
-                                            sep + unit->GetVelocity() * sec + v * unit->rSize(),
-                                            unit->rSize() * 8,
-                                            .97);
+                    sep + unit->GetVelocity() * sec + v * unit->rSize(),
+                    unit->rSize() * 8,
+                    .97);
             UniverseUtil::playAnimationGrow(insys_jump_ani,
-                                            sep + unit->GetVelocity() * sec + 2 * v * unit->rSize()
-                                                    + r * 4 * unit->rSize(),
-                                            unit->rSize() * 16,
-                                            .97);
+                    sep + unit->GetVelocity() * sec + 2 * v * unit->rSize()
+                            + r * 4 * unit->rSize(),
+                    unit->rSize() * 16,
+                    .97);
         }
         static bool warptrail = XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp_trail", "true"));
         if (warptrail && (!nowhere)) {
@@ -384,14 +376,14 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                         if (otherord) {
                             if (otherord->PursueTarget(unit, leadah)) {
                                 other->AutoPilotToErrorMessage(unit,
-                                                               ignore_energy_requirements,
-                                                               followermessage,
-                                                               recursive_level - 1);
+                                        ignore_energy_requirements,
+                                        followermessage,
+                                        recursive_level - 1);
                                 if (leadah) {
                                     if (NULL == _Universe->isPlayerStarship(other)) {
                                         other->SetPosition(AutoSafeEntrancePoint(unit->LocalPosition(),
-                                                                                 other->rSize() * 1.5,
-                                                                                 other));
+                                                other->rSize() * 1.5,
+                                                other));
                                     }
                                 }
                             }
@@ -405,9 +397,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 }
 
 float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
-                                            Unit **nearest_unit,
-                                            bool count_negative_warp_units) const
-{
+        Unit **nearest_unit,
+        bool count_negative_warp_units) const {
     const Unit *unit = static_cast<const Unit *>(this);
 
     static float smallwarphack = XMLSupport::parse_float(vs_config->getVariable("physics", "minwarpeffectsize", "100"));
@@ -426,19 +417,19 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
     //inverse fractional effect of ship vs real big object
     static float def_inv_interdiction = 1.
             / XMLSupport::parse_float(vs_config->getVariable("physics", "default_interdiction",
-                                                             ".125"));
+                    ".125"));
     Unit *planet;
     Unit *testthis = NULL;
     {
         NearestUnitLocator locatespec;
         findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
-                    unit->location[Unit::UNIT_ONLY],
-                    &locatespec);
+                unit->location[Unit::UNIT_ONLY],
+                &locatespec);
         testthis = locatespec.retval.unit;
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
-         (planet = *iter) || testthis;
-         ++iter) {
+            (planet = *iter) || testthis;
+            ++iter) {
         if (!planet || !planet->Killed()) {
             if (planet == NULL) {
                 planet = testthis;
@@ -500,8 +491,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
     return minmultiplier;
 }
 
-float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const
-{
+float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const {
     const Unit *unit = static_cast<const Unit *>(this);
     if (unit->ViewComputerData().max_ab_speed() > .001) {
         return (OriginalCourse - (FinalCourse)).Magnitude() / unit->ViewComputerData().max_ab_speed();
@@ -510,28 +500,24 @@ float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &F
     }
 }
 
-void JumpCapable::DeactivateJumpDrive()
-{
+void JumpCapable::DeactivateJumpDrive() {
     Unit *unit = static_cast<Unit *>(this);
     if (unit->jump.drive >= 0) {
         unit->jump.drive = -1;
     }
 }
 
-const std::vector<std::string> &JumpCapable::GetDestinations() const
-{
+const std::vector<std::string> &JumpCapable::GetDestinations() const {
     const Unit *unit = static_cast<const Unit *>(this);
     return unit->pImage->destination;
 }
 
-const Energetic::UnitJump &JumpCapable::GetJumpStatus() const
-{
+const Energetic::UnitJump &JumpCapable::GetJumpStatus() const {
     const Unit *unit = static_cast<const Unit *>(this);
     return unit->jump;
 }
 
-StarSystem *JumpCapable::getStarSystem()
-{
+StarSystem *JumpCapable::getStarSystem() {
     Unit *unit = static_cast<Unit *>(this);
     if (activeStarSystem) {
         return activeStarSystem;
@@ -546,8 +532,7 @@ StarSystem *JumpCapable::getStarSystem()
     return _Universe->activeStarSystem();
 }
 
-const StarSystem *JumpCapable::getStarSystem() const
-{
+const StarSystem *JumpCapable::getStarSystem() const {
     const Unit *unit = static_cast<const Unit *>(this);
     if (activeStarSystem) {
         return activeStarSystem;
@@ -562,8 +547,7 @@ const StarSystem *JumpCapable::getStarSystem() const
     return _Universe->activeStarSystem();
 }
 
-Vector JumpCapable::GetWarpRefVelocity() const
-{
+Vector JumpCapable::GetWarpRefVelocity() const {
     const Unit *unit = static_cast<const Unit *>(this);
 
     //Velocity
@@ -583,8 +567,7 @@ Vector JumpCapable::GetWarpRefVelocity() const
     return v;
 }
 
-Vector JumpCapable::GetWarpVelocity() const
-{
+Vector JumpCapable::GetWarpVelocity() const {
     const Unit *unit = static_cast<const Unit *>(this);
 
     if (unit->graphicOptions.WarpFieldStrength == 1.0) {
@@ -618,13 +601,11 @@ Vector JumpCapable::GetWarpVelocity() const
     }
 }
 
-bool JumpCapable::InCorrectStarSystem(StarSystem *active)
-{
+bool JumpCapable::InCorrectStarSystem(StarSystem *active) {
     return active == activeStarSystem;
 }
 
-bool JumpCapable::TransferUnitToSystem(StarSystem *Current)
-{
+bool JumpCapable::TransferUnitToSystem(StarSystem *Current) {
     Unit *unit = static_cast<Unit *>(this);
     if (getStarSystem()->RemoveUnit(unit)) {
         unit->RemoveFromSystem();
@@ -646,9 +627,8 @@ bool JumpCapable::TransferUnitToSystem(StarSystem *Current)
 }
 
 bool JumpCapable::TransferUnitToSystem(unsigned int whichJumpQueue,
-                                       class StarSystem *&previouslyActiveStarSystem,
-                                       bool DoSightAndSound)
-{
+        class StarSystem *&previouslyActiveStarSystem,
+        bool DoSightAndSound) {
     return false;
 }
 

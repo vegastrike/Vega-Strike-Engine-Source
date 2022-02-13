@@ -40,15 +40,13 @@ class Hashtable : public vsUMap<KEY, VALUE *> {
     typedef std::pair<KEY, VALUE *> HashElement;
     typedef vsUMap<KEY, VALUE *> supertype;
 public:
-    static size_t hash(const int key)
-    {
+    static size_t hash(const int key) {
         unsigned int k = key;
         k %= SIZ;
         return k;
     }
 
-    static size_t hash(const char *key)
-    {
+    static size_t hash(const char *key) {
         unsigned int k = 0;
         for (const char *start = key; *start != '\0'; ++start) {
             k ^= (*start & HASH_SALT_1);
@@ -60,8 +58,7 @@ public:
         return k;
     }
 
-    static size_t hash(const std::string &key)
-    {
+    static size_t hash(const std::string &key) {
         unsigned int k = 0;
         for (typename std::string::const_iterator start = key.begin(); start != key.end(); ++start) {
             k ^= (*start & HASH_SALT_1);
@@ -73,8 +70,7 @@ public:
         return k;
     }
 
-    std::vector<VALUE *> GetAll() const
-    {
+    std::vector<VALUE *> GetAll() const {
         std::vector<VALUE *> retval(this->size());
         typename supertype::const_iterator iter = this->begin();
         typename supertype::const_iterator end = this->end();
@@ -85,8 +81,7 @@ public:
         return retval;
     }
 
-    VALUE *Get(const KEY &key) const
-    {
+    VALUE *Get(const KEY &key) const {
         typename supertype::const_iterator iter = this->find(key);
         typename supertype::const_iterator end = this->end();
         if (iter != end) {
@@ -95,13 +90,11 @@ public:
         return NULL;
     }
 
-    void Put(const KEY &key, VALUE *value)
-    {
+    void Put(const KEY &key, VALUE *value) {
         (*this)[key] = value;
     }
 
-    void Delete(const KEY &key)
-    {
+    void Delete(const KEY &key) {
         typename supertype::iterator iter = this->find(key);
         if (iter == this->end()) {
             return;

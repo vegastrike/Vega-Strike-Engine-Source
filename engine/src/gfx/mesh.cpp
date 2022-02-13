@@ -61,8 +61,7 @@ Hashtable<std::string, Mesh, 503>Mesh::meshHashTable;
 Hashtable<std::string, std::vector<int>, 503>Mesh::animationSequences;
 Vector mouseline;
 
-int Mesh::getNumAnimationFrames(const string &which) const
-{
+int Mesh::getNumAnimationFrames(const string &which) const {
     if (which.empty()) {
         vector<int> *animSeq = animationSequences.Get(hash_name);
         if (animSeq) {
@@ -77,8 +76,7 @@ int Mesh::getNumAnimationFrames(const string &which) const
     return 0;
 }
 
-void Mesh::InitUnit()
-{
+void Mesh::InitUnit() {
     convex = false;
     polygon_offset = 0;
     framespersecond = 0;
@@ -116,21 +114,18 @@ void Mesh::InitUnit()
     initTechnique("fixed");
 }
 
-Mesh::Mesh()
-{
+Mesh::Mesh() {
     InitUnit();
 }
 
-bool Mesh::LoadExistant(Mesh *oldmesh)
-{
+bool Mesh::LoadExistant(Mesh *oldmesh) {
     *this = *oldmesh;
     oldmesh->refcount++;
     orig = oldmesh;
     return true;
 }
 
-bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction)
-{
+bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction) {
     Mesh *oldmesh;
 
     hash_name = VSFileSystem::GetHashName(filehash, scale, faction);
@@ -147,8 +142,7 @@ bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction)
 
 extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 
-Mesh::Mesh(const Mesh &m)
-{
+Mesh::Mesh(const Mesh &m) {
     VS_LOG(warning, "UNTESTED MESH COPY CONSTRUCTOR");
     this->orig = NULL;
     this->hash_name = m.hash_name;
@@ -165,7 +159,7 @@ Mesh::Mesh(const Mesh &m)
         if (0 == oldmesh) {
             if (vec->size() > 1) {
                 VS_LOG(warning,
-                       (boost::format("Copy constructor %1$s used in ambiguous Situation") % hash_name.c_str()));
+                        (boost::format("Copy constructor %1$s used in ambiguous Situation") % hash_name.c_str()));
             }
             if (vec->size()) {
                 oldmesh = (*vec)[0];
@@ -177,8 +171,7 @@ Mesh::Mesh(const Mesh &m)
     }
 }
 
-void Mesh::setConvex(bool b)
-{
+void Mesh::setConvex(bool b) {
     this->convex = b;
     if (orig && orig != this) {
         orig->setConvex(b);
@@ -188,8 +181,7 @@ void Mesh::setConvex(bool b)
 using namespace VSFileSystem;
 extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 
-Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *fg, bool orig) : hash_name(filename)
-{
+Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *fg, bool orig) : hash_name(filename) {
     this->convex = false;
     Mesh *cpy = LoadMesh(filename.c_str(), scale, faction, fg, vector<std::string>());
     if (cpy->orig) {
@@ -226,12 +218,11 @@ Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *
 }
 
 Mesh::Mesh(const char *filename,
-           const Vector &scale,
-           int faction,
-           Flightgroup *fg,
-           bool orig,
-           const vector<string> &textureOverride) : hash_name(filename)
-{
+        const Vector &scale,
+        int faction,
+        Flightgroup *fg,
+        bool orig,
+        const vector<string> &textureOverride) : hash_name(filename) {
     this->convex = false;
     this->orig = NULL;
     InitUnit();
@@ -283,8 +274,7 @@ Mesh::Mesh(const char *filename,
 float const ooPI = 1.00F / 3.1415926535F;
 
 //#include "d3d_internal.h"
-void Mesh::SetMaterial(const GFXMaterial &mat)
-{
+void Mesh::SetMaterial(const GFXMaterial &mat) {
     GFXSetMaterial(myMatNum, mat);
     if (orig) {
         for (int i = 0; i < numlods; i++) {
@@ -293,38 +283,31 @@ void Mesh::SetMaterial(const GFXMaterial &mat)
     }
 }
 
-int Mesh::getNumLOD() const
-{
+int Mesh::getNumLOD() const {
     return numlods;
 }
 
-void Mesh::setCurrentFrame(float which)
-{
+void Mesh::setCurrentFrame(float which) {
     framespersecond = which;
 }
 
-float Mesh::getCurrentFrame() const
-{
+float Mesh::getCurrentFrame() const {
     return framespersecond;
 }
 
-GFXVertexList *Mesh::getVertexList() const
-{
+GFXVertexList *Mesh::getVertexList() const {
     return vlist;
 }
 
-void Mesh::setVertexList(GFXVertexList *_vlist)
-{
+void Mesh::setVertexList(GFXVertexList *_vlist) {
     vlist = _vlist;
 }
 
-float Mesh::getFramesPerSecond() const
-{
+float Mesh::getFramesPerSecond() const {
     return orig ? orig->framespersecond : framespersecond;
 }
 
-Mesh *Mesh::getLOD(float lod, bool bBypassDamping)
-{
+Mesh *Mesh::getLOD(float lod, bool bBypassDamping) {
     if (!orig) {
         return this;
     }
@@ -333,7 +316,7 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping)
     if (getFramesPerSecond() > .0000001 && (animFrames = animationSequences.Get(hash_name))) {
         //return &orig[(int)floor(fmod (getNewTime()*getFramesPerSecond(),numlods))];
         unsigned int which = (int) float_to_int(floor(fmod(getCurrentFrame(),
-                                                           animFrames->size())));
+                animFrames->size())));
         float adv = GetElapsedTime() * getFramesPerSecond();
         static float max_frames_skipped =
                 XMLSupport::parse_float(vs_config->getVariable("graphics", "mesh_animation_max_frames_skipped", "3"));
@@ -349,7 +332,7 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping)
             if (!bBypassDamping) {
                 if (lod < orig[i].lodsize) {
                     lodoffs = ((i < numlods - 1) ? (orig[i + 1].lodsize - orig[i].lodsize) / LOD_HYSTHERESIS_DIVIDER
-                                                 : 0.0f);
+                            : 0.0f);
                 } else {
                     lodoffs = ((i > 0) ? (orig[i - 1].lodsize - orig[i].lodsize) / LOD_HYSTHERESIS_DIVIDER : 0.0f);
                 }
@@ -368,8 +351,7 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping)
     return retval;
 }
 
-void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade)
-{
+void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade) {
     blendSrc = src;
     blendDst = dst;
     draw_sequence = 0;
@@ -396,11 +378,10 @@ void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade)
 enum EX_EXCLUSION { EX_X, EX_Y, EX_Z };
 
 inline bool OpenWithin(const QVector &query,
-                       const Vector &mn,
-                       const Vector &mx,
-                       const float err,
-                       enum EX_EXCLUSION excludeWhich)
-{
+        const Vector &mn,
+        const Vector &mx,
+        const float err,
+        enum EX_EXCLUSION excludeWhich) {
     switch (excludeWhich) {
         case EX_X:
             return (query.j >= mn.j - err) && (query.k >= mn.k - err) && (query.j <= mx.j + err)

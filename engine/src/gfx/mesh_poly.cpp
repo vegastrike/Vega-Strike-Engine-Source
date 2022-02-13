@@ -38,8 +38,7 @@
 
 #define WHICHSID(v) ( ( (v.x*a+v.y*b+v.z*c+d) > 0 )*2-1 )
 
-static int whichside(GFXVertex *t, int numvertex, float a, float b, float c, float d)
-{
+static int whichside(GFXVertex *t, int numvertex, float a, float b, float c, float d) {
     int count = PUNK;
     for (int i = 0; i < numvertex; i++) {
         count += WHICHSID(t[i]);
@@ -52,8 +51,7 @@ static int whichside(GFXVertex *t, int numvertex, float a, float b, float c, flo
 
 void updateMax(Vector &mn, Vector &mx, const GFXVertex &ver);
 
-void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d)
-{
+void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
     if (orig && orig != this) {
         orig->Fork(x, y, a, b, c, d);
         return;
@@ -207,8 +205,7 @@ void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d)
     delete[] Y;
 }
 
-void Mesh::GetPolys(vector<mesh_polygon> &polys)
-{
+void Mesh::GetPolys(vector<mesh_polygon> &polys) {
     int numtris;
     int numquads;
     if (orig && orig != this) {

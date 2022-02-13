@@ -45,8 +45,7 @@
 
 //#include <GL/glu.h>
 
-inline void Zero(float matrix[])
-{
+inline void Zero(float matrix[]) {
     matrix[0] = 0;
     matrix[1] = 0;
     matrix[2] = 0;
@@ -68,8 +67,7 @@ inline void Zero(float matrix[])
     matrix[15] = 0;
 }
 
-inline void Identity(float matrix[])
-{
+inline void Identity(float matrix[]) {
     matrix[0] = 1;
     matrix[1] = 0;
     matrix[2] = 0;
@@ -91,8 +89,7 @@ inline void Identity(float matrix[])
     matrix[15] = 1;
 }
 
-float Magnitude(Vector v)
-{
+float Magnitude(Vector v) {
     return sqrtf(v.i * v.i + v.j * v.j + v.k * v.k);
 }
 
@@ -102,13 +99,11 @@ float Magnitude(Vector v)
  *       return Vector(right.i*left, right.j*left, right.k*left);
  *  }*/
 
-float DotProduct(Vector &a, Vector &b)
-{
+float DotProduct(Vector &a, Vector &b) {
     return a.Dot(b);
 }
 
-inline void MultMatrix(float dest[], const float m1[], const float m2[])
-{
+inline void MultMatrix(float dest[], const float m1[], const float m2[]) {
     dest[0] = m1[0] * m2[0] + m1[4] * m2[1] + m1[8] * m2[2] + m1[12] * m2[3];
     dest[1] = m1[1] * m2[0] + m1[5] * m2[1] + m1[9] * m2[2] + m1[13] * m2[3];
     dest[2] = m1[2] * m2[0] + m1[6] * m2[1] + m1[10] * m2[2] + m1[14] * m2[3];
@@ -136,8 +131,7 @@ inline void MultMatrix(float dest[], const float m1[], const float m2[])
      */
 }
 
-inline void CopyMatrix(Matrix dest, const Matrix source)
-{
+inline void CopyMatrix(Matrix dest, const Matrix source) {
     dest[0] = source[0];
     dest[1] = source[1];
     dest[2] = source[2];
@@ -165,8 +159,7 @@ using namespace GFXMatrices;  //causes problems with g_game
 
 float centerx, centery, centerz;
 
-void evaluateViews()
-{
+void evaluateViews() {
     //Identity(transview);
     Identity(rotview);
 #define M(row, col) rotview[col*4+row]
@@ -187,8 +180,7 @@ void evaluateViews()
 
 Vector eye, center, up;
 
-void getInverseProjection(float *&inv)
-{
+void getInverseProjection(float *&inv) {
     inv = invprojection;
 }
 
@@ -202,8 +194,7 @@ void getInverseProjection(float *&inv)
  * therefore   return 1/(xs *d) and 1/(ys * d)
  * I'm not good with matrix math...tell me if I should ret 1/xs+c/d instead
  * for test cases I can think of, it doesn't matter--- */
-float GFXGetZPerspective(const float z)
-{
+float GFXGetZPerspective(const float z) {
     float left, right, bottom, top, nearval, farval;
     GFXGetFrustumVars(true, &left, &right, &bottom, &top, &nearval, &farval);
 
@@ -220,18 +211,15 @@ float GFXGetZPerspective(const float z)
     return hx / hw;
 }
 
-float GFXGetXInvPerspective()
-{
+float GFXGetXInvPerspective() {
     return /*invprojection[11]*  */ invprojection[0];     //invprojection[15];//should be??  c/d == invproj[15]
 }
 
-float GFXGetYInvPerspective()
-{
+float GFXGetYInvPerspective() {
     return /*invprojection[11]*  */ invprojection[5];     //invprojection[15];//should be??  c/d == invproj[15]
 }
 
-void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector &a)
-{
+void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector &a) {
     switch (mode) {
         case MODEL:
             model[12] += a.i * model[0] + a.j * model[4] + a.k * model[8];
@@ -265,8 +253,7 @@ void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector &a)
     }
 }
 
-void /*GFXDRVAPI*/ GFXMultMatrix(const MATRIXMODE mode, const Matrix matrix)
-{
+void /*GFXDRVAPI*/ GFXMultMatrix(const MATRIXMODE mode, const Matrix matrix) {
     Matrix t;
     switch (mode) {
         case MODEL:
@@ -303,8 +290,7 @@ void /*GFXDRVAPI*/ GFXMultMatrix(const MATRIXMODE mode, const Matrix matrix)
     }
 }
 
-void /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix)
-{
+void /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix) {
     Matrix t;
     switch (mode) {
         case MODEL:
@@ -347,13 +333,11 @@ void /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix)
     }
 }
 
-void GFXViewPort(int minx, int miny, int maxx, int maxy)
-{
+void GFXViewPort(int minx, int miny, int maxx, int maxy) {
     glViewport(minx, miny, maxx, maxy);
 }
 
-void GFXHudMode(const bool Enter)
-{
+void GFXHudMode(const bool Enter) {
     if (Enter) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
@@ -369,8 +353,7 @@ void GFXHudMode(const bool Enter)
     }
 }
 
-void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
-{
+void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode) {
     switch (mode) {
         case MODEL:
             Identity(model);
@@ -398,8 +381,7 @@ void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
     }
 }
 
-void /*GFXDRVAPI*/ GFXGetMatrix(const MATRIXMODE mode, Matrix matrix)
-{
+void /*GFXDRVAPI*/ GFXGetMatrix(const MATRIXMODE mode, Matrix matrix) {
     Matrix translation;
     switch (mode) {
         case MODEL:
@@ -419,14 +401,12 @@ void /*GFXDRVAPI*/ GFXGetMatrix(const MATRIXMODE mode, Matrix matrix)
     }
 }
 
-static void gl_Frustum(float left, float right, float bottom, float top, float nearval, float farval)
-{
+static void gl_Frustum(float left, float right, float bottom, float top, float nearval, float farval) {
     GFXGetFrustumVars(false, &left, &right, &bottom, &top, &nearval, &farval);
     GFXFrustum(projection, invprojection, left, right, bottom, top, nearval, farval);
 }
 
-void GFXGetFrustumVars(bool retr, float *l, float *r, float *b, float *t, float *n, float *f)
-{
+void GFXGetFrustumVars(bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
     static float nnear, ffar, left, right, bot, top;     //Visual C++ reserves near and far
     if (!retr) {
         nnear = *n;
@@ -445,8 +425,7 @@ void GFXGetFrustumVars(bool retr, float *l, float *r, float *b, float *t, float 
     }
 }
 
-void GFXFrustum(float *m, float *i, float left, float right, float bottom, float top, float nearval, float farval)
-{
+void GFXFrustum(float *m, float *i, float left, float right, float bottom, float top, float nearval, float farval) {
     GLfloat x, y, a, b, c, d;
     x = (((float) 2.0) * nearval) / (right - left);
     y = (((float) 2.0) * nearval) / (top - bottom);
@@ -498,8 +477,7 @@ void GFXFrustum(float *m, float *i, float left, float right, float bottom, float
 #undef M
 }
 
-void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset)
-{
+void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset) {
     //gluPerspective (fov,aspect,znear,zfar);
     float xmin, xmax, ymin, ymax;
     ymax = znear * tanf(fov * M_PI / ((float) 360.0));       //78.0 --> 4.7046
@@ -512,8 +490,7 @@ void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
     glLoadMatrixf(projection);
 }
 
-void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval)
-{
+void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval) {
     float *m = projection, x, y, z, tx, ty, tz;
     x = 2.0 / (right - left);
     y = 2.0 / (top - bottom);
@@ -544,15 +521,14 @@ void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
 }
 
 static void LookAtHelper(float eyex,
-                         float eyey,
-                         float eyez,
-                         float centerx,
-                         float centery,
-                         float centerz,
-                         float upx,
-                         float upy,
-                         float upz)
-{
+        float eyey,
+        float eyez,
+        float centerx,
+        float centery,
+        float centerz,
+        float upx,
+        float upy,
+        float upz) {
     float m[16];
     float x[3], y[3], z[3];
     float mag;
@@ -682,8 +658,7 @@ static void LookAtHelper(float eyex,
 #endif
 }
 
-void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
-{
+void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up) {
     LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
 
     //Identity(transview);
@@ -698,13 +673,11 @@ void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
 
 float frust[6][4];
 
-float /*GFXDRVAPI*/ GFXSphereInFrustum(const Vector &Cnt, float radius)
-{
+float /*GFXDRVAPI*/ GFXSphereInFrustum(const Vector &Cnt, float radius) {
     return GFXSphereInFrustum(frust, Cnt, radius);
 }
 
-float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4], const Vector &Cnt, float radius)
-{
+float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4], const Vector &Cnt, float radius) {
     int p;
     float d;
     for (p = 0; p < 5; p++) {
@@ -717,18 +690,15 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4], const Vector &Cnt, float r
     return d;
 }
 
-void /*GFXDRVAPI*/ GFXGetFrustum(float f[6][4])
-{
+void /*GFXDRVAPI*/ GFXGetFrustum(float f[6][4]) {
     f = frust;
 }
 
-void /*GFXDRVAPI*/ GFXCalculateFrustum()
-{
+void /*GFXDRVAPI*/ GFXCalculateFrustum() {
     GFXCalculateFrustum(frust, view, projection);
 }
 
-void /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4], float *modl, float *proj)
-{
+void /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4], float *modl, float *proj) {
 ////float   *proj=projection;
 ////float   *modl=view;
     float clip[16];

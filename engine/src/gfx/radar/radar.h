@@ -44,30 +44,24 @@ class Sensor;
 // Draws radar on display
 class Display {
 public:
-    virtual ~Display()
-    {
+    virtual ~Display() {
     }
 
     virtual void Draw(const Sensor &sensor, VSSprite *, VSSprite *) = 0;
 
-    virtual void OnDockEnd()
-    {
+    virtual void OnDockEnd() {
     }
 
-    virtual void OnJumpBegin()
-    {
+    virtual void OnJumpBegin() {
     }
 
-    virtual void OnJumpEnd()
-    {
+    virtual void OnJumpEnd() {
     }
 
-    virtual void OnPauseBegin()
-    {
+    virtual void OnPauseBegin() {
     }
 
-    virtual void OnPauseEnd()
-    {
+    virtual void OnPauseEnd() {
     }
 };
 

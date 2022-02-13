@@ -49,8 +49,7 @@ public:
      *	\return		Self-Reference
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    Container &Add(uint32_t entry)
-    {
+    inline_    Container &Add(uint32_t entry) {
         // Resize if needed
         if (mCurNbEntries == mMaxNbEntries) {
             Resize();
@@ -61,8 +60,7 @@ public:
         return *this;
     }
 
-    inline_    Container &Add(const uint32_t *entries, uint32_t nb)
-    {
+    inline_    Container &Add(const uint32_t *entries, uint32_t nb) {
         // Resize if needed
         if (mCurNbEntries + nb > mMaxNbEntries) {
             Resize(nb);
@@ -87,8 +85,7 @@ public:
      *	\return		Self-Reference
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    Container &Add(float entry)
-    {
+    inline_    Container &Add(float entry) {
         // Resize if needed
         if (mCurNbEntries == mMaxNbEntries) {
             Resize();
@@ -99,8 +96,7 @@ public:
         return *this;
     }
 
-    inline_    Container &Add(const float *entries, uint32_t nb)
-    {
+    inline_    Container &Add(const float *entries, uint32_t nb) {
         // Resize if needed
         if (mCurNbEntries + nb > mMaxNbEntries) {
             Resize(nb);
@@ -113,8 +109,7 @@ public:
     }
 
     //! Add unique [slow]
-    inline_    Container &AddUnique(uint32_t entry)
-    {
+    inline_    Container &AddUnique(uint32_t entry) {
         if (!Contains(entry)) {
             Add(entry);
         }
@@ -137,8 +132,7 @@ public:
      *	\see		Empty()
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    void Reset()
-    {
+    inline_    void Reset() {
         // Avoid the write if possible
         // ### CMOV
         if (mCurNbEntries) {
@@ -147,8 +141,7 @@ public:
     }
 
     // HANDLE WITH CARE
-    inline_    void ForceSize(uint32_t size)
-    {
+    inline_    void ForceSize(uint32_t size) {
         mCurNbEntries = size;
     }
 
@@ -176,15 +169,13 @@ public:
     // Deletes an entry - does preserve insertion order.
     bool DeleteKeepingOrder(uint32_t entry);
     //! Deletes the very last entry.
-    inline_    void DeleteLastEntry()
-    {
+    inline_    void DeleteLastEntry() {
         if (mCurNbEntries) {
             mCurNbEntries--;
         }
     }
     //! Deletes the entry whose index is given
-    inline_    void DeleteIndex(uint32_t index)
-    {
+    inline_    void DeleteIndex(uint32_t index) {
         mEntries[index] = mEntries[--mCurNbEntries];
     }
 
@@ -192,56 +183,45 @@ public:
     Container &FindNext(uint32_t &entry, FindMode find_mode = FIND_CLAMP);
     Container &FindPrev(uint32_t &entry, FindMode find_mode = FIND_CLAMP);
     // Data access.
-    inline_    uint32_t GetNbEntries() const
-    {
+    inline_    uint32_t GetNbEntries() const {
         return mCurNbEntries;
     }    //!< Returns the current number of entries.
-    inline_    uint32_t GetEntry(uint32_t i) const
-    {
+    inline_    uint32_t GetEntry(uint32_t i) const {
         return mEntries[i];
     }    //!< Returns ith entry
-    inline_    uint32_t *GetEntries() const
-    {
+    inline_    uint32_t *GetEntries() const {
         return mEntries;
     }    //!< Returns the list of entries.
 
-    inline_    uint32_t GetFirst() const
-    {
+    inline_    uint32_t GetFirst() const {
         return mEntries[0];
     }
 
-    inline_    uint32_t GetLast() const
-    {
+    inline_    uint32_t GetLast() const {
         return mEntries[mCurNbEntries - 1];
     }
 
     // Growth control
-    inline_    float GetGrowthFactor() const
-    {
+    inline_    float GetGrowthFactor() const {
         return mGrowthFactor;
     }    //!< Returns the growth factor
-    inline_    void SetGrowthFactor(float growth)
-    {
+    inline_    void SetGrowthFactor(float growth) {
         mGrowthFactor = growth;
     }    //!< Sets the growth factor
-    inline_    bool IsFull() const
-    {
+    inline_    bool IsFull() const {
         return mCurNbEntries == mMaxNbEntries;
     }    //!< Checks the container is full
-    inline_    BOOL IsNotEmpty() const
-    {
+    inline_    BOOL IsNotEmpty() const {
         return mCurNbEntries;
     }    //!< Checks the container is empty
 
     //! Read-access as an array
-    inline_    uint32_t operator[](uint32_t i) const
-    {
+    inline_    uint32_t operator[](uint32_t i) const {
         OPASSERT(i >= 0 && i < mCurNbEntries);
         return mEntries[i];
     }
     //! Write-access as an array
-    inline_    uint32_t &operator[](uint32_t i)
-    {
+    inline_    uint32_t &operator[](uint32_t i) {
         OPASSERT(i >= 0 && i < mCurNbEntries);
         return mEntries[i];
     }
@@ -254,13 +234,11 @@ public:
 
 #ifdef CONTAINER_STATS
 
-    inline_    uint32_t GetNbContainers() const
-    {
+    inline_    uint32_t GetNbContainers() const {
         return mNbContainers;
     }
 
-    inline_    uint32_t GetTotalBytes() const
-    {
+    inline_    uint32_t GetTotalBytes() const {
         return mUsedRam;
     }
 

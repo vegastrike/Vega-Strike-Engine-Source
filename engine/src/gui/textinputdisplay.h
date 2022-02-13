@@ -43,8 +43,7 @@ public:
     virtual bool processMouseDown(const InputEvent &event);
     virtual bool processKeypress(unsigned int pressedKey);
 
-    void setPassword(char passchar)
-    {
+    void setPassword(char passchar) {
         passwordChar = passchar;
     }
 

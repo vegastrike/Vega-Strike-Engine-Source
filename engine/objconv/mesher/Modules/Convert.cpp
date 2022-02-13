@@ -32,16 +32,14 @@ typedef multimap<int, ConversionImpl *> ConversionImplList;
 struct CRegistry {
     ConversionImplList list;
 
-    CRegistry()
-    {
+    CRegistry() {
     }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 
 // This is ok because our modules are all the same size as the abstract
-    ~CRegistry()
-    {
+    ~CRegistry() {
         for (ConversionImplList::iterator it = list.begin(); it != list.end(); ++it) {
             delete it->second;
         }
@@ -52,14 +50,12 @@ struct CRegistry {
 
 // This awkward thing makes sure the registry has been constructed when we need it.
 // Since we'll be using registry functions at static object initialization, we need this.
-static ConversionImplList &getRegistry()
-{
+static ConversionImplList &getRegistry() {
     static CRegistry registry;
     return registry.list;
 }
 
-void registerConversionImplementation(ConversionImpl *module, int priority)
-{
+void registerConversionImplementation(ConversionImpl *module, int priority) {
     assert(module);
     getRegistry().insert(pair<int, ConversionImpl *>(priority, module));
 }
@@ -73,8 +69,7 @@ class ConvertHandler : public Module {
     OptionList mOptions;
 
 public:
-    ConvertHandler()
-    {
+    ConvertHandler() {
 #define ADD_OPTION(name) mNames.push_back("-" name); mOptions.insert(name)
 #define ADD_ALIAS(alias, original) ADD_OPTION(alias); mAliases.insert(pair<string,string>(alias,original))
 
@@ -131,8 +126,7 @@ public:
      *     Module interface
      */
 
-    virtual int execute(const string &command, ParameterList &params, unsigned int phase)
-    {
+    virtual int execute(const string &command, ParameterList &params, unsigned int phase) {
         if (command == "-i" || command == "--input") {
             if (params.size() == 0) {
                 cerr << "Warning: " << command << " needs a file path to follow. Ignoring." << endl;
@@ -154,10 +148,10 @@ public:
         } else if (command == "-c" || command == "--convert") {
             if (params.size() < 3) {
                 cerr << "Fatal: " << command << " needs three arguments:\n"
-                     << "\tmesher <...> " << command
-                     << " {XMesh|BFXM|Wavefront} (XMesh|BFXM|Wafefront|Ogre) (create|append|optimize)\n"
-                     << "\n"
-                     << "Do \"mesher --help convert\" for details" << endl;
+                        << "\tmesher <...> " << command
+                        << " {XMesh|BFXM|Wavefront} (XMesh|BFXM|Wafefront|Ogre) (create|append|optimize)\n"
+                        << "\n"
+                        << "Do \"mesher --help convert\" for details" << endl;
                 return 1;
             } else {
                 if (phase == 0) {
@@ -167,12 +161,12 @@ public:
                     ConversionImplList &registry = getRegistry();
                     ConversionImpl::RetCodeEnum rc = ConversionImpl::RC_NOT_IMPLEMENTED;
                     for (ConversionImplList::iterator cit = registry.begin();
-                         (rc == ConversionImpl::RC_NOT_IMPLEMENTED) && (cit != registry.end()); ++cit) {
+                            (rc == ConversionImpl::RC_NOT_IMPLEMENTED) && (cit != registry.end()); ++cit) {
                         rc = cit->second->convert(params[0], params[1], params[2]);
                     }
                     if (rc == ConversionImpl::RC_NOT_IMPLEMENTED) {
                         cerr << "Error: " << params[2] << " from " << params[0] << " to " << params[1]
-                             << " unimplemented" << endl;
+                                << " unimplemented" << endl;
                         return ConversionImpl::RC_NOT_IMPLEMENTED;
                     } else if (rc == ConversionImpl::RC_OK) {
                         params.erase(params.begin(), params.begin() + 3);
@@ -223,21 +217,19 @@ public:
         }
     }
 
-    virtual const NameList &getNames() const
-    {
+    virtual const NameList &getNames() const {
         return mNames;
     }
 
-    virtual void help(const string &command, ParameterList &params) const
-    {
+    virtual void help(const string &command, ParameterList &params) const {
         if (command == "-i" || command == "--input" || command == "-o" || command == "--output") {
             cout << "Set current input/output file.\n"
-                 << "Usage:\n"
-                 << "\tmesher ((--input|-i)|(--output|-o)) (path)\n\n"
-                 << "The command is transitory and passive.\n"
-                 << "Any further instance of the command will override any previous one.\n"
-                 << "Executive commands will use the most recently bound pathname.\n"
-                 << endl;
+                    << "Usage:\n"
+                    << "\tmesher ((--input|-i)|(--output|-o)) (path)\n\n"
+                    << "The command is transitory and passive.\n"
+                    << "Any further instance of the command will override any previous one.\n"
+                    << "Executive commands will use the most recently bound pathname.\n"
+                    << endl;
             params.clear();
         } else if (command == "-c" || command == "--convert") {
             string inf, outf, op;

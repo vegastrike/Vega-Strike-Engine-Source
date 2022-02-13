@@ -28,13 +28,11 @@ class RText {
 private:
 //text rendering
     struct cline {
-        cline()
-        {
+        cline() {
             outtime = 0;
         }
 
-        cline(const cline &in)
-        {
+        cline(const cline &in) {
             if (in.cref.size() > 0) {
                 cref.append(in.cref);
             }

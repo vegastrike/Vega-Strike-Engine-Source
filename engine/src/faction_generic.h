@@ -53,8 +53,7 @@ public:
         ///A value between 0 and 1 indicating my attitude towards index
         float relationship;
         boost::shared_ptr<FSM> conversation;  //a conversation any two factions can have
-        faction_stuff() : relationship(0.0)
-        {
+        faction_stuff() : relationship(0.0) {
             stats.index = 0;
         }
     };
@@ -85,8 +84,7 @@ public:
         CHOICE dockable;
         CHOICE base;
 
-        comm_face_t() : dockable(CEITHER), base(CEITHER)
-        {
+        comm_face_t() : dockable(CEITHER), base(CEITHER) {
         }
     };
     std::vector<comm_face_t> comm_faces;
@@ -103,8 +101,7 @@ public:
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
     static void endElement(void *userData, const XML_Char *name);
 
-    Faction()
-    {
+    Faction() {
         playlist = -1;
         citizen = false;
         logo = secondaryLogo = NULL;
@@ -144,23 +141,19 @@ const char *GetFaction(int faction);
  */
 int GetFactionIndex(const std::string &name);
 
-inline int GetUpgradeFaction()
-{
+inline int GetUpgradeFaction() {
     return upgradefac;
 }
 
-inline int GetNeutralFaction()
-{
+inline int GetNeutralFaction() {
     return neutralfac;
 }
 
-inline int GetPlanetFaction()
-{
+inline int GetPlanetFaction() {
     return planetfac;
 }
 
-inline float GetIntRelation(const int myfaction, const int theirfaction)
-{
+inline float GetIntRelation(const int myfaction, const int theirfaction) {
     return factions[myfaction]->faction[theirfaction].relationship;
 }
 

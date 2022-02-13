@@ -67,8 +67,7 @@ using namespace Opcode;
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SphereCollider::SphereCollider()
-{
+SphereCollider::SphereCollider() {
     mCenter.Zero();
     mRadius2 = 0.0f;
 }
@@ -78,8 +77,7 @@ SphereCollider::SphereCollider()
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SphereCollider::~SphereCollider()
-{
+SphereCollider::~SphereCollider() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,11 +97,10 @@ SphereCollider::~SphereCollider()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool SphereCollider::Collide(SphereCache &cache,
-                             const Sphere &sphere,
-                             const Model &model,
-                             const Matrix4x4 *worlds,
-                             const Matrix4x4 *worldm)
-{
+        const Sphere &sphere,
+        const Model &model,
+        const Matrix4x4 *worlds,
+        const Matrix4x4 *worldm) {
     // Checkings
     if (!Setup(&model)) {
         return false;
@@ -182,10 +179,9 @@ bool SphereCollider::Collide(SphereCache &cache,
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool SphereCollider::InitQuery(SphereCache &cache,
-                               const Sphere &sphere,
-                               const Matrix4x4 *worlds,
-                               const Matrix4x4 *worldm)
-{
+        const Sphere &sphere,
+        const Matrix4x4 *worlds,
+        const Matrix4x4 *worldm) {
     // 1) Call the base method
     VolumeCollider::InitQuery();
 
@@ -295,8 +291,7 @@ bool SphereCollider::InitQuery(SphereCache &cache,
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool SphereCollider::Collide(SphereCache &cache, const Sphere &sphere, const AABBTree *tree)
-{
+bool SphereCollider::Collide(SphereCache &cache, const Sphere &sphere, const AABBTree *tree) {
     // This is typically called for a scene tree, full of -AABBs-, not full of triangles.
     // So we don't really have "primitives" to deal with. Hence it doesn't work with
     // "FirstContact" + "TemporalCoherence".
@@ -326,8 +321,7 @@ bool SphereCollider::Collide(SphereCache &cache, const Sphere &sphere, const AAB
  *	\return		true if the sphere contains the whole box
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ bool SphereCollider::SphereContainsBox(const Point &bc, const Point &be)
-{
+inline_ bool SphereCollider::SphereContainsBox(const Point &bc, const Point &be) {
     // I assume if all 8 box vertices are inside the sphere, so does the whole box.
     // Sounds ok but maybe there's a better way?
     Point p;
@@ -388,8 +382,7 @@ inline_ bool SphereCollider::SphereContainsBox(const Point &bc, const Point &be)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_Collide(const AABBCollisionNode *node)
-{
+void SphereCollider::_Collide(const AABBCollisionNode *node) {
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents)) {
         return;
@@ -416,8 +409,7 @@ void SphereCollider::_Collide(const AABBCollisionNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node)
-{
+void SphereCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node) {
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents)) {
         return;
@@ -444,16 +436,15 @@ void SphereCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_Collide(const AABBQuantizedNode *node)
-{
+void SphereCollider::_Collide(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -481,16 +472,15 @@ void SphereCollider::_Collide(const AABBQuantizedNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node)
-{
+void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -518,8 +508,7 @@ void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_Collide(const AABBNoLeafNode *node)
-{
+void SphereCollider::_Collide(const AABBNoLeafNode *node) {
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents)) {
         return;
@@ -550,8 +539,7 @@ void SphereCollider::_Collide(const AABBNoLeafNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node)
-{
+void SphereCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node) {
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents)) {
         return;
@@ -582,16 +570,15 @@ void SphereCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_Collide(const AABBQuantizedNoLeafNode *node)
-{
+void SphereCollider::_Collide(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -623,16 +610,15 @@ void SphereCollider::_Collide(const AABBQuantizedNoLeafNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node)
-{
+void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -664,8 +650,7 @@ void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::_Collide(const AABBTreeNode *node)
-{
+void SphereCollider::_Collide(const AABBTreeNode *node) {
     // Perform Sphere-AABB overlap test
     Point Center, Extents;
     node->GetAABB()->GetCenter(Center);
@@ -694,8 +679,7 @@ void SphereCollider::_Collide(const AABBTreeNode *node)
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridSphereCollider::HybridSphereCollider()
-{
+HybridSphereCollider::HybridSphereCollider() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -703,16 +687,14 @@ HybridSphereCollider::HybridSphereCollider()
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridSphereCollider::~HybridSphereCollider()
-{
+HybridSphereCollider::~HybridSphereCollider() {
 }
 
 bool HybridSphereCollider::Collide(SphereCache &cache,
-                                   const Sphere &sphere,
-                                   const HybridModel &model,
-                                   const Matrix4x4 *worlds,
-                                   const Matrix4x4 *worldm)
-{
+        const Sphere &sphere,
+        const HybridModel &model,
+        const Matrix4x4 *worlds,
+        const Matrix4x4 *worldm) {
     // We don't want primitive tests here!
     mFlags |= OPC_NO_PRIMITIVE_TESTS;
 

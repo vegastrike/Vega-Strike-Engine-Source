@@ -123,8 +123,7 @@ csBox3::bFace csBox3::faces[6] =
                 {BOX_EDGE_XYZ_xYZ, BOX_EDGE_xYZ_xyZ, BOX_EDGE_xyZ_XyZ, BOX_EDGE_XyZ_XYZ}
         };
 
-csVector3 csBox3::GetCorner(int corner) const
-{
+csVector3 csBox3::GetCorner(int corner) const {
     switch (corner) {
         case BOX_CORNER_xyz:
             return Min();
@@ -146,22 +145,19 @@ csVector3 csBox3::GetCorner(int corner) const
     return csVector3(0, 0, 0);
 }
 
-void csBox3::SetCenter(const csVector3 &c)
-{
+void csBox3::SetCenter(const csVector3 &c) {
     csVector3 move = c - GetCenter();
     minbox += move;
     maxbox += move;
 }
 
-void csBox3::SetSize(const csVector3 &s)
-{
+void csBox3::SetSize(const csVector3 &s) {
     csVector3 center = GetCenter();
     minbox = center - s * (float) .5;
     maxbox = center + s * (float) .5;
 }
 
-bool csBox3::AdjacentX(const csBox3 &other) const
-{
+bool csBox3::AdjacentX(const csBox3 &other) const {
     if (ABS (other.MinX() - MaxX()) < SMALL_EPSILON ||
             ABS (other.MaxX() - MinX()) < SMALL_EPSILON) {
         if (MaxY() < other.MinY() || MinY() > other.MaxY()) {
@@ -175,8 +171,7 @@ bool csBox3::AdjacentX(const csBox3 &other) const
     return false;
 }
 
-bool csBox3::AdjacentY(const csBox3 &other) const
-{
+bool csBox3::AdjacentY(const csBox3 &other) const {
     if (ABS (other.MinY() - MaxY()) < SMALL_EPSILON ||
             ABS (other.MaxY() - MinY()) < SMALL_EPSILON) {
         if (MaxX() < other.MinX() || MinX() > other.MaxX()) {
@@ -190,8 +185,7 @@ bool csBox3::AdjacentY(const csBox3 &other) const
     return false;
 }
 
-bool csBox3::AdjacentZ(const csBox3 &other) const
-{
+bool csBox3::AdjacentZ(const csBox3 &other) const {
     if (ABS (other.MinZ() - MaxZ()) < SMALL_EPSILON ||
             ABS (other.MaxZ() - MinZ()) < SMALL_EPSILON) {
         if (MaxX() < other.MinX() || MinX() > other.MaxX()) {
@@ -205,8 +199,7 @@ bool csBox3::AdjacentZ(const csBox3 &other) const
     return false;
 }
 
-int csBox3::Adjacent(const csBox3 &other) const
-{
+int csBox3::Adjacent(const csBox3 &other) const {
     if (AdjacentX(other)) {
         if (other.MaxX() > MaxX()) {
             return BOX_SIDE_X;
@@ -231,8 +224,7 @@ int csBox3::Adjacent(const csBox3 &other) const
     return -1;
 }
 
-int csBox3::GetVisibleSides(const csVector3 &pos, int *visible_sides) const
-{
+int csBox3::GetVisibleSides(const csVector3 &pos, int *visible_sides) const {
     const csVector3 &bmin = Min();
     const csVector3 &bmax = Max();
     int idx;
@@ -270,8 +262,7 @@ int csBox3::GetVisibleSides(const csVector3 &pos, int *visible_sides) const
 }
 
 void csBox3::GetConvexOutline(const csVector3 &pos,
-                              csVector3 *ar, int &num_array, bool bVisible) const
-{
+        csVector3 *ar, int &num_array, bool bVisible) const {
     const csVector3 &bmin = Min();
     const csVector3 &bmax = Max();
     int idx;
@@ -349,8 +340,7 @@ void csBox3::GetConvexOutline(const csVector3 &pos,
     }
 }
 
-bool csBox3::Between(const csBox3 &box1, const csBox3 &box2) const
-{
+bool csBox3::Between(const csBox3 &box1, const csBox3 &box2) const {
     // First the trival test to see if the coordinates are
     // at least within the right intervals.
     if (((maxbox.x >= box1.minbox.x && minbox.x <= box2.maxbox.x) ||
@@ -366,8 +356,7 @@ bool csBox3::Between(const csBox3 &box1, const csBox3 &box2) const
     return false;
 }
 
-void csBox3::ManhattanDistance(const csBox3 &other, csVector3 &dist) const
-{
+void csBox3::ManhattanDistance(const csBox3 &other, csVector3 &dist) const {
     if (other.MinX() >= MaxX()) {
         dist.x = other.MinX() - MaxX();
     } else if (MinX() >= other.MaxX()) {
@@ -391,8 +380,7 @@ void csBox3::ManhattanDistance(const csBox3 &other, csVector3 &dist) const
     }
 }
 
-float csBox3::SquaredOriginDist() const
-{
+float csBox3::SquaredOriginDist() const {
     // Thanks to Ivan Avramovic for the original.
     // Adapted by Norman Kramer, Jorrit Tyberghein and Wouter Wijngaards.
     float res = 0;
@@ -414,8 +402,7 @@ float csBox3::SquaredOriginDist() const
     return res;
 }
 
-float csBox3::SquaredOriginMaxDist() const
-{
+float csBox3::SquaredOriginMaxDist() const {
     // Thanks to Ivan Avramovic for the original.
     // Adapted by Norman Kramer, Jorrit Tyberghein and Wouter Wijngaards.
     float res;
@@ -443,8 +430,7 @@ float csBox3::SquaredOriginMaxDist() const
     return res;
 }
 
-csBox3 &csBox3::operator+=(const csBox3 &box)
-{
+csBox3 &csBox3::operator+=(const csBox3 &box) {
     if (box.minbox.x < minbox.x) {
         minbox.x = box.minbox.x;
     }
@@ -466,8 +452,7 @@ csBox3 &csBox3::operator+=(const csBox3 &box)
     return *this;
 }
 
-csBox3 &csBox3::operator+=(const csVector3 &point)
-{
+csBox3 &csBox3::operator+=(const csVector3 &point) {
     if (point.x < minbox.x) {
         minbox.x = point.x;
     }
@@ -489,8 +474,7 @@ csBox3 &csBox3::operator+=(const csVector3 &point)
     return *this;
 }
 
-csBox3 &csBox3::operator*=(const csBox3 &box)
-{
+csBox3 &csBox3::operator*=(const csBox3 &box) {
     if (box.minbox.x > minbox.x) {
         minbox.x = box.minbox.x;
     }
@@ -512,8 +496,7 @@ csBox3 &csBox3::operator*=(const csBox3 &box)
     return *this;
 }
 
-csBox3 operator+(const csBox3 &box1, const csBox3 &box2)
-{
+csBox3 operator+(const csBox3 &box1, const csBox3 &box2) {
     return csBox3(
             MIN(box1.minbox.x, box2.minbox.x),
             MIN(box1.minbox.y, box2.minbox.y),
@@ -523,8 +506,7 @@ csBox3 operator+(const csBox3 &box1, const csBox3 &box2)
             MAX(box1.maxbox.z, box2.maxbox.z));
 }
 
-csBox3 operator+(const csBox3 &box, const csVector3 &point)
-{
+csBox3 operator+(const csBox3 &box, const csVector3 &point) {
     return csBox3(
             MIN(box.minbox.x, point.x),
             MIN(box.minbox.y, point.y),
@@ -534,8 +516,7 @@ csBox3 operator+(const csBox3 &box, const csVector3 &point)
             MAX(box.maxbox.z, point.z));
 }
 
-csBox3 operator*(const csBox3 &box1, const csBox3 &box2)
-{
+csBox3 operator*(const csBox3 &box1, const csBox3 &box2) {
     return csBox3(
             MAX(box1.minbox.x, box2.minbox.x),
             MAX(box1.minbox.y, box2.minbox.y),
@@ -545,8 +526,7 @@ csBox3 operator*(const csBox3 &box1, const csBox3 &box2)
             MIN(box1.maxbox.z, box2.maxbox.z));
 }
 
-bool operator==(const csBox3 &box1, const csBox3 &box2)
-{
+bool operator==(const csBox3 &box1, const csBox3 &box2) {
     return ((box1.minbox.x == box2.minbox.x)
             && (box1.minbox.y == box2.minbox.y)
             && (box1.minbox.z == box2.minbox.z)
@@ -555,8 +535,7 @@ bool operator==(const csBox3 &box1, const csBox3 &box2)
             && (box1.maxbox.z == box2.maxbox.z));
 }
 
-bool operator!=(const csBox3 &box1, const csBox3 &box2)
-{
+bool operator!=(const csBox3 &box1, const csBox3 &box2) {
     return ((box1.minbox.x != box2.minbox.x)
             || (box1.minbox.y != box2.minbox.y)
             || (box1.minbox.z != box2.minbox.z)
@@ -565,8 +544,7 @@ bool operator!=(const csBox3 &box1, const csBox3 &box2)
             || (box1.maxbox.z != box2.maxbox.z));
 }
 
-bool operator<(const csBox3 &box1, const csBox3 &box2)
-{
+bool operator<(const csBox3 &box1, const csBox3 &box2) {
     return ((box1.minbox.x >= box2.minbox.x)
             && (box1.minbox.y >= box2.minbox.y)
             && (box1.minbox.z >= box2.minbox.z)
@@ -575,8 +553,7 @@ bool operator<(const csBox3 &box1, const csBox3 &box2)
             && (box1.maxbox.z <= box2.maxbox.z));
 }
 
-bool operator>(const csBox3 &box1, const csBox3 &box2)
-{
+bool operator>(const csBox3 &box1, const csBox3 &box2) {
     return ((box2.minbox.x >= box1.minbox.x)
             && (box2.minbox.y >= box1.minbox.y)
             && (box2.minbox.z >= box1.minbox.z)
@@ -585,8 +562,7 @@ bool operator>(const csBox3 &box1, const csBox3 &box2)
             && (box2.maxbox.z <= box1.maxbox.z));
 }
 
-bool operator<(const csVector3 &point, const csBox3 &box)
-{
+bool operator<(const csVector3 &point, const csBox3 &box) {
     return ((point.x >= box.minbox.x)
             && (point.x <= box.maxbox.x)
             && (point.y >= box.minbox.y)

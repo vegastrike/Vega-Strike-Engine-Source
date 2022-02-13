@@ -55,8 +55,8 @@ public:
     void Init(int argc, char **argv, const char *galaxy);
     ~Universe();
     class StarSystem *Init(string systemfile,
-                           const Vector &centroid = Vector(0, 0, 0),
-                           const string planetname = string()); // Should load the Universe data file. Now just inits system with test.xml
+            const Vector &centroid = Vector(0, 0, 0),
+            const string planetname = string()); // Should load the Universe data file. Now just inits system with test.xml
     friend void bootstrap_main_loop(); //so it can get all cockpits
     friend class Faction;
 
@@ -69,8 +69,7 @@ public:
     void StartDraw(); // Begin a scene
     void StartGFX(); // Loads Defaults in Graphics Drivers
     void StartGL(); // init proc
-    void SetViewport()
-    {
+    void SetViewport() {
         AccessCockpit()->SetViewport();
     }
 
@@ -106,8 +105,7 @@ public:
 // Player Ship
     Cockpit *isPlayerStarship(const Unit *fighter);
 
-    Cockpit *isPlayerStarshipVoid(const void *pointercompare)
-    {
+    Cockpit *isPlayerStarshipVoid(const void *pointercompare) {
         return isPlayerStarship((const Unit *) pointercompare);
     }
 

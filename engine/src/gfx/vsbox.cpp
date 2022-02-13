@@ -33,14 +33,12 @@
  *  return os << "(" << obj.i << "," << obj.j << "," << obj.k << ")";
  *  }
  */
-string tostring(const Vector &v)
-{
+string tostring(const Vector &v) {
     return std::string("(") + XMLSupport::tostring(v.i) + ", " + XMLSupport::tostring(v.j) + ", "
             + XMLSupport::tostring(v.k) + ")";
 }
 
-Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2)
-{
+Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2) {
     InitUnit();
     draw_sequence = 3;
     setEnvMap(GFXFALSE);
@@ -113,8 +111,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
 #undef VERTEX
 }
 
-void Box::ProcessDrawQueue(int)
-{
+void Box::ProcessDrawQueue(int) {
     if (!draw_queue[0].size()) {
         return;
     }

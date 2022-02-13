@@ -71,8 +71,7 @@ extern void abletodock(int dock);
 // Functions
 //////////////////////////////////////////////
 
-char *getnoslash(char *inp)
-{
+char *getnoslash(char *inp) {
     char *tmp = inp;
     for (unsigned int i = 0; inp[i] != '\0'; i++) {
         if (inp[i] == '/' || inp[i] == '\\') {
@@ -82,8 +81,7 @@ char *getnoslash(char *inp)
     return tmp;
 }
 
-string getCargoUnitName(const char *textname)
-{
+string getCargoUnitName(const char *textname) {
     char *tmp2 = strdup(textname);
     char *tmp = getnoslash(tmp2);
     unsigned int i;
@@ -97,8 +95,7 @@ string getCargoUnitName(const char *textname)
     return retval;
 }
 
-string GetElMeshName(string name, string faction, char direction)
-{
+string GetElMeshName(string name, string faction, char direction) {
     using namespace VSFileSystem;
     char strdir[2] = {direction, 0};
     string elxmesh = string(strdir) + "_elevator.bfxm";
@@ -113,8 +110,7 @@ string GetElMeshName(string name, string faction, char direction)
     return elevator_mesh;
 }
 
-static void SetFogMaterialColor(Mesh *thus, const GFXColor &color, const GFXColor &dcolor)
-{
+static void SetFogMaterialColor(Mesh *thus, const GFXColor &color, const GFXColor &dcolor) {
     static float emm = GameConfig::GetVariable("graphics", "atmosphere_emmissive", 1.0f);
     static float diff = XMLSupport::parse_float(vs_config->getVariable("graphics", "atmosphere_diffuse", "1"));
     GFXMaterial m;
@@ -126,8 +122,7 @@ static void SetFogMaterialColor(Mesh *thus, const GFXColor &color, const GFXColo
     thus->SetMaterial(m);
 }
 
-Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius)
-{
+Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius) {
     static int count = 0;
     count++;
     string nam = f.meshname + XMLSupport::tostring(count) + ".png";
@@ -141,13 +136,13 @@ Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius)
             tex[i * 4 + 1] = 255;
             tex[i * 4 + 2] = 255;
             tex[i * 4 + 3] = get_alpha(i,
-                                       rez,
-                                       f.min_alpha,
-                                       f.max_alpha,
-                                       f.focus,
-                                       f.concavity,
-                                       f.tail_mode_start,
-                                       f.tail_mode_end);
+                    rez,
+                    f.min_alpha,
+                    f.max_alpha,
+                    f.focus,
+                    f.concavity,
+                    f.tail_mode_start,
+                    f.tail_mode_end);
         }
         //Writing in the homedir texture directory
         ::VSImage image;
@@ -157,10 +152,10 @@ Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius)
     vector<string> override;
     override.push_back(nam);
     Mesh *ret = Mesh::LoadMesh(f.meshname.c_str(),
-                               Vector(f.scale * radius, f.scale * radius, f.scale * radius),
-                               0,
-                               nullptr,
-                               override);
+            Vector(f.scale * radius, f.scale * radius, f.scale * radius),
+            0,
+            nullptr,
+            override);
     ret->setConvex(true);
     SetFogMaterialColor(ret, GFXColor(f.er, f.eg, f.eb, f.ea), GFXColor(f.dr, f.dg, f.db, f.da));
     return ret;
@@ -174,13 +169,11 @@ public:
     float planetRadius;
 
     AtmosphereHalo(float radiusOfPlanet, vector<Mesh *> &meshes, int faction) :
-            Unit(meshes, true, faction)
-    {
+            Unit(meshes, true, faction) {
         planetRadius = radiusOfPlanet;
     }
 
-    virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix)
-    {
+    virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix) {
         QVector dirtocam = _Universe->AccessCamera()->GetPosition() - m.p;
         Transformation qua = quat;
         Matrix mat = m;
@@ -204,8 +197,7 @@ public:
 // Constructors and the like
 //////////////////////////////////////////////
 Planet::Planet() :
-        Unit(0)
-{
+        Unit(0) {
     Init();
     SetAI(new Order());     //no behavior
 }
@@ -213,27 +205,26 @@ Planet::Planet() :
 extern const vector<string> &ParseDestinations(const string &value);
 
 Planet::Planet(QVector x,
-               QVector y,
-               float vely,
-               const Vector &rotvel,
-               float pos,
-               float gravity,
-               float radius,
-               const string &textname,
-               const string &technique,
-               const string &unitname,
-               BLENDFUNC blendSrc,
-               BLENDFUNC blendDst,
-               const vector<string> &dest,
-               const QVector &orbitcent,
-               Unit *parent,
-               const GFXMaterial &ourmat,
-               const std::vector<GFXLightLocal> &ligh,
-               int faction,
-               string fgid,
-               bool inside_out) :
-        Unit(0)
-{
+        QVector y,
+        float vely,
+        const Vector &rotvel,
+        float pos,
+        float gravity,
+        float radius,
+        const string &textname,
+        const string &technique,
+        const string &unitname,
+        BLENDFUNC blendSrc,
+        BLENDFUNC blendDst,
+        const vector<string> &dest,
+        const QVector &orbitcent,
+        Unit *parent,
+        const GFXMaterial &ourmat,
+        const std::vector<GFXLightLocal> &ligh,
+        int faction,
+        string fgid,
+        bool inside_out) :
+        Unit(0) {
     atmosphere = nullptr;
     atmospheric = false;
 
@@ -301,14 +292,14 @@ Planet::Planet(QVector x,
         static int stacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "planet_detail", "24"));
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
         meshdata.push_back(new SphereMesh(radius,
-                                          stacks,
-                                          stacks,
-                                          textname.c_str(),
-                                          technique,
-                                          nullptr,
-                                          inside_out,
-                                          blendSrc,
-                                          blendDst));
+                stacks,
+                stacks,
+                textname.c_str(),
+                technique,
+                nullptr,
+                inside_out,
+                blendSrc,
+                blendDst));
         meshdata.back()->setEnvMap(GFXFALSE);
         meshdata.back()->SetMaterial(ourmat);
         meshdata.push_back(nullptr);
@@ -351,12 +342,12 @@ Planet::Planet(QVector x,
                 shines.push_back("shine.ani");
             }
             shine = new Animation(shines[rand() % shines.size()].c_str(),
-                                  true,
-                                  .1,
-                                  BILINEAR,
-                                  false,
-                                  true,
-                                  c);             //GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+                    true,
+                    .1,
+                    BILINEAR,
+                    false,
+                    true,
+                    c);             //GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
             shine->SetDimensions(glowradius * radius, glowradius * radius);
             if (!drawstar) {
                 delete meshdata[0];
@@ -366,18 +357,17 @@ Planet::Planet(QVector x,
         }
     }
     this->InitPlanet(x, y, vely, rotvel,
-                     pos,
-                     gravity, radius,
-                     textname, technique, unitname,
-                     dest,
-                     orbitcent, parent,
-                     faction, fgid,
-                     inside_out,
-                     nlights);
+            pos,
+            gravity, radius,
+            textname, technique, unitname,
+            dest,
+            orbitcent, parent,
+            faction, fgid,
+            inside_out,
+            nlights);
 }
 
-Planet::~Planet()
-{
+Planet::~Planet() {
     if (shine != nullptr) {
         delete shine;
         shine = nullptr;
@@ -402,23 +392,22 @@ Planet::~Planet()
 }
 
 void Planet::InitPlanet(QVector x,
-                        QVector y,
-                        float vely,
-                        const Vector &rotvel,
-                        float pos,
-                        float gravity,
-                        float radius,
-                        const string &filename,
-                        const string &technique,
-                        const string &unitname,
-                        const vector<string> &dest,
-                        const QVector &orbitcent,
-                        Unit *parent,
-                        int faction,
-                        string fullname,
-                        bool inside_out,
-                        unsigned int lights_num)
-{
+        QVector y,
+        float vely,
+        const Vector &rotvel,
+        float pos,
+        float gravity,
+        float radius,
+        const string &filename,
+        const string &technique,
+        const string &unitname,
+        const vector<string> &dest,
+        const QVector &orbitcent,
+        Unit *parent,
+        int faction,
+        string fullname,
+        bool inside_out,
+        unsigned int lights_num) {
     static const float bodyradius = GameConfig::GetVariable("graphics", "star_body_radius", 0.33f);
 
     if (lights_num) {
@@ -509,11 +498,10 @@ void Planet::InitPlanet(QVector x,
 //////////////////////////////////////////////
 
 void Planet::AddAtmosphere(const std::string &texture,
-                           float radius,
-                           BLENDFUNC blendSrc,
-                           BLENDFUNC blendDst,
-                           bool inside_out)
-{
+        float radius,
+        BLENDFUNC blendSrc,
+        BLENDFUNC blendDst,
+        bool inside_out) {
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
@@ -521,14 +509,14 @@ void Planet::AddAtmosphere(const std::string &texture,
     meshdata.pop_back();
     static int stacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "planet_detail", "24"));
     meshdata.push_back(new SphereMesh(radius,
-                                      stacks,
-                                      stacks,
-                                      texture.c_str(),
-                                      string(),
-                                      nullptr,
-                                      inside_out,
-                                      blendSrc,
-                                      blendDst));
+            stacks,
+            stacks,
+            texture.c_str(),
+            string(),
+            nullptr,
+            inside_out,
+            blendSrc,
+            blendDst));
     if (meshdata.back()) {
         //By klauss - this needs to be done for most atmospheres
         GFXMaterial a = {
@@ -544,14 +532,13 @@ void Planet::AddAtmosphere(const std::string &texture,
 }
 
 void Planet::AddCity(const std::string &texture,
-                     float radius,
-                     int numwrapx,
-                     int numwrapy,
-                     BLENDFUNC blendSrc,
-                     BLENDFUNC blendDst,
-                     bool inside_out,
-                     bool reverse_normals)
-{
+        float radius,
+        int numwrapx,
+        int numwrapy,
+        BLENDFUNC blendSrc,
+        BLENDFUNC blendDst,
+        bool inside_out,
+        bool reverse_normals) {
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
@@ -569,15 +556,14 @@ void Planet::AddCity(const std::string &texture,
     m.power = 0.0;
     static int stacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "planet_detail", "24"));
     meshdata.push_back(new CityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
-                                      false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
+            false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
     meshdata.back()->setEnvMap(GFXFALSE);
     meshdata.back()->SetMaterial(m);
 
     meshdata.push_back(shield);
 }
 
-void Planet::AddFog(const std::vector<AtmosphericFogMesh> &v, bool opticalillusion)
-{
+void Planet::AddFog(const std::vector<AtmosphericFogMesh> &v, bool opticalillusion) {
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
@@ -605,16 +591,15 @@ void Planet::AddFog(const std::vector<AtmosphericFogMesh> &v, bool opticalillusi
 }
 
 void Planet::AddRing(const std::string &texture,
-                     float iradius,
-                     float oradius,
-                     const QVector &R,
-                     const QVector &S,
-                     int slices,
-                     int wrapx,
-                     int wrapy,
-                     BLENDFUNC blendSrc,
-                     BLENDFUNC blendDst)
-{
+        float iradius,
+        float oradius,
+        const QVector &R,
+        const QVector &S,
+        int slices,
+        int wrapx,
+        int wrapy,
+        BLENDFUNC blendSrc,
+        BLENDFUNC blendDst) {
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
@@ -628,31 +613,29 @@ void Planet::AddRing(const std::string &texture,
         }
         for (int i = 0; i < slices; i++) {
             meshdata.push_back(new RingMesh(iradius,
-                                            oradius,
-                                            stacks,
-                                            texture.c_str(),
-                                            R,
-                                            S,
-                                            wrapx,
-                                            wrapy,
-                                            blendSrc,
-                                            blendDst,
-                                            false,
-                                            i * (2 * M_PI) / ((float) slices),
-                                            (i + 1) * (2 * M_PI) / ((float) slices)));
+                    oradius,
+                    stacks,
+                    texture.c_str(),
+                    R,
+                    S,
+                    wrapx,
+                    wrapy,
+                    blendSrc,
+                    blendDst,
+                    false,
+                    i * (2 * M_PI) / ((float) slices),
+                    (i + 1) * (2 * M_PI) / ((float) slices)));
         }
     }
     meshdata.push_back(shield);
 }
 
-void Planet::AddSatellite(Unit *orbiter)
-{
+void Planet::AddSatellite(Unit *orbiter) {
     satellites.prepend(orbiter);
     orbiter->SetOwner(this);
 }
 
-Vector Planet::AddSpaceElevator(const std::string &name, const std::string &faction, char direction)
-{
+Vector Planet::AddSpaceElevator(const std::string &name, const std::string &faction, char direction) {
     Vector dir, scale;
     switch (direction) {
         case 'u':
@@ -679,10 +662,10 @@ Vector Planet::AddSpaceElevator(const std::string &name, const std::string &fact
     Mesh *shield = meshdata.back();
     string elevator_mesh = GetElMeshName(name, faction, direction);     //filename
     Mesh *tmp = meshdata.back() = Mesh::LoadMesh(elevator_mesh.c_str(),
-                                                 scale,
-                                                 FactionUtil::
-                                                 GetFactionIndex(faction),
-                                                 nullptr);
+            scale,
+            FactionUtil::
+            GetFactionIndex(faction),
+            nullptr);
 
     meshdata.push_back(shield);
     {
@@ -712,8 +695,7 @@ Vector Planet::AddSpaceElevator(const std::string &name, const std::string &fact
 
 vector<UnitContainer *> PlanetTerrainDrawQueue;
 
-void Planet::Draw(const Transformation &quat, const Matrix &m)
-{
+void Planet::Draw(const Transformation &quat, const Matrix &m) {
     //Do lighting fx
     //if cam inside don't draw?
     //if(!inside) {
@@ -755,8 +737,7 @@ void Planet::Draw(const Transformation &quat, const Matrix &m)
     }
 }
 
-void Planet::DrawTerrain()
-{
+void Planet::DrawTerrain() {
     inside = true;
     if (terrain) {
         terrain->EnableUpdate();
@@ -796,26 +777,25 @@ void Planet::DrawTerrain()
 ///////////////////////////////////////////////////////////////////////
 
 Unit *Planet::beginElement(QVector x,
-                           QVector y,
-                           float vely,
-                           const Vector &rotvel,
-                           float pos,
-                           float gravity,
-                           float radius,
-                           const string &filename,
-                           const string &technique,
-                           const string &unitname,
-                           BLENDFUNC blendSrc,
-                           BLENDFUNC blendDst,
-                           const vector<string> &dest,
-                           int level,
-                           const GFXMaterial &ourmat,
-                           const vector<GFXLightLocal> &ligh,
-                           bool isunit,
-                           int faction,
-                           string fullname,
-                           bool inside_out)
-{
+        QVector y,
+        float vely,
+        const Vector &rotvel,
+        float pos,
+        float gravity,
+        float radius,
+        const string &filename,
+        const string &technique,
+        const string &unitname,
+        BLENDFUNC blendSrc,
+        BLENDFUNC blendDst,
+        const vector<string> &dest,
+        int level,
+        const GFXMaterial &ourmat,
+        const vector<GFXLightLocal> &ligh,
+        bool isunit,
+        int faction,
+        string fullname,
+        bool inside_out) {
     //this function is OBSOLETE
     Unit *un = nullptr;
     if (level > 2) {
@@ -823,15 +803,15 @@ Unit *Planet::beginElement(QVector x,
         assert(*satiterator);
         if ((*satiterator)->isUnit() == _UnitType::planet) {
             un = ((Planet *) (*satiterator))->beginElement(x, y, vely, rotvel, pos,
-                                                           gravity, radius,
-                                                           filename, technique, unitname,
-                                                           blendSrc, blendDst,
-                                                           dest,
-                                                           level - 1,
-                                                           ourmat, ligh,
-                                                           isunit,
-                                                           faction, fullname,
-                                                           inside_out);
+                    gravity, radius,
+                    filename, technique, unitname,
+                    blendSrc, blendDst,
+                    dest,
+                    level - 1,
+                    ourmat, ligh,
+                    isunit,
+                    faction, fullname,
+                    inside_out);
         } else {
             VS_LOG(error, "Planets are unable to orbit around units");
         }
@@ -864,47 +844,42 @@ Unit *Planet::beginElement(QVector x,
                 radius = ScaleJumpRadius(radius);
             }
             satellites.prepend(p = new Planet(x, y, vely, rotvel, pos, gravity, radius,
-                                              filename, technique, unitname,
-                                              blendSrc, blendDst, dest,
-                                              QVector(0, 0, 0), this, ourmat, ligh, faction, fullname, inside_out));
+                    filename, technique, unitname,
+                    blendSrc, blendDst, dest,
+                    QVector(0, 0, 0), this, ourmat, ligh, faction, fullname, inside_out));
             un = p;
             p->SetOwner(this);
             VS_LOG(trace,
-                   (boost::format("Created planet %1% of type %2% orbiting %3%") % fullname % p->fullname
-                           % this->fullname));
+                    (boost::format("Created planet %1% of type %2% orbiting %3%") % fullname % p->fullname
+                            % this->fullname));
 
         }
     }
     return un;
 }
 
-void Planet::DisableLights()
-{
+void Planet::DisableLights() {
     for (unsigned int i = 0; i < lights.size(); i++) {
         GFXDisableLight(lights[i]);
     }
 }
 
-void Planet::EnableLights()
-{
+void Planet::EnableLights() {
     for (unsigned int i = 0; i < lights.size(); i++) {
         GFXEnableLight(lights[i]);
     }
 }
 
-void Planet::endElement()
-{
+void Planet::endElement() {
 }
 
-string Planet::getHumanReadablePlanetType() const
-{
+string Planet::getHumanReadablePlanetType() const {
     //static std::map<std::string, std::string> planetTypes (readPlanetTypes("planet_types.xml"));
     //return planetTypes[getCargoUnitName()];
     return _Universe->getGalaxy()->getPlanetNameFromTexture(getCargoUnitName());
 }
 
-Planet *Planet::GetTopPlanet(int level)
-{
+Planet *Planet::GetTopPlanet(int level) {
     if (level > 2) {
         un_iter satiterator = satellites.createIterator();
         assert(*satiterator);
@@ -919,8 +894,7 @@ Planet *Planet::GetTopPlanet(int level)
     }
 }
 
-void Planet::Kill(bool erasefromsave)
-{
+void Planet::Kill(bool erasefromsave) {
     Unit *tmp;
     for (un_iter iter = satellites.createIterator(); (tmp = *iter) != nullptr; ++iter) {
         tmp->SetAI(new Order);
@@ -935,8 +909,7 @@ void Planet::Kill(bool erasefromsave)
     Unit::Kill(erasefromsave);
 }
 
-void Planet::ProcessTerrains()
-{
+void Planet::ProcessTerrains() {
     while (!PlanetTerrainDrawQueue.empty()) {
         Planet *pl = (Planet *) PlanetTerrainDrawQueue.back()->GetUnit();
         pl->DrawTerrain();
@@ -946,13 +919,11 @@ void Planet::ProcessTerrains()
     }
 }
 
-void Planet::setAtmosphere(Atmosphere *t)
-{
+void Planet::setAtmosphere(Atmosphere *t) {
     atmosphere = t;
 }
 
-PlanetaryTransform *Planet::setTerrain(ContinuousTerrain *t, float ratiox, int numwraps, float scaleatmos)
-{
+PlanetaryTransform *Planet::setTerrain(ContinuousTerrain *t, float ratiox, int numwraps, float scaleatmos) {
     terrain = t;
     terrain->DisableDraw();
     float x, z;
@@ -970,8 +941,7 @@ PlanetaryTransform *Planet::setTerrain(ContinuousTerrain *t, float ratiox, int n
 
 
 
-bool operator==(const Planet &lhs, const Planet &rhs)
-{
+bool operator==(const Planet &lhs, const Planet &rhs) {
     bool equal = true;
     if (lhs.inside != rhs.inside) {
         equal = false;

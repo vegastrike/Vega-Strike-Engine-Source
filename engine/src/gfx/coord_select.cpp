@@ -40,8 +40,7 @@ int CoordinateSelectmousey;
 extern Vector MouseCoordinate(int mouseX, int mouseY);
 extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 
-void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int)
-{
+void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int) {
     if (keyState[0]['z'] == DOWN) {
         CoordinateSelectChange = 2;
     } else {
@@ -52,16 +51,14 @@ void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int)
 }
 
 CoordinateSelect::CoordinateSelect(QVector start) : LocSelAni("locationselect.ani", true, .5, MIPMAP, true),
-                                                    LocalPosition(start)
-{
+        LocalPosition(start) {
     CrosshairSize = 2;
     CoordinateSelectmousex = g_game.x_resolution / 2;
     CoordinateSelectmousey = g_game.y_resolution / 2;
     CoordinateSelectChange = 1;
 }
 
-void CoordinateSelect::UpdateMouse()
-{
+void CoordinateSelect::UpdateMouse() {
     if (CoordinateSelectChange == 1) {
         Vector CamPos;
         Vector CamQ, CamR;
@@ -104,8 +101,7 @@ void CoordinateSelect::UpdateMouse()
     }
 }
 
-void CoordinateSelect::Draw()
-{
+void CoordinateSelect::Draw() {
     if (CoordinateSelectChange) {
         UpdateMouse();
     }

@@ -47,55 +47,46 @@
 //something that can execute them.
 
 //Process a command event.
-bool EventResponder::processCommand(const EventCommandId &command, Control *control)
-{
+bool EventResponder::processCommand(const EventCommandId &command, Control *control) {
     return m_modal;
 }
 
 //Process a key pressed down.
-bool EventResponder::processKeyDown(const InputEvent &event)
-{
+bool EventResponder::processKeyDown(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a key released.
-bool EventResponder::processKeyUp(const InputEvent &event)
-{
+bool EventResponder::processKeyUp(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse button pressed down.
-bool EventResponder::processMouseDown(const InputEvent &event)
-{
+bool EventResponder::processMouseDown(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse button pressed elsewhere, unfocusing this control.
-void EventResponder::processUnfocus(const InputEvent &event)
-{
+void EventResponder::processUnfocus(const InputEvent &event) {
 }
 
 //Process a mouse button released.
-bool EventResponder::processMouseUp(const InputEvent &event)
-{
+bool EventResponder::processMouseUp(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse location change.
-bool EventResponder::processMouseMove(const InputEvent &event)
-{
+bool EventResponder::processMouseMove(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse location change when at least one mouse button is down.
-bool EventResponder::processMouseDrag(const InputEvent &event)
-{
+bool EventResponder::processMouseDrag(const InputEvent &event) {
     return m_modal;
 }
 
 //Send a command event into the event chain.
-void EventResponder::sendCommand(const EventCommandId &command, Control *control)
-{
+void EventResponder::sendCommand(const EventCommandId &command, Control *control) {
     if (m_commandTarget != NULL) {
         if (m_commandTarget->processCommand(command, control)) {
             return;
@@ -108,25 +99,21 @@ void EventResponder::sendCommand(const EventCommandId &command, Control *control
 //event chain, they are sent to this specific target.  This can be used, for
 //instance, to tie two controls tightly together.
 //Use NULL to clear the target and forward commands into the event chain.
-void EventResponder::setCommandTarget(EventResponder *responder)
-{
+void EventResponder::setCommandTarget(EventResponder *responder) {
     m_commandTarget = responder;
 }
 
 //Handle all input events.  Don't forward anything down the event chain.
-void EventResponder::setModal(bool flag)
-{
+void EventResponder::setModal(bool flag) {
     m_modal = flag;
 }
 
 //CONSTRUCTION
 EventResponder::EventResponder(void) :
-        m_modal(false), m_commandTarget(NULL)
-{
+        m_modal(false), m_commandTarget(NULL) {
 }
 
-EventResponder::~EventResponder(void)
-{
+EventResponder::~EventResponder(void) {
     //Make sure this responder is not in the event chain.
     if (hasGlobalEventManager()) {
         globalEventManager().removeResponder(this);

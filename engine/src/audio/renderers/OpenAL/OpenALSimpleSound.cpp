@@ -50,16 +50,13 @@ namespace Audio {
 
 OpenALSimpleSound::OpenALSimpleSound(const std::string &name, VSFileSystem::VSFileType type) :
         SimpleSound(name, type, false),
-        bufferHandle(AL_NULL_BUFFER)
-{
+        bufferHandle(AL_NULL_BUFFER) {
 }
 
-OpenALSimpleSound::~OpenALSimpleSound()
-{
+OpenALSimpleSound::~OpenALSimpleSound() {
 }
 
-void OpenALSimpleSound::loadImpl(bool wait)
-{
+void OpenALSimpleSound::loadImpl(bool wait) {
     // just in case
     unloadImpl();
 
@@ -164,9 +161,9 @@ void OpenALSimpleSound::loadImpl(bool wait)
         checkAlError();
 
         alBufferData(bufferHandle,
-                     asALFormat(targetFormat),
-                     buffer.getBuffer(), buffer.getUsedBytes(),
-                     targetFormat.sampleFrequency);
+                asALFormat(targetFormat),
+                buffer.getBuffer(), buffer.getUsedBytes(),
+                targetFormat.sampleFrequency);
         checkAlError();
 
         onLoaded(true);
@@ -176,8 +173,7 @@ void OpenALSimpleSound::loadImpl(bool wait)
     }
 }
 
-void OpenALSimpleSound::unloadImpl()
-{
+void OpenALSimpleSound::unloadImpl() {
     if (bufferHandle == AL_NULL_BUFFER) {
         return;
     }

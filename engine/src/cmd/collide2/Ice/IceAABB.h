@@ -273,12 +273,10 @@ struct ICEMATHS_API ShadowAABB
 class ICEMATHS_API AABB {
 public:
     //! Constructor
-    inline_ AABB()
-    {
+    inline_ AABB() {
     }
     //! Destructor
-    inline_                        ~AABB()
-    {
+    inline_                        ~AABB() {
     }
 
     //! Type-independent methods
@@ -291,8 +289,7 @@ public:
      *	\param		max			[in] the max point
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SetMinMax(const Point &min, const Point &max)
-    {
+    void SetMinMax(const Point &min, const Point &max) {
         mCenter = (max + min) * 0.5f;
         mExtents = (max - min) * 0.5f;
     }
@@ -304,8 +301,7 @@ public:
      *	\param		e			[in] the extents vector
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SetCenterExtents(const Point &c, const Point &e)
-    {
+    void SetCenterExtents(const Point &c, const Point &e) {
         mCenter = c;
         mExtents = e;
     }
@@ -315,8 +311,7 @@ public:
      *	Setups an empty AABB.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SetEmpty()
-    {
+    void SetEmpty() {
         mCenter.Zero();
         mExtents.Set(MIN_FLOAT, MIN_FLOAT, MIN_FLOAT);
     }
@@ -326,8 +321,7 @@ public:
      *	Setups a point AABB.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SetPoint(const Point &pt)
-    {
+    void SetPoint(const Point &pt) {
         mCenter = pt;
         mExtents.Zero();
     }
@@ -338,8 +332,7 @@ public:
      *	\return		the size of the AABB
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    float GetSize() const
-    {
+    float GetSize() const {
         return mExtents.Max();
     }
 
@@ -349,8 +342,7 @@ public:
      *	\param		p	[in] the next point
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void Extend(const Point &p)
-    {
+    void Extend(const Point &p) {
         Point Max = mCenter + mExtents;
         Point Min = mCenter - mExtents;
 
@@ -380,73 +372,60 @@ public:
     // Data access
 
     //! Get min point of the box
-    inline_            void GetMin(Point &min) const
-    {
+    inline_            void GetMin(Point &min) const {
         min = mCenter - mExtents;
     }
     //! Get max point of the box
-    inline_            void GetMax(Point &max) const
-    {
+    inline_            void GetMax(Point &max) const {
         max = mCenter + mExtents;
     }
 
     //! Get component of the box's min point along a given axis
-    inline_            float GetMin(uint32_t axis) const
-    {
+    inline_            float GetMin(uint32_t axis) const {
         return mCenter[axis] - mExtents[axis];
     }
     //! Get component of the box's max point along a given axis
-    inline_            float GetMax(uint32_t axis) const
-    {
+    inline_            float GetMax(uint32_t axis) const {
         return mCenter[axis] + mExtents[axis];
     }
 
     //! Get box center
-    inline_            void GetCenter(Point &center) const
-    {
+    inline_            void GetCenter(Point &center) const {
         center = mCenter;
     }
     //! Get box extents
-    inline_            void GetExtents(Point &extents) const
-    {
+    inline_            void GetExtents(Point &extents) const {
         extents = mExtents;
     }
 
     //! Get component of the box's center along a given axis
-    inline_            float GetCenter(uint32_t axis) const
-    {
+    inline_            float GetCenter(uint32_t axis) const {
         return mCenter[axis];
     }
     //! Get component of the box's extents along a given axis
-    inline_            float GetExtents(uint32_t axis) const
-    {
+    inline_            float GetExtents(uint32_t axis) const {
         return mExtents[axis];
     }
 
     //! Get box diagonal
-    inline_            void GetDiagonal(Point &diagonal) const
-    {
+    inline_            void GetDiagonal(Point &diagonal) const {
         diagonal = mExtents * 2.0f;
     }
 
-    inline_            float GetWidth() const
-    {
+    inline_            float GetWidth() const {
         return mExtents.x * 2.0f;
     }
 
-    inline_            float GetHeight() const
-    {
+    inline_            float GetHeight() const {
         return mExtents.y * 2.0f;
     }
 
-    inline_            float GetDepth() const
-    {
+    inline_            float GetDepth() const {
         return mExtents.z * 2.0f;
     }
 
     //! Volume
-    inline_            float GetVolume() const
-    {
+    inline_            float GetVolume() const {
         return mExtents.x * mExtents.y * mExtents.z * 8.0f;
     }
 
@@ -457,8 +436,7 @@ public:
      *	\return		true on intersection
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            BOOL Intersect(const AABB &a) const
-    {
+    inline_            BOOL Intersect(const AABB &a) const {
         float tx = mCenter.x - a.mCenter.x;
         float ex = a.mExtents.x + mExtents.x;
         if (AIR(tx) > IR(ex)) {
@@ -484,8 +462,7 @@ public:
      *	\return		true on intersection
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            bool GomezIntersect(const AABB &a)
-    {
+    inline_            bool GomezIntersect(const AABB &a) {
         Point T = mCenter - a.mCenter;    // Vector from A to B
         return ((fabsf(T.x) <= (a.mExtents.x + mExtents.x))
                 && (fabsf(T.y) <= (a.mExtents.y + mExtents.y))
@@ -500,8 +477,7 @@ public:
      *	\return		true on intersection
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            BOOL Intersect(const AABB &a, uint32_t axis) const
-    {
+    inline_            BOOL Intersect(const AABB &a, uint32_t axis) const {
         float t = mCenter[axis] - a.mCenter[axis];
         float e = a.mExtents[axis] + mExtents[axis];
         if (AIR(t) > IR(e)) {
@@ -517,8 +493,7 @@ public:
      *	\param		aabb		[out] the transformed AABB [can be *this]
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            void Rotate(const Matrix4x4 &mtx, AABB &aabb) const
-    {
+    inline_            void Rotate(const Matrix4x4 &mtx, AABB &aabb) const {
         // Compute new center
         aabb.mCenter = mCenter * mtx;
 
@@ -549,8 +524,7 @@ public:
      *	\return		true if the box is valid
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            BOOL IsValid() const
-    {
+    inline_            BOOL IsValid() const {
         // Consistency condition for (Center, Extents) boxes: Extents >= 0
         if (mExtents.x < 0.0f) {
             return FALSE;
@@ -565,22 +539,19 @@ public:
     }
 
     //! Operator for AABB *= float. Scales the extents, keeps same center.
-    inline_            AABB &operator*=(float s)
-    {
+    inline_            AABB &operator*=(float s) {
         mExtents *= s;
         return *this;
     }
 
     //! Operator for AABB /= float. Scales the extents, keeps same center.
-    inline_            AABB &operator/=(float s)
-    {
+    inline_            AABB &operator/=(float s) {
         mExtents /= s;
         return *this;
     }
 
     //! Operator for AABB += Point. Translates the box.
-    inline_            AABB &operator+=(const Point &trans)
-    {
+    inline_            AABB &operator+=(const Point &trans) {
         mCenter += trans;
         return *this;
     }
@@ -592,8 +563,7 @@ private:
 
 #endif
 
-inline_ void ComputeMinMax(const Point &p, Point &min, Point &max)
-{
+inline_ void ComputeMinMax(const Point &p, Point &min, Point &max) {
     if (p.x > max.x) {
         max.x = p.x;
     }
@@ -616,8 +586,7 @@ inline_ void ComputeMinMax(const Point &p, Point &min, Point &max)
     }
 }
 
-inline_ void ComputeAABB(AABB &aabb, const Point *list, uint32_t nb_pts)
-{
+inline_ void ComputeAABB(AABB &aabb, const Point *list, uint32_t nb_pts) {
     if (list) {
         Point Maxi(MIN_FLOAT, MIN_FLOAT, MIN_FLOAT);
         Point Mini(MAX_FLOAT, MAX_FLOAT, MAX_FLOAT);

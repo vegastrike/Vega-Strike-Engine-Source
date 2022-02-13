@@ -38,23 +38,20 @@ public:
     void setThumbLength(float len);
 
 //Set size of a "page" - used when clicked outside the thumb.
-    void setPageSize(int s)
-    {
+    void setPageSize(int s) {
         m_pageSize = s;
     }
 
 //Position.
 //This is some value between min and max.
-    int position(void)
-    {
+    int position(void) {
         return m_position;
     }
 
     void setPosition(int pos);
 
 //Color of thumb.
-    void setThumbColor(const GFXColor &color, const GFXColor &outline)
-    {
+    void setThumbColor(const GFXColor &color, const GFXColor &outline) {
         m_thumbColor = color;
         m_thumbOutlineColor = outline;
     }
@@ -75,8 +72,7 @@ public:
 public:
     Slider(void);
 
-    virtual ~Slider(void)
-    {
+    virtual ~Slider(void) {
     }
 
 protected:

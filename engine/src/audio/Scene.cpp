@@ -34,12 +34,10 @@
 namespace Audio {
 
 Scene::Scene(const std::string &nam) :
-        name(nam)
-{
+        name(nam) {
 }
 
-Scene::~Scene()
-{
+Scene::~Scene() {
 }
 
 };

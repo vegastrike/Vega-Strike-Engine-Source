@@ -30,33 +30,27 @@ using namespace GFXMatrices;  //causes problems with g_game
 double BoxFrust[6][4];
 double frust[6][4];
 
-float /*GFXDRVAPI*/ GFXSphereInFrustum(const QVector &Cnt, float radius)
-{
+float /*GFXDRVAPI*/ GFXSphereInFrustum(const QVector &Cnt, float radius) {
     return GFXSphereInFrustum(frust, Cnt, radius);
 }
 
-CLIPSTATE GFXBoxInFrustum(const Vector &min, const Vector &max)
-{
+CLIPSTATE GFXBoxInFrustum(const Vector &min, const Vector &max) {
     return GFXBoxInFrustum(BoxFrust, min, max);
 }
 
-CLIPSTATE GFXTransformedBoxInFrustum(const Vector &min, const Vector &max)
-{
+CLIPSTATE GFXTransformedBoxInFrustum(const Vector &min, const Vector &max) {
     return GFXBoxInFrustum(frust, min, max);
 }
 
-CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(const Vector &Cnt, float radius)
-{
+CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(const Vector &Cnt, float radius) {
     return GFXSpherePartiallyInFrustum(BoxFrust, Cnt, radius);
 }
 
-CLIPSTATE /*GFXDRVAPI*/ GFXTransformedSpherePartiallyInFrustum(const Vector &Cnt, float radius)
-{
+CLIPSTATE /*GFXDRVAPI*/ GFXTransformedSpherePartiallyInFrustum(const Vector &Cnt, float radius) {
     return GFXSpherePartiallyInFrustum(frust, Cnt, radius);
 }
 
-CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(double f[6][4], const Vector &Cnt, const float radius)
-{
+CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(double f[6][4], const Vector &Cnt, const float radius) {
     int p;
     float d;
     CLIPSTATE retval = GFX_TOTALLY_VISIBLE;
@@ -72,8 +66,7 @@ CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(double f[6][4], const Vector
     return retval;
 }
 
-CLIPSTATE GFXBoxInFrustum(double f[6][4], const Vector &min, const Vector &max)
-{
+CLIPSTATE GFXBoxInFrustum(double f[6][4], const Vector &min, const Vector &max) {
     //Doesn't do a perfect test for NOT_VISIBLE.  Just checks to
     //see if all box vertices are outside at least one frustum
     //plane.  Some pathological boxes could return SOME_CLIP even
@@ -120,8 +113,7 @@ CLIPSTATE GFXBoxInFrustum(double f[6][4], const Vector &min, const Vector &max)
     }
 }
 
-void DrawFrustum(double f[6][4])
-{
+void DrawFrustum(double f[6][4]) {
     GFXDisable(LIGHTING);
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
@@ -165,8 +157,7 @@ void DrawFrustum(double f[6][4])
     GFXDraw(GFXQUAD, verts);
 }
 
-float /*GFXDRVAPI*/ GFXSphereInFrustum(double f[6][4], const QVector &Cnt, float radius)
-{
+float /*GFXDRVAPI*/ GFXSphereInFrustum(double f[6][4], const QVector &Cnt, float radius) {
     /*
      *  static float lasttime = GetElapsedTime();
      *  if (lasttime!=GetElapsedTime()) {
@@ -187,8 +178,7 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum(double f[6][4], const QVector &Cnt, float
     return d;
 }
 
-void GFXGetFrustumVars(bool retr, float *l, float *r, float *b, float *t, float *n, float *f)
-{
+void GFXGetFrustumVars(bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
     static float nnear, ffar, left, right, bot, top;     //Visual C++ reserves near and far
     if (!retr) {
         nnear = *n;
@@ -207,25 +197,21 @@ void GFXGetFrustumVars(bool retr, float *l, float *r, float *b, float *t, float 
     }
 }
 
-void /*GFXDRVAPI*/ GFXGetFrustum(double f[6][4])
-{
+void /*GFXDRVAPI*/ GFXGetFrustum(double f[6][4]) {
     f = frust;
 }
 
-void /*GFXDRVAPI*/ GFXBoxInFrustumModel(const Matrix &model)
-{
+void /*GFXDRVAPI*/ GFXBoxInFrustumModel(const Matrix &model) {
     Matrix tmp;
     MultMatrix(tmp, view, model);
     GFXCalculateFrustum(BoxFrust, tmp, projection);
 }
 
-void /*GFXDRVAPI*/ GFXCalculateFrustum()
-{
+void /*GFXDRVAPI*/ GFXCalculateFrustum() {
     GFXCalculateFrustum(frust, view, projection);
 }
 
-void WackyMultFloatMatrix(double dest[], const float m1[], const Matrix &m2)
-{
+void WackyMultFloatMatrix(double dest[], const float m1[], const Matrix &m2) {
     QVector p(InvTransformNormal(m2, m2.p));
     p = (TransformNormal(m2, -m2.p));
     //p=m2.p;
@@ -250,8 +236,7 @@ void WackyMultFloatMatrix(double dest[], const float m1[], const Matrix &m2)
     dest[15] = m1[3] * p.i + m1[7] * p.j + m1[11] * p.k + m1[15];
 }
 
-void /*GFXDRVAPI*/ GFXCalculateFrustum(double frustum[6][4], const Matrix &modl, const float *proj)
-{
+void /*GFXDRVAPI*/ GFXCalculateFrustum(double frustum[6][4], const Matrix &modl, const float *proj) {
     double clip[16];
     WackyMultFloatMatrix(clip, proj, modl);
     double t;
@@ -338,8 +323,7 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum(double frustum[6][4], const Matrix &modl,
  * GFXGetZPerspective () returns the relative scale of an object placed
  *      at distance z from the camera with the current projection matrix.
  */
-float GFXGetZPerspective(const float z)
-{
+float GFXGetZPerspective(const float z) {
     /*
      *
      * | xs 0  a 0 |[x]   [xs + az]          [1/xs 0   0  a/xs][x]   [x/xs+ aw/xs]

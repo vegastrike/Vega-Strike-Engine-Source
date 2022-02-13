@@ -50,8 +50,7 @@ public:
             const float radius,
             updateparity *updatetransform = identityparity);
 
-    void SetTotalSize(float X, float Z)
-    {
+    void SetTotalSize(float X, float Z) {
         TotalSizeX = X;
         TotalSizeZ = Z;
     }

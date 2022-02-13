@@ -35,46 +35,38 @@ struct Quaternion {
     float s;
     Vector v;
 
-    inline Quaternion() : s(0), v(0, 0, 0)
-    {
+    inline Quaternion() : s(0), v(0, 0, 0) {
     }
 
-    inline Quaternion(float s, Vector v)
-    {
+    inline Quaternion(float s, Vector v) {
         this->s = s;
         this->v = v;
     }
 
     //inline Quaternion(float s, Vector v) {this->s = s; this->v = v;};
-    inline Quaternion Conjugate() const
-    {
+    inline Quaternion Conjugate() const {
         return Quaternion(s, Vector(-v.i, -v.j, -v.k));
     }
 
-    inline void netswap()
-    {
+    inline void netswap() {
         s = VSSwapHostFloatToLittle(s);
         v.netswap();
     }
 
-    inline float Magnitude() const
-    {
+    inline float Magnitude() const {
         return sqrtf(s * s + v.i * v.i + v.j * v.j + v.k * v.k);
     }
 
-    inline Quaternion operator*(const Quaternion &rval) const
-    {
+    inline Quaternion operator*(const Quaternion &rval) const {
         return Quaternion(s * rval.s - DotProduct(v, rval.v),
-                          s * rval.v + rval.s * v + v.Cross(rval.v));
+                s * rval.v + rval.s * v + v.Cross(rval.v));
     }
 
-    inline Quaternion &operator*=(const Quaternion &rval)
-    {
+    inline Quaternion &operator*=(const Quaternion &rval) {
         return *this = *this * rval;
     }
 
-    Quaternion &Normalize()
-    {
+    Quaternion &Normalize() {
         float rcpmag = 1.0f / Magnitude();
         v *= rcpmag;
         s *= rcpmag;
@@ -84,8 +76,7 @@ struct Quaternion {
     static Quaternion from_vectors(const Vector &v1, const Vector &v2, const Vector &v3);
     static Quaternion from_axis_angle(const Vector &axis, float angle);
 
-    void to_matrix(Matrix &mat) const
-    {
+    void to_matrix(Matrix &mat) const {
         const float GFXEPSILON = ((float) 10e-6);
         float W = v.i * v.i + v.j * v.j + v.k * v.k + s * s;         //norm
         W = (W < 0 + GFXEPSILON && W > 0 - GFXEPSILON) ? 0 : 2.0 / W;
@@ -127,18 +118,15 @@ struct Quaternion {
     }
 };
 
-inline Quaternion operator-(const Quaternion &a, const Quaternion &b)
-{
+inline Quaternion operator-(const Quaternion &a, const Quaternion &b) {
     return Quaternion(a.s - b.s, a.v - b.v);
 }
 
-inline Quaternion operator+(const Quaternion &a, const Quaternion &b)
-{
+inline Quaternion operator+(const Quaternion &a, const Quaternion &b) {
     return Quaternion(a.s + b.s, a.v + b.v);
 }
 
-inline Quaternion operator*(const Quaternion &a, const float &b)
-{
+inline Quaternion operator*(const Quaternion &a, const float &b) {
     return Quaternion(a.s * b, a.v * b);
 }
 
@@ -148,48 +136,40 @@ struct Transformation {
     Quaternion orientation;
     QVector position;
 
-    inline Transformation() : orientation(identity_quaternion), position(0, 0, 0)
-    {
+    inline Transformation() : orientation(identity_quaternion), position(0, 0, 0) {
     }
 
-    inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos)
-    {
+    inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) {
     }
     //inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) { }
 
-    inline void netswap()
-    {
+    inline void netswap() {
         orientation.netswap();
         position.netswap();
     }
 
-    inline void to_matrix(Matrix &m) const
-    {
+    inline void to_matrix(Matrix &m) const {
         orientation.to_matrix(m);
         m.p = position;
     }
 
-    inline void Compose(const Transformation &b, const Matrix &m)
-    {
+    inline void Compose(const Transformation &b, const Matrix &m) {
         orientation *= b.orientation;
         position = Transform(m, position);
     }
 
-    inline void InvertOrientationRevPos()
-    {
+    inline void InvertOrientationRevPos() {
         orientation = orientation.Conjugate();
         position = -position;
     }
 
-    inline void InvertAndToMatrix(Matrix &m)
-    {
+    inline void InvertAndToMatrix(Matrix &m) {
         InvertOrientationRevPos();
         to_matrix(m);
         m.p = TransformNormal(m, position);
     }
 
-    static Transformation from_matrix(Matrix &m)
-    {
+    static Transformation from_matrix(Matrix &m) {
         Vector p, q, r;
         QVector c;
         MatrixToVectors(m, p, q, r, c);

@@ -34,15 +34,13 @@
 #include <iostream>
 #include <string>
 
-float accelStarHandler(float &input)
-{
+float accelStarHandler(float &input) {
     static float game_speed = GameConfig::GetVariable("physics", "game_speed", 1.0f);
     static float game_accel = GameConfig::GetVariable("physics", "game_accel", 1.0f);
     return input / (game_speed * game_accel);
 }
 
-float speedStarHandler(float &input)
-{
+float speedStarHandler(float &input) {
     static float game_speed = GameConfig::GetVariable("physics", "game_speed", 1.0f);
     return input / game_speed;
 }
@@ -71,19 +69,18 @@ float Movable::air_res_coef = 0.0f;
 float Movable::lateral_air_res_coef = 0.0f;
 
 Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
-                     sim_atom_multiplier(1),
-                     predicted_priority(1),
-                     last_processed_sqs(0),
-                     docked(NOT_DOCKED),
-                     corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
-                     corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
-                     radial_size(0),
-                     Momentofinertia(0.01)
-{
+        sim_atom_multiplier(1),
+        predicted_priority(1),
+        last_processed_sqs(0),
+        docked(NOT_DOCKED),
+        corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
+        corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
+        radial_size(0),
+        Momentofinertia(0.01) {
     cur_sim_queue_slot = rand() % SIM_QUEUE_SIZE;
     static Vector default_angular_velocity(GameConfig::GetVariable("general", "pitch", 0.0f),
-                                           GameConfig::GetVariable("general", "yaw", 0.0f),
-                                           GameConfig::GetVariable("general", "roll", 0.0f));
+            GameConfig::GetVariable("general", "yaw", 0.0f),
+            GameConfig::GetVariable("general", "roll", 0.0f));
 
     if (!configLoaded) {
         VELOCITY_MAX = GameConfig::GetVariable("physics", "velocity_max", 10000);
@@ -122,8 +119,7 @@ Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
     AngularVelocity = default_angular_velocity;
 }
 
-Movable::graphic_options::graphic_options()
-{
+Movable::graphic_options::graphic_options() {
     FaceCamera = Animating = missilelock = InWarp = unused1 = WarpRamping = NoDamageParticles = 0;
     specInterdictionOnline = 1;
     NumAnimationPoints = 0;
@@ -137,13 +133,11 @@ Movable::graphic_options::graphic_options()
     SubUnit = 0; // Also this
 }
 
-void Movable::SetPosition(const QVector &pos)
-{
+void Movable::SetPosition(const QVector &pos) {
     prev_physical_state.position = curr_physical_state.position = pos;
 }
 
-void Movable::GetOrientation(Vector &p, Vector &q, Vector &r) const
-{
+void Movable::GetOrientation(Vector &p, Vector &q, Vector &r) const {
     Matrix m;
     curr_physical_state.to_matrix(m);
     p = m.getP();
@@ -151,8 +145,7 @@ void Movable::GetOrientation(Vector &p, Vector &q, Vector &r) const
     r = m.getR();
 }
 
-Vector Movable::GetNetAcceleration() const
-{
+Vector Movable::GetNetAcceleration() const {
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector res(NetLocalForce.i * p + NetLocalForce.j * q + NetLocalForce.k * r);
@@ -160,8 +153,7 @@ Vector Movable::GetNetAcceleration() const
     return res / Mass;
 }
 
-Vector Movable::GetNetAngularAcceleration() const
-{
+Vector Movable::GetNetAngularAcceleration() const {
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector res(NetLocalTorque.i * p + NetLocalTorque.j * q + NetLocalTorque.k * r);
@@ -169,8 +161,7 @@ Vector Movable::GetNetAngularAcceleration() const
     return res / GetMoment();
 }
 
-float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn) const
-{
+float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn) const {
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector lref(ref * p, ref * q, ref * r);
@@ -182,29 +173,25 @@ float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn
     return lref.Magnitude() * tm / Mass;
 }
 
-void Movable::SetVelocity(const Vector &v)
-{
+void Movable::SetVelocity(const Vector &v) {
     Velocity = v;
 }
 
-void Movable::SetAngularVelocity(const Vector &v)
-{
+void Movable::SetAngularVelocity(const Vector &v) {
     AngularVelocity = v;
 }
 
 //FIXME Daughter units should be able to be turrets (have y/p/r)
-void Movable::SetResolveForces(bool ys)
-{
+void Movable::SetResolveForces(bool ys) {
     resolveforces = ys;
 }
 
 void Movable::UpdatePhysics(const Transformation &trans,
-                            const Matrix &transmat,
-                            const Vector &cum_vel,
-                            bool lastframe,
-                            UnitCollection *uc,
-                            Unit *superunit)
-{
+        const Matrix &transmat,
+        const Vector &cum_vel,
+        bool lastframe,
+        UnitCollection *uc,
+        Unit *superunit) {
     //Save information about when this happened
     unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
     //Well, wasn't skipped actually, but...
@@ -239,8 +226,7 @@ void Movable::UpdatePhysics(const Transformation &trans,
 
 }
 
-void Movable::AddVelocity(float difficulty)
-{
+void Movable::AddVelocity(float difficulty) {
     Unit *unit = static_cast<Unit *>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
@@ -305,14 +291,13 @@ void Movable::AddVelocity(float difficulty)
 }
 
 void Movable::UpdatePhysics2(const Transformation &trans,
-                             const Transformation &old_physical_state,
-                             const Vector &accel,
-                             float difficulty,
-                             const Matrix &transmat,
-                             const Vector &cum_vel,
-                             bool lastframe,
-                             UnitCollection *uc)
-{
+        const Transformation &old_physical_state,
+        const Vector &accel,
+        float difficulty,
+        const Matrix &transmat,
+        const Vector &cum_vel,
+        bool lastframe,
+        UnitCollection *uc) {
     //Only in non-networking OR networking && is a player OR SERVER && not a player
     if (AngularVelocity.i || AngularVelocity.j || AngularVelocity.k) {
         Rotate(simulation_atom_var * (AngularVelocity));
@@ -320,8 +305,7 @@ void Movable::UpdatePhysics2(const Transformation &trans,
 
 }
 
-void Movable::Rotate(const Vector &axis)
-{
+void Movable::Rotate(const Vector &axis) {
     double theta = axis.Magnitude();
     double ootheta = 0;
     if (theta == 0) {
@@ -343,8 +327,7 @@ void Movable::Rotate(const Vector &axis)
     }
 }
 
-Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transmat)
-{
+Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transmat) {
     //First, save theoretical instantaneous acceleration (not time-quantized) for GetAcceleration()
     SavedAccel = GetNetAcceleration();
     SavedAngAccel = GetNetAngularAcceleration();
@@ -410,9 +393,9 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
 
         float tmpsec = oldbig ? endsec : sec;
         UniverseUtil::playAnimationGrow(insys_jump_ani,
-                                        realPosition().Cast() + Velocity * tmpsec + v * radial_size,
-                                        radial_size * 8,
-                                        1);
+                realPosition().Cast() + Velocity * tmpsec + v * radial_size,
+                radial_size * 8,
+                1);
     }
 
     // stephengtuggy 2020-10-17: These need to be initialized here, because they depend on having an active mission.
@@ -447,8 +430,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     return temp2;
 }
 
-void Movable::SetOrientation(QVector q, QVector r)
-{
+void Movable::SetOrientation(QVector q, QVector r) {
     q.Normalize();
     r.Normalize();
     QVector p;
@@ -457,34 +439,30 @@ void Movable::SetOrientation(QVector q, QVector r)
     curr_physical_state.orientation = Quaternion::from_vectors(p.Cast(), q.Cast(), r.Cast());
 }
 
-void Movable::SetOrientation(QVector p, QVector q, QVector r)
-{
+void Movable::SetOrientation(QVector p, QVector q, QVector r) {
     q.Normalize();
     r.Normalize();
     p.Normalize();
     curr_physical_state.orientation = Quaternion::from_vectors(p.Cast(), q.Cast(), r.Cast());
 }
 
-void Movable::SetOrientation(Quaternion Q)
-{
+void Movable::SetOrientation(Quaternion Q) {
     curr_physical_state.orientation = Q;
 }
 
 #define MM(A, B) m.r[B*3+A]
 
-Vector Movable::UpCoordinateLevel(const Vector &v) const
-{
+Vector Movable::UpCoordinateLevel(const Vector &v) const {
     Matrix m;
     curr_physical_state.to_matrix(m);
     return Vector(v.i * MM(0, 0) + v.j * MM(1, 0) + v.k * MM(2, 0),
-                  v.i * MM(0, 1) + v.j * MM(1, 1) + v.k * MM(2, 1),
-                  v.i * MM(0, 2) + v.j * MM(1, 2) + v.k * MM(2, 2));
+            v.i * MM(0, 1) + v.j * MM(1, 1) + v.k * MM(2, 1),
+            v.i * MM(0, 2) + v.j * MM(1, 2) + v.k * MM(2, 2));
 }
 
 #undef MM
 
-Vector Movable::DownCoordinateLevel(const Vector &v) const
-{
+Vector Movable::DownCoordinateLevel(const Vector &v) const {
     Matrix m;
     curr_physical_state.to_matrix(m);
     return TransformNormal(m, v);
@@ -492,25 +470,22 @@ Vector Movable::DownCoordinateLevel(const Vector &v) const
 
 #define MM(A, B) ( (cumulative_transformation_matrix.r[B*3+A]) )
 
-Vector Movable::ToLocalCoordinates(const Vector &v) const
-{
+Vector Movable::ToLocalCoordinates(const Vector &v) const {
     //Matrix m;
     //062201: not a cumulative transformation...in prev unit space  curr_physical_state.to_matrix(m);
     return Vector(v.i * MM(0, 0) + v.j * MM(1, 0) + v.k * MM(2, 0),
-                  v.i * MM(0, 1) + v.j * MM(1, 1) + v.k * MM(2, 1),
-                  v.i * MM(0, 2) + v.j * MM(1, 2) + v.k * MM(2, 2));
+            v.i * MM(0, 1) + v.j * MM(1, 1) + v.k * MM(2, 1),
+            v.i * MM(0, 2) + v.j * MM(1, 2) + v.k * MM(2, 2));
 }
 
 #undef MM
 
-Vector Movable::ToWorldCoordinates(const Vector &v) const
-{
+Vector Movable::ToWorldCoordinates(const Vector &v) const {
     return TransformNormal(cumulative_transformation_matrix, v);
 }
 
 // TODO: move this to JumpCapable
-float Movable::GetMaxWarpFieldStrength(float rampmult) const
-{
+float Movable::GetMaxWarpFieldStrength(float rampmult) const {
     const Unit *unit = static_cast<const Unit *>(this);
     Vector v = unit->GetWarpRefVelocity();
 

@@ -48,8 +48,7 @@ GLenum bTex[32] = {
         0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target)
-{
+GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target) {
     GLenum tt;
     switch (texture_target) {
         case TEXTURE1D:
@@ -77,15 +76,13 @@ GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target)
 
 int activeTextureStage = -1; //FIXME Shouldn't this be a member of a class?, or at least be an official global variable?
 
-static inline bool _GFXActiveTextureValid()
-{
+static inline bool _GFXActiveTextureValid() {
     return !(activeTextureStage && (activeTextureStage >= static_cast<int>(gl_options.Multitexture)));
 }
 
 extern GFXBOOL GFXLIGHTING;
 
-void /*GFXDRVAPI*/ GFXEnable(const STATE state)
-{
+void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
     switch (state) {
         case LIGHTING:
             glEnable(GL_LIGHTING);
@@ -173,8 +170,7 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state)
     }
 }
 
-void GFXToggleTexture(bool enable, int whichstage, enum TEXTURE_TARGET target)
-{
+void GFXToggleTexture(bool enable, int whichstage, enum TEXTURE_TARGET target) {
     if ((whichstage < static_cast<int>(gl_options.Multitexture)) || (whichstage == 0)) {
         GLenum tt = GetGLTextureTarget(target);
         GLenum btt = (enable ? tt : 0);
@@ -192,8 +188,7 @@ void GFXToggleTexture(bool enable, int whichstage, enum TEXTURE_TARGET target)
     }
 }
 
-void /*GFXDRVAPI*/ GFXDisable(const STATE state)
-{
+void /*GFXDRVAPI*/ GFXDisable(const STATE state) {
     switch (state) {
         case LIGHTING:
             glDisable(GL_LIGHTING);
@@ -276,8 +271,7 @@ void /*GFXDRVAPI*/ GFXDisable(const STATE state)
 #define GL_CLAMP_TO_BORDER_ARB 0x812D
 #endif
 
-void GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target)
-{
+void GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target) {
     if (!_GFXActiveTextureValid()) {
         return;
     }
@@ -324,8 +318,7 @@ void GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target)
 struct BlendMode {
     BLENDFUNC sfactor, dfactor;
 
-    BlendMode()
-    {
+    BlendMode() {
         sfactor = dfactor = ONE;
     }
 }
@@ -334,14 +327,12 @@ struct BlendMode {
 using std::stack;
 stack<BlendMode> blendstack;
 
-void /*GFXDRVAPI*/ GFXGetBlendMode(enum BLENDFUNC &src, enum BLENDFUNC &dst)
-{
+void /*GFXDRVAPI*/ GFXGetBlendMode(enum BLENDFUNC &src, enum BLENDFUNC &dst) {
     src = currBlendMode.sfactor;
     dst = currBlendMode.dfactor;
 }
 
-static GLenum blendToGL(const enum BLENDFUNC func)
-{
+static GLenum blendToGL(const enum BLENDFUNC func) {
     switch (func) {
         default:
         case ZERO:
@@ -379,8 +370,7 @@ static GLenum blendToGL(const enum BLENDFUNC func)
     }
 }
 
-void GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst)
-{
+void GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst) {
     GLenum sfactor = blendToGL(src);
     GLenum dfactor = blendToGL(dst);
     glBlendFunc(sfactor, dfactor);
@@ -388,13 +378,11 @@ void GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst)
     currBlendMode.dfactor = dst;
 }
 
-void GFXPushBlendMode()
-{
+void GFXPushBlendMode() {
     blendstack.push(currBlendMode);
 }
 
-void GFXPopBlendMode()
-{
+void GFXPopBlendMode() {
     if (!blendstack.empty()) {
         currBlendMode = blendstack.top();
         GFXBlendMode(currBlendMode.sfactor, currBlendMode.dfactor);
@@ -402,8 +390,7 @@ void GFXPopBlendMode()
     }
 }
 
-void GFXColorMaterial(int LIGHTTARG)
-{
+void GFXColorMaterial(int LIGHTTARG) {
     if (LIGHTTARG) {
         glEnable(GL_COLOR_MATERIAL);
         switch (LIGHTTARG) {
@@ -430,13 +417,11 @@ void GFXColorMaterial(int LIGHTTARG)
 
 static DEPTHFUNC cur_depth_func = LESS;
 
-enum DEPTHFUNC GFXDepthFunc()
-{
+enum DEPTHFUNC GFXDepthFunc() {
     return cur_depth_func;
 }
 
-void GFXDepthFunc(enum DEPTHFUNC dfunc)
-{
+void GFXDepthFunc(enum DEPTHFUNC dfunc) {
     GLenum func;
     switch (dfunc) {
         case NEVER:
@@ -479,13 +464,11 @@ static STENCILOP cur_stencil_op_f = KEEP;
 static STENCILOP cur_stencil_op_zf = KEEP;
 static STENCILOP cur_stencil_op_zp = KEEP;
 
-enum DEPTHFUNC GFXStencilFunc()
-{
+enum DEPTHFUNC GFXStencilFunc() {
     return cur_stencil_func;
 }
 
-void GFXStencilFunc(enum DEPTHFUNC *pFunc, int *pRef, int *pMask)
-{
+void GFXStencilFunc(enum DEPTHFUNC *pFunc, int *pRef, int *pMask) {
     if (pFunc) {
         *pFunc = cur_stencil_func;
     }
@@ -497,8 +480,7 @@ void GFXStencilFunc(enum DEPTHFUNC *pFunc, int *pRef, int *pMask)
     }
 }
 
-void GFXStencilFunc(enum DEPTHFUNC sfunc, int ref, unsigned int mask)
-{
+void GFXStencilFunc(enum DEPTHFUNC sfunc, int ref, unsigned int mask) {
     GLenum func;
     switch (sfunc) {
         case NEVER:
@@ -535,8 +517,7 @@ void GFXStencilFunc(enum DEPTHFUNC sfunc, int ref, unsigned int mask)
     cur_stencil_func_mask = mask;
 }
 
-void GFXStencilOp(enum STENCILOP *pFail, enum STENCILOP *pZfail, enum STENCILOP *pZpass)
-{
+void GFXStencilOp(enum STENCILOP *pFail, enum STENCILOP *pZfail, enum STENCILOP *pZpass) {
     if (pFail) {
         *pFail = cur_stencil_op_f;
     }
@@ -548,8 +529,7 @@ void GFXStencilOp(enum STENCILOP *pFail, enum STENCILOP *pZfail, enum STENCILOP 
     }
 }
 
-void GFXStencilOp(enum STENCILOP fail, enum STENCILOP zfail, enum STENCILOP zpass)
-{
+void GFXStencilOp(enum STENCILOP fail, enum STENCILOP zfail, enum STENCILOP zpass) {
     GLenum ffunc, zffunc, zpfunc;
     switch (fail) {
         case KEEP:
@@ -626,19 +606,16 @@ void GFXStencilOp(enum STENCILOP fail, enum STENCILOP zfail, enum STENCILOP zpas
     cur_stencil_op_zp = zpass;
 }
 
-unsigned int GFXStencilMask()
-{
+unsigned int GFXStencilMask() {
     return cur_stencil_mask;
 }
 
-void GFXStencilMask(unsigned int mask)
-{
+void GFXStencilMask(unsigned int mask) {
     glStencilMask((GLuint) mask);
     cur_stencil_mask = mask;
 }
 
-void GFXActiveTexture(const int stage)
-{
+void GFXActiveTexture(const int stage) {
 #if !defined (IRIX)
     if (gl_options.Multitexture && stage != activeTextureStage && glActiveTextureARB_p) {
         glActiveTextureARB_p(GL_TEXTURE0_ARB + stage);
@@ -649,8 +626,7 @@ void GFXActiveTexture(const int stage)
 #endif
 }
 
-void GFXAlphaTest(const enum DEPTHFUNC df, const float ref)
-{
+void GFXAlphaTest(const enum DEPTHFUNC df, const float ref) {
     if (df == ALWAYS) {
         glDisable(GL_ALPHA_TEST);
         return;

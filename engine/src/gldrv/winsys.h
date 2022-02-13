@@ -318,7 +318,7 @@ typedef void (*winsys_display_func_t)();
 typedef void (*winsys_idle_func_t)();
 typedef void (*winsys_reshape_func_t)(int w, int h);
 typedef void (*winsys_keyboard_func_t)(unsigned int key, unsigned int mod,
-                                       bool release, int x, int y);
+        bool release, int x, int y);
 typedef void (*winsys_mouse_func_t)(int button, int state, int x, int y);
 typedef void (*winsys_motion_func_t)(int x, int y);
 
@@ -339,7 +339,7 @@ void winsys_warp_pointer(int x, int y);
 void winsys_show_cursor(bool visible);
 
 void winsys_init(int *argc, char **argv, char const *window_title,
-                 char const *icon_title);
+        char const *icon_title);
 void winsys_shutdown();
 
 void winsys_process_events(); /* Never returns */

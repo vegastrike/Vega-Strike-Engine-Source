@@ -49,12 +49,10 @@ public:
     typedef _Pt pointer_type;
     typedef VirtualIterator<_T, _Rt, _Pt> iterator_type;
 
-    VirtualIterator()
-    {
+    VirtualIterator() {
     }
 
-    virtual ~VirtualIterator()
-    {
+    virtual ~VirtualIterator() {
     }
 
     virtual reference_type operator*() = 0;
@@ -77,23 +75,19 @@ public:
      * operator interface is highly inconvenient
      */
 
-    reference_type get()
-    {
+    reference_type get() {
         return operator*();
     }
 
-    pointer_type getPtr()
-    {
+    pointer_type getPtr() {
         return operator->();
     }
 
-    iterator_type &next()
-    {
+    iterator_type &next() {
         return operator++();
     }
 
-    iterator_type &prev()
-    {
+    iterator_type &prev() {
         return operator--();
     }
 };
@@ -116,48 +110,39 @@ public:
     typedef typename std::iterator_traits<_It>::pointer pointer_type;
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
-    VirtualStandardIterator(const _It &_begin, const _It &_end) : begin(_begin), end(_end), cur(_begin)
-    {
+    VirtualStandardIterator(const _It &_begin, const _It &_end) : begin(_begin), end(_end), cur(_begin) {
     }
 
-    VirtualStandardIterator(const VirtualStandardIterator<_It> &o) : begin(o.begin), end(o.end), cur(o.cur)
-    {
+    VirtualStandardIterator(const VirtualStandardIterator<_It> &o) : begin(o.begin), end(o.end), cur(o.cur) {
     }
 
-    virtual reference_type operator*()
-    {
+    virtual reference_type operator*() {
         return *cur;
     };
 
-    virtual pointer_type operator->()
-    {
+    virtual pointer_type operator->() {
         return cur.operator->();
     };
 
-    virtual iterator_type &operator++()
-    {
+    virtual iterator_type &operator++() {
         ++cur;
         return *this;
     };
 
-    virtual iterator_type &operator--()
-    {
+    virtual iterator_type &operator--() {
         --cur;
         return *this;
     };
 
-    virtual SharedPtr<iterator_type> clone() const
-    {
+    virtual SharedPtr<iterator_type> clone() const {
         return SharedPtr<iterator_type>(new VirtualStandardIterator<_It>(*this));
     };
 
-    virtual bool eos() const
-    {
+    virtual bool eos() const {
         return cur == end;
     }
 
-    virtual bool sos() const
-    {
+    virtual bool sos() const {
         return cur == begin;
     };
 };
@@ -176,39 +161,32 @@ public:
     typedef VirtualIterator<_T, _Rt, _Pt> iterator_type;
 
     VirtualMappingIterator(const _It &_begin, const _It &_end) :
-            it(_begin, _end)
-    {
+            it(_begin, _end) {
     }
 
     VirtualMappingIterator(const iterator_type &o) :
-            it(o.it)
-    {
+            it(o.it) {
     }
 
     VirtualMappingIterator(const VirtualStandardIterator<_It> &o) :
-            it(o)
-    {
+            it(o) {
     }
 
-    virtual iterator_type &operator++()
-    {
+    virtual iterator_type &operator++() {
         ++it;
         return *this;
     };
 
-    virtual iterator_type &operator--()
-    {
+    virtual iterator_type &operator--() {
         --it;
         return *this;
     };
 
-    virtual bool eos() const
-    {
+    virtual bool eos() const {
         return it.eos();
     }
 
-    virtual bool sos() const
-    {
+    virtual bool sos() const {
         return it.sos();
     };
 };
@@ -224,32 +202,26 @@ public:
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
     VirtualValuesIterator(const _It &_begin, const _It &_end) :
-            VirtualMappingIterator<_It, value_type>(_begin, _end)
-    {
+            VirtualMappingIterator<_It, value_type>(_begin, _end) {
     }
 
     VirtualValuesIterator(const VirtualValuesIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o.it)
-    {
+            VirtualMappingIterator<_It, value_type>(o.it) {
     }
 
     VirtualValuesIterator(const VirtualStandardIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o)
-    {
+            VirtualMappingIterator<_It, value_type>(o) {
     }
 
-    virtual reference_type operator*()
-    {
+    virtual reference_type operator*() {
         return VirtualMappingIterator<_It, value_type>::it->second;
     };
 
-    virtual pointer_type operator->()
-    {
+    virtual pointer_type operator->() {
         return &(VirtualMappingIterator<_It, value_type>::it->second);
     };
 
-    virtual SharedPtr<iterator_type> clone() const
-    {
+    virtual SharedPtr<iterator_type> clone() const {
         return SharedPtr<iterator_type>(new VirtualValuesIterator(*this));
     }
 };
@@ -265,32 +237,26 @@ public:
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
     VirtualKeysIterator(const _It &_begin, const _It &_end) :
-            VirtualMappingIterator<_It, value_type>(_begin, _end)
-    {
+            VirtualMappingIterator<_It, value_type>(_begin, _end) {
     }
 
     VirtualKeysIterator(const VirtualKeysIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o.it)
-    {
+            VirtualMappingIterator<_It, value_type>(o.it) {
     }
 
     VirtualKeysIterator(const VirtualStandardIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o)
-    {
+            VirtualMappingIterator<_It, value_type>(o) {
     }
 
-    virtual reference_type operator*()
-    {
+    virtual reference_type operator*() {
         return VirtualMappingIterator<_It, value_type>::it->first;
     };
 
-    virtual pointer_type operator->()
-    {
+    virtual pointer_type operator->() {
         return VirtualMappingIterator<_It, value_type>::it->first;
     };
 
-    virtual SharedPtr<iterator_type> clone() const
-    {
+    virtual SharedPtr<iterator_type> clone() const {
         return SharedPtr<iterator_type>(new VirtualKeysIterator(*this));
     }
 };
@@ -312,34 +278,27 @@ public:
     typedef typename _It1::pointer_type pointer_type;
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
-    ChainingIterator()
-    {
+    ChainingIterator() {
     }
 
-    ChainingIterator(const ChainingIterator<_It1, _It2> &o) : it1(o.it1), it2(o.it2)
-    {
+    ChainingIterator(const ChainingIterator<_It1, _It2> &o) : it1(o.it1), it2(o.it2) {
     }
 
-    ChainingIterator(_It1 _it1, _It2 _it2) : it1(_it1), it2(_it2)
-    {
+    ChainingIterator(_It1 _it1, _It2 _it2) : it1(_it1), it2(_it2) {
     }
 
-    virtual ~ChainingIterator()
-    {
+    virtual ~ChainingIterator() {
     }
 
-    virtual reference_type operator*()
-    {
+    virtual reference_type operator*() {
         return (it1.eos() ? *it2 : *it1);
     }
 
-    virtual pointer_type operator->()
-    {
+    virtual pointer_type operator->() {
         return (it1.eos() ? it2.operator->() : it1.operator->());
     }
 
-    virtual iterator_type &operator++()
-    {
+    virtual iterator_type &operator++() {
         if (it1.eos()) {
             ++it2;
         } else {
@@ -348,8 +307,7 @@ public:
         return *this;
     }
 
-    virtual iterator_type &operator--()
-    {
+    virtual iterator_type &operator--() {
         if (it1.eos() && !it2.sos()) {
             --it2;
         } else {
@@ -358,18 +316,15 @@ public:
         return *this;
     }
 
-    virtual SharedPtr<iterator_type> clone() const
-    {
+    virtual SharedPtr<iterator_type> clone() const {
         return SharedPtr<iterator_type>(new ChainingIterator<_It1, _It2>(it1, it2));
     }
 
-    virtual bool eos() const
-    {
+    virtual bool eos() const {
         return (it1.eos() && it2.eos());
     }
 
-    virtual bool sos() const
-    {
+    virtual bool sos() const {
         return (it1.sos() && it2.sos());
     }
 };

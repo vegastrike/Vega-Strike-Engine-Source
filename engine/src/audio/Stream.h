@@ -63,16 +63,13 @@ protected:
      */
     class NoBufferException : public Exception {
     public:
-        NoBufferException()
-        {
+        NoBufferException() {
         }
 
-        NoBufferException(const NoBufferException &other) : Exception(other)
-        {
+        NoBufferException(const NoBufferException &other) : Exception(other) {
         }
 
-        explicit NoBufferException(const std::string &message) : Exception(message)
-        {
+        explicit NoBufferException(const std::string &message) : Exception(message) {
         }
     };
 
@@ -81,8 +78,7 @@ protected:
     Stream(const std::string &path);
 
     /** Internal write access to stream format, for derived classes */
-    Format &getFormatInternal()
-    {
+    Format &getFormatInternal() {
         return streamFormat;
     }
 
@@ -90,14 +86,12 @@ public:
     virtual ~Stream();
 
     /** Return the path of the associated file. */
-    const std::string &getPath() const
-    {
+    const std::string &getPath() const {
         return filePath;
     };
 
     /** Return the format of the stream. */
-    const Format &getFormat() const
-    {
+    const Format &getFormat() const {
         return streamFormat;
     }
 

@@ -30,8 +30,7 @@ namespace InitializationFunctors {
 template<typename T>
 class DefaultConstructor {
 public:
-    T *operator()() const
-    {
+    T *operator()() const {
         return new T();
     }
 };
@@ -54,8 +53,7 @@ class Singleton {
 protected:
     static T *_singletonInstance;
 
-    static void initializeSingleton()
-    {
+    static void initializeSingleton() {
         if (_singletonInstance != 0) {
             delete _singletonInstance;
         }
@@ -64,21 +62,18 @@ protected:
         _singletonInstance = singletonConstructor();
     }
 
-    static void deinitializeSingleton()
-    {
+    static void deinitializeSingleton() {
         _singletonInstance = 0;
     }
 
-    ~Singleton()
-    {
+    ~Singleton() {
         if (_singletonInstance == this) {
             deinitializeSingleton();
         }
     }
 
 public:
-    static T *getSingleton()
-    {
+    static T *getSingleton() {
         if (_singletonInstance == 0) {
             initializeSingleton();
         }

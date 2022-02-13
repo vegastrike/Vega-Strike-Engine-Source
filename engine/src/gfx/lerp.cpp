@@ -27,8 +27,7 @@
 
 #include "lerp.h"
 
-Transformation linear_interpolate_uncapped(const Transformation &A, const Transformation &B, double blend)
-{
+Transformation linear_interpolate_uncapped(const Transformation &A, const Transformation &B, double blend) {
     Quaternion result;
     const Quaternion &a = A.orientation;
     const Quaternion &b = B.orientation;

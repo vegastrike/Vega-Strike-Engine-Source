@@ -48,8 +48,7 @@
 #include "vs_logging.h"
 
 /* *********************************************************** */
-Mission::~Mission()
-{
+Mission::~Mission() {
     VS_LOG(info, "Mission Cleanup Not Yet Implemented");
     //do not delete msgcenter...could be vital
 }
@@ -60,18 +59,15 @@ int Mission::number_of_flightgroups = 0;
 int Mission::total_nr_frames = 0;
 vector<Flightgroup *>Mission::flightgroups;
 
-Mission::Mission(const char *filename, const std::string &script, bool loadscripts)
-{
+Mission::Mission(const char *filename, const std::string &script, bool loadscripts) {
     ConstructMission(filename, script, loadscripts);
 }
 
-Mission::Mission(const char *filename, bool loadscripts)
-{
+Mission::Mission(const char *filename, bool loadscripts) {
     ConstructMission(filename, string(""), loadscripts);
 }
 
-void Mission::ConstructMission(const char *configfile, const std::string &script, bool loadscripts)
-{
+void Mission::ConstructMission(const char *configfile, const std::string &script, bool loadscripts) {
     player_autopilot = global_autopilot = AUTO_NORMAL;
     player_num = 0;
     briefing = NULL;
@@ -111,8 +107,7 @@ void Mission::ConstructMission(const char *configfile, const std::string &script
 #endif
 }
 
-Unit *Mission::Objective::getOwner()
-{
+Unit *Mission::Objective::getOwner() {
     Unit *Nawl = NULL;
     if (Owner != Nawl) {
         Unit *ret = Owner.GetUnit();
@@ -126,8 +121,7 @@ Unit *Mission::Objective::getOwner()
 
 MessageCenter *Mission::msgcenter = NULL;
 
-void Mission::initMission(bool loadscripts)
-{
+void Mission::initMission(bool loadscripts) {
     if (!top) {
         return;
     }
@@ -140,8 +134,7 @@ void Mission::initMission(bool loadscripts)
 
 /* *********************************************************** */
 
-bool Mission::checkMission(easyDomNode *node, bool loadscripts)
-{
+bool Mission::checkMission(easyDomNode *node, bool loadscripts) {
     if (node->Name() != "mission") {
         VS_LOG(warning, "this is no Vegastrike mission file");
         return false;
@@ -190,16 +183,14 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts)
 
 static std::vector<Mission *> Mission_delqueue;
 
-void Mission::wipeDeletedMissions()
-{
+void Mission::wipeDeletedMissions() {
     while (!Mission_delqueue.empty()) {
         delete Mission_delqueue.back();
         Mission_delqueue.pop_back();
     }
 }
 
-int Mission::getPlayerMissionNumber()
-{
+int Mission::getPlayerMissionNumber() {
     int num = 0;
 
     vector<Mission *> *active_missions = ::active_missions.Get();
@@ -222,8 +213,7 @@ int Mission::getPlayerMissionNumber()
     return -1;
 }
 
-Mission *Mission::getNthPlayerMission(int cp, int missionnum)
-{
+Mission *Mission::getNthPlayerMission(int cp, int missionnum) {
     vector<Mission *> *active_missions = ::active_missions.Get();
     Mission *activeMis = NULL;
     if (missionnum >= 0) {
@@ -246,8 +236,7 @@ Mission *Mission::getNthPlayerMission(int cp, int missionnum)
     return activeMis;
 }
 
-void Mission::terminateMission()
-{
+void Mission::terminateMission() {
     vector<Mission *> *active_missions = ::active_missions.Get();
     vector<Mission *>::iterator f;
 
@@ -309,8 +298,7 @@ void Mission::terminateMission()
 
 /* *********************************************************** */
 
-void Mission::doOrigin(easyDomNode *node)
-{
+void Mission::doOrigin(easyDomNode *node) {
     origin_node = node;
 }
 
@@ -318,8 +306,7 @@ void Mission::doOrigin(easyDomNode *node)
 
 #ifndef VS_MIS_SEL
 
-void Mission::GetOrigin(QVector &pos, string &planetname)
-{
+void Mission::GetOrigin(QVector &pos, string &planetname) {
     if (origin_node == NULL) {
         pos.i = pos.j = pos.k = 0.0;
         planetname = string();
@@ -336,8 +323,7 @@ void Mission::GetOrigin(QVector &pos, string &planetname)
 
 /* *********************************************************** */
 
-void Mission::doSettings(easyDomNode *node)
-{
+void Mission::doSettings(easyDomNode *node) {
     vector<easyDomNode *>::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
         easyDomNode *mnode = *siter;
@@ -349,8 +335,7 @@ void Mission::doSettings(easyDomNode *node)
 
 /* *********************************************************** */
 
-void Mission::doVariables(easyDomNode *node)
-{
+void Mission::doVariables(easyDomNode *node) {
     if (variables != NULL) {
         VS_LOG(warning, "only one variable section allowed");
         return;
@@ -365,8 +350,7 @@ void Mission::doVariables(easyDomNode *node)
 
 /* *********************************************************** */
 
-void Mission::checkVar(easyDomNode *node)
-{
+void Mission::checkVar(easyDomNode *node) {
     if (node->Name() != "var") {
         VS_LOG(warning, "not a variable");
         return;
@@ -377,16 +361,14 @@ void Mission::checkVar(easyDomNode *node)
 
 /* *********************************************************** */
 
-void Mission::doFlightgroups(easyDomNode *node)
-{
+void Mission::doFlightgroups(easyDomNode *node) {
     vector<easyDomNode *>::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
         checkFlightgroup(*siter);
     }
 }
 
-void Mission::AddFlightgroup(Flightgroup *fg)
-{
+void Mission::AddFlightgroup(Flightgroup *fg) {
     fg->flightgroup_nr = flightgroups.size();
     flightgroups.push_back(fg);
     number_of_flightgroups = flightgroups.size();
@@ -394,8 +376,7 @@ void Mission::AddFlightgroup(Flightgroup *fg)
 
 /* *********************************************************** */
 
-void Mission::checkFlightgroup(easyDomNode *node)
-{
+void Mission::checkFlightgroup(easyDomNode *node) {
     if (node->Name() != "flightgroup") {
         VS_LOG(warning, "not a flightgroup");
         return;
@@ -479,8 +460,7 @@ void Mission::checkFlightgroup(easyDomNode *node)
 
 /* *********************************************************** */
 
-bool Mission::doPosition(easyDomNode *node, double pos[3], CreateFlightgroup *cf)
-{
+bool Mission::doPosition(easyDomNode *node, double pos[3], CreateFlightgroup *cf) {
     string x = node->attr_value("x");
     string y = node->attr_value("y");
     string z = node->attr_value("z");
@@ -501,8 +481,7 @@ bool Mission::doPosition(easyDomNode *node, double pos[3], CreateFlightgroup *cf
 
 /* *********************************************************** */
 
-Flightgroup *Mission::findFlightgroup(const string &offset_name, const string &fac)
-{
+Flightgroup *Mission::findFlightgroup(const string &offset_name, const string &fac) {
     vector<Flightgroup *>::const_iterator siter;
     for (siter = flightgroups.begin(); siter != flightgroups.end(); siter++) {
         if ((*siter)->name == offset_name && (fac.empty() || (*siter)->faction == fac)) {
@@ -522,8 +501,7 @@ Flightgroup *Mission::findFlightgroup(const string &offset_name, const string &f
 */
 /* *********************************************************** */
 
-void Mission::doOrder(easyDomNode *node, Flightgroup *fg)
-{
+void Mission::doOrder(easyDomNode *node, Flightgroup *fg) {
     //nothing yet
     string order = node->attr_value("order");
     string target = node->attr_value("target");
@@ -538,8 +516,7 @@ void Mission::doOrder(easyDomNode *node, Flightgroup *fg)
 
 /* *********************************************************** */
 
-string Mission::getVariable(string name, string defaultval)
-{
+string Mission::getVariable(string name, string defaultval) {
     vector<easyDomNode *>::const_iterator siter;
     for (siter = variables->subnodes.begin(); siter != variables->subnodes.end(); siter++) {
         string scan_name = (*siter)->attr_value("name");

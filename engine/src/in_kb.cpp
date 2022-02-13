@@ -39,8 +39,7 @@ struct HandlerCall {
     KBHandler function;
     KBData data;
 
-    HandlerCall()
-    {
+    HandlerCall() {
         function = DefaultKBHandler;
     }
 };
@@ -48,8 +47,7 @@ static HandlerCall keyBindings[LAST_MODIFIER][WSK_LAST];
 static unsigned int playerBindings[LAST_MODIFIER][WSK_LAST];
 KBSTATE keyState[LAST_MODIFIER][WSK_LAST];
 
-static void kbGetInput(int key, int modifiers, bool release, int x, int y)
-{
+static void kbGetInput(int key, int modifiers, bool release, int x, int y) {
     ///FIXME If key is out of array index range, do nothing. This is a quick hack, the underlying cause of invalid parameters ever being given should probably be fixed instead
     if (key < 0 || key >= WSK_LAST) {
         return;
@@ -66,8 +64,7 @@ static void kbGetInput(int key, int modifiers, bool release, int x, int y)
     _Universe->SetActiveCockpit(i);
 }
 
-static bool kbHasBinding(int key, int modifiers)
-{
+static bool kbHasBinding(int key, int modifiers) {
     static HandlerCall defaultHandler;
     return keyBindings[modifiers][key].function != defaultHandler.function;
 }
@@ -75,8 +72,7 @@ static bool kbHasBinding(int key, int modifiers)
 static const char _lomap[] = "0123456789-=\';/.,`\\";
 static const char _himap[] = ")!@#$%^&*(_+\":?><~|";
 
-int shiftup(int ch)
-{
+int shiftup(int ch) {
     if (ch == (ch & 0xFF)) {
         const char *c = strchr(_lomap, ch);
         if (c) {
@@ -89,8 +85,7 @@ int shiftup(int ch)
     }
 }
 
-int shiftdown(int ch)
-{
+int shiftdown(int ch) {
     if (ch == (ch & 0xFF)) {
         const char *c = strchr(_himap, ch);
         if (c) {
@@ -105,15 +100,13 @@ int shiftdown(int ch)
 
 static unsigned int _activeModifiers = 0;
 
-void setActiveModifiers(unsigned int mask)
-{
+void setActiveModifiers(unsigned int mask) {
     _activeModifiers = mask;
 }
 
 #ifdef SDL_WINDOWING
 
-void setActiveModifiersSDL(SDLMod mask)
-{
+void setActiveModifiersSDL(SDLMod mask) {
     setActiveModifiers(
             ((mask & (KMOD_LSHIFT | KMOD_RSHIFT)) ? KB_MOD_SHIFT : 0)
                     | ((mask & (KMOD_LCTRL | KMOD_RCTRL)) ? KB_MOD_CTRL : 0)
@@ -122,21 +115,18 @@ void setActiveModifiersSDL(SDLMod mask)
 
 #endif
 
-unsigned int getActiveModifiers()
-{
+unsigned int getActiveModifiers() {
     return _activeModifiers;
 }
 
-unsigned int pullActiveModifiers()
-{
+unsigned int pullActiveModifiers() {
 #ifdef SDL_WINDOWING
     setActiveModifiersSDL(SDL_GetModState());
 #endif
     return getActiveModifiers();
 }
 
-unsigned int getModifier(const char *mod_name)
-{
+unsigned int getModifier(const char *mod_name) {
     if (mod_name[0] == '\0') {
         return 0;
     }
@@ -153,13 +143,11 @@ unsigned int getModifier(const char *mod_name)
     return rv;
 }
 
-int getModifier(bool alton, bool cntrlon, bool shifton)
-{
+int getModifier(bool alton, bool cntrlon, bool shifton) {
     return cntrlon ? KB_MOD_CTRL : (alton ? KB_MOD_ALT : (shifton ? KB_MOD_SHIFT : 0));
 }
 
-void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y)
-{
+void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     bool shifton = false;
     int alton = false;
     int ctrlon = false;
@@ -210,8 +198,7 @@ void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, in
     }
 }
 
-void RestoreKB()
-{
+void RestoreKB() {
     for (int i = 0; i < LAST_MODIFIER; ++i) {
         for (int a = 0; a < KEYMAP_SIZE; a++) {
             if (keyState[i][a] == DOWN) {
@@ -223,8 +210,7 @@ void RestoreKB()
     winsys_set_keyboard_func(glut_keyboard_cb);
 }
 
-void InitKB()
-{
+void InitKB() {
     for (int i = 0; i < LAST_MODIFIER; ++i) {
         for (int a = 0; a < KEYMAP_SIZE; a++) {
             keyState[i][a] = UP;
@@ -234,8 +220,7 @@ void InitKB()
     RestoreKB();
 }
 
-void ProcessKB(unsigned int player)
-{
+void ProcessKB(unsigned int player) {
     for (int mod = 0; mod < LAST_MODIFIER; mod++) {
         for (int a = 0; a < KEYMAP_SIZE; a++) {
             if (playerBindings[mod][a] == player) {
@@ -245,16 +230,14 @@ void ProcessKB(unsigned int player)
     }
 }
 
-void BindKey(int key, unsigned int mod, unsigned int player, KBHandler handler, const KBData &data)
-{
+void BindKey(int key, unsigned int mod, unsigned int player, KBHandler handler, const KBData &data) {
     keyBindings[mod][key].function = handler;
     keyBindings[mod][key].data = data;
     playerBindings[mod][key] = player;
     handler(std::string(), RESET);     //key is not used in handler
 }
 
-void UnbindKey(int key, unsigned int mod)
-{
+void UnbindKey(int key, unsigned int mod) {
     keyBindings[mod][key] = HandlerCall();
 }
 

@@ -36,20 +36,19 @@
 extern int pixelscalesize; //from sphere.cpp
 
 void RingMesh::InitRing(float iradius,
-                        float oradius,
-                        int slices,
-                        const char *texture,
-                        const QVector &R,
-                        const QVector &S,
-                        int wrapx,
-                        int wrapy,
-                        const BLENDFUNC a,
-                        const BLENDFUNC b,
-                        bool envMapping,
-                        float theta_min,
-                        float theta_max,
-                        FILTER mipmap)
-{
+        float oradius,
+        int slices,
+        const char *texture,
+        const QVector &R,
+        const QVector &S,
+        int wrapx,
+        int wrapy,
+        const BLENDFUNC a,
+        const BLENDFUNC b,
+        bool envMapping,
+        float theta_min,
+        float theta_max,
+        FILTER mipmap) {
     int numspheres = slices / 4;
     if (numspheres < 1) {
         numspheres = 1;
@@ -69,8 +68,8 @@ void RingMesh::InitRing(float iradius,
             AllocNewMeshesEachInSizeofMeshSpace(numspheres);     //FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
     numlods = numspheres;
     meshHashTable.Put(hash_name = VSFileSystem::GetSharedMeshHashName(hash_name, Vector(iradius,
-                                                                                        iradius,
-                                                                                        iradius), 0), oldmesh);
+            iradius,
+            iradius), 0), oldmesh);
     this->orig = oldmesh;
     radialSize = oradius;     //MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
     //mn = Vector (radialSize,radialSize,radialSize);
@@ -158,11 +157,11 @@ void RingMesh::InitRing(float iradius,
                 Decal.push_back(NULL);
             }
             Decal[0] = new Texture(texture,
-                                   0,
-                                   mipmap,
-                                   TEXTURE2D,
-                                   TEXTURE_2D,
-                                   g_game.use_planet_textures ? GFXTRUE : GFXFALSE);
+                    0,
+                    mipmap,
+                    TEXTURE2D,
+                    TEXTURE_2D,
+                    g_game.use_planet_textures ? GFXTRUE : GFXFALSE);
         }
         setEnvMap(envMapping);
         Mesh *oldorig = orig;
@@ -186,8 +185,7 @@ void RingMesh::InitRing(float iradius,
     draw_queue = odq;
 }
 
-float RingMesh::clipRadialSize() const
-{
+float RingMesh::clipRadialSize() const {
     return /*mx.Magnitude()*.33+*/ rSize();
 }
 

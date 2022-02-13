@@ -48,39 +48,37 @@ protected:
     // Constructors
 public:
     Building(ContinuousTerrain *parent,
-             bool vehicle,
-             const char *filename,
-             bool SubUnit,
-             int faction,
-             const std::string &unitModifications = std::string(""),
-             Flightgroup *fg = NULL);
+            bool vehicle,
+            const char *filename,
+            bool SubUnit,
+            int faction,
+            const std::string &unitModifications = std::string(""),
+            Flightgroup *fg = NULL);
 
     Building(Terrain *parent,
-             bool vehicle,
-             const char *filename,
-             bool SubUnit,
-             int faction,
-             const std::string &unitModifications = std::string(""),
-             Flightgroup *fg = NULL);
+            bool vehicle,
+            const char *filename,
+            bool SubUnit,
+            int faction,
+            const std::string &unitModifications = std::string(""),
+            Flightgroup *fg = NULL);
 
 public:
 
-    enum _UnitType isUnit() const
-    {
+    enum _UnitType isUnit() const {
         return _UnitType::building;
     }
 
     virtual void UpdatePhysics2(const Transformation &trans,
-                                const Transformation &old_physical_state,
-                                const Vector &accel,
-                                float difficulty,
-                                const Matrix &transmat,
-                                const Vector &CumulativeVelocity,
-                                bool ResolveLast,
-                                UnitCollection *uc = NULL);
+            const Transformation &old_physical_state,
+            const Vector &accel,
+            float difficulty,
+            const Matrix &transmat,
+            const Vector &CumulativeVelocity,
+            bool ResolveLast,
+            UnitCollection *uc = NULL);
 
-    bool ownz(void *parent)
-    {
+    bool ownz(void *parent) {
         return this->parent.terrain == (Terrain *) parent;
     }
 

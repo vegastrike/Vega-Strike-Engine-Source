@@ -42,26 +42,22 @@ public:
     double objectd;
     enum { MYSTRING, MYLONG, MYDOUBLE } type;
 
-    PythonBasicType(const std::string &mystr)
-    {
+    PythonBasicType(const std::string &mystr) {
         type = MYSTRING;
         objects = mystr;
     }
 
-    PythonBasicType(const long mystr)
-    {
+    PythonBasicType(const long mystr) {
         type = MYLONG;
         objecti = mystr;
     }
 
-    PythonBasicType(const float mystr)
-    {
+    PythonBasicType(const float mystr) {
         type = MYDOUBLE;
         objectd = mystr;
     }
 
-    PyObject *NewObject() const
-    {
+    PyObject *NewObject() const {
         switch (type) {
             case MYSTRING:
                 return PyUnicode_FromString(objects.c_str());
@@ -88,13 +84,11 @@ template<class T>
 class BasicPointer {
     T *myitem;
 public:
-    BasicPointer(T *myitem)
-    {
+    BasicPointer(T *myitem) {
         this->myitem = myitem;
     }
 
-    T &operator*()
-    {
+    T &operator*() {
         return *myitem;
     }
 };

@@ -43,9 +43,8 @@ namespace {
 
 // Find waypoints if we can travel through all of them.
 boost::optional<size_t> FindWaypoint(Unit *player,
-                                     const std::vector<DockingPorts> &dockingPorts,
-                                     size_t port)
-{
+        const std::vector<DockingPorts> &dockingPorts,
+        size_t port) {
     if (!dockingPorts[port].IsConnected()) {
         return port;
     }
@@ -68,8 +67,7 @@ boost::optional<size_t> FindWaypoint(Unit *player,
 
 // Find suitable docking port and associated waypoints.
 Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
-                                                 Unit *station)
-{
+        Unit *station) {
     // FIXME: Prefer outside docking ports (because they are more safe to travel to)
     // FIXME: Ensure line-of-sight to first point
     // FIXME: Start at the closest waypoint (and skip those before it)
@@ -97,7 +95,7 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
         }
 
         QVector dockingPosition = Transform(station->GetTransformation(),
-                                            dockingPorts[i].GetPosition().Cast());
+                dockingPorts[i].GetPosition().Cast());
         float distance = (dockingPosition - player->Position()).Magnitude();
         if (shortestDistance > distance) {
             if (isPlanet) {
@@ -136,13 +134,11 @@ namespace Orders {
 
 AutoDocking::AutoDocking(Unit *destination)
         : Order(MOVEMENT | FACING, SLOCATION),
-          state(&AutoDocking::InitialState),
-          target(destination)
-{
+        state(&AutoDocking::InitialState),
+        target(destination) {
 }
 
-void AutoDocking::Execute()
-{
+void AutoDocking::Execute() {
     Unit *player = GetParent();
     Unit *station = target.GetUnit();
     // Exit if either the ship or the station has been destroyed
@@ -153,8 +149,7 @@ void AutoDocking::Execute()
     }
 }
 
-bool AutoDocking::CanDock(Unit *player, Unit *station)
-{
+bool AutoDocking::CanDock(Unit *player, Unit *station) {
     if (!station->IsCleared(player)) {
         return false;
     } else if (UnitUtil::isCapitalShip(player)) {
@@ -171,14 +166,12 @@ bool AutoDocking::CanDock(Unit *player, Unit *station)
     return true;
 }
 
-void AutoDocking::EndState(Unit *player, Unit *station)
-{
+void AutoDocking::EndState(Unit *player, Unit *station) {
     player->autopilotactive = false;
     done = true;
 }
 
-void AutoDocking::AbortState(Unit *player, Unit *station)
-{
+void AutoDocking::AbortState(Unit *player, Unit *station) {
     EraseOrders();
     state = &AutoDocking::EndState;
 
@@ -187,8 +180,7 @@ void AutoDocking::AbortState(Unit *player, Unit *station)
     FlyByKeyboard::StopKey(kbdata, PRESS);
 }
 
-void AutoDocking::InitialState(Unit *player, Unit *station)
-{
+void AutoDocking::InitialState(Unit *player, Unit *station) {
     if (CanDock(player, station)) {
         state = &AutoDocking::SelectionState;
     } else {
@@ -196,8 +188,7 @@ void AutoDocking::InitialState(Unit *player, Unit *station)
     }
 }
 
-void AutoDocking::SelectionState(Unit *player, Unit *station)
-{
+void AutoDocking::SelectionState(Unit *player, Unit *station) {
     EraseOrders();
 
     dockingPath = FindDockingPort(player, station);
@@ -214,8 +205,7 @@ void AutoDocking::SelectionState(Unit *player, Unit *station)
     state = &AutoDocking::ApproachState;
 }
 
-void AutoDocking::ApproachState(Unit *player, Unit *station)
-{
+void AutoDocking::ApproachState(Unit *player, Unit *station) {
     assert(!dockingPath.empty());
 
     // Move to docking port
@@ -230,22 +220,19 @@ void AutoDocking::ApproachState(Unit *player, Unit *station)
     }
 }
 
-void AutoDocking::DockingState(Unit *player, Unit *station)
-{
+void AutoDocking::DockingState(Unit *player, Unit *station) {
     assert(!dockingPath.empty());
 
     player->ForceDock(station, dockingPath.back());
     state = &AutoDocking::DockedState;
 }
 
-void AutoDocking::DockedState(Unit *player, Unit *station)
-{
+void AutoDocking::DockedState(Unit *player, Unit *station) {
     EraseOrders();
     state = &AutoDocking::UndockingState;
 }
 
-void AutoDocking::UndockingState(Unit *player, Unit *station)
-{
+void AutoDocking::UndockingState(Unit *player, Unit *station) {
     assert(!dockingPath.empty());
 
     state = &AutoDocking::EndState;
@@ -261,8 +248,7 @@ void AutoDocking::UndockingState(Unit *player, Unit *station)
     }
 }
 
-void AutoDocking::DepartureState(Unit *player, Unit *station)
-{
+void AutoDocking::DepartureState(Unit *player, Unit *station) {
     Order::Execute();
     if (Done()) {
         EraseOrders();
@@ -271,14 +257,12 @@ void AutoDocking::DepartureState(Unit *player, Unit *station)
     }
 }
 
-void AutoDocking::EraseOrders()
-{
+void AutoDocking::EraseOrders() {
     eraseType(FACING);
     eraseType(MOVEMENT);
 }
 
-void AutoDocking::EnqueuePort(Unit *player, Unit *station, size_t port)
-{
+void AutoDocking::EnqueuePort(Unit *player, Unit *station, size_t port) {
     // Set the coordinates for the docking port
     const float turningSpeed = 1;
     // If accuracy is too low then the ship does not always turn precisely.
@@ -292,7 +276,7 @@ void AutoDocking::EnqueuePort(Unit *player, Unit *station, size_t port)
 
     const DockingPorts &currentPort = station->DockingPortLocations()[port];
     QVector position = Transform(station->GetTransformation(),
-                                 currentPort.GetPosition().Cast());
+            currentPort.GetPosition().Cast());
 
     Order *facing = new ChangeHeading(position, accuracy, turningSpeed, terminateAfterUse);
     Order *movement = new MoveTo(position, useAfterburner, accuracy, terminateAfterUse);

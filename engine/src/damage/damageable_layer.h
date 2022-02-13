@@ -51,20 +51,20 @@ struct DamageableLayer {
 
     //static float damage_component_chance = 0.03;
     DamageableLayer(int layer_index,
-                    FacetConfiguration configuration,
-                    Health health_template,
-                    bool core_layer);
+            FacetConfiguration configuration,
+            Health health_template,
+            bool core_layer);
 
     DamageableLayer(int layer_index,
-                    FacetConfiguration configuration,
-                    float health_array[],
-                    float regeneration,
-                    bool core_layer);
+            FacetConfiguration configuration,
+            float health_array[],
+            float regeneration,
+            bool core_layer);
 
     DamageableLayer(int layer_index,
-                    int number_of_facets,
-                    std::vector<Health> &facets,
-                    bool core_layer);
+            int number_of_facets,
+            std::vector<Health> &facets,
+            bool core_layer);
     DamageableLayer();
 
     void AdjustPower(const float &percent);
@@ -80,7 +80,7 @@ struct DamageableLayer {
     int GetFacetIndex(const CoreVector &attack_vector);
 
     void ReduceLayerCapability(const float &percent,
-                               const float &chance_to_reduce_regeneration);
+            const float &chance_to_reduce_regeneration);
 
     float TotalLayerValue();
     float TotalMaxLayerValue();

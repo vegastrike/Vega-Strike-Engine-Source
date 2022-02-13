@@ -52,8 +52,7 @@ class PackageFileCreator {
 public:
     PackageFileCreator(const string &file);
 
-    ~PackageFileCreator(void)
-    {
+    ~PackageFileCreator(void) {
         finish();
     }
 
@@ -73,8 +72,7 @@ static char usage[] =
         "\t<pkgfile> The package file to create or overwrite.\n"
         "\t<path1> The first file/directory to add to the package file.\n";
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "%s", usage);
         exit(0);
@@ -91,14 +89,12 @@ int main(int argc, char *argv[])
 }
 
 PackageFileCreator::PackageFileCreator(const string &file)
-        : pkg(file, "wb"), offsetInPackage(12)
-{
+        : pkg(file, "wb"), offsetInPackage(12) {
     offsetInPackage = 12;
 }
 
 void
-PackageFileCreator::addFile(const string &fname, uint32_t file_size)
-{
+PackageFileCreator::addFile(const string &fname, uint32_t file_size) {
     if (fseek(pkg, offsetInPackage, SEEK_SET)) {
         throw errno;
     }
@@ -122,15 +118,14 @@ PackageFileCreator::addFile(const string &fname, uint32_t file_size)
 }
 
 void
-PackageFileCreator::addDirectory(const string &dname)
-{
+PackageFileCreator::addDirectory(const string &dname) {
     DIR *dd = opendir(dname.c_str());
 
     if (dd == 0) {
         throw errno;
     }
     for (struct dirent *dentry = readdir(dd); dentry != 0;
-         dentry = readdir(dd)) {
+            dentry = readdir(dd)) {
         try {
             if (dentry->d_name[0] != '.') {
                 add(dname + '/' + dentry->d_name);
@@ -142,8 +137,7 @@ PackageFileCreator::addDirectory(const string &dname)
 }
 
 void
-PackageFileCreator::add(const string &pname)
-{
+PackageFileCreator::add(const string &pname) {
     struct stat stats;
 
     stat(pname.c_str(), &stats);
@@ -160,8 +154,7 @@ PackageFileCreator::add(const string &pname)
     }
 }
 
-void PackageFileCreator::finish(void)
-{
+void PackageFileCreator::finish(void) {
     //Sort the index
     sort(pkg_index.begin(), pkg_index.end());
     VSRHeader header;
@@ -173,7 +166,7 @@ void PackageFileCreator::finish(void)
     //Now write entry table to file
     fseek(pkg, offsetInPackage, SEEK_SET);
     for (vector<VSRMember>::iterator ii = pkg_index.begin();
-         ii != pkg_index.end(); ++ii) {
+            ii != pkg_index.end(); ++ii) {
         VSRPEntry entry;
         entry.fileLength = ii->fileLength;
         entry.offset = ii->offset;

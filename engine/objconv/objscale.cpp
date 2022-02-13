@@ -26,8 +26,7 @@
 
 float huge = .5e38;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int i;
     float scalex = 1;
     float scaley = 1;
@@ -68,7 +67,7 @@ int main(int argc, char **argv)
         }
     }
     printf("Scaling the mesh to (%f %f %f)\ntranslating to (%f %f %f)\n",
-           scalex, scaley, scalez, transx, transy, transz);
+            scalex, scaley, scalez, transx, transy, transz);
     FILE *in = fopen(argv[1], "rb");
     FILE *out = fopen(argv[2], "wb");
     char line[16384];
@@ -105,9 +104,9 @@ int main(int argc, char **argv)
         }
     }
     printf("Translating bounds of\n[(%f %f %f) - (%f %f %f) ]\nto bounds of\n[(%f %f %f) - (%f %f %f)]\n",
-           minx, miny, minz, maxx, maxy, maxz,
-           scalex * (minx + transx), scaley * (miny + transy), scalez * (minz + transz),
-           scalex * (maxx + transx), scaley * (maxy + transy), scalez * (maxz + transz));
+            minx, miny, minz, maxx, maxy, maxz,
+            scalex * (minx + transx), scaley * (miny + transy), scalez * (minz + transz),
+            scalex * (maxx + transx), scaley * (maxy + transy), scalez * (maxz + transz));
     return 0;
 }
 

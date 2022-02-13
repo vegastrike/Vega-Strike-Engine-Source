@@ -327,8 +327,7 @@ public:
     void setProgram(const string &vertex, const string &fragment);
 
     /** Get the vertex and fragment programs, compiled. 0 for fixed-function */
-    int getCompiledProgram() const
-    {
+    int getCompiledProgram() const {
         return program;
     }
 
@@ -344,10 +343,10 @@ public:
      * @remarks [type] may be either Decal or File, mapping to equally named SourceType s
      */
     void addTextureUnit(const string &source,
-                        int target,
-                        const string &deflt,
-                        const string &paramName,
-                        Pass::TextureUnit::Kind texKind);
+            int target,
+            const string &deflt,
+            const string &paramName,
+            Pass::TextureUnit::Kind texKind);
 
     /** Add a constant shader param
      * @param name A string defining the shader's parameter name.
@@ -366,38 +365,32 @@ public:
     void addShaderParam(const string &name, ShaderParam::Semantic semantic, bool optional);
 
     /** Get the number of texture units in this pass */
-    size_t getNumTextureUnits() const
-    {
+    size_t getNumTextureUnits() const {
         return textureUnits.size();
     }
 
     /** Get the specified texture unit */
-    const TextureUnit &getTextureUnit(int index) const
-    {
+    const TextureUnit &getTextureUnit(int index) const {
         return textureUnits[index];
     }
 
     /** Get the specified texture unit */
-    TextureUnit &getTextureUnit(int index)
-    {
+    TextureUnit &getTextureUnit(int index) {
         return textureUnits[index];
     }
 
     /** Get the number of shader params in this pass */
-    size_t getNumShaderParams() const
-    {
+    size_t getNumShaderParams() const {
         return shaderParams.size();
     }
 
     /** Get the specified shader param */
-    const ShaderParam &getShaderParam(int index) const
-    {
+    const ShaderParam &getShaderParam(int index) const {
         return shaderParams[index];
     }
 
     /** Get the specified shader param */
-    ShaderParam &getShaderParam(int index)
-    {
+    ShaderParam &getShaderParam(int index) {
         return shaderParams[index];
     }
 

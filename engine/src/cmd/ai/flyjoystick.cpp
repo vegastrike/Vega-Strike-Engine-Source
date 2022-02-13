@@ -34,8 +34,7 @@
 #include "config_xml.h"
 #include  "in_kb_data.h"
 
-FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile)
-{
+FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile) {
     for (int i = 0; i < MAX_JOYSTICKS; i++) {
         if ((unsigned int) joystick[i]->player == configfile) {
             whichjoystick.push_back(i);
@@ -82,8 +81,7 @@ void FlyByJoystick::JDecelKey( KBSTATE k, float, float, int )
 
 #endif
 
-void FlyByJoystick::Execute()
-{
+void FlyByJoystick::Execute() {
     static bool clamp_joystick_axes = XMLSupport::parse_bool(vs_config->getVariable("joystick", "clamp_axes", "true"));
     static bool nonlinear_throttle_nav =
             XMLSupport::parse_bool(vs_config->getVariable("joystick", "nonlinear_throttle_nav", "true"));
@@ -228,12 +226,12 @@ void FlyByJoystick::Execute()
                         static float norm = float(exp(expfactorn) - 1);
                         axis_value =
                                 float(expamountn * (exp(expfactorn * axis_value) - 1) / norm
-                                              + pamountn * pow(axis_value, pfactorn));
+                                        + pamountn * pow(axis_value, pfactorn));
                     } else if (nonlinear_throttle_combat && cpu->combat_mode) {
                         static float norm = float(exp(expfactorc) - 1);
                         axis_value =
                                 float(expamountc * (exp(expfactorc * axis_value) - 1) / norm
-                                              + pamountc * pow(axis_value, pfactorc));
+                                        + pamountc * pow(axis_value, pfactorc));
                     }
                     cpu->set_speed = axis_value * cpu->max_speed();
                     desired_velocity = Vector(0, 0, cpu->set_speed);
@@ -244,7 +242,6 @@ void FlyByJoystick::Execute()
     FlyByKeyboard::Execute(false);
 }
 
-FlyByJoystick::~FlyByJoystick()
-{
+FlyByJoystick::~FlyByJoystick() {
 }
 

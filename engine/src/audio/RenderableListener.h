@@ -73,8 +73,7 @@ public:
     };
 
     /** Get the attached listener */
-    Listener *getListener() const
-    {
+    Listener *getListener() const {
         return listener;
     }
 

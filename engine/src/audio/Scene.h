@@ -63,8 +63,7 @@ protected:
 public:
     virtual ~Scene();
 
-    const std::string &getName() const
-    {
+    const std::string &getName() const {
         return name;
     }
 

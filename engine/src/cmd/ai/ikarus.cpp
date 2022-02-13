@@ -44,13 +44,11 @@
 #include "ikarus.h"
 using namespace Orders;
 
-Ikarus::Ikarus() : AggressiveAI("default.agg.xml")
-{
+Ikarus::Ikarus() : AggressiveAI("default.agg.xml") {
     last_time = cur_time = 0;
 }
 
-void Ikarus::ExecuteStrategy(Unit *target)
-{
+void Ikarus::ExecuteStrategy(Unit *target) {
     WillFire(target);
     if (queryType(Order::FACING) == NULL) {
         //we have nothing to do now
@@ -59,9 +57,9 @@ void Ikarus::ExecuteStrategy(Unit *target)
     }
     if (queryType(Order::MOVEMENT) == NULL) {
         MatchLinearVelocity(true,
-                            Vector(0, 0, 10000),
-                            false,
-                            true);         //all ahead full! (not with afterburners but in local coords)
+                Vector(0, 0, 10000),
+                false,
+                true);         //all ahead full! (not with afterburners but in local coords)
         AddReplaceLastOrder(true);
     }
     //might want to enqueue both movement and facing at the same time as follows:
@@ -77,8 +75,7 @@ void Ikarus::ExecuteStrategy(Unit *target)
     }
 }
 
-void Ikarus::WillFire(Unit *target)
-{
+void Ikarus::WillFire(Unit *target) {
     bool missilelockp = false;
     if (ShouldFire(target, missilelockp)) {
         // this is a function from fire.cpp  you probably want to write a better one
@@ -95,8 +92,7 @@ void Ikarus::WillFire(Unit *target)
 }
 
 ///you should certainly edit this!!
-void Ikarus::DecideTarget()
-{
+void Ikarus::DecideTarget() {
     Unit *targ = parent->Target();
     if (!targ || /*some other qualifying factor for changing targets*/ 0) {
         Unit *un = NULL;
@@ -110,8 +106,7 @@ void Ikarus::DecideTarget()
 }
 
 ///you can ignore the function below unless it causes problems...this merely makes it so that the AI responds to your commands
-void Ikarus::Execute()
-{
+void Ikarus::Execute() {
     Flightgroup *fg = parent->getFlightgroup();
     ReCommandWing(fg);
     CommunicatingAI::Execute();

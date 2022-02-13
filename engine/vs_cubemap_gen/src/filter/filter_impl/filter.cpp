@@ -22,12 +22,10 @@
 
 #include "../filter.h"
 
-void filter::init_constants()
-{
+void filter::init_constants() {
 }
 
-void filter::do_it()
-{
+void filter::do_it() {
     filter_one_texel flt_one_tex(source_, target_, shininess_);
     fvector v;
     for (size_t s = eLeft; s < eBack; ++s) {

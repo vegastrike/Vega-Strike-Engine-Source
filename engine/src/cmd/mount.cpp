@@ -46,8 +46,7 @@
 
 extern char SERVER;
 
-Mount::Mount()
-{
+Mount::Mount() {
     static WeaponInfo wi(WEAPON_TYPE::BEAM);
     functionality = 1;
     maxfunctionality = 1;
@@ -68,15 +67,13 @@ Mount::Mount()
 
 extern double interpolation_blend_factor;
 
-void DestroyMount(Mount *mount)
-{
+void DestroyMount(Mount *mount) {
     mount->UnFire();
     AUDStopPlaying(mount->sound);
     mount->status = Mount::DESTROYED;
 }
 
-float Mount::ComputeAnimatedFrame(Mesh *gun)
-{
+float Mount::ComputeAnimatedFrame(Mesh *gun) {
     if (type->type == WEAPON_TYPE::BEAM) {
         if (ref.gun) {
             if (ref.gun->Ready()) {
@@ -98,8 +95,7 @@ float Mount::ComputeAnimatedFrame(Mesh *gun)
 }
 
 Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscale, float func, float maxfunc,
-             bool banked) : bank(banked)
-{
+        bool banked) : bank(banked) {
     //short fix
     functionality = func;
     maxfunctionality = maxfunc;
@@ -139,13 +135,11 @@ Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscal
 
 extern bool AdjustMatrix(Matrix &mat, const Vector &velocity, Unit *target, float speed, bool lead, float cone);
 
-void AdjustMatrixToTrackTarget(Matrix &mat, const Vector &velocity, Unit *target, float speed, bool lead, float cone)
-{
+void AdjustMatrixToTrackTarget(Matrix &mat, const Vector &velocity, Unit *target, float speed, bool lead, float cone) {
     AdjustMatrix(mat, velocity, target, speed, lead, cone);
 }
 
-void Mount::UnFire()
-{
+void Mount::UnFire() {
     processed = UNFIRED;
     if (status != ACTIVE || ref.gun == NULL || type->type != WEAPON_TYPE::BEAM) {
         return;
@@ -153,8 +147,7 @@ void Mount::UnFire()
     ref.gun->Destabilize();
 }
 
-void Mount::ReplaceMounts(Unit *un, const Mount *other)
-{
+void Mount::ReplaceMounts(Unit *un, const Mount *other) {
     int thisvol = volume;     //short fix
     int thissize = size;     //short fix
     float xyscale = this->xyscale;
@@ -183,8 +176,7 @@ void Mount::ReplaceMounts(Unit *un, const Mount *other)
     un->setAverageGunSpeed();
 }
 
-double Mount::Percentage(const Mount *newammo) const
-{
+double Mount::Percentage(const Mount *newammo) const {
     float percentage = 1. / 1024;
     int thingstocompare = 0;
     if (status == UNCHOSEN || status == DESTROYED) {
@@ -240,15 +232,14 @@ extern void GetMadAt(Unit *un, Unit *parent, int numhits = 0);
 
 //bool returns whether to refund the cost of firing
 bool Mount::PhysicsAlignedFire(Unit *caller,
-                               const Transformation &Cumulative,
-                               const Matrix &m,
-                               const Vector &velocity,
-                               void *owner,
-                               Unit *target,
-                               signed char autotrack,
-                               float trackingcone,
-                               CollideMap::iterator hint[])
-{
+        const Transformation &Cumulative,
+        const Matrix &m,
+        const Vector &velocity,
+        void *owner,
+        Unit *target,
+        signed char autotrack,
+        float trackingcone,
+        CollideMap::iterator hint[]) {
     using namespace VSFileSystem;
     if (time_to_lock > 0) {
         target = NULL;
@@ -310,10 +301,10 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
             case WEAPON_TYPE::BOLT:
                 caller->energy -= type->energy_rate;
                 hint[Unit::UNIT_BOLT] = Bolt(type,
-                                             mat,
-                                             velocity,
-                                             owner,
-                                             hint[Unit::UNIT_BOLT]).location;             //FIXME turrets won't work! Velocity
+                        mat,
+                        velocity,
+                        owner,
+                        hint[Unit::UNIT_BOLT]).location;             //FIXME turrets won't work! Velocity
                 break;
 
             case WEAPON_TYPE::BALL: {
@@ -352,14 +343,14 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                     if (testfg->name == "Base") {
                         int fgsnumber = 0;
                         Flightgroup *fg = Flightgroup::newFlightgroup("Base_Patrol",
-                                                                      type->file,
-                                                                      FactionUtil::GetFactionName(caller->faction),
-                                                                      "deafult",
-                                                                      1,
-                                                                      1,
-                                                                      "",
-                                                                      "",
-                                                                      mission);
+                                type->file,
+                                FactionUtil::GetFactionName(caller->faction),
+                                "deafult",
+                                1,
+                                1,
+                                "",
+                                "",
+                                mission);
                         if (fg != NULL) {
                             fg->target.SetUnit(caller->Target());
                             fg->directive = "a";
@@ -442,10 +433,10 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         double distancesqr = (tmp.position - AUDListenerLocation()).MagnitudeSquared();
         static double maxdistancesqr =
                 XMLSupport::parse_float(vs_config->getVariable("audio", "max_range_to_hear_weapon_fire",
-                                                               "100000"))
+                        "100000"))
                         * XMLSupport::parse_float(vs_config->getVariable("audio",
-                                                                         "max_range_to_hear_weapon_fire",
-                                                                         "100000"));
+                                "max_range_to_hear_weapon_fire",
+                                "100000"));
         static float weapon_gain =
                 XMLSupport::parse_float(vs_config->getVariable("audio", "weapon_gain", ".25"));
         static float exterior_weapon_gain =
@@ -506,8 +497,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
     return true;
 }
 
-bool Mount::NextMountCloser(Mount *nextmount, Unit *firer)
-{
+bool Mount::NextMountCloser(Mount *nextmount, Unit *firer) {
     Unit *target;
     if (nextmount && (target = firer->Target())) {
         Matrix mat;
@@ -524,8 +514,7 @@ bool Mount::NextMountCloser(Mount *nextmount, Unit *firer)
     return false;
 }
 
-bool Mount::Fire(Unit *firer, void *owner, bool Missile, bool listen_to_owner)
-{
+bool Mount::Fire(Unit *firer, void *owner, bool Missile, bool listen_to_owner) {
     if (ammo == 0) {
         processed = UNFIRED;
     }
@@ -555,8 +544,7 @@ bool Mount::Fire(Unit *firer, void *owner, bool Missile, bool listen_to_owner)
     return false;
 }
 
-void Mount::PhysicsAlignedUnfire()
-{
+void Mount::PhysicsAlignedUnfire() {
     //Stop Playing SOund?? No, that's done in the beam, must not be aligned
     if (processed == UNFIRED) {
         if (AUDIsPlaying(sound)) {
@@ -565,13 +553,11 @@ void Mount::PhysicsAlignedUnfire()
     }
 }
 
-void Mount::ReplaceSound()
-{
+void Mount::ReplaceSound() {
     sound = AUDCreateSound(sound, false);     //copy constructor basically
 }
 
-void Mount::Activate(bool Missile)
-{
+void Mount::Activate(bool Missile) {
     if (type->isMissile() == Missile) {
         if (status == INACTIVE) {
             status = ACTIVE;
@@ -580,8 +566,7 @@ void Mount::Activate(bool Missile)
 }
 
 ///Sets this gun to inactive, unless unchosen or destroyed
-void Mount::DeActive(bool Missile)
-{
+void Mount::DeActive(bool Missile) {
     if (type->isMissile() == Missile) {
         if (status == ACTIVE) {
             status = INACTIVE;
@@ -589,13 +574,11 @@ void Mount::DeActive(bool Missile)
     }
 }
 
-void Mount::SetMountPosition(const Vector &v)
-{
+void Mount::SetMountPosition(const Vector &v) {
     pos = v;
 }
 
-void Mount::SetMountOrientation(const Quaternion &t)
-{
+void Mount::SetMountOrientation(const Quaternion &t) {
     orient = t;
 }
 

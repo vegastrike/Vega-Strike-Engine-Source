@@ -57,14 +57,12 @@ using std::vector;
 class Faction;
 extern vector<boost::shared_ptr<Faction> > factions;
 
-StarDate::StarDate()
-{
+StarDate::StarDate() {
     initial_time = mission->getGametime();
     initial_star_time = nullptr;
 }
 
-void StarDate::Init(double time)
-{
+void StarDate::Init(double time) {
     if (initial_star_time != nullptr) {
         delete[] initial_star_time;
         initial_star_time = nullptr;
@@ -77,8 +75,7 @@ void StarDate::Init(double time)
 }
 
 //Get the current StarDate time in seconds
-double StarDate::GetCurrentStarTime(int faction)
-{
+double StarDate::GetCurrentStarTime(int faction) {
     //Get the number of seconds elapsed since the server start
     double time_since_server_started = mission->getGametime() - initial_time;
     //Add them to the current date
@@ -91,8 +88,7 @@ double StarDate::GetCurrentStarTime(int faction)
 
 //Needed to calculate relative message and mission times
 //into stardate
-double StarDate::GetElapsedStarTime(int faction)
-{
+double StarDate::GetElapsedStarTime(int faction) {
     if (initial_star_time == nullptr) {
         return initial_time;
     } else {
@@ -106,8 +102,7 @@ double StarDate::GetElapsedStarTime(int faction)
  *********************************************************************************
  */
 
-void StarDate::InitTrek(string date)
-{
+void StarDate::InitTrek(string date) {
     if (initial_star_time != nullptr) {
         //we must be reinitializing;
         delete[] initial_star_time;
@@ -128,8 +123,7 @@ void StarDate::InitTrek(string date)
 /// The hour has 60 minutes and the day has 100 hours
 
 //Convert a StarDate time into a Stardate string
-string StarDate::ConvertFullTrekDate(double date)
-{
+string StarDate::ConvertFullTrekDate(double date) {
     unsigned int days, hours, minutes, seconds;
     char cdate[32];
 
@@ -154,8 +148,7 @@ string StarDate::ConvertFullTrekDate(double date)
     return string(cdate);
 }
 
-string StarDate::ConvertTrekDate(double date)
-{
+string StarDate::ConvertTrekDate(double date) {
     unsigned int days, hours, minutes;
     char cdate[32];
 
@@ -172,8 +165,7 @@ string StarDate::ConvertTrekDate(double date)
 }
 
 //Convert a StarDate into a number of seconds
-double StarDate::ConvertTrekDate(string date)
-{
+double StarDate::ConvertTrekDate(string date) {
     unsigned int days, hours, minutes, tmphrs, seconds, nb, pos;
     double res;
     //Replace the dot with 'a' so sscanf won't take it for a decimal symbol
@@ -195,20 +187,17 @@ double StarDate::ConvertTrekDate(string date)
 }
 
 //Get the current StarDate in a string
-string StarDate::GetFullTrekDate(int faction)
-{
+string StarDate::GetFullTrekDate(int faction) {
     return ConvertFullTrekDate(this->GetCurrentStarTime(faction));
 }
 
 //Get the current StarDate in a string - short format
-string StarDate::GetTrekDate(int faction)
-{
+string StarDate::GetTrekDate(int faction) {
     return ConvertTrekDate(this->GetCurrentStarTime(faction));
 }
 
 //Convert the string xxxx.y date format into a float representing the same data xxxx.y
-float StarDate::GetFloatFromTrekDate(int faction)
-{
+float StarDate::GetFloatFromTrekDate(int faction) {
     float float_date;
     string cur_date = this->GetFullTrekDate(faction);
     sscanf(cur_date.c_str(), "%f", &float_date);
@@ -222,17 +211,14 @@ float StarDate::GetFloatFromTrekDate(int faction)
  *********************************************************************************
  */
 
-void InitSDate(string date)
-{
+void InitSDate(string date) {
 }
 
-string GetSDate(int faction = 0)
-{
+string GetSDate(int faction = 0) {
     return string("");
 }
 
-string GetFullSDate(int faction = 0)
-{
+string GetFullSDate(int faction = 0) {
     return string("");
 }
 
@@ -242,12 +228,10 @@ string GetFullSDate(int faction = 0)
  *********************************************************************************
  */
 
-string SDateFromTrekDate(string trekdate)
-{
+string SDateFromTrekDate(string trekdate) {
     return string("");
 }
 
-string TrekDateFromSDate(string sdate)
-{
+string TrekDateFromSDate(string sdate) {
     return string("");
 }

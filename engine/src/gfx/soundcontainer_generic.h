@@ -55,18 +55,15 @@ public:
     explicit SoundContainer(const std::string &soundfile, bool looping = false, float gain = 1.0f);
     explicit SoundContainer(const StringPool::Reference &soundfile, bool looping = false, float gain = 1.0f);
 
-    const std::string &getSoundFile() const
-    {
+    const std::string &getSoundFile() const {
         return soundFile.get();
     }
 
-    const bool isLooping() const
-    {
+    const bool isLooping() const {
         return looping;
     }
 
-    const bool getGain() const
-    {
+    const bool getGain() const {
         return gain;
     }
 

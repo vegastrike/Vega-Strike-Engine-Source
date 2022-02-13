@@ -63,29 +63,25 @@ class UnitHash3d {
 
 ///hashes 3 values into the appropriate spot in the hash table
 
-    static void hash_vec(double i, double j, double k, int &x, int &y, int &z)
-    {
+    static void hash_vec(double i, double j, double k, int &x, int &y, int &z) {
         x = hash_int(i);
         y = hash_int(j);
         z = hash_int(k);
     }
 
 ///hashes 3 vals into the appropriate place in hash table
-    static void hash_vec(const QVector &t, int &x, int &y, int &z)
-    {
+    static void hash_vec(const QVector &t, int &x, int &y, int &z) {
         hash_vec(t.i, t.j, t.k, x, y, z);
     }
 
 public:
-    UnitHash3d(StarSystem *ss)
-    {
+    UnitHash3d(StarSystem *ss) {
         activeStarSystem = ss;
         active_huge = &ha;
         accum_huge = &hb;
     }
 
-    void SwapHugeAccum()
-    {
+    void SwapHugeAccum() {
         if (active_huge == &ha) {
             active_huge = &hb;
             accum_huge = &ha;
@@ -98,8 +94,7 @@ public:
         acc_huge.clear();
     }
 
-    void AddHugeToActive(Unit *un)
-    {
+    void AddHugeToActive(Unit *un) {
         if (acc_huge.find(un) == acc_huge.end()) {
             acc_huge.insert(un);
             accum_huge->prepend(un);
@@ -111,16 +106,14 @@ public:
     }
 
 ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
-    static int hash_int(const double aye)
-    {
+    static int hash_int(const double aye) {
         return ((int) (((aye < 0) ? (aye
                 - COLLIDETABLEACCURACY) : aye)
                 / COLLIDETABLEACCURACY)) % (COLLIDETABLESIZE / 2) + (COLLIDETABLESIZE / 2);
     }
 
 ///clears entire table
-    void Clear()
-    {
+    void Clear() {
         if (!hugeobjects.empty()) {
             hugeobjects.clear();
         }
@@ -144,8 +137,7 @@ public:
     }
 
 ///returns any objects residing in the sector occupied by Exact
-    int Get(const QVector &Exact, UnitCollection *retval[], bool GetHuge)
-    {
+    int Get(const QVector &Exact, UnitCollection *retval[], bool GetHuge) {
         retval[1] = &table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
         retval[0] = active_huge;
         if (GetHuge) {
@@ -155,14 +147,12 @@ public:
     }
 
 ///Returns all objects too big to be conveniently fit in the array
-    UnitCollection &GetHuge()
-    {
+    UnitCollection &GetHuge() {
         return hugeobjects;
     }
 
 ///Returns all objects within sector(s) occupied by target
-    int Get(const LineCollide *target, UnitCollection *retval[], bool GetHuge)
-    {
+    int Get(const LineCollide *target, UnitCollection *retval[], bool GetHuge) {
         unsigned int sizer = 1;
         double maxx = (ceil(target->Maxi.i / COLLIDETABLEACCURACY)) * COLLIDETABLEACCURACY;
         double maxy = (ceil(target->Maxi.j / COLLIDETABLEACCURACY)) * COLLIDETABLEACCURACY;
@@ -205,8 +195,7 @@ public:
     }
 
 ///Adds objectToPut into collide table with limits specified by target.
-    void Put(LineCollide *target, Unit *objectToPut)
-    {
+    void Put(LineCollide *target, Unit *objectToPut) {
         int x, y, z;
         double maxx = (ceil(target->Maxi.i / COLLIDETABLEACCURACY)) * COLLIDETABLEACCURACY;
         double maxy = (ceil(target->Maxi.j / COLLIDETABLEACCURACY)) * COLLIDETABLEACCURACY;
@@ -226,10 +215,10 @@ public:
         }
         if (fabs((maxx
                 - minx)
-                         * (maxy
-                                 - miny)
-                         * (maxz
-                                 - minz)) > ((double) COLLIDETABLEACCURACY) * ((double) COLLIDETABLEACCURACY)
+                * (maxy
+                        - miny)
+                * (maxz
+                        - minz)) > ((double) COLLIDETABLEACCURACY) * ((double) COLLIDETABLEACCURACY)
                 * ((double) COLLIDETABLEACCURACY)
                 * ((double) HUGEOBJECT)) {
             target->hhuge = true;
@@ -250,13 +239,11 @@ public:
         }
     }
 
-    static bool removeFromVector(UnitCollection &myvector, Unit *objectToKill)
-    {
+    static bool removeFromVector(UnitCollection &myvector, Unit *objectToKill) {
         return (myvector.remove(objectToKill));
     }
 
-    bool Eradicate(Unit *objectToKill)
-    {
+    bool Eradicate(Unit *objectToKill) {
         bool ret = removeFromVector(hugeobjects, objectToKill);
         for (unsigned int i = 0; i <= COLLIDETABLESIZE - 1; i++) {
             for (unsigned int j = 0; j <= COLLIDETABLESIZE - 1; j++) {
@@ -269,8 +256,7 @@ public:
     }
 
 ///Removes objectToKill from collide table with span of Target
-    bool Remove(const LineCollide *target, Unit *objectToKill)
-    {
+    bool Remove(const LineCollide *target, Unit *objectToKill) {
         bool ret = false;
         int x, y, z;
         double maxx = (ceil(target->Maxi.i / COLLIDETABLEACCURACY)) * COLLIDETABLEACCURACY;
@@ -313,12 +299,10 @@ const int coltablesize = 20;
 class CollideTable {
     unsigned int blocupdate;
 public:
-    CollideTable(StarSystem *ss) : blocupdate(0), c(ss)
-    {
+    CollideTable(StarSystem *ss) : blocupdate(0), c(ss) {
     }
 
-    void Update()
-    {
+    void Update() {
         ++blocupdate;
     }
 
@@ -338,13 +322,12 @@ struct collideTrees {
 
     csOPCODECollider *rapidColliders[collideTreesMaxTrees];
 
-    bool usingColTree() const
-    {
+    bool usingColTree() const {
         return rapidColliders[0] != NULL;
     }
 
     csOPCODECollider *colTree(Unit *un,
-                              const Vector &othervelocity);     //gets the appropriately scaled unit collide tree
+            const Vector &othervelocity);     //gets the appropriately scaled unit collide tree
 
     // Not sure at the moment where we decide to collide to the shield ...since all we ever compare to is colTree in Collide()
     // Yet, this is used somewhere.
@@ -353,8 +336,7 @@ struct collideTrees {
     int refcount;
     collideTrees(const std::string &hk, csOPCODECollider *cT, csOPCODECollider *cS);
 
-    void Inc()
-    {
+    void Inc() {
         refcount++;
     }
 

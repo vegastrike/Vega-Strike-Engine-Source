@@ -38,8 +38,7 @@
 
 using namespace FactionUtil;
 
-Faction::~Faction()
-{
+Faction::~Faction() {
     delete[] factionname;
     if (contraband.get()) {
         contraband->Kill();
@@ -47,8 +46,7 @@ Faction::~Faction()
     delete logo;
 }
 
-Texture *FactionUtil::getForceLogo(int faction)
-{
+Texture *FactionUtil::getForceLogo(int faction) {
     boost::shared_ptr<Faction> fac = factions[faction];
     if (fac->logo == 0) {
         if (!fac->logoName.empty()) {
@@ -65,8 +63,7 @@ Texture *FactionUtil::getForceLogo(int faction)
 }
 
 //fixme--add squads in here
-Texture *FactionUtil::getSquadLogo(int faction)
-{
+Texture *FactionUtil::getSquadLogo(int faction) {
     boost::shared_ptr<Faction> fac = factions[faction];
     if (fac->secondaryLogo == 0) {
         if (!fac->secondaryLogoName.empty()) {
@@ -83,21 +80,18 @@ Texture *FactionUtil::getSquadLogo(int faction)
     return factions[faction]->secondaryLogo;
 }
 
-int FactionUtil::GetNumAnimation(int faction)
-{
+int FactionUtil::GetNumAnimation(int faction) {
     return factions[faction]->comm_faces.size();
 }
 
 //COMES FROM FACTION_XML.CPP
 
-std::vector<Animation *> *FactionUtil::GetAnimation(int faction, int n, unsigned char &sex)
-{
+std::vector<Animation *> *FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
     sex = factions[faction]->comm_face_sex[n];
     return &factions[faction]->comm_faces[n].animations;
 }
 
-std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *un, unsigned char &sex)
-{
+std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *un, unsigned char &sex) {
     bool dockable = UnitUtil::isDockableUnit(un);
     bool base = UnitUtil::getFlightgroupName(un) == "Base";
     int siz = factions[faction]->comm_faces.size();
@@ -116,13 +110,13 @@ std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *u
             }
             if (tmp->base == Faction::comm_face_t::CYES && base) {
                 return GetAnimation(faction,
-                                    ind,
-                                    sex);                  //bases may be dockable but we have set dockable_only to no
+                        ind,
+                        sex);                  //bases may be dockable but we have set dockable_only to no
             }
         }
         VS_LOG(error,
-               (boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") % faction
-                       % ((int) base) % ((int) dockable)));
+                (boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") % faction
+                        % ((int) base) % ((int) dockable)));
         return GetAnimation(faction, rand() % siz, sex);
     } else {
         sex = 0;
@@ -130,8 +124,7 @@ std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *u
     }
 }
 
-Animation *FactionUtil::GetRandExplosionAnimation(int whichfaction, std::string &which)
-{
+Animation *FactionUtil::GetRandExplosionAnimation(int whichfaction, std::string &which) {
     if (whichfaction < (int) factions.size()) {
         if (factions[whichfaction]->explosion_name.size()) {
             int whichexp = rand() % factions[whichfaction]->explosion_name.size();
@@ -142,8 +135,7 @@ Animation *FactionUtil::GetRandExplosionAnimation(int whichfaction, std::string 
     return NULL;
 }
 
-void FactionUtil::LoadFactionPlaylists()
-{
+void FactionUtil::LoadFactionPlaylists() {
     for (unsigned int i = 0; i < factions.size(); i++) {
         string fac = FactionUtil::GetFaction(i);
         fac += ".m3u";
@@ -151,13 +143,11 @@ void FactionUtil::LoadFactionPlaylists()
     }
 }
 
-Animation *FactionUtil::createAnimation(const char *anim)
-{
+Animation *FactionUtil::createAnimation(const char *anim) {
     return new Animation(anim);
 }
 
-Texture *FactionUtil::createTexture(const char *tex, bool force)
-{
+Texture *FactionUtil::createTexture(const char *tex, bool force) {
     if (force) {
         return new Texture(tex, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE);
     } else {
@@ -165,8 +155,7 @@ Texture *FactionUtil::createTexture(const char *tex, bool force)
     }
 }
 
-Texture *FactionUtil::createTexture(const char *tex, const char *tmp, bool force)
-{
+Texture *FactionUtil::createTexture(const char *tex, const char *tmp, bool force) {
     if (force) {
         return new Texture(tex, tmp, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0, GFXTRUE);
     } else {

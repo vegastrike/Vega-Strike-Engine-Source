@@ -158,30 +158,30 @@ public:
             enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
             Texture *main = 0);
     void Load(const char *,
-              const char *,
-              int stage = 0,
-              enum FILTER mipmap = MIPMAP,
-              enum TEXTURE_TARGET target = TEXTURE2D,
-              enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
-              float alpha = 1,
-              int zeroval = 0,
-              GFXBOOL force = GFXFALSE,
-              int max_dimension_size = 65536,
-              GFXBOOL detail_texture = GFXFALSE,
-              GFXBOOL nocache = false,
-              enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-              Texture *main = 0);
+            const char *,
+            int stage = 0,
+            enum FILTER mipmap = MIPMAP,
+            enum TEXTURE_TARGET target = TEXTURE2D,
+            enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
+            float alpha = 1,
+            int zeroval = 0,
+            GFXBOOL force = GFXFALSE,
+            int max_dimension_size = 65536,
+            GFXBOOL detail_texture = GFXFALSE,
+            GFXBOOL nocache = false,
+            enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
+            Texture *main = 0);
     void Load(const char *FileName,
-              int stage = 0,
-              enum FILTER mipmap = MIPMAP,
-              enum TEXTURE_TARGET target = TEXTURE2D,
-              enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
-              GFXBOOL force = GFXFALSE,
-              int max_dimension_size = 65536,
-              GFXBOOL detail_texture = GFXFALSE,
-              GFXBOOL nocache = false,
-              enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-              Texture *main = 0);
+            int stage = 0,
+            enum FILTER mipmap = MIPMAP,
+            enum TEXTURE_TARGET target = TEXTURE2D,
+            enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
+            GFXBOOL force = GFXFALSE,
+            int max_dimension_size = 65536,
+            GFXBOOL detail_texture = GFXFALSE,
+            GFXBOOL nocache = false,
+            enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
+            Texture *main = 0);
     virtual const Texture *Original() const;
     virtual Texture *Original();
     virtual Texture *Clone();
@@ -192,62 +192,50 @@ public:
     ///Destructor for texture
     virtual ~Texture();
 
-    virtual unsigned int numFrames() const
-    {
+    virtual unsigned int numFrames() const {
         return 1;
     }                                               //Number of frames in an animated texture (or, rather, keyframes)
 
-    virtual double curTime() const
-    {
+    virtual double curTime() const {
         return 0;
     }                                       //Current time of an animated texture
 
-    virtual void setTime(double tim)
-    {
+    virtual void setTime(double tim) {
     }
 
-    virtual float framesPerSecond() const
-    {
+    virtual float framesPerSecond() const {
         return 0;
     }                                               //Frames per second, if applicable.
 
-    virtual unsigned int numLayers() const
-    {
+    virtual unsigned int numLayers() const {
         return 1;
     }                                               //Number of layers in the texture. If more than 1, makeActive() sets up multitexturing units, and other use of multitexture units, other than [stage..stage+numLayers), should be avoided. If not enough multitexturing units are available, special fall-back mechanisms should be implmemented by MakeActive() so that it still renders as correctly as possible. In that case, canMultiPass(), numPasses() and MakeActive(stage,pass) could be used to process in multipass mode (one stage at a time, or a stage group at a time, depending on fallback implementation), if possible.
 
-    virtual unsigned int numPasses() const
-    {
+    virtual unsigned int numPasses() const {
         return 1;
     }                                               //Number of passes when on multipass rendering.
 
-    virtual bool canMultiPass() const
-    {
+    virtual bool canMultiPass() const {
         return true;
     }                                             //True, if full functionality can be achieved after multipass rendering. If false, fallback rendering must be possible by multipass (or singlepass) rendering. True, also, if texturing units are sufficient for singlepass rendering.
 
-    virtual bool constFrameRate() const
-    {
+    virtual bool constFrameRate() const {
         return true;
     }                                               //If frames advance at a regular rate - keyframe based animations would return false.
 
-    int getStage() const
-    {
+    int getStage() const {
         return stage;
     }
 
-    int getFilter() const
-    {
+    int getFilter() const {
         return ismipmapped;
     }
 
-    int getTarget() const
-    {
+    int getTarget() const {
         return texture_target;
     }
 
-    int getImageTarget() const
-    {
+    int getImageTarget() const {
         return image_target;
     }
 
@@ -267,31 +255,26 @@ public:
     void setReference(Texture *other);
 
     ///Binds the texture in the GFX library
-    virtual void MakeActive()
-    {
+    virtual void MakeActive() {
         MakeActive(this->stage, 0);
     }                                                      //Assumes stage=this->stage, pass=0
 
-    virtual void MakeActive(int stage)
-    {
+    virtual void MakeActive(int stage) {
         MakeActive(stage, 0);
     }                                                         //Assumes pass=0
 
     virtual void MakeActive(int stage, int pass);
 
-    virtual bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst)
-    {
+    virtual bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst) {
         return SetupPass(pass, stage, src, dst);
     }                                                                                                                            //If one is going to perform multipass rendering of this texture, the Texture() must handle blending - SetupPass() sets up blending. If it returns false, then blending is not compatible with the requested blend mode emulation. One may assume that if numPasses()==1, no SetupPass() is needed. pass==-1 means restore setup. You should call it after multipass rendering.
 
-    virtual bool SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst)
-    {
+    virtual bool SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst) {
         return true;
     }                                                                                                              //If one is going to perform multipass rendering of this texture, the Texture() must handle blending - SetupPass() sets up blending. If it returns false, then blending is not compatible with the requested blend mode emulation. One may assume that if numPasses()==1, no SetupPass() is needed. pass==-1 means restore setup. You should call it after multipass rendering.
 
     ///If the texture has loaded properly returns true
-    virtual bool LoadSuccess()
-    {
+    virtual bool LoadSuccess() {
         return name >= 0;
     }
 

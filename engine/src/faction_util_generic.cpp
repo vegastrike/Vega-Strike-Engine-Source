@@ -37,22 +37,19 @@ int FactionUtil::upgradefac = 0;
 int FactionUtil::planetfac = 0;
 int FactionUtil::neutralfac = 0;
 
-FSM *FactionUtil::GetConversation(int Myfaction, int TheirFaction)
-{
+FSM *FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
     assert(factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
     return factions[Myfaction]->faction[TheirFaction].conversation.get();
 }
 
-const char *FactionUtil::GetFaction(int i)
-{
+const char *FactionUtil::GetFaction(int i) {
     if (i >= 0 && i < (int) factions.size()) {
         return factions[i]->factionname;
     }
     return "";
 }
 
-static int GetFactionLookup(const char *factionname)
-{
+static int GetFactionLookup(const char *factionname) {
 #ifdef _MSC_VER
     #define strcasecmp stricmp
 #endif
@@ -64,8 +61,7 @@ static int GetFactionLookup(const char *factionname)
     return 0;
 }
 
-Unit *FactionUtil::GetContraband(int faction)
-{
+Unit *FactionUtil::GetContraband(int faction) {
     return factions[faction]->contraband.get();
 }
 
@@ -74,8 +70,7 @@ Unit *FactionUtil::GetContraband(int faction)
  * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
  * -1 is mad. <0 will attack
  */
-int FactionUtil::GetFactionIndex(const string &name)
-{
+int FactionUtil::GetFactionIndex(const string &name) {
     static Hashtable<string, int, 47> factioncache;
     int *tmp = factioncache.Get(name);
     if (tmp) {
@@ -88,18 +83,15 @@ int FactionUtil::GetFactionIndex(const string &name)
     return i;
 }
 
-bool FactionUtil::isCitizenInt(int faction)
-{
+bool FactionUtil::isCitizenInt(int faction) {
     return factions[faction]->citizen;
 }
 
-bool FactionUtil::isCitizen(const std::string &name)
-{
+bool FactionUtil::isCitizen(const std::string &name) {
     return isCitizenInt(GetFactionIndex(name));
 }
 
-string FactionUtil::GetFactionName(int index)
-{
+string FactionUtil::GetFactionName(int index) {
     const char *tmp = GetFaction(index);
     if (tmp) {
         return tmp;
@@ -108,8 +100,7 @@ string FactionUtil::GetFactionName(int index)
     return nullstr;
 }
 
-static bool isPlayerFaction(const int MyFaction)
-{
+static bool isPlayerFaction(const int MyFaction) {
     unsigned int numplayers = _Universe->numPlayers();
     for (unsigned int i = 0; i < numplayers; ++i) {
         Unit *un = _Universe->AccessCockpit(i)->GetParent();
@@ -122,8 +113,7 @@ static bool isPlayerFaction(const int MyFaction)
     return false;
 }
 
-void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction, float factor, float rank)
-{
+void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction, float factor, float rank) {
     assert(factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
     if (strcmp(factions[Myfaction]->factionname, "neutral") != 0) {
         if (strcmp(factions[Myfaction]->factionname, "upgrades") != 0) {
@@ -152,23 +142,19 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
     }
 }
 
-int FactionUtil::GetPlaylist(const int myfaction)
-{
+int FactionUtil::GetPlaylist(const int myfaction) {
     return factions[myfaction]->playlist;     //can be -1
 }
 
-const float *FactionUtil::GetSparkColor(const int myfaction)
-{
+const float *FactionUtil::GetSparkColor(const int myfaction) {
     return factions[myfaction]->sparkcolor;     //can be -1
 }
 
-unsigned int FactionUtil::GetNumFactions()
-{
+unsigned int FactionUtil::GetNumFactions() {
     return factions.size();
 }
 
-void FactionUtil::SerializeFaction(FILE *fp)
-{
+void FactionUtil::SerializeFaction(FILE *fp) {
     for (unsigned int i = 0; i < factions.size(); i++) {
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
             VSFileSystem::vs_fprintf(fp, "%g ", factions[i]->faction[j].relationship);
@@ -177,8 +163,7 @@ void FactionUtil::SerializeFaction(FILE *fp)
     }
 }
 
-string FactionUtil::SerializeFaction()
-{
+string FactionUtil::SerializeFaction() {
     char temp[8192];
     string ret("");
     for (unsigned int i = 0; i < factions.size(); i++) {
@@ -192,8 +177,7 @@ string FactionUtil::SerializeFaction()
     return ret;
 }
 
-int FactionUtil::numnums(const char *str)
-{
+int FactionUtil::numnums(const char *str) {
     int count = 0;
     for (int i = 0; str[i]; i++) {
         count += (str[i] >= '0' && str[i] <= '9') ? 1 : 0;
@@ -201,8 +185,7 @@ int FactionUtil::numnums(const char *str)
     return count;
 }
 
-void FactionUtil::LoadSerializedFaction(FILE *fp)
-{
+void FactionUtil::LoadSerializedFaction(FILE *fp) {
     for (unsigned int i = 0; i < factions.size(); i++) {
         char *tmp = new char[24 * factions[i]->faction.size()];
         fgets(tmp, 24 * factions[i]->faction.size() - 1, fp);
@@ -235,8 +218,7 @@ void FactionUtil::LoadSerializedFaction(FILE *fp)
     }
 }
 
-bool whitespaceNewline(char *inp)
-{
+bool whitespaceNewline(char *inp) {
     for (; *inp; inp++) {
         if (inp[0] == '\n' || inp[0] == '\r') {
             return true;
@@ -250,8 +232,7 @@ bool whitespaceNewline(char *inp)
 
 string savedFactions;
 
-void FactionUtil::LoadSerializedFaction(char *&buf)
-{
+void FactionUtil::LoadSerializedFaction(char *&buf) {
     if (buf == NULL) {
         char *bleh = strdup(savedFactions.c_str());
         char *blah = bleh;

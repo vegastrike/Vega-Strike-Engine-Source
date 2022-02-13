@@ -40,31 +40,25 @@ namespace Audio {
 
 using std::min;
 
-Stream::Stream(const std::string &path)
-{
+Stream::Stream(const std::string &path) {
 }
 
-Stream::~Stream()
-{
+Stream::~Stream() {
 }
 
-double Stream::getLength()
-{
+double Stream::getLength() {
     return getLengthImpl();
 }
 
-double Stream::getPosition() const
-{
+double Stream::getPosition() const {
     return getPositionImpl();
 }
 
-void Stream::seek(double position)
-{
+void Stream::seek(double position) {
     seekImpl(position);
 }
 
-unsigned int Stream::read(void *buffer, unsigned int bufferSize)
-{
+unsigned int Stream::read(void *buffer, unsigned int bufferSize) {
     void *rbuffer;
     void *rbufferEnd;
     unsigned int rbufferSize;
@@ -88,8 +82,8 @@ unsigned int Stream::read(void *buffer, unsigned int bufferSize)
         }
 
         size_t remaining = min(bufferSize,
-                               (unsigned int) ((char *) rbufferEnd
-                                       - (char *) curBufferPos)); //is there no std::ptrdiff?
+                (unsigned int) ((char *) rbufferEnd
+                        - (char *) curBufferPos)); //is there no std::ptrdiff?
         memcpy(buffer, curBufferPos, remaining);
         buffer = (void *) ((char *) buffer + remaining);
         curBufferPos = (void *) ((char *) curBufferPos + remaining);

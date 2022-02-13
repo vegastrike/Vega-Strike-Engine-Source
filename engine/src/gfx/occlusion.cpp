@@ -63,8 +63,7 @@ class Occluder {
     float maxOcclusionDistance;
     float occlusionRating;
 
-    void computeOcclusionRating()
-    {
+    void computeOcclusionRating() {
         double distanceSq = (pos - light).MagnitudeSquared();
         double maxSq = maxOcclusionDistance * maxOcclusionDistance;
         if (distanceSq >= maxSq) {
@@ -80,8 +79,7 @@ class Occluder {
         }
     }
 
-    void computeMaxOcclusionDistance()
-    {
+    void computeMaxOcclusionDistance() {
         double distance = (pos - light).Magnitude() - rSize - lightSize;
         float inner = (rSize - lightSize);
         float outer = (rSize + lightSize);
@@ -115,8 +113,7 @@ class Occluder {
 
 public:
     Occluder(const QVector &pos_, float rSize_, const QVector &cam_, const QVector &light_, float lightSize_)
-            : cam(cam_), light(light_), lightSize(lightSize_), pos(pos_), rSize(rSize_)
-    {
+            : cam(cam_), light(light_), lightSize(lightSize_), pos(pos_), rSize(rSize_) {
         cam = _Universe->AccessCamera()->GetPosition();
         computeMaxOcclusionDistance();
         computeOcclusionRating();
@@ -128,21 +125,18 @@ public:
      * important than b, to make max-heap-based N-most-important
      * data structures easily implementable.
      */
-    bool operator<(const Occluder &other) const
-    {
+    bool operator<(const Occluder &other) const {
         return occlusionRating > other.occlusionRating;
     }
 
-    bool affects(const QVector &ctr, float rSize, float threshSize) const
-    {
+    bool affects(const QVector &ctr, float rSize, float threshSize) const {
         return (
                 (this->rSize >= threshSize)
                         && (((pos - ctr).Magnitude() - rSize) <= maxOcclusionDistance)
         );
     }
 
-    float test(const QVector &lightPos, float lightSize, const QVector &pos, float rSize) const
-    {
+    float test(const QVector &lightPos, float lightSize, const QVector &pos, float rSize) const {
         // To maintain computational precision,
         // compute object position in reference to the light-occluder segment
         // and scale the tangent direction by the occluder's size
@@ -212,8 +206,7 @@ public:
         }
     }
 
-    unsigned long hash() const
-    {
+    unsigned long hash() const {
         return ((unsigned long) (long) (pos.x * 17)
                 ^ (unsigned long) (long) (pos.y * 19)
                 ^ (unsigned long) (long) (pos.z * 5));
@@ -228,8 +221,7 @@ static VS::priority_queue<Occluder> dynamic_occluders;
 static QVector biggestLightPos;
 static float biggestLightSize;
 
-void /*GFXDRVAPI*/ start()
-{
+void /*GFXDRVAPI*/ start() {
     end();
 
     std::vector<int> globalLights;
@@ -255,8 +247,7 @@ void /*GFXDRVAPI*/ start()
     }
 }
 
-void /*GFXDRVAPI*/ end()
-{
+void /*GFXDRVAPI*/ end() {
     VS_LOG(trace, (boost::format("Occluders: %1% forced and %2% dynamic")
             % forced_occluders.size()
             % dynamic_occluders.size()));
@@ -266,8 +257,7 @@ void /*GFXDRVAPI*/ end()
     dynamic_occluders.clear();
 }
 
-void /*GFXDRVAPI*/ addOccluder(const QVector &pos, float rSize, bool significant)
-{
+void /*GFXDRVAPI*/ addOccluder(const QVector &pos, float rSize, bool significant) {
     Occluder occ(
             pos, rSize,
             _Universe->AccessCamera()->GetPosition(),
@@ -289,8 +279,7 @@ void /*GFXDRVAPI*/ addOccluder(const QVector &pos, float rSize, bool significant
     }
 }
 
-float /*GFXDRVAPI*/ testOcclusion(const QVector &lightPos, float lightSize, const QVector &pos, float rSize)
-{
+float /*GFXDRVAPI*/ testOcclusion(const QVector &lightPos, float lightSize, const QVector &pos, float rSize) {
     float rv = 1.0f;
 
     {
@@ -306,7 +295,7 @@ float /*GFXDRVAPI*/ testOcclusion(const QVector &lightPos, float lightSize, cons
 
     {
         for (VS::priority_queue<Occluder>::const_iterator it = dynamic_occluders.begin(); it != dynamic_occluders.end();
-             ++it) {
+                ++it) {
             if (it->affects(pos, rSize, rSize * 4.f)) {
                 rv *= it->test(lightPos, lightSize, pos, rSize);
                 if (rv <= 0.f) {

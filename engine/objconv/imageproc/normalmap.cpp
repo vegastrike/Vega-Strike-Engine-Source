@@ -39,8 +39,7 @@ int PNG_HAS_ALPHA = 4;
  *  }
  */
 
-static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
-{
+static void png_cexcept_error(png_structp png_ptr, png_const_charp msg) {
     if (png_ptr) {
     }
 #ifndef PNG_NO_CONSOLE_IO
@@ -49,21 +48,20 @@ static void png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 }
 
 unsigned char *ReadPNG(FILE *fp,
-                       unsigned int &sizeX,
-                       unsigned int &sizeY,
-                       int &img_depth,
-                       int &img_color_type,
-                       unsigned char ***row_pointer_ptr)
-{
+        unsigned int &sizeX,
+        unsigned int &sizeY,
+        int &img_depth,
+        int &img_color_type,
+        unsigned char ***row_pointer_ptr) {
     png_structp png_ptr;
     png_bytepp row_pointers;
     png_infop info_ptr;
     int interlace_type;
 
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                     NULL,
-                                     (png_error_ptr) png_cexcept_error,
-                                     (png_error_ptr) NULL);
+            NULL,
+            (png_error_ptr) png_cexcept_error,
+            (png_error_ptr) NULL);
     if (png_ptr == NULL) {
         exit(1);
         return NULL;
@@ -87,14 +85,14 @@ unsigned char *ReadPNG(FILE *fp,
     //png_set_sig_bytes(png_ptr, 8);
     png_read_info(png_ptr, info_ptr);     /* read all PNG info up to image data */
     png_get_IHDR(png_ptr,
-                 info_ptr,
-                 (png_uint_32 *) &sizeX,
-                 (png_uint_32 *) &sizeY,
-                 &img_depth,
-                 &img_color_type,
-                 &interlace_type,
-                 NULL,
-                 NULL);
+            info_ptr,
+            (png_uint_32 *) &sizeX,
+            (png_uint_32 *) &sizeY,
+            &img_depth,
+            &img_color_type,
+            &interlace_type,
+            NULL,
+            NULL);
 
 # if __BYTE_ORDER != __BIG_ENDIAN
     if (img_depth == 16) {
@@ -113,14 +111,14 @@ unsigned char *ReadPNG(FILE *fp,
     png_set_expand(png_ptr);
     png_read_update_info(png_ptr, info_ptr);
     png_get_IHDR(png_ptr,
-                 info_ptr,
-                 (png_uint_32 *) &sizeX,
-                 (png_uint_32 *) &sizeY,
-                 &img_depth,
-                 &img_color_type,
-                 &interlace_type,
-                 NULL,
-                 NULL);
+            info_ptr,
+            (png_uint_32 *) &sizeX,
+            (png_uint_32 *) &sizeY,
+            &img_depth,
+            &img_color_type,
+            &interlace_type,
+            NULL,
+            NULL);
     row_pointers = (unsigned char **) malloc(sizeof(unsigned char *) * sizeY);
     int numchan = 1;
     if (img_color_type & PNG_COLOR_MASK_COLOR) {
@@ -153,8 +151,7 @@ enum errort {
     Ok
 };
 
-errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int sizeY, int img_depth, int img_alpha)
-{
+errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int sizeY, int img_depth, int img_alpha) {
     png_structp png_ptr = png_create_write_struct
             (PNG_LIBPNG_VER_STRING, (png_voidp) NULL, NULL, NULL);
     if (!png_ptr) {
@@ -181,14 +178,14 @@ errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int 
     png_set_compression_method(png_ptr, 8);
 
     png_set_IHDR(png_ptr,
-                 info_ptr,
-                 sizeX,
-                 sizeY,
-                 img_depth,
-                 img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT,
-                 PNG_FILTER_TYPE_DEFAULT);
+            info_ptr,
+            sizeX,
+            sizeY,
+            img_depth,
+            img_alpha ? PNG_COLOR_TYPE_RGB_ALPHA : PNG_COLOR_TYPE_RGB,
+            PNG_INTERLACE_NONE,
+            PNG_COMPRESSION_TYPE_DEFAULT,
+            PNG_FILTER_TYPE_DEFAULT);
 
     png_write_info(png_ptr, info_ptr);
 # if __BYTE_ORDER != __BIG_ENDIAN
@@ -212,8 +209,7 @@ errort WritePNG(FILE *fp, unsigned char *data, unsigned int sizeX, unsigned int 
 }
 
 template<typename T>
-T *readimgA(T *data, int x, int y, int width)
-{
+T *readimgA(T *data, int x, int y, int width) {
     if (x < 0) {
         printf("error\n");
     }
@@ -225,23 +221,20 @@ T *readimgA(T *data, int x, int y, int width)
     return data;
 }
 
-float *readimg(float *data, int x, int y, int width)
-{
+float *readimg(float *data, int x, int y, int width) {
     return readimgA(data, x, y, width);
 }
 
-unsigned char *readimg(unsigned char *data, int x, int y, int width)
-{
+unsigned char *readimg(unsigned char *data, int x, int y, int width) {
     return readimgA(data, x, y, width);
 }
 
 void ModifyImage(unsigned int sizex,
-                 unsigned int sizey,
-                 int img_depth,
-                 int img_alpha,
-                 unsigned char **row_pointers,
-                 unsigned char *output)
-{
+        unsigned int sizey,
+        int img_depth,
+        int img_alpha,
+        unsigned char **row_pointers,
+        unsigned char *output) {
     int stride = (img_depth / 8) * (img_alpha ? 4 : 3);
     float *heightmap = (float *) malloc(sizex * sizey * sizeof(float));
     int w = sizex;
@@ -254,12 +247,12 @@ void ModifyImage(unsigned int sizex,
             if (j == 0) {
                 if (i != 0) {
                     *readimg(heightmap, i, j,
-                             w) = candidate = *readimg(heightmap, i - 1, j, w) + row_pointers[j][i * stride + 0] - 127;
+                            w) = candidate = *readimg(heightmap, i - 1, j, w) + row_pointers[j][i * stride + 0] - 127;
                 }
             } else {
                 if (i == 0) {
                     *readimg(heightmap, i, j,
-                             w) = candidate = *readimg(heightmap, i, j - 1, w) + row_pointers[j][i * stride + 1] - 127;
+                            w) = candidate = *readimg(heightmap, i, j - 1, w) + row_pointers[j][i * stride + 1] - 127;
                 } else {
                     *readimg(heightmap, i, j, w) = candidate =
                             .5 * (*readimg(heightmap, i - 1, j, w) + row_pointers[j][i * stride + 0] - 127)
@@ -288,8 +281,7 @@ void ModifyImage(unsigned int sizex,
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc == 3) {
         FILE *fp = fopen(argv[1], "rb");
         if (fp) {

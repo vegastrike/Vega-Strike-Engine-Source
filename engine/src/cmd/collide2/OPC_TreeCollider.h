@@ -35,14 +35,12 @@
 //! even entering the recursive collision code.
 struct OPCODE_API BVTCache : Pair {
     //! Constructor
-    BVTCache()
-    {
+    BVTCache() {
         ResetCache();
         ResetCountDown();
     }
 
-    void ResetCache()
-    {
+    void ResetCache() {
         Model0 = nullptr;
         Model1 = nullptr;
         id0 = 0;
@@ -55,8 +53,7 @@ struct OPCODE_API BVTCache : Pair {
 #endif // __MESHMERIZER_H__
     }
 
-    void ResetCountDown()
-    {
+    void ResetCountDown() {
 #ifdef __MESHMERIZER_H__        // Collision hulls only supported within ICE !
         CountDown		= 50;
 #endif // __MESHMERIZER_H__
@@ -97,25 +94,25 @@ public:
 
     // Collision queries
     bool Collide(const AABBCollisionTree *tree0,
-                 const AABBCollisionTree *tree1,
-                 const Matrix4x4 *world0 = nullptr,
-                 const Matrix4x4 *world1 = nullptr,
-                 Pair *cache = nullptr);
+            const AABBCollisionTree *tree1,
+            const Matrix4x4 *world0 = nullptr,
+            const Matrix4x4 *world1 = nullptr,
+            Pair *cache = nullptr);
     bool Collide(const AABBNoLeafTree *tree0,
-                 const AABBNoLeafTree *tree1,
-                 const Matrix4x4 *world0 = nullptr,
-                 const Matrix4x4 *world1 = nullptr,
-                 Pair *cache = nullptr);
+            const AABBNoLeafTree *tree1,
+            const Matrix4x4 *world0 = nullptr,
+            const Matrix4x4 *world1 = nullptr,
+            Pair *cache = nullptr);
     bool Collide(const AABBQuantizedTree *tree0,
-                 const AABBQuantizedTree *tree1,
-                 const Matrix4x4 *world0 = nullptr,
-                 const Matrix4x4 *world1 = nullptr,
-                 Pair *cache = nullptr);
+            const AABBQuantizedTree *tree1,
+            const Matrix4x4 *world0 = nullptr,
+            const Matrix4x4 *world1 = nullptr,
+            Pair *cache = nullptr);
     bool Collide(const AABBQuantizedNoLeafTree *tree0,
-                 const AABBQuantizedNoLeafTree *tree1,
-                 const Matrix4x4 *world0 = nullptr,
-                 const Matrix4x4 *world1 = nullptr,
-                 Pair *cache = nullptr);
+            const AABBQuantizedNoLeafTree *tree1,
+            const Matrix4x4 *world0 = nullptr,
+            const Matrix4x4 *world1 = nullptr,
+            Pair *cache = nullptr);
     // Settings
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,8 +122,7 @@ public:
      *	\see		SetFullPrimBoxTest(bool flag)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetFullBoxBoxTest(bool flag)
-    {
+    inline_                void SetFullBoxBoxTest(bool flag) {
         mFullBoxBoxTest = flag;
     }
 
@@ -137,8 +133,7 @@ public:
      *	\see		SetFullBoxBoxTest(bool flag)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void SetFullPrimBoxTest(bool flag)
-    {
+    void SetFullPrimBoxTest(bool flag) {
         mFullPrimBoxTest = flag;
     }
 
@@ -152,8 +147,7 @@ public:
      *	\return		the number of BV-BV tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbBVBVTests() const
-    {
+    inline_                uint32_t GetNbBVBVTests() const {
         return mNbBVBVTests;
     }
 
@@ -165,8 +159,7 @@ public:
      *	\return		the number of Triangle-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbPrimPrimTests() const
-    {
+    inline_                uint32_t GetNbPrimPrimTests() const {
         return mNbPrimPrimTests;
     }
 
@@ -178,8 +171,7 @@ public:
      *	\return		the number of BV-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbBVPrimTests() const
-    {
+    inline_                uint32_t GetNbBVPrimTests() const {
         return mNbBVPrimTests;
     }
 
@@ -193,8 +185,7 @@ public:
      *	\return		the number of contacts / colliding pairs.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbPairs() const
-    {
+    inline_                uint32_t GetNbPairs() const {
         return mPairs.GetNbEntries() >> 1;
     }
 
@@ -206,8 +197,7 @@ public:
      *	\return		the list of colliding pairs (triangle indices)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                const Pair *GetPairs() const
-    {
+    inline_                const Pair *GetPairs() const {
         return (const Pair *) mPairs.GetEntries();
     }
 
@@ -252,11 +242,11 @@ protected:
     void _Collide(const AABBCollisionNode *b0, const AABBCollisionNode *b1);
     // Quantized AABB trees
     void _Collide(const AABBQuantizedNode *b0,
-                  const AABBQuantizedNode *b1,
-                  const Point &a,
-                  const Point &Pa,
-                  const Point &b,
-                  const Point &Pb);
+            const AABBQuantizedNode *b1,
+            const Point &a,
+            const Point &Pa,
+            const Point &b,
+            const Point &Pb);
     // No-leaf AABB trees
     void _CollideTriBox(const AABBNoLeafNode *b);
     void _CollideBoxTri(const AABBNoLeafNode *b);
@@ -273,17 +263,16 @@ protected:
     inline_            bool BoxBoxOverlap(const Point &ea, const Point &ca, const Point &eb, const Point &cb);
     inline_            bool TriBoxOverlap(const Point &center, const Point &extents);
     inline_            bool TriTriOverlap(const Point &V0,
-                                          const Point &V1,
-                                          const Point &V2,
-                                          const Point &U0,
-                                          const Point &U1,
-                                          const Point &U2);
+            const Point &V1,
+            const Point &V2,
+            const Point &U0,
+            const Point &U1,
+            const Point &U2);
     // Init methods
     void InitQuery(const Matrix4x4 *world0 = nullptr, const Matrix4x4 *world1 = nullptr);
     bool CheckTemporalCoherence(Pair *cache);
 
-    inline_                bool Setup(const MeshInterface *mi0, const MeshInterface *mi1)
-    {
+    inline_                bool Setup(const MeshInterface *mi0, const MeshInterface *mi1) {
         mIMesh0 = mi0;
         mIMesh1 = mi1;
 

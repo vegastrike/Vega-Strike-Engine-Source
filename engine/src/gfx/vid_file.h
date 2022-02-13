@@ -44,85 +44,68 @@ public:
         std::string _message;
 
     public:
-        Exception()
-        {
+        Exception() {
         }
 
-        Exception(const Exception &other) : _message(other._message)
-        {
+        Exception(const Exception &other) : _message(other._message) {
         }
 
-        explicit Exception(const std::string &message) : _message(message)
-        {
+        explicit Exception(const std::string &message) : _message(message) {
         }
 
-        virtual ~Exception()
-        {
+        virtual ~Exception() {
         }
 
-        virtual const char *what() const noexcept
-        {
+        virtual const char *what() const noexcept {
             return _message.c_str();
         }
     };
 
     class UnsupportedCodecException : public Exception {
     public:
-        UnsupportedCodecException()
-        {
+        UnsupportedCodecException() {
         }
 
-        UnsupportedCodecException(const UnsupportedCodecException &other) : Exception(other)
-        {
+        UnsupportedCodecException(const UnsupportedCodecException &other) : Exception(other) {
         }
 
-        explicit UnsupportedCodecException(const std::string &message) : Exception(message)
-        {
+        explicit UnsupportedCodecException(const std::string &message) : Exception(message) {
         }
     };
 
     class FileOpenException : public Exception {
     public:
-        FileOpenException()
-        {
+        FileOpenException() {
         }
 
-        FileOpenException(const FileOpenException &other) : Exception(other)
-        {
+        FileOpenException(const FileOpenException &other) : Exception(other) {
         }
 
-        explicit FileOpenException(const std::string &message) : Exception(message)
-        {
+        explicit FileOpenException(const std::string &message) : Exception(message) {
         }
     };
 
     class FrameDecodeException : public Exception {
     public:
-        FrameDecodeException()
-        {
+        FrameDecodeException() {
         }
 
-        FrameDecodeException(const FrameDecodeException &other) : Exception(other)
-        {
+        FrameDecodeException(const FrameDecodeException &other) : Exception(other) {
         }
 
-        explicit FrameDecodeException(const std::string &message) : Exception(message)
-        {
+        explicit FrameDecodeException(const std::string &message) : Exception(message) {
         }
     };
 
     class EndOfStreamException : public Exception {
     public:
-        EndOfStreamException()
-        {
+        EndOfStreamException() {
         }
 
-        EndOfStreamException(const EndOfStreamException &other) : Exception(other)
-        {
+        EndOfStreamException(const EndOfStreamException &other) : Exception(other) {
         }
 
-        explicit EndOfStreamException(const std::string &message) : Exception(message)
-        {
+        explicit EndOfStreamException(const std::string &message) : Exception(message) {
         }
     };
 

@@ -65,8 +65,7 @@
 
 using namespace Opcode;
 
-float Ray::SquareDistance(const Point &point, float *t) const
-{
+float Ray::SquareDistance(const Point &point, float *t) const {
     Point Diff = point - mOrig;
     float fT = Diff | mDir;
 

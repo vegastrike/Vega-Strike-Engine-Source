@@ -34,8 +34,7 @@
 
 using namespace Orders;
 
-TurretAI::TurretAI() : FaceTargetITTS(false)
-{
+TurretAI::TurretAI() : FaceTargetITTS(false) {
     type |= WEAPON;
     range = -1;
     speed = 1;
@@ -43,8 +42,7 @@ TurretAI::TurretAI() : FaceTargetITTS(false)
     hadFired = false;
 }
 
-void TurretAI::getAverageGunSpeed(float &speed, float &range, float &mrange) const
-{
+void TurretAI::getAverageGunSpeed(float &speed, float &range, float &mrange) const {
     speed = this->speed;
     range = this->range;
     mrange = this->mrange;
@@ -52,8 +50,7 @@ void TurretAI::getAverageGunSpeed(float &speed, float &range, float &mrange) con
 
 extern unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile);
 
-void TurretAI::Execute()
-{
+void TurretAI::Execute() {
     Unit *targ = parent->Target();
     if (range == -1) {
         range = mrange = speed = 0;

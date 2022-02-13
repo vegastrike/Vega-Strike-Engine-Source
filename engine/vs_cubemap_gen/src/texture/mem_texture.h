@@ -45,8 +45,7 @@ class mem_tex {
 public:
     mem_tex();
 
-    size_t size() const
-    {
+    size_t size() const {
         return SIZE;
     }
 

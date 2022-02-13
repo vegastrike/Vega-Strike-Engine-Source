@@ -73,8 +73,7 @@
 
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
-void Mission::DirectorLoop()
-{
+void Mission::DirectorLoop() {
     double oldgametime = gametime;
     gametime += SIMULATION_ATOM;     //elapsed;
     //VS_LOG(trace, (boost::format("void Mission::DirectorLoop(): oldgametime = %1$.6f; SIMULATION_ATOM = %2$.6f; gametime = %3$.6f") % oldgametime % SIMULATION_ATOM % gametime));
@@ -101,16 +100,14 @@ void Mission::DirectorLoop()
     }
 }
 
-void Mission::DirectorEnd()
-{
+void Mission::DirectorEnd() {
     if (director == NULL) {
         return;
     }
     RunDirectorScript("endgame");
 }
 
-void Mission::DirectorShipDestroyed(Unit *unit)
-{
+void Mission::DirectorShipDestroyed(Unit *unit) {
     Flightgroup *fg = unit->getFlightgroup();
     if (fg == nullptr) {
         VS_LOG(info, "ship destroyed-no flightgroup");
@@ -162,13 +159,11 @@ void Mission::DirectorShipDestroyed(Unit *unit)
     }
 }
 
-bool Mission::BriefingInProgress()
-{
+bool Mission::BriefingInProgress() {
     return briefing != NULL;
 }
 
-void Mission::BriefingStart()
-{
+void Mission::BriefingStart() {
     if (briefing) {
         BriefingEnd();
     }
@@ -178,15 +173,13 @@ void Mission::BriefingStart()
     }
 }
 
-void Mission::BriefingUpdate()
-{
+void Mission::BriefingUpdate() {
     if (briefing) {
         briefing->Update();
     }
 }
 
-void Mission::BriefingLoop()
-{
+void Mission::BriefingLoop() {
     if (briefing) {
         if (runtime.pymissions) {
             runtime.pymissions->callFunction("loopbriefing");
@@ -194,8 +187,7 @@ void Mission::BriefingLoop()
     }
 }
 
-class TextPlane *Mission::BriefingRender()
-{
+class TextPlane *Mission::BriefingRender() {
     if (briefing) {
         vector<std::string> who;
         who.push_back("briefing");
@@ -214,8 +206,7 @@ class TextPlane *Mission::BriefingRender()
     return NULL;
 }
 
-void Mission::BriefingEnd()
-{
+void Mission::BriefingEnd() {
     if (briefing) {
         if (runtime.pymissions) {
             runtime.pymissions->callFunction("endbriefing");
@@ -225,13 +216,12 @@ void Mission::BriefingEnd()
     }
 }
 
-void Mission::DirectorBenchmark()
-{
+void Mission::DirectorBenchmark() {
     total_nr_frames++;
     if (benchmark > 0.0 && benchmark < gametime) {
         VS_LOG_AND_FLUSH(trace,
-                         (boost::format("Game was running for %1% secs,   av. framerate %2%") % gametime
-                                 % (((double) total_nr_frames) / gametime)));
+                (boost::format("Game was running for %1% secs,   av. framerate %2%") % gametime
+                        % (((double) total_nr_frames) / gametime)));
         winsys_exit(0);
     }
 }

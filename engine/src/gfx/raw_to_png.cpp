@@ -35,8 +35,7 @@ unsigned int width = 256;
 int rowoffset = 0;
 int coloffset = 0;
 
-unsigned short *Rread(const char *myfile)
-{
+unsigned short *Rread(const char *myfile) {
     unsigned short *tm = (unsigned short *) malloc(512 * 512 * sizeof(unsigned short));
     int i;
     FILE *fp = VSFileSystem::vs_open(myfile, "rb");
@@ -90,8 +89,7 @@ unsigned short *Rread(const char *myfile)
     return smaller;
 }
 
-void Wwrite(const char *myfile, unsigned short *data)
-{
+void Wwrite(const char *myfile, unsigned short *data) {
     FILE *fp = VSFileSystem::vs_open(myfile, "wb");
     png_structp png_ptr = png_create_write_struct
             (PNG_LIBPNG_VER_STRING, (png_voidp) NULL, NULL, NULL);
@@ -102,7 +100,7 @@ void Wwrite(const char *myfile, unsigned short *data)
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
         png_destroy_write_struct(&png_ptr,
-                                 (png_infopp) NULL);
+                (png_infopp) NULL);
         return;
     }
     if (setjmp(png_ptr->jmpbuf)) {
@@ -112,19 +110,19 @@ void Wwrite(const char *myfile, unsigned short *data)
     }
     png_init_io(png_ptr, fp);
     png_set_filter(png_ptr, 0,
-                   PNG_FILTER_NONE);
+            PNG_FILTER_NONE);
     png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
     /* set other zlib parameters */
     png_set_compression_mem_level(png_ptr, 8);
     png_set_compression_strategy(png_ptr,
-                                 Z_DEFAULT_STRATEGY);
+            Z_DEFAULT_STRATEGY);
     png_set_compression_window_bits(png_ptr, 15);
     png_set_compression_method(png_ptr, 8);
 
     png_set_IHDR(png_ptr, info_ptr, width, height,
-                 16, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+            16, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE,
+            PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
     png_write_info(png_ptr, info_ptr);
     png_set_swap(png_ptr);
@@ -141,8 +139,7 @@ void Wwrite(const char *myfile, unsigned short *data)
     delete[] row_pointers;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc > 3) {
         sscanf(argv[3], "%d", &rowoffset);
     }

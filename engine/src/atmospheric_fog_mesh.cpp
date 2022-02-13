@@ -22,8 +22,7 @@
 
 #include "atmospheric_fog_mesh.h"
 
-AtmosphericFogMesh::AtmosphericFogMesh()
-{
+AtmosphericFogMesh::AtmosphericFogMesh() {
     er = eg = eb = ea = .5;
     dr = dg = db = da = .5;
     meshname = "sphereatm.bfxm";

@@ -52,8 +52,7 @@ static double lasttime;
 static double elapsedtime = .1;
 static double timecompression = 1;
 
-double getNewTime()
-{
+double getNewTime() {
 #ifdef _WIN32
     return dblnewtime-firsttime;
 #else
@@ -65,32 +64,28 @@ class NetClient;
 
 int timecount;
 
-void inc_time_compression(const KBData &, KBSTATE a)
-{
+void inc_time_compression(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         timecompression *= 1.5;
         timecount++;
     }
 }
 
-void dec_time_compression(const KBData &, KBSTATE a)
-{
+void dec_time_compression(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         timecompression /= 1.5;
         timecount--;
     }
 }
 
-void reset_time_compression(const KBData &, KBSTATE a)
-{
+void reset_time_compression(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         timecompression = 1;
         timecount = 0;
     }
 }
 
-void pause_key(const KBData &s, KBSTATE a)
-{
+void pause_key(const KBData &s, KBSTATE a) {
     static bool paused = false;
     if (a == PRESS) {
         if (paused == false) {
@@ -104,19 +99,16 @@ void pause_key(const KBData &s, KBSTATE a)
     }
 }
 
-float getTimeCompression()
-{
+float getTimeCompression() {
     return timecompression;
 }
 
-void setTimeCompression(float tc)
-{
+void setTimeCompression(float tc) {
     timecompression = tc;
     timecount = 0;     //to avoid any problems with time compression sounds... use getTimeCompression() instead
 }
 
-bool toggle_pause()
-{
+bool toggle_pause() {
     static bool paused = false;
     VS_LOG(debug, "toggle_pause() called in lin_time.cpp");
     if (paused) {
@@ -157,8 +149,7 @@ void micro_sleep( unsigned int n )
 
 #else
 
-void micro_sleep(unsigned int n)
-{
+void micro_sleep(unsigned int n) {
     struct timeval tv = {
             0, 0
     };
@@ -170,8 +161,7 @@ void micro_sleep(unsigned int n)
 
 #endif
 
-void InitTime()
-{
+void InitTime() {
 #ifdef WIN32
     QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
     QueryPerformanceCounter( (LARGE_INTEGER*) &ttime );
@@ -199,13 +189,11 @@ void InitTime()
     elapsedtime = .0001;
 }
 
-double GetElapsedTime()
-{
+double GetElapsedTime() {
     return elapsedtime;
 }
 
-double queryTime()
-{
+double queryTime() {
 #ifdef WIN32
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
@@ -229,8 +217,7 @@ double queryTime()
 #endif
 }
 
-double realTime()
-{
+double realTime() {
 #ifdef WIN32
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
@@ -254,8 +241,7 @@ double realTime()
     return tmpnewtime - reallyfirsttime;
 }
 
-void UpdateTime()
-{
+void UpdateTime() {
     static bool first = true;
 #ifdef WIN32
     QueryPerformanceCounter( (LARGE_INTEGER*) &newtime );
@@ -299,8 +285,7 @@ void UpdateTime()
     first = false;
 }
 
-void setNewTime(double newnewtime)
-{
+void setNewTime(double newnewtime) {
     firsttime -= newnewtime - queryTime();
     UpdateTime();
 }

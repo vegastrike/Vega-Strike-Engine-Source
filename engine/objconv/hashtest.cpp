@@ -44,24 +44,20 @@ class size {
 public:
     size_t num;
 
-    size()
-    {
+    size() {
         num = (size_t) vsrandom.genrand_int32() % globmax;
     }
 
-    bool operator==(const size &a) const
-    {
+    bool operator==(const size &a) const {
         return this->num == a.num;
     }
 
-    operator size_t() const
-    {
+    operator size_t() const {
         return num;
     }
 };
 
-bool operator<(const size &a, const size &b)
-{
+bool operator<(const size &a, const size &b) {
     return a.num < b.num;
 }
 
@@ -71,8 +67,7 @@ template<>
 class hash<size> {
     hash<size_t> a;
 public:
-    size_t operator()(const size &s) const
-    {
+    size_t operator()(const size &s) const {
         return a(s.num);
     }
 };
@@ -80,8 +75,7 @@ public:
 #endif
 double firsttime = 0;
 
-double queryTime()
-{
+double queryTime() {
 #ifdef _WIN32
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
@@ -103,16 +97,14 @@ double queryTime()
 #endif
 }
 
-double getTime()
-{
+double getTime() {
     return queryTime();
 }
 
 std::map<size_t, size_t> pod;
 stdext::hash_map<size, size> clas;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 #ifdef _WIN32
     QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
     QueryPerformanceCounter( (LARGE_INTEGER*) &ttime );
@@ -198,7 +190,7 @@ int main(int argc, char **argv)
     }
     double eighth = getTime();
     printf("Outer Array Size %d. Num Important Elem %d. Repeats %d. Num Erases %d\nInitial Hit Percent %f\n",
-           pod.size(), sdata.size(), limc, limd, sdata.size() / (double) lime);
+            pod.size(), sdata.size(), limc, limd, sdata.size() / (double) lime);
     printf("Find Percent Times %f %f\n", third - second, fourth - third);
     printf("Insert/Erase Times %f %f\n", fifth - fourth, sixth - fifth);
     printf("Find all itm Times %f %f\n", seventh - sixth, eighth - seventh);

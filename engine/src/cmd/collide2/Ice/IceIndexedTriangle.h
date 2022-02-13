@@ -23,26 +23,22 @@
 class IndexedTriangle {
 public:
     //! Constructor
-    inline_ IndexedTriangle()
-    {
+    inline_ IndexedTriangle() {
     }
     //! Constructor
-    inline_ IndexedTriangle(uint32_t r0, uint32_t r1, uint32_t r2)
-    {
+    inline_ IndexedTriangle(uint32_t r0, uint32_t r1, uint32_t r2) {
         mVRef[0] = r0;
         mVRef[1] = r1;
         mVRef[2] = r2;
     }
     //! Copy constructor
-    inline_ IndexedTriangle(const IndexedTriangle &triangle)
-    {
+    inline_ IndexedTriangle(const IndexedTriangle &triangle) {
         mVRef[0] = triangle.mVRef[0];
         mVRef[1] = triangle.mVRef[1];
         mVRef[2] = triangle.mVRef[2];
     }
     //! Destructor
-    inline_                    ~IndexedTriangle()
-    {
+    inline_                    ~IndexedTriangle() {
     }
 
     //! Vertex-references
@@ -68,8 +64,7 @@ public:
     uint8_t FindEdge(uint32_t vref0, uint32_t vref1) const;
     uint32_t OppositeVertex(uint32_t vref0, uint32_t vref1) const;
 
-    inline_    uint32_t OppositeVertex(uint8_t edgenb) const
-    {
+    inline_    uint32_t OppositeVertex(uint8_t edgenb) const {
         return mVRef[2 - edgenb];
     }
 
@@ -79,8 +74,7 @@ public:
     void ComputePoint(const Point *verts, float u, float v, Point &pt, uint32_t *nearvtx = nullptr) const;
     float Angle(const IndexedTriangle &tri, const Point *verts) const;
 
-    inline_    Plane PlaneEquation(const Point *verts) const
-    {
+    inline_    Plane PlaneEquation(const Point *verts) const {
         return Plane(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);
     }
 

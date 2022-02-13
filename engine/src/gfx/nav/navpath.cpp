@@ -61,8 +61,7 @@ using std::pair;
 ////
 //*******************************************************************//
 
-bool NavPath::isAbsolute() const
-{
+bool NavPath::isAbsolute() const {
     if (!isComplete()) {
         return false;
     }
@@ -72,8 +71,7 @@ bool NavPath::isAbsolute() const
     return true;
 }
 
-bool NavPath::isComplete() const
-{
+bool NavPath::isComplete() const {
     if (!source || !destination) {
         return false;
     }
@@ -90,8 +88,7 @@ bool NavPath::isComplete() const
     return true;
 }
 
-bool NavPath::isCurrentDependant() const
-{
+bool NavPath::isCurrentDependant() const {
     if (source) {
         if (source->isCurrentDependant()) {
             return true;
@@ -105,8 +102,7 @@ bool NavPath::isCurrentDependant() const
     return false;
 }
 
-bool NavPath::isTargetDependant() const
-{
+bool NavPath::isTargetDependant() const {
     if (source) {
         if (source->isTargetDependant()) {
             return true;
@@ -120,8 +116,7 @@ bool NavPath::isTargetDependant() const
     return false;
 }
 
-string NavPath::getDescription() const
-{
+string NavPath::getDescription() const {
     string temp;
 
     temp = getName();
@@ -150,38 +145,31 @@ string NavPath::getDescription() const
     return temp;
 }
 
-void NavPath::setVisible(bool vis)
-{
+void NavPath::setVisible(bool vis) {
     visible = vis;
 }
 
-void NavPath::setColor(GFXColor col)
-{
+void NavPath::setColor(GFXColor col) {
     color = col;
 }
 
-void NavPath::setName(string n)
-{
+void NavPath::setName(string n) {
     name = n;
 }
 
-bool NavPath::getVisible() const
-{
+bool NavPath::getVisible() const {
     return visible;
 }
 
-GFXColor NavPath::getColor() const
-{
+GFXColor NavPath::getColor() const {
     return color;
 }
 
-string NavPath::getName() const
-{
+string NavPath::getName() const {
     return name;
 }
 
-bool NavPath::setSourceNode(PathNode *node)
-{
+bool NavPath::setSourceNode(PathNode *node) {
     if (!node) {
         return false;
     }
@@ -213,8 +201,7 @@ bool NavPath::setSourceNode(PathNode *node)
     }
 }
 
-bool NavPath::setDestinationNode(PathNode *node)
-{
+bool NavPath::setDestinationNode(PathNode *node) {
     if (!node) {
         return false;
     }
@@ -243,54 +230,45 @@ bool NavPath::setDestinationNode(PathNode *node)
     }
 }
 
-unsigned NavPath::getAbsoluteSource() const
-{
+unsigned NavPath::getAbsoluteSource() const {
     return path.front();
 }
 
-unsigned NavPath::getAbsoluteDestination() const
-{
+unsigned NavPath::getAbsoluteDestination() const {
     return path.back();
 }
 
-const std::list<unsigned> *NavPath::getAllPoints() const
-{
+const std::list<unsigned> *NavPath::getAllPoints() const {
     return &path;
 }
 
-std::list<unsigned> *NavPath::getAllPoints()
-{
+std::list<unsigned> *NavPath::getAllPoints() {
     return &path;
 }
 
-void NavPath::addDependant(NavPath *dependant)
-{
+void NavPath::addDependant(NavPath *dependant) {
     if (dependant == NULL) {
         return;
     }
     dependants.insert(dependant);
 }
 
-void NavPath::removeDependant(NavPath *dependant)
-{
+void NavPath::removeDependant(NavPath *dependant) {
     if (dependant == NULL) {
         return;
     }
     dependants.erase(dependant);
 }
 
-const std::set<NavPath *> *NavPath::getDependants() const
-{
+const std::set<NavPath *> *NavPath::getDependants() const {
     return &dependants;
 }
 
-std::set<NavPath *> *NavPath::getDependants()
-{
+std::set<NavPath *> *NavPath::getDependants() {
     return &dependants;
 }
 
-std::vector<NavPath *> NavPath::getRequiredPaths() const
-{
+std::vector<NavPath *> NavPath::getRequiredPaths() const {
     std::vector<NavPath *> temp;
     if (source) {
         if (source->getRequiredPath()) {
@@ -305,8 +283,7 @@ std::vector<NavPath *> NavPath::getRequiredPaths() const
     return temp;
 }
 
-bool NavPath::checkForCycles() const
-{
+bool NavPath::checkForCycles() const {
     const NavPath *v;
     vector<NavPath *> neighbors;
     unsigned i;
@@ -328,8 +305,7 @@ bool NavPath::checkForCycles() const
     return cycle;
 }
 
-bool NavPath::evaluate()
-{
+bool NavPath::evaluate() {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
     path.clear();
     static size_t max_size = XMLSupport::parse_int(vs_config->getVariable("graphics", "nav_max_search_size", "16384"));
@@ -358,11 +334,11 @@ bool NavPath::evaluate()
         unsigned visitMark;
         if (originIndex >= visited.size() || destIndex >= visited.size()) {
             VS_LOG_AND_FLUSH(error,
-                             (boost::format(
-                                     "(previously) FATAL error with nav system, referencing value too big %1% %2% with visited size %3%")
-                                     % ((int) originIndex)
-                                     % ((int) destIndex)
-                                     % ((int) visited.size())));
+                    (boost::format(
+                            "(previously) FATAL error with nav system, referencing value too big %1% %2% with visited size %3%")
+                            % ((int) originIndex)
+                            % ((int) destIndex)
+                            % ((int) visited.size())));
             return false;
         }
         oriFront.push_back(originIndex);
@@ -491,8 +467,7 @@ bool NavPath::evaluate()
     }
 }
 
-void NavPath::removeOldPath()
-{
+void NavPath::removeOldPath() {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
     //Erase old path
     //*************************
@@ -506,8 +481,7 @@ void NavPath::removeOldPath()
     pathNeighbors.clear();
 }
 
-void NavPath::addNewPath()
-{
+void NavPath::addNewPath() {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
 
     //Inscribe new path
@@ -526,8 +500,7 @@ void NavPath::addNewPath()
     }
 }
 
-bool NavPath::isNeighborPath(unsigned system, unsigned neighbor)
-{
+bool NavPath::isNeighborPath(unsigned system, unsigned neighbor) {
     map<unsigned, pair<unsigned, unsigned> >::iterator i = pathNeighbors.find(system);
     if (i == pathNeighbors.end()) {
         return false;
@@ -545,8 +518,7 @@ bool NavPath::isNeighborPath(unsigned system, unsigned neighbor)
     return false;
 }
 
-bool NavPath::update()
-{
+bool NavPath::update() {
     removeOldPath();
     if (evaluate()) {
         addNewPath();
@@ -556,8 +528,7 @@ bool NavPath::update()
     }
 }
 
-NavPath::NavPath()
-{
+NavPath::NavPath() {
     name = "New Path";
     visible = true;
     color = GFXColor(1, 0, 0);
@@ -565,8 +536,7 @@ NavPath::NavPath()
     destination = NULL;
 }
 
-NavPath::~NavPath()
-{
+NavPath::~NavPath() {
     removeOldPath();
     if (source) {
         if (source->getRequiredPath()) {
@@ -601,15 +571,13 @@ NavPath::~NavPath()
 ////
 //*******************************************************************//
 
-void PathManager::addPath()
-{
+void PathManager::addPath() {
     NavPath *path = new NavPath();
     path->setSourceNode(new CurrentPathNode());
     paths.push_back(path);
 }
 
-bool PathManager::removePath(NavPath *path)
-{
+bool PathManager::removePath(NavPath *path) {
     bool ret = false;
     for (std::vector<NavPath *>::iterator i = paths.begin(); i < paths.end(); ++i) {
         if ((*i) == path) {
@@ -621,30 +589,26 @@ bool PathManager::removePath(NavPath *path)
     return ret;
 }
 
-void PathManager::showAll()
-{
+void PathManager::showAll() {
     for (std::vector<NavPath *>::iterator i = paths.begin(); i < paths.end(); ++i) {
         (*i)->setVisible(true);
     }
 }
 
-void PathManager::showNone()
-{
+void PathManager::showNone() {
     for (std::vector<NavPath *>::iterator i = paths.begin(); i < paths.end(); ++i) {
         (*i)->setVisible(false);
     }
 }
 
-bool PathManager::updateSpecificPath(NavPath *path)
-{
+bool PathManager::updateSpecificPath(NavPath *path) {
     path->updated = true;
     path->update();
     updateDependants(path);
     return path->updated;
 }
 
-void PathManager::updatePaths(UpdateType type)
-{
+void PathManager::updatePaths(UpdateType type) {
     std::list<NavPath *>::iterator i;
     DFS();
     if (type == ALL) {
@@ -675,16 +639,14 @@ void PathManager::updatePaths(UpdateType type)
     }
 }
 
-void PathManager::updateDependants(NavPath *parent)
-{
+void PathManager::updateDependants(NavPath *parent) {
     set<NavPath *> *dependants = parent->getDependants();
     for (std::set<NavPath *>::iterator i = dependants->begin(); i != dependants->end(); ++i) {
         updateSpecificPath(*i);
     }
 }
 
-void PathManager::DFS()
-{
+void PathManager::DFS() {
     topoOrder.clear();
     std::vector<NavPath *>::iterator u;
     for (u = paths.begin(); u < paths.end(); ++u) {
@@ -698,8 +660,7 @@ void PathManager::DFS()
     }
 }
 
-void PathManager::dfsVisit(NavPath *path)
-{
+void PathManager::dfsVisit(NavPath *path) {
     path->topoColor = TOPO_GRAY;
 
     std::set<NavPath *> *dependants = path->getDependants();
@@ -714,12 +675,10 @@ void PathManager::dfsVisit(NavPath *path)
     topoOrder.push_front(path);
 }
 
-PathManager::PathManager()
-{
+PathManager::PathManager() {
 }
 
-PathManager::~PathManager()
-{
+PathManager::~PathManager() {
     for (std::vector<NavPath *>::iterator i = paths.begin(); i < paths.end(); ++i) {
         delete (*i);
         (*i) = NULL;
@@ -732,13 +691,11 @@ PathManager::~PathManager()
 ////
 //*******************************************************************//
 
-std::string AbsolutePathNode::getDescription() const
-{
+std::string AbsolutePathNode::getDescription() const {
     return _Universe->AccessCockpit()->AccessNavSystem()->systemIter[system].GetName();
 }
 
-std::deque<unsigned> AbsolutePathNode::initSearchQueue() const
-{
+std::deque<unsigned> AbsolutePathNode::initSearchQueue() const {
     deque<unsigned> temp;
     temp.push_back(system);
     return temp;
@@ -750,13 +707,11 @@ std::deque<unsigned> AbsolutePathNode::initSearchQueue() const
 ////
 //*******************************************************************//
 
-bool CurrentPathNode::isDestination(unsigned index) const
-{
+bool CurrentPathNode::isDestination(unsigned index) const {
     return _Universe->AccessCockpit()->AccessNavSystem()->currentsystemindex == index;
 }
 
-std::deque<unsigned> CurrentPathNode::initSearchQueue() const
-{
+std::deque<unsigned> CurrentPathNode::initSearchQueue() const {
     deque<unsigned> temp;
     temp.push_back(_Universe->AccessCockpit()->AccessNavSystem()->currentsystemindex);
     return temp;
@@ -768,13 +723,11 @@ std::deque<unsigned> CurrentPathNode::initSearchQueue() const
 ////
 //*******************************************************************//
 
-bool TargetPathNode::isDestination(unsigned index) const
-{
+bool TargetPathNode::isDestination(unsigned index) const {
     return _Universe->AccessCockpit()->AccessNavSystem()->destinationsystemindex == index;
 }
 
-std::deque<unsigned> TargetPathNode::initSearchQueue() const
-{
+std::deque<unsigned> TargetPathNode::initSearchQueue() const {
     deque<unsigned> temp;
     temp.push_back(_Universe->AccessCockpit()->AccessNavSystem()->destinationsystemindex);
     return temp;
@@ -786,8 +739,7 @@ std::deque<unsigned> TargetPathNode::initSearchQueue() const
 ////
 //*******************************************************************//
 
-std::string CriteriaPathNode::getDescription() const
-{
+std::string CriteriaPathNode::getDescription() const {
     assert(criteria != NULL);
 
     string temp = "Criteria: ";
@@ -795,14 +747,12 @@ std::string CriteriaPathNode::getDescription() const
     return temp;
 }
 
-bool CriteriaPathNode::isDestination(unsigned index) const
-{
+bool CriteriaPathNode::isDestination(unsigned index) const {
     assert(criteria != NULL);
     return criteria->isDestination(index);
 }
 
-PathNode *CriteriaPathNode::clone() const
-{
+PathNode *CriteriaPathNode::clone() const {
     assert(criteria != NULL);
 
     CriteriaPathNode *newNode = new CriteriaPathNode();
@@ -810,13 +760,11 @@ PathNode *CriteriaPathNode::clone() const
     return newNode;
 }
 
-CriteriaPathNode::CriteriaPathNode()
-{
+CriteriaPathNode::CriteriaPathNode() {
     criteria = new CriteriaRoot();
 }
 
-CriteriaPathNode::~CriteriaPathNode()
-{
+CriteriaPathNode::~CriteriaPathNode() {
     assert(criteria != NULL);
 
     delete criteria;
@@ -828,8 +776,7 @@ CriteriaPathNode::~CriteriaPathNode()
 ////
 //*******************************************************************//
 
-std::string ChainPathNode::getDescription() const
-{
+std::string ChainPathNode::getDescription() const {
     string temp = "Chain: ";
     temp += supplierPath->getName();
     if (type == SOURCE) {
@@ -842,8 +789,7 @@ std::string ChainPathNode::getDescription() const
     return temp;
 }
 
-std::deque<unsigned> ChainPathNode::initSearchQueue() const
-{
+std::deque<unsigned> ChainPathNode::initSearchQueue() const {
     deque<unsigned> systemDeque;
     if (type == SOURCE) {
         systemDeque.push_back(supplierPath->getAbsoluteSource());
@@ -858,8 +804,7 @@ std::deque<unsigned> ChainPathNode::initSearchQueue() const
     return systemDeque;
 }
 
-bool ChainPathNode::isDestination(unsigned index) const
-{
+bool ChainPathNode::isDestination(unsigned index) const {
     if (type == SOURCE) {
         return supplierPath->getAbsoluteSource() == index;
     } else if (type == DESTINATION) {

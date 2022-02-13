@@ -45,8 +45,7 @@
 
 using namespace Opcode;
 
-inline_ void Sort(uint32_t &id0, uint32_t &id1)
-{
+inline_ void Sort(uint32_t &id0, uint32_t &id1) {
     if (id0 > id1) {
         Swap(id0, id1);
     }
@@ -54,16 +53,13 @@ inline_ void Sort(uint32_t &id0, uint32_t &id1)
 
 class Opcode::SAP_Element {
 public:
-    inline_ SAP_Element()
-    {
+    inline_ SAP_Element() {
     }
 
-    inline_ SAP_Element(uint32_t id, SAP_Element *next) : mID(id), mNext(next)
-    {
+    inline_ SAP_Element(uint32_t id, SAP_Element *next) : mID(id), mNext(next) {
     }
 
-    inline_                    ~SAP_Element()
-    {
+    inline_                    ~SAP_Element() {
     }
 
     uint32_t mID;
@@ -83,23 +79,19 @@ public:
     SAP_EndPoint *Next;        // Next EndPoint whose Value is greater than ours (or nullptr)
     uint32_t Data;        // Parent box ID *2 | MinMax flag
 
-    inline_    void SetData(uint32_t box_id, bool is_max)
-    {
+    inline_    void SetData(uint32_t box_id, bool is_max) {
         Data = (box_id << 1) | (is_max ? 1 : 0);
     }
 
-    inline_    bool IsMax() const
-    {
+    inline_    bool IsMax() const {
         return Data & 1;
     }
 
-    inline_    uint32_t GetBoxID() const
-    {
+    inline_    uint32_t GetBoxID() const {
         return Data >> 1;
     }
 
-    inline_    void InsertAfter(SAP_EndPoint *element)
-    {
+    inline_    void InsertAfter(SAP_EndPoint *element) {
         if (this != element && this != element->Next) {
             // Remove
             if (Previous) {
@@ -120,8 +112,7 @@ public:
         }
     }
 
-    inline_    void InsertBefore(SAP_EndPoint *element)
-    {
+    inline_    void InsertBefore(SAP_EndPoint *element) {
         if (this != element && this != element->Previous) {
             // Remove
             if (Previous) {
@@ -163,8 +154,7 @@ SAP_PairData::SAP_PairData() :
         mElementPool(nullptr),
         mFirstFree(nullptr),
         mNbObjects(0),
-        mArray(nullptr)
-{
+        mArray(nullptr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,13 +162,11 @@ SAP_PairData::SAP_PairData() :
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SAP_PairData::~SAP_PairData()
-{
+SAP_PairData::~SAP_PairData() {
     Release();
 }
 
-void SAP_PairData::Release()
-{
+void SAP_PairData::Release() {
     mNbElements = 0;
     mNbUsedElements = 0;
     mNbObjects = 0;
@@ -193,8 +181,7 @@ void SAP_PairData::Release()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool SAP_PairData::Init(uint32_t nb_objects)
-{
+bool SAP_PairData::Init(uint32_t nb_objects) {
     // Make sure everything has been released
     Release();
     if (!nb_objects) {
@@ -216,8 +203,7 @@ bool SAP_PairData::Init(uint32_t nb_objects)
  *	\param		delta	[in] offset in bytes
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ void Remap(SAP_Element *&element, uint32_t delta)
-{
+inline_ void Remap(SAP_Element *&element, uint32_t delta) {
     if (element) {
         element = (SAP_Element *) (uintptr_t(element) + delta);
     }
@@ -232,8 +218,7 @@ inline_ void Remap(SAP_Element *&element, uint32_t delta)
  *	\return		the new element
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SAP_Element *SAP_PairData::GetFreeElem(uint32_t id, SAP_Element *next, uint32_t *remap)
-{
+SAP_Element *SAP_PairData::GetFreeElem(uint32_t id, SAP_Element *next, uint32_t *remap) {
     if (remap) {
         *remap = 0;
     }
@@ -294,15 +279,13 @@ SAP_Element *SAP_PairData::GetFreeElem(uint32_t id, SAP_Element *next, uint32_t 
  *	\param		elem	[in] element to free/recycle
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ void SAP_PairData::FreeElem(SAP_Element *elem)
-{
+inline_ void SAP_PairData::FreeElem(SAP_Element *elem) {
     elem->mNext = mFirstFree;    // Next free
     mFirstFree = elem;
 }
 
 // Add a pair to the set.
-void SAP_PairData::AddPair(uint32_t id1, uint32_t id2)
-{
+void SAP_PairData::AddPair(uint32_t id1, uint32_t id2) {
     // Order the ids
     Sort(id1, id2);
 
@@ -345,8 +328,7 @@ void SAP_PairData::AddPair(uint32_t id1, uint32_t id2)
 }
 
 // Delete a pair from the set.
-void SAP_PairData::RemovePair(uint32_t id1, uint32_t id2)
-{
+void SAP_PairData::RemovePair(uint32_t id1, uint32_t id2) {
     // Order the ids.
     Sort(id1, id2);
 
@@ -387,8 +369,7 @@ void SAP_PairData::RemovePair(uint32_t id1, uint32_t id2)
     }
 }
 
-void SAP_PairData::DumpPairs(Pairs &pairs) const
-{
+void SAP_PairData::DumpPairs(Pairs &pairs) const {
     // ### Ugly and slow
     for (uint32_t i = 0; i < mNbObjects; i++) {
         SAP_Element *Current = mArray[i];
@@ -401,8 +382,7 @@ void SAP_PairData::DumpPairs(Pairs &pairs) const
     }
 }
 
-void SAP_PairData::DumpPairs(PairCallback callback, void *user_data) const
-{
+void SAP_PairData::DumpPairs(PairCallback callback, void *user_data) const {
     if (!callback) {
         return;
     }
@@ -453,8 +433,7 @@ void SAP_PairData::DumpPairs(PairCallback callback, void *user_data) const
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SweepAndPrune::SweepAndPrune()
-{
+SweepAndPrune::SweepAndPrune() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -462,22 +441,18 @@ SweepAndPrune::SweepAndPrune()
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SweepAndPrune::~SweepAndPrune()
-{
+SweepAndPrune::~SweepAndPrune() {
 }
 
-void SweepAndPrune::GetPairs(Pairs &pairs) const
-{
+void SweepAndPrune::GetPairs(Pairs &pairs) const {
     mPairs.DumpPairs(pairs);
 }
 
-void SweepAndPrune::GetPairs(PairCallback callback, void *user_data) const
-{
+void SweepAndPrune::GetPairs(PairCallback callback, void *user_data) const {
     mPairs.DumpPairs(callback, user_data);
 }
 
-bool SweepAndPrune::Init(uint32_t nb_objects, const AABB **boxes)
-{
+bool SweepAndPrune::Init(uint32_t nb_objects, const AABB **boxes) {
     // 1) Create sorted lists
     mNbObjects = nb_objects;
 
@@ -553,8 +528,7 @@ bool SweepAndPrune::Init(uint32_t nb_objects, const AABB **boxes)
     return true;
 }
 
-bool SweepAndPrune::CheckListsIntegrity()
-{
+bool SweepAndPrune::CheckListsIntegrity() {
     for (uint32_t Axis = 0; Axis < 3; Axis++) {
         // Find list head
         SAP_EndPoint *Current = mList[Axis];
@@ -589,8 +563,7 @@ bool SweepAndPrune::CheckListsIntegrity()
     return true;
 }
 
-inline_ bool Intersect(const AABB &a, const SAP_Box &b)
-{
+inline_ bool Intersect(const AABB &a, const SAP_Box &b) {
     if (b.Max[0]->Value < a.GetMin(0) || a.GetMax(0) < b.Min[0]->Value
             || b.Max[1]->Value < a.GetMin(1) || a.GetMax(1) < b.Min[1]->Value
             || b.Max[2]->Value < a.GetMin(2) || a.GetMax(2) < b.Min[2]->Value) {
@@ -600,8 +573,7 @@ inline_ bool Intersect(const AABB &a, const SAP_Box &b)
     return TRUE;
 }
 
-bool SweepAndPrune::UpdateObject(uint32_t i, const AABB &box)
-{
+bool SweepAndPrune::UpdateObject(uint32_t i, const AABB &box) {
     for (uint32_t Axis = 0; Axis < 3; Axis++) {
 //		uint32_t Base = (uint32_t)&mList[Axis][0];
 

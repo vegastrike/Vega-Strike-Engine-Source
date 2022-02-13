@@ -49,14 +49,12 @@ using std::string;
 
 extern double interpolation_blend_factor;
 
-inline void BlendTrans(Matrix &drawmat, const QVector &cur_position, const QVector &prev_position)
-{
+inline void BlendTrans(Matrix &drawmat, const QVector &cur_position, const QVector &prev_position) {
     drawmat.p = prev_position.Scale(1 - interpolation_blend_factor) + cur_position.Scale(interpolation_blend_factor);
 }
 
 // Bolts have texture
-int Bolt::AddTexture(BoltDrawManager *q, std::string file)
-{
+int Bolt::AddTexture(BoltDrawManager *q, std::string file) {
     int decal = q->boltdecals.AddTexture(file.c_str(), MIPMAP);
     if (decal >= (int) q->bolts.size()) {
         q->bolts.push_back(vector<Bolt>());
@@ -70,8 +68,7 @@ int Bolt::AddTexture(BoltDrawManager *q, std::string file)
 }
 
 // Balls have animation
-int Bolt::AddAnimation(BoltDrawManager *q, std::string file, QVector cur_position)
-{
+int Bolt::AddAnimation(BoltDrawManager *q, std::string file, QVector cur_position) {
     int decal = -1;
     for (unsigned int i = 0; i < q->animationname.size(); i++) {
         if (file == q->animationname[i]) {
@@ -82,15 +79,18 @@ int Bolt::AddAnimation(BoltDrawManager *q, std::string file, QVector cur_positio
         decal = q->animations.size();
         q->animationname.push_back(file);
         q->animations
-         .push_back(new Animation(file.c_str(), true, .1, MIPMAP, false));         //balls have their own orientation
+                .push_back(new Animation(file.c_str(),
+                        true,
+                        .1,
+                        MIPMAP,
+                        false));         //balls have their own orientation
         q->animations.back()->SetPosition(cur_position);
         q->balls.push_back(vector<Bolt>());
     }
     return decal;
 }
 
-void Bolt::DrawAllBolts()
-{
+void Bolt::DrawAllBolts() {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
     GFXVertexList *qmesh = bolt_draw_manager.boltmesh;
 
@@ -145,8 +145,7 @@ void Bolt::DrawAllBolts()
     qmesh->EndDrawState();
 }
 
-void Bolt::DrawAllBalls()
-{
+void Bolt::DrawAllBalls() {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
     vector<Animation *>::iterator k = bolt_draw_manager.animations.begin();
 
@@ -169,8 +168,7 @@ void Bolt::DrawAllBalls()
     }
 }
 
-void Bolt::DrawBolt(GFXVertexList *qmesh)
-{
+void Bolt::DrawBolt(GFXVertexList *qmesh) {
     float distance = (cur_position - BoltDrawManager::camera_position).MagnitudeSquared();
 
     if (distance * BoltDrawManager::pixel_angle >= bolt_size) {
@@ -183,17 +181,16 @@ void Bolt::DrawBolt(GFXVertexList *qmesh)
     Matrix drawmat(this->drawmat);
     if (game_options.StretchBolts > 0) {
         ScaleMatrix(drawmat,
-                    Vector(1,
-                           1,
-                           type->speed * BoltDrawManager::elapsed_time * game_options.StretchBolts / type->length));
+                Vector(1,
+                        1,
+                        type->speed * BoltDrawManager::elapsed_time * game_options.StretchBolts / type->length));
     }
     GFXLoadMatrixModel(drawmat);
     GFXColor4f(wt->r, wt->g, wt->b, wt->a);
     qmesh->Draw();
 }
 
-void Bolt::DrawBall(float &bolt_size, Animation *cur)
-{
+void Bolt::DrawBall(float &bolt_size, Animation *cur) {
     // TODO: move up to DrawBalls
     Vector p, q, r;
     _Universe->AccessCamera()->GetOrientation(p, q, r);
@@ -211,8 +208,7 @@ void Bolt::DrawBall(float &bolt_size, Animation *cur)
     }
 }
 
-void Bolt::Destroy(unsigned int index)
-{
+void Bolt::Destroy(unsigned int index) {
     bool isBall = true;
     if (type->type == WEAPON_TYPE::BOLT) {
         isBall = false;
@@ -249,11 +245,10 @@ void Bolt::Destroy(unsigned int index)
 
 // A bolt is created when fired
 Bolt::Bolt(const WeaponInfo *typ,
-           const Matrix &orientationpos,
-           const Vector &shipspeed,
-           void *owner,
-           CollideMap::iterator hint) : cur_position(orientationpos.p), ShipSpeed(shipspeed)
-{
+        const Matrix &orientationpos,
+        const Vector &shipspeed,
+        void *owner,
+        CollideMap::iterator hint) : cur_position(orientationpos.p), ShipSpeed(shipspeed) {
     VSCONSTRUCT2('t')
     BoltDrawManager &q = BoltDrawManager::GetInstance();
     prev_position = cur_position;
@@ -275,15 +270,15 @@ Bolt::Bolt(const WeaponInfo *typ,
         decal = Bolt::AddTexture(&q, typ->file);
 
         int bolt_index = Bolt::BoltIndex(q.bolts[decal].size(),
-                                         decal,
-                                         false).bolt_index;
+                decal,
+                false).bolt_index;
 
         this->location = bolt_collide_map->insert(Collidable(bolt_index,
-                                                             (shipspeed
-                                                                     + orientationpos.getR() * typ->speed).Magnitude()
-                                                                     * .5,
-                                                             cur_position + vel * simulation_atom_var * .5),
-                                                  hint);
+                        (shipspeed
+                                + orientationpos.getR() * typ->speed).Magnitude()
+                                * .5,
+                        cur_position + vel * simulation_atom_var * .5),
+                hint);
 
         q.bolts[decal].push_back(*this);
 
@@ -294,24 +289,22 @@ Bolt::Bolt(const WeaponInfo *typ,
         decal = Bolt::AddAnimation(&q, typ->file, cur_position);
 
         int bolt_index = Bolt::BoltIndex(q.balls[decal].size(),
-                                         decal,
-                                         true).bolt_index;
+                decal,
+                true).bolt_index;
         Collidable collidable = Collidable(bolt_index,
-                                           (shipspeed + orientationpos.getR()
-                                                   * typ->speed).Magnitude() * .5,
-                                           cur_position + vel * simulation_atom_var * .5);
+                (shipspeed + orientationpos.getR()
+                        * typ->speed).Magnitude() * .5,
+                cur_position + vel * simulation_atom_var * .5);
         this->location = bolt_collide_map->insert(collidable, hint);
         q.balls[decal].push_back(*this);
     }
 }
 
-size_t nondecal_index(Collidable::CollideRef b)
-{
+size_t nondecal_index(Collidable::CollideRef b) {
     return b.bolt_index >> 8;
 }
 
-bool Bolt::Update(Collidable::CollideRef index)
-{
+bool Bolt::Update(Collidable::CollideRef index) {
     const WeaponInfo *type = this->type;
     float speed = type->speed;
     curdist += speed * simulation_atom_var;
@@ -335,14 +328,12 @@ class UpdateBolt {
     CollideMap *collide_map;
     StarSystem *starSystem;
 public:
-    UpdateBolt(StarSystem *ss, CollideMap *collide_map)
-    {
+    UpdateBolt(StarSystem *ss, CollideMap *collide_map) {
         this->starSystem = ss;
         this->collide_map = collide_map;
     }
 
-    void operator()(Collidable &collidable)
-    {
+    void operator()(Collidable &collidable) {
         if (collidable.radius < 0) {
             Bolt *thus = Bolt::BoltFromIndex(collidable.ref);
             if (!collide_map->CheckCollisions(thus, collidable)) {
@@ -356,8 +347,7 @@ namespace vsalg {
 //
 
 template<typename IT, typename F>
-void for_each(IT start, IT end, F f)
-{
+void for_each(IT start, IT end, F f) {
     //This way, deletion of current item is allowed
     //- drawback: iterator copy each iteration
     while (start != end) {
@@ -371,26 +361,22 @@ void for_each(IT start, IT end, F f)
 class UpdateBolts {
     UpdateBolt sub;
 public:
-    UpdateBolts(StarSystem *ss, CollideMap *collide_map) : sub(ss, collide_map)
-    {
+    UpdateBolts(StarSystem *ss, CollideMap *collide_map) : sub(ss, collide_map) {
     }
 
     template<class T>
-    void operator()(T &collidableList)
-    {
+    void operator()(T &collidableList) {
         vsalg::for_each(collidableList.begin(), collidableList.end(), sub);
     }
 };
 
-void Bolt::UpdatePhysics(StarSystem *ss)
-{
+void Bolt::UpdatePhysics(StarSystem *ss) {
     CollideMap *cm = ss->collide_map[Unit::UNIT_BOLT];
     vsalg::for_each(cm->sorted.begin(), cm->sorted.end(), UpdateBolt(ss, cm));
     vsalg::for_each(cm->toflattenhints.begin(), cm->toflattenhints.end(), UpdateBolts(ss, cm));
 }
 
-bool Bolt::Collide(Unit *target)
-{
+bool Bolt::Collide(Unit *target) {
     Vector normal;
     float distance;
     Unit *affectedSubUnit;
@@ -417,21 +403,20 @@ bool Bolt::Collide(Unit *target)
         distance = curdist / this->type->range;
         GFXColor coltmp(this->type->r, this->type->g, this->type->b, this->type->a);
         Damage damage(this->type->damage * ((1 - distance) + distance * this->type->long_range),
-                      this->type->phase_damage * ((1 - distance) + distance * this->type->long_range));
+                this->type->phase_damage * ((1 - distance) + distance * this->type->long_range));
 
         target->ApplyDamage((prev_position + tmp).Cast(),
-                            normal,
-                            damage,
-                            affectedSubUnit,
-                            coltmp,
-                            owner);
+                normal,
+                damage,
+                affectedSubUnit,
+                coltmp,
+                owner);
         return true;
     }
     return false;
 }
 
-Bolt *Bolt::BoltFromIndex(Collidable::CollideRef b)
-{
+Bolt *Bolt::BoltFromIndex(Collidable::CollideRef b) {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
     size_t ind = nondecal_index(b);
     if (b.bolt_index & 128) {
@@ -441,8 +426,7 @@ Bolt *Bolt::BoltFromIndex(Collidable::CollideRef b)
     }
 }
 
-bool Bolt::CollideAnon(Collidable::CollideRef b, Unit *un)
-{
+bool Bolt::CollideAnon(Collidable::CollideRef b, Unit *un) {
     Bolt *tmp = BoltFromIndex(b);
     if (tmp->Collide(un)) {
         tmp->Destroy(nondecal_index(b));
@@ -451,8 +435,7 @@ bool Bolt::CollideAnon(Collidable::CollideRef b, Unit *un)
     return false;
 }
 
-Collidable::CollideRef Bolt::BoltIndex(int index, int decal, bool isBall)
-{
+Collidable::CollideRef Bolt::BoltIndex(int index, int decal, bool isBall) {
     Collidable::CollideRef temp;
     temp.bolt_index = index;
     temp.bolt_index <<= 8;

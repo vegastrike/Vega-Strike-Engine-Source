@@ -29,8 +29,7 @@
 
 
 // Demonstrate some basic assertions.
-TEST(Shield, Sanity)
-{
+TEST(Shield, Sanity) {
     Damage damage;
     InflictedDamage inflicted_damage(3);
     damage.normal_damage = 10;
@@ -66,8 +65,7 @@ TEST(Shield, Sanity)
     EXPECT_EQ(damage.normal_damage, 85);
 }
 
-TEST(Armor, Sanity)
-{
+TEST(Armor, Sanity) {
     Damage damage;
     InflictedDamage inflicted_damage(3);
     damage.normal_damage = 10;

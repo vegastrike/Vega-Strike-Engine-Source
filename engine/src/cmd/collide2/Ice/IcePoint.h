@@ -44,8 +44,7 @@ const float EPSILON2 = 1.0e-20f;
 
 class ICEMATHS_API Point {
 protected:
-    inline_ const float &Vals(enum PointComponent pointComponent) const
-    {
+    inline_ const float &Vals(enum PointComponent pointComponent) const {
         switch (pointComponent) {
             case _X:
                 return x;
@@ -61,45 +60,37 @@ protected:
 public:
 
     //! Empty constructor
-    inline_ Point()
-    {
+    inline_ Point() {
     }
     //! Constructor from a single float
 //		inline_					Point(float val) : x(val), y(val), z(val)					{}
 // Removed since it introduced the nasty "Point T = *Matrix4x4.GetTrans();" bug.......
     //! Constructor from floats
-    inline_ Point(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {
+    inline_ Point(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {
     }
     //! Constructor from array
-    inline_ Point(const float f[3]) : x(f[_X]), y(f[_Y]), z(f[_Z])
-    {
+    inline_ Point(const float f[3]) : x(f[_X]), y(f[_Y]), z(f[_Z]) {
     }
     //! Copy constructor
-    inline_ Point(const Point &p) : x(p.x), y(p.y), z(p.z)
-    {
+    inline_ Point(const Point &p) : x(p.x), y(p.y), z(p.z) {
     }
     //! Destructor
-    inline_                    ~Point()
-    {
+    inline_                    ~Point() {
     }
 
     //! Clears the vector
-    inline_    Point &Zero()
-    {
+    inline_    Point &Zero() {
         x = y = z = 0.0f;
         return *this;
     }
 
     //! + infinity
-    inline_    Point &SetPlusInfinity()
-    {
+    inline_    Point &SetPlusInfinity() {
         x = y = z = MAX_FLOAT;
         return *this;
     }
     //! - infinity
-    inline_    Point &SetMinusInfinity()
-    {
+    inline_    Point &SetMinusInfinity() {
         x = y = z = MIN_FLOAT;
         return *this;
     }
@@ -110,24 +101,21 @@ public:
     Point &UnitRandomVector();
 
     //! Assignment from values
-    inline_    Point &Set(float _x, float _y, float _z)
-    {
+    inline_    Point &Set(float _x, float _y, float _z) {
         x = _x;
         y = _y;
         z = _z;
         return *this;
     }
     //! Assignment from array
-    inline_    Point &Set(const float f[3])
-    {
+    inline_    Point &Set(const float f[3]) {
         x = f[_X];
         y = f[_Y];
         z = f[_Z];
         return *this;
     }
     //! Assignment from another point
-    inline_    Point &Set(const Point &src)
-    {
+    inline_    Point &Set(const Point &src) {
         x = src.x;
         y = src.y;
         z = src.z;
@@ -135,32 +123,28 @@ public:
     }
 
     //! Adds a vector
-    inline_    Point &Add(const Point &p)
-    {
+    inline_    Point &Add(const Point &p) {
         x += p.x;
         y += p.y;
         z += p.z;
         return *this;
     }
     //! Adds a vector
-    inline_    Point &Add(float _x, float _y, float _z)
-    {
+    inline_    Point &Add(float _x, float _y, float _z) {
         x += _x;
         y += _y;
         z += _z;
         return *this;
     }
     //! Adds a vector
-    inline_    Point &Add(const float f[3])
-    {
+    inline_    Point &Add(const float f[3]) {
         x += f[_X];
         y += f[_Y];
         z += f[_Z];
         return *this;
     }
     //! Adds vectors
-    inline_    Point &Add(const Point &p, const Point &q)
-    {
+    inline_    Point &Add(const Point &p, const Point &q) {
         x = p.x + q.x;
         y = p.y + q.y;
         z = p.z + q.z;
@@ -168,32 +152,28 @@ public:
     }
 
     //! Subtracts a vector
-    inline_    Point &Sub(const Point &p)
-    {
+    inline_    Point &Sub(const Point &p) {
         x -= p.x;
         y -= p.y;
         z -= p.z;
         return *this;
     }
     //! Subtracts a vector
-    inline_    Point &Sub(float _x, float _y, float _z)
-    {
+    inline_    Point &Sub(float _x, float _y, float _z) {
         x -= _x;
         y -= _y;
         z -= _z;
         return *this;
     }
     //! Subtracts a vector
-    inline_    Point &Sub(const float f[3])
-    {
+    inline_    Point &Sub(const float f[3]) {
         x -= f[_X];
         y -= f[_Y];
         z -= f[_Z];
         return *this;
     }
     //! Subtracts vectors
-    inline_    Point &Sub(const Point &p, const Point &q)
-    {
+    inline_    Point &Sub(const Point &p, const Point &q) {
         x = p.x - q.x;
         y = p.y - q.y;
         z = p.z - q.z;
@@ -201,16 +181,14 @@ public:
     }
 
     //! this = -this
-    inline_    Point &Neg()
-    {
+    inline_    Point &Neg() {
         x = -x;
         y = -y;
         z = -z;
         return *this;
     }
     //! this = -a
-    inline_    Point &Neg(const Point &a)
-    {
+    inline_    Point &Neg(const Point &a) {
         x = -a.x;
         y = -a.y;
         z = -a.z;
@@ -218,8 +196,7 @@ public:
     }
 
     //! Multiplies by a scalar
-    inline_    Point &Mult(float s)
-    {
+    inline_    Point &Mult(float s) {
         x *= s;
         y *= s;
         z *= s;
@@ -227,8 +204,7 @@ public:
     }
 
     //! this = a * scalar
-    inline_    Point &Mult(const Point &a, float scalar)
-    {
+    inline_    Point &Mult(const Point &a, float scalar) {
         x = a.x * scalar;
         y = a.y * scalar;
         z = a.z * scalar;
@@ -236,8 +212,7 @@ public:
     }
 
     //! this = a + b * scalar
-    inline_    Point &Mac(const Point &a, const Point &b, float scalar)
-    {
+    inline_    Point &Mac(const Point &a, const Point &b, float scalar) {
         x = a.x + b.x * scalar;
         y = a.y + b.y * scalar;
         z = a.z + b.z * scalar;
@@ -245,8 +220,7 @@ public:
     }
 
     //! this = this + a * scalar
-    inline_    Point &Mac(const Point &a, float scalar)
-    {
+    inline_    Point &Mac(const Point &a, float scalar) {
         x += a.x * scalar;
         y += a.y * scalar;
         z += a.z * scalar;
@@ -254,8 +228,7 @@ public:
     }
 
     //! this = a - b * scalar
-    inline_    Point &Msc(const Point &a, const Point &b, float scalar)
-    {
+    inline_    Point &Msc(const Point &a, const Point &b, float scalar) {
         x = a.x - b.x * scalar;
         y = a.y - b.y * scalar;
         z = a.z - b.z * scalar;
@@ -263,8 +236,7 @@ public:
     }
 
     //! this = this - a * scalar
-    inline_    Point &Msc(const Point &a, float scalar)
-    {
+    inline_    Point &Msc(const Point &a, float scalar) {
         x -= a.x * scalar;
         y -= a.y * scalar;
         z -= a.z * scalar;
@@ -272,8 +244,7 @@ public:
     }
 
     //! this = a + b * scalarb + c * scalarc
-    inline_    Point &Mac2(const Point &a, const Point &b, float scalarb, const Point &c, float scalarc)
-    {
+    inline_    Point &Mac2(const Point &a, const Point &b, float scalarb, const Point &c, float scalarc) {
         x = a.x + b.x * scalarb + c.x * scalarc;
         y = a.y + b.y * scalarb + c.y * scalarc;
         z = a.z + b.z * scalarb + c.z * scalarc;
@@ -281,8 +252,7 @@ public:
     }
 
     //! this = a - b * scalarb - c * scalarc
-    inline_    Point &Msc2(const Point &a, const Point &b, float scalarb, const Point &c, float scalarc)
-    {
+    inline_    Point &Msc2(const Point &a, const Point &b, float scalarb, const Point &c, float scalarc) {
         x = a.x - b.x * scalarb - c.x * scalarc;
         y = a.y - b.y * scalarb - c.y * scalarc;
         z = a.z - b.z * scalarb - c.z * scalarc;
@@ -302,8 +272,7 @@ public:
     inline_    Point &TransMult(const Matrix3x3 &mat, const Point &a);
 
     //! Linear interpolate between two vectors: this = a + t * (b - a)
-    inline_    Point &Lerp(const Point &a, const Point &b, float t)
-    {
+    inline_    Point &Lerp(const Point &a, const Point &b, float t) {
         x = a.x + t * (b.x - a.x);
         y = a.y + t * (b.y - a.y);
         z = a.z + t * (b.z - a.z);
@@ -315,8 +284,7 @@ public:
     //!			+ p1 * (3t^3 - 5t^2 + 2)/2
     //!			+ p2 * (4t^2 - 3t^3 + t)/2
     //!			+ p3 * (t^3 - t^2)/2
-    inline_    Point &Herp(const Point &p0, const Point &p1, const Point &p2, const Point &p3, float t)
-    {
+    inline_    Point &Herp(const Point &p0, const Point &p1, const Point &p2, const Point &p3, float t) {
         float t2 = t * t;
         float t3 = t2 * t;
         float kp0 = (2.0f * t2 - t3 - t) * 0.5f;
@@ -336,26 +304,22 @@ public:
     inline_    Point &InvTransform(const Point &r, const Matrix3x3 &rotpos, const Point &linpos);
 
     //! Returns MIN(x, y, z);
-    inline_    float Min() const
-    {
+    inline_    float Min() const {
         return MIN(x, MIN(y, z));
     }
     //! Returns MAX(x, y, z);
-    inline_    float Max() const
-    {
+    inline_    float Max() const {
         return MAX(x, MAX(y, z));
     }
     //! Sets each element to be componentwise minimum
-    inline_    Point &Min(const Point &p)
-    {
+    inline_    Point &Min(const Point &p) {
         x = MIN(x, p.x);
         y = MIN(y, p.y);
         z = MIN(z, p.z);
         return *this;
     }
     //! Sets each element to be componentwise maximum
-    inline_    Point &Max(const Point &p)
-    {
+    inline_    Point &Max(const Point &p) {
         x = MAX(x, p.x);
         y = MAX(y, p.y);
         z = MAX(z, p.z);
@@ -363,8 +327,7 @@ public:
     }
 
     //! Clamps each element
-    inline_    Point &Clamp(float min, float max)
-    {
+    inline_    Point &Clamp(float min, float max) {
         if (x < min) {
             x = min;
         } else if (x > max) {
@@ -384,30 +347,25 @@ public:
     }
 
     //! Computes square magnitude
-    inline_    float SquareMagnitude() const
-    {
+    inline_    float SquareMagnitude() const {
         return x * x + y * y + z * z;
     }
     //! Computes magnitude
-    inline_    float Magnitude() const
-    {
+    inline_    float Magnitude() const {
         return sqrtf(x * x + y * y + z * z);
     }
     //! Computes volume
-    inline_    float Volume() const
-    {
+    inline_    float Volume() const {
         return x * y * z;
     }
 
     //! Checks the point is near zero
-    inline_    bool ApproxZero() const
-    {
+    inline_    bool ApproxZero() const {
         return SquareMagnitude() < EPSILON2;
     }
 
     //! Tests for exact zero vector
-    inline_    bool IsZero() const
-    {
+    inline_    bool IsZero() const {
         if (IR(x) || IR(y) || IR(z)) {
             return FALSE;
         }
@@ -415,8 +373,7 @@ public:
     }
 
     //! Checks point validity
-    inline_    bool IsValid() const
-    {
+    inline_    bool IsValid() const {
         if (!IsValidFloat(x)) {
             return FALSE;
         }
@@ -430,8 +387,7 @@ public:
     }
 
     //! Slighty moves the point
-    void Tweak(uint32_t coord_mask, uint32_t tweak_mask)
-    {
+    void Tweak(uint32_t coord_mask, uint32_t tweak_mask) {
         if (coord_mask & 1) {
             uint32_t Dummy = IR(x);
             Dummy ^= tweak_mask;
@@ -452,8 +408,7 @@ public:
     #define TWEAKMASK        0x3fffff
     #define TWEAKNOTMASK    ~TWEAKMASK
     //! Slighty moves the point out
-    inline_    void TweakBigger()
-    {
+    inline_    void TweakBigger() {
         uint32_t Dummy = (IR(x) & TWEAKNOTMASK);
         if (x >= 0.0f) {
             Dummy += TWEAKMASK + 1;
@@ -472,8 +427,7 @@ public:
     }
 
     //! Slighty moves the point in
-    inline_    void TweakSmaller()
-    {
+    inline_    void TweakSmaller() {
         uint32_t Dummy = (IR(x) & TWEAKNOTMASK);
         if (x < 0.0f) {
             Dummy += TWEAKMASK + 1;
@@ -492,8 +446,7 @@ public:
     }
 
     //! Normalizes the vector
-    inline_    Point &Normalize()
-    {
+    inline_    Point &Normalize() {
         float M = x * x + y * y + z * z;
         if (M) {
             M = 1.0f / sqrtf(M);
@@ -505,8 +458,7 @@ public:
     }
 
     //! Sets vector length
-    inline_    Point &SetLength(float length)
-    {
+    inline_    Point &SetLength(float length) {
         float NewLength = length / Magnitude();
         x *= NewLength;
         y *= NewLength;
@@ -515,8 +467,7 @@ public:
     }
 
     //! Clamps vector length
-    inline_    Point &ClampLength(float limit_length)
-    {
+    inline_    Point &ClampLength(float limit_length) {
         if (limit_length >= 0.0f)    // Magnitude must be positive
         {
             float CurrentSquareLength = SquareMagnitude();
@@ -532,26 +483,22 @@ public:
     }
 
     //! Computes distance to another point
-    inline_    float Distance(const Point &b) const
-    {
+    inline_    float Distance(const Point &b) const {
         return sqrtf((x - b.x) * (x - b.x) + (y - b.y) * (y - b.y) + (z - b.z) * (z - b.z));
     }
 
     //! Computes square distance to another point
-    inline_    float SquareDistance(const Point &b) const
-    {
+    inline_    float SquareDistance(const Point &b) const {
         return ((x - b.x) * (x - b.x) + (y - b.y) * (y - b.y) + (z - b.z) * (z - b.z));
     }
 
     //! Dot product dp = this|a
-    inline_    float Dot(const Point &p) const
-    {
+    inline_    float Dot(const Point &p) const {
         return p.x * x + p.y * y + p.z * z;
     }
 
     //! Cross product this = a x b
-    inline_    Point &Cross(const Point &a, const Point &b)
-    {
+    inline_    Point &Cross(const Point &a, const Point &b) {
         x = a.y * b.z - a.z * b.y;
         y = a.z * b.x - a.x * b.z;
         z = a.x * b.y - a.y * b.x;
@@ -559,14 +506,12 @@ public:
     }
 
     //! Vector code ( bitmask = sign(z) | sign(y) | sign(x) )
-    inline_    uint32_t VectorCode() const
-    {
+    inline_    uint32_t VectorCode() const {
         return (IR(x) >> 31) | ((IR(y) & SIGN_BITMASK) >> 30) | ((IR(z) & SIGN_BITMASK) >> 29);
     }
 
     //! Returns largest axis
-    inline_    PointComponent LargestAxis() const
-    {
+    inline_    PointComponent LargestAxis() const {
         PointComponent m = _X;
         if (Vals(_Y) > Vals(m)) {
             m = _Y;
@@ -578,8 +523,7 @@ public:
     }
 
     //! Returns closest axis
-    inline_    PointComponent ClosestAxis() const
-    {
+    inline_    PointComponent ClosestAxis() const {
         PointComponent m = _X;
         if (AIR(Vals(_Y)) > AIR(Vals(m))) {
             m = _Y;
@@ -591,8 +535,7 @@ public:
     }
 
     //! Returns smallest axis
-    inline_    PointComponent SmallestAxis() const
-    {
+    inline_    PointComponent SmallestAxis() const {
         PointComponent m = _X;
         if (Vals(_Y) < Vals(m)) {
             m = _Y;
@@ -616,8 +559,7 @@ public:
     Point &Unfold(Plane &p, Point &a, Point &b);
 
     //! Hash function from Ville Miettinen
-    inline_    uint32_t GetHashValue() const
-    {
+    inline_    uint32_t GetHashValue() const {
         const uint32_t *h = (const uint32_t *) (this);
         uint32_t f = (h[0] + h[1] * 11 - (h[2] * 17)) & 0x7fffffff;    // avoid problems with +-0
         return (f >> 22) ^ (f >> 12) ^ (f);
@@ -631,63 +573,52 @@ public:
     // Arithmetic operators
 
     //! Unary operator for Point Negate = - Point
-    inline_    Point operator-() const
-    {
+    inline_    Point operator-() const {
         return Point(-x, -y, -z);
     }
 
     //! Operator for Point Plus = Point + Point.
-    inline_    Point operator+(const Point &p) const
-    {
+    inline_    Point operator+(const Point &p) const {
         return Point(x + p.x, y + p.y, z + p.z);
     }
     //! Operator for Point Minus = Point - Point.
-    inline_    Point operator-(const Point &p) const
-    {
+    inline_    Point operator-(const Point &p) const {
         return Point(x - p.x, y - p.y, z - p.z);
     }
 
     //! Operator for Point Mul   = Point * Point.
-    inline_    Point operator*(const Point &p) const
-    {
+    inline_    Point operator*(const Point &p) const {
         return Point(x * p.x, y * p.y, z * p.z);
     }
     //! Operator for Point Scale = Point * float.
-    inline_    Point operator*(float s) const
-    {
+    inline_    Point operator*(float s) const {
         return Point(x * s, y * s, z * s);
     }
     //! Operator for Point Scale = float * Point.
-    inline_ friend Point operator*(float s, const Point &p)
-    {
+    inline_ friend Point operator*(float s, const Point &p) {
         return Point(s * p.x, s * p.y, s * p.z);
     }
 
     //! Operator for Point Div   = Point / Point.
-    inline_    Point operator/(const Point &p) const
-    {
+    inline_    Point operator/(const Point &p) const {
         return Point(x / p.x, y / p.y, z / p.z);
     }
     //! Operator for Point Scale = Point / float.
-    inline_    Point operator/(float s) const
-    {
+    inline_    Point operator/(float s) const {
         s = 1.0f / s;
         return Point(x * s, y * s, z * s);
     }
     //! Operator for Point Scale = float / Point.
-    inline_    friend Point operator/(float s, const Point &p)
-    {
+    inline_    friend Point operator/(float s, const Point &p) {
         return Point(s / p.x, s / p.y, s / p.z);
     }
 
     //! Operator for float DotProd = Point | Point.
-    inline_    float operator|(const Point &p) const
-    {
+    inline_    float operator|(const Point &p) const {
         return x * p.x + y * p.y + z * p.z;
     }
     //! Operator for Point VecProd = Point ^ Point.
-    inline_    Point operator^(const Point &p) const
-    {
+    inline_    Point operator^(const Point &p) const {
         return Point(
                 y * p.z - z * p.y,
                 z * p.x - x * p.z,
@@ -695,16 +626,14 @@ public:
     }
 
     //! Operator for Point += Point.
-    inline_    Point &operator+=(const Point &p)
-    {
+    inline_    Point &operator+=(const Point &p) {
         x += p.x;
         y += p.y;
         z += p.z;
         return *this;
     }
     //! Operator for Point += float.
-    inline_    Point &operator+=(float s)
-    {
+    inline_    Point &operator+=(float s) {
         x += s;
         y += s;
         z += s;
@@ -712,16 +641,14 @@ public:
     }
 
     //! Operator for Point -= Point.
-    inline_    Point &operator-=(const Point &p)
-    {
+    inline_    Point &operator-=(const Point &p) {
         x -= p.x;
         y -= p.y;
         z -= p.z;
         return *this;
     }
     //! Operator for Point -= float.
-    inline_    Point &operator-=(float s)
-    {
+    inline_    Point &operator-=(float s) {
         x -= s;
         y -= s;
         z -= s;
@@ -729,16 +656,14 @@ public:
     }
 
     //! Operator for Point *= Point.
-    inline_    Point &operator*=(const Point &p)
-    {
+    inline_    Point &operator*=(const Point &p) {
         x *= p.x;
         y *= p.y;
         z *= p.z;
         return *this;
     }
     //! Operator for Point *= float.
-    inline_    Point &operator*=(float s)
-    {
+    inline_    Point &operator*=(float s) {
         x *= s;
         y *= s;
         z *= s;
@@ -746,16 +671,14 @@ public:
     }
 
     //! Operator for Point /= Point.
-    inline_    Point &operator/=(const Point &p)
-    {
+    inline_    Point &operator/=(const Point &p) {
         x /= p.x;
         y /= p.y;
         z /= p.z;
         return *this;
     }
     //! Operator for Point /= float.
-    inline_    Point &operator/=(float s)
-    {
+    inline_    Point &operator/=(float s) {
         s = 1.0f / s;
         x *= s;
         y *= s;
@@ -766,21 +689,18 @@ public:
     // Logical operators
 
     //! Operator for "if(Point==Point)"
-    inline_    bool operator==(const Point &p) const
-    {
+    inline_    bool operator==(const Point &p) const {
         return ((IR(x) == IR(p.x)) && (IR(y) == IR(p.y)) && (IR(z) == IR(p.z)));
     }
     //! Operator for "if(Point!=Point)"
-    inline_    bool operator!=(const Point &p) const
-    {
+    inline_    bool operator!=(const Point &p) const {
         return ((IR(x) != IR(p.x)) || (IR(y) != IR(p.y)) || (IR(z) != IR(p.z)));
     }
 
     // Arithmetic operators
 
     //! Operator for Point Mul = Point * Matrix3x3.
-    inline_    Point operator*(const Matrix3x3 &mat) const
-    {
+    inline_    Point operator*(const Matrix3x3 &mat) const {
         class ShadowMatrix3x3 { public: float m[3][3]; };    // To allow inlining
         const ShadowMatrix3x3 *Mat = (const ShadowMatrix3x3 *) &mat;
 
@@ -791,8 +711,7 @@ public:
     }
 
     //! Operator for Point Mul = Point * Matrix4x4.
-    inline_    Point operator*(const Matrix4x4 &mat) const
-    {
+    inline_    Point operator*(const Matrix4x4 &mat) const {
         class ShadowMatrix4x4 { public: float m[4][4]; };    // To allow inlining
         const ShadowMatrix4x4 *Mat = (const ShadowMatrix4x4 *) &mat;
 
@@ -803,8 +722,7 @@ public:
     }
 
     //! Operator for Point *= Matrix3x3.
-    inline_    Point &operator*=(const Matrix3x3 &mat)
-    {
+    inline_    Point &operator*=(const Matrix3x3 &mat) {
         class ShadowMatrix3x3 { public: float m[3][3]; };    // To allow inlining
         const ShadowMatrix3x3 *Mat = (const ShadowMatrix3x3 *) &mat;
 
@@ -820,8 +738,7 @@ public:
     }
 
     //! Operator for Point *= Matrix4x4.
-    inline_    Point &operator*=(const Matrix4x4 &mat)
-    {
+    inline_    Point &operator*=(const Matrix4x4 &mat) {
         class ShadowMatrix4x4 { public: float m[4][4]; };    // To allow inlining
         const ShadowMatrix4x4 *Mat = (const ShadowMatrix4x4 *) &mat;
 
@@ -841,13 +758,11 @@ public:
     //! Cast a Point to a HPoint. w is set to zero.
     operator HPoint() const;
 
-    inline_ float operator[](int n) const
-    {
+    inline_ float operator[](int n) const {
         return *(&x + n);
     }
 
-    inline_ float &operator[](int n)
-    {
+    inline_ float &operator[](int n) {
         return *(&x + n);
     }
 

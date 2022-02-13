@@ -27,8 +27,7 @@ extern "C" {
  *  void CGLSetFullScreen() {
  *
  *  }*/
-void CGMainDusplayID()
-{
+void CGMainDusplayID() {
 }                                                 /*
                                                                            *    void glClear() {
                                                                            *

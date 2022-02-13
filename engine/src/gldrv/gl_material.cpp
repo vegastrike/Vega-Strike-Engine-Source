@@ -29,8 +29,7 @@
 static vector<GFXMaterial> materialinfo;
 static int selectedmaterial = -1;
 
-void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material)
-{
+void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material) {
     number = (unsigned int) -1;     //intended warning for unsigned....
     for (unsigned int i = 0; i < materialinfo.size(); i++) {
         if (memcmp(&materialinfo[i], &material, sizeof(GFXMaterial)) == 0) {
@@ -45,13 +44,11 @@ void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &mater
     }
 }
 
-void /*GFXDRVAPI*/ GFXModifyMaterial(const unsigned int number, const GFXMaterial &material)
-{
+void /*GFXDRVAPI*/ GFXModifyMaterial(const unsigned int number, const GFXMaterial &material) {
     materialinfo[number] = material;
 }
 
-const GFXMaterial & /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number)
-{
+const GFXMaterial & /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number) {
     if (number >= materialinfo.size()) {
         static GFXMaterial tmp;
         return tmp;
@@ -59,8 +56,7 @@ const GFXMaterial & /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number)
     return materialinfo[number];
 }
 
-GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material)
-{
+GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material) {
     if ((number == (unsigned int) -1) || number >= materialinfo.size()) {
         return GFXFALSE;
     }
@@ -68,8 +64,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &mat
     return GFXTRUE;
 }
 
-void /*GFXDRVAPI*/ GFXSelectMaterialAlpha(const unsigned int number, float alpha)
-{
+void /*GFXDRVAPI*/ GFXSelectMaterialAlpha(const unsigned int number, float alpha) {
     selectedmaterial = -1;
     float matvect[4];
     matvect[0] = materialinfo[number].ar;
@@ -102,11 +97,10 @@ void /*GFXDRVAPI*/ GFXSelectMaterialAlpha(const unsigned int number, float alpha
 const float zerovect[4] = {0.0};
 
 void /*GFXDRVAPI*/ GFXSelectMaterialHighlights(const unsigned int number,
-                                               const GFXColor &ambient,
-                                               const GFXColor &diffuse,
-                                               const GFXColor &specular,
-                                               const GFXColor &emissive)
-{
+        const GFXColor &ambient,
+        const GFXColor &diffuse,
+        const GFXColor &specular,
+        const GFXColor &emissive) {
     selectedmaterial = -1;
     float matvect[4];
     matvect[0] = materialinfo[number].ar * ambient.r * ambient.a;
@@ -136,8 +130,7 @@ void /*GFXDRVAPI*/ GFXSelectMaterialHighlights(const unsigned int number,
     glMaterialfv(GL_FRONT, GL_SHININESS, &materialinfo[number].power);
 }
 
-void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number)
-{
+void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number) {
     if (1 || static_cast<int>(number) != selectedmaterial) { //FIXME Last time I checked true or anything was true
         float matvect[4];
         matvect[0] = materialinfo[number].ar;

@@ -29,8 +29,7 @@
 #include "vs_logging.h"
 #include "cmd/unit_generic.h"
 
-void CloakFor::Execute()
-{
+void CloakFor::Execute() {
     if (time == 0) {
         parent->Cloak(enable);
     }
@@ -44,8 +43,7 @@ void CloakFor::Execute()
     }
 }
 
-CloakFor::~CloakFor()
-{
+CloakFor::~CloakFor() {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("clk%1$x") % this));
 #endif

@@ -44,35 +44,31 @@ class Halo {
 public:
     ~Halo();
     Halo(const char *texture,
-         const GFXColor &col = TranslucentWhite,
-         const QVector &pos = ZeroQvector,
-         float sizx = 1,
-         float sizy = 1);
+            const GFXColor &col = TranslucentWhite,
+            const QVector &pos = ZeroQvector,
+            float sizx = 1,
+            float sizy = 1);
     void Draw(const Transformation &quat = identity_transformation,
-              const Matrix &m = identity_matrix,
-              float alpha = -1);
+            const Matrix &m = identity_matrix,
+            float alpha = -1);
     static void ProcessDrawQueue();
 
-    void SetDimensions(float wid, float hei)
-    {
+    void SetDimensions(float wid, float hei) {
         sizex = wid;
         sizey = hei;
     }
 
-    void SetPosition(const QVector &k)
-    {
+    void SetPosition(const QVector &k) {
         position = k;
     }
 
-    QVector &Position()
-    {
+    QVector &Position() {
         return position;
     }
 
     void SetColor(const GFXColor &col);
 
-    void GetDimensions(float &wid, float &hei)
-    {
+    void GetDimensions(float &wid, float &hei) {
         wid = sizex;
         hei = sizey;
     }

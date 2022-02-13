@@ -56,8 +56,7 @@ public:
     virtual void setCallback(ModalDialogCallback *cb, const std::string &id);
 
 //Set up the window and get everything ready.
-    virtual void init(void)
-    {
+    virtual void init(void) {
     }
 
 //Start everything up.
@@ -71,8 +70,7 @@ public:
 //CONSTRUCTION
     ModalDialog();
 
-    virtual ~ModalDialog(void)
-    {
+    virtual ~ModalDialog(void) {
     }
 
 protected:
@@ -96,9 +94,9 @@ static const int NO_ANSWER = 0;
 //Display a modal list of options.
 //The result is supplied in the callback.
 void showListQuestion(const std::string &title,
-                      const std::vector<std::string> &options,
-                      ModalDialogCallback *cb,
-                      const std::string &id);
+        const std::vector<std::string> &options,
+        ModalDialogCallback *cb,
+        const std::string &id);
 
 //This class is used to display predefined alerts and questions.
 //It creates a Window, loads controls, etc.
@@ -114,12 +112,10 @@ public:
     virtual void run(void);
 
 //CONSTRUCTION
-    QuestionDialog() : m_deleteWindow(true)
-    {
+    QuestionDialog() : m_deleteWindow(true) {
     }
 
-    virtual ~QuestionDialog(void)
-    {
+    virtual ~QuestionDialog(void) {
         if (m_window != NULL && m_deleteWindow) {
             delete m_window;
         }
@@ -137,8 +133,7 @@ protected:
 class ListQuestionDialog : public QuestionDialog {
 public:
 //Load the controls for this dialog into the window.
-    virtual void initControls(void)
-    {
+    virtual void initControls(void) {
         CreateControlsForListWindow(window());
     }
 

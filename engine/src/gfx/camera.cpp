@@ -41,8 +41,7 @@
 
 //const float PI=3.1415926536;
 
-Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075, &Coord, &P, &Q, &R)
-{
+Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075, &Coord, &P, &Q, &R) {
     ResetVectors(P, Q, R);
     R = -R;
     Coord.i = 0;
@@ -69,8 +68,7 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075
     lastGFXUpdate.overrideZFar = 1000000;
 }
 
-void Camera::GetPQR(Vector &p1, Vector &q1, Vector &r1) const
-{
+void Camera::GetPQR(Vector &p1, Vector &q1, Vector &r1) const {
     p1.i = P.i;
     p1.j = P.j;
     p1.k = P.k;
@@ -83,12 +81,11 @@ void Camera::GetPQR(Vector &p1, Vector &q1, Vector &r1) const
 }
 
 void Camera::UpdateGFX(GFXBOOL clip,
-                       GFXBOOL updateFrustum,
-                       GFXBOOL centerCamera,
-                       GFXBOOL overrideZFrustum,
-                       float overrideZNear,
-                       float overrideZFar)
-{
+        GFXBOOL updateFrustum,
+        GFXBOOL centerCamera,
+        GFXBOOL overrideZFrustum,
+        float overrideZNear,
+        float overrideZFar) {
     lastGFXUpdate.clip = clip;
     lastGFXUpdate.updateFrustum = updateFrustum;
     lastGFXUpdate.centerCamera = centerCamera;
@@ -110,10 +107,10 @@ void Camera::UpdateGFX(GFXBOOL clip,
             zfar = (overrideZFrustum ? overrideZFar : g_game.zfar * (clip ? 1 : ZFARCONST));
 
             GFXPerspective(zoom * fov,
-                           g_game.aspect,
-                           znear,
-                           zfar,
-                           cockpit_offset);             //set perspective to 78 degree FOV
+                    g_game.aspect,
+                    znear,
+                    zfar,
+                    cockpit_offset);             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
 
@@ -146,21 +143,18 @@ void Camera::UpdateGFX(GFXBOOL clip,
 
 }
 
-void Camera::UpdateCameraSounds()
-{
+void Camera::UpdateCameraSounds() {
 #ifndef PERFRAMESOUND
     AUDListener(Coord, GetVelocity());
     AUDListenerOrientation(P, Q, R);
 #endif
 }
 
-void Camera::GetView(Matrix &vw)
-{
+void Camera::GetView(Matrix &vw) {
     GFXGetMatrixView(vw);
 }
 
-void Camera::SetNebula(Nebula *neb)
-{
+void Camera::SetNebula(Nebula *neb) {
     nebula.SetUnit((Unit *) neb);
 }
 
@@ -169,18 +163,15 @@ Nebula *Camera::GetNebula() //this function can't be const, as it must return a 
     return reinterpret_cast<Nebula *>( nebula.GetUnit()); //changed by chuck from (Nebula*) cast
 }
 
-void Camera::UpdatePlanetGFX()
-{
+void Camera::UpdatePlanetGFX() {
     Identity(planetview);
 }
 
-void Camera::RestoreViewPort(float xoffset, float yoffset)
-{
+void Camera::RestoreViewPort(float xoffset, float yoffset) {
     GFXSubwindow(x + xoffset, y + yoffset, xsize, ysize);
 }
 
-void Camera::UpdateGLCenter()
-{
+void Camera::UpdateGLCenter() {
 #define ITISDEPRECATED 0
     assert(ITISDEPRECATED);
 #undef ITISDEPRECATED
@@ -193,10 +184,10 @@ void Camera::UpdateGLCenter()
         switch (Camera::PERSPECTIVE) {
             case Camera::PERSPECTIVE:
                 GFXPerspective(zoom * fov,
-                               g_game.aspect,
-                               g_game.znear,
-                               g_game.zfar,
-                               cockpit_offset);             //set perspective to 78 degree FOV
+                        g_game.aspect,
+                        g_game.znear,
+                        g_game.zfar,
+                        cockpit_offset);             //set perspective to 78 degree FOV
                 break;
             case Camera::PARALLEL:
 
@@ -212,8 +203,7 @@ void Camera::UpdateGLCenter()
     //glMultMatrixf(view);
 }
 
-void Camera::SetPosition(const QVector &origin, const Vector &vel, const Vector &angvel, const Vector &acceleration)
-{
+void Camera::SetPosition(const QVector &origin, const Vector &vel, const Vector &angvel, const Vector &acceleration) {
     if (FINITE(origin.i) && FINITE(origin.j) && FINITE(origin.k)) {
         velocity = vel;
         angular_velocity = angvel;
@@ -229,14 +219,12 @@ void Camera::SetPosition(const QVector &origin, const Vector &vel, const Vector 
 /** GetView (Matrix x)
  *  returns the view matrix (inverse matrix based on camera pqr)
  */
-Matrix *Camera::GetPlanetGFX()
-{
+Matrix *Camera::GetPlanetGFX() {
     return &planetview;
     //CopyMatrix (x,view);
 }
 
-void Camera::LookDirection(const Vector &myR, const Vector &up)
-{
+void Camera::LookDirection(const Vector &myR, const Vector &up) {
     P = (myR);
     P.Normalize();
     Q = up;
@@ -245,8 +233,7 @@ void Camera::LookDirection(const Vector &myR, const Vector &up)
     changed = GFXTRUE;
 }
 
-void Camera::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
-{
+void Camera::SetOrientation(const Vector &p, const Vector &q, const Vector &r) {
     P = p;
     Q = q;
     R = r;
@@ -254,8 +241,7 @@ void Camera::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
     changed = GFXTRUE;
 }
 
-void Camera::SetSubwindow(float x, float y, float xsize, float ysize)
-{
+void Camera::SetSubwindow(float x, float y, float xsize, float ysize) {
     this->x = x;
     this->y = y;
     this->xsize = xsize;
@@ -263,63 +249,52 @@ void Camera::SetSubwindow(float x, float y, float xsize, float ysize)
     changed = GFXTRUE;
 }
 
-void Camera::SetProjectionType(ProjectionType t)
-{
+void Camera::SetProjectionType(ProjectionType t) {
     projectionType = t;
 }
 
-void Camera::SetZoom(float z)
-{
+void Camera::SetZoom(float z) {
     zoom = z;
 }
 
-float Camera::GetZoom() const
-{
+float Camera::GetZoom() const {
     return zoom;
 }
 
-void Camera::SetFov(float f)
-{
+void Camera::SetFov(float f) {
     fov = f;
 }
 
-float Camera::GetFov() const
-{
+float Camera::GetFov() const {
     return fov;
 }
 
-void Camera::Yaw(float rad)
-{
+void Camera::Yaw(float rad) {
     ::Yaw(rad, P, Q, R);
     changed = GFXTRUE;
 }
 
-void Camera::Pitch(float rad)
-{
+void Camera::Pitch(float rad) {
     ::Pitch(rad, P, Q, R);
     changed = GFXTRUE;
 }
 
-void Camera::Roll(float rad)
-{
+void Camera::Roll(float rad) {
     ::Roll(rad, P, Q, R);
     changed = GFXTRUE;
 }
 
-void Camera::XSlide(float factor)
-{
+void Camera::XSlide(float factor) {
     Coord += (P * factor).Cast();
     changed = GFXTRUE;
 }
 
-void Camera::YSlide(float factor)
-{
+void Camera::YSlide(float factor) {
     Coord += (Q * factor).Cast();
     changed = GFXTRUE;
 }
 
-void Camera::ZSlide(float factor)
-{
+void Camera::ZSlide(float factor) {
     Coord += (R * factor).Cast();
     changed = GFXTRUE;
 }

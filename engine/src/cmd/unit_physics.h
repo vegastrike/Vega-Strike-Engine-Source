@@ -44,14 +44,13 @@ extern unsigned int apply_float_to_unsigned_int(float tmp); //short fix
 
 
 void Unit::UpdatePhysics2(const Transformation &trans,
-                          const Transformation &old_physical_state,
-                          const Vector &accel,
-                          float difficulty,
-                          const Matrix &transmat,
-                          const Vector &cum_vel,
-                          bool lastframe,
-                          UnitCollection *uc)
-{
+        const Transformation &old_physical_state,
+        const Vector &accel,
+        float difficulty,
+        const Matrix &transmat,
+        const Vector &cum_vel,
+        bool lastframe,
+        UnitCollection *uc) {
     Movable::UpdatePhysics2(trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc);
 
     this->AddVelocity(difficulty);
@@ -96,8 +95,7 @@ void Unit::UpdatePhysics2(const Transformation &trans,
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
 
 
-void GameUnit::Thrust(const Vector &amt1, bool afterburn)
-{
+void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
     if (this->afterburntype == 0) {
         afterburn = afterburn && this->energy > this->afterburnenergy * simulation_atom_var;
     } //SIMULATION_ATOM; ?
@@ -113,8 +111,8 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn)
             XMLSupport::parse_bool(vs_config->getVariable("audio", "buzzing_needs_afterburner", "false"));
     if (_Universe->isPlayerStarship(this) != NULL) {
         static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                                                                        "player_afterburner",
-                                                                        "sfx10.wav"), true);
+                "player_afterburner",
+                "sfx10.wav"), true);
         static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
         if (afterburn != AUDIsPlaying(playerengine)) {
             if (afterburn) {
@@ -131,7 +129,7 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn)
         Unit *playa = _Universe->AccessCockpit()->GetParent();
         if (playa) {
             if (UnitUtil::getDistance(this,
-                                      playa) < buzzingdistance && playa->owner != this && this->owner != playa
+                    playa) < buzzingdistance && playa->owner != this && this->owner != playa
                     && this->owner != playa->owner) {
                 float ttime = getNewTime();
                 if (ttime - lastbuzz > buzzingtime) {
@@ -152,8 +150,7 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn)
     }
 }
 
-Vector Unit::ResolveForces(const Transformation &trans, const Matrix &transmat)
-{
+Vector Unit::ResolveForces(const Transformation &trans, const Matrix &transmat) {
 #ifndef PERFRAMESOUND
     //AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );
     adjustSound(SoundType::engine);

@@ -31,8 +31,7 @@
 using VSFileSystem::CockpitFile;
 using VSFileSystem::vs_fprintf;
 
-bool NavigationSystem::ParseFile(string filename)
-{
+bool NavigationSystem::ParseFile(string filename) {
     string expression = "";
     string tag = "";
     string data = "";

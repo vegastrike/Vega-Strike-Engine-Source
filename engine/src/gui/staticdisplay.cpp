@@ -37,29 +37,25 @@
 //This control does not respond to input events.
 
 //The rect for the text object has changed -- reset it.
-void StaticDisplay::setPaintTextRect(void)
-{
+void StaticDisplay::setPaintTextRect(void) {
     const Rect textRect = m_rect.copyAndInset(m_textMargins);
     m_paintText.setRect(textRect);
 }
 
 //Set text margins.
-void StaticDisplay::setTextMargins(const Size &s)
-{
+void StaticDisplay::setTextMargins(const Size &s) {
     m_textMargins = s;
     setPaintTextRect();
 }
 
 //The outside boundaries of the control.
-void StaticDisplay::setRect(const Rect &r)
-{
+void StaticDisplay::setRect(const Rect &r) {
     Control::setRect(r);
     setPaintTextRect();
 }
 
 //Draw the control.
-void StaticDisplay::draw(void)
-{
+void StaticDisplay::draw(void) {
     //Draw the background.
     drawBackground();
     //If we have a scroller and the layout has changed, need to reset the scroller.
@@ -77,15 +73,13 @@ void StaticDisplay::draw(void)
 }
 
 //Set the object that takes care of scrolling.
-void StaticDisplay::setScroller(Scroller *s)
-{
+void StaticDisplay::setScroller(Scroller *s) {
     m_scroller = s;
     s->setCommandTarget(this);
 }
 
 //Process a command event.
-bool StaticDisplay::processCommand(const EventCommandId &command, Control *control)
-{
+bool StaticDisplay::processCommand(const EventCommandId &command, Control *control) {
     if (command == "Scroller::PositionChanged") {
         assert(control == m_scroller);
         m_scrollPosition = m_scroller->scrollPosition();
@@ -95,8 +89,7 @@ bool StaticDisplay::processCommand(const EventCommandId &command, Control *contr
 }
 
 //Process wheel events for scrolling.
-bool StaticDisplay::processMouseDown(const InputEvent &event)
-{
+bool StaticDisplay::processMouseDown(const InputEvent &event) {
     static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
     if (m_scroller) {
         if (event.code == WHEELUP_MOUSE_BUTTON) {
@@ -117,7 +110,6 @@ StaticDisplay::StaticDisplay(void) :
         m_textMargins(Size(0.0, 0.0)),
         m_scrollPosition(0),
         m_layoutVersion(m_paintText.layoutVersion()),
-        m_scroller(NULL)
-{
+        m_scroller(NULL) {
 }
 

@@ -56,8 +56,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-string varToString(varInst *vi)
-{
+string varToString(varInst *vi) {
     switch (vi->type) {
         case VAR_FLOAT:
             return XMLSupport::tostring((float) vi->float_val);
@@ -75,8 +74,7 @@ string varToString(varInst *vi)
     }
 }
 
-void Mission::doCall_toxml(string module, varInst *ovi)
-{
+void Mission::doCall_toxml(string module, varInst *ovi) {
     if (module == "_olist") {
         call_olist_toxml(NULL, SCRIPT_RUN, ovi);
     } else if (module == "_unit") {
@@ -84,8 +82,7 @@ void Mission::doCall_toxml(string module, varInst *ovi)
     }
 }
 
-varInst *Mission::doCall(missionNode *node, int mode, string module, string method)
-{
+varInst *Mission::doCall(missionNode *node, int mode, string module, string method) {
     varInst *vi = NULL;
     callback_module_type module_id = node->script.callback_module_id;
     if (module_id == CMT_UNIT) {
@@ -195,8 +192,7 @@ varInst *Mission::doCall(missionNode *node, int mode, string module, string meth
     return vi;
 }
 
-varInst *Mission::doCall(missionNode *node, int mode)
-{
+varInst *Mission::doCall(missionNode *node, int mode) {
     trace(node, mode);
     if (mode == SCRIPT_PARSE) {
         string name = node->attr_value("name");
@@ -246,8 +242,7 @@ varInst *Mission::doCall(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::call_isNull(missionNode *node, int mode)
-{
+varInst *Mission::call_isNull(missionNode *node, int mode) {
     varInst *ovi = getObjectArg(node, mode);
     varInst *viret = newVarInst(VI_TEMP);
     viret->type = VAR_BOOL;
@@ -256,8 +251,7 @@ varInst *Mission::call_isNull(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_setNull(missionNode *node, int mode)
-{
+varInst *Mission::call_setNull(missionNode *node, int mode) {
     varInst *ovi = getObjectArg(node, mode);
     ovi->object = NULL;
     varInst *viret = newVarInst(VI_TEMP);
@@ -266,8 +260,7 @@ varInst *Mission::call_setNull(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_terminateMission(missionNode *node, int mode)
-{
+varInst *Mission::call_terminateMission(missionNode *node, int mode) {
     getBoolArg(node, mode, 0);
     if (mode == SCRIPT_RUN) {
         terminateMission();
@@ -277,8 +270,7 @@ varInst *Mission::call_terminateMission(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_float_cast(missionNode *node, int mode)
-{
+varInst *Mission::call_float_cast(missionNode *node, int mode) {
     missionNode *snode = getArgument(node, mode, 0);
     int intval = checkIntExpr(snode, mode);
     varInst *viret = newVarInst(VI_TEMP);
@@ -287,8 +279,7 @@ varInst *Mission::call_float_cast(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_int_cast(missionNode *node, int mode)
-{
+varInst *Mission::call_int_cast(missionNode *node, int mode) {
     missionNode *snode = getArgument(node, mode, 0);
     double floatval = checkFloatExpr(snode, mode);
     varInst *viret = newVarInst(VI_TEMP);
@@ -297,8 +288,7 @@ varInst *Mission::call_int_cast(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_isequal(missionNode *node, int mode)
-{
+varInst *Mission::call_isequal(missionNode *node, int mode) {
     varInst *ovi = getObjectArg(node, mode);
     missionNode *other_node = getArgument(node, mode, 1);
     varInst *other_vi = checkObjectExpr(other_node, mode);
@@ -318,8 +308,7 @@ varInst *Mission::call_isequal(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::callGetGameTime(missionNode *node, int mode)
-{
+varInst *Mission::callGetGameTime(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_FLOAT;
     if (mode == SCRIPT_RUN) {
@@ -328,8 +317,7 @@ varInst *Mission::callGetGameTime(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callResetTimeCompression(missionNode *node, int mode)
-{
+varInst *Mission::callResetTimeCompression(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_VOID;
     if (mode == SCRIPT_RUN) {
@@ -338,8 +326,7 @@ varInst *Mission::callResetTimeCompression(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callGetSystemName(missionNode *node, int mode)
-{
+varInst *Mission::callGetSystemName(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_OBJECT;
     vi->objectname = "string";
@@ -352,8 +339,7 @@ varInst *Mission::callGetSystemName(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callGetSystemFile(missionNode *node, int mode, StarSystem *ss)
-{
+varInst *Mission::callGetSystemFile(missionNode *node, int mode, StarSystem *ss) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_OBJECT;
     vi->objectname = "string";
@@ -368,8 +354,7 @@ varInst *Mission::callGetSystemFile(missionNode *node, int mode, StarSystem *ss)
     return vi;
 }
 
-varInst *Mission::callGetAdjacentSystem(missionNode *node, int mode)
-{
+varInst *Mission::callGetAdjacentSystem(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_OBJECT;
     vi->objectname = "string";
@@ -383,8 +368,7 @@ varInst *Mission::callGetAdjacentSystem(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callGetGalaxyProperty(missionNode *node, int mode)
-{
+varInst *Mission::callGetGalaxyProperty(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_OBJECT;
     vi->objectname = "string";
@@ -398,8 +382,7 @@ varInst *Mission::callGetGalaxyProperty(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callGetNumAdjacentSystems(missionNode *node, int mode)
-{
+varInst *Mission::callGetNumAdjacentSystems(missionNode *node, int mode) {
     string sysname = getStringArgument(node, mode, 0);
     int ret = 0;
     if (mode == SCRIPT_RUN) {
@@ -411,8 +394,7 @@ varInst *Mission::callGetNumAdjacentSystems(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::call_io_printmsglist(missionNode *node, int mode)
-{
+varInst *Mission::call_io_printmsglist(missionNode *node, int mode) {
     int i = 0;
     if (mode == SCRIPT_RUN) {
         gameMessage msg;
@@ -426,8 +408,7 @@ varInst *Mission::call_io_printmsglist(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_io_message(missionNode *node, int mode)
-{
+varInst *Mission::call_io_message(missionNode *node, int mode) {
     missionNode *args[3];
     varInst *args_vi[3];
     string args_str[3];
@@ -450,8 +431,7 @@ varInst *Mission::call_io_message(missionNode *node, int mode)
 
 #if 1
 
-string Mission::replaceNewline(string origstr)
-{
+string Mission::replaceNewline(string origstr) {
     string ostr = origstr;
     int breakpos = ostr.find("\\n", 0);
     if (breakpos >= 0) {
@@ -464,8 +444,7 @@ string Mission::replaceNewline(string origstr)
 
 #endif
 
-varInst *Mission::call_io_sprintf(missionNode *node, int mode)
-{
+varInst *Mission::call_io_sprintf(missionNode *node, int mode) {
     missionNode *outstr_node = getArgument(node, mode, 0);
     varInst *outstr_vi = checkObjectExpr(outstr_node, mode);
     string *outstrptr = getStringObject(outstr_node, mode, outstr_vi);
@@ -543,8 +522,7 @@ varInst *Mission::call_io_sprintf(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_io_printf(missionNode *node, int mode)
-{
+varInst *Mission::call_io_printf(missionNode *node, int mode) {
     missionNode *stringnode = getArgument(node, mode, 0);
     if (stringnode->tag != DTAG_CONST) {
         fatalError(node, mode, "only const string allowed for first arg of printf");
@@ -620,30 +598,26 @@ varInst *Mission::call_io_printf(missionNode *node, int mode)
     return viret;
 }
 
-varInst *Mission::call_musicAddList(missionNode *node, int mode)
-{
+varInst *Mission::call_musicAddList(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_INT;
     vi->int_val = 0;
     return vi;
 }
 
-varInst *Mission::call_musicPlaySong(missionNode *node, int mode)
-{
+varInst *Mission::call_musicPlaySong(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_VOID;
     return vi;
 }
 
-varInst *Mission::call_musicPlayList(missionNode *node, int mode)
-{
+varInst *Mission::call_musicPlayList(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_VOID;
     return vi;
 }
 
-varInst *Mission::callPrintFloats(missionNode *node, int mode)
-{
+varInst *Mission::callPrintFloats(missionNode *node, int mode) {
     string s1 = node->attr_value("s1");
     string s2 = node->attr_value("s2");
     if (mode == SCRIPT_RUN) {
@@ -665,8 +639,7 @@ varInst *Mission::callPrintFloats(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callGetCurrentAIUnit(missionNode *node, int mode)
-{
+varInst *Mission::callGetCurrentAIUnit(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_OBJECT;
     vi->objectname = "unit";
@@ -675,8 +648,7 @@ varInst *Mission::callGetCurrentAIUnit(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callGetCurrentAIOrder(missionNode *node, int mode)
-{
+varInst *Mission::callGetCurrentAIOrder(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_OBJECT;
     vi->objectname = "order";
@@ -685,8 +657,7 @@ varInst *Mission::callGetCurrentAIOrder(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::callRnd(missionNode *node, int mode)
-{
+varInst *Mission::callRnd(missionNode *node, int mode) {
     varInst *vi = newVarInst(VI_TEMP);
     vi->type = VAR_FLOAT;
     vi->float_val = ((float) rand()) / (((float) RAND_MAX) + 1);
@@ -698,8 +669,7 @@ varInst *Mission::callRnd(missionNode *node, int mode)
     return vi;
 }
 
-varInst *Mission::getObjectArg(missionNode *node, int mode)
-{
+varInst *Mission::getObjectArg(missionNode *node, int mode) {
     if (node->subnodes.size() < 1) {
         fatalError(node, mode, method_str(node) + " needs an object as first  argument");
         assert(0);
@@ -713,33 +683,28 @@ varInst *Mission::getObjectArg(missionNode *node, int mode)
     return ovi;
 }
 
-string Mission::method_str(missionNode *node)
-{
+string Mission::method_str(missionNode *node) {
     return node->attr_value("module") + "." + node->attr_value("name");
 }
 
-bool Mission::getBoolArg(missionNode *node, int mode, int arg_nr)
-{
+bool Mission::getBoolArg(missionNode *node, int mode, int arg_nr) {
     missionNode *val_node = getArgument(node, mode, arg_nr);
     bool res = checkBoolExpr(val_node, mode);
     return res;
 }
 
-double Mission::getFloatArg(missionNode *node, int mode, int arg_nr)
-{
+double Mission::getFloatArg(missionNode *node, int mode, int arg_nr) {
     missionNode *val_node = getArgument(node, mode, arg_nr);
     return checkFloatExpr(val_node, mode);
 }
 
-int Mission::getIntArg(missionNode *node, int mode, int arg_nr)
-{
+int Mission::getIntArg(missionNode *node, int mode, int arg_nr) {
     missionNode *val_node = getArgument(node, mode, arg_nr);
     int res = checkIntExpr(val_node, mode);
     return res;
 }
 
-Unit *Mission::getUnitArg(missionNode *node, int mode, int arg_nr)
-{
+Unit *Mission::getUnitArg(missionNode *node, int mode, int arg_nr) {
     Unit *ret = NULL;
 
     missionNode *unit_node = getArgument(node, mode, arg_nr);
@@ -756,8 +721,7 @@ Unit *Mission::getUnitArg(missionNode *node, int mode, int arg_nr)
     return ret;
 }
 
-QVector Mission::getVec3Arg(missionNode *node, int mode, int arg_nr)
-{
+QVector Mission::getVec3Arg(missionNode *node, int mode, int arg_nr) {
     missionNode *pos_node = getArgument(node, mode, arg_nr);
     varInst *pos_vi = checkObjectExpr(pos_node, mode);
 
@@ -769,8 +733,7 @@ QVector Mission::getVec3Arg(missionNode *node, int mode, int arg_nr)
     return vec3;
 }
 
-missionNode *Mission::getArgument(missionNode *node, int mode, int arg_nr)
-{
+missionNode *Mission::getArgument(missionNode *node, int mode, int arg_nr) {
     if (node->subnodes.size() < (unsigned int) (arg_nr + 1)) {
         char buf[200];
         sprintf(buf, " needs at least %d arguments", arg_nr + 1);
@@ -782,8 +745,7 @@ missionNode *Mission::getArgument(missionNode *node, int mode, int arg_nr)
     return snode;
 }
 
-void Mission::initCallbackMaps()
-{
+void Mission::initCallbackMaps() {
     module_map["_io"] = CMT_IO;
     module_map["_std"] = CMT_STD;
     module_map["_string"] = CMT_STRING;

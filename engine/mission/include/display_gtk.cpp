@@ -28,8 +28,7 @@
 GtkWidget *window, *main_vbox, *scrolled_win, *tree, *main_hbox;
 GtkWidget *labels[4];    // Array of changable lables to display the mission information
 
-void InitGraphics(void)
-{
+void InitGraphics(void) {
     char title[1024];
     GtkWidget *label;
 
@@ -66,8 +65,7 @@ void InitGraphics(void)
     gtk_widget_show(window);
 }
 
-void ShowMain(int run_vegastrike)
-{
+void ShowMain(int run_vegastrike) {
     GtkWidget *button;
     /* A generic scrolled window */
     scrolled_win = gtk_scrolled_window_new(NULL, NULL);
@@ -103,8 +101,7 @@ void ShowMain(int run_vegastrike)
     gtk_widget_show(button);
 }
 
-void AddMainLabels(void)
-{
+void AddMainLabels(void) {
     GtkWidget *vbox;
 
     vbox = gtk_vbox_new(FALSE, 0);
@@ -118,8 +115,7 @@ void AddMainLabels(void)
     AddLabelRow("Briefing: ", 3, vbox);
 }
 
-void AddLabelRow(char *desc, int count, GtkWidget *vbox)
-{
+void AddLabelRow(char *desc, int count, GtkWidget *vbox) {
     GtkWidget *hbox, *label;
 
     hbox = gtk_hbox_new(FALSE, 2);
@@ -145,8 +141,7 @@ void AddLabelRow(char *desc, int count, GtkWidget *vbox)
  *   Chcek sub_dir/sub_dir.campaign for campaign info
  */
 
-void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent)
-{
+void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent) {
     glob_t *search;
     unsigned int length;
     int count, max;
@@ -205,8 +200,7 @@ void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent)
     return;
 }
 
-GtkWidget *AddItem(GtkWidget *tree, char *name, char *filename)
-{
+GtkWidget *AddItem(GtkWidget *tree, char *name, char *filename) {
     GtkWidget *item;
 
     item = gtk_tree_item_new_with_label(name);
@@ -225,8 +219,7 @@ GtkWidget *AddItem(GtkWidget *tree, char *name, char *filename)
  *   Struct elements can be handled with pointers. Use that to make it more dynamic
  */
 
-void select_item(GtkWidget *item, gchar *filename)
-{
+void select_item(GtkWidget *item, gchar *filename) {
     if (strcmp("dir", filename) == 0) {
         deselect_item(item, filename);
         return;
@@ -239,22 +232,18 @@ void select_item(GtkWidget *item, gchar *filename)
     gtk_label_set_text(GTK_LABEL(labels[3]), DATA.briefing);
 }
 
-void deselect_item(GtkWidget *item, gchar *filename)
-{
+void deselect_item(GtkWidget *item, gchar *filename) {
 }
 
 /* These would be useful for campaigns. Don't have anything for them now */
-void cb_unselect_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree)
-{
+void cb_unselect_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree) {
 
 }
 
-void cb_select_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree)
-{
+void cb_select_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree) {
 
 }
 
-void cb_selection_changed(GtkWidget *tree)
-{
+void cb_selection_changed(GtkWidget *tree) {
 
 }

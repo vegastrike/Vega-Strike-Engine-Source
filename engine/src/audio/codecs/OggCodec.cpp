@@ -40,16 +40,13 @@
 
 namespace Audio {
 
-OggCodec::OggCodec() : Codec("ogg")
-{
+OggCodec::OggCodec() : Codec("ogg") {
 }
 
-OggCodec::~OggCodec()
-{
+OggCodec::~OggCodec() {
 }
 
-const Codec::Extensions *OggCodec::getExtensions() const
-{
+const Codec::Extensions *OggCodec::getExtensions() const {
     static Extensions ext;
     if (ext.empty() == 0) {
         ext.push_back(".ogg");
@@ -57,8 +54,7 @@ const Codec::Extensions *OggCodec::getExtensions() const
     return &ext;
 }
 
-bool OggCodec::canHandle(const std::string &path, bool canOpen, VSFileSystem::VSFileType type)
-{
+bool OggCodec::canHandle(const std::string &path, bool canOpen, VSFileSystem::VSFileType type) {
     if (canOpen) {
         try {
             VSFileSystem::VSFile file;
@@ -79,8 +75,7 @@ bool OggCodec::canHandle(const std::string &path, bool canOpen, VSFileSystem::VS
     }
 }
 
-Stream *OggCodec::open(const std::string &path, VSFileSystem::VSFileType type)
-{
+Stream *OggCodec::open(const std::string &path, VSFileSystem::VSFileType type) {
     return new OggStream(path, type);
 }
 

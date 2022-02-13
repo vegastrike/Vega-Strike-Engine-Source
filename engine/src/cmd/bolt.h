@@ -69,8 +69,7 @@ public:
     static Bolt *BoltFromIndex(Collidable::CollideRef bolt_name);
     static Collidable::CollideRef BoltIndex(int index, int decal, bool isBall);
 
-    bool operator==(const Bolt &b) const
-    {
+    bool operator==(const Bolt &b) const {
 
         return owner == b.owner
                 && curdist == b.curdist
@@ -79,10 +78,10 @@ public:
     }
 
     Bolt(const WeaponInfo *type,
-         const Matrix &orientationpos,
-         const Vector &ShipSpeed,
-         void *owner,
-         CollideMap::iterator hint);//makes a bolt
+            const Matrix &orientationpos,
+            const Vector &ShipSpeed,
+            void *owner,
+            CollideMap::iterator hint);//makes a bolt
     void Destroy(unsigned int index);
     //static void Draw();
     static void DrawAllBolts();
@@ -92,8 +91,7 @@ public:
     bool Update(Collidable::CollideRef index);
     bool Collide(Collidable::CollideRef index);
     static void UpdatePhysics(StarSystem *ss);//updates all physics in the starsystem
-    void noop() const
-    {
+    void noop() const {
     }
 };
 

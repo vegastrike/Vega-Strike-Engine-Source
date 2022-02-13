@@ -44,8 +44,7 @@ using namespace VegaStrike;
 
 static vs_vector<csCollisionPair> pairs;
 
-csOPCODECollider::csOPCODECollider(const std::vector<mesh_polygon> &polygons)
-{
+csOPCODECollider::csOPCODECollider(const std::vector<mesh_polygon> &polygons) {
     m_pCollisionModel = nullptr;
     vertholder = nullptr;
     //pairs.IncRef();
@@ -59,18 +58,15 @@ csOPCODECollider::csOPCODECollider(const std::vector<mesh_polygon> &polygons)
 
 }
 
-inline float min3(float a, float b, float c)
-{
+inline float min3(float a, float b, float c) {
     return (a < b ? (a < c ? a : (c < b ? c : b)) : (b < c ? b : c));
 }
 
-inline float max3(float a, float b, float c)
-{
+inline float max3(float a, float b, float c) {
     return (a > b ? (a > c ? a : (c > b ? c : b)) : (b > c ? b : c));
 }
 
-void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polygons)
-{
+void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polygons) {
     OPCODECREATE OPCC;
     unsigned int tri_count = 0;
     std::vector<Vector>::size_type vert_count = 0;
@@ -100,7 +96,7 @@ void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polyg
             }
         }
         radius = max3(tmp.MaxX() - tmp.MinX(), tmp.MaxY() - tmp.MinY(),
-                      tmp.MaxZ() - tmp.MinZ());
+                tmp.MaxZ() - tmp.MinZ());
         opcMeshInt.SetNbTriangles(tri_count);
         opcMeshInt.SetNbVertices(last);
 
@@ -119,8 +115,7 @@ void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polyg
     m_pCollisionModel->Build(OPCC);
 }
 
-csOPCODECollider::~csOPCODECollider()
-{
+csOPCODECollider::~csOPCODECollider() {
 
     if (m_pCollisionModel) {
         delete m_pCollisionModel;
@@ -131,9 +126,8 @@ csOPCODECollider::~csOPCODECollider()
 }
 
 void csOPCODECollider::MeshCallback(uint32_t triangle_index,
-                                    VertexPointers &triangle,
-                                    void *user_data)
-{
+        VertexPointers &triangle,
+        void *user_data) {
     csOPCODECollider *collider = (csOPCODECollider *) user_data;
     Point *vertholder = collider->vertholder;
     int index = 3 * triangle_index;
@@ -142,8 +136,7 @@ void csOPCODECollider::MeshCallback(uint32_t triangle_index,
     triangle.Vertex[2] = &vertholder[index + 2];
 }
 
-bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector &norm, float &distance)
-{
+bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector &norm, float &distance) {
     rCollider.SetHitCallback(&csOPCODECollider::RayCallback);
     rCollider.SetUserData(this);
     rCollider.SetFirstContact(false);
@@ -166,8 +159,7 @@ bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector &norm, float &dist
     return retval;
 }
 
-void csOPCODECollider::RayCallback(const CollisionFace &faceHit, void *user_data)
-{
+void csOPCODECollider::RayCallback(const CollisionFace &faceHit, void *user_data) {
     csOPCODECollider *collider = (csOPCODECollider *) user_data;
     if (collider) {
         if (collider->collFace.mDistance > faceHit.mDistance) {
@@ -177,9 +169,8 @@ void csOPCODECollider::RayCallback(const CollisionFace &faceHit, void *user_data
 }
 
 bool csOPCODECollider::Collide(csOPCODECollider &otherCollider,
-                               const csReversibleTransform *trans1,
-                               const csReversibleTransform *trans2)
-{
+        const csReversibleTransform *trans1,
+        const csReversibleTransform *trans2) {
     csOPCODECollider *col2 = (csOPCODECollider *) &otherCollider;
     ColCache.Model0 = this->m_pCollisionModel;
     ColCache.Model1 = col2->m_pCollisionModel;
@@ -254,29 +245,24 @@ bool csOPCODECollider::Collide(csOPCODECollider &otherCollider,
     }
 }
 
-void csOPCODECollider::ResetCollisionPairs()
-{
+void csOPCODECollider::ResetCollisionPairs() {
     pairs.clear();
 }
 
-csCollisionPair *csOPCODECollider::GetCollisions()
-{
+csCollisionPair *csOPCODECollider::GetCollisions() {
     return pairs.data();
 }
 
-size_t csOPCODECollider::GetCollisionPairCount()
-{
+size_t csOPCODECollider::GetCollisionPairCount() {
     return pairs.size();
 }
 
-void csOPCODECollider::SetOneHitOnly(bool on)
-{
+void csOPCODECollider::SetOneHitOnly(bool on) {
     TreeCollider.SetFirstContact(on);
     rCollider.SetFirstContact(on);
 }
 
-Vector csOPCODECollider::getVertex(unsigned int which) const
-{
+Vector csOPCODECollider::getVertex(unsigned int which) const {
     // This function is used to position the damage particles
     if (!vertholder) {
         return Vector(0, 0, 0);
@@ -285,8 +271,7 @@ Vector csOPCODECollider::getVertex(unsigned int which) const
 }
 
 void csOPCODECollider::CopyCollisionPairs(csOPCODECollider *col1,
-                                          csOPCODECollider *col2)
-{
+        csOPCODECollider *col2) {
     if (!col1 || !col2) {
         return;
     }

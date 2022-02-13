@@ -40,8 +40,7 @@ using namespace VSFileSystem;
 float colors[] = {1, 1, 1, 1};
 
 //x,y must be -1 to 1, with -1,-1 being the bottom left corner. x,y must be the top left corner to draw
-void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha)
-{
+void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha) {
     float cols[4] = {red, green, blue, alpha};
     if (wid < 0 || hei < 0) {
         VS_LOG(error, "Cannot draw color with negative height or width");
@@ -74,8 +73,7 @@ void ShowColor(float x, float y, float wid, float hei, float red, float green, f
     glEnable(GL_TEXTURE_2D);
 }
 
-float word_length(const char *str)
-{
+float word_length(const char *str) {
     float length = 0;
     while (*str && *str != '\\' && (!isspAce(*str))) {
         char mychar = *str++;
@@ -84,8 +82,7 @@ float word_length(const char *str)
     return length / 2500;
 }
 
-void ShowText(float x, float y, float wid, int size, const char *str, int no_end)
-{
+void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
     static float rescale_font = XMLSupport::parse_float(vs_config->getVariable("graphics", "gui_font_scale", ".75"));
     float font_size_float = rescale_font * 5. / 100;
 
@@ -142,8 +139,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
     }
 }
 
-float WidthOfChar(char chr)
-{
+float WidthOfChar(char chr) {
     float width = glutStrokeWidth(GLUT_STROKE_ROMAN, chr);
     width /= 2500;
     return width;
@@ -152,16 +148,14 @@ float WidthOfChar(char chr)
 static int mmx = 0;
 static int mmy = 0;
 
-void SetSoftwareMousePosition(int x, int y)
-{
+void SetSoftwareMousePosition(int x, int y) {
     mmx = x;
     mmy = y;
 }
 
 /** Starts a Frame of OpenGL with proper parameters and mouse
  */
-void StartGUIFrame(GFXBOOL clr)
-{
+void StartGUIFrame(GFXBOOL clr) {
     //glutSetCursor(GLUT_CURSOR_INHERIT);
     //GFXViewPort (0,0,g_game.x_resolution,g_game.y_resolution);
     GFXHudMode(true);
@@ -178,8 +172,7 @@ void StartGUIFrame(GFXBOOL clr)
     GFXEnable(TEXTURE0);
 }
 
-void DrawGlutMouse(int mousex, int mousey, VSSprite *spr)
-{
+void DrawGlutMouse(int mousex, int mousey, VSSprite *spr) {
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXColor4f(1, 1, 1, 1);
     GFXDisable(TEXTURE1);
@@ -200,8 +193,7 @@ void DrawGlutMouse(int mousex, int mousey, VSSprite *spr)
 
 extern void ConditionalCursorDraw(bool);
 
-void EndGUIFrame(MousePointerStyle pointerStyle)
-{
+void EndGUIFrame(MousePointerStyle pointerStyle) {
     static VSSprite MouseOverVSSprite("mouseover.spr", BILINEAR, GFXTRUE);
     static VSSprite MouseVSSprite("mouse.spr", BILINEAR, GFXTRUE);
     static Texture dummy("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);

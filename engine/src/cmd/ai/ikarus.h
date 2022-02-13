@@ -38,8 +38,7 @@ public:
     Ikarus();
     virtual void Execute();
 
-    virtual string getOrderDescription()
-    {
+    virtual string getOrderDescription() {
         return "ikarus";
     }
 };

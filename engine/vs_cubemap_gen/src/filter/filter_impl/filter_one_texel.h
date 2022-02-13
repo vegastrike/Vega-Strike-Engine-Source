@@ -51,8 +51,7 @@ public:
             (
                     mem_tex<S> const &source, Shininess const &shininess
             )
-            : source_(source), shininess_(shininess)
-    {
+            : source_(source), shininess_(shininess) {
         init_constants();
     }
 

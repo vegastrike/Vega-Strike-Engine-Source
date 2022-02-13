@@ -27,8 +27,7 @@
 
 #include "masks.h"
 
-bool checkbit(int &number, int bit_number)
-{
+bool checkbit(int &number, int bit_number) {
     if ((bit_number > 31) || (bit_number < 0)) {
         return 0;
     }
@@ -39,16 +38,14 @@ bool checkbit(int &number, int bit_number)
     }
 }
 
-void dosetbit(int &number, int bit_number)
-{
+void dosetbit(int &number, int bit_number) {
     if ((bit_number > 31) || (bit_number < 0)) {
         return;
     }
     number = (number | (1 << bit_number));
 }
 
-void unsetbit(int &number, int bit_number)
-{
+void unsetbit(int &number, int bit_number) {
     if ((bit_number > 31) || (bit_number < 0)) {
         return;
     }
@@ -61,8 +58,7 @@ void unsetbit(int &number, int bit_number)
     number = number & temp;
 }
 
-void flipbit(int &number, int bit_number)
-{
+void flipbit(int &number, int bit_number) {
     if ((bit_number > 31) || (bit_number < 0)) {
         return;
     }
@@ -73,8 +69,7 @@ void flipbit(int &number, int bit_number)
     }
 }
 
-float Delta(float a, float b)
-{
+float Delta(float a, float b) {
     float ans = a - b;
     if (ans < 0) {
         return -1.0 * ans;

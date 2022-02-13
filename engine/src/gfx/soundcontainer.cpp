@@ -30,33 +30,28 @@
 #include "soundcontainer.h"
 
 GameSoundContainer::GameSoundContainer(const SoundContainer &other)
-        : SoundContainer(other), triggered(false), loaded(false)
-{
+        : SoundContainer(other), triggered(false), loaded(false) {
 }
 
-GameSoundContainer::~GameSoundContainer()
-{
+GameSoundContainer::~GameSoundContainer() {
     unload();
 }
 
-void GameSoundContainer::load()
-{
+void GameSoundContainer::load() {
     if (!loaded) {
         loadImpl();
         loaded = true;
     }
 }
 
-void GameSoundContainer::unload()
-{
+void GameSoundContainer::unload() {
     if (loaded) {
         unloadImpl();
         loaded = false;
     }
 }
 
-void GameSoundContainer::play()
-{
+void GameSoundContainer::play() {
     if (!loaded) {
         load();
     }
@@ -67,16 +62,14 @@ void GameSoundContainer::play()
     }
 }
 
-void GameSoundContainer::stop()
-{
+void GameSoundContainer::stop() {
     if (loaded && triggered) {
         stopImpl();
         triggered = false;
     }
 }
 
-bool GameSoundContainer::isPlaying() const
-{
+bool GameSoundContainer::isPlaying() const {
     if (!loaded || !triggered) {
         return false;
     } else {

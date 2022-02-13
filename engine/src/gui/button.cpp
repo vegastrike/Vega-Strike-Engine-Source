@@ -26,8 +26,7 @@
 #include <cstring>
 
 //Button::Button(float x, float y, float wid, float hei, char *name) { ; }
-Button::Button(float x, float y, float wid, float hei, const char *name)
-{
+Button::Button(float x, float y, float wid, float hei, const char *name) {
     //Initialize the variables
     xcoord = x;
     ycoord = y;
@@ -39,8 +38,7 @@ Button::Button(float x, float y, float wid, float hei, const char *name)
     Refresh();
 }
 
-void Button::ModifyName(const char *newname)
-{
+void Button::ModifyName(const char *newname) {
     if (label && newname) {
         free(label);
     }
@@ -49,16 +47,14 @@ void Button::ModifyName(const char *newname)
     }
 }
 
-Button::~Button(void)
-{
+Button::~Button(void) {
     if (label != nullptr) {
         free(label);
         label = nullptr;
     }
 }
 
-void Button::Refresh(void)
-{
+void Button::Refresh(void) {
     if (highlight == 0) {
         ShowColor(xcoord, ycoord, width, height, 0.51, 0.47, 0.79, 1);
     } else {
@@ -68,8 +64,7 @@ void Button::Refresh(void)
     ShowText(xcoord + 0.01, ycoord - height + ((height - 0.04) / 2), width, 4, label, 0);
 }
 
-int Button::MouseClick(int button, int state, float x, float y)
-{
+int Button::MouseClick(int button, int state, float x, float y) {
     if (Inside(x, y) == 0) {
         return 0;
     }
@@ -80,8 +75,7 @@ int Button::MouseClick(int button, int state, float x, float y)
     return 1;
 }
 
-int Button::MouseMove(float x, float y)
-{
+int Button::MouseMove(float x, float y) {
     if (Inside(x, y) == 0) {
         highlight = 0;
         return 0;
@@ -90,14 +84,12 @@ int Button::MouseMove(float x, float y)
     return 1;
 }
 
-int Button::MouseMoveClick(float x, float y)
-{
+int Button::MouseMoveClick(float x, float y) {
     //Nothing to do
     return 0;
 }
 
-int Button::DoMouse(int type, float x, float y, int button, int state)
-{
+int Button::DoMouse(int type, float x, float y, int button, int state) {
     if (type == 1) {
         return MouseClick(button, state, x, y);
     }
@@ -110,8 +102,7 @@ int Button::DoMouse(int type, float x, float y, int button, int state)
     return 0;
 }
 
-int Button::Inside(float x, float y)
-{
+int Button::Inside(float x, float y) {
     if (x < xcoord || y > ycoord) {
         return 0;
     }

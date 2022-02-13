@@ -51,8 +51,7 @@ using namespace VSFileSystem;
 
 extern double interpolation_blend_factor;
 
-FOGMODE NebulaXML::parse_fogmode(string val)
-{
+FOGMODE NebulaXML::parse_fogmode(string val) {
     if (val == "exp") {
         return FOG_EXP;
     } else if (val == "exp2") {
@@ -66,8 +65,7 @@ FOGMODE NebulaXML::parse_fogmode(string val)
 
 //WARNING : USED TO CALL a GameUnit constructor but now Nebula::Nebula calls a Unit one
 Nebula::Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg, int fg_snumber) :
-        Unit(unitfile, SubU, faction, string(""), fg, fg_snumber)
-{
+        Unit(unitfile, SubU, faction, string(""), fg, fg_snumber) {
     fogme = true;
     string fullpath(unitfile);
     fullpath += ".nebula";
@@ -78,13 +76,11 @@ Nebula::Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg, in
     lastfadein = 0;
 }
 
-void Nebula::beginElement(void *Userdata, const XML_Char *name, const XML_Char **atts)
-{
+void Nebula::beginElement(void *Userdata, const XML_Char *name, const XML_Char **atts) {
     ((Nebula *) Userdata)->beginElem(std::string(name), AttributeList(atts));
 }
 
-void Nebula::beginElem(const std::string &name, const AttributeList &atts)
-{
+void Nebula::beginElem(const std::string &name, const AttributeList &atts) {
     Names elem = (Names) element_map.lookup(name);
     AttributeList::const_iterator iter;
     switch (elem) {
@@ -147,12 +143,10 @@ void Nebula::beginElem(const std::string &name, const AttributeList &atts)
     }
 }
 
-static void Nebula_endElement(void *Userdata, const XML_Char *)
-{
+static void Nebula_endElement(void *Userdata, const XML_Char *) {
 }
 
-void Nebula::LoadXML(const char *filename)
-{
+void Nebula::LoadXML(const char *filename) {
     VSFile f;
     VSError err = f.OpenReadOnly(filename, UnitFile);
     static bool usefog = XMLSupport::parse_bool(vs_config->getVariable("graphics", "fog", "true"));
@@ -173,8 +167,7 @@ void Nebula::LoadXML(const char *filename)
     f.Close();
 }
 
-void Nebula::SetFogState()
-{
+void Nebula::SetFogState() {
     float thisfadein = (lastfadein * (1 - interpolation_blend_factor) + (fadeinvalue) * interpolation_blend_factor);
     GFXFogMode(fogmode);
     GFXFogDensity(Density * thisfadein);
@@ -184,14 +177,13 @@ void Nebula::SetFogState()
 }
 
 void Nebula::UpdatePhysics2(const Transformation &trans,
-                            const Transformation &old_physical_state,
-                            const Vector &accel,
-                            float difficulty,
-                            const Matrix &transmat,
-                            const Vector &CumulativeVelocity,
-                            bool ResolveLast,
-                            UnitCollection *uc)
-{
+        const Transformation &old_physical_state,
+        const Vector &accel,
+        float difficulty,
+        const Matrix &transmat,
+        const Vector &CumulativeVelocity,
+        bool ResolveLast,
+        UnitCollection *uc) {
     static float nebdelta = XMLSupport::parse_float(vs_config->getVariable("graphics", "fog_time", ".01"));
     lastfadein = fadeinvalue;
     fadeinvalue -= nebdelta * simulation_atom_var;
@@ -199,13 +191,13 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
         fadeinvalue = 0;
     }
     this->Unit::UpdatePhysics2(trans,
-                               old_physical_state,
-                               accel,
-                               difficulty,
-                               transmat,
-                               CumulativeVelocity,
-                               ResolveLast,
-                               uc);
+            old_physical_state,
+            accel,
+            difficulty,
+            transmat,
+            CumulativeVelocity,
+            ResolveLast,
+            uc);
     Vector t1;
     float dis;
     unsigned int i;
@@ -227,8 +219,7 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
     }
 }
 
-void Nebula::PutInsideCam(int i)
-{
+void Nebula::PutInsideCam(int i) {
     static float nebdelta = XMLSupport::parse_float(vs_config->getVariable("graphics", "fog_time", ".01"));
     static float fadeinrate = XMLSupport::parse_float(vs_config->getVariable("graphics", "fog_fade_in_percent", "0.5"));
     if (_Universe->AccessCamera() == _Universe->AccessCamera(i)) {

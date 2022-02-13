@@ -37,22 +37,18 @@ namespace alg = boost::algorithm;
 
 Hashtable<std::string, WeaponInfo, 257> lookuptable;
 
-WeaponInfo::WeaponInfo()
-{
+WeaponInfo::WeaponInfo() {
 }
 
-WeaponInfo::WeaponInfo(WEAPON_TYPE type)
-{
+WeaponInfo::WeaponInfo(WEAPON_TYPE type) {
     this->type = type;
 }
 
-WeaponInfo::WeaponInfo(const WeaponInfo &tmp)
-{
+WeaponInfo::WeaponInfo(const WeaponInfo &tmp) {
     *this = tmp;
 }
 
-float WeaponInfo::Refire() const
-{
+float WeaponInfo::Refire() const {
     unsigned int len = name.length();
     // TODO: what is this???
     if (g_game.difficulty > .98 || len < 9 || name[len - 8] != 'C' || name[len - 9] != '_' || name[len - 7]
@@ -64,8 +60,7 @@ float WeaponInfo::Refire() const
             / (1.0f + (game_options.refire_difficulty_scaling - 1.0f) * g_game.difficulty));
 }
 
-bool WeaponInfo::isMissile() const
-{
+bool WeaponInfo::isMissile() const {
     if (game_options.projectile_means_missile && this->type == WEAPON_TYPE::PROJECTILE) {
         return true;
     }
@@ -78,8 +73,7 @@ bool WeaponInfo::isMissile() const
 // TODO: this should not be here
 using namespace VSFileSystem;
 
-WeaponInfo *getWeapon(const std::string &key)
-{
+WeaponInfo *getWeapon(const std::string &key) {
     WeaponInfo *wi = lookuptable.Get(boost::to_upper_copy(key));
     if (wi) {
         if (!WeaponMeshCache::getCachedMutable(wi->name)) {
@@ -96,8 +90,7 @@ WeaponInfo *getWeapon(const std::string &key)
     return wi;
 }
 
-void WeaponInfo::netswap()
-{
+void WeaponInfo::netswap() {
     //Enum elements are the size of an int
     //byte order swap doesn't work with ENUM - MAY NEED TO FIND A WORKAROUND SOMEDAY
     //type = VSSwapHostIntToLittle( type);

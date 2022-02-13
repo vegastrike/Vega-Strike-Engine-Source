@@ -27,8 +27,7 @@
 #include "windowcontroller.h"
 
 //Make everything happen.
-void WindowController::run(void)
-{
+void WindowController::run(void) {
     if (m_window) {
         m_window->setDeleteOnClose(true);         //We want the window to delete itself.
         m_window->setController(this);
@@ -39,14 +38,12 @@ void WindowController::run(void)
     }
 }
 
-void WindowController::draw(void)
-{
+void WindowController::draw(void) {
     //Do nothing.
 }
 
 //Process a command from the window.
-bool WindowController::processWindowCommand(const EventCommandId &command, Control *control)
-{
+bool WindowController::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Window::Close") {
         //Our window is closing.
         if (m_deleteOnWindowClose) {
@@ -60,12 +57,10 @@ bool WindowController::processWindowCommand(const EventCommandId &command, Contr
 }
 
 //CONSTRUCTOR
-WindowController::WindowController() : m_window(NULL), m_deleteOnWindowClose(true)
-{
+WindowController::WindowController() : m_window(NULL), m_deleteOnWindowClose(true) {
 }
 
 //DESTRUCTOR
-WindowController::~WindowController(void)
-{
+WindowController::~WindowController(void) {
 }
 

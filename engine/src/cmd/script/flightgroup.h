@@ -58,8 +58,7 @@ public:
     std::vector<class varInst *> *orderlist;
 
 //removes a ship from the flightgroup below
-    void Decrement(Unit *trashed)
-    {
+    void Decrement(Unit *trashed) {
         nr_ships--;
         nr_ships_left--;
         if (leader.GetUnit() == trashed) {
@@ -68,17 +67,16 @@ public:
     }
 
     static Flightgroup *newFlightgroup(const std::string &name,
-                                       const std::string &type,
-                                       const std::string &faction,
-                                       const std::string &order,
-                                       int num_ships,
-                                       int num_waves,
-                                       const std::string &texname,
-                                       const std::string &alphname,
-                                       class Mission *mis);
+            const std::string &type,
+            const std::string &faction,
+            const std::string &order,
+            int num_ships,
+            int num_waves,
+            const std::string &texname,
+            const std::string &alphname,
+            class Mission *mis);
 
-    Flightgroup() : pos(0, 0, 0)
-    {
+    Flightgroup() : pos(0, 0, 0) {
         //betterto have a flightgroup constructor
         orderlist = NULL;
         nr_waves_left = nr_ships_left = nr_ships = flightgroup_nr = 0;
@@ -87,14 +85,13 @@ public:
     }
 
     void Init(Flightgroup *fg,
-              const std::string &name,
-              const std::string &type,
-              const std::string &faction,
-              const std::string &order,
-              int num_ships,
-              int num_waves,
-              Mission *mis)
-    {
+            const std::string &name,
+            const std::string &type,
+            const std::string &faction,
+            const std::string &order,
+            int num_ships,
+            int num_waves,
+            Mission *mis) {
         bool new_fg = false;
         if (fg == NULL) {
             new_fg = true;
@@ -116,8 +113,7 @@ public:
         this->nr_ships_left += num_ships;
     }
 
-    Flightgroup(Flightgroup &other)
-    {
+    Flightgroup(Flightgroup &other) {
         *this = other;
     }
 

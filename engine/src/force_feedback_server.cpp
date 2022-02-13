@@ -32,45 +32,35 @@
 
 #define FF_DOIT 1
 
-ForceFeedback::ForceFeedback()
-{
+ForceFeedback::ForceFeedback() {
 }
 
-ForceFeedback::~ForceFeedback()
-{
+ForceFeedback::~ForceFeedback() {
 }
 
-bool ForceFeedback::haveFF()
-{
+bool ForceFeedback::haveFF() {
     return false;
 }
 
-void ForceFeedback::updateForce(float angle, float strength)
-{
+void ForceFeedback::updateForce(float angle, float strength) {
 }
 
-void ForceFeedback::updateSpeedEffect(float strength)
-{
+void ForceFeedback::updateSpeedEffect(float strength) {
 }
 
-void ForceFeedback::playHit(float angle, float strength)
-{
+void ForceFeedback::playHit(float angle, float strength) {
 }
 
-void ForceFeedback::playAfterburner(bool activate)
-{
+void ForceFeedback::playAfterburner(bool activate) {
 }
 
-void ForceFeedback::playLaser()
-{
+void ForceFeedback::playLaser() {
 }
 
-void ForceFeedback::playDurationEffect(unsigned int eff_nr, bool activate)
-{
+void ForceFeedback::playDurationEffect(unsigned int eff_nr, bool activate) {
 }
 
-void ForceFeedback::playShortEffect(unsigned int eff_nr)
-{
+void ForceFeedback::playShortEffect(unsigned int eff_nr) {
 }
 
 #if HAVE_FORCE_FEEDBACK

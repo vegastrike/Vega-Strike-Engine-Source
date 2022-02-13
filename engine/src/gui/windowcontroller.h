@@ -46,13 +46,11 @@ public:
     virtual void draw(void);
 
 //The window we are controlling.
-    virtual Window *window(void)
-    {
+    virtual Window *window(void) {
         return m_window;
     }
 
-    virtual void setWindow(Window *w)
-    {
+    virtual void setWindow(Window *w) {
         m_window = w;
     }
 
@@ -79,8 +77,7 @@ struct WindowControllerTableEntry {
     Handler function;
 
     WindowControllerTableEntry(const EventCommandId &cmd, const std::string &cid, const Handler &func) :
-            command(cmd), controlId(cid), function(func)
-    {
+            command(cmd), controlId(cid), function(func) {
     }
 };
 
@@ -89,8 +86,7 @@ class WctlBase : public WindowController {
 public:
     typedef WindowControllerTableEntry<Subclass> WctlTableEntry;
 
-    virtual bool processWindowCommand(const EventCommandId &command, Control *control)
-    {
+    virtual bool processWindowCommand(const EventCommandId &command, Control *control) {
         //Iterate through the dispatch table.
         for (const WctlTableEntry *p = &WctlCommandTable[0]; p->function; p++) {
             if (p->command == command) {

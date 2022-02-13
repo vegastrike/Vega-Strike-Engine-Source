@@ -28,16 +28,14 @@
 static const int CHILD_VECTOR_RESERVE = 20;         //Make sure we don't get many re-alloc's.
 
 //Add a child to the list of children of this cell.
-void SimplePickerCell::addChild(SimplePickerCell *c)
-{
+void SimplePickerCell::addChild(SimplePickerCell *c) {
     createEmptyChildList();
 
     m_children->addCell(c);
 }
 
 //Make sure there is an empty list for children.
-SimplePickerCells *SimplePickerCell::createEmptyChildList(void)
-{
+SimplePickerCells *SimplePickerCell::createEmptyChildList(void) {
     if (m_children == NULL) {
         m_children = new SimplePickerCells;
     }
@@ -46,21 +44,18 @@ SimplePickerCells *SimplePickerCell::createEmptyChildList(void)
 
 //Constructor.
 SimplePickerCell::SimplePickerCell(const std::string &t, const std::string &id, const GFXColor &c, int tag) :
-        m_text(t), m_id(id), m_textColor(c), m_tag(tag), m_children(nullptr)
-{
+        m_text(t), m_id(id), m_textColor(c), m_tag(tag), m_children(nullptr) {
 }
 
 //Destructor.
-SimplePickerCell::~SimplePickerCell(void)
-{
+SimplePickerCell::~SimplePickerCell(void) {
     if (m_children != nullptr) {
         delete m_children;
         m_children = nullptr;
     }
 }
 
-SimplePickerCell &SimplePickerCell::operator=(const SimplePickerCell &cell)
-{
+SimplePickerCell &SimplePickerCell::operator=(const SimplePickerCell &cell) {
     m_text = cell.m_text;
     m_id = cell.m_id;
     m_textColor = cell.m_textColor;
@@ -73,21 +68,18 @@ SimplePickerCell &SimplePickerCell::operator=(const SimplePickerCell &cell)
     return *this;
 }
 
-SimplePickerCell::SimplePickerCell(const SimplePickerCell &cell)
-{
+SimplePickerCell::SimplePickerCell(const SimplePickerCell &cell) {
     *this = cell;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 
 //Constructor.
-SimplePickerCells::SimplePickerCells(void)
-{
+SimplePickerCells::SimplePickerCells(void) {
     m_cells.reserve(CHILD_VECTOR_RESERVE);
 }
 
-void SimplePickerCells::clear(void)
-{
+void SimplePickerCells::clear(void) {
     for (size_t i = 0; i < m_cells.size(); ++i) {
         delete m_cells[i];
     }
@@ -97,8 +89,7 @@ void SimplePickerCells::clear(void)
 ////////////////////////////////////////////////////////////////////////////
 
 //Clear out all the cells.
-void SimplePicker::clear(void)
-{
+void SimplePicker::clear(void) {
     m_cellPressed = NULL;
     m_selectedCell = NULL;
     m_highlightedCell = NULL;
@@ -109,13 +100,11 @@ void SimplePicker::clear(void)
 }
 
 //Constructor.
-SimplePicker::SimplePicker(void)
-{
+SimplePicker::SimplePicker(void) {
     m_cells = new SimplePickerCells();
 }
 
-SimplePicker::~SimplePicker(void)
-{
+SimplePicker::~SimplePicker(void) {
     clear();
 }
 

@@ -33,22 +33,19 @@
 #include "unit_generic.h"
 #endif
 
-UnitCollection::UnitListNode::UnitListNode(Unit *unit) : unit(unit), next(NULL)
-{
+UnitCollection::UnitListNode::UnitListNode(Unit *unit) : unit(unit), next(NULL) {
     if (unit) {
         unit->Ref();
     }
 }
 
-UnitCollection::UnitListNode::UnitListNode(Unit *unit, UnitListNode *next) : unit(unit), next(next)
-{
+UnitCollection::UnitListNode::UnitListNode(Unit *unit, UnitListNode *next) : unit(unit), next(next) {
     if (unit) {
         unit->Ref();
     }
 }
 
-UnitCollection::UnitListNode::~UnitListNode()
-{
+UnitCollection::UnitListNode::~UnitListNode() {
     if (NULL != unit) {
         unit->UnRef();
     }
@@ -56,8 +53,7 @@ UnitCollection::UnitListNode::~UnitListNode()
     next = NULL;
 }
 
-void UnitCollection::destr()
-{
+void UnitCollection::destr() {
     UnitListNode *tmp;
     while (u->next) {
         tmp = u->next;
@@ -69,8 +65,7 @@ void UnitCollection::destr()
     PushUnusedNode(u);
 }
 
-void *UnitCollection::PushUnusedNode(UnitListNode *node)
-{
+void *UnitCollection::PushUnusedNode(UnitListNode *node) {
     static UnitListNode cat(NULL, NULL);
     static UnitListNode dog(NULL, &cat);
     static bool cachunk = true;
@@ -87,8 +82,7 @@ void *UnitCollection::PushUnusedNode(UnitListNode *node)
     return NULL;
 }
 
-void UnitCollection::FreeUnusedNodes()
-{
+void UnitCollection::FreeUnusedNodes() {
     static std::vector<UnitCollection::UnitListNode *> bakdogpile;
     std::vector<UnitCollection::UnitListNode *>
             *dogpile = (std::vector<UnitCollection::UnitListNode *> *) PushUnusedNode(
@@ -100,8 +94,7 @@ void UnitCollection::FreeUnusedNodes()
     }
 }
 
-void UnitCollection::UnitIterator::moveBefore(UnitCollection &otherList)
-{
+void UnitCollection::UnitIterator::moveBefore(UnitCollection &otherList) {
     if (pos->next->unit) {
         UnitListNode *tmp = pos->next->next;
         otherList.prepend(pos->next);
@@ -111,8 +104,7 @@ void UnitCollection::UnitIterator::moveBefore(UnitCollection &otherList)
     }
 }
 
-void UnitCollection::prepend(UnitIterator *iter)
-{
+void UnitCollection::prepend(UnitIterator *iter) {
     UnitListNode *n = u;
     Unit *tmp;
     while ((tmp = iter->current())) {
@@ -122,8 +114,7 @@ void UnitCollection::prepend(UnitIterator *iter)
     }
 }
 
-void UnitCollection::append(UnitIterator *iter)
-{
+void UnitCollection::append(UnitIterator *iter) {
     UnitListNode *n = u;
     while (n->next->unit != NULL) {
         n = n->next;
@@ -136,8 +127,7 @@ void UnitCollection::append(UnitIterator *iter)
     }
 }
 
-void UnitCollection::append(Unit *unit)
-{
+void UnitCollection::append(Unit *unit) {
     UnitListNode *n = u;
     while (n->next->unit != NULL) {
         n = n->next;
@@ -145,8 +135,7 @@ void UnitCollection::append(Unit *unit)
     n->next = new UnitListNode(unit, n->next);
 }
 
-void UnitCollection::UnitListNode::PostInsert(Unit *unit)
-{
+void UnitCollection::UnitListNode::PostInsert(Unit *unit) {
     if (next->unit != NULL) {
         next->next = new UnitListNode(unit, next->next);
     } else {
@@ -154,18 +143,15 @@ void UnitCollection::UnitListNode::PostInsert(Unit *unit)
     }
 }
 
-void UnitCollection::UnitIterator::postinsert(Unit *unit)
-{
+void UnitCollection::UnitIterator::postinsert(Unit *unit) {
     pos->PostInsert(unit);
 }
 
-void UnitCollection::FastIterator::postinsert(Unit *unit)
-{
+void UnitCollection::FastIterator::postinsert(Unit *unit) {
     pos->PostInsert(unit);
 }
 
-void UnitCollection::UnitListNode::Remove()
-{
+void UnitCollection::UnitListNode::Remove() {
     if (next->unit) {
         UnitListNode *tmp = next->next;
         //delete next; //takes care of unref! And causes a shitload of bugs
@@ -177,25 +163,21 @@ void UnitCollection::UnitListNode::Remove()
     }
 }
 
-void UnitCollection::UnitIterator::remove()
-{
+void UnitCollection::UnitIterator::remove() {
     pos->Remove();
 }
 
-void UnitCollection::FastIterator::remove()
-{
+void UnitCollection::FastIterator::remove() {
     pos->Remove();
 }
 
-void UnitCollection::ConstIterator::GetNextValidUnit()
-{
+void UnitCollection::ConstIterator::GetNextValidUnit() {
     while (pos->next->unit ? pos->next->unit->Killed() : false) {
         pos = pos->next;
     }
 }
 
-const UnitCollection &UnitCollection::operator=(const UnitCollection &uc)
-{
+const UnitCollection &UnitCollection::operator=(const UnitCollection &uc) {
 #ifdef _DEBUG
     printf( "warning could cause problems with concurrent lists. Make sure no one is traversing gotten list" );
 #endif
@@ -213,8 +195,7 @@ const UnitCollection &UnitCollection::operator=(const UnitCollection &uc)
     return uc;
 }
 
-UnitCollection::UnitCollection(const UnitCollection &uc) : u(NULL)
-{
+UnitCollection::UnitCollection(const UnitCollection &uc) : u(NULL) {
     init();
     un_iter ui = createIterator();
     const UnitListNode *n = uc.u;
@@ -227,8 +208,7 @@ UnitCollection::UnitCollection(const UnitCollection &uc) : u(NULL)
     }
 }
 
-bool UnitCollection::contains(const Unit *unit) const
-{
+bool UnitCollection::contains(const Unit *unit) const {
     if (empty()) {
         return false;
     }
@@ -243,8 +223,7 @@ bool UnitCollection::contains(const Unit *unit) const
     return false;
 }
 
-bool UnitCollection::remove(const Unit *unit)
-{
+bool UnitCollection::remove(const Unit *unit) {
     bool res = false;
     if (empty()) {
         return false;
@@ -260,8 +239,7 @@ bool UnitCollection::remove(const Unit *unit)
     return res;
 }
 
-void UnitCollection::cleanup()
-{
+void UnitCollection::cleanup() {
     //NOTE: advance() will be cleaning up the list by itself
     un_iter ui = createIterator();
     while (!ui.isDone()) {

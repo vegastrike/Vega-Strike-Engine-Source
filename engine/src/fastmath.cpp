@@ -98,14 +98,12 @@ float two = 2.0f;
     }                                   \
     while (0)
 
-inline unsigned long FP_NORM_TO_BYTE2(float p)
-{
+inline unsigned long FP_NORM_TO_BYTE2(float p) {
     float fpTmp = p + 1.0f;
     return ((*(unsigned *) &fpTmp) >> 15) & 0xFF;
 }
 
-inline unsigned long FP_NORM_TO_BYTE3(float p)
-{
+inline unsigned long FP_NORM_TO_BYTE3(float p) {
     float ftmp = p + 12582912.0f;
     return (*(unsigned long *) &ftmp) & 0xFF;
 }
@@ -116,8 +114,7 @@ typedef union FastSqrtUnion {
     unsigned int i;
 } FastSqrtUnion;
 
-void build_sqrt_table()
-{
+void build_sqrt_table() {
     unsigned int i;
     FastSqrtUnion s;
     for (i = 0; i <= 0x7FFF; i++) {
@@ -142,8 +139,7 @@ void build_sqrt_table()
     }
 }
 
-inline float fastsqrt(float n)
-{
+inline float fastsqrt(float n) {
     if (FP_BITS(n) == 0) {
         return 0.0;
     }             //check for square root of 0
@@ -156,13 +152,11 @@ inline float fastsqrt(float n)
 
 //At the assembly level the recommended workaround for the second FIST bug is the same for the first;
 //inserting the FRNDINT instruction immediately preceding the FIST instruction.
-__forceinline void FloatToInt(int *int_pointer, float f)
-{
+__forceinline void FloatToInt(int *int_pointer, float f) {
     *int_pointer = f;
 }
 
-int Stupodmain(int argc, char *argv[])
-{
+int Stupodmain(int argc, char *argv[]) {
     float t, it, test_sqrt;
     int i = 0;
     build_sqrt_table();
@@ -216,8 +210,7 @@ struct Vec3 {
     float z;
 };
 
-float CylTest_CapsFirst(const Vec3 &pt1, const Vec3 &pt2, float lengthsq, float radius_sq, const Vec3 &testpt)
-{
+float CylTest_CapsFirst(const Vec3 &pt1, const Vec3 &pt2, float lengthsq, float radius_sq, const Vec3 &testpt) {
     float dx, dy, dz;           //vector d  from line segment point 1 to point 2
     float pdx, pdy, pdz;        //vector pd from point 1 to test point
     float dot, dsq;

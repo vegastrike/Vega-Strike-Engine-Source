@@ -49,8 +49,7 @@ static const float ABSOLUTE_MIN_THUMB_LENGTH = .05;
 static const Size THUMB_DRAG_CANCEL_MARGINS = Size(-.3, -.3);
 
 //Set the position of this scroller.
-void Slider::setPosition(int pos)
-{
+void Slider::setPosition(int pos) {
     int newPosition = pos;
     if (pos > m_maxValue) {
         newPosition = m_maxValue;
@@ -64,8 +63,7 @@ void Slider::setPosition(int pos)
 }
 
 //Range represented by the slider.
-void Slider::setMaxMin(int max, int min)
-{
+void Slider::setMaxMin(int max, int min) {
     m_maxValue = max;
     m_minValue = min;
 
@@ -75,8 +73,7 @@ void Slider::setMaxMin(int max, int min)
 }
 
 //"Thumb" length.  1.0 = Entire range.
-void Slider::setThumbLength(float len)
-{
+void Slider::setThumbLength(float len) {
     float realLen = m_originalThumbLength = len;
     if (realLen > MAX_THUMB_LENGTH || realLen < 0.0) {
         realLen = NO_THUMB_LENGTH;
@@ -95,8 +92,7 @@ void Slider::setThumbLength(float len)
 }
 
 //The outside boundaries of the control.
-void Slider::setRect(const Rect &r)
-{
+void Slider::setRect(const Rect &r) {
     Control::setRect(r);
 
     //Calculate other things based on new rect.
@@ -105,14 +101,12 @@ void Slider::setRect(const Rect &r)
 }
 
 //Whether color is light or dark.
-static bool isColorLight(const GFXColor &c)
-{
+static bool isColorLight(const GFXColor &c) {
     return c.r > .6 || c.g > .6 || c.b > .6;
 }
 
 //Make a color somewhat darker.
-static GFXColor darkenColor(const GFXColor &c, const float factor)
-{
+static GFXColor darkenColor(const GFXColor &c, const float factor) {
     GFXColor result;
     result.r = guiMax(0, c.r - factor);
     result.g = guiMax(0, c.g - factor);
@@ -123,8 +117,7 @@ static GFXColor darkenColor(const GFXColor &c, const float factor)
 }
 
 //Make a color somewhat darker.
-static GFXColor lightenColor(const GFXColor &c, const float factor)
-{
+static GFXColor lightenColor(const GFXColor &c, const float factor) {
     GFXColor result;
     result.r = guiMin(1.0, c.r + factor);
     result.g = guiMin(1.0, c.g + factor);
@@ -135,8 +128,7 @@ static GFXColor lightenColor(const GFXColor &c, const float factor)
 }
 
 //Calculate the thumb colors based on the specified background color.
-void Slider::setThumbColorBasedOnColor(const GFXColor &c)
-{
+void Slider::setThumbColorBasedOnColor(const GFXColor &c) {
     if (!isClear(c)) {
         if (isColorLight(c)) {
             //Light color.  Make thumb darker.
@@ -149,8 +141,7 @@ void Slider::setThumbColorBasedOnColor(const GFXColor &c)
 }
 
 //Set the background color.
-void Slider::setColor(const GFXColor &c)
-{
+void Slider::setColor(const GFXColor &c) {
     //Calculate a reasonable thumb color.
     setThumbColorBasedOnColor(c);
 
@@ -158,8 +149,7 @@ void Slider::setColor(const GFXColor &c)
 }
 
 //Draw the control.
-void Slider::draw(void)
-{
+void Slider::draw(void) {
     //Draw the background.
     drawBackground();
     //Draw the thumb.
@@ -185,8 +175,7 @@ void Slider::draw(void)
     }
 }
 
-bool Slider::processMouseDown(const InputEvent &event)
-{
+bool Slider::processMouseDown(const InputEvent &event) {
     static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
     if (event.code == LEFT_MOUSE_BUTTON && m_thumbLength != NO_THUMB_LENGTH && hitTest(event.loc)) {
         if (m_vertical) {
@@ -226,8 +215,7 @@ bool Slider::processMouseDown(const InputEvent &event)
     return Control::processMouseDown(event);
 }
 
-bool Slider::processMouseDrag(const InputEvent &event)
-{
+bool Slider::processMouseDrag(const InputEvent &event) {
     //The interface for mouse dragging is a little weird.  There is no button information.  All
     //we know is that some button is down.  This is enough, since we don't get into a specific
     //mouse state in this control unless we know which mouse button was pressed...
@@ -266,8 +254,7 @@ bool Slider::processMouseDrag(const InputEvent &event)
     return false;
 }
 
-bool Slider::processMouseUp(const InputEvent &event)
-{
+bool Slider::processMouseUp(const InputEvent &event) {
     if (m_mouseState != MOUSE_NONE && event.code == LEFT_MOUSE_BUTTON) {
         //We are now done with the modal mouse loop.
         switch (m_mouseState) {
@@ -312,7 +299,6 @@ Slider::Slider(void) :
         m_mouseState(MOUSE_NONE),
         m_buttonDownMouse(0.0),
         m_buttonDownPosition(0),
-        m_thumbRect()
-{
+        m_thumbRect() {
 }
 

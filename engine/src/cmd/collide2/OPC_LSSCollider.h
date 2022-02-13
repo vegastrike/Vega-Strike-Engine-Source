@@ -28,8 +28,7 @@
 #define __OPC_LSSCOLLIDER_H__
 
 struct OPCODE_API LSSCache : VolumeCache {
-    LSSCache()
-    {
+    LSSCache() {
         Previous.mP0 = Point(0.0f, 0.0f, 0.0f);
         Previous.mP1 = Point(0.0f, 0.0f, 0.0f);
         Previous.mRadius = 0.0f;
@@ -65,10 +64,10 @@ public:
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     bool Collide(LSSCache &cache,
-                 const LSS &lss,
-                 const Model &model,
-                 const Matrix4x4 *worldl = nullptr,
-                 const Matrix4x4 *worldm = nullptr);
+            const LSS &lss,
+            const Model &model,
+            const Matrix4x4 *worldl = nullptr,
+            const Matrix4x4 *worldm = nullptr);
     //
     bool Collide(LSSCache &cache, const LSS &lss, const AABBTree *tree);
 protected:
@@ -91,9 +90,9 @@ protected:
     inline_                bool LSSTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
     // Init methods
     bool InitQuery(LSSCache &cache,
-                   const LSS &lss,
-                   const Matrix4x4 *worldl = nullptr,
-                   const Matrix4x4 *worldm = nullptr);
+            const LSS &lss,
+            const Matrix4x4 *worldl = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 };
 
 class OPCODE_API HybridLSSCollider : public LSSCollider {
@@ -103,10 +102,10 @@ public:
     virtual                                ~HybridLSSCollider();
 
     bool Collide(LSSCache &cache,
-                 const LSS &lss,
-                 const HybridModel &model,
-                 const Matrix4x4 *worldl = nullptr,
-                 const Matrix4x4 *worldm = nullptr);
+            const LSS &lss,
+            const HybridModel &model,
+            const Matrix4x4 *worldl = nullptr,
+            const Matrix4x4 *worldm = nullptr);
 protected:
     Container mTouchedBoxes;
 };

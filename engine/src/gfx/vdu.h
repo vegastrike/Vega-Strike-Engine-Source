@@ -92,15 +92,13 @@ private:
 ///draws the target camera
     void DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE viewStyle, Unit *parent, Unit *target);
 public:
-    void ReceivedTargetData()
-    {
+    void ReceivedTargetData() {
         got_target_info = true;
     }
 
     bool staticable() const;
 
-    unsigned int getMode() const
-    {
+    unsigned int getMode() const {
         return thismode.back();
     }
 
@@ -123,12 +121,12 @@ public:
         WEBCAM = 0x2000
     };
     VDU(const char *file,
-        TextPlane *textp,
-        unsigned short modes,
-        short rows,
-        short cols,
-        float *MaxArmor,
-        float *maxhull);
+            TextPlane *textp,
+            unsigned short modes,
+            short rows,
+            short cols,
+            float *MaxArmor,
+            float *maxhull);
 ///Draws the entire VDU, all data, etc
     void Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &c);
 ///Changes the mode of the current VDU to another legal mode

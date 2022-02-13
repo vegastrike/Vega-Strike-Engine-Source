@@ -68,102 +68,101 @@ public:
     Planet();
 
     Planet(QVector x,
-           QVector y,
-           float vely,
-           const Vector &rotvel,
-           float pos,
-           float gravity,
-           float radius,
-           const std::string &filename,
-           const std::string &technique,
-           const std::string &unitname,
-           BLENDFUNC blendsrc,
-           BLENDFUNC blenddst,
-           const std::vector<std::string> &dest,
-           const QVector &orbitcent,
-           Unit *parent,
-           const GFXMaterial &ourmat,
-           const std::vector<GFXLightLocal> &,
-           int faction,
-           string fullname,
-           bool inside_out = false);
+            QVector y,
+            float vely,
+            const Vector &rotvel,
+            float pos,
+            float gravity,
+            float radius,
+            const std::string &filename,
+            const std::string &technique,
+            const std::string &unitname,
+            BLENDFUNC blendsrc,
+            BLENDFUNC blenddst,
+            const std::vector<std::string> &dest,
+            const QVector &orbitcent,
+            Unit *parent,
+            const GFXMaterial &ourmat,
+            const std::vector<GFXLightLocal> &,
+            int faction,
+            string fullname,
+            bool inside_out = false);
 
     void InitPlanet(QVector x,
-                    QVector y,
-                    float vely,
-                    const Vector &rotvel,
-                    float pos,
-                    float gravity,
-                    float radius,
-                    const string &filename,
-                    const string &technique,
-                    const string &unitname,
-                    const vector<string> &dest,
-                    const QVector &orbitcent,
-                    Unit *parent,
-                    int faction,
-                    string fullname,
-                    bool inside_out,
-                    unsigned int lights_num);
+            QVector y,
+            float vely,
+            const Vector &rotvel,
+            float pos,
+            float gravity,
+            float radius,
+            const string &filename,
+            const string &technique,
+            const string &unitname,
+            const vector<string> &dest,
+            const QVector &orbitcent,
+            Unit *parent,
+            int faction,
+            string fullname,
+            bool inside_out,
+            unsigned int lights_num);
 
     virtual ~Planet();
 
     friend class PlanetaryOrbit;
 
-    enum _UnitType isUnit() const
-    {
+    enum _UnitType isUnit() const {
         return _UnitType::planet;
     }
 
     // Methods
     void AddAtmosphere(const std::string &texture,
-                       float radius,
-                       BLENDFUNC blendSrc,
-                       BLENDFUNC blendDst,
-                       bool inside_out);
+            float radius,
+            BLENDFUNC blendSrc,
+            BLENDFUNC blendDst,
+            bool inside_out);
     void AddCity(const std::string &texture,
-                 float radius,
-                 int numwrapx,
-                 int numwrapy,
-                 BLENDFUNC blendSrc,
-                 BLENDFUNC blendDst,
-                 bool inside_out = false,
-                 bool reverse_normals = true);
+            float radius,
+            int numwrapx,
+            int numwrapy,
+            BLENDFUNC blendSrc,
+            BLENDFUNC blendDst,
+            bool inside_out = false,
+            bool reverse_normals = true);
     virtual void AddFog(const std::vector<AtmosphericFogMesh> &, bool optical_illusion);
     void AddRing(const std::string &texture,
-                 float iradius,
-                 float oradius,
-                 const QVector &r,
-                 const QVector &s,
-                 int slices,
-                 int numwrapx,
-                 int numwrapy,
-                 BLENDFUNC blendSrc,
-                 BLENDFUNC blendDst);
+            float iradius,
+            float oradius,
+            const QVector &r,
+            const QVector &s,
+            int slices,
+            int numwrapx,
+            int numwrapy,
+            BLENDFUNC blendSrc,
+            BLENDFUNC blendDst);
     void AddSatellite(Unit *orbiter);
 
     Vector AddSpaceElevator(const std::string &name, const std::string &faction, char direction);
 
     Unit *beginElement(QVector x,
-                       QVector y,
-                       float vely,
-                       const Vector &rotvel,
-                       float pos,
-                       float gravity,
-                       float radius,
-                       const string &filename,
-                       const string &technique,
-                       const string &unitname,
-                       BLENDFUNC blendsrc,
-                       BLENDFUNC blenddst,
-                       const vector<string> &dest,
-                       int level,
-                       const GFXMaterial &ourmat,
-                       const std::vector<GFXLightLocal> &ligh,
-                       bool isunit,
-                       int faction,
-                       string fullname,
-                       bool inside_out);
+            QVector y,
+            float vely,
+            const Vector &rotvel,
+            float pos,
+            float gravity,
+            float radius,
+            const string &filename,
+            const string &technique,
+            const string &unitname,
+            BLENDFUNC blendsrc,
+            BLENDFUNC blenddst,
+            const vector<string> &dest,
+            int level,
+            const GFXMaterial &ourmat,
+            const std::vector<GFXLightLocal> &ligh,
+            bool isunit,
+            int faction,
+            string fullname,
+            bool inside_out);
 
     void DisableLights();
     virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix);
@@ -171,25 +170,21 @@ public:
     void EnableLights();
     void endElement();
 
-    Atmosphere *getAtmosphere()
-    {
+    Atmosphere *getAtmosphere() {
         return atmosphere;
     }
 
-    string getCargoUnitName() const
-    {
+    string getCargoUnitName() const {
         return getFullname();
     }
 
     string getHumanReadablePlanetType() const;
 
-    inline const float getRadius() const
-    {
+    inline const float getRadius() const {
         return radius;
     }
 
-    ContinuousTerrain *getTerrain(PlanetaryTransform *&t)
-    {
+    ContinuousTerrain *getTerrain(PlanetaryTransform *&t) {
         t = terraintrans;
         return terrain;
     }
@@ -205,41 +200,34 @@ public:
 
     class PlanetIterator {
     public:
-        PlanetIterator(Planet *p)
-        {
+        PlanetIterator(Planet *p) {
             localCollection.append(p);
             pos = localCollection.createIterator();
         }
 
-        ~PlanetIterator()
-        {
+        ~PlanetIterator() {
         }
 
-        void preinsert(Unit *unit)
-        {
+        void preinsert(Unit *unit) {
             abort();
         }
 
-        void postinsert(Unit *unit)
-        {
+        void postinsert(Unit *unit) {
             abort();
         }
 
-        void remove()
-        {
+        void remove() {
             abort();
         }
 
-        inline Unit *current()
-        {
+        inline Unit *current() {
             if (!pos.isDone()) {
                 return *pos;
             }
             return NULL;
         }
 
-        void advance()
-        {
+        void advance() {
             if (current() != NULL) {
                 Unit *cur = *pos;
                 if (cur->isUnit() == _UnitType::planet) {
@@ -251,20 +239,17 @@ public:
             }
         }
 
-        inline PlanetIterator &operator++()
-        {
+        inline PlanetIterator &operator++() {
             advance();
             return *this;
         }
 
-        inline Unit *operator*()
-        {
+        inline Unit *operator*() {
             return current();
         }
 
     private:
-        inline un_iter operator++(int)
-        {
+        inline un_iter operator++(int) {
             abort();
         }
 
@@ -272,33 +257,27 @@ public:
         un_iter pos;
     };
 
-    PlanetIterator createIterator()
-    {
+    PlanetIterator createIterator() {
         return PlanetIterator(this);
     }
 
-    bool isAtmospheric() const
-    {
+    bool isAtmospheric() const {
         return hasLights() || atmospheric;
     }
 
-    bool hasLights() const
-    {
+    bool hasLights() const {
         return !lights.empty();
     }
 
-    const std::vector<int> &activeLights()
-    {
+    const std::vector<int> &activeLights() {
         return lights;
     }
 
-    virtual const float GetHullPercent() const
-    {
+    virtual const float GetHullPercent() const {
         return 1.0f;
     }
 
-    virtual const float GetShieldPercent() const
-    {
+    virtual const float GetShieldPercent() const {
         return 0.0f;
     }
 

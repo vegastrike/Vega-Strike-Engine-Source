@@ -109,8 +109,7 @@ protected:
         /** looping */
         int soundAttributes: 1;
 
-        void reset()
-        {
+        void reset() {
             location = 0;
             attributes = 0;
             gain = 0;
@@ -118,8 +117,7 @@ protected:
             soundAttributes = 0;
         }
 
-        void setAll()
-        {
+        void setAll() {
             location = 1;
             attributes = 1;
             gain = 1;
@@ -135,40 +133,34 @@ public:
     virtual ~Source();
 
     /** Return the source's central position in 3D space */
-    LVector3 getPosition() const
-    {
+    LVector3 getPosition() const {
         return position;
     }
 
     /** Set the source's central position in 3D space */
-    void setPosition(LVector3 x)
-    {
+    void setPosition(LVector3 x) {
         position = x;
         dirty.location = 1;
     }
 
     /** Return the source's main propagation direction */
-    Vector3 getDirection() const
-    {
+    Vector3 getDirection() const {
         return direction;
     }
 
     /** Set the source's main propagation direction */
-    void setDirection(Vector3 x)
-    {
+    void setDirection(Vector3 x) {
         direction = x;
         dirty.location = 1;
     }
 
     /** Return the source's velocity */
-    Vector3 getVelocity() const
-    {
+    Vector3 getVelocity() const {
         return velocity;
     }
 
     /** Set the source's velocity */
-    void setVelocity(Vector3 x)
-    {
+    void setVelocity(Vector3 x) {
         velocity = x;
         dirty.location = 1;
     }
@@ -184,27 +176,23 @@ public:
     void setAngleRange(Range<Scalar> r);
 
     /** @see getAngleRange @remarks This version returns cosine-angles rather than radians, much quicker */
-    Range<Scalar> getCosAngleRange() const
-    {
+    Range<Scalar> getCosAngleRange() const {
         return cosAngleRange;
     }
 
     /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
-    void setCosAngleRange(Range<Scalar> r)
-    {
+    void setCosAngleRange(Range<Scalar> r) {
         cosAngleRange = r;
         dirty.attributes = 1;
     }
 
     /** Get the source's radius */
-    Scalar getRadius() const
-    {
+    Scalar getRadius() const {
         return radius;
     }
 
     /** Set the source's radius */
-    void setRadius(Scalar r)
-    {
+    void setRadius(Scalar r) {
         radius = r;
         dirty.attributes = 1;
     }
@@ -215,68 +203,58 @@ public:
      *      volume that is generating high/low frequency vibrations. This will affect
      *      propagation of those frequencies over distance.
      */
-    PerFrequency<Scalar> getPerFrequencyRadiusRatios() const
-    {
+    PerFrequency<Scalar> getPerFrequencyRadiusRatios() const {
         return pfRadiusRatios;
     }
 
     /** Set the source's frequency-dependant radius ratios
      * @see getRadiusRatios
      */
-    void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val)
-    {
+    void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val) {
         pfRadiusRatios = val;
         dirty.attributes = 1;
     }
 
     /** Get the source's refernece frequencies */
-    PerFrequency<Scalar> getReferenceFreqs() const
-    {
+    PerFrequency<Scalar> getReferenceFreqs() const {
         return referenceFreqs;
     }
 
     /** Set the source's reference frequencies */
-    void setReferenceFreqs(PerFrequency<Scalar> val)
-    {
+    void setReferenceFreqs(PerFrequency<Scalar> val) {
         referenceFreqs = val;
         dirty.attributes = 1;
     }
 
     /** Get the source's main gain */
-    Scalar getGain() const
-    {
+    Scalar getGain() const {
         return gain;
     }
 
     /** Set the source's main gain */
-    void setGain(Scalar g)
-    {
+    void setGain(Scalar g) {
         gain = g;
         dirty.gain = 1;
     }
 
     /** Is the source in looping mode? */
-    bool isLooping() const
-    {
+    bool isLooping() const {
         return flags.looping != 0;
     }
 
     /** Set the source's looping mode */
-    void setLooping(bool loop)
-    {
+    void setLooping(bool loop) {
         flags.looping = loop ? 1 : 0;
         dirty.soundAttributes = 1;
     }
 
     /** Is the source using distance attenuation? */
-    bool isAttenuated() const
-    {
+    bool isAttenuated() const {
         return flags.attenuated != 0;
     }
 
     /** Set whether the source uses distance attenuation */
-    void setAttenuated(bool attenuated)
-    {
+    void setAttenuated(bool attenuated) {
         flags.attenuated = attenuated ? 1 : 0;
         dirty.attributes = 1;
     }
@@ -286,14 +264,12 @@ public:
      *      comm streams, and all those sources which are not anchored
      *      to a real 3D object, but rather to the listener itself.
      */
-    bool isRelative() const
-    {
+    bool isRelative() const {
         return flags.relative != 0;
     }
 
     /** Set whether the source's position is always relative to the root listener. */
-    void setRelative(bool relative)
-    {
+    void setRelative(bool relative) {
         flags.relative = relative ? 1 : 0;
         dirty.attributes = 1;
     }
@@ -342,8 +318,7 @@ public:
     Timestamp getWouldbePlayingTime() const;
 
     /** Get renderer-specific data associated (and destroyed) with this sound source */
-    SharedPtr<RenderableSource> getRenderable() const
-    {
+    SharedPtr<RenderableSource> getRenderable() const {
         return rendererDataPtr;
     }
 
@@ -351,50 +326,42 @@ public:
     void setRenderable(SharedPtr<RenderableSource> ptr);
 
     /** Get user-specific data associated (and destroyed) with this sound source */
-    SharedPtr<UserData> getUserDataPtr() const
-    {
+    SharedPtr<UserData> getUserDataPtr() const {
         return userDataPtr;
     }
 
     /** Set user-specific data to be associated (and destroyed) with this sound source */
-    void setUserDataLong(SharedPtr<UserData> ptr)
-    {
+    void setUserDataLong(SharedPtr<UserData> ptr) {
         userDataPtr = ptr;
     }
 
     /** Get user-specific data associated with this sound source */
-    long getUserDataLong() const
-    {
+    long getUserDataLong() const {
         return userDataLong;
     }
 
     /** Get user-specific data associated with this sound source */
-    void setUserDataLong(long data)
-    {
+    void setUserDataLong(long data) {
         userDataLong = data;
     }
 
     /** Get an event listener associated with this sound source */
-    SharedPtr<SourceListener> getSourceListener() const
-    {
+    SharedPtr<SourceListener> getSourceListener() const {
         return sourceListenerPtr;
     }
 
     /** Set an event listener to be associated with this sound source */
-    void setSourceListener(SharedPtr<SourceListener> ptr)
-    {
+    void setSourceListener(SharedPtr<SourceListener> ptr) {
         sourceListenerPtr = ptr;
     }
 
     /** Get the associated sound stream */
-    SharedPtr<Sound> getSound() const
-    {
+    SharedPtr<Sound> getSound() const {
         return soundPtr;
     }
 
     /** Set the associated sound stream - Only for SceneManagers to call */
-    void setSound(SharedPtr<Sound> ptr)
-    {
+    void setSound(SharedPtr<Sound> ptr) {
         soundPtr = ptr;
         dirty.soundPtr = 1;
     }

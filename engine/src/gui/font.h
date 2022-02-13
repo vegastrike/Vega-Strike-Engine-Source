@@ -50,25 +50,21 @@ static const double REFERENCE_LINE_SPACING = REFERENCE_FONT_ASCENDER + REFERENCE
 class Font {
 public:
 //Font size.  Vertical distance in identity space.
-    float size(void) const
-    {
+    float size(void) const {
         return m_size * 0.5;
     }
 
-    void setSize(float s)
-    {
+    void setSize(float s) {
         m_size = s;
         m_needMetrics = true;
     }
 
 //The "boldness" of the font.  See predefined weights above for examples.
-    float strokeWeight(void) const
-    {
+    float strokeWeight(void) const {
         return m_strokeWeight;
     }
 
-    void setStrokeWeight(float w)
-    {
+    void setStrokeWeight(float w) {
         m_strokeWeight = w;
         m_needMetrics = true;
     }
@@ -97,21 +93,18 @@ public:
             m_extraCharWidth(0.5),
             m_spaceCharFixup(10.0),
             m_verticalScaling(1.0),
-            m_horizontalScaling(1.0)
-    {
+            m_horizontalScaling(1.0) {
     }
 
 //METRICS
     double strokeWidth(void) const; //Get the stroke width.
 
 //OPERATORS
-    bool operator==(const Font &other)
-    {
+    bool operator==(const Font &other) {
         return m_size == other.m_size && m_strokeWeight == other.m_strokeWeight;
     }
 
-    bool operator!=(const Font &other)
-    {
+    bool operator!=(const Font &other) {
         return !(*this == other);
     }
 

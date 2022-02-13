@@ -57,8 +57,7 @@ struct TerrainTexture {
     }
             tex;
 
-    TerrainTexture()
-    {
+    TerrainTexture() {
         scales = scalet = 1;
         tex.filename = NULL;
         material = 0;
@@ -93,8 +92,7 @@ struct TextureIndex {
     Resizable<unsigned int> q;
     Resizable<GFXColorVertex> c;
 
-    void Clear()
-    {
+    void Clear() {
         q.clear();
         c.clear();
     }
@@ -149,29 +147,29 @@ public:
     int CountNodes() const;
 ///Make sure to translate into Quadtree Space
     void Update(const quadcornerdata &cd,
-                const Vector &ViewerLocation,
-                float Detail,
-                unsigned short numstages,
-                unsigned short whichstage,
-                updateparity *whichordertoupdate);
+            const Vector &ViewerLocation,
+            float Detail,
+            unsigned short numstages,
+            unsigned short whichstage,
+            updateparity *whichordertoupdate);
     int Render(const quadcornerdata &cd, const Vector &camera);
     float GetHeight(const quadcornerdata &cd, float x, float z, Vector &normal); // const;
     static Vector MakeLightness(float xslope, float zslope, const Vector &loc);
     static void SetCurrentTerrain(unsigned int *VertexAllocated,
-                                  unsigned int *VertexCount,
-                                  GFXVertexList *vertices,
-                                  std::vector<unsigned int> *unusedvertices,
-                                  IdentityTransform *transform,
-                                  std::vector<TerrainTexture> *texturelist,
-                                  const Vector &NormalScale,
-                                  quadsquare *neighbor[4]);
+            unsigned int *VertexCount,
+            GFXVertexList *vertices,
+            std::vector<unsigned int> *unusedvertices,
+            IdentityTransform *transform,
+            std::vector<TerrainTexture> *texturelist,
+            const Vector &NormalScale,
+            quadsquare *neighbor[4]);
 private:
     static void tri(unsigned int Aind,
-                    unsigned short Atex,
-                    unsigned int Bind,
-                    unsigned short Btex,
-                    unsigned int Cind,
-                    unsigned short Ctex);
+            unsigned short Atex,
+            unsigned int Bind,
+            unsigned short Btex,
+            unsigned int Cind,
+            unsigned short Ctex);
 ///Sets the 5 vertices in vertexs array in 3space from a quadcornerdata and return half of the size
     unsigned int SetVertices(GFXVertex *vertexs, const quadcornerdata &pcd);
     void EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata &cd);
@@ -185,9 +183,9 @@ private:
     void CreateChild(int index, const quadcornerdata &cd);
     void SetupCornerData(quadcornerdata *q, const quadcornerdata &pd, int ChildIndex);
     void UpdateAux(const quadcornerdata &cd,
-                   const Vector &ViewerLocation,
-                   float CenterError,
-                   unsigned int pipelinemask);
+            const Vector &ViewerLocation,
+            float CenterError,
+            unsigned int pipelinemask);
     void RenderAux(const quadcornerdata &cd, CLIPSTATE vis);
     void SetStatic(const quadcornerdata &cd);
     static IdentityTransform *nonlinear_trans;

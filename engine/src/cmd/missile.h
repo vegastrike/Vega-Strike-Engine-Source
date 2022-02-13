@@ -73,8 +73,7 @@ public:
             float detonation_radius);
 
     Missile(std::vector<Mesh *> m, bool b, int i) :
-            Unit(m, b, i)
-    {
+            Unit(m, b, i) {
     }
 
 public:
@@ -82,19 +81,18 @@ public:
     void Discharge();
     float ExplosionRadius();
 
-    enum _UnitType isUnit() const
-    {
+    enum _UnitType isUnit() const {
         return _UnitType::missile;
     }
 
     virtual void UpdatePhysics2(const Transformation &trans,
-                                const Transformation &old_physical_state,
-                                const Vector &accel,
-                                float difficulty,
-                                const Matrix &transmat,
-                                const Vector &CumulativeVelocity,
-                                bool ResolveLast,
-                                UnitCollection *uc = NULL);
+            const Transformation &old_physical_state,
+            const Vector &accel,
+            float difficulty,
+            const Matrix &transmat,
+            const Vector &CumulativeVelocity,
+            bool ResolveLast,
+            UnitCollection *uc = NULL);
 
     Unit *breakECMLock(Unit *target);
     bool proximityFuse(Unit *target);

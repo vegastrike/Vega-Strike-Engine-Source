@@ -3,8 +3,7 @@
 
 static const float gs_fTolerance = 1e-05f;
 
-static float OPC_PointTriangleSqrDist(const Point &point, const Point &p0, const Point &p1, const Point &p2)
-{
+static float OPC_PointTriangleSqrDist(const Point &point, const Point &p0, const Point &p1, const Point &p2) {
     // Hook
     Point TriEdge0 = p1 - p0;
     Point TriEdge1 = p2 - p0;
@@ -143,8 +142,7 @@ static float OPC_PointTriangleSqrDist(const Point &point, const Point &p0, const
     return fabsf(fSqrDist);
 }
 
-static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkSeg1)
-{
+static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkSeg1) {
     // Hook
     Point rkSeg0Direction = rkSeg0.ComputeDirection();
     Point rkSeg1Direction = rkSeg1.ComputeDirection();
@@ -336,13 +334,11 @@ static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkS
     return fabsf(fSqrDist);
 }
 
-inline_ float OPC_SegmentRaySqrDist(const Segment &rkSeg0, const Ray &rkSeg1)
-{
+inline_ float OPC_SegmentRaySqrDist(const Segment &rkSeg0, const Ray &rkSeg1) {
     return OPC_SegmentSegmentSqrDist(rkSeg0, Segment(rkSeg1.mOrig, rkSeg1.mOrig + rkSeg1.mDir));
 }
 
-static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0, const Point &p1, const Point &p2)
-{
+static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0, const Point &p1, const Point &p2) {
     // Hook
     const Point TriEdge0 = p1 - p0;
     const Point TriEdge1 = p2 - p0;
@@ -673,8 +669,7 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
     return fabsf(fSqrDist);
 }
 
-inline_ bool LSSCollider::LSSTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2)
-{
+inline_ bool LSSCollider::LSSTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2) {
     // Stats
     mNbVolumePrimTests++;
 

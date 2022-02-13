@@ -29,8 +29,7 @@
 
 using std::string;
 
-string retrievedata(string data, string type)
-{
+string retrievedata(string data, string type) {
     int length = data.size();
     if (length == 0) {
         return "";

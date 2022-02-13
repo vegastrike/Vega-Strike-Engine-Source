@@ -45,27 +45,25 @@
 #include "networking/zonemgr.h"
 #include "networking/netserver.h"
 
-Unit *UnitFactory::createUnit()
-{
+Unit *UnitFactory::createUnit() {
     return new Unit(0);
 }
 
 Unit *UnitFactory::createUnit(const char *filename,
-                              bool SubUnit,
-                              int faction,
-                              std::string customizedUnit,
-                              Flightgroup *flightgroup,
-                              int fg_subnumber,
-                              string *netxml,
-                              ObjSerial netcreate)
-{
+        bool SubUnit,
+        int faction,
+        std::string customizedUnit,
+        Flightgroup *flightgroup,
+        int fg_subnumber,
+        string *netxml,
+        ObjSerial netcreate) {
     _Universe->netLock(true);
     Unit *un = new Unit(filename,
-                        SubUnit,
-                        faction,
-                        customizedUnit,
-                        flightgroup,
-                        fg_subnumber, netxml);
+            SubUnit,
+            faction,
+            customizedUnit,
+            flightgroup,
+            fg_subnumber, netxml);
     _Universe->netLock(false);
     if (netcreate) {
         //Send a packet to clients in order to make them create this unit
@@ -86,40 +84,37 @@ Unit *UnitFactory::createUnit(const char *filename,
 }
 
 Unit *UnitFactory::createServerSideUnit(const char *filename,
-                                        bool SubUnit,
-                                        int faction,
-                                        std::string customizedUnit,
-                                        Flightgroup *flightgroup,
-                                        int fg_subnumber)
-{
+        bool SubUnit,
+        int faction,
+        std::string customizedUnit,
+        Flightgroup *flightgroup,
+        int fg_subnumber) {
     return new Unit(filename,
-                    SubUnit,
-                    faction,
-                    customizedUnit,
-                    flightgroup,
-                    fg_subnumber);
+            SubUnit,
+            faction,
+            customizedUnit,
+            flightgroup,
+            fg_subnumber);
 }
 
-Unit *UnitFactory::createUnit(vector<Mesh *> &meshes, bool Subunit, int faction)
-{
+Unit *UnitFactory::createUnit(vector<Mesh *> &meshes, bool Subunit, int faction) {
     return new Unit(meshes,
-                    Subunit,
-                    faction);
+            Subunit,
+            faction);
 }
 
 Nebula *UnitFactory::createNebula(const char *unitfile,
-                                  bool SubU,
-                                  int faction,
-                                  Flightgroup *fg,
-                                  int fg_snumber,
-                                  ObjSerial netcreate)
-{
+        bool SubU,
+        int faction,
+        Flightgroup *fg,
+        int fg_snumber,
+        ObjSerial netcreate) {
     _Universe->netLock(true);
     Nebula *neb = new Nebula(unitfile,
-                             SubU,
-                             faction,
-                             fg,
-                             fg_snumber);
+            SubU,
+            faction,
+            fg,
+            fg_snumber);
     _Universe->netLock(false);
     if (netcreate) {
         neb->SetSerial(netcreate);
@@ -137,26 +132,25 @@ Nebula *UnitFactory::createNebula(const char *unitfile,
 }
 
 Missile *UnitFactory::createMissile(const char *filename,
-                                    int faction,
-                                    const string &modifications,
-                                    const float damage,
-                                    float phasedamage,
-                                    float time,
-                                    float radialeffect,
-                                    float radmult,
-                                    float detonation_radius,
-                                    ObjSerial netcreate)
-{
+        int faction,
+        const string &modifications,
+        const float damage,
+        float phasedamage,
+        float time,
+        float radialeffect,
+        float radmult,
+        float detonation_radius,
+        ObjSerial netcreate) {
     _Universe->netLock(true);
     Missile *un = new Missile(filename,
-                              faction,
-                              modifications,
-                              damage,
-                              phasedamage,
-                              time,
-                              radialeffect,
-                              radmult,
-                              detonation_radius);
+            faction,
+            modifications,
+            damage,
+            phasedamage,
+            time,
+            radialeffect,
+            radmult,
+            detonation_radius);
     _Universe->netLock(false);
     if (netcreate) {
         un->SetSerial(netcreate);
@@ -173,37 +167,35 @@ Missile *UnitFactory::createMissile(const char *filename,
     return un;
 }
 
-Planet *UnitFactory::createPlanet()
-{
+Planet *UnitFactory::createPlanet() {
     return new Planet;
 }
 
 Planet *UnitFactory::createPlanet(QVector x,
-                                  QVector y,
-                                  float vely,
-                                  const Vector &rotvel,
-                                  float pos,
-                                  float gravity,
-                                  float radius,
-                                  const std::string &filename,
-                                  const std::string &technique,
-                                  const std::string &unitname,
-                                  BLENDFUNC sr,
-                                  BLENDFUNC ds,
-                                  const vector<string> &dest,
-                                  const QVector &orbitcent,
-                                  Unit *parent,
-                                  const GFXMaterial &ourmat,
-                                  const std::vector<GFXLightLocal> &ligh,
-                                  int faction,
-                                  string fullname,
-                                  bool inside_out,
-                                  ObjSerial netcreate)
-{
+        QVector y,
+        float vely,
+        const Vector &rotvel,
+        float pos,
+        float gravity,
+        float radius,
+        const std::string &filename,
+        const std::string &technique,
+        const std::string &unitname,
+        BLENDFUNC sr,
+        BLENDFUNC ds,
+        const vector<string> &dest,
+        const QVector &orbitcent,
+        Unit *parent,
+        const GFXMaterial &ourmat,
+        const std::vector<GFXLightLocal> &ligh,
+        int faction,
+        string fullname,
+        bool inside_out,
+        ObjSerial netcreate) {
     _Universe->netLock(true);
     Planet *p = new Planet(x, y, vely, rotvel, pos, gravity, radius,
-                           filename, technique, unitname, dest, orbitcent, parent, faction,
-                           fullname, inside_out, ligh.size());
+            filename, technique, unitname, dest, orbitcent, parent, faction,
+            fullname, inside_out, ligh.size());
     _Universe->netLock(false);
     if (netcreate) {
         p->SetSerial(netcreate);
@@ -225,43 +217,39 @@ Planet *UnitFactory::createPlanet(QVector x,
 }
 
 Enhancement *UnitFactory::createEnhancement(const char *filename,
-                                            int faction,
-                                            const string &modifications,
-                                            Flightgroup *flightgrp,
-                                            int fg_subnumber)
-{
+        int faction,
+        const string &modifications,
+        Flightgroup *flightgrp,
+        int fg_subnumber) {
     return new Enhancement(filename, faction, modifications, flightgrp, fg_subnumber);
 }
 
 Building *UnitFactory::createBuilding(ContinuousTerrain *parent,
-                                      bool vehicle,
-                                      const char *filename,
-                                      bool SubUnit,
-                                      int faction,
-                                      const std::string &unitModifications,
-                                      Flightgroup *fg)
-{
+        bool vehicle,
+        const char *filename,
+        bool SubUnit,
+        int faction,
+        const std::string &unitModifications,
+        Flightgroup *fg) {
     return NULL;
 }
 
 Building *UnitFactory::createBuilding(Terrain *parent,
-                                      bool vehicle,
-                                      const char *filename,
-                                      bool SubUnit,
-                                      int faction,
-                                      const std::string &unitModifications,
-                                      Flightgroup *fg)
-{
+        bool vehicle,
+        const char *filename,
+        bool SubUnit,
+        int faction,
+        const std::string &unitModifications,
+        Flightgroup *fg) {
     return NULL;
 }
 
 Asteroid *UnitFactory::createAsteroid(const char *filename,
-                                      int faction,
-                                      Flightgroup *fg,
-                                      int fg_snumber,
-                                      float difficulty,
-                                      ObjSerial netcreate)
-{
+        int faction,
+        Flightgroup *fg,
+        int fg_snumber,
+        float difficulty,
+        ObjSerial netcreate) {
     _Universe->netLock(true);
     Asteroid *ast = new Asteroid(filename, faction, fg, fg_snumber, difficulty);
     _Universe->netLock(false);
@@ -282,18 +270,15 @@ Asteroid *UnitFactory::createAsteroid(const char *filename,
     return ast;
 }
 
-Terrain *UnitFactory::createTerrain(const char *file, Vector scale, float position, float radius, Matrix &t)
-{
+Terrain *UnitFactory::createTerrain(const char *file, Vector scale, float position, float radius, Matrix &t) {
     return NULL;
 }
 
-ContinuousTerrain *UnitFactory::createContinuousTerrain(const char *file, Vector scale, float position, Matrix &t)
-{
+ContinuousTerrain *UnitFactory::createContinuousTerrain(const char *file, Vector scale, float position, Matrix &t) {
     return NULL;
 }
 
-void UnitFactory::broadcastUnit(Unit *unit, unsigned short zone)
-{
+void UnitFactory::broadcastUnit(Unit *unit, unsigned short zone) {
     if (!_Universe->netLocked() && unit->GetSerial()) {
         if (SERVER) {
             VSServer->broadcastUnit(unit, zone);

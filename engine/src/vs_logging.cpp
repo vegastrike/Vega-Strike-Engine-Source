@@ -50,8 +50,7 @@ boost::shared_ptr<VegaStrikeLogging::ConsoleLogSink> VegaStrikeLogger::console_l
 //     winsys_exit(code);
 // }
 
-void VegaStrikeLogger::InitLoggingPart1()
-{
+void VegaStrikeLogger::InitLoggingPart1() {
     ::boost::log::add_common_attributes();
 
     console_log_sink_ = ::boost::log::add_console_log
@@ -65,12 +64,11 @@ void VegaStrikeLogger::InitLoggingPart1()
 }
 
 void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
-                                        const ::boost::filesystem::path &vega_strike_home_dir)
-{
+        const ::boost::filesystem::path &vega_strike_home_dir) {
     auto logging_core = ::boost::log::core::get();
 
     const ::boost::filesystem::path &logging_dir = ::boost::filesystem::absolute("logs",
-                                                                                 vega_strike_home_dir);         /*< $HOME/.vegastrike/logs, typically >*/
+            vega_strike_home_dir);         /*< $HOME/.vegastrike/logs, typically >*/
     const std::string &logging_dir_name = logging_dir.string();
     VS_LOG(info, (boost::format("log directory : '%1%'") % logging_dir_name));
 
@@ -108,8 +106,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
     console_log_sink_->set_filter(::boost::log::trivial::severity >= ::boost::log::trivial::fatal);
 }
 
-void VegaStrikeLogger::FlushLogs()
-{
+void VegaStrikeLogger::FlushLogs() {
     if (console_log_sink_) {
         console_log_sink_->flush();
     }

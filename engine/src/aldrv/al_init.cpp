@@ -53,8 +53,7 @@
 #define AL_GET_PROC( name ) ( alGetProcAddress( name ) )
 #endif
 
-static void fixup_function_pointers(void)
-{
+static void fixup_function_pointers(void) {
     /* UNCOMMENT AS NEEDED
      *     talcGetAudioChannel = (ALfloat (*)(ALuint channel))
      *                             GP("alcGetAudioChannel_LOKI");
@@ -107,8 +106,7 @@ static void fixup_function_pointers(void)
 
 #endif
 
-void AUDChangeVolume(float volume)
-{
+void AUDChangeVolume(float volume) {
 #ifdef HAVE_AL
     if (volume == 0) {
         usepositional = false;
@@ -120,8 +118,7 @@ void AUDChangeVolume(float volume)
 #endif
 }
 
-float AUDGetVolume()
-{
+float AUDGetVolume() {
 #ifdef HAVE_AL
     return 1. / scalepos;
 
@@ -130,8 +127,7 @@ float AUDGetVolume()
 #endif
 }
 
-void AUDChangeDoppler(float doppler)
-{
+void AUDChangeDoppler(float doppler) {
 #ifdef HAVE_AL
     if (doppler <= 0) {
         usedoppler = false;
@@ -142,8 +138,7 @@ void AUDChangeDoppler(float doppler)
 #endif
 }
 
-float AUDGetDoppler()
-{
+float AUDGetDoppler() {
 #ifdef HAVE_AL
     return scalevel;
 
@@ -163,8 +158,7 @@ static ALCcontext *context_id = NULL;
 #endif
 #endif
 
-bool AUDInit()
-{
+bool AUDInit() {
 #ifdef HAVE_AL
     // g_game.sound_enabled =
     usedoppler = game_options.Doppler;
@@ -180,7 +174,7 @@ bool AUDInit()
     g_game.audio_frequency_mode = game_options.frequency;
     maxallowedsingle = game_options.MaxSingleSounds;
     g_game.max_sound_sources =
-    maxallowedtotal = game_options.MaxTotalSounds;
+            maxallowedtotal = game_options.MaxTotalSounds;
     if (!game_options.Sound && !game_options.Music) {
         return false;
     }
@@ -228,8 +222,7 @@ bool AUDInit()
     return false;
 }
 
-void AUDDestroy()
-{
+void AUDDestroy() {
 #ifdef HAVE_AL
     //Go through and delete all loaded wavs
     unsigned int i;

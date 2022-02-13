@@ -61,8 +61,7 @@ class Unit;
 #define PATHSEP "/"
 #endif
 
-void Python::initpaths()
-{
+void Python::initpaths() {
     /*
      *  char pwd[2048];
      *  getcwd (pwd,2047);
@@ -115,8 +114,7 @@ void Python::initpaths()
     free(temppython);
 }
 
-void Python::reseterrors()
-{
+void Python::reseterrors() {
     if (PyErr_Occurred()) {
         VS_LOG_AND_FLUSH(error, "void Python::reseterrors(): Python error occurred");
         PyErr_Print();
@@ -127,13 +125,11 @@ void Python::reseterrors()
 
 #if BOOST_VERSION != 102800
 
-static void *Vector_convertible(PyObject * p)
-{
+static void *Vector_convertible(PyObject * p) {
     return PyTuple_Check(p) ? p : 0;
 }
 
-static void Vector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data)
-{
+static void Vector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data) {
     void *const storage = ((boost::python::converter::rvalue_from_python_storage<Vector> *) data)->storage.bytes;
     new(storage) Vector(0, 0, 0);
     //Fill in QVector values from source tuple here
@@ -144,8 +140,7 @@ static void Vector_construct(PyObject * source, boost::python::converter::rvalue
     data->convertible = storage;
 }
 
-static void QVector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data)
-{
+static void QVector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data) {
     void *const storage = ((boost::python::converter::rvalue_from_python_storage<QVector> *) data)->storage.bytes;
     new(storage) QVector(0, 0, 0);
     //Fill in QVector values from source tuple here
@@ -158,8 +153,7 @@ static void QVector_construct(PyObject * source, boost::python::converter::rvalu
 
 #endif
 
-void Python::init()
-{
+void Python::init() {
     static bool isinit = false;
     if (isinit) {
         return;
@@ -180,8 +174,8 @@ void Python::init()
 
 #if BOOST_VERSION != 102800
     boost::python::converter::registry::insert(Vector_convertible,
-                                               QVector_construct,
-                                               boost::python::type_id<QVector>());
+            QVector_construct,
+            boost::python::type_id<QVector>());
     boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
 #endif
 #if (PY_VERSION_HEX < 0x03000000)
@@ -212,8 +206,7 @@ void Python::init()
 #endif
 }
 
-void Python::test()
-{
+void Python::test() {
     /* initialize vegastrike module so that
      *  'import VS' works in python */
 

@@ -43,13 +43,11 @@ struct light_key {
     int number;
     float intensity_key;
 
-    light_key()
-    {
+    light_key() {
         intensity_key = number = 0;
     }
 
-    light_key(int num, float inte)
-    {
+    light_key(int num, float inte) {
         number = num;
         intensity_key = inte;
     }
@@ -57,8 +55,7 @@ struct light_key {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"  // Disable the unused warning for this function only
 
-static bool operator<(light_key tmp1, light_key tmp2)
-{
+static bool operator<(light_key tmp1, light_key tmp2) {
     return tmp1.intensity_key < tmp2.intensity_key;
 }
 
@@ -72,8 +69,7 @@ static vector<int> pickedlights[2];
 static vector<int> *newpicked = &pickedlights[0];
 static vector<int> *oldpicked = &pickedlights[1];
 
-void removelightfromnewpick(int index)
-{
+void removelightfromnewpick(int index) {
     std::vector<int>::iterator where;
     for (int i = 0; i < 2; ++i) {
         while ((where = std::find(pickedlights[i].begin(), pickedlights[i].end(), index)) != pickedlights[i].end()) {
@@ -82,13 +78,11 @@ void removelightfromnewpick(int index)
     }
 }
 
-inline int getIndex(const LineCollide &t)
-{
+inline int getIndex(const LineCollide &t) {
     return t.object.i;
 }
 
-static void swappicked()
-{
+static void swappicked() {
     if (newpicked == &pickedlights[0]) {
         newpicked = &pickedlights[1];
         oldpicked = &pickedlights[0];
@@ -99,13 +93,12 @@ static void swappicked()
     newpicked->clear();
 }
 
-void unpicklights()
-{
+void unpicklights() {
     for (std::vector<int>::iterator i = newpicked->begin(); i != newpicked->end(); i++) {
         if (*i >= (int) _llights->size()) {
             VS_LOG(error,
-                   (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int) *i)
-                           % ((int) _llights->size())));
+                    (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int) *i)
+                            % ((int) _llights->size())));
         }
         if (GLLights[(*_llights)[*i].Target()].index != *i) {
             VS_LOG(error, "GFXLIGHT uh oh");
@@ -124,13 +117,11 @@ void unpicklights()
     oldpicked->clear();
 }
 
-static float occludedIntensity(const gfx_light &light, const Vector &center, const float rad)
-{
+static float occludedIntensity(const gfx_light &light, const Vector &center, const float rad) {
     return Occlusion::testOcclusion(light.getPosition().Cast(), light.getSize(), center.Cast(), rad);
 }
 
-static float attenuatedIntensity(const gfx_light &light, const Vector &center, const float rad)
-{
+static float attenuatedIntensity(const gfx_light &light, const Vector &center, const float rad) {
     float intensity = (1.0 / 3.0) * (
             light.diffuse[0] + light.specular[0]
                     + light.diffuse[1] + light.specular[1]
@@ -148,13 +139,12 @@ static float attenuatedIntensity(const gfx_light &light, const Vector &center, c
 }
 
 static bool picklight(const LineCollide &lightcollide,
-                      const Vector &center,
-                      const float rad,
-                      const int lightsenabled,
-                      const int lightindex,
-                      float &attenuated,
-                      float &occlusion)
-{
+        const Vector &center,
+        const float rad,
+        const int lightsenabled,
+        const int lightindex,
+        float &attenuated,
+        float &occlusion) {
     const gfx_light &light = (*_llights)[lightindex];
     return (
             !light.attenuated()
@@ -166,12 +156,10 @@ struct lightsort {
     Vector center;
     float rad;
 
-    lightsort(const Vector &_center, const float _rad) : center(_center), rad(_rad)
-    {
+    lightsort(const Vector &_center, const float _rad) : center(_center), rad(_rad) {
     }
 
-    bool operator()(const int a, const int b) const
-    {
+    bool operator()(const int a, const int b) const {
         const gfx_light &lighta = (*_llights)[a];
         const gfx_light &lightb = (*_llights)[b];
         return attenuatedIntensity(lighta, center, rad) > attenuatedIntensity(lightb, center, rad);
@@ -180,8 +168,7 @@ struct lightsort {
 
 typedef vector<LineCollideStar> veclinecol;
 
-void GFXGlobalLights(vector<int> &lights, const Vector &center, const float radius)
-{
+void GFXGlobalLights(vector<int> &lights, const Vector &center, const float radius) {
     for (int i = 0; i < GFX_MAX_LIGHTS; ++i) {
         if ((GLLights[i].options & (OpenGLL::GL_ENABLED | OpenGLL::GLL_LOCAL)) == OpenGLL::GL_ENABLED) {
             // It's global and enabled
@@ -192,8 +179,7 @@ void GFXGlobalLights(vector<int> &lights, const Vector &center, const float radi
     }
 }
 
-void GFXGlobalLights(vector<int> &lights)
-{
+void GFXGlobalLights(vector<int> &lights) {
     for (int i = 0; i < GFX_MAX_LIGHTS; ++i) {
         if ((GLLights[i].options & (OpenGLL::GL_ENABLED | OpenGLL::GLL_LOCAL)) == OpenGLL::GL_ENABLED) {
             // It's global and enabled
@@ -203,11 +189,10 @@ void GFXGlobalLights(vector<int> &lights)
 }
 
 void GFXPickLights(const Vector &center,
-                   const float radius,
-                   vector<int> &lights,
-                   const int maxlights,
-                   const bool pickglobals)
-{
+        const float radius,
+        vector<int> &lights,
+        const int maxlights,
+        const bool pickglobals) {
     QVector tmp;
     //Beware if re-using rndvar !! Because rand returns an int and on 64 bits archs sizeof( void*) != sizeof( int) !!!
     //void * rndvar = (void *)rand();
@@ -238,22 +223,19 @@ void GFXPickLights(const Vector &center,
     std::sort(lights.begin(), lights.end(), lightsort(center, radius));
 }
 
-void GFXPickLights(const Vector &center, const float radius)
-{
+void GFXPickLights(const Vector &center, const float radius) {
     swappicked();
     GFXPickLights(center, radius, *newpicked, 8, false);
     gfx_light::dopickenables();
 }
 
-void GFXPickLights(vector<int>::const_iterator begin, vector<int>::const_iterator end)
-{
+void GFXPickLights(vector<int>::const_iterator begin, vector<int>::const_iterator end) {
     swappicked();
     newpicked->insert(newpicked->end(), begin, end);
     gfx_light::dopickenables();
 }
 
-void gfx_light::dopickenables()
-{
+void gfx_light::dopickenables() {
     //sort it to find minimum num lights changed from last time.
     sort(newpicked->begin(), newpicked->end());
     //newpicked->sort();
@@ -279,15 +261,15 @@ void gfx_light::dopickenables()
     for (traverse = newpicked->begin(); traverse != newpicked->end(); ++traverse) {
         if (*traverse >= (int) _llights->size()) {
             VS_LOG(error,
-                   (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int) *traverse)
-                           % ((int) _llights->size())));
+                    (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int) *traverse)
+                            % ((int) _llights->size())));
             continue;
         }
         if ((*_llights)[*traverse].target == -1) {
             int gltarg = findLocalClobberable();
             if (gltarg == -1) {
                 newpicked->erase(traverse,
-                                 newpicked->end());                 //erase everything on the picked list. Nothing can fit;
+                        newpicked->end());                 //erase everything on the picked list. Nothing can fit;
                 break;
             }
             (*_llights)[(*traverse)].ClobberGLLight(gltarg);
@@ -307,8 +289,8 @@ void gfx_light::dopickenables()
     for (oldtrav = oldpicked->begin(); oldtrav != oldpicked->end(); oldtrav++) {
         if (*oldtrav >= (int) _llights->size()) {
             VS_LOG(error,
-                   (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int) *oldtrav)
-                           % ((int) _llights->size())));
+                    (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int) *oldtrav)
+                            % ((int) _llights->size())));
             continue;
         }
 

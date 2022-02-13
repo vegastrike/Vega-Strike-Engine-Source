@@ -34,37 +34,31 @@ class SimplePickerCells;      //Forward reference.
 class SimplePickerCell : public PickerCell {
 public:
 //The text to be displayed.
-    virtual std::string text(void) const
-    {
+    virtual std::string text(void) const {
         return m_text;
     }
 
 //A unique identifier for the cell.
-    virtual std::string id(void) const
-    {
+    virtual std::string id(void) const {
         return m_id;
     }
 
 //The color of the text.
-    virtual GFXColor textColor(void) const
-    {
+    virtual GFXColor textColor(void) const {
         return m_textColor;
     }
 
 //List of children.
-    virtual PickerCells *children(void) const
-    {
+    virtual PickerCells *children(void) const {
         return (PickerCells *) m_children;
     }
 
 //Unique identifier for this cell.
-    virtual int tag(void) const
-    {
+    virtual int tag(void) const {
         return m_tag;
     }
 
-    virtual void setTextColor(const GFXColor &c)
-    {
+    virtual void setTextColor(const GFXColor &c) {
         m_textColor = c;
     }
 
@@ -93,25 +87,21 @@ protected:
 class SimplePickerCells : public PickerCells {
 public:
 //Number of cells in this list.
-    virtual int count(void) const
-    {
+    virtual int count(void) const {
         return m_cells.size();
     }
 
 //Get a particular cell.
-    virtual PickerCell *cellAt(int index)
-    {
+    virtual PickerCell *cellAt(int index) {
         return m_cells[index];
     }
 
-    virtual const PickerCell *cellAt(int index) const
-    {
+    virtual const PickerCell *cellAt(int index) const {
         return m_cells[index];
     }
 
 //Add a new cell to this list.
-    virtual void addCell(PickerCell *c)
-    {
+    virtual void addCell(PickerCell *c) {
         m_cells.push_back(c);
     }
 
@@ -121,8 +111,7 @@ public:
 //CONSTRUCTION
     SimplePickerCells(void);
 
-    virtual ~SimplePickerCells(void)
-    {
+    virtual ~SimplePickerCells(void) {
         clear();
     }
 
@@ -137,8 +126,7 @@ protected:
 class SimplePicker : public Picker {
 public:
 //Add a new cell to this control.
-    void addCell(SimplePickerCell *c)
-    {
+    void addCell(SimplePickerCell *c) {
         static_cast< SimplePickerCells * > (m_cells)->addCell(c);
     }
 
@@ -156,27 +144,23 @@ class ValuedPickerCell : public SimplePickerCell {
 public:
 //CONSTRUCTION
     ValuedPickerCell(T value,
-                     const std::string &text,
-                     const std::string &id = "",
-                     const GFXColor &c = GUI_CLEAR,
-                     int newTag = 0) :
-            SimplePickerCell(text, id, c, newTag), m_value(value)
-    {
+            const std::string &text,
+            const std::string &id = "",
+            const GFXColor &c = GUI_CLEAR,
+            int newTag = 0) :
+            SimplePickerCell(text, id, c, newTag), m_value(value) {
     }
 
-    virtual ~ValuedPickerCell(void)
-    {
+    virtual ~ValuedPickerCell(void) {
     }
 
 //The type associated with the cell.
-    T value(void) const
-    {
+    T value(void) const {
         return m_value;
     }
 
     ValuedPickerCell(const ValuedPickerCell &cell) :
-            SimplePickerCell(cell), m_value(cell.m_value)
-    {
+            SimplePickerCell(cell), m_value(cell.m_value) {
     }
 
 protected:

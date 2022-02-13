@@ -37,8 +37,7 @@ enum class TURRET_SIZE {
     CAPSHIP_LARGE = 0x8
 };
 
-void Tokenize(const string &str, vector<string> &tokens, const string &delimiters = " ")
-{
+void Tokenize(const string &str, vector<string> &tokens, const string &delimiters = " ") {
     //Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiters, 0);
     //Find first "non-delimiter".
@@ -53,8 +52,7 @@ void Tokenize(const string &str, vector<string> &tokens, const string &delimiter
     }
 }
 
-std::string CheckBasicSizes(const std::string tokens)
-{
+std::string CheckBasicSizes(const std::string tokens) {
     if (tokens.find("small") != string::npos) {
         return "small";
     }
@@ -73,13 +71,11 @@ std::string CheckBasicSizes(const std::string tokens)
     return "";
 }
 
-Turret::Turret()
-{
+Turret::Turret() {
 
 }
 
-std::map<std::string, std::string> parseTurretSizes()
-{
+std::map<std::string, std::string> parseTurretSizes() {
     using namespace VSFileSystem;
     std::map<std::string, std::string> t;
     VSFile f;
@@ -109,8 +105,7 @@ std::map<std::string, std::string> parseTurretSizes()
     return t;
 }
 
-std::string getTurretSize(const std::string &size)
-{
+std::string getTurretSize(const std::string &size) {
     static std::map<std::string, std::string> turretmap = parseTurretSizes();
     std::map<std::string, std::string>::iterator h = turretmap.find(size);
     if (h != turretmap.end()) {
@@ -131,8 +126,7 @@ std::string getTurretSize(const std::string &size)
     return "capital";
 }
 
-Unit *CreateGenericTurret(std::string tur, int faction)
-{
+Unit *CreateGenericTurret(std::string tur, int faction) {
     return new Unit(tur.c_str(), true, faction, "", 0, 0);
 }
 

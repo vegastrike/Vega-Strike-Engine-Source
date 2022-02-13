@@ -40,8 +40,7 @@ static const int CHILD_CONTROL_COUNT = 3;
 //of scroll position.
 
 //Set the position of this scroller.
-void Scroller::setScrollPosition(int pos)
-{
+void Scroller::setScrollPosition(int pos) {
     int newScrollPosition = pos;
     if (pos > m_maxValue) {
         newScrollPosition = m_maxValue;
@@ -59,8 +58,7 @@ void Scroller::setScrollPosition(int pos)
 }
 
 //Parameters for the scrolling range:  Max value, visible values, optional min value.
-void Scroller::setRangeValues(int max, int visible, int min)
-{
+void Scroller::setRangeValues(int max, int visible, int min) {
     const int newMax = guiMax(min, max - visible + 1);
     if (newMax != m_maxValue || min != m_minValue || visible != m_visible) {
         m_maxValue = newMax;
@@ -78,8 +76,7 @@ void Scroller::setRangeValues(int max, int visible, int min)
 }
 
 //The outside boundaries of the control.
-void Scroller::setRect(const Rect &r)
-{
+void Scroller::setRect(const Rect &r) {
     if (m_rect != r) {
         m_needLayout = true;
     }
@@ -87,8 +84,7 @@ void Scroller::setRect(const Rect &r)
 }
 
 //Background color of control.
-void Scroller::setColor(const GFXColor &c)
-{
+void Scroller::setColor(const GFXColor &c) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     childAt(DOWN_BUTTON_INDEX)->setColor(c);
     childAt(UP_BUTTON_INDEX)->setColor(c);
@@ -101,24 +97,21 @@ void Scroller::setColor(const GFXColor &c)
 }
 
 //The color of the thumb.
-void Scroller::setThumbColor(const GFXColor &c, const GFXColor &outline)
-{
+void Scroller::setThumbColor(const GFXColor &c, const GFXColor &outline) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     Slider *slider = static_cast< Slider * > ( childAt(SLIDER_INDEX));
     slider->setThumbColor(c, outline);
 }
 
 //The color of the thumb.
-void Scroller::setButtonColor(const GFXColor &c)
-{
+void Scroller::setButtonColor(const GFXColor &c) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     childAt(DOWN_BUTTON_INDEX)->setColor(c);
     childAt(UP_BUTTON_INDEX)->setColor(c);
 }
 
 //This is used as the color of the arrows on the scroller buttons.
-void Scroller::setTextColor(const GFXColor &c)
-{
+void Scroller::setTextColor(const GFXColor &c) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     childAt(DOWN_BUTTON_INDEX)->setTextColor(c);
     childAt(UP_BUTTON_INDEX)->setTextColor(c);
@@ -140,18 +133,15 @@ public:
     };
 
 //Set the direction the arrow points.
-    void setArrowType(ButtonArrow arrow)
-    {
+    void setArrowType(ButtonArrow arrow) {
         m_arrowType = arrow;
     }
 //CONSTRUCTION
 public:
-    ScrollerButton() : m_arrowType(LEFT_ARROW)
-    {
+    ScrollerButton() : m_arrowType(LEFT_ARROW) {
     }
 
-    virtual ~ScrollerButton(void)
-    {
+    virtual ~ScrollerButton(void) {
     }
 //VARIABLES
 protected:
@@ -159,8 +149,7 @@ protected:
 };
 
 //Draw the scroller button.
-void ScrollerButton::draw(void)
-{
+void ScrollerButton::draw(void) {
     //Draw the other stuff first, so our stuff goes on top.
     assert(label().empty());          //We are assuming it won't paint text on itself.
     NewButton::draw();
@@ -195,8 +184,7 @@ void ScrollerButton::draw(void)
 }
 
 //Calculate the rects for the child controls.
-void Scroller::calcLayout(void)
-{
+void Scroller::calcLayout(void) {
     assert(childCount() == CHILD_CONTROL_COUNT);
 
     //Make the buttons slightly smaller than the scroller.
@@ -245,8 +233,7 @@ void Scroller::calcLayout(void)
 }
 
 //Create the child controls.
-void Scroller::createControls(void)
-{
+void Scroller::createControls(void) {
     //"Scroll Down" button.
     NewButton *down = new ScrollerButton;
     down->setCommand("LineDown");
@@ -272,8 +259,7 @@ void Scroller::createControls(void)
 }
 
 //Draw the control.
-void Scroller::draw(void)
-{
+void Scroller::draw(void) {
     drawBackground();
     if (m_needLayout) {
         calcLayout();
@@ -282,8 +268,7 @@ void Scroller::draw(void)
 }
 
 //Process a command event.
-bool Scroller::processCommand(const EventCommandId &command, Control *control)
-{
+bool Scroller::processCommand(const EventCommandId &command, Control *control) {
     if (command == "LineUp") {
         setScrollPosition(scrollPosition() - 1);
         return true;
@@ -306,8 +291,7 @@ Scroller::Scroller(void) :
         m_scrollPosition(m_minValue),
         m_thumbColor(GUI_CLEAR),
         m_thumbOutlineColor(GUI_CLEAR),
-        m_needLayout(true)
-{
+        m_needLayout(true) {
     createControls();
 }
 

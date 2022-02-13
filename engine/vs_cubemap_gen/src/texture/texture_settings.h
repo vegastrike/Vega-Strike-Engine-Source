@@ -41,10 +41,9 @@ public:
             , float correction_power    //0.0 to 1.0
     )
             : source_tex_(source_tex),
-              source_gamma_(source_gamma),
-              ideal_ambient_light_(ideal_ambient_light),
-              correction_power_(correction_power)
-    {
+            source_gamma_(source_gamma),
+            ideal_ambient_light_(ideal_ambient_light),
+            correction_power_(correction_power) {
     }
 
     void init();

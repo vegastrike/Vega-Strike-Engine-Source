@@ -37,8 +37,7 @@ class UnitCSVFactory {
     static std::string DEFAULT_ERROR_VALUE;
     static std::map<std::string, std::map<std::string, std::string>> units;
 
-    static inline std::string _GetVariable(std::string unit_key, std::string const &attribute_key)
-    {
+    static inline std::string _GetVariable(std::string unit_key, std::string const &attribute_key) {
         if (units.count(unit_key) == 0) {
             return DEFAULT_ERROR_VALUE;
         }
@@ -62,9 +61,8 @@ public:
 // Template Specialization
 template<>
 inline std::string UnitCSVFactory::GetVariable(std::string unit_key,
-                                               std::string const &attribute_key,
-                                               std::string default_value)
-{
+        std::string const &attribute_key,
+        std::string default_value) {
     std::string result = _GetVariable(unit_key, attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -86,8 +84,7 @@ inline const char* UnitCSVFactory::GetVariable(std::string unit_key, std::string
 }*/
 
 template<>
-inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, bool default_value)
-{
+inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, bool default_value) {
     std::string result = _GetVariable(unit_key, attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -97,8 +94,7 @@ inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const 
 }
 
 template<>
-inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, float default_value)
-{
+inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, float default_value) {
     std::string result = _GetVariable(unit_key, attribute_key);
 
     if (result == DEFAULT_ERROR_VALUE) {
@@ -113,8 +109,9 @@ inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const
 }
 
 template<>
-inline double UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, double default_value)
-{
+inline double UnitCSVFactory::GetVariable(std::string unit_key,
+        std::string const &attribute_key,
+        double default_value) {
     std::string result = _GetVariable(unit_key, attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -127,8 +124,7 @@ inline double UnitCSVFactory::GetVariable(std::string unit_key, std::string cons
 }
 
 template<>
-inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, int default_value)
-{
+inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, int default_value) {
     std::string result = _GetVariable(unit_key, attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;

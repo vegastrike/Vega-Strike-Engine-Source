@@ -43,18 +43,17 @@
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 
-ContinuousTerrain::ContinuousTerrain(const char *filename, const Vector &Scales, const float mass)
-{
+ContinuousTerrain::ContinuousTerrain(const char *filename, const Vector &Scales, const float mass) {
     float tmass;
     FILE *fp = VSFileSystem::vs_open(filename, "r");
     if (fp) {
         VSFileSystem::vs_fscanf(fp,
-                                "%d %f\n<%f %f %f>",
-                                &width,
-                                &tmass,
-                                &this->Scales.i,
-                                &this->Scales.j,
-                                &this->Scales.k);
+                "%d %f\n<%f %f %f>",
+                &width,
+                &tmass,
+                &this->Scales.i,
+                &this->Scales.j,
+                &this->Scales.k);
         if (mass) {
             tmass = mass;
         }
@@ -132,9 +131,9 @@ ContinuousTerrain::ContinuousTerrain(const char *filename, const Vector &Scales,
                         && data[nj + width * i]
                         && data[j + width * ni]) {
                     data[j + width * i]->SetNeighbors(data[(j + 1) % width + width * i],
-                                                      data[j + width * ((i + 1) % width)],
-                                                      data[nj + width * i],
-                                                      data[j + width * ni]);
+                            data[j + width * ((i + 1) % width)],
+                            data[nj + width * i],
+                            data[j + width * ni]);
                     data[j + width * i]->StaticCullData(25);
                 }
                 location[j + width * i].Set(0 + sizeX * j, 0, 0 - sizeZ * i);
@@ -153,8 +152,7 @@ ContinuousTerrain::ContinuousTerrain(const char *filename, const Vector &Scales,
     }
 }
 
-ContinuousTerrain::~ContinuousTerrain()
-{
+ContinuousTerrain::~ContinuousTerrain() {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i] != nullptr) {
             delete data[i];
@@ -187,8 +185,7 @@ ContinuousTerrain::~ContinuousTerrain()
     }
 }
 
-void ContinuousTerrain::Collide()
-{
+void ContinuousTerrain::Collide() {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]) {
             data[i]->Collide();
@@ -198,8 +195,7 @@ void ContinuousTerrain::Collide()
     }
 }
 
-void ContinuousTerrain::Collide(Unit *un)
-{
+void ContinuousTerrain::Collide(Unit *un) {
     bool datacol = false;
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]) {
@@ -213,8 +209,7 @@ void ContinuousTerrain::Collide(Unit *un)
     }
 }
 
-QVector ContinuousTerrain::GetGroundPosIdentTrans(QVector ShipPos, Vector &norm)
-{
+QVector ContinuousTerrain::GetGroundPosIdentTrans(QVector ShipPos, Vector &norm) {
     Matrix ident;
     Identity(ident);
     ShipPos.i /= Scales.i;
@@ -222,10 +217,10 @@ QVector ContinuousTerrain::GetGroundPosIdentTrans(QVector ShipPos, Vector &norm)
     ShipPos.k /= Scales.k;
     for (int i = 0; i < numcontterr; i++) {
         QVector tmploc = ShipPos - location[i] + QVector((data[i])->getminX() + .5 * (data[i])->getSizeX(), 0,
-                                                         (data[i])->getminZ() + .5 * (data[i])->getSizeZ());
+                (data[i])->getminZ() + .5 * (data[i])->getSizeZ());
         if (data[i]->GetGroundPos(tmploc, norm, ident, sizeX * width, sizeZ * width)) {
             tmploc += location[i] - QVector((data[i])->getminX() + .5 * (data[i])->getSizeX(), 0,
-                                            (data[i])->getminZ() + .5 * (data[i])->getSizeZ());
+                    (data[i])->getminZ() + .5 * (data[i])->getSizeZ());
 
             tmploc.i *= Scales.i;
             tmploc.j *= Scales.j;
@@ -240,8 +235,7 @@ QVector ContinuousTerrain::GetGroundPosIdentTrans(QVector ShipPos, Vector &norm)
     return ShipPos;
 }
 
-QVector ContinuousTerrain::GetGroundPos(QVector ShipPos, Vector &norm)
-{
+QVector ContinuousTerrain::GetGroundPos(QVector ShipPos, Vector &norm) {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]->GetGroundPos(ShipPos, norm, sizeX * width, sizeZ * width)) {
             return ShipPos;
@@ -250,8 +244,7 @@ QVector ContinuousTerrain::GetGroundPos(QVector ShipPos, Vector &norm)
     return ShipPos;
 }
 
-void ContinuousTerrain::DisableDraw()
-{
+void ContinuousTerrain::DisableDraw() {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]) {
             data[i]->DisableDraw();
@@ -259,8 +252,7 @@ void ContinuousTerrain::DisableDraw()
     }
 }
 
-void ContinuousTerrain::DisableUpdate()
-{
+void ContinuousTerrain::DisableUpdate() {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]) {
             data[i]->DisableUpdate();
@@ -268,8 +260,7 @@ void ContinuousTerrain::DisableUpdate()
     }
 }
 
-void ContinuousTerrain::EnableDraw()
-{
+void ContinuousTerrain::EnableDraw() {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]) {
             data[i]->EnableDraw();
@@ -277,8 +268,7 @@ void ContinuousTerrain::EnableDraw()
     }
 }
 
-void ContinuousTerrain::EnableUpdate()
-{
+void ContinuousTerrain::EnableUpdate() {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]) {
             data[i]->EnableUpdate();
@@ -286,16 +276,15 @@ void ContinuousTerrain::EnableUpdate()
     }
 }
 
-void ContinuousTerrain::Draw()
-{
+void ContinuousTerrain::Draw() {
     for (int i = 0; i < numcontterr; i++) {
         if (data[i]) {
             data[i]->Render();
         } else if (md[i].mesh) {
             Vector TransformedPosition = Transform(md[i].mat,
-                                                   md[i].mesh->Position());
+                    md[i].mesh->Position());
             float d = GFXSphereInFrustum(TransformedPosition,
-                                         md[i].mesh->rSize()
+                    md[i].mesh->rSize()
             );
             if (d) {
                 md[i].mesh->Draw(1000, md[i].mat, d, -1, (_Universe->AccessCamera()->GetNebula() != NULL) ? -1 : 0);
@@ -304,8 +293,7 @@ void ContinuousTerrain::Draw()
     }
 }
 
-void ContinuousTerrain::SetTransformation(const Matrix &transformation)
-{
+void ContinuousTerrain::SetTransformation(const Matrix &transformation) {
     CopyMatrix(this->transformation, transformation);
     ScaleMatrix(this->transformation, Scales);
     for (int i = 0; i < numcontterr; i++) {
@@ -313,8 +301,7 @@ void ContinuousTerrain::SetTransformation(const Matrix &transformation)
     }
 }
 
-bool ContinuousTerrain::checkInvScale(double &pos, double campos, float size)
-{
+bool ContinuousTerrain::checkInvScale(double &pos, double campos, float size) {
     bool retval = false;
     size *= width;
     float tmp = pos - campos;
@@ -332,8 +319,7 @@ bool ContinuousTerrain::checkInvScale(double &pos, double campos, float size)
     return retval;
 }
 
-void ContinuousTerrain::Collide(Unit *un, Matrix t)
-{
+void ContinuousTerrain::Collide(Unit *un, Matrix t) {
     Matrix transform;
     if (un->isUnit() == _UnitType::building) {
         return;
@@ -350,8 +336,8 @@ void ContinuousTerrain::Collide(Unit *un, Matrix t)
                         + (.5
                                 * (data[i] ? (data[i])->getSizeZ() : (md[i].mesh->corner_max().i
                                         - md[i].mesh->corner_min(
-                                               )
-                                               .i))))));
+                                                )
+                                                .i))))));
 
         transform.p = tmp;
         if (data[i]) {
@@ -399,18 +385,18 @@ void ContinuousTerrain::Collide(Unit *un, Matrix t)
                 if (un->colTrees) {
                     if (un->colTrees->colTree(un, Vector(0, 0, 0))) {
                         if (un->colTrees->colTree(un, Vector(0, 0, 0))->Collide(*md[i].collider,
-                                                                                &smalltransform,
-                                                                                &bigtransform)) {
+                                &smalltransform,
+                                &bigtransform)) {
                             csCollisionPair *mycollide = csOPCODECollider::GetCollisions();
                             unsigned int numHits = csOPCODECollider::GetCollisionPairCount();
                             if (numHits) {
                                 smallpos.Set((mycollide[0].a1.x + mycollide[0].b1.x + mycollide[0].c1.x) / 3,
-                                             (mycollide[0].a1.y + mycollide[0].b1.y + mycollide[0].c1.y) / 3,
-                                             (mycollide[0].a1.z + mycollide[0].b1.z + mycollide[0].c1.z) / 3);
+                                        (mycollide[0].a1.y + mycollide[0].b1.y + mycollide[0].c1.y) / 3,
+                                        (mycollide[0].a1.z + mycollide[0].b1.z + mycollide[0].c1.z) / 3);
                                 smallpos = Transform(un->cumulative_transformation_matrix, smallpos);
                                 bigpos.Set((mycollide[0].a2.x + mycollide[0].b2.x + mycollide[0].c2.x) / 3,
-                                           (mycollide[0].a2.y + mycollide[0].b2.y + mycollide[0].c2.y) / 3,
-                                           (mycollide[0].a2.z + mycollide[0].b2.z + mycollide[0].c2.z) / 3);
+                                        (mycollide[0].a2.y + mycollide[0].b2.y + mycollide[0].c2.y) / 3,
+                                        (mycollide[0].a2.z + mycollide[0].b2.z + mycollide[0].c2.z) / 3);
                                 bigpos = Transform(transform, bigpos);
                                 csVector3 sn, bn;
                                 sn.Cross(mycollide[0].b1 - mycollide[0].a1, mycollide[0].c1 - mycollide[0].a1);
@@ -435,18 +421,17 @@ void ContinuousTerrain::Collide(Unit *un, Matrix t)
                 Damage damage(.5 * fabs(bigNormal.Dot(un->GetVelocity())) * mass * simulation_atom_var);
 
                 un->ApplyDamage(un->Position().Cast() - bigNormal * un->rSize(),
-                                -bigNormal,
-                                damage,
-                                un,
-                                GFXColor(1, 1, 1, 1),
-                                nullptr);
+                        -bigNormal,
+                        damage,
+                        un,
+                        GFXColor(1, 1, 1, 1),
+                        nullptr);
             }
         }
     }
 }
 
-void ContinuousTerrain::AdjustTerrain(Matrix &transform, const Matrix &transformation, const QVector &campos, int i)
-{
+void ContinuousTerrain::AdjustTerrain(Matrix &transform, const Matrix &transformation, const QVector &campos, int i) {
     dirty[i] |= checkInvScale(location[i].i, campos.i, sizeX);
     dirty[i] |= checkInvScale(location[i].k, campos.k, sizeZ);
     CopyMatrix(transform, transformation);
@@ -461,8 +446,7 @@ void ContinuousTerrain::AdjustTerrain(Matrix &transform, const Matrix &transform
     transform.p = tmp;
 }
 
-void ContinuousTerrain::AdjustTerrain(StarSystem *ss)
-{
+void ContinuousTerrain::AdjustTerrain(StarSystem *ss) {
     Matrix transform;
 
     QVector campos = InvScaleTransform(transformation, _Universe->AccessCamera()->GetPosition());
@@ -479,15 +463,13 @@ void ContinuousTerrain::AdjustTerrain(StarSystem *ss)
     }
 }
 
-Vector ContinuousTerrain::GetUpVector(const Vector &pos)
-{
+Vector ContinuousTerrain::GetUpVector(const Vector &pos) {
     return (data[0])
-           ? data[0]->GetUpVector(pos)
-           : Vector(transformation.getQ());
+            ? data[0]->GetUpVector(pos)
+            : Vector(transformation.getQ());
 }
 
-void disableTerrainDraw(ContinuousTerrain *ct)
-{
+void disableTerrainDraw(ContinuousTerrain *ct) {
     ct->DisableDraw();
 }
 

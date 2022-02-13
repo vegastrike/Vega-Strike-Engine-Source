@@ -45,28 +45,23 @@
 class VSRandom {
 #define NN_CONSTANT 624
 
-    static const unsigned int N()
-    {
+    static const unsigned int N() {
         return NN_CONSTANT;
     }
 
-    static const unsigned int M()
-    {
+    static const unsigned int M() {
         return 397;
     }
 
-    static const unsigned int MATRIX_A()
-    {
+    static const unsigned int MATRIX_A() {
         return 0x9908b0dfUL;
     }
 
-    static const unsigned int UPPER_MASK()
-    {
+    static const unsigned int UPPER_MASK() {
         return 0x80000000UL;
     }
 
-    static const unsigned int LOWER_MASK()
-    {
+    static const unsigned int LOWER_MASK() {
         return 0x7fffffffUL;
     }
 
@@ -75,13 +70,11 @@ class VSRandom {
     unsigned int mti; /* mti==N+1 means mt[N] is not initialized */
 /* initializes mt[N] with a seed */
 public:
-    VSRandom(unsigned int s) : mti(N() + 1)
-    {
+    VSRandom(unsigned int s) : mti(N() + 1) {
         init_genrand(s);
     }
 
-    void init_genrand(unsigned int s)
-    {
+    void init_genrand(unsigned int s) {
         mt[0] = s & 0xffffffffUL;
         for (mti = 1; mti < N(); mti++) {
             mt[mti] =
@@ -102,8 +95,7 @@ public:
  * init_key is the array for initializing keys
  * key_length is its length
  */
-    VSRandom(unsigned int init_key[], unsigned int key_length) : mti(N() + 1)
-    {
+    VSRandom(unsigned int init_key[], unsigned int key_length) : mti(N() + 1) {
         unsigned int i, j, k;
         init_genrand(19650218UL);
         i = 1;
@@ -137,8 +129,7 @@ public:
     }
 
 /* generates a random number on [0,0xffffffff]-interval */
-    unsigned int genrand_int32(void)
-    {
+    unsigned int genrand_int32(void) {
         unsigned int y;
         static unsigned int mag01[2] = {0x0UL, MATRIX_A()};
         /* mag01[x] = x * MATRIX_A  for x=0,1 */
@@ -170,50 +161,42 @@ public:
     }
 
 /* generates a random number on [0,0x7fffffff]-interval */
-    int genrand_int31(void)
-    {
+    int genrand_int31(void) {
         return (int) (genrand_int32() >> 1);
     }
 
-    unsigned int rand()
-    {
+    unsigned int rand() {
         return genrand_int31();
     }
 
 /* generates a random number on [0,1]-real-interval */
-    double genrand_real1(void)
-    {
+    double genrand_real1(void) {
         return genrand_int32() * (1.0 / 4294967295.0);
         /* divided by 2^32-1 */
     }
 
 /* generates a random number on [0,1)-real-interval */
-    double genrand_real2(void)
-    {
+    double genrand_real2(void) {
         return genrand_int32() * (1.0 / 4294967296.0);
         /* divided by 2^32 */
     }
 
-    double uniformInc(double min, double max)
-    {
+    double uniformInc(double min, double max) {
         return genrand_real1() * (max - min) + min;
     }
 
-    double uniformExc(double min, double max)
-    {
+    double uniformExc(double min, double max) {
         return genrand_real2() * (max - min) + min;
     }
 
 /* generates a random number on (0,1)-real-interval */
-    double genrand_real3(void)
-    {
+    double genrand_real3(void) {
         return (((double) genrand_int32()) + 0.5) * (1.0 / 4294967296.0);
         /* divided by 2^32 */
     }
 
 /* generates a random number on [0,1) with 53-bit resolution*/
-    double genrand_res53(void)
-    {
+    double genrand_res53(void) {
         unsigned int a = genrand_int32() >> 5, b = genrand_int32() >> 6;
         return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
     }

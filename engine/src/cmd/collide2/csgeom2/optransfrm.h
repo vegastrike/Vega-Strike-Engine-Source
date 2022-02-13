@@ -43,8 +43,7 @@ public:
     /**
      * Initialize with the identity transformation.
      */
-    csTransform() : m_o2t(), v_o2t(0, 0, 0)
-    {
+    csTransform() : m_o2t(), v_o2t(0, 0, 0) {
     }
 
     /**
@@ -55,16 +54,14 @@ public:
      * V the transformation vector.
      */
     csTransform(const csMatrix3 &other2this, const csVector3 &origin_pos) :
-            m_o2t(other2this), v_o2t(origin_pos)
-    {
+            m_o2t(other2this), v_o2t(origin_pos) {
     }
 
     /**
      * Get 'other' to 'this' transformation matrix. This is the 3x3
      * matrix M from the transform equation T=M*(O-V).
      */
-    inline const csMatrix3 &GetO2T() const
-    {
+    inline const csMatrix3 &GetO2T() const {
         return m_o2t;
     }
 
@@ -72,16 +69,14 @@ public:
      * Get 'world' to 'this' translation. This is the vector V
      * from the transform equation T=M*(O-V).
      */
-    inline const csVector3 &GetO2TTranslation() const
-    {
+    inline const csVector3 &GetO2TTranslation() const {
         return v_o2t;
     }
 
     /**
      * Get origin of transformed coordinate system.
      */
-    inline const csVector3 &GetOrigin() const
-    {
+    inline const csVector3 &GetOrigin() const {
         return v_o2t;
     }
 
@@ -89,8 +84,7 @@ public:
      * Set 'other' to 'this' transformation matrix.
      * this is the 3x3 matrix M from the transform equation T=M*(O-V).
      */
-    virtual void SetO2T(const csMatrix3 &m)
-    {
+    virtual void SetO2T(const csMatrix3 &m) {
         m_o2t = m;
     }
 
@@ -98,24 +92,21 @@ public:
      * Set 'world' to 'this' translation. This is the vector V
      * from the transform equation T=M*(O-V).
      */
-    virtual void SetO2TTranslation(const csVector3 &v)
-    {
+    virtual void SetO2TTranslation(const csVector3 &v) {
         v_o2t = v;
     }
 
     /**
      * Set origin of transformed coordinate system.
      */
-    inline void SetOrigin(const csVector3 &v)
-    {
+    inline void SetOrigin(const csVector3 &v) {
         SetO2TTranslation(v);
     }
 
     /**
      * Move the 'other' to 'this' translation by a specified amount.
      */
-    inline void Translate(const csVector3 &v)
-    {
+    inline void Translate(const csVector3 &v) {
         SetO2TTranslation(v_o2t + v);
     }
 
@@ -123,8 +114,7 @@ public:
      * Transform vector in 'other' space v to a vector in 'this' space.
      * This is the basic transform function.
      */
-    inline csVector3 Other2This(const csVector3 &v) const
-    {
+    inline csVector3 Other2This(const csVector3 &v) const {
         return m_o2t * (v - v_o2t);
     }
 
@@ -132,8 +122,7 @@ public:
      * Convert vector v in 'other' space to a vector in 'this' space.
      * Use the origin of 'other' space.
      */
-    csVector3 Other2ThisRelative(const csVector3 &v) const
-    {
+    csVector3 Other2ThisRelative(const csVector3 &v) const {
         return m_o2t * v;
     }
 
@@ -180,7 +169,7 @@ public:
     friend csMatrix3 &operator*=(csMatrix3 &m, const csTransform &t);
     /// Combine two transforms, rightmost first.
     friend csTransform operator*(const csTransform &t1,
-                                 const csReversibleTransform &t2);
+            const csReversibleTransform &t2);
 
     /**
      * Return a transform that represents a mirroring across a plane.
@@ -206,16 +195,14 @@ protected:
      * Initialize transform with both transform matrix and inverse tranform.
      */
     csReversibleTransform(const csMatrix3 &o2t, const csMatrix3 &t2o,
-                          const csVector3 &pos) : csTransform(o2t, pos), m_t2o(t2o)
-    {
+            const csVector3 &pos) : csTransform(o2t, pos), m_t2o(t2o) {
     }
 
 public:
     /**
      * Initialize with the identity transformation.
      */
-    csReversibleTransform() : csTransform(), m_t2o()
-    {
+    csReversibleTransform() : csTransform(), m_t2o() {
     }
 
     ///Daniel: I think that this matrix is in row major order...
@@ -224,13 +211,12 @@ public:
     csReversibleTransform(const Matrix &m) :
             csTransform(
                     csMatrix3(m.r[0], m.r[3], m.r[6],
-                              m.r[1], m.r[4], m.r[7],
-                              m.r[2], m.r[5], m.r[8]).GetInverse(),
+                            m.r[1], m.r[4], m.r[7],
+                            m.r[2], m.r[5], m.r[8]).GetInverse(),
                     csVector3(m.p.i, m.p.j, m.p.k)),
             m_t2o(m.r[0], m.r[3], m.r[6],
-                  m.r[1], m.r[4], m.r[7],
-                  m.r[2], m.r[5], m.r[8])
-    {
+                    m.r[1], m.r[4], m.r[7],
+                    m.r[2], m.r[5], m.r[8]) {
     }
 
     /**
@@ -241,8 +227,7 @@ public:
      * V the transformation vector.
      */
     csReversibleTransform(const csMatrix3 &o2t, const csVector3 &pos) :
-            csTransform(o2t, pos)
-    {
+            csTransform(o2t, pos) {
         m_t2o = m_o2t.GetInverse();
     }
 
@@ -250,46 +235,40 @@ public:
      * Initialize with the given transformation.
      */
     csReversibleTransform(const csTransform &t) :
-            csTransform(t)
-    {
+            csTransform(t) {
         m_t2o = m_o2t.GetInverse();
     }
 
     csReversibleTransform(const csReversibleTransform &t) :
-            csTransform(t)
-    {
+            csTransform(t) {
         m_t2o = t.m_t2o;
     }
 
     /**
     * Get 'this' to 'other' transformation matrix.
     */
-    inline const csMatrix3 &GetT2O() const
-    {
+    inline const csMatrix3 &GetT2O() const {
         return m_t2o;
     }
 
     /**
      * Get 'this' to 'other' translation.
      */
-    inline csVector3 GetT2OTranslation() const
-    {
+    inline csVector3 GetT2OTranslation() const {
         return -m_o2t * v_o2t;
     }
 
     /**
      * Get the inverse of this transform.
      */
-    csReversibleTransform GetInverse() const
-    {
+    csReversibleTransform GetInverse() const {
         return csReversibleTransform(m_t2o, m_o2t, -m_o2t * v_o2t);
     }
 
     /**
      * Set 'other' to 'this' transformation matrix.
      */
-    virtual void SetO2T(const csMatrix3 &m)
-    {
+    virtual void SetO2T(const csMatrix3 &m) {
         m_o2t = m;
         m_t2o = m_o2t.GetInverse();
     }
@@ -297,8 +276,7 @@ public:
     /**
      * Set 'this' to 'other' transformation matrix.
      */
-    virtual void SetT2O(const csMatrix3 &m)
-    {
+    virtual void SetT2O(const csMatrix3 &m) {
         m_t2o = m;
         m_o2t = m_t2o.GetInverse();
     }
@@ -307,8 +285,7 @@ public:
      * Convert vector v in 'this' space to 'other' space.
      * This is the basic inverse transform operation.
      */
-    csVector3 This2Other(const csVector3 &v) const
-    {
+    csVector3 This2Other(const csVector3 &v) const {
         return v_o2t + m_t2o * v;
     }
 
@@ -316,8 +293,7 @@ public:
      * Convert vector v in 'this' space to a vector in 'other' space,
      * relative to local origin.
      */
-    inline csVector3 This2OtherRelative(const csVector3 &v) const
-    {
+    inline csVector3 This2OtherRelative(const csVector3 &v) const {
         return m_t2o * v;
     }
 
@@ -360,8 +336,7 @@ public:
      * to reorient the transformation.
      * Note: this function rotates the transformation, not the coordinate system.
      */
-    void RotateOther(const csMatrix3 &m)
-    {
+    void RotateOther(const csMatrix3 &m) {
         SetT2O(m * m_t2o);
     }
 
@@ -370,8 +345,7 @@ public:
      * to reorient the transformation.
      * Note: this function rotates the transformation, not the coordinate system.
      */
-    void RotateThis(const csMatrix3 &m)
-    {
+    void RotateThis(const csMatrix3 &m) {
         SetT2O(m_t2o * m);
     }
 
@@ -393,8 +367,7 @@ public:
 //  friend csPlane3& operator/= (csPlane3& p, const csReversibleTransform& t);
     /// Combine two transforms, with the rightmost being applied first.
     friend csReversibleTransform &operator*=(csReversibleTransform &t1,
-                                             const csReversibleTransform &t2)
-    {
+            const csReversibleTransform &t2) {
         t1.v_o2t = t2.m_t2o * t1.v_o2t;
         t1.v_o2t += t2.v_o2t;
         t1.m_o2t *= t2.m_o2t;
@@ -404,21 +377,20 @@ public:
 
     /// Combine two transforms, with the rightmost being applied first.
     friend csReversibleTransform operator*(const csReversibleTransform &t1,
-                                           const csReversibleTransform &t2)
-    {
+            const csReversibleTransform &t2) {
         return csReversibleTransform(t1.m_o2t * t2.m_o2t, t2.m_t2o * t1.m_t2o,
-                                     t2.v_o2t + t2.m_t2o * t1.v_o2t);
+                t2.v_o2t + t2.m_t2o * t1.v_o2t);
     }
 
     /// Combine two transforms, with the rightmost being applied first.
     friend csTransform operator*(const csTransform &t1,
-                                 const csReversibleTransform &t2);
+            const csReversibleTransform &t2);
     /// Combine two transforms, reversing t2 then applying t1.
     friend csReversibleTransform &operator/=(csReversibleTransform &t1,
-                                             const csReversibleTransform &t2);
+            const csReversibleTransform &t2);
     /// Combine two transforms, reversing t2 then applying t1.
     friend csReversibleTransform operator/(const csReversibleTransform &t1,
-                                           const csReversibleTransform &t2);
+            const csReversibleTransform &t2);
 };
 
 /**
@@ -432,31 +404,27 @@ public:
     /**
      * Initialize with the identity transformation.
      */
-    csOrthoTransform() : csReversibleTransform()
-    {
+    csOrthoTransform() : csReversibleTransform() {
     }
 
     /**
      * Initialize with the given transformation.
      */
     csOrthoTransform(const csMatrix3 &o2t, const csVector3 &pos) :
-            csReversibleTransform(o2t, o2t.GetTranspose(), pos)
-    {
+            csReversibleTransform(o2t, o2t.GetTranspose(), pos) {
     }
 
     /**
      * Initialize with the given transformation.
      */
     csOrthoTransform(const csTransform &t) :
-            csReversibleTransform(t.GetO2T(), t.GetO2T().GetTranspose(), t.GetO2TTranslation())
-    {
+            csReversibleTransform(t.GetO2T(), t.GetO2T().GetTranspose(), t.GetO2TTranslation()) {
     }
 
     /**
      * Set 'other' to 'this' transformation matrix.
      */
-    virtual void SetO2T(const csMatrix3 &m)
-    {
+    virtual void SetO2T(const csMatrix3 &m) {
         m_o2t = m;
         m_t2o = m_o2t.GetTranspose();
     }
@@ -464,8 +432,7 @@ public:
     /**
      * Set 'this' to 'other' transformation matrix.
      */
-    virtual void SetT2O(const csMatrix3 &m)
-    {
+    virtual void SetT2O(const csMatrix3 &m) {
         m_t2o = m;
         m_o2t = m_t2o.GetTranspose();
     }

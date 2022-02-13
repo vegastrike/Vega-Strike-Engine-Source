@@ -402,8 +402,7 @@ public:
 #else /* !HAVE_FFMPEG */
 class VidFileImpl {
 private:
-    VidFileImpl(size_t, bool)
-    {
+    VidFileImpl(size_t, bool) {
     }
 
 public:
@@ -413,8 +412,7 @@ public:
     void *frameBuffer;
     int frameBufferStride;
 
-    bool seek(float time)
-    {
+    bool seek(float time) {
         return false;
     }
 };
@@ -424,25 +422,21 @@ public:
 /* ************************************ */
 
 VidFile::VidFile() :
-        impl(nullptr)
-{
+        impl(nullptr) {
 }
 
-VidFile::~VidFile()
-{
+VidFile::~VidFile() {
     if (impl != nullptr) {
         delete impl;
         impl = nullptr;
     }
 }
 
-bool VidFile::isOpen() const
-{
+bool VidFile::isOpen() const {
     return impl != nullptr;
 }
 
-void VidFile::open(const std::string &path, size_t maxDimension, bool forcePOT)
-{
+void VidFile::open(const std::string &path, size_t maxDimension, bool forcePOT) {
 #ifdef HAVE_FFMPEG
     if (!impl)
         impl = new VidFileImpl( maxDimension, forcePOT );
@@ -451,45 +445,37 @@ void VidFile::open(const std::string &path, size_t maxDimension, bool forcePOT)
 #endif
 }
 
-void VidFile::close()
-{
+void VidFile::close() {
     if (impl != nullptr) {
         delete impl;
         impl = nullptr;
     }
 }
 
-float VidFile::getFrameRate() const
-{
+float VidFile::getFrameRate() const {
     return impl ? impl->frameRate : 0;
 }
 
-float VidFile::getDuration() const
-{
+float VidFile::getDuration() const {
     return impl ? impl->duration : 0;
 }
 
-int VidFile::getWidth() const
-{
+int VidFile::getWidth() const {
     return impl ? impl->width : 0;
 }
 
-int VidFile::getHeight() const
-{
+int VidFile::getHeight() const {
     return impl ? impl->height : 0;
 }
 
-void *VidFile::getFrameBuffer() const
-{
+void *VidFile::getFrameBuffer() const {
     return impl ? impl->frameBuffer : 0;
 }
 
-int VidFile::getFrameBufferStride() const
-{
+int VidFile::getFrameBufferStride() const {
     return impl ? impl->frameBufferStride : 0;
 }
 
-bool VidFile::seek(float time)
-{
+bool VidFile::seek(float time) {
     return (impl != 0) && impl->seek(time);
 }

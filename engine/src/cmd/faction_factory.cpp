@@ -45,8 +45,7 @@ using std::string;
 
 extern std::vector<boost::shared_ptr<Faction> > factions;   //the factions
 
-FactionFactory::FactionFactory(std::string filename)
-{
+FactionFactory::FactionFactory(std::string filename) {
     pt::ptree tree;
     pt::read_xml(filename, tree);
 
@@ -59,8 +58,7 @@ FactionFactory::FactionFactory(std::string filename)
     }
 }
 
-void FactionFactory::parse(ptree tree)
-{
+void FactionFactory::parse(ptree tree) {
     int counter = 0;
     for (const auto &iterator : tree) {
         if (iterator.first != "Faction") {

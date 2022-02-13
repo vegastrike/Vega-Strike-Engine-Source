@@ -26,8 +26,7 @@
 using std::vector;
 using std::string;
 
-TextInputDisplay::TextInputDisplay(vector<unsigned int> *keyboard_input_queue, const char *disallowed)
-{
+TextInputDisplay::TextInputDisplay(vector<unsigned int> *keyboard_input_queue, const char *disallowed) {
     isFocused = false;
     if (keyboard_input_queue) {
         this->keyboard_queue = keyboard_input_queue;
@@ -40,8 +39,7 @@ TextInputDisplay::TextInputDisplay(vector<unsigned int> *keyboard_input_queue, c
     strcpy(this->disallowed, disallowed);
 }
 
-bool TextInputDisplay::processMouseDown(const InputEvent &event)
-{
+bool TextInputDisplay::processMouseDown(const InputEvent &event) {
     if (event.code != WHEELUP_MOUSE_BUTTON && event.code != WHEELDOWN_MOUSE_BUTTON) {
         //If click is on me, set me focused... otherwise, clear my focus.
         this->isFocused = (hitTest(event.loc));
@@ -49,8 +47,7 @@ bool TextInputDisplay::processMouseDown(const InputEvent &event)
     return StaticDisplay::processMouseDown(event);
 }
 
-void TextInputDisplay::processUnfocus(const InputEvent &event)
-{
+void TextInputDisplay::processUnfocus(const InputEvent &event) {
     if (event.code != WHEELUP_MOUSE_BUTTON && event.code != WHEELDOWN_MOUSE_BUTTON) {
         //If click is on me, set me focused... otherwise, clear my focus.
         this->isFocused = false;
@@ -58,13 +55,11 @@ void TextInputDisplay::processUnfocus(const InputEvent &event)
     StaticDisplay::processUnfocus(event);
 }
 
-bool TextInputDisplay::processKeypress(unsigned int c)
-{
+bool TextInputDisplay::processKeypress(unsigned int c) {
     return true;
 }
 
-void TextInputDisplay::draw()
-{
+void TextInputDisplay::draw() {
     string text = this->text();
     if (!this->isFocused) {
         if (passwordChar) {
@@ -117,8 +112,7 @@ void TextInputDisplay::draw()
     this->setText(text);
 }
 
-TextInputDisplay::~TextInputDisplay()
-{
+TextInputDisplay::~TextInputDisplay() {
     delete[] this->disallowed;
 }
 

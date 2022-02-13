@@ -102,8 +102,7 @@ HybridModel::HybridModel() :
         mNbLeaves(0),
         mTriangles(nullptr),
         mNbPrimitives(0),
-        mIndices(nullptr)
-{
+        mIndices(nullptr) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,8 +110,7 @@ HybridModel::HybridModel() :
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridModel::~HybridModel()
-{
+HybridModel::~HybridModel() {
     Release();
 }
 
@@ -121,8 +119,7 @@ HybridModel::~HybridModel()
  *	Releases everything.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void HybridModel::Release()
-{
+void HybridModel::Release() {
     ReleaseBase();
     DELETEARRAY(mIndices);
     DELETEARRAY(mTriangles);
@@ -131,16 +128,14 @@ void HybridModel::Release()
 }
 
 struct Internal {
-    Internal()
-    {
+    Internal() {
         mNbLeaves = 0;
         mLeaves = nullptr;
         mTriangles = nullptr;
         mBase = nullptr;
     }
 
-    ~Internal()
-    {
+    ~Internal() {
         DELETEARRAY(mLeaves);
     }
 
@@ -157,8 +152,7 @@ struct Internal {
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool HybridModel::Build(const OPCODECREATE &create)
-{
+bool HybridModel::Build(const OPCODECREATE &create) {
     // 1) Checkings
     if (!create.mIMesh || !create.mIMesh->IsValid()) {
         return false;
@@ -197,8 +191,7 @@ bool HybridModel::Build(const OPCODECREATE &create)
     // 2-2) Here's the trick : create *another* AABB tree using the leaves of the first one (which are boxes, this time)
     struct Local {
         // A callback to count leaf nodes
-        static bool CountLeaves(const AABBTreeNode *current, uint32_t /*depth*/, void *user_data)
-        {
+        static bool CountLeaves(const AABBTreeNode *current, uint32_t /*depth*/, void *user_data) {
             if (current->IsLeaf()) {
                 Internal *Data = (Internal *) user_data;
                 Data->mNbLeaves++;
@@ -207,8 +200,7 @@ bool HybridModel::Build(const OPCODECREATE &create)
         }
 
         // A callback to setup leaf nodes in our internal structures
-        static bool SetupLeafData(const AABBTreeNode *current, uint32_t /*depth*/, void *user_data)
-        {
+        static bool SetupLeafData(const AABBTreeNode *current, uint32_t /*depth*/, void *user_data) {
             if (current->IsLeaf()) {
                 Internal *Data = (Internal *) user_data;
 
@@ -313,8 +305,7 @@ bool HybridModel::Build(const OPCODECREATE &create)
  *	\return		amount of bytes used
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-size_t HybridModel::GetUsedBytes() const
-{
+size_t HybridModel::GetUsedBytes() const {
     size_t UsedBytes = 0;
     if (mTree) {
         UsedBytes += mTree->GetUsedBytes();
@@ -328,8 +319,7 @@ size_t HybridModel::GetUsedBytes() const
     return UsedBytes;
 }
 
-inline_ void OPComputeMinMax(Point &min, Point &max, const VertexPointers &vp)
-{
+inline_ void OPComputeMinMax(Point &min, Point &max, const VertexPointers &vp) {
     // Compute triangle's AABB = a leaf box
 #ifdef OPC_USE_FCOMI    // a 15% speedup on my machine, not much
     min.x = FCMin3(vp.Vertex[0]->x, vp.Vertex[1]->x, vp.Vertex[2]->x);
@@ -358,8 +348,7 @@ inline_ void OPComputeMinMax(Point &min, Point &max, const VertexPointers &vp)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool HybridModel::Refit()
-{
+bool HybridModel::Refit() {
     if (!mIMesh) {
         return false;
     }

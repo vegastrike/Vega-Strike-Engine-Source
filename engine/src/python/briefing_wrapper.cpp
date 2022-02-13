@@ -28,55 +28,45 @@
 #include "faction_generic.h"
 
 namespace BriefingUtil {
-int addShip(string name, string faction, Vector vec)
-{
+int addShip(string name, string faction, Vector vec) {
     return mission->briefing->AddStarship(name.c_str(),
-                                          FactionUtil::GetFactionIndex(faction),
-                                          vec);
+            FactionUtil::GetFactionIndex(faction),
+            vec);
 }
 
-void removeShip(int whichship)
-{
+void removeShip(int whichship) {
     mission->briefing->RemoveStarship(whichship);
 }
 
-void enqueueOrder(int whichship, Vector vec, float time)
-{
+void enqueueOrder(int whichship, Vector vec, float time) {
     mission->briefing->EnqueueOrder(whichship, vec, time);
 }
 
-void replaceOrder(int whichship, Vector vec, float time)
-{
+void replaceOrder(int whichship, Vector vec, float time) {
     mission->briefing->OverrideOrder(whichship, vec, time);
 }
 
-Vector getShipPosition(int whichship)
-{
+Vector getShipPosition(int whichship) {
     return mission->briefing->GetPosition(whichship);
 }
 
-void setShipPosition(int whichship, Vector vec)
-{
+void setShipPosition(int whichship, Vector vec) {
     mission->briefing->SetPosition(whichship, vec);
 }
 
-void terminate()
-{
+void terminate() {
     mission->BriefingEnd();
 }
 
-void setCamPosition(QVector p)
-{
+void setCamPosition(QVector p) {
     mission->briefing->cam.SetPosition(p, Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0));
 }
 
-void setCamOrientation(Vector p, Vector q, Vector r)
-{
+void setCamOrientation(Vector p, Vector q, Vector r) {
     mission->briefing->cam.SetOrientation(p, q, r);
 }
 
-void setCloak(int whichship, float cloak)
-{
+void setCloak(int whichship, float cloak) {
     mission->briefing->SetCloak(whichship, cloak);
 }
 }
@@ -93,13 +83,11 @@ PYTHON_BEGIN_MODULE(Briefing)
     PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setCloak, "setCloak");
 PYTHON_END_MODULE(Briefing)
 
-void InitBriefing()
-{
+void InitBriefing() {
     PyImport_AppendInittab("Briefing", PYTHON_MODULE_INIT_FUNCTION(Briefing));
 }
 
-void InitBriefing2()
-{
+void InitBriefing2() {
     Python::reseterrors();
     PYTHON_INIT_MODULE(Briefing);
     Python::reseterrors();

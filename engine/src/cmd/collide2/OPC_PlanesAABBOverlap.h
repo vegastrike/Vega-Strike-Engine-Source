@@ -43,10 +43,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool PlanesCollider::PlanesAABBOverlap(const Point &center,
-                                               const Point &extents,
-                                               uint32_t &out_clip_mask,
-                                               uint32_t in_clip_mask)
-{
+        const Point &extents,
+        uint32_t &out_clip_mask,
+        uint32_t in_clip_mask) {
     // Stats
     mNbVolumeBVTests++;
 

@@ -46,75 +46,61 @@ struct XMLType {
             w;
     std::string str;
 
-    XMLType(bool *mybool)
-    {
+    XMLType(bool *mybool) {
         w.b = mybool;
     }
 
-    XMLType(double *mydouble)
-    {
+    XMLType(double *mydouble) {
         w.d = mydouble;
     }
 
-    XMLType(int *myint)
-    {
+    XMLType(int *myint) {
         w.i = myint;
     }
 
-    XMLType(unsigned int *myuint)
-    {
+    XMLType(unsigned int *myuint) {
         w.ui = myuint;
     }
 
-    XMLType(int myhardint)
-    {
+    XMLType(int myhardint) {
         w.hardint = myhardint;
     }
 
-    XMLType(float myhardfloat)
-    {
+    XMLType(float myhardfloat) {
         w.hardfloat = myhardfloat;
     }
 
-    XMLType(float *myfloat)
-    {
+    XMLType(float *myfloat) {
         w.f = myfloat;
     }
 
-    XMLType(void *myvoid)
-    {
+    XMLType(void *myvoid) {
         w.p = myvoid;
     }
 
-    XMLType(char *mychar)
-    {
+    XMLType(char *mychar) {
         w.c = mychar;
     }
 
     //XMLType (short * mychar) {w.s=mychar;} // removing useless shorts - use integers instead
     //XMLType (unsigned short * mychar) {w.us=mychar;} // removing useless shorts - use integers instead
-    XMLType(unsigned char *mychar)
-    {
+    XMLType(unsigned char *mychar) {
         w.uc = mychar;
     }
 
-    XMLType(const std::string &s) : str(s)
-    {
+    XMLType(const std::string &s) : str(s) {
         w.p = &this->str;
     }
 
-    XMLType(const std::string &s, void *v) : str(s)
-    {
+    XMLType(const std::string &s, void *v) : str(s) {
         w.p = v;
     }
 
-    XMLType(const std::string &s, int myhardint) : str(s)
-    {
+    XMLType(const std::string &s, int myhardint) : str(s) {
         w.hardint = myhardint;
     }
 
-    XMLType(const std::string &s, float *f) : str(s)
-    {
+    XMLType(const std::string &s, float *f) : str(s) {
         w.f = f;
     }
 };
@@ -154,8 +140,7 @@ struct XMLElement {
     XMLType value;
     XMLHandler *handler;
 
-    XMLElement(const std::string &ele, const XMLType &val, XMLHandler *hand) : value(val)
-    {
+    XMLElement(const std::string &ele, const XMLType &val, XMLHandler *hand) : value(val) {
         elem = ele;
         handler = hand;
     }
@@ -169,13 +154,11 @@ struct XMLnode {
     vector<XMLElement> elements;
     vector<XMLnode> subnodes;
 
-    XMLnode()
-    {
+    XMLnode() {
         up = NULL;
     }
 
-    XMLnode(const std::string &val, XMLnode *newup)
-    {
+    XMLnode(const std::string &val, XMLnode *newup) {
         this->val = val;
         up = newup;
     }
@@ -198,13 +181,11 @@ public:
     std::string WriteString();
     void EndTag(const std::string endname = string(""));
 
-    const std::string &getName()
-    {
+    const std::string &getName() {
         return filename;
     }
 
-    void setName(const std::string &fil)
-    {
+    void setName(const std::string &fil) {
         this->filename = fil;
     }
 };

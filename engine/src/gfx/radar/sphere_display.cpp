@@ -40,8 +40,7 @@
 
 namespace {
 
-float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat)
-{
+float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
     using namespace Radar;
 
     switch (threat) {
@@ -65,8 +64,7 @@ struct SphereDisplay::Impl {
     VertexBuilder<float, 3, 0, 3> lines;
     VertexBuilder<> thinlines;
 
-    void clear()
-    {
+    void clear() {
         points.clear();
         lines.clear();
         thinlines.clear();
@@ -74,18 +72,15 @@ struct SphereDisplay::Impl {
 };
 
 SphereDisplay::SphereDisplay()
-        : impl(new SphereDisplay::Impl), innerSphere(0.98), radarTime(0.0)
-{
+        : impl(new SphereDisplay::Impl), innerSphere(0.98), radarTime(0.0) {
 }
 
-SphereDisplay::~SphereDisplay()
-{
+SphereDisplay::~SphereDisplay() {
 }
 
 void SphereDisplay::Draw(const Sensor &sensor,
-                         VSSprite *frontSprite,
-                         VSSprite *rearSprite)
-{
+        VSSprite *frontSprite,
+        VSSprite *rearSprite) {
     assert(frontSprite || rearSprite); // There should be at least one radar display
 
     radarTime += GetElapsedTime();
@@ -139,10 +134,9 @@ void SphereDisplay::Draw(const Sensor &sensor,
 }
 
 void SphereDisplay::DrawTrack(const Sensor &sensor,
-                              const ViewArea &radarView,
-                              const Track &track,
-                              bool negate_z)
-{
+        const ViewArea &radarView,
+        const Track &track,
+        bool negate_z) {
     if (!radarView.IsActive()) {
         return;
     }
@@ -156,9 +150,9 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
     if (position.z < 0) {
         static bool negate_z =
                 XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                              "hud",
-                                                              "show_negative_blips_as_positive",
-                                                              "true"));
+                        "hud",
+                        "show_negative_blips_as_positive",
+                        "true"));
         if (negate_z) {
             position.z = -position.z;
         } else {
@@ -215,8 +209,7 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
     impl->points.insert(GFXColorVertex(head, headColor));
 }
 
-void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize)
-{
+void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
     // Crosshair
     const float crossSize = 8.0;
     const float xcross = crossSize / g_game.x_resolution;
@@ -230,8 +223,7 @@ void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &col
     impl->lines.insert(position.x, position.y + ycross, 0.0f, color);
 }
 
-void SphereDisplay::DrawBackground(const Sensor &sensor, const ViewArea &radarView)
-{
+void SphereDisplay::DrawBackground(const Sensor &sensor, const ViewArea &radarView) {
     // Split crosshair
 
     if (!radarView.IsActive()) {

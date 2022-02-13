@@ -78,40 +78,35 @@ public:
 //The outside boundaries to use for drawing.
     virtual void setRect(const Rect &r);
 
-    virtual Rect rect(void) const
-    {
+    virtual Rect rect(void) const {
         return m_rect;
     }
 
 //The text to draw.
     virtual void setText(const std::string &text);
 
-    virtual const std::string &text(void) const
-    {
+    virtual const std::string &text(void) const {
         return m_text;
     }
 
 //The initial color of the text.
     virtual void setColor(const GFXColor &c);
 
-    virtual GFXColor color(void) const
-    {
+    virtual GFXColor color(void) const {
         return m_color;
     }
 
 //The initial Font for text.
     virtual void setFont(const Font &f);
 
-    virtual Font font(void) const
-    {
+    virtual Font font(void) const {
         return m_font;
     }
 
 //Text justification.
     virtual void setJustification(Justification j);
 
-    virtual Justification justification(void) const
-    {
+    virtual Justification justification(void) const {
         return m_justification;
     }
 
@@ -125,8 +120,7 @@ public:
 //What to do when text width exceeds boundary rectangle.
     virtual void setWidthExceeded(WidthExceeded w);
 
-    virtual WidthExceeded widthExceeded(void) const
-    {
+    virtual WidthExceeded widthExceeded(void) const {
         return m_widthExceeded;
     }
 
@@ -143,8 +137,7 @@ public:
     static const size_t END_LINE;
     virtual void drawLines(size_t start, size_t count = END_LINE) const;
 
-    void draw(void) const
-    {
+    void draw(void) const {
         drawLines(0);
     }
 
@@ -152,14 +145,13 @@ public:
 public:
     PaintText(void);
     PaintText(const Rect &rect,
-              const std::string &text,
-              const Font &font,
-              const GFXColor &color,
-              Justification just = RIGHT_JUSTIFY,
-              WidthExceeded w = ELLIPSIS);
+            const std::string &text,
+            const Font &font,
+            const GFXColor &color,
+            Justification just = RIGHT_JUSTIFY,
+            WidthExceeded w = ELLIPSIS);
 
-    virtual ~PaintText(void)
-    {
+    virtual ~PaintText(void) {
     }
 
 protected:
@@ -199,8 +191,7 @@ protected:
 
         //CONSTRUCTION.
         LayoutState(float lineSpacing = 0.0, float permSpacing = 0.0) :
-                currentLineSpacing(lineSpacing), permanentLineSpacing(permSpacing)
-        {
+                currentLineSpacing(lineSpacing), permanentLineSpacing(permSpacing) {
         }
     };
 
@@ -211,32 +202,32 @@ protected:
 //The fragment is added to the specified TextLine.
 //Formatting commands should have been filtered out already.
     void addFragment(TextLine &line, //Line descriptor.
-                     const std::string::size_type endPos, //One past last char to consider.
-                     std::string::size_type &startPos, //IN/OUT: location of string.
-                     double &width //IN/OUT: Reference width of string.
+            const std::string::size_type endPos, //One past last char to consider.
+            std::string::size_type &startPos, //IN/OUT: location of string.
+            double &width //IN/OUT: Reference width of string.
     );
 
 //Parse a format string in a PaintText string.
 //The first character should be the one *after* the initial format char.
     void parseFormat(std::string::size_type startPos,         //Location of beginning of string to examine.
-                     std::string::size_type *resultPos,       //OUT: Ptr to string past the format string.
-                     bool *endLine         //OUT: True = Done with current line.
+            std::string::size_type *resultPos,       //OUT: Ptr to string past the format string.
+            bool *endLine         //OUT: True = Done with current line.
     );
 
 //Parse one line of text, create fragments, end line when overflow width.
     void parseFragmentsWithCharBreak(TextLine &line, //Line descriptor.
-                                     std::string::size_type startPos, //Location of beginning of string to examine.
-                                     std::string::size_type endPos, //Location of one past the last character to examine.
-                                     float maxWidth, //Can't go beyond this width.
-                                     bool ellipsis, //True = if line doesn't fit, append ellipsis.
-                                     std::string::size_type *resultPos //OUT: Ptr to string past the format string.
+            std::string::size_type startPos, //Location of beginning of string to examine.
+            std::string::size_type endPos, //Location of one past the last character to examine.
+            float maxWidth, //Can't go beyond this width.
+            bool ellipsis, //True = if line doesn't fit, append ellipsis.
+            std::string::size_type *resultPos //OUT: Ptr to string past the format string.
     );
 
 //Parse one line of text, create fragments, end line on word break when width overflows.
     void parseFragmentsWithWordBreak(TextLine &line, //Line descriptor.
-                                     std::string::size_type startPos, //Location of beginning of string to examine.
-                                     float maxWidth, //Can't go beyond this width.
-                                     std::string::size_type *resultPos //OUT: Ptr to string past the format string.
+            std::string::size_type startPos, //Location of beginning of string to examine.
+            float maxWidth, //Can't go beyond this width.
+            std::string::size_type *resultPos //OUT: Ptr to string past the format string.
     );
 
 //VARIABLES

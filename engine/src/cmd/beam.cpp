@@ -54,12 +54,10 @@ struct BeamDrawContext {
     class GFXVertexList *vlist;
     Beam *beam;
 
-    BeamDrawContext()
-    {
+    BeamDrawContext() {
     }
 
-    BeamDrawContext(const Matrix &a, GFXVertexList *vl, Beam *b) : m(a), vlist(vl), beam(b)
-    {
+    BeamDrawContext(const Matrix &a, GFXVertexList *vl, Beam *b) : m(a), vlist(vl), beam(b) {
     }
 };
 
@@ -69,8 +67,7 @@ static vector<vector<BeamDrawContext> > beamdrawqueue;
 /*
  * Internal functions
  */
-static bool beamCheckCollision(QVector pos, float len, const Collidable &un)
-{
+static bool beamCheckCollision(QVector pos, float len, const Collidable &un) {
     return (un.GetPosition() - pos).MagnitudeSquared() <= len * len + 2 * len * un.radius + un.radius * un.radius;
 }
 
@@ -95,8 +92,7 @@ static bool beamCheckCollision(QVector pos, float len, const Collidable &un)
     }                               \
     while (0)
 
-void Beam::RecalculateVertices(const Matrix &trans)
-{
+void Beam::RecalculateVertices(const Matrix &trans) {
     GFXColorVertex *beam = (vlist->BeginMutate(0))->colors;
     static float fadelocation = XMLSupport::parse_float(vs_config->getVariable("graphics", "BeamFadeoutLength", ".8"));
     static float hitfadelocation =
@@ -119,9 +115,9 @@ void Beam::RecalculateVertices(const Matrix &trans)
     float leftex = -texturespeed * (numframes * simulation_atom_var + interpolation_blend_factor * simulation_atom_var);
     float righttex = leftex + texturestretch * curlength / curthick;           //how long compared to how wide!
     float len = (impact == ALIVE)
-                ? (curlength < range ? curlength - speed * simulation_atom_var * (1 - interpolation_blend_factor)
-                                     : range)
-                : curlength;
+            ? (curlength < range ? curlength - speed * simulation_atom_var * (1 - interpolation_blend_factor)
+                    : range)
+            : curlength;
     float fadelen = (impact == ALIVE) ? len * fadelocation : len * hitfadelocation;
     const bool doscoop = (scoop && (tractor || repulsor));
     float fadetex = leftex + (righttex - leftex) * fadelocation;
@@ -247,8 +243,7 @@ void Beam::RecalculateVertices(const Matrix &trans)
 
 #undef V
 
-void Beam::CollideHuge(const LineCollide &lc, Unit *targetToCollideWith, Unit *firer, Unit *superunit)
-{
+void Beam::CollideHuge(const LineCollide &lc, Unit *targetToCollideWith, Unit *firer, Unit *superunit) {
     QVector x0 = center;
     QVector v = direction * curlength;
     if (is_null(superunit->location[Unit::UNIT_ONLY]) && curlength) {
@@ -328,8 +323,7 @@ void Beam::CollideHuge(const LineCollide &lc, Unit *targetToCollideWith, Unit *f
  * Constructors
  */
 Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer, int sound)
-        : vlist(NULL), Col(clne.r, clne.g, clne.b, clne.a)
-{
+        : vlist(NULL), Col(clne.r, clne.g, clne.b, clne.a) {
     listen_to_owner = false;
 #ifdef PERBOLTSOUND
     sound = AUDCreateSound( clne.sound, true );
@@ -393,8 +387,7 @@ Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit 
     impact = UNSTABLE;
 }
 
-Beam::~Beam()
-{
+Beam::~Beam() {
     VSDESTRUCT2
 #ifdef PERBOLTSOUND
     AUDDeleteSound( sound );
@@ -408,8 +401,7 @@ Beam::~Beam()
 
 // Called everytime the beam is fired
 // Used to be Init
-void Beam::Reinitialize()
-{
+void Beam::Reinitialize() {
     CollideInfo.object.b = nullptr;
     CollideInfo.type = LineCollide::BEAM;
 
@@ -446,8 +438,7 @@ void Beam::Reinitialize()
  * Public Methods
  */
 
-bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit)
-{
+bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
     if (target == NULL) {
         VS_LOG(error, "Recovering from nonfatal beam error when beam inactive\n");
         return false;
@@ -559,10 +550,10 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit)
                 if (relspeed < maxrelspeed) {
                     //Modulate force on little mass objects, so they don't slingshot right past you
                     target->ApplyForce(direction
-                                               * (appldam
-                                                       / sqrt( /*(target->sim_atom_multiplier
+                            * (appldam
+                                    / sqrt( /*(target->sim_atom_multiplier
                                                  > 0) ? target->sim_atom_multiplier : */ 1.0)
-                                                       * std::min(1.0f, target->getMass())));
+                                    * std::min(1.0f, target->getMass())));
                 }
             }
             float ors_m = o_ors_m, trs_m = o_trs_m, ofs = o_o;
@@ -604,16 +595,16 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit)
                             tmp.category = "starships";
                             static float starshipprice =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                                                                   "junk_starship_price",
-                                                                                   "100000"));
+                                            "junk_starship_price",
+                                            "100000"));
                             static float starshipmass =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                                                                   "junk_starship_mass",
-                                                                                   "50"));
+                                            "junk_starship_mass",
+                                            "50"));
                             static float starshipvolume =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
-                                                                                   "junk_starship_volume",
-                                                                                   "1500"));
+                                            "junk_starship_volume",
+                                            "1500"));
                             tmp.price = starshipprice;
                             tmp.quantity = 1;
                             tmp.mass = starshipmass;
@@ -628,7 +619,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit)
                             if (_Universe->isPlayerStarship(un)) {
                                 static int tractor_onboard =
                                         AUDCreateSoundWAV(vs_config->getVariable("unitaudio", "player_tractor_cargo",
-                                                                                 "tractor_onboard.wav"));
+                                                "tractor_onboard.wav"));
                                 AUDPlay(tractor_onboard, QVector(0, 0, 0), Vector(0, 0, 0), 1);
                             } else {
                                 Unit *tmp = _Universe->AccessCockpit()->GetParent();
@@ -636,8 +627,8 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit)
                                     //Subunit of player (a turret)
                                     static int tractor_onboard_fromturret =
                                             AUDCreateSoundWAV(vs_config->getVariable("unitaudio",
-                                                                                     "player_tractor_cargo_fromturret",
-                                                                                     "tractor_onboard.wav"));
+                                                    "player_tractor_cargo_fromturret",
+                                                    "tractor_onboard.wav"));
                                     AUDPlay(tractor_onboard_fromturret, QVector(0, 0, 0), Vector(0, 0, 0), 1);
                                 }
                             }
@@ -655,18 +646,15 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit)
     return false;
 }
 
-void Beam::Destabilize()
-{
+void Beam::Destabilize() {
     impact = UNSTABLE;
 }
 
-bool Beam::Dissolved()
-{
+bool Beam::Dissolved() {
     return curthick == 0;
 }
 
-void Beam::Draw(const Transformation &trans, const Matrix &m, Unit *targ, float tracking_cone)
-{
+void Beam::Draw(const Transformation &trans, const Matrix &m, Unit *targ, float tracking_cone) {
     //hope that the correct transformation is on teh stack
     if (curthick == 0) {
         return;
@@ -687,18 +675,15 @@ void Beam::Draw(const Transformation &trans, const Matrix &m, Unit *targ, float 
     beamdrawqueue[decal].push_back(BeamDrawContext(cumulative_transformation_matrix, vlist, this));
 }
 
-QVector Beam::GetPosition() const
-{
+QVector Beam::GetPosition() const {
     return local_transformation.position;
 }
 
-void Beam::ListenToOwner(bool listen)
-{
+void Beam::ListenToOwner(bool listen) {
     listen_to_owner = listen;
 }
 
-void Beam::ProcessDrawQueue()
-{
+void Beam::ProcessDrawQueue() {
     GFXDisable(LIGHTING);
     GFXDisable(CULLFACE);     //don't want lighting on this baby
     GFXDisable(DEPTHWRITE);
@@ -733,40 +718,34 @@ void Beam::ProcessDrawQueue()
     GFXPopBlendMode();
 }
 
-bool Beam::Ready()
-{
+bool Beam::Ready() {
     return curthick == 0 && refiretime > refire;
 }
 
-float Beam::refireTime()
-{
+float Beam::refireTime() {
     return refiretime;
 }
 
 // TODO: this does nothing!
-void Beam::RemoveFromSystem(bool eradicate)
-{
+void Beam::RemoveFromSystem(bool eradicate) {
 }
 
-void Beam::SetPosition(const QVector &k)
-{
+void Beam::SetPosition(const QVector &k) {
     local_transformation.position = k;
 }
 
-void Beam::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
-{
+void Beam::SetOrientation(const Vector &p, const Vector &q, const Vector &r) {
     local_transformation.orientation = Quaternion::from_vectors(p, q, r);
 }
 
 void Beam::UpdatePhysics(const Transformation &trans,
-                         const Matrix &m,
-                         Unit *targ,
-                         float tracking_cone,
-                         Unit *targetToCollideWith,
-                         float HeatSink,
-                         Unit *firer,
-                         Unit *superunit)
-{
+        const Matrix &m,
+        Unit *targ,
+        float tracking_cone,
+        Unit *targetToCollideWith,
+        float HeatSink,
+        Unit *firer,
+        Unit *superunit) {
     curlength += simulation_atom_var * speed;
     if (curlength < 0) {
         curlength = 0;

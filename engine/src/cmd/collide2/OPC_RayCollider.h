@@ -30,12 +30,10 @@
 class OPCODE_API CollisionFace {
 public:
     //! Constructor
-    inline_ CollisionFace()
-    {
+    inline_ CollisionFace() {
     }
     //! Destructor
-    inline_                ~CollisionFace()
-    {
+    inline_                ~CollisionFace() {
     }
 
     uint32_t mFaceID;                //!< Index of touched face
@@ -46,32 +44,26 @@ public:
 class OPCODE_API CollisionFaces : private Container {
 public:
     //! Constructor
-    CollisionFaces()
-    {
+    CollisionFaces() {
     }
 
     //! Destructor
-    ~CollisionFaces()
-    {
+    ~CollisionFaces() {
     }
 
-    inline_    uint32_t GetNbFaces() const
-    {
+    inline_    uint32_t GetNbFaces() const {
         return GetNbEntries() >> 2;
     }
 
-    inline_    const CollisionFace *GetFaces() const
-    {
+    inline_    const CollisionFace *GetFaces() const {
         return (const CollisionFace *) GetEntries();
     }
 
-    inline_    void Reset()
-    {
+    inline_    void Reset() {
         Container::Reset();
     }
 
-    inline_    void AddFace(const CollisionFace &face)
-    {
+    inline_    void AddFace(const CollisionFace &face) {
         Add(face.mFaceID).Add(face.mDistance).Add(face.mU).Add(face.mV);
     }
 };
@@ -133,8 +125,7 @@ public:
      *	\see		SetDestination(StabbedFaces* sf)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetCulling(bool flag)
-    {
+    inline_                void SetCulling(bool flag) {
         mCulling = flag;
     }
 
@@ -147,20 +138,17 @@ public:
      *	\see		SetDestination(StabbedFaces* sf)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetMaxDist(float max_dist = MAX_FLOAT)
-    {
+    inline_                void SetMaxDist(float max_dist = MAX_FLOAT) {
         mMaxDist = max_dist;
     }
 
 #ifdef OPC_RAYHIT_CALLBACK
 
-    inline_                void SetHitCallback(HitCallback cb)
-    {
+    inline_                void SetHitCallback(HitCallback cb) {
         mHitCallback = cb;
     }
 
-    inline_                void SetUserData(void *user_data)
-    {
+    inline_                void SetUserData(void *user_data) {
         mUserData = user_data;
     }
 
@@ -185,8 +173,7 @@ public:
      *	\return		the number of Ray-BV tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbRayBVTests() const
-    {
+    inline_                uint32_t GetNbRayBVTests() const {
         return mNbRayBVTests;
     }
 
@@ -198,8 +185,7 @@ public:
      *	\return		the number of Ray-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbRayPrimTests() const
-    {
+    inline_                uint32_t GetNbRayPrimTests() const {
         return mNbRayPrimTests;
     }
 
@@ -212,8 +198,7 @@ public:
      *	\return		the number of valid intersections during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbIntersections() const
-    {
+    inline_                uint32_t GetNbIntersections() const {
         return mNbIntersections;
     }
 

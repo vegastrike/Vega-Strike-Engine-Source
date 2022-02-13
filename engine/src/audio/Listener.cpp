@@ -47,25 +47,21 @@ Listener::Listener() :
 {
 }
 
-Listener::~Listener()
-{
+Listener::~Listener() {
 }
 
-Range<Scalar> Listener::getAngleRange() const
-{
+Range<Scalar> Listener::getAngleRange() const {
     return Range<Scalar>(Scalar(acos(cosAngleRange.min)),
-                         Scalar(acos(cosAngleRange.max)));
+            Scalar(acos(cosAngleRange.max)));
 }
 
-void Listener::setAngleRange(Range<Scalar> r)
-{
+void Listener::setAngleRange(Range<Scalar> r) {
     cosAngleRange.min = Scalar(cos(r.min));
     cosAngleRange.max = Scalar(cos(r.max));
     dirty.attributes = 1;
 }
 
-void Listener::update(int flags)
-{
+void Listener::update(int flags) {
     if (!dirty.attributes) {
         flags &= ~RenderableListener::UPDATE_ATTRIBUTES;
     }
@@ -97,8 +93,7 @@ void Listener::update(int flags)
     }
 }
 
-Vector3 Listener::toLocalDirection(Vector3 dir) const
-{
+Vector3 Listener::toLocalDirection(Vector3 dir) const {
     return worldToLocal * dir;
 }
 

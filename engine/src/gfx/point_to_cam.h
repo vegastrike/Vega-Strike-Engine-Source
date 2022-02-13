@@ -46,15 +46,14 @@
 #include "universe.h"
 
 inline bool CalculateOrientation(QVector &Pos,
-                                 Vector &p,
-                                 Vector &q,
-                                 Vector &r,
-                                 float &wid,
-                                 float &hei,
-                                 float OffsetByThisPercent,
-                                 bool moveiftoofar,
-                                 Matrix *local_transformation = NULL)
-{
+        Vector &p,
+        Vector &q,
+        Vector &r,
+        float &wid,
+        float &hei,
+        float OffsetByThisPercent,
+        bool moveiftoofar,
+        Matrix *local_transformation = NULL) {
     const float kkkk = 3;     //this seems to work for no good reason
     _Universe->AccessCamera()->GetPQR(p, q, r);
     QVector OLDR(r.i, r.j, r.k);

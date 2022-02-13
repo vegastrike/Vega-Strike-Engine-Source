@@ -73,8 +73,7 @@ public:
     } effect;
 
     Health(int layer, float health = 1, float regeneration = 0) :
-            Health(layer, health, health, regeneration)
-    {
+            Health(layer, health, health, regeneration) {
     }
 
     Health(int layer, float max_health, float health, float regeneration) :
@@ -84,8 +83,7 @@ public:
             health(health),
             max_regeneration(regeneration),
             regeneration(regeneration),
-            regenerative(regeneration > 0)
-    {
+            regenerative(regeneration > 0) {
         destroyed = false;
         if (layer == 0) {
             regenerative = false;
@@ -95,8 +93,7 @@ public:
         vulnerabilities.phase_damage = 1;
     };
 
-    const float Percent() const
-    {
+    const float Percent() const {
         return max_health != 0 ? health / max_health : 0.0f;
     }
 

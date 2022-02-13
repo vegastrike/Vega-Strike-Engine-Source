@@ -55,13 +55,11 @@ extern void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Cl
 extern void ExportUnit(boost::python::class_builder<UnitWrapper> &Class);
 
 namespace UniverseUtil {
-UnitWrapper newGetPlayer()
-{
+UnitWrapper newGetPlayer() {
     return UniverseUtil::getPlayer();
 }
 
-void setOwner(int obj, UnitWrapper un)
-{
+void setOwner(int obj, UnitWrapper un) {
     setOwnerII(obj, un.GetUnit());
 }
 }
@@ -162,9 +160,9 @@ PYTHON_BEGIN_MODULE(VS)
     PYTHON_BEGIN_INHERIT_CLASS(VS, PythonAIFireAt, FireAt, "PythonAI")
         PYTHON_DEFINE_METHOD_DEFAULT(Class, &FireAt::Execute, "Execute", PythonAI<FireAt>::default_Execute);
         PYTHON_DEFINE_METHOD_DEFAULT(Class,
-                                     &FireAt::ChooseTarget,
-                                     "ChooseTarget",
-                                     PythonAI<FireAt>::default_ChooseTarget);
+                &FireAt::ChooseTarget,
+                "ChooseTarget",
+                PythonAI<FireAt>::default_ChooseTarget);
         PYTHON_DEFINE_METHOD_DEFAULT(Class, &FireAt::SetParent, "init", PythonAI<FireAt>::default_SetParent);
         PYTHON_DEFINE_METHOD(Class, &FireAt::GetParent, "GetParent");
         PYTHON_DEFINE_METHOD(Class, &FireAt::AddReplaceLastOrder, "AddReplaceLastOrder");
@@ -192,20 +190,17 @@ PYTHON_BEGIN_MODULE(VS)
 
 PYTHON_END_MODULE(VS)
 
-void InitVS()
-{
+void InitVS() {
     PyImport_AppendInittab("VS", PYTHON_MODULE_INIT_FUNCTION(VS));
 }
 
-void InitVS2()
-{
+void InitVS2() {
     Python::reseterrors();
     PYTHON_INIT_MODULE(VS);
     Python::reseterrors();
 }
 
-static std::string ParseSizeFlags(int size)
-{
+static std::string ParseSizeFlags(int size) {
     static const std::pair<int, std::string> masks[] = {
             std::pair<int, std::string>(as_integer(MOUNT_SIZE::LIGHT), " LIGHT"),
             std::pair<int, std::string>(as_integer(MOUNT_SIZE::MEDIUM), " MEDIUM"),
@@ -241,8 +236,7 @@ case Class::Enum:                 \
 default:                   \
     return std::string( "UNDEFINED" )
 
-static std::string ParseMountStatus(Mount::STATUS status)
-{
+static std::string ParseMountStatus(Mount::STATUS status) {
     switch (status) {
         PARSE_CASE(Mount, ACTIVE);
         PARSE_CASE(Mount, INACTIVE);
@@ -252,8 +246,7 @@ static std::string ParseMountStatus(Mount::STATUS status)
     }
 }
 
-static std::string ParseWeaponType(WEAPON_TYPE type)
-{
+static std::string ParseWeaponType(WEAPON_TYPE type) {
     switch (type) {
         case WEAPON_TYPE::BEAM:
             return "BEAM";
@@ -268,8 +261,7 @@ static std::string ParseWeaponType(WEAPON_TYPE type)
     }
 }
 
-static BoostPythonDictionary GatherWeaponInfo(const WeaponInfo *wi)
-{
+static BoostPythonDictionary GatherWeaponInfo(const WeaponInfo *wi) {
     BoostPythonDictionary rv;
     if (wi) {
         rv["type"] = ParseWeaponType(wi->type);
@@ -288,8 +280,7 @@ static BoostPythonDictionary GatherWeaponInfo(const WeaponInfo *wi)
     return rv;
 }
 
-BoostPythonDictionary UnitWrapper::GetMountInfo(int index) const
-{
+BoostPythonDictionary UnitWrapper::GetMountInfo(int index) const {
     BoostPythonDictionary rv;
     if ((index >= 0) && ((unsigned) index < unit->mounts.size())) {
         Mount &mnt = unit->mounts[index];

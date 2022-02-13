@@ -103,13 +103,11 @@ static soundContainer enableautosound;
 
 #define sqr(x) ( ( (x) )*( (x) ) )
 
-std::string GameCockpit::GetNavSelectedSystem()
-{
+std::string GameCockpit::GetNavSelectedSystem() {
     return AccessNavSystem()->getSelectedSystem();
 }
 
-void soundContainer::loadsound(string soundfile, bool looping)
-{
+void soundContainer::loadsound(string soundfile, bool looping) {
     if (this->sound == -2 && soundfile.size()) {
         string sound = GameCockpit::getsoundfile(soundfile);
         if (sound.size()) {
@@ -120,16 +118,14 @@ void soundContainer::loadsound(string soundfile, bool looping)
     }
 }
 
-void soundContainer::playsound()
-{
+void soundContainer::playsound() {
     if (sound >= 0) {
         AUDAdjustSound(sound, QVector(0, 0, 0), Vector(0, 0, 0));
         AUDPlay(sound, QVector(0, 0, 0), Vector(0, 0, 0), 1);
     }
 }
 
-soundContainer::~soundContainer()
-{
+soundContainer::~soundContainer() {
     if (sound >= 0) {
 #if 0
                                                                                                                                 AUDStopPlaying( sound );
@@ -139,25 +135,22 @@ soundContainer::~soundContainer()
     }
 }
 
-void GameCockpit::ReceivedTargetInfo()
-{
+void GameCockpit::ReceivedTargetInfo() {
     for (size_t j = 0; j < vdu.size(); j++) {
         vdu[j]->ReceivedTargetData();
     }
 }
 
-void GameCockpit::SetSoundFile(string sound)
-{
+void GameCockpit::SetSoundFile(string sound) {
     soundfile = AUDCreateSoundWAV(sound, false);
 }
 
-void GameCockpit::DrawNavigationSymbol(const Vector &Loc, const Vector &P, const Vector &Q, float size)
-{
+void GameCockpit::DrawNavigationSymbol(const Vector &Loc, const Vector &P, const Vector &Q, float size) {
     static float crossthick =
             XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                           "hud",
-                                                           "NavCrossLineThickness",
-                                                           "1"));                        //1.05;
+                    "hud",
+                    "NavCrossLineThickness",
+                    "1"));                        //1.05;
 
     GFXLineWidth(crossthick);
     size = .125 * size;
@@ -192,20 +185,18 @@ void GameCockpit::DrawNavigationSymbol(const Vector &Loc, const Vector &P, const
     GFXLineWidth(1);
 }
 
-float GameCockpit::computeLockingSymbol(Unit *par)
-{
+float GameCockpit::computeLockingSymbol(Unit *par) {
     return par->computeLockingPercent();
 }
 
 inline void DrawOneTargetBox(const QVector &Loc,
-                             float rSize,
-                             const Vector &CamP,
-                             const Vector &CamQ,
-                             const Vector &CamR,
-                             float lock_percent,
-                             bool ComputerLockon,
-                             bool Diamond = false)
-{
+        float rSize,
+        const Vector &CamP,
+        const Vector &CamQ,
+        const Vector &CamR,
+        float lock_percent,
+        bool ComputerLockon,
+        bool Diamond = false) {
     static float boxthick = XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "BoxLineThickness", "1"));
     static float rat = XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "min_target_box_size", ".01"));
     float len = (Loc).Magnitude();
@@ -277,9 +268,9 @@ inline void DrawOneTargetBox(const QVector &Loc,
         //eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
         static float diamondthick =
                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                               "hud",
-                                                               "DiamondLineThickness",
-                                                               "1"));                          //1.05;
+                        "hud",
+                        "DiamondLineThickness",
+                        "1"));                          //1.05;
         glLineWidth(diamondthick);
         static bool center =
                 XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "LockCenterCrosshair", "false"));
@@ -287,44 +278,44 @@ inline void DrawOneTargetBox(const QVector &Loc,
                 XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "min_lock_box_size", ".001"));
         static float endreticle =
                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                               "hud",
-                                                               "MinMissileBracketSize",
-                                                               "1.05"));                        //1.05;
+                        "hud",
+                        "MinMissileBracketSize",
+                        "1.05"));                        //1.05;
         static float startreticle =
                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                               "hud",
-                                                               "MaxMissileBracketSize",
-                                                               "2.05"));                          //2.05;
+                        "hud",
+                        "MaxMissileBracketSize",
+                        "2.05"));                          //2.05;
         static float diamondsize = XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                                  "hud",
-                                                                                  "DiamondSize",
-                                                                                  "2.05"));         //1.05;
+                "hud",
+                "DiamondSize",
+                "2.05"));         //1.05;
         static float bracketsize =
                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                               "hud",
-                                                               "RotatingBracketSize",
-                                                               "0.58"));                         //1.05;
+                        "hud",
+                        "RotatingBracketSize",
+                        "0.58"));                         //1.05;
         static float thetaspeed =
                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                               "hud",
-                                                               "DiamondRotationSpeed",
-                                                               "1"));                        //1.05;
+                        "hud",
+                        "DiamondRotationSpeed",
+                        "1"));                        //1.05;
         static float lockline =
                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                               "hud",
-                                                               "LockConfirmLineLength",
-                                                               "1.5"));                      //1.05;
+                        "hud",
+                        "LockConfirmLineLength",
+                        "1.5"));                      //1.05;
         if (center) {
             static float bracketwidth =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "hud",
-                                                                   "RotatingBracketWidth",
-                                                                   "0.1"));                              //1.05;
+                            "hud",
+                            "RotatingBracketWidth",
+                            "0.1"));                              //1.05;
             static bool bracketinnerouter =
                     XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                  "hud",
-                                                                  "RotatingBracketInner",
-                                                                  "true"));                                  //1.05;
+                            "hud",
+                            "RotatingBracketInner",
+                            "true"));                                  //1.05;
             float innerdis = endreticle + (startreticle - endreticle) * lock_percent;
             float outerdis = innerdis + bracketsize;
             float bracketdis = (bracketinnerouter ? innerdis : outerdis);
@@ -370,9 +361,9 @@ inline void DrawOneTargetBox(const QVector &Loc,
 
             static float diamondthick =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "hud",
-                                                                   "DiamondLineThickness",
-                                                                   "1"));                              //1.05;
+                            "hud",
+                            "DiamondLineThickness",
+                            "1"));                              //1.05;
             GFXLineWidth(diamondthick);
             QVector TLockBox(rtot * LockBox.i + rtot * LockBox.j, rtot * LockBox.j - rtot * LockBox.i, LockBox.k);
             QVector SLockBox(TLockBox.j, TLockBox.i, TLockBox.k);
@@ -448,8 +439,7 @@ inline void DrawOneTargetBox(const QVector &Loc,
     GFXDisable(SMOOTH);
 }
 
-inline void DrawDockingBoxes(Unit *un, const Unit *target, const Vector &CamP, const Vector &CamQ, const Vector &CamR)
-{
+inline void DrawDockingBoxes(Unit *un, const Unit *target, const Vector &CamP, const Vector &CamQ, const Vector &CamR) {
     if (target->IsCleared(un)) {
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
         static GFXColor dockboxstop = vs_config->getColor("docking_box_halt", GFXColor(1, 0, 0, 1));
@@ -467,7 +457,7 @@ inline void DrawDockingBoxes(Unit *un, const Unit *target, const Vector &CamP, c
                 if (waypointcolor.a > 0.01) {
                     GFXColorf(waypointcolor);
                     DrawOneTargetBox(dockpos, rad, CamP, CamQ, CamR, 1,
-                                     true, true);
+                            true, true);
                 }
                 continue;
             }
@@ -475,12 +465,12 @@ inline void DrawDockingBoxes(Unit *un, const Unit *target, const Vector &CamP, c
             GFXDisable(DEPTHWRITE);
             GFXColorf(dockboxstop);
             DrawOneTargetBox(dockpos, rad, CamP, CamQ, CamR, 1,
-                             true, true);
+                    true, true);
             GFXEnable(DEPTHTEST);
             GFXEnable(DEPTHWRITE);
             GFXColorf(dockboxgo);
             DrawOneTargetBox(dockpos, rad, CamP, CamQ, CamR, 1,
-                             true, true);
+                    true, true);
         }
         GFXDisable(DEPTHTEST);
         GFXDisable(DEPTHWRITE);
@@ -488,8 +478,7 @@ inline void DrawDockingBoxes(Unit *un, const Unit *target, const Vector &CamP, c
     }
 }
 
-void GameCockpit::DrawTargetBoxes(const Radar::Sensor &sensor)
-{
+void GameCockpit::DrawTargetBoxes(const Radar::Sensor &sensor) {
     if (sensor.InsideNebula()) {
         return;
     }
@@ -523,8 +512,8 @@ void GameCockpit::DrawTargetBoxes(const Radar::Sensor &sensor)
                     if (sensor.IsTracking(track)) {
                         static bool draw_dock_box =
                                 XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                              "draw_docking_boxes",
-                                                                              "true"));
+                                        "draw_docking_boxes",
+                                        "true"));
                         if (draw_dock_box) {
                             DrawDockingBoxes(player, target, CamP, CamQ, CamR);
                         }
@@ -545,8 +534,7 @@ void GameCockpit::DrawTargetBoxes(const Radar::Sensor &sensor)
 #define SCATTER_CUBE \
     QVector( rand()/RAND_MAX -.5, rand()/RAND_MAX -.5, rand()/RAND_MAX -.5 )
 
-inline void DrawITTSLine(QVector fromLoc, QVector aimLoc, GFXColor linecolor = GFXColor(1, 1, 1, 1))
-{
+inline void DrawITTSLine(QVector fromLoc, QVector aimLoc, GFXColor linecolor = GFXColor(1, 1, 1, 1)) {
     GFXColorf(linecolor);
     GFXEnable(SMOOTH);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -562,8 +550,7 @@ inline void DrawITTSLine(QVector fromLoc, QVector aimLoc, GFXColor linecolor = G
     GFXDisable(SMOOTH);
 }
 
-inline void DrawITTSMark(float Size, QVector p, QVector q, QVector aimLoc, GFXColor markcolor = GFXColor(1, 1, 1, 1))
-{
+inline void DrawITTSMark(float Size, QVector p, QVector q, QVector aimLoc, GFXColor markcolor = GFXColor(1, 1, 1, 1)) {
     GFXColorf(markcolor);
     GFXEnable(SMOOTH);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -578,8 +565,7 @@ inline void DrawITTSMark(float Size, QVector p, QVector q, QVector aimLoc, GFXCo
     GFXDisable(SMOOTH);
 }
 
-void GameCockpit::DrawTargetBox(const Radar::Sensor &sensor)
-{
+void GameCockpit::DrawTargetBox(const Radar::Sensor &sensor) {
     if (sensor.InsideNebula()) {
         return;
     }
@@ -607,9 +593,9 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor &sensor)
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "drawNavSymbol", "false"));
     if (draw_nav_symbol) {
         DrawNavigationSymbol(player->GetComputerData().NavPoint, CamP, CamQ,
-                             CamR.Cast()
-                                 .Dot((player->GetComputerData().NavPoint).Cast()
-                                              - _Universe->AccessCamera()->GetPosition()));
+                CamR.Cast()
+                        .Dot((player->GetComputerData().NavPoint).Cast()
+                                - _Universe->AccessCamera()->GetPosition()));
     }
     Radar::Track track = sensor.CreateTrack(target, Loc);
     GFXColor trackcolor = sensor.GetColor(track);
@@ -713,9 +699,9 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor &sensor)
                             && (ITTS_for_beams || (player->mounts[i].type->type != WEAPON_TYPE::BEAM))
                             && (ITTS_for_locks || (player->mounts[i].type->lock_time == 0))) {
                         iLoc = target->PositionITTS(PlayerPosition,
-                                                    PlayerVelocity,
-                                                    player->mounts[i].type->speed,
-                                                    steady_itts) - offs;
+                                PlayerVelocity,
+                                player->mounts[i].type->speed,
+                                steady_itts) - offs;
                         DrawITTSLine(Loc, iLoc, GFXColor(trackcolor.r, trackcolor.g, trackcolor.b, line_to_itts_alpha));
                     }
                 }
@@ -726,9 +712,9 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor &sensor)
                         && (ITTS_for_locks || (player->mounts[i].type->lock_time == 0))) {
                     mntcolor = MountColor(&player->mounts[i]);
                     iLoc = target->PositionITTS(PlayerPosition,
-                                                PlayerVelocity,
-                                                player->mounts[i].type->speed,
-                                                steady_itts) - offs;
+                            PlayerVelocity,
+                            player->mounts[i].type->speed,
+                            steady_itts) - offs;
                     DrawITTSMark(scatter, p, q, iLoc, mntcolor);
                 }
             }
@@ -736,8 +722,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor &sensor)
     }       // draw ITTS
 }
 
-void GameCockpit::DrawCommunicatingBoxes()
-{
+void GameCockpit::DrawCommunicatingBoxes() {
     Vector CamP, CamQ, CamR;
     _Universe->AccessCamera()->GetPQR(CamP, CamQ, CamR);
     //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
@@ -759,8 +744,7 @@ void GameCockpit::DrawCommunicatingBoxes()
     }
 }
 
-void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor &sensor)
-{
+void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor &sensor) {
     if (sensor.InsideNebula()) {
         return;
     }
@@ -796,8 +780,8 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor &sensor)
         if (draw_nav_symbol) {
             GFXColor4f(1, 1, 1, 1);
             DrawNavigationSymbol(subunit->GetComputerData().NavPoint, CamP, CamQ,
-                                 CamR.Cast().Dot((subunit->GetComputerData().NavPoint).Cast()
-                                                         - _Universe->AccessCamera()->GetPosition()));
+                    CamR.Cast().Dot((subunit->GetComputerData().NavPoint).Cast()
+                            - _Universe->AccessCamera()->GetPosition()));
         }
         GFXColorf(sensor.GetColor(track));
 
@@ -829,8 +813,7 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor &sensor)
     }
 }
 
-void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor &sensor)
-{
+void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor &sensor) {
     static bool drawtactarg =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "DrawTacticalTarget", "false"));
     if (!drawtactarg) {
@@ -887,20 +870,17 @@ void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor &sensor)
     }
 }
 
-void GameCockpit::Eject()
-{
+void GameCockpit::Eject() {
     ejecting = true;
     going_to_dock_screen = false;
 }
 
-void GameCockpit::EjectDock()
-{
+void GameCockpit::EjectDock() {
     ejecting = true;
     going_to_dock_screen = true;
 }
 
-void GameCockpit::DoAutoLanding(Unit *un, Unit *target)
-{
+void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     if (!un || !target) {
         return;
     }
@@ -978,17 +958,17 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target)
                 static string str1 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone1", "als");
                 static string str2 = vs_config->getVariable("cockpitaudio", "automatic_landing_zone2", "als");
                 static string autolandinga = vs_config->getVariable("graphics",
-                                                                    "automatic_landing_zone_warning",
-                                                                    "comm_docking.ani");
+                        "automatic_landing_zone_warning",
+                        "comm_docking.ani");
                 static string autolandinga1 = vs_config->getVariable("graphics",
-                                                                     "automatic_landing_zone_warning1",
-                                                                     "comm_docking.ani");
+                        "automatic_landing_zone_warning1",
+                        "comm_docking.ani");
                 static string autolandinga2 = vs_config->getVariable("graphics",
-                                                                     "automatic_landing_zone_warning2",
-                                                                     "comm_docking.ani");
+                        "automatic_landing_zone_warning2",
+                        "comm_docking.ani");
                 static string message = vs_config->getVariable("graphics",
-                                                               "automatic_landing_zone_warning_text",
-                                                               "Now Entering an \"Automatic Landing Zone\".");
+                        "automatic_landing_zone_warning_text",
+                        "Now Entering an \"Automatic Landing Zone\".");
                 UniverseUtil::IOmessage(0, "game", "all", message);
                 static Animation *ani0 = new Animation(autolandinga.c_str());
                 static Animation *ani1 = new Animation(autolandinga1.c_str());
@@ -1026,8 +1006,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target)
     }
 }
 
-void GameCockpit::AutoLanding()
-{
+void GameCockpit::AutoLanding() {
     static bool autolanding_enable =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "AutoLandingEnable", "false"));
     if (autolanding_enable) {
@@ -1052,8 +1031,7 @@ void GameCockpit::AutoLanding()
     }
 }
 
-void GameCockpit::DrawRadar(const Radar::Sensor &sensor)
-{
+void GameCockpit::DrawRadar(const Radar::Sensor &sensor) {
     if (radarSprites[0] || radarSprites[1]) {
         GFXDisable(TEXTURE0);
         GFXDisable(LIGHTING);
@@ -1088,8 +1066,7 @@ void GameCockpit::DrawRadar(const Radar::Sensor &sensor)
     }
 }
 
-float GameCockpit::LookupTargetStat(int stat, Unit *target)
-{
+float GameCockpit::LookupTargetStat(int stat, Unit *target) {
     switch (stat) {
         case UnitImages<void>::TARGETSHIELDF:
             return target->FShieldData();
@@ -1106,8 +1083,7 @@ float GameCockpit::LookupTargetStat(int stat, Unit *target)
     return 1;
 }
 
-float GameCockpit::LookupUnitStat(int stat, Unit *target)
-{
+float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
     static bool
             display_in_meters = XMLSupport::parse_bool(vs_config->getVariable("physics", "display_in_meters", "true"));
@@ -1211,9 +1187,9 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target)
         case UnitImages<void>::WARPENERGY: {
             static bool warpifnojump =
                     XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                  "hud",
-                                                                  "display_warp_energy_if_no_jump_drive",
-                                                                  "true"));
+                            "hud",
+                            "display_warp_energy_if_no_jump_drive",
+                            "true"));
             return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->warpEnergyData() : 0;
         }
         case UnitImages<void>::HULL:
@@ -1293,9 +1269,9 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target)
         case UnitImages<void>::MAXCOMBATABKPS: {
             static bool use_relative_velocity =
                     XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                                  "hud",
-                                                                  "display_relative_velocity",
-                                                                  "true"));
+                            "hud",
+                            "display_relative_velocity",
+                            "true"));
             float value;
             switch (stat) {
                 case UnitImages<void>::KPS:
@@ -1376,8 +1352,8 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target)
             int abletoautopilot = 0;
             static bool auto_valid =
                     XMLSupport::parse_bool(vs_config->getVariable("physics",
-                                                                  "insystem_jump_or_timeless_auto-pilot",
-                                                                  "false"));
+                            "insystem_jump_or_timeless_auto-pilot",
+                            "false"));
             if (target) {
                 if (!auto_valid) {
                     abletoautopilot = (target->graphicOptions.InWarp);
@@ -1400,8 +1376,8 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target)
                     static soundContainer autostopsound;
                     if (autostopsound.sound < 0) {
                         static string str = vs_config->getVariable("cockpitaudio",
-                                                                   "autopilot_available",
-                                                                   "autopilot_available");
+                                "autopilot_available",
+                                "autopilot_available");
                         autostopsound.loadsound(str);
                     }
                     autostopsound.playsound();
@@ -1409,8 +1385,8 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target)
                     static soundContainer autosound;
                     if (autosound.sound < 0) {
                         static string str = vs_config->getVariable("cockpitaudio",
-                                                                   "autopilot_unavailable",
-                                                                   "autopilot_unavailable");
+                                "autopilot_unavailable",
+                                "autopilot_unavailable");
                         autosound.loadsound(str);
                     }
                     autosound.playsound();
@@ -1463,7 +1439,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target)
         case UnitImages<void>::ECM_MODAL:
             if (target->ecm > 0) {
                 return (target->GetComputerData().ecmactive ? (float) UnitImages<void>::ACTIVE
-                                                            : (float) UnitImages<void>::READY);
+                        : (float) UnitImages<void>::READY);
             } else {
                 return (float) UnitImages<void>::NOTAPPLICABLE;
             }
@@ -1544,8 +1520,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target)
     return 1.0f;
 }
 
-void GameCockpit::DrawTargetGauges(Unit *target)
-{
+void GameCockpit::DrawTargetGauges(Unit *target) {
     int i;
     for (i = UnitImages<void>::TARGETSHIELDF; i < UnitImages<void>::KPS; i++) {
         if (gauges[i]) {
@@ -1557,24 +1532,22 @@ void GameCockpit::DrawTargetGauges(Unit *target)
     }
 }
 
-GameCockpit::LastState::LastState()
-{
+GameCockpit::LastState::LastState() {
     processing_time = 0;
 
     jumpok = jumpnotok =
-    specon = specoff =
-    asapon = asapoff =
-    asap_dockon = asap_dockoff =
-    asap_dock_avail =
-    dock =
-    dock_avail =
-    lock = missilelock =
-    eject =
-    flightcompon = flightcompoff = false;
+            specon = specoff =
+                    asapon = asapoff =
+                            asap_dockon = asap_dockoff =
+                                    asap_dock_avail =
+                                            dock =
+                                                    dock_avail =
+                                                            lock = missilelock =
+                                                                    eject =
+                                                                            flightcompon = flightcompoff = false;
 }
 
-void GameCockpit::TriggerEvents(Unit *un)
-{
+void GameCockpit::TriggerEvents(Unit *un) {
     double curtime = UniverseUtil::GetGameTime();
     if ((curtime - AUDIO_ATOM) < last.processing_time) {
         return;
@@ -1646,17 +1619,17 @@ void GameCockpit::TriggerEvents(Unit *un)
                 case ASAP_DOCKING_ENGAGED: {
                     float candock = LookupUnitStat(UnitImages<void>::CANDOCK_MODAL, un);
                     MODAL_TRIGGER("ASAP_DOCKING", true,
-                                  (un->autopilotactive && (candock == UnitImages<void>::READY
-                                          || candock == UnitImages<void>::AUTOREADY)),
-                                  asap_dockon);
+                            (un->autopilotactive && (candock == UnitImages<void>::READY
+                                    || candock == UnitImages<void>::AUTOREADY)),
+                            asap_dockon);
                 }
                     break;
                 case ASAP_DOCKING_DISENGAGED: {
                     float candock = LookupUnitStat(UnitImages<void>::CANDOCK_MODAL, un);
                     MODAL_TRIGGER("ASAP_DOCKING", false,
-                                  (un->autopilotactive && (candock == UnitImages<void>::READY
-                                          || candock == UnitImages<void>::AUTOREADY)),
-                                  asap_dockoff);
+                            (un->autopilotactive && (candock == UnitImages<void>::READY
+                                    || candock == UnitImages<void>::AUTOREADY)),
+                            asap_dockoff);
                 }
                     break;
                 case JUMP_AVAILABLE:
@@ -1717,8 +1690,7 @@ void GameCockpit::TriggerEvents(Unit *un)
     } // for
 }
 
-void GameCockpit::DrawGauges(Unit *un)
-{
+void GameCockpit::DrawGauges(Unit *un) {
     int i;
     for (i = 0; i < UnitImages<void>::TARGETSHIELDF; i++) {
         if (gauges[i]) {
@@ -1897,8 +1869,7 @@ void GameCockpit::DrawGauges(Unit *un)
     GFXColor4f(1, 1, 1, 1);
 }
 
-void GameCockpit::Init(const char *file)
-{
+void GameCockpit::Init(const char *file) {
     smooth_fov = g_game.fov;
     editingTextMessage = false;
     armor8 = false;
@@ -1911,8 +1882,7 @@ void GameCockpit::Init(const char *file)
     }
 }
 
-void GameCockpit::Delete()
-{
+void GameCockpit::Delete() {
     Cockpit::Delete();
 
     if (text != nullptr) {
@@ -1968,8 +1938,7 @@ void GameCockpit::Delete()
     Panel.clear();
 }
 
-void GameCockpit::InitStatic()
-{
+void GameCockpit::InitStatic() {
     int i;
     for (i = 0; i < UnitImages<void>::NUMGAUGES; i++) {
         gauge_time[i] = 0;
@@ -1984,15 +1953,14 @@ void GameCockpit::InitStatic()
 /***** WARNING CHANGED ORDER *****/
 GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilot_name)
         : Cockpit(file, parent, pilot_name),
-          insidePanYaw(0),
-          insidePanPitch(0),
-          insidePanYawSpeed(0),
-          insidePanPitchSpeed(0),
-          shake_time(0),
-          shake_type(0),
-          textcol(1, 1, 1, 1),
-          text(NULL)
-{
+        insidePanYaw(0),
+        insidePanPitch(0),
+        insidePanYawSpeed(0),
+        insidePanPitchSpeed(0),
+        shake_time(0),
+        shake_type(0),
+        textcol(1, 1, 1, 1),
+        text(NULL) {
     autoMessageTime = 0;
     shield8 = armor8 = false;
     editingTextMessage = false;
@@ -2052,8 +2020,7 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     updateRadar(parent);
 }
 
-void GameCockpit::SelectProperCamera()
-{
+void GameCockpit::SelectProperCamera() {
     SelectCamera(view);
 }
 
@@ -2061,14 +2028,12 @@ extern vector<int> respawnunit;
 extern vector<int> switchunit;
 extern vector<int> turretcontrol;
 
-void DoCockpitKeys()
-{
+void DoCockpitKeys() {
     CockpitKeys::Pan(KBData(), PRESS);
     CockpitKeys::Inside(KBData(), PRESS);
 }
 
-void GameCockpit::NavScreen(const KBData &, KBSTATE k)
-{
+void GameCockpit::NavScreen(const KBData &, KBSTATE k) {
     //scheherazade
     if (k == PRESS) {
         //UniverseUtil::IOmessage(0,"game","all","hit key");
@@ -2087,25 +2052,22 @@ void GameCockpit::NavScreen(const KBData &, KBSTATE k)
     }
 }
 
-bool GameCockpit::SetDrawNavSystem(bool what)
-{
+bool GameCockpit::SetDrawNavSystem(bool what) {
     ThisNav.SetDraw(what);
     return what;
 }
 
-bool GameCockpit::CanDrawNavSystem()
-{
+bool GameCockpit::CanDrawNavSystem() {
     return ThisNav.CheckDraw();
 }
 
-void GameCockpit::visitSystem(string systemname)
-{
+void GameCockpit::visitSystem(string systemname) {
     Cockpit::visitSystem(systemname);
     if (AccessNavSystem()) {
         static bool AlwaysUpdateNavMap =
                 XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                              "update_nav_after_jump",
-                                                              "false"));                              //causes occasional crash--only may have tracked it down
+                        "update_nav_after_jump",
+                        "false"));                              //causes occasional crash--only may have tracked it down
         if (AlwaysUpdateNavMap) {
             AccessNavSystem()->pathman->updatePaths();
         }
@@ -2113,8 +2075,7 @@ void GameCockpit::visitSystem(string systemname)
     }
 }
 
-bool GameCockpit::DrawNavSystem()
-{
+bool GameCockpit::DrawNavSystem() {
     bool ret = ThisNav.CheckDraw();
     if (ret) {
         Camera *cam = AccessCamera(currentcamera);
@@ -2126,8 +2087,7 @@ bool GameCockpit::DrawNavSystem()
     return ret;
 }
 
-void RespawnNow(Cockpit *cp)
-{
+void RespawnNow(Cockpit *cp) {
     while (respawnunit.size() <= _Universe->numPlayers()) {
         respawnunit.push_back(0);
     }
@@ -2138,8 +2098,7 @@ void RespawnNow(Cockpit *cp)
     }
 }
 
-void GameCockpit::SwitchControl(const KBData &, KBSTATE k)
-{
+void GameCockpit::SwitchControl(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         while (switchunit.size() <= _Universe->CurrentCockpit()) {
             switchunit.push_back(0);
@@ -2148,16 +2107,14 @@ void GameCockpit::SwitchControl(const KBData &, KBSTATE k)
     }
 }
 
-void GameCockpit::ForceSwitchControl(const KBData &, KBSTATE k)
-{
+void GameCockpit::ForceSwitchControl(const KBData &, KBSTATE k) {
     while (switchunit.size() <= _Universe->CurrentCockpit()) {
         switchunit.push_back(0);
     }
     switchunit[_Universe->CurrentCockpit()] = 1;
 }
 
-void SuicideKey(const KBData &, KBSTATE k)
-{
+void SuicideKey(const KBData &, KBSTATE k) {
     static int orig = 0;
     if (k == PRESS) {
         int newtime = time(NULL);
@@ -2178,21 +2135,18 @@ class UnivMap {
     VSSprite *ll;
     VSSprite *lr;
 public:
-    bool isNull()
-    {
+    bool isNull() {
         return ul == NULL;
     }
 
-    UnivMap(VSSprite *ull, VSSprite *url, VSSprite *lll, VSSprite *lrl)
-    {
+    UnivMap(VSSprite *ull, VSSprite *url, VSSprite *lll, VSSprite *lrl) {
         ul = ull;
         ur = url;
         ll = lll;
         lr = lrl;
     }
 
-    void Draw()
-    {
+    void Draw() {
         if (ul || ur || ll || lr) {
             GFXBlendMode(SRCALPHA, INVSRCALPHA);
             GFXEnable(TEXTURE0);
@@ -2216,8 +2170,7 @@ public:
 
 std::vector<UnivMap> univmap;
 
-void MapKey(const KBData &, KBSTATE k)
-{
+void MapKey(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         static VSSprite ul("upper-left-map.spr");
         static VSSprite ur("upper-right-map.spr");
@@ -2234,8 +2187,7 @@ void MapKey(const KBData &, KBSTATE k)
     }
 }
 
-void GameCockpit::TurretControl(const KBData &, KBSTATE k)
-{
+void GameCockpit::TurretControl(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         while (turretcontrol.size() <= _Universe->CurrentCockpit()) {
             turretcontrol.push_back(0);
@@ -2244,8 +2196,7 @@ void GameCockpit::TurretControl(const KBData &, KBSTATE k)
     }
 }
 
-void GameCockpit::Respawn(const KBData &, KBSTATE k)
-{
+void GameCockpit::Respawn(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         while (respawnunit.size() <= _Universe->CurrentCockpit()) {
             respawnunit.push_back(0);
@@ -2255,8 +2206,7 @@ void GameCockpit::Respawn(const KBData &, KBSTATE k)
 }
 
 //SAME AS IN COCKPIT BUT ADDS SETVIEW and ACCESSCAMERA -> ~ DUPLICATE CODE
-int GameCockpit::Autopilot(Unit *target)
-{
+int GameCockpit::Autopilot(Unit *target) {
     static bool autopan = XMLSupport::parse_bool(vs_config->getVariable("graphics", "pan_on_auto", "true"));
     int retauto = 0;
     if (target) {
@@ -2279,7 +2229,7 @@ int GameCockpit::Autopilot(Unit *target)
                 if (autoMessage.length() == 0 && !movedatall) {
                     autoMessage =
                             XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "AlreadyNearMessage",
-                                                                              "#ff0000Already Near#000000"));
+                                    "#ff0000Already Near#000000"));
                     retauto = false;
                 } else if ((retauto || retautoA) && movedatall) {
                     if (autopan) {
@@ -2289,28 +2239,28 @@ int GameCockpit::Autopilot(Unit *target)
                         un->GetOrientation(uP, uQ, uR);
                         static float auto_side_bias =
                                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                               "autopilot_side_bias",
-                                                                               "1.1"));
+                                        "autopilot_side_bias",
+                                        "1.1"));
                         static float auto_front_bias =
                                 XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                               "autopilot_front_bias",
-                                                                               "1.65"));
+                                        "autopilot_front_bias",
+                                        "1.65"));
                         P += uP * auto_side_bias + uR * auto_front_bias;
                         P.Normalize();
                         R = P.Cross(Q);
                         AccessCamera(CP_FIXED)->SetPosition(un->LocalPosition() + 2 * un->rSize() * P,
-                                                            Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0));
+                                Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0));
                         AccessCamera(CP_FIXED)->SetOrientation(R, Q, -P);
                         AccessCamera(CP_FIXEDPOS)->SetPosition(un->LocalPosition() + 2 * un->rSize() * P, Vector(0,
-                                                                                                                 0,
-                                                                                                                 0),
-                                                               Vector(0, 0, 0), Vector(0, 0, 0));
+                                        0,
+                                        0),
+                                Vector(0, 0, 0), Vector(0, 0, 0));
                         AccessCamera(CP_FIXEDPOS)->SetOrientation(R, Q, -P);
                     }
 
                     static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                                                           "autotime",
-                                                                                           "10"));                    //10 seconds for auto to kick in;
+                            "autotime",
+                            "10"));                    //10 seconds for auto to kick in;
 
                     autopilot_time = autotime;
                     autopilot_target.SetUnit(target);
@@ -2323,8 +2273,7 @@ int GameCockpit::Autopilot(Unit *target)
 
 extern void reset_time_compression(const KBData &, KBSTATE a);
 
-void GameCockpit::Shake(float amt, int dtype)
-{
+void GameCockpit::Shake(float amt, int dtype) {
     static float shak = XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_shake", "3"));
     static float shak_max = XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_shake_max", "20"));
     shakin += shak;
@@ -2335,8 +2284,7 @@ void GameCockpit::Shake(float amt, int dtype)
     this->shake_type = dtype;
 }
 
-static void DrawDamageFlash(int dtype)
-{
+static void DrawDamageFlash(int dtype) {
     const int numtypes = 3;
     static string shieldflash = vs_config->getVariable("graphics", "shield_flash_animation", "");
     static string armorflash = vs_config->getVariable("graphics", "armor_flash_animation", "armorflash.ani");
@@ -2389,9 +2337,9 @@ static void DrawDamageFlash(int dtype)
                 GFXDraw(GFXQUAD, verts, 4, 3, 0, 2);
             } else {
                 GFXColor4f(fallbackcolor[i].r,
-                           fallbackcolor[i].g,
-                           fallbackcolor[i].b,
-                           fallbackcolor[i].a);
+                        fallbackcolor[i].g,
+                        fallbackcolor[i].b,
+                        fallbackcolor[i].a);
                 GFXDisable(TEXTURE0);
 
                 static const float verts[4 * 3] = {
@@ -2410,8 +2358,7 @@ static void DrawDamageFlash(int dtype)
     GFXColor4f(1, 1, 1, 1);
 }
 
-static void DrawHeadingMarker(const Vector &p, const Vector &q, const Vector &pos, float size)
-{
+static void DrawHeadingMarker(const Vector &p, const Vector &q, const Vector &pos, float size) {
     static VertexBuilder<> verts;
     verts.clear();
     verts.insert(pos + (2.5 * size) * p);
@@ -2429,8 +2376,7 @@ static void DrawHeadingMarker(const Vector &p, const Vector &q, const Vector &po
     GFXDraw(GFXLINESTRIP, verts);
 }
 
-static void DrawHeadingMarker(Cockpit &cp, const GFXColor &col)
-{
+static void DrawHeadingMarker(Cockpit &cp, const GFXColor &col) {
     const Unit *u = cp.GetParent();
     const Camera *cam = cp.AccessCamera();
     bool drawv = true;
@@ -2483,8 +2429,7 @@ static void DrawHeadingMarker(Cockpit &cp, const GFXColor &col)
     GFXEnable(TEXTURE0);
 }
 
-static void DrawCrosshairs(float x, float y, float wid, float hei, const GFXColor &col)
-{
+static void DrawCrosshairs(float x, float y, float wid, float hei, const GFXColor &col) {
     GFXColorf(col);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
@@ -2518,8 +2463,7 @@ extern bool screenshotkey;
 QVector SystemLocation(std::string system);
 double howFarToJump();
 
-void GameCockpit::Draw()
-{
+void GameCockpit::Draw() {
     static bool drawHeadingMarker = parse_bool(vs_config->getVariable("graphics", "draw_heading_marker", "false"));
     static bool draw_star_destination_arrow =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_star_direction", "true"));
@@ -2576,9 +2520,9 @@ void GameCockpit::Draw()
                     AccessCamera()->GetPQR(P, Q, R);
 
                     GFXColor4f(destination_system_color.r,
-                               destination_system_color.g,
-                               destination_system_color.b,
-                               destination_system_color.a);
+                            destination_system_color.g,
+                            destination_system_color.b,
+                            destination_system_color.a);
 
                     static GFXColor suncol = vs_config->getColor("remote_star", GFXColor(0, 1, 1, .8));
                     GFXColorf(suncol);
@@ -2661,11 +2605,11 @@ void GameCockpit::Draw()
                         max(1.0f, ((GetParent() != NULL) ? LookupUnitStat(UnitImages<void>::SETKPS, GetParent()) : 0));
                 float warp_strength =
                         max(0.0f,
-                            min(max(0.0f,
-                                    min(1.0f,
-                                        self_kps / self_setkps)),
-                                ((GetParent() != NULL) ? LookupUnitStat(UnitImages<void>::WARPFIELDSTRENGTH,
-                                                                        GetParent()) : 0.0f) / warp_shake_ref));
+                                min(max(0.0f,
+                                                min(1.0f,
+                                                        self_kps / self_setkps)),
+                                        ((GetParent() != NULL) ? LookupUnitStat(UnitImages<void>::WARPFIELDSTRENGTH,
+                                                GetParent()) : 0.0f) / warp_shake_ref));
                 if (shakin > shake_limit) {
                     shakin = shake_limit;
                 }
@@ -2702,19 +2646,19 @@ void GameCockpit::Draw()
                 //if (COCKPITZ_PARTITIONS>1) GFXClear(GFXFALSE,GFXFALSE,GFXTRUE);//only clear stencil buffer
                 static size_t COCKPITZ_PARTITIONS =
                         XMLSupport::parse_int(vs_config->getVariable("graphics",
-                                                                     "cockpit_z_partitions",
-                                                                     "1"));                                         //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
+                                "cockpit_z_partitions",
+                                "1"));                                         //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
                 float zrange = cockpitradial * (1 - VERYNEAR_CONST) + driftmag;
                 float zfloor = cockpitradial * VERYNEAR_CONST;
                 for (j = COCKPITZ_PARTITIONS; j > 0;
-                     j--) { //FIXME This is a program lockup!!! (actually, no; j is a size_t...)
+                        j--) { //FIXME This is a program lockup!!! (actually, no; j is a size_t...)
                     AccessCamera()->UpdateGFX(GFXTRUE,
-                                              GFXTRUE,
-                                              GFXTRUE,
-                                              GFXTRUE,
-                                              zfloor + zrange * (j - 1) / COCKPITZ_PARTITIONS,
-                                              zfloor + zrange * j
-                                                      / COCKPITZ_PARTITIONS);                                                                                       //cockpit-specific frustrum (with clipping, with frustrum update)
+                            GFXTRUE,
+                            GFXTRUE,
+                            GFXTRUE,
+                            zfloor + zrange * (j - 1) / COCKPITZ_PARTITIONS,
+                            zfloor + zrange * j
+                                    / COCKPITZ_PARTITIONS);                                                                                       //cockpit-specific frustrum (with clipping, with frustrum update)
                     for (i = 0; i < mesh.size(); ++i) {
                         mesh[i]->Draw(FLT_MAX, headtrans.back());
                     }
@@ -2732,7 +2676,7 @@ void GameCockpit::Draw()
             }
         }
         _Universe->AccessCamera()
-                 ->UpdateGFX(GFXFALSE, GFXFALSE, GFXTRUE, GFXFALSE, 0, 1000000);         //Restore normal frustrum
+                ->UpdateGFX(GFXFALSE, GFXFALSE, GFXTRUE, GFXFALSE, 0, 1000000);         //Restore normal frustrum
     }
     GFXHudMode(true);
     static float damage_flash_length =
@@ -2759,9 +2703,9 @@ void GameCockpit::Draw()
         if (Panel.size() > 0 && Panel.front() && screenshotkey == false) {
             static bool drawCrosshairs =
                     parse_bool(vs_config->getVariable("graphics", "hud", "draw_rendered_crosshairs",
-                                                      vs_config->getVariable("graphics",
-                                                                             "draw_rendered_crosshairs",
-                                                                             "true")));
+                            vs_config->getVariable("graphics",
+                                    "draw_rendered_crosshairs",
+                                    "true")));
             if (drawCrosshairs) {
                 float x, y, wid, hei;
                 Panel.front()->GetPosition(x, y);
@@ -3121,7 +3065,7 @@ void GameCockpit::Draw()
             float xcoord = (-1 + float(mousex) / (.5 * g_game.x_resolution));
             float ycoord = (-revspr + float(revspr * mousey) / (.5 * g_game.y_resolution));
             MouseVSSprite.SetPosition(xcoord * (1 - fabs(crosscenx)) + crosscenx,
-                                      ycoord * (1 - fabs(crossceny)) + crossceny);
+                    ycoord * (1 - fabs(crossceny)) + crossceny);
             float xs, ys;
             MouseVSSprite.GetSize(xs, ys);
             if (xcoord < deadband && ycoord < deadband && xcoord > -deadband && ycoord > -deadband) {
@@ -3159,8 +3103,7 @@ void GameCockpit::Draw()
     GFXEnable(TEXTURE0);
 }
 
-int GameCockpit::getScrollOffset(unsigned int whichtype)
-{
+int GameCockpit::getScrollOffset(unsigned int whichtype) {
     for (unsigned int i = 0; i < vdu.size(); i++) {
         if (vdu[i]->getMode() & whichtype) {
             return vdu[i]->scrolloffset;
@@ -3169,8 +3112,7 @@ int GameCockpit::getScrollOffset(unsigned int whichtype)
     return 0;
 }
 
-string GameCockpit::getsoundending(int which)
-{
+string GameCockpit::getsoundending(int which) {
     static bool gotten = false;
     static string strs[9];
     if (gotten == false) {
@@ -3191,8 +3133,7 @@ string GameCockpit::getsoundending(int which)
 
 #include <algorithm>
 
-string GameCockpit::getsoundfile(string sound)
-{
+string GameCockpit::getsoundfile(string sound) {
     bool ok = false;
     int i;
     string lastsound = "";
@@ -3227,8 +3168,7 @@ string GameCockpit::getsoundfile(string sound)
 
 void SetStartupView(Cockpit *);
 
-void GameCockpit::UpdAutoPilot()
-{
+void GameCockpit::UpdAutoPilot() {
     static bool autopan = XMLSupport::parse_bool(vs_config->getVariable("graphics", "pan_on_auto", "true"));
     if (autopilot_time != 0) {
         autopilot_time -= SIMULATION_ATOM;
@@ -3279,8 +3219,7 @@ void GameCockpit::UpdAutoPilot()
     }
 }
 
-void SwitchUnits2(Unit *nw)
-{
+void SwitchUnits2(Unit *nw) {
     if (nw) {
         nw->PrimeOrders();
         nw->EnqueueAI(new FireKeyboard(_Universe->CurrentCockpit(), _Universe->CurrentCockpit()));
@@ -3293,8 +3232,8 @@ void SwitchUnits2(Unit *nw)
                 XMLSupport::parse_bool(vs_config->getVariable("graphics", "UnitSwitchCockpitChange", "false"));
         static bool DisCockpit =
                 XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                                              "SwitchCockpitToDefaultOnUnitSwitch",
-                                                              "false"));
+                        "SwitchCockpitToDefaultOnUnitSwitch",
+                        "false"));
         if (nw->getCockpit().length() > 0 || DisCockpit) {
             _Universe->AccessCockpit()->Init(nw->getCockpit().c_str(), LoadNewCockpit == false);
         }
@@ -3312,8 +3251,7 @@ void SwitchUnits2(Unit *nw)
     }
 }
 
-GameCockpit::~GameCockpit()
-{
+GameCockpit::~GameCockpit() {
     Delete();
     int i;
     for (i = 0; i < 4; i++) {
@@ -3325,8 +3263,7 @@ GameCockpit::~GameCockpit()
     delete savegame;
 }
 
-int GameCockpit::getVDUMode(int vdunum)
-{
+int GameCockpit::getVDUMode(int vdunum) {
     if (vdunum < (int) vdu.size()) {
         if (vdu[vdunum]) {
             return vdu[vdunum]->getMode();
@@ -3335,8 +3272,7 @@ int GameCockpit::getVDUMode(int vdunum)
     return 0;
 }
 
-void GameCockpit::VDUSwitch(int vdunum)
-{
+void GameCockpit::VDUSwitch(int vdunum) {
     if (soundfile >= 0) {
         //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0), .5);
         AUDPlay(soundfile, QVector(0, 0, 0), Vector(0, 0, 0), 1);
@@ -3348,8 +3284,7 @@ void GameCockpit::VDUSwitch(int vdunum)
     }
 }
 
-void GameCockpit::ScrollVDU(int vdunum, int howmuch)
-{
+void GameCockpit::ScrollVDU(int vdunum, int howmuch) {
     if (soundfile >= 0) {
         //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0),.5);
         AUDPlay(soundfile, QVector(0, 0, 0), Vector(0, 0, 0), 1);
@@ -3361,8 +3296,7 @@ void GameCockpit::ScrollVDU(int vdunum, int howmuch)
     }
 }
 
-void GameCockpit::ScrollAllVDU(int howmuch)
-{
+void GameCockpit::ScrollAllVDU(int howmuch) {
     if (ThisNav.CheckDraw()) {
         ThisNav.scroll(howmuch);
     } else {
@@ -3372,8 +3306,7 @@ void GameCockpit::ScrollAllVDU(int howmuch)
     }
 }
 
-void GameCockpit::SetStaticAnimation()
-{
+void GameCockpit::SetStaticAnimation() {
     static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
     static Animation Statuc(comm_static.c_str());
     for (unsigned int i = 0; i < vdu.size(); i++) {
@@ -3383,8 +3316,7 @@ void GameCockpit::SetStaticAnimation()
     }
 }
 
-void GameCockpit::SetCommAnimation(Animation *ani, Unit *un)
-{
+void GameCockpit::SetCommAnimation(Animation *ani, Unit *un) {
     bool seti = false;
     for (unsigned int i = 0; i < vdu.size(); i++) {
         if (vdu[i]->SetCommAnimation(ani, un, false)) {
@@ -3401,8 +3333,7 @@ void GameCockpit::SetCommAnimation(Animation *ani, Unit *un)
     }
 }
 
-string GameCockpit::getTargetLabel()
-{
+string GameCockpit::getTargetLabel() {
     Unit *par = GetParent();
     if ((!targetLabel.empty())
             && (!par || ((void *) par->Target()) != labeledTargetUnit)) {
@@ -3414,21 +3345,18 @@ string GameCockpit::getTargetLabel()
     return targetLabel;
 }
 
-void GameCockpit::setTargetLabel(const string &newLabel)
-{
+void GameCockpit::setTargetLabel(const string &newLabel) {
     if (GetParent()) {
         targetLabel = newLabel;
         labeledTargetUnit = GetParent()->Target();
     }
 }
 
-void GameCockpit::RestoreViewPort()
-{
+void GameCockpit::RestoreViewPort() {
     _Universe->AccessCamera()->RestoreViewPort(0, 0);
 }
 
-static void FaceCamTarget(Cockpit *cp, int cam, Unit *un)
-{
+static void FaceCamTarget(Cockpit *cp, int cam, Unit *un) {
     QVector diff = un->Position() - cp->AccessCamera()->GetPosition();
     diff.Normalize();
     if (diff.i != 0 && diff.k != 0) {
@@ -3437,8 +3365,7 @@ static void FaceCamTarget(Cockpit *cp, int cam, Unit *un)
     }
 }
 
-static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor)
-{
+static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor) {
     //commented out by chuck_starchaser; --never used
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     _Universe->AccessCamera(cam)->SetPosition(
@@ -3446,8 +3373,7 @@ static void ShoveCamBehindUnit(int cam, Unit *un, float zoomfactor)
             un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration());
 }
 
-static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor)
-{
+static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     //commented out by chuck_starchaser; --never used
     QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     Vector p, q, r;
@@ -3461,22 +3387,20 @@ static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor)
             un->GetAcceleration());
 }
 
-static Vector lerp(const Vector &a, const Vector &b, float t)
-{
+static Vector lerp(const Vector &a, const Vector &b, float t) {
     t = min(1.0f, max(0.0f, t));
     return a * (1 - t) + b * t;
 }
 
 static void translate_as(Vector &p,
-                         Vector &q,
-                         Vector &r,
-                         Vector p1,
-                         Vector q1,
-                         Vector r1,
-                         Vector p2,
-                         Vector q2,
-                         Vector r2)
-{
+        Vector &q,
+        Vector &r,
+        Vector p1,
+        Vector q1,
+        Vector r1,
+        Vector p2,
+        Vector q2,
+        Vector r2) {
     //Translate p,q,r to <p1,q1,r1> base
     p = Vector(p.Dot(p1), p.Dot(q1), p.Dot(r1));
     q = Vector(q.Dot(p1), q.Dot(q1), q.Dot(r1));
@@ -3487,13 +3411,12 @@ static void translate_as(Vector &p,
     r = p2 * r.i + q2 * r.j + r2 * r.k;
 }
 
-void GameCockpit::SetupViewPort(bool clip)
-{
+void GameCockpit::SetupViewPort(bool clip) {
     _Universe->AccessCamera()->RestoreViewPort(0, (view == CP_FRONT ? viewport_offset : 0));
     GFXViewPort(0,
-                (int) ((view == CP_FRONT ? viewport_offset : 0) * g_game.y_resolution),
-                g_game.x_resolution,
-                g_game.y_resolution);
+            (int) ((view == CP_FRONT ? viewport_offset : 0) * g_game.y_resolution),
+            g_game.x_resolution,
+            g_game.y_resolution);
     _Universe->AccessCamera()->setCockpitOffset(view < CP_CHASE ? cockpit_offset : 0);
     Unit *un, *tgt;
     if ((un = parent.GetUnit())) {
@@ -3543,9 +3466,9 @@ void GameCockpit::SetupViewPort(bool clip)
                 static float PadlockViewLag_inv = 1.f / PadlockViewLag;
                 static float PadlockViewLag_fix =
                         XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                       "hud",
-                                                                       "PadlockViewLagFixZone",
-                                                                       "0.0872"));                                            //~5 deg
+                                "hud",
+                                "PadlockViewLagFixZone",
+                                "0.0872"));                                            //~5 deg
                 static float PadlockViewLag_fixcos = (float) cos(PadlockViewLag_fix);
 
                 //pp,qq,rr <-- world-relative padlock target
@@ -3604,26 +3527,26 @@ void GameCockpit::SetupViewPort(bool clip)
                     XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp.fovlink.stable.asymptotic", "1"));
             static float stable_offset_f =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.stable.offset.front",
-                                                                   "0"));
+                            "warp.fovlink.stable.offset.front",
+                            "0"));
             static float stable_offset_b =
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.stable.offset.back", "0"));
             static float stable_offset_p =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.stable.offset.perpendicular",
-                                                                   "0"));
+                            "warp.fovlink.stable.offset.perpendicular",
+                            "0"));
             static float stable_multiplier_f =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.stable.multiplier.front",
-                                                                   "0.85"));
+                            "warp.fovlink.stable.multiplier.front",
+                            "0.85"));
             static float stable_multiplier_b =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.stable.multiplier.back",
-                                                                   "1.5"));
+                            "warp.fovlink.stable.multiplier.back",
+                            "1.5"));
             static float stable_multiplier_p =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.stable.multiplier.perpendicular",
-                                                                   "1.25"));
+                            "warp.fovlink.stable.multiplier.perpendicular",
+                            "1.25"));
 
             static float shake_lowarpref =
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.loref", "10000"));
@@ -3641,25 +3564,25 @@ void GameCockpit::SetupViewPort(bool clip)
                     XMLSupport::parse_float(vs_config->getVariable("graphics", "warp.fovlink.shake.offset.back", "0"));
             static float shake_offset_p =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.shake.offset.perpendicular",
-                                                                   "0"));
+                            "warp.fovlink.shake.offset.perpendicular",
+                            "0"));
             static float shake_multiplier_f =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.shake.multiplier.front",
-                                                                   "0"));
+                            "warp.fovlink.shake.multiplier.front",
+                            "0"));
             static float shake_multiplier_b =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.shake.multiplier.back",
-                                                                   "0"));
+                            "warp.fovlink.shake.multiplier.back",
+                            "0"));
             static float shake_multiplier_p =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.shake.multiplier.perpendicular",
-                                                                   "0"));
+                            "warp.fovlink.shake.multiplier.perpendicular",
+                            "0"));
 
             static float refkpsoverride =
                     XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                                                   "warp.fovlink.referencekps",
-                                                                   "0"));                                       //0 means automatic
+                            "warp.fovlink.referencekps",
+                            "0"));                                       //0 means automatic
 
             static float theta = 0;
             theta += shake_speed * GetElapsedTime();
@@ -3671,18 +3594,18 @@ void GameCockpit::SetupViewPort(bool clip)
             }
             float warpfieldstrength = LookupUnitStat(UnitImages<void>::WARPFIELDSTRENGTH, un);
             float refkps = (refkpsoverride > 0) ? refkpsoverride : LookupUnitStat(UnitImages<void>::MAXCOMBATABKPS,
-                                                                                  un);               //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
+                    un);               //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
             float kps = LookupUnitStat(UnitImages<void>::KPS, un);
             float st_warpfieldstrength =
                     pow((max(stable_lowarpref,
-                             min(stable_asymptotic ? FLT_MAX : stable_hiwarpref,
-                                 warpfieldstrength)) - stable_lowarpref) / (stable_hiwarpref - stable_lowarpref),
-                        stable_refexp);
+                                    min(stable_asymptotic ? FLT_MAX : stable_hiwarpref,
+                                            warpfieldstrength)) - stable_lowarpref) / (stable_hiwarpref - stable_lowarpref),
+                            stable_refexp);
             float sh_warpfieldstrength =
                     pow((max(shake_lowarpref, min(shake_asymptotic ? FLT_MAX : shake_hiwarpref,
-                                                  warpfieldstrength)) - shake_lowarpref)
-                                / (shake_hiwarpref - shake_lowarpref),
-                        shake_refexp);
+                                    warpfieldstrength)) - shake_lowarpref)
+                                    / (shake_hiwarpref - shake_lowarpref),
+                            shake_refexp);
             float costheta = cos(theta);
             if (stable_asymptotic) {
                 st_warpfieldstrength = atan(st_warpfieldstrength);
@@ -3726,9 +3649,9 @@ void GameCockpit::SetupViewPort(bool clip)
             float fov_smoot = pow(double(fov_smoothing), GetElapsedTime());
             smooth_fov =
                     min(170.0f,
-                        max(5.0f,
-                            (1 - fov_smoot) * smooth_fov
-                                    + fov_smoot * (g_game.fov * (st_mult + sh_mult) + st_offs + sh_offs)));
+                            max(5.0f,
+                                    (1 - fov_smoot) * smooth_fov
+                                            + fov_smoot * (g_game.fov * (st_mult + sh_mult) + st_offs + sh_offs)));
             _Universe->AccessCamera()->SetFov(smooth_fov);
         }
     }
@@ -3737,15 +3660,13 @@ void GameCockpit::SetupViewPort(bool clip)
     //parent->UpdateHudMatrix();
 }
 
-void GameCockpit::SelectCamera(int cam)
-{
+void GameCockpit::SelectCamera(int cam) {
     if (cam < NUM_CAM && cam >= 0) {
         currentcamera = cam;
     }
 }
 
-Camera *GameCockpit::AccessCamera(int num)
-{
+Camera *GameCockpit::AccessCamera(int num) {
     if (num < NUM_CAM && num >= 0) {
         return &cam[num];
     } else {
@@ -3761,8 +3682,7 @@ Camera *GameCockpit::AccessCamera(int num)
 #define TARGET_ARROW_SIN_THETA (0.34202014332566873304409961468226)
 #define TARGET_ARROW_SIZE (0.05)
 
-void GameCockpit::DrawArrowToTarget(const Radar::Sensor &sensor, Unit *target)
-{
+void GameCockpit::DrawArrowToTarget(const Radar::Sensor &sensor, Unit *target) {
     Unit *player = sensor.GetPlayer();
     if (player && target) {
         Radar::Track track = sensor.CreateTrack(target);
@@ -3771,8 +3691,7 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor &sensor, Unit *target)
     }
 }
 
-void GameCockpit::DrawArrowToTarget(const Radar::Sensor &sensor, Vector localcoord)
-{
+void GameCockpit::DrawArrowToTarget(const Radar::Sensor &sensor, Vector localcoord) {
     float s, t, s_normalized, t_normalized, inv_len;
     Vector p1, p2, p_n;
 
@@ -3846,8 +3765,7 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor &sensor, Vector localcoo
     GFXDisable(SMOOTH);
 }
 
-bool GameCockpit::CheckCommAnimation(Unit *un)
-{
+bool GameCockpit::CheckCommAnimation(Unit *un) {
     for (unsigned int i = 0; i < vdu.size(); ++i) {
         if (vdu[i]->CheckCommAnimation(un)) {
             return true;
@@ -3856,24 +3774,20 @@ bool GameCockpit::CheckCommAnimation(Unit *un)
     return false;
 }
 
-bool GameCockpit::IsPaused() const
-{
+bool GameCockpit::IsPaused() const {
     // stephengtuggy 2020-07-21 FIXME - I don't think this is correct
     return (GetElapsedTime() <= 0.001);
 }
 
-void GameCockpit::OnPauseBegin()
-{
+void GameCockpit::OnPauseBegin() {
     radarDisplay->OnPauseBegin();
 }
 
-void GameCockpit::OnPauseEnd()
-{
+void GameCockpit::OnPauseEnd() {
     radarDisplay->OnPauseEnd();
 }
 
-void GameCockpit::updateRadar(Unit *ship)
-{
+void GameCockpit::updateRadar(Unit *ship) {
     if (ship) {
         // We may have bought a new radar brand while docked, so the actual
         // radar display is instantiated when we undock.
@@ -3896,44 +3810,37 @@ void GameCockpit::updateRadar(Unit *ship)
 
 }
 
-void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc)
-{
+void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) {
     this->Cockpit::SetParent(unit, filename, unitmodname, startloc);
     updateRadar(unit);
 }
 
-void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
-{
+void GameCockpit::OnDockEnd(Unit *station, Unit *ship) {
     if (_Universe->isPlayerStarship(ship)) {
         updateRadar(ship);
     }
 }
 
-void GameCockpit::OnJumpBegin(Unit *ship)
-{
+void GameCockpit::OnJumpBegin(Unit *ship) {
     if (_Universe->isPlayerStarship(ship)) {
         radarDisplay->OnJumpBegin();
     }
 }
 
-void GameCockpit::OnJumpEnd(Unit *ship)
-{
+void GameCockpit::OnJumpEnd(Unit *ship) {
     if (_Universe->isPlayerStarship(ship)) {
         radarDisplay->OnJumpEnd();
     }
 }
 
-void GameCockpit::SetInsidePanYawSpeed(float speed)
-{
+void GameCockpit::SetInsidePanYawSpeed(float speed) {
     insidePanYawSpeed = speed;
 }
 
-void GameCockpit::SetInsidePanPitchSpeed(float speed)
-{
+void GameCockpit::SetInsidePanPitchSpeed(float speed) {
     insidePanPitchSpeed = speed;
 }
 
-SoundContainer *GameCockpit::soundImpl(const SoundContainer &specs)
-{
+SoundContainer *GameCockpit::soundImpl(const SoundContainer &specs) {
     return new AldrvSoundContainer(specs);
 }

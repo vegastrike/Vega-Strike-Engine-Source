@@ -35,26 +35,22 @@ queue<InputListener *> activationreqqueue;
 list<InputListener *> listeners;
 InputListener *activelistener;
 
-void AddListener(InputListener *il)
-{
+void AddListener(InputListener *il) {
     il->keystate = keyState;
     il->mousex = &mousex;
     il->mousey = &mousey;
     listeners.push_back(il);
 }
 
-void ActivateListener(InputListener *il)
-{
+void ActivateListener(InputListener *il) {
     activationreqqueue.push(il);
 }
 
-void RemoveListener(InputListener *il)
-{
+void RemoveListener(InputListener *il) {
     listeners.remove(il);
 }
 
-void ProcessInput(size_t whichplayer)
-{
+void ProcessInput(size_t whichplayer) {
     ProcessKB(whichplayer);
     ProcessMouse();
     for (int i = 0; i < MAX_JOYSTICKS; i++) {
@@ -64,15 +60,13 @@ void ProcessInput(size_t whichplayer)
     }
 }
 
-void InitInput()
-{
+void InitInput() {
     InitKB();
     InitMouse();
     InitJoystick();
 }
 
-void DeInitInput()
-{
+void DeInitInput() {
     DeInitJoystick();
 }
 

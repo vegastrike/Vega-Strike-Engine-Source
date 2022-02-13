@@ -131,8 +131,7 @@ struct CubeCoord {
     unsigned int padding;  //added by chuck_starchaser
 };
 
-static void gluSphereMap(CubeCoord &Tex, Vector Normal, float Theta)
-{
+static void gluSphereMap(CubeCoord &Tex, Vector Normal, float Theta) {
     Tex.TexMap = 0;
     float vert = Normal.j;
     if (!pushdown) {
@@ -144,8 +143,7 @@ static void gluSphereMap(CubeCoord &Tex, Vector Normal, float Theta)
     }
 }
 
-static void TexMap(CubeCoord &Tex, Vector Normal)
-{
+static void TexMap(CubeCoord &Tex, Vector Normal) {
     float r[6] = {0, 0, 0, 0, 0, 0};
     Normal.i = Normal.i;
     Normal.j = -Normal.j;
@@ -212,8 +210,7 @@ static void TexMap(CubeCoord &Tex, Vector Normal)
     }
 }
 
-static bool LoadTex(char *FileName, unsigned char scdata[lmwid][lmwid][3])
-{
+static bool LoadTex(char *FileName, unsigned char scdata[lmwid][lmwid][3]) {
     using namespace VSFileSystem;
 
     VSFile f;
@@ -298,8 +295,7 @@ struct Texmp {
     unsigned char D[lmwid][lmwid][3];
 };
 
-static char *makebgname(char *tmp, size_t size, const char *InputName, const char *add, const char *suffix)
-{
+static char *makebgname(char *tmp, size_t size, const char *InputName, const char *add, const char *suffix) {
     size_t len = strlen(InputName) + strlen(add) + strlen(suffix) + 1;
     if (size > len) {
         strcpy(tmp, InputName);
@@ -315,8 +311,7 @@ static char *makebgname(char *tmp, size_t size, const char *InputName, const cha
     return tmp;
 }
 
-static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid], unsigned char Col[])
-{
+static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid], unsigned char Col[]) {
     Texmp *Data = NULL;
     Data = new Texmp[6];
     if (!Data) {
@@ -339,22 +334,22 @@ static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid]
         //backwards compatibility
     }
     if (!(LoadTex(makebgname(tmp, tmpsize, InputName, "_front",
-                             suffix),
-                  Data[0].D)
+                    suffix),
+            Data[0].D)
             && LoadTex(makebgname(tmp, tmpsize, InputName, "_back",
-                                  suffix),
-                       Data[1].D)
+                            suffix),
+                    Data[1].D)
             && LoadTex(makebgname(tmp, tmpsize, InputName, "_left",
-                                  suffix),
-                       Data[2].D)
+                            suffix),
+                    Data[2].D)
             && LoadTex(makebgname(tmp, tmpsize, InputName, "_right",
-                                  suffix),
-                       Data[3].D)
+                            suffix),
+                    Data[3].D)
             && LoadTex(makebgname(tmp, tmpsize, InputName, "_up",
-                                  suffix),
-                       Data[4].D)
+                            suffix),
+                    Data[4].D)
             && LoadTex(makebgname(tmp, tmpsize, InputName, "_down",
-                                  suffix), Data[5].D))) {
+                    suffix), Data[5].D))) {
         if (!LoadTex(makebgname(tmp, tmpsize, InputName, "_sphere", suffix), Data[0].D)) {
             LoadTex(makebgname(tmp, tmpsize, InputName, "", suffix), Data[0].D);
         }
@@ -438,8 +433,7 @@ static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid]
     delete[] Data;
 }
 
-static void GenerateSphereMap()
-{
+static void GenerateSphereMap() {
     //float SinPhi;
     //float CosPhi;
     //float Theta;
@@ -476,8 +470,7 @@ static void GenerateSphereMap()
     image.WriteImage((char *) OutputName, LightMap, PngImage, lmwid, lmwid, false, 8, TextureFile);
 }
 
-void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, float m, float p, bool w)
-{
+void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, float m, float p, bool w) {
     affine = a;
     multiplicitive = m;
     power = p;

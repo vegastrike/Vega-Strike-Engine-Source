@@ -58,8 +58,7 @@ using namespace Opcode;
  *	\return		Self-reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Point &Point::PositiveUnitRandomVector()
-{
+Point &Point::PositiveUnitRandomVector() {
     x = UnitRandomFloat();
     y = UnitRandomFloat();
     z = UnitRandomFloat();
@@ -73,8 +72,7 @@ Point &Point::PositiveUnitRandomVector()
  *	\return		Self-reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Point &Point::UnitRandomVector()
-{
+Point &Point::UnitRandomVector() {
     x = UnitRandomFloat() - 0.5f;
     y = UnitRandomFloat() - 0.5f;
     z = UnitRandomFloat() - 0.5f;
@@ -84,13 +82,11 @@ Point &Point::UnitRandomVector()
 
 // Cast operator
 // WARNING: not inlined
-Point::operator HPoint() const
-{
+Point::operator HPoint() const {
     return HPoint(x, y, z, 0.0f);
 }
 
-Point &Point::Refract(const Point &eye, const Point &n, float refractindex, Point &refracted)
-{
+Point &Point::Refract(const Point &eye, const Point &n, float refractindex, Point &refracted) {
     //	Point EyePt = eye position
     //	Point p = current vertex
     //	Point n = vertex normal
@@ -111,17 +107,15 @@ Point &Point::Refract(const Point &eye, const Point &n, float refractindex, Poin
     return *this;
 }
 
-Point &Point::ProjectToPlane(const Plane &p)
-{
+Point &Point::ProjectToPlane(const Plane &p) {
     *this -= (p.d + (*this | p.n)) * p.n;
     return *this;
 }
 
 void Point::ProjectToScreen(float halfrenderwidth,
-                            float halfrenderheight,
-                            const Matrix4x4 &mat,
-                            HPoint &projected) const
-{
+        float halfrenderheight,
+        const Matrix4x4 &mat,
+        HPoint &projected) const {
     projected = HPoint(x, y, z, 1.0f) * mat;
     projected.w = 1.0f / projected.w;
 
@@ -135,16 +129,14 @@ void Point::ProjectToScreen(float halfrenderwidth,
     projected.y += halfrenderheight;
 }
 
-void Point::SetNotUsed()
-{
+void Point::SetNotUsed() {
     // We use a particular integer pattern : 0xffffffff everywhere. This is a NAN.
     IR(x) = 0xffffffff;
     IR(y) = 0xffffffff;
     IR(z) = 0xffffffff;
 }
 
-bool Point::IsNotUsed() const
-{
+bool Point::IsNotUsed() const {
     if (IR(x) != 0xffffffff) {
         return FALSE;
     }
@@ -157,16 +149,14 @@ bool Point::IsNotUsed() const
     return TRUE;
 }
 
-Point &Point::Mult(const Matrix3x3 &mat, const Point &a)
-{
+Point &Point::Mult(const Matrix3x3 &mat, const Point &a) {
     x = a.x * mat.m[0][0] + a.y * mat.m[0][1] + a.z * mat.m[0][2];
     y = a.x * mat.m[1][0] + a.y * mat.m[1][1] + a.z * mat.m[1][2];
     z = a.x * mat.m[2][0] + a.y * mat.m[2][1] + a.z * mat.m[2][2];
     return *this;
 }
 
-Point &Point::Mult2(const Matrix3x3 &mat1, const Point &a1, const Matrix3x3 &mat2, const Point &a2)
-{
+Point &Point::Mult2(const Matrix3x3 &mat1, const Point &a1, const Matrix3x3 &mat2, const Point &a2) {
     x = a1.x * mat1.m[0][0] + a1.y * mat1.m[0][1] + a1.z * mat1.m[0][2] + a2.x * mat2.m[0][0] + a2.y * mat2.m[0][1]
             + a2.z * mat2.m[0][2];
     y = a1.x * mat1.m[1][0] + a1.y * mat1.m[1][1] + a1.z * mat1.m[1][2] + a2.x * mat2.m[1][0] + a2.y * mat2.m[1][1]
@@ -176,32 +166,28 @@ Point &Point::Mult2(const Matrix3x3 &mat1, const Point &a1, const Matrix3x3 &mat
     return *this;
 }
 
-Point &Point::Mac(const Matrix3x3 &mat, const Point &a)
-{
+Point &Point::Mac(const Matrix3x3 &mat, const Point &a) {
     x += a.x * mat.m[0][0] + a.y * mat.m[0][1] + a.z * mat.m[0][2];
     y += a.x * mat.m[1][0] + a.y * mat.m[1][1] + a.z * mat.m[1][2];
     z += a.x * mat.m[2][0] + a.y * mat.m[2][1] + a.z * mat.m[2][2];
     return *this;
 }
 
-Point &Point::TransMult(const Matrix3x3 &mat, const Point &a)
-{
+Point &Point::TransMult(const Matrix3x3 &mat, const Point &a) {
     x = a.x * mat.m[0][0] + a.y * mat.m[1][0] + a.z * mat.m[2][0];
     y = a.x * mat.m[0][1] + a.y * mat.m[1][1] + a.z * mat.m[2][1];
     z = a.x * mat.m[0][2] + a.y * mat.m[1][2] + a.z * mat.m[2][2];
     return *this;
 }
 
-Point &Point::Transform(const Point &r, const Matrix3x3 &rotpos, const Point &linpos)
-{
+Point &Point::Transform(const Point &r, const Matrix3x3 &rotpos, const Point &linpos) {
     x = r.x * rotpos.m[0][0] + r.y * rotpos.m[0][1] + r.z * rotpos.m[0][2] + linpos.x;
     y = r.x * rotpos.m[1][0] + r.y * rotpos.m[1][1] + r.z * rotpos.m[1][2] + linpos.y;
     z = r.x * rotpos.m[2][0] + r.y * rotpos.m[2][1] + r.z * rotpos.m[2][2] + linpos.z;
     return *this;
 }
 
-Point &Point::InvTransform(const Point &r, const Matrix3x3 &rotpos, const Point &linpos)
-{
+Point &Point::InvTransform(const Point &r, const Matrix3x3 &rotpos, const Point &linpos) {
     float sx = r.x - linpos.x;
     float sy = r.y - linpos.y;
     float sz = r.z - linpos.z;

@@ -33,8 +33,7 @@ static float endpotency = 4;
 static float flickertime = 3.5;
 const float mindamage = .1;
 
-static void AvLights(float target[4], const float other[4])
-{
+static void AvLights(float target[4], const float other[4]) {
     target[0] = .5 * (target[0] + other[0]);
     target[1] = .5 * (target[1] + other[1]);
     target[2] = .5 * (target[2] + other[2]);
@@ -42,22 +41,20 @@ static void AvLights(float target[4], const float other[4])
 }
 
 MeshFX::MeshFX(const float TTL,
-               const float delta,
-               const bool enabled,
-               const GFXColor &vect,
-               const GFXColor &diffuse,
-               const GFXColor &specular,
-               const GFXColor &ambient,
-               const GFXColor &attenuate) :
-        GFXLight(enabled, vect, diffuse, specular, ambient, attenuate)
-{
+        const float delta,
+        const bool enabled,
+        const GFXColor &vect,
+        const GFXColor &diffuse,
+        const GFXColor &specular,
+        const GFXColor &ambient,
+        const GFXColor &attenuate) :
+        GFXLight(enabled, vect, diffuse, specular, ambient, attenuate) {
     this->TTL = TTL;
     this->TTD = this->TTL;
     this->delta = delta;
 }
 
-void MeshFX::MergeLights(const MeshFX &other)
-{
+void MeshFX::MergeLights(const MeshFX &other) {
     //if (TTL>0) {
     delta = .5 * (other.delta + this->delta);
     /*  TTL = (TTL>other.TTL)
@@ -92,8 +89,7 @@ void MeshFX::MergeLights(const MeshFX &other)
     //}
 }
 
-bool MeshFX::Update(float howmuchtime)
-{
+bool MeshFX::Update(float howmuchtime) {
     TTL -= howmuchtime;
     if (TTL < 0) {
         TTL = 0;
@@ -115,8 +111,7 @@ bool MeshFX::Update(float howmuchtime)
     return TTD > 0;
 }
 
-void Mesh::AddDamageFX(const Vector &pnt, const Vector &norm, const float damage, const GFXColor &col)
-{
+void Mesh::AddDamageFX(const Vector &pnt, const Vector &norm, const float damage, const GFXColor &col) {
     float r_size = rSize();
 
     if (r_size == 0) {
@@ -133,11 +128,11 @@ void Mesh::AddDamageFX(const Vector &pnt, const Vector &norm, const float damage
     GFXColor tmp(col.r, col.g, col.b, col.a);
     float numsec = flickertime * ((damage < mindamage) ? mindamage : damage);
     MeshFX newFX(numsec, (startpotency - endpotency) / (numsec * rSize() * rSize()), true,
-                 GFXColor(loc.i, loc.j, loc.k, 1),
-                 tmp,
-                 GFXColor(0, 0, 0, 1),
-                 tmp,
-                 GFXColor(1, 0, startpotency / (r_size * r_size)));
+            GFXColor(loc.i, loc.j, loc.k, 1),
+            tmp,
+            GFXColor(0, 0, 0, 1),
+            tmp,
+            GFXColor(1, 0, startpotency / (r_size * r_size)));
     newFX.setSize(rSize());
     if (LocalFX.size() >= MAXLOCALFX) {
         LocalFX[(rand() % (LocalFX.size()))].MergeLights(newFX);
@@ -146,8 +141,7 @@ void Mesh::AddDamageFX(const Vector &pnt, const Vector &norm, const float damage
     }
 }
 
-void Mesh::UpdateFX(float howmuchtime)
-{
+void Mesh::UpdateFX(float howmuchtime) {
     //adjusts lights by TTL, eventually removing them
     for (int i = LocalFX.size() - 1; i >= 0; i--) {
         if (!LocalFX[i].Update(howmuchtime)) {
@@ -156,8 +150,7 @@ void Mesh::UpdateFX(float howmuchtime)
     }
 }
 
-void Mesh::EnableSpecialFX()
-{
+void Mesh::EnableSpecialFX() {
     draw_sequence = MESH_SPECIAL_FX_ONLY;
     setEnvMap(GFXFALSE);
     setLighting(GFXTRUE);

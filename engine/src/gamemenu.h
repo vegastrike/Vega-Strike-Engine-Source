@@ -69,12 +69,10 @@ private:
 public:
 //CONSTRUCTION.
     NetActionConfirm(int pnum, Window *w, ActionMode action) :
-            player(pnum), m_parent(w), netAction(action)
-    {
+            player(pnum), m_parent(w), netAction(action) {
     }
 
-    virtual ~NetActionConfirm(void)
-    {
+    virtual ~NetActionConfirm(void) {
     }
 
 //Set up the window and get everything ready.

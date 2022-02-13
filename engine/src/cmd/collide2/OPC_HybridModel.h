@@ -37,8 +37,7 @@ struct LeafTriangles {
      *	\return		number of triangles N, with 0 < N <= 16
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    uint32_t GetNbTriangles() const
-    {
+    inline_    uint32_t GetNbTriangles() const {
         return (Data & 15) + 1;
     }
 
@@ -48,13 +47,11 @@ struct LeafTriangles {
      *	\return		triangle index
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    uint32_t GetTriangleIndex() const
-    {
+    inline_    uint32_t GetTriangleIndex() const {
         return Data >> 4;
     }
 
-    inline_    void SetData(uint32_t nb, uint32_t index)
-    {
+    inline_    void SetData(uint32_t nb, uint32_t index) {
         OPASSERT(nb > 0 && nb <= 16);
         nb--;
         Data = (index << 4) | (nb & 15);
@@ -100,8 +97,7 @@ public:
      *	\return		array of triangles
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                const LeafTriangles *GetLeafTriangles() const
-    {
+    inline_                const LeafTriangles *GetLeafTriangles() const {
         return mTriangles;
     }
 
@@ -111,8 +107,7 @@ public:
      *	\return		array of indices
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                const uint32_t *GetIndices() const
-    {
+    inline_                const uint32_t *GetIndices() const {
         return mIndices;
     }
 

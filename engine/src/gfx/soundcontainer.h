@@ -86,8 +86,7 @@ public:
      * Will return true after play(), false after stop() and right
      * after creation.
      */
-    bool isTriggered() const
-    {
+    bool isTriggered() const {
         return triggered;
     }
 

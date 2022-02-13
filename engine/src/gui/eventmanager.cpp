@@ -39,8 +39,7 @@ extern void ModifyMouseSensitivity(int &x, int &y);
 static EventManager *globalEventManagerPtr = NULL;
 
 //STATIC: Get the global instance of the event manager
-EventManager &globalEventManager(void)
-{
+EventManager &globalEventManager(void) {
     if (globalEventManagerPtr == NULL) {
         EventManager::initializeEventManager();
         assert(globalEventManagerPtr != NULL);         //Make sure we got a manager!
@@ -48,24 +47,21 @@ EventManager &globalEventManager(void)
     return *globalEventManagerPtr;
 }
 
-bool hasGlobalEventManager(void)
-{
+bool hasGlobalEventManager(void) {
     return globalEventManagerPtr != NULL;
 }
 
 //STATIC: Initialize the event manager.  This starts the event loop, etc.
 //This may be called more than once -- it does nothing after the
 //first call.
-void EventManager::initializeEventManager(void)
-{
+void EventManager::initializeEventManager(void) {
     globalEventManagerPtr = new EventManager();
     globalEventManagerPtr->takeOverEventManagement();              //FIXME -- EVENT HACK
 }
 
 static std::vector<EventResponder *> deleteQueue;
 
-void EventManager::addToDeleteQueue(EventResponder *controlToDelete)
-{
+void EventManager::addToDeleteQueue(EventResponder *controlToDelete) {
     if (controlToDelete == NULL || find(deleteQueue.begin(), deleteQueue.end(), controlToDelete) != deleteQueue.end()) {
         bool DUPLICATE_DELETE_OF_OBJECT = true;
         VS_LOG_AND_FLUSH(fatal, (boost::format("\nERROR: duplicate delete of object %1$x.\n\n") % controlToDelete));
@@ -77,8 +73,7 @@ void EventManager::addToDeleteQueue(EventResponder *controlToDelete)
     }
 }
 
-static void clearDeleteQueue()
-{
+static void clearDeleteQueue() {
     while (deleteQueue.size()) {
         std::vector<EventResponder *> queue(deleteQueue);
         deleteQueue.clear();
@@ -90,16 +85,14 @@ static void clearDeleteQueue()
 
 //Add a new event responder to the top of the chain.
 //This responder will get events *first*.
-void EventManager::pushResponder(EventResponder *responder)
-{
+void EventManager::pushResponder(EventResponder *responder) {
     m_responders.push_back(responder);
 }
 
 //Remove an event responder from the chain.
 void EventManager::removeResponder(EventResponder *responder, //The responder to get rid of.
-                                   bool top //True = only topmost, False = all.
-)
-{
+        bool top //True = only topmost, False = all.
+) {
     bool found;                 //Whether we found one
     do {
         found = false;
@@ -118,8 +111,7 @@ void EventManager::removeResponder(EventResponder *responder, //The responder to
 }
 
 //Send a command through the responder chain.
-void EventManager::sendCommand(const EventCommandId &id, Control *control)
-{
+void EventManager::sendCommand(const EventCommandId &id, Control *control) {
     vector<EventResponder *>::reverse_iterator iter;
     //Loop through the event chain, starting at the end.
     for (iter = m_responders.rbegin(); iter != m_responders.rend(); iter++) {
@@ -131,8 +123,7 @@ void EventManager::sendCommand(const EventCommandId &id, Control *control)
 }
 
 //Send an input event through the responder chain.
-void EventManager::sendInputEvent(const InputEvent &event)
-{
+void EventManager::sendInputEvent(const InputEvent &event) {
     //Record the mouse position.
     //This is used (at least) to render the cursor.
     switch (event.type) {
@@ -188,13 +179,11 @@ void EventManager::sendInputEvent(const InputEvent &event)
 
 //Constructor isn't public.  Use initializeEventManager.
 EventManager::EventManager(void) :
-        m_mouseLoc(0.0, 0.0)
-{
+        m_mouseLoc(0.0, 0.0) {
 }
 
 //Destructor.
-EventManager::~EventManager(void)
-{
+EventManager::~EventManager(void) {
 }
 
 ///////////// HACKS FOR WORKING WITH CURRENT EVENT SYSTEM  //////////////////
@@ -204,8 +193,7 @@ EventManager::~EventManager(void)
 extern void InitCallbacks(void);
 
 //Called to revert to old event management.
-void EventManager::checkForShutDownEventManager(void)
-{
+void EventManager::checkForShutDownEventManager(void) {
     if (m_responders.empty() && globalEventManagerPtr != NULL) {
         //There are no more responders.  We assume no more of our windows, and reset mouse callbacks.
         //If we don't have a global event manager, we already did this.
@@ -218,8 +206,7 @@ void EventManager::checkForShutDownEventManager(void)
 }
 
 //Map mouse coord to Vegastrike 2d coord.
-static float MouseXTo2dX(int x)
-{
+static float MouseXTo2dX(int x) {
     //2*(coord+.5)/res + 1.
     //Puts origin in the middle of the screen, going -1 -> 1 left to right.
     //Add .5 to put mouse in middle of pixel, rather than left side.
@@ -229,8 +216,7 @@ static float MouseXTo2dX(int x)
     return (2.0 * ((double) x + 0.5)) / g_game.x_resolution - 1.0;
 }
 
-static float MouseYTo2dY(int y)
-{
+static float MouseYTo2dY(int y) {
     //See explanation of x.
     //This is a bit different from x because the mouse coords increase top-
     //to-bottom, and the drawing surface y increases bottom-to-top.
@@ -238,8 +224,7 @@ static float MouseYTo2dY(int y)
     return 1.0 - (2.0 * ((double) y + 0.5)) / g_game.y_resolution;
 }
 
-void EventManager::ProcessMouseClick(int button, int state, int x, int y)
-{
+void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
     ModifyMouseSensitivity(x, y);
     //Make sure we are working with the same "button" constants.
     assert(LEFT_MOUSE_BUTTON == WS_LEFT_BUTTON);
@@ -257,8 +242,7 @@ void EventManager::ProcessMouseClick(int button, int state, int x, int y)
     clearDeleteQueue();
 }
 
-void EventManager::ProcessMouseActive(int x, int y)
-{
+void EventManager::ProcessMouseActive(int x, int y) {
     ModifyMouseSensitivity(x, y);
     //FIXME mbyron -- Should provide info about which buttons are down.
     InputEvent event(MOUSE_DRAG_EVENT, 0, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
@@ -266,8 +250,7 @@ void EventManager::ProcessMouseActive(int x, int y)
     clearDeleteQueue();
 }
 
-void EventManager::ProcessMousePassive(int x, int y)
-{
+void EventManager::ProcessMousePassive(int x, int y) {
     ModifyMouseSensitivity(x, y);
     InputEvent event(MOUSE_MOVE_EVENT, 0, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
     globalEventManager().sendInputEvent((event));
@@ -275,8 +258,7 @@ void EventManager::ProcessMousePassive(int x, int y)
 }
 
 //Called to grab event management from old system.
-void EventManager::takeOverEventManagement(void)
-{
+void EventManager::takeOverEventManagement(void) {
     winsys_set_mouse_func(EventManager::ProcessMouseClick);
     winsys_set_motion_func(EventManager::ProcessMouseActive);
     winsys_set_passive_motion_func(EventManager::ProcessMousePassive);

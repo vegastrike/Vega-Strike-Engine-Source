@@ -32,8 +32,7 @@
 
 using std::string;
 
-std::vector<string> readCSV(const string &s, string delim)
-{
+std::vector<string> readCSV(const string &s, string delim) {
     std::vector<string> l;
     string as;
     unsigned int epos = 0;
@@ -86,8 +85,7 @@ std::vector<string> readCSV(const string &s, string delim)
     return l;
 }
 
-static string addQuote(string s, string delim = ",;")
-{
+static string addQuote(string s, string delim = ",;") {
     if (s.find_first_of(delim + "\"") != string::npos) {
         if (s.find('\"') != string::npos) {
             //Replace " by ""
@@ -110,8 +108,7 @@ static string addQuote(string s, string delim = ",;")
     return s;
 }
 
-string writeCSV(const std::vector<string> &key, const std::vector<string> &table, string delim)
-{
+string writeCSV(const std::vector<string> &key, const std::vector<string> &table, string delim) {
     unsigned int i;
     unsigned int wid = key.size();
     string ret;
@@ -133,8 +130,7 @@ string writeCSV(const std::vector<string> &key, const std::vector<string> &table
     return ret;
 }
 
-void CSVTable::Init(const string &data)
-{
+void CSVTable::Init(const string &data) {
     //Clear optimizer
     optimizer_setup = false;
     optimizer_keys.clear();
@@ -168,7 +164,7 @@ void CSVTable::Init(const string &data)
         unsigned int row = table.size() / key.size();
         while (strs.size() > key.size()) {
             VS_LOG(error,
-                   (boost::format("error in csv, line %1$d: %2$s has no key") % (row + 1) % strs.back().c_str()));
+                    (boost::format("error in csv, line %1$d: %2$s has no key") % (row + 1) % strs.back().c_str()));
             strs.pop_back();
         }
         while (strs.size() < key.size()) {
@@ -184,14 +180,12 @@ void CSVTable::Init(const string &data)
     }
 }
 
-CSVTable::CSVTable(const string &data, const string &root)
-{
+CSVTable::CSVTable(const string &data, const string &root) {
     this->rootdir = root;
     Init(data);
 }
 
-CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root)
-{
+CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root) {
     std::string data = f.ReadFull();
 
     UnitCSVFactory factory;
@@ -207,8 +201,7 @@ CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root)
     Init(data);
 }
 
-static string strip_white(const string &s)
-{
+static string strip_white(const string &s) {
     string::size_type start = s.find_first_not_of(" \t\r\n");
     if (start == string::npos) {
         return "";
@@ -223,8 +216,7 @@ static string strip_white(const string &s)
 }
 
 void
-CSVTable::Merge(const CSVTable &other)
-{
+CSVTable::Merge(const CSVTable &other) {
     // Remember in preparation to reshape
     size_t orig_cols = key.size();
 
@@ -292,20 +284,17 @@ CSVTable::Merge(const CSVTable &other)
     VS_LOG(debug, (boost::format("Merged table holds %1% cells") % table.size()));
 }
 
-CSVRow::CSVRow(CSVTable *parent, const string &key)
-{
+CSVRow::CSVRow(CSVTable *parent, const string &key) {
     this->parent = parent;
     iter = parent->rows[key] * parent->key.size();
 }
 
-CSVRow::CSVRow(CSVTable *parent, unsigned int i)
-{
+CSVRow::CSVRow(CSVTable *parent, unsigned int i) {
     this->parent = parent;
     iter = i * parent->key.size();
 }
 
-const string &CSVRow::operator[](const string &col) const
-{
+const string &CSVRow::operator[](const string &col) const {
     static string empty_string;
     vsUMap<string, int>::iterator i = parent->columns.find(col);
     if (i == parent->columns.end()) {
@@ -315,18 +304,15 @@ const string &CSVRow::operator[](const string &col) const
     }
 }
 
-const string &CSVRow::operator[](unsigned int col) const
-{
+const string &CSVRow::operator[](unsigned int col) const {
     return parent->table[iter + col];
 }
 
-const string &CSVRow::getKey(unsigned int which) const
-{
+const string &CSVRow::getKey(unsigned int which) const {
     return parent->key[which];
 }
 
-bool CSVTable::RowExists(const string &name, unsigned int &where)
-{
+bool CSVTable::RowExists(const string &name, unsigned int &where) {
     vsUMap<string, int>::iterator i = rows.find(name);
     if (i == rows.end()) {
         return false;
@@ -335,8 +321,7 @@ bool CSVTable::RowExists(const string &name, unsigned int &where)
     return true;
 }
 
-bool CSVTable::ColumnExists(const string &name, unsigned int &where)
-{
+bool CSVTable::ColumnExists(const string &name, unsigned int &where) {
     vsUMap<string, int>::iterator i = columns.find(name);
     if (i == columns.end()) {
         return false;
@@ -347,8 +332,7 @@ bool CSVTable::ColumnExists(const string &name, unsigned int &where)
 
 std::vector<CSVTable *> unitTables;
 
-string CSVRow::getRoot()
-{
+string CSVRow::getRoot() {
     if (parent) {
         return parent->rootdir;
     }
@@ -356,8 +340,7 @@ string CSVRow::getRoot()
     return "";
 }
 
-void CSVTable::SetupOptimizer(const std::vector<string> &keys, unsigned int type)
-{
+void CSVTable::SetupOptimizer(const std::vector<string> &keys, unsigned int type) {
     optimizer_setup = true;
     optimizer_type = type;
     optimizer_keys = keys;
@@ -367,8 +350,7 @@ void CSVTable::SetupOptimizer(const std::vector<string> &keys, unsigned int type
     }
 }
 
-CSVTable *loadCSVTableList(const string &csvfiles, VSFileSystem::VSFileType fileType, bool critical)
-{
+CSVTable *loadCSVTableList(const string &csvfiles, VSFileSystem::VSFileType fileType, bool critical) {
     string::size_type pwhere = 0, where, where2 = 0;
     CSVTable *table = NULL;
     while (where2 != string::npos) {

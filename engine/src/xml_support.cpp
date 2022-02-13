@@ -33,8 +33,7 @@
 
 using std::string;
 
-string strtoupper(const string &foo)
-{
+string strtoupper(const string &foo) {
     string rval(foo);
     for (string::iterator it = rval.begin(); it != rval.end(); ++it) {
         *it = toupper(*it);
@@ -42,8 +41,7 @@ string strtoupper(const string &foo)
     return rval;
 }
 
-string strtolower(const string &foo)
-{
+string strtolower(const string &foo) {
     string rval(foo);
     for (string::iterator it = rval.begin(); it != rval.end(); ++it) {
         *it = tolower(*it);
@@ -57,16 +55,14 @@ typedef boost::tokenizer<Separator> Tokenizer;
 
 static const char *SEPARATORS = " \t,";
 
-EnumMap::EnumMap(const Pair *data, unsigned int num)
-{
+EnumMap::EnumMap(const Pair *data, unsigned int num) {
     for (unsigned int a = 0; a < num; a++) {
         forward.Put(strtoupper(data[a].name), &data[a].val);
         reverse.Put(tostring(data[a].val), &data[a].name);
     }
 }
 
-int EnumMap::lookup(const string &str) const
-{
+int EnumMap::lookup(const string &str) const {
     const int *result = forward.Get(strtoupper(str));
     if (!result) {
         result = forward.Get("UNKNOWN");
@@ -74,22 +70,19 @@ int EnumMap::lookup(const string &str) const
     return result ? *result : 0;
 }
 
-const string &EnumMap::lookup(int val) const
-{
+const string &EnumMap::lookup(int val) const {
     const string *result = reverse.Get(tostring(val));
     assert(0 != result);
     return *result;
 }
 
-AttributeList::AttributeList(const XML_Char **atts)
-{
+AttributeList::AttributeList(const XML_Char **atts) {
     for (; *atts != NULL; atts += 2) {
         push_back(Attribute(atts[0], atts[1]));
     }
 }
 
-string replace_space(const string &str)
-{
+string replace_space(const string &str) {
     string retval(str);
     for (string::iterator i = retval.begin(); i != retval.end(); i++) {
         if (*i == ' ') {
@@ -99,8 +92,7 @@ string replace_space(const string &str)
     return retval;
 }
 
-bool parse_bool(const string &str)
-{
+bool parse_bool(const string &str) {
     if ((!str.empty())
             && ((*str.begin()) == 't' || (*str.begin()) == 'T' || (*str.begin()) == 'y' || (*str.begin()) == 'Y'
                     || (*str.begin()) == '1')) {
@@ -110,24 +102,21 @@ bool parse_bool(const string &str)
     }
 }
 
-double parse_float(const string &str)
-{
+double parse_float(const string &str) {
     double ret = 0.0f;
     std::stringstream ss(str);
     ss >> ret;
     return ret;
 }
 
-float parse_floatf(const string &str)
-{
+float parse_floatf(const string &str) {
     float ret = 0.0f;
     std::stringstream ss(str);
     ss >> ret;
     return ret;
 }
 
-void parse_floatv(const std::string &input, size_t maxTokens, ...)
-{
+void parse_floatv(const std::string &input, size_t maxTokens, ...) {
     va_list arguments;
     va_start(arguments, maxTokens);
     Separator separator(SEPARATORS);
@@ -140,8 +129,7 @@ void parse_floatv(const std::string &input, size_t maxTokens, ...)
     va_end(arguments);
 }
 
-void parse_floatfv(const string &input, int maxTokens, ...)
-{
+void parse_floatfv(const string &input, int maxTokens, ...) {
     va_list arguments;
     va_start(arguments, maxTokens);
     Separator separator(SEPARATORS);
@@ -154,16 +142,14 @@ void parse_floatfv(const string &input, int maxTokens, ...)
     va_end(arguments);
 }
 
-int parse_int(const string &str)
-{
+int parse_int(const string &str) {
     int ret = 0;
     std::stringstream ss(str);
     ss >> ret;
     return ret;
 }
 
-string::size_type parse_option_find(const string &str, const string &opt, const string &sep, const string &vsep)
-{
+string::size_type parse_option_find(const string &str, const string &opt, const string &sep, const string &vsep) {
     bool ini = true;
     string::size_type pos = 0;
     string::size_type optlen = opt.length();
@@ -184,17 +170,15 @@ string::size_type parse_option_find(const string &str, const string &opt, const 
     return found ? pos : string::npos;
 }
 
-bool parse_option_ispresent(const string &str, const string &opt, const string &sep, const string &vsep)
-{
+bool parse_option_ispresent(const string &str, const string &opt, const string &sep, const string &vsep) {
     return parse_option_find(str, opt, sep, vsep) != string::npos;
 }
 
 string parse_option_value(const string &str,
-                          const string &opt,
-                          const string &defvalue,
-                          const string &sep,
-                          const string &vsep)
-{
+        const string &opt,
+        const string &defvalue,
+        const string &sep,
+        const string &vsep) {
     string::size_type pos = parse_option_find(str, opt, sep, vsep);
     string::size_type vpos = str.find_first_of(vsep, pos + opt.length());
     string value;
@@ -209,8 +193,7 @@ string parse_option_value(const string &str,
     return value;
 }
 
-string escaped_string(const string &str)
-{
+string escaped_string(const string &str) {
 #define ESCAPE_CASE(e, c, skip)               \
 case e:                                         \
     if (rp && str[rp-1] == '\\') rv[ip++] = c;  \

@@ -62,15 +62,13 @@ private:
     bool ReadFile(int i, void *pBuf);
 
 public:
-    CPK3() : m_nEntries(0)
-    {
+    CPK3() : m_nEntries(0) {
     }
 
     CPK3(FILE *n_f);
     CPK3(const char *filename);
 
-    ~CPK3()
-    {
+    ~CPK3() {
     }
 
     bool CheckPK3(FILE *f);

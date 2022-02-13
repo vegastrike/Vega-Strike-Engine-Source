@@ -48,11 +48,11 @@ class Background {
     SphereMesh *SphereBackground;
 public:
     Background(const char *file,
-               int numstars,
-               float spread,
-               const std::string &starfilename,
-               const GFXColor &color,
-               bool degamma);
+            int numstars,
+            float spread,
+            const std::string &starfilename,
+            const GFXColor &color,
+            bool degamma);
     ~Background();
     void EnableBG(bool);
     void Draw();

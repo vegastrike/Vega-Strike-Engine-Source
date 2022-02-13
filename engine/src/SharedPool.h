@@ -44,13 +44,11 @@ public:
     typedef T ValueType;
     typedef RefcounterTraits RefocounterTraitsType;
 
-    static PoolType &getSingleton()
-    {
+    static PoolType &getSingleton() {
         return *ms_singleton;
     }
 
-    static PoolType *getSingletonPtr()
-    {
+    static PoolType *getSingletonPtr() {
         return ms_singleton;
     }
 
@@ -62,8 +60,7 @@ public:
         typename ReferenceCounter::iterator _it;
         ReferenceCounter *_rc;
 
-        void unref()
-        {
+        void unref() {
             if (_rc && (_it != _rc->end())) {
                 if ((_it->second == 0) || ((--(_it->second)) == 0)) {
                     _rc->erase(_it);
@@ -72,8 +69,7 @@ public:
             }
         }
 
-        void ref()
-        {
+        void ref() {
             if (_rc && (_it != _rc->end())) {
                 ++(_it->second);
             }
@@ -82,41 +78,34 @@ public:
     public:
         Reference() :
                 _it(SharedPool::getSingleton().referenceCounter.end()),
-                _rc(&SharedPool::getSingleton().referenceCounter)
-        {
+                _rc(&SharedPool::getSingleton().referenceCounter) {
         }
 
         explicit Reference(const T &s) :
                 _it(SharedPool::getSingleton().referenceCounter.end()),
-                _rc(&SharedPool::getSingleton().referenceCounter)
-        {
+                _rc(&SharedPool::getSingleton().referenceCounter) {
             set(s);
         }
 
         explicit Reference(ReferenceCounter *pool) :
-                _it(pool->end()), _rc(pool)
-        {
+                _it(pool->end()), _rc(pool) {
         }
 
         Reference(ReferenceCounter *pool, const T &s) :
-                _it(pool->end()), _rc(pool)
-        {
+                _it(pool->end()), _rc(pool) {
             set(s);
         }
 
         Reference(const Reference &other) :
-                _it(other._it), _rc(other._rc)
-        {
+                _it(other._it), _rc(other._rc) {
             ref();
         }
 
-        ~Reference()
-        {
+        ~Reference() {
             unref();
         }
 
-        const T &get() const
-        {
+        const T &get() const {
             static T empty_value;
             if (_rc && (_it != _rc->end()) && (_it->second > 0)) {
                 return _it->first;
@@ -125,8 +114,7 @@ public:
             }
         }
 
-        Reference &set(const T &s)
-        {
+        Reference &set(const T &s) {
             unref();
             if (_rc) {
                 _it = _rc->insert(std::pair<T, unsigned int>(s, 0)).first;
@@ -135,18 +123,15 @@ public:
             return *this;
         }
 
-        operator const T &() const
-        {
+        operator const T &() const {
             return get();
         }
 
-        Reference &operator=(const T &s)
-        {
+        Reference &operator=(const T &s) {
             return set(s);
         }
 
-        Reference &operator=(const Reference &s)
-        {
+        Reference &operator=(const Reference &s) {
             if (this == &s) {
                 return *this;
             }
@@ -160,13 +145,11 @@ public:
             return *this;
         }
 
-        bool operator==(const T &s) const
-        {
+        bool operator==(const T &s) const {
             return get() == s;
         }
 
-        bool operator==(const Reference &r) const
-        {
+        bool operator==(const Reference &r) const {
             if (_rc && (_rc == r._rc)) {
                 return _it == r._it;
             } else {
@@ -174,34 +157,28 @@ public:
             }
         }
 
-        bool operator<(const T &s) const
-        {
+        bool operator<(const T &s) const {
             return get() < s;
         }
 
-        bool operator<(const Reference &r) const
-        {
+        bool operator<(const Reference &r) const {
             return get() < r.get();
         }
 
-        bool operator!=(const T &s) const
-        {
+        bool operator!=(const T &s) const {
             return get() != s;
         }
 
-        bool operator!=(const Reference &r) const
-        {
+        bool operator!=(const Reference &r) const {
             return !(*this == r);
         }
     };
 
-    Reference get(const T &s)
-    {
+    Reference get(const T &s) {
         return Reference(&referenceCounter, s);
     }
 
-    Reference get()
-    {
+    Reference get() {
         return Reference(&referenceCounter);
     }
 
@@ -217,19 +194,16 @@ typedef SharedPool<std::string, StringpoolTraits> StringPool;
 
 static StringPool stringPool;
 
-inline std::string operator+(const std::string &s, const StringPool::Reference &r)
-{
+inline std::string operator+(const std::string &s, const StringPool::Reference &r) {
     return s + r.get();
 }
 
-inline std::string operator+(const StringPool::Reference &r, const std::string &s)
-{
+inline std::string operator+(const StringPool::Reference &r, const std::string &s) {
     return r.get() + s;
 }
 
 template<typename T>
-inline T &operator<<(T &stream, const StringPool::Reference &ref)
-{
+inline T &operator<<(T &stream, const StringPool::Reference &ref) {
     return stream << ref.get();
 }
 

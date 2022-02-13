@@ -37,8 +37,7 @@ QVector BoltDrawManager::camera_position = QVector();
 float BoltDrawManager::pixel_angle = 0.0;
 float BoltDrawManager::elapsed_time = 0.0;
 
-BoltDrawManager::BoltDrawManager()
-{
+BoltDrawManager::BoltDrawManager() {
     if (!boltmesh) {
         GFXVertex vtx[12];
 #define V(ii, xx, yy, zz, ss, \
@@ -62,8 +61,7 @@ BoltDrawManager::BoltDrawManager()
 
 GFXVertexList *BoltDrawManager::boltmesh = NULL;
 
-BoltDrawManager::~BoltDrawManager()
-{
+BoltDrawManager::~BoltDrawManager() {
     unsigned int i;
     for (i = 0; i < animations.size(); i++) {
         delete animations[i];
@@ -82,14 +80,12 @@ BoltDrawManager::~BoltDrawManager()
     }
 }
 
-BoltDrawManager &BoltDrawManager::GetInstance()
-{
+BoltDrawManager &BoltDrawManager::GetInstance() {
     static BoltDrawManager instance;    // Guaranteed to be destroyed.
     return instance;                    // Instantiated on first use.
 }
 
-void BoltDrawManager::Draw()
-{
+void BoltDrawManager::Draw() {
     GFXDisable(LIGHTING);
     GFXDisable(CULLFACE);
     GFXBlendMode(ONE, game_options.BlendGuns ? ONE : ZERO);
@@ -98,8 +94,8 @@ void BoltDrawManager::Draw()
 
     float pixel_angle = 2
             * sin(g_game.fov * M_PI / 180.0
-                          / (g_game.y_resolution
-                                     > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution))
+                    / (g_game.y_resolution
+                            > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution))
             * game_options.bolt_pixel_size;
     pixel_angle *= pixel_angle;
     camera_position = _Universe->AccessCamera()->GetPosition();
@@ -123,11 +119,10 @@ void BoltDrawManager::Draw()
 }
 
 CollideMap::iterator BoltDrawManager::AddBall(const WeaponInfo *typ,
-                                              const Matrix &orientationpos,
-                                              const Vector &shipspeed,
-                                              void *owner,
-                                              CollideMap::iterator hint)
-{
+        const Matrix &orientationpos,
+        const Vector &shipspeed,
+        void *owner,
+        CollideMap::iterator hint) {
     Bolt ball = Bolt(typ, orientationpos, shipspeed, owner, hint);             //FIXME turrets won't work! Velocity
     _balls.push_back(ball);
     return _balls[_balls.size() - 1].location;

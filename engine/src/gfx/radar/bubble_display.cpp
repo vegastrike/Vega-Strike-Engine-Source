@@ -44,8 +44,7 @@
 
 namespace {
 
-float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat)
-{
+float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
     using namespace Radar;
 
     switch (threat) {
@@ -75,8 +74,7 @@ struct BubbleDisplay::Impl {
     LineElements lineIndices;
     PointBufferMap pointmap;
 
-    PointBuffer &getPointBuffer(float size)
-    {
+    PointBuffer &getPointBuffer(float size) {
         int isize = int(size / POINT_SIZE_GRANULARITY);
         if (isize < 1) {
             isize = 1;
@@ -89,8 +87,7 @@ struct BubbleDisplay::Impl {
         return it->second;
     }
 
-    void clear()
-    {
+    void clear() {
         for (PointBufferMap::iterator it = pointmap.begin(); it != pointmap.end(); ++it) {
             it->second.clear();
         }
@@ -99,8 +96,7 @@ struct BubbleDisplay::Impl {
         lineIndices.clear();
     }
 
-    void flush()
-    {
+    void flush() {
         for (Impl::PointBufferMap::reverse_iterator it = pointmap.rbegin(); it != pointmap.rend(); ++it) {
             Impl::PointBuffer &points = it->second;
             if (points.size() > 0) {
@@ -116,13 +112,12 @@ struct BubbleDisplay::Impl {
 
 BubbleDisplay::BubbleDisplay()
         : impl(new BubbleDisplay::Impl),
-          innerSphere(0.45),
-          outerSphere(1.0),
-          sphereZoom(1.0),
-          radarTime(0.0),
-          currentTargetMarkerSize(0.0),
-          lastAnimationTime(0.0)
-{
+        innerSphere(0.45),
+        outerSphere(1.0),
+        sphereZoom(1.0),
+        radarTime(0.0),
+        currentTargetMarkerSize(0.0),
+        lastAnimationTime(0.0) {
     using namespace boost::assign; // vector::operator+=
     explodeSequence +=
             0.0, 0.0001, 0.0009, 0.0036, 0.0100, 0.0225, 0.0441, 0.0784, 0.1296, 0.2025, 0.3025, 0.4356, 0.6084, 0.8281, 1.0, 0.8713, 0.7836, 0.7465, 0.7703, 0.8657, 1.0, 0.9340, 0.9595, 1.0, 0.9659, 1.0;
@@ -130,12 +125,10 @@ BubbleDisplay::BubbleDisplay()
             1.0, 0.9999, 0.9991, 0.9964, 0.9900, 0.9775, 0.9559, 0.9216, 0.8704, 0.7975, 0.6975, 0.5644, 0.3916, 0.1719, 0.0, 0.1287, 0.2164, 0.2535, 0.2297, 0.1343, 0.0, 0.0660, 0.0405, 0.0, 0.0341, 0.0;
 }
 
-BubbleDisplay::~BubbleDisplay()
-{
+BubbleDisplay::~BubbleDisplay() {
 }
 
-void BubbleDisplay::PrepareAnimation(const ZoomSequence &sequence)
-{
+void BubbleDisplay::PrepareAnimation(const ZoomSequence &sequence) {
     AnimationItem firstItem;
     firstItem.duration = 0.0;
     firstItem.sphereZoom = sequence[0];
@@ -151,23 +144,19 @@ void BubbleDisplay::PrepareAnimation(const ZoomSequence &sequence)
     }
 }
 
-void BubbleDisplay::OnDockEnd()
-{
+void BubbleDisplay::OnDockEnd() {
     PrepareAnimation(explodeSequence);
 }
 
-void BubbleDisplay::OnJumpBegin()
-{
+void BubbleDisplay::OnJumpBegin() {
     PrepareAnimation(implodeSequence);
 }
 
-void BubbleDisplay::OnJumpEnd()
-{
+void BubbleDisplay::OnJumpEnd() {
     PrepareAnimation(explodeSequence);
 }
 
-void BubbleDisplay::Animate()
-{
+void BubbleDisplay::Animate() {
     if (!animation.empty()) {
         if (radarTime > lastAnimationTime + animation.front().duration) {
             sphereZoom = animation.front().sphereZoom;
@@ -178,9 +167,8 @@ void BubbleDisplay::Animate()
 }
 
 void BubbleDisplay::Draw(const Sensor &sensor,
-                         VSSprite *frontSprite,
-                         VSSprite *rearSprite)
-{
+        VSSprite *frontSprite,
+        VSSprite *rearSprite) {
     assert(frontSprite || rearSprite); // There should be at least one radar display
 
     radarTime += GetElapsedTime();
@@ -226,9 +214,8 @@ void BubbleDisplay::Draw(const Sensor &sensor,
 }
 
 void BubbleDisplay::DrawTrack(const Sensor &sensor,
-                              const ViewArea &radarView,
-                              const Track &track)
-{
+        const ViewArea &radarView,
+        const Track &track) {
     if (!radarView.IsActive()) {
         return;
     }
@@ -292,8 +279,7 @@ void BubbleDisplay::DrawTrack(const Sensor &sensor,
     impl->getPointBuffer(trackSize).insert(GFXColorVertex(head, headColor));
 }
 
-void BubbleDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize)
-{
+void BubbleDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
     // Split octagon
     float size = 3.0 * std::max(trackSize, 3.0f);
     float xsize = size / g_game.x_resolution;
@@ -326,8 +312,7 @@ void BubbleDisplay::DrawTargetMarker(const Vector &position, const GFXColor &col
     }
 }
 
-void BubbleDisplay::DrawBackground(const ViewArea &radarView, float trackSize)
-{
+void BubbleDisplay::DrawBackground(const ViewArea &radarView, float trackSize) {
     if (!radarView.IsActive()) {
         return;
     }

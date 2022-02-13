@@ -39,49 +39,44 @@
 #include "universe.h"
 
 extern Texture *createTexture(const char *filename,
-                              int stage = 0,
-                              enum FILTER f1 = MIPMAP,
-                              enum TEXTURE_TARGET t0 = TEXTURE2D,
-                              enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-                              unsigned char c = GFXFALSE,
-                              int i = 65536);
+        int stage = 0,
+        enum FILTER f1 = MIPMAP,
+        enum TEXTURE_TARGET t0 = TEXTURE2D,
+        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+        unsigned char c = GFXFALSE,
+        int i = 65536);
 extern Texture *createTexture(char const *ccc,
-                              char const *cc,
-                              int k = 0,
-                              enum FILTER f1 = MIPMAP,
-                              enum TEXTURE_TARGET t0 = TEXTURE2D,
-                              enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-                              float f = 1,
-                              int j = 0,
-                              unsigned char c = GFXFALSE,
-                              int i = 65536);
+        char const *cc,
+        int k = 0,
+        enum FILTER f1 = MIPMAP,
+        enum TEXTURE_TARGET t0 = TEXTURE2D,
+        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+        float f = 1,
+        int j = 0,
+        unsigned char c = GFXFALSE,
+        int i = 65536);
 extern AnimatedTexture *createAnimatedTexture(char const *c, int i, enum FILTER f);
 
 using XMLSupport::tostring;
 int pixelscalesize = 30;
 
-float SphereMesh::GetT(float rho, float rho_min, float rho_max) const
-{
+float SphereMesh::GetT(float rho, float rho_min, float rho_max) const {
     return 1 - (rho - rho_min) / (rho_max - rho_min);
 }
 
-float SphereMesh::GetS(float theta, float theta_min, float theta_max) const
-{
+float SphereMesh::GetS(float theta, float theta_min, float theta_max) const {
     return 1 - (theta - theta_min) / (theta_max - theta_min);
 }
 
-float CityLights::GetT(float rho, float rho_min, float rho_max) const
-{
+float CityLights::GetT(float rho, float rho_min, float rho_max) const {
     return wrapy * SphereMesh::GetT(rho, rho_min, rho_max);
 }
 
-float CityLights::GetS(float theta, float theta_min, float theta_max) const
-{
+float CityLights::GetS(float theta, float theta_min, float theta_max) const {
     return wrapx * SphereMesh::GetS(theta, theta_min, theta_max);
 }
 
-string truncateByPipe(string &input)
-{
+string truncateByPipe(string &input) {
     string::size_type i = input.find("|");
     string ret = input;
     if (i != string::npos) {
@@ -94,23 +89,22 @@ string truncateByPipe(string &input)
 }
 
 void SphereMesh::InitSphere(float radius,
-                            int stacks,
-                            int slices,
-                            const char *texture,
-                            const std::string &technique,
-                            const char *alpha,
-                            bool Insideout,
-                            const BLENDFUNC a,
-                            const BLENDFUNC b,
-                            bool envMapping,
-                            float rho_min,
-                            float rho_max,
-                            float theta_min,
-                            float theta_max,
-                            FILTER mipmap,
-                            bool reverse_normals,
-                            bool subclass)
-{
+        int stacks,
+        int slices,
+        const char *texture,
+        const std::string &technique,
+        const char *alpha,
+        bool Insideout,
+        const BLENDFUNC a,
+        const BLENDFUNC b,
+        bool envMapping,
+        float rho_min,
+        float rho_max,
+        float theta_min,
+        float theta_max,
+        FILTER mipmap,
+        bool reverse_normals,
+        bool subclass) {
     setConvex(true);
     int numspheres = (stacks + slices) / 8;
     if (numspheres < 1) {
@@ -241,7 +235,7 @@ void SphereMesh::InitSphere(float radius,
                 if (alpha) {
                     Decal[count] =
                             createTexture(thistex.c_str(), alpha, 0, mipmap, TEXTURE2D, TEXTURE_2D, 1, 0,
-                                          (Insideout || g_game.use_planet_textures) ? GFXTRUE : GFXFALSE);
+                                    (Insideout || g_game.use_planet_textures) ? GFXTRUE : GFXFALSE);
                 } else {
                     Decal[count] =
                             createTexture(
@@ -277,8 +271,7 @@ void SphereMesh::InitSphere(float radius,
     draw_queue = odq;
 }
 
-void SphereMesh::Draw(float lod, bool centered, const Matrix &m)
-{
+void SphereMesh::Draw(float lod, bool centered, const Matrix &m) {
     if (centered) {
         Matrix m1(m);
         m1.p = QVector(_Universe->AccessCamera()->GetPosition().Transform(m1));
@@ -288,8 +281,7 @@ void SphereMesh::Draw(float lod, bool centered, const Matrix &m)
     }
 }
 
-void SphereMesh::RestoreCullFace(int whichdrawqueue)
-{
+void SphereMesh::RestoreCullFace(int whichdrawqueue) {
     //always right
 }
 
@@ -297,43 +289,42 @@ float CityLights::wrapx = 1;
 float CityLights::wrapy = 1;
 
 CityLights::CityLights(float radius,
-                       int stacks,
-                       int slices,
-                       const char *texture,
-                       int zzwrapx,
-                       int zzwrapy,
-                       bool insideout,
-                       const BLENDFUNC a,
-                       const BLENDFUNC b,
-                       bool envMap,
-                       float rho_min,
-                       float rho_max,
-                       float theta_min,
-                       float theta_max,
-                       bool reversed_normals) : SphereMesh()
-{
+        int stacks,
+        int slices,
+        const char *texture,
+        int zzwrapx,
+        int zzwrapy,
+        bool insideout,
+        const BLENDFUNC a,
+        const BLENDFUNC b,
+        bool envMap,
+        float rho_min,
+        float rho_max,
+        float theta_min,
+        float theta_max,
+        bool reversed_normals) : SphereMesh() {
     setConvex(true);
     wrapx = zzwrapx;
     wrapy = zzwrapy;
     FILTER filter =
             (FILTER) XMLSupport::parse_int(vs_config->getVariable("graphics", "CityLightFilter",
-                                                                  XMLSupport::tostring(((int) TRILINEAR))));
+                    XMLSupport::tostring(((int) TRILINEAR))));
     InitSphere(radius,
-               stacks,
-               slices,
-               texture,
-               "",
-               NULL,
-               insideout,
-               a,
-               b,
-               envMap,
-               rho_min,
-               rho_max,
-               theta_min,
-               theta_max,
-               filter,
-               reversed_normals,
-               zzwrapx != 1 || zzwrapy != 1);
+            stacks,
+            slices,
+            texture,
+            "",
+            NULL,
+            insideout,
+            a,
+            b,
+            envMap,
+            rho_min,
+            rho_max,
+            theta_min,
+            theta_max,
+            filter,
+            reversed_normals,
+            zzwrapx != 1 || zzwrapy != 1);
 }
 

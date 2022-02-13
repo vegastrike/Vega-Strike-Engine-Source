@@ -119,8 +119,7 @@ ClickList *shipList = NULL;
 float SIMULATION_ATOM = 0.0f;
 float AUDIO_ATOM = 0.0f;
 
-void VolUp(const KBData &, KBSTATE newState)
-{
+void VolUp(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         float gain = AUDGetListenerGain();
         if (gain < 1) {
@@ -134,8 +133,7 @@ void VolUp(const KBData &, KBSTATE newState)
     }
 }
 
-void VolDown(const KBData &, KBSTATE newState)
-{
+void VolDown(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         float gain = AUDGetListenerGain();
         if (gain > 0) {
@@ -149,8 +147,7 @@ void VolDown(const KBData &, KBSTATE newState)
     }
 }
 
-static void SwitchVDUTo(VDU::VDU_MODE v)
-{
+static void SwitchVDUTo(VDU::VDU_MODE v) {
     int i;
     static int whichvdu = 1;
     for (int j = 0; j < 3; ++j) {
@@ -180,8 +177,7 @@ static void SwitchVDUTo(VDU::VDU_MODE v)
     }
 }
 
-void ExamineWhenTargetKey()
-{
+void ExamineWhenTargetKey() {
     if (game_options.switchToTargetModeOnKey) {
         int view = 0;
         int examine = 0;
@@ -205,8 +201,7 @@ namespace CockpitKeys {
 unsigned int textmessager = 0;
 static bool waszero = false;
 
-void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y)
-{
+void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     GameCockpit *gcp = static_cast< GameCockpit * > ( _Universe->AccessCockpit(textmessager));
     gcp->editingTextMessage = true;
     if ((release
@@ -255,8 +250,7 @@ void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x,
     }
 }
 
-void TextMessageKey(const KBData &, KBSTATE newState)
-{
+void TextMessageKey(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         if (game_options.chat_only_in_network) {
             return;
@@ -266,8 +260,7 @@ void TextMessageKey(const KBData &, KBSTATE newState)
     }
 }
 
-void QuitNow()
-{
+void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
         if (game_options.write_savegame_on_exit) {
@@ -286,16 +279,14 @@ void QuitNow()
     }
 }
 
-void SkipMusicTrack(const KBData &, KBSTATE newState)
-{
+void SkipMusicTrack(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         VS_LOG(info, "skipping");
         muzak->Skip();
     }
 }
 
-static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
-{
+static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1) {
     static Vector Q;
     static Vector R;
     for (int i = fromCam; i <= toCam; i++) {
@@ -306,8 +297,8 @@ static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 
             Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q,
-                                                                                            R,
-                                                                                            game_options.camera_pan_speed);
+                    R,
+                    game_options.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -315,8 +306,7 @@ static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 
     }
 }
 
-static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
-{
+static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1) {
     static Vector Q;
     static Vector R;
     for (int i = fromCam; i <= toCam; i++) {
@@ -324,8 +314,8 @@ static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q,
-                                                                                            R,
-                                                                                            game_options.camera_pan_speed);
+                    R,
+                    game_options.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -333,8 +323,7 @@ static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
     }
 }
 
-static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
-{
+static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1) {
     static Vector P;
     static Vector R;
     for (int i = fromCam; i <= toCam; i++) {
@@ -342,8 +331,8 @@ static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             P = _Universe->AccessCockpit()->AccessCamera(i)->P;
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P,
-                                                                                            R,
-                                                                                            game_options.camera_pan_speed);
+                    R,
+                    game_options.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -351,8 +340,7 @@ static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
     }
 }
 
-static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
-{
+static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1) {
     for (int i = fromCam; i <= toCam; i++) {
         static Vector P;
         static Vector R;
@@ -360,8 +348,8 @@ static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1
             P = _Universe->AccessCockpit()->AccessCamera(i)->P;
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P,
-                                                                                            R,
-                                                                                            game_options.camera_pan_speed);
+                    R,
+                    game_options.camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -369,28 +357,23 @@ static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1
     }
 }
 
-void PitchDown(const KBData &, KBSTATE newState)
-{
+void PitchDown(const KBData &, KBSTATE newState) {
     _PitchDown(newState);
 }
 
-void PitchUp(const KBData &, KBSTATE newState)
-{
+void PitchUp(const KBData &, KBSTATE newState) {
     _PitchUp(newState);
 }
 
-void YawLeft(const KBData &, KBSTATE newState)
-{
+void YawLeft(const KBData &, KBSTATE newState) {
     _YawLeft(newState);
 }
 
-void YawRight(const KBData &, KBSTATE newState)
-{
+void YawRight(const KBData &, KBSTATE newState) {
     _YawRight(newState);
 }
 
-static void InitPanInside()
-{
+static void InitPanInside() {
     YawLeft(std::string(), RELEASE);
     YawRight(std::string(), RELEASE);
     PitchUp(std::string(), RELEASE);
@@ -398,8 +381,7 @@ static void InitPanInside()
     _Universe->AccessCockpit()->SetView(CP_PANINSIDE);
 }
 
-void LookDown(const KBData &kbdata, KBSTATE newState)
-{
+void LookDown(const KBData &kbdata, KBSTATE newState) {
     if (newState == PRESS && QuitAllow) {
         QuitNow();
     }
@@ -420,8 +402,7 @@ void LookDown(const KBData &kbdata, KBSTATE newState)
     }
 }
 
-void LookUp(const KBData &kbdata, KBSTATE newState)
-{
+void LookUp(const KBData &kbdata, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
@@ -439,8 +420,7 @@ void LookUp(const KBData &kbdata, KBSTATE newState)
     }
 }
 
-void LookLeft(const KBData &kbdata, KBSTATE newState)
-{
+void LookLeft(const KBData &kbdata, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
@@ -458,8 +438,7 @@ void LookLeft(const KBData &kbdata, KBSTATE newState)
     }
 }
 
-void LookRight(const KBData &kbdata, KBSTATE newState)
-{
+void LookRight(const KBData &kbdata, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
@@ -477,15 +456,13 @@ void LookRight(const KBData &kbdata, KBSTATE newState)
     }
 }
 
-void Quit(const KBData &, KBSTATE newState)
-{
+void Quit(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         QuitAllow = !QuitAllow;
     }
 }
 
-void Inside(const KBData &, KBSTATE newState)
-{
+void Inside(const KBData &, KBSTATE newState) {
     {
         if (_Universe->activeStarSystem() && _Universe->activeStarSystem()->getBackground()) {
             _Universe->activeStarSystem()->getBackground()->EnableBG(game_options.background);
@@ -518,8 +495,7 @@ void Inside(const KBData &, KBSTATE newState)
     }
 }
 
-void ZoomOut(const KBData &, KBSTATE newState)
-{
+void ZoomOut(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         _Universe->AccessCockpit()->zoomfactor += GetElapsedTime() / getTimeCompression();
     }
@@ -527,8 +503,7 @@ void ZoomOut(const KBData &, KBSTATE newState)
 
 static float scrolltime = 0;
 
-void ScrollUp(const KBData &, KBSTATE newState)
-{
+void ScrollUp(const KBData &, KBSTATE newState) {
     scrolltime += GetElapsedTime();
     if (newState == PRESS || (newState == DOWN && scrolltime >= .5)) {
         scrolltime = 0;
@@ -537,8 +512,7 @@ void ScrollUp(const KBData &, KBSTATE newState)
     }
 }
 
-void ScrollDown(const KBData &, KBSTATE newState)
-{
+void ScrollDown(const KBData &, KBSTATE newState) {
     scrolltime += GetElapsedTime();
     if (newState == PRESS || (newState == DOWN && scrolltime >= .5)) {
         scrolltime = 0;
@@ -547,22 +521,19 @@ void ScrollDown(const KBData &, KBSTATE newState)
     }
 }
 
-void ZoomIn(const KBData &, KBSTATE newState)
-{
+void ZoomIn(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         _Universe->AccessCockpit()->zoomfactor -= GetElapsedTime() / getTimeCompression();
     }
 }
 
-void ZoomReset(const KBData &, KBSTATE newState)
-{
+void ZoomReset(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         _Universe->AccessCockpit()->zoomfactor = 1.f;
     }
 }
 
-void InsideLeft(const KBData &, KBSTATE newState)
-{
+void InsideLeft(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         YawLeft(std::string(), RELEASE);
         YawRight(std::string(), RELEASE);
@@ -573,22 +544,19 @@ void InsideLeft(const KBData &, KBSTATE newState)
     }
 }
 
-void InsideRight(const KBData &, KBSTATE newState)
-{
+void InsideRight(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         _Universe->AccessCockpit()->SetView(CP_RIGHT);
     }
 }
 
-void PanTarget(const KBData &, KBSTATE newState)
-{
+void PanTarget(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         _Universe->AccessCockpit()->SetView(CP_PANTARGET);
     }
 }
 
-void ViewTarget(const KBData &, KBSTATE newState)
-{
+void ViewTarget(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         YawLeft(std::string(), RELEASE);
         YawRight(std::string(), RELEASE);
@@ -599,8 +567,7 @@ void ViewTarget(const KBData &, KBSTATE newState)
     }
 }
 
-void OutsideTarget(const KBData &, KBSTATE newState)
-{
+void OutsideTarget(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         YawLeft(std::string(), RELEASE);
         YawRight(std::string(), RELEASE);
@@ -611,8 +578,7 @@ void OutsideTarget(const KBData &, KBSTATE newState)
     }
 }
 
-void InsideBack(const KBData &, KBSTATE newState)
-{
+void InsideBack(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         YawLeft(std::string(), RELEASE);
         YawRight(std::string(), RELEASE);
@@ -623,8 +589,7 @@ void InsideBack(const KBData &, KBSTATE newState)
     }
 }
 
-void CommModeVDU(const KBData &, KBSTATE newState)
-{
+void CommModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
@@ -635,8 +600,7 @@ void CommModeVDU(const KBData &, KBSTATE newState)
     }
 }
 
-void ScanningModeVDU(const KBData &, KBSTATE newState)
-{
+void ScanningModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
@@ -647,8 +611,7 @@ void ScanningModeVDU(const KBData &, KBSTATE newState)
     }
 }
 
-void ObjectiveModeVDU(const KBData &, KBSTATE newState)
-{
+void ObjectiveModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
@@ -660,8 +623,7 @@ void ObjectiveModeVDU(const KBData &, KBSTATE newState)
     }
 }
 
-void TargetModeVDU(const KBData &, KBSTATE newState)
-{
+void TargetModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
@@ -673,8 +635,7 @@ void TargetModeVDU(const KBData &, KBSTATE newState)
     }
 }
 
-void ViewModeVDU(const KBData &, KBSTATE newState)
-{
+void ViewModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
@@ -685,8 +646,7 @@ void ViewModeVDU(const KBData &, KBSTATE newState)
     }
 }
 
-void DamageModeVDU(const KBData &, KBSTATE newState)
-{
+void DamageModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
@@ -698,8 +658,7 @@ void DamageModeVDU(const KBData &, KBSTATE newState)
     }
 }
 
-void ManifestModeVDU(const KBData &, KBSTATE newState)
-{
+void ManifestModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
@@ -711,82 +670,71 @@ void ManifestModeVDU(const KBData &, KBSTATE newState)
     }
 }
 
-void GunModeVDU(const KBData &s, KBSTATE newState)
-{
+void GunModeVDU(const KBData &s, KBSTATE newState) {
     if (newState == PRESS) {
         SwitchVDUTo(VDU::WEAPON);
     }
     FireKeyboard::WeapSelKey(s, newState);
 }
 
-void ReverseGunModeVDU(const KBData &s, KBSTATE newState)
-{
+void ReverseGunModeVDU(const KBData &s, KBSTATE newState) {
     if (newState == PRESS) {
         SwitchVDUTo(VDU::WEAPON);
     }
     FireKeyboard::ReverseWeapSelKey(s, newState);
 }
 
-void MissileModeVDU(const KBData &s, KBSTATE newState)
-{
+void MissileModeVDU(const KBData &s, KBSTATE newState) {
     if (newState == PRESS) {
         SwitchVDUTo(VDU::WEAPON);
     }
     FireKeyboard::MisSelKey(s, newState);
 }
 
-void ReverseMissileModeVDU(const KBData &s, KBSTATE newState)
-{
+void ReverseMissileModeVDU(const KBData &s, KBSTATE newState) {
     if (newState == PRESS) {
         SwitchVDUTo(VDU::WEAPON);
     }
     FireKeyboard::ReverseMisSelKey(s, newState);
 }
 
-void SwitchLVDU(const KBData &, KBSTATE newState)
-{
+void SwitchLVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         _Universe->AccessCockpit()->VDUSwitch(0);
     }
 }
 
-void SwitchRVDU(const KBData &, KBSTATE newState)
-{
+void SwitchRVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         _Universe->AccessCockpit()->VDUSwitch(1);
     }
 }
 
-void SwitchMVDU(const KBData &, KBSTATE newState)
-{
+void SwitchMVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         _Universe->AccessCockpit()->VDUSwitch(2);
     }
 }
 
-void SwitchULVDU(const KBData &, KBSTATE newState)
-{
+void SwitchULVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         _Universe->AccessCockpit()->VDUSwitch(3);
     }
 }
 
-void SwitchURVDU(const KBData &, KBSTATE newState)
-{
+void SwitchURVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         _Universe->AccessCockpit()->VDUSwitch(4);
     }
 }
 
-void SwitchUMVDU(const KBData &, KBSTATE newState)
-{
+void SwitchUMVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         _Universe->AccessCockpit()->VDUSwitch(5);
     }
 }
 
-void Behind(const KBData &, KBSTATE newState)
-{
+void Behind(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         YawLeft(std::string(), RELEASE);
         YawRight(std::string(), RELEASE);
@@ -797,8 +745,7 @@ void Behind(const KBData &, KBSTATE newState)
     }
 }
 
-void Pan(const KBData &, KBSTATE newState)
-{
+void Pan(const KBData &, KBSTATE newState) {
     if (newState == PRESS || newState == DOWN) {
         YawLeft(std::string(), RELEASE);
         YawRight(std::string(), RELEASE);
@@ -812,13 +759,11 @@ void Pan(const KBData &, KBSTATE newState)
 
 using namespace CockpitKeys;
 
-void InitializeInput()
-{
+void InitializeInput() {
     BindKey(27, 0, 0, Quit, KBData());     //always have quit on esc
 }
 
-void IncrementStartupVariable()
-{
+void IncrementStartupVariable() {
     if (mission->getVariable("savegame", "").length() == 0) {
         return;
     }
@@ -837,10 +782,9 @@ void IncrementStartupVariable()
 }
 
 void createObjects(std::vector<std::string> &fighter0name,
-                   std::vector<StarSystem *> &ssys,
-                   std::vector<QVector> &savedloc,
-                   vector<vector<std::string> > &savefiles)
-{
+        std::vector<StarSystem *> &ssys,
+        std::vector<QVector> &savedloc,
+        vector<vector<std::string> > &savefiles) {
     vector<std::string> fighter0mods;
     vector<int> fighter0indices;
 
@@ -898,8 +842,9 @@ void createObjects(std::vector<std::string> &fighter0name,
                 a -= 22;
                 VS_LOG(error, "Error: in createObjects: more ships in flightgroups than in total for mission!");
                 VS_LOG(error,
-                       (boost::format("Variables a=%1%, fg-number-of-ships=%2%, total nr=%3%, fact=%4%, fgname=%5%")
-                               % a % fg->nr_ships % mission->number_of_ships % fg->faction.c_str() % fg->name.c_str()));
+                        (boost::format("Variables a=%1%, fg-number-of-ships=%2%, total nr=%3%, fact=%4%, fgname=%5%")
+                                % a % fg->nr_ships % mission->number_of_ships % fg->faction.c_str()
+                                % fg->name.c_str()));
                 break;
             }
             numf++;
@@ -935,17 +880,17 @@ void createObjects(std::vector<std::string> &fighter0name,
                             std::string srcsys = (*dat)[0];
                             Unit *grav;
                             for (un_iter ui = cp->activeStarSystem->gravitationalUnits().createIterator();
-                                 (grav = *ui) != NULL;
-                                 ++ui) {
+                                    (grav = *ui) != NULL;
+                                    ++ui) {
                                 size_t siz = grav->GetDestinations().size();
                                 for (unsigned int i = 0; i < siz; ++i) {
                                     if (srcsys == grav->GetDestinations()[i]) {
                                         QVector newpos = grav->LocalPosition()
                                                 + QVector(vsrandom.uniformExc(-grav->rSize() / 4, grav->rSize() / 4),
-                                                          vsrandom.uniformExc(-grav->rSize() / 4,
-                                                                              grav->rSize() / 4),
-                                                          vsrandom.uniformExc(-grav->rSize() / 4,
-                                                                              grav->rSize() / 4));
+                                                        vsrandom.uniformExc(-grav->rSize() / 4,
+                                                                grav->rSize() / 4),
+                                                        vsrandom.uniformExc(-grav->rSize() / 4,
+                                                                grav->rSize() / 4));
                                         if (grav->isUnit() != _UnitType::planet) {
                                             newpos = UniverseUtil::SafeEntrancePoint(newpos);
                                         }
@@ -958,8 +903,8 @@ void createObjects(std::vector<std::string> &fighter0name,
                         }
                         fighter0mods.push_back(modifications = game_options.getCallsign(squadnum));
                         VS_LOG(info,
-                               (boost::format("FOUND MODIFICATION = %1% FOR PLAYER #%2%") % modifications.c_str()
-                                       % squadnum));
+                                (boost::format("FOUND MODIFICATION = %1% FOR PLAYER #%2%") % modifications.c_str()
+                                        % squadnum));
                     } else {
                         fighter0mods.push_back("");
                     }
@@ -977,7 +922,7 @@ void createObjects(std::vector<std::string> &fighter0name,
                 if (s == 0 && squadnum < (int) fighter0name.size()) {
                     _Universe->AccessCockpit(squadnum)->Init(fighters[a]->getCockpit().c_str());
                     _Universe->AccessCockpit(squadnum)->SetParent(fighters[a], fighter0name[squadnum].c_str(),
-                                                                  fighter0mods[squadnum].c_str(), pox);
+                            fighter0mods[squadnum].c_str(), pox);
                 }
                 if (squadnum < (int) fighter0name.size()) {
                     _Universe->popActiveStarSystem();
@@ -995,7 +940,7 @@ void createObjects(std::vector<std::string> &fighter0name,
                                 fg_terrain - _Universe->activeStarSystem()->numTerrain()
                                         < _Universe->activeStarSystem()->numContTerrain());
                         t = _Universe->activeStarSystem()
-                                     ->getContTerrain(fg_terrain - _Universe->activeStarSystem()->numTerrain());
+                                ->getContTerrain(fg_terrain - _Universe->activeStarSystem()->numTerrain());
                         fighters[a] = new Building(t, isvehicle, fightername, false, tmptarget[a], string(
                                 ""), fg);
                     } else {
@@ -1040,8 +985,7 @@ void createObjects(std::vector<std::string> &fighter0name,
     IncrementStartupVariable();
 }
 
-void AddUnitToSystem(const SavedUnits *su)
-{
+void AddUnitToSystem(const SavedUnits *su) {
     Unit *un = NULL;
     switch (su->type) {
         case _UnitType::enhancement:
@@ -1056,17 +1000,16 @@ void AddUnitToSystem(const SavedUnits *su)
             un->SetTurretAI();
             if (_Universe->AccessCockpit()->GetParent()) {
                 un->SetPosition(_Universe->AccessCockpit()->GetParent()->Position()
-                                        + QVector(rand() * 10000. / RAND_MAX - 5000,
-                                                  rand() * 10000. / RAND_MAX - 5000,
-                                                  rand() * 10000. / RAND_MAX - 5000));
+                        + QVector(rand() * 10000. / RAND_MAX - 5000,
+                                rand() * 10000. / RAND_MAX - 5000,
+                                rand() * 10000. / RAND_MAX - 5000));
             }
             break;
     }
     _Universe->activeStarSystem()->AddUnit(un);
 }
 
-void destroyObjects()
-{
+void destroyObjects() {
     if (myterrain != nullptr) {
         delete myterrain;
         myterrain = nullptr;
@@ -1077,20 +1020,17 @@ void destroyObjects()
     delete locSel;
 }
 
-int getmicrosleep()
-{
+int getmicrosleep() {
     return game_options.threadtime;
 }
 
-void restore_main_loop()
-{
+void restore_main_loop() {
     RestoreKB();
     RestoreMouse();
     GFXLoop(main_loop);
 }
 
-void main_loop()
-{
+void main_loop() {
     //Evaluate number of loops per second each XX loops
     if (loop_count == 500) {
         last_check = cur_check;
@@ -1114,7 +1054,7 @@ void main_loop()
 
 #ifndef NO_GFX
     VS_LOG(trace,
-           (boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame));
+            (boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame));
     gl_vertices_this_frame = 0;
     gl_batches_this_frame = 0;
 #endif

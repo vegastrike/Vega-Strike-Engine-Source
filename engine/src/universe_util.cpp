@@ -44,10 +44,10 @@
 #include "vs_logging.h"
 
 extern unsigned int AddAnimation(const QVector &pos,
-                                 const float size,
-                                 bool mvolatile,
-                                 const std::string &name,
-                                 float percentgrow);
+        const float size,
+        bool mvolatile,
+        const std::string &name,
+        float percentgrow);
 extern void RespawnNow(Cockpit *cp);
 extern void TerminateCurrentBase(void);
 extern void SetStarSystemLoading(bool value);
@@ -60,130 +60,107 @@ using std::string;
 //less to write
 #define activeSys _Universe->activeStarSystem()
 
-void ClientServerSetLightContext(int lightcontext)
-{
+void ClientServerSetLightContext(int lightcontext) {
     GFXSetLightContext(lightcontext);
 }
 
 namespace UniverseUtil {
-void playVictoryTune()
-{
+void playVictoryTune() {
     muzak->GotoSong(game_options.missionvictorysong);
 }
 
-int musicAddList(string str)
-{
+int musicAddList(string str) {
     return muzak->Addlist(str.c_str());
 }
 
-void musicLayerSkip(int layer)
-{
+void musicLayerSkip(int layer) {
     muzak->Skip(layer);
 }
 
-void musicLayerStop(int layer)
-{
+void musicLayerStop(int layer) {
     muzak->Stop(layer);
 }
 
-void musicLayerPlaySong(string str, int layer)
-{
+void musicLayerPlaySong(string str, int layer) {
     muzak->GotoSong(str, layer);
 }
 
-void musicLayerPlayList(int which, int layer)
-{
+void musicLayerPlayList(int which, int layer) {
     if (which != -1) {
         muzak->SkipRandSong(which, layer);
     }
 }
 
-void musicLayerLoopList(int numloops, int layer)
-{
+void musicLayerLoopList(int numloops, int layer) {
     muzak->SetLoops(numloops, layer);
 }
 
-void musicLayerSetSoftVolume(float vol, float latency_override, int layer)
-{
+void musicLayerSetSoftVolume(float vol, float latency_override, int layer) {
     Music::SetVolume(vol, layer, false, latency_override);
 }
 
-void musicLayerSetHardVolume(float vol, int layer)
-{
+void musicLayerSetHardVolume(float vol, int layer) {
     Music::SetVolume(vol, layer, true);
 }
 
-void musicSetSoftVolume(float vol, float latency_override)
-{
+void musicSetSoftVolume(float vol, float latency_override) {
     musicLayerSetSoftVolume(vol, latency_override, -1);
 }
 
-void musicSetHardVolume(float vol)
-{
+void musicSetHardVolume(float vol) {
     musicLayerSetHardVolume(vol, -1);
 }
 
-void musicMute(bool stopSound)
-{
+void musicMute(bool stopSound) {
     muzak->Mute(stopSound);
 }
 
-void playSound(string soundName, QVector loc, Vector speed)
-{
+void playSound(string soundName, QVector loc, Vector speed) {
     int sound = AUDCreateSoundWAV(soundName, false);
     AUDAdjustSound(sound, loc, speed);
     AUDStartPlaying(sound);
     AUDDeleteSound(sound);
 }
 
-void playSoundCockpit(string soundName)
-{
+void playSoundCockpit(string soundName) {
     int sound = AUDCreateSoundWAV(soundName, false);
     AUDStartPlaying(sound);
     AUDDeleteSound(sound);
 }
 
-void StopAllSounds(void)
-{
+void StopAllSounds(void) {
     AUDStopAllSounds();
 }
 
-void cacheAnimation(string aniName)
-{
+void cacheAnimation(string aniName) {
     static vector<Animation *> anis;
     anis.push_back(new Animation(aniName.c_str()));
 }
 
-void playAnimation(string aniName, QVector loc, float size)
-{
+void playAnimation(string aniName, QVector loc, float size) {
     AddAnimation(loc, size, true, aniName, 1);
 }
 
-void playAnimationGrow(string aniName, QVector loc, float size, float growpercent)
-{
+void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {
     AddAnimation(loc, size, true, aniName, growpercent);
 }
 
-unsigned int getCurrentPlayer()
-{
+unsigned int getCurrentPlayer() {
     return _Universe->CurrentCockpit();
 }
 
-unsigned int maxMissions()
-{
+unsigned int maxMissions() {
     return game_options.max_missions;
 }
 
-void addParticle(QVector loc, Vector velocity, Vector color, float size)
-{
+void addParticle(QVector loc, Vector velocity, Vector color, float size) {
     ParticlePoint p;
     p.loc = loc;
     p.col = color;
     particleTrail.AddParticle(p, velocity, size);
 }
 
-void loadGame(const string &savename)
-{
+void loadGame(const string &savename) {
     Cockpit *cockpit = _Universe->AccessCockpit();
     Unit *player = cockpit->GetParent();
     UniverseUtil::setCurrentSaveGame(savename);
@@ -196,16 +173,14 @@ void loadGame(const string &savename)
     TerminateCurrentBase();
 }
 
-void saveGame(const string &savename)
-{
+void saveGame(const string &savename) {
 
     UniverseUtil::setCurrentSaveGame(savename);
     WriteSaveGame(_Universe->AccessCockpit(), false);
 
 }
 
-void showSplashScreen(const string &filename)
-{
+void showSplashScreen(const string &filename) {
     static Animation *curSplash = 0;
     if (!filename.empty()) {
         if (curSplash != nullptr) {
@@ -222,8 +197,7 @@ void showSplashScreen(const string &filename)
     bootstrap_draw("Loading...", curSplash);
 }
 
-void showSplashMessage(const string &text)
-{
+void showSplashMessage(const string &text) {
     bootstrap_draw(text, 0);
 }
 
@@ -232,18 +206,15 @@ void showSplashProgress(float progress) //DELETE ?
     //Unimplemented
 }
 
-void hideSplashScreen()
-{
+void hideSplashScreen() {
     SetStarSystemLoading(false);
 }
 
-bool isSplashScreenShowing()
-{
+bool isSplashScreenShowing() {
     return GetStarSystemLoading();
 }
 
-void sendCustom(int cp, string cmd, string args, string id)
-{
+void sendCustom(int cp, string cmd, string args, string id) {
     if (cp < 0 || cp >= static_cast<int>(_Universe->numPlayers())) {
         VS_LOG(error, (boost::format("sendCustom %1% with invalid player %2%") % cmd % cp));
         return;

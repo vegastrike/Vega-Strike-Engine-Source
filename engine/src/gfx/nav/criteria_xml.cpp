@@ -46,8 +46,7 @@ using namespace VSFileSystem;   // FIXME -- Shouldn't include entire namespace
 using std::set;
 using std::string;
 
-void CriteriaContains::beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
-{
+void CriteriaContains::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes(atts);
     if (string(name) == "Planet") {
         for (AttributeList::const_iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -58,12 +57,10 @@ void CriteriaContains::beginElement(void *userData, const XML_Char *name, const 
     }
 }
 
-void CriteriaContains::endElement(void *userData, const XML_Char *name)
-{
+void CriteriaContains::endElement(void *userData, const XML_Char *name) {
 }
 
-std::set<std::string> CriteriaContains::getPlanetTypesFromXML(const char *filename) const
-{
+std::set<std::string> CriteriaContains::getPlanetTypesFromXML(const char *filename) const {
     set<string> textures;
 
     VSFile f;

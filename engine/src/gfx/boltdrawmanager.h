@@ -56,10 +56,10 @@ public:
 
     static BoltDrawManager &GetInstance();
     CollideMap::iterator AddBall(const WeaponInfo *typ,
-                                 const Matrix &orientationpos,
-                                 const Vector &shipspeed,
-                                 void *owner,
-                                 CollideMap::iterator hint);
+            const Matrix &orientationpos,
+            const Vector &shipspeed,
+            void *owner,
+            CollideMap::iterator hint);
 
     static void Draw();
 };

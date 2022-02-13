@@ -51,13 +51,11 @@ namespace __impl {
 
 using std::numeric_limits;
 
-size_t OggData::read_func(void *ptr, size_t size, size_t nmemb, void *datasource)
-{
+size_t OggData::read_func(void *ptr, size_t size, size_t nmemb, void *datasource) {
     return ((VSFileSystem::VSFile *) datasource)->Read(ptr, size * nmemb);
 }
 
-int OggData::seek_func(void *datasource, ogg_int64_t offset, int whence)
-{
+int OggData::seek_func(void *datasource, ogg_int64_t offset, int whence) {
     if (offset > numeric_limits<long>::max()) {
         return -1;
     }
@@ -80,19 +78,16 @@ int OggData::seek_func(void *datasource, ogg_int64_t offset, int whence)
     return 0;
 }
 
-int OggData::close_func(void *datasource)
-{
+int OggData::close_func(void *datasource) {
     ((VSFileSystem::VSFile *) datasource)->Close();
     return 0;
 }
 
-long OggData::tell_func(void *datasource)
-{
+long OggData::tell_func(void *datasource) {
     return ((VSFileSystem::VSFile *) datasource)->GetPosition();
 }
 
-int OggData::nativeIsLsb()
-{
+int OggData::nativeIsLsb() {
     union {
         short s;
         char c[sizeof(short)];
@@ -101,8 +96,7 @@ int OggData::nativeIsLsb()
     return c[0] ? 1 : 0;
 }
 
-OggData::OggData(VSFileSystem::VSFile &file, Format &fmt, int streamIdx, bool test)
-{
+OggData::OggData(VSFileSystem::VSFile &file, Format &fmt, int streamIdx, bool test) {
     callbacks.read_func = &read_func;
     callbacks.seek_func = &seek_func;
     callbacks.close_func = &close_func;
@@ -128,8 +122,7 @@ OggData::OggData(VSFileSystem::VSFile &file, Format &fmt, int streamIdx, bool te
     }
 }
 
-OggData::~OggData()
-{
+OggData::~OggData() {
     ov_clear(&vorbisFile);
 }
 }

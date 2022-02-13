@@ -42,18 +42,17 @@
 #include "universe.h"
 
 CommunicatingAI::CommunicatingAI(int ttype,
-                                 int stype,
-                                 float mood,
-                                 float anger,
-                                 float appeas,
-                                 float moodswingyness,
-                                 float randomresp) : Order(ttype, stype),
-                                                     anger(anger),
-                                                     appease(appeas),
-                                                     moodswingyness(moodswingyness),
-                                                     randomresponse(randomresp),
-                                                     mood(mood)
-{
+        int stype,
+        float mood,
+        float anger,
+        float appeas,
+        float moodswingyness,
+        float randomresp) : Order(ttype, stype),
+        anger(anger),
+        appease(appeas),
+        moodswingyness(moodswingyness),
+        randomresponse(randomresp),
+        mood(mood) {
     if (appease > 665 && appease < 667) {
         static float appeas = XMLSupport::parse_float(vs_config->getVariable("AI", "EaseToAppease", ".5"));
         this->appease = appeas;
@@ -72,18 +71,17 @@ CommunicatingAI::CommunicatingAI(int ttype,
     }
 }
 
-bool MatchingMood(const CommunicationMessage &c, float mood, float randomresponse, float relationship)
-{
+bool MatchingMood(const CommunicationMessage &c, float mood, float randomresponse, float relationship) {
     static float pos_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                            "LowestPositiveCommChoice",
-                                                                            "0"));
+            "LowestPositiveCommChoice",
+            "0"));
     static float neg_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                            "LowestNegativeCommChoice",
-                                                                            "-.00001"));
+            "LowestNegativeCommChoice",
+            "-.00001"));
     const FSM::Node *n = (unsigned int) c.curstate
-                                 < c.fsm->nodes.size() ? (&c.fsm->nodes[c.curstate]) : (&c.fsm->nodes[c.fsm
-                                                                                                       ->getDefaultState(
-                                                                                                               relationship)]);
+            < c.fsm->nodes.size() ? (&c.fsm->nodes[c.curstate]) : (&c.fsm->nodes[c.fsm
+            ->getDefaultState(
+                    relationship)]);
     std::vector<unsigned int>::const_iterator iend = n->edges.end();
     for (std::vector<unsigned int>::const_iterator i = n->edges.begin(); i != iend; ++i) {
         if (c.fsm->nodes[*i].messagedelta >= pos_limit && relationship >= 0) {
@@ -96,8 +94,7 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
     return false;
 }
 
-int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, float mood)
-{
+int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, float mood) {
     Unit *targ = c.sender.GetUnit();
     float relationship = 0;
     if (targ) {
@@ -116,8 +113,7 @@ int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, flo
 
 using std::pair;
 
-void GetMadAt(Unit *un, Unit *parent, int numhits = 0)
-{
+void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
     if (numhits == 0) {
         static int snumhits = XMLSupport::parse_int(vs_config->getVariable("AI", "ContrabandMadness", "5"));
         numhits = snumhits;
@@ -129,8 +125,7 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0)
     }
 }
 
-void AllUnitsCloseAndEngage(Unit *un, int faction)
-{
+void AllUnitsCloseAndEngage(Unit *un, int faction) {
     Unit *ally;
     static float contraband_assist_range =
             XMLSupport::parse_float(vs_config->getVariable("physics", "contraband_assist_range", "50000"));
@@ -150,8 +145,8 @@ void AllUnitsCloseAndEngage(Unit *un, int faction)
         UniverseUtil::adjustRelationModifierInt(cp, faction, delta);
     }
     for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-         (ally = *i) != NULL;
-         ++i) {
+            (ally = *i) != NULL;
+            ++i) {
         //Vector loc;
         if (ally->faction == faction) {
             if ((ally->Position() - un->Position()).Magnitude() < contraband_assist_range) {
@@ -172,8 +167,7 @@ void AllUnitsCloseAndEngage(Unit *un, int faction)
     //}
 }
 
-void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected)
-{
+void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
     //reports success or failure
     Unit *un;
     unsigned char gender;
@@ -195,13 +189,11 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected)
     contraband_searchee.SetUnit(NULL);
 }
 
-void CommunicatingAI::GetMadAt(Unit *un, int numHitsPerContrabandFail)
-{
+void CommunicatingAI::GetMadAt(Unit *un, int numHitsPerContrabandFail) {
     ::GetMadAt(un, parent, numHitsPerContrabandFail);
 }
 
-static int InList(std::string item, Unit *un)
-{
+static int InList(std::string item, Unit *un) {
     float numcontr = 0;
     if (un) {
         for (unsigned int i = 0; i < un->numCargo(); i++) {
@@ -215,8 +207,7 @@ static int InList(std::string item, Unit *un)
     return float_to_int(numcontr);
 }
 
-void CommunicatingAI::UpdateContrabandSearch()
-{
+void CommunicatingAI::UpdateContrabandSearch() {
     static unsigned int contraband_search_batch_update =
             XMLSupport::parse_int(vs_config->getVariable("AI", "num_contraband_scans_per_search", "10"));
     for (unsigned int rep = 0; rep < contraband_search_batch_update; ++rep) {
@@ -231,8 +222,8 @@ void CommunicatingAI::UpdateContrabandSearch()
                             XMLSupport::parse_bool(vs_config->getVariable("physics", "use_hidden_cargo_space", "true"));
                     static float speed_course_change =
                             XMLSupport::parse_float(vs_config->getVariable("AI",
-                                                                           "PercentageSpeedChangeToStopSearch",
-                                                                           "1"));
+                                    "PercentageSpeedChangeToStopSearch",
+                                    "1"));
                     if (u->CourseDeviation(SpeedAndCourse, u->GetVelocity()) > speed_course_change) {
                         unsigned char gender;
                         std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
@@ -273,13 +264,11 @@ void CommunicatingAI::UpdateContrabandSearch()
     }
 }
 
-static bool isDockedAtAll(Unit *un)
-{
+static bool isDockedAtAll(Unit *un) {
     return (un->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) != 0;
 }
 
-void CommunicatingAI::Destroy()
-{
+void CommunicatingAI::Destroy() {
     for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
         Unit *target = _Universe->AccessCockpit(i)->GetParent();
         if (target) {
@@ -293,8 +282,7 @@ void CommunicatingAI::Destroy()
     this->Order::Destroy();
 }
 
-void CommunicatingAI::InitiateContrabandSearch(float playaprob, float targprob)
-{
+void CommunicatingAI::InitiateContrabandSearch(float playaprob, float targprob) {
     Unit *u = GetRandomUnit(playaprob, targprob);
     if (u) {
         Unit *un = FactionUtil::GetContraband(parent->faction);
@@ -323,8 +311,7 @@ void CommunicatingAI::InitiateContrabandSearch(float playaprob, float targprob)
     }
 }
 
-void CommunicatingAI::AdjustRelationTo(Unit *un, float factor)
-{
+void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
     Order::AdjustRelationTo(un, factor);
     float newrel = parent->pilot->adjustSpecificRelationship(parent, un, factor, un->faction);
 
@@ -373,8 +360,7 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor)
 }
 
 //modified not to check player when hostiles are around--unless player IS the hostile
-Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob)
-{
+Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     if (vsrandom.uniformInc(0, 1) < playaprob) {
         Unit *playa = _Universe->AccessCockpit(rand() % _Universe->numPlayers())->GetParent();
         if (playa) {
@@ -389,8 +375,8 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob)
     //FIXME FOR TESTING ONLY
     //return parent->Target();
     QVector where = parent->Position() + parent->GetComputerData().radar.maxrange * QVector(vsrandom.uniformInc(-1, 1),
-                                                                                            vsrandom.uniformInc(-1, 1),
-                                                                                            vsrandom.uniformInc(-1, 1));
+            vsrandom.uniformInc(-1, 1),
+            vsrandom.uniformInc(-1, 1));
     Collidable wherewrapper(0, 0, where);
 
     NearestUnitLocator unitLocator;
@@ -413,8 +399,7 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob)
     return target;
 }
 
-void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targprob)
-{
+void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targprob) {
     Unit *target = GetRandomUnit(playaprob, targprob);
     if (target != NULL) {
         if (UnitUtil::getUnitSystemFile(target) == UnitUtil::getUnitSystemFile(parent)
@@ -437,8 +422,7 @@ void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targpro
     }
 }
 
-int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *un)
-{
+int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *un) {
     if (0 && mood == 0) {
         FSM::Node *n = c.getCurrentState();
         if (n) {
@@ -452,13 +436,12 @@ int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *u
         static float staticrelmul =
                 XMLSupport::parse_float(vs_config->getVariable("AI", "StaticRelationshipAffectsResponse", "1"));
         return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
-                                                                                                     un) + staticrelmul
+                un) + staticrelmul
                 * UnitUtil::getFactionRelation(parent, un));
     }
 }
 
-void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c)
-{
+void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c) {
     if (messagequeue.back()->curstate < messagequeue.back()->fsm->GetUnDockNode()) {
         Order::ProcessCommMessage(c);
         FSM *tmpfsm = c.fsm;
@@ -485,7 +468,6 @@ void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c)
     }
 }
 
-CommunicatingAI::~CommunicatingAI()
-{
+CommunicatingAI::~CommunicatingAI() {
 }
 

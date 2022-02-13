@@ -37,24 +37,24 @@
 using namespace VSFileSystem;   // FIXME -- Shouldn't include the entire namespace
 
 extern Texture *createTexture(char const *ccc,
-                              char const *cc,
-                              int k = 0,
-                              enum FILTER f1 = MIPMAP,
-                              enum TEXTURE_TARGET t0 = TEXTURE2D,
-                              enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-                              float f = 1,
-                              int j = 0,
-                              unsigned char c = GFXFALSE,
-                              int i = 65536);
+        char const *cc,
+        int k = 0,
+        enum FILTER f1 = MIPMAP,
+        enum TEXTURE_TARGET t0 = TEXTURE2D,
+        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+        float f = 1,
+        int j = 0,
+        unsigned char c = GFXFALSE,
+        int i = 65536);
 
 extern Logo *createLogo(int numberlogos,
-                        Vector *center,
-                        Vector *normal,
-                        float *sizes,
-                        float *rotations,
-                        float offset,
-                        Texture *Dec,
-                        Vector *Ref);
+        Vector *center,
+        Vector *normal,
+        float *sizes,
+        float *rotations,
+        float offset,
+        Texture *Dec,
+        Vector *Ref);
 
 #ifdef __cplusplus
 extern "C"
@@ -63,8 +63,7 @@ void winsys_exit(int code);
 }
 #endif
 
-void Mesh::LoadBinary(const char *filename, int faction)
-{
+void Mesh::LoadBinary(const char *filename, int faction) {
     GFXBOOL objtex;
     int TexNameLength;
     char *TexName = NULL;
@@ -398,11 +397,11 @@ void Mesh::LoadBinary(const char *filename, int faction)
     delete[] offset;
     for (ii = 0; ii < NumTris * 3; ii += 3) {
         Vector Norm1(vertexlist[ii + 1].x - vertexlist[ii].x,
-                     vertexlist[ii + 1].y - vertexlist[ii].y,
-                     vertexlist[ii + 1].z - vertexlist[ii].z);
+                vertexlist[ii + 1].y - vertexlist[ii].y,
+                vertexlist[ii + 1].z - vertexlist[ii].z);
         Vector Norm2(vertexlist[ii + 2].x - vertexlist[ii].x,
-                     vertexlist[ii + 2].y - vertexlist[ii].y,
-                     vertexlist[ii + 2].z - vertexlist[ii].z);
+                vertexlist[ii + 2].y - vertexlist[ii].y,
+                vertexlist[ii + 2].z - vertexlist[ii].z);
         Vector Normal;
         CrossProduct(Norm2, Norm1, Normal);
         //CrossProduct (Norm1,Norm2,Normal);
@@ -413,11 +412,11 @@ void Mesh::LoadBinary(const char *filename, int faction)
     }
     for (ii = NumTris * 3; ii < NumTris * 3 + NumQuads * 4; ii += 4) {
         Vector Norm1(vertexlist[ii + 1].x - vertexlist[ii].x,
-                     vertexlist[ii + 1].y - vertexlist[ii].y,
-                     vertexlist[ii + 1].z - vertexlist[ii].z);
+                vertexlist[ii + 1].y - vertexlist[ii].y,
+                vertexlist[ii + 1].z - vertexlist[ii].z);
         Vector Norm2(vertexlist[ii + 3].x - vertexlist[ii].x,
-                     vertexlist[ii + 3].y - vertexlist[ii].y,
-                     vertexlist[ii + 3].z - vertexlist[ii].z);
+                vertexlist[ii + 3].y - vertexlist[ii].y,
+                vertexlist[ii + 3].z - vertexlist[ii].z);
         Vector Normal;
         CrossProduct(Norm2, Norm1, Normal);
         //CrossProduct (Norm1,Norm2,Normal);
@@ -529,13 +528,13 @@ void Mesh::LoadBinary(const char *filename, int faction)
     }
     squadlogos =
             createLogo(numsquadlogo,
-                       center,
-                       PolyNormal,
-                       sizes,
-                       rotations,
-                       (float) 0.01,
-                       FactionUtil::getSquadLogo(faction),
-                       Ref);
+                    center,
+                    PolyNormal,
+                    sizes,
+                    rotations,
+                    (float) 0.01,
+                    FactionUtil::getSquadLogo(faction),
+                    Ref);
     delete[] Ref;
     int vert_offset[2];
     vert_offset[0] = NumTris * 3;

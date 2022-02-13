@@ -67,15 +67,14 @@ private:
 protected:
     /** Internal constructor used by derived classes */
     SimpleSound(const std::string &name,
-                VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-                bool streaming = false);
+            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
+            bool streaming = false);
 
 public:
     virtual ~SimpleSound();
 
     /** VSFileSystem File type */
-    VSFileSystem::VSFileType getType() const
-    {
+    VSFileSystem::VSFileType getType() const {
         return type;
     }
 
@@ -85,8 +84,7 @@ public:
 protected:
 
     /** Do we have an open stream? */
-    bool isStreamLoaded() const
-    {
+    bool isStreamLoaded() const {
         return stream.get() != 0;
     }
 

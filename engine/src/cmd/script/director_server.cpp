@@ -51,32 +51,27 @@ PYTHON_BEGIN_MODULE(Briefing)
 //Nothing here, but keeps those files that do a "import Briefing" happy.
 PYTHON_END_MODULE(Briefing)
 
-void InitBase()
-{
+void InitBase() {
     PyImport_AppendInittab("Base", PYTHON_MODULE_INIT_FUNCTION(Base));
 }
 
-void InitBriefing()
-{
+void InitBriefing() {
     PyImport_AppendInittab("Briefing", PYTHON_MODULE_INIT_FUNCTION(Briefing));
 }
 
-void InitBase2()
-{
+void InitBase2() {
     Python::reseterrors();
     PYTHON_INIT_MODULE(Base);
     Python::reseterrors();
 }
 
-void InitBriefing2()
-{
+void InitBriefing2() {
     Python::reseterrors();
     PYTHON_INIT_MODULE(Briefing);
     Python::reseterrors();
 }
 
-void Mission::DirectorLoop()
-{
+void Mission::DirectorLoop() {
     gametime += SIMULATION_ATOM;     //elapsed;
 
     try {
@@ -95,16 +90,13 @@ void Mission::DirectorLoop()
     }
 }
 
-void Mission::BriefingUpdate()
-{
+void Mission::BriefingUpdate() {
 }
 
-void Mission::DirectorBenchmark()
-{
+void Mission::DirectorBenchmark() {
 }
 
-varInst *Mission::call_briefing(missionNode *node, int mode)
-{
+varInst *Mission::call_briefing(missionNode *node, int mode) {
     return NULL;
 }
 

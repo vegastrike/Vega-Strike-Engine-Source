@@ -87,12 +87,11 @@ using std::endl;
 
 extern void ClientServerSetLightContext(int lightcontext);
 double calc_blend_factor(double frac,
-                         unsigned int priority,
-                         unsigned int when_it_will_be_simulated,
-                         unsigned int cur_simulation_frame);
+        unsigned int priority,
+        unsigned int when_it_will_be_simulated,
+        unsigned int cur_simulation_frame);
 
-StarSystem::StarSystem(const string filename, const Vector &centr, const float timeofyear)
-{
+StarSystem::StarSystem(const string filename, const Vector &centr, const float timeofyear) {
     collide_map[Unit::UNIT_ONLY] = new CollideMap(Unit::UNIT_ONLY);
     collide_map[Unit::UNIT_BOLT] = new CollideMap(Unit::UNIT_BOLT);
 
@@ -137,8 +136,7 @@ StarSystem::StarSystem(const string filename, const Vector &centr, const float t
     _Universe->popActiveStarSystem();
 }
 
-StarSystem::~StarSystem()
-{
+StarSystem::~StarSystem() {
     if (_Universe->getNumActiveStarSystem()) {
         _Universe->activeStarSystem()->SwapOut();
     }
@@ -189,13 +187,11 @@ StarSystem::~StarSystem()
     delete stars;
 }
 
-Texture *StarSystem::getLightMap()
-{
+Texture *StarSystem::getLightMap() {
     return light_map[0];
 }
 
-void StarSystem::activateLightMap(int stage)
-{
+void StarSystem::activateLightMap(int stage) {
     GFXActiveTexture(stage);
 #ifdef NV_CUBE_MAP
     light_map[0]->MakeActive(stage);
@@ -214,25 +210,21 @@ void StarSystem::activateLightMap(int stage)
     GFXActiveTexture(0);
 }
 
-ClickList *StarSystem::getClickList()
-{
+ClickList *StarSystem::getClickList() {
     return new ClickList(this, &draw_list);
 }
 
-void ConditionalCursorDraw(bool tf)
-{
+void ConditionalCursorDraw(bool tf) {
     if (game_options.hardware_cursor) {
         winsys_show_cursor(tf);
     }
 }
 
-void StarSystem::SwapIn()
-{
+void StarSystem::SwapIn() {
     GFXSetLightContext(light_context);
 }
 
-void StarSystem::SwapOut()
-{
+void StarSystem::SwapOut() {
 }
 
 extern double saved_interpolation_blend_factor;
@@ -248,16 +240,14 @@ public:
     Unit *parent;
     Unit *parenttarget;
 
-    UnitDrawer()
-    {
+    UnitDrawer() {
         parent = nullptr;
         parenttarget = nullptr;
     }
 
     // can't remove redundant distance parameter, as function acquire is overloaded
     // by template in UnitWithinRangeLocator
-    bool acquire(Unit *unit, float distance)
-    {
+    bool acquire(Unit *unit, float distance) {
         if (gravunits.find(unit) == gravunits.end()) {
             return draw(unit);
         } else {
@@ -265,8 +255,7 @@ public:
         }
     }
 
-    void drawParents()
-    {
+    void drawParents() {
         if (parent && parent->isSubUnit()) {
             parent = UnitUtil::owner(parent);
         }
@@ -282,8 +271,7 @@ public:
         }
     }
 
-    bool draw(Unit *unit)
-    {
+    bool draw(Unit *unit) {
         if (parent == unit || (parent && parent->isSubUnit() && parent->owner == unit)) {
             parent = nullptr;
         }
@@ -294,8 +282,8 @@ public:
         //VS_LOG(trace, (boost::format("UnitDrawer::draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         interpolation_blend_factor = calc_blend_factor(saved_interpolation_blend_factor, unit->sim_atom_multiplier,
-                                                       unit->cur_sim_queue_slot,
-                                                       cur_sim_frame);
+                unit->cur_sim_queue_slot,
+                cur_sim_frame);
         simulation_atom_var = backup * unit->sim_atom_multiplier;
         //VS_LOG(trace, (boost::format("UnitDrawer::draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
         (/*(GameUnit*)*/ unit)->Draw();
@@ -305,8 +293,7 @@ public:
         return true;
     }
 
-    bool grav_acquire(Unit *unit)
-    {
+    bool grav_acquire(Unit *unit) {
         gravunits[unit] = empty();
         return draw(unit);
     }
@@ -314,8 +301,7 @@ public:
 
 #define UPDATEDEBUG  //for hard to track down bugs
 
-void StarSystem::Draw(bool DrawCockpit)
-{
+void StarSystem::Draw(bool DrawCockpit) {
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     saved_interpolation_blend_factor = interpolation_blend_factor =
@@ -333,13 +319,13 @@ void StarSystem::Draw(bool DrawCockpit)
     } else if (!par->isSubUnit()) {
         //now we can assume world is topps
         par->cumulative_transformation = linear_interpolate(par->prev_physical_state,
-                                                            par->curr_physical_state,
-                                                            interpolation_blend_factor);
+                par->curr_physical_state,
+                interpolation_blend_factor);
         Unit *targ = par->Target();
         if (targ && !targ->isSubUnit()) {
             targ->cumulative_transformation = linear_interpolate(targ->prev_physical_state,
-                                                                 targ->curr_physical_state,
-                                                                 interpolation_blend_factor);
+                    targ->curr_physical_state,
+                    interpolation_blend_factor);
         }
         _Universe->AccessCockpit()->SetupViewPort(true);
     }
@@ -362,9 +348,9 @@ void StarSystem::Draw(bool DrawCockpit)
             //Make sure unit is not null;
             if (unit && !unit->isSubUnit()) {
                 interpolation_blend_factor = calc_blend_factor(saved_interpolation_blend_factor,
-                                                               unit->sim_atom_multiplier,
-                                                               unit->cur_sim_queue_slot,
-                                                               cur_sim_frame);
+                        unit->sim_atom_multiplier,
+                        unit->cur_sim_queue_slot,
+                        cur_sim_frame);
                 // stephengtuggy 2020-07-25 - Should we just use the standard SIMULATION_ATOM here?
                 simulation_atom_var = backup * unit->sim_atom_multiplier;
                 //VS_LOG(trace, (boost::format("StarSystem::Draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
@@ -471,29 +457,24 @@ void StarSystem::Draw(bool DrawCockpit)
 
 extern void update_ani_cache();
 
-void UpdateAnimatedTexture()
-{
+void UpdateAnimatedTexture() {
     AnimatedTexture::UpdateAllPhysics();
     update_ani_cache();
 }
 
-void TerrainCollide()
-{
+void TerrainCollide() {
     Terrain::CollideAll();
 }
 
-void UpdateTerrain()
-{
+void UpdateTerrain() {
     Terrain::UpdateAll(64);
 }
 
-void UpdateCameraSnds()
-{
+void UpdateCameraSnds() {
     _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
 }
 
-void NebulaUpdate(StarSystem *ss)
-{
+void NebulaUpdate(StarSystem *ss) {
     if (_Universe->AccessCockpit()->activeStarSystem == ss) {
         Nebula *neb;
         if ((neb = _Universe->AccessCamera()->GetNebula())) {
@@ -505,39 +486,38 @@ void NebulaUpdate(StarSystem *ss)
     }
 }
 
-void StarSystem::createBackground(Star_XML *xml)
-{
+void StarSystem::createBackground(Star_XML *xml) {
 #ifdef NV_CUBE_MAP
     VS_LOG(info, "using NV_CUBE_MAP");
     light_map[0] = new Texture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                               GFXFALSE, game_options.max_cubemap_size);
+            GFXFALSE, game_options.max_cubemap_size);
     if (light_map[0]->LoadSuccess() && light_map[0]->isCube()) {
         light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = 0;
     } else {
         delete light_map[0];
         light_map[0] =
                 new Texture((xml->backgroundname + "_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                            GFXFALSE, game_options.max_cubemap_size);
+                        GFXFALSE, game_options.max_cubemap_size);
         light_map[1] =
                 new Texture((xml->backgroundname + "_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
-                            GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
-                            light_map[0]);
+                        GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        light_map[0]);
         light_map[2] =
                 new Texture((xml->backgroundname + "_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
-                            GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
-                            light_map[0]);
+                        GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        light_map[0]);
         light_map[3] =
                 new Texture((xml->backgroundname + "_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
-                            GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
-                            light_map[0]);
+                        GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        light_map[0]);
         light_map[4] =
                 new Texture((xml->backgroundname + "_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
-                            GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
-                            light_map[0]);
+                        GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        light_map[0]);
         light_map[5] =
                 new Texture((xml->backgroundname + "_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
-                            GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
-                            light_map[0]);
+                        GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        light_map[0]);
     }
 #else
     string  bglight = xml->backgroundname+"_light.image";
@@ -569,8 +549,7 @@ using namespace XMLSupport;
 vector<Vector> perplines;
 extern vector<unorigdest *> pendingjump;
 
-void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::string &system)
-{
+void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::string &system) {
     for (unsigned int i = 0; i < pendingjump.size(); ++i) {
         if (pendingjump[i]->un.GetUnit() == un) {
             return;
@@ -579,16 +558,14 @@ void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::strin
     ss->JumpTo(un, jumppoint, system);
 }
 
-float ScaleJumpRadius(float radius)
-{
+float ScaleJumpRadius(float radius) {
     //need this because sys scale doesn't affect j-point size
     radius *= game_options.jump_radius_scale * game_options.game_speed;
     return radius;
 }
 
 /********* FROM STAR SYSTEM XML *********/
-void setStaticFlightgroup(vector<Flightgroup *> &fg, const std::string &nam, int faction)
-{
+void setStaticFlightgroup(vector<Flightgroup *> &fg, const std::string &nam, int faction) {
     while (faction >= (int) fg.size()) {
         fg.push_back(new Flightgroup());
         fg.back()->nr_ships = 0;
@@ -608,38 +585,33 @@ void setStaticFlightgroup(vector<Flightgroup *> &fg, const std::string &nam, int
     ++fg[faction]->nr_ships_left;
 }
 
-Flightgroup *getStaticBaseFlightgroup(int faction)
-{
+Flightgroup *getStaticBaseFlightgroup(int faction) {
     //warning mem leak...not big O(num factions)
     static vector<Flightgroup *> fg;
     setStaticFlightgroup(fg, "Base", faction);
     return fg[faction];
 }
 
-Flightgroup *getStaticStarFlightgroup(int faction)
-{
+Flightgroup *getStaticStarFlightgroup(int faction) {
     //warning mem leak...not big O(num factions)
     static vector<Flightgroup *> fg;
     setStaticFlightgroup(fg, "Base", faction);
     return fg[faction];
 }
 
-Flightgroup *getStaticNebulaFlightgroup(int faction)
-{
+Flightgroup *getStaticNebulaFlightgroup(int faction) {
     static vector<Flightgroup *> fg;
     setStaticFlightgroup(fg, "Nebula", faction);
     return fg[faction];
 }
 
-Flightgroup *getStaticAsteroidFlightgroup(int faction)
-{
+Flightgroup *getStaticAsteroidFlightgroup(int faction) {
     static vector<Flightgroup *> fg;
     setStaticFlightgroup(fg, "Asteroid", faction);
     return fg[faction];
 }
 
-Flightgroup *getStaticUnknownFlightgroup(int faction)
-{
+Flightgroup *getStaticUnknownFlightgroup(int faction) {
     static vector<Flightgroup *> fg;
     setStaticFlightgroup(fg, "Unknown", faction);
     return fg[faction];
@@ -647,18 +619,15 @@ Flightgroup *getStaticUnknownFlightgroup(int faction)
 
 extern string RemoveDotSystem(const char *input);
 
-string StarSystem::getFileName() const
-{
+string StarSystem::getFileName() const {
     return getStarSystemSector(filename) + string("/") + RemoveDotSystem(getStarSystemName(filename).c_str());
 }
 
-string StarSystem::getName()
-{
+string StarSystem::getName() {
     return name;
 }
 
-void StarSystem::AddUnit(Unit *unit)
-{
+void StarSystem::AddUnit(Unit *unit) {
     if (stats.system_faction == FactionUtil::GetNeutralFaction()) {
         stats.CheckVitals(this);
     }
@@ -677,8 +646,7 @@ void StarSystem::AddUnit(Unit *unit)
     stats.AddUnit(unit);
 }
 
-bool StarSystem::RemoveUnit(Unit *un)
-{
+bool StarSystem::RemoveUnit(Unit *un) {
     for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
         if (!is_null(un->location[locind])) {
             collide_map[locind]->erase(un->location[locind]);
@@ -699,8 +667,7 @@ bool StarSystem::RemoveUnit(Unit *un)
     return (false);
 }
 
-void StarSystem::ExecuteUnitAI()
-{
+void StarSystem::ExecuteUnitAI() {
     try {
         Unit *unit = nullptr;
         for (un_iter iter = getUnitList().createIterator(); (unit = *iter); ++iter) {
@@ -739,21 +706,18 @@ void StarSystem::ExecuteUnitAI()
 extern Unit *TheTopLevelUnit;
 
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
-Unit *getTopLevelOwner()
-{
+Unit *getTopLevelOwner() {
     return (TheTopLevelUnit);  // Now we return a pointer to a new game unit created in main(), outside of any lists
 }
 
-void CarSimUpdate(Unit *un, float height)
-{
+void CarSimUpdate(Unit *un, float height) {
     un->SetVelocity(Vector(un->GetVelocity().i, 0, un->GetVelocity().k));
     un->curr_physical_state.position = QVector(un->curr_physical_state.position.i,
-                                               height,
-                                               un->curr_physical_state.position.k);
+            height,
+            un->curr_physical_state.position.k);
 }
 
-Statistics::Statistics()
-{
+Statistics::Statistics() {
     system_faction = FactionUtil::GetNeutralFaction();
     newfriendlycount = 0;
     newenemycount = 0;
@@ -767,8 +731,7 @@ Statistics::Statistics()
     navCheckIter = 0;
 }
 
-void Statistics::CheckVitals(StarSystem *ss)
-{
+void Statistics::CheckVitals(StarSystem *ss) {
     int faction = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(ss->getFileName()));
     if (faction != system_faction) {
         *this = Statistics();                    //invoke copy constructor to clear it
@@ -838,8 +801,7 @@ void Statistics::CheckVitals(StarSystem *ss)
     }
 }
 
-void Statistics::AddUnit(Unit *un)
-{
+void Statistics::AddUnit(Unit *un) {
     float rel = UnitUtil::getRelationFromFaction(un, system_faction);
     if (FactionUtil::isCitizenInt(un->faction)) {
         ++citizencount;
@@ -864,14 +826,14 @@ void Statistics::AddUnit(Unit *un)
             k = 1;
         }                                       //friendly planet
         //asteroid field/debris field
-        if (UnitUtil::isAsteroid(un))
+        if (UnitUtil::isAsteroid(un)) {
             k = 2;
+        }
         navs[k].push_back(UnitContainer(un));
     }
 }
 
-void Statistics::RemoveUnit(Unit *un)
-{
+void Statistics::RemoveUnit(Unit *un) {
     float rel = UnitUtil::getRelationFromFaction(un, system_faction);
     if (FactionUtil::isCitizenInt(un->faction)) {
         --citizencount;
@@ -915,8 +877,7 @@ double aggfire = 0;
 int numprocessed = 0;
 double targetpick = 0;
 
-void StarSystem::RequestPhysics(Unit *un, unsigned int queue)
-{
+void StarSystem::RequestPhysics(Unit *un, unsigned int queue) {
     Unit *unit = nullptr;
     un_iter iter = this->physics_buffer[queue].createIterator();
     while ((unit = *iter) && *iter != un) {
@@ -940,8 +901,7 @@ void StarSystem::RequestPhysics(Unit *un, unsigned int queue)
 //scheduling also require a constant base priority, since otherwise priority changes
 //will wreak havoc with subunit interpolation. Luckily again, we only need
 //randomization on priority changes, so we're fine.
-void StarSystem::UpdateUnitsPhysics(bool firstframe)
-{
+void StarSystem::UpdateUnitsPhysics(bool firstframe) {
     static int batchcount = SIM_QUEUE_SIZE - 1;
     double collidetime = 0;
     double bolttime = 0;
@@ -961,7 +921,7 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe)
         } catch (const boost::python::error_already_set &) {
             if (PyErr_Occurred()) {
                 VS_LOG_AND_FLUSH(fatal,
-                                 "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred");
+                        "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred");
                 PyErr_Print();
                 PyErr_Clear();
                 VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
@@ -1003,8 +963,7 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe)
     }
 }
 
-void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit)
-{
+void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
     int priority = UnitUtil::getPhysicsPriority(unit);
     //Doing spreading here and only on priority changes, so as to make AI easier
     int predprior = unit->predicted_priority;
@@ -1033,14 +992,14 @@ void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit)
         unit->ResetThreatLevel();
         //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
         unit->UpdatePhysics(identity_transformation,
-                            identity_matrix,
-                            Vector(0,
-                                   0,
-                                   0),
-                            priority
-                                    == 1 ? firstframe : true,
-                            &this->gravitationalUnits(),
-                            unit);
+                identity_matrix,
+                Vector(0,
+                        0,
+                        0),
+                priority
+                        == 1 ? firstframe : true,
+                &this->gravitationalUnits(),
+                unit);
         simulation_atom_var = backup;
     } catch (...) {
         simulation_atom_var = backup;
@@ -1057,8 +1016,7 @@ extern void UpdateCameraSnds();
 extern float getTimeCompression();
 
 //server
-void ExecuteDirector()
-{
+void ExecuteDirector() {
     unsigned int curcockpit = _Universe->CurrentCockpit();
     {
         for (unsigned int i = 0; i < active_missions.size(); ++i) {
@@ -1100,13 +1058,11 @@ void ExecuteDirector()
     }
 }
 
-Unit *StarSystem::nextSignificantUnit()
-{
+Unit *StarSystem::nextSignificantUnit() {
     return (*sigIter);
 }
 
-void StarSystem::Update(float priority)
-{
+void StarSystem::Update(float priority) {
     Unit *unit;
     bool firstframe = true;
     //No time compression here
@@ -1136,8 +1092,7 @@ void StarSystem::Update(float priority)
 }
 
 //client
-void StarSystem::Update(float priority, bool executeDirector)
-{
+void StarSystem::Update(float priority, bool executeDirector) {
     bool firstframe = true;
     ///this makes it so systems without players may be simulated less accurately
     for (unsigned int k = 0; k < _Universe->numPlayers(); ++k) {
@@ -1156,9 +1111,9 @@ void StarSystem::Update(float priority, bool executeDirector)
     if (time > simulation_atom_var) {
         if (time > simulation_atom_var * 2) {
             VS_LOG(trace,
-                   (boost::format(
-                           "void StarSystem::Update( float priority, bool executeDirector ): time, %1$.6f, is more than twice simulation_atom_var, %2$.6f")
-                           % time % simulation_atom_var));
+                    (boost::format(
+                            "void StarSystem::Update( float priority, bool executeDirector ): time, %1$.6f, is more than twice simulation_atom_var, %2$.6f")
+                            % time % simulation_atom_var));
         }
         //Chew up all sim_atoms that have elapsed since last update
         // ** stephengtuggy 2020-07-23: We definitely need this block of code! **
@@ -1239,20 +1194,17 @@ void StarSystem::Update(float priority, bool executeDirector)
 
 Hashtable<std::string, StarSystem, 127> star_system_table;
 
-void StarSystem::AddStarsystemToUniverse(const string &mname)
-{
+void StarSystem::AddStarsystemToUniverse(const string &mname) {
     star_system_table.Put(mname, this);
 }
 
-void StarSystem::RemoveStarsystemFromUniverse()
-{
+void StarSystem::RemoveStarsystemFromUniverse() {
     if (star_system_table.Get(filename)) {
         star_system_table.Delete(filename);
     }
 }
 
-StarSystem *GetLoadedStarSystem(const char *system)
-{
+StarSystem *GetLoadedStarSystem(const char *system) {
     StarSystem *ss = star_system_table.Get(string(system));
     std::string ssys(string(system) + string(".system"));
     if (!ss) {
@@ -1263,13 +1215,11 @@ StarSystem *GetLoadedStarSystem(const char *system)
 
 std::vector<unorigdest *> pendingjump;
 
-bool PendingJumpsEmpty()
-{
+bool PendingJumpsEmpty() {
     return pendingjump.empty();
 }
 
-void StarSystem::ProcessPendingJumps()
-{
+void StarSystem::ProcessPendingJumps() {
     for (unsigned int kk = 0; kk < pendingjump.size(); ++kk) {
         Unit *un = pendingjump[kk]->un.GetUnit();
         if (pendingjump[kk]->delay >= 0) {
@@ -1337,10 +1287,9 @@ void StarSystem::ProcessPendingJumps()
 }
 
 double calc_blend_factor(double frac,
-                         unsigned int priority,
-                         unsigned int when_it_will_be_simulated,
-                         unsigned int cur_simulation_frame)
-{
+        unsigned int priority,
+        unsigned int when_it_will_be_simulated,
+        unsigned int cur_simulation_frame) {
     if (when_it_will_be_simulated == SIM_QUEUE_SIZE) {
         return 1;
     }
@@ -1363,16 +1312,14 @@ double calc_blend_factor(double frac,
 
 }
 
-void ActivateAnimation(Unit *jumppoint)
-{
+void ActivateAnimation(Unit *jumppoint) {
     jumppoint->graphicOptions.Animating = 1;
     for (un_iter i = jumppoint->getSubUnits(); !i.isDone(); ++i) {
         ActivateAnimation(*i);
     }
 }
 
-static bool isJumping(const vector<unorigdest *> &pending, Unit *un)
-{
+static bool isJumping(const vector<unorigdest *> &pending, Unit *un) {
     for (size_t i = 0; i < pending.size(); ++i) {
         if (pending[i]->un == un) {
             return true;
@@ -1384,8 +1331,7 @@ static bool isJumping(const vector<unorigdest *> &pending, Unit *un)
 QVector SystemLocation(std::string system);
 double howFarToJump();
 
-QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string destination)
-{
+QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string destination) {
     QVector finish = SystemLocation(destination);
     QVector start = SystemLocation(origin);
     QVector dir = finish - start;
@@ -1402,8 +1348,7 @@ QVector ComputeJumpPointArrival(QVector pos, std::string origin, std::string des
     return QVector(0, 0, 0);
 }
 
-bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bool force, bool save_coordinates)
-{
+bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bool force, bool save_coordinates) {
     if ((un->DockedOrDocking() & (~Unit::DOCKING_UNITS)) != 0) {
         return false;
     }
@@ -1435,9 +1380,9 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
         }
         _Universe->AccessCockpit()->OnJumpBegin(un);
         pendingjump.push_back(new unorigdest(un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
-                                             save_coordinates ? ComputeJumpPointArrival(un->Position(),
-                                                                                        this->getFileName(),
-                                                                                        system) : QVector(0, 0, 0)));
+                save_coordinates ? ComputeJumpPointArrival(un->Position(),
+                        this->getFileName(),
+                        system) : QVector(0, 0, 0)));
     } else {
 #ifdef JUMP_DEBUG
         VS_LOG(debug, "Failed to retrieve!");
@@ -1451,33 +1396,27 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
     return true;
 }
 
-Background *StarSystem::getBackground()
-{
+Background *StarSystem::getBackground() {
     return background;
 }
 
-Terrain *StarSystem::getTerrain(unsigned int which)
-{
+Terrain *StarSystem::getTerrain(unsigned int which) {
     return terrains[which];
 }
 
-unsigned int StarSystem::numTerrain()
-{
+unsigned int StarSystem::numTerrain() {
     return terrains.size();
 }
 
-ContinuousTerrain *StarSystem::getContTerrain(unsigned int which)
-{
+ContinuousTerrain *StarSystem::getContTerrain(unsigned int which) {
     return continuous_terrains[which];
 }
 
-unsigned int StarSystem::numContTerrain()
-{
+unsigned int StarSystem::numContTerrain() {
     return continuous_terrains.size();
 }
 
-void StarSystem::UpdateMissiles()
-{
+void StarSystem::UpdateMissiles() {
     //if false, missiles collide with rocks as units, but not harm them with explosions
     //FIXME that's how it's used now, but not really correct, as there could be separate AsteroidWeaponDamage for this
     static bool collideroids =
@@ -1493,8 +1432,8 @@ void StarSystem::UpdateMissiles()
                 > 0) {           //we can avoid this iterated check for kinetic projectiles even if they "discharge" on hit
             Unit *un;
             for (un_iter ui = getUnitList().createIterator();
-                 NULL != (un = (*ui));
-                 ++ui) {
+                    NULL != (un = (*ui));
+                    ++ui) {
                 enum _UnitType type = un->isUnit();
                 if (collideroids || type
                         != _UnitType::asteroid) {           // could check for more, unless someone wants planet-killer missiles, but what it would change?
@@ -1507,7 +1446,6 @@ void StarSystem::UpdateMissiles()
     }
 }
 
-void StarSystem::AddMissileToQueue(MissileEffect *me)
-{
+void StarSystem::AddMissileToQueue(MissileEffect *me) {
     discharged_missiles.push_back(me);
 }

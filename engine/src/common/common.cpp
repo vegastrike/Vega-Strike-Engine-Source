@@ -55,8 +55,7 @@ const char *datadirs[] = {
         "/opt/share/vegastrike/data4.x",
 };
 
-string getdatadir()
-{
+string getdatadir() {
     string datadir;
     char tmppwd[65536];
     if (NULL == getcwd(tmppwd, 32768)) {

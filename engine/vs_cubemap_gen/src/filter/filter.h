@@ -50,8 +50,7 @@ public:
 
     source_ (source)
     , target_(target)
-    , radius_(radius)
-    {
+    , radius_(radius) {
         init_constants();
     }
 

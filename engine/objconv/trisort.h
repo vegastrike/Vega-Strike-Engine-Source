@@ -30,8 +30,7 @@ class Vector {
 public:
     double x, y, z;
 
-    Vector(double xx, double yy, double zz) : x(xx), y(yy), z(zz)
-    {
+    Vector(double xx, double yy, double zz) : x(xx), y(yy), z(zz) {
     }
 };
 class Index {
@@ -39,8 +38,7 @@ public:
     Vector V;
     int p, n, t, c;
 
-    Index(Vector xyz, int p, int n, int t, int c) : V(xyz), p(p), n(n), t(t), c(c)
-    {
+    Index(Vector xyz, int p, int n, int t, int c) : V(xyz), p(p), n(n), t(t), c(c) {
     }
 
     void write(FILE *fp) const;
@@ -50,14 +48,12 @@ class Plane {
 public:
     double a, b, c, d;
 
-    Plane(int a, int b, int c, int d) : a(a), b(b), c(c), d(d)
-    {
+    Plane(int a, int b, int c, int d) : a(a), b(b), c(c), d(d) {
     }
 
     POLYGON_RELATION inFront(const Vector &) const;
 
-    float frontBack(const Vector &v) const
-    {
+    float frontBack(const Vector &v) const {
         return a * v.x + b * v.y + c * v.z + d;
     }
 };
@@ -70,8 +66,7 @@ public:
     Plane planeEqu() const;
     bool operator<(const class Face &) const;
 
-    Face()
-    {
+    Face() {
         static int temp = 0;
         id = temp++;
     }

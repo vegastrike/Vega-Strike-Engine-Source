@@ -41,8 +41,7 @@
 // TODO: convert all float to double and all Vector to QVector.
 
 Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) :
-        unit(unit), location(location), normal(normal)
-{
+        unit(unit), location(location), normal(normal) {
     cockpit = _Universe->isPlayerStarship(unit); // smcp/thcp
     unit_type = unit->isUnit();
     is_player_ship = _Universe->isPlayerStarship(unit);
@@ -61,8 +60,7 @@ _UnitType::nebula,
 _UnitType::asteroid,
 _UnitType::enhancement,
 _UnitType::missile*/
-void Collision::shouldApplyForceAndDealDamage(Unit *other_unit)
-{
+void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
     // Collision with a nebula does nothing
     if (other_unit->isUnit() == _UnitType::nebula) {
         return;
@@ -150,8 +148,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit)
 }
 
 // Apply damage, in VS Damage units (a unit of energy), based on change in energy from collision outcome
-void Collision::dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular)
-{
+void Collision::dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular) {
     if (!deal_damage) {
         return;
     }
@@ -163,9 +160,9 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
             configuration.physics.kilojoules_per_damage);
 
     unit->ApplyDamage(other_collision.location.Cast(),
-                      other_collision.normal,
-                      damage, unit, GFXColor(1, 1, 1, 2), other_collision.unit->owner
-                                                                  != nullptr ? other_collision.unit->owner : this);
+            other_collision.normal,
+            damage, unit, GFXColor(1, 1, 1, 2), other_collision.unit->owner
+                    != nullptr ? other_collision.unit->owner : this);
 }
 
 /*
@@ -173,8 +170,7 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
 * Specifically, impulse model for rigid body collisions assumes that, being rigid bodies, the two geometries have zero interpenetration,
 * but VS physics granularity + object relative velocity means that non-trivial interpenetration is common
 */
-void Collision::adjustInterpenetration(QVector &new_velocity, QVector &new_angular_velocity, const Vector &normal)
-{
+void Collision::adjustInterpenetration(QVector &new_velocity, QVector &new_angular_velocity, const Vector &normal) {
 
     if (!apply_force) {
         return;
@@ -190,8 +186,7 @@ void Collision::adjustInterpenetration(QVector &new_velocity, QVector &new_angul
 }
 
 // apply force and torque, enforce clamping
-void Collision::applyForce(QVector &force, QVector &location_local)
-{
+void Collision::applyForce(QVector &force, QVector &location_local) {
     if (!apply_force) {
         return;
     }
@@ -230,14 +225,13 @@ void Collision::applyForce(QVector &force, QVector &location_local)
 * Correctness check to validate collision math - should be eventually moved to testing, rather than on critical path
 */
 void Collision::validateCollision(const QVector &relative_velocity,
-                                  const Vector &normal1,
-                                  const QVector &location1_local,
-                                  const QVector &location2_local,
-                                  const QVector &v1_new,
-                                  const QVector &v2_new,
-                                  const QVector &w1_new,
-                                  const QVector &w2_new)
-{
+        const Vector &normal1,
+        const QVector &location1_local,
+        const QVector &location2_local,
+        const QVector &v1_new,
+        const QVector &v2_new,
+        const QVector &w1_new,
+        const QVector &w2_new) {
     //following two values should be identical. Due to FP math, should be nearly identical. Checks for both absolute and relative error, the former to shield slightly larger errors on very small values - can set tighter/looser bounds later
     double RestorativeVelAlongNormal =
             -1 * (1 - configuration.physics.inelastic_scale) * relative_velocity.Dot(normal1);
@@ -248,22 +242,21 @@ void Collision::validateCollision(const QVector &relative_velocity,
     // absolute error > 1 milimeter/second along collision normal AND normalized error > 1%
     if (absoluteError > 0.001 && normalizedError > 0.01) {
         VS_LOG(warning,
-               (boost::format(
-                       "Computed error between equation sides for collision is beyond acceptable error bounds:%1%:%2%:%3%:%4%")
-                       % absoluteError % normalizedError % ResultantVelAlongNormal % RestorativeVelAlongNormal));
+                (boost::format(
+                        "Computed error between equation sides for collision is beyond acceptable error bounds:%1%:%2%:%3%:%4%")
+                        % absoluteError % normalizedError % ResultantVelAlongNormal % RestorativeVelAlongNormal));
     }
 }
 
 // Discussion - the original code ran this once for both units. This required a comparison of the units to find out which is smaller.
 // The history on this is as follows - one of the normals is picked to compute the force along; while this is arbitrary in the ideal case, given interpentration, we use the heuristic that the larger object's normal is likely to better characterize the collision angles
 void Collision::collide(Unit *unit1,
-                        const QVector &location1,
-                        const Vector &normal1,
-                        Unit *unit2,
-                        const QVector &location2,
-                        const Vector &normal2,
-                        float distance)
-{
+        const QVector &location1,
+        const Vector &normal1,
+        Unit *unit2,
+        const QVector &location2,
+        const Vector &normal2,
+        float distance) {
 
     Collision collision1 = Collision(unit1, location1, normal1);
     Collision collision2 = Collision(unit2, location2, normal2);
@@ -298,7 +291,7 @@ void Collision::collide(Unit *unit1,
     QVector location1_local = location1 - unit1->Position(); // vector from center of mass to contact point for unit1
     QVector location2_local = location2 - unit2->Position(); // vector from center of mass to contact point for unit2
     QVector velocity_of_contact_point1 = unit1->GetVelocity() + unit1->GetAngularVelocity()
-                                                                     .Cross(location1_local); // compute velocity of point of contact for unit 1 - note that "location1_local" is a relative vector from unit1's coordinate system, with origin assumed to be at center of mass. Placing the origin off center is considered a data set error
+            .Cross(location1_local); // compute velocity of point of contact for unit 1 - note that "location1_local" is a relative vector from unit1's coordinate system, with origin assumed to be at center of mass. Placing the origin off center is considered a data set error
     QVector velocity_of_contact_point2 = unit2->GetVelocity()
             + unit2->GetAngularVelocity().Cross(location2_local); // compute velocity of point of contact for unit 2
     QVector relative_velocity = velocity_of_contact_point2 - velocity_of_contact_point1;
@@ -315,8 +308,8 @@ void Collision::collide(Unit *unit1,
             / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
     double I2_inverse = 1.0 / I2;
     double mass1 = std::max(unit1->GetMass(),
-                            configuration.physics
-                                         .minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
+            configuration.physics
+                    .minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
     double mass2 = std::max(unit2->GetMass(), configuration.physics.minimum_mass); // avoid subsequent divides by 0
     double mass1_inverse = 1.0 / mass1;
     double mass2_inverse = 1.0 / mass2;

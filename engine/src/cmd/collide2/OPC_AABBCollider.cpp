@@ -65,8 +65,7 @@ using namespace Opcode;
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBCollider::AABBCollider()
-{
+AABBCollider::AABBCollider() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,8 +73,7 @@ AABBCollider::AABBCollider()
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBCollider::~AABBCollider()
-{
+AABBCollider::~AABBCollider() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,8 +90,7 @@ AABBCollider::~AABBCollider()
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const Model &model)
-{
+bool AABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const Model &model) {
     // Checkings
     if (!Setup(&model)) {
         return false;
@@ -167,8 +164,7 @@ bool AABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const Mod
  *	\return		TRUE if we can return immediately
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBCollider::InitQuery(AABBCache &cache, const CollisionAABB &box)
-{
+bool AABBCollider::InitQuery(AABBCache &cache, const CollisionAABB &box) {
     // 1) Call the base method
     VolumeCollider::InitQuery();
 
@@ -264,8 +260,7 @@ bool AABBCollider::InitQuery(AABBCache &cache, const CollisionAABB &box)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const AABBTree *tree)
-{
+bool AABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const AABBTree *tree) {
     // This is typically called for a scene tree, full of -AABBs-, not full of triangles.
     // So we don't really have "primitives" to deal with. Hence it doesn't work with
     // "FirstContact" + "TemporalCoherence".
@@ -295,8 +290,7 @@ bool AABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const AAB
  *	\return		true if the AABB contains the whole box
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ bool AABBCollider::AABBContainsBox(const Point &bc, const Point &be)
-{
+inline_ bool AABBCollider::AABBContainsBox(const Point &bc, const Point &be) {
     if (mMin.x > bc.x - be.x) {
         return FALSE;
     }
@@ -335,8 +329,7 @@ inline_ bool AABBCollider::AABBContainsBox(const Point &bc, const Point &be)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_Collide(const AABBCollisionNode *node)
-{
+void AABBCollider::_Collide(const AABBCollisionNode *node) {
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(node->mAABB.mExtents, node->mAABB.mCenter)) {
         return;
@@ -363,8 +356,7 @@ void AABBCollider::_Collide(const AABBCollisionNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node)
-{
+void AABBCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node) {
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(node->mAABB.mExtents, node->mAABB.mCenter)) {
         return;
@@ -391,16 +383,15 @@ void AABBCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_Collide(const AABBQuantizedNode *node)
-{
+void AABBCollider::_Collide(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(Extents, Center)) {
@@ -428,16 +419,15 @@ void AABBCollider::_Collide(const AABBQuantizedNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node)
-{
+void AABBCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(Extents, Center)) {
@@ -465,8 +455,7 @@ void AABBCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_Collide(const AABBNoLeafNode *node)
-{
+void AABBCollider::_Collide(const AABBNoLeafNode *node) {
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(node->mAABB.mExtents, node->mAABB.mCenter)) {
         return;
@@ -497,8 +486,7 @@ void AABBCollider::_Collide(const AABBNoLeafNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node)
-{
+void AABBCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node) {
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(node->mAABB.mExtents, node->mAABB.mCenter)) {
         return;
@@ -529,16 +517,15 @@ void AABBCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_Collide(const AABBQuantizedNoLeafNode *node)
-{
+void AABBCollider::_Collide(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(Extents, Center)) {
@@ -570,16 +557,15 @@ void AABBCollider::_Collide(const AABBQuantizedNoLeafNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node)
-{
+void AABBCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
     const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-                       float(Box.mCenter[1]) * mCenterCoeff.y,
-                       float(Box.mCenter[2]) * mCenterCoeff.z);
+            float(Box.mCenter[1]) * mCenterCoeff.y,
+            float(Box.mCenter[2]) * mCenterCoeff.z);
     const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-                        float(Box.mExtents[1]) * mExtentsCoeff.y,
-                        float(Box.mExtents[2]) * mExtentsCoeff.z);
+            float(Box.mExtents[1]) * mExtentsCoeff.y,
+            float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform AABB-AABB overlap test
     if (!AABBAABBOverlap(Extents, Center)) {
@@ -611,8 +597,7 @@ void AABBCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBCollider::_Collide(const AABBTreeNode *node)
-{
+void AABBCollider::_Collide(const AABBTreeNode *node) {
     // Perform AABB-AABB overlap test
     Point Center, Extents;
     node->GetAABB()->GetCenter(Center);
@@ -638,8 +623,7 @@ void AABBCollider::_Collide(const AABBTreeNode *node)
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridAABBCollider::HybridAABBCollider()
-{
+HybridAABBCollider::HybridAABBCollider() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -647,12 +631,10 @@ HybridAABBCollider::HybridAABBCollider()
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridAABBCollider::~HybridAABBCollider()
-{
+HybridAABBCollider::~HybridAABBCollider() {
 }
 
-bool HybridAABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const HybridModel &model)
-{
+bool HybridAABBCollider::Collide(AABBCache &cache, const CollisionAABB &box, const HybridModel &model) {
     // We don't want primitive tests here!
     mFlags |= OPC_NO_PRIMITIVE_TESTS;
 

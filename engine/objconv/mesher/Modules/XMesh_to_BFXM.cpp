@@ -35,16 +35,15 @@ public:
      */
 
     virtual RetCodeEnum convert(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode)
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) {
         if (inputFormat == "XMesh" && outputFormat == "BFXM") {
             if (opCode == "add") {
                 bool forcenormals = atoi(getNamedOption("forcenormals").c_str()) != 0;
                 string input = getNamedOption("inputPath");
                 string output = getNamedOption("outputPath");
                 FILE *Outputfile = fopen(output.c_str(),
-                                         "rb+"); //append to end, but not append, which doesn't do what you want it to.
+                        "rb+"); //append to end, but not append, which doesn't do what you want it to.
                 fseek(Outputfile, 0, SEEK_END);
                 XML memfile = (LoadXML(input.c_str(), 1));
                 xmeshToBFXM(memfile, Outputfile, 'a', forcenormals);
@@ -66,15 +65,14 @@ public:
     }
 
     virtual void conversionHelp(const std::string &inputFormat,
-                                const std::string &outputFormat,
-                                const std::string &opCode) const
-    {
+            const std::string &outputFormat,
+            const std::string &opCode) const {
         if ((inputFormat.empty() || inputFormat == "XMesh")
                 && (outputFormat.empty() || outputFormat == "BFXM")
                 && (opCode.empty() || (opCode == "add" || opCode == "create"))) {
             cout << "XMesh -> BFXM\n"
-                 << "\tSupported operations: add, create\n"
-                 << endl;
+                    << "\tSupported operations: add, create\n"
+                    << endl;
         }
     }
 
