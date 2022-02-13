@@ -65,108 +65,108 @@ using namespace Opcode;
 #define CURRENT_SIZE        (mCurrentSize&0x7fffffff)
 #define INVALID_RANKS        (mCurrentSize&0x80000000)
 
-#define CHECK_RESIZE(n)                                                                        \
+#define CHECK_RESIZE(n)                                                                     \
     if(n!=mPreviousSize)                                                                    \
-    {                                                                                        \
-                if(n>mCurrentSize)    Resize(n);                                                \
-        else                        ResetRanks();                                            \
-        mPreviousSize = n;                                                                    \
+    {                                                                                       \
+                if(n>mCurrentSize)    Resize(n);                                            \
+        else                        ResetRanks();                                           \
+        mPreviousSize = n;                                                                  \
     }
 
-#define CREATE_HISTOGRAMS(type, buffer)                                                        \
-    /* Clear counters/histograms */                                                            \
-    ZeroMemory(mHistogram, 256*4*sizeof(uint32_t));                                            \
+#define CREATE_HISTOGRAMS(type, buffer)                                                     \
+    /* Clear counters/histograms */                                                         \
+    ZeroMemory(mHistogram, 256*4*sizeof(uint32_t));                                         \
                                                                                             \
-    /* Prepare to count */                                                                    \
-    uint8_t* p = (uint8_t*)input;                                                                \
-    uint8_t* pe = &p[nb*4];                                                                    \
-    uint32_t* h0= &mHistogram[0];        /* Histogram for first pass (LSB)	*/                    \
-    uint32_t* h1= &mHistogram[256];    /* Histogram for second pass		*/                    \
-    uint32_t* h2= &mHistogram[512];    /* Histogram for third pass			*/                    \
-    uint32_t* h3= &mHistogram[768];    /* Histogram for last pass (MSB)	*/                    \
+    /* Prepare to count */                                                                  \
+    uint8_t* p = (uint8_t*)input;                                                           \
+    uint8_t* pe = &p[nb*4];                                                                 \
+    uint32_t* h0= &mHistogram[0];        /* Histogram for first pass (LSB)	*/              \
+    uint32_t* h1= &mHistogram[256];    /* Histogram for second pass		*/                  \
+    uint32_t* h2= &mHistogram[512];    /* Histogram for third pass			*/              \
+    uint32_t* h3= &mHistogram[768];    /* Histogram for last pass (MSB)	*/                  \
                                                                                             \
-    bool AlreadySorted = true;    /* Optimism... */                                            \
+    bool AlreadySorted = true;    /* Optimism... */                                         \
                                                                                             \
-    if(INVALID_RANKS)                                                                        \
-    {                                                                                        \
+    if(INVALID_RANKS)                                                                       \
+    {                                                                                       \
         /* Prepare for temporal coherence */                                                \
-        type* Running = (type*)buffer;                                                        \
+        type* Running = (type*)buffer;                                                      \
         type PrevVal = *Running;                                                            \
                                                                                             \
         while(p!=pe)                                                                        \
-        {                                                                                    \
+        {                                                                                   \
             /* Read input buffer in previous sorted order */                                \
-            type Val = *Running++;                                                            \
-            /* Check whether already sorted or not */                                        \
-            if(Val<PrevVal)    { AlreadySorted = false; break; } /* Early out */                \
-            /* Update for next iteration */                                                    \
-            PrevVal = Val;                                                                    \
+            type Val = *Running++;                                                          \
+            /* Check whether already sorted or not */                                       \
+            if(Val<PrevVal)    { AlreadySorted = false; break; } /* Early out */            \
+            /* Update for next iteration */                                                 \
+            PrevVal = Val;                                                                  \
                                                                                             \
-            /* Create histograms */                                                            \
-            h0[*p++]++;    h1[*p++]++;    h2[*p++]++;    h3[*p++]++;                                    \
-        }                                                                                    \
+            /* Create histograms */                                                         \
+            h0[*p++]++;    h1[*p++]++;    h2[*p++]++;    h3[*p++]++;                        \
+        }                                                                                   \
                                                                                             \
-        /* If all input values are already sorted, we just have to return and leave the */    \
-        /* previous list unchanged. That way the routine may take advantage of temporal */    \
-        /* coherence, for example when used to sort transparent faces.					*/    \
-        if(AlreadySorted)                                                                    \
-        {                                                                                    \
-            mNbHits++;                                                                        \
-            for(uint32_t i=0;i<nb;i++)    mRanks[i] = i;                                        \
-            return *this;                                                                    \
-        }                                                                                    \
-    }                                                                                        \
+        /* If all input values are already sorted, we just have to return and leave the */  \
+        /* previous list unchanged. That way the routine may take advantage of temporal */  \
+        /* coherence, for example when used to sort transparent faces.					*/  \
+        if(AlreadySorted)                                                                   \
+        {                                                                                   \
+            mNbHits++;                                                                      \
+            for(uint32_t i=0;i<nb;i++)    mRanks[i] = i;                                    \
+            return *this;                                                                   \
+        }                                                                                   \
+    }                                                                                       \
     else                                                                                    \
-    {                                                                                        \
+    {                                                                                       \
         /* Prepare for temporal coherence */                                                \
-        uint32_t* Indices = mRanks;                                                            \
-        type PrevVal = (type)buffer[*Indices];                                                \
+        uint32_t* Indices = mRanks;                                                         \
+        type PrevVal = (type)buffer[*Indices];                                              \
                                                                                             \
         while(p!=pe)                                                                        \
-        {                                                                                    \
+        {                                                                                   \
             /* Read input buffer in previous sorted order */                                \
             type Val = (type)buffer[*Indices++];                                            \
-            /* Check whether already sorted or not */                                        \
-            if(Val<PrevVal)    { AlreadySorted = false; break; } /* Early out */                \
-            /* Update for next iteration */                                                    \
-            PrevVal = Val;                                                                    \
+            /* Check whether already sorted or not */                                       \
+            if(Val<PrevVal)    { AlreadySorted = false; break; } /* Early out */            \
+            /* Update for next iteration */                                                 \
+            PrevVal = Val;                                                                  \
                                                                                             \
-            /* Create histograms */                                                            \
-            h0[*p++]++;    h1[*p++]++;    h2[*p++]++;    h3[*p++]++;                                    \
-        }                                                                                    \
+            /* Create histograms */                                                         \
+            h0[*p++]++;    h1[*p++]++;    h2[*p++]++;    h3[*p++]++;                        \
+        }                                                                                   \
                                                                                             \
-        /* If all input values are already sorted, we just have to return and leave the */    \
-        /* previous list unchanged. That way the routine may take advantage of temporal */    \
-        /* coherence, for example when used to sort transparent faces.					*/    \
-        if(AlreadySorted)    { mNbHits++; return *this;    }                                    \
-    }                                                                                        \
+        /* If all input values are already sorted, we just have to return and leave the */  \
+        /* previous list unchanged. That way the routine may take advantage of temporal */  \
+        /* coherence, for example when used to sort transparent faces.					*/  \
+        if(AlreadySorted)    { mNbHits++; return *this;    }                                \
+    }                                                                                       \
                                                                                             \
-    /* Else there has been an early out and we must finish computing the histograms */        \
+    /* Else there has been an early out and we must finish computing the histograms */      \
     while(p!=pe)                                                                            \
-    {                                                                                        \
-        /* Create histograms without the previous overhead */                                \
-        h0[*p++]++;    h1[*p++]++;    h2[*p++]++;    h3[*p++]++;                                        \
+    {                                                                                       \
+        /* Create histograms without the previous overhead */                               \
+        h0[*p++]++;    h1[*p++]++;    h2[*p++]++;    h3[*p++]++;                            \
     }
 
-#define CHECK_PASS_VALIDITY(pass)                                                            \
-    /* Shortcut to current counters */                                                        \
-    uint32_t* CurCount = &mHistogram[pass<<8];                                                \
+#define CHECK_PASS_VALIDITY(pass)                                                           \
+    /* Shortcut to current counters */                                                      \
+    uint32_t* CurCount = &mHistogram[pass<<8];                                              \
                                                                                             \
-    /* Reset flag. The sorting pass is supposed to be performed. (default) */                \
+    /* Reset flag. The sorting pass is supposed to be performed. (default) */               \
     bool PerformPass = true;                                                                \
                                                                                             \
-    /* Check pass validity */                                                                \
+    /* Check pass validity */                                                               \
                                                                                             \
-    /* If all values have the same byte, sorting is useless. */                                \
-    /* It may happen when sorting bytes or words instead of dwords. */                        \
-    /* This routine actually sorts words faster than dwords, and bytes */                    \
-    /* faster than words. Standard running time (O(4*n))is reduced to O(2*n) */                \
-    /* for words and O(n) for bytes. Running time for floats depends on actual values... */    \
+    /* If all values have the same byte, sorting is useless. */                             \
+    /* It may happen when sorting bytes or words instead of dwords. */                      \
+    /* This routine actually sorts words faster than dwords, and bytes */                   \
+    /* faster than words. Standard running time (O(4*n))is reduced to O(2*n) */             \
+    /* for words and O(n) for bytes. Running time for floats depends on actual values... */ \
                                                                                             \
     /* Get first byte */                                                                    \
-    uint8_t UniqueVal = *(((uint8_t*)input)+pass);                                            \
+    uint8_t UniqueVal = *(((uint8_t*)input)+pass);                                          \
                                                                                             \
-    /* Check that byte's counter */                                                            \
+    /* Check that byte's counter */                                                         \
     if(CurCount[UniqueVal]==nb)    PerformPass=false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -81,33 +81,33 @@ const char *VolumeCollider::ValidateSettings() {
 
 // Pretty dumb way to dump - to do better - one day...
 
-#define IMPLEMENT_NOLEAFDUMP(type)                                                \
+#define IMPLEMENT_NOLEAFDUMP(type)                                              \
 void VolumeCollider::_Dump(const type* node)                                    \
-{                                                                                \
-    if(node->HasPosLeaf())    mTouchedPrimitives->Add(node->GetPosPrimitive());    \
-    else                    _Dump(node->GetPos());                                \
+{                                                                               \
+    if(node->HasPosLeaf())    mTouchedPrimitives->Add(node->GetPosPrimitive()); \
+    else                    _Dump(node->GetPos());                              \
                                                                                 \
-    if(ContactFound()) return;                                                    \
+    if(ContactFound()) return;                                                  \
                                                                                 \
-    if(node->HasNegLeaf())    mTouchedPrimitives->Add(node->GetNegPrimitive());    \
-    else                    _Dump(node->GetNeg());                                \
+    if(node->HasNegLeaf())    mTouchedPrimitives->Add(node->GetNegPrimitive()); \
+    else                    _Dump(node->GetNeg());                              \
 }
 
-#define IMPLEMENT_LEAFDUMP(type)                        \
-void VolumeCollider::_Dump(const type* node)            \
-{                                                        \
-    if(node->IsLeaf())                                    \
-    {                                                    \
-        mTouchedPrimitives->Add(node->GetPrimitive());    \
-    }                                                    \
-    else                                                \
-    {                                                    \
-        _Dump(node->GetPos());                            \
-                                                        \
-        if(ContactFound()) return;                        \
-                                                        \
-        _Dump(node->GetNeg());                            \
-    }                                                    \
+#define IMPLEMENT_LEAFDUMP(type)                                                \
+void VolumeCollider::_Dump(const type* node)                                    \
+{                                                                               \
+    if(node->IsLeaf())                                                          \
+    {                                                                           \
+        mTouchedPrimitives->Add(node->GetPrimitive());                          \
+    }                                                                           \
+    else                                                                        \
+    {                                                                           \
+        _Dump(node->GetPos());                                                  \
+                                                                                \
+        if(ContactFound()) return;                                              \
+                                                                                \
+        _Dump(node->GetNeg());                                                  \
+    }                                                                           \
 }
 
 IMPLEMENT_NOLEAFDUMP(AABBNoLeafNode)

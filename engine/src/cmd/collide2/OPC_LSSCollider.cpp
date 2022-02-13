@@ -332,12 +332,12 @@ inline_ bool LSSCollider::LSSContainsBox(const Point & /*bc*/, const Point & /*b
 }
 
 #define TEST_BOX_IN_LSS(center, extents)    \
-    if(LSSContainsBox(center, extents))        \
-    {                                        \
+    if(LSSContainsBox(center, extents))     \
+    {                                       \
         /* Set contact status */            \
-        mFlags |= OPC_CONTACT;                \
+        mFlags |= OPC_CONTACT;              \
         _Dump(node);                        \
-        return;                                \
+        return;                             \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

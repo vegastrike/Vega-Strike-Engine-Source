@@ -367,13 +367,13 @@ inline_ bool SphereCollider::SphereContainsBox(const Point &bc, const Point &be)
     return TRUE;
 }
 
-#define TEST_BOX_IN_SPHERE(center, extents)    \
-    if(SphereContainsBox(center, extents))    \
-    {                                        \
+#define TEST_BOX_IN_SPHERE(center, extents) \
+    if(SphereContainsBox(center, extents))  \
+    {                                       \
         /* Set contact status */            \
-        mFlags |= OPC_CONTACT;                \
+        mFlags |= OPC_CONTACT;              \
         _Dump(node);                        \
-        return;                                \
+        return;                             \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -42,22 +42,22 @@ using namespace Opcode;
 #include "OPC_BoxBoxOverlap.h"
 #include "OPC_TriBoxOverlap.h"
 
-#define SET_CONTACT(prim_index, flag)                        \
-    /* Set contact status */                                \
-    mFlags |= flag;                                            \
+#define SET_CONTACT(prim_index, flag)                           \
+    /* Set contact status */                                    \
+    mFlags |= flag;                                             \
     mTouchedPrimitives->Add(prim_index);
 
 //! AABB-triangle test
-#define AABB_PRIM(prim_index, flag)                            \
-    /* Request vertices from the app */                        \
-    VertexPointers VP;    mIMesh->GetTriangle(VP, prim_index);\
-    mLeafVerts[0] = *VP.Vertex[0];                            \
-    mLeafVerts[1] = *VP.Vertex[1];                            \
-    mLeafVerts[2] = *VP.Vertex[2];                            \
-    /* Perform triangle-box overlap test */                    \
-    if(TriBoxOverlap())                                        \
-    {                                                        \
-        SET_CONTACT(prim_index, flag)                        \
+#define AABB_PRIM(prim_index, flag)                             \
+    /* Request vertices from the app */                         \
+    VertexPointers VP;    mIMesh->GetTriangle(VP, prim_index);  \
+    mLeafVerts[0] = *VP.Vertex[0];                              \
+    mLeafVerts[1] = *VP.Vertex[1];                              \
+    mLeafVerts[2] = *VP.Vertex[2];                              \
+    /* Perform triangle-box overlap test */                     \
+    if(TriBoxOverlap())                                         \
+    {                                                           \
+        SET_CONTACT(prim_index, flag)                           \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,13 +314,13 @@ inline_ bool AABBCollider::AABBContainsBox(const Point &bc, const Point &be) {
     return TRUE;
 }
 
-#define TEST_BOX_IN_AABB(center, extents)    \
-    if(AABBContainsBox(center, extents))    \
-    {                                        \
-        /* Set contact status */            \
-        mFlags |= OPC_CONTACT;                \
-        _Dump(node);                        \
-        return;                                \
+#define TEST_BOX_IN_AABB(center, extents)       \
+    if(AABBContainsBox(center, extents))        \
+    {                                           \
+        /* Set contact status */                \
+        mFlags |= OPC_CONTACT;                  \
+        _Dump(node);                            \
+        return;                                 \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

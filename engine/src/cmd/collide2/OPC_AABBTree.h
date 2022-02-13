@@ -29,26 +29,26 @@
 
 #ifdef OPC_NO_NEG_VANILLA_TREE
 //! TO BE DOCUMENTED
-#define IMPLEMENT_TREE(base_class, volume)                                                                                \
-        public:                                                                                                                \
-        /* Constructor / Destructor */                                                                                        \
-                                    base_class();                                                                            \
-                                    ~base_class();                                                                            \
-        /* Data access */                                                                                                    \
-        inline_    const volume*        Get##volume()    const    { return &mBV;                            }                        \
-        /* Clear the last bit */                                                                                            \
-        inline_    const base_class*    GetPos()        const    { return (const base_class*)(mPos&~1);    }                        \
-        inline_    const base_class*    GetNeg()        const    { const base_class* P = GetPos(); return P ? P+1 : nullptr;}    \
-                                                                                                                            \
-        /* We don't need to test both nodes since we can't have one without the other	*/                                    \
-        inline_    bool                IsLeaf()        const    { return !GetPos();                        }                        \
-                                                                                                                            \
-        /* Stats */                                                                                                            \
-        inline_    size_t                GetNodeSize()    const    { return SIZEOFOBJECT;                    }                        \
-        protected:                                                                                                            \
-        /* Tree-independent data */                                                                                            \
-        /* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/                    \
-        /* Whatever happens we need the two children and the enclosing volume.*/                                            \
+#define IMPLEMENT_TREE(base_class, volume)                                                                                      \
+        public:                                                                                                                 \
+        /* Constructor / Destructor */                                                                                          \
+                                    base_class();                                                                               \
+                                    ~base_class();                                                                              \
+        /* Data access */                                                                                                       \
+        inline_    const volume*        Get##volume()    const    { return &mBV;                            }                   \
+        /* Clear the last bit */                                                                                                \
+        inline_    const base_class*    GetPos()        const    { return (const base_class*)(mPos&~1);    }                    \
+        inline_    const base_class*    GetNeg()        const    { const base_class* P = GetPos(); return P ? P+1 : nullptr;}   \
+                                                                                                                                \
+        /* We don't need to test both nodes since we can't have one without the other	*/                                      \
+        inline_    bool                IsLeaf()        const    { return !GetPos();                        }                    \
+                                                                                                                                \
+        /* Stats */                                                                                                             \
+        inline_    size_t                GetNodeSize()    const    { return SIZEOFOBJECT;                    }                  \
+        protected:                                                                                                              \
+        /* Tree-independent data */                                                                                             \
+        /* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/                        \
+        /* Whatever happens we need the two children and the enclosing volume.*/                                                \
                 volume                mBV;        /* Global bounding-volume enclosing all the node-related primitives */        \
                 uintptr_t            mPos;        /* "Positive" & "Negative" children */
 #else

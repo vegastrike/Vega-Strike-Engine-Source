@@ -433,12 +433,12 @@ extern bool isWeapon(std::string name);
     }                                                         \
     while (0)
 
-#define MODIFIES(mode, playerUnit, blankUnit, what)         \
-    (   (((playerUnit) -> what) != 0)                         \
+#define MODIFIES(mode, playerUnit, blankUnit, what)                                 \
+    (   (((playerUnit) -> what) != 0)                                               \
      && ( (mode != 0) || (((playerUnit) -> what) != ((blankUnit) -> what)) )   )
 
-#define MODIFIES_ALTEMPTY(mode, playerUnit, blankUnit, what, empty)         \
-    (   (((playerUnit) -> what) != (empty))                         \
+#define MODIFIES_ALTEMPTY(mode, playerUnit, blankUnit, what, empty)                 \
+    (   (((playerUnit) -> what) != (empty))                                         \
      && ( (mode != 0) || (((playerUnit) -> what) != ((blankUnit) -> what)) )   )
 
 //CONSTRUCTOR.
