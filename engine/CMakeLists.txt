@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2008-2021 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2008-2022 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -31,7 +31,7 @@
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 
 SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "9")
@@ -237,21 +237,21 @@ SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
 
 # Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
 IF (CPUAMD_k8)
-    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -fprefetch-loop-arrays ")
+    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -fprefetch-loop-arrays ")
 ELSEIF (CPUAMD_K9)
-    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
 ELSEIF (CPUINTEL_p4)
-    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
 ELSEIF (CPUINTEL_prescott)
-    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops " )
+    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops " )
 ELSEIF (CPUINTEL_nocona)
-    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
 ELSEIF (CPUINTEL_core2)
-    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
 ELSEIF (CPUINTEL_native)
-    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
 ELSEIF (CPUAMD_vishera)
-    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 -funsafe-loop-optimizations ")
+    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 ")
 ENDIF (CPUAMD_k8)
 
 IF (CPU_SMP GREATER 1)
