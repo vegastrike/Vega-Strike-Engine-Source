@@ -3,9 +3,8 @@
 ##
 # docker-entrypoint.sh
 #
-# Copyright (c) 2001-2002 Daniel Horn
-# Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-# Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+# Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# and other Vega Strike Contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -34,14 +33,14 @@ echo "docker-entrypoint.sh: Flags passed in: $FLAGS"
 
 if [ $IS_RELEASE -eq 1 ]
 then
-    script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
+    script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
     script/package
 else
     if [ "$CC" == "clang" ]
     then
-        script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
+        script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
     else
-        script/build.sh -DCMAKE_BUILD_TYPE=Debug $FLAGS
+        script/build -DCMAKE_BUILD_TYPE=Debug $FLAGS
     fi
 
     pushd build

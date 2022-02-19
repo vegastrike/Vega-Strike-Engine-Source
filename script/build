@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #====================================
-# @file   : build.sh
+# @file   : build
 # @brief  : build VegaStrike
-# @usage  : ./script/build.sh
+# @usage  : ./script/build
 # @param  : none
 #====================================
 
@@ -35,9 +35,9 @@
 
 set -e
 
-echo "-----------------------------"
-echo "--- build.sh | 2021-11-11 ---"
-echo "-----------------------------"
+echo "--------------------------"
+echo "--- build | 2022-02-19 ---"
+echo "--------------------------"
 
 #----------------------------------
 # validate parameters
