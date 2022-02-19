@@ -13,7 +13,7 @@
 # https://github.com/Taose/Vegastrike-taose/wiki/How-to-Build
 #====================================
 
-# Copyright (C) 2020-2021 Stephen G. Tuggy and other Vega Strike contributors.
+# Copyright (C) 2020-2022 Stephen G. Tuggy and other Vega Strike contributors.
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -63,8 +63,14 @@ cmake '$@' "${SRC_DIR}"
 # mut we can do it manually
 #make clean
 
-# compile now using all cpus # and show compilation commands
-cmake --build "${BUILD_DIR}" -j $(getconf _NPROCESSORS_ONLN) # -v
+MAX_THREADS_TO_BUILD_WITH=8
+NUM_THREADS_TO_BUILD_WITH=$(getconf _NPROCESSORS_ONLN)
+if [ ${NUM_THREADS_TO_BUILD_WITH} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
+then
+    NUM_THREADS_TO_BUILD_WITH=${MAX_THREADS_TO_BUILD_WITH}
+fi
+
+VERBOSE=1 cmake --build "${BUILD_DIR}" -j ${NUM_THREADS_TO_BUILD_WITH}
 
 cd "${ROOT_DIR}"
 
