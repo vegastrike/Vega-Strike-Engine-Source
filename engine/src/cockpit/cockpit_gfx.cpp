@@ -11,6 +11,9 @@
 #include "gfx/camera.h"
 #include "gfx/nav/navcomputer.h"
 #include "gfx/gauge.h"
+#include "gfx/cockpit_gfx_utils.h"
+
+#include <algorithm>
 
 extern float rand01();
 #define SWITCH_CONST (.9)
@@ -30,180 +33,43 @@ inline void DrawOneTargetBox( const QVector &Loc,
                               bool ComputerLockon,
                               bool Diamond  )
 {
-    static float boxthick = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "BoxLineThickness", "1" ) );
+    SetThickness(ShapeType::Box);
     static float rat = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "min_target_box_size", ".01" ) );
     float len = (Loc).Magnitude();
     float curratio   = rSize/len;
     if (curratio < rat)
         rSize = len*rat;
-    GFXLineWidth( boxthick );
     GFXEnable( SMOOTH );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     static VertexBuilder<> verts;
     verts.clear();
     if (Diamond) {
-        float ModrSize = rSize/1.41;
-        verts.insert( Loc+(.75*CamP+CamQ).Cast()*ModrSize );
-        verts.insert( Loc+(CamP+.75*CamQ).Cast()*ModrSize );
-        verts.insert( Loc+(CamP-.75*CamQ).Cast()*ModrSize );
-        verts.insert( Loc+(.75*CamP-CamQ).Cast()*ModrSize );
-        verts.insert( Loc+(-.75*CamP-CamQ).Cast()*ModrSize );
-        verts.insert( Loc+(-CamP-.75*CamQ).Cast()*ModrSize );
-        verts.insert( Loc+(.75*CamQ-CamP).Cast()*ModrSize );
-        verts.insert( Loc+(CamQ-.75*CamP).Cast()*ModrSize );
-        verts.insert( Loc+(.75*CamP+CamQ).Cast()*ModrSize );
+        GetDiamond(Loc, CamP, CamQ, rSize);
         GFXDraw( GFXLINESTRIP, verts );
     } else if (ComputerLockon) {
-        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
-        verts.insert( Loc+(CamP-CamQ).Cast()*rSize );
-        verts.insert( Loc+(-CamP-CamQ).Cast()*rSize );
-        verts.insert( Loc+(CamQ-CamP).Cast()*rSize );
-        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
+        verts = GetRectangle(Loc, CamP, CamQ, rSize);
         GFXDraw( GFXLINESTRIP, verts );
     } else {
-        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
-        verts.insert( Loc+(CamP+.66*CamQ).Cast()*rSize );
-
-        verts.insert( Loc+(CamP-CamQ).Cast()*rSize );
-        verts.insert( Loc+(CamP-.66*CamQ).Cast()*rSize );
-
-        verts.insert( Loc+(-CamP-CamQ).Cast()*rSize );
-        verts.insert( Loc+(-CamP-.66*CamQ).Cast()*rSize );
-
-        verts.insert( Loc+(CamQ-CamP).Cast()*rSize );
-        verts.insert( Loc+(CamQ-.66*CamP).Cast()*rSize );
-
-        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
-        verts.insert( Loc+(CamP+.66*CamQ).Cast()*rSize );
-
-        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
-        verts.insert( Loc+(.66*CamP+CamQ).Cast()*rSize );
-
-        verts.insert( Loc+(CamP-CamQ).Cast()*rSize );
-        verts.insert( Loc+(.66*CamP-CamQ).Cast()*rSize );
-
-        verts.insert( Loc+(-CamP-CamQ).Cast()*rSize );
-        verts.insert( Loc+(-.66*CamP-CamQ).Cast()*rSize );
-
-        verts.insert( Loc+(CamQ-CamP).Cast()*rSize );
-        verts.insert( Loc+(.66*CamQ-CamP).Cast()*rSize );
-
-        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
-        verts.insert( Loc+(.66*CamP+CamQ).Cast()*rSize );
-
+        verts = GetOpenRectangle(Loc, CamP, CamQ, rSize);
         GFXDraw( GFXLINE, verts );
     }
+
+    // Still locking on
+    lock_percent = std::min(0.0f, lock_percent);
     if (lock_percent < .99) {
-        if (lock_percent < 0)
-            lock_percent = 0;
         //eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
         static float diamondthick =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "DiamondLineThickness", "1" ) );                          //1.05;
         glLineWidth( diamondthick );
         static bool  center       =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "LockCenterCrosshair", "false" ) );
-        static float absmin       =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "min_lock_box_size", ".001" ) );
-        static float endreticle   =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "MinMissileBracketSize", "1.05" ) );                        //1.05;
-        static float startreticle =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "MaxMissileBracketSize", "2.05" ) );                          //2.05;
-        static float diamondsize  = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "DiamondSize", "2.05" ) );         //1.05;
-        static float bracketsize  =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "RotatingBracketSize", "0.58" ) );                         //1.05;
-        static float thetaspeed   =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "DiamondRotationSpeed", "1" ) );                        //1.05;
-        static float lockline     =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "LockConfirmLineLength", "1.5" ) );                      //1.05;
+
         if (center) {
-            static float bracketwidth =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "RotatingBracketWidth", "0.1" ) );                              //1.05;
-            static bool  bracketinnerouter =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "RotatingBracketInner", "true" ) );                                  //1.05;
-            float innerdis   = endreticle+(startreticle-endreticle)*lock_percent;
-            float outerdis   = innerdis+bracketsize;
-            float bracketdis = (bracketinnerouter ? innerdis : outerdis);
-            float r = rSize < absmin ? absmin : rSize;
-
-            verts.clear();
-
-            verts.insert( Loc+CamP*(innerdis*r) );
-            verts.insert( Loc+CamP*(outerdis*r) );
-
-            verts.insert( Loc+CamP*(bracketdis*r)+CamQ*(bracketwidth*r) );
-            verts.insert( Loc+CamP*(bracketdis*r)-CamQ*(bracketwidth*r) );
-
-            verts.insert( Loc-CamP*(innerdis*r) );
-            verts.insert( Loc-CamP*(outerdis*r) );
-
-            verts.insert( Loc-CamP*(bracketdis*r)+CamQ*(bracketwidth*r) );
-            verts.insert( Loc-CamP*(bracketdis*r)-CamQ*(bracketwidth*r) );
-
-            verts.insert( Loc+CamQ*(innerdis*r) );
-            verts.insert( Loc+CamQ*(outerdis*r) );
-
-            verts.insert( Loc+CamQ*(bracketdis*r)+CamP*(bracketwidth*r) );
-            verts.insert( Loc+CamQ*(bracketdis*r)-CamP*(bracketwidth*r) );
-
-            verts.insert( Loc-CamQ*(innerdis*r) );
-            verts.insert( Loc-CamQ*(outerdis*r) );
-
-            verts.insert( Loc-CamQ*(bracketdis*r)+CamP*(bracketwidth*r) );
-            verts.insert( Loc-CamQ*(bracketdis*r)-CamP*(bracketwidth*r) );
-
+            verts = GetLockingIcon(Loc, CamP, CamQ, rSize, lock_percent);
             GFXDraw( GFXLINE, verts );
         } else {
-            float  max   = diamondsize;
-            float  coord = endreticle+(startreticle-endreticle)*lock_percent;              //rSize/(1-lock_percent);//this is a number between 1 and 100
-            double rtot  = 1./sqrtf( 2 );
-
-            //this causes the rotation!
-            float  theta = 4*M_PI*lock_percent*thetaspeed;
-            Vector LockBox( -cos( theta )*rtot, -rtot, sin( theta )*rtot );
-            //Vector LockBox (0*rtot,-rtot,1*rtot);
-
-            static float diamondthick =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "DiamondLineThickness", "1" ) );                              //1.05;
-            GFXLineWidth( diamondthick );
-            QVector TLockBox( rtot*LockBox.i+rtot*LockBox.j, rtot*LockBox.j-rtot*LockBox.i, LockBox.k );
-            QVector SLockBox( TLockBox.j, TLockBox.i, TLockBox.k );
-            QVector Origin = (CamP+CamQ).Cast()*(rSize*coord);
-            QVector Origin1 = (CamP-CamQ).Cast()*(rSize*coord);
-            TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR).Cast();
-            SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR).Cast();
-            double  r1Size = rSize*bracketsize;
-            if (r1Size < absmin)
-                r1Size = absmin;
-
-            TLockBox *= r1Size;
-            SLockBox *= r1Size;
-
-            max *= rSize*.75*endreticle;
-            verts.clear();
             if (lock_percent == 0) {
-                const QVector qCamP(CamP.Cast());
-                const QVector qCamQ(CamQ.Cast());
-
-                verts.insert( Loc+qCamQ*max*lockline );
-                verts.insert( Loc+qCamQ*max );
-                verts.insert( Loc+Origin+TLockBox );
-                verts.insert( Loc+Origin );
-                verts.insert( Loc+Origin+SLockBox );
-                verts.insert( Loc+qCamP*max );
-                verts.insert( Loc+qCamP*max*lockline );
-                verts.insert( Loc-qCamP*max );
-                verts.insert( Loc-Origin-SLockBox );
-                verts.insert( Loc-Origin );
-                verts.insert( Loc-Origin-TLockBox );
-                verts.insert( Loc-qCamQ*max );
-                verts.insert( Loc-qCamQ*max*lockline );
-                verts.insert( Loc+Origin1+TLockBox );
-                verts.insert( Loc+Origin1 );
-                verts.insert( Loc+Origin1-SLockBox );
-                verts.insert( Loc-qCamP*max*lockline );
-                verts.insert( Loc-Origin1+SLockBox );
-                verts.insert( Loc-Origin1 );
-                verts.insert( Loc-Origin1-TLockBox );
+                verts = GetAnimatedLockingIcon(Loc, CamP, CamQ, CamR, rSize, lock_percent);
 
                 static const unsigned char indices[] = {
                     0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8,
@@ -213,18 +79,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
 
                 GFXDrawElements( GFXLINE, verts, indices, sizeof(indices) / sizeof(*indices) );
             } else {
-                verts.insert( Loc+Origin+TLockBox );
-                verts.insert( Loc+Origin );
-                verts.insert( Loc+Origin+SLockBox );
-                verts.insert( Loc-Origin-SLockBox );
-                verts.insert( Loc-Origin );
-                verts.insert( Loc-Origin-TLockBox );
-                verts.insert( Loc+Origin1+TLockBox );
-                verts.insert( Loc+Origin1 );
-                verts.insert( Loc+Origin1-SLockBox );
-                verts.insert( Loc-Origin1+SLockBox );
-                verts.insert( Loc-Origin1 );
-                verts.insert( Loc-Origin1-TLockBox );
+                verts = GetAnimatedLockingIcon(Loc, CamP, CamQ, CamR, rSize, lock_percent);
 
                 static const unsigned char indices[] = {
                     0, 1, 1, 2, 3, 4, 4, 5, 6, 7, 7, 8, 9, 10, 10, 11
@@ -234,7 +89,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
             }
         }
     }
-    GFXLineWidth( 1 );
+    SetThickness( ShapeType::Default );
     GFXDisable( SMOOTH );
 }
 
@@ -616,42 +471,21 @@ void DrawGauges( Cockpit *cockpit, Unit *un, Gauge *gauges[],
     GFXColor4f( 1, 1, 1, 1 );
 }
 
-
+// This draws a cross
 void DrawNavigationSymbol( const Vector &Loc, const Vector &P, const Vector &Q, float size )
 {
-    static float crossthick = GameConfig::GetVariable( "graphics", "hud", "NavCrossLineThickness", 1.0 );                        //1.05;
 
-    GFXLineWidth( crossthick );
+
+    SetThickness(ShapeType::Cross);
     size = .125*size;
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXEnable( SMOOTH );
 
-    static VertexBuilder<> verts;
-    verts.clear();
-    verts.insert( Loc+P*size );
-    verts.insert( Loc+.125*P*size );
-    verts.insert( Loc-P*size );
-    verts.insert( Loc-.125*P*size );
-    verts.insert( Loc+Q*size );
-    verts.insert( Loc+.125*Q*size );
-    verts.insert( Loc-Q*size );
-    verts.insert( Loc-.125*Q*size );
-    verts.insert( Loc+.0625*Q*size );
-    verts.insert( Loc+.0625*P*size );
-    verts.insert( Loc-.0625*Q*size );
-    verts.insert( Loc-.0625*P*size );
-    verts.insert( Loc+.9*P*size+.125*Q*size );
-    verts.insert( Loc+.9*P*size-.125*Q*size );
-    verts.insert( Loc-.9*P*size+.125*Q*size );
-    verts.insert( Loc-.9*P*size-.125*Q*size );
-    verts.insert( Loc+.9*Q*size+.125*P*size );
-    verts.insert( Loc+.9*Q*size-.125*P*size );
-    verts.insert( Loc-.9*Q*size+.125*P*size );
-    verts.insert( Loc-.9*Q*size-.125*P*size );
+    static VertexBuilder<> verts = GetCross(Loc, P, Q, size);
     GFXDraw( GFXLINE, verts );
 
     GFXDisable( SMOOTH );
-    GFXLineWidth( 1 );
+    SetThickness(ShapeType::Default);
 }
 
 
