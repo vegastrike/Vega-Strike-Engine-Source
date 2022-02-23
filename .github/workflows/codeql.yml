@@ -42,7 +42,7 @@ jobs:
     - name: Bootstrap and Build the Code
       run: |
         sudo script/bootstrap
-        script/build.sh
+        script/build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1

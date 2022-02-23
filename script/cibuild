@@ -56,7 +56,7 @@ then
     docker rm $DOCKER_CONTAINER_NAME
 elif [ "$MY_OS_NAME" == "macos" ]
 then
-    script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
+    script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
     # On macOS, the following is done by the calling CI workflow
     # ctest -V
     # Not building successfully yet, so shouldn't try to package it

@@ -252,7 +252,7 @@ If you encounter any issues while playing, please create an issue with the Vega 
 
 2. Build Vega Strike:
 
-   a. Use the `build.sh` script in the `script` directory.
+   a. Use the `build` bash script in the `script` directory.
 
    b. *OR* configure and compile VS manually, using the ncurses ccmake frontend:
 
@@ -331,7 +331,7 @@ by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source
 
 If you get compilation issues with the system `libboost`, download it manually from
 [here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
-and run `./script/build.sh -DUSE_SYSTEM_BOOST=NO`
+and run `./script/build -DUSE_SYSTEM_BOOST=NO`
 
 ## Compiling On Windows
 
