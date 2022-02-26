@@ -34,7 +34,7 @@ echo "docker-entrypoint.sh: Flags passed in: $FLAGS"
 if [ $IS_RELEASE -eq 1 ]
 then
     script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
-    script/package
+    script/package $FLAGS
 else
     if [ "$CC" == "clang" ]
     then
