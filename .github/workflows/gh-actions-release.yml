@@ -113,13 +113,15 @@ jobs:
     # where in a pull request we want to move to the head of the PR and not be at the
     # merge commit; here we want to be at the HEAD of the ref
 
-    - name: Extract tag name etc
+    - name: Extract tag name and short SHA
       shell: bash
       run: |
         echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
-    - name: Test tag name etc
+        echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+    - name: Test tag name and short SHA
       run: |
         echo "${TAG_NAME}"
+        echo "${SHORT_SHA}"
     - name: Run CI
       env:
         FROM:       ${{ matrix.FROM }}

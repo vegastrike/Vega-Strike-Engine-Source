@@ -106,7 +106,15 @@ jobs:
     # Ensure PRs are built against the PR Head
     # As opposed to the merge commit
     - name: Move to PR HEAD
-      run: git checkout HEAD^2
+      run: git checkout ${{ github.event.pull_request.head.sha }}
+
+    - name: Extract short SHA
+      shell: bash
+      run: |
+        echo "SHORT_SHA=`git rev-parse --short ${{ github.event.pull_request.head.sha }}`" >> $GITHUB_ENV
+    - name: Test short SHA
+      run: |
+        echo "${SHORT_SHA}"
 
     - name: Build and Test
       env:
