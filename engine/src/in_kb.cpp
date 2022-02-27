@@ -202,13 +202,12 @@ void InitKB()
     RestoreKB();
 }
 
-void ProcessKB()
+void ProcessKB( unsigned int player )
 {
-    for (int mod = 0; mod < LAST_MODIFIER; mod++) {
-        for (int a = 0; a < KEYMAP_SIZE; a++) {
-            keyBindings[mod][a].function( keyBindings[mod][a].data, keyState[mod][a] );
-        }
-    }
+    for (int mod = 0; mod < LAST_MODIFIER; mod++)
+        for (int a = 0; a < KEYMAP_SIZE; a++)
+            if (playerBindings[mod][a] == player)
+                keyBindings[mod][a].function( keyBindings[mod][a].data, keyState[mod][a] );
 }
 
 void BindKey( int key, unsigned int mod, unsigned int player, KBHandler handler, const KBData &data )

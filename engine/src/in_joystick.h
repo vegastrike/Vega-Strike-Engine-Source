@@ -45,7 +45,7 @@ class JoyStick;
 
 //typedef void (*JoyHandler) (int);
 
-extern void ProcessJoystick();
+extern void ProcessJoystick( int whichjoystick );
 extern void InitJoystick();
 extern void DeInitJoystick();
 

@@ -25,7 +25,7 @@
 
 void InitInput();
 void DeInitInput();
-void ProcessInput();
+void ProcessInput( size_t whichplayer );
 int TermInput();
 
 #endif

@@ -30,12 +30,13 @@ using std::list;
 extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 
 
-void ProcessInput()
+void ProcessInput( size_t whichplayer )
 {
-    ProcessKB();
+    ProcessKB( whichplayer );
     ProcessMouse();
     for (int i = 0; i < MAX_JOYSTICKS; i++)
-        ProcessJoystick();
+        if (joystick[i]->player == whichplayer)
+            ProcessJoystick( i );
 }
 
 void InitInput()
