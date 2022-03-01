@@ -246,17 +246,20 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
             uint32bit stringindex = 0;
             uint32bit namebound = (detailtexturenamelen + 3) / 4;
             for (stringindex = 0; stringindex < namebound; stringindex++) {
-                for (uint32bit bytenum = 0; bytenum < 4; bytenum++)                  //Extract chars
-                    if (inmemfile[word32index].c8val[bytenum])                      //If not padding
+                for (uint32bit bytenum = 0; bytenum < 4; bytenum++) {                  //Extract chars
+                    if (inmemfile[word32index].c8val[bytenum]) {                      //If not padding
                         detailtexturename += inmemfile[word32index].c8val[bytenum];
+                    }
+                }
                 //Append char to end of string
                 word32index += 1;
             }
             if (detailtexturename.size() != 0) {
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, " detailtexture=\"%s\" ", detailtexturename.c_str());
-                else
+                } else {
                     fprintf(mtl, "map_detail %s\n", detailtexturename.c_str());
+                }
             }
             vector<Mesh_vec3f> Detailplanes;             //store detail planes until finish printing mesh attributes
             uint32bit numdetailplanes =
@@ -272,8 +275,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                 temp.y = y;
                 temp.z = z;
                 Detailplanes.push_back(temp);
-                if (!isxmesh)
+                if (!isxmesh) {
                     fprintf(mtl, "detail_plane %f %f %f\n", x, y, z);
+                }
             }             //End detail planes
             //Textures
             uint32bit
@@ -290,40 +294,48 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                 string texname = "";
                 uint32bit namebound = (texnamelen + 3) / 4;
                 for (stringindex = 0; stringindex < namebound; stringindex++) {
-                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++)                      //Extract chars
-                        if (inmemfile[word32index].c8val[bytenum])                          //If not padding
+                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++) {                      //Extract chars
+                        if (inmemfile[word32index].c8val[bytenum]) {                          //If not padding
                             texname += inmemfile[word32index].c8val[bytenum];
+                        }
+                    }
                     //Append char to end of string
                     word32index += 1;
                 }
                 switch (textype) {
                     case ALPHAMAP:
-                        if (isxmesh)
+                        if (isxmesh) {
                             fprintf(Outputfile, " alphamap");
+                        }
                         break;
                     case ANIMATION:
-                        if (isxmesh)
+                        if (isxmesh) {
                             fprintf(Outputfile, " animation");
+                        }
                         break;
                     case TEXTURE:
-                        if (isxmesh)
+                        if (isxmesh) {
                             fprintf(Outputfile, " texture");
+                        }
                         break;
                     case TECHNIQUE:
-                        if (isxmesh)
+                        if (isxmesh) {
                             fprintf(Outputfile, " technique");
+                        }
                         break;
                     default:
                         fprintf(stderr,
                                 "Bad case in switch(textype) in file from_BFXM.cpp: type=%d index=%d\n",
                                 textype,
                                 texindex);
-                        if (isxmesh)
+                        if (isxmesh) {
                             fprintf(Outputfile, " unknown_textype");
+                        }
                         break;
                 }
-                if (isxmesh && texindex)
-                    fprintf(Outputfile, "%d", texindex); //adds 2 or 3 or 4 or 5 to "texture"
+                if (isxmesh && texindex) {
+                    fprintf(Outputfile, "%d", texindex);
+                } //adds 2 or 3 or 4 or 5 to "texture"
                 if (isxmesh)
                     fprintf(Outputfile,
                             "=\"%s\" ",
@@ -362,8 +374,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                         fprintf(mtl, "%d %s\n", texindex, texname.c_str());
                 }
             }
-            if (isxmesh)
+            if (isxmesh) {
                 fprintf(Outputfile, ">\n");
+            }
             //End Textures
             if (!isxmesh) {
                 fprintf(mtl, "Ns %f\n", power);
@@ -371,14 +384,17 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                 fprintf(mtl, "Kd %f %f %f\n", dr, dg, db);
                 fprintf(mtl, "Ke %f %f %f\n", er, eg, eb);
                 fprintf(mtl, "Ks %f %f %f\n", sr, sg, sb);
-                if (bsrc == ONE && bdst == ONE)
+                if (bsrc == ONE && bdst == ONE) {
                     fprintf(mtl, "Blend 1.0\n");
-                else if (bsrc == SRCALPHA && bdst == INVSRCALPHA)
+                } else if (bsrc == SRCALPHA && bdst == INVSRCALPHA) {
                     fprintf(mtl, "Blend 0.5\n");
-                if (!usenormals)
+                }
+                if (!usenormals) {
                     fprintf(mtl, "Normals 0\n");
-                if (reflect)
+                }
+                if (reflect) {
                     fprintf(mtl, "Map_Reflection 1\n");
+                }
             } else {
                 fprintf(Outputfile,
                         "<Material power=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\">\n",
@@ -393,7 +409,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                 fprintf(Outputfile, "\t<Specular Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n", sr, sg, sb, sa);
                 fprintf(Outputfile, "</Material>\n");
             }
-            for (std::vector<Mesh_vec3f>::size_type detplane = 0; detplane < Detailplanes.size(); detplane++)
+            for (std::vector<Mesh_vec3f>::size_type detplane = 0; detplane < Detailplanes.size(); detplane++) {
                 if (isxmesh) {
                     fprintf(Outputfile,
                             "<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n",
@@ -401,6 +417,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                             Detailplanes[detplane].y,
                             Detailplanes[detplane].z);
                 }
+            }
             //Logos
             uint32bit numlogos = VSSwapHostIntToLittle(inmemfile[word32index].i32val);             //number of logos
             word32index += 1;
@@ -426,12 +443,14 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                             refnum = VSSwapHostIntToLittle(inmemfile[word32index].i32val);                   //Logo ref
                     float32bit weight = VSSwapHostFloatToLittle(inmemfile[word32index
                             + 1].f32val);                     //reference weight
-                    if (isxmesh)
+                    if (isxmesh) {
                         fprintf(Outputfile, "\t<Ref point=\"%d\" weight=\"%f\"/>\n", refnum, weight);
+                    }
                     word32index += 2;
                 }
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "</Logo>\n");
+                }
             }
             //End logos
             //LODs
@@ -440,8 +459,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
             for (uint32bit LOD = 0; LOD < numLODs; LOD++) {
                 float32bit size = VSSwapHostFloatToLittle(inmemfile[word32index].f32val);                 //Size
                 uint32bit index = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);               //Mesh index
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "<LOD size=\"%f\" meshfile=\"%d_%d.xmesh\"/>\n", size, recordindex, index);
+                }
                 word32index += 2;
             }
             //End LODs
@@ -450,9 +470,11 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     VSSwapHostIntToLittle(inmemfile[word32index].i32val);             //number of animation definitions
             word32index += 1;
             if (meshindex == 0) {
-                for (unsigned int framecount = numLODs + 1; framecount < nummeshes; framecount++)
-                    if (isxmesh)
+                for (unsigned int framecount = numLODs + 1; framecount < nummeshes; framecount++) {
+                    if (isxmesh) {
                         fprintf(Outputfile, "<Frame FrameMeshName=\"%d_%d.xmesh\"/>\n", recordindex, framecount);
+                    }
+                }
             }
             for (uint32bit anim = 0; anim < numanimdefs; anim++) {
                 uint32bit animnamelen =
@@ -461,18 +483,21 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                 string animname = "";
                 uint32bit namebound = (animnamelen + 3) / 4;
                 for (stringindex = 0; stringindex < namebound; stringindex++) {
-                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++)                      //Extract chars
-                        if (inmemfile[word32index].c8val[bytenum])                          //If not padding
+                    for (uint32bit bytenum = 0; bytenum < 4; bytenum++) {                      //Extract chars
+                        if (inmemfile[word32index].c8val[bytenum]) {                          //If not padding
                             animname += inmemfile[word32index].c8val[bytenum];
+                        }
+                    }
                     //Append char to end of string
                     word32index += 1;
                 }
                 float32bit FPS = VSSwapHostFloatToLittle(inmemfile[word32index].f32val);                 //FPS
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile,
                             "<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",
                             animname.c_str(),
                             FPS);
+                }
                 word32index += NUMFIELDSPERANIMATIONDEF;
                 uint32bit numframerefs =
                         VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //number of animation frame references
@@ -481,19 +506,22 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     uint32bit ref =
                             VSSwapHostIntToLittle(inmemfile[word32index].i32val);                     //number of animation frame references
                     word32index += NUMFIELDSPERREFERENCEDANIMATION;
-                    if (isxmesh)
+                    if (isxmesh) {
                         fprintf(Outputfile, "<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n", ref - 1 - numLODs);
+                    }
                 }
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "</AnimationDefinition>\n");
+                }
             }
             //End AnimationDefinitions
             //End VSA
             //go to geometry
             word32index = VSAbeginword + (LengthOfArbitraryLengthAttributes / 4);
             //Vertices
-            if (isxmesh)
+            if (isxmesh) {
                 fprintf(Outputfile, "<Points>\n");
+            }
             uint32bit
                     numvertices = VSSwapHostIntToLittle(inmemfile[word32index].i32val);             //number of vertices
             word32index += 1;
@@ -533,19 +561,22 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                             k * (flipn ? -1 : 1));
                 }
                 if (sharevert) {
-                    if (!isxmesh)
+                    if (!isxmesh) {
                         fprintf(OutputObj, "vt %f %f\n", (flips ? 1.0f - s : s), (flipt ? t : 1.0f - t));
+                    }
                     texcount += 1;
                 }
                 vtxcount += 1;
                 normcount += 1;
             }
-            if (isxmesh)
+            if (isxmesh) {
                 fprintf(Outputfile, "</Points>\n");
+            }
             //End Vertices
             //Lines
-            if (isxmesh)
+            if (isxmesh) {
                 fprintf(Outputfile, "<Polygons>\n");
+            }
             uint32bit numlines = VSSwapHostIntToLittle(inmemfile[word32index].i32val);             //number of vertices
             word32index += 1;
             for (uint32bit rvert = 0; rvert < numlines; rvert++) {
@@ -720,19 +751,22 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                         VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //number of vertices
                 uint32bit flatshade =
                         VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);                 //flatshade
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t<Linestrip flatshade=\"%d\">\n", flatshade);
+                }
                 word32index += 1 + NUMFIELDSPERPOLYGONSTRUCTURE;
                 for (uint32bit elem = 0; elem < numstripelements; elem++) {
                     uint32bit ind = VSSwapHostIntToLittle(inmemfile[word32index].i32val);                   //index 1
                     float32bit s = VSSwapHostFloatToLittle(inmemfile[word32index + 1].f32val);                     //s
                     float32bit t = VSSwapHostFloatToLittle(inmemfile[word32index + 2].f32val);                     //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                    if (isxmesh)
+                    if (isxmesh) {
                         fprintf(Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind, s, t);
+                    }
                 }
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t</Linestrip>");
+                }
             }
             //End Linestrips
             //Tristrips
@@ -744,8 +778,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                         VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //number of vertices
                 uint32bit flatshade =
                         VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);                 //flatshade
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t<Tristrip flatshade=\"%d\">\n", flatshade);
+                }
                 word32index += 1 + NUMFIELDSPERPOLYGONSTRUCTURE;
                 int to1 = 0, to2 = 0;
                 int indo1 = 0, indo2 = 0;
@@ -754,22 +789,25 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     float32bit s = VSSwapHostFloatToLittle(inmemfile[word32index + 1].f32val);                     //s
                     float32bit t = VSSwapHostFloatToLittle(inmemfile[word32index + 2].f32val);                     //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                    if (isxmesh)
+                    if (isxmesh) {
                         fprintf(Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind, s, t);
+                    }
                     int tco = ind + texoffset;
                     int vind = ind + indoffset;
                     int nind = ind + normoffset;
                     if (!sharevert) {
-                        if (!isxmesh)
+                        if (!isxmesh) {
                             fprintf(OutputObj, "vt %f %f\n", (flips ? 1.0f - s : s), (flipt ? t : 1.0f - t));
+                        }
                         tco = texcount;
                         texcount += 1;
                     }
                     if (elem > 1) {
                         if (elem % 2) {
-                            if (!isxmesh)
+                            if (!isxmesh) {
                                 fprintf(OutputObj, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
                                         indo2, to2, indo2, indo1, to1, indo1, vind, tco, nind);
+                            }
                         } else if (!isxmesh) {
                             fprintf(OutputObj, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
                                     indo1, to1, indo1, indo2, to2, indo2, vind, tco, nind);
@@ -780,8 +818,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     to2 = to1;
                     to1 = tco;
                 }
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t</Tristrip>");
+                }
             }
             //End Tristrips
             //Trifans
@@ -793,8 +832,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                         VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //number of vertices
                 uint32bit flatshade =
                         VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);                 //flatshade
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t<Trifan flatshade=\"%d\">\n", flatshade);
+                }
                 word32index += 1 + NUMFIELDSPERPOLYGONSTRUCTURE;
                 int indo1 = 0, indo2 = 0, to1 = 0, to2 = 0;
                 for (uint32bit elem = 0; elem < numstripelements; elem++) {
@@ -802,21 +842,24 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     float32bit s = VSSwapHostFloatToLittle(inmemfile[word32index + 1].f32val);                     //s
                     float32bit t = VSSwapHostFloatToLittle(inmemfile[word32index + 2].f32val);                     //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                    if (isxmesh)
+                    if (isxmesh) {
                         fprintf(Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind, s, t);
+                    }
                     int tco = ind + texoffset;
                     int nind = ind + normoffset;
                     int vind = ind + indoffset;
                     if (!sharevert) {
-                        if (!isxmesh)
+                        if (!isxmesh) {
                             fprintf(OutputObj, "vt %f %f\n", (flips ? 1.0f - s : s), (flipt ? t : 1.0f - t));
+                        }
                         tco = texcount;
                         texcount += 1;
                     }
                     if (elem > 1) {
-                        if (!isxmesh)
+                        if (!isxmesh) {
                             fprintf(OutputObj, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
                                     indo2, to2, indo2, indo1, to1, indo1, vind, tco, nind);
+                        }
                     }
                     if (elem == 0) {
                         indo2 = vind;
@@ -825,8 +868,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     indo1 = vind;
                     to1 = tco;
                 }
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t</Trifan>");
+                }
             }
             //End Trifans
             //Quadstrips
@@ -838,8 +882,9 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                         VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //number of vertices
                 uint32bit flatshade =
                         VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);                 //flatshade
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t<Quadstrip flatshade=\"%d\">\n", flatshade);
+                }
                 word32index += 1 + NUMFIELDSPERPOLYGONSTRUCTURE;
                 int indo1 = 0, indo2 = 0, to1 = 0, to2 = 0;
                 for (uint32bit elem = 0; elem < numstripelements; elem++) {
@@ -847,22 +892,25 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     float32bit s = VSSwapHostFloatToLittle(inmemfile[word32index + 1].f32val);                     //s
                     float32bit t = VSSwapHostFloatToLittle(inmemfile[word32index + 2].f32val);                     //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                    if (isxmesh)
+                    if (isxmesh) {
                         fprintf(Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind, s, t);
+                    }
                     int tco = ind + texoffset;
                     int nind = ind + normoffset;
                     int vind = ind + indoffset;
                     if (!sharevert) {
-                        if (!isxmesh)
+                        if (!isxmesh) {
                             fprintf(OutputObj, "vt %f %f\n", (flips ? 1.0f - s : s), (flipt ? t : 1.0f - t));
+                        }
                         tco = texcount;
                         texcount += 1;
                     }
                     if (elem > 1) {
                         if (elem % 2) {
-                            if (!isxmesh)
+                            if (!isxmesh) {
                                 fprintf(OutputObj, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
                                         indo2, to2, indo2, indo1, to1, indo1, vind, tco, nind);
+                            }
                         } else if (!isxmesh) {
                             fprintf(OutputObj, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
                                     indo1, to1, indo1, indo2, to2, indo2, vind, tco, nind);
@@ -873,16 +921,19 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
                     to2 = to1;
                     to1 = tco;
                 }
-                if (isxmesh)
+                if (isxmesh) {
                     fprintf(Outputfile, "\t</Quadstrip>");
+                }
             }
             //End Quadstrips
-            if (isxmesh)
+            if (isxmesh) {
                 fprintf(Outputfile, "</Polygons>\n");
+            }
             //End Geometry
             //go to next mesh
-            if (isxmesh)
+            if (isxmesh) {
                 fprintf(Outputfile, "</Mesh>\n");
+            }
             word32index = meshbeginword + (meshlength / 4);
         }
         //go to next record

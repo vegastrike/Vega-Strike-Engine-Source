@@ -500,8 +500,7 @@ void SceneManager::activationPhaseImpl() {
     }
 
     // Detach deactivated sources
-    for (SceneManagerData::SourceRefSet::iterator sit = data->activeSources.begin(); sit != data->activeSources.end();
-            ++sit) {
+    for (SceneManagerData::SourceRefSet::iterator sit = data->activeSources.begin(); sit != data->activeSources.end(); ++sit) {
         if (newSources.find(*sit) == newSources.end()) {
             renderer->detach(sit->source);
         }

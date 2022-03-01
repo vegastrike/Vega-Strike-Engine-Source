@@ -372,16 +372,16 @@ void hello(GtkWidget *widget, gpointer data) {
         case 3:
 #ifdef _WIN32
             {
-            char pwd [65535];
-            getcwd(pwd,65533);
-            pwd[65533]=pwd[65534]='\0';
-            int pid=spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
-            if (pid==-1) {
-                if (chdir("bin")==0) {
-                    spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/bin/Setup.exe").c_str(),NULL);
-                    chdir("..");
+                char pwd [65535];
+                getcwd(pwd,65533);
+                pwd[65533]=pwd[65534]='\0';
+                int pid=spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+                if (pid==-1) {
+                    if (chdir("bin")==0) {
+                        spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/bin/Setup.exe").c_str(),NULL);
+                        chdir("..");
+                    }
                 }
-            }
             }
 #else
             pid = fork();

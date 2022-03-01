@@ -49,8 +49,13 @@ struct Listener {
     float gain;
     float rsize;
 
-    Listener() : pos(0, 0, 0), vel(0, 0, 0), p(1, 0, 0), q(0, 1, 0), r(0, 0, 1), gain(1), rsize(1) {
-    }
+    Listener() : pos( 0, 0, 0 )
+            ,  vel( 0, 0, 0 )
+            ,  p( 1, 0, 0 )
+            ,  q( 0, 1, 0 )
+            ,  r( 0, 0, 1 )
+            ,  gain( 1 )
+            ,  rsize( 1 ) {}
 }
         mylistener;
 
