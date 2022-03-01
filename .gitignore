@@ -1,17 +1,17 @@
 bin/
 build/
+build-*/
 data/
 ext/
 *.pyc
-build-*/
 packages/
 *.log
 *.bak
 *.kdev4
 .vs/
 .vscode/
-.editorconfig
 engine/.idea/
+.editorconfig
 
 engine/src/version.h
 engine/setup/src/include/version.h

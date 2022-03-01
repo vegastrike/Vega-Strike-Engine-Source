@@ -15,90 +15,90 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - FROM:     'ubuntu:hirsute'
+          - FROM:     'ubuntu:impish'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'deb'
-          - FROM:     'ubuntu:hirsute'
+          - FROM:     'ubuntu:impish'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
-            ARTIFACT_EXT: 'deb'
-          - FROM:     'ubuntu:focal'
-            COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ARTIFACT_EXT: 'deb'
+          - FROM:     'ubuntu:focal'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
           # Source tarballs only
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'tar.[xb]z*'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'deb'
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:buster'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:buster'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'rpm'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'fedora:35'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'fedora:35'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:34'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:34'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
-            ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:33'
-            COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
-            ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:33'
-            COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'rpm'
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'rpm'
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'rpm'
 
     steps:
@@ -113,18 +113,20 @@ jobs:
     # where in a pull request we want to move to the head of the PR and not be at the
     # merge commit; here we want to be at the HEAD of the ref
 
-    - name: Extract tag name etc
+    - name: Extract tag name and short SHA
       shell: bash
       run: |
         echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
-    - name: Test tag name etc
+        echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+    - name: Test tag name and short SHA
       run: |
         echo "${TAG_NAME}"
+        echo "${SHORT_SHA}"
     - name: Run CI
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '-DVEGA_STRIKE_PREFER_LEGACY_OPENGL=${{ matrix.PREFER_LEGACY_OPENGL }}'
+        FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
         MY_OS_NAME: linux
         IS_RELEASE: 1
       run: script/cibuild $FLAGS

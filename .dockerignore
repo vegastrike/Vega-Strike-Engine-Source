@@ -3,10 +3,10 @@
 .vscode/
 bin/
 build/
+build-*/
 data/
 ext/
 *.pyc
-build-engine-Desktop-Default/
 *.log
 *.bak
 packages/

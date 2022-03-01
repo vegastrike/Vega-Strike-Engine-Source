@@ -15,84 +15,84 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - FROM:     'ubuntu:hirsute'
+          - FROM:     'ubuntu:impish'
             COMPILER: 'gcc'
-            PREFER_LEGACY_OPENGL: 'ON'
-          - FROM:     'ubuntu:hirsute'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+          - FROM:     'ubuntu:impish'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
-          - FROM:     'ubuntu:hirsute'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+          - FROM:     'ubuntu:impish'
             COMPILER: 'gcc'
-            PREFER_LEGACY_OPENGL: 'OFF'
-          - FROM:     'ubuntu:hirsute'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+          - FROM:     'ubuntu:impish'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'gcc'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'gcc'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'debian:buster'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'debian:buster'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+          - FROM:     'fedora:35'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+          - FROM:     'fedora:35'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'fedora:34'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'fedora:34'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
-          - FROM:     'fedora:33'
-            COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
-          - FROM:     'fedora:33'
-            COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
-            PREFER_LEGACY_OPENGL: 'OFF'
+            OpenGL_GL_PREFERENCE: 'GLVND'
 
     steps:
     - name: Checkout repository
@@ -106,13 +106,21 @@ jobs:
     # Ensure PRs are built against the PR Head
     # As opposed to the merge commit
     - name: Move to PR HEAD
-      run: git checkout HEAD^2
+      run: git checkout ${{ github.event.pull_request.head.sha }}
+
+    - name: Extract short SHA
+      shell: bash
+      run: |
+        echo "SHORT_SHA=`git rev-parse --short ${{ github.event.pull_request.head.sha }}`" >> $GITHUB_ENV
+    - name: Test short SHA
+      run: |
+        echo "${SHORT_SHA}"
 
     - name: Build and Test
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '-DVEGA_STRIKE_PREFER_LEGACY_OPENGL=${{ matrix.PREFER_LEGACY_OPENGL }}'
+        FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
         MY_OS_NAME: linux
         IS_RELEASE: 0
       run: script/cibuild $FLAGS
