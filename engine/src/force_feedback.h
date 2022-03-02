@@ -1,10 +1,6 @@
-/**
- * force_feedback.h
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -59,9 +55,8 @@
 
 #define ALL_EFFECTS 1
 
-enum vseffects
-{
-    eff_speed_damper=0,     //the higher the speed, the more damped
+enum vseffects {
+    eff_speed_damper = 0,     //the higher the speed, the more damped
     eff_ab_wiggle_x, eff_ab_wiggle_y, eff_ab_jerk,     //afterburner on
     eff_ab_off_x, eff_ab_off_y,     //afterburner off
     eff_laser_jerk, eff_laser_vibrate,     //laser fired
@@ -79,46 +74,46 @@ enum vseffects
 #define N_EFFECTS 9
 #endif
 
-class ForceFeedback
-{
-public: ForceFeedback();
+class ForceFeedback {
+public:
+    ForceFeedback();
     ~ForceFeedback();
 
     bool haveFF();
 
-    void playDurationEffect( unsigned int eff_nr, bool activate );
-    void playShortEffect( unsigned int eff_nr );
+    void playDurationEffect(unsigned int eff_nr, bool activate);
+    void playShortEffect(unsigned int eff_nr);
 
-    void playHit( float angle, float strength );
-    void updateForce( float angle, float strength );
-    void updateSpeedEffect( float strength );
-    void playAfterburner( bool activate );
+    void playHit(float angle, float strength);
+    void updateForce(float angle, float strength);
+    void updateSpeedEffect(float strength);
+    void playAfterburner(bool activate);
     void playLaser();
 
 private:
     bool have_ff;
 
 #if HAVE_FORCE_FEEDBACK
-private:
-    void init();
+    private:
+        void init();
 
-    void init_bogus( int i );
-    void playEffect( unsigned int eff_nr );
-    void stopEffect( unsigned int eff_nr );
+        void init_bogus( int i );
+        void playEffect( unsigned int eff_nr );
+        void stopEffect( unsigned int eff_nr );
 
-    int device_nr;
+        int device_nr;
 
-    struct ff_effect   effects[N_EFFECTS];
-    struct input_event play, stop;
-    int    ff_fd;
-    unsigned long features[4];
-    int    n_effects;   /* Number of effects the device can play at the same time */
+        struct ff_effect   effects[N_EFFECTS];
+        struct input_event play, stop;
+        int    ff_fd;
+        unsigned long features[4];
+        int    n_effects;   /* Number of effects the device can play at the same time */
 
-    double eff_last_time[N_EFFECTS];
+        double eff_last_time[N_EFFECTS];
 
-    double min_effect_time;
+        double min_effect_time;
 
-    bool   is_played[N_EFFECTS];
+        bool   is_played[N_EFFECTS];
 #endif //have_force_feedback
 };
 

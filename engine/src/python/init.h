@@ -1,27 +1,24 @@
-/**
-* init.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 //#define HAVE_PYTHON
 
@@ -41,8 +38,7 @@
 #else
 #include <boost/python/detail/extension_class.hpp>
 #endif
-class Python
-{
+class Python {
 public:
     static void init();
     static void initpaths();
@@ -61,13 +57,12 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
  *       }
  *  };
  */
-struct my_builtin_to_python
-{
-    BOOST_STATIC_CONSTANT( bool, uses_registry = false );
+struct my_builtin_to_python {
+    BOOST_STATIC_CONSTANT(bool, uses_registry = false);
 };
 
 #ifndef BOOST_PYTHON_TO_PYTHON_BY_VALUE
-# define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE( T, expr ) \
+# define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T, expr) \
     template < class MYTYPE >                              \
     struct to_python_value;                                \
     template < >                                           \
@@ -89,7 +84,7 @@ struct my_builtin_to_python
         }                                                  \
     };
 
-# define BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE( T, expr ) \
+# define BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE(T, expr) \
     namespace converter                                 \
     {                                                   \
     template < class MYTYPE >                           \
@@ -104,24 +99,24 @@ struct my_builtin_to_python
     }
 
 //Specialize argument and return value converters for T using expr
-# define BOOST_PYTHON_TO_PYTHON_BY_VALUE( T, expr )   \
+# define BOOST_PYTHON_TO_PYTHON_BY_VALUE(T, expr)   \
     BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE( T, expr ) \
     BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE( T, expr )
 #endif
-BOOST_PYTHON_TO_PYTHON_BY_VALUE( Vector,
-                                boost::python::to_python_value< boost::python::tuple > () ( boost::python::make_tuple( (double)
-                                                                                                                      x.i,
-                                                                                                                      (double)
-                                                                                                                      x.j,
-                                                                                                                      (double)
-                                                                                                                      x.k ) ) );
-BOOST_PYTHON_TO_PYTHON_BY_VALUE( QVector,
-                                boost::python::to_python_value< boost::python::tuple > () ( boost::python::make_tuple( (double)
-                                                                                                                      x.i,
-                                                                                                                      (double)
-                                                                                                                      x.j,
-                                                                                                                      (double)
-                                                                                                                      x.k ) ) );
+BOOST_PYTHON_TO_PYTHON_BY_VALUE(Vector,
+        boost::python::to_python_value<boost::python::tuple>()(boost::python::make_tuple((double)
+                        x.i,
+                (double)
+                        x.j,
+                (double)
+                        x.k)));
+BOOST_PYTHON_TO_PYTHON_BY_VALUE(QVector,
+        boost::python::to_python_value<boost::python::tuple>()(boost::python::make_tuple((double)
+                        x.i,
+                (double)
+                        x.j,
+                (double)
+                        x.k)));
 #else
 inline PyObject * to_python( Vector vec )
 {

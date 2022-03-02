@@ -6,7 +6,7 @@
  *
  *  Copyright (C) Daniel Horn, chuck starchaser, and pheonixstorm
  *  Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- *  Copyright (C) 2021 Stephen G. Tuggy
+ *  Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  *  https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -48,5 +48,5 @@
 #include "Opcode.h"
 #include "vs_collections.hpp"
 
-#endif	// _STDAFX_H_
+#endif    // _STDAFX_H_
 

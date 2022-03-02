@@ -1,9 +1,8 @@
 /**
  * intelligent.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 Roy Falk
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -47,34 +46,31 @@
 using std::string;
 
 // TODO: really. This should be properly defined
-extern bool CheckAccessory( Unit *tur );
+extern bool CheckAccessory(Unit *tur);
 
 // TODO: remove
 using namespace Orders;
 
-Intelligent::Intelligent()
-{
+Intelligent::Intelligent() {
 
 }
 
-
-void Intelligent::LoadAIScript( const std::string &s )
-{
-    if (s.find( ".py" ) != string::npos) {
-        Order *ai = PythonClass< FireAt >::Factory( s );
-        PrimeOrders( ai );
+void Intelligent::LoadAIScript(const std::string &s) {
+    if (s.find(".py") != string::npos) {
+        Order *ai = PythonClass<FireAt>::Factory(s);
+        PrimeOrders(ai);
         return;
     } else {
         if (s.length() > 0) {
             if (*s.begin() == '_') {
-                mission->addModule( s.substr( 1 ) );
-                PrimeOrders( new AImissionScript( s.substr( 1 ) ) );
+                mission->addModule(s.substr(1));
+                PrimeOrders(new AImissionScript(s.substr(1)));
             } else {
                 if (s == "ikarus") {
-                    PrimeOrders( new Orders::Ikarus() );
+                    PrimeOrders(new Orders::Ikarus());
                 } else {
-                    string ai_agg = s+".agg.xml";
-                    PrimeOrders( new Orders::AggressiveAI( ai_agg.c_str() ) );
+                    string ai_agg = s + ".agg.xml";
+                    PrimeOrders(new Orders::AggressiveAI(ai_agg.c_str()));
                 }
             }
         } else {
@@ -83,17 +79,16 @@ void Intelligent::LoadAIScript( const std::string &s )
     }
 }
 
-void Intelligent::eraseOrderType( unsigned int type )
-{
-    if (aistate)
-        aistate->eraseType( type );
+void Intelligent::eraseOrderType(unsigned int type) {
+    if (aistate) {
+        aistate->eraseType(type);
+    }
 }
 
-bool Intelligent::LoadLastPythonAIScript()
-{
-    Order *pyai = PythonClass< Orders::FireAt >::LastPythonClass();
+bool Intelligent::LoadLastPythonAIScript() {
+    Order *pyai = PythonClass<Orders::FireAt>::LastPythonClass();
     if (pyai) {
-        PrimeOrders( pyai );
+        PrimeOrders(pyai);
     } else if (!aistate) {
         PrimeOrders();
         return false;
@@ -101,244 +96,238 @@ bool Intelligent::LoadLastPythonAIScript()
     return true;
 }
 
-bool Intelligent::EnqueueLastPythonAIScript()
-{
-    Order *pyai = PythonClass< Orders::FireAt >::LastPythonClass();
-    if (pyai)
-        EnqueueAI( pyai );
-    else if (!aistate)
+bool Intelligent::EnqueueLastPythonAIScript() {
+    Order *pyai = PythonClass<Orders::FireAt>::LastPythonClass();
+    if (pyai) {
+        EnqueueAI(pyai);
+    } else if (!aistate) {
         return false;
+    }
     return true;
 }
 
-void Intelligent::PrimeOrders( Order *newAI )
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::PrimeOrders(Order *newAI) {
+    Unit *unit = static_cast<Unit *>(this);
 
     if (newAI) {
-        if (aistate)
+        if (aistate) {
             aistate->Destroy();
+        }
         aistate = newAI;
-        newAI->SetParent( unit );
+        newAI->SetParent(unit);
     } else {
         PrimeOrders();
     }
 }
 
-void Intelligent::PrimeOrders()
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::PrimeOrders() {
+    Unit *unit = static_cast<Unit *>(this);
 
     if (aistate) {
         aistate->Destroy();
         aistate = nullptr;
     }
     aistate = new Order;                 //get 'er ready for enqueueing
-    aistate->SetParent( unit );
+    aistate->SetParent(unit);
 }
 
-void Intelligent::PrimeOrdersLaunched()
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::PrimeOrdersLaunched() {
+    Unit *unit = static_cast<Unit *>(this);
 
     if (aistate) {
         aistate->Destroy();
         aistate = nullptr;
     }
-    Vector vec( 0, 0, 10000 );
-    aistate = new ExecuteFor( new Orders::MatchVelocity( unit->ClampVelocity( vec, true ), Vector( 0,
-                                                                                                   0,
-                                                                                                   0 ), true, true,
-                                                         false ), 4.0f );
-    aistate->SetParent( unit );
+    Vector vec(0, 0, 10000);
+    aistate = new ExecuteFor(new Orders::MatchVelocity(unit->ClampVelocity(vec, true), Vector(0,
+                    0,
+                    0), true, true,
+            false), 4.0f);
+    aistate->SetParent(unit);
 }
 
-void Intelligent::SetAI( Order *newAI )
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::SetAI(Order *newAI) {
+    Unit *unit = static_cast<Unit *>(this);
 
-    newAI->SetParent( unit );
-    if (aistate)
-        aistate->ReplaceOrder( newAI );
-    else
+    newAI->SetParent(unit);
+    if (aistate) {
+        aistate->ReplaceOrder(newAI);
+    } else {
         aistate = newAI;
+    }
 }
 
-void Intelligent::EnqueueAI( Order *newAI )
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::EnqueueAI(Order *newAI) {
+    Unit *unit = static_cast<Unit *>(this);
 
-    newAI->SetParent( unit );
-    if (aistate)
-        aistate->EnqueueOrder( newAI );
-    else
+    newAI->SetParent(unit);
+    if (aistate) {
+        aistate->EnqueueOrder(newAI);
+    } else {
         aistate = newAI;
+    }
 }
 
-void Intelligent::EnqueueAIFirst( Order *newAI )
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::EnqueueAIFirst(Order *newAI) {
+    Unit *unit = static_cast<Unit *>(this);
 
-    newAI->SetParent( unit );
-    if (aistate)
-        aistate->EnqueueOrderFirst( newAI );
-    else
+    newAI->SetParent(unit);
+    if (aistate) {
+        aistate->EnqueueOrderFirst(newAI);
+    } else {
         aistate = newAI;
+    }
 }
 
-void Intelligent::ExecuteAI()
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::ExecuteAI() {
+    Unit *unit = static_cast<Unit *>(this);
     Flightgroup *flightgroup = unit->flightgroup;
     if (flightgroup) {
         Unit *leader = flightgroup->leader.GetUnit();
         //no heirarchy in flight group
-        if (leader ? (flightgroup->leader_decision > -1) && ( leader->getFgSubnumber() >= unit->getFgSubnumber() ) : true) {
-            if (!leader)
+        if (leader ? (flightgroup->leader_decision > -1) && (leader->getFgSubnumber() >= unit->getFgSubnumber())
+                : true) {
+            if (!leader) {
                 flightgroup->leader_decision = flightgroup->nr_ships;
-            flightgroup->leader.SetUnit( unit );
+            }
+            flightgroup->leader.SetUnit(unit);
         }
         flightgroup->leader_decision--;
     }
-    if (aistate) aistate->Execute();
-    if ( !unit->SubUnits.empty() ) {
+    if (aistate) {
+        aistate->Execute();
+    }
+    if (!unit->SubUnits.empty()) {
         un_iter iter = unit->getSubUnits();
-        Unit   *un;
-        while ( (un = *iter) ) {
+        Unit *un;
+        while ((un = *iter)) {
             un->ExecuteAI();                     //like dubya
             ++iter;
         }
     }
 }
 
-string Intelligent::getFullAIDescription()
-{
-    Unit *unit = static_cast<Unit*>(this);
+string Intelligent::getFullAIDescription() {
+    Unit *unit = static_cast<Unit *>(this);
 
-    if ( getAIState() )
-        return unit->getFgID()+":"+getAIState()->createFullOrderDescription( 0 ).c_str();
-    else
+    if (getAIState()) {
+        return unit->getFgID() + ":" + getAIState()->createFullOrderDescription(0).c_str();
+    } else {
         return "no order";
+    }
 }
 
+float Intelligent::getRelation(const Unit *targ) const {
+    const Unit *unit = static_cast<const Unit *>(this);
 
-
-float Intelligent::getRelation( const Unit *targ ) const
-{
-    const Unit *unit = static_cast<const Unit*>(this);
-
-    return unit->pilot->GetEffectiveRelationship( unit, targ );
+    return unit->pilot->GetEffectiveRelationship(unit, targ);
 }
 
+double Intelligent::getMinDis(const QVector &pnt) const {
+    const Unit *unit = static_cast<const Unit *>(this);
 
-
-
-
-double Intelligent::getMinDis( const QVector &pnt ) const
-{
-    const Unit *unit = static_cast<const Unit*>(this);
-
-    float  minsofar = 1e+10;
-    float  tmpvar;
-    unsigned int    i;
-    Vector TargetPoint( unit->cumulative_transformation_matrix.getP() );
+    float minsofar = 1e+10;
+    float tmpvar;
+    unsigned int i;
+    Vector TargetPoint(unit->cumulative_transformation_matrix.getP());
 
 #ifdef VARIABLE_LENGTH_PQR
     //the scale factor of the current UNIT
     float SizeScaleFactor = sqrtf( TargetPoint.Dot( TargetPoint ) );
 #endif
     for (i = 0; i < unit->nummesh(); ++i) {
-        TargetPoint = (Transform( unit->cumulative_transformation_matrix, unit->meshdata[i]->Position() ).Cast()-pnt).Cast();
-        tmpvar = sqrtf( TargetPoint.Dot( TargetPoint ) )-unit->meshdata[i]->rSize()
+        TargetPoint =
+                (Transform(unit->cumulative_transformation_matrix, unit->meshdata[i]->Position()).Cast() - pnt).Cast();
+        tmpvar = sqrtf(TargetPoint.Dot(TargetPoint)) - unit->meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
-                 *SizeScaleFactor
+            *SizeScaleFactor
 #endif
-        ;
-        if (tmpvar < minsofar)
+                ;
+        if (tmpvar < minsofar) {
             minsofar = tmpvar;
+        }
     }
     for (un_kiter ui = unit->viewSubUnits(); !ui.isDone(); ++ui) {
-        tmpvar = (*ui)->getMinDis( pnt );
-        if (tmpvar < minsofar)
+        tmpvar = (*ui)->getMinDis(pnt);
+        if (tmpvar < minsofar) {
             minsofar = tmpvar;
+        }
     }
     return minsofar;
 }
 
-
-void Intelligent::SetTurretAI()
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::SetTurretAI() {
+    Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 2;
-    static bool talkinturrets = XMLSupport::parse_bool( vs_config->getVariable( "AI", "independent_turrets", "false" ) );
+    static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI", "independent_turrets", "false"));
     if (talkinturrets) {
         Unit *un;
         for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
-            if ( !CheckAccessory( un ) ) {
-                un->EnqueueAIFirst( new Orders::FireAt( 15.0f ) );
-                un->EnqueueAIFirst( new Orders::FaceTarget( false, 3 ) );
+            if (!CheckAccessory(un)) {
+                un->EnqueueAIFirst(new Orders::FireAt(15.0f));
+                un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
             }
             un->SetTurretAI();
         }
     } else {
         Unit *un;
         for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
-            if ( !CheckAccessory( un ) ) {
-                if (un->aistate)
+            if (!CheckAccessory(un)) {
+                if (un->aistate) {
                     un->aistate->Destroy();
-                un->aistate = ( new Orders::TurretAI() );
-                un->aistate->SetParent( un );
+                }
+                un->aistate = (new Orders::TurretAI());
+                un->aistate->SetParent(un);
             }
             un->SetTurretAI();
         }
     }
 }
 
-void Intelligent::DisableTurretAI()
-{
-    Unit *unit = static_cast<Unit*>(this);
+void Intelligent::DisableTurretAI() {
+    Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 1;
     Unit *un;
     for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
-        if (un->aistate)
+        if (un->aistate) {
             un->aistate->Destroy();
+        }
         un->aistate = new Order;         //get 'er ready for enqueueing
-        un->aistate->SetParent( un );
+        un->aistate->SetParent(un);
         un->UnFire();
         un->DisableTurretAI();
     }
 }
 
-csOPCODECollider* Intelligent::getCollideTree( const Vector & RESTRICT scale, std::vector< mesh_polygon > * RESTRICT pol )
-{
-    Unit *unit = static_cast<Unit*>(this);
+csOPCODECollider *Intelligent::getCollideTree(const Vector &RESTRICT scale, std::vector<mesh_polygon> *RESTRICT pol) {
+    Unit *unit = static_cast<Unit *>(this);
 
-    if (!pol){
-    vector< mesh_polygon > polies;
-        for (unsigned int j = 0; j < unit->nummesh(); j++){
-            unit->meshdata[j]->GetPolys( polies );
-    }
-    if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
-        for (unsigned int i = 0;i < polies.size();++i){
-            for (unsigned int j = 0; j < polies[i].v.size(); ++j) {
+    if (!pol) {
+        vector<mesh_polygon> polies;
+        for (unsigned int j = 0; j < unit->nummesh(); j++) {
+            unit->meshdata[j]->GetPolys(polies);
+        }
+        if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
+            for (unsigned int i = 0; i < polies.size(); ++i) {
+                for (unsigned int j = 0; j < polies[i].v.size(); ++j) {
                     polies[i].v[j].i *= scale.i;
                     polies[i].v[j].j *= scale.j;
                     polies[i].v[j].k *= scale.k;
+                }
+            }
+        }
+        return new csOPCODECollider(polies);
+    }
+    if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
+        for (unsigned int i = 0; i < pol->size(); ++i) {
+            for (unsigned int j = 0; j < (*pol)[i].v.size(); ++j) {
+                (*pol)[i].v[j].i *= scale.i;
+                (*pol)[i].v[j].j *= scale.j;
+                (*pol)[i].v[j].k *= scale.k;
             }
         }
     }
-    return new csOPCODECollider( polies );
-    }
-    if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
-    for (unsigned int i = 0;i < pol->size();++i){
-        for (unsigned int j = 0; j < (*pol)[i].v.size(); ++j) {
-            (*pol)[i].v[j].i *= scale.i;
-            (*pol)[i].v[j].j *= scale.j;
-            (*pol)[i].v[j].k *= scale.k;
-            }
-    }
-    }
-    return new csOPCODECollider( *pol );
+    return new csOPCODECollider(*pol);
 }

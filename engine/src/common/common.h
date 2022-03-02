@@ -4,6 +4,7 @@
 *    begin                : Wed Jun 26 2002
 *    copyright            : (C) 2002 by jhunt
 *    email                : jhunt@jaja
+*    copyright            : (C) 2022 by Stephen G. Tuggy
 ***************************************************************************/
 
 /***************************************************************************
@@ -14,8 +15,10 @@
 *   (at your option) any later version.                                   *
 *                                                                         *
 ***************************************************************************/
+
+
 /* This file is for common (as in shared between vegastrike, vegasettings as vsconfig) stuff
- * that is not import enought to warrant it's own file.
+ * that is not important enough to warrant its own file.
  */
 
 #ifndef _WIN32

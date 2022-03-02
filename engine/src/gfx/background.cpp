@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -38,29 +38,33 @@
 
 #include <float.h>
 const float size = 100;
-Background::Background( const char *file, int numstars, float spread, const std::string &filename, const GFXColor &color_, bool degamma_ )
-    : Enabled( true )
-    , degamma( degamma_ )
-    , color( color_ )
-    , stars( NULL )
-{
+
+Background::Background(const char *file,
+        int numstars,
+        float spread,
+        const std::string &filename,
+        const GFXColor &color_,
+        bool degamma_)
+        : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
-    static string starspritetextures = vs_config->getVariable( "graphics", "far_stars_sprite_texture", "" );
-    static float  starspritesize     =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "far_stars_sprite_size", "2" ) );
+    static string starspritetextures = vs_config->getVariable("graphics", "far_stars_sprite_texture", "");
+    static float starspritesize =
+            XMLSupport::parse_float(vs_config->getVariable("graphics", "far_stars_sprite_size", "2"));
     if (starspritetextures.length() == 0) {
         stars =
-            new PointStarVlist( numstars, 200 /*spread*/,
-                                XMLSupport::parse_bool( vs_config->getVariable( "graphics",
-                                                                                "use_star_coords",
-                                                                                "true" ) ) ? filename : "" );
+                new PointStarVlist(numstars, 200 /*spread*/,
+                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
+                                "use_star_coords",
+                                "true")) ? filename : "");
     } else {
         stars =
-            new SpriteStarVlist( numstars, 200 /*spread*/,
-                                 XMLSupport::parse_bool( vs_config->getVariable( "graphics",
-                                                                                 "use_star_coords",
-                                                                                 "true" ) ) ? filename : "", starspritetextures,
-                                 starspritesize );
+                new SpriteStarVlist(numstars,
+                        200 /*spread*/,
+                        XMLSupport::parse_bool(vs_config->getVariable("graphics",
+                                "use_star_coords",
+                                "true")) ? filename : "",
+                        starspritetextures,
+                        starspritesize);
     }
     up = left = down = front = right = back = NULL;
 
@@ -123,13 +127,12 @@ Background::Background( const char *file, int numstars, float spread, const std:
     }
 #endif
 }
-void Background::EnableBG( bool tf )
-{
+
+void Background::EnableBG(bool tf) {
     Enabled = tf;
 }
 
-Background::~Background()
-{
+Background::~Background() {
 #ifndef NV_CUBE_MAP
     if (up != nullptr) {
         delete up;
@@ -166,8 +169,7 @@ Background::~Background()
     }
 }
 
-Background::BackgroundClone Background::Cache()
-{
+Background::BackgroundClone Background::Cache() {
     BackgroundClone ret;
 #ifndef NV_CUBE_MAP
     ret.backups[0] = up ? up->Clone() : NULL;
@@ -183,8 +185,8 @@ Background::BackgroundClone Background::Cache()
 #endif
     return ret;
 }
-void Background::BackgroundClone::FreeClone()
-{
+
+void Background::BackgroundClone::FreeClone() {
 #ifndef NV_CUBE_MAP
     for (int i = 0; i < 7; ++i)
         if (backups[i]) {
@@ -195,26 +197,27 @@ void Background::BackgroundClone::FreeClone()
 #endif
 
 }
-void Background::Draw()
-{
-    GFXClear( Enabled ? GFXFALSE : GFXTRUE );
+
+void Background::Draw() {
+    GFXClear(Enabled ? GFXFALSE : GFXTRUE);
     if (Enabled) {
-        if (degamma)
-            GFXBlendMode( SRCCOLOR, ZERO );
-        else
-            GFXBlendMode( ONE, ZERO );
-        GFXDisable( LIGHTING );
-        GFXDisable( DEPTHWRITE );
-        GFXDisable( DEPTHTEST );
-        GFXEnable( TEXTURE0 );
-        GFXDisable( TEXTURE1 );
+        if (degamma) {
+            GFXBlendMode(SRCCOLOR, ZERO);
+        } else {
+            GFXBlendMode(ONE, ZERO);
+        }
+        GFXDisable(LIGHTING);
+        GFXDisable(DEPTHWRITE);
+        GFXDisable(DEPTHTEST);
+        GFXEnable(TEXTURE0);
+        GFXDisable(TEXTURE1);
         GFXColorf(color);
         if (SphereBackground) {
-            SphereBackground->DrawNow( FLT_MAX, true );
+            SphereBackground->DrawNow(FLT_MAX, true);
             //Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
         } else {
-            GFXCenterCamera( true );
-            GFXLoadMatrixModel( identity_matrix );
+            GFXCenterCamera(true);
+            GFXLoadMatrixModel(identity_matrix);
             //GFXLoadIdentity(MODEL);
             //GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition());
 
@@ -229,128 +232,127 @@ void Background::Draw()
             ********************************/
             //_Universe->AccessCamera()->UpdateGLCenter();
 
-            static struct skybox_rendering_record
-            {
+            static struct skybox_rendering_record {
                 Texture *tex;
-                float    vertices[4][3];              //will be *= size
-                char     tcoord[4][4];             //S-T-S-T: 0 >= min, 1 => max
+                float vertices[4][3];              //will be *= size
+                char tcoord[4][4];             //S-T-S-T: 0 >= min, 1 => max
             }
-            skybox_rendering_sequence[6] = {
+                    skybox_rendering_sequence[6] = {
 #ifdef NV_CUBE_MAP
-                //For rendering with a single cube map as texture
+                    //For rendering with a single cube map as texture
 
-                {                 //up
-                    NULL,
-                    {
-                        {-1, +1, +1}, {-1, +1, -1}, {+1, +1, -1}, {+1, +1, +1}
+                    {                 //up
+                            NULL,
+                            {
+                                    {-1, +1, +1}, {-1, +1, -1}, {+1, +1, -1}, {+1, +1, +1}
+                            },
+                            {
+                                    {-1, +2, +1, 0}, {-1, +2, -1, 0}, {+1, +2, -1, 0}, {+1, +2, +1, 0}
+                            },
                     },
-                    {
-                        {-1, +2, +1, 0}, {-1, +2, -1, 0}, {+1, +2, -1, 0}, {+1, +2, +1, 0}
+                    {                 //left
+                            NULL,
+                            {
+                                    {-1, +1, -1}, {-1, +1, +1}, {-1, -1, +1}, {-1, -1, -1}
+                            },
+                            {
+                                    {-2, +1, -1, 0}, {-2, +1, +1, 0}, {-2, -1, +1, 0}, {-2, -1, -1, 0}
+                            },
                     },
-                },
-                {                 //left
-                    NULL,
-                    {
-                        {-1,+1, -1}, {-1, +1, +1}, {-1, -1, +1}, {-1, -1, -1}
+                    {                 //front
+                            NULL,
+                            {
+                                    {-1, +1, +1}, {+1, +1, +1}, {+1, -1, +1}, {-1, -1, +1}
+                            },
+                            {
+                                    {-1, +1, +2, 0}, {+1, +1, +2, 0}, {+1, -1, +2, 0}, {-1, -1, +2, 0}
+                            },
                     },
-                    {
-                        {-2, +1, -1, 0}, {-2, +1, +1, 0}, {-2, -1, +1, 0}, {-2, -1, -1, 0}
+                    {                 //right
+                            NULL,
+                            {
+                                    {+1, +1, +1}, {+1, +1, -1}, {+1, -1, -1}, {+1, -1, +1}
+                            },
+                            {
+                                    {+2, +1, +1, 0}, {+2, +1, -1, 0}, {+2, -1, -1, 0}, {+2, -1, +1, 0}
+                            },
                     },
-                },
-                {                 //front
-                    NULL,
-                    {
-                        {-1, +1, +1}, {+1, +1, +1}, {+1, -1, +1}, {-1, -1, +1}
+                    {                 //back
+                            NULL,
+                            {
+                                    {+1, +1, -1}, {-1, +1, -1}, {-1, -1, -1}, {+1, -1, -1}
+                            },
+                            {
+                                    {+1, +1, -2, 0}, {-1, +1, -2, 0}, {-1, -1, -2, 0}, {+1, -1, -2, 0}
+                            },
                     },
-                    {
-                        {-1, +1, +2, 0}, {+1, +1, +2, 0}, {+1, -1, +2, 0}, {-1, -1, +2, 0}
-                    },
-                },
-                {                 //right
-                    NULL,
-                    {
-                        {+1, +1, +1}, {+1, +1, -1}, {+1, -1, -1}, {+1, -1, +1}
-                    },
-                    {
-                        {+2, +1, +1, 0}, {+2, +1, -1, 0}, {+2, -1, -1, 0}, {+2, -1, +1, 0}
-                    },
-                },
-                {                 //back
-                    NULL,
-                    {
-                        {+1, +1, -1}, {-1, +1, -1}, {-1, -1, -1}, {+1, -1, -1}
-                    },
-                    {
-                        {+1, +1, -2, 0}, {-1, +1, -2, 0}, {-1, -1, -2, 0}, {+1, -1, -2, 0}
-                    },
-                },
-                {                 //down
-                    NULL,
-                    {
-                        {-1, -1, +1}, {+1, -1, +1}, {+1, -1, -1}, {-1, -1, -1}
-                    },
-                    {
-                        {-1, -2, +1, 0}, {+1, -2, +1, 0}, {+1, -2, -1, 0}, {-1, -2, -1, 0}
-                    },
-                }
+                    {                 //down
+                            NULL,
+                            {
+                                    {-1, -1, +1}, {+1, -1, +1}, {+1, -1, -1}, {-1, -1, -1}
+                            },
+                            {
+                                    {-1, -2, +1, 0}, {+1, -2, +1, 0}, {+1, -2, -1, 0}, {-1, -2, -1, 0}
+                            },
+                    }
 
 #else
-                //For rendering with multiple 2D texture faces
+                    //For rendering with multiple 2D texture faces
 
-                {                 //up
-                    NULL,
-                    {
-                        {-1, +1, +1}, {-1, +1, -1}, {+1, +1, -1}, {+1, +1, +1}
+                    {                 //up
+                        NULL,
+                        {
+                            {-1, +1, +1}, {-1, +1, -1}, {+1, +1, -1}, {+1, +1, +1}
+                        },
+                        {
+                            {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
+                        }
                     },
-                    {
-                        {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
-                    }
-                },
-                {                 //left
-                    NULL,
-                    {
-                        {-1, +1, -1}, {-1, +1, +1}, {-1, -1, +1}, {-1, -1, -1}
+                    {                 //left
+                        NULL,
+                        {
+                            {-1, +1, -1}, {-1, +1, +1}, {-1, -1, +1}, {-1, -1, -1}
+                        },
+                        {
+                            {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
+                        }
                     },
-                    {
-                        {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
-                    }
-                },
-                {                 //front
-                    NULL,
-                    {
-                        {-1, +1, +1}, {+1, +1, +1}, {+1, -1, +1}, {-1, -1, +1}
+                    {                 //front
+                        NULL,
+                        {
+                            {-1, +1, +1}, {+1, +1, +1}, {+1, -1, +1}, {-1, -1, +1}
+                        },
+                        {
+                            {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
+                        }
                     },
-                    {
-                        {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
-                    }
-                },
-                {                 //right
-                    NULL,
-                    {
-                        {+1, +1, +1}, {+1, +1, -1}, {+1, -1, -1}, {+1, -1, +1}
+                    {                 //right
+                        NULL,
+                        {
+                            {+1, +1, +1}, {+1, +1, -1}, {+1, -1, -1}, {+1, -1, +1}
+                        },
+                        {
+                            {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
+                        }
                     },
-                    {
-                        {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
-                    }
-                },
-                {                 //back
-                    NULL,
-                    {
-                        {+1, +1, -1}, {-1, +1, -1}, {-1, -1, -1}, {+1, -1, -1}
+                    {                 //back
+                        NULL,
+                        {
+                            {+1, +1, -1}, {-1, +1, -1}, {-1, -1, -1}, {+1, -1, -1}
+                        },
+                        {
+                            {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
+                        }
                     },
-                    {
-                        {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
+                    {                 //down
+                        NULL,
+                        {
+                            {-1, -1, +1}, {+1, -1, +1}, {+1, -1, -1}, {-1, -1, -1}
+                        },
+                        {
+                            {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
+                        }
                     }
-                },
-                {                 //down
-                    NULL,
-                    {
-                        {-1, -1, +1}, {+1, -1, +1}, {+1, -1, -1}, {-1, -1, -1}
-                    },
-                    {
-                        {1, 0, 1, 0}, {0, 0, 0, 0}, {0,  1,  0, 1}, {1,  1,  1, 1}
-                    }
-                }
 #endif
             };
             skybox_rendering_sequence[0].tex = up;
@@ -359,24 +361,26 @@ void Background::Draw()
             skybox_rendering_sequence[3].tex = right;
             skybox_rendering_sequence[4].tex = back;
             skybox_rendering_sequence[5].tex = down;
-            for (size_t skr = 0; skr < sizeof (skybox_rendering_sequence)/sizeof (skybox_rendering_sequence[0]); skr++) {
+            for (size_t skr = 0; skr < sizeof(skybox_rendering_sequence) / sizeof(skybox_rendering_sequence[0]);
+                    skr++) {
                 Texture *tex = skybox_rendering_sequence[skr].tex;
 
 #ifdef NV_CUBE_MAP
-                if (tex == NULL)
+                if (tex == NULL) {
                     tex = _Universe->getLightMap();
-                const int    numpasses = 1;
+                }
+                const int numpasses = 1;
                 static float edge_fixup =
-                    XMLSupport::parse_float( vs_config->getVariable( "graphics", "background_edge_fixup", "0" ) );
-                const float  ms      = 0.f, Ms = 1.f-edge_fixup/tex->boundSizeX;
-                const float  mt      = 0.f, Mt = 1.f-edge_fixup/tex->boundSizeY;
-                const float  _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
-                const float *stca    = _stca+2, *ttca = _ttca+2;
+                        XMLSupport::parse_float(vs_config->getVariable("graphics", "background_edge_fixup", "0"));
+                const float ms = 0.f, Ms = 1.f - edge_fixup / tex->boundSizeX;
+                const float mt = 0.f, Mt = 1.f - edge_fixup / tex->boundSizeY;
+                const float _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
+                const float *stca = _stca + 2, *ttca = _ttca + 2;
 
                 GFXColorf(color);
 
-                _Universe->activateLightMap( 0 );
-                GFXToggleTexture( true, 0, CUBEMAP );
+                _Universe->activateLightMap(0);
+                GFXToggleTexture(true, 0, CUBEMAP);
 #else
                 int   lyr;
                 int   numlayers = tex->numLayers();
@@ -399,30 +403,31 @@ void Background::Draw()
                         GFXTextureCoordGenMode( lyr, NO_GEN, NULL, NULL );
                 }
 #endif
-                for (int pass = 0; pass < numpasses; pass++)
-                    if ( !tex || tex->SetupPass( pass, 0, ONE, ZERO ) ) {
-                        if (tex)
-                            tex->MakeActive( 0, pass );
-                        GFXTextureAddressMode( CLAMP );
-                        GFXTextureEnv( 0, GFXMODULATETEXTURE );
-                        GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
+                for (int pass = 0; pass < numpasses; pass++) {
+                    if (!tex || tex->SetupPass(pass, 0, ONE, ZERO)) {
+                        if (tex) {
+                            tex->MakeActive(0, pass);
+                        }
+                        GFXTextureAddressMode(CLAMP);
+                        GFXTextureEnv(0, GFXMODULATETEXTURE);
+                        GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
 
-#define X( i ) skybox_rendering_sequence[skr].vertices[i][0]*size
-#define Y( i ) skybox_rendering_sequence[skr].vertices[i][1]*size
-#define Z( i ) skybox_rendering_sequence[skr].vertices[i][2]*size
-#define S( i ) stca[size_t(skybox_rendering_sequence[skr].tcoord[i][0])]
-#define T( i ) ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][1])]
-#define U( i ) stca[size_t(skybox_rendering_sequence[skr].tcoord[i][2])]
-#define V( i ) ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][3])]
+#define X(i) skybox_rendering_sequence[skr].vertices[i][0]*size
+#define Y(i) skybox_rendering_sequence[skr].vertices[i][1]*size
+#define Z(i) skybox_rendering_sequence[skr].vertices[i][2]*size
+#define S(i) stca[size_t(skybox_rendering_sequence[skr].tcoord[i][0])]
+#define T(i) ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][1])]
+#define U(i) stca[size_t(skybox_rendering_sequence[skr].tcoord[i][2])]
+#define V(i) ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][3])]
 
 #ifdef NV_CUBE_MAP
                         const float verts[4 * (3 + 3)] = {
-                            X(0), Y(0), Z(0), S(0), T(0), U(0),
-                            X(1), Y(1), Z(1), S(1), T(1), U(1),
-                            X(2), Y(2), Z(2), S(2), T(2), U(2),
-                            X(3), Y(3), Z(3), S(3), T(3), U(3),
+                                X(0), Y(0), Z(0), S(0), T(0), U(0),
+                                X(1), Y(1), Z(1), S(1), T(1), U(1),
+                                X(2), Y(2), Z(2), S(2), T(2), U(2),
+                                X(3), Y(3), Z(3), S(3), T(3), U(3),
                         };
-                        GFXDraw( GFXQUAD, verts, 4, 3, 0, 3 );
+                        GFXDraw(GFXQUAD, verts, 4, 3, 0, 3);
 #else
                         if (!multitex) {
                             const float verts[4 * (3 + 2)] = {
@@ -451,9 +456,10 @@ void Background::Draw()
 #undef U
 #undef V
                     }
+                }
 
 #ifdef NV_CUBE_MAP
-                GFXToggleTexture( false, 0, CUBEMAP );
+                GFXToggleTexture(false, 0, CUBEMAP);
 #else
                 for (lyr = 0; lyr < numlayers; lyr++) {
                     GFXToggleTexture( false, lyr );
@@ -464,29 +470,29 @@ void Background::Draw()
 #endif
             }
 
-            GFXActiveTexture( 0 );
-            GFXTextureAddressMode( WRAP );
-            GFXCenterCamera( false );
+            GFXActiveTexture(0);
+            GFXTextureAddressMode(WRAP);
+            GFXCenterCamera(false);
         }
     }
     //GFXLoadIdentity(MODEL);
     //GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition());
-    GFXCenterCamera( true );
+    GFXCenterCamera(true);
 //GFXEnable(DEPTHWRITE);
-    GFXDisable( TEXTURE0 );
-    GFXDisable( LIGHTING );
-    GFXColor( 1, 1, 1, 1 );
-    GFXDisable( TEXTURE1 );
-    GFXDisable( DEPTHWRITE );
-    GFXBlendMode( ONE, ONE );
+    GFXDisable(TEXTURE0);
+    GFXDisable(LIGHTING);
+    GFXColor(1, 1, 1, 1);
+    GFXDisable(TEXTURE1);
+    GFXDisable(DEPTHWRITE);
+    GFXBlendMode(ONE, ONE);
     static float background_velocity_scale =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "background_star_streak_velocity_scale", "0" ) );
-    stars->DrawAll( QVector( 0, 0, 0 ), _Universe->AccessCamera()->GetVelocity().Scale(
-                        background_velocity_scale ), _Universe->AccessCamera()->GetAngularVelocity(), true, true );
-    GFXBlendMode( ONE, ZERO );
-    GFXEnable( DEPTHTEST );
-    GFXEnable( DEPTHWRITE );
-    GFXCenterCamera( false );
+            XMLSupport::parse_float(vs_config->getVariable("graphics", "background_star_streak_velocity_scale", "0"));
+    stars->DrawAll(QVector(0, 0, 0), _Universe->AccessCamera()->GetVelocity().Scale(
+            background_velocity_scale), _Universe->AccessCamera()->GetAngularVelocity(), true, true);
+    GFXBlendMode(ONE, ZERO);
+    GFXEnable(DEPTHTEST);
+    GFXEnable(DEPTHWRITE);
+    GFXCenterCamera(false);
     //_Universe->AccessCamera()->UpdateGFX(false);
 }
 

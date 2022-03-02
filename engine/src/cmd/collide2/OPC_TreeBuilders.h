@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2001-2022 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
  *	OPCODE - Optimized Collision Detection
@@ -18,6 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
+ * Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -26,154 +49,193 @@
 #ifndef __OPC_TREEBUILDERS_H__
 #define __OPC_TREEBUILDERS_H__
 
-	//! Tree splitting rules
-	enum SplittingRules
-	{
-		// Primitive split
-		SPLIT_LARGEST_AXIS		= (1<<0),		//!< Split along the largest axis
-		SPLIT_SPLATTER_POINTS	= (1<<1),		//!< Splatter primitive centers (QuickCD-style)
-		SPLIT_BEST_AXIS			= (1<<2),		//!< Try largest axis, then second, then last
-		SPLIT_BALANCED			= (1<<3),		//!< Try to keep a well-balanced tree
-		SPLIT_FIFTY				= (1<<4),		//!< Arbitrary 50-50 split
-		// Node split
-		SPLIT_GEOM_CENTER		= (1<<5),		//!< Split at geometric center (else split in the middle)
-		//
-		SPLIT_FORCE_DWORD		= 0x7fffffff
-	};
+//! Tree splitting rules
+enum SplittingRules {
+    // Primitive split
+    SPLIT_LARGEST_AXIS = (1 << 0),        //!< Split along the largest axis
+    SPLIT_SPLATTER_POINTS = (1 << 1),        //!< Splatter primitive centers (QuickCD-style)
+    SPLIT_BEST_AXIS = (1 << 2),        //!< Try largest axis, then second, then last
+    SPLIT_BALANCED = (1 << 3),        //!< Try to keep a well-balanced tree
+    SPLIT_FIFTY = (1 << 4),        //!< Arbitrary 50-50 split
+    // Node split
+    SPLIT_GEOM_CENTER = (1 << 5),        //!< Split at geometric center (else split in the middle)
+    //
+    SPLIT_FORCE_DWORD = 0x7fffffff
+};
 
-	//! Simple wrapper around build-related settings [Opcode 1.3]
-	struct OPCODE_API BuildSettings
-	{
-		inline_	BuildSettings() : mLimit(1), mRules(SPLIT_FORCE_DWORD)	{}
+//! Simple wrapper around build-related settings [Opcode 1.3]
+struct OPCODE_API BuildSettings {
+    inline_ BuildSettings() : mLimit(1), mRules(SPLIT_FORCE_DWORD) {
+    }
 
-		uint32_t	mLimit;		//!< Limit number of primitives / node. If limit is 1, build a complete tree (2*N-1 nodes)
-		uint32_t	mRules;		//!< Building/Splitting rules (a combination of SplittingRules flags)
-	};
+    uint32_t mLimit;        //!< Limit number of primitives / node. If limit is 1, build a complete tree (2*N-1 nodes)
+    uint32_t mRules;        //!< Building/Splitting rules (a combination of SplittingRules flags)
+};
 
-	class OPCODE_API AABBTreeBuilder
-	{
-		public:
-		//! Constructor
-													AABBTreeBuilder() :
-														mNbPrimitives(0),
-														mNodeBase(nullptr),
-														mCount(0),
-														mNbInvalidSplits(0)		{}
-		//! Destructor
-		virtual										~AABBTreeBuilder()			{}
+class OPCODE_API AABBTreeBuilder {
+public:
+    //! Constructor
+    AABBTreeBuilder() :
+            mNbPrimitives(0),
+            mNodeBase(nullptr),
+            mCount(0),
+            mNbInvalidSplits(0) {
+    }
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/**
-		 *	Computes the AABB of a set of primitives.
-		 *	\param		primitives		[in] list of indices of primitives
-		 *	\param		nb_prims		[in] number of indices
-		 *	\param		global_box		[out] global AABB enclosing the set of input primitives
-		 *	\return		true if success
-		 */
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						bool			ComputeGlobalBox(const uint32_t* primitives, uint32_t nb_prims, AABB& global_box)	const	= 0;
+    //! Destructor
+    virtual                                        ~AABBTreeBuilder() {
+    }
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/**
-		 *	Computes the splitting value along a given axis for a given primitive.
-		 *	\param		index			[in] index of the primitive to split
-		 *	\param		axis			[in] axis index (0,1,2)
-		 *	\return		splitting value
-		 */
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						float			GetSplittingValue(uint32_t index, uint32_t axis)	const	= 0;
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     *	Computes the AABB of a set of primitives.
+     *	\param		primitives		[in] list of indices of primitives
+     *	\param		nb_prims		[in] number of indices
+     *	\param		global_box		[out] global AABB enclosing the set of input primitives
+     *	\return		true if success
+     */
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    virtual bool ComputeGlobalBox(const uint32_t *primitives, uint32_t nb_prims, AABB &global_box) const = 0;
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/**
-		 *	Computes the splitting value along a given axis for a given node.
-		 *	\param		primitives		[in] list of indices of primitives
-		 *	\param		nb_prims		[in] number of indices
-		 *	\param		global_box		[in] global AABB enclosing the set of input primitives
-		 *	\param		axis			[in] axis index (0,1,2)
-		 *	\return		splitting value
-		 */
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						float			GetSplittingValue(const uint32_t* /*primitives*/, uint32_t /*nb_prims*/, const AABB& global_box, uint32_t axis)	const
-													{
-														// Default split value = middle of the axis (using only the box)
-														return global_box.GetCenter(axis);
-													}
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     *	Computes the splitting value along a given axis for a given primitive.
+     *	\param		index			[in] index of the primitive to split
+     *	\param		axis			[in] axis index (0,1,2)
+     *	\return		splitting value
+     */
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    virtual float GetSplittingValue(uint32_t index, uint32_t axis) const = 0;
 
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/**
-		 *	Validates node subdivision. This is called each time a node is considered for subdivision, during tree building.
-		 *	\param		primitives		[in] list of indices of primitives
-		 *	\param		nb_prims		[in] number of indices
-		 *	\param		global_box		[in] global AABB enclosing the set of input primitives
-		 *	\return		TRUE if the node should be subdivised
-		 */
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						BOOL			ValidateSubdivision(const uint32_t* /*primitives*/, uint32_t nb_prims, const AABB& /*global_box*/)
-													{
-														// Check the user-defined limit
-														if(nb_prims<=mSettings.mLimit)	return FALSE;
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     *	Computes the splitting value along a given axis for a given node.
+     *	\param		primitives		[in] list of indices of primitives
+     *	\param		nb_prims		[in] number of indices
+     *	\param		global_box		[in] global AABB enclosing the set of input primitives
+     *	\param		axis			[in] axis index (0,1,2)
+     *	\return		splitting value
+     */
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    virtual float GetSplittingValue(const uint32_t * /*primitives*/,
+            uint32_t /*nb_prims*/,
+            const AABB &global_box,
+            uint32_t axis) const {
+        // Default split value = middle of the axis (using only the box)
+        return global_box.GetCenter(axis);
+    }
 
-														return TRUE;
-													}
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     *	Validates node subdivision. This is called each time a node is considered for subdivision, during tree building.
+     *	\param		primitives		[in] list of indices of primitives
+     *	\param		nb_prims		[in] number of indices
+     *	\param		global_box		[in] global AABB enclosing the set of input primitives
+     *	\return		TRUE if the node should be subdivised
+     */
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    virtual BOOL ValidateSubdivision(const uint32_t * /*primitives*/, uint32_t nb_prims, const AABB & /*global_box*/) {
+        // Check the user-defined limit
+        if (nb_prims <= mSettings.mLimit) {
+            return FALSE;
+        }
 
-									BuildSettings	mSettings;			//!< Splitting rules & split limit [Opcode 1.3]
-									uint32_t			mNbPrimitives;		//!< Total number of primitives.
-									void*			mNodeBase;			//!< Address of node pool [Opcode 1.3]
-		// Stats
-		inline_						void			SetCount(uint32_t nb)				{ mCount=nb;				}
-		inline_						void			IncreaseCount(uint32_t nb)		{ mCount+=nb;				}
-		inline_						uint32_t			GetCount()				const	{ return mCount;			}
-		inline_						void			SetNbInvalidSplits(uint32_t nb)	{ mNbInvalidSplits=nb;		}
-		inline_						void			IncreaseNbInvalidSplits()		{ mNbInvalidSplits++;		}
-		inline_						uint32_t			GetNbInvalidSplits()	const	{ return mNbInvalidSplits;	}
+        return TRUE;
+    }
 
-		private:
-									uint32_t			mCount;				//!< Stats: number of nodes created
-									uint32_t			mNbInvalidSplits;	//!< Stats: number of invalid splits
-	};
+    BuildSettings mSettings;            //!< Splitting rules & split limit [Opcode 1.3]
+    uint32_t mNbPrimitives;        //!< Total number of primitives.
+    void *mNodeBase;            //!< Address of node pool [Opcode 1.3]
+    // Stats
+    inline_                        void SetCount(uint32_t nb) {
+        mCount = nb;
+    }
 
-	class OPCODE_API AABBTreeOfVerticesBuilder : public AABBTreeBuilder
-	{
-		public:
-		//! Constructor
-													AABBTreeOfVerticesBuilder() : mVertexArray(nullptr)	{}
-		//! Destructor
-		virtual										~AABBTreeOfVerticesBuilder()						{}
+    inline_                        void IncreaseCount(uint32_t nb) {
+        mCount += nb;
+    }
 
-		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const uint32_t* primitives, uint32_t nb_prims, AABB& global_box)	const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(uint32_t index, uint32_t axis)									const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(const uint32_t* primitives, uint32_t nb_prims, const AABB& global_box, uint32_t axis)	const;
+    inline_                        uint32_t GetCount() const {
+        return mCount;
+    }
 
-		const						Point*			mVertexArray;		//!< Shortcut to an app-controlled array of vertices.
-	};
+    inline_                        void SetNbInvalidSplits(uint32_t nb) {
+        mNbInvalidSplits = nb;
+    }
 
-	class OPCODE_API AABBTreeOfAABBsBuilder : public AABBTreeBuilder
-	{
-		public:
-		//! Constructor
-													AABBTreeOfAABBsBuilder() : mAABBArray(nullptr)	{}
-		//! Destructor
-		virtual										~AABBTreeOfAABBsBuilder()					{}
+    inline_                        void IncreaseNbInvalidSplits() {
+        mNbInvalidSplits++;
+    }
 
-		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const uint32_t* primitives, uint32_t nb_prims, AABB& global_box)	const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(uint32_t index, uint32_t axis)									const;
+    inline_                        uint32_t GetNbInvalidSplits() const {
+        return mNbInvalidSplits;
+    }
 
-		const						AABB*			mAABBArray;			//!< Shortcut to an app-controlled array of AABBs.
-	};
+private:
+    uint32_t mCount;                //!< Stats: number of nodes created
+    uint32_t mNbInvalidSplits;    //!< Stats: number of invalid splits
+};
 
-	class OPCODE_API AABBTreeOfTrianglesBuilder : public AABBTreeBuilder
-	{
-		public:
-		//! Constructor
-													AABBTreeOfTrianglesBuilder() : mIMesh(nullptr)										{}
-		//! Destructor
-		virtual										~AABBTreeOfTrianglesBuilder()													{}
+class OPCODE_API AABBTreeOfVerticesBuilder : public AABBTreeBuilder {
+public:
+    //! Constructor
+    AABBTreeOfVerticesBuilder() : mVertexArray(nullptr) {
+    }
 
-		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const uint32_t* primitives, uint32_t nb_prims, AABB& global_box)	const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(uint32_t index, uint32_t axis)									const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(const uint32_t* primitives, uint32_t nb_prims, const AABB& global_box, uint32_t axis)	const;
+    //! Destructor
+    virtual                                        ~AABBTreeOfVerticesBuilder() {
+    }
 
-		const				MeshInterface*			mIMesh;			//!< Shortcut to an app-controlled mesh interface
-	};
+    override(AABBTreeBuilder) bool ComputeGlobalBox(const uint32_t *primitives,
+            uint32_t nb_prims,
+            AABB &global_box) const;
+    override(AABBTreeBuilder) float GetSplittingValue(uint32_t index, uint32_t axis) const;
+    override(AABBTreeBuilder) float GetSplittingValue(const uint32_t *primitives,
+            uint32_t nb_prims,
+            const AABB &global_box,
+            uint32_t axis) const;
+
+    const Point *mVertexArray;        //!< Shortcut to an app-controlled array of vertices.
+};
+
+class OPCODE_API AABBTreeOfAABBsBuilder : public AABBTreeBuilder {
+public:
+    //! Constructor
+    AABBTreeOfAABBsBuilder() : mAABBArray(nullptr) {
+    }
+
+    //! Destructor
+    virtual                                        ~AABBTreeOfAABBsBuilder() {
+    }
+
+    override(AABBTreeBuilder) bool ComputeGlobalBox(const uint32_t *primitives,
+            uint32_t nb_prims,
+            AABB &global_box) const;
+    override(AABBTreeBuilder) float GetSplittingValue(uint32_t index, uint32_t axis) const;
+
+    const AABB *mAABBArray;            //!< Shortcut to an app-controlled array of AABBs.
+};
+
+class OPCODE_API AABBTreeOfTrianglesBuilder : public AABBTreeBuilder {
+public:
+    //! Constructor
+    AABBTreeOfTrianglesBuilder() : mIMesh(nullptr) {
+    }
+
+    //! Destructor
+    virtual                                        ~AABBTreeOfTrianglesBuilder() {
+    }
+
+    override(AABBTreeBuilder) bool ComputeGlobalBox(const uint32_t *primitives,
+            uint32_t nb_prims,
+            AABB &global_box) const;
+    override(AABBTreeBuilder) float GetSplittingValue(uint32_t index, uint32_t axis) const;
+    override(AABBTreeBuilder) float GetSplittingValue(const uint32_t *primitives,
+            uint32_t nb_prims,
+            const AABB &global_box,
+            uint32_t axis) const;
+
+    const MeshInterface *mIMesh;            //!< Shortcut to an app-controlled mesh interface
+};
 
 #endif // __OPC_TREEBUILDERS_H__

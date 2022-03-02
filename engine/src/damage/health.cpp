@@ -1,32 +1,54 @@
+/*
+ * health.cpp
+ *
+ * Copyright (C) 2021 Roy Falk
+ * Copyright (C) 2022 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "health.h"
 
 #include <algorithm>
 #include <iostream>
 #include <string>
 
-
-void Health::AdjustPower(const float& percent) {
-    if(!regenerative) {
+void Health::AdjustPower(const float &percent) {
+    if (!regenerative) {
         // Not applicable for armor and hull
         return;
     }
 
-    if(percent > 1 || percent < 0) {
+    if (percent > 1 || percent < 0) {
         // valid values are between 0 and 1
         return;
     }
 
     adjusted_health = max_health * percent;
-    if(adjusted_health < health) {
+    if (adjusted_health < health) {
         health = adjusted_health;
     }
 }
 
-
-
-void Health::DealDamage( Damage &damage, InflictedDamage& inflicted_damage ) {
+void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage) {
     // If this layer is destroyed, it can no longer sustain damage
-    if(destroyed) {
+    if (destroyed) {
         return;
     }
 
@@ -45,7 +67,7 @@ void Health::DealDamage( Damage &damage, InflictedDamage& inflicted_damage ) {
  * @param vulnerability - adjust for
  */
 // TODO: type is ugly hack
-void Health::DealDamageComponent( int type, float &damage, float vulnerability, InflictedDamage& inflicted_damage ) {
+void Health::DealDamageComponent(int type, float &damage, float vulnerability, InflictedDamage &inflicted_damage) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
     // We also cap the actual damage at the current health
@@ -59,23 +81,23 @@ void Health::DealDamageComponent( int type, float &damage, float vulnerability, 
 
     // Record damage
     switch (type) {
-    case 0:
-        inflicted_damage.normal_damage += adjusted_damage;
-        break;
-    case 1:
-        inflicted_damage.phase_damage += adjusted_damage;
+        case 0:
+            inflicted_damage.normal_damage += adjusted_damage;
+            break;
+        case 1:
+            inflicted_damage.phase_damage += adjusted_damage;
     }
 
     inflicted_damage.total_damage += adjusted_damage;
     inflicted_damage.inflicted_damage_by_layer[layer] += adjusted_damage;
 
-    if(health == 0 && !regenerative) {
+    if (health == 0 && !regenerative) {
         destroyed = true;
     }
 }
 
 void Health::Disable() {
-    if(regenerative && enabled) {
+    if (regenerative && enabled) {
         enabled = false;
         health = 0.0f;
     }
@@ -87,26 +109,24 @@ void Health::Destroy() {
 }
 
 void Health::Enable() {
-    if(regenerative && !enabled) {
+    if (regenerative && !enabled) {
         enabled = true;
     }
 }
 
-
 void Health::Enhance(float percent) {
     // Don't enhance armor and hull
-    if(!regenerative) {
+    if (!regenerative) {
         return;
     }
 
     health = max_health * percent;
 }
 
-void Health::ReduceLayerMaximum(const float& percent) {
+void Health::ReduceLayerMaximum(const float &percent) {
     adjusted_health = std::max(0.0f, max_health * (1 - percent));
     health = std::min(health, max_health);
 }
-
 
 void Health::ReduceLayerMaximumByOne() {
     adjusted_health = std::max(0.0f, adjusted_health - 1);
@@ -114,26 +134,24 @@ void Health::ReduceLayerMaximumByOne() {
 }
 
 void Health::ReduceLayerMaximumByOnePercent() {
-    float percent = adjusted_health/max_health - 0.01f;
+    float percent = adjusted_health / max_health - 0.01f;
     max_health = std::max(0.0f, max_health * percent);
 }
 
-void Health::ReduceRegeneration(const float& percent) {
+void Health::ReduceRegeneration(const float &percent) {
     regeneration = std::max(0.0f, regeneration - max_regeneration * percent);
 }
 
-
 void Health::Regenerate() {
-    if(!enabled || destroyed || !regenerative) {
+    if (!enabled || destroyed || !regenerative) {
         return;
     }
 
     health = std::min(adjusted_health, health + regeneration);
 }
 
-
 void Health::Regenerate(float recharge_rate) {
-    if(!enabled || destroyed || !regenerative) {
+    if (!enabled || destroyed || !regenerative) {
         return;
     }
 

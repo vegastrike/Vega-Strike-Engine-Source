@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::SceneManager
 //
@@ -36,80 +38,78 @@
 
 namespace Audio {
 
-    namespace __impl {
+namespace __impl {
 
-        namespace OpenAL {
-            // Forward declaration of internal renderer data
-            struct RendererData;
-        };
+namespace OpenAL {
+// Forward declaration of internal renderer data
+struct RendererData;
+};
 
-    };
+};
 
-    /**
-     * OpenAL Renderer implementation
-     *
-     * @remarks Audio renderer implementation based on OpenAL.
-     *
-     */
-    class OpenALRenderer : public Renderer
-    {
-    protected:
-        AutoPtr<__impl::OpenAL::RendererData> data;
+/**
+ * OpenAL Renderer implementation
+ *
+ * @remarks Audio renderer implementation based on OpenAL.
+ *
+ */
+class OpenALRenderer : public Renderer {
+protected:
+    AutoPtr<__impl::OpenAL::RendererData> data;
 
-    public:
-        /** Initialize the renderer with default or config-driven settings. */
-        OpenALRenderer();
+public:
+    /** Initialize the renderer with default or config-driven settings. */
+    OpenALRenderer();
 
-        virtual ~OpenALRenderer();
+    virtual ~OpenALRenderer();
 
-        /** @copydoc Renderer::getSound */
-        virtual SharedPtr<Sound> getSound(
+    /** @copydoc Renderer::getSound */
+    virtual SharedPtr<Sound> getSound(
             const std::string &name,
             VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
             bool streaming = false);
 
-        /** @copydoc Renderer::owns */
-        virtual bool owns(SharedPtr<Sound> sound);
+    /** @copydoc Renderer::owns */
+    virtual bool owns(SharedPtr<Sound> sound);
 
-        /** @copydoc Renderer::attach(SharedPtr<Source>) */
-        virtual void attach(SharedPtr<Source> source);
+    /** @copydoc Renderer::attach(SharedPtr<Source>) */
+    virtual void attach(SharedPtr<Source> source);
 
-        /** @copydoc Renderer::attach(SharedPtr<Listener>) */
-        virtual void attach(SharedPtr<Listener> listener);
+    /** @copydoc Renderer::attach(SharedPtr<Listener>) */
+    virtual void attach(SharedPtr<Listener> listener);
 
-        /** @copydoc Renderer::detach(SharedPtr<Source>) */
-        virtual void detach(SharedPtr<Source> source);
+    /** @copydoc Renderer::detach(SharedPtr<Source>) */
+    virtual void detach(SharedPtr<Source> source);
 
-        /** @copydoc Renderer::detach(SharedPtr<Listener>) */
-        virtual void detach(SharedPtr<Listener> listener);
+    /** @copydoc Renderer::detach(SharedPtr<Listener>) */
+    virtual void detach(SharedPtr<Listener> listener);
 
-        /** @copydoc Renderer::setMeterDistance */
-        virtual void setMeterDistance(Scalar distance);
+    /** @copydoc Renderer::setMeterDistance */
+    virtual void setMeterDistance(Scalar distance);
 
-        /** @copydoc Renderer::setDopplerFactor */
-        virtual void setDopplerFactor(Scalar factor);
+    /** @copydoc Renderer::setDopplerFactor */
+    virtual void setDopplerFactor(Scalar factor);
 
-        /** @copydoc Renderer::setOutputFormat */
-        virtual void setOutputFormat(const Format &format);
+    /** @copydoc Renderer::setOutputFormat */
+    virtual void setOutputFormat(const Format &format);
 
-        /** @copydoc Renderer::beginTransaction */
-        virtual void beginTransaction();
+    /** @copydoc Renderer::beginTransaction */
+    virtual void beginTransaction();
 
-        /** @copydoc Renderer::commitTransaction */
-        virtual void commitTransaction();
-    protected:
+    /** @copydoc Renderer::commitTransaction */
+    virtual void commitTransaction();
+protected:
 
-        /** Makes sure the AL context is valid, creating one if necessary */
-        virtual void checkContext();
+    /** Makes sure the AL context is valid, creating one if necessary */
+    virtual void checkContext();
 
-        /** Sets expected defaults into the context */
-        virtual void initContext();
+    /** Sets expected defaults into the context */
+    virtual void initContext();
 
-        /** Sets doppler effect globals into the context */
-        void setupDopplerEffect();
-    };
-
+    /** Sets doppler effect globals into the context */
+    void setupDopplerEffect();
 };
 
+};
 
 #endif//__AUDIO_OPENAL_RENDERER_H__INCLUDED__

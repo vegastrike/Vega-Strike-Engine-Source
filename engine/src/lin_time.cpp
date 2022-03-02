@@ -1,9 +1,6 @@
 /*
- * lin_time.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -30,7 +27,7 @@
 #include "vs_logging.h"
 
 static double firsttime;
-VSRandom vsrandom( time( NULL ) );
+VSRandom vsrandom(time(NULL));
 
 #ifdef WIN32
 #ifndef NOMINMAX
@@ -52,15 +49,14 @@ static double lasttime;
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-static double elapsedtime     = .1;
+static double elapsedtime = .1;
 static double timecompression = 1;
 
-double getNewTime()
-{
+double getNewTime() {
 #ifdef _WIN32
     return dblnewtime-firsttime;
 #else
-    return newtime-firsttime;
+    return newtime - firsttime;
 #endif
 }
 
@@ -68,32 +64,28 @@ class NetClient;
 
 int timecount;
 
-void inc_time_compression( const KBData&, KBSTATE a )
-{
+void inc_time_compression(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         timecompression *= 1.5;
         timecount++;
     }
 }
 
-void dec_time_compression( const KBData&, KBSTATE a )
-{
+void dec_time_compression(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         timecompression /= 1.5;
         timecount--;
     }
 }
 
-void reset_time_compression( const KBData&, KBSTATE a )
-{
+void reset_time_compression(const KBData &, KBSTATE a) {
     if (a == PRESS) {
         timecompression = 1;
         timecount = 0;
     }
 }
 
-void pause_key( const KBData &s, KBSTATE a )
-{
+void pause_key(const KBData &s, KBSTATE a) {
     static bool paused = false;
     if (a == PRESS) {
         if (paused == false) {
@@ -102,34 +94,28 @@ void pause_key( const KBData &s, KBSTATE a )
             paused = true;
         } else {
             paused = false;
-            reset_time_compression( s, a );
+            reset_time_compression(s, a);
         }
     }
 }
 
-float getTimeCompression()
-{
+float getTimeCompression() {
     return timecompression;
 }
 
-void setTimeCompression( float tc )
-{
+void setTimeCompression(float tc) {
     timecompression = tc;
     timecount = 0;     //to avoid any problems with time compression sounds... use getTimeCompression() instead
 }
 
-bool toggle_pause()
-{
+bool toggle_pause() {
     static bool paused = false;
     VS_LOG(debug, "toggle_pause() called in lin_time.cpp");
-    if (paused)
-    {
+    if (paused) {
         VS_LOG(debug, "toggle_pause() in lin_time.cpp: Resuming (unpausing)");
         setTimeCompression(1);
         paused = false;
-    }
-    else
-    {
+    } else {
         VS_LOG(debug, "toggle_pause() in lin_time.cpp: Pausing");
 
         // If you make this value too small, then when the user presses the
@@ -163,20 +149,19 @@ void micro_sleep( unsigned int n )
 
 #else
 
-void micro_sleep( unsigned int n )
-{
+void micro_sleep(unsigned int n) {
     struct timeval tv = {
-        0, 0
+            0, 0
     };
 
-    tv.tv_usec = n%1000000;
-    tv.tv_sec  = n/1000000;
-    select( 0, NULL, NULL, NULL, &tv );
+    tv.tv_usec = n % 1000000;
+    tv.tv_sec = n / 1000000;
+    select(0, NULL, NULL, NULL, &tv);
 }
+
 #endif
 
-void InitTime()
-{
+void InitTime() {
 #ifdef WIN32
     QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
     QueryPerformanceCounter( (LARGE_INTEGER*) &ttime );
@@ -184,8 +169,8 @@ void InitTime()
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    newtime  = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
-    lasttime = newtime-.0001;
+    newtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
+    lasttime = newtime - .0001;
 
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
@@ -204,13 +189,11 @@ void InitTime()
     elapsedtime = .0001;
 }
 
-double GetElapsedTime()
-{
+double GetElapsedTime() {
     return elapsedtime;
 }
 
-double queryTime()
-{
+double queryTime() {
 #ifdef WIN32
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
@@ -218,8 +201,8 @@ double queryTime()
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    double tmpnewtime = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
-    return tmpnewtime-firsttime;
+    double tmpnewtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
+    return tmpnewtime - firsttime;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
@@ -234,8 +217,7 @@ double queryTime()
 #endif
 }
 
-double realTime()
-{
+double realTime() {
 #ifdef WIN32
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
@@ -243,7 +225,7 @@ double realTime()
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    double tmpnewtime = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
+    double tmpnewtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
@@ -259,9 +241,8 @@ double realTime()
     return tmpnewtime - reallyfirsttime;
 }
 
-void UpdateTime()
-{
-    static bool first=true;
+void UpdateTime() {
+    static bool first = true;
 #ifdef WIN32
     QueryPerformanceCounter( (LARGE_INTEGER*) &newtime );
     elapsedtime = ( (double) (newtime-ttime) )/freq;
@@ -275,9 +256,9 @@ void UpdateTime()
 #elif defined(_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    lasttime    = newtime;
-    newtime     = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
-    elapsedtime = newtime-lasttime;
+    lasttime = newtime;
+    newtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
+    elapsedtime = newtime - lasttime;
     // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before time compression is %3%") % lasttime % newtime % elapsedtime));
     if (first) {
         firsttime = newtime;
@@ -301,12 +282,11 @@ void UpdateTime()
 #endif
     elapsedtime *= timecompression;
     // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime));
-    first=false;
+    first = false;
 }
 
-void setNewTime( double newnewtime )
-{
-    firsttime -= newnewtime-queryTime();
+void setNewTime(double newnewtime) {
+    firsttime -= newnewtime - queryTime();
     UpdateTime();
 }
 

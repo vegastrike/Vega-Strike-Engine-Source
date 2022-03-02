@@ -1,9 +1,6 @@
 /*
- * hashtable.h
- *
- * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -38,47 +35,45 @@
 class Unit;
 //const int hashsize = 1001;
 //Hashtable doesn't grow
-template < class KEY, class VALUE, int SIZ >
-class Hashtable : public vsUMap< KEY, VALUE* >
-{
-    typedef std::pair< KEY, VALUE* >HashElement;
-    typedef vsUMap< KEY, VALUE* >   supertype;
+template<class KEY, class VALUE, int SIZ>
+class Hashtable : public vsUMap<KEY, VALUE *> {
+    typedef std::pair<KEY, VALUE *> HashElement;
+    typedef vsUMap<KEY, VALUE *> supertype;
 public:
-    static size_t hash( const int key )
-    {
+    static size_t hash(const int key) {
         unsigned int k = key;
         k %= SIZ;
         return k;
     }
-    static size_t hash( const char *key )
-    {
+
+    static size_t hash(const char *key) {
         unsigned int k = 0;
         for (const char *start = key; *start != '\0'; ++start) {
-            k ^= (*start&HASH_SALT_1);
+            k ^= (*start & HASH_SALT_1);
             k ^= HASH_SALT_0;
-            k  = ( ( (k>>4)&0xF )|( k<<(HASH_INTSIZE-4) ) );
+            k = (((k >> 4) & 0xF) | (k << (HASH_INTSIZE - 4)));
             k ^= *start;
         }
         k %= SIZ;
         return k;
     }
-    static size_t hash( const std::string &key )
-    {
+
+    static size_t hash(const std::string &key) {
         unsigned int k = 0;
         for (typename std::string::const_iterator start = key.begin(); start != key.end(); ++start) {
-            k ^= (*start&HASH_SALT_1);
+            k ^= (*start & HASH_SALT_1);
             k ^= HASH_SALT_0;
-            k  = ( ( (k>>4)&0xF )|( k<<(HASH_INTSIZE-4) ) );
+            k = (((k >> 4) & 0xF) | (k << (HASH_INTSIZE - 4)));
             k ^= *start;
         }
         k %= SIZ;
         return k;
     }
-    std::vector< VALUE* >GetAll() const
-    {
-        std::vector< VALUE* >retval( this->size() );
+
+    std::vector<VALUE *> GetAll() const {
+        std::vector<VALUE *> retval(this->size());
         typename supertype::const_iterator iter = this->begin();
-        typename supertype::const_iterator end  = this->end();
+        typename supertype::const_iterator end = this->end();
         size_t i = 0;
         for (; iter != end; ++iter, ++i) {
             retval[i] = iter->second;
@@ -86,28 +81,25 @@ public:
         return retval;
     }
 
-    VALUE * Get( const KEY &key ) const
-    {
-        typename supertype::const_iterator iter = this->find( key );
-        typename supertype::const_iterator end  = this->end();
+    VALUE *Get(const KEY &key) const {
+        typename supertype::const_iterator iter = this->find(key);
+        typename supertype::const_iterator end = this->end();
         if (iter != end) {
             return iter->second;
         }
         return NULL;
     }
 
-    void Put( const KEY &key, VALUE *value )
-    {
+    void Put(const KEY &key, VALUE *value) {
         (*this)[key] = value;
     }
 
-    void Delete( const KEY &key )
-    {
-        typename supertype::iterator iter = this->find( key );
-        if ( iter == this->end() ) {
+    void Delete(const KEY &key) {
+        typename supertype::iterator iter = this->find(key);
+        if (iter == this->end()) {
             return;
         }
-        this->erase( iter );
+        this->erase(iter);
     }
 };
 

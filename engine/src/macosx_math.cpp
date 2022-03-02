@@ -1,27 +1,24 @@
-/**
-* macosx_math.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include <macosx_math.h>
 #include <string>
@@ -29,13 +26,13 @@
 #if defined (__APPLE__)
 //these stuffs are included in OSX 10.4 and above--so just check for x86
 #include <stdio.h>
-        #include <string.h>
-        #include <assert.h>
-        #include <sys/param.h>
-        #include <stdlib.h>
-        #include <crt_externs.h>
-        #include <errno.h>
-        #include <mach-o/dyld.h>
+    #include <string.h>
+    #include <assert.h>
+    #include <sys/param.h>
+    #include <stdlib.h>
+    #include <crt_externs.h>
+    #include <errno.h>
+    #include <mach-o/dyld.h>
 
 typedef int (*NSGetExecutablePathProcPtr)( char *buf, size_t *bufsize );
 
@@ -107,24 +104,36 @@ int XNSGetExecutablePath( char *execPath, size_t *execPathSize )
 
 #endif
 
-int float_to_int( float a )
-{
+int float_to_int(float a) {
     int maxint = 0x7ffffff;
     int minint = -0x8000000;
-    if ( (a < maxint) && (a > minint) ) return int(a);
-    if (a > 0) return maxint;
-    if (a < 0) return minint;
+    if ((a < maxint) && (a > minint)) {
+        return int(a);
+    }
+    if (a > 0) {
+        return maxint;
+    }
+    if (a < 0) {
+        return minint;
+    }
     return 0;
 }
-int double_to_int( double a )
-{
+
+int double_to_int(double a) {
     int maxint = 0x7ffffff;
     int minint = -0x8000000;
-    if ( (a < maxint) && (a > minint) ) return int(a);
-    if (a > 0) return maxint;
-    if (a < 0) return minint;
+    if ((a < maxint) && (a > minint)) {
+        return int(a);
+    }
+    if (a > 0) {
+        return maxint;
+    }
+    if (a < 0) {
+        return minint;
+    }
     return 0;
 }
+
 #ifdef WITH_MACOSX_BUNDLE
 #if (defined (__APPLE__) || defined (MACOSX ) ) && !defined (POSH_LITTLE_ENDIAN)
 extern "C" {

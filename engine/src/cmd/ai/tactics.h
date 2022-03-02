@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,15 +29,14 @@
 #define TACTICS_H_
 #include "order.h"
 
-class CloakFor : public Order
-{
+class CloakFor : public Order {
     float time;
     float maxtime;
-    bool  enable;
-public: CloakFor( bool enable, float seconds = 0 ) : Order( CLOAKING, 0 )
-        , time( 0 )
-        , maxtime( seconds )
-        , enable( enable ) {}
+    bool enable;
+public:
+    CloakFor(bool enable, float seconds = 0) : Order(CLOAKING, 0), time(0), maxtime(seconds), enable(enable) {
+    }
+
     void Execute();
     ~CloakFor();
 };

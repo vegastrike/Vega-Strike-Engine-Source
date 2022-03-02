@@ -1,22 +1,23 @@
 /*
- * Vega Strike
- * Copyright (C) 2003 Mike Byron
+ * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "vegastrike.h"
@@ -26,11 +27,10 @@
 #include "windowcontroller.h"
 
 //Make everything happen.
-void WindowController::run( void )
-{
+void WindowController::run(void) {
     if (m_window) {
-        m_window->setDeleteOnClose( true );         //We want the window to delete itself.
-        m_window->setController( this );
+        m_window->setDeleteOnClose(true);         //We want the window to delete itself.
+        m_window->setController(this);
         m_window->open();
     } else {
         //We have no window.  Close down.
@@ -38,14 +38,12 @@ void WindowController::run( void )
     }
 }
 
-void WindowController::draw( void )
-{
+void WindowController::draw(void) {
     //Do nothing.
 }
 
 //Process a command from the window.
-bool WindowController::processWindowCommand( const EventCommandId &command, Control *control )
-{
+bool WindowController::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Window::Close") {
         //Our window is closing.
         if (m_deleteOnWindowClose) {
@@ -59,10 +57,10 @@ bool WindowController::processWindowCommand( const EventCommandId &command, Cont
 }
 
 //CONSTRUCTOR
-WindowController::WindowController() : m_window( NULL )
-    , m_deleteOnWindowClose( true )
-{}
+WindowController::WindowController() : m_window(NULL), m_deleteOnWindowClose(true) {
+}
 
 //DESTRUCTOR
-WindowController::~WindowController( void ) {}
+WindowController::~WindowController(void) {
+}
 

@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::OpenALRenderableSource
 //
@@ -38,63 +40,66 @@
 
 namespace Audio {
 
+/**
+ * OpenAL Renderable Source class
+ *
+ * @remarks This class implements the RenderableSource interface for the
+ *      OpenAL renderer.
+ *
+ */
+class OpenALRenderableStreamingSource : public RenderableSource {
+    ALuint alSource;
+    bool atEos;
+    bool shouldPlay;
+    bool startedPlaying;
+    bool buffering;
+
+public:
+    OpenALRenderableStreamingSource(Source *source);
+
+    virtual ~OpenALRenderableStreamingSource();
+
     /**
-     * OpenAL Renderable Source class
-     *
-     * @remarks This class implements the RenderableSource interface for the
-     *      OpenAL renderer.
-     *
+     * Returns whether this stream should be playing
+     * @remarks Streaming sources may halt due to buffer underruns.
+     *      By keeping track of the desired state, rather than querying
+     *      the underlying AL source, we can overcome this problem.
      */
-    class OpenALRenderableStreamingSource : public RenderableSource
-    {
-        ALuint alSource;
-        bool atEos;
-        bool shouldPlay;
-        bool startedPlaying;
-        bool buffering;
+    bool shouldBePlaying() const {
+        return shouldPlay && !atEos;
+    }
 
-    public:
-        OpenALRenderableStreamingSource(Source *source);
+protected:
+    /** @see RenderableSource::startPlayingImpl. */
+    virtual void startPlayingImpl(Timestamp start);
 
-        virtual ~OpenALRenderableStreamingSource();
+    /** @see RenderableSource::stopPlayingImpl. */
+    virtual void stopPlayingImpl();
 
-        /**
-         * Returns whether this stream should be playing
-         * @remarks Streaming sources may halt due to buffer underruns.
-         *      By keeping track of the desired state, rather than querying
-         *      the underlying AL source, we can overcome this problem.
-         */
-        bool shouldBePlaying() const { return shouldPlay && !atEos; }
+    /** @see RenderableSource::isPlayingImpl. */
+    virtual bool isPlayingImpl() const;
 
-    protected:
-        /** @see RenderableSource::startPlayingImpl. */
-        virtual void startPlayingImpl(Timestamp start);
+    /** @see RenderableSource::getPlayingTimeImpl. */
+    virtual Timestamp getPlayingTimeImpl() const;
 
-        /** @see RenderableSource::stopPlayingImpl. */
-        virtual void stopPlayingImpl();
+    /** @see RenderableSource::updateImpl. */
+    virtual void updateImpl(int flags, const Listener &sceneListener);
 
-        /** @see RenderableSource::isPlayingImpl. */
-        virtual bool isPlayingImpl() const;
+    /** @see RenderableSource::seekImpl. */
+    virtual void seekImpl(Timestamp time);
 
-        /** @see RenderableSource::getPlayingTimeImpl. */
-        virtual Timestamp getPlayingTimeImpl() const;
+    /** Derived classes may use the underlying AL source handle to set additional attributes */
+    ALuint getALSource() const {
+        return alSource;
+    }
 
-        /** @see RenderableSource::updateImpl. */
-        virtual void updateImpl(int flags, const Listener& sceneListener);
-
-        /** @see RenderableSource::seekImpl. */
-        virtual void seekImpl(Timestamp time);
-
-        /** Derived classes may use the underlying AL source handle to set additional attributes */
-        ALuint getALSource() const { return alSource; }
-
-        /** Queue AL buffers from the source's AL sound stream.
-         * @note It will fail with an assertion if the attached sound isn't a streaming OpenAL sound
-         * @note It will not throw an EndOfStream exception, even if the sound reaches the end
-         *      and it's not a looping source.
-         */
-        void queueALBuffers();
-    };
+    /** Queue AL buffers from the source's AL sound stream.
+     * @note It will fail with an assertion if the attached sound isn't a streaming OpenAL sound
+     * @note It will not throw an EndOfStream exception, even if the sound reaches the end
+     *      and it's not a looping source.
+     */
+    void queueALBuffers();
+};
 
 };
 

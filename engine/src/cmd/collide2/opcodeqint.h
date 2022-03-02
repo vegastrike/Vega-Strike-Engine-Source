@@ -1,16 +1,16 @@
 /*
     Copyright (C) 1998-2000 by Andrew Zabolotny
-  
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
-  
+
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Library General Public License for more details.
-  
+
     You should have received a copy of the GNU Library General Public
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -195,7 +195,7 @@ inline long QInt24 (float inval)
   double dtemp = FIST_MAGIC_QINT24 + inval;
   return CS_LONG_AT_BYTE (dtemp, CS_LOWER_WORD_BYTE) - 0x80000000;
 }
-    
+
 #else /* not CS_IEEE_DOUBLE_FORMAT */
 
 #define QRound(x) (int ((x) + ((x < 0) ? -0.5 : +0.5)))

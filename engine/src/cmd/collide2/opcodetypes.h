@@ -2,7 +2,7 @@
     Copyright (C) 1998-2004 by Jorrit Tyberghein
     Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other
     Vega Strike contributors
-    Copyright (C) 2021 Stephen G. Tuggy
+    Copyright (C) 2021-2022 Stephen G. Tuggy
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -145,16 +145,15 @@ typedef intptr_t opc_ptrdiff_t;
 #if !((defined(CS_HAVE_WINT_T) && defined(_WCTYPE_T_DEFINED)) || defined(_WINT_T) || defined(_WINT_T_DECLARED))
 #ifndef wint_t
 #if _MSC_VER >= 1300
-    typedef unsigned short wint_t;
+typedef unsigned short wint_t;
 #else
-    typedef wchar_t wint_t;
+typedef wchar_t wint_t;
 #endif
 #endif
 #define _WCTYPE_T_DEFINED
 #define _WINT_T
 #define _WINT_T_DECLARED
 #endif
-
 
 /**
  * A time value measured in milliseconds (1/1000 of a second).  Ticks do not

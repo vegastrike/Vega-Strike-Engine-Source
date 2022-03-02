@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::OpenALSimpleSound
 //
@@ -39,38 +41,39 @@
 
 namespace Audio {
 
-    /**
-     * OpenAL Simple Sound implementation class
-     *
-     * @remarks This class implements simple (non-streaming) OpenAL sounds.
-     *      This will load the whole sound into a single OpenAL buffer.
-     * @see Sound, SimpleSound
-     *
-     */
-    class OpenALSimpleSound : public SimpleSound
-    {
-        ALBufferHandle bufferHandle;
+/**
+ * OpenAL Simple Sound implementation class
+ *
+ * @remarks This class implements simple (non-streaming) OpenAL sounds.
+ *      This will load the whole sound into a single OpenAL buffer.
+ * @see Sound, SimpleSound
+ *
+ */
+class OpenALSimpleSound : public SimpleSound {
+    ALBufferHandle bufferHandle;
 
-    public:
-        /** Internal constructor used by derived classes */
-        OpenALSimpleSound(const std::string& name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
+public:
+    /** Internal constructor used by derived classes */
+    OpenALSimpleSound(const std::string &name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
 
-        /** Package-private: the OpenAL renderer package uses this, YOU DON'T */
-        ALBufferHandle getAlBuffer() const { return bufferHandle; }
+    /** Package-private: the OpenAL renderer package uses this, YOU DON'T */
+    ALBufferHandle getAlBuffer() const {
+        return bufferHandle;
+    }
 
-    public:
-        virtual ~OpenALSimpleSound();
+public:
+    virtual ~OpenALSimpleSound();
 
-        // The following section contains supporting methods for accessing the stream.
-        // Subclasses need not bother with actual stream management, they need only worry
-        // about sending the samples to where they're needed.
-    protected:
-        /** @copydoc Sound::loadImpl */
-        virtual void loadImpl(bool wait);
+    // The following section contains supporting methods for accessing the stream.
+    // Subclasses need not bother with actual stream management, they need only worry
+    // about sending the samples to where they're needed.
+protected:
+    /** @copydoc Sound::loadImpl */
+    virtual void loadImpl(bool wait);
 
-        /** @copydoc Sound::unloadImpl */
-        virtual void unloadImpl();
-    };
+    /** @copydoc Sound::unloadImpl */
+    virtual void unloadImpl();
+};
 
 };
 

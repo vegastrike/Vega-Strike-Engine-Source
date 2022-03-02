@@ -1,19 +1,24 @@
-/***************************************************************************
- *                           file.h  -  description
- *                           ----------------------------
- *                           begin                : January 18, 2002
- *                           copyright            : (C) 2002 by David Ranger
- *                           email                : sabarok@start.com.au
- **************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   any later version.                                                    *
- *                                                                         *
- **************************************************************************/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 // Check to see if we're already loaded
 #ifndef FILE_H
@@ -30,7 +35,7 @@
 using namespace std;
 void FindMissions(char *path);
 void LoadMission(char *filename);
-void ScanNode (string *parent, easyDomNode *node, string filename);
+void ScanNode(string *parent, easyDomNode *node, string filename);
 void CheckVar(string parent, string current, string name, string value);
 
 using std::string;
@@ -48,30 +53,28 @@ class missionThread {
 */
 
 struct script_t {
-  string name; // script,defvar,module
+    string name; // script,defvar,module
 //    varInstMap variables; // script,module
 //    vector<varInstMap *>  classvars; //module
 //    varInst *varinst; // defvar,const
-  missionNode *if_block[3]; // if
-  missionNode *while_arg[2]; // while
-  int tester; // test
-  missionNode *test_arg[2]; // test
+    missionNode *if_block[3]; // if
+    missionNode *while_arg[2]; // while
+    int tester; // test
+    missionNode *test_arg[2]; // test
 //    enum var_type vartype; // defvar,script
-  string initval;
-  missionNode *context_block_node; // defvar
+    string initval;
+    missionNode *context_block_node; // defvar
 //    map<string,missionNode *> scripts; // module
-  missionNode *exec_node; // exec, return
-  int nr_arguments; // script
-  missionNode *argument_node; //script
-  missionNode *module_node; // exec
-  unsigned int classinst_counter;
+    missionNode *exec_node; // exec, return
+    int nr_arguments; // script
+    missionNode *argument_node; //script
+    missionNode *module_node; // exec
+    unsigned int classinst_counter;
 };
-
 
 class missionNode : public tagDomNode {
- public:
-  struct script_t script;
+public:
+    struct script_t script;
 };
-
 
 #endif

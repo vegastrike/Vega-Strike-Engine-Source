@@ -1,9 +1,6 @@
 /*
- * init.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -64,8 +61,7 @@ class Unit;
 #define PATHSEP "/"
 #endif
 
-void Python::initpaths()
-{
+void Python::initpaths() {
     /*
      *  char pwd[2048];
      *  getcwd (pwd,2047);
@@ -75,8 +71,8 @@ void Python::initpaths()
      *               pwd[i]=DELIM;
      *  }
      */
-    std::string moduledir( vs_config->getVariable( "data", "python_modules", "modules" ) );
-    std::string basesdir( vs_config->getVariable( "data", "python_bases", "bases" ) );
+    std::string moduledir(vs_config->getVariable("data", "python_modules", "modules"));
+    std::string basesdir(vs_config->getVariable("data", "python_bases", "bases"));
 
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["
@@ -85,24 +81,25 @@ void Python::initpaths()
      *                       ",\""+std::string(pwd)+DELIMSTR+basesdir + string("\"")+
      *                       "]\n");
      */
-    std::string modpaths( "\"\"," );
+    std::string modpaths("\"\",");
     //Find all the mods dir (ignore homedir)
     for (unsigned int i = 1; i < VSFileSystem::Rootdir.size(); i++) {
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "builtin\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "quests\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "missions\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "ai\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+"\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+basesdir+"\"";
-        if ( i+1 < VSFileSystem::Rootdir.size() )
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "builtin\",";
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "quests\",";
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "missions\",";
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "ai\",";
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + "\",";
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + basesdir + "\"";
+        if (i + 1 < VSFileSystem::Rootdir.size()) {
             modpaths += ",";
+        }
     }
     /*
      *  string::size_type backslash;
      *  while ((backslash=modpaths.find("\\"))!=std::string::npos) {
      *  modpaths[backslash]='/';
      *  }*/
-    std::string changepath( "import sys\nprint(sys.path)\nsys.path = ["+modpaths+"] + sys.path\n" );
+    std::string changepath("import sys\nprint(sys.path)\nsys.path = [" + modpaths + "] + sys.path\n");
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["
      *                       "\""+VSFileSystem::datadir+DELIMSTR"modules"DELIMSTR"builtin\""
@@ -111,15 +108,14 @@ void Python::initpaths()
      *                       "]\n");
      */
     VS_LOG(info, (boost::format("running %1%") % changepath));
-    char *temppython = strdup( changepath.c_str() );
-    PyRun_SimpleString( temppython );
+    char *temppython = strdup(changepath.c_str());
+    PyRun_SimpleString(temppython);
     Python::reseterrors();
-    free( temppython );
+    free(temppython);
 }
 
-void Python::reseterrors()
-{
-    if ( PyErr_Occurred() ) {
+void Python::reseterrors() {
+    if (PyErr_Occurred()) {
         VS_LOG_AND_FLUSH(error, "void Python::reseterrors(): Python error occurred");
         PyErr_Print();
         PyErr_Clear();
@@ -128,42 +124,40 @@ void Python::reseterrors()
 }
 
 #if BOOST_VERSION != 102800
-static void * Vector_convertible( PyObject *p )
-{
-    return PyTuple_Check( p ) ? p : 0;
+
+static void *Vector_convertible(PyObject * p) {
+    return PyTuple_Check(p) ? p : 0;
 }
 
-
-static void Vector_construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data )
-{
-    void*const storage = ( (boost::python::converter::rvalue_from_python_storage< Vector >*)data )->storage.bytes;
-    new (storage) Vector( 0, 0, 0 );
+static void Vector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data) {
+    void *const storage = ((boost::python::converter::rvalue_from_python_storage<Vector> *) data)->storage.bytes;
+    new(storage) Vector(0, 0, 0);
     //Fill in QVector values from source tuple here
     //details left to reader.
-    Vector *vec = (Vector*) storage;
+    Vector *vec = (Vector *) storage;
     static char fff[4] = "fff"; //added by chuck_starchaser, to kill a warning
-    PyArg_ParseTuple( source, fff, &vec->i, &vec->j, &vec->k );
+    PyArg_ParseTuple(source, fff, &vec->i, &vec->j, &vec->k);
     data->convertible = storage;
 }
 
-static void QVector_construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data )
-{
-    void*const storage = ( (boost::python::converter::rvalue_from_python_storage< QVector >*)data )->storage.bytes;
-    new (storage) QVector( 0, 0, 0 );
+static void QVector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data) {
+    void *const storage = ((boost::python::converter::rvalue_from_python_storage<QVector> *) data)->storage.bytes;
+    new(storage) QVector(0, 0, 0);
     //Fill in QVector values from source tuple here
     //details left to reader.
-    QVector *vec = (QVector*) storage;
+    QVector *vec = (QVector *) storage;
     static char ddd[4] = "ddd"; //added by chuck_starchaser, to kill a warning
-    PyArg_ParseTuple( source, ddd, &vec->i, &vec->j, &vec->k );
+    PyArg_ParseTuple(source, ddd, &vec->i, &vec->j, &vec->k);
     data->convertible = storage;
 }
+
 #endif
 
-void Python::init()
-{
+void Python::init() {
     static bool isinit = false;
-    if (isinit)
+    if (isinit) {
         return;
+    }
     isinit = true;
 //initialize python library
     Py_NoSiteFlag = 1;
@@ -179,39 +173,40 @@ void Python::init()
     initpaths();
 
 #if BOOST_VERSION != 102800
-    boost::python::converter::registry::insert( Vector_convertible, QVector_construct, boost::python::type_id< QVector > () );
-    boost::python::converter::registry::insert( Vector_convertible, Vector_construct, boost::python::type_id< Vector > () );
+    boost::python::converter::registry::insert(Vector_convertible,
+            QVector_construct,
+            boost::python::type_id<QVector>());
+    boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
 #endif
 #if (PY_VERSION_HEX < 0x03000000)
     InitBriefing2();
     InitVS2();
 #endif
     VS_LOG(info, "testing VS random");
-    std::string changepath( "import sys\nprint(sys.path)\n" );
+    std::string changepath("import sys\nprint(sys.path)\n");
     VS_LOG(info, (boost::format("running %1%") % changepath));
-    char *temppython = strdup( changepath.c_str() );
-    PyRun_SimpleString( temppython );
+    char *temppython = strdup(changepath.c_str());
+    PyRun_SimpleString(temppython);
     Python::reseterrors();
     const std::string python_snippet_to_run{
-    "import VS\n"
-    "print("
-        "\"Engine Version: {0} \\nAsset API Version: {1}\".format("
+            "import VS\n"
+            "print("
+            "\"Engine Version: {0} \\nAsset API Version: {1}\".format("
             "'.'.join([str(i) for i in VS.EngineVersion().GetVersion()]),"
             "VS.EngineVersion().GetAssetAPIVersion()"
-        ")"
-    ")"
+            ")"
+            ")"
     };
     PyRun_SimpleString(python_snippet_to_run.c_str());
     Python::reseterrors();
-    free( temppython );
+    free(temppython);
 #if (PY_VERSION_HEX < 0x03000000)
     InitDirector2();
     InitBase2();
 #endif
 }
 
-void Python::test()
-{
+void Python::test() {
     /* initialize vegastrike module so that
      *  'import VS' works in python */
 

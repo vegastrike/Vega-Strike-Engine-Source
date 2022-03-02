@@ -1,10 +1,6 @@
 /*
- * easydom.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass,
+ * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -33,10 +29,10 @@
 
 #include <assert.h>     /// needed for assert() calls.
 
-easyDomNode::easyDomNode() {}
+easyDomNode::easyDomNode() {
+}
 
-void easyDomNode::set( easyDomNode *_parent, std::string _name, const XML_Char **atts )
-{
+void easyDomNode::set(easyDomNode *_parent, std::string _name, const XML_Char **atts) {
     parent = _parent;
     if (atts != nullptr) {
         for (; *atts != nullptr; atts += 2) {
@@ -50,31 +46,32 @@ void easyDomNode::set( easyDomNode *_parent, std::string _name, const XML_Char *
     name = _name;
 }
 
-void easyDomNode::addChild( easyDomNode *child )
-{
-    subnodes.push_back( child );
+void easyDomNode::addChild(easyDomNode *child) {
+    subnodes.push_back(child);
 }
 
-std::string easyDomNode::attr_value( std::string search_name )
-{
+std::string easyDomNode::attr_value(std::string search_name) {
     return attribute_map[search_name];
 }
 
-void easyDomNode::printNode( std::ostream &out, int recurse_level, int level )
-{
-    vsUMap< std::string, std::string >::const_iterator iter;
+void easyDomNode::printNode(std::ostream &out, int recurse_level, int level) {
+    vsUMap<std::string, std::string>::const_iterator iter;
 
-    out<<"<"<<name;
-    for (iter = attribute_map.begin(); iter != attribute_map.end(); iter++)
-        out<<" "<<(*iter).first<<"=\""<<(*iter).second<<"\"";
-    out<<">"<<std::endl;
+    out << "<" << name;
+    for (iter = attribute_map.begin(); iter != attribute_map.end(); iter++) {
+        out << " " << (*iter).first << "=\"" << (*iter).second << "\"";
+    }
+    out << ">" << std::endl;
 
-    std::vector< easyDomNode* >::const_iterator siter;
-    if (recurse_level > 0)
-        for (siter = subnodes.begin(); siter != subnodes.end(); siter++)
-            (*siter)->printNode( out, recurse_level-1, level+1 );
-    if ( !(recurse_level == 0 && level == 0) )
-        out<<"</"<<name<<">"<<std::endl;
+    std::vector<easyDomNode *>::const_iterator siter;
+    if (recurse_level > 0) {
+        for (siter = subnodes.begin(); siter != subnodes.end(); siter++) {
+            (*siter)->printNode(out, recurse_level - 1, level + 1);
+        }
+    }
+    if (!(recurse_level == 0 && level == 0)) {
+        out << "</" << name << ">" << std::endl;
+    }
 }
 
 const char *textAttr = "Text_Attr";

@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 //
 // C++ Implementation: Audio::OggStream
@@ -53,8 +54,8 @@
 
 #if (defined(AVCODEC_MAX_AUDIO_FRAME_SIZE) && ((AVCODEC_MAX_AUDIO_FRAME_SIZE) > (BUFFER_SIZE)))
 
-    #undef BUFFER_SIZE
-    #define BUFFER_SIZE ((AVCODEC_MAX_AUDIO_FRAME_SIZE*3)/2)
+#undef BUFFER_SIZE
+#define BUFFER_SIZE ((AVCODEC_MAX_AUDIO_FRAME_SIZE*3)/2)
 
 #endif
 
@@ -129,9 +130,9 @@ namespace Audio {
                     throw FileOpenException(errbase + " (wrong format or file not found)");
 
                 // Dump format info in case we want to know...
-                #ifdef VS_DEBUG
+#ifdef VS_DEBUG
                 dump_format(pFormatCtx, 0, npath.c_str(), false);
-                #endif
+#endif
 
                 // Find audio stream
                 pCodecCtx = 0;
@@ -161,16 +162,16 @@ namespace Audio {
                 case SAMPLE_FMT_S16: fmt.bitsPerSample = 16;
                                      fmt.signedSamples = 1;
                                      break;
-                #ifdef SAMPLE_FMT_S24
+#ifdef SAMPLE_FMT_S24
                 case SAMPLE_FMT_S24: fmt.bitsPerSample = 24;
                                      fmt.signedSamples = 1;
                                      break;
-                #endif
-                #ifdef SAMPLE_FMT_S32
+#endif
+#ifdef SAMPLE_FMT_S32
                 case SAMPLE_FMT_S32: fmt.bitsPerSample = 32;
                                      fmt.signedSamples = 1;
                                      break;
-                #endif
+#endif
                 default:             throw CodecNotFoundException(errbase + " (unsupported audio format)");
                 }
                 sampleSize = (fmt.bitsPerSample + 7) / 8 * fmt.channels;
@@ -232,21 +233,21 @@ namespace Audio {
 
             bool hasPacket() const
             {
-                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
                 return packetBuffer && packetBufferSize
                     && packet.data && packet.size;
-                #else
+#else
                 return packetBuffer && packetBufferSize;
-                #endif
+#endif
             }
 
             void readPacket()
             {
                 // Read the next packet, skipping all packets that aren't for this stream
-                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
                 packet.size = packetBufferSize;
                 packet.data = packetBuffer;
-                #endif
+#endif
                 do {
                     // Free old packet
                     if (packet.data != NULL)
@@ -283,22 +284,22 @@ namespace Audio {
 
                 int dataSize = sampleBufferAlloc;
                 int used =
-                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
                     avcodec_decode_audio3(
                         pCodecCtx,
                         (int16_t*)sampleBufferAligned, &dataSize,
                         &packet);
-                #else
+#else
                     avcodec_decode_audio2(
                         pCodecCtx,
                         (int16_t*)sampleBufferAligned, &dataSize,
                         packetBuffer, packetBufferSize);
-                #endif
+#endif
 
                 if (used < 0)
                     throw PacketDecodeException();
 
-                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
 
                 if ((size_t)used > packet.size)
                     used = packet.size;
@@ -306,7 +307,7 @@ namespace Audio {
                 (char*&)(packet.data) += used;
                 packet.size -= used;
 
-                #else
+#else
 
                 if ((size_t)used > packetBufferSize)
                     used = packetBufferSize;
@@ -314,7 +315,7 @@ namespace Audio {
                 (char*&)packetBuffer += used;
                 packetBufferSize -= used;
 
-                #endif
+#endif
 
                 if (dataSize < 0)
                     dataSize = 0;

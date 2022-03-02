@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,13 +28,12 @@
 #ifndef __AL_INCLUDES__INCLUDED__
 #define __AL_INCLUDES__INCLUDED__
 
-
 #ifdef __APPLE__
-    #include <al.h>
-    #include <alc.h>
+#include <al.h>
+#include <alc.h>
 #else
-    #include <AL/al.h>
-    #include <AL/alc.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 #endif
 
 typedef ALuint ALSourceHandle;

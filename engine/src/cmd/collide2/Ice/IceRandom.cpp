@@ -10,6 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
+ * Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,27 +18,22 @@
 // Precompiled Header
 #include "Stdafx.h"
 
-
 using namespace Opcode;
 
-void 	SRand(uint32_t seed)
-{
-	srand(seed);
+void SRand(uint32_t seed) {
+    srand(seed);
 }
 
-uint32_t  Rand()
-{
-	return rand();
+uint32_t Rand() {
+    return rand();
 }
-
 
 static BasicRandom gRandomGenerator(42);
 
-uint32_t GetRandomIndex(uint32_t max_index)
-{
-	// We don't use rand() since it's limited to RAND_MAX
-	uint32_t Index = gRandomGenerator.Randomize();
-	return Index % max_index;
+uint32_t GetRandomIndex(uint32_t max_index) {
+    // We don't use rand() since it's limited to RAND_MAX
+    uint32_t Index = gRandomGenerator.Randomize();
+    return Index % max_index;
 }
 
 

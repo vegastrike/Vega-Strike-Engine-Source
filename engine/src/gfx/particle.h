@@ -1,27 +1,29 @@
 /**
-* particle.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * particle.h
+ *
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #ifndef __PARTICLE_H
 #define __PARTICLE_H
@@ -36,11 +38,10 @@
 
 class Texture;
 
-struct ParticlePoint
-{
-    QVector  loc;
+struct ParticlePoint {
+    QVector loc;
     GFXColor col;
-    float    size;
+    float size;
 };
 
 /**
@@ -49,55 +50,60 @@ struct ParticlePoint
  * 
  * Can be instantiated statically.
  */
-class ParticleTrail
-{
-    std::vector< Vector, aligned_allocator<Vector> > particleVel;
-    std::vector< QVector, aligned_allocator<QVector> > particleLoc;
-    std::vector< GFXColor, aligned_allocator<GFXColor> > particleColor;
-    std::vector< float, aligned_allocator<float> > particleSize;
-    std::vector< float > particleVert;
-    std::vector< float > distances;
-    std::vector< unsigned short > pointIndices;
-    std::vector< unsigned short > indices;
+class ParticleTrail {
+    std::vector<Vector, aligned_allocator<Vector> > particleVel;
+    std::vector<QVector, aligned_allocator<QVector> > particleLoc;
+    std::vector<GFXColor, aligned_allocator<GFXColor> > particleColor;
+    std::vector<float, aligned_allocator<float> > particleSize;
+    std::vector<float> particleVert;
+    std::vector<float> distances;
+    std::vector<unsigned short> pointIndices;
+    std::vector<unsigned short> indices;
     unsigned int maxparticles;
     BLENDFUNC blendsrc, blenddst;
     float alphaMask;
     bool writeDepth, fadeColor;
-    
+
     struct Config {
         std::string prefix;
-        bool  initialized;
-        
-        bool  use;
-        bool  use_points;
-        bool  pblend;
-        bool  psmooth;
+        bool initialized;
+
+        bool use;
+        bool use_points;
+        bool pblend;
+        bool psmooth;
         float pgrow;
         float ptrans;
         float pfade;
         float psize;
         Texture *texture;
-        
+
         explicit Config(const std::string &prefix);
         ~Config();
-        
+
         void init();
     } config;
-    
-public: 
-    ParticleTrail( const std::string &configPrefix, unsigned int max, BLENDFUNC blendsrc=ONE, BLENDFUNC blenddst=ONE, float alphaMask = 0, bool writeDepth = false, bool fadeColor = false )
-        : config(configPrefix)
-    {
-        ChangeMax( max );
+
+public:
+    ParticleTrail(const std::string &configPrefix,
+            unsigned int max,
+            BLENDFUNC blendsrc = ONE,
+            BLENDFUNC blenddst = ONE,
+            float alphaMask = 0,
+            bool writeDepth = false,
+            bool fadeColor = false)
+            : config(configPrefix) {
+        ChangeMax(max);
         this->blendsrc = blendsrc;
         this->blenddst = blenddst;
         this->alphaMask = alphaMask;
         this->writeDepth = writeDepth;
         this->fadeColor = fadeColor;
     }
+
     void DrawAndUpdate();
-    void AddParticle( const ParticlePoint&, const Vector&, float size );
-    void ChangeMax( unsigned int max );
+    void AddParticle(const ParticlePoint &, const Vector &, float size);
+    void ChangeMax(unsigned int max);
 };
 
 /**
@@ -105,30 +111,30 @@ public:
  * position and directions, based on config key. Cannot be instantiated statically
  * since it queries vsConfig at construction time (which is not available statically)
  */
-class ParticleEmitter 
-{
+class ParticleEmitter {
     ParticleTrail *particles;
-    
+
 public:
     struct Config {
-        bool  fixedSize;
-        
+        bool fixedSize;
+
         float rate;
         float speed;
         float locSpread;
         float spread;
         float absSpeed;
         float relSize;
-        
+
         void init(const std::string &prefix);
     } config;
-    
-    explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType) {}
-    explicit ParticleEmitter(ParticleTrail *particleType, const std::string &prefix) : particles(particleType) 
-    {
+
+    explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType) {
+    }
+
+    explicit ParticleEmitter(ParticleTrail *particleType, const std::string &prefix) : particles(particleType) {
         config.init(prefix);
     }
-    
+
     /**
      * Launches (maybe) a particle, according to:
      * 
@@ -141,7 +147,13 @@ public:
      * @param color Particle color
      * 
      */
-    void doParticles( const QVector &pos, float rSize, float percent, const Vector &basevelocity, const Vector &velocity, float pSize, const GFXColor &color );
+    void doParticles(const QVector &pos,
+            float rSize,
+            float percent,
+            const Vector &basevelocity,
+            const Vector &velocity,
+            float pSize,
+            const GFXColor &color);
 };
 
 extern ParticleTrail particleTrail;

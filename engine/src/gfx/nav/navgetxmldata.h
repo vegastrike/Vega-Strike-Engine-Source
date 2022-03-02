@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,7 +32,7 @@
 
 //using std::string; NO!, don't use any using whatsoever in header files; not kosher.
 
-std::string retrievedata( std::string data, std::string type );
+std::string retrievedata(std::string data, std::string type);
 
 #endif
 

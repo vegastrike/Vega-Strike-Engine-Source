@@ -20,6 +20,6 @@
 #ifndef __CS_OPCODEEXTERN_H__
 #define __CS_OPCODEEXTERN_H__
 
-#define CS_CRYSTALSPACE_EXPORT 
+#define CS_CRYSTALSPACE_EXPORT
 
 #endif // __OPCODE_EXTERN_H__

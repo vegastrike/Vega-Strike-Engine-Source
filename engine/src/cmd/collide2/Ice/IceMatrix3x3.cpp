@@ -4,6 +4,8 @@
  *	\file		IceMatrix3x3.cpp
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
+ *
+ *  Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,16 +37,14 @@
 // Precompiled Header
 #include "Stdafx.h"
 
-
 using namespace Opcode;
 
 // Cast operator
-Matrix3x3::operator Matrix4x4() const
-{
-	return Matrix4x4(
-	m[0][0],	m[0][1],	m[0][2],	0.0f,
-	m[1][0],	m[1][1],	m[1][2],	0.0f,
-	m[2][0],	m[2][1],	m[2][2],	0.0f,
-	0.0f,		0.0f,		0.0f,		1.0f);
+Matrix3x3::operator Matrix4x4() const {
+    return Matrix4x4(
+            m[0][0], m[0][1], m[0][2], 0.0f,
+            m[1][0], m[1][1], m[1][2], 0.0f,
+            m[2][0], m[2][1], m[2][2], 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
 }
 

@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2003 Mike Byron
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -46,35 +46,36 @@ using namespace VSFileSystem;   // FIXME -- Shouldn't include entire namespace
 using std::set;
 using std::string;
 
-void CriteriaContains::beginElement( void *userData, const XML_Char *name, const XML_Char **atts )
-{
-    AttributeList attributes( atts );
-    if (string( name ) == "Planet") {
-        for (AttributeList::const_iterator iter = attributes.begin(); iter != attributes.end(); iter++)
-            if ( (*iter).name == "file" )
-                static_cast< set< string >* > (userData)->insert( string( (*iter).value ) );
+void CriteriaContains::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+    AttributeList attributes(atts);
+    if (string(name) == "Planet") {
+        for (AttributeList::const_iterator iter = attributes.begin(); iter != attributes.end(); iter++) {
+            if ((*iter).name == "file") {
+                static_cast< set<string> * > (userData)->insert(string((*iter).value));
+            }
+        }
     }
 }
 
-void CriteriaContains::endElement( void *userData, const XML_Char *name ) {}
+void CriteriaContains::endElement(void *userData, const XML_Char *name) {
+}
 
-std::set< std::string >CriteriaContains::getPlanetTypesFromXML( const char *filename ) const
-{
-    set< string >textures;
+std::set<std::string> CriteriaContains::getPlanetTypesFromXML(const char *filename) const {
+    set<string> textures;
 
-    VSFile  f;
+    VSFile f;
     VSError err;
-    err = f.OpenReadOnly( string( string( filename )+string( ".system" ) ).c_str(), SystemFile );
+    err = f.OpenReadOnly(string(string(filename) + string(".system")).c_str(), SystemFile);
     if (err > Ok) {
         VS_LOG(error, (boost::format("CriteriaContains: file not found %1%") % filename));
         return textures;
     }
-    XML_Parser parser = XML_ParserCreate( NULL );
-    XML_SetUserData( parser, &textures );
-    XML_SetElementHandler( parser, &CriteriaContains::beginElement, &CriteriaContains::endElement );
-    XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
+    XML_Parser parser = XML_ParserCreate(NULL);
+    XML_SetUserData(parser, &textures);
+    XML_SetElementHandler(parser, &CriteriaContains::beginElement, &CriteriaContains::endElement);
+    XML_Parse(parser, (f.ReadFull()).c_str(), f.Size(), 1);
     f.Close();
-    XML_ParserFree( parser );
+    XML_ParserFree(parser);
 
     return textures;
 }

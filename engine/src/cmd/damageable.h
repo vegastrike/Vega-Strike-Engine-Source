@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,8 +37,7 @@ struct GFXColor;
 /**
  * @brief The Damageable class TODO
  */
-class Damageable : public DamageableObject
-{
+class Damageable : public DamageableObject {
 public:
     DamageableLayer *hull;
     DamageableLayer *armor;
@@ -53,25 +53,26 @@ public:
     float shield_regeneration;
 
     //Is dead already?
-    bool  killed;
+    bool killed;
 
     // Methods
 public:
-    Damageable(): hull(&layers[0]),
-        armor(&layers[1]),
-        shield(&layers[2]),
-        current_hull(&hull->facets[as_integer(FacetName::single)].health),
-        max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
-        upgrade_hull(0),
-        shield_regeneration(0),
-        killed(false) {}
+    Damageable() : hull(&layers[0]),
+            armor(&layers[1]),
+            shield(&layers[2]),
+            current_hull(&hull->facets[as_integer(FacetName::single)].health),
+            max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
+            upgrade_hull(0),
+            shield_regeneration(0),
+            killed(false) {
+    }
 
 protected:
     virtual ~Damageable() = default;
     // forbidden
-    Damageable( const Damageable& ) = delete;
+    Damageable(const Damageable &) = delete;
     // forbidden
-    Damageable& operator=( const Damageable& ) = delete;
+    Damageable &operator=(const Damageable &) = delete;
 
 public:
     // We follow the existing convention of GetX for the actual health value
@@ -91,15 +92,15 @@ public:
         return shield->facets[facet].health;
     }
 
-    DamageableLayer& GetHullLayer() {
+    DamageableLayer &GetHullLayer() {
         return layers[0];
     }
 
-    DamageableLayer& GetArmorLayer() {
+    DamageableLayer &GetArmorLayer() {
         return layers[1];
     }
 
-    DamageableLayer& GetShieldLayer() {
+    DamageableLayer &GetShieldLayer() {
         return layers[2];
     }
 
@@ -107,37 +108,33 @@ public:
         return shield->facets[as_integer(FacetName::left_top_front)].regeneration;
     }
 
-    virtual const float GetHullPercent() const
-    {
+    virtual const float GetHullPercent() const {
         return hull->GetPercent(FacetName::single);
     }
 
-    virtual const float GetShieldPercent() const
-    {
+    virtual const float GetShieldPercent() const {
         return shield->GetPercent(FacetName::left_top_front);
     }
 
-
-
-    void ArmorData( float armor[8] ) const;
+    void ArmorData(float armor[8]) const;
 
     // Is the shield up from this position
-    bool ShieldUp( const Vector& ) const;
+    bool ShieldUp(const Vector &) const;
 
     // Currently available in case someone wants to call from python
     // but there isn't an interface
-    float DealDamageToShield( const Vector &pnt, float &Damage );
+    float DealDamageToShield(const Vector &pnt, float &Damage);
 
     // This has a python interface
-    float DealDamageToHull( const Vector &pnt, float Damage );
+    float DealDamageToHull(const Vector &pnt, float Damage);
 
     //Applies damage to the pre-transformed area of the ship
     void ApplyDamage(const Vector &pnt,
-                     const Vector &normal,
-                     Damage damage,
-                     Unit *affected_unit,
-                     const GFXColor &color,
-                     void *ownerDoNotDereference);
+            const Vector &normal,
+            Damage damage,
+            Unit *affected_unit,
+            const GFXColor &color,
+            void *ownerDoNotDereference);
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
     void Destroy(); //explodes then deletes
@@ -157,16 +154,12 @@ public:
 
 
     //reduces shields to X percentage and reduces shield recharge to Y percentage
-    void leach( float XshieldPercent, float YrechargePercent, float ZenergyPercent );
-
-
+    void leach(float XshieldPercent, float YrechargePercent, float ZenergyPercent);
 
     float MaxShieldVal() const;
     void RegenerateShields(const float difficulty, const bool player_ship);
 
     bool flickerDamage();
 };
-
-
 
 #endif // DAMAGEABLE_H

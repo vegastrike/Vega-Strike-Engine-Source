@@ -1,9 +1,6 @@
-/**
- * star_system_xml.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -62,73 +59,62 @@ using std::map;
 
 using namespace XMLSupport;
 using namespace VSFileSystem;
-extern const vector< string >& ParseDestinations( const string &value );
-extern void bootstrap_draw( const string &message, Animation *SplashScreen = NULL );
-extern void disableTerrainDraw( ContinuousTerrain *ct );
-
-
-
-
-
+extern const vector<string> &ParseDestinations(const string &value);
+extern void bootstrap_draw(const string &message, Animation *SplashScreen = NULL);
+extern void disableTerrainDraw(ContinuousTerrain *ct);
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 
-extern Flightgroup * getStaticBaseFlightgroup( int faction );
-extern Flightgroup * getStaticNebulaFlightgroup( int faction );
-extern Flightgroup * getStaticAsteroidFlightgroup( int faction );
+extern Flightgroup *getStaticBaseFlightgroup(int faction);
+extern Flightgroup *getStaticNebulaFlightgroup(int faction);
+extern Flightgroup *getStaticAsteroidFlightgroup(int faction);
 
-template < typename T >
-static bool EvalCondition( const char *op, const T &left, const T &right )
-{
-    switch (op[0])
-    {
-    case '>':
-        switch (op[1])
-        {
-        case 0:
-            return left > right;
+template<typename T>
+static bool EvalCondition(const char *op, const T &left, const T &right) {
+    switch (op[0]) {
+        case '>':
+            switch (op[1]) {
+                case 0:
+                    return left > right;
 
+                case '=':
+                    return left >= right;
+
+                default:
+                    return false;
+            }
         case '=':
-            return left >= right;
+            switch (op[1]) {
+                case 0:
+                case '=':
+                    return left == right;
 
+                default:
+                    return false;
+            }
+        case '<':
+            switch (op[1]) {
+                case 0:
+                    return left < right;
+
+                case '=':
+                    return left <= right;
+
+                default:
+                    return false;
+            }
+        case '!':
+            switch (op[1]) {
+                case '=':
+                    return left != right;
+
+                default:
+                    return false;
+            }
         default:
             return false;
-        }
-    case '=':
-        switch (op[1])
-        {
-        case 0:
-        case '=':
-            return left == right;
-
-        default:
-            return false;
-        }
-    case '<':
-        switch (op[1])
-        {
-        case 0:
-            return left < right;
-
-        case '=':
-            return left <= right;
-
-        default:
-            return false;
-        }
-    case '!':
-        switch (op[1])
-        {
-        case '=':
-            return left != right;
-
-        default:
-            return false;
-        }
-    default:
-        return false;
     }
 }
 
@@ -164,162 +150,161 @@ static bool EvalCondition( const char *op, const T &left, const T &right )
 //    return rv;
 //}
 
-bool ConfigAllows( string var, float val )
-{
+bool ConfigAllows(string var, float val) {
     bool invert = false;
-    if (var.length() == 0)
+    if (var.length() == 0) {
         return true;
+    }
     if (var[0] == '-') {
-        var    = var.substr( 1 );
+        var = var.substr(1);
         invert = true;
     }
-    float x = XMLSupport::parse_floatf( vs_config->getVariable( "graphics", var, "0.0" ) );
-    if (var.length() == 0)
+    float x = XMLSupport::parse_floatf(vs_config->getVariable("graphics", var, "0.0"));
+    if (var.length() == 0) {
         return true;
+    }
     return invert ? -x >= val : x >= val;
 }
 
-Vector ComputeRotVel( float rotvel, const QVector &r, const QVector &s )
-{
-    if ( (r.i || r.j || r.k) && (s.i || s.j || s.k) ) {
-        QVector retval = r.Cross( s );
+Vector ComputeRotVel(float rotvel, const QVector &r, const QVector &s) {
+    if ((r.i || r.j || r.k) && (s.i || s.j || s.k)) {
+        QVector retval = r.Cross(s);
         retval.Normalize();
-        retval = retval*rotvel;
+        retval = retval * rotvel;
         return retval.Cast();
     } else {
-        return Vector( 0, rotvel, 0 );
+        return Vector(0, rotvel, 0);
     }
 }
 
-void GetLights( const vector< GFXLight > &origlights, vector< GFXLightLocal > &curlights, const char *str, float lightSize )
-{
-    int   tint;
-    char  isloc;
-    char *tmp = strdup( str );
+void GetLights(const vector<GFXLight> &origlights, vector<GFXLightLocal> &curlights, const char *str, float lightSize) {
+    int tint;
+    char isloc;
+    char *tmp = strdup(str);
     GFXLightLocal lloc;
-    char *st  = tmp;
-    int   numel;
-    while ( ( numel = sscanf( st, "%d%c", &tint, &isloc ) ) > 0 ) {
-        assert( tint < (int) origlights.size() );
-        lloc.ligh    = origlights[tint];
+    char *st = tmp;
+    int numel;
+    while ((numel = sscanf(st, "%d%c", &tint, &isloc)) > 0) {
+        assert(tint < (int) origlights.size());
+        lloc.ligh = origlights[tint];
         lloc.islocal = (numel > 1 && isloc == 'l');
 
         lloc.ligh.setSize(lightSize);
 
-        curlights.push_back( lloc );
-        while ( isspace( *st ) )
+        curlights.push_back(lloc);
+        while (isspace(*st)) {
             ++st;
-        while ( isalnum( *st ) )
+        }
+        while (isalnum(*st)) {
             ++st;
+        }
     }
-    free( tmp );
+    free(tmp);
 }
 
-extern Unit * getTopLevelOwner();
-extern BLENDFUNC parse_alpha( const char* );
-void SetSubunitRotation( Unit *un, float difficulty )
-{
+extern Unit *getTopLevelOwner();
+extern BLENDFUNC parse_alpha(const char *);
+
+void SetSubunitRotation(Unit *un, float difficulty) {
     Unit *unit;
     for (un_iter iter = un->getSubUnits(); (unit = *iter); ++iter) {
-        float x = 2*difficulty*( (float) rand() )/RAND_MAX-difficulty;
-        float y = 2*difficulty*( (float) rand() )/RAND_MAX-difficulty;
-        float z = 2*difficulty*( (float) rand() )/RAND_MAX-difficulty;
-        unit->SetAngularVelocity( Vector( x, y, z ) );
-        SetSubunitRotation( unit, difficulty );
+        float x = 2 * difficulty * ((float) rand()) / RAND_MAX - difficulty;
+        float y = 2 * difficulty * ((float) rand()) / RAND_MAX - difficulty;
+        float z = 2 * difficulty * ((float) rand()) / RAND_MAX - difficulty;
+        unit->SetAngularVelocity(Vector(x, y, z));
+        SetSubunitRotation(unit, difficulty);
     }
 }
 
-void parse_dual_alpha( const char *alpha, BLENDFUNC &blendSrc, BLENDFUNC &blendDst )
-{
+void parse_dual_alpha(const char *alpha, BLENDFUNC &blendSrc, BLENDFUNC &blendDst) {
     blendSrc = ONE;
     blendDst = ZERO;
-    if (alpha == NULL) {} else if (alpha[0] == '\0') {} else {
-        char *s = strdup( alpha );
-        char *d = strdup( alpha );
+    if (alpha == NULL) {
+    } else if (alpha[0] == '\0') {
+    } else {
+        char *s = strdup(alpha);
+        char *d = strdup(alpha);
         blendSrc = SRCALPHA;
         blendDst = INVSRCALPHA;
-        if ( 2 == sscanf( alpha, "%s %s", s, d ) ) {
-            if (strcmp( s, "true" ) != 0) {
-                blendSrc = parse_alpha( s );
-                blendDst = parse_alpha( d );
+        if (2 == sscanf(alpha, "%s %s", s, d)) {
+            if (strcmp(s, "true") != 0) {
+                blendSrc = parse_alpha(s);
+                blendDst = parse_alpha(d);
             }
         }
-        free( s );
-        free( d );
+        free(s);
+        free(d);
     }
 }
 
-int GetNumNearStarsScale()
-{
+int GetNumNearStarsScale() {
     return game_options.num_near_stars;
 }
 
-int GetNumStarsScale()
-{
+int GetNumStarsScale() {
     return game_options.num_far_stars;
 }
 
-float GetStarSpreadScale()
-{
-    return game_options.star_spreading*game_options.game_speed;
+float GetStarSpreadScale() {
+    return game_options.star_spreading * game_options.game_speed;
 }
 
-float ScaleOrbitDist( bool autogenerated )
-{
-    if (autogenerated)
-        return game_options.autogen_compactness*game_options.runtime_compactness;
+float ScaleOrbitDist(bool autogenerated) {
+    if (autogenerated) {
+        return game_options.autogen_compactness * game_options.runtime_compactness;
+    }
     return game_options.runtime_compactness;
 }
 
-extern float ScaleJumpRadius( float radius );
+extern float ScaleJumpRadius(float radius);
 
-void StarSystem::LoadXML( const string filename, const Vector &centroid, const float timeofyear )
-{
+void StarSystem::LoadXML(const string filename, const Vector &centroid, const float timeofyear) {
     using namespace StarXML;
-    bool   autogenerated = false;
+    bool autogenerated = false;
     this->filename = filename;
-    string file = VSFileSystem::GetCorrectStarSysPath( filename, autogenerated );
-    if ( file.empty() )
+    string file = VSFileSystem::GetCorrectStarSysPath(filename, autogenerated);
+    if (file.empty()) {
         file = filename;
+    }
 
-    if (game_options.game_speed_affects_autogen_systems)
+    if (game_options.game_speed_affects_autogen_systems) {
         autogenerated = false;
+    }
 
     xml = new Star_XML;
     xml->scale = 1;
-    xml->fade  = autogenerated;
+    xml->fade = autogenerated;
     xml->scale *= game_options.star_system_scale;
     xml->parentterrain = NULL;
-    xml->ct     = NULL;
+    xml->ct = NULL;
     xml->systemcentroid = centroid;
-    xml->timeofyear     = timeofyear;
+    xml->timeofyear = timeofyear;
     xml->starsp = GetStarSpreadScale();
-    xml->numnearstars   = GetNumNearStarsScale();
+    xml->numnearstars = GetNumNearStarsScale();
     xml->numstars = GetNumStarsScale();
-    xml->backgroundname = string( "cube" );
-    xml->backgroundColor = GFXColor(1.0,1.0,1.0,1.0);
+    xml->backgroundname = string("cube");
+    xml->backgroundColor = GFXColor(1.0, 1.0, 1.0, 1.0);
     xml->backgroundDegamma = false;
-    xml->reflectivity   = game_options.reflectivity;
+    xml->reflectivity = game_options.reflectivity;
     xml->unitlevel = 0;
-
 
     VSFile other_file;
     string full_path = other_file.GetSystemDirectoryPath(file);
     SystemFactory sys = SystemFactory(file, full_path, xml);
 
-    for(auto& unit : xml->moons)
-    {
+    for (auto &unit : xml->moons) {
         if (unit->isUnit() == _UnitType::planet) {
             Unit *un = nullptr;
             // This code here is completely unclear to me and should be refactored
             // TODO: remove the whole PlanetIterator thing and all custom iterators
-            for (Planet::PlanetIterator iter( (Planet*) unit ); (un = *iter); iter.advance() )
-                AddUnit( un );
+            for (Planet::PlanetIterator iter((Planet *) unit); (un = *iter); iter.advance()) {
+                AddUnit(un);
+            }
         } else {
-            AddUnit( unit );
+            AddUnit(unit);
         }
     }
 
-    createBackground( xml );
+    createBackground(xml);
     delete xml;
 }

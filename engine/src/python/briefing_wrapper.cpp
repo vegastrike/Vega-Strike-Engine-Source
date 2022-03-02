@@ -1,27 +1,24 @@
-/**
-* briefing_wrapper.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef PYTHON_STUB
 #include <math.h>
@@ -30,73 +27,69 @@
 #include "cmd/script/mission.h"
 #include "faction_generic.h"
 
-namespace BriefingUtil
-{
-int addShip( string name, string faction, Vector vec )
-{
-    return mission->briefing->AddStarship( name.c_str(),
-                                           FactionUtil::GetFactionIndex( faction ),
-                                           vec );
+namespace BriefingUtil {
+int addShip(string name, string faction, Vector vec) {
+    return mission->briefing->AddStarship(name.c_str(),
+            FactionUtil::GetFactionIndex(faction),
+            vec);
 }
-void removeShip( int whichship )
-{
-    mission->briefing->RemoveStarship( whichship );
+
+void removeShip(int whichship) {
+    mission->briefing->RemoveStarship(whichship);
 }
-void enqueueOrder( int whichship, Vector vec, float time )
-{
-    mission->briefing->EnqueueOrder( whichship, vec, time );
+
+void enqueueOrder(int whichship, Vector vec, float time) {
+    mission->briefing->EnqueueOrder(whichship, vec, time);
 }
-void replaceOrder( int whichship, Vector vec, float time )
-{
-    mission->briefing->OverrideOrder( whichship, vec, time );
+
+void replaceOrder(int whichship, Vector vec, float time) {
+    mission->briefing->OverrideOrder(whichship, vec, time);
 }
-Vector getShipPosition( int whichship )
-{
-    return mission->briefing->GetPosition( whichship );
+
+Vector getShipPosition(int whichship) {
+    return mission->briefing->GetPosition(whichship);
 }
-void setShipPosition( int whichship, Vector vec )
-{
-    mission->briefing->SetPosition( whichship, vec );
+
+void setShipPosition(int whichship, Vector vec) {
+    mission->briefing->SetPosition(whichship, vec);
 }
-void terminate()
-{
+
+void terminate() {
     mission->BriefingEnd();
 }
-void setCamPosition( QVector p )
-{
-    mission->briefing->cam.SetPosition( p, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
-}
-void setCamOrientation( Vector p, Vector q, Vector r )
-{
-    mission->briefing->cam.SetOrientation( p, q, r );
-}
-void setCloak( int whichship, float cloak )
-{
-    mission->briefing->SetCloak( whichship, cloak );
-}
-}
-PYTHON_BEGIN_MODULE( Briefing )
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::addShip, "addShip" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::removeShip, "removeShip" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::enqueueOrder, "enqueueOrder" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::replaceOrder, "replaceOrder" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::getShipPosition, "getShipPosition" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::setShipPosition, "setShipPosition" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::terminate, "terminate" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::setCamPosition, "setCamPosition" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::setCamOrientation, "setCamOrientation" );
-PYTHON_DEFINE_GLOBAL( Briefing, &BriefingUtil::setCloak, "setCloak" );
-PYTHON_END_MODULE( Briefing )
 
-void InitBriefing()
-{
-    PyImport_AppendInittab("Briefing",PYTHON_MODULE_INIT_FUNCTION(Briefing));
+void setCamPosition(QVector p) {
+    mission->briefing->cam.SetPosition(p, Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0));
 }
 
-void InitBriefing2()
-{
+void setCamOrientation(Vector p, Vector q, Vector r) {
+    mission->briefing->cam.SetOrientation(p, q, r);
+}
+
+void setCloak(int whichship, float cloak) {
+    mission->briefing->SetCloak(whichship, cloak);
+}
+}
+PYTHON_BEGIN_MODULE(Briefing)
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::addShip, "addShip");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::removeShip, "removeShip");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::enqueueOrder, "enqueueOrder");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::replaceOrder, "replaceOrder");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::getShipPosition, "getShipPosition");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setShipPosition, "setShipPosition");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::terminate, "terminate");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setCamPosition, "setCamPosition");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setCamOrientation, "setCamOrientation");
+    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setCloak, "setCloak");
+PYTHON_END_MODULE(Briefing)
+
+void InitBriefing() {
+    PyImport_AppendInittab("Briefing", PYTHON_MODULE_INIT_FUNCTION(Briefing));
+}
+
+void InitBriefing2() {
     Python::reseterrors();
-    PYTHON_INIT_MODULE( Briefing );
+    PYTHON_INIT_MODULE(Briefing);
     Python::reseterrors();
 }
 

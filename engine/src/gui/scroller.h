@@ -1,22 +1,23 @@
 /*
- * Vega Strike
- * Copyright (C) 2003 Mike Byron
+ * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef __SCROLLER_H__
@@ -33,56 +34,58 @@
 //The only "event" it communicates to the outside world is a change
 //of scroll position.
 
-class Scroller : public GroupControl
-{
+class Scroller : public GroupControl {
 public:
 //Parameters for the scrolling range:  Max value, visible values, optional min value.
 //The "visible" value sets the "thumb" size.
-    void setRangeValues( int max, int visible, int min = 0 );
+    void setRangeValues(int max, int visible, int min = 0);
 
 //Scroll position.
 //This is some value between min and max.
-    int scrollPosition( void )
-    {
+    int scrollPosition(void) {
         return m_scrollPosition;
     }
-    void setScrollPosition( int pos );
+
+    void setScrollPosition(int pos);
 
 //The color of the thumb.
-    void setThumbColor( const GFXColor &c, const GFXColor &outline );
+    void setThumbColor(const GFXColor &c, const GFXColor &outline);
 
 //The background color of the buttons.
-    void setButtonColor( const GFXColor &c );
+    void setButtonColor(const GFXColor &c);
 
 //Draw the control.
-    virtual void draw( void );
+    virtual void draw(void);
 
 //OVERRIDES
 
 //The outside boundaries of the control.
-    virtual void setRect( const Rect &r );
+    virtual void setRect(const Rect &r);
 
 //Background color of control.
-    virtual void setColor( const GFXColor &c );
+    virtual void setColor(const GFXColor &c);
 
 //This is used as the color of the arrows on the scroller buttons.
-    virtual void setTextColor( const GFXColor &c );
+    virtual void setTextColor(const GFXColor &c);
 
 //Process a command event.
-    virtual bool processCommand( const EventCommandId &command, Control *control );
+    virtual bool processCommand(const EventCommandId &command, Control *control);
 
 //CONSTRUCTION
-public: Scroller( void );
-    virtual ~Scroller( void ) {}
+public:
+    Scroller(void);
+
+    virtual ~Scroller(void) {
+    }
 
 protected:
 //INTERNAL IMPLEMENTATION
 
 //Calculate the rects for the child controls.
-    void calcLayout( void );
+    void calcLayout(void);
 
 //Create the child controls.
-    void createControls( void );
+    void createControls(void);
 
 //VARIABLES
 protected:
@@ -93,7 +96,7 @@ protected:
     GFXColor m_thumbColor;  //Color to paint the thumb.
     GFXColor m_thumbOutlineColor; //Color of outline for thumb.
 
-    bool     m_needLayout;  //True = Need to re-layout the controls.
+    bool m_needLayout;  //True = Need to re-layout the controls.
 };
 
 #endif   //__SCROLLER_H__

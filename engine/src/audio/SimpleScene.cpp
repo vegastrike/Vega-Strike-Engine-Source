@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::SimpleScene
 //
@@ -34,66 +36,57 @@
 
 namespace Audio {
 
-    SimpleScene::SimpleScene(const std::string &name) :
-        Scene(name)
-    {
+SimpleScene::SimpleScene(const std::string &name) :
+        Scene(name) {
+}
+
+SimpleScene::~SimpleScene() {
+    SourceSet::iterator it;
+
+    for (it = activeSources.begin(); it != activeSources.end(); ++it) {
+        (*it)->stopPlaying();
+        detach(dynamic_cast<SimpleSource *>(it->get()));
+    }
+}
+
+void SimpleScene::add(SharedPtr<Source> source) {
+    attach(dynamic_cast<SimpleSource *>(source.get()));
+}
+
+void SimpleScene::remove(SharedPtr<Source> source) {
+    detach(dynamic_cast<SimpleSource *>(source.get()));
+}
+
+Listener &SimpleScene::getListener() {
+    return listener;
+}
+
+void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing) {
+    if (playing) {
+        activeSources.insert(source);
+    } else {
+        activeSources.erase(source);
     }
 
-    SimpleScene::~SimpleScene()
-    {
-        SourceSet::iterator it;
+    SceneManager::getSingleton()->notifySourcePlaying(source, shared_from_this(), playing);
+}
 
-        for (it = activeSources.begin(); it != activeSources.end(); ++it) {
-            (*it)->stopPlaying();
-            detach(dynamic_cast<SimpleSource*>(it->get()));
-        }
-    }
+void SimpleScene::attach(SimpleSource *source) {
+    source->notifySceneAttached(this);
+}
 
-    void SimpleScene::add(SharedPtr<Source> source)
-    {
-        attach(dynamic_cast<SimpleSource*>(source.get()));
-    }
+void SimpleScene::detach(SimpleSource *source) {
+    source->notifySceneAttached(0);
+}
 
-    void SimpleScene::remove(SharedPtr<Source> source)
-    {
-        detach(dynamic_cast<SimpleSource*>(source.get()));
-    }
+/** Gets an iterator over active sources */
+SimpleScene::SourceIterator SimpleScene::getActiveSources() {
+    return activeSources.begin();
+}
 
-    Listener& SimpleScene::getListener()
-    {
-        return listener;
-    }
-
-    void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing)
-    {
-        if (playing)
-            activeSources.insert(source);
-        else
-            activeSources.erase(source);
-
-        SceneManager::getSingleton()->notifySourcePlaying(source, shared_from_this(), playing);
-    }
-
-    void SimpleScene::attach(SimpleSource *source)
-    {
-        source->notifySceneAttached(this);
-    }
-
-    void SimpleScene::detach(SimpleSource *source)
-    {
-        source->notifySceneAttached(0);
-    }
-
-    /** Gets an iterator over active sources */
-    SimpleScene::SourceIterator SimpleScene::getActiveSources()
-    {
-        return activeSources.begin();
-    }
-
-    /** Gets the ending iterator of active sources */
-    SimpleScene::SourceIterator SimpleScene::getActiveSourcesEnd()
-    {
-        return activeSources.end();
-    }
+/** Gets the ending iterator of active sources */
+SimpleScene::SourceIterator SimpleScene::getActiveSourcesEnd() {
+    return activeSources.end();
+}
 
 };

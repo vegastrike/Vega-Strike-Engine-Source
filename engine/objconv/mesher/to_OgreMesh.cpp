@@ -1,27 +1,24 @@
-/**
-* to_OgreMesh.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifdef HAVE_OGRE
@@ -560,7 +557,7 @@ static string AddMaterial( void *outputcontext, const XML &xml )
         string tpl, tplnam;
         map< string, string >::const_iterator tplit = templates.find( GetMaterialCategory( xml, tex ) );
         if ( ( tplit != templates.end() && !tplit->second.empty() )         //First, the appropriate one
-            || ( ( tplit = templates.find( "dif+glow+ppl+env" ) ) != templates.end() && !tplit->second.empty() )          //Next, try the übermaterial
+            || ( ( tplit = templates.find( "dif+glow+ppl+env" ) ) != templates.end() && !tplit->second.empty() )          //Next, try the ï¿½bermaterial
             || ( ( tplit = templates.find( "basic" ) ) != templates.end() && !tplit->second.empty() ) ) {
             //Finally, go to basics
             tpl    = tplit->second;
@@ -1145,17 +1142,17 @@ void AutoLOD( void *outputcontext, bool force, int numLod, float reductionFactor
         
         Real currDist = refDistance;
         
-    #if (OGRE_VERSION >= 0x010700)
+#if (OGRE_VERSION >= 0x010700)
         Ogre::Mesh::LodValueList distanceList;
 
         // pixel area is squared length, and length is proportional to triangle count
-        const Real distFactor = reductionFactor * reductionFactor; 
+        const Real distFactor = reductionFactor * reductionFactor;
         newMesh->setLodStrategy(Ogre::LodStrategyManager::getSingletonPtr()->
             getStrategy( "PixelCount" ) );
-    #else
+#else
         Ogre::Mesh::LodDistanceList distanceList;
         const Real distFactor = ( (reduction > 0.00001) ? 1/reduction : 1 );
-    #endif
+#endif
 
         for (int iLod = 0; iLod < numLod; ++iLod, currDist *= distFactor)
             distanceList.push_back( currDist );

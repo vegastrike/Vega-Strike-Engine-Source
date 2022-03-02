@@ -2,17 +2,17 @@
     Copyright (C) 2000 by Andrew Zabolotny (Intel version)
     Copyright (C) 2002 by Matthew Reda <reda@mac.com> (PowerPC version)
     Fast computation of sqrt(x) and 1/sqrt(x)
-  
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
-  
+
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Library General Public License for more details.
-  
+
     You should have received a copy of the GNU Library General Public
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -28,15 +28,14 @@
 #ifndef __QSQRT_H__
 #define __QSQRT_H__
 
-
 #if (!defined (CS_NO_QSQRT)) && defined (CS_PROCESSOR_X86) && defined (CS_COMPILER_GCC)
 #include "Stdafx.h"
 /*
   NB: Single-precision floating-point format (32 bits):
-	SEEEEEEE.EMMMMMMM.MMMMMMMM.MMMMMMMM
-	S: Sign (0 - positive, 1 - negative)
-	E: Exponent (plus 127, 8 bits)
-	M: Mantissa (23 bits)
+    SEEEEEEE.EMMMMMMM.MMMMMMMM.MMMMMMMM
+    S: Sign (0 - positive, 1 - negative)
+    E: Exponent (plus 127, 8 bits)
+    M: Mantissa (23 bits)
 */
 
 /**
@@ -62,29 +61,29 @@ static inline float qsqrt (float x)
 // return a * x;
 
   __asm__ (
-		"flds	%1\n"			// x
-		"movl	$0xbe6f0000,%%eax\n"
-		"subl	%1,%%eax\n"
-		"shrl	$1,%%eax\n"
-		"movl	%%eax,%1\n"
-		"flds	%2\n"			// x 0.5
-		"fmul	%%st(1)\n"		// x h
-		"flds	%3\n"			// x h 1.5
-		"flds	%1\n"			// x h 1.5 a
-		"fld	%%st\n"			// x h 1.5 a a
-		"fmul	%%st\n"			// x h 1.5 a a*a
-		"fmul	%%st(3)\n"		// x h 1.5 a a*a*h
-		"fsubr	%%st(2)\n"		// x h 1.5 a 1.5-a*a*h
-		"fmulp	%%st(1)\n"		// x h 1.5 a
-		"fld	%%st\n"			// x h 1.5 a a
-		"fmul	%%st\n"			// x h 1.5 a a*a
-		"fmulp	%%st(3)\n"		// x a*a*h 1.5 a
-		"fxch\n"			// x a*a*h a 1.5
-		"fsubp  %%st,%%st(2)\n"		// x 1.5-a*a*h a
-		"fmulp	%%st(1)\n"		// x a
-		"fmulp	%%st(1)\n"		// a
-	: "=&t" (ret), "+m" (x) : "m" (0.5F), "m" (1.5F)
-	: "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
+        "flds	%1\n"			// x
+        "movl	$0xbe6f0000,%%eax\n"
+        "subl	%1,%%eax\n"
+        "shrl	$1,%%eax\n"
+        "movl	%%eax,%1\n"
+        "flds	%2\n"			// x 0.5
+        "fmul	%%st(1)\n"		// x h
+        "flds	%3\n"			// x h 1.5
+        "flds	%1\n"			// x h 1.5 a
+        "fld	%%st\n"			// x h 1.5 a a
+        "fmul	%%st\n"			// x h 1.5 a a*a
+        "fmul	%%st(3)\n"		// x h 1.5 a a*a*h
+        "fsubr	%%st(2)\n"		// x h 1.5 a 1.5-a*a*h
+        "fmulp	%%st(1)\n"		// x h 1.5 a
+        "fld	%%st\n"			// x h 1.5 a a
+        "fmul	%%st\n"			// x h 1.5 a a*a
+        "fmulp	%%st(3)\n"		// x a*a*h 1.5 a
+        "fxch\n"			// x a*a*h a 1.5
+        "fsubp  %%st,%%st(2)\n"		// x 1.5-a*a*h a
+        "fmulp	%%st(1)\n"		// x a
+        "fmulp	%%st(1)\n"		// a
+    : "=&t" (ret), "+m" (x) : "m" (0.5F), "m" (1.5F)
+    : "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
   );
   return ret;
 }
@@ -100,28 +99,28 @@ static inline float qisqrt (float x)
 {
   float ret;
   __asm__ (
-		"flds	%1\n"			// x
-		"movl	$0xbe6f0000,%%eax\n"
-		"subl	%1,%%eax\n"
-		"shrl	$1,%%eax\n"
-		"movl	%%eax,%1\n"
-		"flds	%2\n"			// x 0.5
-		"fmulp	%%st(1)\n"		// h
-		"flds	%3\n"			// h 1.5
-		"flds	%1\n"			// h 1.5 a
-		"fld	%%st\n"			// h 1.5 a a
-		"fmul	%%st\n"			// h 1.5 a a*a
-		"fmul	%%st(3)\n"		// h 1.5 a a*a*h
-		"fsubr	%%st(2)\n"		// h 1.5 a 1.5-a*a*h
-		"fmulp	%%st(1)\n"		// h 1.5 a
-		"fld	%%st\n"			// h 1.5 a a
-		"fmul	%%st\n"			// h 1.5 a a*a
-		"fmulp	%%st(3)\n"		// a*a*h 1.5 a
-		"fxch\n"			// a*a*h a 1.5
-		"fsubp  %%st,%%st(2)\n"		// 1.5-a*a*h a
-		"fmulp	%%st(1)\n"		// a
-	: "=t" (ret), "+m" (x) : "m" (0.5F), "m" (1.5F)
-	: "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
+        "flds	%1\n"			// x
+        "movl	$0xbe6f0000,%%eax\n"
+        "subl	%1,%%eax\n"
+        "shrl	$1,%%eax\n"
+        "movl	%%eax,%1\n"
+        "flds	%2\n"			// x 0.5
+        "fmulp	%%st(1)\n"		// h
+        "flds	%3\n"			// h 1.5
+        "flds	%1\n"			// h 1.5 a
+        "fld	%%st\n"			// h 1.5 a a
+        "fmul	%%st\n"			// h 1.5 a a*a
+        "fmul	%%st(3)\n"		// h 1.5 a a*a*h
+        "fsubr	%%st(2)\n"		// h 1.5 a 1.5-a*a*h
+        "fmulp	%%st(1)\n"		// h 1.5 a
+        "fld	%%st\n"			// h 1.5 a a
+        "fmul	%%st\n"			// h 1.5 a a*a
+        "fmulp	%%st(3)\n"		// a*a*h 1.5 a
+        "fxch\n"			// a*a*h a 1.5
+        "fsubp  %%st,%%st(2)\n"		// 1.5-a*a*h a
+        "fmulp	%%st(1)\n"		// a
+    : "=t" (ret), "+m" (x) : "m" (0.5F), "m" (1.5F)
+    : "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
   );
   return ret;
 }

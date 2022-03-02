@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::Source
 //
@@ -33,65 +35,66 @@
 
 namespace Audio {
 
-    Listener::Listener() :
-        cosAngleRange(-1,-1),
-        position(0,0,0),
-        atDirection(0,0,-1),
-        upDirection(0,1,0),
-        velocity(0,0,0),
+Listener::Listener() :
+        cosAngleRange(-1, -1),
+        position(0, 0, 0),
+        atDirection(0, 0, -1),
+        upDirection(0, 1, 0),
+        velocity(0, 0, 0),
         radius(1),
         gain(1),
         worldToLocal(1) // set to identity, given default settings
-    {
+{
+}
+
+Listener::~Listener() {
+}
+
+Range<Scalar> Listener::getAngleRange() const {
+    return Range<Scalar>(Scalar(acos(cosAngleRange.min)),
+            Scalar(acos(cosAngleRange.max)));
+}
+
+void Listener::setAngleRange(Range<Scalar> r) {
+    cosAngleRange.min = Scalar(cos(r.min));
+    cosAngleRange.max = Scalar(cos(r.max));
+    dirty.attributes = 1;
+}
+
+void Listener::update(int flags) {
+    if (!dirty.attributes) {
+        flags &= ~RenderableListener::UPDATE_ATTRIBUTES;
+    }
+    if (!dirty.location) {
+        flags &= ~RenderableListener::UPDATE_LOCATION;
+    }
+    if (!dirty.gain) {
+        flags &= ~RenderableListener::UPDATE_GAIN;
     }
 
-    Listener::~Listener()
-    {
+    if (getRenderable().get() != 0) {
+        getRenderable()->update(flags);
     }
 
-    Range<Scalar> Listener::getAngleRange() const
-    {
-        return Range<Scalar>(Scalar(acos(cosAngleRange.min)),
-                             Scalar(acos(cosAngleRange.max)));
+    if (flags & RenderableListener::UPDATE_ATTRIBUTES) {
+        dirty.attributes = 0;
     }
-
-    void Listener::setAngleRange(Range<Scalar> r)
-    {
-        cosAngleRange.min = Scalar(cos(r.min));
-        cosAngleRange.max = Scalar(cos(r.max));
-        dirty.attributes = 1;
+    if (flags & RenderableListener::UPDATE_GAIN) {
+        dirty.gain = 0;
     }
-
-    void Listener::update(int flags)
-    {
-        if (!dirty.attributes)
-            flags &= ~RenderableListener::UPDATE_ATTRIBUTES;
-        if (!dirty.location)
-            flags &= ~RenderableListener::UPDATE_LOCATION;
-        if (!dirty.gain)
-            flags &= ~RenderableListener::UPDATE_GAIN;
-
-        if (getRenderable().get() != 0)
-            getRenderable()->update(flags);
-
-        if (flags & RenderableListener::UPDATE_ATTRIBUTES)
-            dirty.attributes = 0;
-        if (flags & RenderableListener::UPDATE_GAIN)
-            dirty.gain = 0;
-        if (flags & RenderableListener::UPDATE_LOCATION) {
-            worldToLocal =
+    if (flags & RenderableListener::UPDATE_LOCATION) {
+        worldToLocal =
                 Matrix3(
-                    atDirection.cross(upDirection),
-                    upDirection,
-                    -atDirection
+                        atDirection.cross(upDirection),
+                        upDirection,
+                        -atDirection
                 ).inverse();
-            dirty.location = 0;
-        }
+        dirty.location = 0;
     }
+}
 
-    Vector3 Listener::toLocalDirection(Vector3 dir) const
-    {
-        return worldToLocal * dir;
-    }
+Vector3 Listener::toLocalDirection(Vector3 dir) const {
+    return worldToLocal * dir;
+}
 
 };

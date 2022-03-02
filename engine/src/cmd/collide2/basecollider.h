@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,16 +37,16 @@
 /**
  * A structure used to return collision pairs.
  */
-struct csCollisionPair
-{
+struct csCollisionPair {
     csCollisionPair()
-        : a1(0.0f, 0.0f, 0.0f),
-          b1(0.0f, 0.0f, 0.0f),
-          c1(0.0f, 0.0f, 0.0f),
-          a2(0.0f, 0.0f, 0.0f),
-          b2(0.0f, 0.0f, 0.0f),
-          c2(0.0f, 0.0f, 0.0f)
-          { }
+            : a1(0.0f, 0.0f, 0.0f),
+            b1(0.0f, 0.0f, 0.0f),
+            c1(0.0f, 0.0f, 0.0f),
+            a2(0.0f, 0.0f, 0.0f),
+            b2(0.0f, 0.0f, 0.0f),
+            c2(0.0f, 0.0f, 0.0f) {
+    }
+
     Opcode::Point a1, b1, c1;   // First triangle
     Opcode::Point a2, b2, c2;   // Second triangle
 };

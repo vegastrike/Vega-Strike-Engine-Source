@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::RenderableListener
 //
@@ -31,22 +33,20 @@
 
 namespace Audio {
 
-    RenderableListener::RenderableListener(Listener *_listener) :
-        listener(_listener)
-    {
-    }
+RenderableListener::RenderableListener(Listener *_listener) :
+        listener(_listener) {
+}
 
-    RenderableListener::~RenderableListener()
-    {
-        // Just in case.
-        listener = 0;
-    }
+RenderableListener::~RenderableListener() {
+    // Just in case.
+    listener = 0;
+}
 
-    void RenderableListener::update(int flags)
-    {
-        try {
-            updateImpl(flags);
-        } catch(const Exception& e) {}
+void RenderableListener::update(int flags) {
+    try {
+        updateImpl(flags);
+    } catch (const Exception &e) {
     }
+}
 
 };

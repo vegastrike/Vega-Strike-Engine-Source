@@ -1,6 +1,7 @@
 /*
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * http://vegastrike.sourceforge.net/
  *
@@ -42,59 +43,60 @@
 #include "cmd/unit_generic.h"
 #include "mission.h"
 
-PYTHON_BEGIN_MODULE( Base )
+PYTHON_BEGIN_MODULE(Base)
 //Nothing here, but keeps those files that do a "import Base" happy.
-PYTHON_END_MODULE( Base )
+PYTHON_END_MODULE(Base)
 
-PYTHON_BEGIN_MODULE( Briefing )
+PYTHON_BEGIN_MODULE(Briefing)
 //Nothing here, but keeps those files that do a "import Briefing" happy.
-PYTHON_END_MODULE( Briefing )
+PYTHON_END_MODULE(Briefing)
 
-
-void InitBase()
-{
-    PyImport_AppendInittab("Base",PYTHON_MODULE_INIT_FUNCTION(Base));
+void InitBase() {
+    PyImport_AppendInittab("Base", PYTHON_MODULE_INIT_FUNCTION(Base));
 }
 
-void InitBriefing()
-{
-    PyImport_AppendInittab("Briefing",PYTHON_MODULE_INIT_FUNCTION(Briefing));
+void InitBriefing() {
+    PyImport_AppendInittab("Briefing", PYTHON_MODULE_INIT_FUNCTION(Briefing));
 }
 
-void InitBase2()
-{
+void InitBase2() {
     Python::reseterrors();
-    PYTHON_INIT_MODULE( Base );
-    Python::reseterrors();
-}
-void InitBriefing2()
-{
-    Python::reseterrors();
-    PYTHON_INIT_MODULE( Briefing );
+    PYTHON_INIT_MODULE(Base);
     Python::reseterrors();
 }
 
-void Mission::DirectorLoop()
-{
+void InitBriefing2() {
+    Python::reseterrors();
+    PYTHON_INIT_MODULE(Briefing);
+    Python::reseterrors();
+}
+
+void Mission::DirectorLoop() {
     gametime += SIMULATION_ATOM;     //elapsed;
 
     try {
-        if (runtime.pymissions)
+        if (runtime.pymissions) {
             runtime.pymissions->Execute();
+        }
     }
     catch (...) {
-        if ( PyErr_Occurred() ) {
+        if (PyErr_Occurred()) {
             PyErr_Print();
             PyErr_Clear();
-            fflush( stderr );
-            fflush( stdout );
-        } throw;
+            fflush(stderr);
+            fflush(stdout);
+        }
+        throw;
     }
 }
-void Mission::BriefingUpdate() {}
-void Mission::DirectorBenchmark() {}
-varInst* Mission::call_briefing( missionNode *node, int mode )
-{
+
+void Mission::BriefingUpdate() {
+}
+
+void Mission::DirectorBenchmark() {
+}
+
+varInst *Mission::call_briefing(missionNode *node, int mode) {
     return NULL;
 }
 

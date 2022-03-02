@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,22 +30,22 @@
 #include <string>
 #include <vector>
 class UnitContainer;
-class PythonMissionBaseClass
-{
+class PythonMissionBaseClass {
 protected:
     virtual void Destructor();
 public:
-    std::vector< UnitContainer* >relevant_units;
+    std::vector<UnitContainer *> relevant_units;
     PythonMissionBaseClass();
-    virtual void Destroy()
-    {
+
+    virtual void Destroy() {
         Destructor();
     }
+
     virtual ~PythonMissionBaseClass();
     virtual void Execute();
-    virtual void callFunction( std::string s );
+    virtual void callFunction(std::string s);
     virtual std::string Pickle();
-    virtual void UnPickle( std::string s );
+    virtual void UnPickle(std::string s);
 };
 
 #endif

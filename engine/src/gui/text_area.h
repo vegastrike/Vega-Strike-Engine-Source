@@ -1,21 +1,24 @@
-/***************************************************************************
-*                           text_area.h  -  description
-*                           --------------------------
-*                           begin                : January 10, 2002
-*                           copyright            : (C) 2002 by David Ranger
-*                           email                : ussreliant@users.sourceforge.net
-*                           copyright            : (C) 2020 by Stephen G. Tuggy
-*                           email                : sgt@stephengtuggy.com
-***************************************************************************/
-
-/***************************************************************************
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   any later version.                                                    *
-*                                                                         *
-***************************************************************************/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef TEXT_AREA_H
 #define TEXT_AREA_H
@@ -85,51 +88,54 @@
 #define IMG_SCROLLBAR 11
 #define IMG_END 13
 
-class TextArea
-{
-public: TextArea( void );
-    TextArea( float x, float y, float wid, float hei, int scrollbar );
-    ~TextArea( void );
-    int GetSelectedItem()
-    {
+class TextArea {
+public:
+    TextArea(void);
+    TextArea(float x, float y, float wid, float hei, int scrollbar);
+    ~TextArea(void);
+
+    int GetSelectedItem() {
         return cur_selected;
     }
-    void SetSelectedItem( int newh )
-    {
+
+    void SetSelectedItem(int newh) {
         cur_selected = newh;
     }
-    void DoHighlight( int yes );        //DoHighlight(0) to disable mouse highlighting. Also disable clicking on entries
-    void DoMultiline( int yes )
-    {
+
+    void DoHighlight(int yes);        //DoHighlight(0) to disable mouse highlighting. Also disable clicking on entries
+    void DoMultiline(int yes) {
         do_multiline = yes;
     }                                                   //DoMultiline(1) to enable multi-line entries
-    void Refresh( void );
-    void RenderText( void );
-    void AddTextItem( const char *name, const char *description, const char *parent_name = NULL, const GFXColor col = GFXColor(
-                         1,
-                         1,
-                         1,
-                         1 ) );
-    void ChangeTextItem( const char *name, const char *description, bool wrap = false );
-    void ChangeTextItemColor( const char *name, const GFXColor &col );
-    void SetText( const char *text );   //Sets the text. Enables Multiline and disables highlighting
-    void ClearList( void );
+    void Refresh(void);
+    void RenderText(void);
+    void AddTextItem(const char *name,
+            const char *description,
+            const char *parent_name = NULL,
+            const GFXColor col = GFXColor(
+                    1,
+                    1,
+                    1,
+                    1));
+    void ChangeTextItem(const char *name, const char *description, bool wrap = false);
+    void ChangeTextItemColor(const char *name, const GFXColor &col);
+    void SetText(const char *text);   //Sets the text. Enables Multiline and disables highlighting
+    void ClearList(void);
 //Returns the char of the currently selected item. NULL if nothing is selected
-    char * GetSelectedItemName( void );
-    char * GetSelectedItemDesc( void );
-    void SortList( void );
+    char *GetSelectedItemName(void);
+    char *GetSelectedItemDesc(void);
+    void SortList(void);
 
 //Returns 1 if the click is inside the text area. 0 if it's outside. Same thing for movement
 //The class requires you convert the x,y co-ordinate to a -1 to 1 float. The class doesn't know the screen dimensions
-    int MouseClick( int button, int state, float x, float y );
-    int MouseMove( float x, float y );
+    int MouseClick(int button, int state, float x, float y);
+    int MouseMove(float x, float y);
 //Mouse movement while the button is clicked
-    int MouseMoveClick( float x, float y );
+    int MouseMoveClick(float x, float y);
 
 //type: 1 is click
 //2 is drag
 //3 is movement
-    int DoMouse( int type, float x, float y, int button, int state );
+    int DoMouse(int type, float x, float y, int button, int state);
 
 private:
 //Flag that enables/disables the scrollbar (It is not shown if it is disabled). This includes the scroll buttons
@@ -168,29 +174,29 @@ private:
     float vertical_left_of_text;
 
 //Size of the font. The float version is to prevent rounding errors in calculations
-    int   font_size;
+    int font_size;
     float font_size_float;
 
 //The number of lines of text we can display at once
     float max_lines;
 
 //0 for no button clicked, 1 for top button, 2 for bottom button, 3 for scrollbar, 4 for above scrollbar, 5 for below scrollbar
-    char  button_pressed;
+    char button_pressed;
 
 //The currently highlighted item
-    int   cur_highlighted;
+    int cur_highlighted;
 
 //The number of items in our list
-    int   item_count;
+    int item_count;
 
 //The currently selected number
-    int   cur_selected;
+    int cur_selected;
 
 //The number of the first item in the visible area
-    int   top_item_number;
+    int top_item_number;
 
 //The number of items to jump when clicking in the passive area of the scrollbar
-    int   page_size;
+    int page_size;
 
 //This stores the y coord of where the mouse was when it started dragging the scrollbar
     float scroll_start;
@@ -199,58 +205,57 @@ private:
     float scroll_cur;
 
 //Linked list of items that will appear if the text area is a select box (doubles as an expanding tree)
-    class TextAreaItem*ItemList;
+    class TextAreaItem *ItemList;
 
 //Check if that x,y co-ordinate is inside us
-    int Inside( float x, float y, int group );
-    void LoadTextures( void );
-    void RenderTextItem( TextAreaItem *current, int level );
+    int Inside(float x, float y, int group);
+    void LoadTextures(void);
+    void RenderTextItem(TextAreaItem *current, int level);
 
-    int LocateCount( float y );
+    int LocateCount(float y);
 
 //Highlighted text (mouse over, selected item) will only occur at a Refresh()
-    void HighlightCount( int count, int type );
+    void HighlightCount(int count, int type);
 
-    void DisplayScrollbar( void );
-    char * GetSelectedItem( int type );
+    void DisplayScrollbar(void);
+    char *GetSelectedItem(int type);
 
 //Takes a line and puts them in as seperate items (line wrapping)
-    void ChompIntoItems( const char *text, const char *parent );
+    void ChompIntoItems(const char *text, const char *parent);
 };
 
 //Keep everything public so the TextArea class can get faster access to the elements in this class
-class TextAreaItem
-{
+class TextAreaItem {
 public:
 //TextAreaItem(void);
 //parent_class is NULL for the master TextAreaItem
-    TextAreaItem( const char *new_name = "blank", const char *desc = "", TextAreaItem *parent_class = 0 );
-    ~TextAreaItem( void );
+    TextAreaItem(const char *new_name = "blank", const char *desc = "", TextAreaItem *parent_class = 0);
+    ~TextAreaItem(void);
 
 //A recursive function. This function will be called to all the children until one of them matches the search_name
 //If no match is found, it will use the main tree.
-    TextAreaItem * FindChild( const char *search_name );
-    TextAreaItem * FindCount( int count, int cur );
+    TextAreaItem *FindChild(const char *search_name);
+    TextAreaItem *FindCount(int count, int cur);
 
-    void AddChild( const char *new_name, const char *desc, const GFXColor col = GFXColor( 1, 1, 1, 1 ) );
-    void ExpandTree( void );
-    void Sort( void );
+    void AddChild(const char *new_name, const char *desc, const GFXColor col = GFXColor(1, 1, 1, 1));
+    void ExpandTree(void);
+    void Sort(void);
     GFXColor col;
-    char    *name;
-    char    *description;
+    char *name;
+    char *description;
 
 //The size of the array is 10 * child_count_multiplier. Allows for an expanding array
     int child_count_multiplier;
     int child_count;
     TextAreaItem **child;
 
-    TextAreaItem  *parent;
+    TextAreaItem *parent;
 
 //seems to be unused, except for the constructor...
 //int expanded;
 };
 
-void LoadTextures( void );
+void LoadTextures(void);
 
 #endif    //TEXT_AREA_H
 

@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,76 +23,70 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::RenderableSource
 //
 
 #include "RenderableSource.h"
-#include <cstdio>
 #include "vs_logging.h"
 
 namespace Audio {
 
-    RenderableSource::RenderableSource(Source *_source) :
-        source(_source)
-    {
-    }
+RenderableSource::RenderableSource(Source *_source) :
+        source(_source) {
+}
 
-    RenderableSource::~RenderableSource()
-    {
-        // Just in case.
-        source = 0;
-    }
+RenderableSource::~RenderableSource() {
+    // Just in case.
+    source = 0;
+}
 
-    void RenderableSource::startPlaying(Timestamp start)
-    {
-        try {
-            startPlayingImpl(start);
-        } catch(const EndOfStreamException&) {
-            // Silently discard EOS, results in the more transparent
-            // behavior of simply notifying listeners of source
-            // termination ASAP, which is also accurate.
-        };
-    }
+void RenderableSource::startPlaying(Timestamp start) {
+    try {
+        startPlayingImpl(start);
+    } catch (const EndOfStreamException &) {
+        // Silently discard EOS, results in the more transparent
+        // behavior of simply notifying listeners of source
+        // termination ASAP, which is also accurate.
+    };
+}
 
-    void RenderableSource::stopPlaying()
-    {
+void RenderableSource::stopPlaying() {
+    // Cannot be playing if an exception rises,
+    // as that implies a problem with the underlying API
+    try {
+        if (isPlaying()) {
+            stopPlayingImpl();
+        }
+    } catch (const Exception &e) {
+    }
+}
+
+bool RenderableSource::isPlaying() const {
+    try {
+        return isPlayingImpl();
+    } catch (const Exception &e) {
         // Cannot be playing if an exception rises,
         // as that implies a problem with the underlying API
-        try {
-            if (isPlaying())
-                stopPlayingImpl();
-        } catch(const Exception& e) {}
+        return false;
     }
+}
 
-    bool RenderableSource::isPlaying() const
-    {
-        try {
-            return isPlayingImpl();
-        } catch(const Exception& e) {
-            // Cannot be playing if an exception rises,
-            // as that implies a problem with the underlying API
-            return false;
-        }
-    }
+Timestamp RenderableSource::getPlayingTime() const {
+    return getPlayingTimeImpl();
+}
 
-    Timestamp RenderableSource::getPlayingTime() const
-    {
-        return getPlayingTimeImpl();
+void RenderableSource::update(int flags, const Listener &sceneListener) {
+    try {
+        updateImpl(flags, sceneListener);
+    } catch (const Exception &e) {
+        VS_LOG(warning, (boost::format("Ignoring exception in renderable update: %1%") % e.what()));
     }
+}
 
-    void RenderableSource::update(int flags, const Listener& sceneListener)
-    {
-        try {
-            updateImpl(flags, sceneListener);
-        } catch(const Exception& e) {
-            VS_LOG(warning, (boost::format("Ignoring exception in renderable update: %1%") % e.what()));
-        }
-    }
-
-    void RenderableSource::seek(Timestamp time)
-    {
-        seekImpl(time);
-    }
+void RenderableSource::seek(Timestamp time) {
+    seekImpl(time);
+}
 
 };

@@ -4,7 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
  * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -73,39 +73,41 @@
 
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
-void Mission::DirectorLoop()
-{
+void Mission::DirectorLoop() {
     double oldgametime = gametime;
     gametime += SIMULATION_ATOM;     //elapsed;
     //VS_LOG(trace, (boost::format("void Mission::DirectorLoop(): oldgametime = %1$.6f; SIMULATION_ATOM = %2$.6f; gametime = %3$.6f") % oldgametime % SIMULATION_ATOM % gametime));
-    if (getTimeCompression() >= .1)
+    if (getTimeCompression() >= .1) {
         if (gametime <= oldgametime) {
             VS_LOG(warning, "void Mission::DirectorLoop(): gametime is before oldgametime!");
             gametime = SIMULATION_ATOM;
         }
+    }
     try {
         BriefingLoop();
-        if (runtime.pymissions)
+        if (runtime.pymissions) {
             runtime.pymissions->Execute();
+        }
     }
     catch (...) {
-        if ( PyErr_Occurred() ) {
+        if (PyErr_Occurred()) {
             VS_LOG_AND_FLUSH(fatal, "void Mission::DirectorLoop(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
             VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
-        } throw;
+        }
+        throw;
     }
 }
-void Mission::DirectorEnd()
-{
-    if (director == NULL)
+
+void Mission::DirectorEnd() {
+    if (director == NULL) {
         return;
-    RunDirectorScript( "endgame" );
+    }
+    RunDirectorScript("endgame");
 }
 
-void Mission::DirectorShipDestroyed( Unit *unit )
-{
+void Mission::DirectorShipDestroyed(Unit *unit) {
     Flightgroup *fg = unit->getFlightgroup();
     if (fg == nullptr) {
         VS_LOG(info, "ship destroyed-no flightgroup");
@@ -119,13 +121,14 @@ void Mission::DirectorShipDestroyed( Unit *unit )
 
     char buf[512];
 
-    if ( (fg->faction.length()+fg->type.length()+fg->name.length()+12+30) < sizeof (buf) )
-        sprintf( buf, "Ship destroyed: %s:%s:%s-%d", fg->faction.c_str(), fg->type.c_str(),
-                fg->name.c_str(), unit->getFgSubnumber() );
-    else
-        sprintf( buf, "Ship destroyed: (ERROR)-%d", unit->getFgSubnumber() );
+    if ((fg->faction.length() + fg->type.length() + fg->name.length() + 12 + 30) < sizeof(buf)) {
+        sprintf(buf, "Ship destroyed: %s:%s:%s-%d", fg->faction.c_str(), fg->type.c_str(),
+                fg->name.c_str(), unit->getFgSubnumber());
+    } else {
+        sprintf(buf, "Ship destroyed: (ERROR)-%d", unit->getFgSubnumber());
+    }
 
-    msgcenter->add( "game", "all", buf );
+    msgcenter->add("game", "all", buf);
 
     if (fg->nr_ships_left == 0) {
         VS_LOG(debug, (boost::format("no ships left in fg %1%") % fg->name));
@@ -134,7 +137,7 @@ void Mission::DirectorShipDestroyed( Unit *unit )
 
             //launch new wave
             fg->nr_waves_left -= 1;
-            fg->nr_ships_left  = fg->nr_ships;
+            fg->nr_ships_left = fg->nr_ships;
 
             Order *order = NULL;
             order = unit->getAIState() ? unit->getAIState()->findOrderList() : NULL;
@@ -143,76 +146,82 @@ void Mission::DirectorShipDestroyed( Unit *unit )
                 fg->orderlist = order->getOrderList();
             }
             CreateFlightgroup cf;
-            cf.fg       = fg;
+            cf.fg = fg;
             cf.unittype = CreateFlightgroup::UNIT;
-            cf.fg->pos  = unit->Position();
-            cf.waves    = fg->nr_waves_left;
+            cf.fg->pos = unit->Position();
+            cf.waves = fg->nr_waves_left;
             cf.nr_ships = fg->nr_ships;
 
-            call_unit_launch( &cf, _UnitType::unit, string( "" ) );
+            call_unit_launch(&cf, _UnitType::unit, string(""));
         } else {
-            mission->msgcenter->add( "game", "all", "Flightgroup "+fg->name+" destroyed" );
+            mission->msgcenter->add("game", "all", "Flightgroup " + fg->name + " destroyed");
         }
     }
 }
 
-bool Mission::BriefingInProgress()
-{
+bool Mission::BriefingInProgress() {
     return briefing != NULL;
 }
-void Mission::BriefingStart()
-{
-    if (briefing)
+
+void Mission::BriefingStart() {
+    if (briefing) {
         BriefingEnd();
+    }
     briefing = new Briefing();
-    if (runtime.pymissions)
-        runtime.pymissions->callFunction( "initbriefing" );
-}
-void Mission::BriefingUpdate()
-{
-    if (briefing)
-        briefing->Update();
+    if (runtime.pymissions) {
+        runtime.pymissions->callFunction("initbriefing");
+    }
 }
 
-void Mission::BriefingLoop()
-{
-    if (briefing)
-        if (runtime.pymissions)
-            runtime.pymissions->callFunction( "loopbriefing" );
-}
-class TextPlane* Mission::BriefingRender()
-{
+void Mission::BriefingUpdate() {
     if (briefing) {
-        vector< std::string >who;
-        who.push_back( "briefing" );
+        briefing->Update();
+    }
+}
+
+void Mission::BriefingLoop() {
+    if (briefing) {
+        if (runtime.pymissions) {
+            runtime.pymissions->callFunction("loopbriefing");
+        }
+    }
+}
+
+class TextPlane *Mission::BriefingRender() {
+    if (briefing) {
+        vector<std::string> who;
+        who.push_back("briefing");
         string str1;
         gameMessage g1, g2;
-        if ( msgcenter->last( 0, g1, who ) )
+        if (msgcenter->last(0, g1, who)) {
             str1 = g1.message;
-        if ( msgcenter->last( 1, g2, who ) )
-            str1 = str1+string( "\n" )+g2.message;
-        briefing->tp.SetText( str1 );
+        }
+        if (msgcenter->last(1, g2, who)) {
+            str1 = str1 + string("\n") + g2.message;
+        }
+        briefing->tp.SetText(str1);
         briefing->Render();
         return &briefing->tp;
     }
     return NULL;
 }
 
-void Mission::BriefingEnd()
-{
+void Mission::BriefingEnd() {
     if (briefing) {
-        if (runtime.pymissions)
-            runtime.pymissions->callFunction( "endbriefing" );
+        if (runtime.pymissions) {
+            runtime.pymissions->callFunction("endbriefing");
+        }
         delete briefing;
         briefing = NULL;
     }
 }
 
-void Mission::DirectorBenchmark()
-{
+void Mission::DirectorBenchmark() {
     total_nr_frames++;
     if (benchmark > 0.0 && benchmark < gametime) {
-        VS_LOG_AND_FLUSH(trace, (boost::format("Game was running for %1% secs,   av. framerate %2%") % gametime % (( (double) total_nr_frames )/gametime)));
-        winsys_exit( 0 );
+        VS_LOG_AND_FLUSH(trace,
+                (boost::format("Game was running for %1% secs,   av. framerate %2%") % gametime
+                        % (((double) total_nr_frames) / gametime)));
+        winsys_exit(0);
     }
 }

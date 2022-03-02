@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::Codec
 //
@@ -31,52 +33,48 @@
 
 namespace Audio {
 
-    /**
-     * Audio format information class
-     *
-     */
-    struct Format {
-        unsigned int sampleFrequency;
-        unsigned char bitsPerSample;
-        unsigned char channels;
-        int signedSamples : 1;
-        int nativeOrder : 1;
+/**
+ * Audio format information class
+ *
+ */
+struct Format {
+    unsigned int sampleFrequency;
+    unsigned char bitsPerSample;
+    unsigned char channels;
+    int signedSamples: 1;
+    int nativeOrder: 1;
 
-        Format() {}
+    Format() {
+    }
 
-        Format(unsigned int freq, unsigned char bps, unsigned char nch) :
+    Format(unsigned int freq, unsigned char bps, unsigned char nch) :
             sampleFrequency(freq),
             bitsPerSample(bps),
             channels(nch),
-            signedSamples((bps>=16)?1:0),
-            nativeOrder(1)
-        {
-        }
+            signedSamples((bps >= 16) ? 1 : 0),
+            nativeOrder(1) {
+    }
 
-        unsigned int frameSize() const
-        {
-            return (bitsPerSample * channels + 7) / 8;
-        }
+    unsigned int frameSize() const {
+        return (bitsPerSample * channels + 7) / 8;
+    }
 
-        unsigned int bytesPerSecond() const
-        {
-            return frameSize() * sampleFrequency;
-        }
+    unsigned int bytesPerSecond() const {
+        return frameSize() * sampleFrequency;
+    }
 
-        bool operator==(const Format &o) const
-        {
-            return (sampleFrequency == o.sampleFrequency)
+    bool operator==(const Format &o) const {
+        return (sampleFrequency == o.sampleFrequency)
                 && (bitsPerSample == o.bitsPerSample)
                 && (channels == o.channels)
                 && (signedSamples == o.signedSamples)
                 && (nativeOrder == o.nativeOrder);
-        }
+    }
 
-        bool operator!=(const Format &o) const
-        {
-            return !(*this == o);
-        }
-    };
+    bool operator!=(const Format &o) const {
+        return !(*this == o);
+    }
+};
 
 };
 

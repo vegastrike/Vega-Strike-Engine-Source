@@ -1,22 +1,23 @@
 /*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef INKB_H
@@ -27,18 +28,17 @@
 //const int KEY_SPECIAL_OFFSET=0;
 //#else
 
-enum KB_MODIFIER_ENUM
-{
-    KB_MOD_ALT  =1,
-    KB_MOD_CTRL =2,
-    KB_MOD_SHIFT=4,
-    KB_MOD_MASK =7
+enum KB_MODIFIER_ENUM {
+    KB_MOD_ALT = 1,
+    KB_MOD_CTRL = 2,
+    KB_MOD_SHIFT = 4,
+    KB_MOD_MASK = 7
 };
 
 #ifndef NO_GFX
 #include "gldrv/winsys.h"
-const int KEYMAP_SIZE   = WSK_LAST;
-const int LAST_MODIFIER = KB_MOD_MASK+1;
+const int KEYMAP_SIZE = WSK_LAST;
+const int LAST_MODIFIER = KB_MOD_MASK + 1;
 #else
 const int KEYMAP_SIZE   = 0;
 const int LAST_MODIFIER = 0;
@@ -48,12 +48,12 @@ const int LAST_MODIFIER = 0;
 
 unsigned int getActiveModifiers();
 unsigned int pullActiveModifiers();
-void setActiveModifiers( unsigned int mask );
+void setActiveModifiers(unsigned int mask);
 
-unsigned int getModifier( const char *mod_name );
-void ProcessKB( unsigned int player );
-void BindKey( int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data );
-void UnbindKey( int key, unsigned int modifiers );
+unsigned int getModifier(const char *mod_name);
+void ProcessKB(unsigned int player);
+void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data);
+void UnbindKey(int key, unsigned int modifiers);
 void InitKB();
 void RestoreKB();
 #endif

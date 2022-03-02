@@ -117,13 +117,13 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
+ * Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
-
 
 using namespace Opcode;
 
@@ -134,19 +134,18 @@ using namespace Opcode;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshInterface::MeshInterface() :
 #ifdef OPC_USE_CALLBACKS
-	mUserData		(nullptr),
-	mObjCallback	(nullptr),
+        mUserData(nullptr),
+        mObjCallback(nullptr),
 #else
-	mTris			(nullptr),
-	mVerts			(nullptr),
-	#ifdef OPC_USE_STRIDE
-	mTriStride		(sizeof(IndexedTriangle)),
-	mVertexStride	(sizeof(Point)),
-	#endif
+        mTris			(nullptr),
+        mVerts			(nullptr),
+#ifdef OPC_USE_STRIDE
+        mTriStride		(sizeof(IndexedTriangle)),
+        mVertexStride	(sizeof(Point)),
 #endif
-	mNbTris			(0),
-	mNbVerts		(0)
-{
+#endif
+        mNbTris(0),
+        mNbVerts(0) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,8 +153,7 @@ MeshInterface::MeshInterface() :
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-MeshInterface::~MeshInterface()
-{
+MeshInterface::~MeshInterface() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,15 +162,18 @@ MeshInterface::~MeshInterface()
  *	\return		true if valid
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::IsValid() const
-{
-	if(!mNbTris || !mNbVerts)	return false;
+bool MeshInterface::IsValid() const {
+    if (!mNbTris || !mNbVerts) {
+        return false;
+    }
 #ifdef OPC_USE_CALLBACKS
-	if(!mObjCallback)			return false;
+    if (!mObjCallback) {
+        return false;
+    }
 #else
-	if(!mTris || !mVerts)		return false;
+    if(!mTris || !mVerts)		return false;
 #endif
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,28 +183,28 @@ bool MeshInterface::IsValid() const
  *	\return		number of degenerate faces
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t MeshInterface::CheckTopology()	const
-{
-	// Check topology. If the model contains degenerate faces, collision report can be wrong in some cases.
-	// e.g. it happens with the standard MAX teapot. So clean your meshes first... If you don't have a mesh cleaner
-	// you can try this: www.codercorner.com/Consolidation.zip
+uint32_t MeshInterface::CheckTopology() const {
+    // Check topology. If the model contains degenerate faces, collision report can be wrong in some cases.
+    // e.g. it happens with the standard MAX teapot. So clean your meshes first... If you don't have a mesh cleaner
+    // you can try this: www.codercorner.com/Consolidation.zip
 
-	uint32_t NbDegenerate = 0;
+    uint32_t NbDegenerate = 0;
 
-	VertexPointers VP;
+    VertexPointers VP;
 
-	// Using callbacks, we don't have access to vertex indices. Nevertheless we still can check for
-	// redundant vertex pointers, which cover all possibilities (callbacks/pointers/strides).
-	for(uint32_t i=0;i<mNbTris;i++)
-	{
-		GetTriangle(VP, i);
+    // Using callbacks, we don't have access to vertex indices. Nevertheless we still can check for
+    // redundant vertex pointers, which cover all possibilities (callbacks/pointers/strides).
+    for (uint32_t i = 0; i < mNbTris; i++) {
+        GetTriangle(VP, i);
 
-		if(		(VP.Vertex[0]==VP.Vertex[1])
-			||	(VP.Vertex[1]==VP.Vertex[2])
-			||	(VP.Vertex[2]==VP.Vertex[0]))	NbDegenerate++;
-	}
+        if ((VP.Vertex[0] == VP.Vertex[1])
+                || (VP.Vertex[1] == VP.Vertex[2])
+                || (VP.Vertex[2] == VP.Vertex[0])) {
+            NbDegenerate++;
+        }
+    }
 
-	return NbDegenerate;
+    return NbDegenerate;
 }
 
 #ifdef OPC_USE_CALLBACKS
@@ -215,14 +216,16 @@ uint32_t MeshInterface::CheckTopology()	const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::SetCallback(RequestCallback callback, void* user_data)
-{
+bool MeshInterface::SetCallback(RequestCallback callback, void *user_data) {
 //	if(!callback)	return SetIceError("MeshInterface::SetCallback: callback pointer is null");
-	if(!callback) return(false);
-	mObjCallback	= callback;
-	mUserData		= user_data;
-	return true;
+    if (!callback) {
+        return (false);
+    }
+    mObjCallback = callback;
+    mUserData = user_data;
+    return true;
 }
+
 #else
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -235,11 +238,11 @@ bool MeshInterface::SetCallback(RequestCallback callback, void* user_data)
 bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts)
 {
 //	if(!tris || !verts)	return SetIceError("MeshInterface::SetPointers: pointer is null", nullptr);
-	if(!tris || !verts) return(false);
-		
-	mTris	= tris;
-	mVerts	= verts;
-	return true;
+    if(!tris || !verts) return(false);
+
+    mTris	= tris;
+    mVerts	= verts;
+    return true;
 }
 #ifdef OPC_USE_STRIDE
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,12 +255,12 @@ bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::SetStrides(uint32_t tri_stride, uint32_t vertex_stride)
 {
-	if(tri_stride<sizeof(IndexedTriangle))	return SetIceError("MeshInterface::SetStrides: invalid triangle stride", nullptr);
-	if(vertex_stride<sizeof(Point))			return SetIceError("MeshInterface::SetStrides: invalid vertex stride", nullptr);
+    if(tri_stride<sizeof(IndexedTriangle))	return SetIceError("MeshInterface::SetStrides: invalid triangle stride", nullptr);
+    if(vertex_stride<sizeof(Point))			return SetIceError("MeshInterface::SetStrides: invalid vertex stride", nullptr);
 
-	mTriStride		= tri_stride;
-	mVertexStride	= vertex_stride;
-	return true;
+    mTriStride		= tri_stride;
+    mVertexStride	= vertex_stride;
+    return true;
 }
 #endif
 #endif
@@ -270,39 +273,42 @@ bool MeshInterface::SetStrides(uint32_t tri_stride, uint32_t vertex_stride)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::RemapClient(uint32_t nb_indices, const uint32_t* permutation) const
-{
-	// Checkings
-	if(!nb_indices || !permutation)	return false;
-	if(nb_indices!=mNbTris)			return false;
+bool MeshInterface::RemapClient(uint32_t nb_indices, const uint32_t *permutation) const {
+    // Checkings
+    if (!nb_indices || !permutation) {
+        return false;
+    }
+    if (nb_indices != mNbTris) {
+        return false;
+    }
 
 #ifdef OPC_USE_CALLBACKS
-	// We can't really do that using callbacks
-	return false;
+    // We can't really do that using callbacks
+    return false;
 #else
-	IndexedTriangle* Tmp = new IndexedTriangle[mNbTris];
-	CHECKALLOC(Tmp);
+    IndexedTriangle* Tmp = new IndexedTriangle[mNbTris];
+    CHECKALLOC(Tmp);
 
-	#ifdef OPC_USE_STRIDE
-	uint32_t Stride = mTriStride;
-	#else
-	uint32_t Stride = sizeof(IndexedTriangle);
-	#endif
-
-	for(uint32_t i=0;i<mNbTris;i++)
-	{
-		const IndexedTriangle* T = (const IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
-		Tmp[i] = *T;
-	}
-
-	for(uint32_t i=0;i<mNbTris;i++)
-	{
-		IndexedTriangle* T = (IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
-		*T = Tmp[permutation[i]];
-	}
-
-	DELETEARRAY(Tmp);
+#ifdef OPC_USE_STRIDE
+    uint32_t Stride = mTriStride;
+#else
+    uint32_t Stride = sizeof(IndexedTriangle);
 #endif
-	return true;
+
+    for(uint32_t i=0;i<mNbTris;i++)
+    {
+        const IndexedTriangle* T = (const IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
+        Tmp[i] = *T;
+    }
+
+    for(uint32_t i=0;i<mNbTris;i++)
+    {
+        IndexedTriangle* T = (IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
+        *T = Tmp[permutation[i]];
+    }
+
+    DELETEARRAY(Tmp);
+#endif
+    return true;
 }
 

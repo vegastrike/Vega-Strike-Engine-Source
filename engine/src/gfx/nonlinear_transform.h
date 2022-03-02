@@ -1,27 +1,29 @@
 /**
-* nonlinear_transform.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * nonlinear_transform.h
+ *
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #ifndef NONLINEAR_TRANSFORM_H_
 #define NONLINEAR_TRANSFORM_H_
@@ -34,106 +36,103 @@
  * We could make it virtual and ahve a sphere-map or cube-map version of this
  *
  */
-class IdentityTransform
-{
+class IdentityTransform {
 public:
-    virtual ~IdentityTransform()
-    {
+    virtual ~IdentityTransform() {
         // dtor
     }
+
 ///Transforms in a possibly nonlinear way the point to some new space
-    virtual QVector Transform( const QVector &v ) const
-    {
+    virtual QVector Transform(const QVector &v) const {
         return v;
     }
+
 ///transforms a direction to some new space
-    virtual QVector TransformNormal( const QVector &v, const QVector &n ) const
-    {
+    virtual QVector TransformNormal(const QVector &v, const QVector &n) const {
         return n;
     }
+
 ///Transforms in reverse the vector into quadsquare space
-    virtual QVector InvTransform( const QVector &v ) const
-    {
+    virtual QVector InvTransform(const QVector &v) const {
         return v;
     }
+
 ///Transforms a min and a max vector and figures out what is bigger
-    virtual CLIPSTATE BoxInFrustum( Vector &min, Vector &max, const Vector &campos ) const
-    {
-        return GFXBoxInFrustum( min, max );
+    virtual CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const {
+        return GFXBoxInFrustum(min, max);
     }
-    float TransformS( float x, float scale ) const
-    {
-        return x*scale;
+
+    float TransformS(float x, float scale) const {
+        return x * scale;
     }
-    float TransformT( float y, float scale ) const
-    {
-        return y*scale;
+
+    float TransformT(float y, float scale) const {
+        return y * scale;
     }
 };
 
 extern float SphereTransformRenderlevel;
-class SphericalTransform : public IdentityTransform
-{
+class SphericalTransform : public IdentityTransform {
 protected:
     float scalex, scalez, r;
-public: SphericalTransform( float a, float b, float c ) : IdentityTransform()
-    {
-        SetXZ( a, c );
-        SetR( b );
+public:
+    SphericalTransform(float a, float b, float c) : IdentityTransform() {
+        SetXZ(a, c);
+        SetR(b);
     }
-    void SetXZ( float x, float z )
-    {
-        this->scalex = 2*M_PI/x;
-        this->scalez = M_PI/z;
+
+    void SetXZ(float x, float z) {
+        this->scalex = 2 * M_PI / x;
+        this->scalez = M_PI / z;
     }                                                                         //x ranges from 0 to 2PI x ranges from -PI/2 to PI/2
-    void SetR( float rr )
-    {
+    void SetR(float rr) {
         r = rr;
     }
-    float GetR() const
-    {
+
+    float GetR() const {
         return r;
     }
-    float GetX() const
-    {
-        return 2*M_PI/scalex;
+
+    float GetX() const {
+        return 2 * M_PI / scalex;
     }
-    float GetZ() const
-    {
-        return M_PI/scalez;
+
+    float GetZ() const {
+        return M_PI / scalez;
     }
-    QVector Transform( const QVector &v ) const
-    {
-        Vector T( v.i*scalex, r+v.j, v.k*scalez-.5*M_PI );
-        float  cosphi = cos( T.k );
-        return QVector( T.j*cosphi*cos( T.i ), T.j*sin( T.k ), T.j*cosphi*sin( T.i ) );
+
+    QVector Transform(const QVector &v) const {
+        Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
+        float cosphi = cos(T.k);
+        return QVector(T.j * cosphi * cos(T.i), T.j * sin(T.k), T.j * cosphi * sin(T.i));
     }
-    QVector TransformNormal( const QVector &point, const QVector &n ) const
-    {
-        return SphericalTransform::Transform( n+point )-Transform( point );
+
+    QVector TransformNormal(const QVector &point, const QVector &n) const {
+        return SphericalTransform::Transform(n + point) - Transform(point);
     }
-    QVector InvTransform( const QVector &v ) const
-    {
+
+    QVector InvTransform(const QVector &v) const {
         float rplusy = v.Magnitude();
         //float lengthxypln = sqrtf (rplusy*rplusy-v.j*v.j);//pythagorus
-        return QVector( (atan2( -v.k, -v.i )+M_PI)/scalex, rplusy-r, (asin( v.j/rplusy )+M_PI*.5)/scalez );
+        return QVector((atan2(-v.k, -v.i) + M_PI) / scalex, rplusy - r, (asin(v.j / rplusy) + M_PI * .5) / scalez);
     }
-    CLIPSTATE BoxInFrustum( Vector &min, Vector &max, const Vector &campos ) const
-    {
+
+    CLIPSTATE BoxInFrustum(Vector &min, Vector &max, const Vector &campos) const {
         const float rendermin = 3;
         /*
          *  float tmpx = fabs(campos.i-min.i);float maxx = fabs(campos.i-max.i);
          *  if (tmpx>.35*GetX()&&tmpx<.65*GetX()&&maxx>.25*GetX()&&maxx<.75*GetX()) {return GFX_NOT_VISIBLE;}
          *  tmpx = fabs(campos.k-min.k); maxx = fabs(campos.k-max.k);
          *  if (tmpx>.25*GetZ()&&tmpx<.75*GetZ()&&maxx>.25*GetZ()&&maxx<.75*GetZ()) {      return GFX_NOT_VISIBLE;//i/f it's on the other side of the hemisphere} */
-        if (SphereTransformRenderlevel < rendermin)
+        if (SphereTransformRenderlevel < rendermin) {
             return GFX_PARTIALLY_VISIBLE;
-        Vector tmin = SphericalTransform::Transform( min );
-        Vector tmax = SphericalTransform::Transform( max );
-        tmax = .5*(tmax+tmin);   //center
-        float  rad  = 1.8*(tmax-tmin).Magnitude();
+        }
+        Vector tmin = SphericalTransform::Transform(min);
+        Vector tmax = SphericalTransform::Transform(max);
+        tmax = .5 * (tmax + tmin);   //center
+        float rad = 1.8 * (tmax - tmin).Magnitude();
 
-        return GFXSpherePartiallyInFrustum( tmax, rad );
+        return GFXSpherePartiallyInFrustum(tmax, rad);
     }
 };
 /*

@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,22 +30,23 @@
 #include <assert.h>
 
 using Orders::FireAt;
-class PythonAI : public FireAt
-{
+class PythonAI : public FireAt {
     PyObject *self;
-    PythonAI( const PythonAI &a ) : FireAt( a )
-    {
-        assert( 0 );
+
+    PythonAI(const PythonAI &a) : FireAt(a) {
+        assert(0);
     }
+
     static PythonAI *last_ai;
 protected:
     virtual void Destruct();
-public: PythonAI( PyObject *self, float reaction_time, float agressivity );
+public:
+    PythonAI(PyObject *self, float reaction_time, float agressivity);
     virtual void Execute();
-    static void default_Execute( FireAt &pay );
+    static void default_Execute(FireAt &pay);
     static void InitModuleAI();
-    static PythonAI * LastAI();
-    static PythonAI * Factory( const std::string &file );
+    static PythonAI *LastAI();
+    static PythonAI *Factory(const std::string &file);
     virtual ~PythonAI();
 };
 

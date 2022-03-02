@@ -1,23 +1,27 @@
 /*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * jacks, dan_w, ashieh, griwodz, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #ifndef LOGO_H_
 #define LOGO_H_
 
@@ -30,37 +34,49 @@
 
 //struct glVertex;
 class Mesh;
+
 class Texture;
-class Logo
-{
+
+class Logo {
     int numlogos;
 //glVertex **LogoCorner;
     GFXVertexList *vlist;
     Texture *Decal;
-    static Hashtable< int, Logo, 257 >decalHash;
-    Logo() {}
+    static Hashtable<int, Logo, 257> decalHash;
+
+    Logo() {
+    }
+
 protected:
     friend class Mesh;
-    int   refcount;   //number of references to draw_queue
+
+    int refcount;   //number of references to draw_queue
     Logo *owner_of_draw_queue;     //owner of the draw_queue
-    vector< DrawContext > *draw_queue;
-    bool  will_be_drawn;
+    vector<DrawContext> *draw_queue;
+    bool will_be_drawn;
+
     void ProcessDrawQueue();
-public: Logo( int numberlogos,
-              Vector *center,
-              Vector *normal,
-              float *sizes,
-              float *rotations,
-              float offset,
-              Texture *Dec,
-              Vector *Ref );
-    Logo( const Logo &rval )
-    {
+
+public:
+    Logo(int numberlogos,
+            Vector *center,
+            Vector *normal,
+            float *sizes,
+            float *rotations,
+            float offset,
+            Texture *Dec,
+            Vector *Ref);
+
+    Logo(const Logo &rval) {
         *this = rval;
     }
+
     ~Logo();
-    void SetDecal( Texture *decal );
-    void Draw( const Matrix &m );
+
+    void SetDecal(Texture *decal);
+
+    void Draw(const Matrix &m);
 };
+
 #endif
 

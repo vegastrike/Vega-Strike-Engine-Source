@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,10 +40,9 @@
 
 // TODO: convert all float to double and all Vector to QVector.
 
-Collision::Collision(Unit* unit, const QVector& location, const Vector& normal):
-    unit(unit), location(location), normal(normal)
-{
-    cockpit = _Universe->isPlayerStarship( unit ); // smcp/thcp
+Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) :
+        unit(unit), location(location), normal(normal) {
+    cockpit = _Universe->isPlayerStarship(unit); // smcp/thcp
     unit_type = unit->isUnit();
     is_player_ship = _Universe->isPlayerStarship(unit);
     mass = std::max(unit->getMass(), configuration.physics.minimum_mass);
@@ -60,119 +60,109 @@ _UnitType::nebula,
 _UnitType::asteroid,
 _UnitType::enhancement,
 _UnitType::missile*/
-void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
-{
+void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
     // Collision with a nebula does nothing
-    if(other_unit->isUnit() == _UnitType::nebula)
-    {
+    if (other_unit->isUnit() == _UnitType::nebula) {
         return;
     }
 
     // Collision with a enhancement improves your shield apparently
-    if(other_unit->isUnit() == _UnitType::enhancement)
-    {
+    if (other_unit->isUnit() == _UnitType::enhancement) {
         apply_force = true;
         return;
     }
 
     // Collision with a jump point does nothing
-    if(other_unit->isJumppoint())
-    {
+    if (other_unit->isJumppoint()) {
         other_unit->jumpReactToCollision(unit);
         return;
     }
 
-    if(unit->isJumppoint())
-    {
+    if (unit->isJumppoint()) {
         return;
     }
 
-    switch(unit_type)
-    {
-    // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-    case _UnitType::missile:
-        // Missile should explode when killed
-        // If not, uncomment this
-        //((Missile*)unit)->Discharge();
-        unit->Kill();
-        return;
+    switch (unit_type) {
+        // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
+        case _UnitType::missile:
+            // Missile should explode when killed
+            // If not, uncomment this
+            //((Missile*)unit)->Discharge();
+            unit->Kill();
+            return;
 
-    case _UnitType::asteroid:
-        apply_force = true;
-        deal_damage = true;
-        return;
+        case _UnitType::asteroid:
+            apply_force = true;
+            deal_damage = true;
+            return;
 
-    // Planets and Nebulas can't be killed right now
-    case _UnitType::planet:
-    case _UnitType::nebula:
-        return;
+            // Planets and Nebulas can't be killed right now
+        case _UnitType::planet:
+        case _UnitType::nebula:
+            return;
 
-    // Buildings should not calculate actual damage
-    case _UnitType::building:
-        return;
+            // Buildings should not calculate actual damage
+        case _UnitType::building:
+            return;
 
-    // Units (ships) should calculate actual damage
-    case _UnitType::unit:
-        apply_force = true;
-        deal_damage = true;
-        return;
+            // Units (ships) should calculate actual damage
+        case _UnitType::unit:
+            apply_force = true;
+            deal_damage = true;
+            return;
 
-    // An enhancement upgrades the shields of the unit it collided with.
-    // TODO: refactor this.
-    case _UnitType::enhancement:
-        // We can't enhance rocks
-        if (other_unit->isUnit() == _UnitType::asteroid ||
-                other_unit->isUnit() == _UnitType::planet)
-        {
+            // An enhancement upgrades the shields of the unit it collided with.
+            // TODO: refactor this.
+        case _UnitType::enhancement:
+            // We can't enhance rocks
+            if (other_unit->isUnit() == _UnitType::asteroid ||
+                    other_unit->isUnit() == _UnitType::planet) {
+                apply_force = true;
+                return;
+            }
+
+            // I've changed the behavior of enhancements for now.
+            // Instead of upgrading the shields, the simply max them out
+            // at 150%.
+            // TODO: someone from the "product" team needs to define the
+            // exact behavior. Preferably after we sort the upgrade
+            // code.
+            other_unit->shield->Enhance();
+
+            /*double percent;
+            char tempdata[sizeof(Shield)];
+            memcpy( tempdata, &unit->shield, sizeof(Shield));
+            unit->shield.number = 0;     //don't want them getting our boosted shields!
+            unit->shield.shield2fb.front = unit->shield.shield2fb.back =
+                    unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
+            other_unit->Upgrade( unit, 0, 0, true, true, percent );
+            memcpy( &unit->shield, tempdata, sizeof (Shield) );
+            string fn( unit->filename );
+            string fac( FactionUtil::GetFaction( unit->faction ) );*/
+            unit->Kill();
+
+            //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
             apply_force = true;
             return;
-        }
-
-        // I've changed the behavior of enhancements for now.
-        // Instead of upgrading the shields, the simply max them out
-        // at 150%.
-        // TODO: someone from the "product" team needs to define the
-        // exact behavior. Preferably after we sort the upgrade
-        // code.
-        other_unit->shield->Enhance();
-
-        /*double percent;
-        char tempdata[sizeof(Shield)];
-        memcpy( tempdata, &unit->shield, sizeof(Shield));
-        unit->shield.number = 0;     //don't want them getting our boosted shields!
-        unit->shield.shield2fb.front = unit->shield.shield2fb.back =
-                unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
-        other_unit->Upgrade( unit, 0, 0, true, true, percent );
-        memcpy( &unit->shield, tempdata, sizeof (Shield) );
-        string fn( unit->filename );
-        string fac( FactionUtil::GetFaction( unit->faction ) );*/
-        unit->Kill();
-
-        //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
-        apply_force = true;
-        return;
     }
 }
 
 // Apply damage, in VS Damage units (a unit of energy), based on change in energy from collision outcome
-void Collision::dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular)
-{
-    if(!deal_damage)
-    {
+void Collision::dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular) {
+    if (!deal_damage) {
         return;
     }
 
     // deltaKE is in KiloJoules, due to mass being in units of 1000 Kg, not Kg -
     // so convert accordingly
     // assign half the change in energy to this unit, convert from KJ to VSD
-    Damage damage(0.5 * ( deltaKE_linear + deltaKE_angular)  /
-                  configuration.physics.kilojoules_per_damage);
+    Damage damage(0.5 * (deltaKE_linear + deltaKE_angular) /
+            configuration.physics.kilojoules_per_damage);
 
-    
     unit->ApplyDamage(other_collision.location.Cast(),
-                      other_collision.normal,
-                      damage, unit, GFXColor( 1,1,1,2 ), other_collision.unit->owner
-                      != nullptr ? other_collision.unit->owner : this );
+            other_collision.normal,
+            damage, unit, GFXColor(1, 1, 1, 2), other_collision.unit->owner
+                    != nullptr ? other_collision.unit->owner : this);
 }
 
 /*
@@ -180,26 +170,24 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
 * Specifically, impulse model for rigid body collisions assumes that, being rigid bodies, the two geometries have zero interpenetration,
 * but VS physics granularity + object relative velocity means that non-trivial interpenetration is common
 */
-void Collision::adjustInterpenetration(QVector& new_velocity, QVector& new_angular_velocity, const Vector& normal)
-{
+void Collision::adjustInterpenetration(QVector &new_velocity, QVector &new_angular_velocity, const Vector &normal) {
 
-    if (!apply_force)
-    {
+    if (!apply_force) {
         return;
     }
 
     double magnitude = new_velocity.Magnitude();
-    QVector velocity_norm = new_velocity.Normalize(); // want to perform positional displacement in direction of new velocity vector
+    QVector velocity_norm =
+            new_velocity.Normalize(); // want to perform positional displacement in direction of new velocity vector
     double movementKludgeMagnitude = 2 * (new_angular_velocity.Dot(velocity_norm) * unit->radial_size / PI + magnitude);
-    QVector movementKludgeAmount = movementKludgeMagnitude*velocity_norm + abs(movementKludgeMagnitude)*normal;
-    unit->SetPosition(unit->Position() + (movementKludgeAmount)*SIMULATION_ATOM); // move by one physics frame at F() resultant linear velocity + component of angular velocity along linear velocity vector + normal before applying force -- this is NOT REMOTELY correct, but will often be sufficient
+    QVector movementKludgeAmount = movementKludgeMagnitude * velocity_norm + abs(movementKludgeMagnitude) * normal;
+    unit->SetPosition(unit->Position() + (movementKludgeAmount)
+            * SIMULATION_ATOM); // move by one physics frame at F() resultant linear velocity + component of angular velocity along linear velocity vector + normal before applying force -- this is NOT REMOTELY correct, but will often be sufficient
 }
 
 // apply force and torque, enforce clamping
-void Collision::applyForce(QVector &force, QVector &location_local)
-{
-    if(!apply_force)
-    {
+void Collision::applyForce(QVector &force, QVector &location_local) {
+    if (!apply_force) {
         return;
     }
 
@@ -233,40 +221,42 @@ void Collision::applyForce(QVector &force, QVector &location_local)
     unit->ApplyForce(remainingLinearforce);
 }
 
-
 /*
 * Correctness check to validate collision math - should be eventually moved to testing, rather than on critical path
 */
-void Collision::validateCollision(const QVector& relative_velocity,
-    const Vector& normal1,
-    const QVector& location1_local,
-    const QVector& location2_local,
-    const QVector& v1_new,
-    const QVector& v2_new,
-    const QVector& w1_new,
-    const QVector& w2_new) {
+void Collision::validateCollision(const QVector &relative_velocity,
+        const Vector &normal1,
+        const QVector &location1_local,
+        const QVector &location2_local,
+        const QVector &v1_new,
+        const QVector &v2_new,
+        const QVector &w1_new,
+        const QVector &w2_new) {
     //following two values should be identical. Due to FP math, should be nearly identical. Checks for both absolute and relative error, the former to shield slightly larger errors on very small values - can set tighter/looser bounds later
-    double RestorativeVelAlongNormal = -1 * (1 - configuration.physics.inelastic_scale) * relative_velocity.Dot(normal1);
-    double ResultantVelAlongNormal = ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
+    double RestorativeVelAlongNormal =
+            -1 * (1 - configuration.physics.inelastic_scale) * relative_velocity.Dot(normal1);
+    double ResultantVelAlongNormal =
+            ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
     double normalizedError = abs(1.0 - ResultantVelAlongNormal / RestorativeVelAlongNormal);
     double absoluteError = abs(ResultantVelAlongNormal - RestorativeVelAlongNormal);
     // absolute error > 1 milimeter/second along collision normal AND normalized error > 1%
     if (absoluteError > 0.001 && normalizedError > 0.01) {
-        VS_LOG(warning, (boost::format("Computed error between equation sides for collision is beyond acceptable error bounds:%1%:%2%:%3%:%4%")
+        VS_LOG(warning,
+                (boost::format(
+                        "Computed error between equation sides for collision is beyond acceptable error bounds:%1%:%2%:%3%:%4%")
                         % absoluteError % normalizedError % ResultantVelAlongNormal % RestorativeVelAlongNormal));
     }
 }
 
 // Discussion - the original code ran this once for both units. This required a comparison of the units to find out which is smaller.
 // The history on this is as follows - one of the normals is picked to compute the force along; while this is arbitrary in the ideal case, given interpentration, we use the heuristic that the larger object's normal is likely to better characterize the collision angles
-void Collision::collide( Unit* unit1,
-                                   const QVector &location1,
-                                   const Vector &normal1,
-                                   Unit* unit2,
-                                   const QVector &location2,
-                                   const Vector &normal2,
-                                   float distance)
-{
+void Collision::collide(Unit *unit1,
+        const QVector &location1,
+        const Vector &normal1,
+        Unit *unit2,
+        const QVector &location2,
+        const Vector &normal2,
+        float distance) {
 
     Collision collision1 = Collision(unit1, location1, normal1);
     Collision collision2 = Collision(unit2, location2, normal2);
@@ -300,31 +290,42 @@ void Collision::collide( Unit* unit1,
     // impulse calculations:
     QVector location1_local = location1 - unit1->Position(); // vector from center of mass to contact point for unit1
     QVector location2_local = location2 - unit2->Position(); // vector from center of mass to contact point for unit2
-    QVector velocity_of_contact_point1 = unit1->GetVelocity() + unit1->GetAngularVelocity().Cross(location1_local); // compute velocity of point of contact for unit 1 - note that "location1_local" is a relative vector from unit1's coordinate system, with origin assumed to be at center of mass. Placing the origin off center is considered a data set error
-    QVector velocity_of_contact_point2 = unit2->GetVelocity() + unit2->GetAngularVelocity().Cross(location2_local); // compute velocity of point of contact for unit 2
+    QVector velocity_of_contact_point1 = unit1->GetVelocity() + unit1->GetAngularVelocity()
+            .Cross(location1_local); // compute velocity of point of contact for unit 1 - note that "location1_local" is a relative vector from unit1's coordinate system, with origin assumed to be at center of mass. Placing the origin off center is considered a data set error
+    QVector velocity_of_contact_point2 = unit2->GetVelocity()
+            + unit2->GetAngularVelocity().Cross(location2_local); // compute velocity of point of contact for unit 2
     QVector relative_velocity = velocity_of_contact_point2 - velocity_of_contact_point1;
     // CAVEAT - next two variables (I1, I2) should be 3x3 matrices; using current data set (scalar) and assuming hollow shell (0.667 MR^2); avoiding divide by zero in case of data set omissions -- should probably just put some asserts here?
     // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues
     // should assert: mass >0; radial_size !=0; moment !=0; -- may require data set cleaning if asserted
-    double I1 = std::max(unit1->GetMoment(), configuration.physics.minimum_mass) * unit1->radial_size * unit1->radial_size * 0.667; // deriving scalar moment of inertia for unit 1
-    double I2 = std::max(unit2->GetMoment(), configuration.physics.minimum_mass) * unit2->radial_size * unit2->radial_size * 0.667; // deriving scalar moment of inertia for unit 2
-    double I1_inverse = 1.0 / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
+    double I1 =
+            std::max(unit1->GetMoment(), configuration.physics.minimum_mass) * unit1->radial_size * unit1->radial_size
+                    * 0.667; // deriving scalar moment of inertia for unit 1
+    double I2 =
+            std::max(unit2->GetMoment(), configuration.physics.minimum_mass) * unit2->radial_size * unit2->radial_size
+                    * 0.667; // deriving scalar moment of inertia for unit 2
+    double I1_inverse = 1.0
+            / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
     double I2_inverse = 1.0 / I2;
-    double mass1 = std::max(unit1->GetMass(), configuration.physics.minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
+    double mass1 = std::max(unit1->GetMass(),
+            configuration.physics
+                    .minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
     double mass2 = std::max(unit2->GetMass(), configuration.physics.minimum_mass); // avoid subsequent divides by 0
     double mass1_inverse = 1.0 / mass1;
     double mass2_inverse = 1.0 / mass2;
     // impulse magnitude, as per equation 5 in wiki -- note that  e = 1 - inelastic_scale, so 1+e = 1 + 1 -inelastic_scale = 2 - inelastic_scale
     double impulse_magnitude = -1 * ((2 - configuration.physics.inelastic_scale) * relative_velocity).Dot(normal1) /
-        (mass1_inverse + mass2_inverse +
-            ((I1_inverse * (location1_local.Cross(normal1))).Cross(location1_local) + (I2_inverse * (location2_local.Cross(normal1))).Cross(location2_local)).Dot(normal1)
+            (mass1_inverse + mass2_inverse +
+                    ((I1_inverse * (location1_local.Cross(normal1))).Cross(location1_local)
+                            + (I2_inverse * (location2_local.Cross(normal1))).Cross(location2_local)).Dot(normal1)
             );
     QVector impulse = impulse_magnitude * normal1;
 
     QVector v1_new = unit1->GetVelocity() - impulse * mass1_inverse;
     QVector v2_new = unit2->GetVelocity() + impulse * mass2_inverse; // difference in sign is intentional and important
     QVector w1_new = unit1->GetAngularVelocity() - impulse_magnitude * I1_inverse * (location1_local.Cross(normal1));
-    QVector w2_new = unit2->GetAngularVelocity() + impulse_magnitude * I2_inverse * (location2_local.Cross(normal1)); // again, repeated use of normal1 and lack of use of normal2 is intentional; difference in sign is intentional and important
+    QVector w2_new = unit2->GetAngularVelocity() + impulse_magnitude * I2_inverse
+            * (location2_local.Cross(normal1)); // again, repeated use of normal1 and lack of use of normal2 is intentional; difference in sign is intentional and important
 
     /*
     * Can factor the following out into testing code later
@@ -336,18 +337,24 @@ void Collision::collide( Unit* unit1,
     */
 
     // Kinetic energy including rotational, from https://en.wikipedia.org/wiki/Moment_of_inertia#Kinetic_energy_2
-    double kinetic_energy_system_initial_linear = 0.5 * mass1 * unit1->GetVelocity().MagnitudeSquared() + 0.5 * mass2 * unit2->GetVelocity().MagnitudeSquared();
-    double kinetic_energy_system_initial_angular = 0.5 * unit1->GetAngularVelocity().Dot(I1 * unit1->GetAngularVelocity()) + 0.5 * unit2->GetAngularVelocity().Dot(I2 * unit2->GetAngularVelocity());
+    double kinetic_energy_system_initial_linear = 0.5 * mass1 * unit1->GetVelocity().MagnitudeSquared()
+            + 0.5 * mass2 * unit2->GetVelocity().MagnitudeSquared();
+    double kinetic_energy_system_initial_angular =
+            0.5 * unit1->GetAngularVelocity().Dot(I1 * unit1->GetAngularVelocity())
+                    + 0.5 * unit2->GetAngularVelocity().Dot(I2 * unit2->GetAngularVelocity());
 
     // compute changes in kinetic energy for linear and rotational
-    double kinetic_energy_system_linear = 0.5 * mass1 * v1_new.MagnitudeSquared() + 0.5 * mass2 * v2_new.MagnitudeSquared();
-    double kinetic_energy_system_angular = (0.5 * w1_new.Dot(I1 * w1_new)) + ( 0.5 * w2_new.Dot(I2 * w2_new));
+    double kinetic_energy_system_linear =
+            0.5 * mass1 * v1_new.MagnitudeSquared() + 0.5 * mass2 * v2_new.MagnitudeSquared();
+    double kinetic_energy_system_angular = (0.5 * w1_new.Dot(I1 * w1_new)) + (0.5 * w2_new.Dot(I2 * w2_new));
     double delta_kinetic_energy_linear = kinetic_energy_system_initial_linear - kinetic_energy_system_linear;
     double delta_kinetic_energy_angular = kinetic_energy_system_initial_angular - kinetic_energy_system_angular;
 
     //we have an impulse [ Force * Time ] and our physics interfaces operate on forces and torques [Force * Meters]
-    QVector force_on_1 = -1 * impulse * (1.0f / (unit1->sim_atom_multiplier * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force -- allow different units to have different physics fidelity
-    QVector force_on_2 = impulse * (1.0f / (unit2->sim_atom_multiplier * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force
+    QVector force_on_1 = -1 * impulse * (1.0f / (unit1->sim_atom_multiplier
+            * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force -- allow different units to have different physics fidelity
+    QVector force_on_2 = impulse * (1.0f / (unit2->sim_atom_multiplier
+            * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force
 
     collision1.adjustInterpenetration(v1_new, w1_new, normal1); // Call this BEFORE applying force
     collision1.applyForce(force_on_1, location1_local); // handles both force-on-center-of-mass and torque

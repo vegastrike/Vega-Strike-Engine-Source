@@ -1,6 +1,7 @@
 /*
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
+    Copyright (C) 2022 Stephen G. Tuggy
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,6 +18,7 @@
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+
 #include <math.h>
 #include <float.h>
 #include "cmd/collide2/opcodesysdef.h"
@@ -26,17 +28,17 @@
 
 //---------------------------------------------------------------------------
 
-float csVector3::Norm () const
-{ 
-  return qsqrt (x*x + y*y + z*z); 
+float csVector3::Norm() const {
+    return qsqrt (x * x + y * y + z * z);
 }
 
-void csVector3::Normalize ()
-{
-  float sqlen = x*x + y*y + z*z;
-  if (sqlen < SMALL_EPSILON) return;
-  float invlen = qisqrt (sqlen);
-  *this *= invlen;
+void csVector3::Normalize() {
+    float sqlen = x * x + y * y + z * z;
+    if (sqlen < SMALL_EPSILON) {
+        return;
+    }
+    float invlen = qisqrt (sqlen);
+    *this *= invlen;
 }
 
 

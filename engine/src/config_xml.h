@@ -1,10 +1,6 @@
-/**
- * config_xml.h
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
- * contributors
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -43,13 +39,12 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
-typedef vsUMap< string, KBHandler > CommandMap;
-typedef vsUMap< string, int >       KeyMap;
+typedef vsUMap<string, KBHandler> CommandMap;
+typedef vsUMap<string, int> KeyMap;
 
-class GameVegaConfig : public VegaConfig
-{
+class GameVegaConfig : public VegaConfig {
 public:
-    explicit GameVegaConfig( const char *configfile );
+    explicit GameVegaConfig(const char *configfile);
 #define AXIS_X 0
 #define AXIS_Y 1
 #define AXIS_Z 2
@@ -58,14 +53,14 @@ private:
     void initCommandMap();
     void initKeyMap();
     CommandMap command_map;
-    KeyMap     key_map;
+    KeyMap key_map;
     int hs_value_index;
 //vector<vColor *> colors;
     void bindKeys();
-    void doBindings( configNode *node );
-    void checkBind( configNode *node );
-    void doAxis( configNode *node );
-    void checkHatswitch( int nr, configNode *node );
+    void doBindings(configNode *node);
+    void checkBind(configNode *node);
+    void doAxis(configNode *node);
+    void checkHatswitch(int nr, configNode *node);
 };
 
 #endif //_VEGACONFIG_H_

@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,25 +30,25 @@
 
 #include "unit_generic.h"
 
-void addShieldMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
-void addRapidMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
-void pushMesh( Unit::XML*xml,
-               const char *filename,
-               const float scale,
-               int faction,
-               class Flightgroup*fg,
-               int startframe /*-1 is random frame*/,
-               double texturestarttime );
+void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
+void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
+void pushMesh(Unit::XML *xml,
+        const char *filename,
+        const float scale,
+        int faction,
+        class Flightgroup *fg,
+        int startframe /*-1 is random frame*/,
+        double texturestarttime);
 
-VSSprite * createVSSprite( const char *file );
-bool isVSSpriteLoaded( const VSSprite* );
-void deleteVSSprite( VSSprite* );
+VSSprite *createVSSprite(const char *file);
+bool isVSSpriteLoaded(const VSSprite *);
+void deleteVSSprite(VSSprite *);
 
-void cache_ani( string s );
+void cache_ani(string s);
 
 /* ADDED FOR extensible use of unit pretty print and unit loading */
 
-enum UNITLOADTYPE {DEFAULT, NO_MESH};
+enum UNITLOADTYPE { DEFAULT, NO_MESH };
 
 extern UNITLOADTYPE current_unit_load_mode;
 

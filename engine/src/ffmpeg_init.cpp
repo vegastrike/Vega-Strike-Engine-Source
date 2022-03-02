@@ -1,27 +1,24 @@
-/**
-* ffmpeg_init.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 //
 //C++ Implementation: vid_file
@@ -94,9 +91,9 @@ extern "C" int _url_read( URLContext *h, unsigned char *buf, int size )
 // See http://git.ffmpeg.org/?p=ffmpeg;a=commitdiff;h=2967315b9ee7afa15d2849b473e359f50a815696
 extern "C" int _url_write( URLContext *h,
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(52, 67, 0)
-				const
+                const
 #endif
-					unsigned char *buf, int size )
+                    unsigned char *buf, int size )
 {
     //read-only please
     return 0;
@@ -119,7 +116,7 @@ struct URLProtocol vsFileProtocol = {
     _url_write,
     _url_seek,
     _url_close,
-    
+
 #if (LIBAVCODEC_VERSION_MAJOR >= 53)
     NULL, NULL, NULL, NULL,
     0,
@@ -137,11 +134,11 @@ void initLibraries()
     if (!initted) {
         initted = true;
         av_register_all();
-        #if (LIBAVFORMAT_VERSION_MAJOR >= 53)
+#if (LIBAVFORMAT_VERSION_MAJOR >= 53)
         av_register_protocol2( &vsFileProtocol, sizeof(vsFileProtocol) );
-        #else
+#else
         register_protocol( &vsFileProtocol );
-        #endif
+#endif
     }
 }
 };
@@ -162,10 +159,8 @@ void av_free_packet( AVPacket *pkt )
 
 #else //No FFMPEG
 
-namespace FFMpeg
-{
-void initLibraries()
-{
+namespace FFMpeg {
+void initLibraries() {
     //No-op stub
 }
 };

@@ -1,22 +1,23 @@
 /*
- * Vega Strike
- * Copyright (C) 2003 Mike Byron
+ * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "vegastrike.h"
@@ -46,84 +47,76 @@
 //something that can execute them.
 
 //Process a command event.
-bool EventResponder::processCommand( const EventCommandId &command, Control *control )
-{
+bool EventResponder::processCommand(const EventCommandId &command, Control *control) {
     return m_modal;
 }
 
 //Process a key pressed down.
-bool EventResponder::processKeyDown( const InputEvent &event )
-{
+bool EventResponder::processKeyDown(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a key released.
-bool EventResponder::processKeyUp( const InputEvent &event )
-{
+bool EventResponder::processKeyUp(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse button pressed down.
-bool EventResponder::processMouseDown( const InputEvent &event )
-{
+bool EventResponder::processMouseDown(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse button pressed elsewhere, unfocusing this control.
-void EventResponder::processUnfocus( const InputEvent &event ) {}
+void EventResponder::processUnfocus(const InputEvent &event) {
+}
 
 //Process a mouse button released.
-bool EventResponder::processMouseUp( const InputEvent &event )
-{
+bool EventResponder::processMouseUp(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse location change.
-bool EventResponder::processMouseMove( const InputEvent &event )
-{
+bool EventResponder::processMouseMove(const InputEvent &event) {
     return m_modal;
 }
 
 //Process a mouse location change when at least one mouse button is down.
-bool EventResponder::processMouseDrag( const InputEvent &event )
-{
+bool EventResponder::processMouseDrag(const InputEvent &event) {
     return m_modal;
 }
 
 //Send a command event into the event chain.
-void EventResponder::sendCommand( const EventCommandId &command, Control *control )
-{
-    if (m_commandTarget != NULL)
-        if ( m_commandTarget->processCommand( command, control ) )
+void EventResponder::sendCommand(const EventCommandId &command, Control *control) {
+    if (m_commandTarget != NULL) {
+        if (m_commandTarget->processCommand(command, control)) {
             return;
-    globalEventManager().sendCommand( command, control );
+        }
+    }
+    globalEventManager().sendCommand(command, control);
 }
 
 //Set a specified target for commands.  Commands aren't forwarded into the
 //event chain, they are sent to this specific target.  This can be used, for
 //instance, to tie two controls tightly together.
 //Use NULL to clear the target and forward commands into the event chain.
-void EventResponder::setCommandTarget( EventResponder *responder )
-{
+void EventResponder::setCommandTarget(EventResponder *responder) {
     m_commandTarget = responder;
 }
 
 //Handle all input events.  Don't forward anything down the event chain.
-void EventResponder::setModal( bool flag )
-{
+void EventResponder::setModal(bool flag) {
     m_modal = flag;
 }
 
 //CONSTRUCTION
-EventResponder::EventResponder( void ) :
-    m_modal( false )
-    , m_commandTarget( NULL )
-{}
+EventResponder::EventResponder(void) :
+        m_modal(false), m_commandTarget(NULL) {
+}
 
-EventResponder::~EventResponder( void )
-{
+EventResponder::~EventResponder(void) {
     //Make sure this responder is not in the event chain.
-    if ( hasGlobalEventManager() )
-        globalEventManager().removeResponder( this );
+    if (hasGlobalEventManager()) {
+        globalEventManager().removeResponder(this);
+    }
 }
 

@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,17 +24,17 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #ifndef ENERGETIC_H
 #define ENERGETIC_H
 
 #include "resource/resource.h"
 
-class Energetic
-{
+class Energetic {
 public:
     Energetic();
 
-    void decreaseWarpEnergy( bool insys, float time );
+    void decreaseWarpEnergy(bool insys, float time);
     void DecreaseWarpEnergyInWarp();
 
     float energyData() const;
@@ -41,9 +42,9 @@ public:
 
     float fuelData() const;
 
-    static float getFuelUsage( bool afterburner );
+    static float getFuelUsage(bool afterburner);
     void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
-    float ExpendMomentaryFuelUsage( float magnitude );
+    float ExpendMomentaryFuelUsage(float magnitude);
     float ExpendFuel(float quantity);
     void ExpendEnergy(const bool player_ship);
     void ExpendEnergy(float usage);
@@ -51,7 +52,7 @@ public:
     void ExpendFuel();
     float getWarpEnergy() const;
 
-    void increaseWarpEnergy( bool insys, float time );
+    void increaseWarpEnergy(bool insys, float time);
 
     float maxEnergyData() const;
 
@@ -62,9 +63,9 @@ public:
     void RechargeWarpCapacitors(const bool player_ship);
     bool refillWarpEnergy();
 
-    void setAfterburnerEnergy( float aft );
-    void setEnergyRecharge( float enrech );
-    void setFuel( float f );
+    void setAfterburnerEnergy(float aft);
+    void setEnergyRecharge(float enrech);
+    void setFuel(float f);
 
     float totalShieldEnergyCapacitance();
 
@@ -76,17 +77,16 @@ public:
     float WarpEnergyMultiplier(const bool player_ship);
 
     // TODO: move to StarFaring class when available
-    struct UnitJump
-    {
+    struct UnitJump {
         float warpDriveRating;
         float energy;       //short fix
         float insysenergy;  //short fix
-        signed char   drive; // disabled
+        signed char drive; // disabled
         unsigned char delay;
         unsigned char damage;
         //negative means fuel
     }
-    jump;
+            jump;
 
     //current energy
     Resource<float> energy;
@@ -103,9 +103,9 @@ public:
 protected:
 
     //fuel of this unit
-    float  fuel;
-    float  afterburnenergy;              //short fix
-    int    afterburntype;   //0--energy, 1--fuel
+    float fuel;
+    float afterburnenergy;              //short fix
+    int afterburntype;   //0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };
 

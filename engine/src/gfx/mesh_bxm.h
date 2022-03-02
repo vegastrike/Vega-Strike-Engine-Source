@@ -3,7 +3,8 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ *  contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,5 +33,5 @@ using std::vector;
 #include <stdlib.h>
 #include <stdio.h>
 
-void BFXMToXmesh( FILE *Inputfile, FILE *Outputfile ); //Translate BFXM file Inputfile to text file Outputfile
+void BFXMToXmesh(FILE *Inputfile, FILE *Outputfile); //Translate BFXM file Inputfile to text file Outputfile
 
