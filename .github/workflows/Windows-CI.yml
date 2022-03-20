@@ -33,17 +33,19 @@ jobs:
 
       - name: install-vcpkg
         # You may pin to the exact commit or the version.
+        # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
         uses: lukka/run-vcpkg@v7
         with:
           vcpkgDirectory: '${{ github.workspace }}/v'
           setupOnly: true
-          vcpkgGitCommitId: 'b3cfaaf1bba70febd07c2f672ae590dc5d914180'
+          vcpkgGitCommitId: '49a30e9db17a8edf7c2809940ee2036746b1b982'
           vcpkgTriplet: 'x64-windows'
           appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
 
       - name: run-cmake
         # You may pin to the exact commit or the version.
+        # uses: lukka/run-cmake@7ba4481660f0f04c86cfa5f1f24b90effc97bde1
         uses: lukka/run-cmake@v3
         with:
           # Path to CMakeLists.txt. Used for both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes.
