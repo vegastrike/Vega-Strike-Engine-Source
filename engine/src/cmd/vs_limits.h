@@ -34,9 +34,9 @@ class Limits {
 public:
     // Init overrides default values of 0 with the following values
 //max ypr--both pos/neg are symmetrical
-    float yaw = 2.55;
-    float pitch = 2.55;
-    float roll = 2.55;
+    float yaw = 2.55f;
+    float pitch = 2.55f;
+    float roll = 2.55f;
 //side-side engine thrust max
     float lateral = 2;
 //vertical engine thrust max
