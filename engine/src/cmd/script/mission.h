@@ -322,7 +322,7 @@ public:
     missionNode *defvar_node;
     missionNode *block_node;
 
-    unsigned int varId;
+    size_t varId;
 };
 
 /* *********************************************************** */

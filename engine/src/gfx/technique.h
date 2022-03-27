@@ -88,7 +88,7 @@ public:
 
     void compile(); //Throws on error
 
-    int getNumPasses() const {
+    inline size_t getNumPasses() const {
         return passes.size();
     }
 
