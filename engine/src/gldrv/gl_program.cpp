@@ -154,7 +154,7 @@ static VSFileSystem::VSError getProgramSource(const std::string &path,
                         } else {
                             // Append a blank line to avoid issues and restore line numbers
                             lines.push_back("\n");
-                            snprintf(buf, buflen, "#line %lu\n", lineno);
+                            snprintf(buf, buflen, "#line %zu\n", lineno);
                             lines.push_back(buf);
                         }
                     } else {
