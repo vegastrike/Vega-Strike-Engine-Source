@@ -26,9 +26,9 @@
 #include <string>
 
 //Some pre-defined weights for the outline stroke font.
-static const float LIGHT_STROKE = 0.6;
-static const float NORMAL_STROKE = 1.0;
-static const float BOLD_STROKE = 1.5;
+static const float LIGHT_STROKE = 0.6f;
+static const float NORMAL_STROKE = 1.0f;
+static const float BOLD_STROKE = 1.5f;
 
 //The GLUT outline font (GLUT_STROKE_ROMAN) has a maximum ascender over the baseline of
 //119.05, and a max descender under the baseline of 33.33.
@@ -51,7 +51,7 @@ class Font {
 public:
 //Font size.  Vertical distance in identity space.
     float size(void) const {
-        return m_size * 0.5;
+        return m_size * 0.5f;
     }
 
     void setSize(float s) {

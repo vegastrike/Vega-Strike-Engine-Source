@@ -79,7 +79,7 @@ public:
     }
 
 //Number of cells in this list.
-    virtual int count(void) const = 0;
+    virtual size_t count(void) const = 0;
 //Get a particular cell.
     virtual PickerCell *cellAt(int index) = 0;
 //Get a particular cell (const).

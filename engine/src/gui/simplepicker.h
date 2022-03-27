@@ -87,7 +87,7 @@ protected:
 class SimplePickerCells : public PickerCells {
 public:
 //Number of cells in this list.
-    virtual int count(void) const {
+    size_t count() const override {
         return m_cells.size();
     }
 
