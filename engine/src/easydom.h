@@ -32,7 +32,7 @@
 #include <vector>
 #include <stack>
 #include <gnuhash.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "xml_support.h"

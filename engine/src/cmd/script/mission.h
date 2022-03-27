@@ -39,7 +39,6 @@
 #include <string>
 #include <fstream>
 
-//#include "xml_support.h"
 #include "easydom.h"
 
 #ifndef VS_MIS_SEL
@@ -55,9 +54,9 @@ class MessageCenter;
 
 #include "star_system.h"
 
-#include <assert.h>
+#include <cassert>
 
-#define qu(x) ("\""+x+"\"")
+#define qu(x) ("\""+(x)+"\"")
 
 /* *********************************************************** */
 
@@ -330,9 +329,9 @@ public:
 
 class varInstVec : public vector<varInst *> {
 public:
-    unsigned int addVar(varInst *vi) {
+    inline size_t addVar(varInst *vi) {
         push_back(vi);
-        int index = size() - 1;
+        size_t index = size() - 1;
         vi->varId = index;
         return index;
     }

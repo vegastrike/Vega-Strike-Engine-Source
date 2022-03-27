@@ -27,7 +27,7 @@
 #include <expat.h>
 #include "xml_support.h"
 #include "vegastrike.h"
-#include <assert.h>
+#include <cassert>
 #include "config_xml.h"
 #include "easydom.h"
 #include "cmd/ai/flykeyboard.h"
@@ -40,7 +40,6 @@
 #include "gfx/cockpit.h"
 #include "in_kb_data.h"
 #include "python/python_compile.h"
-#include "gfx/screenshot.h"
 #include "vs_logging.h"
 
 /* *********************************************************** */

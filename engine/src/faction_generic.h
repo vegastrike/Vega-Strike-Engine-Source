@@ -24,7 +24,6 @@
 #define __FACTIONGENERIC_H
 #include <string>
 #include <boost/shared_ptr.hpp>
-//#include <gnuhash.h>
 
 #include "xml_support.h"
 

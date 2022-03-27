@@ -79,7 +79,7 @@ struct Quaternion {
     void to_matrix(Matrix &mat) const {
         const float GFXEPSILON = ((float) 10e-6);
         float W = v.i * v.i + v.j * v.j + v.k * v.k + s * s;         //norm
-        W = (W < 0 + GFXEPSILON && W > 0 - GFXEPSILON) ? 0 : 2.0 / W;
+        W = (W < 0 + GFXEPSILON && W > 0 - GFXEPSILON) ? 0 : 2.0f / W;
 
         float xw = v.i * W;
         float yw = v.j * W;

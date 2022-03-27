@@ -21,16 +21,13 @@
  */
 
 
-#include <assert.h>
+#include <cassert>
 
-#include "vs_globals.h"
 #include "vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "faction_generic.h"
 #include "gfx/aux_texture.h"
 #include "cmd/unit_util.h"
-#include "cmd/unit_generic.h"
-#include "gfx/aux_texture.h"
 #include "gfx/animation.h"
 #include "cmd/music.h"
 

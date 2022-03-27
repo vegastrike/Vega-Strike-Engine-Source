@@ -21,16 +21,15 @@
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <vector>
 #include <string>
 #include "macosx_math.h"
-#include <math.h>
-#include <time.h>
-#include <assert.h>
+#include <cmath>
+#include <ctime>
+#include <cassert>
 
-#include "configxml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "gfxlib.h"

@@ -139,7 +139,7 @@ public:
     //Split this mesh with into 2^level submeshes at arbitrary planes
     void Split(int level);
 
-    unsigned int nummesh() const {
+    inline size_t nummesh() const {
         // Return number of meshes except shield
         return (meshdata.size() - 1);
     }

@@ -25,11 +25,7 @@
 #include "universe.h"
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
-#include "vsfilesystem.h"
-#include "configxml.h"
-#include "vs_globals.h"
 #include "xml_support.h"
-#include "lin_time.h"
 #include "star_system_generic.h"
 
 #include "options.h"
@@ -38,7 +34,6 @@
 #include <string>
 #include <map>
 #include <deque>
-#include <algorithm>
 
 using namespace XMLSupport;
 using namespace GalaxyXML;

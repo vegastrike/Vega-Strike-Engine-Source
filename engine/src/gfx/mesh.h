@@ -306,14 +306,14 @@ public:
     virtual ~Mesh();
 
 ///Gets number of specialFX
-    unsigned int numFX() const {
+    inline size_t numFX() const {
         return LocalFX.size();
     }
 
 ///Turns on SpecialFX
     void EnableSpecialFX();
 
-    unsigned int numTextures() const {
+    inline size_t numTextures() const {
         return Decal.size();
     }
 

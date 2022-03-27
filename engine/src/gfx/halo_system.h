@@ -53,7 +53,7 @@ public:
     virtual ~HaloSystem();
     HaloSystem();
 
-    unsigned int NumHalos() const {
+    inline size_t NumHalos() const {
         return halo.size();
     }
 

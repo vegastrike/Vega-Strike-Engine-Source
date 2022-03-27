@@ -22,13 +22,11 @@
 
 #ifndef _FILE_MAIN_H_
 #define _FILE_MAIN_H_
-#include <stdio.h>
-#include <string.h>
-//#include "gfxlib.h"
+#include <cstdio>
+#include <cstring>
 #include "endianness.h"
 #include "vsfilesystem.h"
 using VSFileSystem::VSFile;
-//using namespace VSFileSystem;
 extern VSFile fpread;
 
 /*File utility functions*/

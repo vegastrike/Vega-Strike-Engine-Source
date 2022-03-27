@@ -27,8 +27,6 @@
 #include <expat.h>
 #include "easydom.h"
 
-#include <assert.h>     /// needed for assert() calls.
-
 easyDomNode::easyDomNode() {
 }
 

@@ -96,7 +96,7 @@ public:
         /* same as advance, only it returns the unit at the same time */
         Unit *next();
 
-        int size() const {
+        inline size_t size() const {
             return (col->size());
         }
 
@@ -145,7 +145,7 @@ public:
         ConstIterator &operator=(const ConstIterator &orig);
         Unit *next();
 
-        int size() const {
+        inline size_t size() const {
             return (col->size());
         }
 
@@ -248,7 +248,7 @@ public:
     bool remove(const class Unit *);
 
     /* Returns number of non-null units in list */
-    inline const int size() const {
+    inline size_t size() const {
         return u.size() - removedIters.size();
     }
 

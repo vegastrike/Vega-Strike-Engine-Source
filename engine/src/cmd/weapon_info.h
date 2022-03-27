@@ -41,18 +41,18 @@ struct WeaponInfo {
     MOUNT_SIZE size = MOUNT_SIZE::NOWEAP;
 
     // Make const again
-    /*const*/ float damage = 1.8;
+    /*const*/ float damage = 1.8f;
     /*const*/ float energy_rate = 18;
     /*const*/ float length = 5;
     /*const*/ float lock_time = 0;
-    /*const*/ float long_range = .5;
+    /*const*/ float long_range = 0.5f;
     /*const*/ Vector offset = Vector();
     /*const*/ float phase_damage = 0;
     /*const*/ float pulse_speed = 15;
     /*const*/ float radial_speed = 1;
-    /*const*/ float radius = 0.5;
+    /*const*/ float radius = 0.5f;
     /*const*/ float range = 100;
-    /*const*/ float refire_rate = .2;
+    /*const*/ float refire_rate = 0.2f;
     /*const*/ float stability = 60;
     /*const*/ int sound = -1;
     /*const*/ float speed = 10;

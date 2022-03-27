@@ -25,11 +25,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/foreach.hpp>
 #include <string>
 #include <map>
 #include <vector>
-#include <iostream>
 
 namespace pt = boost::property_tree;
 

@@ -579,7 +579,7 @@ public:
     //are shields tight to the hull.  zero means bubble
     float shieldtight = GameConfig::GetVariable("physics",
             "default_shield_tightness",
-            0);
+            0.0f);
 
 public:
     // TODO: move cloak to Cloakable?
