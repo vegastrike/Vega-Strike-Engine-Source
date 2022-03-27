@@ -35,13 +35,11 @@
 #include <process.h>
 #endif
 #include "gfxlib.h"
-#include "in_kb.h"
 #include "lin_time.h"
 #include "main_loop.h"
 #include "config_xml.h"
 #include "cmd/script/mission.h"
 #include "audiolib.h"
-#include "config_xml.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "gfx/animation.h"
@@ -54,14 +52,12 @@
 #include "universe_util.h"
 #include "universe.h"
 #include "save_util.h"
-#include "gfx/masks.h"
 #include "cmd/music.h"
 #include "ship_commands.h"
-#include "gamemenu.h"
 #include "audio/SceneManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 #include "configuration/configuration.h"
-#include <time.h>
+#include <ctime>
 #if !defined(_WIN32) && !defined (__HAIKU__)
 #include <sys/signal.h>
 #endif
