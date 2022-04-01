@@ -1005,6 +1005,8 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/camera.cpp
     src/gfx/cockpit_xml.cpp
     src/gfx/cockpit.cpp
+    src/gfx/cockpit_gfx.cpp
+    src/gfx/cockpit_gfx_utils.cpp
     src/gfx/coord_select.cpp
     src/gfx/env_map_gent.cpp
     src/gfx/gauge.cpp

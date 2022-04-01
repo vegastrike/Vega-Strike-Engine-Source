@@ -214,29 +214,6 @@ protected:
         return 1;
     }
 
-    virtual void DrawTargetBox() {
-    }
-
-    ///draws the target box around all units
-    virtual void DrawTargetBoxes(const Radar::Sensor &) {
-    }
-
-    ///draws a target cross around all units targeted by your turrets // ** jay
-    virtual void DrawTurretTargetBoxes() {
-    }
-
-    ///Shows the flightgroup's target, if any.
-    virtual void DrawTacticalTargetBox() {
-    }
-
-    ///Draws all the tracks on the radar.
-    virtual void DrawRadar(const Radar::Sensor &) {
-    }
-
-    ///Draws gauges
-    virtual void DrawGauges(Unit *un) {
-    }
-
     float cockpit_time;
     bool ejecting;
     bool going_to_dock_screen;
@@ -467,10 +444,6 @@ public:
     }
 
     virtual bool CanDrawNavSystem() {
-        return false;
-    }
-
-    virtual bool DrawNavSystem() {
         return false;
     }
 
