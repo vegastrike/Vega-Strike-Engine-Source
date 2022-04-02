@@ -53,6 +53,7 @@
 extern vector<Logo *> undrawn_logos;
 
 #include <exception>
+#include <utility>
 
 #ifdef _MSC_VER
 //Undefine those nasty min/max macros
@@ -74,13 +75,13 @@ public:
     Exception(const Exception &other) : _message(other._message) {
     }
 
-    explicit Exception(const std::string &message) : _message(message) {
+    explicit Exception(std::string message) : _message(std::move(message)) {
     }
 
-    virtual ~Exception() {
+    ~Exception() override {
     }
 
-    virtual const char *what() const noexcept {
+    const char *what() const noexcept override {
         return _message.c_str();
     }
 };
@@ -96,17 +97,17 @@ public:
 
 class OrigMeshContainer {
 public:
-    float d;
+    float d{};
     Mesh *orig;
-    int program;
+    int program{};
 
-    unsigned int transparent: 1;
-    unsigned int zsort: 1;
-    unsigned int passno: 14;
-    int sequence: 16;
+    unsigned int transparent{1};
+    unsigned int zsort{1};
+    unsigned int passno{14};
+    int sequence{16};
 
     OrigMeshContainer() {
-        orig = NULL;
+        orig = nullptr;
     }
 
     OrigMeshContainer(Mesh *orig, float d, int passno) {
@@ -157,7 +158,7 @@ public:
         if (program == 0) {
             //Fixed-fn passes sort by texture
             SLESS(orig->Decal.size());
-            if (orig->Decal.size() > 0)
+            if (!orig->Decal.empty())
                 PLESS(orig->Decal[0]);
         } else {
             //Shader passes sort by effective texture
@@ -176,10 +177,10 @@ public:
                         //Compare decal textures
                         const Texture *ta =
                                 (atu.sourceIndex < static_cast<int>(orig->Decal.size())) ? orig->Decal[atu.sourceIndex]
-                                        : NULL;
+                                        : nullptr;
                         const Texture *tb = (btu.sourceIndex < static_cast<int>(b.orig->Decal.size())) ? b.orig
                                 ->Decal[btu.sourceIndex]
-                                : NULL;
+                                : nullptr;
                         PLESSX(ta, tb);
                     }
                 } else {
@@ -239,14 +240,14 @@ const int UNDRAWN_MESHES_SIZE = NUM_MESH_SEQUENCE;
 
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE];
 
-Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string factionname, GFXBOOL detail) const {
+Texture *Mesh::TempGetTexture(MeshXML *xml, const std::string& filename, const std::string& factionname, GFXBOOL detail) const {
     static FILTER fil =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "detail_texture_trilinear", "true")) ? TRILINEAR
                     : MIPMAP;
     static bool factionalize_textures =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "faction_dependant_textures", "true"));
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
-    Texture *ret = NULL;
+    Texture *ret = nullptr;
     string facplus = faction_prefix + filename;
     if (filename.find(".ani") != string::npos) {
         ret = new AnimatedTexture(facplus.c_str(), 1, fil, detail);
@@ -255,7 +256,7 @@ Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string fa
             ret = new AnimatedTexture(filename.c_str(), 1, fil, detail);
             if (!ret->LoadSuccess()) {
                 delete ret;
-                ret = NULL;
+                ret = nullptr;
             } else {
                 return ret;
             }
@@ -272,7 +273,7 @@ Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string fa
 }
 
 int Mesh::getNumTextureFrames() const {
-    if (Decal.size()) {
+    if (!Decal.empty()) {
         if (Decal[0]) {
             return Decal[0]->numFrames();
         }
@@ -281,7 +282,7 @@ int Mesh::getNumTextureFrames() const {
 }
 
 double Mesh::getTextureCumulativeTime() const {
-    if (Decal.size()) {
+    if (!Decal.empty()) {
         if (Decal[0]) {
             return Decal[0]->curTime();
         }
@@ -290,7 +291,7 @@ double Mesh::getTextureCumulativeTime() const {
 }
 
 float Mesh::getTextureFramesPerSecond() const {
-    if (Decal.size()) {
+    if (!Decal.empty()) {
         if (Decal[0]) {
             return Decal[0]->framesPerSecond();
         }
