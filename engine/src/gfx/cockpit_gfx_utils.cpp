@@ -30,6 +30,7 @@
 
 #include "../configuration/game_config.h"
 #include "gfxlib.h"
+#include "vs_math.h"
 
 // Shared between several functions
 static const float absolute_minimum = GameConfig::GetVariable( "graphics", "hud", "min_lock_box_size", 0.001 );
