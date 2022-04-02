@@ -33,7 +33,7 @@
 #include "gfx/quaternion.h"
 #include "star_system.h"
 
-#include <float.h>
+#include <cfloat>
 
 struct Transformation;
 class Matrix;
@@ -88,7 +88,7 @@ public:
     Transformation curr_physical_state;
 
     //Should we resolve forces on this unit (is it free to fly or in orbit)
-    // TODO: this should be deleted when we separate satelites from movables
+    // TODO: this should be deleted when we separate satellites from movables
     bool resolveforces;
 
     //The number of frames ahead this was put in the simulation queue
@@ -168,11 +168,11 @@ protected:
 public:
     Movable();
 
-protected:
     // forbidden
     Movable(const Movable &) = delete;
     // forbidden
     Movable &operator=(const Movable &) = delete;
+protected:
     virtual ~Movable() = default;
 
 public:
@@ -230,7 +230,7 @@ public:
             const Matrix &transmat,
             const Vector &CumulativeVelocity,
             bool ResolveLast,
-            UnitCollection *uc = NULL);
+            UnitCollection *uc = nullptr);
 
     //Returns unit-space ang velocity
     const Vector &GetAngularVelocity() const {
