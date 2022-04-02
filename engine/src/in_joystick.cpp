@@ -254,7 +254,7 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
     nr_of_axes    = 3;     //glutDeviceGet(GLUT_JOYSTICK_AXES);
     nr_of_buttons = 15;     //glutDeviceGet(GLUT_JOYSTICK_BUTTONS);
     nr_of_hats    = 0;
-#endif //we have GLUT
+#endif //HAVE_SDL
 #endif
     VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
 }
