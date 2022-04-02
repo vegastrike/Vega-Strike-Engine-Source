@@ -28,8 +28,8 @@
 #include "computer.h"
 #include "configuration/configuration.h"
 
-Computer::Computer() : NavPoint(0, 0, 0),
-        ecmactive(true),
+Computer::Computer() : ecmactive(true),
+        NavPoint(0, 0, 0),
         velocity_ref(nullptr),
         force_velocity_ref(false),
         threatlevel(0),
