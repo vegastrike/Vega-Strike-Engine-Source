@@ -22,4 +22,4 @@
 
 #define CS_CRYSTALSPACE_EXPORT
 
-#endif // __OPCODE_EXTERN_H__
+#endif // __CS_OPCODEEXTERN_H__

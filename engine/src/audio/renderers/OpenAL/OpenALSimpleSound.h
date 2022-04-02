@@ -77,4 +77,4 @@ protected:
 
 };
 
-#endif//__AUDIO_SIMPLESOUND_H__INCLUDED__
+#endif//__AUDIO_OPENALSIMPLESOUND_H__INCLUDED__

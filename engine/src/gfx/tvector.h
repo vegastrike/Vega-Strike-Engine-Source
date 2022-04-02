@@ -195,5 +195,5 @@ void Roll(float rad, TVector<S, T> &p, TVector<S, T> &q, TVector<S, T> &r);
 typedef TVector<float, double> Vector;
 typedef TVector<double, float> QVector;
 
-#endif // C++
+#endif // __cplusplus
 #endif // TVECTOR_H
