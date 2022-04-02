@@ -24,14 +24,15 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#ifndef _VEGASIMPLECONFIG_H_
-#define _VEGASIMPLECONFIG_H_
+#ifndef _VEGA_SIMPLE_CONFIG_H_
+#define _VEGA_SIMPLE_CONFIG_H_
 
 #include <expat.h>
 #include <string>
 #include "xml_support.h"
 #include "easydom.h"
 #include <map>
+#include <utility>
 #include "gfxlib_struct.h"
 
 using std::string;
@@ -47,7 +48,7 @@ public:
 
 class configNode : public easyDomNode {
 public:
-    vColor *color;
+    vColor *color{};
 };
 
 enum section_t { SECTION_COLOR, SECTION_VAR };
@@ -72,13 +73,13 @@ public:
     GFXColor getColor(string section, string name, GFXColor default_color = GFXColor(1, 1, 1, 1));
 
     inline GFXColor getColor(string name, GFXColor default_color = GFXColor(1, 1, 1, 1)) {
-        return getColor("default", name, default_color);
+        return getColor("default", std::move(name), default_color);
     }
 
-    string getVariable(string section, string name, string defaultvalue);
-    string getVariable(string section, string subsection, string name, string defaultvalue);
-    configNode *findSection(string section, configNode *startnode);
-    configNode *findEntry(string name, configNode *startnode);
+    string getVariable(string section, string name, string defaultValue);
+    string getVariable(string section, string subsection, string name, string defaultValue);
+    configNode *findSection(string section, configNode *startNode);
+    configNode *findEntry(string name, configNode *startNode);
     void setVariable(configNode *entry, string value);
     bool setVariable(string section, string name, string value);
     bool setVariable(string section, string subsection, string name, string value);
@@ -91,7 +92,7 @@ public:
     }
 
 protected:
-    string getVariable(configNode *section, string name, string defaultval);
+    string getVariable(configNode *section, string name, string defaultValue);
     configNode *variables;
     configNode *bindings;
     configNode *colors;
@@ -121,5 +122,5 @@ protected:
     }
 };
 
-#endif //_VEGACONFIG_H_
+#endif //_VEGA_SIMPLE_CONFIG_H_
 

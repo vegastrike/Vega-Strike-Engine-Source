@@ -248,31 +248,31 @@ void VegaConfig::doColors(configNode *node) {
 
 /* *********************************************************** */
 
-string VegaConfig::getVariable(string section, string subsection, string name, string defaultvalue) {
+string VegaConfig::getVariable(string section, string subsection, string name, string defaultValue) {
     string hashname = section + "/" + subsection + "/" + name;
     std::map<string, string>::iterator it;
     if ((it = map_variables.find(hashname)) != map_variables.end()) {
         return (*it).second;
     } else {
-        return defaultvalue;
+        return defaultValue;
     }
 }
 
 /* *********************************************************** */
 
-string VegaConfig::getVariable(string section, string name, string defaultval) {
+string VegaConfig::getVariable(string section, string name, string defaultValue) {
     string hashname = section + "/" + name;
     std::map<string, string>::iterator it;
     if ((it = map_variables.find(hashname)) != map_variables.end()) {
         return (*it).second;
     } else {
-        return defaultval;
+        return defaultValue;
     }
 }
 
 /* *********************************************************** */
 
-string VegaConfig::getVariable(configNode *section, string name, string defaultval) {
+string VegaConfig::getVariable(configNode *section, string name, string defaultValue) {
     std::vector<easyDomNode *>::const_iterator siter;
     for (siter = section->subnodes.begin(); siter != section->subnodes.end(); siter++) {
         configNode *cnode = (configNode *) (*siter);
@@ -291,9 +291,9 @@ string VegaConfig::getVariable(configNode *section, string name, string defaultv
     if (shouldwarn) {
         VS_LOG(warning,
                 (boost::format("WARNING: no var named %1% in section %2% using default: %3%") % name
-                        % section->attr_value("name") % defaultval));
+                        % section->attr_value("name") % defaultValue));
     }
-    return defaultval;
+    return defaultValue;
 }
 
 GFXColor VegaConfig::getColor(string section, string name, GFXColor default_color) {
@@ -322,15 +322,15 @@ GFXColor VegaConfig::getColor(configNode *node, string name, GFXColor default_co
 
 /* *********************************************************** */
 
-configNode *VegaConfig::findEntry(string name, configNode *startnode) {
-    return findSection(name, startnode);
+configNode *VegaConfig::findEntry(string name, configNode *startNode) {
+    return findSection(name, startNode);
 }
 
 /* *********************************************************** */
 
-configNode *VegaConfig::findSection(string section, configNode *startnode) {
+configNode *VegaConfig::findSection(string section, configNode *startNode) {
     std::vector<easyDomNode *>::const_iterator siter;
-    for (siter = startnode->subnodes.begin(); siter != startnode->subnodes.end(); siter++) {
+    for (siter = startNode->subnodes.begin(); siter != startNode->subnodes.end(); siter++) {
         configNode *cnode = (configNode *) (*siter);
         string scan_name = (cnode)->attr_value("name");
         if (scan_name == section) {
