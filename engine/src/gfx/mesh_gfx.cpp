@@ -1432,14 +1432,14 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     static std::vector<int> indices;
     if (zsort) {
         indices.resize(cur_draw_queue.size());
-        for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
+        for (size_t i = 0, n = cur_draw_queue.size(); i < n; ++i) {
             indices[i] = i;
         }
         std::sort(indices.begin(), indices.end(),
                 MeshDrawContextPainterSort(sortctr, cur_draw_queue));
     }
     vlist->BeginDrawState();
-    for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
+    for (size_t i = 0, n = cur_draw_queue.size(); i < n; ++i) {
         //Making it static avoids frequent reallocations - although may be troublesome for thread safety
         //but... WTH... nothing is thread safe in VS.
         //Also: Be careful with reentrancy... right now, this section is not reentrant.
@@ -1459,10 +1459,10 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
             }
             //FX lights
             size_t fxLightsBase = lights.size();
-            for (size_t i = 0; i < c.SpecialFX->size(); i++) {
+            for (size_t j = 0; j < c.SpecialFX->size(); j++) {
                 int light;
                 GFXLoadMatrixModel(c.mat);
-                GFXCreateLight(light, (*c.SpecialFX)[i], true);
+                GFXCreateLight(light, (*c.SpecialFX)[j], true);
                 lights.push_back(light);
             }
             if (c.useXtraFX) {
@@ -1562,10 +1562,10 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                 GFXDeleteLight(lights[fxLightsBase]);
             }
             size_t lastPass = technique->getNumPasses();
-            if (0 != forcelogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+            if (nullptr != forcelogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
                 forcelogos->Draw(c.mat);
             }
-            if (0 != squadlogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+            if (nullptr != squadlogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
                 squadlogos->Draw(c.mat);
             }
         }
@@ -1587,7 +1587,7 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     GFXPopBlendMode();
 }
 
-#define GETDECAL(pass) ( (Decal[pass]) )
+#define GETDECAL(pass) ( (decal[pass]) )
 #define HASDECAL(pass) ( ( (NUM_PASSES > pass) && Decal[pass] ) )
 #define SAFEDECAL(pass) ( (HASDECAL( pass ) ? Decal[pass] : black) )
 
@@ -1619,35 +1619,35 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
     }
 
     //Map texture units
-    Texture *Decal[NUM_PASSES];
-    memset(Decal, 0, sizeof(Decal));
+    Texture *decal[NUM_PASSES];
+    memset(decal, 0, sizeof(decal));
     for (unsigned int tui = 0; tui < pass.getNumTextureUnits(); ++tui) {
         const Pass::TextureUnit &tu = pass.getTextureUnit(tui);
         switch (tu.sourceType) {
             case Pass::TextureUnit::File:
                 //Direct file sources go in tu.texture
-                Decal[tu.targetIndex] = tu.texture.get();
+                decal[tu.targetIndex] = tu.texture.get();
                 break;
             case Pass::TextureUnit::Decal:
                 if ((tu.sourceIndex < static_cast<int>(this->Decal.size())) && this->Decal[tu.sourceIndex]) {
                     //Mesh has the referenced decal
-                    Decal[tu.targetIndex] = this->Decal[tu.sourceIndex];
+                    decal[tu.targetIndex] = this->Decal[tu.sourceIndex];
                 } else {
                     //Mesh does not have the referenced decal, activate the default
                     switch (tu.defaultType) {
                         case Pass::TextureUnit::File:
                             //Direct file defaults go in tu.texture (direct file sources preclude defaults)
-                            Decal[tu.targetIndex] = tu.texture.get();
+                            decal[tu.targetIndex] = tu.texture.get();
                             break;
                         case Pass::TextureUnit::Decal:
-                            //Decal reference as default - risky, but may be cool
+                            //decal reference as default - risky, but may be cool
                             if ((tu.defaultIndex < static_cast<int>(this->Decal.size()))
                                     && this->Decal[tu.defaultIndex]) {
                                 //Valid reference, activate
-                                Decal[tu.targetIndex] = this->Decal[tu.defaultIndex];
+                                decal[tu.targetIndex] = this->Decal[tu.defaultIndex];
                             } else {
                                 //Invalid reference, activate global default (null)
-                                Decal[tu.targetIndex] = NULL;
+                                decal[tu.targetIndex] = nullptr;
                             }
                             break;
                         case Pass::TextureUnit::None: //chuck_starchaser
@@ -1758,7 +1758,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         if ((nomultienv && whichpass == ENVSPEC_PASS) || !whichpass || HASDECAL(whichpass)) {
             switch (whichpass) {
                 case BASE_PASS:
-                    SetupSpecMapFirstPass(Decal,
+                    SetupSpecMapFirstPass(decal,
                             DecalSize,
                             myMatNum,
                             getEnvMap(),
@@ -1774,7 +1774,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                         SetupSpecMapSecondPass(SAFEDECAL(ENVSPEC_TEX),
                                 myMatNum,
                                 blendSrc,
-                                (splitpass1 ? false : getEnvMap()),
+                                !splitpass1 && getEnvMap(),
                                 (splitpass1 ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0)),
                                 polygon_offset);
                     } else {
@@ -1786,6 +1786,9 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     break;
                 case GLOW_PASS:
                     SetupGlowMapFourthPass(SAFEDECAL(GLOW_TEX), myMatNum, ONE, GFXColor(1, 1, 1, 1), polygon_offset);
+                    break;
+                default:
+                    ++whichpass;
                     break;
             }
             //Render all instances, no specific order if not necessary
@@ -1846,10 +1849,10 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     GFXDeleteLight(specialfxlight[j]);
                 }
                 RestoreCloakState(c.cloaked, getEnvMap(), damaged);
-                if (0 != forcelogos && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+                if (nullptr != forcelogos && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
                     forcelogos->Draw(c.mat);
                 }
-                if (0 != squadlogos && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+                if (nullptr != squadlogos && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
                     squadlogos->Draw(c.mat);
                 }
             }
@@ -1860,8 +1863,8 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     break;
                 case ENVSPEC_PASS:
                     if (!nomultienv) {
-                        RestoreSpecMapState((splitpass1 ? false : getEnvMap()),
-                                detailTexture != NULL,
+                        RestoreSpecMapState(!splitpass1 && getEnvMap(),
+                                detailTexture != nullptr,
                                 zwrite,
                                 polygon_offset);
                     } else {
@@ -1873,6 +1876,9 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     break;
                 case GLOW_PASS:
                     RestoreGlowMapState(zwrite, polygon_offset);
+                    break;
+                default:
+                    ++whichpass;
                     break;
             }
         }
@@ -1915,6 +1921,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                 break; //FIXME Nothing is done here! --chuck_starchaser
             default:
                 whichpass++;             //always increment pass number, otherwise infinite loop espresso
+                break;
         }
     }
     if (alphatest) {
@@ -1946,13 +1953,13 @@ void Mesh::CreateLogos(MeshXML *xml, int faction, Flightgroup *fg) {
         }
     }
     unsigned int nfl = numforcelogo;
-    Logo **tmplogo = NULL;
-    Texture *Dec = NULL;
+    Logo **tmplogo = nullptr;
+    Texture *Dec = nullptr;
     for (index = 0, nfl = numforcelogo, tmplogo = &forcelogos, Dec = FactionUtil::getForceLogo(faction);
             index < 2;
             index++, nfl = numsquadlogo, tmplogo = &squadlogos, Dec =
-                    (fg == NULL ? FactionUtil::getSquadLogo(faction) : fg->squadLogo)) {
-        if (Dec == NULL) {
+                    (fg == nullptr ? FactionUtil::getSquadLogo(faction) : fg->squadLogo)) {
+        if (Dec == nullptr) {
             Dec = FactionUtil::getSquadLogo(faction);
         }
         if (nfl == 0) {
