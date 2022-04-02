@@ -269,4 +269,4 @@ public:
 
 };
 
-#endif//__AUDIO_VECTOR_H__INCLUDED__
+#endif//__AUDIO_MATRIX_H__INCLUDED__
