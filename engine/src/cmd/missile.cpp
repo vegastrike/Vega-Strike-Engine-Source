@@ -196,7 +196,7 @@ void Missile::Discharge() {
     if ((damage != 0 || phasedamage != 0) && !discharged) {
         Unit *target = Unit::Target();
         VS_LOG(info, (boost::format("Missile discharged (target %1%)")
-                % ((target != NULL) ? target->name.get() : "NULL")));
+                % ((target != nullptr) ? target->name.get() : "NULL")));
         _Universe->activeStarSystem()->AddMissileToQueue(
                 new MissileEffect(Position(), damage, phasedamage,
                         radial_effect, radial_multiplier, owner));
