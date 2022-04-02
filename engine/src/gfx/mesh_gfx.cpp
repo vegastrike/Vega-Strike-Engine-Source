@@ -39,20 +39,16 @@
 #include "gfx/technique.h"
 #include "mesh_xml.h"
 #include "gldrv/gl_globals.h"
-#include "gldrv/gl_light.h"
 #if defined (CG_SUPPORT)
 #include "cg_global.h"
 #endif
 #include "universe_util.h"
 #include "universe.h"
-#include <utility>
 #ifdef _WIN32
 // What do we need from unistd? - let's find out :)
 #else
 #include <unistd.h>
 #endif
-#include <signal.h>
-#include <sys/types.h>
 
 extern vector<Logo *> undrawn_logos;
 
