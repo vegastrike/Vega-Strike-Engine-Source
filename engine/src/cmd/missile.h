@@ -79,33 +79,32 @@ public:
 public:
     virtual void Kill(bool erase = true);
     void Discharge();
-    float ExplosionRadius();
+    float ExplosionRadius() override;
 
-    enum _UnitType isUnit() const {
+    enum _UnitType isUnit() const override {
         return _UnitType::missile;
     }
 
-    virtual void UpdatePhysics2(const Transformation &trans,
+    void UpdatePhysics2(const Transformation &trans,
             const Transformation &old_physical_state,
             const Vector &accel,
             float difficulty,
             const Matrix &transmat,
             const Vector &CumulativeVelocity,
             bool ResolveLast,
-            UnitCollection *uc = NULL);
+            UnitCollection *uc = nullptr) override;
 
     Unit *breakECMLock(Unit *target);
     bool proximityFuse(Unit *target);
     bool useFuel(Unit *target, bool had_target);
 
-private:
-    // TODO: consider if this is really necessary and if so, use = delete
+    // TODO: consider if this is really necessary
 /// default constructor forbidden
-    Missile();
+    Missile() = delete;
 /// copy constructor forbidden
-    Missile(const Missile &);
+    Missile(const Missile &) = delete;
 /// assignment operator forbidden
-    Missile &operator=(const Missile &);
+    Missile &operator=(const Missile &) = delete;
 };
 
 #endif
