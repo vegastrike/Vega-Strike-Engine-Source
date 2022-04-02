@@ -20,8 +20,8 @@
  */
 
 
-#ifndef _VS_COLLECTIONS_HPP_
-#define _VS_COLLECTIONS_HPP_
+#ifndef _VEGA_STRIKE_VS_COLLECTIONS_HPP_
+#define _VEGA_STRIKE_VS_COLLECTIONS_HPP_
 
 #include <cstddef>
 #include <memory>
@@ -45,5 +45,5 @@ public:
 
 }
 
-#endif    // _VS_COLLECTIONS_HPP_
+#endif    // _VEGA_STRIKE_VS_COLLECTIONS_HPP_
 
