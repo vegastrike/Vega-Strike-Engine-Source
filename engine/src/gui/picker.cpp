@@ -53,7 +53,7 @@ PickerCell *PickerCells::cellWithId(const std::string &id) {
         }
     }
     //Didn't find a cell with the specified id.
-    return NULL;
+    return nullptr;
 }
 
 bool PickerCells::saveOpenCategories(std::list<std::list<std::string> > &masterList,
@@ -89,7 +89,7 @@ void Picker::saveOpenCategories(std::list<std::list<std::string> > &idList) cons
 
 int Picker::restoreOpenCategories(const std::list<std::list<std::string> > &idList) {
     int numRestored = 0;
-    PickerCell *selectedCell = NULL;
+    PickerCell *selectedCell = nullptr;
     for (std::list<std::list<std::string> >::const_iterator catIt = idList.begin();
             catIt != idList.end();
             ++catIt) {
@@ -117,7 +117,7 @@ int Picker::restoreOpenCategories(const std::list<std::list<std::string> > &idLi
 }
 
 //Draw the picker
-void Picker::draw(void) {
+void Picker::draw() {
     //If we need to change the displayed cells, do that first.
     if (m_needRecalcDisplay) {
         recalcDisplay();
@@ -188,8 +188,8 @@ void Picker::draw(void) {
 //Return the index of the current selected cell in the list of cells.
 //This can only be used if the list simple, not a tree.
 //Returns -1 if no selection, or if the selection is a child.
-int Picker::selectedItem(void) {
-    if (m_cells != NULL && m_selectedCell != NULL) {
+int Picker::selectedItem() {
+    if (m_cells != nullptr && m_selectedCell != nullptr) {
         //If we have a selection, find it in the list.  Won't find it if it's a child.
         for (int i = 0; i < m_cells->count(); i++) {
             PickerCell *cell = m_cells->cellAt(i);
@@ -214,7 +214,7 @@ PickerCell *Picker::cellForMouse(const Point &point) {
         }
     }
     //Didn't find anything.
-    return NULL;
+    return nullptr;
 }
 
 //Actually cause a cell to be selected.
@@ -222,16 +222,16 @@ void Picker::selectCell(PickerCell *cell, bool scroll) {
     PickerCell *oldCell = m_selectedCell;
     m_selectedCell = cell;
     //If the cell has children, flip whether the children are displayed.
-    if (cell != NULL) {
+    if (cell != nullptr) {
         PickerCells *list = cell->children();
-        if (list != NULL && list->count() > 0) {
+        if (list != nullptr && list->count() > 0) {
             const bool hideChildren = !cell->hideChildren();
             cell->setHideChildren(hideChildren);
             if (!hideChildren) {
                 recalcDisplay();
                 //Make sure the children are visible.
                 PickerCells *loopList = list;
-                PickerCell *lastChild = NULL;
+                PickerCell *lastChild = nullptr;
                 while (true) {
                     lastChild = loopList->cellAt(loopList->count() - 1);
                     if (lastChild->hideChildren()) {
@@ -239,7 +239,7 @@ void Picker::selectCell(PickerCell *cell, bool scroll) {
                         break;
                     }
                     loopList = lastChild->children();
-                    if (loopList == NULL || loopList->count() == 0) {
+                    if (loopList == nullptr || loopList->count() == 0) {
                         //lastChild has no children.
                         break;
                     }
@@ -270,7 +270,7 @@ void Picker::addListToDisplay(PickerCells *list, int level) {
         DisplayCell displayCell(cell, level);
         m_displayCells.push_back(displayCell);         //Add this cell to the list.
         PickerCells *children = cell->children();
-        if (!cell->hideChildren() && children != NULL) {
+        if (!cell->hideChildren() && children != nullptr) {
             //We have children to show, so add them, too.
             addListToDisplay(children, level + 1);
         }
@@ -282,7 +282,7 @@ void Picker::addListToDisplay(PickerCells *list, int level) {
 //when we scroll, which again changes the cells we display.
 //It does not need to be called for text or color changes, only when
 //cells are added or removed, etc.
-void Picker::recalcDisplay(void) {
+void Picker::recalcDisplay() {
     //Clear out the old display list.
     m_displayCells.clear();
 
@@ -290,7 +290,7 @@ void Picker::recalcDisplay(void) {
     addListToDisplay(m_cells, 0);
     if (m_scroller) {
         //Update the scroller's view of the number of lines, and try to preserve the scroll position.
-        int oldScrollPosition = m_scrollPosition;
+        size_t oldScrollPosition = m_scrollPosition;
         const int visibleCells = float_to_int(m_rect.size.height / totalCellHeight());
         m_scroller->setRangeValues(m_displayCells.size() - 1, visibleCells);
         m_scroller->setScrollPosition(oldScrollPosition);
@@ -354,7 +354,7 @@ bool Picker::processMouseDown(const InputEvent &event) {
     static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
     if (event.code == LEFT_MOUSE_BUTTON) {
         PickerCell *cell = cellForMouse(event.loc);
-        if (cell != NULL) {
+        if (cell != nullptr) {
             //We found the cell that was clicked.
             m_cellPressed = cell;
             setModal(true);                 //Make sure we don't miss anything.
@@ -388,7 +388,7 @@ bool Picker::processMouseUp(const InputEvent &event) {
         if (newSelection) {
             selectCell(m_cellPressed);
         }
-        m_cellPressed = NULL;
+        m_cellPressed = nullptr;
 
         return true;
     }
@@ -398,34 +398,34 @@ bool Picker::processMouseUp(const InputEvent &event) {
 //Mouse moved over this control.
 bool Picker::processMouseMove(const InputEvent &event) {
     const PickerCell *cell = cellForMouse(event.loc);
-    if (cell != NULL) {
+    if (cell != nullptr) {
         //Change the highlighted cell.
         m_highlightedCell = cell;
     } else {
         //Make sure it's clear.
-        m_highlightedCell = NULL;
+        m_highlightedCell = nullptr;
     }
     return true;
 }
 
 //CONSTRUCTION
-Picker::Picker(void) :
-        m_cells(NULL),
+Picker::Picker() :
+        m_cells(nullptr),
         m_selectionColor(GUI_CLEAR),
         m_selectionTextColor(GUI_CLEAR),
         m_highlightColor(GUI_CLEAR),
         m_highlightTextColor(GUI_CLEAR),
         m_extraCellHeight(0.0),
         m_textMargins(Size(0.0, 0.0)),
-        m_cellPressed(NULL),
-        m_highlightedCell(NULL),
-        m_selectedCell(NULL),
-        m_scroller(NULL),
+        m_cellPressed(nullptr),
+        m_highlightedCell(nullptr),
+        m_selectedCell(nullptr),
+        m_scroller(nullptr),
         m_scrollPosition(0),
         m_needRecalcDisplay(true) {
     m_displayCells.reserve(DISPLAY_VECTOR_RESERVE);
 }
 
-Picker::~Picker(void) {
+Picker::~Picker() {
 }
 
