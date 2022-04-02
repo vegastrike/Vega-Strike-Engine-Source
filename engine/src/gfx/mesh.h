@@ -131,7 +131,7 @@ enum CLK_CONSTS { CLKSCALE = 2147483647 };
 class Mesh {
 private:
 //make sure to only use TempGetTexture when xml-> is valid \|/
-    Texture *TempGetTexture(struct MeshXML *, int index, std::string factionname) const;
+    Texture *TempGetTexture(struct MeshXML *, int index, const std::string& factionname) const;
     Texture *TempGetTexture(struct MeshXML *, const std::string& filename, const std::string& factionname, GFXBOOL detail) const;
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
 ///Loads XML data into this mesh.

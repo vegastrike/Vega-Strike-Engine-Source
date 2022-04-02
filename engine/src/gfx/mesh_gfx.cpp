@@ -64,21 +64,21 @@ extern vector<Logo *> undrawn_logos;
 
 #include "vs_logging.h"
 
-class Exception : public std::exception {
+class MeshGfxException : public std::exception {
 private:
     std::string _message;
 
 public:
-    Exception() {
+    MeshGfxException() {
     }
 
-    Exception(const Exception &other) : _message(other._message) {
+    MeshGfxException(const MeshGfxException &other) : _message(other._message) {
     }
 
-    explicit Exception(std::string message) : _message(std::move(message)) {
+    explicit MeshGfxException(std::string message) : _message(std::move(message)) {
     }
 
-    ~Exception() override {
+    ~MeshGfxException() override {
     }
 
     const char *what() const noexcept override {
@@ -86,9 +86,9 @@ public:
     }
 };
 
-class MissingTexture : public Exception {
+class MissingTexture : public MeshGfxException {
 public:
-    explicit MissingTexture(const string &msg) : Exception(msg) {
+    explicit MissingTexture(const string &msg) : MeshGfxException(msg) {
     }
 
     MissingTexture() {
@@ -307,11 +307,11 @@ void Mesh::setTextureCumulativeTime(double d) {
     }
 }
 
-Texture *Mesh::TempGetTexture(MeshXML *xml, int index, std::string factionname) const {
+Texture *Mesh::TempGetTexture(MeshXML *xml, int index, const std::string& factionname) const {
     static bool factionalize_textures =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "faction_dependant_textures", "true"));
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
-    Texture *tex = NULL;
+    Texture *tex = nullptr;
     assert(index < (int) xml->decals.size());
     MeshXML::ZeTexture *zt = &(xml->decals[index]);
     if (zt->animated_name.length()) {
@@ -322,7 +322,7 @@ Texture *Mesh::TempGetTexture(MeshXML *xml, int index, std::string factionname) 
             tex = new AnimatedTexture(zt->animated_name.c_str(), 0, BILINEAR);
         }
     } else if (zt->decal_name.length() == 0) {
-        tex = NULL;
+        tex = nullptr;
     } else {
         if (zt->alpha_name.length() == 0) {
             string temptex = faction_prefix + zt->decal_name;
@@ -435,7 +435,7 @@ Mesh::~Mesh() {
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
         vector<Mesh *>::iterator finder;
         if (hashers) {
-            for (int i = hashers->size() - 1; i >= 0; --i) {
+            for (size_t i = hashers->size() - 1; i >= 0; --i) {
                 if ((*hashers)[i] == this) {
                     hashers->erase(hashers->begin() + i);
                     if (hashers->empty()) {
@@ -573,12 +573,12 @@ void Mesh::DrawNow(float lod, bool centered, const Matrix &m, int cloak, float n
         GFXDisable(DEPTHWRITE);
     }
     GFXBlendMode(blendSrc, blendDst);
-    if (o->Decal.size() && o->Decal[0]) {
+    if (!o->Decal.empty() && o->Decal[0]) {
         o->Decal[0]->MakeActive();
     }
     GFXTextureEnv(0, GFXMODULATETEXTURE);     //Default diffuse mode
     GFXTextureEnv(1, GFXADDTEXTURE);     //Default envmap mode
-    GFXToggleTexture(bool(o->Decal.size() && o->Decal[0]), 0);
+    GFXToggleTexture(bool(!o->Decal.empty() && o->Decal[0]), 0);
     o->vlist->DrawOnce();
     if (centered) {
         GFXCenterCamera(false);
@@ -831,12 +831,12 @@ bool SetupSpecMapFirstPass(Texture **decal,
                 GFXColor(0, 0, 0, 0),
                 GFXColor(0, 0, 0, 0));
         retval = true;
-        if (envMap && detailTexture == NULL) {
+        if (envMap && detailTexture == nullptr) {
             if ((decalSize > GLOW_PASS) && decal[GLOW_PASS] && gl_options.Multitexture && multitex_glowpass) {
                 decal[GLOW_PASS]->MakeActive(1);
                 GFXTextureEnv(1, GFXADDTEXTURE);
                 GFXToggleTexture(true, 1);
-                GFXTextureCoordGenMode(1, NO_GEN, NULL, NULL);
+                GFXTextureCoordGenMode(1, NO_GEN, nullptr, nullptr);
                 skip_glowpass = true;
             } else {
                 GFXDisable(TEXTURE1);
@@ -885,7 +885,7 @@ void RestoreFirstPassState(Texture *detailTexture,
             GFXToggleTexture(false, i + 1);
         }              //turn off high detial tex
 
-        GFXTextureCoordGenMode(1, NO_GEN, NULL, NULL);
+        GFXTextureCoordGenMode(1, NO_GEN, nullptr, nullptr);
     }
 }
 
@@ -928,7 +928,7 @@ void RestoreEnvmapState() {
                     : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
     GFXEnable(LIGHTING);
-    GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
+    GFXTextureCoordGenMode(0, NO_GEN, nullptr, nullptr);
     GFXTextureEnv(0, GFXMODULATETEXTURE);
     GFXDepthFunc(LEQUAL);
     GFXPopBlendMode();
@@ -1042,7 +1042,7 @@ void RestoreSpecMapState(bool envMap, bool detailMap, bool write_to_depthmap, fl
             GFXActiveTexture(1);
             GFXTextureEnv(1, GFXADDTEXTURE);             //restore modulate
         } else {
-            GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
+            GFXTextureCoordGenMode(0, NO_GEN, nullptr, nullptr);
         }
     } else {
         static bool separatespec =
@@ -1051,7 +1051,7 @@ void RestoreSpecMapState(bool envMap, bool detailMap, bool write_to_depthmap, fl
         GFXSetSeparateSpecularColor(separatespec);
     }
     if (detailMap) {
-        GFXTextureCoordGenMode(1, NO_GEN, NULL, NULL);
+        GFXTextureCoordGenMode(1, NO_GEN, nullptr, nullptr);
     }
     if (write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
@@ -1092,7 +1092,7 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
                     break;
                 case Pass::TextureUnit::TexSepCube:
                 default:
-                    throw Exception("Texture Unit for technique of unhandled kind");
+                    throw MeshGfxException("Texture Unit for technique of unhandled kind");
             }
             switch (tu.texKind) {
                 case Pass::TextureUnit::TexDefault:
@@ -1107,7 +1107,7 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
                     GFXToggleTexture(true, targetIndex, CUBEMAP);
                     break;
                 default:
-                    throw Exception("Texture Unit for technique of unhandled kind");
+                    throw MeshGfxException("Texture Unit for technique of unhandled kind");
             }
             break;
         case Pass::TextureUnit::Environment:
@@ -1116,13 +1116,13 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
             if (tu.texKind != Pass::TextureUnit::TexDefault
                     && tu.texKind != Pass::TextureUnit::TexCube
                     && tu.texKind != Pass::TextureUnit::TexSepCube) {
-                throw Exception(
+                throw MeshGfxException(
                         "Environment Texture Unit for technique must be a cube map");
             }
             GFXToggleTexture(true, targetIndex, CUBEMAP);
             #else
             if (tu.texKind != Pass::TextureUnit::TexDefault
-                && tu.texKind != Pass::TextureUnit::Tex2D) throw Exception(
+                && tu.texKind != Pass::TextureUnit::Tex2D) throw MeshGfxException(
                     "Environment Texture Unit for technique must be a 2D spheremap" );
             GFXToggleTexture( true, targetIndex, TEXTURE2D );
             #endif
@@ -1130,7 +1130,7 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
         case Pass::TextureUnit::Detail:
             if (tu.texKind != Pass::TextureUnit::TexDefault
                     && tu.texKind != Pass::TextureUnit::Tex2D) {
-                throw Exception(
+                throw MeshGfxException(
                         "Detail Texture Unit for technique must be 2D");
             }
             if (detailTexture) {
@@ -1165,7 +1165,7 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
                     GFXToggleTexture(true, targetIndex, CUBEMAP);
                     break;
                 default:
-                    throw Exception("Texture Unit for technique of unhandled kind");
+                    throw MeshGfxException("Texture Unit for technique of unhandled kind");
             }
             break;
         case Pass::TextureUnit::None: //chuck_starchaser
@@ -1312,7 +1312,7 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
         try {
             technique->compile();
         }
-        catch (const Exception &e) {
+        catch (const MeshGfxException &e) {
             VS_LOG(info, (boost::format("Technique recompilation failed: %1%") % e.what()));
         }
     }
