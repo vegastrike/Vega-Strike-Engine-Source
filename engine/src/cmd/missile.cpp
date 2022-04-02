@@ -335,7 +335,7 @@ bool Missile::proximityFuse(Unit *target) {
         //spiritplumber assumes that the missile is hitting a much larger object than itself
         // It seems spiritplumber is a former dev of the project.
         static float percent_missile_match_target_velocity =
-                GameConfig::GetVariable("physics", "percent_missile_match_target_velocity", 1.0);
+                GameConfig::GetVariable("physics", "percent_missile_match_target_velocity", 1.0f);
         Velocity += percent_missile_match_target_velocity * (target->Velocity - Velocity);
 
         Discharge();
@@ -348,7 +348,7 @@ bool Missile::proximityFuse(Unit *target) {
 
 bool Missile::useFuel(Unit *target, bool had_target) {
     static float max_lost_target_live_time =
-            GameConfig::GetVariable("physics", "max_lost_target_live_time", 30);
+            GameConfig::GetVariable("physics", "max_lost_target_live_time", 30.0f);
 
     // An previous dev marked this as BROKEN
     // If we had a target but it's now gone, limit the missile's fuel
