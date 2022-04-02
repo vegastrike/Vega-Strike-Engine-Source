@@ -130,7 +130,7 @@ char *StripExtension(char *filename);
 #ifdef _G_RANDOM
 int randnum(int start, int end);
 void randcode(char *line, int length);
-#endif    // _G_STRING_RANDOM
+#endif    // _G_RANDOM
 
 #ifdef _G_NUMBER
 void itoa(char *line, int number, int length);
@@ -147,7 +147,7 @@ void btoa(char *dest, char *string);
 #ifdef _G_GLIB
 char *GetString(GString *line);
 void SetString(GString **ptr, char *line);
-#endif    // G_GLIB
+#endif    // _G_GLIB
 
 #ifdef __cplusplus
 char *GetString(char *line);
