@@ -846,13 +846,13 @@ class /*GFXDRVAPI*/ GFXQuadList {
 ///Number of quads to be drawn packed first numQuads*4 vertices
     int numQuads;
 ///Assignments to packed data for quad modification
-    int *quadassignments;
+    int *quadassignments{};
 ///all numVertices allocated vertices and color
     union VCDAT {
         GFXVertex *vertices;
         GFXColorVertex *colors;
     }
-            data;
+            data{};
 ///Is color in this quad list
     GFXBOOL isColor;
 ///number of "dirty" quads, hence gaps in quadassignments that must be assigned before more are allocated
