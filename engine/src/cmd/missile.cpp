@@ -25,17 +25,14 @@
 #include "damageable.h"
 
 #include "mount_size.h"
-#include "universe_util.h"
 #include "unit_generic.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
-#include "configxml.h"
 #include "images.h"
 #include "collection.h"
 #include "star_system_generic.h"
 #include "role_bitmask.h"
 #include "ai/order.h"
-#include "faction_generic.h"
 #include "unit_util.h"
 #include "vs_logging.h"
 #include "star_system.h"
@@ -156,9 +153,9 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                         % distance
                         % radius
                         % (damage * damage_fraction * damage_left)));
-        Damage damage(this->damage * damage_fraction * damage_left,
+        Damage damage2(this->damage * damage_fraction * damage_left,
                 phasedamage * damage_fraction * damage_left);
-        parent->ApplyDamage(pos.Cast(), norm, damage, un, GFXColor(1, 1, 1, 1),
+        parent->ApplyDamage(pos.Cast(), norm, damage2, un, GFXColor(1, 1, 1, 1),
                 ownerDoNotDereference);
     }
 }
@@ -186,8 +183,8 @@ Missile::Missile(const char *filename,
         radial_multiplier(radmult),
         detonation_radius(detonation_radius),
         discharged(false),
-        retarget(-1),
-        had_target(false) {
+        had_target(false),
+        retarget(-1) {
     // TODO: why would a sparkling missile be four times as hard to kill???
     static bool missilesparkle = XMLSupport::parse_bool(vs_config->getVariable("graphics", "missilesparkle", "false"));
     if (missilesparkle) {

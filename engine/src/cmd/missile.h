@@ -52,20 +52,20 @@ private:
 
 class Missile : public Unit {
 protected:
-    float time;
-    float damage;
-    float phasedamage;
-    float radial_effect;
-    float radial_multiplier;
-    float detonation_radius;
-    bool discharged;
-    bool had_target;
-    signed char retarget;
+    float time{};
+    float damage{};
+    float phasedamage{};
+    float radial_effect{};
+    float radial_multiplier{};
+    float detonation_radius{};
+    bool discharged{};
+    bool had_target{};
+    signed char retarget{};
 public:
     Missile(const char *filename,
             int faction,
             const string &modifications,
-            const float damage,
+            float damage,
             float phasedamage,
             float time,
             float radialeffect,
