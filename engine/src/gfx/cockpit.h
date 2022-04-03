@@ -169,29 +169,9 @@ class GameCockpit : public Cockpit {
     void endElement(const string &name);
     ///Destructs cockpit info for new loading
     void Delete();
-    ///draws the navigation symbol around targetted location
-    void DrawNavigationSymbol(const Vector &loc, const Vector &p, const Vector &q, float size);
-    ///draws the target box around targetted unit
-    float computeLockingSymbol(Unit *par);
-    void DrawTargetBox(const Radar::Sensor &);
-    ///draws the target box around all units
-    void DrawTargetBoxes(const Radar::Sensor &);
-    ///draws a target cross around all units targeted by your turrets // ** jay
-    void DrawTurretTargetBoxes(const Radar::Sensor &);
-    void DrawTacticalTargetBox(const Radar::Sensor &);
-    void DrawCommunicatingBoxes();
-    ///Draws all the tracks on the radar.
-    void DrawRadar(const Radar::Sensor &);
-    ///Draws target gauges
-    void DrawTargetGauges(Unit *target);
-    ///Draws unit gauges
-    void DrawGauges(Unit *un);
     ///Trigger scripted events
     void TriggerEvents(Unit *un);
     NavigationSystem ThisNav;
-    //Draw the arrow pointing to the target.
-    void DrawArrowToTarget(const Radar::Sensor &, Unit *);
-    void DrawArrowToTarget(const Radar::Sensor &, Vector LocalCoordinates);
     void updateRadar(Unit *un);
 public:
     std::string textMessage;
@@ -268,7 +248,6 @@ public:
 
     virtual bool SetDrawNavSystem(bool);
     virtual bool CanDrawNavSystem();
-    virtual bool DrawNavSystem();
     virtual bool CheckCommAnimation(Unit *un);
     virtual void visitSystem(std::string systemName);
     void AutoLanding();
