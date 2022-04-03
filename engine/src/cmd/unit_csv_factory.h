@@ -103,7 +103,7 @@ inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const
 
     try {
         return std::stof(result);
-    } catch (std::invalid_argument) {
+    } catch (std::invalid_argument &) {
         return default_value;
     }
 }
@@ -118,7 +118,7 @@ inline double UnitCSVFactory::GetVariable(std::string unit_key,
     }
     try {
         return std::stod(result);
-    } catch (std::invalid_argument) {
+    } catch (std::invalid_argument &) {
         return default_value;
     }
 }
@@ -131,7 +131,7 @@ inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &
     }
     try {
         return std::stoi(result);
-    } catch (std::invalid_argument) {
+    } catch (std::invalid_argument &) {
         return default_value;
     }
 }
