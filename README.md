@@ -317,6 +317,8 @@ If you encounter any issues while playing, please create an issue with the Vega 
    ./bin/vegasettings --target ../Assets-Production
    ```
 
+   Absolute path may need to be supplied when running vegasettings for the first time.
+
    Do the same with vegastrike-engine using `-d` and no space. E.g.:
 
    ```bash
