@@ -25,7 +25,7 @@
 
 #include "SoundBuffer.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <memory.h>
 #include <utility>
 

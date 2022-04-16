@@ -35,9 +35,7 @@
 #include "OggStream.h"
 #include "OggData.h"
 
-#include <utility>
-#include <limits>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <vorbis/vorbisfile.h>
 #include "vsfilesystem.h"

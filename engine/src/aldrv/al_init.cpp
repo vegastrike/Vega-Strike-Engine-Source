@@ -34,8 +34,8 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #endif
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 
 #include <vector>
 

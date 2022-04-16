@@ -31,7 +31,7 @@
 #ifndef __AUDIO_VECTOR_H__INCLUDED__
 #define __AUDIO_VECTOR_H__INCLUDED__
 
-#include <math.h>
+#include <cmath>
 
 namespace Audio {
 

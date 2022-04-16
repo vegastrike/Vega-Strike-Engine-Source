@@ -31,10 +31,7 @@
 
 #include "Stream.h"
 
-#include <utility>
 #include <cstring>
-
-//using namespace std;
 
 namespace Audio {
 

@@ -26,13 +26,12 @@
 
 
 #include "audiolib.h"
-#include "hashtable.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include <string>
 #include "al_globals.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "options.h"

@@ -31,7 +31,7 @@
 
 #include "SourceTemplate.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace Audio {
 

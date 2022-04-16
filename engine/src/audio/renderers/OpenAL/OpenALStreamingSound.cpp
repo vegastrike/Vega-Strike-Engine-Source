@@ -40,7 +40,6 @@
 #undef max
 #endif
 
-#include <utility>
 #include <list>
 #include <string>
 

@@ -33,7 +33,7 @@
 #include "SourceListener.h"
 #include "utils.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace Audio {
 

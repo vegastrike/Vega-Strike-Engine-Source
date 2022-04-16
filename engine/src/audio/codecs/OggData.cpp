@@ -36,10 +36,8 @@
 #include <stdint.h>
 #endif
 #include "OggData.h"
-#include "../Format.h"
 #include "../Exceptions.h"
 
-#include <utility>
 #include <limits>
 
 #include <vorbis/vorbisfile.h>

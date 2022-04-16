@@ -31,12 +31,11 @@
 #include "OpenALHelpers.h"
 
 #include "../../Types.h"
-#include "../../Exceptions.h"
 
 #include "al.h"
 
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 #include "vs_logging.h"
 
 namespace Audio {
