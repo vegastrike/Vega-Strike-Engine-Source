@@ -434,14 +434,15 @@ Mesh::~Mesh() {
         }
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
         vector<Mesh *>::iterator finder;
-        if (hashers) {
+        if (hashers != nullptr) {
             for (size_t i = hashers->size() - 1; i >= 0; --i) {
-                if ((*hashers)[i] == this) {
+                if (hashers->at(i) == this) {
                     hashers->erase(hashers->begin() + i);
                     if (hashers->empty()) {
                         bfxmHashTable.Delete(hash_name);
                         delete hashers;
                         hashers = nullptr;
+                        break;
                     }
                 }
             }
