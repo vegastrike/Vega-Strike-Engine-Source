@@ -29,7 +29,6 @@
 #include "cmd/unit_generic.h"
 #include "navigation.h"
 #include "autodocking.h"
-#include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
 #include "vs_logging.h"

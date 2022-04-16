@@ -26,8 +26,8 @@
 
 #include "flybywire.h"
 #include "vegastrike.h"
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 #include "cmd/unit_generic.h"
 #include "lin_time.h"
 #include "gfx/cockpit_generic.h"

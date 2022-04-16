@@ -29,7 +29,7 @@
 #include <expat.h>
 #include "vegastrike.h"
 #include "communication.h"
-#include <assert.h>
+#include <cassert>
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 

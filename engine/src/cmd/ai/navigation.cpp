@@ -26,16 +26,13 @@
 
 #include "navigation.h"
 #include "macosx_math.h"
-#include <math.h>
+#include <cmath>
 #ifndef _WIN32
-#include <assert.h>
+#include <cassert>
 #endif
 #include "cmd/unit_generic.h"
 #include "lin_time.h"
-#include "cmd/script/flightgroup.h"
-#include "config_xml.h"
 #include "vs_globals.h"
-#include "vs_logging.h"
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"

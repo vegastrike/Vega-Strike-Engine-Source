@@ -23,11 +23,8 @@
 
 #include "fire.h"
 #include "flybywire.h"
-#include "navigation.h"
 #include "cmd/planet.h"
-#include "config_xml.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"   // Is this needed here? -- stephengtuggy 2021-09-06
 #include "vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"

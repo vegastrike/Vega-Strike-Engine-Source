@@ -28,7 +28,7 @@
 #include "navigation.h"
 #include "xml_support.h"
 #include "flybywire.h"
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <stack>
 #include "vsfilesystem.h"
@@ -37,10 +37,9 @@
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
 #include "universe_util.h"
-#include "configxml.h"
 #include "universe.h"
 
-#include <assert.h>
+#include <cassert>
 
 using namespace XMLSupport;
 

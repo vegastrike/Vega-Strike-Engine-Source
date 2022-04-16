@@ -32,7 +32,6 @@
 #include "flykeyboard.h"
 #include "vs_globals.h"
 #include "config_xml.h"
-#include  "in_kb_data.h"
 
 FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile) {
     for (int i = 0; i < MAX_JOYSTICKS; i++) {

@@ -26,21 +26,15 @@
 
 
 #include "aggressive.h"
-#include "event_xml.h"
 #include "script.h"
 #include <list>
-#include <vector>
 #include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
 #include "cmd/unit_generic.h"
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
 #include "flybywire.h"
 #include "hard_coded_scripts.h"
-#include "cmd/script/mission.h"
 #include "universe_util.h"
-#include "gfx/cockpit_generic.h"
 #include "ikarus.h"
 using namespace Orders;
 

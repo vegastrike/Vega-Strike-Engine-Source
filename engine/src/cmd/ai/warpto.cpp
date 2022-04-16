@@ -27,7 +27,6 @@
 
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "universe_util.h"
 #include "config_xml.h"
 
 float max_allowable_travel_time() {

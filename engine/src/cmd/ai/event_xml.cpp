@@ -30,8 +30,8 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <float.h>
-#include <assert.h>
+#include <cfloat>
+#include <cassert>
 #include "vegastrike.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"

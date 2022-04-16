@@ -28,7 +28,7 @@
 #include "vs_globals.h"
 #include "vs_logging.h"
 #include "config_xml.h"
-#include <assert.h>
+#include <cassert>
 #include "audiolib.h"
 #include "options.h"
 #include "universe.h"

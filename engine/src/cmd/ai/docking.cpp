@@ -28,7 +28,6 @@
 #include "python/python_compile.h"
 #include "docking.h"
 #include "xml_support.h"
-#include "config_xml.h"
 #include "cmd/unit_generic.h"
 #include "warpto.h"
 #include "universe_util.h"
