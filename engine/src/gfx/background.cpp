@@ -170,7 +170,7 @@ Background::~Background() {
 }
 
 Background::BackgroundClone Background::Cache() {
-    BackgroundClone ret;
+    BackgroundClone ret{};
 #ifndef NV_CUBE_MAP
     ret.backups[0] = up ? up->Clone() : NULL;
     ret.backups[1] = down ? down->Clone() : NULL;
@@ -235,7 +235,7 @@ void Background::Draw() {
             static struct skybox_rendering_record {
                 Texture *tex;
                 float vertices[4][3];              //will be *= size
-                char tcoord[4][4];             //S-T-S-T: 0 >= min, 1 => max
+                signed char tcoord[4][4];             //S-T-S-T: 0 >= min, 1 => max
             }
                     skybox_rendering_sequence[6] = {
 #ifdef NV_CUBE_MAP
