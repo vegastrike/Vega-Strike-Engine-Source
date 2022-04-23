@@ -1,9 +1,8 @@
 /**
  * damageable.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2022 Roy Falk, Stephen G. Tuggy and other
+ * Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -403,7 +402,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     unit->DamageRandSys(system_failure * rand01() +
-                    (1 - system_failure) * (1 - ((*current_hull) > 0 ? hull_damage / (*current_hull) : 1.0f)),
+                    (1 - system_failure) * (1 - ((*current_hull) > 0 ? (hull_damage / (*current_hull)) : 1.0f)),
             attack_vector, 1.0f, 1.0f);
 }
 
