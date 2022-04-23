@@ -1,4 +1,4 @@
-#====================================
+ #====================================
 # @file   : CMakeLists.txt
 # @brief  : cmake configuration file for VegaStrike
 #====================================
@@ -327,7 +327,7 @@ ELSE (CMAKE_VERSION VERSION_LESS "3.14")
 ENDIF (CMAKE_VERSION VERSION_LESS "3.14")
 
 IF (MSVC)
-    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ ")
+    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ -D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4305")
     SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
     SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
     SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
