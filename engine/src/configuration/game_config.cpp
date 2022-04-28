@@ -25,10 +25,8 @@
 
 #include "configuration/game_config.h"
 
-std::map<string, string> GameConfig::variables;
-
 // This is probably unique enough to ensure no collision
-string GameConfig::DEFAULT_ERROR_VALUE = "GameConfig::_GetVariable DEFAULT_ERROR_VALUE";
+string GameConfig::DEFAULT_ERROR_VALUE = "GameConfig::_getVariable DEFAULT_ERROR_VALUE";
 
 void GameConfig::LoadGameConfig(const string &filename) {
     ptree tree;
@@ -50,7 +48,12 @@ void GameConfig::LoadGameConfig(const string &filename) {
             }
 
             string const key = section_name + "." + name;
-            variables[key] = value;
+            _getVariables()->insert_or_assign(key, value);
         }
     }
+}
+
+std::shared_ptr<std::map<std::string, std::string>> GameConfig::_getVariables() {
+    static const std::shared_ptr<std::map<std::string, std::string>> VARIABLES_MAP = std::make_shared<std::map<std::string, std::string>>();
+    return VARIABLES_MAP;
 }
