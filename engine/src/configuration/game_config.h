@@ -49,25 +49,25 @@ class GameConfig {
 private:
     static string DEFAULT_ERROR_VALUE;
 
-    static inline string _getVariable(string const &section, string const &name) {
+    static inline string GetVar(string const &section, string const &name) {
         string const key = section + "." + name;
-        if (_getVariables()->count(key)) {
-            return _getVariables()->at(key);
+        if (variables()->count(key)) {
+            return variables()->at(key);
         }
         return DEFAULT_ERROR_VALUE;
     }
 
-    static inline string _getVariable(string const &section,
+    static inline string GetVar(string const &section,
             string const &sub_section,
             string const &name) {
         string const key = section + "." + sub_section + "." + name;
-        if (_getVariables()->count(key)) {
-            return _getVariables()->at(key);
+        if (variables()->count(key)) {
+            return variables()->at(key);
         }
         return DEFAULT_ERROR_VALUE;
     }
 
-    static std::shared_ptr<std::map<std::string, std::string>> _getVariables();
+    static std::shared_ptr<std::map<std::string, std::string>> variables();
 
 public:
     static void LoadGameConfig(const string &filename);
@@ -83,7 +83,7 @@ public:
 // Template Specialization
 template<>
 inline bool GameConfig::GetVariable(string const &section, string const &name, bool default_value) {
-    string result = _getVariable(section, name);
+    string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -93,7 +93,7 @@ inline bool GameConfig::GetVariable(string const &section, string const &name, b
 
 template<>
 inline float GameConfig::GetVariable(string const &section, string const &name, float default_value) {
-    string result = _getVariable(section, name);
+    string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -102,7 +102,7 @@ inline float GameConfig::GetVariable(string const &section, string const &name, 
 
 template<>
 inline double GameConfig::GetVariable(string const &section, string const &name, double default_value) {
-    string result = _getVariable(section, name);
+    string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -111,7 +111,7 @@ inline double GameConfig::GetVariable(string const &section, string const &name,
 
 template<>
 inline int GameConfig::GetVariable(string const &section, string const &name, int default_value) {
-    string result = _getVariable(section, name);
+    string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -122,7 +122,7 @@ inline int GameConfig::GetVariable(string const &section, string const &name, in
 template<>
 inline bool GameConfig::GetVariable(string const &section, string const &sub_section,
         string const &name, bool default_value) {
-    string result = _getVariable(section, sub_section, name);
+    string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -133,7 +133,7 @@ inline bool GameConfig::GetVariable(string const &section, string const &sub_sec
 template<>
 inline float GameConfig::GetVariable(string const &section, string const &sub_section,
         string const &name, float default_value) {
-    string result = _getVariable(section, sub_section, name);
+    string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -143,7 +143,7 @@ inline float GameConfig::GetVariable(string const &section, string const &sub_se
 template<>
 inline double GameConfig::GetVariable(string const &section, string const &sub_section,
         string const &name, double default_value) {
-    string result = _getVariable(section, sub_section, name);
+    string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -153,7 +153,7 @@ inline double GameConfig::GetVariable(string const &section, string const &sub_s
 template<>
 inline int GameConfig::GetVariable(string const &section, string const &sub_section,
         string const &name, int default_value) {
-    string result = _getVariable(section, sub_section, name);
+    string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
