@@ -54,6 +54,6 @@ void GameConfig::LoadGameConfig(const string &filename) {
 }
 
 std::shared_ptr<std::map<std::string, std::string>> GameConfig::variables() {
-    static const std::shared_ptr<std::map<std::string, std::string>> kVariablesMap = std::make_shared<std::map<std::string, std::string>>();
-    return kVariablesMap;
+    static const std::shared_ptr<std::map<std::string, std::string>> VARIABLES_MAP = std::make_shared<std::map<std::string, std::string>>();
+    return VARIABLES_MAP;
 }
