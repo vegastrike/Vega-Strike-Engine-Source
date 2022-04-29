@@ -48,7 +48,7 @@ void GameConfig::LoadGameConfig(const string &filename) {
             }
 
             string const key = section_name + "." + name;
-            _getVariables()->insert_or_assign(key, value);
+            (*_getVariables())[key] = value;
         }
     }
 }
