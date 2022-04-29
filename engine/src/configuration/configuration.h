@@ -133,6 +133,6 @@ public:
     vegastrike_configuration::Weapons weapons;
 };
 
-extern Configuration configuration;
+extern std::shared_ptr<Configuration> configuration();
 
 #endif // CONFIGURATION_H

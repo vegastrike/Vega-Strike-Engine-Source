@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
     }
 
     // now that the user config file has been loaded from disk, update the global configuration struct values
-    configuration.OverrideDefaultsWithUserConfiguration();
+    configuration()->OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {

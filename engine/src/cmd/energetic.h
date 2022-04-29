@@ -86,7 +86,7 @@ public:
         unsigned char damage;
         //negative means fuel
     }
-            jump;
+            jump{};
 
     //current energy
     Resource<float> energy;

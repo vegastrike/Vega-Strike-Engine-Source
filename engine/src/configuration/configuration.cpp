@@ -30,9 +30,6 @@
 #endif
 #include <math.h>
 
-// Global Variable Definition
-Configuration configuration;
-
 Configuration::Configuration() {
     //logging.verbose_debug = GameConfig::GetVariable("data", "verbose_debug", false);
 }
@@ -159,4 +156,9 @@ vegastrike_configuration::Warp::Warp() :
 vegastrike_configuration::Weapons::Weapons() :
         can_fire_in_cloak(false),
         can_fire_in_spec(false) {
+}
+
+std::shared_ptr<Configuration> configuration() {
+    static const std::shared_ptr<Configuration> CONFIGURATION = std::make_shared<Configuration>();
+    return CONFIGURATION;
 }

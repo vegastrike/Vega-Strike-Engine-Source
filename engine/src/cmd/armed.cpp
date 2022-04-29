@@ -1,9 +1,8 @@
 /*
  * armed.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2022 Roy Falk, Stephen G. Tuggy, and other
+ * Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -200,8 +199,8 @@ void Armed::ActivateGuns(const WeaponInfo *sz, bool ms) {
 void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
     Unit *unit = static_cast<Unit *>(this);
 
-    if ((unit->cloaking >= 0 && configuration.weapons.can_fire_in_cloak == false) ||
-            (unit->graphicOptions.InWarp && configuration.weapons.can_fire_in_spec == false)) {
+    if ((unit->cloaking >= 0 && !configuration()->weapons.can_fire_in_cloak) ||
+            (unit->graphicOptions.InWarp && !configuration()->weapons.can_fire_in_spec)) {
         UnFire();
         return;
     }
@@ -216,7 +215,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         if (i->status != Mount::ACTIVE) {
             continue;
         }
-        if (i->bank == true) {
+        if (i->bank) {
             unsigned int best = index;
             unsigned int j;
             for (j = index + 1; j < mountssize; ++j) {
@@ -244,7 +243,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         const bool locked_missile = (mis && locked_on && lockable_weapon);
         const bool missile_and_want_to_fire_missiles = (mis && (weapon_type_bitmask & ROLES::FIRE_MISSILES));
         const bool gun_and_want_to_fire_guns = ((!mis) && (weapon_type_bitmask & ROLES::FIRE_GUNS));
-        if (configuration.logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
+        if (configuration()->logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
             VSFileSystem::vs_fprintf(stderr, "\n about to fire locked missile \n");
         }
         bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
