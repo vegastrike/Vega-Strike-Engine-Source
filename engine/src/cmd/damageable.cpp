@@ -402,7 +402,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     unit->DamageRandSys(system_failure * rand01() +
-                    (1 - system_failure) * (1 - (((*current_hull) > 0) ? (hull_damage / (*current_hull)) : 1.0f)),
+                    (1 - system_failure) * (1 - ((*current_hull) > 0 ? hull_damage / (*current_hull) : 1.0f)),
             attack_vector, 1.0f, 1.0f);
 }
 
