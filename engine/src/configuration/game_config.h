@@ -57,7 +57,7 @@ private:
         return DEFAULT_ERROR_VALUE;
     }
 
-    static inline string GetVar(std::string const &section,
+    static inline std::string GetVar(std::string const &section,
             std::string const &sub_section,
             std::string const &name) {
         std::string const key = section + "." + sub_section + "." + name;
