@@ -26,28 +26,28 @@
 #include "configuration/game_config.h"
 
 // This is probably unique enough to ensure no collision
-string GameConfig::DEFAULT_ERROR_VALUE = "GameConfig::GetVar DEFAULT_ERROR_VALUE";
+std::string GameConfig::DEFAULT_ERROR_VALUE = "GameConfig::GetVar DEFAULT_ERROR_VALUE";
 
-void GameConfig::LoadGameConfig(const string &filename) {
+void GameConfig::LoadGameConfig(const std::string &filename) {
     ptree tree;
     pt::read_xml(filename, tree);
 
-    string const xpath = "vegaconfig.variables.";
+    std::string const xpath = "vegaconfig.variables.";
     for (const auto &section_iterator : tree.get_child(xpath)) {
-        string section_name = section_iterator.second.get<string>("<xmlattr>.name", "");
+        std::string section_name = section_iterator.second.get<std::string>("<xmlattr>.name", "");
         if (section_name == "") {
             continue;
         }
 
         ptree inner_tree = section_iterator.second;
         for (const auto &variable_iterator : inner_tree) {
-            string name = variable_iterator.second.get<string>("<xmlattr>.name", "");
-            string value = variable_iterator.second.get<string>("<xmlattr>.value", "");
+            std::string name = variable_iterator.second.get<std::string>("<xmlattr>.name", "");
+            std::string value = variable_iterator.second.get<std::string>("<xmlattr>.value", "");
             if (name == "") {
                 continue;
             }
 
-            string const key = section_name + "." + name;
+            std::string const key = section_name + "." + name;
             (*variables())[key] = value;
         }
     }

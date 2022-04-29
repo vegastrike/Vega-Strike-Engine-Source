@@ -40,27 +40,27 @@
 
 namespace pt = boost::property_tree;
 
-using std::string;
+//using std::string;
 using pt::ptree;
 
 // TODO: test this functionality, especially the subsection...
 
 class GameConfig {
 private:
-    static string DEFAULT_ERROR_VALUE;
+    static std::string DEFAULT_ERROR_VALUE;
 
-    static inline string GetVar(string const &section, string const &name) {
-        string const key = section + "." + name;
+    static inline std::string GetVar(std::string const &section, std::string const &name) {
+        std::string const key = section + "." + name;
         if (variables()->count(key)) {
             return variables()->at(key);
         }
         return DEFAULT_ERROR_VALUE;
     }
 
-    static inline string GetVar(string const &section,
-            string const &sub_section,
-            string const &name) {
-        string const key = section + "." + sub_section + "." + name;
+    static inline string GetVar(std::string const &section,
+            std::string const &sub_section,
+            std::string const &name) {
+        std::string const key = section + "." + sub_section + "." + name;
         if (variables()->count(key)) {
             return variables()->at(key);
         }
@@ -70,20 +70,20 @@ private:
     static std::shared_ptr<std::map<std::string, std::string>> variables();
 
 public:
-    static void LoadGameConfig(const string &filename);
+    static void LoadGameConfig(const std::string &filename);
     template<class T>
-    static inline T GetVariable(string const &section, string const &name, T default_value) = delete;
+    static inline T GetVariable(std::string const &section, std::string const &name, T default_value) = delete;
 
     template<class T>
-    static inline T GetVariable(string const &section, string const &sub_section,
-            string const &name, T default_value) = delete;
+    static inline T GetVariable(std::string const &section, std::string const &sub_section,
+            std::string const &name, T default_value) = delete;
 
 };
 
 // Template Specialization
 template<>
-inline bool GameConfig::GetVariable(string const &section, string const &name, bool default_value) {
-    string result = GetVar(section, name);
+inline bool GameConfig::GetVariable(std::string const &section, std::string const &name, bool default_value) {
+    std::string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -92,8 +92,8 @@ inline bool GameConfig::GetVariable(string const &section, string const &name, b
 }
 
 template<>
-inline float GameConfig::GetVariable(string const &section, string const &name, float default_value) {
-    string result = GetVar(section, name);
+inline float GameConfig::GetVariable(std::string const &section, std::string const &name, float default_value) {
+    std::string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -101,8 +101,8 @@ inline float GameConfig::GetVariable(string const &section, string const &name, 
 }
 
 template<>
-inline double GameConfig::GetVariable(string const &section, string const &name, double default_value) {
-    string result = GetVar(section, name);
+inline double GameConfig::GetVariable(std::string const &section, std::string const &name, double default_value) {
+    std::string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -110,8 +110,8 @@ inline double GameConfig::GetVariable(string const &section, string const &name,
 }
 
 template<>
-inline int GameConfig::GetVariable(string const &section, string const &name, int default_value) {
-    string result = GetVar(section, name);
+inline int GameConfig::GetVariable(std::string const &section, std::string const &name, int default_value) {
+    std::string result = GetVar(section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -120,9 +120,9 @@ inline int GameConfig::GetVariable(string const &section, string const &name, in
 
 // With Subsection
 template<>
-inline bool GameConfig::GetVariable(string const &section, string const &sub_section,
-        string const &name, bool default_value) {
-    string result = GetVar(section, sub_section, name);
+inline bool GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
+        std::string const &name, bool default_value) {
+    std::string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -131,8 +131,8 @@ inline bool GameConfig::GetVariable(string const &section, string const &sub_sec
 }
 
 template<>
-inline float GameConfig::GetVariable(string const &section, string const &sub_section,
-        string const &name, float default_value) {
+inline float GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
+        std::string const &name, float default_value) {
     string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
@@ -141,9 +141,9 @@ inline float GameConfig::GetVariable(string const &section, string const &sub_se
 }
 
 template<>
-inline double GameConfig::GetVariable(string const &section, string const &sub_section,
-        string const &name, double default_value) {
-    string result = GetVar(section, sub_section, name);
+inline double GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
+        std::string const &name, double default_value) {
+    std::string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
@@ -151,9 +151,9 @@ inline double GameConfig::GetVariable(string const &section, string const &sub_s
 }
 
 template<>
-inline int GameConfig::GetVariable(string const &section, string const &sub_section,
-        string const &name, int default_value) {
-    string result = GetVar(section, sub_section, name);
+inline int GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
+        std::string const &name, int default_value) {
+    std::string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
