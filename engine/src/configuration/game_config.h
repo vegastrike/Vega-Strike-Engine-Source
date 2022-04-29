@@ -133,7 +133,7 @@ inline bool GameConfig::GetVariable(std::string const &section, std::string cons
 template<>
 inline float GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
         std::string const &name, float default_value) {
-    string result = GetVar(section, sub_section, name);
+    std::string result = GetVar(section, sub_section, name);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
