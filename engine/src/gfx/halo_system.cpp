@@ -211,7 +211,7 @@ void HaloSystem::Draw(const Matrix &trans,
             ScaleMatrix(m, Vector(scale.i * i->size.i, scale.j * i->size.j, scale.k * i->size.k * value / maxvalue));
 
             float maxfade =
-                    minvalue * (1.0 - game_options.percent_halo_fade_in) + maxvalue * game_options.percent_halo_fade_in;
+                    minvalue * (1.0 - game_options()->percent_halo_fade_in) + maxvalue * game_options()->percent_halo_fade_in;
             int alpha = halo_alpha;
             if (value < maxfade) {
                 if (alpha < 0) {
@@ -221,19 +221,19 @@ void HaloSystem::Draw(const Matrix &trans,
                 alpha |= 1;
             }
 
-            GFXColor blend = GFXColor(game_options.engine_color_red,
-                    game_options.engine_color_green,
-                    game_options.engine_color_blue,
+            GFXColor blend = GFXColor(game_options()->engine_color_red,
+                    game_options()->engine_color_green,
+                    game_options()->engine_color_blue,
                     1);
-            if (value > maxvalue * game_options.percent_afterburner_color_change) {
-                float test = value - maxvalue * game_options.percent_afterburner_color_change;
-                test /= maxvalue * game_options.percent_afterburner_color_change;
+            if (value > maxvalue * game_options()->percent_afterburner_color_change) {
+                float test = value - maxvalue * game_options()->percent_afterburner_color_change;
+                test /= maxvalue * game_options()->percent_afterburner_color_change;
                 if (!(test < 1.0)) {
                     test = 1.0;
                 }
-                float r = game_options.afterburner_color_red * test + game_options.engine_color_red * (1.0 - test);
-                float g = game_options.afterburner_color_green * test + game_options.engine_color_green * (1.0 - test);
-                float b = game_options.afterburner_color_blue * test + game_options.engine_color_blue * (1.0 - test);
+                float r = game_options()->afterburner_color_red * test + game_options()->engine_color_red * (1.0 - test);
+                float g = game_options()->afterburner_color_green * test + game_options()->engine_color_green * (1.0 - test);
+                float b = game_options()->afterburner_color_blue * test + game_options()->engine_color_blue * (1.0 - test);
                 blend = GFXColor(r, g, b, 1.0);
             }
 
@@ -255,14 +255,14 @@ void HaloSystem::Draw(const Matrix &trans,
                     i->sparkle_accum -= 1;
 
                     float rsize = i->mesh->rSize() * scale.i * i->size.i;
-                    Vector pvelocity = thrustvector * -rsize * game_options.halosparklespeed * vpercent;
+                    Vector pvelocity = thrustvector * -rsize * game_options()->halosparklespeed * vpercent;
 
                     DoParticles(m.p,
                             hullpercent,
                             velocity,
                             pvelocity,
                             rsize,
-                            rsize * game_options.halosparklescale,
+                            rsize * game_options()->halosparklescale,
                             faction);
                 }
             } else {

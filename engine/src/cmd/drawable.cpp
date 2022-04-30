@@ -986,35 +986,35 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = static_cast<const Unit *>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared()
-            < (game_options()->warp_stretch_cutoff * game_options()->warp_stretch_cutoff * game_options.game_speed
-                    * game_options.game_speed)
-            || (game_options.only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
+            < (game_options()->warp_stretch_cutoff * game_options()->warp_stretch_cutoff * game_options()->game_speed
+                    * game_options()->game_speed)
+            || (game_options()->only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
         return ctm;
     } else {
         Matrix k(ctm);
 
         float speed = unit->GetWarpVelocity().Magnitude();
-        float stretchregion0length = game_options.warp_stretch_region0_max
-                * (speed - (game_options.warp_stretch_cutoff * game_options.game_speed))
-                / ((game_options.warp_stretch_max_region0_speed * game_options.game_speed)
-                        - (game_options.warp_stretch_cutoff * game_options.game_speed));
+        float stretchregion0length = game_options()->warp_stretch_region0_max
+                * (speed - (game_options()->warp_stretch_cutoff * game_options()->game_speed))
+                / ((game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
+                        - (game_options()->warp_stretch_cutoff * game_options()->game_speed));
         float stretchlength =
-                (game_options.warp_stretch_max
-                        - game_options.warp_stretch_region0_max)
-                        * (speed - (game_options.warp_stretch_max_region0_speed * game_options.game_speed))
-                        / ((game_options.warp_stretch_max_speed * game_options.game_speed)
-                                - (game_options.warp_stretch_max_region0_speed * game_options.game_speed) + .06125f)
-                        + game_options.warp_stretch_region0_max;
-        if (stretchlength > game_options.warp_stretch_max) {
-            stretchlength = game_options.warp_stretch_max;
+                (game_options()->warp_stretch_max
+                        - game_options()->warp_stretch_region0_max)
+                        * (speed - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed))
+                        / ((game_options()->warp_stretch_max_speed * game_options()->game_speed)
+                                - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed) + .06125f)
+                        + game_options()->warp_stretch_region0_max;
+        if (stretchlength > game_options()->warp_stretch_max) {
+            stretchlength = game_options()->warp_stretch_max;
         }
-        if (stretchregion0length > game_options.warp_stretch_region0_max) {
-            stretchregion0length = game_options.warp_stretch_region0_max;
+        if (stretchregion0length > game_options()->warp_stretch_region0_max) {
+            stretchregion0length = game_options()->warp_stretch_region0_max;
         }
         ScaleMatrix(k,
                 Vector(1,
                         1,
-                        1 + (speed > (game_options.warp_stretch_max_region0_speed * game_options.game_speed)
+                        1 + (speed > (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
                                 ? stretchlength : stretchregion0length)));
         return k;
     }

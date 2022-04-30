@@ -213,14 +213,14 @@ static bool setup_sdl_video_mode() {
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
-    if (game_options.rgb_pixel_format.compare("undefined") == 0) {
-        game_options.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+    if (game_options()->rgb_pixel_format.compare("undefined") == 0) {
+        game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
-    if ((game_options.rgb_pixel_format.length() == 3) && isdigit(game_options.rgb_pixel_format[0])
-            && isdigit(game_options.rgb_pixel_format[1]) && isdigit(game_options.rgb_pixel_format[2])) {
-        rs = game_options.rgb_pixel_format[0] - '0';
-        gs = game_options.rgb_pixel_format[1] - '0';
-        bs = game_options.rgb_pixel_format[2] - '0';
+    if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
+            && isdigit(game_options()->rgb_pixel_format[1]) && isdigit(game_options()->rgb_pixel_format[2])) {
+        rs = game_options()->rgb_pixel_format[0] - '0';
+        gs = game_options()->rgb_pixel_format[1] - '0';
+        bs = game_options()->rgb_pixel_format[2] - '0';
     }
     int otherbpp;
     int otherattributes;
@@ -230,7 +230,7 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, rs);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, gs);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, bs);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options.z_pixel_format);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     } else {
         otherattributes = 5;
@@ -238,11 +238,11 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, rs);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, gs);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, bs);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options.z_pixel_format);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
 #if SDL_VERSION_ATLEAST(1, 2, 10)
-    if (game_options.gl_accelerated_visual) {
+    if (game_options()->gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
 #endif
@@ -279,10 +279,10 @@ static bool setup_sdl_video_mode() {
 
     std::string version = (const char *) glGetString(GL_RENDERER);
     if (version == "GDI Generic") {
-        if (game_options.gl_accelerated_visual) {
+        if (game_options()->gl_accelerated_visual) {
             VS_LOG(error, "GDI Generic software driver reported, trying to reset.");
             SDL_Quit();
-            game_options.gl_accelerated_visual = false;
+            game_options()->gl_accelerated_visual = false;
             return false;
         } else {
             VS_LOG(error, "GDI Generic software driver reported, reset failed.\n");
@@ -315,10 +315,10 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
 
     //SDL_INIT_AUDIO|
     Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
-    g_game.x_resolution = game_options.x_resolution;
-    g_game.y_resolution = game_options.y_resolution;
-    gl_options.fullscreen = game_options.fullscreen;
-    gl_options.color_depth = game_options.colordepth;
+    g_game.x_resolution = game_options()->x_resolution;
+    g_game.y_resolution = game_options()->y_resolution;
+    gl_options.fullscreen = game_options()->fullscreen;
+    gl_options.color_depth = game_options()->colordepth;
     /*
      * Initialize SDL
      */
@@ -450,7 +450,7 @@ void winsys_process_events() {
                     if (keyboard_func) {
                         SDL_GetMouseState(&x, &y);
 
-                        bool maybe_unicode = game_options.enable_unicode && !(event.key.keysym.sym & ~0xFF);
+                        bool maybe_unicode = game_options()->enable_unicode && !(event.key.keysym.sym & ~0xFF);
                         bool is_unicode = maybe_unicode && event.key.keysym.unicode;
 
                         //Fix up ctrl unicode codes
@@ -792,12 +792,12 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 {
     int width, height;
     int glutWindow;
-    g_game.x_resolution    = game_options.x_resolution;
-    g_game.y_resolution    = game_options.y_resolution;
-    gl_options.fullscreen  = game_options.fullscreen;
-    gl_options.color_depth = game_options.colordepth;
+    g_game.x_resolution    = game_options()->x_resolution;
+    g_game.y_resolution    = game_options()->y_resolution;
+    gl_options.fullscreen  = game_options()->fullscreen;
+    gl_options.color_depth = game_options()->colordepth;
     glutInit( argc, argv );
-    if (game_options.glut_stencil) {
+    if (game_options()->glut_stencil) {
 #ifdef __APPLE__
         if ( !(glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE|GLUT_STENCIL ), 1) )
             glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE );

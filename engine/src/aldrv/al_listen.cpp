@@ -116,7 +116,7 @@ char AUDQueryAudability(const int sound, const Vector &pos, const Vector &vel, c
         mag = 0;
         return 1;
     }
-    if (!(mag < game_options()->audio_max_distance * game_options.audio_max_distance)) {
+    if (!(mag < game_options()->audio_max_distance * game_options()->audio_max_distance)) {
         return 0;
     }
     unsigned int hashed = hash_sound(sounds[sound].buffer);
