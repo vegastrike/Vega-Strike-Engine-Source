@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
     legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
     std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
 
-    if (true == legacy_data_dir_mode) {
+    if (legacy_data_dir_mode) {
         VSFileSystem::datadir = boost::filesystem::current_path().string();
         std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
     }
@@ -262,17 +262,11 @@ int main(int argc, char *argv[]) {
 
     VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
 
-    // stephengtuggy 2021-09-10 Let's try initializing the directories in the same order
-    // on Windows as on other platforms, and see what happens
-// #ifdef WIN32
-//     VSFileSystem::InitHomeDirectory();
-// #endif
-
-    CONFIGFILE = 0;
+    CONFIGFILE = nullptr;
     mission_name[0] = '\0';
     {
         char pwd[8192] = "";
-        if (NULL != getcwd(pwd, 8191)) {
+        if (nullptr != getcwd(pwd, 8191)) {
             pwd[8191] = '\0';
             VS_LOG(info, (boost::format(" In path %1%") % pwd));
         } else {
@@ -293,7 +287,7 @@ int main(int argc, char *argv[]) {
            "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n");
     /* Seed the random number generator */
     if (benchmark < 0.0) {
-        srand(time(NULL));
+        srand(time(nullptr));
     } else {
         //in benchmark mode, always use the same seed
         srand(171070);
