@@ -411,3 +411,8 @@ string vs_options::getPassword(int playernum) {
             "password",
             ""));
 }
+
+std::shared_ptr<vs_options> game_options() {
+    static const std::shared_ptr<vs_options> GAME_OPTIONS = std::make_shared<vs_options>();
+    return GAME_OPTIONS;
+}

@@ -70,11 +70,11 @@ void modifyDeadZone(JoyStick *j) {
 }
 
 void modifyExponent(JoyStick *j) {
-    if ((game_options.joystick_exponent != 1.0) && (game_options.joystick_exponent > 0)) {
+    if ((game_options()->joystick_exponent != 1.0) && (game_options()->joystick_exponent > 0)) {
         for (int a = 0; a < j->nr_of_axes; a++) {
             j->joy_axis[a] =
-                    ((j->joy_axis[a] < 0) ? -pow(-j->joy_axis[a], game_options.joystick_exponent) : pow(j->joy_axis[a],
-                            game_options.
+                    ((j->joy_axis[a] < 0) ? -pow(-j->joy_axis[a], game_options()->joystick_exponent) : pow(j->joy_axis[a],
+                            game_options()->
                                     joystick_exponent));
         }
     }
@@ -144,7 +144,7 @@ JoyStick::JoyStick() {
 }
 
 int JoystickPollingRate() {
-    return game_options.polling_rate;
+    return game_options()->polling_rate;
 }
 
 void InitJoystick() {
@@ -173,7 +173,7 @@ void InitJoystick() {
     VS_LOG(info, "The names of the joysticks are:\n");
 #else
     //use glut
-    if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || game_options.force_use_of_joystick) {
+    if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || game_options()->force_use_of_joystick) {
         VS_LOG(info, "setting joystick functionality:: joystick online");
         glutJoystickFunc( myGlutJoystickCallback, JoystickPollingRate() );
         num_joysticks = 1;
@@ -211,11 +211,11 @@ JoyStick::JoyStick(int which) : mouse(which == MOUSE_JOYSTICK) {
     joy_buttons = 0;
 
     player = which;     //by default bind players to whichever joystick it is
-    debug_digital_hatswitch = game_options.debug_digital_hatswitch;
+    debug_digital_hatswitch = game_options()->debug_digital_hatswitch;
     if (which != MOUSE_JOYSTICK) {
-        deadzone = game_options.deadband;
+        deadzone = game_options()->deadband;
     } else {
-        deadzone = game_options.mouse_deadband;
+        deadzone = game_options()->mouse_deadband;
     };
     joy_available = 0;
     joy_x = joy_y = joy_z = 0;
@@ -296,18 +296,15 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     int _mx, _my;
     GetMouseXY(_mx, _my);
     GetMouseDelta(_dx, _dy);
-    if (0 && (_dx || _dy)) {
-        VS_LOG(info, (boost::format("x:%1% y:%2%\n") % _dx % _dy));
-    }
-    if (!game_options.warp_mouse) {
-        fdx = (float) (_dx = _mx - g_game.x_resolution / 2);
+    if (!game_options()->warp_mouse) {
+        fdx = (float) (_dx = _mx - g_game.x_resolution / 2.0f);
         def_mouse_sens = 25;
-        fdy = (float) (_dy = _my - g_game.y_resolution / 2);
+        fdy = (float) (_dy = _my - g_game.y_resolution / 2.0f);
     } else {
         static std::list<mouseData> md;
         std::list<mouseData>::iterator i = md.begin();
         float ttime = getNewTime();
-        float lasttime = ttime - game_options.mouse_blur;
+        float lasttime = ttime - game_options()->mouse_blur;
         int avg = (_dx || _dy) ? 1 : 0;
         float valx = _dx;
         float valy = _dy;
@@ -341,16 +338,16 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
             _dx = float_to_int(valx / avg);
             _dy = float_to_int(valy / avg);
         }
-        fdx = float(valx) / game_options.mouse_blur;
-        fdy = float(valy) / game_options.mouse_blur;
+        fdx = float(valx) / game_options()->mouse_blur;
+        fdy = float(valy) / game_options()->mouse_blur;
     }
-    joy_axis[0] = fdx / (g_game.x_resolution * def_mouse_sens / game_options.mouse_sensitivity);
-    joy_axis[1] = fdy / (g_game.y_resolution * def_mouse_sens / game_options.mouse_sensitivity);
-    if (!game_options.warp_mouse) {
+    joy_axis[0] = fdx / (g_game.x_resolution * def_mouse_sens / game_options()->mouse_sensitivity);
+    joy_axis[1] = fdy / (g_game.y_resolution * def_mouse_sens / game_options()->mouse_sensitivity);
+    if (!game_options()->warp_mouse) {
         modifyDeadZone(this);
     }
-    joy_axis[0] *= game_options.mouse_exponent;
-    joy_axis[1] *= game_options.mouse_exponent;
+    joy_axis[0] *= game_options()->mouse_exponent;
+    joy_axis[1] *= game_options()->mouse_exponent;
     x = joy_axis[0];
     y = joy_axis[1];
 
@@ -360,7 +357,7 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
 
 void JoyStick::GetJoyStick(float &x, float &y, float &z, int &buttons) {
     //int status;
-    if (joy_available == false) {
+    if (!joy_available) {
         for (int a = 0; a < MAX_AXES; a++) {
             joy_axis[a] = 0;
         }

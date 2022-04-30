@@ -161,15 +161,15 @@ static ALCcontext *context_id = NULL;
 bool AUDInit() {
 #ifdef HAVE_AL
     // g_game.sound_enabled =
-    usedoppler = game_options.Doppler;
-    usepositional = game_options.Positional;
+    usedoppler = game_options()->Doppler;
+    usepositional = game_options()->Positional;
     double linuxadjust = 1;
 #ifndef _WIN32
 #ifndef __APPLE__
     linuxadjust = 1. / 3.;
 #endif
 #endif
-    scalepos = 1.0f / (game_options.Volume * linuxadjust);
+    scalepos = 1.0f / (game_options()->Volume * linuxadjust);
     scalevel = game_options.DopplerScale;
     g_game.audio_frequency_mode = game_options.frequency;
     maxallowedsingle = game_options.MaxSingleSounds;

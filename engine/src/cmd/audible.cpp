@@ -96,21 +96,21 @@ void Audible::playSound(SoundType type) {
 
 void Audible::playShieldDamageSound(const Vector &pnt) {
     const int shieldSound = sounds[SoundType::shield];
-    static int playerShieldSound = AUDCreateSoundWAV(game_options.player_shield_hit);
+    static int playerShieldSound = AUDCreateSoundWAV(game_options()->player_shield_hit);
     int currentPlayerSound = playerShieldSound != -1 ? playerShieldSound : shieldSound;
     playSound(pnt, shieldSound, currentPlayerSound);
 }
 
 void Audible::playArmorDamageSound(const Vector &pnt) {
     const int armorSound = sounds[SoundType::armor];
-    static int playerArmorSound = AUDCreateSoundWAV(game_options.player_armor_hit);
+    static int playerArmorSound = AUDCreateSoundWAV(game_options()->player_armor_hit);
     int currentPlayerSound = playerArmorSound != -1 ? playerArmorSound : armorSound;
     playSound(pnt, armorSound, currentPlayerSound);
 }
 
 void Audible::playHullDamageSound(const Vector &pnt) {
     const int hullSound = sounds[SoundType::hull];
-    static int playerHullSound = AUDCreateSoundWAV(game_options.player_hull_hit);
+    static int playerHullSound = AUDCreateSoundWAV(game_options()->player_hull_hit);
     int currentPlayerSound = playerHullSound != -1 ? playerHullSound : hullSound;
     playSound(pnt, hullSound, currentPlayerSound);
 }
@@ -142,7 +142,7 @@ void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
     }
 
     if (!_Universe->isPlayerStarship(unit)) {
-        if (game_options.ai_sound) {
+        if (game_options()->ai_sound) {
             playDopplerSound(pnt, sound);
         }
     } else {

@@ -132,22 +132,22 @@ inline void loadsounds(const string &str, const int max, soundArray &snds, bool 
 
 static void UpdateTimeCompressionSounds() {
     static int lasttimecompress = 0;
-    if ((timecount != lasttimecompress) && (game_options.compress_max > 0)) {
+    if ((timecount != lasttimecompress) && (game_options()->compress_max > 0)) {
         static bool inittimecompresssounds = false;
         static soundArray loop_snds;
         static soundArray burst_snds;
         static soundArray end_snds;
         if (inittimecompresssounds == false) {
-            loadsounds(game_options.compress_loop, game_options.compress_max, loop_snds, true);
-            loadsounds(game_options.compress_stop, game_options.compress_max, end_snds);
-            loadsounds(game_options.compress_change, game_options.compress_max, burst_snds);
+            loadsounds(game_options()->compress_loop, game_options()->compress_max, loop_snds, true);
+            loadsounds(game_options()->compress_stop, game_options()->compress_max, end_snds);
+            loadsounds(game_options()->compress_change, game_options()->compress_max, burst_snds);
             inittimecompresssounds = true;
         }
-        int soundfile = (timecount - 1) / game_options.compress_interval;
-        int lastsoundfile = (lasttimecompress - 1) / game_options.compress_interval;
+        int soundfile = (timecount - 1) / game_options()->compress_interval;
+        int lastsoundfile = (lasttimecompress - 1) / game_options()->compress_interval;
         if (timecount > 0 && lasttimecompress >= 0) {
-            if ((soundfile + 1) >= game_options.compress_max) {
-                burst_snds.ptr[game_options.compress_max - 1].playsound();
+            if ((soundfile + 1) >= game_options()->compress_max) {
+                burst_snds.ptr[game_options()->compress_max - 1].playsound();
             } else {
                 if (lasttimecompress > 0 && loop_snds.ptr[lastsoundfile].sound >= 0
                         && AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound)) {
@@ -157,13 +157,13 @@ static void UpdateTimeCompressionSounds() {
                 burst_snds.ptr[soundfile].playsound();
             }
         } else if (lasttimecompress > 0 && timecount == 0) {
-            for (int i = 0; i < game_options.compress_max; ++i) {
+            for (int i = 0; i < game_options()->compress_max; ++i) {
                 if (loop_snds.ptr[i].sound >= 0 && AUDIsPlaying(loop_snds.ptr[i].sound)) {
                     AUDStopPlaying(loop_snds.ptr[i].sound);
                 }
             }
-            if (lastsoundfile >= game_options.compress_max) {
-                end_snds.ptr[game_options.compress_max - 1].playsound();
+            if (lastsoundfile >= game_options()->compress_max) {
+                end_snds.ptr[game_options()->compress_max - 1].playsound();
             } else {
                 end_snds.ptr[lastsoundfile].playsound();
             }
@@ -173,7 +173,7 @@ static void UpdateTimeCompressionSounds() {
 }
 
 Unit *DockToSavedBases(int playernum, QVector &safevec) {
-    string str = game_options.startDockedTo;
+    string str = game_options()->startDockedTo;
     Unit *plr = _Universe->AccessCockpit(playernum)->GetParent();
     if (!plr || !plr->getStarSystem()) {
         safevec = QVector(0, 0, 0);
@@ -269,8 +269,8 @@ static void AppendUnitTables(const string &csvfiles) {
 }
 
 void InitUnitTables() {
-    AppendUnitTables(game_options.modUnitCSV);
-    AppendUnitTables(game_options.unitCSV);
+    AppendUnitTables(game_options()->modUnitCSV);
+    AppendUnitTables(game_options()->unitCSV);
 }
 
 void CleanupUnitTables() {
@@ -397,8 +397,8 @@ void Universe::StartDraw() {
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(((int) (rand01() * _cockpits.size())) % _cockpits.size());
-    for (i = 0; i < star_system.size() && i < game_options.NumRunningSystems; ++i) {
-        star_system[i]->Update((i == 0) ? 1 : game_options.InactiveSystemTime / i, true);
+    for (i = 0; i < star_system.size() && i < game_options()->NumRunningSystems; ++i) {
+        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i, true);
     }
     StarSystem::ProcessPendingJumps();
     for (i = 0; i < _cockpits.size(); ++i) {
@@ -418,12 +418,12 @@ void Universe::StartDraw() {
 
     //remove systems not recently visited?
     static int sorttime = 0;
-    if (game_options.garbagecollectfrequency != 0) {
+    if (game_options()->garbagecollectfrequency != 0) {
         //don't want to delete something when there is something pending to jump therexo
         if (PendingJumpsEmpty()) {
-            if ((++sorttime) % game_options.garbagecollectfrequency == 1) {
+            if ((++sorttime) % game_options()->garbagecollectfrequency == 1) {
                 SortStarSystems(star_system, _active_star_systems.back());
-                if (star_system.size() > game_options.numoldsystems && game_options.deleteoldsystems) {
+                if (star_system.size() > game_options()->numoldsystems && game_options()->deleteoldsystems) {
                     if (std::find(_active_star_systems.begin(), _active_star_systems.end(),
                             star_system.back()) == _active_star_systems.end()) {
                         delete star_system.back();
@@ -460,7 +460,7 @@ void Universe::StartGFX() {
 void Universe::Update() {
     for (unsigned int i = 0; i < star_system.size(); ++i) {
         //Calls the update function for server
-        star_system[i]->Update((i == 0) ? 1 : game_options.InactiveSystemTime / i);
+        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i);
     }
 }
 
@@ -640,7 +640,7 @@ void Universe::UnloadStarSystem(StarSystem *s) {
 
 void Universe::Generate1(const char *file, const char *jumpback) {
     int count = 0;
-    if (game_options.while_loading_starsystem) {
+    if (game_options()->while_loading_starsystem) {
         ss_generating(true);
     }
     VSFile f;
@@ -655,7 +655,7 @@ void Universe::Generate2(StarSystem *ss) {
     static bool firsttime = true;
     LoadStarSystem(ss);
     pushActiveStarSystem(ss);
-    for (unsigned int tume = 0; tume <= game_options.num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
+    for (unsigned int tume = 0; tume <= game_options()->num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
             ++tume) {
         ss->UpdateUnitsPhysics(true);
     }

@@ -2052,13 +2052,13 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static Animation cache(game_options.explosion_animation.c_str(), false, .1, BILINEAR, false);
+            static Animation cache(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
             bleh = getRandomCachedAniString();
             if (bleh.size() == 0) {
-                bleh = game_options.explosion_animation;
+                bleh = game_options()->explosion_animation;
             }
         }
-        this->pImage->pExplosion = new Animation(bleh.c_str(), game_options.explosion_face_player, .1, BILINEAR, true);
+        this->pImage->pExplosion = new Animation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
         this->pImage->pExplosion->SetDimensions(this->ExplosionRadius(), this->ExplosionRadius());
         Vector p, q, r;
         this->GetOrientation(p, q, r);
@@ -2068,10 +2068,10 @@ bool Unit::Explode(bool drawit, float timeit) {
                     this->MaxShieldVal(),
                     0,
                     this->ExplosionRadius()
-                            * game_options.explosion_damage_center,
+                            * game_options()->explosion_damage_center,
                     this->ExplosionRadius()
-                            * game_options.explosion_damage_center
-                            * game_options.explosion_damage_edge,
+                            * game_options()->explosion_damage_center
+                            * game_options()->explosion_damage_edge,
                     NULL));
         }
         QVector exploc = this->cumulative_transformation.position;
@@ -2079,8 +2079,8 @@ bool Unit::Explode(bool drawit, float timeit) {
         Unit *un = NULL;
         if (!sub) {
             if ((un = _Universe->AccessCockpit(0)->GetParent())) {
-                exploc = un->Position() * game_options.explosion_closeness
-                        + exploc * (1 - game_options.explosion_closeness);
+                exploc = un->Position() * game_options()->explosion_closeness
+                        + exploc * (1 - game_options()->explosion_closeness);
             }
         }
         //AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
@@ -2089,8 +2089,8 @@ bool Unit::Explode(bool drawit, float timeit) {
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
             if (this->isUnit() == _UnitType::unit) {
-                if (rand() < RAND_MAX * game_options.percent_shockwave && (!this->isSubUnit())) {
-                    static string shockani(game_options.shockwave_animation);
+                if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
+                    static string shockani(game_options()->shockwave_animation);
                     static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
 
                     __shock__ani->SetFaceCam(false);
@@ -2098,7 +2098,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                             this->ExplosionRadius(),
                             true,
                             shockani,
-                            game_options.shockwave_growth);
+                            game_options()->shockwave_growth);
                     Animation *ani = GetVolatileAni(which);
                     if (ani) {
                         ani->SetFaceCam(false);
@@ -2122,15 +2122,15 @@ bool Unit::Explode(bool drawit, float timeit) {
                     if (!BaseInterface::CurrentBase) {
                         static float lasttime = 0;
                         float newtime = getNewTime();
-                        if (newtime - lasttime > game_options.time_between_music
+                        if (newtime - lasttime > game_options()->time_between_music
                                 || (_Universe->isPlayerStarship(this) && this->isUnit() != _UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
-                            if (rel > game_options.victory_relationship) {
+                            if (rel > game_options()->victory_relationship) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong(Music::LOSSLIST);
-                            } else if (rel < game_options.loss_relationship) {
+                            } else if (rel < game_options()->loss_relationship) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong(Music::VICTORYLIST);
                             }
@@ -2141,7 +2141,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         }
     }
     bool timealldone =
-            (this->pImage->timeexplode > game_options.debris_time || this->isUnit() == _UnitType::missile
+            (this->pImage->timeexplode > game_options()->debris_time || this->isUnit() == _UnitType::missile
                     || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty());
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -2167,8 +2167,8 @@ bool Unit::Explode(bool drawit, float timeit) {
             }
         }
     }
-    if ((game_options.eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
-        unsigned int dropcount = floorf(this->numCargo() / game_options.eject_cargo_on_blowup) + 1;
+    if ((game_options()->eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
+        unsigned int dropcount = floorf(this->numCargo() / game_options()->eject_cargo_on_blowup) + 1;
         if (dropcount > this->numCargo()) {
             dropcount = this->numCargo();
         }

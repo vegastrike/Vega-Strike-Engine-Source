@@ -114,10 +114,10 @@ static void EnableArrays(const GFXVertex *data) {
 
 void GFXVertexList::RefreshDisplayList() {
 #ifndef NO_VBO_SUPPORT
-    if (game_options.vbo && !vbo_data) {
-        if (glGenBuffersARB_p == 0 || glBindBufferARB_p == 0 || glBufferDataARB_p == 0 || glMapBufferARB_p == 0
-                || glUnmapBufferARB_p == 0) {
-            game_options.vbo = 0;
+    if (game_options()->vbo && !vbo_data) {
+        if (glGenBuffersARB_p == nullptr || glBindBufferARB_p == nullptr || glBufferDataARB_p == nullptr || glMapBufferARB_p == nullptr
+                || glUnmapBufferARB_p == nullptr) {
+            game_options()->vbo = false;
         } else {
             (*glGenBuffersARB_p)(1, (GLuint *) &vbo_data);
             if (changed & HAS_INDEX) {

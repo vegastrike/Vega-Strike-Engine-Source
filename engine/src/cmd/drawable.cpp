@@ -451,7 +451,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     Matrix wmat = WarpMatrix(mat);
     for (i = 0; (int) i < nummounts; i++) {
         Mount *mahnt = &unit->mounts[i];
-        if (game_options.draw_weapons) {
+        if (game_options()->draw_weapons) {
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
@@ -674,7 +674,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
         return;
     }
 
-    double sparkle_accum = GetElapsedTime() * game_options.sparklerate;
+    double sparkle_accum = GetElapsedTime() * game_options()->sparklerate;
     int spawn = (int) (sparkle_accum);
     sparkle_accum -= spawn;
 
@@ -780,7 +780,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
         }
 
         // Don't draw mounts if game is set not to...
-        if (!game_options.draw_weapons) {
+        if (!game_options()->draw_weapons) {
             continue;
         }
 
@@ -837,7 +837,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
 void Drawable::Split(int level) {
     Unit *unit = static_cast<Unit *>(this);
 
-    if (game_options.split_dead_subunits) {
+    if (game_options()->split_dead_subunits) {
         for (un_iter su = unit->getSubUnits(); *su; ++su) {
             (*su)->Split(level);
         }
@@ -940,7 +940,7 @@ void Drawable::Split(int level) {
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
         *splitsub->current_hull = 1000.0f;
         splitsub->name = "debris";
-        splitsub->setMass(game_options.debris_mass * splitsub->getMass() / level);
+        splitsub->setMass(game_options()->debris_mass * splitsub->getMass() / level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc = splitsub->meshdata[0]->Position();
@@ -949,18 +949,18 @@ void Drawable::Split(int level) {
                 locm = 1;
             }
             splitsub->ApplyForce(
-                    splitsub->meshdata[0]->rSize() * game_options.explosionforce * 10 * splitsub->getMass() * loc
+                    splitsub->meshdata[0]->rSize() * game_options()->explosionforce * 10 * splitsub->getMass() * loc
                             / locm);
             loc.Set(rand(), rand(), rand() + .1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options.explosiontorque
+            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options()->explosiontorque
                     * (1 + rand() % (int) (1 + unit->rSize())));
         }
     }
     old.clear();
     this->meshdata.clear();
     this->meshdata.push_back(NULL);     //the shield
-    unit->Mass *= game_options.debris_mass;
+    unit->Mass *= game_options()->debris_mass;
 }
 
 void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
@@ -986,7 +986,7 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = static_cast<const Unit *>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared()
-            < (game_options.warp_stretch_cutoff * game_options.warp_stretch_cutoff * game_options.game_speed
+            < (game_options()->warp_stretch_cutoff * game_options()->warp_stretch_cutoff * game_options.game_speed
                     * game_options.game_speed)
             || (game_options.only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
         return ctm;

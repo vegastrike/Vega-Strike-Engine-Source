@@ -199,12 +199,12 @@ void ForceFeedback::stopEffect( unsigned int eff_nr )
 
 void ForceFeedback::init()
 {
-    if (!game_options.force_feedback) {
+    if (!game_options()->force_feedback) {
         VS_LOG(info, "force feedback disabled in config file");
         return;
     }
     char devname[200];
-    sprintf( devname, "/dev/input/event%d", game_options.ff_device );
+    sprintf( devname, "/dev/input/event%d", game_options()->ff_device );
 
     ff_fd = open( devname, O_RDWR );
     if (ff_fd == -1) {

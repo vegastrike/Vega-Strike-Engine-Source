@@ -83,7 +83,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
         bool done = false;
         Vector back = vel;
         back.Normalize();
-        back *= -game_options.sparkleabsolutespeed;
+        back *= -game_options()->sparkleabsolutespeed;
 
         collideTrees *colTrees = mush->colTrees;
         if (colTrees) {
@@ -99,7 +99,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                             vel,
                             back,
                             0,
-                            mush->rSize() * game_options.sparkleenginesizerelativetoship,
+                            mush->rSize() * game_options()->sparkleenginesizerelativetoship,
                             faction);
                     done = true;
                 }
@@ -119,7 +119,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                         vel,
                         back,
                         0,
-                        mush->rSize() * game_options.sparkleenginesizerelativetoship,
+                        mush->rSize() * game_options()->sparkleenginesizerelativetoship,
                         faction);
                 done = true;
             }
@@ -140,11 +140,11 @@ unsigned int HaloSystem::AddHalo(const char *filename,
     int neutralfac = FactionUtil::GetNeutralFaction();
     halo.push_back(Halo());
     halo.back().trans = trans;
-    halo.back().size = Vector(size.i * game_options.engine_radii_scale,
-            size.j * game_options.engine_radii_scale,
-            size.k * game_options.engine_length_scale);
+    halo.back().size = Vector(size.i * game_options()->engine_radii_scale,
+            size.j * game_options()->engine_radii_scale,
+            size.k * game_options()->engine_length_scale);
     halo.back().mesh = Mesh::LoadMesh((string(filename)).c_str(), Vector(1, 1, 1), neutralfac, NULL);
-    halo.back().activation = activation_accel * game_options.game_speed;
+    halo.back().activation = activation_accel * game_options()->game_speed;
     halo.back().oscale = 0;
     halo.back().sparkle_accum = 0;
     halo.back().sparkle_rate = 0.5 + rand() * 0.5 / float(RAND_MAX);
@@ -188,12 +188,12 @@ void HaloSystem::Draw(const Matrix &trans,
         maxvelocity = 1;
     }
 
-    double sparkledelta = GetElapsedTime() * game_options.halosparklerate;
+    double sparkledelta = GetElapsedTime() * game_options()->halosparklerate;
 
     for (std::vector<Halo>::iterator i = halo.begin(); i != halo.end(); ++i) {
         Vector thrustvector = TransformNormal(trans, i->trans.getR()).Normalize();
         float value, maxvalue, minvalue;
-        if (game_options.halos_by_velocity) {
+        if (game_options()->halos_by_velocity) {
             value = velocity.Dot(thrustvector);
             maxvalue = sqrt(maxvelocity);
             minvalue = i->activation;

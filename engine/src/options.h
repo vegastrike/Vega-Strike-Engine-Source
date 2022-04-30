@@ -355,7 +355,7 @@ public:
     std::string getPassword(int);
 };
 
-extern vs_options game_options;
+extern std::shared_ptr<vs_options> game_options();
 
 #endif
 

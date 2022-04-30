@@ -75,7 +75,7 @@ string RemoveDotSystem(const char *input) {
 
 string getUniversePath() {
     char del[] = {'/', '\0'};
-    return game_options.universe_path + string(del);
+    return game_options()->universe_path + string(del);
 }
 
 string getVarEitherSectionOrSub(Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
@@ -235,7 +235,7 @@ void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom)
     si.nebulaelist = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "nebulalist", Ave.nebulaelist);
     si.backgrounds = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "backgroundlist", Ave.backgrounds);
     si.force = parse_bool(getVarEitherSectionOrSub(galaxy, si.sector, si.name, "force", Ave.force ? "true" : "false"));
-    if (game_options.PushValuesToMean) {
+    if (game_options()->PushValuesToMean) {
         si.force = true;
     }
     string dest = galaxy->getVariable(si.sector, si.name, "jumps", "");

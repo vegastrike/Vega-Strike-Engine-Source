@@ -650,7 +650,7 @@ int numActiveMissions() {
 }
 
 void IOmessage(int delay, string from, string to, string message) {
-    if (to == "news" && (!game_options.news_from_cargolist)) {
+    if (to == "news" && (!game_options()->news_from_cargolist)) {
         for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
             pushSaveString(i, "news", string("#") + message);
         }
@@ -694,7 +694,7 @@ void SetAutoStatus(int global_auto, int player_auto) {
 
 QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector pos, float radial_size) {
     if (radial_size < 0) {
-        radial_size = game_options.respawn_unit_size;
+        radial_size = game_options()->respawn_unit_size;
     }
     for (unsigned int k = 0; k < 10; ++k) {
         Unit *un;
@@ -799,7 +799,7 @@ void receivedCustom(int cp, bool trusted, string cmd, string args, string id) {
     securepythonstr(cmd);
     securepythonstr(args);
     securepythonstr(id);
-    string pythonCode = game_options.custompython + "(" + (trusted ? "True" : "False")
+    string pythonCode = game_options()->custompython + "(" + (trusted ? "True" : "False")
             + ", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
     VS_LOG(info, "Executing python command: ");
     VS_LOG(info, (boost::format("    %1%") % pythonCode));
@@ -823,7 +823,7 @@ Unit *getPlayerX(int which) {
 }
 
 float getPlanetRadiusPercent() {
-    return game_options.auto_pilot_planet_radius_percent;
+    return game_options()->auto_pilot_planet_radius_percent;
 }
 
 std::string getVariable(std::string section, std::string name, std::string def) {
@@ -910,12 +910,12 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
     static bool campaign_score_vars_init = false;
     if (!campaign_score_vars_init) {
 
-        string::size_type where = 0, when = game_options.campaigns.find(' ');
+        string::size_type where = 0, when = game_options()->campaigns.find(' ');
         while (where != string::npos) {
-            campaign_score_vars.insert(game_options.campaigns
+            campaign_score_vars.insert(game_options()->campaigns
                     .substr(where, ((when == string::npos) ? when : when - where)));
             where = (when == string::npos) ? when : when + 1;
-            when = game_options.campaigns.find(' ', where);
+            when = game_options()->campaigns.find(' ', where);
         }
         campaign_score_vars_init = true;
     }
@@ -938,7 +938,7 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
             "",
             true,
             false,
-            game_options.quick_savegame_summaries,
+            game_options()->quick_savegame_summaries,
             true,
             true,
             campaign_score_vars);
@@ -989,7 +989,7 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
             }
         }
     }
-    if (!game_options.quick_savegame_summaries) {
+    if (!game_options()->quick_savegame_summaries) {
         bool hit = false;
         for (set<string>::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
             string var = *it;
