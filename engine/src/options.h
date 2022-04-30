@@ -24,6 +24,7 @@
 #define _VS_OPTIONS_H
 
 #include <string>
+#include <memory>
 
 #ifndef uint
 typedef unsigned int uint;
