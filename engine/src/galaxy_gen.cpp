@@ -30,7 +30,6 @@
 #include <time.h>
 #include <assert.h>
 
-#include "configxml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "gfxlib.h"
@@ -58,7 +57,7 @@ using namespace VSFileSystem;
 using std::string;
 using std::vector;
 
-static VSRandom starsysrandom(time(NULL));
+static VSRandom starsysrandom(time(nullptr));
 
 static void seedrand(unsigned long seed) {
     starsysrandom = VSRandom(seed);
@@ -129,8 +128,8 @@ string getRandName(vector<string> &s) {
 }
 
 struct Color {
-    float r, g, b, a;
-    float nr, ng, nb, na;
+    float r, g, b, a{};
+    float nr{}, ng{}, nb{}, na{};
 
     Color(float rr, float gg, float bb) {
         r = rr;
@@ -140,11 +139,11 @@ struct Color {
 };
 class Vector {
 public:
-    float i;
-    float j;
-    float k;
-    float s;
-    float t;
+    float i{};
+    float j{};
+    float k{};
+    float s{};
+    float t{};
 
     Vector() {
         i = j = k = 0;
@@ -155,9 +154,7 @@ public:
         memcpy(this, &in, sizeof(*this));
     }
 
-    Vector(const Vector &in) {
-        memcpy(this, &in, sizeof(*this));
-    }
+    Vector(const Vector &in) : i(in.i), j(in.j), k(in.k), s(in.s), t(in.t) {}
 
     Vector(float x, float y, float z) {
         i = x;
@@ -173,7 +170,7 @@ public:
         this->t = t;
     }
 
-    float Mag() {
+    float Mag() const {
         return sqrtf(i * i + j * j + k * k);
     }
 
@@ -368,23 +365,23 @@ void readColorGrads(vector<string> &entity, const char *file) {
     VSError err = f.OpenReadOnly(file, UniverseFile);
     if (err > Ok) {
         VS_LOG(error, (boost::format("Failed to load %1%") % file));
-        GradColor g;
+        GradColor g{};
         g.minrad = 0;
         g.r = g.g = g.b = .9;
         g.variance = .1;
-        entity.push_back("white_star.png");
+        entity.emplace_back("white_star.png");
         colorGradiant.push_back(g);
         return;
     }
     char input_buffer[1000];
     char output_buffer[1000];
-    GradColor g;
+    GradColor g{};
     while (!f.Eof()) {
         f.ReadLine(input_buffer, 999);
         if (sscanf(input_buffer, "%f %f %f %f %f %s", &g.minrad, &g.r, &g.g, &g.b, &g.variance, output_buffer) == 6) {
             g.minrad *= game_options()->StarRadiusScale;
             colorGradiant.push_back(g);
-            entity.push_back(output_buffer);
+            entity.emplace_back(output_buffer);
         }
     }
     f.Close();
@@ -574,7 +571,7 @@ vector<string> parseBigUnit(const string &input) {
             *ptr = '\0';
             ptr++;
         }
-        ans.push_back(string(oldptr));
+        ans.emplace_back(oldptr);
         oldptr = ptr;
     }
     free(mystr);
@@ -816,7 +813,7 @@ void MakeBigUnit(int callingentitytype, string name = string(), float orbitalrad
             string type = AnalyzeType(fullname[i], nebfile, size);
             if (!first) {
                 first = true;
-                center = generateAndUpdateRS(r, s, size, callingentitytype != STAR ? type == "Unit" : false);
+                center = generateAndUpdateRS(r, s, size, callingentitytype != STAR && type == "Unit");
                 stdloy = LengthOfYear(r, s);
             }
             WriteUnit(type, "", fullname[i], r, s, center, nebfile, string(""), i != 0, stdloy);
@@ -969,8 +966,8 @@ void MakePlanet(float radius,
         float ringrand = grand();
         if (ringrand < game_options()->RingProbability) {
             string ringname = getRandName(rings);
-            double inner_rad = (game_options()->InnerRingRadius * (1 + grand() * .5)) * radius;
-            double outer_rad = inner_rad + (game_options()->OuterRingRadius * grand()) * radius;
+            double inner_rad = (game_options()->InnerRingRadius * (1.0 + grand() * 0.5)) * radius;
+            double outer_rad = inner_rad + (static_cast<double>(game_options()->OuterRingRadius) * grand()) * radius;
             int wrapx = 1;
             int wrapy = 1;
             if (ringname.empty()) {
@@ -1194,7 +1191,7 @@ void readentity(vector<string> &entity, const char *filename) {
     ///warning... obvious vulnerability
     char input_buffer[1000];
     while (1 == f.Fscanf("%s", input_buffer)) {
-        entity.push_back(input_buffer);
+        entity.emplace_back(input_buffer);
     }
     f.Close();
 }
@@ -1259,7 +1256,7 @@ void readnames(vector<string> &entity, const char *filename) {
                 break;
             }
         }
-        entity.push_back(input_buffer);
+        entity.emplace_back(input_buffer);
     }
     f.Close();
 }
@@ -1273,7 +1270,7 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
     unsigned int u;
     starinfos.reserve(numstars);
     for (u = 0; u < numstars; ++u) {
-        starinfos.push_back(StarInfo());
+        starinfos.emplace_back();
     }
     u--;
     while (i = planetlist.find(' '), 1) {
@@ -1291,7 +1288,7 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
         if (j == string::npos || j >= planetlist.size()) {
             break;
         }
-        starinfos[u % numstars].planets.push_back(PlanetInfo());
+        starinfos[u % numstars].planets.emplace_back();
         starinfos[u % numstars].planets.back().moonlevel = nummoon;
         {
             GalaxyXML::Galaxy *galaxy = _Universe->getGalaxy();
@@ -1353,10 +1350,10 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
         planetlist = planetlist.substr(i + 1);
     }
     unsigned int k;
-    if (starinfos.size()) {
-        bool size = 0;
+    if (!starinfos.empty()) {
+        bool size = false;
         for (k = 0; k < starinfos.size(); ++k) {
-            if (starinfos[k].planets.size()) {
+            if (!starinfos[k].planets.empty()) {
                 size = true;
                 break;
             }
@@ -1378,14 +1375,14 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
                 vector<PlanetInfo> *temp;                 //& doesn't like me so I use *.
                 do {
                     temp = &starinfos[rnd(0, starinfos.size())].planets;
-                } while (!temp->size());
+                } while (temp->empty());
                 (*temp)[rnd(0, temp->size())].numjumps++;
             }
             for (k = 0; k < numstarbases; ++k) {
                 vector<PlanetInfo> *temp;                 //& appears to still have dislike for me.
                 do {
                     temp = &starinfos[rnd(0, starinfos.size())].planets;
-                } while (!temp->size());
+                } while (temp->empty());
                 (*temp)[rnd(0, temp->size())].numstarbases++;
             }
         }

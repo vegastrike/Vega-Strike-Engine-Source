@@ -986,7 +986,7 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = dynamic_cast<const Unit *>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared()
-            < (game_options()->warp_stretch_cutoff * game_options()->warp_stretch_cutoff * game_options()->game_speed
+            < (static_cast<double>(game_options()->warp_stretch_cutoff) * game_options()->warp_stretch_cutoff * game_options()->game_speed
                     * game_options()->game_speed)
             || (game_options()->only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
         return ctm;
