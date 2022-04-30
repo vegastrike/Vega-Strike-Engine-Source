@@ -26,6 +26,8 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#include <memory>
+
 namespace vegastrike_configuration {
 // Config Structs Declaration
 
