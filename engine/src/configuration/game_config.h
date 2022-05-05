@@ -40,7 +40,6 @@
 
 namespace pt = boost::property_tree;
 
-//using std::string;
 using pt::ptree;
 
 // TODO: test this functionality, especially the subsection...

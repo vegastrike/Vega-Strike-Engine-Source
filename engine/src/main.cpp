@@ -663,6 +663,7 @@ void bootstrap_main_loop() {
         UpdateTime();
         FactionUtil::LoadContrabandLists();
         {
+            // TODO: Figure out how to refactor this section to use a loop or similar, eliminating code duplication
             if (!game_options()->intro1.empty()) {
                 UniverseUtil::IOmessage(0, "game", "all", game_options()->intro1);
                 if (!game_options()->intro2.empty()) {
