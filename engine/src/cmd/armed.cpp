@@ -215,7 +215,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         if (i->status != Mount::ACTIVE) {
             continue;
         }
-        if (i->bank) {
+        if (i->bank == true) {
             unsigned int best = index;
             unsigned int j;
             for (j = index + 1; j < mountssize; ++j) {
