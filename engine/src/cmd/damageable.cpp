@@ -115,12 +115,12 @@ void Damageable::ApplyDamage(const Vector &pnt,
     const Damageable *const_damagable = static_cast<const Damageable *>(this);
     Unit *unit = static_cast<Unit *>(this);
 
-    static float hull_percent_for_comm = GameConfig::GetVariable("AI", "HullPercentForComm", 0.75);
+    static float hull_percent_for_comm = GameConfig::GetVariable("AI", "HullPercentForComm", 0.75f);
     static int shield_damage_anger = GameConfig::GetVariable("AI", "ShieldDamageAnger", 1);
     static int hull_damage_anger = GameConfig::GetVariable("AI", "HullDamageAnger", 10);
     static bool assist_ally_in_need =
             GameConfig::GetVariable("AI", "assist_friend_in_need", true);
-    static float nebula_shields = GameConfig::GetVariable("physics", "nebula_shield_recharge", 0.5);
+    static float nebula_shields = GameConfig::GetVariable("physics", "nebula_shield_recharge", 0.5f);
     //We also do the following lock on client side in order not to display shield hits
     static bool no_dock_damage = GameConfig::GetVariable("physics", "no_damage_to_docked_ships", true);
     static bool apply_difficulty_enemy_damage =
