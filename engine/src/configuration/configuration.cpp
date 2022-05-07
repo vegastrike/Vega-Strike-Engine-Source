@@ -55,7 +55,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
             GameConfig::GetVariable("physics", "only_hangar_collision_docks", collision_hacks.crash_dock_hangar);
     collision_hacks.crash_dock_unit =
             GameConfig::GetVariable("physics", "unit_collision_docks", collision_hacks.crash_dock_unit);
-    // (STYLE WARNING) front collision_hack_angle appears to expects to equal the cosine of a radian value, but default implies that it reads degrees! Value not specified directly, breaks pattern, should consider normalizing behavior with other config vars
+    // (STYLE WARNING) front collision_hack_angle appears to expect to equal the cosine of a radian value, but default implies that it reads degrees! Value not specified directly, breaks pattern, should consider normalizing behavior with other config vars
     collision_hacks.front_collision_hack_angle = std::cos(
             M_PI * GameConfig::GetVariable("physics", "front_collision_avoidance_hack_angle", 40)
                     / 180.0f); // uses default value - must be changed in tandem with constructor!
@@ -110,7 +110,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     weapons.can_fire_in_spec = GameConfig::GetVariable("physics", "can_fire_in_spec", weapons.can_fire_in_spec);
 }
 
-// Each of the following constructors MUST specify default values for ALL struct elements - will be subsequently overrident by user specified values, if any
+// Each of the following constructors MUST specify default values for ALL struct elements - will be subsequently overridden by user specified values, if any
 
 vegastrike_configuration::CollisionHacks::CollisionHacks() :
         collision_hack_distance(10000.0f),
@@ -150,7 +150,7 @@ vegastrike_configuration::Physics::Physics() :
         max_force_multiplier(5.0f),
         max_shield_lowers_capacitance(false),
         max_torque_multiplier(0.67f),
-        minimum_mass(1e-6f), /* this is actually a bit high (1 gram, in the current, non-SI, units that VS uses ), fwiw - we may want to change this some day to, say, a miligram .*/
+        minimum_mass(1e-6f), /* this is actually a bit high (1 gram, in the current, non-SI, units that VS uses ), fwiw - we may want to change this some day to, say, a milligram .*/
         minimum_time(0.1f) {
 }
 
