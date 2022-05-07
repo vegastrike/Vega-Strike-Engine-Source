@@ -1,8 +1,8 @@
-/**
+/*
  * game_config.h
  *
- * Copyright (C) 2020-2022 Roy Falk, Stephen G. Tuggy, David Wales,
- * and other Vega Strike Contributors
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * David Wales, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -38,6 +38,8 @@
 #include <exception>
 #include <iostream>
 
+#include "vs_logging.h"
+
 namespace pt = boost::property_tree;
 
 using pt::ptree;
@@ -50,9 +52,10 @@ private:
 
     static inline std::string GetVar(std::string const &section, std::string const &name) {
         std::string const key = section + "." + name;
-        if (variables()->count(key)) {
+        if (variables()->count(key) > 0) {
             return variables()->at(key);
         }
+        VS_LOG(warning, (boost::format("GameConfig::GetVar: Key '%1%' not found in section '%2%'") % name % section));
         return DEFAULT_ERROR_VALUE;
     }
 
@@ -60,9 +63,10 @@ private:
             std::string const &sub_section,
             std::string const &name) {
         std::string const key = section + "." + sub_section + "." + name;
-        if (variables()->count(key)) {
+        if (variables()->count(key) > 0) {
             return variables()->at(key);
         }
+        VS_LOG(warning, (boost::format("GameConfig::GetVar: Key '%1%' not found in section '%2%', subsection '%3%'") % name % section % sub_section));
         return DEFAULT_ERROR_VALUE;
     }
 
@@ -96,7 +100,15 @@ inline float GameConfig::GetVariable(std::string const &section, std::string con
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return std::stof(result);
+    try {
+        return std::stof(result);
+    } catch (std::invalid_argument& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw invalid_argument: %1%") % e.what()));
+        return default_value;
+    } catch (std::out_of_range& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw out_of_range: %1%") % e.what()));
+        return default_value;
+    }
 }
 
 template<>
@@ -105,7 +117,15 @@ inline double GameConfig::GetVariable(std::string const &section, std::string co
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return std::stod(result);
+    try {
+        return std::stod(result);
+    } catch (std::invalid_argument& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw invalid_argument: %1%") % e.what()));
+        return default_value;
+    } catch (std::out_of_range& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw out_of_range: %1%") % e.what()));
+        return default_value;
+    }
 }
 
 template<>
@@ -114,7 +134,15 @@ inline int GameConfig::GetVariable(std::string const &section, std::string const
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return std::stoi(result);
+    try {
+        return std::stoi(result);
+    } catch (std::invalid_argument& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw invalid_argument: %1%") % e.what()));
+        return default_value;
+    } catch (std::out_of_range& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw out_of_range: %1%") % e.what()));
+        return default_value;
+    }
 }
 
 // With Subsection
@@ -136,7 +164,15 @@ inline float GameConfig::GetVariable(std::string const &section, std::string con
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return std::stof(result);
+    try {
+        return std::stof(result);
+    } catch (std::invalid_argument& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw invalid_argument: %1%") % e.what()));
+        return default_value;
+    } catch (std::out_of_range& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw out_of_range: %1%") % e.what()));
+        return default_value;
+    }
 }
 
 template<>
@@ -146,7 +182,15 @@ inline double GameConfig::GetVariable(std::string const &section, std::string co
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return std::stod(result);
+    try {
+        return std::stod(result);
+    } catch (std::invalid_argument& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw invalid_argument: %1%") % e.what()));
+        return default_value;
+    } catch (std::out_of_range& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw out_of_range: %1%") % e.what()));
+        return default_value;
+    }
 }
 
 template<>
@@ -156,7 +200,15 @@ inline int GameConfig::GetVariable(std::string const &section, std::string const
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
     }
-    return std::stoi(result);
+    try {
+        return std::stoi(result);
+    } catch (std::invalid_argument& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw invalid_argument: %1%") % e.what()));
+        return default_value;
+    } catch (std::out_of_range& e) {
+        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw out_of_range: %1%") % e.what()));
+        return default_value;
+    }
 }
 
 #endif // GAME_CONFIG_H
