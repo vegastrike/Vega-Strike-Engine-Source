@@ -1,8 +1,8 @@
-/**
+/*
  * configuration.cpp
  *
- * Copyright (C) 2021 Roy Falk, ministerofinformation, and David Wales
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, ministerofinformation,
+ * David Wales, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -40,6 +40,11 @@ Configuration::Configuration() {
 * behavior/range bounding is complicated/necessary-for-stability abd additional validation code is required for checking/adjusting user inputs
 */
 void Configuration::OverrideDefaultsWithUserConfiguration() {
+    ai.assist_friend_in_need = GameConfig::GetVariable("AI", "assist_friend_in_need", true);
+    ai.hull_damage_anger = GameConfig::GetVariable("AI", "HullDamageAnger", 10);
+    ai.hull_percent_for_comm = GameConfig::GetVariable("AI", "HullPercentForComm", 0.75F);
+    ai.shield_damage_anger = GameConfig::GetVariable("AI", "ShieldDamageAnger", 1);
+
     // collision_hacks substruct
     collision_hacks.collision_hack_distance = GameConfig::GetVariable("physics",
             "collision_avoidance_hack_distance",

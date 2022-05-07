@@ -1,8 +1,8 @@
-/**
+/*
  * configuration.h
  *
- * Copyright (C) 2021 Roy Falk, ministerofinformation, and David Wales
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, ministerofinformation,
+ * David Wales, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,10 +26,18 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#include <cstdint>
 #include <memory>
 
 namespace vegastrike_configuration {
 // Config Structs Declaration
+
+struct AIConfig {
+    bool assist_friend_in_need{};
+    int32_t hull_damage_anger{};
+    float hull_percent_for_comm{};
+    int32_t shield_damage_anger{};
+};
 
 // These are settings that are relevant to collision.cpp and are marked as hacks
 // or their comments are unclear or they are unclear
@@ -126,6 +134,7 @@ class Configuration {
 public:
     Configuration();
     void OverrideDefaultsWithUserConfiguration();
+    vegastrike_configuration::AIConfig ai;
     vegastrike_configuration::CollisionHacks collision_hacks;
     vegastrike_configuration::Computer computer;
     vegastrike_configuration::Fuel fuel;

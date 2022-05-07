@@ -1,4 +1,4 @@
-/**
+/*
  * damageable.cpp
  *
  * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and
@@ -30,7 +30,6 @@
 #include "configuration/game_config.h"
 #include "vs_globals.h"
 #include "configxml.h"
-#include "gfx/vec.h"
 #include "lin_time.h"
 #include "damage.h"
 #include "unit_generic.h"
@@ -40,9 +39,9 @@
 #include "pilot.h"
 #include "ai/comm_ai.h"
 #include "gfx/mesh.h"
-#include "resource/resource.h"
 
 #include <algorithm>
+#include "configuration/configuration.h"
 
 // TODO: make GameConfig support sub sections
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/358
@@ -115,11 +114,6 @@ void Damageable::ApplyDamage(const Vector &pnt,
     const Damageable *const_damagable = static_cast<const Damageable *>(this);
     Unit *unit = static_cast<Unit *>(this);
 
-    static float hull_percent_for_comm = GameConfig::GetVariable("AI", "HullPercentForComm", 0.75f);
-    static int shield_damage_anger = GameConfig::GetVariable("AI", "ShieldDamageAnger", 1);
-    static int hull_damage_anger = GameConfig::GetVariable("AI", "HullDamageAnger", 10);
-    static bool assist_ally_in_need =
-            GameConfig::GetVariable("AI", "assist_friend_in_need", true);
     static float nebula_shields = GameConfig::GetVariable("physics", "nebula_shield_recharge", 0.5f);
     //We also do the following lock on client side in order not to display shield hits
     static bool no_dock_damage = GameConfig::GetVariable("physics", "no_damage_to_docked_ships", true);
@@ -166,7 +160,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Anger Management
         float inflicted_armor_damage = inflicted_damage.inflicted_damage_by_layer[1];
-        int anger = inflicted_armor_damage ? hull_damage_anger : shield_damage_anger;
+        int anger = inflicted_armor_damage ? configuration()->ai.hull_damage_anger : configuration()->ai.shield_damage_anger;
 
         // If we damage the armor, we do this 10 times by default
         for (int i = 0; i < anger; ++i) {
@@ -310,8 +304,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Only happens if we crossed the threshold in this attack
-    if (previous_hull_percent >= hull_percent_for_comm &&
-            GetHullPercent() < hull_percent_for_comm &&
+    if (previous_hull_percent >= configuration()->ai.hull_percent_for_comm &&
+            GetHullPercent() < configuration()->ai.hull_percent_for_comm &&
             (shooter_is_player || shot_at_is_player)) {
         Unit *computer_ai = nullptr;
         Unit *player = nullptr;
@@ -332,7 +326,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
                     ai_is_unit && player_is_unit) {
                 unsigned char gender;
                 vector<Animation *> *anim = computer_ai->pilot->getCommFaces(gender);
-                if (shooter_is_player && assist_ally_in_need) {
+                if (shooter_is_player && configuration()->ai.assist_friend_in_need) {
                     AllUnitsCloseAndEngage(player, computer_ai->faction);
                 }
                 if (GetHullPercent() > 0 || !shooter_cockpit) {
