@@ -1,7 +1,7 @@
-/**
+/*
  * game_config.cpp
  *
- * Copyright (C) 2020-2022 Roy Falk, Stephen G. Tuggy, David Wales,
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, David Wales,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -51,6 +51,68 @@ void GameConfig::LoadGameConfig(const std::string &filename) {
             (*variables())[key] = value;
         }
     }
+}
+
+std::string GameConfig::GetEscapedString(const std::string &section,
+        const std::string &name,
+        const std::string &default_value) {
+    std::string temp = GetVar(section, name);
+    if (temp == DEFAULT_ERROR_VALUE) {
+        return default_value;
+    }
+    return EscapedString(temp);
+}
+
+std::string GameConfig::GetEscapedString(const std::string &section,
+        const std::string &sub_section,
+        const std::string &name,
+        const std::string &default_value) {
+    std::string temp = GetVar(section, sub_section, name);
+    if (temp == DEFAULT_ERROR_VALUE) {
+        return default_value;
+    }
+    return EscapedString(temp);
+}
+
+std::string GameConfig::EscapedString(const std::string &input) {
+    std::string rv;
+    std::string::size_type rp = 0;
+    std::string::size_type ip = 0;
+    std::string::size_type n = input.length();
+    for (; rp < n; ++rp) {
+        switch (input.at(rp)) {
+            case '\\':
+                if ((rp > 0) && (input.at(rp - 1) == '\\')) {
+                    rv[ip++] = '\\';
+                }
+                break;
+            case 'n':
+                if ((rp > 0) && (input.at(rp - 1) == '\\')) {
+                    rv[ip++] = '\n';
+                } else {
+                    rv[ip++] = 'n';
+                }
+                break;
+            case 'r':
+                if ((rp > 0) && (input.at(rp - 1) == '\\')) {
+                    rv[ip++] = '\r';
+                } else {
+                    rv[ip++] = 'r';
+                }
+                break;
+            case 't':
+                if ((rp > 0) && (input.at(rp - 1) == '\\')) {
+                    rv[ip++] = '\t';
+                } else {
+                    rv[ip++] = 't';
+                }
+                break;
+            default:
+                rv[ip++] = input.at(rp);
+                break;
+        }
+    }
+    return rv;
 }
 
 std::shared_ptr<std::map<std::string, std::string>> GameConfig::variables() {

@@ -70,6 +70,8 @@ private:
         return DEFAULT_ERROR_VALUE;
     }
 
+    static std::string EscapedString(const std::string const& input);
+
     static std::shared_ptr<std::map<std::string, std::string>> variables();
 
 public:
@@ -80,6 +82,25 @@ public:
     template<class T>
     static inline T GetVariable(std::string const &section, std::string const &sub_section,
             std::string const &name, T default_value) = delete;
+
+    static std::string GetEscapedString(std::string const &section, std::string const& name, std::string const& default_value);
+    static std::string GetEscapedString(std::string const &section, std::string const& sub_section, std::string const& name, std::string const& default_value);
+
+    static inline std::string GetString(std::string const &section, std::string const& name, std::string const& default_value) {
+        std::string result = GetVar(section, name);
+        if (result == DEFAULT_ERROR_VALUE) {
+            return default_value;
+        }
+        return result;
+    }
+
+    static inline std::string GetString(std::string const &section, std::string const& sub_section, std::string const& name, std::string const& default_value) {
+        std::string result = GetVar(section, sub_section, name);
+        if (result == DEFAULT_ERROR_VALUE) {
+            return default_value;
+        }
+        return result;
+    }
 
 };
 

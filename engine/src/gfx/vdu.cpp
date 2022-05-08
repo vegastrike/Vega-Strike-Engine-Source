@@ -1,10 +1,8 @@
-/**
+/*
  * vdu.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- *  contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -40,10 +38,8 @@
 #include "cmd/images.h"
 #include "cmd/planet.h"
 #include "cmd/beam.h"
-#include "config_xml.h"
 #include "xml_support.h"
 #include "gfx/animation.h"
-#include "gfx/vsimage.h"
 #include "galaxy_gen.h"
 #include "universe_util.h"
 #include "vsfilesystem.h"
@@ -51,6 +47,7 @@
 #include "universe.h"
 #include "mount_size.h"
 #include "weapon_info.h"
+#include "configuration/configuration.h"
 
 template<typename T>
 inline T mymin(T a, T b) {
@@ -375,22 +372,10 @@ static void DrawShield(float fs,
             {innershield, middleshield, outershield},
             {innershield, middleshield, outershield}
     };
-    static bool do_shield_fade =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "shield_vdu_fade", "true"));
+    float shthresh[3] = { configuration()->graphics.hud.shield_vdu_thresh[0], configuration()->graphics.hud.shield_vdu_thresh[1], configuration()->graphics.hud.shield_vdu_thresh[2] };
 
-    static float shthresh[3] = {
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "hud",
-                    "shield_vdu_thresh0",
-                    do_shield_fade ? "0" : ".25")),
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "hud",
-                    "shield_vdu_thresh1",
-                    do_shield_fade ? ".33" : ".50")),
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "hud",
-                    "shield_vdu_thresh2",
-                    do_shield_fade ? ".66" : ".75"))
-    };                                                                                                                    //PM me if you don't know why I did this.
     float shtrans[3] = {1.0f, 1.0f, 1.0f};
-    if (do_shield_fade) {
+    if (configuration()->graphics.hud.shield_vdu_fade) {
         shcolor[0][0].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[0]) / (shthresh[1] - shthresh[0]) * shtrans[0]));
         shcolor[0][1].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[1]) / (shthresh[2] - shthresh[1]) * shtrans[1]));
         shcolor[0][2].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[2]) / (1.0f - shthresh[2]) * shtrans[2]));
