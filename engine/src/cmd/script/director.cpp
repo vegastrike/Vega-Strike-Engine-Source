@@ -143,7 +143,7 @@ void Mission::DirectorShipDestroyed(Unit *unit) {
             if (order) {
                 fg->orderlist = order->getOrderList();
             }
-            CreateFlightgroup cf;
+            CreateFlightgroup cf{};
             cf.fg = fg;
             cf.unittype = CreateFlightgroup::UNIT;
             cf.fg->pos = unit->Position();
