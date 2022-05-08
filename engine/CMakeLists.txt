@@ -1705,26 +1705,28 @@ IF (USE_GTEST)
 
     SET(TEST_NAME ${PROJECT_NAME}_tests)
 
-ADD_EXECUTABLE(
-    ${TEST_NAME}
-    src/cmd/tests/csv_tests.cpp
-    src/configuration/tests/configuration_tests.cpp
-    src/damage/tests/health_tests.cpp
-    src/damage/tests/layer_tests.cpp
-    src/damage/tests/object_tests.cpp
-)
+    ADD_EXECUTABLE(
+        ${TEST_NAME}
+        src/cmd/tests/csv_tests.cpp
+        src/configuration/tests/configuration_tests.cpp
+        src/damage/tests/health_tests.cpp
+        src/damage/tests/layer_tests.cpp
+        src/damage/tests/object_tests.cpp
+    )
 
-ADD_LIBRARY(vegastrike-testing
-    ${LIBCONFIG}
-    ${LIBDAMAGE}
-    ${LIBRESOURCE}
-    ${LIBCMD_SOURCES}
-)
+    ADD_LIBRARY(vegastrike-testing
+        ${LIBCONFIG}
+        ${LIBDAMAGE}
+        ${LIBRESOURCE}
+        ${LIBCMD_SOURCES}
+        ${LIBVS_LOGGING}
+    )
 
     TARGET_LINK_LIBRARIES(
         ${TEST_NAME}
         gtest_main
         vegastrike-testing
+        ${Boost_LIBRARIES}
     )
 
     FILE(
