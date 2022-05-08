@@ -70,7 +70,7 @@ private:
         return DEFAULT_ERROR_VALUE;
     }
 
-    static std::string EscapedString(const std::string const& input);
+    static std::string EscapedString(const std::string& input);
 
     static std::shared_ptr<std::map<std::string, std::string>> variables();
 
