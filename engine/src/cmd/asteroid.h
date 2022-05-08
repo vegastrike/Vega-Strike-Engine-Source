@@ -41,8 +41,8 @@ private:
 public:
     Asteroid(const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01);
 
-    enum _UnitType isUnit() const {
-        return _UnitType::asteroid;
+    enum Vega_UnitType isUnit() const {
+        return Vega_UnitType::asteroid;
     }
 
 private:

@@ -886,7 +886,7 @@ void createObjects(std::vector<std::string> &fighter0name,
                                                                 grav->rSize() / 4),
                                                         vsrandom.uniformExc(-grav->rSize() / 4,
                                                                 grav->rSize() / 4));
-                                        if (grav->isUnit() != _UnitType::planet) {
+                                        if (grav->isUnit() != Vega_UnitType::planet) {
                                             newpos = UniverseUtil::SafeEntrancePoint(newpos);
                                         }
                                         cp->savegame->SetPlayerLocation(newpos);
@@ -983,12 +983,12 @@ void createObjects(std::vector<std::string> &fighter0name,
 void AddUnitToSystem(const SavedUnits *su) {
     Unit *un = NULL;
     switch (su->type) {
-        case _UnitType::enhancement:
+        case Vega_UnitType::enhancement:
             un =
                     new Enhancement(su->filename.get().c_str(), FactionUtil::GetFactionIndex(su->faction), string(""));
             un->SetPosition(QVector(0, 0, 0));
             break;
-        case _UnitType::unit:
+        case Vega_UnitType::unit:
         default:
             un = new Unit(su->filename.get().c_str(), false, FactionUtil::GetFactionIndex(su->faction));
             un->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));

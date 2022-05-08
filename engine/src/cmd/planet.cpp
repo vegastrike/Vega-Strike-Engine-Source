@@ -801,7 +801,7 @@ Unit *Planet::beginElement(QVector x,
     if (level > 2) {
         un_iter satiterator = satellites.createIterator();
         assert(*satiterator);
-        if ((*satiterator)->isUnit() == _UnitType::planet) {
+        if ((*satiterator)->isUnit() == Vega_UnitType::planet) {
             un = ((Planet *) (*satiterator))->beginElement(x, y, vely, rotvel, pos,
                     gravity, radius,
                     filename, technique, unitname,
@@ -883,7 +883,7 @@ Planet *Planet::GetTopPlanet(int level) {
     if (level > 2) {
         un_iter satiterator = satellites.createIterator();
         assert(*satiterator);
-        if ((*satiterator)->isUnit() == _UnitType::planet) {
+        if ((*satiterator)->isUnit() == Vega_UnitType::planet) {
             return ((Planet *) (*satiterator))->GetTopPlanet(level - 1);
         } else {
             VS_LOG(error, "Planets are unable to orbit around units");

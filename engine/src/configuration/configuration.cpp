@@ -36,7 +36,7 @@ Configuration::Configuration() {
 
 /* Override the default value(provided by constructor) with the value from the user specified configuration file, if any.
 * Behavior is undefined and erroneous if no default is provided in the constructor!
-* Descriptions/invariants for each variable are/will be provided in the header file and are not repeated here, except where 
+* Descriptions/invariants for each variable are/will be provided in the header file and are not repeated here, except where
 * behavior/range bounding is complicated/necessary-for-stability abd additional validation code is required for checking/adjusting user inputs
 */
 void Configuration::OverrideDefaultsWithUserConfiguration() {
@@ -205,6 +205,8 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics.minimum_mass = GameConfig::GetVariable("physics", "minimum_physics_object_mass", physics.minimum_mass);
     physics.minimum_time =
             GameConfig::GetVariable("physics", "minimum_time_between_recorded_player_collisions", physics.minimum_time);
+    physics.default_shield_tightness = GameConfig::GetVariable("physics", "default_shield_tightness", 0.0F);
+    physics.does_missile_bounce = GameConfig::GetVariable("physics", "missile_bounce", false);
 
     // warp substruct
     warp.insystem_jump_cost = GameConfig::GetVariable("physics", "insystem_jump_cost", warp.insystem_jump_cost);

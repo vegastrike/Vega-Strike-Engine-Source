@@ -59,7 +59,7 @@ void MissileEffect::ApplyDamage(Unit *smaller) {
     float smaller_rsize = smaller->rSize();
     float distance = norm.Magnitude() - smaller_rsize;            // no better check than the bounding sphere for now
     if (distance
-            < radius) {                                   // "smaller->isUnit() != _UnitType::missile &&" was removed - why disable antimissiles?
+            < radius) {                                   // "smaller->isUnit() != Vega_UnitType::missile &&" was removed - why disable antimissiles?
         if (distance < 0) {
             distance =
                     0.f;

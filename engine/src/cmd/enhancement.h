@@ -46,8 +46,8 @@ public:
 protected:
     std::string filename;
 
-    enum _UnitType isUnit() const {
-        return _UnitType::enhancement;
+    enum Vega_UnitType isUnit() const {
+        return Vega_UnitType::enhancement;
     }
 
 protected:

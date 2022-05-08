@@ -156,7 +156,7 @@ bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool loc
             || target->rSize() < computer.radar.mintargetsize) {
         Flightgroup *fg = target->getFlightgroup();
         if ((target->rSize() < capship_size || (!cap)) && (fg == NULL ? true : fg->name != "Base")) {
-            return target->isUnit() == _UnitType::planet;
+            return target->isUnit() == Vega_UnitType::planet;
         }
     }
     return true;
@@ -594,7 +594,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
     if (!isSubUnit() && update_collide_queue && (!Destroyed())) {
         //only do it in Unit::CollideAll UpdateCollideQueue();
     }
-    if (isUnit() == _UnitType::planet) {
+    if (isUnit() == Vega_UnitType::planet) {
         radial_size = tmpmax(tmpmax(corner_max.i, corner_max.j), corner_max.k);
     }
 }
@@ -1760,7 +1760,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         un->Kill();
     }
 
-    //if (isUnit() != _UnitType::missile) {
+    //if (isUnit() != Vega_UnitType::missile) {
     //    VS_LOG(info, (boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get()));
     //}
 
@@ -2064,7 +2064,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         Vector p, q, r;
         this->GetOrientation(p, q, r);
         this->pImage->pExplosion->SetOrientation(p, q, r);
-        if (this->isUnit() != _UnitType::missile) {
+        if (this->isUnit() != Vega_UnitType::missile) {
             _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(this->Position(),
                     this->MaxShieldVal(),
                     0,
@@ -2089,7 +2089,7 @@ bool Unit::Explode(bool drawit, float timeit) {
 
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
-            if (this->isUnit() == _UnitType::unit) {
+            if (this->isUnit() == Vega_UnitType::unit) {
                 if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
                     static string shockani(game_options()->shockwave_animation);
                     static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
@@ -2124,7 +2124,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                         static float lasttime = 0;
                         float newtime = getNewTime();
                         if (newtime - lasttime > game_options()->time_between_music
-                                || (_Universe->isPlayerStarship(this) && this->isUnit() != _UnitType::missile
+                                || (_Universe->isPlayerStarship(this) && this->isUnit() != Vega_UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
@@ -2142,7 +2142,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         }
     }
     bool timealldone =
-            (this->pImage->timeexplode > game_options()->debris_time || this->isUnit() == _UnitType::missile
+            (this->pImage->timeexplode > game_options()->debris_time || this->isUnit() == Vega_UnitType::missile
                     || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty());
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -5115,7 +5115,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     Unit *target = Unit::Target();
     bool increase_locking = false;
     if (target && cloaking < 0 /*-1 or -32768*/) {
-        if (target->isUnit() != _UnitType::planet) {
+        if (target->isUnit() != Vega_UnitType::planet) {
             Vector TargetPos(InvTransform(cumulative_transformation_matrix, (target->Position())).Cast());
             dist_sqr_to_target = TargetPos.MagnitudeSquared();
             TargetPos.Normalize();
@@ -5458,7 +5458,7 @@ extern string getCargoUnitName(const char *name);
 
 void Unit::UpgradeInterface(Unit *baseun) {
     string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
-    if (baseun->isUnit() != _UnitType::planet) {
+    if (baseun->isUnit() != Vega_UnitType::planet) {
         basename = baseun->name;
     }
     BaseUtil::LoadBaseInterfaceAtDock(basename, baseun, this);
@@ -5553,7 +5553,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
 
                 this->SetCurPosition(pos);
                 ActivateAnimation(jumpnode);
-                if (jumpnode->isUnit() == _UnitType::unit) {
+                if (jumpnode->isUnit() == Vega_UnitType::unit) {
                     QVector Offset(pos.i < 0 ? 1 : -1,
                             pos.j < 0 ? 1 : -1,
                             pos.k < 0 ? 1 : -1);
@@ -5570,7 +5570,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             for (unsigned int jjj = 0; jjj < 2; ++jjj) {
                 for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
                         (tester = *i) != NULL; ++i) {
-                    if (tester->isUnit() == _UnitType::unit && tester != this) {
+                    if (tester->isUnit() == Vega_UnitType::unit && tester != this) {
                         if ((this->LocalPosition() - tester->LocalPosition()).Magnitude()
                                 < this->rSize() + tester->rSize()) {
                             this->SetCurPosition(this->LocalPosition() + this->cumulative_transformation_matrix.getR()

@@ -243,15 +243,15 @@ bool Unit::InsideCollideTree(Unit *smaller,
     un_iter i;
     static float
             rsizelim = XMLSupport::parse_float(vs_config->getVariable("physics", "smallest_subunit_to_collide", ".2"));
-    _UnitType bigtype = bigasteroid ? _UnitType::asteroid : bigger->isUnit();
-    _UnitType smalltype = smallasteroid ? _UnitType::asteroid : smaller->isUnit();
+    Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->isUnit();
+    Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->isUnit();
     if (bigger->SubUnits.empty() == false
-            && (bigger->graphicOptions.RecurseIntoSubUnitsOnCollision == true || bigtype == _UnitType::asteroid)) {
+            && (bigger->graphicOptions.RecurseIntoSubUnitsOnCollision == true || bigtype == Vega_UnitType::asteroid)) {
         i = bigger->getSubUnits();
         float rad = smaller->rSize();
         for (Unit *un; (un = *i); ++i) {
             float subrad = un->rSize();
-            if ((bigtype != _UnitType::asteroid) && (subrad / bigger->rSize() < rsizelim)) {
+            if ((bigtype != Vega_UnitType::asteroid) && (subrad / bigger->rSize() < rsizelim)) {
                 break;
             }
             if ((un->Position() - smaller->Position()).Magnitude() <= subrad + rad) {
@@ -260,20 +260,20 @@ bool Unit::InsideCollideTree(Unit *smaller,
                         bigNormal,
                         smallpos,
                         smallNormal,
-                        bigtype == _UnitType::asteroid,
-                        smalltype == _UnitType::asteroid))) {
+                        bigtype == Vega_UnitType::asteroid,
+                        smalltype == Vega_UnitType::asteroid))) {
                     return true;
                 }
             }
         }
     }
     if (smaller->SubUnits.empty() == false
-            && (smaller->graphicOptions.RecurseIntoSubUnitsOnCollision == true || smalltype == _UnitType::asteroid)) {
+            && (smaller->graphicOptions.RecurseIntoSubUnitsOnCollision == true || smalltype == Vega_UnitType::asteroid)) {
         i = smaller->getSubUnits();
         float rad = bigger->rSize();
         for (Unit *un; (un = *i); ++i) {
             float subrad = un->rSize();
-            if ((smalltype != _UnitType::asteroid) && (subrad / smaller->rSize() < rsizelim)) {
+            if ((smalltype != Vega_UnitType::asteroid) && (subrad / smaller->rSize() < rsizelim)) {
                 break;
             }
             if ((un->Position() - bigger->Position()).Magnitude() <= subrad + rad) {
@@ -282,8 +282,8 @@ bool Unit::InsideCollideTree(Unit *smaller,
                         bigNormal,
                         smallpos,
                         smallNormal,
-                        bigtype == _UnitType::asteroid,
-                        smalltype == _UnitType::asteroid))) {
+                        bigtype == Vega_UnitType::asteroid,
+                        smalltype == Vega_UnitType::asteroid))) {
                     return true;
                 }
             }
@@ -303,23 +303,23 @@ bool Unit::Collide(Unit *target) {
     if ((Position() - target->Position()).MagnitudeSquared() > mysqr(radial_size + target->radial_size)) {
         return false;
     }
-    _UnitType targetisUnit = target->isUnit();
-    _UnitType thisisUnit = this->isUnit();
+    Vega_UnitType targetisUnit = target->isUnit();
+    Vega_UnitType thisisUnit = this->isUnit();
     static float
             NEBULA_SPACE_DRAG = XMLSupport::parse_float(vs_config->getVariable("physics", "nebula_space_drag", "0.01"));
-    if (targetisUnit == _UnitType::nebula) {
+    if (targetisUnit == Vega_UnitType::nebula) {
         //why? why not?
         this->Velocity *= (1 - NEBULA_SPACE_DRAG);
     }
     if (target == this
-            || ((targetisUnit != _UnitType::nebula
-                    && thisisUnit != _UnitType::nebula)
+            || ((targetisUnit != Vega_UnitType::nebula
+                    && thisisUnit != Vega_UnitType::nebula)
                     && (owner == target || target->owner == this
                             || (owner != NULL
                                     && target->owner == owner)))) {
         return false;
     }
-    if (targetisUnit == _UnitType::asteroid && thisisUnit == _UnitType::asteroid) {
+    if (targetisUnit == Vega_UnitType::asteroid && thisisUnit == Vega_UnitType::asteroid) {
         return false;
     }
     std::multimap<Unit *, Unit *> *last_collisions = &_Universe->activeStarSystem()->last_collisions;
@@ -562,7 +562,7 @@ float Unit::querySphereNoRecurse(const QVector &start, const QVector &end, float
         if ((meshdata[i]->Position().Magnitude() > this->rSize()) || (meshdata[i]->rSize() > 30 + this->rSize())) {
             continue;
         }
-        if (isUnit() == _UnitType::planet && i > 0) {
+        if (isUnit() == Vega_UnitType::planet && i > 0) {
             break;
         }
         double a, b, c;

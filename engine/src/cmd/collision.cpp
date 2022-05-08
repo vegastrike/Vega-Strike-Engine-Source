@@ -52,21 +52,21 @@ Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) 
 // This function handles the initial reaction of the unit to hitting the other unit
 // Note: I'm (@royfalk) changing the expected behavior here
 // Return value indicates whether to continue processing
-/*_UnitType::unit,
-_UnitType::planet,
-_UnitType::building,
-_UnitType::nebula,
-_UnitType::asteroid,
-_UnitType::enhancement,
-_UnitType::missile*/
+/*Vega_UnitType::unit,
+Vega_UnitType::planet,
+Vega_UnitType::building,
+Vega_UnitType::nebula,
+Vega_UnitType::asteroid,
+Vega_UnitType::enhancement,
+Vega_UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
     // Collision with a nebula does nothing
-    if (other_unit->isUnit() == _UnitType::nebula) {
+    if (other_unit->isUnit() == Vega_UnitType::nebula) {
         return;
     }
 
     // Collision with a enhancement improves your shield apparently
-    if (other_unit->isUnit() == _UnitType::enhancement) {
+    if (other_unit->isUnit() == Vega_UnitType::enhancement) {
         apply_force = true;
         return;
     }
@@ -83,39 +83,39 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
 
     switch (unit_type) {
         // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-        case _UnitType::missile:
+        case Vega_UnitType::missile:
             // Missile should explode when killed
             // If not, uncomment this
             //((Missile*)unit)->Discharge();
             unit->Kill();
             return;
 
-        case _UnitType::asteroid:
+        case Vega_UnitType::asteroid:
             apply_force = true;
             deal_damage = true;
             return;
 
             // Planets and Nebulas can't be killed right now
-        case _UnitType::planet:
-        case _UnitType::nebula:
+        case Vega_UnitType::planet:
+        case Vega_UnitType::nebula:
             return;
 
             // Buildings should not calculate actual damage
-        case _UnitType::building:
+        case Vega_UnitType::building:
             return;
 
             // Units (ships) should calculate actual damage
-        case _UnitType::unit:
+        case Vega_UnitType::unit:
             apply_force = true;
             deal_damage = true;
             return;
 
             // An enhancement upgrades the shields of the unit it collided with.
             // TODO: refactor this.
-        case _UnitType::enhancement:
+        case Vega_UnitType::enhancement:
             // We can't enhance rocks
-            if (other_unit->isUnit() == _UnitType::asteroid ||
-                    other_unit->isUnit() == _UnitType::planet) {
+            if (other_unit->isUnit() == Vega_UnitType::asteroid ||
+                    other_unit->isUnit() == Vega_UnitType::planet) {
                 apply_force = true;
                 return;
             }
@@ -140,7 +140,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             string fac( FactionUtil::GetFaction( unit->faction ) );*/
             unit->Kill();
 
-            //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
+            //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), Vega_UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
             apply_force = true;
             return;
     }

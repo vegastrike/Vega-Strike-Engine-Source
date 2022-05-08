@@ -65,8 +65,8 @@ public:
 
 public:
 
-    enum _UnitType isUnit() const {
-        return _UnitType::building;
+    enum Vega_UnitType isUnit() const {
+        return Vega_UnitType::building;
     }
 
     virtual void UpdatePhysics2(const Transformation &trans,

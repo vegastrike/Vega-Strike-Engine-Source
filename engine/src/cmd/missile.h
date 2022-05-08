@@ -81,8 +81,8 @@ public:
     void Discharge();
     float ExplosionRadius();
 
-    enum _UnitType isUnit() const {
-        return _UnitType::missile;
+    enum Vega_UnitType isUnit() const {
+        return Vega_UnitType::missile;
     }
 
     virtual void UpdatePhysics2(const Transformation &trans,

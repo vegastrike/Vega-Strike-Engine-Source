@@ -250,7 +250,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
                 VS_LOG(debug, "Not auto ejecting player");
             }
         } else {
-            if (unit->isUnit() == _UnitType::unit
+            if (unit->isUnit() == Vega_UnitType::unit
                     && rand() < (RAND_MAX * auto_eject_percent)) {
                 VS_LOG(debug, "Auto ejecting NPC");
                 unit->EjectCargo((unsigned int) -1);
@@ -320,8 +320,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
         if (computer_ai && player) {
             Order *computer_ai_state = computer_ai->getAIState();
             Order *player_ai_state = player->getAIState();
-            bool ai_is_unit = computer_ai->isUnit() == _UnitType::unit;
-            bool player_is_unit = player->isUnit() == _UnitType::unit;
+            bool ai_is_unit = computer_ai->isUnit() == Vega_UnitType::unit;
+            bool player_is_unit = player->isUnit() == Vega_UnitType::unit;
             if (computer_ai && player && computer_ai_state && player_ai_state &&
                     ai_is_unit && player_is_unit) {
                 unsigned char gender;

@@ -211,9 +211,8 @@ struct Physics {
     float minimum_mass;
     float minimum_time;             // between recorded player collisions
 
-
-    // Disabled bouncing missile option. Missiles always explode when colliding with something.
-    //static bool does_missile_bounce = GameConfig::GetVariable( "physics", "missile_bounce", false);
+    bool does_missile_bounce{};
+    float default_shield_tightness{};
 
     Physics();
 };

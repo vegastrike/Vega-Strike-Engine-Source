@@ -198,7 +198,7 @@ Unit *DockToSavedBases(int playernum, QVector &safevec) {
         }
     }
     if (closestUnit) {
-        if (UnitUtil::getSignificantDistance(plr, closestUnit) > 0 && closestUnit->isUnit() != _UnitType::planet) {
+        if (UnitUtil::getSignificantDistance(plr, closestUnit) > 0 && closestUnit->isUnit() != Vega_UnitType::planet) {
             dock_position = closestUnit->Position();
         }
         dock_position = UniverseUtil::SafeEntrancePoint(dock_position, plr->rSize());

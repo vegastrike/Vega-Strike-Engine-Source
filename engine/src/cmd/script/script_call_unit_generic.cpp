@@ -186,11 +186,11 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         }
         Unit *my_unit = NULL;
         if (mode == SCRIPT_RUN) {
-            _UnitType clstyp = _UnitType::unit;
+            Vega_UnitType clstyp = Vega_UnitType::unit;
             if (method_id == CMT_UNIT_launchJumppoint || method_id == CMT_UNIT_launchPlanet) {
-                clstyp = _UnitType::planet;
+                clstyp = Vega_UnitType::planet;
             } else if (method_id == CMT_UNIT_launchNebula) {
-                clstyp = _UnitType::nebula;
+                clstyp = Vega_UnitType::nebula;
             }
             string name_string = *((string *) name_vi->object);
             string faction_string = *((string *) faction_vi->object);
@@ -1001,7 +1001,7 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
     }
     for (u = 0; u < fg->nr_ships; u++) {
         Unit *my_unit;
-        if (type == _UnitType::planet) {
+        if (type == Vega_UnitType::planet) {
             float radius = 1;
             char *tex = strdup(fg->fg->type.c_str());
             char *nam = strdup(fg->fg->type.c_str());
@@ -1032,10 +1032,10 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
             free(tex);
             free(nam);
             free(citylights);
-        } else if (type == _UnitType::nebula) {
+        } else if (type == Vega_UnitType::nebula) {
             my_unit = new Nebula(
                     fg->fg->type.c_str(), false, faction_nr, fg->fg, u + fg->fg->nr_ships - fg->nr_ships);
-        } else if (type == _UnitType::asteroid) {
+        } else if (type == Vega_UnitType::asteroid) {
             my_unit = new Asteroid(
                     fg->fg->type.c_str(), faction_nr, fg->fg, u + fg->fg->nr_ships - fg->nr_ships, .01);
         } else {
@@ -1053,7 +1053,7 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
         pox.j = fg->fg->pos.j + u * fg_radius * 3;
         pox.k = fg->fg->pos.k + u * fg_radius * 3;
         my_unit->SetPosAndCumPos(pox);
-        if (type == _UnitType::asteroid || type == _UnitType::nebula) {
+        if (type == Vega_UnitType::asteroid || type == Vega_UnitType::nebula) {
             my_unit->PrimeOrders();
         } else {
             my_unit->LoadAIScript(fg->fg->ainame);

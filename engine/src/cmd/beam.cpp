@@ -448,16 +448,16 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
 
     QVector direction(this->direction.Cast());
     QVector end(center + direction.Scale(curlength));
-    enum _UnitType type = target->isUnit();
-    if (target == owner || type == _UnitType::nebula || type == _UnitType::asteroid) {
+    enum Vega_UnitType type = target->isUnit();
+    if (target == owner || type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
         static bool collideroids =
                 XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
-        if (type != _UnitType::asteroid || (!collideroids)) {
+        if (type != Vega_UnitType::asteroid || (!collideroids)) {
             return false;
         }
     }
     static bool collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics", "JumpWeaponCollision", "false"));
-    if (type == _UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
+    if (type == Vega_UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
         return false;
     }
     //A bunch of needed config variables - its best to have them here, so that they're loaded the

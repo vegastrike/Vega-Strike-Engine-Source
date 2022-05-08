@@ -321,7 +321,7 @@ bool ContinuousTerrain::checkInvScale(double &pos, double campos, float size) {
 
 void ContinuousTerrain::Collide(Unit *un, Matrix t) {
     Matrix transform;
-    if (un->isUnit() == _UnitType::building) {
+    if (un->isUnit() == Vega_UnitType::building) {
         return;
     }
     ScaleMatrix(t, Scales);

@@ -631,7 +631,7 @@ void StarSystem::AddUnit(Unit *unit) {
     if (stats.system_faction == FactionUtil::GetNeutralFaction()) {
         stats.CheckVitals(this);
     }
-    if (unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == _UnitType::asteroid) {
+    if (unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == Vega_UnitType::asteroid) {
         if (!gravitationalUnits().contains(unit)) {
             gravitationalUnits().prepend(unit);
         }
@@ -1434,9 +1434,9 @@ void StarSystem::UpdateMissiles() {
             for (un_iter ui = getUnitList().createIterator();
                     NULL != (un = (*ui));
                     ++ui) {
-                enum _UnitType type = un->isUnit();
+                enum Vega_UnitType type = un->isUnit();
                 if (collideroids || type
-                        != _UnitType::asteroid) {           // could check for more, unless someone wants planet-killer missiles, but what it would change?
+                        != Vega_UnitType::asteroid) {           // could check for more, unless someone wants planet-killer missiles, but what it would change?
                     discharged_missiles.back()->ApplyDamage(un);
                 }
             }

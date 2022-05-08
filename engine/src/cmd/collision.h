@@ -46,7 +46,7 @@ class Collision {
     // Stage 1
     Cockpit *cockpit;
     Unit *unit;
-    _UnitType unit_type;
+    Vega_UnitType unit_type;
     bool is_player_ship;
     const QVector &location;
     const Vector &normal;

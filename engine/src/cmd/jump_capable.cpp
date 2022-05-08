@@ -143,7 +143,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         failuremessage = err;
         return false;
     }
-    if (target->isUnit() == _UnitType::planet) {
+    if (target->isUnit() == Vega_UnitType::planet) {
         const Unit *targ = *(target->viewSubUnits());
         if (targ && 0 == targ->graphicOptions.FaceCamera) {
             return AutoPilotToErrorMessage(targ, ignore_energy_requirements, failuremessage, recursive_level);
@@ -197,10 +197,10 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     float totpercent = 1;
     if (totallength > 1) {
         float apt =
-                (target->isUnit() == _UnitType::planet) ? (autopilot_term_distance + target->rSize()
+                (target->isUnit() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : autopilot_term_distance;
         float aptne =
-                (target->isUnit() == _UnitType::planet) ? (atd_no_enemies + target->rSize()
+                (target->isUnit() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
                         * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
@@ -228,8 +228,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
                 static bool canflythruplanets =
                         XMLSupport::parse_bool(vs_config->getVariable("physics", "can_auto_through_planets", "true"));
-                if ((!(un->isUnit() == _UnitType::planet
-                        && canflythruplanets)) && un->isUnit() != _UnitType::nebula && (!UnitUtil::isSun(un))) {
+                if ((!(un->isUnit() == Vega_UnitType::planet
+                        && canflythruplanets)) && un->isUnit() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
                         float tdis = (start - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float nedis = (end - un->Position()).Magnitude() - unit->rSize() - un->rSize();
@@ -439,7 +439,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 continue;
             }
             float shiphack = 1;
-            if (planet->isUnit() != _UnitType::planet) {
+            if (planet->isUnit() != Vega_UnitType::planet) {
                 shiphack = def_inv_interdiction;
                 if (planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
                         && (planet->specInterdiction > 0 || count_negative_warp_units)) {
