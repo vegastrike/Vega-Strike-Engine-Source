@@ -1,10 +1,8 @@
 /*
  * director.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -94,7 +92,7 @@ void Mission::DirectorLoop() {
             VS_LOG_AND_FLUSH(fatal, "void Mission::DirectorLoop(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
-            VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+            VegaStrikeLogging::vega_logger()->FlushLogs();
         }
         throw;
     }

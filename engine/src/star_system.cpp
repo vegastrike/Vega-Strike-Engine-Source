@@ -680,7 +680,7 @@ void StarSystem::ExecuteUnitAI() {
             VS_LOG_AND_FLUSH(fatal, "void StarSystem::ExecuteUnitAI(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
-            VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+            VegaStrikeLogging::vega_logger()->FlushLogs();
         }
         throw;
     }
@@ -924,7 +924,7 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                         "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred");
                 PyErr_Print();
                 PyErr_Clear();
-                VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+                VegaStrikeLogging::vega_logger()->FlushLogs();
             }
             throw;
         }

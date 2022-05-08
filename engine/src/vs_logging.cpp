@@ -45,7 +45,7 @@ namespace VegaStrikeLogging {
 // void exitProgram(int code)
 // {
 //     Music::CleanupMuzak();
-//     VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+//     VegaStrikeLogging::vega_logger()->FlushLogs();
 //     winsys_exit(code);
 // }
 

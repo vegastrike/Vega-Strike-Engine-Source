@@ -137,7 +137,7 @@ int readCommandLineOptions(int argc, char **argv);
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
 void VSExit(int code) {
     Music::CleanupMuzak();
-    ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+    VegaStrikeLogging::vega_logger()->FlushLogs();
     winsys_exit(code);
 }
 
@@ -146,7 +146,7 @@ void cleanup(void) {
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
     VS_LOG(info, "Thank you for playing!");
-    ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+    VegaStrikeLogging::vega_logger()->FlushLogs();
     if (_Universe != NULL) {
         _Universe->WriteSaveGame(true);
     }
@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
         boost::filesystem::current_path(program_directory_path);
     }
 
-    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
+//    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
 
     CONFIGFILE = nullptr;
     mission_name[0] = '\0';
@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
         home_subdir_path = home_path;
     }
 
-    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart2(g_game.vsdebug, home_subdir_path);
+    VegaStrikeLogging::vega_logger()->InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
     if (game_options()->force_client_connect) {
@@ -392,7 +392,7 @@ int main(int argc, char *argv[]) {
     delete _Universe;
     CleanupUnitTables();
     // Just to be sure -- stephengtuggy 2020-07-27
-    VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+    VegaStrikeLogging::vega_logger()->FlushLogs();
     return 0;
 }
 
