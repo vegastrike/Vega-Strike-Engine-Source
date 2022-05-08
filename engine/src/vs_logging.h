@@ -57,11 +57,11 @@ typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend
 
 #define VS_LOG(log_level, log_message)                                               \
     do {                                                                             \
-        VegaStrikeLogging::vega_logger()->Log((log_level), (log_message));           \
+        VegaStrikeLogging::vega_logger()->Log(VegaStrikeLogging::vega_log_level::log_level, (log_message));           \
     } while (false)
 #define VS_LOG_AND_FLUSH(log_level, log_message)                                     \
     do {                                                                             \
-        VegaStrikeLogging::vega_logger()->LogAndFlush((log_level), (log_message));   \
+        VegaStrikeLogging::vega_logger()->LogAndFlush(VegaStrikeLogging::vega_log_level::log_level, (log_message));   \
     } while (false)
 
 //#define VS_LOG(log_level, log_message)                      \

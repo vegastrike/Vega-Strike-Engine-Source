@@ -99,8 +99,8 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                             "[%TimeStamp%]: %Message%",                                     /*< log record format >*/
                     boost::log::keywords::auto_flush =
                             true, /*false,*/                                                /*< whether to auto flush to the file after every line >*/
-                    boost::log::keywords::min_free_space = 2L * 1024L * 1024L
-                            * 1024L                                      /*< stop boost::log when there's only 2 GiB free space left >*/
+                    boost::log::keywords::min_free_space = 2UL * 1024UL * 1024UL
+                            * 1024UL                                      /*< stop boost::log when there's only 2 GiB free space left >*/
             );
 
 //    console_log_sink_->set_filter(boost::log::trivial::severity >= boost::log::trivial::fatal);
