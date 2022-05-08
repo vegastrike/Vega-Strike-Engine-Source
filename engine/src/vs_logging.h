@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-2022 Stephen G. Tuggy and other Vega Strike contributors.
+ * Copyright (C) 2021-2022 Daniel Horn, Stephen G. Tuggy and
+ * other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,9 +26,12 @@
 
 #include <cstdint>
 
+#include <boost/move/utility_core.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/format.hpp>
-#include <boost/log/trivial.hpp>
+//#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/sinks/sync_frontend.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/sinks/text_ostream_backend.hpp>
@@ -35,40 +39,64 @@
 
 namespace VegaStrikeLogging {
 
-typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_ostream_backend> ConsoleLogSink;
-typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_file_backend> FileLogSink;
+enum vega_log_level {
+    trace,
+    debug,
+    info,
+    info_to_console,
+    warning,
+    serious_warning,
+    error,
+    fatal
+};
 
-#define VS_LOG(log_level, log_message)                      \
-    do {                                                    \
-        BOOST_LOG_TRIVIAL(log_level) << (log_message);      \
+BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", vega_log_level)
+
+typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend> ConsoleLogSink;
+typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend> FileLogSink;
+
+#define VS_LOG(log_level, log_message)                                               \
+    do {                                                                             \
+        VegaStrikeLogging::vega_logger()->Log((log_level), (log_message));           \
     } while (false)
-#define VS_LOG_AND_FLUSH(log_level, log_message)            \
-    do {                                                    \
-        BOOST_LOG_TRIVIAL(log_level) << (log_message);      \
-        ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs(); \
+#define VS_LOG_AND_FLUSH(log_level, log_message)                                     \
+    do {                                                                             \
+        VegaStrikeLogging::vega_logger()->LogAndFlush((log_level), (log_message));   \
     } while (false)
+
+//#define VS_LOG(log_level, log_message)                      \
+//    do {                                                    \
+//        BOOST_LOG_TRIVIAL(log_level) << (log_message);      \
+//    } while (false)
+//#define VS_LOG_AND_FLUSH(log_level, log_message)            \
+//    do {                                                    \
+//        BOOST_LOG_TRIVIAL(log_level) << (log_message);      \
+//        VegaStrikeLogging::vega_logger()->FlushLogs(); \
+//    } while (false)
 
 // void exitProgram(int code);
 
 class VegaStrikeLogger {
 private:
-    static ::boost::shared_ptr<ConsoleLogSink> console_log_sink_;
-    static ::boost::shared_ptr<FileLogSink> file_log_sink_;
+    boost::log::core_ptr logging_core_;
+    boost::shared_ptr<boost::log::sources::severity_logger_mt<vega_log_level>> slg_;
+    boost::shared_ptr<ConsoleLogSink> console_log_sink_;
+    boost::shared_ptr<FileLogSink> file_log_sink_;
 
 public:
-    static void InitLoggingPart1();
-    static void InitLoggingPart2(const uint8_t debug_level, const ::boost::filesystem::path &vega_strike_home_dir);
-    static void FlushLogs();
-    // inline template<class LogLevel, class LogMessage> static void Log(LogLevel log_level, LogMessage log_message)
-    // {
-    //     BOOST_LOG_TRIVIAL(log_level) << log_message;
-    // }
-    // inline template<class LogLevel, class LogMessage> static void LogAndFlush(LogLevel log_level, LogMessage log_message)
-    // {
-    //     BOOST_LOG_TRIVIAL(log_level) << log_message;
-    //     FlushLogs();
-    // }
+    VegaStrikeLogger();
+    ~VegaStrikeLogger();
+    void InitLoggingPart2(const uint8_t debug_level, const boost::filesystem::path &vega_strike_home_dir);
+    void FlushLogs();
+    void Log(const vega_log_level level, const std::string& message);
+    void Log(const vega_log_level level, const char * message);
+    void Log(const vega_log_level level, const boost::basic_format<char>& message);
+    void LogAndFlush(const vega_log_level level, const std::string& message);
+    void LogAndFlush(const vega_log_level level, const char * message);
+    void LogAndFlush(const vega_log_level level, const boost::basic_format<char>& message);
 };
+
+static boost::shared_ptr<VegaStrikeLogger> vega_logger();
 
 } // namespace VegaStrikeLogging
 

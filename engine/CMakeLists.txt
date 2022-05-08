@@ -1726,7 +1726,8 @@ IF (USE_GTEST)
         ${TEST_NAME}
         gtest_main
         vegastrike-testing
-        ${Boost_LIBRARIES}
+        Boost::log
+        Boost::log_setup
     )
 
     FILE(
