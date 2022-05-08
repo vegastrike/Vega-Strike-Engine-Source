@@ -55,13 +55,13 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", vega_log_level)
 typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend> ConsoleLogSink;
 typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend> FileLogSink;
 
-#define VS_LOG(log_level, log_message)                                               \
-    do {                                                                             \
-        VegaStrikeLogging::vega_logger()->Log(VegaStrikeLogging::vega_log_level::log_level, (log_message));           \
+#define VS_LOG(log_level, log_message)                                                                              \
+    do {                                                                                                            \
+        VegaStrikeLogging::vega_logger()->Log(VegaStrikeLogging::vega_log_level::log_level, (log_message));         \
     } while (false)
-#define VS_LOG_AND_FLUSH(log_level, log_message)                                     \
-    do {                                                                             \
-        VegaStrikeLogging::vega_logger()->LogAndFlush(VegaStrikeLogging::vega_log_level::log_level, (log_message));   \
+#define VS_LOG_AND_FLUSH(log_level, log_message)                                                                    \
+    do {                                                                                                            \
+        VegaStrikeLogging::vega_logger()->LogAndFlush(VegaStrikeLogging::vega_log_level::log_level, (log_message)); \
     } while (false)
 
 //#define VS_LOG(log_level, log_message)                      \
@@ -96,7 +96,7 @@ public:
     void LogAndFlush(const vega_log_level level, const boost::basic_format<char>& message);
 };
 
-static boost::shared_ptr<VegaStrikeLogger> vega_logger();
+extern boost::shared_ptr<VegaStrikeLogger> vega_logger();
 
 } // namespace VegaStrikeLogging
 

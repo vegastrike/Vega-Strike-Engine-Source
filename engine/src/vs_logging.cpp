@@ -189,4 +189,5 @@ boost::shared_ptr<VegaStrikeLogger> vega_logger() {
     static const boost::shared_ptr<VegaStrikeLogger> VEGA_LOGGER = boost::make_shared<VegaStrikeLogger>();
     return VEGA_LOGGER;
 }
+
 } // namespace VegaStrikeLogging
