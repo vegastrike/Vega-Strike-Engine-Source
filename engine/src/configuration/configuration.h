@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 
 namespace vegastrike_configuration {
 // Config Structs Declaration
