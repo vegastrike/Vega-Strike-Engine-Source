@@ -75,6 +75,7 @@
 
 #include <math.h>
 #include <list>
+#include <cstdint>
 #include <boost/format.hpp>
 
 #ifdef _WIN32
@@ -228,20 +229,20 @@ unsigned int apply_float_to_unsigned_int(float tmp) {
 }
 
 static list<Unit *> Unitdeletequeue;
-static Hashtable<long, Unit, 2095> deletedUn;
+static Hashtable<uintmax_t, Unit, 2095> deletedUn;
 int deathofvs = 1;
 
 void CheckUnit(Unit *un) {
-    if (deletedUn.Get((long) un) != NULL) {
+    if (deletedUn.Get((uintmax_t) un) != nullptr) {
         while (deathofvs) {
-            VS_LOG(info, (boost::format("%1% died") % ((long) un)));
+            VS_LOG(info, (boost::format("%1% died") % ((uintmax_t) un)));
         }
     }
 }
 
 void UncheckUnit(Unit *un) {
-    if (deletedUn.Get((long) un) != NULL) {
-        deletedUn.Delete((long) un);
+    if (deletedUn.Get((uintmax_t) un) != NULL) {
+        deletedUn.Delete((uintmax_t) un);
     }
 }
 
@@ -1786,7 +1787,7 @@ void Unit::UnRef() {
     ucref--;
     if (killed && ucref == 0) {
 #ifdef CONTAINER_DEBUG
-        deletedUn.Put( (long) this, this );
+        deletedUn.Put( (uintmax_t) this, this );
 #endif
         //delete
         Unitdeletequeue.push_back(this);
