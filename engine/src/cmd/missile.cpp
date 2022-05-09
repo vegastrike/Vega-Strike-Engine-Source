@@ -99,13 +99,13 @@ float MissileEffect::GetRadius() const {
 void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
     QVector norm = pos - un->Position();
     norm.Normalize();
-    float damage_left = 1.f;
+    float damage_left = 1.0F;
     if (un->hasSubUnits()) {
         /*
          * Compute damage aspect ratio of each subunit with their apparent size ( (radius/distance)^2 )
          * and spread damage across affected subunits based on their apparent size vs total spread surface
          */
-        double total_area = 0.0f;
+        double total_area = 0.0;
         {
             un_kiter ki = un->viewSubUnits();
             for (const Unit *subun; (subun = *ki); ++ki) {
@@ -123,7 +123,7 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                 total_area += (r * r) / (d * d);
             }
         }
-        if (total_area > 0) {
+        if (total_area > 0.0) {
             VS_LOG(info, (boost::format("Missile subunit damage of %1$.3f%%") % (total_area * (100.0 / 4.0 * M_PI))));
         }
         if (total_area < 4.0 * M_PI) {
@@ -150,7 +150,7 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
     }
     if (damage_left > 0) {
         VS_LOG(info,
-                (boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
+                (boost::format("Missile damaging %1$s/%2$s (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
                         % parent->name.get()
                         % ((un == parent) ? "." : un->name.get())
                         % distance
