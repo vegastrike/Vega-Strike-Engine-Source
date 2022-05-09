@@ -27,7 +27,6 @@
 #include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"   // Is this needed here? -- stephengtuggy 2021-09-06
 #include "vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
@@ -201,7 +200,7 @@ struct TurretBin {
     void AssignTargets(const TargetAndRange &finalChoice, const Matrix &pos) {
         //go through modularly assigning as you go;
         int count = 0;
-        const unsigned long lotsize[2] = {listOfTargets[0].size(), listOfTargets[1].size()};
+        size_t lotsize[2] = {listOfTargets[0].size(), listOfTargets[1].size()};
         for (vector<RangeSortedTurrets>::iterator uniter = turret.begin(); uniter != turret.end(); ++uniter) {
             bool foundfinal = false;
             uniter->tur->Target(NULL);
@@ -219,8 +218,8 @@ struct TurretBin {
             }
             if (!foundfinal) {
                 for (unsigned int f = 0; f < 2 && !foundfinal; f++) {
-                    for (unsigned int i = 0; i < lotsize[f]; i++) {
-                        const int index = (count + i) % lotsize[f];
+                    for (size_t i = 0; i < lotsize[f]; i++) {
+                        const size_t index = (count + i) % lotsize[f];
                         if (listOfTargets[f][index].range < uniter->gunrange) {
                             if (CanFaceTarget(uniter->tur, finalChoice.t, pos)) {
                                 uniter->tur->Target(listOfTargets[f][index].t);
@@ -354,22 +353,22 @@ public:
 
 template<size_t numTuple>
 class ChooseTargetClass {
-    Unit *parent;
-    Unit *parentparent;
-    vector<TurretBin> *tbin;
+    Unit *parent{};
+    Unit *parentparent{};
+    vector<TurretBin> *tbin{};
     StaticTuple<float, numTuple> maxinnerrangeless;
     StaticTuple<float, numTuple> maxinnerrangemore;
-    float priority;
-    char rolepriority;
-    char maxrolepriority;
-    bool reachedMore;
-    bool reachedLess;
-    FireAt *fireat;
-    float gunrange;
-    int numtargets;
-    int maxtargets;
+    float priority{};
+    char rolepriority{};
+    char maxrolepriority{};
+    bool reachedMore{};
+    bool reachedLess{};
+    FireAt *fireat{};
+    float gunrange{};
+    int numtargets{};
+    int maxtargets{};
 public:
-    Unit *mytarg;
+    Unit *mytarg{};
 
     ChooseTargetClass() {
     }
@@ -584,7 +583,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
             "search_max_candidates",
             "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
     UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->GetComputerData().radar.maxrange, unitRad);
-    StaticTuple<float, 2> maxranges;
+    StaticTuple<float, 2> maxranges{};
 
     maxranges[0] = gunrange;
     maxranges[1] = missilerange;
