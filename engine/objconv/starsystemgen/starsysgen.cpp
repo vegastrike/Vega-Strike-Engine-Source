@@ -778,7 +778,7 @@ void readentity(vector<string> &entity, const char *filename) {
     }
     ///warning... obvious vulnerability
     char input_buffer[1000];
-    while (1 == fscanf(fp, "%s", input_buffer)) {
+    while (1 == fscanf(fp, "%999s", input_buffer)) {
         entity.push_back(input_buffer);
     }
     fclose(fp);

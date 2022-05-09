@@ -1190,7 +1190,7 @@ void readentity(vector<string> &entity, const char *filename) {
     }
     ///warning... obvious vulnerability
     char input_buffer[1000];
-    while (1 == f.Fscanf("%s", input_buffer)) {
+    while (1 == f.Fscanf("%999s", input_buffer)) {
         entity.emplace_back(input_buffer);
     }
     f.Close();
