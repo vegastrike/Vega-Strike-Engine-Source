@@ -40,7 +40,7 @@
 #include "SourceListener.h"
 
 #include <limits>
-#include <assert.h>
+#include <cassert>
 #include <vector>
 #include <algorithm>
 
@@ -458,6 +458,7 @@ void SceneManager::activationPhaseImpl() {
             it != data->activeScenes.end();
             ++it) {
         SimpleScene *scene = dynamic_cast<SimpleScene *>(it->second.get());
+        assert(scene != nullptr);
         Listener &listener = scene->getListener();
 
         for (SimpleScene::SourceIterator sit = scene->getActiveSources(),
@@ -492,10 +493,12 @@ void SceneManager::activationPhaseImpl() {
 
     SceneManagerData::SourceRefSet newSources;
     for (std::vector<SourcePriorityRef>::const_iterator it = selection.begin(); it != selection.end(); ++it) {
+        SimpleScene *p_simple_scene = dynamic_cast<SimpleScene *>(it->scene);
+        assert(p_simple_scene != nullptr);
         newSources.insert(
                 SceneManagerData::SourceRef(
                         *(it->iter),
-                        dynamic_cast<SimpleScene *>(it->scene)->shared_from_this()
+                        p_simple_scene->shared_from_this()
                 ));
     }
 

@@ -111,7 +111,7 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
              p != self->wrapped_objects().end(); ++p) \
         { \
             boost::python::detail::instance_holder<SuperClass>* held = dynamic_cast<boost::python::detail::instance_holder<SuperClass>*>(*p); \
-            if (held != 0) \
+            if (held != nullptr) \
                 return *held->target(); \
             void* target = boost::python::detail::class_registry<SuperClass>::class_object()->try_class_conversions(*p); \
             if(target)  \

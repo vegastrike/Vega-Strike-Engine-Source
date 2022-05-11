@@ -44,7 +44,8 @@ typedef boost::python::dictionary BoostPythonDictionary;
 
 #include "python/python_class.h"
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cassert>
 #include "audiolib.h"
 #include "base.h"
 #include "base_util.h"
@@ -133,9 +134,9 @@ public:
                 for (size_t i = 0; i < room->objs.size(); i++) {
                     if (room->objs[i]) {
                         if (room->objs[i]->index == index) {
-                            //FIXME: Will crash if not a Movie object.
                             BaseInterface::Room::BaseVSMovie *movie =
                                     dynamic_cast< BaseInterface::Room::BaseVSMovie * > (room->objs[i]);
+                            assert(movie != nullptr);
 
                             if (!movie->getCallback().empty()) {
                                 RunPython(movie->getCallback().c_str());
@@ -173,7 +174,10 @@ void Texture(int room, std::string index, std::string file, float x, float y) {
     if (addspritepos) {
         ((BaseInterface::Room::BaseVSSprite *) newroom->objs.back())->spr.GetPosition(tx, ty);
     }
-    dynamic_cast< BaseInterface::Room::BaseVSSprite * > ( newroom->objs.back())->spr.SetPosition(x + tx, y + ty);
+    BaseInterface::Room::BaseVSSprite
+            *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > ( newroom->objs.back());
+    assert(p_base_vs_sprite != nullptr);
+    p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
 }
 
 SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene) {
@@ -215,6 +219,7 @@ bool Video(int room, std::string index, std::string vfile, std::string afile, fl
 
     BaseInterface::Room::BaseVSSprite
             *baseSprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > ( newroom->objs.back());
+    assert(baseSprite != nullptr);
 
     if (!afile.empty()) {
         if (g_game.sound_enabled) {
@@ -270,9 +275,9 @@ void SetVideoCallback(int room, std::string index, std::string callback) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                //FIXME: Will crash if not a Sprite object.
                 BaseInterface::Room::BaseVSMovie *movie =
                         dynamic_cast< BaseInterface::Room::BaseVSMovie * > (newroom->objs[i]);
+                assert(movie != nullptr);
                 movie->setCallback(callback);
 
                 if (movie->soundsource.get() != NULL) {
@@ -294,8 +299,10 @@ void SetTexture(int room, std::string index, std::string file) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                //FIXME: Will crash if not a Sprite object.
-                dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i])->SetSprite(file);
+                BaseInterface::Room::BaseVSSprite
+                        *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i]);
+                assert(p_base_vs_sprite != nullptr);
+                p_base_vs_sprite->SetSprite(file);
             }
         }
     }
@@ -309,8 +316,10 @@ void SetTextureSize(int room, std::string index, float w, float h) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                //FIXME: Will crash if not a Sprite object.
-                dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i])->SetSize(w, h);
+                BaseInterface::Room::BaseVSSprite
+                        *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i]);
+                assert(p_base_vs_sprite != nullptr);
+                p_base_vs_sprite->SetSize(w, h);
             }
         }
     }
@@ -324,8 +333,10 @@ void SetTexturePos(int room, std::string index, float x, float y) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                //FIXME: Will crash if not a Sprite object.
-                dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i])->SetPos(x, y);
+                BaseInterface::Room::BaseVSSprite
+                        *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i]);
+                assert(p_base_vs_sprite);
+                p_base_vs_sprite->SetPos(x, y);
             }
         }
     }
@@ -339,10 +350,10 @@ void PlayVideo(int room, std::string index) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                //FIXME: Will crash if not a Sprite object.
                 SharedPtr<Source>
                         source = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i])->soundsource;
-                if (source.get() != NULL) {
+                assert(source && source.get() != nullptr);
+                if (source.get() != nullptr) {
                     if (!source->isPlaying()) {
                         source->startPlaying();
                     }
@@ -360,10 +371,10 @@ void StopVideo(int room, std::string index) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                //FIXME: Will crash if not a Sprite object.
                 SharedPtr<Source>
                         source = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i])->soundsource;
-                if (source.get() != NULL) {
+                assert(source && source.get() != nullptr);
+                if (source.get() != nullptr) {
                     if (source->isPlaying()) {
                         source->stopPlaying();
                     }
@@ -423,8 +434,10 @@ void SetTextBoxText(int room, std::string index, std::string text) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                //FIXME: Will crash if not a Text object.
-                dynamic_cast< BaseInterface::Room::BaseText * > (newroom->objs[i])->SetText(text);
+                BaseInterface::Room::BaseText
+                        *p_base_text = dynamic_cast< BaseInterface::Room::BaseText * > (newroom->objs[i]);
+                assert(p_base_text != nullptr);
+                p_base_text->SetText(text);
             }
         }
     }
@@ -484,7 +497,9 @@ void SetLinkRoom(int room, std::string index, int to) {
         if (newroom->links[i]) {
             if (newroom->links[i]->index == index) {
                 //FIXME: Will crash if not a Goto object.
-                dynamic_cast< BaseInterface::Room::Goto * > (newroom->links[i])->index = to;
+                BaseInterface::Room::Goto *p_goto = dynamic_cast< BaseInterface::Room::Goto * > (newroom->links[i]);
+                assert(p_goto != nullptr);
+                p_goto->index = to;
             }
         }
     }
