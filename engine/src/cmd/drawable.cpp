@@ -23,6 +23,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cassert>
 
 #include "drawable.h"
 #include "vsfilesystem.h"
@@ -145,6 +146,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
         sprintf(count, "%u", unitCount);
         uniqueUnitName = drawableGetName() + string(count);
         Units[uniqueUnitName] = dynamic_cast<Unit *>(this);
+        assert(Units[uniqueUnitName] != nullptr);
         VS_LOG(info,
                 (boost::format("Animation data loaded for unit: %1%, named %2% - with: %3% frames.") % string(filename)
                         % uniqueUnitName % numFrames));
@@ -166,6 +168,7 @@ extern double calc_blend_factor(double frac,
 
 void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
 
     //Quick shortcut for camera setup phase
     bool myparent = (unit == _Universe->AccessCockpit()->GetParent());
@@ -383,6 +386,7 @@ void Drawable::AnimationStep() {
 
 void Drawable::DrawNow(const Matrix &mato, float lod) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
 
     static const void *rootunit = NULL;
     if (rootunit == NULL) {
@@ -640,6 +644,7 @@ Matrix *GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix
  */
 void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
     const Vector velocity = unit->GetVelocity();
 
     // Docked units don't sparkle
@@ -706,6 +711,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
 
 void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
 
     // Units not shown don't emit a halo
     if (!on_screen) {
@@ -750,6 +756,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
 
 void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
     Transformation *ct = &unit->cumulative_transformation;
 
     for (int i = 0; (int) i < unit->getNumMounts(); i++) {
@@ -836,6 +843,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
 
 void Drawable::Split(int level) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
 
     if (game_options()->split_dead_subunits) {
         for (un_iter su = unit->getSubUnits(); *su; ++su) {
@@ -965,6 +973,8 @@ void Drawable::Split(int level) {
 
 void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
+
     // Not sure about shield percentage - more variance for more damage?
     // TODO: figure out the above comment
 
@@ -984,6 +994,7 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
 
 Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = dynamic_cast<const Unit *>(this);
+    assert(unit != nullptr);
 
     if (unit->GetWarpVelocity().MagnitudeSquared()
             < (static_cast<double>(game_options()->warp_stretch_cutoff) * game_options()->warp_stretch_cutoff * game_options()->game_speed
@@ -1022,6 +1033,7 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
 
 void Drawable::UpdateHudMatrix(int whichcam) {
     Unit *unit = dynamic_cast<Unit *>(this);
+    assert(unit != nullptr);
 
     Matrix m;
     Matrix ctm = unit->cumulative_transformation_matrix;
@@ -1040,5 +1052,6 @@ void Drawable::UpdateHudMatrix(int whichcam) {
 
 VSSprite *Drawable::getHudImage() const {
     const Unit *unit = dynamic_cast<const Unit *>(this);
+    assert(unit != nullptr);
     return unit->pImage->pHudImage;
 }

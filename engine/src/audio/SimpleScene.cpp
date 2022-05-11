@@ -29,6 +29,7 @@
 // C++ Implementation: Audio::SimpleScene
 //
 
+#include <cassert>
 #include "SimpleScene.h"
 #include "SimpleSource.h"
 
@@ -45,16 +46,22 @@ SimpleScene::~SimpleScene() {
 
     for (it = activeSources.begin(); it != activeSources.end(); ++it) {
         (*it)->stopPlaying();
-        detach(dynamic_cast<SimpleSource *>(it->get()));
+        SimpleSource *p_simple_source = dynamic_cast<SimpleSource *>(it->get());
+        assert(p_simple_source != nullptr);
+        detach(p_simple_source);
     }
 }
 
 void SimpleScene::add(SharedPtr<Source> source) {
-    attach(dynamic_cast<SimpleSource *>(source.get()));
+    SimpleSource *p_simple_source = dynamic_cast<SimpleSource *>(source.get());
+    assert(p_simple_source != nullptr);
+    attach(p_simple_source);
 }
 
 void SimpleScene::remove(SharedPtr<Source> source) {
-    detach(dynamic_cast<SimpleSource *>(source.get()));
+    SimpleSource *p_simple_source = dynamic_cast<SimpleSource *>(source.get());
+    assert(p_simple_source != nullptr);
+    detach(p_simple_source);
 }
 
 Listener &SimpleScene::getListener() {

@@ -69,16 +69,18 @@ void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start) {
 
         assert(sound->isStreaming() && "OpenALRenderableStreamingSource can only handle streaming sounds");
 
+        OpenALStreamingSound *p_streaming_sound = dynamic_cast<OpenALStreamingSound *>(sound.get());
+        assert(p_streaming_sound != nullptr);
         if (!sound->isLoaded()) {
             sound->load();
         } else if (!buffering) {
-            dynamic_cast<OpenALStreamingSound *>(sound.get())->flushBuffers();
+            p_streaming_sound->flushBuffers();
         }
 
         // Seek the stream to the specified position
         atEos = false;
         shouldPlay = true;
-        dynamic_cast<OpenALStreamingSound *>(sound.get())->seek(start);
+        p_streaming_sound->seek(start);
 
         // Make sure we have some starting buffers queued
         queueALBuffers();
@@ -122,7 +124,9 @@ Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const {
         throw NotImplementedException("getPlayingTimeImpl");
     }
 
-    Timestamp base = dynamic_cast<OpenALStreamingSound *>(getSource()->getSound().get())
+    OpenALStreamingSound *p_streaming_sound = dynamic_cast<OpenALStreamingSound *>(getSource()->getSound().get());
+    assert(p_streaming_sound != nullptr);
+    Timestamp base = p_streaming_sound
             ->getTimeBase();
 
     return Timestamp(offs) + base;
@@ -131,7 +135,9 @@ Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const {
 void OpenALRenderableStreamingSource::seekImpl(Timestamp time) {
     // Seek the stream to the specified position
     atEos = false;
-    dynamic_cast<OpenALStreamingSound *>(getSource()->getSound().get())
+    OpenALStreamingSound *p_streaming_sound = dynamic_cast<OpenALStreamingSound *>(getSource()->getSound().get());
+    assert(p_streaming_sound != nullptr);
+    p_streaming_sound
             ->seek(time);
 }
 
@@ -151,7 +157,9 @@ void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &scen
         if (!sound->isLoaded()) {
             sound->load();
         } else if (!buffering) {
-            dynamic_cast<OpenALStreamingSound *>(sound.get())->flushBuffers();
+            OpenALStreamingSound *p_streaming_sound = dynamic_cast<OpenALStreamingSound *>(sound.get());
+            assert(p_streaming_sound != nullptr);
+            p_streaming_sound->flushBuffers();
         }
 
         // Make sure we have some starting buffers queued
@@ -229,6 +237,7 @@ void OpenALRenderableStreamingSource::queueALBuffers() {
     buffering = true;
 
     OpenALStreamingSound *streamingSound = dynamic_cast<OpenALStreamingSound *>(sound.get());
+    assert(streamingSound != nullptr);
     Source *source = getSource();
     ALSourceHandle als = getALSource();
     ALint buffersProcessed = 0;

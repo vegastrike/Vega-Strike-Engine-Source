@@ -161,7 +161,9 @@ void OpenALRenderableSource::attachALBuffers() {
         assert(!sound->isStreaming() && "OpenALRenderableSource can only handle streaming sounds");
 
         // Attachment to a simple sound, just assign the AL buffer to this AL source
-        ALBufferHandle alBuffer = dynamic_cast<OpenALSimpleSound *>(sound.get())->getAlBuffer();
+        OpenALSimpleSound *p_simple_sound = dynamic_cast<OpenALSimpleSound *>(sound.get());
+        assert(p_simple_sound != nullptr);
+        ALBufferHandle alBuffer = p_simple_sound->getAlBuffer();
         ALSourceHandle alSource = getALSource();
         alSourcei(alSource, AL_BUFFER, alBuffer);
         alBuffersAttached = true;

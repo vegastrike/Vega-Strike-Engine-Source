@@ -43,6 +43,7 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <cassert>
 
 #include "utils.h"
 #include "vs_math.h"
@@ -364,7 +365,9 @@ void testComplexScene(bool doppler) {
         spcscene->getListener().setOrientation(dpos, Vector3(0, 1, 0));
         spcscene->getListener().setPosition(pos);
 
-        dynamic_cast<EngParticleListener *>(englistener.get())->time = (getRealTime() - t) / 20.0;
+        EngParticleListener *p_listener = dynamic_cast<EngParticleListener *>(englistener.get());
+        assert(p_listener != nullptr);
+        p_listener->time = (getRealTime() - t) / 20.0;
 
         smQuickTick();
     }
