@@ -322,7 +322,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
             Order *player_ai_state = player->getAIState();
             bool ai_is_unit = computer_ai->isUnit() == Vega_UnitType::unit;
             bool player_is_unit = player->isUnit() == Vega_UnitType::unit;
-            if (computer_ai && player && computer_ai_state && player_ai_state &&
+            if (computer_ai_state != nullptr && player_ai_state &&
                     ai_is_unit && player_is_unit) {
                 unsigned char gender;
                 vector<Animation *> *anim = computer_ai->pilot->getCommFaces(gender);
