@@ -35,8 +35,14 @@ namespace vegastrike_configuration {
 
 struct AIConfig {
     bool assist_friend_in_need{};
+    float ease_to_anger{};
+    float ease_to_appease{};
     int32_t hull_damage_anger{};
     float hull_percent_for_comm{};
+    float lowest_negative_comm_choice{};
+    float lowest_positive_comm_choice{};
+    float mood_swing_level{};
+    float random_response_range{};
     int32_t shield_damage_anger{};
 };
 
