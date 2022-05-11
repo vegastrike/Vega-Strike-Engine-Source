@@ -496,7 +496,6 @@ void SetLinkRoom(int room, std::string index, int to) {
     for (size_t i = 0; i < newroom->links.size(); i++) {
         if (newroom->links[i]) {
             if (newroom->links[i]->index == index) {
-                //FIXME: Will crash if not a Goto object.
                 BaseInterface::Room::Goto *p_goto = dynamic_cast< BaseInterface::Room::Goto * > (newroom->links[i]);
                 assert(p_goto != nullptr);
                 p_goto->index = to;
@@ -543,10 +542,10 @@ void SetLinkEventMask(int room, std::string index, std::string maskdef) {
         return;
     }
     for (i = 0; i < newroom->links.size(); i++) {
-        if (newroom->links[i]) {
-            if (newroom->links[i]->index == index) {
-                //FIXME: Will crash if not a Goto object.
-                newroom->links[i]->setEventMask(mask);
+        BaseInterface::Room::Link *&p_link = newroom->links[i];
+        if (p_link) {
+            if (p_link->index == index) {
+                p_link->setEventMask(mask);
             }
         }
     }
