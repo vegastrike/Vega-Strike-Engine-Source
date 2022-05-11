@@ -100,17 +100,17 @@ public:
 
 class OrigMeshContainer {
 public:
-    float d;
+    float d{};
     Mesh *orig;
-    int program;
+    int program{};
 
-    unsigned int transparent: 1;
-    unsigned int zsort: 1;
-    unsigned int passno: 14;
-    int sequence: 16;
+    unsigned int transparent{1};
+    unsigned int zsort{1};
+    unsigned int passno{14};
+    int sequence{16};
 
     OrigMeshContainer() {
-        orig = NULL;
+        orig = nullptr;
     }
 
     OrigMeshContainer(Mesh *orig, float d, int passno) {
@@ -161,7 +161,7 @@ public:
         if (program == 0) {
             //Fixed-fn passes sort by texture
             SLESS(orig->Decal.size());
-            if (orig->Decal.size() > 0)
+            if (!orig->Decal.empty())
                 PLESS(orig->Decal[0]);
         } else {
             //Shader passes sort by effective texture
@@ -276,7 +276,7 @@ Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string fa
 }
 
 int Mesh::getNumTextureFrames() const {
-    if (Decal.size()) {
+    if (!Decal.empty()) {
         if (Decal[0]) {
             return Decal[0]->numFrames();
         }
@@ -285,7 +285,7 @@ int Mesh::getNumTextureFrames() const {
 }
 
 double Mesh::getTextureCumulativeTime() const {
-    if (Decal.size()) {
+    if (!Decal.empty()) {
         if (Decal[0]) {
             return Decal[0]->curTime();
         }
@@ -294,7 +294,7 @@ double Mesh::getTextureCumulativeTime() const {
 }
 
 float Mesh::getTextureFramesPerSecond() const {
-    if (Decal.size()) {
+    if (!Decal.empty()) {
         if (Decal[0]) {
             return Decal[0]->framesPerSecond();
         }
@@ -438,13 +438,14 @@ Mesh::~Mesh() {
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
         vector<Mesh *>::iterator finder;
         if (hashers) {
-            for (int i = hashers->size() - 1; i >= 0; --i) {
-                if ((*hashers)[i] == this) {
+            for (size_t i = hashers->size() - 1; i >= 0; --i) {
+                if (hashers->at(i) == this) {
                     hashers->erase(hashers->begin() + i);
                     if (hashers->empty()) {
                         bfxmHashTable.Delete(hash_name);
                         delete hashers;
                         hashers = nullptr;
+                        break;
                     }
                 }
             }
@@ -576,12 +577,12 @@ void Mesh::DrawNow(float lod, bool centered, const Matrix &m, int cloak, float n
         GFXDisable(DEPTHWRITE);
     }
     GFXBlendMode(blendSrc, blendDst);
-    if (o->Decal.size() && o->Decal[0]) {
+    if (!o->Decal.empty() && o->Decal[0]) {
         o->Decal[0]->MakeActive();
     }
     GFXTextureEnv(0, GFXMODULATETEXTURE);     //Default diffuse mode
     GFXTextureEnv(1, GFXADDTEXTURE);     //Default envmap mode
-    GFXToggleTexture(bool(o->Decal.size() && o->Decal[0]), 0);
+    GFXToggleTexture(bool(!o->Decal.empty() && o->Decal[0]), 0);
     o->vlist->DrawOnce();
     if (centered) {
         GFXCenterCamera(false);

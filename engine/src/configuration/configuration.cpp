@@ -41,8 +41,14 @@ Configuration::Configuration() {
 */
 void Configuration::OverrideDefaultsWithUserConfiguration() {
     ai.assist_friend_in_need = GameConfig::GetVariable("AI", "assist_friend_in_need", true);
+    ai.ease_to_anger = GameConfig::GetVariable("AI", "EaseToAnger", -0.5F);
+    ai.ease_to_appease = GameConfig::GetVariable("AI", "EaseToAppease", 0.5F);
     ai.hull_damage_anger = GameConfig::GetVariable("AI", "HullDamageAnger", 10);
     ai.hull_percent_for_comm = GameConfig::GetVariable("AI", "HullPercentForComm", 0.75F);
+    ai.lowest_negative_comm_choice = GameConfig::GetVariable("AI", "LowestNegativeCommChoice", -0.00001F);
+    ai.lowest_positive_comm_choice = GameConfig::GetVariable("AI", "LowestPositiveCommChoice", 0.0F);
+    ai.mood_swing_level = GameConfig::GetVariable("AI", "MoodSwingLevel", 0.2F);
+    ai.random_response_range = GameConfig::GetVariable("AI", "RandomResponseRange", 0.8F);
     ai.shield_damage_anger = GameConfig::GetVariable("AI", "ShieldDamageAnger", 1);
 
     // collision_hacks substruct

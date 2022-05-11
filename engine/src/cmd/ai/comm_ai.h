@@ -42,7 +42,7 @@ protected:
     float mood;
     UnitContainer contraband_searchee;
     Vector SpeedAndCourse;
-    int which_cargo_item;
+    int which_cargo_item{};
     void GetMadAt(Unit *which, int howMad);
 protected:
 public:
