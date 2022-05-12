@@ -306,7 +306,7 @@ Unit *Missile::breakECMLock(Unit *target) {
     }
 
     // Second check
-    uintmax_t missile_hash = reinterpret_cast<uintmax_t>(this) / 16383UL;
+    uintmax_t missile_hash = reinterpret_cast<uintmax_t>(this) / 16383ULL;
 
     if (static_cast<int>(missile_hash % configuration()->physics.max_ecm) < UnitUtil::getECM(target)) {
         return nullptr;

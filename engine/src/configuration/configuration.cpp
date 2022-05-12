@@ -250,7 +250,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics.warp_energy_multiplier = GameConfig::GetVariable("physics.warp_energy_multiplier", 0.12F);
     physics.player_warp_energy_multiplier = GameConfig::GetVariable("physics.player_warp_energy_multiplier", 0.12F);
     physics.vsd_mj_yield = GameConfig::GetVariable("physics.VSD_MJ_yield", 5.4F);
-    physics.max_ecm = GameConfig::GetVariable("physics.max_ecm", 4UL);
+    physics.max_ecm = GameConfig::GetVariable("physics.max_ecm", 4ULL);
     physics.max_lost_target_live_time = GameConfig::GetVariable("physics.max_lost_target_live_time", 30.0F);
     physics.percent_missile_match_target_velocity = GameConfig::GetVariable("physics.percent_missile_match_target_velocity", 1.0F);
     physics.game_speed = GameConfig::GetVariable("physics.game_speed", 1.0F);
