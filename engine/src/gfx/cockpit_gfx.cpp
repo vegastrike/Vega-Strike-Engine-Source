@@ -62,7 +62,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
                               bool Diamond  )
 {
     SetThickness(ShapeType::Box);
-    static float rat = GameConfig::GetVariable( "graphics", "hud", "min_target_box_size", .01 );
+    const float rat = configuration()->graphics_config_.hud.min_target_box_size;
     float len = (Loc).Magnitude();
     float curratio   = rSize/len;
     if (curratio < rat)
