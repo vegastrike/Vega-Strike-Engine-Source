@@ -1,8 +1,8 @@
 /*
  * unit_csv_factory.cpp
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -104,7 +104,7 @@ void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game) {
     line_num = 1;
 
     // Add newline to end of file, so last line will be processed.
-    if (data.back() != '\n') {
+    if (!data.empty() && data.back() != '\n') {
         data.append("\n");
     }
 
