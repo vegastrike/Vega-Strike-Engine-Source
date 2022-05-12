@@ -330,6 +330,8 @@ ENDIF (CMAKE_VERSION VERSION_LESS "3.14")
 #        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
 #        )
 
+add_compile_definitions(NV_CUBE_MAP BOOST_PYTHON_NO_PY_SIGNATURES BOOST_ALL_DYN_LINK)
+
 add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:__x86_64__ >")
 add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS >")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h >")    # /wd4244 /wd4267 /wd4305 >)
