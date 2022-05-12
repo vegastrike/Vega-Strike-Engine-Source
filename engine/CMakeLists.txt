@@ -330,26 +330,10 @@ ENDIF (CMAKE_VERSION VERSION_LESS "3.14")
 #        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
 #        )
 
-add_compile_definitions(NV_CUBE_MAP BOOST_PYTHON_NO_PY_SIGNATURES BOOST_ALL_DYN_LINK)
-
-add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:__x86_64__ >")
-add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS >")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h >")    # /wd4244 /wd4267 /wd4305 >)
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/wd4244 >")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/wd4267 >")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/wd4305 >")
-#add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:$<CONFIG:Debug>:/Z7 >")
-add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-include config.h >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-pipe >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-fvisibility=hidden >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Debug,Profiler,RelWithDebInfo>:-Og >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Debug,RelWithDebInfo>:-g3 >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Profiler>:-pg >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Profiler>:-g2 >")
-add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Release>:-O3 >")
-add_link_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Bsymbolic >")
+add_compile_definitions("NV_CUBE_MAP" "BOOST_PYTHON_NO_PY_SIGNATURES" "BOOST_ALL_DYN_LINK" "$<$<CXX_COMPILER_ID:MSVC>:__x86_64__>" "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h>" "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>" "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>" "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>") #"$<$<CXX_COMPILER_ID:MSVC>:$<CONFIG:Debug>:/Z7 >")
+add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-pipe>" "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>" "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-fvisibility=hidden>") # "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Debug,Profiler,RelWithDebInfo>:-Og>" "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Debug,RelWithDebInfo>:-g3>"
 
 #IF (MSVC)
 #    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ -D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4305")
@@ -792,7 +776,15 @@ ENDIF (UNIX)
 CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_DIR}/config.h)
 
 #end config.h generation
+
+INCLUDE_DIRECTORIES(APPEND ${TST_INCLUDES})
+include_directories(APPEND ${CMAKE_CURRENT_BINARY_DIR})
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-include>" "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:config.h>")
+#add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Profiler>:-pg>")
+#add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Profiler>:-g2>")
+#add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Release>:-O3>")
+add_link_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Bsymbolic>")
 
 # Now the source files are listed starting here!
 SET(LIBVS_LOGGING
@@ -1294,9 +1286,7 @@ SET(VEGASTRIKE_SOURCES
 )
 
 
-#Setup shared lib and include listings for vegastrike-engine.
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
-INCLUDE_DIRECTORIES(${TST_INCLUDES})
 
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
@@ -1322,14 +1312,14 @@ ADD_SUBDIRECTORY(setup)
 # Add other utilies here
 ADD_SUBDIRECTORY(objconv)
 
-# show debug output
-GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
-MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
-MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-MESSAGE("Linking with : ${TST_LIBS}")
-MESSAGE("including : ${TEMP_DIRECTORY}")
-# end debug output
+## show debug output
+#GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
+#MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
+#MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
+#MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+#MESSAGE("Linking with : ${TST_LIBS}")
+#MESSAGE("including : ${TEMP_DIRECTORY}")
+## end debug output
 
 MARK_AS_ADVANCED(FORCE
     Boost_DIR
