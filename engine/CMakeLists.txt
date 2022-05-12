@@ -208,14 +208,14 @@ IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
     # cmake_pop_check_state()
 ENDIF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
 
-# Set the default build type
-IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
-ENDIF (NOT CMAKE_BUILD_TYPE)
-
-IF (NOT BUILD_OPT)
-    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
-ENDIF (NOT BUILD_OPT)
+## Set the default build type
+#IF (NOT CMAKE_BUILD_TYPE)
+#    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
+#ENDIF (NOT CMAKE_BUILD_TYPE)
+#
+#IF (NOT BUILD_OPT)
+#    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
+#ENDIF (NOT BUILD_OPT)
 
 # Option to turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
@@ -326,122 +326,145 @@ ELSE (CMAKE_VERSION VERSION_LESS "3.14")
     ENDIF (ENABLE_PIE)
 ENDIF (CMAKE_VERSION VERSION_LESS "3.14")
 
-IF (MSVC)
-    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ -D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4305")
-    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
-    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
-    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
-    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
-ELSE (MSVC)
-    SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Wall -std=c++11 -fvisibility=hidden ")
-    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "-Og -g3 ")
-    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "-Og -pg -g2 ")
-    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
-    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "-Bsymbolic ")
-ENDIF (MSVC)
+#set_property(DIRECTORY APPEND PROPERTY
+#        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
+#        )
+
+add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:__x86_64__ >")
+add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS >")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h >")    # /wd4244 /wd4267 /wd4305 >)
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/wd4244 >")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/wd4267 >")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/wd4305 >")
+#add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:$<CONFIG:Debug>:/Z7 >")
+add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-include config.h >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-pipe >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-fvisibility=hidden >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Debug,Profiler,RelWithDebInfo>:-Og >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Debug,RelWithDebInfo>:-g3 >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Profiler>:-pg >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Profiler>:-g2 >")
+add_compile_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<CONFIG:Release>:-O3 >")
+add_link_options("$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Bsymbolic >")
+
+#IF (MSVC)
+#    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ -D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4305")
+#    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
+#    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
+#    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+#    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
+#ELSE (MSVC)
+#    SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Wall -std=c++11 -fvisibility=hidden ")
+#    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "-Og -g3 ")
+#    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "-Og -pg -g2 ")
+#    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+#    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "-Bsymbolic ")
+#ENDIF (MSVC)
 
 
 
-# Debug target block.
-SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} " CACHE STRING
-    "Flags used by the C++ compiler during debug builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C compiler during debug builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG
-    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
-    "Flags used for linking binaries during debug builds."
-    FORCE
-)
-
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_C_FLAGS_DEBUG
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_DEBUG )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-
-#MESSAGE("** Compile [${MSVC}][${CMAKE_BUILD_TYPE}] options [${CMAKE_CXX_FLAGS}] [${CMAKE_CXX_FLAGS_DEBUG}] [${BUILD_OPT}] [${CPU_OPTS}] [${DEFINES}]")
-
-# Release Target block
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C++ compiler during release builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_RELEASE " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C compiler during release builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "Release linker flags"
-    FORCE
-)
-MARK_AS_ADVANCED(
-    CMAKE_C_FLAGS_RELEASE
-    CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_EXE_LINKER_FLAGS_RELEASE
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELEASE )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-
-
-# RelWithDebInfo Target block
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C++ compiler during release-with-debug-info builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_RELWITHDEBINFO "  ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C compiler during release-with-debug-info builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "RelWithDebInfo linker flags"
-    FORCE
-)
-MARK_AS_ADVANCED(
-    CMAKE_C_FLAGS_RELWITHDEBINFO
-    CMAKE_CXX_FLAGS_RELWITHDEBINFO
-    CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELWITHDEBINFO )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELWITHDEBINFO )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-
-
-# Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C++ compiler during profiler builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C compiler during profiler builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_PROFILER
-    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
-    "Flags used for linking binaries during profiler builds."
-    FORCE
-)
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_PROFILER
-    CMAKE_C_FLAGS_PROFILER
-    CMAKE_EXE_LINKER_FLAGS_PROFILER
-    CMAKE_SHARED_LINKER_FLAGS_PROFILER
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_PROFILER )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_PROFILER )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+## Debug target block.
+#SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} " CACHE STRING
+#    "Flags used by the C++ compiler during debug builds."
+#    FORCE
+#)
+#SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+#    "Flags used by the C compiler during debug builds."
+#    FORCE
+#)
+#SET(CMAKE_EXE_LINKER_FLAGS_DEBUG
+#    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
+#    "Flags used for linking binaries during debug builds."
+#    FORCE
+#)
+#
+#MARK_AS_ADVANCED(
+#    CMAKE_CXX_FLAGS_DEBUG
+#    CMAKE_C_FLAGS_DEBUG
+#)
+#IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+#    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_DEBUG )
+#ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+#    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
+#ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+#
+##MESSAGE("** Compile [${MSVC}][${CMAKE_BUILD_TYPE}] options [${CMAKE_CXX_FLAGS}] [${CMAKE_CXX_FLAGS_DEBUG}] [${BUILD_OPT}] [${CPU_OPTS}] [${DEFINES}]")
+#
+## Release Target block
+#SET(CMAKE_CXX_FLAGS_RELEASE  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+#    "Flags used by the C++ compiler during release builds."
+#    FORCE
+#)
+#SET(CMAKE_C_FLAGS_RELEASE " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+#    "Flags used by the C compiler during release builds."
+#    FORCE
+#)
+#SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "Release linker flags"
+#    FORCE
+#)
+#MARK_AS_ADVANCED(
+#    CMAKE_C_FLAGS_RELEASE
+#    CMAKE_CXX_FLAGS_RELEASE
+#    CMAKE_EXE_LINKER_FLAGS_RELEASE
+#)
+#IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+#    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELEASE )
+#ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+#    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
+#ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+#
+#
+## RelWithDebInfo Target block
+#SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+#    "Flags used by the C++ compiler during release-with-debug-info builds."
+#    FORCE
+#)
+#SET(CMAKE_C_FLAGS_RELWITHDEBINFO "  ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+#    "Flags used by the C compiler during release-with-debug-info builds."
+#    FORCE
+#)
+#SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "RelWithDebInfo linker flags"
+#    FORCE
+#)
+#MARK_AS_ADVANCED(
+#    CMAKE_C_FLAGS_RELWITHDEBINFO
+#    CMAKE_CXX_FLAGS_RELWITHDEBINFO
+#    CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+#)
+#IF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+#    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+#ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+#    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+#ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+#
+#
+## Profiler Target block
+#SET(CMAKE_CXX_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+#    "Flags used by the C++ compiler during profiler builds."
+#    FORCE
+#)
+#SET(CMAKE_C_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+#    "Flags used by the C compiler during profiler builds."
+#    FORCE
+#)
+#SET(CMAKE_EXE_LINKER_FLAGS_PROFILER
+#    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
+#    "Flags used for linking binaries during profiler builds."
+#    FORCE
+#)
+#MARK_AS_ADVANCED(
+#    CMAKE_CXX_FLAGS_PROFILER
+#    CMAKE_C_FLAGS_PROFILER
+#    CMAKE_EXE_LINKER_FLAGS_PROFILER
+#    CMAKE_SHARED_LINKER_FLAGS_PROFILER
+#)
+#IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+#    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_PROFILER )
+#ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+#    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_PROFILER )
+#ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
