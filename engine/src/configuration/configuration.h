@@ -53,6 +53,8 @@ struct AIConfig {
     float random_response_range{};
     int32_t shield_damage_anger{};
     bool jump_without_energy{};
+    float friend_factor{};
+    float kill_factor{};
 
     AIConfig() = default;
 };

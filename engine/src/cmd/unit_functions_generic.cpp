@@ -110,19 +110,17 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
     if (un->isUnit() != Vega_UnitType::unit || killedUnit->isUnit() != Vega_UnitType::unit) {
         return;
     }
-    static float KILL_FACTOR = -XMLSupport::parse_float(vs_config->getVariable("AI", "kill_factor", ".2"));
     int killedCp = _Universe->whichPlayerStarship(killedUnit);
     int killerCp = killedCp;
     if (killedCp != -1) {
-        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, KILL_FACTOR);
+        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, configuration()->ai.kill_factor);
     } else {
         killerCp = _Universe->whichPlayerStarship(un);
         if (killerCp != -1) {
-            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, KILL_FACTOR);
+            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, configuration()->ai.kill_factor);
         }
     }
     int faction = killedUnit->faction;
-    static float FRIEND_FACTOR = -XMLSupport::parse_float(vs_config->getVariable("AI", "friend_factor", ".1"));
     for (unsigned int i = 0; i < FactionUtil::GetNumFactions(); i++) {
         float relation;
         if (faction != (int) i && un->faction != (int) i) {
@@ -130,9 +128,9 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
             if (killedCp != -1) {
                 relation += UniverseUtil::getRelationModifierInt(i, faction);
             }
-            if (relation) {
+            if (relation != 0.0F) {
                 if (killerCp != -1) {
-                    UniverseUtil::adjustRelationModifierInt(killerCp, i, FRIEND_FACTOR * relation);
+                    UniverseUtil::adjustRelationModifierInt(killerCp, i, configuration()->ai.friend_factor * relation);
                 }
             }
         }

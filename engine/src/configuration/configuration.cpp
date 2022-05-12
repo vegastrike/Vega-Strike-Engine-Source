@@ -58,6 +58,8 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     ai.random_response_range                            = GameConfig::GetVariable("AI.RandomResponseRange", 0.8F);
     ai.shield_damage_anger                              = GameConfig::GetVariable("AI.ShieldDamageAnger", 1);
     ai.jump_without_energy = GameConfig::GetVariable("AI.jump_without_energy", false);
+    ai.friend_factor = -GameConfig::GetVariable("AI.friend_factor", 0.1F);
+    ai.kill_factor = -GameConfig::GetVariable("AI.kill_factor", 0.2F);
 
     audio_config_.every_other_mount = GameConfig::GetVariable("audio.every_other_mount", false);
     audio_config_.shuffle_songs.clear_history_on_list_change = GameConfig::GetVariable("audio.shuffle_songs.clear_history_on_list_change", false);
