@@ -35,38 +35,12 @@
 #include <string>
 
 float accelStarHandler(float &input) {
-    static float game_speed = GameConfig::GetVariable("physics", "game_speed", 1.0f);
-    static float game_accel = GameConfig::GetVariable("physics", "game_accel", 1.0f);
-    return input / (game_speed * game_accel);
+    return input / (configuration()->physics.game_speed * configuration()->physics.game_accel);
 }
 
 float speedStarHandler(float &input) {
-    static float game_speed = GameConfig::GetVariable("physics", "game_speed", 1.0f);
-    return input / game_speed;
+    return input / configuration()->physics.game_speed;
 }
-
-bool Movable::configLoaded = false;
-float Movable::VELOCITY_MAX = 0.0f;
-//for the heck of it.
-float Movable::humanwarprampuptime = 0.0f;
-//for the heck of it.
-float Movable::compwarprampuptime = 0.0f;
-float Movable::warprampdowntime = 0.0f;
-float Movable::WARPMEMORYEFFECT = 0.0f;
-float Movable::maxplayerrotationrate = 0.0f;
-float Movable::maxnonplayerrotationrate = 0.0f;
-float Movable::warpstretchcutoff = 0.0f;
-float Movable::warpstretchoutcutoff = 0.0f;
-float Movable::sec = 0.0f;
-float Movable::endsec = 0.0f;
-float Movable::warpMultiplierMin = 0.0f;
-float Movable::warpMultiplierMax = 0.0f;
-float Movable::warpMaxEfVel = 0.0f;
-float Movable::cutsqr = 0.0f;
-float Movable::outcutsqr = 0.0f;
-std::string Movable::insys_jump_ani = "";
-float Movable::air_res_coef = 0.0f;
-float Movable::lateral_air_res_coef = 0.0f;
 
 Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
         sim_atom_multiplier(1),
@@ -78,39 +52,11 @@ Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
         radial_size(0),
         Momentofinertia(0.01) {
     cur_sim_queue_slot = rand() % SIM_QUEUE_SIZE;
-    static Vector default_angular_velocity(GameConfig::GetVariable("general", "pitch", 0.0f),
-            GameConfig::GetVariable("general", "yaw", 0.0f),
-            GameConfig::GetVariable("general", "roll", 0.0f));
-
-    if (!configLoaded) {
-        VELOCITY_MAX = GameConfig::GetVariable("physics", "velocity_max", 10000);
-        humanwarprampuptime = GameConfig::GetVariable("physics", "warprampuptime", 5);
-        compwarprampuptime = GameConfig::GetVariable("physics", "computerwarprampuptime", 10);
-        warprampdowntime = GameConfig::GetVariable("physics", "warprampdowntime", 0.5f);
-        WARPMEMORYEFFECT = GameConfig::GetVariable("physics", "WarpMemoryEffect", 0.9f);
-        maxplayerrotationrate = GameConfig::GetVariable("physics", "maxplayerrot", 24);
-        maxnonplayerrotationrate = GameConfig::GetVariable("physics", "maxNPCrot", 360);
-        warpstretchcutoff = GameConfig::GetVariable("graphics", "warp_stretch_cutoff", 500000)
-                * GameConfig::GetVariable("physics", "game_speed", 1);
-        warpstretchoutcutoff = GameConfig::GetVariable("graphics", "warp_stretch_decel_cutoff", 500000)
-                * GameConfig::GetVariable("physics", "game_speed", 1);
-        sec = GameConfig::GetVariable("graphics", "insys_jump_ani_second_ahead", 4.0f)
-                / (GameConfig::GetVariable("physics", "game_speed", 1.0f)
-                        * GameConfig::GetVariable("physics", "game_accel", 1.0f));
-        endsec = GameConfig::GetVariable("graphics", "insys_jump_ani_second_ahead_end", 0.03f)
-                / (GameConfig::GetVariable("physics", "game_speed", 1.0f)
-                        * GameConfig::GetVariable("physics", "game_accel", 1.0f));
-        //Pi^2
-        warpMultiplierMin = GameConfig::GetVariable("physics", "warpMultiplierMin", 9.86960440109f);
-        //C
-        warpMultiplierMax = GameConfig::GetVariable("physics", "warpMultiplierMax", 300000000);
-        //Pi^2 * C
-        warpMaxEfVel = GameConfig::GetVariable("physics", "warpMaxEfVel", 2960881320.0f);
-        cutsqr = warpstretchcutoff * warpstretchcutoff;
-        outcutsqr = warpstretchoutcutoff * warpstretchoutcutoff;
-        insys_jump_ani = vs_config->getVariable("graphics", "insys_jump_animation", "warp.ani");
-        configLoaded = true;
-    }
+    const Vector default_angular_velocity(configuration()->general_config_.pitch,
+            configuration()->general_config_.yaw,
+            configuration()->general_config_.roll);
+    cutsqr = configuration()->physics.warp_stretch_cutoff * configuration()->physics.warp_stretch_cutoff;
+    outcutsqr = configuration()->physics.warp_stretch_decel_cutoff * configuration()->physics.warp_stretch_decel_cutoff;
 
     Identity(cumulative_transformation_matrix);
     cumulative_transformation = identity_transformation;
@@ -204,20 +150,21 @@ void Movable::UpdatePhysics(const Transformation &trans,
     if (resolveforces) {
         //clamp velocity
         ResolveForces(trans, transmat);
-        if (Velocity.i > VELOCITY_MAX) {
-            Velocity.i = VELOCITY_MAX;
-        } else if (Velocity.i < -VELOCITY_MAX) {
-            Velocity.i = -VELOCITY_MAX;
+        float velocity_max = configuration()->physics.velocity_max;
+        if (Velocity.i > velocity_max) {
+            Velocity.i = velocity_max;
+        } else if (Velocity.i < -velocity_max) {
+            Velocity.i = -velocity_max;
         }
-        if (Velocity.j > VELOCITY_MAX) {
-            Velocity.j = VELOCITY_MAX;
-        } else if (Velocity.j < -VELOCITY_MAX) {
-            Velocity.j = -VELOCITY_MAX;
+        if (Velocity.j > velocity_max) {
+            Velocity.j = velocity_max;
+        } else if (Velocity.j < -velocity_max) {
+            Velocity.j = -velocity_max;
         }
-        if (Velocity.k > VELOCITY_MAX) {
-            Velocity.k = VELOCITY_MAX;
-        } else if (Velocity.k < -VELOCITY_MAX) {
-            Velocity.k = -VELOCITY_MAX;
+        if (Velocity.k > velocity_max) {
+            Velocity.k = velocity_max;
+        } else if (Velocity.k < -velocity_max) {
+            Velocity.k = -velocity_max;
         }
     }
 
@@ -232,19 +179,19 @@ void Movable::AddVelocity(float difficulty) {
 
     bool playa = isPlayerShip();
 
-    float warprampuptime = playa ? humanwarprampuptime : compwarprampuptime;
+    float warprampuptime = playa ? configuration()->physics.warp_ramp_up_time : configuration()->physics.computer_warp_ramp_up_time;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
         if (graphicOptions.InWarp == 1) {             //Warp Turning on
             graphicOptions.RampCounter = warprampuptime;
         } else {                                        //Warp Turning off
-            graphicOptions.RampCounter = warprampdowntime;
+            graphicOptions.RampCounter = configuration()->physics.warp_ramp_down_time;
         }
         //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
         if (oldrampcounter != 0 && graphicOptions.RampCounter != 0) {
             if (graphicOptions.InWarp == 1) {             //Warp is turning on before it turned off
-                graphicOptions.RampCounter *= (1 - oldrampcounter / warprampdowntime);
+                graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->physics.warp_ramp_down_time);
             } else {                                        //Warp is turning off before it turned on
                 graphicOptions.RampCounter *= (1 - oldrampcounter / warprampuptime);
             }
@@ -258,18 +205,18 @@ void Movable::AddVelocity(float difficulty) {
             if (graphicOptions.RampCounter <= 0) {
                 graphicOptions.RampCounter = 0;
             }
-            if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > warprampdowntime) {
-                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * warprampdowntime;
+            if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > configuration()->physics.warp_ramp_down_time) {
+                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration()->physics.warp_ramp_down_time;
             }
             if (graphicOptions.InWarp == 1 && graphicOptions.RampCounter > warprampuptime) {
                 graphicOptions.RampCounter = warprampuptime;
             }
-            rampmult = (graphicOptions.InWarp) ? 1.0
+            rampmult = (graphicOptions.InWarp) ? 1.0F
                     - ((graphicOptions.RampCounter
                             / warprampuptime)
                             * (graphicOptions.RampCounter
                                     / warprampuptime)) : (graphicOptions.RampCounter
-                    / warprampdowntime) * (graphicOptions.RampCounter / warprampdowntime);
+                    / configuration()->physics.warp_ramp_down_time) * (graphicOptions.RampCounter / configuration()->physics.warp_ramp_down_time);
         }
         graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
     } else {
@@ -284,7 +231,7 @@ void Movable::AddVelocity(float difficulty) {
     }
 
     graphicOptions.WarpFieldStrength =
-            lastWarpField * WARPMEMORYEFFECT + (1.0 - WARPMEMORYEFFECT) * graphicOptions.WarpFieldStrength;
+            lastWarpField * configuration()->physics.warp_memory_effect + (1.0 - configuration()->physics.warp_memory_effect) * graphicOptions.WarpFieldStrength;
     curr_physical_state.position = curr_physical_state.position + (v * simulation_atom_var * difficulty).Cast();
     //now we do this later in update physics
     //I guess you have to, to be robust}
@@ -350,9 +297,9 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
 
     float caprate;
     if (isPlayerShip()) {         //clamp to avoid vomit-comet effects
-        caprate = maxplayerrotationrate;
+        caprate = configuration()->physics.max_player_rotation_rate;
     } else {
-        caprate = maxnonplayerrotationrate;
+        caprate = configuration()->physics.max_non_player_rotation_rate;
     }
     if (AngularVelocity.MagnitudeSquared() > caprate * caprate) {
         AngularVelocity = AngularVelocity.Normalize() * caprate;
@@ -382,8 +329,8 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
     bool newoutbig = newmagsquared > outcutsqr;
     if ((newbig && !oldbig) || (oldoutbig && !newoutbig)) {
         static bool docache = true;
-        if (docache) {
-            UniverseUtil::cacheAnimation(insys_jump_ani);
+        if (docache && !configuration()->graphics_config_.in_system_jump_animation.empty()) {
+            UniverseUtil::cacheAnimation(configuration()->graphics_config_.in_system_jump_animation);
             docache = false;
         }
         Vector v(GetVelocity());
@@ -391,18 +338,18 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
         Vector p, q, r;
         GetOrientation(p, q, r);
 
-        float tmpsec = oldbig ? endsec : sec;
-        UniverseUtil::playAnimationGrow(insys_jump_ani,
+        float tmpsec = oldbig ? configuration()->physics.warp_stretch_decel_cutoff : configuration()->physics.warp_stretch_cutoff;
+        UniverseUtil::playAnimationGrow(configuration()->graphics_config_.in_system_jump_animation,
                 realPosition().Cast() + Velocity * tmpsec + v * radial_size,
                 radial_size * 8,
                 1);
     }
 
     // stephengtuggy 2020-10-17: These need to be initialized here, because they depend on having an active mission.
-    air_res_coef = XMLSupport::parse_float(active_missions[0]->getVariable("air_resistance", "0"));
-    lateral_air_res_coef = XMLSupport::parse_float(active_missions[0]->getVariable("lateral_air_resistance", "0"));
+    air_res_coef = XMLSupport::parse_floatf(active_missions[0]->getVariable("air_resistance", "0"));
+    lateral_air_res_coef = XMLSupport::parse_floatf(active_missions[0]->getVariable("lateral_air_resistance", "0"));
 
-    if (air_res_coef || lateral_air_res_coef) {
+    if (air_res_coef != 0.0F || lateral_air_res_coef != 0.0F) {
         float velmag = Velocity.Magnitude();
         Vector AirResistance = Velocity
                 * (air_res_coef * velmag / Mass) * (corner_max.i - corner_min.i) * (corner_max.j - corner_min.j);
@@ -410,7 +357,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
             Velocity.Set(0, 0, 0);
         } else {
             Velocity = Velocity - AirResistance;
-            if (lateral_air_res_coef) {
+            if (lateral_air_res_coef != 0.0F) {
                 Vector p, q, r;
                 GetOrientation(p, q, r);
                 Vector lateralVel = p * Velocity.Dot(p) + q * Velocity.Dot(q);
@@ -491,11 +438,11 @@ float Movable::GetMaxWarpFieldStrength(float rampmult) const {
 
 
     //inverse fractional effect of ship vs real big object
-    float minmultiplier = warpMultiplierMax * graphicOptions.MaxWarpMultiplier;
+    float minmultiplier = configuration()->physics.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit = NULL;
     minmultiplier = unit->CalculateNearestWarpUnit(minmultiplier, &nearest_unit, true);
-    float minWarp = warpMultiplierMin * graphicOptions.MinWarpMultiplier;
-    float maxWarp = warpMultiplierMax * graphicOptions.MaxWarpMultiplier;
+    float minWarp = configuration()->physics.warp_multiplier_min * graphicOptions.MinWarpMultiplier;
+    float maxWarp = configuration()->physics.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
     if (minmultiplier < minWarp) {
         minmultiplier = minWarp;
     }
@@ -508,9 +455,9 @@ float Movable::GetMaxWarpFieldStrength(float rampmult) const {
     }
     v *= minmultiplier;
     float vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
-    if (vmag > warpMaxEfVel) {
-        v *= warpMaxEfVel / vmag; //HARD LIMIT
-        minmultiplier *= warpMaxEfVel / vmag;
+    if (vmag > configuration()->physics.warp_max_effective_velocity) {
+        v *= configuration()->physics.warp_max_effective_velocity / vmag; //HARD LIMIT
+        minmultiplier *= configuration()->physics.warp_max_effective_velocity / vmag;
     }
     return minmultiplier;
 }

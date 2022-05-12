@@ -37,199 +37,96 @@
 #include <map>
 #include <exception>
 #include <iostream>
+#include <cstdint>
 
 #include "vs_logging.h"
 
 namespace pt = boost::property_tree;
 
-using pt::ptree;
-
-// TODO: test this functionality, especially the subsection...
-
 class GameConfig {
 private:
-    static std::string DEFAULT_ERROR_VALUE;
+    // This is probably unique enough to ensure no collision
+//    constexpr static const char DEFAULT_ERROR_VALUE[] {"GameConfig::GetVar DEFAULT_ERROR_VALUE"};
 
-    static inline std::string GetVar(std::string const &section, std::string const &name) {
-        std::string const key = section + "." + name;
-        if (variables()->count(key) > 0) {
-            return variables()->at(key);
-        }
-        VS_LOG(warning, (boost::format("GameConfig::GetVar: Key '%1%' not found in section '%2%'") % name % section));
-        return DEFAULT_ERROR_VALUE;
+    template<class T>
+    static inline T GetVar(std::string const & path, T default_value) {
+//        const std::string full_path = "vegaconfig.variables." + path;
+        return variables_()->get(path, default_value);
     }
-
-    static inline std::string GetVar(std::string const &section,
-            std::string const &sub_section,
-            std::string const &name) {
-        std::string const key = section + "." + sub_section + "." + name;
-        if (variables()->count(key) > 0) {
-            return variables()->at(key);
-        }
-        VS_LOG(warning, (boost::format("GameConfig::GetVar: Key '%1%' not found in section '%2%', subsection '%3%'") % name % section % sub_section));
-        return DEFAULT_ERROR_VALUE;
-    }
-
-    static std::string EscapedString(const std::string& input);
-
-    static std::shared_ptr<std::map<std::string, std::string>> variables();
+    static std::string EscapedString(std::string const & input);
+    static boost::shared_ptr<pt::ptree> variables_();
 
 public:
     static void LoadGameConfig(const std::string &filename);
-    template<class T>
-    static inline T GetVariable(std::string const &section, std::string const &name, T default_value) = delete;
 
     template<class T>
-    static inline T GetVariable(std::string const &section, std::string const &sub_section,
-            std::string const &name, T default_value) = delete;
+    static inline T GetVariable(std::string const & path, T default_value) = delete;
 
-    static std::string GetEscapedString(std::string const &section, std::string const& name, std::string const& default_value);
-    static std::string GetEscapedString(std::string const &section, std::string const& sub_section, std::string const& name, std::string const& default_value);
-
-    static inline std::string GetString(std::string const &section, std::string const& name, std::string const& default_value) {
-        std::string result = GetVar(section, name);
-        if (result == DEFAULT_ERROR_VALUE) {
-            return default_value;
-        }
-        return result;
+    static inline std::string GetEscapedString(std::string const & path, std::string const & default_value) {
+        return EscapedString(GetVar(path, default_value));
     }
 
-    static inline std::string GetString(std::string const &section, std::string const& sub_section, std::string const& name, std::string const& default_value) {
-        std::string result = GetVar(section, sub_section, name);
-        if (result == DEFAULT_ERROR_VALUE) {
-            return default_value;
-        }
-        return result;
+    static inline std::string GetString(std::string const & path, std::string const & default_value) {
+        return GetVar(path, default_value);
     }
-
 };
 
 // Template Specialization
 template<>
-inline bool GameConfig::GetVariable(std::string const &section, std::string const &name, bool default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    boost::algorithm::to_lower(result);
-    return result == "true";
+inline bool GameConfig::GetVariable(std::string const & path, bool default_value) {
+    return GetVar(path, default_value);
 }
 
 template<>
-inline float GameConfig::GetVariable(std::string const &section, std::string const &name, float default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    try {
-        return std::stof(result);
-    } catch (std::invalid_argument& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw invalid_argument: %1%") % e.what()));
-        return default_value;
-    } catch (std::out_of_range& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw out_of_range: %1%") % e.what()));
-        return default_value;
-    }
+inline float GameConfig::GetVariable(std::string const & path, float default_value) {
+    return GetVar(path, default_value);
 }
 
 template<>
-inline double GameConfig::GetVariable(std::string const &section, std::string const &name, double default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    try {
-        return std::stod(result);
-    } catch (std::invalid_argument& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw invalid_argument: %1%") % e.what()));
-        return default_value;
-    } catch (std::out_of_range& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw out_of_range: %1%") % e.what()));
-        return default_value;
-    }
+inline double GameConfig::GetVariable(std::string const & path, double default_value) {
+    return GetVar(path, default_value);
+}
+
+// Here it's too hard to tell if you want an 8-bit integer or a single character
+//template<>
+//inline int8_t GameConfig::GetVariable(std::string const & path, int8_t default_value) {
+//    return GetVar(path, default_value);
+//}
+
+template<>
+inline int16_t GameConfig::GetVariable(std::string const & path, int16_t default_value) {
+    return GetVar(path, default_value);
 }
 
 template<>
-inline int GameConfig::GetVariable(std::string const &section, std::string const &name, int default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    try {
-        return std::stoi(result);
-    } catch (std::invalid_argument& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw invalid_argument: %1%") % e.what()));
-        return default_value;
-    } catch (std::out_of_range& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw out_of_range: %1%") % e.what()));
-        return default_value;
-    }
-}
-
-// With Subsection
-template<>
-inline bool GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, bool default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    boost::algorithm::to_lower(result);
-    return result == "true";
+inline uint16_t GameConfig::GetVariable(std::string const & path, uint16_t default_value) {
+    return GetVar(path, default_value);
 }
 
 template<>
-inline float GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, float default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    try {
-        return std::stof(result);
-    } catch (std::invalid_argument& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw invalid_argument: %1%") % e.what()));
-        return default_value;
-    } catch (std::out_of_range& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stof threw out_of_range: %1%") % e.what()));
-        return default_value;
-    }
+inline int32_t GameConfig::GetVariable(std::string const & path, int32_t default_value) {
+    return GetVar(path, default_value);
 }
 
 template<>
-inline double GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, double default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    try {
-        return std::stod(result);
-    } catch (std::invalid_argument& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw invalid_argument: %1%") % e.what()));
-        return default_value;
-    } catch (std::out_of_range& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stod threw out_of_range: %1%") % e.what()));
-        return default_value;
-    }
+inline uint32_t GameConfig::GetVariable(std::string const & path, uint32_t default_value) {
+    return GetVar(path, default_value);
+}
+
+// Evidently, on some platforms, int64_t and intmax_t are the same
+//template<>
+//inline int64_t GameConfig::GetVariable(std::string const & path, int64_t default_value) {
+//    return GetVar(path, default_value);
+//}
+
+template<>
+inline intmax_t GameConfig::GetVariable(std::string const & path, intmax_t default_value) {
+    return GetVar(path, default_value);
 }
 
 template<>
-inline int GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, int default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    try {
-        return std::stoi(result);
-    } catch (std::invalid_argument& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw invalid_argument: %1%") % e.what()));
-        return default_value;
-    } catch (std::out_of_range& e) {
-        VS_LOG(error, (boost::format("GameConfig::GetVariable: stoi threw out_of_range: %1%") % e.what()));
-        return default_value;
-    }
+inline uintmax_t GameConfig::GetVariable(std::string const & path, uintmax_t default_value) {
+    return GetVar(path, default_value);
 }
 
 #endif // GAME_CONFIG_H

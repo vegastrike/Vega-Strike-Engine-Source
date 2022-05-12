@@ -372,10 +372,10 @@ static void DrawShield(float fs,
             {innershield, middleshield, outershield},
             {innershield, middleshield, outershield}
     };
-    float shthresh[3] = { configuration()->graphics.hud.shield_vdu_thresh[0], configuration()->graphics.hud.shield_vdu_thresh[1], configuration()->graphics.hud.shield_vdu_thresh[2] };
+    float shthresh[3] = { configuration()->graphics_config_.hud.shield_vdu_thresh[0], configuration()->graphics_config_.hud.shield_vdu_thresh[1], configuration()->graphics_config_.hud.shield_vdu_thresh[2] };
 
     float shtrans[3] = {1.0f, 1.0f, 1.0f};
-    if (configuration()->graphics.hud.shield_vdu_fade) {
+    if (configuration()->graphics_config_.hud.shield_vdu_fade) {
         shcolor[0][0].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[0]) / (shthresh[1] - shthresh[0]) * shtrans[0]));
         shcolor[0][1].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[1]) / (shthresh[2] - shthresh[1]) * shtrans[1]));
         shcolor[0][2].a *= mymax(0.0f, mymin(1.0f, (fs - shthresh[2]) / (1.0f - shthresh[2]) * shtrans[2]));

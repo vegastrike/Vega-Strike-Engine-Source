@@ -519,11 +519,7 @@ void Music::GotoSong(int whichlist, int whichsong, bool skip, int layer) {
         if (whichsong != NOLIST && whichlist != NOLIST && whichlist < (int) playlist.size() && whichsong
                 < (int) playlist[whichlist].size()) {
             if (muzak[(layer >= 0) ? layer : 0].lastlist != whichlist) {
-                static bool clear =
-                        XMLSupport::parse_bool(vs_config->getVariable("audio",
-                                "shuffle_songs.clear_history_on_list_change",
-                                "true"));
-                if (clear) {
+                if (configuration()->audio_config_.shuffle_songs.clear_history_on_list_change) {
                     std::list<std::string> &recent = muzak[(layer >= 0) ? layer : 0].recent_songs;
                     recent.clear();
                 }

@@ -25,97 +25,87 @@
 
 #include "configuration/game_config.h"
 
-// This is probably unique enough to ensure no collision
-std::string GameConfig::DEFAULT_ERROR_VALUE = "GameConfig::GetVar DEFAULT_ERROR_VALUE";
-
-void GameConfig::LoadGameConfig(const std::string &filename) {
-    ptree tree;
-    pt::read_xml(filename, tree);
-
-    std::string const xpath = "vegaconfig.variables.";
-    for (const auto &section_iterator : tree.get_child(xpath)) {
-        std::string section_name = section_iterator.second.get<std::string>("<xmlattr>.name", "");
-        if (section_name == "") {
-            continue;
-        }
-
-        ptree inner_tree = section_iterator.second;
-        for (const auto &variable_iterator : inner_tree) {
-            std::string name = variable_iterator.second.get<std::string>("<xmlattr>.name", "");
-            std::string value = variable_iterator.second.get<std::string>("<xmlattr>.value", "");
-            if (name == "") {
-                continue;
-            }
-
-            std::string const key = section_name + "." + name;
-            (*variables())[key] = value;
-        }
-    }
-}
-
-std::string GameConfig::GetEscapedString(const std::string &section,
-        const std::string &name,
-        const std::string &default_value) {
-    std::string temp = GetVar(section, name);
-    if (temp == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return EscapedString(temp);
-}
-
-std::string GameConfig::GetEscapedString(const std::string &section,
-        const std::string &sub_section,
-        const std::string &name,
-        const std::string &default_value) {
-    std::string temp = GetVar(section, sub_section, name);
-    if (temp == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return EscapedString(temp);
-}
-
 std::string GameConfig::EscapedString(const std::string &input) {
     std::string rv;
     std::string::size_type rp = 0;
-    std::string::size_type ip = 0;
     std::string::size_type n = input.length();
     for (; rp < n; ++rp) {
         switch (input.at(rp)) {
             case '\\':
                 if ((rp > 0) && (input.at(rp - 1) == '\\')) {
-                    rv[ip++] = '\\';
+                    rv += '\\';
                 }
                 break;
             case 'n':
                 if ((rp > 0) && (input.at(rp - 1) == '\\')) {
-                    rv[ip++] = '\n';
+                    rv += '\n';
                 } else {
-                    rv[ip++] = 'n';
+                    rv += 'n';
                 }
                 break;
             case 'r':
                 if ((rp > 0) && (input.at(rp - 1) == '\\')) {
-                    rv[ip++] = '\r';
+                    rv += '\r';
                 } else {
-                    rv[ip++] = 'r';
+                    rv += 'r';
                 }
                 break;
             case 't':
                 if ((rp > 0) && (input.at(rp - 1) == '\\')) {
-                    rv[ip++] = '\t';
+                    rv += '\t';
                 } else {
-                    rv[ip++] = 't';
+                    rv += 't';
                 }
                 break;
             default:
-                rv[ip++] = input.at(rp);
+                rv += input.at(rp);
                 break;
         }
     }
     return rv;
 }
 
-std::shared_ptr<std::map<std::string, std::string>> GameConfig::variables() {
-    static const std::shared_ptr<std::map<std::string, std::string>> VARIABLES_MAP = std::make_shared<std::map<std::string, std::string>>();
+boost::shared_ptr<pt::ptree> GameConfig::variables_() {
+    static boost::shared_ptr<pt::ptree> VARIABLES_MAP = boost::make_shared<pt::ptree>();
     return VARIABLES_MAP;
+}
+
+void GameConfig::LoadGameConfig(const std::string &filename) {
+    pt::ptree temp_ptree;
+    pt::read_xml(filename, temp_ptree);
+    for (const auto& iterator : temp_ptree.get_child("vegaconfig.variables.")) {
+        if (boost::iequals(iterator.first, "section")) {
+            std::string section_name = iterator.second.get<std::string>("<xmlattr>.name", "");
+            if (section_name.empty()) {
+                continue;
+            }
+            pt::ptree inner_tree = iterator.second;
+            for (const auto& iterator2 : inner_tree) {
+                if (boost::iequals(iterator2.first, "var")) {
+                    std::string variable_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
+                    if (variable_name.empty()) {
+                        continue;
+                    }
+                    std::string variable_value = iterator2.second.get<std::string>("<xmlattr>.value", "");
+                    variables_()->put(section_name + "." + variable_name, variable_value);
+                } else if (boost::iequals(iterator2.first, "section")) {
+                    std::string subsection_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
+                    if (subsection_name.empty()) {
+                        continue;
+                    }
+                    pt::ptree inner_tree2 = iterator2.second;
+                    for (const auto& iterator3 : inner_tree2) {
+                        if (boost::iequals(iterator3.first, "var")) {
+                            std::string variable_name2 = iterator3.second.get<std::string>("<xmlattr>.name", "");
+                            if (variable_name2.empty()) {
+                                continue;
+                            }
+                            std::string variable_value2 = iterator3.second.get<std::string>("<xmlattr>.value", "");
+                            variables_()->put(section_name + "." + subsection_name + "." + variable_name2, variable_value2);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

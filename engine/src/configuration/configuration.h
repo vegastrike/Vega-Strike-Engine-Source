@@ -33,6 +33,14 @@
 namespace vegastrike_configuration {
 // Config Structs Declaration
 
+struct GeneralConfig {
+    float pitch{};
+    float yaw{};
+    float roll{};
+
+    GeneralConfig() = default;
+};
+
 struct AIConfig {
     bool assist_friend_in_need{};
     float ease_to_anger{};
@@ -44,6 +52,22 @@ struct AIConfig {
     float mood_swing_level{};
     float random_response_range{};
     int32_t shield_damage_anger{};
+    bool jump_without_energy{};
+
+    AIConfig() = default;
+};
+
+struct ShuffleSongsConfig {
+    bool clear_history_on_list_change{};
+
+    ShuffleSongsConfig() = default;
+};
+
+struct AudioConfig {
+    bool every_other_mount{};
+    ShuffleSongsConfig shuffle_songs;
+
+    AudioConfig() = default;
 };
 
 // These are settings that are relevant to collision.cpp and are marked as hacks
@@ -53,7 +77,7 @@ struct CollisionHacks {
     bool collision_damage_to_ai;
     bool crash_dock_hangar;
     bool crash_dock_unit;
-    float front_collision_hack_angle;
+    double front_collision_hack_angle;
     float front_collision_hack_distance;
     bool cargo_deals_collide_damage;
     //int upgrade_faction = (cargo_deals_collide_damage ? -1 : FactionUtil::GetUpgradeFaction())
@@ -70,6 +94,13 @@ struct Computer {
     float default_tracking_cone;
 
     Computer();
+};
+
+struct DataConfig {
+    std::string master_part_list{};
+    bool using_templates{};
+
+    DataConfig() = default;
 };
 
 struct Fuel {
@@ -190,15 +221,42 @@ struct HudConfig {
     float text_background_alpha{};
     bool top_view{};
     bool untarget_beyond_cone{};
+
+    HudConfig() = default;
+};
+
+struct GlowFlickerConfig {
+    float flicker_time{};
+    float flicker_off_time{};
+    float min_flicker_cycle{};
+    float num_times_per_second_on{};
+    float hull_for_total_dark{};
+
+    GlowFlickerConfig() = default;
 };
 
 struct GraphicsConfig {
     HudConfig hud;
+    GlowFlickerConfig glow_flicker;
     std::string automatic_landing_zone_warning{};
     std::string automatic_landing_zone_warning1{};
     std::string automatic_landing_zone_warning2{};
     std::string automatic_landing_zone_warning_text{};
     bool draw_heading_marker{};
+    float missile_explosion_radius_mult{};
+    bool missile_sparkle{};
+    float in_system_jump_ani_second_ahead{};
+    float in_system_jump_ani_second_ahead_end{};
+    std::string in_system_jump_animation{};
+    float atmosphere_emmissive{};
+    float atmosphere_diffuse{};
+    float default_engine_activation{};
+    std::string explosion_animation{};
+    int32_t shield_detail{};
+    std::string shield_texture{};
+    std::string shield_technique{};
+
+    GraphicsConfig() = default;
 };
 
 struct Logging {
@@ -219,6 +277,56 @@ struct Physics {
 
     bool does_missile_bounce{};
     float default_shield_tightness{};
+    bool system_damage_on_armor{};
+    float indiscriminate_system_destruction{};
+    bool separate_system_flakiness_component{};
+    float shield_energy_capacitance{};
+    bool use_max_shield_energy_usage{};
+    float fmec_factor{};
+    float reactor_idle_efficiency{};
+    float min_reactor_efficiency{};
+    float ecm_energy_cost{};
+    bool shields_in_spec{};
+    float shield_maintenance_charge{};
+    float warp_energy_multiplier{};
+    float player_warp_energy_multiplier{};
+    float vsd_mj_yield{};
+    uintmax_t max_ecm{};
+    float max_lost_target_live_time{};
+    float percent_missile_match_target_velocity{};
+    float game_speed{};
+    float game_accel{};
+    float velocity_max{};
+    float warp_ramp_up_time{};
+    float computer_warp_ramp_up_time{};
+    float warp_ramp_down_time{};
+    float warp_memory_effect{};
+    float max_player_rotation_rate{};
+    float max_non_player_rotation_rate{};
+    float warp_stretch_cutoff{};
+    float warp_stretch_decel_cutoff{};
+    float warp_multiplier_min{};
+    float warp_multiplier_max{};
+    float warp_max_effective_velocity{};
+    float fuel_conversion{};
+    bool unit_table{};
+    float capship_size{};
+    float near_autotrack_cone{};
+    float close_enough_to_autotrack{};
+    float distance_to_warp{};
+    float target_distance_to_warp_bonus{};
+    bool no_spec_jump{};
+    float difficulty_speed_exponent{};
+    float no_fuel_thrust{};
+    float no_fuel_afterburn{};
+    bool variable_fuel_consumption{};
+    float deuterium_relative_efficiency_lithium{};
+    float min_damage{};
+    float max_damage{};
+    float max_radar_cone_damage{};
+    float max_radar_lock_cone_damage{};
+    float max_radar_track_cone_damage{};
+    float thruster_hit_chance{};
 
     Physics();
 };
@@ -244,11 +352,14 @@ class Configuration {
 public:
     Configuration();
     void OverrideDefaultsWithUserConfiguration();
+    vegastrike_configuration::GeneralConfig general_config_;
+    vegastrike_configuration::DataConfig data_config_;
     vegastrike_configuration::AIConfig ai;
+    vegastrike_configuration::AudioConfig audio_config_;
     vegastrike_configuration::CollisionHacks collision_hacks;
     vegastrike_configuration::Computer computer;
     vegastrike_configuration::Fuel fuel;
-    vegastrike_configuration::GraphicsConfig graphics;
+    vegastrike_configuration::GraphicsConfig graphics_config_;
     vegastrike_configuration::Logging logging;
     vegastrike_configuration::Physics physics;
     vegastrike_configuration::Warp warp;

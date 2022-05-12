@@ -92,14 +92,13 @@ using std::endl;
 using std::list;
 
 std::string getMasterPartListUnitName() {
-    static std::string mpl = vs_config->getVariable("data", "master_part_list", "master_part_list");
-    return mpl;
+    return configuration()->data_config_.master_part_list;
 }
 
 Unit *_masterPartList = nullptr;
 
 Unit *getMasterPartList() {
-    if (_masterPartList == NULL) {
+    if (_masterPartList == nullptr) {
         static bool making = true;
         if (making) {
             making = false;
@@ -131,7 +130,7 @@ void Unit::SetNebula(Nebula *neb) {
 }
 
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
-    static float capship_size = GameConfig::GetVariable("physics", "capship_size", 500);
+    const float capship_size = configuration()->physics.capship_size;
 
     if (this == target || target->CloakVisible() < .8) {
         return false;
@@ -415,7 +414,7 @@ void Unit::Init(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber) {
-    static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
+    const bool UNITTAB = configuration()->physics.unit_table;
     CSVRow unitRow;
     // TODO: something with the following line
     this->Unit::Init();
@@ -494,8 +493,7 @@ void Unit::Init(const char *filename,
     this->filename = filename;
     if (!foundFile) {
         bool istemplate = (string::npos != (string(filename).find(".template")));
-        static bool usingtemplates = XMLSupport::parse_bool(vs_config->getVariable("data", "usingtemplates", "true"));
-        if (!istemplate || (istemplate && usingtemplates)) {
+        if (!istemplate || (istemplate && configuration()->data_config_.using_templates)) {
             VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();
@@ -626,15 +624,13 @@ static float tmpsqr(float x) {
 }
 
 float CloseEnoughCone(Unit *me) {
-    static float close_autotrack_cone =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "near_autotrack_cone", ".9"));
-    return close_autotrack_cone;
+    return configuration()->physics.near_autotrack_cone;
 }
 
 bool CloseEnoughToAutotrack(Unit *me, Unit *targ, float &cone) {
     if (targ) {
-        static float close_enough_to_autotrack =
-                tmpsqr(XMLSupport::parse_float(vs_config->getVariable("physics", "close_enough_to_autotrack", "4")));
+        const float close_enough_to_autotrack =
+                tmpsqr(configuration()->physics.close_enough_to_autotrack);
         float dissqr = (me->curr_physical_state.position.Cast()
                 - targ->curr_physical_state.position.Cast()).MagnitudeSquared();
         float movesqr = close_enough_to_autotrack
@@ -846,9 +842,7 @@ extern signed char ComputeAutoGuarantee(Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
 
 double howFarToJump() {
-    static float
-            tmp = XMLSupport::parse_float(vs_config->getVariable("physics", "distance_to_warp", "1000000000000.0"));
-    return tmp;
+    return configuration()->physics.distance_to_warp;
 }
 
 QVector SystemLocation(std::string system) {
@@ -899,11 +893,7 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
                                         i->first.length()) == i->first
                                         && whereto.substr(i->first.length() + 1)
                                                 == j->first) {
-                                    static float SystemWarpTargetBonus =
-                                            XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                    "target_distance_to_warp_bonus",
-                                                    "1.33"));
-                                    tmp /= SystemWarpTargetBonus;
+                                    tmp /= configuration()->physics.target_distance_to_warp_bonus;
                                 }
                             }
                         }
@@ -1035,11 +1025,11 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 }
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
-    static bool ai_jump_cheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "jump_without_energy", "false"));
-    static bool nojumpinSPEC = XMLSupport::parse_bool(vs_config->getVariable("physics", "noSPECJUMP", "true"));
-    bool SPEC_interference = (NULL != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
-            && nojumpinSPEC : (NULL != _Universe->isPlayerStarship(this)) ? graphicOptions.InWarp
-            && nojumpinSPEC : false;
+    const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
+    const bool nojumpinSPEC = configuration()->physics.no_spec_jump;
+    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
+            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && graphicOptions.InWarp
+            && nojumpinSPEC;
     //only allow big with small
     if (!GetDestinations().empty()) {
         Cockpit *cp = _Universe->isPlayerStarship(smalle);
@@ -1053,7 +1043,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
                 &&          //we have power
                         (smalle->warpenergy >= smalle->GetJumpStatus().energy
                                 //or we're being cheap
-                                || (ai_jump_cheat && cp == NULL)
+                                || (ai_jump_cheat && cp == nullptr)
                         )))
                 || forcejump) {
             //or the jump is being forced?
@@ -1098,10 +1088,8 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
 Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
-    if ((player_cockpit) == NULL) {
-        static float
-                exp = XMLSupport::parse_float(vs_config->getVariable("physics", "difficulty_speed_exponent", ".2"));
-        difficulty = pow(g_game.difficulty, exp);
+    if ((player_cockpit) == nullptr) {
+        difficulty = pow(g_game.difficulty, configuration()->physics.difficulty_speed_exponent);
     }
     return player_cockpit;
 }
@@ -1167,13 +1155,11 @@ Vector Unit::MaxTorque(const Vector &torque) {
 }
 
 Vector Unit::ClampTorque(const Vector &amt1) {
-    static float staticfuelclamp = GameConfig::GetVariable("physics", "NoFuelThrust", 0.4);
-
     Vector Res = amt1;
 
     WCWarpIsFuelHack(true);
 
-    float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_thrust : 1;
     if (fabs(amt1.i) > fuelclamp * limits.pitch) {
         Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
     }
@@ -1203,11 +1189,8 @@ bool Unit::CombatMode() {
 }
 
 Vector Unit::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    static float staticfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelThrust", ".4"));
-    static float
-            staticabfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelAfterburn", ".1"));
-    float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
-    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? staticabfuelclamp : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? configuration()->physics.no_fuel_afterburn : 1;
     float limit =
             afterburn ? (abfuelclamp
                     * (computer.max_ab_speed()
@@ -1273,12 +1256,8 @@ Vector Unit::MaxThrust(const Vector &amt1) {
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 // TODO: refactor soon. Especially access to the fuel variable
 Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
-    static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics", "fuel_equals_warp", "false"));
-    static float staticfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelThrust", ".4"));
-    static float
-            staticabfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelAfterburn", ".1"));
-    static bool finegrainedFuelEfficiency =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "VariableFuelConsumption", "false"));
+    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
+    const bool finegrainedFuelEfficiency = configuration()->physics.variable_fuel_consumption;
     if (WCfuelhack) {
         if (fuel > warpenergy) {
             fuel = warpenergy;
@@ -1304,8 +1283,8 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     }
     Vector Res = amt1;
 
-    float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
-    float abfuelclamp = (fuel <= 0) ? staticabfuelclamp : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_afterburn : 1;
     if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
         Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
     }
@@ -1322,11 +1301,9 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k < -limits.retro) {
         Res.k = -limits.retro;
     }
-    static float Lithium6constant =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "DeuteriumRelativeEfficiency_Lithium", "1"));
+    const float Lithium6constant = configuration()->physics.deuterium_relative_efficiency_lithium;
     //1/5,000,000 m/s
-    static float FMEC_exit_vel_inverse =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "FMEC_exit_vel", "0.0000002"));
+    const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
     if (afterburntype == 2) {
         //Energy-consuming afterburner
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
@@ -1457,8 +1434,8 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
     randnum = rand01();
-    static float inv_min_dam = 1.0f - XMLSupport::parse_float(vs_config->getVariable("physics", "min_damage", ".001"));
-    static float inv_max_dam = 1.0f - XMLSupport::parse_float(vs_config->getVariable("physics", "min_damage", ".999"));
+    const float inv_min_dam = 1.0F - configuration()->physics.min_damage;
+    const float inv_max_dam = 1.0F - configuration()->physics.max_damage;
     if (dam < inv_max_dam) {
         dam = inv_max_dam;
     }
@@ -1496,26 +1473,23 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
             }
         } else if (randnum >= .5) {
             //THIS IS NOT YET SUPPORTED IN NETWORKING
-            computer.target = NULL;             //set the target to NULL
+            computer.target = nullptr;             //set the target to NULL
         } else if (randnum >= .4) {
             limits.retro *= dam;
         } else if (randnum >= .3275) {
-            static float
-                    maxdam = XMLSupport::parse_float(vs_config->getVariable("physics", "max_radar_cone_damage", ".9"));
+            const float maxdam = configuration()->physics.max_radar_cone_damage;
             computer.radar.maxcone += (1 - dam);
             if (computer.radar.maxcone > maxdam) {
                 computer.radar.maxcone = maxdam;
             }
         } else if (randnum >= .325) {
-            static float maxdam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "max_radar_lockcone_damage", ".95"));
+            const float maxdam = configuration()->physics.max_radar_lock_cone_damage;
             computer.radar.lockcone += (1 - dam);
             if (computer.radar.lockcone > maxdam) {
                 computer.radar.lockcone = maxdam;
             }
         } else if (randnum >= .25) {
-            static float maxdam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "max_radar_trackcone_damage", ".98"));
+            const float maxdam = configuration()->physics.max_radar_track_cone_damage;
             computer.radar.trackingcone += (1 - dam);
             if (computer.radar.trackingcone > maxdam) {
                 computer.radar.trackingcone = maxdam;
@@ -1532,9 +1506,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         damages |= Damages::COMPUTER_DAMAGED;
         return;
     }
-    static float thruster_hit_chance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "thruster_hit_chance", ".25"));
-    if (rand01() < thruster_hit_chance) {
+    if (rand01() < configuration()->physics.thruster_hit_chance) {
         //DAMAGE ROLL/YAW/PITCH/THRUST
         float orandnum = rand01() * .82 + .18;
         if (randnum >= .9) {
@@ -5064,8 +5036,8 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     UpdateCloak();
 
     // Recharge energy and shields
-    static bool apply_difficulty_shields = GameConfig::GetVariable("physics", "difficulty_based_shield_recharge", true);
-    static bool energy_before_shield = GameConfig::GetVariable("physics", "engine_energy_priority", true);
+    static bool apply_difficulty_shields = GameConfig::GetVariable("physics.difficulty_based_shield_recharge", true);
+    static bool energy_before_shield = GameConfig::GetVariable("physics.engine_energy_priority", true);
 
     // Difficulty settings
     float difficulty_shields = 1.0f;
@@ -5359,7 +5331,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 void Unit::UpdateCloak() {
     // Use warp power for cloaking (SPEC capacitor)
     static bool warp_energy_for_cloak =
-            GameConfig::GetVariable("physics", "warp_energy_for_cloak", true);
+            GameConfig::GetVariable("physics.warp_energy_for_cloak", true);
 
     // We are not cloaked - exiting function
     if (cloaking < cloakmin) {
