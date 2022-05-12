@@ -1,8 +1,8 @@
 /*
  * health.h
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -70,7 +70,7 @@ public:
         disabling,  // The whole DamageableObject is disabled but not destroyed.
         // It can then be tractored to another ship and repaired or sold.
         destroying  // The DamageableObject is destroyed, potentially leaving debris behind
-    } effect;
+    } effect{};
 
     Health(int layer, float health = 1, float regeneration = 0) :
             Health(layer, health, health, regeneration) {
@@ -93,7 +93,7 @@ public:
         vulnerabilities.phase_damage = 1;
     };
 
-    const float Percent() const {
+    float Percent() const {
         return max_health != 0 ? health / max_health : 0.0f;
     }
 
