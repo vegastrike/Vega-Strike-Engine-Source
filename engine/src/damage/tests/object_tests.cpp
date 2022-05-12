@@ -1,8 +1,8 @@
 /*
  * object_tests.cpp
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -52,15 +52,15 @@ TEST(DamageableObject, Sanity) {
     Damage damage;
     damage.normal_damage = 10;
 
-    InflictedDamage inflicated_damage = object.DealDamage(core_vector, damage);
+    InflictedDamage inflicted_damage = object.DealDamage(core_vector, damage);
     EXPECT_EQ(object.layers[0].facets[0].health, 50);
     EXPECT_EQ(object.layers[1].facets[0].health, 100);
     EXPECT_EQ(object.layers[2].facets[0].health, 140);
     EXPECT_EQ(damage.normal_damage, 0);
-    EXPECT_EQ(inflicated_damage.total_damage, 10);
-    EXPECT_EQ(inflicated_damage.normal_damage, 10);
-    EXPECT_EQ(inflicated_damage.phase_damage, 0);
-    EXPECT_EQ(inflicated_damage.inflicted_damage_by_layer[0], 0);
-    EXPECT_EQ(inflicated_damage.inflicted_damage_by_layer[1], 0);
-    EXPECT_EQ(inflicated_damage.inflicted_damage_by_layer[2], 10);
+    EXPECT_EQ(inflicted_damage.total_damage, 10);
+    EXPECT_EQ(inflicted_damage.normal_damage, 10);
+    EXPECT_EQ(inflicted_damage.phase_damage, 0);
+    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer[0], 0);
+    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer[1], 0);
+    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer[2], 10);
 }
