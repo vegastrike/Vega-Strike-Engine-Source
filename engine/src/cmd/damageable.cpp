@@ -329,9 +329,9 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Damage internal systems
-    const bool system_damage_on_armor = vega_config::GetGameConfig().GetBool("physics.system_damage_on_armor", false);
-    bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
-    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+//    const bool system_damage_on_armor = vega_config::GetGameConfig().GetBool("physics.system_damage_on_armor", false);
+//    bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+//    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
     DamageRandomSystem(inflicted_damage, shot_at_is_player, pnt);
 

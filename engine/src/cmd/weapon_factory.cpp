@@ -74,9 +74,9 @@ WeaponFactory::WeaponFactory(std::string filename) {
 }
 
 void WeaponFactory::parse(ptree tree) {
-    static float gun_speed =
-            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
-    static int gamma = (int) (20 * game_options()->weapon_gamma);
+//    static float gun_speed =
+//            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
+//    static int gamma = (int) (20 * game_options()->weapon_gamma);
 
     for (const auto &iterator : tree) {
         WeaponInfo wi;

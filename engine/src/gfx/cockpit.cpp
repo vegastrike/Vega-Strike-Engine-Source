@@ -1147,7 +1147,7 @@ void SuicideKey(const KBData &, KBSTATE k) {
             orig = newtime;
             Unit *un = NULL;
             if ((un = _Universe->AccessCockpit()->GetParent())) {
-                float armor[8];                 //short fix
+//                float armor[8];                 //short fix
                 un->Destroy();
             }
         }
