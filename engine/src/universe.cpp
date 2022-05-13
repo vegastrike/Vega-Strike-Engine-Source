@@ -376,7 +376,10 @@ void Universe::StartDraw() {
     StarSystem *lastStarSystem = NULL;
     for (i = 0; i < _cockpits.size(); ++i) {
         SetActiveCockpit(i);
-        float x, y, w, h;
+        float x{};
+        float y{};
+        float w{};
+        float h{};
         CalculateCoords(i, _cockpits.size(), x, y, w, h);
         AccessCamera()->SetSubwindow(x, y, w, h);
         if (_cockpits.size() > 1 && AccessCockpit(i)->activeStarSystem != lastStarSystem) {
@@ -386,7 +389,7 @@ void Universe::StartDraw() {
             lastStarSystem->SwapIn();
         }
         AccessCockpit()->SelectProperCamera();
-        if (_cockpits.size() > 0) {
+        if (!_cockpits.empty()) {
             AccessCamera()->UpdateGFX();
         }
         if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
