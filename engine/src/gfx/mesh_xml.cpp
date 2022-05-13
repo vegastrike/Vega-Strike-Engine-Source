@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Copyright (C) 2001-2022 Daniel Horn, chuck_starchaser, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,11 +27,11 @@
 #include "aux_logo.h"
 #include "vegastrike.h"
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 #include <expat.h>
-#include <float.h>
-#include <assert.h>
-#include "ani_texture.h"
+#include <cfloat>
+#include <cassert>
+//#include "ani_texture.h"
 #ifndef _WIN32
 #include <unistd.h>
 #include <sys/types.h>
@@ -45,9 +45,9 @@
 #endif
 #include "xml_support.h"
 #include "vec.h"
-#include "config_xml.h"
+//#include "config_xml.h"
 #include "vs_globals.h"
-#include "cmd/script/mission.h"
+//#include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
 #include "hashtable.h"
 #include "vs_logging.h"
@@ -305,9 +305,8 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
     AttributeList::const_iterator iter;
     float flotsize = 1;
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup(name);
-    MeshXML::Names top; //FIXME If state stack is empty, top is used uninitialized !!!
-    top = MeshXML::UNKNOWN; //FIXME this line temporarily added by chuck_starchaser
-    if (xml->state_stack.size() > 0) {
+    MeshXML::Names top = MeshXML::UNKNOWN;
+    if (!xml->state_stack.empty()) {
         top = *xml->state_stack.rbegin();
     }
     xml->state_stack.push_back(elem);
