@@ -1047,9 +1047,9 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
     for (u = 0; u < fg->nr_ships; u++) {
         my_unit = units[u];
         QVector pox;
-        pox.i = fg->fg->pos.i + static_cast<float>(u) * fg_radius * 3;
-        pox.j = fg->fg->pos.j + static_cast<float>(u) * fg_radius * 3;
-        pox.k = fg->fg->pos.k + static_cast<float>(u) * fg_radius * 3;
+        pox.i = fg->fg->pos.i + static_cast<float>(u) * fg_radius * 3.0F;
+        pox.j = fg->fg->pos.j + static_cast<float>(u) * fg_radius * 3.0F;
+        pox.k = fg->fg->pos.k + static_cast<float>(u) * fg_radius * 3.0F;
         my_unit->SetPosAndCumPos(pox);
         if (type == Vega_UnitType::asteroid || type == Vega_UnitType::nebula) {
             my_unit->PrimeOrders();
