@@ -518,7 +518,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
         case CROSSHAIRS:
         case PANEL:
             if (elem == CROSSHAIRS) {
-                if (Panel.size() == 0) {
+                if (Panel.empty()) {
                     Panel.push_back(NULL);
                 }
                 if (Panel.front()) {
@@ -527,7 +527,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                 }
                 newsprite = &Panel.front();
             } else {
-                if (Panel.size() == 0) {              /* Create NULL crosshairs */
+                if (Panel.empty()) {              /* Create NULL crosshairs */
                     Panel.push_back(NULL);
                 }
                 Panel.push_back(NULL);

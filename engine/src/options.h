@@ -114,7 +114,6 @@ public:
     std::string jumpgate;
     double jumpanimationshrink;
     double jumpgatesize;
-    bool switchToTargetModeOnKey;
     double camera_pan_speed;
     bool background;
     bool cockpit;
@@ -210,7 +209,6 @@ public:
     float warp_stretch_max_speed;
     float warp_stretch_max_region0_speed;
     float weapon_gamma;
-    bool projectile_means_missile;
     bool split_dead_subunits;
     float explosionforce;
     float explosiontorque;

@@ -174,7 +174,8 @@ static void SwitchVDUTo(VDU::VDU_MODE v) {
 }
 
 void ExamineWhenTargetKey() {
-    if (game_options()->switchToTargetModeOnKey) {
+    //if (game_options()->switchToTargetModeOnKey) {
+    if (configuration()->graphics_config_.hud.switch_to_target_mode_on_key) {
         int view = 0;
         int examine = 0;
         for (; view < 2; ++view) {
@@ -198,7 +199,8 @@ unsigned int textmessager = 0;
 static bool waszero = false;
 
 void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y) {
-    GameCockpit *gcp = static_cast< GameCockpit * > ( _Universe->AccessCockpit(textmessager));
+    GameCockpit *gcp = dynamic_cast< GameCockpit * > ( _Universe->AccessCockpit(textmessager));
+    assert(gcp != nullptr);
     gcp->editingTextMessage = true;
     if ((release
             && (waszero || ch == WSK_KP_ENTER || ch == WSK_ESCAPE)) || (release == false && (ch == ']' || ch == '['))) {

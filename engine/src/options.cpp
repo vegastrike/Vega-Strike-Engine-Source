@@ -117,8 +117,6 @@ void vs_options::init() {
     jumpgate = vs_config->getVariable("graphics", "jumpgate", "warp.ani");
     jumpanimationshrink = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpanimationshrink", ".95"));
     jumpgatesize = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpgatesize", "1.75"));
-    switchToTargetModeOnKey =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "switchToTargetModeOnKey", "true"));
     camera_pan_speed = XMLSupport::parse_float(vs_config->getVariable("graphics", "camera_pan_speed", "0.0001"));
     background = XMLSupport::parse_bool(vs_config->getVariable("graphics", "background", "true"));
     cockpit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit", "true"));
@@ -231,8 +229,6 @@ void vs_options::init() {
     warp_stretch_max_region0_speed =
             XMLSupport::parse_floatf(vs_config->getVariable("graphics", "warp_stretch_max_region0_speed", "100000"));
     weapon_gamma = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "weapon_gamma", "1.35"));
-    projectile_means_missile =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "projectile_means_missile", "false"));
     split_dead_subunits = XMLSupport::parse_bool(vs_config->getVariable("graphics", "split_dead_subunits", "true"));
     explosionforce = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "explosionforce", ".5"));
     explosiontorque = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "explosiontorque", ".001"));

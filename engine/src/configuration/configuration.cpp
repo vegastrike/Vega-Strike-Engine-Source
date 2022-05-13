@@ -45,6 +45,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     general_config_.pitch = GetGameConfig().GetFloat("general.pitch", 0.0F);
     general_config_.yaw = GetGameConfig().GetFloat("general.yaw", 0.0F);
     general_config_.roll = GetGameConfig().GetFloat("general.roll", 0.0F);
+    general_config_.force_anonymous_mission_names = GetGameConfig().GetBool("general.force_anonymous_mission_names", true);
 
     data_config_.master_part_list = GetGameConfig().GetString("data.master_part_list", "master_part_list");
     data_config_.using_templates = GetGameConfig().GetBool("data.usingtemplates", true);
@@ -113,6 +114,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.shield_detail = GetGameConfig().GetInt32("graphics.shield_detail", 16);
     graphics_config_.shield_texture = GetGameConfig().GetString("graphics.shield_texture", "shield.bmp");
     graphics_config_.shield_technique = GetGameConfig().GetString("graphics.shield_technique", "");
+    graphics_config_.fov = GetGameConfig().GetFloat("graphics.fov", 78.0F);
+    graphics_config_.reduced_vdus_width = GetGameConfig().GetFloat("graphics.reduced_vdus_width", 0.0F);
+    graphics_config_.reduced_vdus_height = GetGameConfig().GetFloat("graphics.reduced_vdus_height", 0.0F);
 
     graphics_config_.glow_flicker.flicker_time = GetGameConfig().GetFloat("graphics.glowflicker.time", 30.0F);
     graphics_config_.glow_flicker.flicker_off_time = GetGameConfig().GetFloat("graphics.glowflicker.off-time", 2.0F);
@@ -295,6 +299,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.neutral_auto_radius = GetGameConfig().GetFloat("physics.neutral_auto_radius", 0.0F) * physics_config_.game_speed;
     physics_config_.hostile_auto_radius = GetGameConfig().GetFloat("physics.hostile_auto_radius", 1000.0F) * physics_config_.game_speed;
     physics_config_.min_asteroid_distance = GetGameConfig().GetFloat("physics.min_asteroid_distance", -100.0F);
+    physics_config_.steady_itts = GetGameConfig().GetBool("physics.steady_itts", false);
 
     // These calculations depend on the physics.game_speed and physics.game_accel values to be set already;
     // that's why they're down here instead of with the other graphics settings

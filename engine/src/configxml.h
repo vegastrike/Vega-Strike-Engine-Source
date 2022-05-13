@@ -47,7 +47,7 @@ public:
 
 class configNode : public easyDomNode {
 public:
-    vColor *color;
+    vColor *color{};
 };
 
 enum section_t { SECTION_COLOR, SECTION_VAR };

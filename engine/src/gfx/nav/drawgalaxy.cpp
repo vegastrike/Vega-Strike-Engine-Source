@@ -85,8 +85,7 @@ static void DrawNodeDescription(string text,
     }
     TextPlane displayname;   //will be used to display shits names
     displayname.col = col;
-    static float background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "text_background_alpha", "0.0625"));
+    const float background_alpha = configuration()->graphics_config_.hud.text_background_alpha;
     int length = text.size();
     float offset = (float(length) * 0.005);
     if (ignore_occupied_areas) {

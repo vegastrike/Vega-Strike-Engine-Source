@@ -138,12 +138,9 @@ public:
         assert(player);
         assert(target);
 
-        static bool draw_significant_blips =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_significant_blips", "true"));
-        static bool untarget_out_cone =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "untarget_beyond_cone", "false"));
-        static float minblipsize =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "min_radarblip_size", "0"));
+        const bool draw_significant_blips = configuration()->graphics_config_.hud.draw_significant_blips;
+        const bool untarget_out_cone = configuration()->graphics_config_.hud.untarget_beyond_cone;
+        const float min_radar_blip_size = configuration()->graphics_config_.hud.min_radar_blip_size;
 
         if (target != player) {
             const bool isCurrentTarget = (player->Target() == target);
@@ -162,13 +159,13 @@ public:
             }
 
             // Blips will be sorted later as different radars need to sort them differently
-            if (target->rSize() > minblipsize) {
+            if (target->rSize() > min_radar_blip_size) {
                 collection->push_back(sensor->CreateTrack(target));
             }
             if (target->isPlanet() == Vega_UnitType::planet && target->radial_size > 0) {
                 const Unit *sub = NULL;
                 for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i) {
-                    if (target->rSize() > minblipsize) {
+                    if (target->rSize() > min_radar_blip_size) {
                         collection->push_back(sensor->CreateTrack(sub));
                     }
                 }
@@ -190,19 +187,17 @@ const Sensor::TrackCollection &Sensor::FindTracksInRange() const {
     collection.clear();
 
     // Find all units within range
-    static float maxUnitRadius =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "radar_search_extra_radius", "1000"));
-    static bool allGravUnits =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_gravitational_objects", "true"));
+    const float kMaxUnitRadius = configuration()->graphics_config_.hud.radar_search_extra_radius;
+    const bool kDrawGravitationalObjects = configuration()->graphics_config_.hud.draw_gravitational_objects;
 
-    UnitWithinRangeLocator<CollectRadarTracks> unitLocator(GetMaxRange(), maxUnitRadius);
+    UnitWithinRangeLocator<CollectRadarTracks> unitLocator(GetMaxRange(), kMaxUnitRadius);
     unitLocator.action.init(this, &collection, player);
     if (!is_null(player->location[Unit::UNIT_ONLY])) {
         findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
                 player->location[Unit::UNIT_ONLY],
                 &unitLocator);
     }
-    if (allGravUnits) {
+    if (kDrawGravitationalObjects) {
         Unit *target = player->Target();
         const Unit *gravUnit;
         bool foundtarget = false;

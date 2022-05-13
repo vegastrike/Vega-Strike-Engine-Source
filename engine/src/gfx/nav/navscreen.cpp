@@ -702,8 +702,7 @@ void NavigationSystem::DrawShip() {
     displayname.SetPos(originx - (.1 * deltax), originy /*+(1*deltay)*/ );
     displayname.SetText(writethis);
     displayname.SetCharSize(1, 1);
-    static float background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "text_background_alpha", "0.0625"));
+    const float background_alpha = configuration()->graphics_config_.hud.text_background_alpha;
     GFXColor tpbg = displayname.bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {
@@ -1124,8 +1123,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     static bool nav_button_labels =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_button_labels", "true"));
     if (nav_button_labels) {
-        static float background_alpha =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "text_background_alpha", "0.0625"));
+        const float background_alpha = configuration()->graphics_config_.hud.text_background_alpha;
         GFXColor tpbg = a_label.bgcol;
         bool automatte = (0 == tpbg.a);
         if (automatte) {

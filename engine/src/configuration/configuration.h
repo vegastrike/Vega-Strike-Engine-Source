@@ -37,6 +37,7 @@ struct GeneralConfig {
     float pitch{};
     float yaw{};
     float roll{};
+    bool force_anonymous_mission_names{};
 
     GeneralConfig() = default;
 };
@@ -258,6 +259,9 @@ struct GraphicsConfig {
     int32_t shield_detail{};
     std::string shield_texture{};
     std::string shield_technique{};
+    float fov{};
+    float reduced_vdus_width{};
+    float reduced_vdus_height{};
 
     GraphicsConfig() = default;
 };
@@ -333,6 +337,7 @@ struct PhysicsConfig {
     float neutral_auto_radius{};
     float hostile_auto_radius{};
     float min_asteroid_distance{};
+    bool steady_itts{};
 
     PhysicsConfig();
 };
