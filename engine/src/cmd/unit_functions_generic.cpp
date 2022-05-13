@@ -167,24 +167,17 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
 
 
 float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false) {
-    static float gamespeed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
-
-    static float friendly_autodist =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "friendly_auto_radius", "00")) * gamespeed;
-    static float neutral_autodist =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "neutral_auto_radius", "0")) * gamespeed;
-    static float hostile_autodist =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "hostile_auto_radius", "1000")) * gamespeed;
+    const float friendly_autodist = configuration()->physics.friendly_auto_radius;
+    const float neutral_autodist = configuration()->physics.neutral_auto_radius;
+    const float hostile_autodist = configuration()->physics.hostile_auto_radius;
     int upgradefaction = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
     if (un->isUnit() == Vega_UnitType::asteroid) {
-        static float minasteroiddistance =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "min_asteroid_distance", "-100"));
-        return minasteroiddistance;
+        return configuration()->physics.min_asteroid_distance;
     }
     if (un->isUnit() == Vega_UnitType::planet
             || (un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup())) {
-        //same flihgtgroup
+        //same flightgroup
         return orig->rSize();
     }
     if (un->faction == upgradefaction) {
