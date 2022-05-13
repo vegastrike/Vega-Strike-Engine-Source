@@ -1,10 +1,8 @@
 /*
  * script_call_unit_generic.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -1049,9 +1047,9 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &d
     for (u = 0; u < fg->nr_ships; u++) {
         my_unit = units[u];
         QVector pox;
-        pox.i = fg->fg->pos.i + u * fg_radius * 3;
-        pox.j = fg->fg->pos.j + u * fg_radius * 3;
-        pox.k = fg->fg->pos.k + u * fg_radius * 3;
+        pox.i = fg->fg->pos.i + static_cast<float>(u) * fg_radius * 3;
+        pox.j = fg->fg->pos.j + static_cast<float>(u) * fg_radius * 3;
+        pox.k = fg->fg->pos.k + static_cast<float>(u) * fg_radius * 3;
         my_unit->SetPosAndCumPos(pox);
         if (type == Vega_UnitType::asteroid || type == Vega_UnitType::nebula) {
             my_unit->PrimeOrders();
