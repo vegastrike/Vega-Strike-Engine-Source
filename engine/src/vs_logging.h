@@ -43,7 +43,7 @@ enum vega_log_level {
     trace,
     debug,
     info,
-    info_to_console,
+    important_info,
     warning,
     serious_warning,
     error,

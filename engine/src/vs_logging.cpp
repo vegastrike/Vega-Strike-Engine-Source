@@ -55,7 +55,6 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
     const boost::filesystem::path &logging_dir = boost::filesystem::absolute("logs",
             vega_strike_home_dir);         /*< $HOME/.vegastrike/logs, typically >*/
     const std::string &logging_dir_name = logging_dir.string();
-//    Log(info, (boost::format("log directory : '%1%'") % logging_dir_name).str());
     VS_LOG(info, (boost::format("log directory : '%1%'") % logging_dir_name));
 
     switch (debug_level) {
@@ -69,23 +68,9 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
             logging_core_->set_filter(severity >= trace);
             break;
         default:
-            logging_core_->set_filter(severity >= info_to_console);
+            logging_core_->set_filter(severity >= important_info);
             break;
     }
-//    switch (debug_level) {
-//        case 1:
-//            logging_core_->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
-//            break;
-//        case 2:
-//            logging_core_->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
-//            break;
-//        case 3:
-//            logging_core_->set_filter(boost::log::trivial::severity >= boost::log::trivial::trace);
-//            break;
-//        default:
-//            logging_core_->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
-//            break;
-//    }
 
     file_log_sink_ = boost::log::add_file_log
             (
@@ -103,7 +88,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                             * 1024UL                                      /*< stop boost::log when there's only 2 GiB free space left >*/
             );
 
-//    console_log_sink_->set_filter(boost::log::trivial::severity >= boost::log::trivial::fatal);
+    console_log_sink_->set_filter(severity >= fatal);
 }
 
 void VegaStrikeLogger::FlushLogs() {
