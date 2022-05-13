@@ -569,11 +569,11 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
             last_directive = fg->directive;
         }
         if (fg->directive != last_directive) {
-            static bool forceobedient = XMLSupport::parse_bool(vs_config->getVariable("AI", "always_obedient", "true"));
-            if (forceobedient) {
+            if (configuration()->ai.always_obedient) {
                 obedient = true;
-            } else if (float ( rand())/RAND_MAX < (obedient ? (1 - logic->obedience) : logic->obedience))
-            obedient = !obedient;
+            } else if (float ( rand())/RAND_MAX < (obedient ? (1 - logic->obedience) : logic->obedience)) {
+                obedient = !obedient;
+            }
             if (obedient) {
                 eraseType(Order::FACING);
                 eraseType(Order::MOVEMENT);
