@@ -1188,9 +1188,8 @@ void readentity(vector<string> &entity, const char *filename) {
     if (err > Ok) {
         return;
     }
-    ///warning... obvious vulnerability
-    char input_buffer[1000];
-    while (1 == f.Fscanf("%999s", input_buffer)) {
+    char input_buffer[32000];
+    while (1 == f.Fscanf("%31999s", input_buffer)) {
         entity.emplace_back(input_buffer);
     }
     f.Close();
@@ -1240,10 +1239,9 @@ void readnames(vector<string> &entity, const char *filename) {
     if (err > Ok) {
         return;
     }
-    ///warning... obvious vulnerability
-    char input_buffer[1000];
+    char input_buffer[32000];
     while (!f.Eof()) {
-        f.ReadLine(input_buffer, 999);
+        f.ReadLine(input_buffer, 31999);
         if (input_buffer[0] == '\0' || input_buffer[0] == '\n' || input_buffer[0] == '\r') {
             continue;
         }

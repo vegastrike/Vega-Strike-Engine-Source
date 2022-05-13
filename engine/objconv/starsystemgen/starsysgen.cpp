@@ -776,9 +776,8 @@ void readentity(vector<string> &entity, const char *filename) {
     if (!fp) {
         return;
     }
-    ///warning... obvious vulnerability
-    char input_buffer[1000];
-    while (1 == fscanf(fp, "%999s", input_buffer)) {
+    char input_buffer[32000];
+    while (1 == fscanf(fp, "%31999s", input_buffer)) {
         entity.push_back(input_buffer);
     }
     fclose(fp);
@@ -789,10 +788,9 @@ void readnames(vector<string> &entity, const char *filename) {
     if (!fp) {
         return;
     }
-    ///warning... obvious vulnerability
-    char input_buffer[1000];
+    char input_buffer[32000];
     while (!feof(fp)) {
-        fgets(input_buffer, 999, fp);
+        fgets(input_buffer, 31999, fp);
         if (input_buffer[0] == '\0' || input_buffer[0] == '\n' || input_buffer[0] == '\r') {
             continue;
         }
