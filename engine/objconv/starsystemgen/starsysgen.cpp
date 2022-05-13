@@ -32,6 +32,10 @@
 #ifndef M_PI
 #define M_PI 3.1415926536
 #endif
+
+static const size_t BUFFER_SIZE = 16000;
+static const char SCANF_FORMAT_STRING[] = "%15999s";
+
 using namespace std;
 static unsigned int starsysrandom = time(NULL);
 
@@ -776,8 +780,8 @@ void readentity(vector<string> &entity, const char *filename) {
     if (!fp) {
         return;
     }
-    char input_buffer[32000];
-    while (1 == fscanf(fp, "%31999s", input_buffer)) {
+    char input_buffer[BUFFER_SIZE];
+    while (1 == fscanf(fp, SCANF_FORMAT_STRING, input_buffer)) {
         entity.push_back(input_buffer);
     }
     fclose(fp);
@@ -788,9 +792,9 @@ void readnames(vector<string> &entity, const char *filename) {
     if (!fp) {
         return;
     }
-    char input_buffer[32000];
+    char input_buffer[BUFFER_SIZE];
     while (!feof(fp)) {
-        fgets(input_buffer, 31999, fp);
+        fgets(input_buffer, BUFFER_SIZE - 1, fp);
         if (input_buffer[0] == '\0' || input_buffer[0] == '\n' || input_buffer[0] == '\r') {
             continue;
         }

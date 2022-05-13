@@ -28,6 +28,9 @@
 using std::string;
 using std::vector;
 
+static const size_t BUFFER_SIZE = 16000;
+static const char SCANF_FORMAT_STRING[] = "%15999s";
+
 /// All the properties from the galaxy in a system.
 struct SystemInfo {
     string sector;

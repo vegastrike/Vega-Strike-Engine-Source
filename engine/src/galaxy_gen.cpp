@@ -373,11 +373,11 @@ void readColorGrads(vector<string> &entity, const char *file) {
         colorGradiant.push_back(g);
         return;
     }
-    char input_buffer[1000];
-    char output_buffer[1000];
+    char input_buffer[BUFFER_SIZE];
+    char output_buffer[BUFFER_SIZE];
     GradColor g{};
     while (!f.Eof()) {
-        f.ReadLine(input_buffer, 999);
+        f.ReadLine(input_buffer, BUFFER_SIZE - 1);
         if (sscanf(input_buffer, "%f %f %f %f %f %s", &g.minrad, &g.r, &g.g, &g.b, &g.variance, output_buffer) == 6) {
             g.minrad *= game_options()->StarRadiusScale;
             colorGradiant.push_back(g);
@@ -608,7 +608,7 @@ void WriteUnit(const string &tag,
 }
 
 string getJumpTo(const string &s) {
-    char tmp[1000] = "";
+    char tmp[BUFFER_SIZE] = "";
     if (1 == sscanf(s.c_str(), "Jump_To_%s", tmp)) {
         tmp[0] = tolower(tmp[0]);
     } else {
@@ -1188,8 +1188,8 @@ void readentity(vector<string> &entity, const char *filename) {
     if (err > Ok) {
         return;
     }
-    char input_buffer[32000];
-    while (1 == f.Fscanf("%31999s", input_buffer)) {
+    char input_buffer[BUFFER_SIZE];
+    while (1 == f.Fscanf(SCANF_FORMAT_STRING, input_buffer)) {
         entity.emplace_back(input_buffer);
     }
     f.Close();
@@ -1239,13 +1239,13 @@ void readnames(vector<string> &entity, const char *filename) {
     if (err > Ok) {
         return;
     }
-    char input_buffer[32000];
+    char input_buffer[BUFFER_SIZE];
     while (!f.Eof()) {
-        f.ReadLine(input_buffer, 31999);
+        f.ReadLine(input_buffer, BUFFER_SIZE - 1);
         if (input_buffer[0] == '\0' || input_buffer[0] == '\n' || input_buffer[0] == '\r') {
             continue;
         }
-        for (unsigned int i = 0; input_buffer[i] != '\0' && i < 999; i++) {
+        for (unsigned int i = 0; input_buffer[i] != '\0' && i < BUFFER_SIZE - 1; i++) {
             if (input_buffer[i] == '\r') {
                 input_buffer[i] = '\0';
             }
