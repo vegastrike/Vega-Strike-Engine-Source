@@ -680,7 +680,11 @@ int SystemFactory::getIntAttribute(Object object, string key, int default_value,
         int multiplier, int default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        return std::stoi(object.attributes[key]) * multiplier;
+        try {
+            return std::stoi(object.attributes[key]) * multiplier;
+        } catch (std::invalid_argument&) {
+            return default_value * default_multiplier;
+        }
     }
     return default_value * default_multiplier;
 }
@@ -689,7 +693,11 @@ float SystemFactory::getFloatAttribute(Object object, string key, float default_
         float multiplier, float default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        return std::stof(object.attributes[key]) * multiplier;
+        try {
+            return std::stof(object.attributes[key]) * multiplier;
+        } catch (std::invalid_argument&) {
+            return default_value * default_multiplier;
+        }
     }
     return default_value * default_multiplier;
 }
@@ -698,7 +706,11 @@ double SystemFactory::getDoubleAttribute(Object object, string key, double defau
         double multiplier, double default_multiplier) {
     alg::to_lower(key);
     if (object.attributes.count(key)) {
-        return std::stod(object.attributes[key]) * multiplier;
+        try {
+            return std::stod(object.attributes[key]) * multiplier;
+        } catch (std::invalid_argument&) {
+            return default_value * default_multiplier;
+        }
     }
     return default_value * default_multiplier;
 }
