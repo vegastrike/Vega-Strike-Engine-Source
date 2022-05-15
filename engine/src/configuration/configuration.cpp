@@ -300,6 +300,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.hostile_auto_radius = GetGameConfig().GetFloat("physics.hostile_auto_radius", 1000.0F) * physics_config_.game_speed;
     physics_config_.min_asteroid_distance = GetGameConfig().GetFloat("physics.min_asteroid_distance", -100.0F);
     physics_config_.steady_itts = GetGameConfig().GetBool("physics.steady_itts", false);
+    physics_config_.no_unit_collisions = GetGameConfig().GetBool("physics.no_unit_collisions", false);
 
     // These calculations depend on the physics.game_speed and physics.game_accel values to be set already;
     // that's why they're down here instead of with the other graphics settings

@@ -126,9 +126,7 @@ void Unit::UpdateCollideQueue(StarSystem *ss, CollideMap::iterator hint[NUM_COLL
 }
 
 void Unit::CollideAll() {
-    static bool
-            noUnitCollisions = XMLSupport::parse_bool(vs_config->getVariable("physics", "no_unit_collisions", "false"));
-    if (isSubUnit() || killed || noUnitCollisions) {
+    if (isSubUnit() || killed || configuration()->physics.no_unit_collisions) {
         return;
     }
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind) {

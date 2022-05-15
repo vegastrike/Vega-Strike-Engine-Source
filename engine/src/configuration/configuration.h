@@ -338,6 +338,7 @@ struct PhysicsConfig {
     float hostile_auto_radius{};
     float min_asteroid_distance{};
     bool steady_itts{};
+    bool no_unit_collisions{};
 
     PhysicsConfig();
 };
