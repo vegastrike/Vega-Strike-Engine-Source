@@ -72,6 +72,10 @@ boost::shared_ptr<pt::ptree> GameConfig::variables_() {
 
 void GameConfig::LoadGameConfig(const std::string &filename) {
     pt::ptree temp_ptree;
+    if (!boost::filesystem::exists(filename)) {
+        VS_LOG_AND_FLUSH(fatal, (boost::format("void GameConfig::LoadGameConfig(const std::string &filename): Could not find vegastrike.config at '%1%'") % filename));
+//        VSExit
+    }
     pt::read_xml(filename, temp_ptree);
     for (const auto& iterator : temp_ptree.get_child("vegaconfig.variables.")) {
         if (boost::iequals(iterator.first, "section")) {
