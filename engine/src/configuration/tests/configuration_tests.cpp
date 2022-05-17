@@ -68,4 +68,17 @@ TEST(LoadConfig, Sanity) {
     EXPECT_FLOAT_EQ(subsection_float, 4.2) << "Expected 4.2 but got " << subsection_float;
     EXPECT_EQ(subsection_string, "hello");
     EXPECT_EQ(subsection_escaped_string, "#FF0000Hello\r\nthere!#000000");
+
+    // Another main section
+    const bool test_bool2 = GameConfig::GetVariable("test2.boolean_variable2", false);
+    const int test_int2 = GameConfig::GetVariable("test2.int_variable2", 1);
+    const float test_float2 = GameConfig::GetVariable("test2.float_variable2", 7.8F);
+    const std::string test_string2 = GameConfig::GetString("test2.string_variable2", "World");
+    const std::string escaped_string2 = GameConfig::GetEscapedString("test2.escaped_string_variable2", "#00FF00Hi\\\r\\\nthere!#000000");
+    EXPECT_TRUE(test_bool2);
+    EXPECT_EQ(test_int2, 15) << "Expected 15 but got " << test_int2;
+    EXPECT_FLOAT_EQ(test_float2, 4.2) << "Expected 4.2 but got " << test_float2;
+    EXPECT_EQ(test_string2, "hello");
+    EXPECT_EQ(escaped_string2, "#FF0000Hello\r\nthere!#000000");
+
 }
