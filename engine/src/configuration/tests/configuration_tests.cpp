@@ -37,7 +37,7 @@ TEST(LoadConfig, Sanity) {
     const std::string default_escaped_string = GameConfig::GetEscapedString("test.default_escaped_string", "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_FALSE(default_bool);
     EXPECT_EQ(default_int, 1);
-    EXPECT_FLOAT_EQ(default_float, 7.8);
+    EXPECT_FLOAT_EQ(default_float, 7.8F);
     EXPECT_EQ(default_string, "World");
     EXPECT_EQ(default_escaped_string, "#00FF00Hi\r\nthere!#000000");
 
@@ -53,31 +53,31 @@ TEST(LoadConfig, Sanity) {
     const std::string escaped_string = GameConfig::GetEscapedString("test.escaped_string_variable", "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_TRUE(test_bool);
     EXPECT_EQ(test_int, 15) << "Expected 15 but got " << test_int;
-    EXPECT_FLOAT_EQ(test_float, 4.2) << "Expected 4.2 but got " << test_float;
+    EXPECT_FLOAT_EQ(test_float, 4.2F) << "Expected 4.2 but got " << test_float;
     EXPECT_EQ(test_string, "hello");
     EXPECT_EQ(escaped_string, "#FF0000Hello\r\nthere!#000000");
 
     // Test subsection functionality
     const bool subsection_bool = GameConfig::GetVariable("test.subsection.subsection_boolean_variable", false);
-    const int subsection_int = GameConfig::GetVariable("test.subsection.subsection_int_variable", 1);
-    const float subsection_float = GameConfig::GetVariable("test.subsection.subsection_float_variable", 7.8F);
+    const int subsection_int = GameConfig::GetVariable("test.subsection.subsection_int_variable", 2);
+    const float subsection_float = GameConfig::GetVariable("test.subsection.subsection_float_variable", 8.9F);
     const std::string subsection_string = GameConfig::GetString("test.subsection.subsection_string_variable", "World");
     const std::string subsection_escaped_string = GameConfig::GetEscapedString("test.subsection.subsection_escaped_string_variable", "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_TRUE(subsection_bool);
     EXPECT_EQ(subsection_int, 15) << "Expected 15 but got " << subsection_int;
-    EXPECT_FLOAT_EQ(subsection_float, 4.2) << "Expected 4.2 but got " << subsection_float;
+    EXPECT_FLOAT_EQ(subsection_float, 4.2F) << "Expected 4.2 but got " << subsection_float;
     EXPECT_EQ(subsection_string, "hello");
     EXPECT_EQ(subsection_escaped_string, "#FF0000Hello\r\nthere!#000000");
 
     // Another main section
-    const bool test_bool2 = GameConfig::GetVariable("test2.boolean_variable2", false);
-    const int test_int2 = GameConfig::GetVariable("test2.int_variable2", 1);
-    const float test_float2 = GameConfig::GetVariable("test2.float_variable2", 7.8F);
+    const bool test_bool2 = GameConfig::GetVariable("test2.boolean_variable2", true);
+    const int test_int2 = GameConfig::GetVariable("test2.int_variable2", 3);
+    const float test_float2 = GameConfig::GetVariable("test2.float_variable2", 10.0F);
     const std::string test_string2 = GameConfig::GetString("test2.string_variable2", "World");
     const std::string escaped_string2 = GameConfig::GetEscapedString("test2.escaped_string_variable2", "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_TRUE(test_bool2);
     EXPECT_EQ(test_int2, 15) << "Expected 15 but got " << test_int2;
-    EXPECT_FLOAT_EQ(test_float2, 4.2) << "Expected 4.2 but got " << test_float2;
+    EXPECT_FLOAT_EQ(test_float2, 4.2F) << "Expected 4.2 but got " << test_float2;
     EXPECT_EQ(test_string2, "hello");
     EXPECT_EQ(escaped_string2, "#FF0000Hello\r\nthere!#000000");
 
