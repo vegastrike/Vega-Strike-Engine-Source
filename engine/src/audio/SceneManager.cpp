@@ -1,4 +1,4 @@
-/**
+/*
  * SceneManager.cpp
  *
  * Copyright (C) Daniel Horn
@@ -46,6 +46,7 @@
 
 #include "utils.h"
 #include "vs_math.h"
+#include "vega_cast_utils.hpp"
 
 template<> Audio::SceneManager *Singleton<Audio::SceneManager>::_singletonInstance = 0;
 
@@ -457,8 +458,7 @@ void SceneManager::activationPhaseImpl() {
     for (SceneManagerData::SceneMap::iterator it = data->activeScenes.begin();
             it != data->activeScenes.end();
             ++it) {
-        SimpleScene *scene = dynamic_cast<SimpleScene *>(it->second.get());
-        assert(scene != nullptr);
+        SimpleScene *scene = vega_dynamic_cast_ptr<SimpleScene>(it->second.get());
         Listener &listener = scene->getListener();
 
         for (SimpleScene::SourceIterator sit = scene->getActiveSources(),
@@ -493,8 +493,7 @@ void SceneManager::activationPhaseImpl() {
 
     SceneManagerData::SourceRefSet newSources;
     for (std::vector<SourcePriorityRef>::const_iterator it = selection.begin(); it != selection.end(); ++it) {
-        SimpleScene *p_simple_scene = dynamic_cast<SimpleScene *>(it->scene);
-        assert(p_simple_scene != nullptr);
+        SimpleScene *p_simple_scene = vega_dynamic_cast_ptr<SimpleScene>(it->scene);
         newSources.insert(
                 SceneManagerData::SourceRef(
                         *(it->iter),
