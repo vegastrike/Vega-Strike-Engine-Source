@@ -46,6 +46,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include <string>
 #include <cstdlib>
 #include <cassert>
+#include "vega_cast_utils.hpp"
 #include "audiolib.h"
 #include "base.h"
 #include "base_util.h"
@@ -135,8 +136,7 @@ public:
                     if (room->objs[i]) {
                         if (room->objs[i]->index == index) {
                             BaseInterface::Room::BaseVSMovie *movie =
-                                    dynamic_cast< BaseInterface::Room::BaseVSMovie * > (room->objs[i]);
-                            assert(movie != nullptr);
+                                    vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSMovie>(room->objs[i]);
 
                             if (!movie->getCallback().empty()) {
                                 RunPython(movie->getCallback().c_str());
@@ -175,8 +175,7 @@ void Texture(int room, std::string index, std::string file, float x, float y) {
         ((BaseInterface::Room::BaseVSSprite *) newroom->objs.back())->spr.GetPosition(tx, ty);
     }
     BaseInterface::Room::BaseVSSprite
-            *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > ( newroom->objs.back());
-    assert(p_base_vs_sprite != nullptr);
+            *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
     p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
 }
 
@@ -218,8 +217,7 @@ bool Video(int room, std::string index, std::string vfile, std::string afile, fl
     BaseUtil::Texture(room, index, vfile, x, y);
 
     BaseInterface::Room::BaseVSSprite
-            *baseSprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > ( newroom->objs.back());
-    assert(baseSprite != nullptr);
+            *baseSprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
 
     if (!afile.empty()) {
         if (g_game.sound_enabled) {
@@ -276,8 +274,7 @@ void SetVideoCallback(int room, std::string index, std::string callback) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 BaseInterface::Room::BaseVSMovie *movie =
-                        dynamic_cast< BaseInterface::Room::BaseVSMovie * > (newroom->objs[i]);
-                assert(movie != nullptr);
+                        vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSMovie>(newroom->objs[i]);
                 movie->setCallback(callback);
 
                 if (movie->soundsource.get() != NULL) {
@@ -300,8 +297,7 @@ void SetTexture(int room, std::string index, std::string file) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i]);
-                assert(p_base_vs_sprite != nullptr);
+                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 p_base_vs_sprite->SetSprite(file);
             }
         }
@@ -317,8 +313,7 @@ void SetTextureSize(int room, std::string index, float w, float h) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i]);
-                assert(p_base_vs_sprite != nullptr);
+                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 p_base_vs_sprite->SetSize(w, h);
             }
         }
@@ -334,8 +329,7 @@ void SetTexturePos(int room, std::string index, float x, float y) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i]);
-                assert(p_base_vs_sprite);
+                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 p_base_vs_sprite->SetPos(x, y);
             }
         }
@@ -350,13 +344,12 @@ void PlayVideo(int room, std::string index) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                SharedPtr<Source>
-                        source = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i])->soundsource;
+                BaseInterface::Room::BaseVSSprite
+                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
+                SharedPtr<Source> source = p_base_vs_sprite->soundsource;
                 assert(source && source.get() != nullptr);
-                if (source.get() != nullptr) {
-                    if (!source->isPlaying()) {
-                        source->startPlaying();
-                    }
+                if (source && !source->isPlaying()) {
+                    source->startPlaying();
                 }
             }
         }
@@ -371,13 +364,11 @@ void StopVideo(int room, std::string index) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                SharedPtr<Source>
-                        source = dynamic_cast< BaseInterface::Room::BaseVSSprite * > (newroom->objs[i])->soundsource;
-                assert(source && source.get() != nullptr);
-                if (source.get() != nullptr) {
-                    if (source->isPlaying()) {
-                        source->stopPlaying();
-                    }
+                BaseInterface::Room::BaseVSSprite
+                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
+                SharedPtr<Source> source = p_base_vs_sprite->soundsource;
+                if (source && source->isPlaying()) {
+                    source->stopPlaying();
                 }
             }
         }
@@ -435,8 +426,7 @@ void SetTextBoxText(int room, std::string index, std::string text) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 BaseInterface::Room::BaseText
-                        *p_base_text = dynamic_cast< BaseInterface::Room::BaseText * > (newroom->objs[i]);
-                assert(p_base_text != nullptr);
+                        *p_base_text = vega_dynamic_cast_ptr<BaseInterface::Room::BaseText>(newroom->objs[i]);
                 p_base_text->SetText(text);
             }
         }
@@ -496,8 +486,7 @@ void SetLinkRoom(int room, std::string index, int to) {
     for (size_t i = 0; i < newroom->links.size(); i++) {
         if (newroom->links[i]) {
             if (newroom->links[i]->index == index) {
-                BaseInterface::Room::Goto *p_goto = dynamic_cast< BaseInterface::Room::Goto * > (newroom->links[i]);
-                assert(p_goto != nullptr);
+                BaseInterface::Room::Goto *p_goto = vega_dynamic_cast_ptr<BaseInterface::Room::Goto>(newroom->links[i]);
                 p_goto->index = to;
             }
         }

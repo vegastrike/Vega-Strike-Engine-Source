@@ -493,8 +493,7 @@ void SceneManager::activationPhaseImpl() {
 
     SceneManagerData::SourceRefSet newSources;
     for (std::vector<SourcePriorityRef>::const_iterator it = selection.begin(); it != selection.end(); ++it) {
-        SimpleScene *p_simple_scene = dynamic_cast<SimpleScene *>(it->scene);
-        assert(p_simple_scene != nullptr);
+        SimpleScene *p_simple_scene = vega_dynamic_cast_ptr<SimpleScene>(it->scene);
         newSources.insert(
                 SceneManagerData::SourceRef(
                         *(it->iter),
