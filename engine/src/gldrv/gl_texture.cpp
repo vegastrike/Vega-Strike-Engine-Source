@@ -929,7 +929,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         internalformat = GetTextureFormat(internformat);
         if (((textures[handle].mipmapped & (TRILINEAR | MIPMAP)) && gl_options.mipmap >= 2) || detail_texture) {
             if (detail_texture) {
-                static FILTER fil = game_options.detail_texture_trilinear ? TRILINEAR : MIPMAP;
+                static FILTER fil = game_options()->detail_texture_trilinear ? TRILINEAR : MIPMAP;
                 textures[handle].mipmapped = fil;
                 glTexParameteri(textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 if (fil & TRILINEAR) {

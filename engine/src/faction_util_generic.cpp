@@ -119,18 +119,18 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
         if (strcmp(factions[Myfaction]->factionname, "upgrades") != 0) {
             if (strcmp(factions[TheirFaction]->factionname, "neutral") != 0) {
                 if (strcmp(factions[TheirFaction]->factionname, "upgrades") != 0) {
-                    if (isPlayerFaction(TheirFaction) || game_options.AllowNonplayerFactionChange) {
-                        if (game_options.AllowCivilWar || Myfaction != TheirFaction) {
+                    if (isPlayerFaction(TheirFaction) || game_options()->AllowNonplayerFactionChange) {
+                        if (game_options()->AllowCivilWar || Myfaction != TheirFaction) {
                             factions[Myfaction]->faction[TheirFaction].relationship += factor * rank;
                             if (factions[Myfaction]->faction[TheirFaction].relationship > 1
-                                    && game_options.CappedFactionRating) {
+                                    && game_options()->CappedFactionRating) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = 1;
                             }
                             if (factions[Myfaction]->faction[TheirFaction].relationship
-                                    < game_options.min_relationship) {
-                                factions[Myfaction]->faction[TheirFaction].relationship = game_options.min_relationship;
+                                    < game_options()->min_relationship) {
+                                factions[Myfaction]->faction[TheirFaction].relationship = game_options()->min_relationship;
                             }
-                            if (!game_options.AllowNonplayerFactionChange) {
+                            if (!game_options()->AllowNonplayerFactionChange) {
                                 factions[TheirFaction]->faction[Myfaction].relationship =
                                         factions[Myfaction]->faction[TheirFaction].relationship;
                             }                                                                                     //reflect if player

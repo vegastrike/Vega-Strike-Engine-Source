@@ -1,9 +1,8 @@
 /*
  * drawable.cpp
  *
- * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
  * Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +22,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+//#include <cassert>
 
 #include "drawable.h"
 #include "vsfilesystem.h"
@@ -44,6 +44,7 @@
 #include "universe_util.h"
 
 #include <boost/algorithm/string.hpp>
+#include "vega_cast_utils.hpp"
 
 // Dupe to same function in unit.cpp
 // TODO: remove duplication
@@ -144,7 +145,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
         ++Drawable::unitCount;
         sprintf(count, "%u", unitCount);
         uniqueUnitName = drawableGetName() + string(count);
-        Units[uniqueUnitName] = static_cast<Unit *>(this);
+        Units[uniqueUnitName] = vega_dynamic_cast_ptr<Unit>(this);
         VS_LOG(info,
                 (boost::format("Animation data loaded for unit: %1%, named %2% - with: %3% frames.") % string(filename)
                         % uniqueUnitName % numFrames));
@@ -165,7 +166,7 @@ extern double calc_blend_factor(double frac,
         unsigned int cur_simulation_frame);
 
 void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     //Quick shortcut for camera setup phase
     bool myparent = (unit == _Universe->AccessCockpit()->GetParent());
@@ -382,7 +383,7 @@ void Drawable::AnimationStep() {
 }
 
 void Drawable::DrawNow(const Matrix &mato, float lod) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     static const void *rootunit = NULL;
     if (rootunit == NULL) {
@@ -451,7 +452,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     Matrix wmat = WarpMatrix(mat);
     for (i = 0; (int) i < nummounts; i++) {
         Mount *mahnt = &unit->mounts[i];
-        if (game_options.draw_weapons) {
+        if (game_options()->draw_weapons) {
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
@@ -639,7 +640,7 @@ Matrix *GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix
  * @brief Drawable::Sparkle caused damaged units to emit sparks
  */
 void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     const Vector velocity = unit->GetVelocity();
 
     // Docked units don't sparkle
@@ -674,7 +675,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
         return;
     }
 
-    double sparkle_accum = GetElapsedTime() * game_options.sparklerate;
+    double sparkle_accum = GetElapsedTime() * game_options()->sparklerate;
     int spawn = (int) (sparkle_accum);
     sparkle_accum -= spawn;
 
@@ -705,7 +706,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
 }
 
 void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // Units not shown don't emit a halo
     if (!on_screen) {
@@ -749,7 +750,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
 }
 
 void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Transformation *ct = &unit->cumulative_transformation;
 
     for (int i = 0; (int) i < unit->getNumMounts(); i++) {
@@ -780,7 +781,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
         }
 
         // Don't draw mounts if game is set not to...
-        if (!game_options.draw_weapons) {
+        if (!game_options()->draw_weapons) {
             continue;
         }
 
@@ -835,9 +836,9 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
 }
 
 void Drawable::Split(int level) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    if (game_options.split_dead_subunits) {
+    if (game_options()->split_dead_subunits) {
         for (un_iter su = unit->getSubUnits(); *su; ++su) {
             (*su)->Split(level);
         }
@@ -940,7 +941,7 @@ void Drawable::Split(int level) {
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
         *splitsub->current_hull = 1000.0f;
         splitsub->name = "debris";
-        splitsub->setMass(game_options.debris_mass * splitsub->getMass() / level);
+        splitsub->setMass(game_options()->debris_mass * splitsub->getMass() / level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc = splitsub->meshdata[0]->Position();
@@ -949,22 +950,23 @@ void Drawable::Split(int level) {
                 locm = 1;
             }
             splitsub->ApplyForce(
-                    splitsub->meshdata[0]->rSize() * game_options.explosionforce * 10 * splitsub->getMass() * loc
+                    splitsub->meshdata[0]->rSize() * game_options()->explosionforce * 10 * splitsub->getMass() * loc
                             / locm);
             loc.Set(rand(), rand(), rand() + .1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options.explosiontorque
+            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options()->explosiontorque
                     * (1 + rand() % (int) (1 + unit->rSize())));
         }
     }
     old.clear();
     this->meshdata.clear();
     this->meshdata.push_back(NULL);     //the shield
-    unit->Mass *= game_options.debris_mass;
+    unit->Mass *= game_options()->debris_mass;
 }
 
 void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+
     // Not sure about shield percentage - more variance for more damage?
     // TODO: figure out the above comment
 
@@ -983,45 +985,45 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
 }
 
 Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared()
-            < (game_options.warp_stretch_cutoff * game_options.warp_stretch_cutoff * game_options.game_speed
-                    * game_options.game_speed)
-            || (game_options.only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
+            < (static_cast<double>(game_options()->warp_stretch_cutoff) * game_options()->warp_stretch_cutoff * game_options()->game_speed
+                    * game_options()->game_speed)
+            || (game_options()->only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
         return ctm;
     } else {
         Matrix k(ctm);
 
         float speed = unit->GetWarpVelocity().Magnitude();
-        float stretchregion0length = game_options.warp_stretch_region0_max
-                * (speed - (game_options.warp_stretch_cutoff * game_options.game_speed))
-                / ((game_options.warp_stretch_max_region0_speed * game_options.game_speed)
-                        - (game_options.warp_stretch_cutoff * game_options.game_speed));
+        float stretchregion0length = static_cast<float>(game_options()->warp_stretch_region0_max
+                * (speed - (game_options()->warp_stretch_cutoff * game_options()->game_speed))
+                / ((game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
+                        - (game_options()->warp_stretch_cutoff * game_options()->game_speed)));
         float stretchlength =
-                (game_options.warp_stretch_max
-                        - game_options.warp_stretch_region0_max)
-                        * (speed - (game_options.warp_stretch_max_region0_speed * game_options.game_speed))
-                        / ((game_options.warp_stretch_max_speed * game_options.game_speed)
-                                - (game_options.warp_stretch_max_region0_speed * game_options.game_speed) + .06125f)
-                        + game_options.warp_stretch_region0_max;
-        if (stretchlength > game_options.warp_stretch_max) {
-            stretchlength = game_options.warp_stretch_max;
+                static_cast<float>((game_options()->warp_stretch_max
+                        - game_options()->warp_stretch_region0_max)
+                        * (speed - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed))
+                        / ((game_options()->warp_stretch_max_speed * game_options()->game_speed)
+                                - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed) + .06125f)
+                        + game_options()->warp_stretch_region0_max);
+        if (stretchlength > game_options()->warp_stretch_max) {
+            stretchlength = game_options()->warp_stretch_max;
         }
-        if (stretchregion0length > game_options.warp_stretch_region0_max) {
-            stretchregion0length = game_options.warp_stretch_region0_max;
+        if (stretchregion0length > game_options()->warp_stretch_region0_max) {
+            stretchregion0length = game_options()->warp_stretch_region0_max;
         }
         ScaleMatrix(k,
                 Vector(1,
                         1,
-                        1 + (speed > (game_options.warp_stretch_max_region0_speed * game_options.game_speed)
+                        1 + (speed > (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
                                 ? stretchlength : stretchregion0length)));
         return k;
     }
 }
 
 void Drawable::UpdateHudMatrix(int whichcam) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     Matrix m;
     Matrix ctm = unit->cumulative_transformation_matrix;
@@ -1039,6 +1041,6 @@ void Drawable::UpdateHudMatrix(int whichcam) {
 }
 
 VSSprite *Drawable::getHudImage() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     return unit->pImage->pHudImage;
 }

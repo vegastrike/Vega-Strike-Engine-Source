@@ -2106,7 +2106,7 @@ void GameCockpit::Draw() {
             GFXEnable(TEXTURE0);
             //GFXDisable (DEPTHTEST);
             //GFXDisable(TEXTURE1);
-            static float deadband = game_options.mouse_deadband;
+            static float deadband = game_options()->mouse_deadband;
             static int revspr =
                     XMLSupport::parse_bool(vs_config->getVariable("joystick", "reverse_mouse_spr", "true")) ? 1 : -1;
             static string blah = vs_config->getVariable("joystick", "mouse_crosshair", "crosshairs.spr");

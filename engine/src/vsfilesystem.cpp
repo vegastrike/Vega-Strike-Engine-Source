@@ -79,7 +79,7 @@ using std::string;
 
 int VSFS_DEBUG() {
     if (vs_config) {
-        return (game_options.debug_fs);
+        return (game_options()->debug_fs);
     }
     return 0;
 }
@@ -703,10 +703,10 @@ void LoadConfig(string subdir) {
 
     //Now check if there is a data directory specified in it
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
-    if (game_options.datadir.size() > 0) {
+    if (game_options()->datadir.size() > 0) {
         //We found a path to data in config file
-        VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options.datadir));
-        datadir = game_options.datadir;
+        VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
+        datadir = game_options()->datadir;
     } else {
         if (true == legacy_data_dir_mode) {
             VS_LOG(info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
@@ -736,14 +736,14 @@ void InitMods() {
     struct dirent **dirlist;
     //new config program should insert hqtextures variable
     //with value "hqtextures" in data section.
-    if (game_options.hqtextures.size() > 0) {
+    if (game_options()->hqtextures.size() > 0) {
         //HQ Texture dir sits alongside data dir.
         selectcurrentdir = datadir + "/..";
         int ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
         if (ret >= 0) {
             while (ret--) {
                 string dname(dirlist[ret]->d_name);
-                if (dname == game_options.hqtextures) {
+                if (dname == game_options()->hqtextures) {
                     curpath = selectcurrentdir + "/" + dname;
                     VS_LOG(info, "\n\nAdding HQ Textures Pack\n\n");
                     Rootdir.push_back(curpath);
@@ -825,21 +825,21 @@ void InitPaths(string conf, string subdir) {
         SubDirectories.push_back(vec);
     }
 
-    game_options.init();
+    game_options()->init();
 
-    sharedsectors = game_options.sectors;
-    sharedcockpits = game_options.cockpits;
-    shareduniverse = game_options.universe_path;
-    sharedanims = game_options.animations;
-    sharedvideos = game_options.movies;
-    sharedsprites = game_options.sprites;
-    savedunitpath = game_options.serialized_xml;
-    sharedtextures = game_options.sharedtextures;
-    sharedsounds = game_options.sharedsounds;
-    sharedmeshes = game_options.sharedmeshes;
-    sharedunits = game_options.sharedunits;
-    aidir = game_options.ai_directory;
-    universe_name = game_options.galaxy;
+    sharedsectors = game_options()->sectors;
+    sharedcockpits = game_options()->cockpits;
+    shareduniverse = game_options()->universe_path;
+    sharedanims = game_options()->animations;
+    sharedvideos = game_options()->movies;
+    sharedsprites = game_options()->sprites;
+    savedunitpath = game_options()->serialized_xml;
+    sharedtextures = game_options()->sharedtextures;
+    sharedsounds = game_options()->sharedsounds;
+    sharedmeshes = game_options()->sharedmeshes;
+    sharedunits = game_options()->sharedunits;
+    aidir = game_options()->ai_directory;
+    universe_name = game_options()->galaxy;
 
     //Setup the directory lists we know about - note these are relative paths to datadir or homedir
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to files
@@ -888,9 +888,9 @@ void InitPaths(string conf, string subdir) {
     Directories[PythonFile] = "bases";
     Directories[AccountFile] = "accounts";
 
-    SIMULATION_ATOM = game_options.simulation_atom;
+    SIMULATION_ATOM = game_options()->simulation_atom;
     simulation_atom_var = SIMULATION_ATOM;
-    AUDIO_ATOM = game_options.audio_atom;
+    AUDIO_ATOM = game_options()->audio_atom;
     audio_atom_var = AUDIO_ATOM;
     VS_LOG(info, (boost::format("SIMULATION_ATOM: %1%") % SIMULATION_ATOM));
 
@@ -913,7 +913,7 @@ void InitPaths(string conf, string subdir) {
     //NOTE : UniverseFiles cannot use volumes since some are needed by python
     //Also : Have to try with systems, not sure it would work well
     //Setup the use of volumes for certain VSFileType
-    volume_format = game_options.volume_format;
+    volume_format = game_options()->volume_format;
     if (volume_format == "vsr") {
         q_volume_format = vfmtVSR;
     } else if (volume_format == "pk3") {

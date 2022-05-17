@@ -24,6 +24,7 @@
 #define _VS_OPTIONS_H
 
 #include <string>
+#include <memory>
 
 #ifndef uint
 typedef unsigned int uint;
@@ -355,7 +356,7 @@ public:
     std::string getPassword(int);
 };
 
-extern vs_options game_options;
+extern std::shared_ptr<vs_options> game_options();
 
 #endif
 

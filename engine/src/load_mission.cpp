@@ -42,7 +42,7 @@
 #include "options.h"
 
 std::string PickledDataSansMissionName(std::string pickled) {
-    string::size_type newline = pickled.find("\n");
+    string::size_type newline = pickled.find('\n');
     if (newline != string::npos) {
         return pickled.substr(newline + 1, pickled.length() - (newline + 1));
     } else {
@@ -266,7 +266,7 @@ void LoadMission(const char *nission_name, const std::string &script, bool loadF
         friendly_mission_name++;
     }
     if (mission_name.empty()) {
-        mission_name = game_options.empty_mission;
+        mission_name = game_options()->empty_mission;
     }
     VS_LOG(info, (boost::format("%1%") % script));
     VSFile f;

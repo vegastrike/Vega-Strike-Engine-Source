@@ -1,10 +1,8 @@
 /**
  * energetic.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
+ * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -51,15 +49,15 @@ Energetic::Energetic() : energy(0, 0),
         afterburntype(0) {
     jump.warpDriveRating = 0;
     jump.energy = 100;
-    jump.insysenergy = configuration.warp.insystem_jump_cost * jump.energy;
+    jump.insysenergy = configuration()->warp.insystem_jump_cost * jump.energy;
     jump.drive = -2;
     jump.delay = 5;
     jump.damage = 0;
 }
 
 void Energetic::decreaseWarpEnergy(bool insys, float time) {
-    static float bleed_factor = configuration.physics.bleed_factor;
-    static bool wc_fuel_hack = configuration.fuel.fuel_equals_warp;
+    static float bleed_factor = configuration()->physics.bleed_factor;
+    static bool wc_fuel_hack = configuration()->fuel.fuel_equals_warp;
     if (wc_fuel_hack) {
         this->warpenergy = this->fuel;
     }
@@ -76,7 +74,7 @@ void Energetic::DecreaseWarpEnergyInWarp() {
     Unit *unit = static_cast<Unit *>(this);
 
     const bool in_warp = unit->graphicOptions.InWarp;
-    static float bleed_factor = configuration.physics.bleed_factor;
+    static float bleed_factor = configuration()->physics.bleed_factor;
 
     if (!in_warp) {
         return;
@@ -96,7 +94,7 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 float Energetic::energyData() const {
     float capacitance = const_cast<Energetic *>(this)->totalShieldEnergyCapacitance();
 
-    if (configuration.physics.max_shield_lowers_capacitance) {
+    if (configuration()->physics.max_shield_lowers_capacitance) {
         if (energy.MaxValue() <= capacitance) {
             return 0;
         }
@@ -116,9 +114,9 @@ float Energetic::fuelData() const {
 
 float Energetic::getFuelUsage(bool afterburner) {
     if (afterburner) {
-        return configuration.fuel.afterburner_fuel_usage;
+        return configuration()->fuel.afterburner_fuel_usage;
     }
-    return configuration.fuel.normal_fuel_usage;
+    return configuration()->fuel.normal_fuel_usage;
 }
 
 /**
@@ -128,7 +126,7 @@ float Energetic::getFuelUsage(bool afterburner) {
  */
 // TODO: this is still an ugly hack
 void Energetic::WCWarpIsFuelHack(bool transfer_warp_to_fuel) {
-    if (!configuration.fuel.fuel_equals_warp) {
+    if (!configuration()->fuel.fuel_equals_warp) {
         return;
     }
 
@@ -143,7 +141,7 @@ float Energetic::ExpendMomentaryFuelUsage(float magnitude) {
     // TODO: have this make some kind of sense to someone other than the person who wrote the comment below.
     //HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
     float quantity = Energetic::getFuelUsage(false) * simulation_atom_var * magnitude *
-            configuration.fuel.fmec_exit_velocity_inverse / configuration.fuel.fuel_efficiency;
+            configuration()->fuel.fmec_exit_velocity_inverse / configuration()->fuel.fuel_efficiency;
 
     return ExpendFuel(quantity);
 }
@@ -154,7 +152,7 @@ float Energetic::ExpendMomentaryFuelUsage(float magnitude) {
  * @return - actual quantity used
  */
 float Energetic::ExpendFuel(float quantity) {
-    fuel -= configuration.fuel.normal_fuel_usage * quantity;
+    fuel -= configuration()->fuel.normal_fuel_usage * quantity;
 
     if (fuel < 0) {
         quantity += fuel;
@@ -169,7 +167,7 @@ float Energetic::getWarpEnergy() const {
 }
 
 void Energetic::increaseWarpEnergy(bool insys, float time) {
-    static bool WCfuelhack = configuration.fuel.fuel_equals_warp;
+    static bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
     if (WCfuelhack) {
         this->warpenergy = this->fuel;
     }
@@ -187,13 +185,13 @@ float Energetic::maxEnergyData() const {
 }
 
 void Energetic::rechargeEnergy() {
-    if ((!configuration.fuel.reactor_uses_fuel) || (fuel > 0)) {
+    if ((!configuration()->fuel.reactor_uses_fuel) || (fuel > 0)) {
         energy += recharge * simulation_atom_var;
     }
 }
 
 bool Energetic::refillWarpEnergy() {
-    static bool WCfuelhack = configuration.fuel.fuel_equals_warp;
+    static bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
     if (WCfuelhack) {
         this->warpenergy = this->fuel;
     }
@@ -284,7 +282,7 @@ void Energetic::ExpendFuel() {
     static float reactor_idle_efficiency = GameConfig::GetVariable("physics", "reactor_idle_efficiency", 0.98f);
     static float min_reactor_efficiency = GameConfig::GetVariable("physics", "min_reactor_efficiency", 0.00001f);
 
-    if (!configuration.fuel.reactor_uses_fuel) {
+    if (!configuration()->fuel.reactor_uses_fuel) {
         return;
     }
 

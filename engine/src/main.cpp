@@ -78,13 +78,11 @@
 #include "options.h"
 #include "version.h"
 
-vs_options game_options;
-
 /*
  * Globals
  */
 Universe *_Universe;
-TextPlane *bs_tp = NULL;
+TextPlane *bs_tp = nullptr;
 char SERVER = 0;
 
 //false if command line option --net is given to start without network
@@ -252,7 +250,7 @@ int main(int argc, char *argv[]) {
     legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
     std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
 
-    if (true == legacy_data_dir_mode) {
+    if (legacy_data_dir_mode) {
         VSFileSystem::datadir = boost::filesystem::current_path().string();
         std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
     }
@@ -264,17 +262,11 @@ int main(int argc, char *argv[]) {
 
     VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
 
-    // stephengtuggy 2021-09-10 Let's try initializing the directories in the same order
-    // on Windows as on other platforms, and see what happens
-// #ifdef WIN32
-//     VSFileSystem::InitHomeDirectory();
-// #endif
-
-    CONFIGFILE = 0;
+    CONFIGFILE = nullptr;
     mission_name[0] = '\0';
     {
         char pwd[8192] = "";
-        if (NULL != getcwd(pwd, 8191)) {
+        if (nullptr != getcwd(pwd, 8191)) {
             pwd[8191] = '\0';
             VS_LOG(info, (boost::format(" In path %1%") % pwd));
         } else {
@@ -295,7 +287,7 @@ int main(int argc, char *argv[]) {
            "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n");
     /* Seed the random number generator */
     if (benchmark < 0.0) {
-        srand(time(NULL));
+        srand(time(nullptr));
     } else {
         //in benchmark mode, always use the same seed
         srand(171070);
@@ -316,11 +308,11 @@ int main(int argc, char *argv[]) {
     }
 
     // now that the user config file has been loaded from disk, update the global configuration struct values
-    configuration.OverrideDefaultsWithUserConfiguration();
+    configuration()->OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {
-        g_game.vsdebug = game_options.vsdebug;
+        g_game.vsdebug = game_options()->vsdebug;
     }
 
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
@@ -336,11 +328,11 @@ int main(int argc, char *argv[]) {
     VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
-    if (game_options.force_client_connect) {
+    if (game_options()->force_client_connect) {
         ignore_network = false;
     }
     if (mission_name[0] == '\0') {
-        strncpy(mission_name, game_options.default_mission.c_str(), 1023);
+        strncpy(mission_name, game_options()->default_mission.c_str(), 1023);
         mission_name[1023] = '\0';
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
@@ -373,7 +365,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     AUDInit();
-    AUDListenerGain(game_options.sound_gain);
+    AUDListenerGain(game_options()->sound_gain);
     Music::InitMuzak();
 
     initSceneManager();
@@ -382,11 +374,11 @@ int main(int argc, char *argv[]) {
 
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
-    if (game_options.command_interpretor) {
+    if (game_options()->command_interpretor) {
         CommandInterpretor = new commandI;
         InitShipCommands();
     }
-    _Universe = new Universe(argc, argv, game_options.galaxy.c_str());
+    _Universe = new Universe(argc, argv, game_options()->galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
     _Universe->Loop(bootstrap_first_loop);
 
@@ -473,9 +465,9 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             ani->DrawNow(tmp);
         }
     }
-    bs_tp->Draw(game_options.default_boot_message.length() > 0 ?
-            game_options.default_boot_message : message.length() > 0 ?
-                    message : game_options.initial_boot_message);
+    bs_tp->Draw(game_options()->default_boot_message.length() > 0 ?
+            game_options()->default_boot_message : message.length() > 0 ?
+                    message : game_options()->initial_boot_message);
 
     GFXHudMode(GFXFALSE);
     GFXEndScene();
@@ -529,11 +521,11 @@ vector<string> parse_space_string(std::string s) {
 void bootstrap_first_loop() {
     static int i = 0;
     if (i == 0) {
-        vector<string> s = parse_space_string(game_options.splash_screen);
-        vector<string> sa = parse_space_string(game_options.splash_audio);
-        int snum = time(NULL) % s.size();
-        SplashScreen = new Animation(s[snum].c_str(), 0);
-        if (sa.size() && sa[0].length()) {
+        vector<string> s = parse_space_string(game_options()->splash_screen);
+        vector<string> sa = parse_space_string(game_options()->splash_audio);
+        int snum = time(nullptr) % s.size();
+        SplashScreen = new Animation(s[snum].c_str(), false);
+        if (!sa.empty() && sa[0].length()) {
             muzak->GotoSong(sa[snum % sa.size()]);
         }
         bs_tp = new TextPlane();
@@ -541,7 +533,7 @@ void bootstrap_first_loop() {
     bootstrap_draw("Vegastrike Loading...", SplashScreen);
     if (i++ > 4) {
         if (_Universe) {
-            if (game_options.main_menu) {
+            if (game_options()->main_menu) {
                 UniverseUtil::startMenuInterface(true);
             } else {
                 _Universe->Loop(bootstrap_main_loop);
@@ -551,9 +543,9 @@ void bootstrap_first_loop() {
 }
 
 void SetStartupView(Cockpit *cp) {
-    cp->SetView(game_options.startup_cockpit_view
-            == "view_target" ? CP_TARGET : (game_options.startup_cockpit_view
-            == "back" ? CP_BACK : (game_options.startup_cockpit_view
+    cp->SetView(game_options()->startup_cockpit_view
+            == "view_target" ? CP_TARGET : (game_options()->startup_cockpit_view
+            == "back" ? CP_BACK : (game_options()->startup_cockpit_view
             == "chase" ? CP_CHASE
             : CP_FRONT)));
 }
@@ -582,12 +574,12 @@ void bootstrap_main_loop() {
         vector<std::string> playerpasswd;
         string pname, ppasswd;
         for (int p = 0; p < numplayers; p++) {
-            pname = game_options.getPlayer(p);
-            ppasswd = game_options.getPassword(p);
+            pname = game_options()->getPlayer(p);
+            ppasswd = game_options()->getPassword(p);
 
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
-                if (pname == "") {
+                if (pname.empty()) {
                     VS_LOG_AND_FLUSH(fatal, (boost::format("Missing or incomplete section for player %1%") % p));
                     cleanexit = true;
                     VSExit(1);
@@ -629,7 +621,7 @@ void bootstrap_main_loop() {
         vector<SavedUnits> saved;
         vector<string> packedInfo;
 
-        if (game_options.load_last_savegame) {
+        if (game_options()->load_last_savegame) {
             _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
                     mysystem,
                     mysystem,
@@ -671,16 +663,17 @@ void bootstrap_main_loop() {
         UpdateTime();
         FactionUtil::LoadContrabandLists();
         {
-            if (!game_options.intro1.empty()) {
-                UniverseUtil::IOmessage(0, "game", "all", game_options.intro1);
-                if (!game_options.intro2.empty()) {
-                    UniverseUtil::IOmessage(4, "game", "all", game_options.intro2);
-                    if (!game_options.intro3.empty()) {
-                        UniverseUtil::IOmessage(8, "game", "all", game_options.intro3);
-                        if (!game_options.intro4.empty()) {
-                            UniverseUtil::IOmessage(12, "game", "all", game_options.intro4);
-                            if (!game_options.intro5.empty()) {
-                                UniverseUtil::IOmessage(16, "game", "all", game_options.intro5);
+            // TODO: Figure out how to refactor this section to use a loop or similar, eliminating code duplication
+            if (!game_options()->intro1.empty()) {
+                UniverseUtil::IOmessage(0, "game", "all", game_options()->intro1);
+                if (!game_options()->intro2.empty()) {
+                    UniverseUtil::IOmessage(4, "game", "all", game_options()->intro2);
+                    if (!game_options()->intro3.empty()) {
+                        UniverseUtil::IOmessage(8, "game", "all", game_options()->intro3);
+                        if (!game_options()->intro4.empty()) {
+                            UniverseUtil::IOmessage(12, "game", "all", game_options()->intro4);
+                            if (!game_options()->intro5.empty()) {
+                                UniverseUtil::IOmessage(16, "game", "all", game_options()->intro5);
                             }
                         }
                     }
@@ -690,14 +683,14 @@ void bootstrap_main_loop() {
 
         if (mission->getVariable("savegame",
                 "").length() != 0
-                && game_options.dockOnLoad) {
+                && game_options()->dockOnLoad) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
                 DockToSavedBases(i, vec);
             }
         }
 
-        if (game_options.load_last_savegame) {
+        if (game_options()->load_last_savegame) {
             //Don't write if we didn't load...
             for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
                 WriteSaveGame(_Universe->AccessCockpit(i), false);
@@ -709,7 +702,7 @@ void bootstrap_main_loop() {
         }
         _Universe->Loop(main_loop);
         ///return to idle func which now should call main_loop mohahahah
-        if (game_options.auto_hide) {
+        if (game_options()->auto_hide) {
             UniverseUtil::hideSplashScreen();
         }
     }

@@ -89,11 +89,11 @@ void AddDelta(int dx, int dy) {
 int warpallowage = 2;
 
 void DealWithWarp(int x, int y) {
-    if (game_options.warp_mouse) {
+    if (game_options()->warp_mouse) {
         if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
-            if (x < game_options.warp_mouse_zone || y < game_options.warp_mouse_zone
-                    || x > g_game.x_resolution - game_options.warp_mouse_zone || y
-                    > g_game.y_resolution - game_options.warp_mouse_zone) {
+            if (x < game_options()->warp_mouse_zone || y < game_options()->warp_mouse_zone
+                    || x > g_game.x_resolution - game_options()->warp_mouse_zone || y
+                    > g_game.y_resolution - game_options()->warp_mouse_zone) {
 
                 int delx = -x + g_game.x_resolution / 2;
                 int dely = -y + g_game.y_resolution / 2;

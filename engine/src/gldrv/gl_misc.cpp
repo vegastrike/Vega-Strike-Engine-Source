@@ -21,7 +21,7 @@
  */
 
 
-#include <string.h>
+#include <cstring>
 #define GL_MISC_CPP
 #include "gl_globals.h"
 #undef GL_MISC_CPP
@@ -29,7 +29,6 @@
 #include "gfxlib.h"
 #include "vs_globals.h"
 #include "gl_light.h"
-#include "config_xml.h"
 #include "winsys.h"
 #include "options.h"
 
@@ -50,10 +49,10 @@ void GFXCircle(float x, float y, float wid, float hei) {
     float segmag =
             (Vector(wid * g_game.x_resolution, 0,
                     0)
-                    - Vector(wid * g_game.x_resolution * cos(2. * M_PI / 360.0),
-                            hei * g_game.y_resolution * sin(2. * M_PI / 360.0),
+                    - Vector(static_cast<double>(wid) * g_game.x_resolution * cos(2.0 * M_PI / 360.0),
+                            static_cast<double>(hei) * g_game.y_resolution * sin(2.0 * M_PI / 360.0),
                             0)).Magnitude();
-    int accuracy = (int) (360.0f * game_options.circle_accuracy * (1.0f < segmag ? 1.0 : segmag));
+    int accuracy = (int) (360.0f * game_options()->circle_accuracy * (1.0f < segmag ? 1.0 : segmag));
     if (accuracy < 4) {
         accuracy = 4;
     }

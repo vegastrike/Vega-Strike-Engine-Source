@@ -351,7 +351,7 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
     // Discussion - the original value (day/year) needs to be adjusted to velocity
     // by multiplying
     float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(game_options.YearScale);
+    float float_year_scale = static_cast<float>(game_options()->YearScale);
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
@@ -456,7 +456,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
 }
 
 void SystemFactory::processFog(Star_XML *xml, Object &object, Planet *owner) {
-    if (!game_options.usePlanetFog) {
+    if (!game_options()->usePlanetFog) {
         return;
     }
 
@@ -521,7 +521,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     int neutralfaction = FactionUtil::GetNeutralFaction();
 
     float scalex = getFloatAttribute(object, "difficulty",
-            static_cast<float>(game_options.AsteroidDifficulty));
+            static_cast<float>(game_options()->AsteroidDifficulty));
     float absolute_scalex = std::fabs(scalex);
     double velocity = getDoubleAttribute(object, "year", 0.0);
     float rotational_velocity = getFloatAttribute(object, "day", 0.0f);
@@ -556,14 +556,14 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
     // I assume negative means counter movement and therefore fabs
     // TODO: this code is repeated. Refactor into function
     float float_pi = static_cast<float>(M_PI);
-    float float_year_scale = static_cast<float>(game_options.YearScale);
+    float float_year_scale = static_cast<float>(game_options()->YearScale);
     // TODO: turn floating point comparisons into a function
     if (std::fabs(rotational_velocity) > .00001f) {
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
     }
 
     if (std::fabs(velocity) > .00001) {
-        velocity = 2.0 * M_PI / (game_options.YearScale * velocity);
+        velocity = 2.0 * M_PI / (game_options()->YearScale * velocity);
     }
 
     if (boost::iequals(element, "nebula")) {

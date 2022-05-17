@@ -1,10 +1,8 @@
-/**
+/*
  * test.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -42,7 +40,9 @@
 
 #include <iostream>
 #include <string>
-#include <limits>
+//#include <limits>
+#include <cassert>
+#include "vega_cast_utils.hpp"
 
 #include "utils.h"
 #include "vs_math.h"
@@ -364,7 +364,8 @@ void testComplexScene(bool doppler) {
         spcscene->getListener().setOrientation(dpos, Vector3(0, 1, 0));
         spcscene->getListener().setPosition(pos);
 
-        dynamic_cast<EngParticleListener *>(englistener.get())->time = (getRealTime() - t) / 20.0;
+        EngParticleListener *p_listener = vega_dynamic_cast_ptr<EngParticleListener>(englistener.get());
+        p_listener->time = (getRealTime() - t) / 20.0;
 
         smQuickTick();
     }
@@ -661,6 +662,11 @@ void initALRenderer() {
 void closeRenderer() {
     cerr << "Shutting down renderer..." << endl;
     SceneManager::getSingleton()->setRenderer(SharedPtr<Renderer>());
+}
+
+void VSExit(int code) {
+    ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+    exit(code);
 }
 
 int main(int argc, char **argv) {

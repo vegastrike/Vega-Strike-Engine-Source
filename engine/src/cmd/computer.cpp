@@ -72,9 +72,9 @@ Computer::RADARLIM::RADARLIM() :
         canlock(false),
         trackingactive(true) {
 
-    maxrange = configuration.computer.default_max_range;
-    trackingcone = configuration.computer.default_tracking_cone;
-    lockcone = configuration.computer.default_lock_cone;
+    maxrange = configuration()->computer.default_max_range;
+    trackingcone = configuration()->computer.default_tracking_cone;
+    lockcone = configuration()->computer.default_lock_cone;
 }
 
 Computer::RADARLIM::Brand::Value Computer::RADARLIM::GetBrand() const {

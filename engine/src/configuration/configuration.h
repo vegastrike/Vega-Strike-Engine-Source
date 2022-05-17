@@ -26,6 +26,8 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#include <memory>
+
 namespace vegastrike_configuration {
 // Config Structs Declaration
 
@@ -133,6 +135,6 @@ public:
     vegastrike_configuration::Weapons weapons;
 };
 
-extern Configuration configuration;
+extern std::shared_ptr<Configuration> configuration();
 
 #endif // CONFIGURATION_H

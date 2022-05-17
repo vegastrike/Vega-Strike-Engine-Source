@@ -21,14 +21,13 @@
  */
 
 
-#include <stdlib.h>
+#include <cstdlib>
 #ifndef _WIN32
 #include <fenv.h>
 #endif
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cassert>
+#include <cstring>
 #include "lin_time.h"
 #include "cmd/movable.h"
 #include "vegastrike.h"
@@ -51,7 +50,7 @@
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/navigation.h"
 #include "cmd/beam.h"
-#include  "gfx/halo.h"
+#include "gfx/halo.h"
 #include "gfx/matrix.h"
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
@@ -64,7 +63,6 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "cmd/nebula.h"
-// #include "vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-06
 #include "vs_logging.h"
 #include "cmd/script/mission.h"
 #include "xml_support.h"
@@ -87,8 +85,6 @@
 #ifndef NO_GFX
 #include "gldrv/gl_globals.h"
 #endif
-
-extern vs_options game_options;
 
 #define KEYDOWN(name, key) (name[key]&0x80)
 
@@ -178,7 +174,7 @@ static void SwitchVDUTo(VDU::VDU_MODE v) {
 }
 
 void ExamineWhenTargetKey() {
-    if (game_options.switchToTargetModeOnKey) {
+    if (game_options()->switchToTargetModeOnKey) {
         int view = 0;
         int examine = 0;
         for (; view < 2; ++view) {
@@ -252,7 +248,7 @@ void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x,
 
 void TextMessageKey(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
-        if (game_options.chat_only_in_network) {
+        if (game_options()->chat_only_in_network) {
             return;
         }
         winsys_set_keyboard_func(TextMessageCallback);
@@ -263,7 +259,7 @@ void TextMessageKey(const KBData &, KBSTATE newState) {
 void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
-        if (game_options.write_savegame_on_exit) {
+        if (game_options()->write_savegame_on_exit) {
             _Universe->WriteSaveGame(true);              //gotta do important stuff first
         }
         for (size_t i = 0; i < active_missions.size(); ++i) {
@@ -298,7 +294,7 @@ static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q,
                     R,
-                    game_options.camera_pan_speed);
+                    game_options()->camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -315,7 +311,7 @@ static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q,
                     R,
-                    game_options.camera_pan_speed);
+                    game_options()->camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -332,7 +328,7 @@ static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P,
                     R,
-                    game_options.camera_pan_speed);
+                    game_options()->camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -349,7 +345,7 @@ static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P,
                     R,
-                    game_options.camera_pan_speed);
+                    game_options()->camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -389,7 +385,7 @@ void LookDown(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(game_options.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(game_options()->camera_pan_speed * 1000.0);
         } else {
             PitchDown(kbdata, newState);
         }
@@ -407,7 +403,7 @@ void LookUp(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-game_options.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-game_options()->camera_pan_speed * 1000.0);
         } else {
             PitchUp(kbdata, newState);
         }
@@ -425,7 +421,7 @@ void LookLeft(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(game_options.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(game_options()->camera_pan_speed * 1000.0);
         } else {
             YawLeft(kbdata, newState);
         }
@@ -443,7 +439,7 @@ void LookRight(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-game_options.camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-game_options()->camera_pan_speed * 1000.0);
         } else {
             YawRight(kbdata, newState);
         }
@@ -465,12 +461,12 @@ void Quit(const KBData &, KBSTATE newState) {
 void Inside(const KBData &, KBSTATE newState) {
     {
         if (_Universe->activeStarSystem() && _Universe->activeStarSystem()->getBackground()) {
-            _Universe->activeStarSystem()->getBackground()->EnableBG(game_options.background);
+            _Universe->activeStarSystem()->getBackground()->EnableBG(game_options()->background);
         }
     }
-    static int tmp = (game_options.cockpit ? 1 : 0);
+    static int tmp = (game_options()->cockpit ? 1 : 0);
     if (newState == PRESS && (_Universe->AccessCockpit()->GetView() == CP_FRONT)
-            && game_options.disabled_cockpit_allowed) {
+            && game_options()->disabled_cockpit_allowed) {
         YawLeft(KBData(), RELEASE);
         YawRight(KBData(), RELEASE);
         PitchUp(KBData(), RELEASE);
@@ -479,15 +475,14 @@ void Inside(const KBData &, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetParent()) {
             cockpit = _Universe->AccessCockpit()->GetParent()->getCockpit();
         }
-        Unit *u =
-                NULL; //= NULL just to shut off a warning about its possibly being used uninitialized --chuck_starchaser
-        if ((_Universe->AccessCockpit()->GetParent() != NULL)
+        Unit *u = nullptr;
+        if ((_Universe->AccessCockpit()->GetParent() != nullptr)
                 && (_Universe->AccessCockpit()->GetParent()->name == "return_to_cockpit")
-                && (_Universe->AccessCockpit()->GetParent()->owner != NULL)
+                && (_Universe->AccessCockpit()->GetParent()->owner != nullptr)
                 && (u = findUnitInStarsystem(_Universe->AccessCockpit()->GetParent()->owner))) {
             cockpit = u->getCockpit();
         }
-        _Universe->AccessCockpit()->Init(cockpit.c_str(), ((tmp) && _Universe->AccessCockpit()->GetParent()) == false);
+        _Universe->AccessCockpit()->Init(cockpit.c_str(), !((tmp) && _Universe->AccessCockpit()->GetParent()));
         tmp = (tmp + 1) % 2;
     }
     if (newState == PRESS || newState == DOWN) {
@@ -593,7 +588,7 @@ void CommModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options.comm);
+            sc.loadsound(game_options()->comm);
         }
         sc.playsound();
         SwitchVDUTo(VDU::COMM);
@@ -604,7 +599,7 @@ void ScanningModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options.scanning);
+            sc.loadsound(game_options()->scanning);
         }
         sc.playsound();
         SwitchVDUTo(VDU::SCANNING);
@@ -615,7 +610,7 @@ void ObjectiveModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options.objective);
+            sc.loadsound(game_options()->objective);
         }
         sc.playsound();
 
@@ -627,7 +622,7 @@ void TargetModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options.examine);
+            sc.loadsound(game_options()->examine);
         }
         sc.playsound();
 
@@ -639,7 +634,7 @@ void ViewModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options.view);
+            sc.loadsound(game_options()->view);
         }
         sc.playsound();
         SwitchVDUTo(VDU::VIEW);
@@ -650,7 +645,7 @@ void DamageModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options.repair);
+            sc.loadsound(game_options()->repair);
         }
         sc.playsound();
 
@@ -662,7 +657,7 @@ void ManifestModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options.manifest);
+            sc.loadsound(game_options()->manifest);
         }
         sc.playsound();
 
@@ -776,7 +771,7 @@ void IncrementStartupVariable() {
         var = getSaveData(0, "436457r1K3574r7uP71m35", 0);
         putSaveData(0, "436457r1K3574r7uP71m35", 0, var + 1);
     }
-    if (var <= game_options.times_to_show_help_screen) {
+    if (var <= game_options()->times_to_show_help_screen) {
         GameCockpit::NavScreen(KBData(), PRESS);
     }          //HELP FIXME
 }
@@ -788,12 +783,12 @@ void createObjects(std::vector<std::string> &fighter0name,
     vector<std::string> fighter0mods;
     vector<int> fighter0indices;
 
-    static Vector TerrainScale(game_options.xscale, game_options.yscale, game_options.zscale);
+    static Vector TerrainScale(game_options()->xscale, game_options()->yscale, game_options()->zscale);
 
-    myterrain = NULL;
+    myterrain = nullptr;
     std::string stdstr = mission->getVariable("terrain", "");
     if (stdstr.length() > 0) {
-        Terrain *terr = new Terrain(stdstr.c_str(), TerrainScale, game_options.mass, game_options.radius);
+        Terrain *terr = new Terrain(stdstr.c_str(), TerrainScale, game_options()->mass, game_options()->radius);
         Matrix tmp;
         ScaleMatrix(tmp, TerrainScale);
         QVector pos;
@@ -803,7 +798,7 @@ void createObjects(std::vector<std::string> &fighter0name,
     }
     stdstr = mission->getVariable("continuousterrain", "");
     if (stdstr.length() > 0) {
-        myterrain = new ContinuousTerrain(stdstr.c_str(), TerrainScale, game_options.mass);
+        myterrain = new ContinuousTerrain(stdstr.c_str(), TerrainScale, game_options()->mass);
         Matrix tmp;
         Identity(tmp);
         QVector pos;
@@ -901,7 +896,7 @@ void createObjects(std::vector<std::string> &fighter0name,
                             }
                             dat->clear();
                         }
-                        fighter0mods.push_back(modifications = game_options.getCallsign(squadnum));
+                        fighter0mods.push_back(modifications = game_options()->getCallsign(squadnum));
                         VS_LOG(info,
                                 (boost::format("FOUND MODIFICATION = %1% FOR PLAYER #%2%") % modifications.c_str()
                                         % squadnum));
@@ -1021,7 +1016,7 @@ void destroyObjects() {
 }
 
 int getmicrosleep() {
-    return game_options.threadtime;
+    return game_options()->threadtime;
 }
 
 void restore_main_loop() {

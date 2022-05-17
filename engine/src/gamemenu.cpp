@@ -125,12 +125,12 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
 
     GroupControl *acctConnGroup = new GroupControl;
     acctConnGroup->setId("MultiPlayerAccountServer");
-    acctConnGroup->setHidden(!game_options.use_account_server);
+    acctConnGroup->setHidden(!game_options()->use_account_server);
     serverConnGroup->addChild(acctConnGroup);
 
     GroupControl *hostConnGroup = new GroupControl;
     hostConnGroup->setId("MultiPlayerHostPort");
-    hostConnGroup->setHidden(game_options.use_account_server);
+    hostConnGroup->setHidden(game_options()->use_account_server);
     serverConnGroup->addChild(hostConnGroup);
     StaticDisplay *mplayTitle = new StaticDisplay;
     mplayTitle->setRect(Rect(-.7, .6, 1, .1));
@@ -151,7 +151,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     serverInputText->setTextColor(GUI_OPAQUE_WHITE());
     serverInputText->setTextMargins(Size(.02, .01));
     serverInputText->setId("VegaserverHost");
-    serverInputText->setText(game_options.server_ip);
+    serverInputText->setText(game_options()->server_ip);
     hostConnGroup->addChild(serverInputText);
 
     mplayTitle = new StaticDisplay;
@@ -173,7 +173,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     portInputText->setTextColor(GUI_OPAQUE_WHITE());
     portInputText->setTextMargins(Size(.02, .01));
     portInputText->setId("VegaserverPort");
-    portInputText->setText(game_options.server_port);
+    portInputText->setText(game_options()->server_port);
     hostConnGroup->addChild(portInputText);
 
     mplayTitle = new StaticDisplay;
@@ -194,7 +194,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     acctserverInput->setTextColor(GUI_OPAQUE_WHITE());
     acctserverInput->setTextMargins(Size(.02, .01));
     acctserverInput->setId("AccountServer");
-    acctserverInput->setText(game_options.account_server_url);
+    acctserverInput->setText(game_options()->account_server_url);
     acctConnGroup->addChild(acctserverInput);
 
     mplayTitle = new StaticDisplay;
@@ -215,8 +215,8 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     usernameInput->setTextColor(GUI_OPAQUE_WHITE());
     usernameInput->setTextMargins(Size(.02, .01));
     usernameInput->setId("Username");
-    if (!game_options.password.empty()) {
-        usernameInput->setText(game_options.callsign);
+    if (!game_options()->password.empty()) {
+        usernameInput->setText(game_options()->callsign);
     }
     serverConnGroup->addChild(usernameInput);
 
@@ -248,7 +248,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector<
     passwordInput->setTextColor(GUI_OPAQUE_WHITE());
     passwordInput->setTextMargins(Size(.02, .01));
     passwordInput->setId("Password");
-    passwordInput->setText(game_options.password);
+    passwordInput->setText(game_options()->password);
     serverConnGroup->addChild(passwordInput);
 
     NewButton *multiStart = new NewButton;

@@ -28,6 +28,7 @@
 //
 // C++ Implementation: Audio::OpenALRenderableListener
 //
+#include "vega_cast_utils.hpp"
 #include "OpenALRenderableSource.h"
 #include "OpenALSimpleSound.h"
 #include "OpenALHelpers.h"
@@ -161,7 +162,8 @@ void OpenALRenderableSource::attachALBuffers() {
         assert(!sound->isStreaming() && "OpenALRenderableSource can only handle streaming sounds");
 
         // Attachment to a simple sound, just assign the AL buffer to this AL source
-        ALBufferHandle alBuffer = dynamic_cast<OpenALSimpleSound *>(sound.get())->getAlBuffer();
+        OpenALSimpleSound *p_simple_sound = vega_dynamic_cast_ptr<OpenALSimpleSound>(sound.get());
+        ALBufferHandle alBuffer = p_simple_sound->getAlBuffer();
         ALSourceHandle alSource = getALSource();
         alSourcei(alSource, AL_BUFFER, alBuffer);
         alBuffersAttached = true;

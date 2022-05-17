@@ -1,10 +1,8 @@
-/**
+/*
  * SimpleScene.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,6 +27,8 @@
 // C++ Implementation: Audio::SimpleScene
 //
 
+//#include <cassert>
+#include "vega_cast_utils.hpp"
 #include "SimpleScene.h"
 #include "SimpleSource.h"
 
@@ -45,16 +45,19 @@ SimpleScene::~SimpleScene() {
 
     for (it = activeSources.begin(); it != activeSources.end(); ++it) {
         (*it)->stopPlaying();
-        detach(dynamic_cast<SimpleSource *>(it->get()));
+        SimpleSource *p_simple_source = vega_dynamic_cast_ptr<SimpleSource>(it->get());
+        detach(p_simple_source);
     }
 }
 
 void SimpleScene::add(SharedPtr<Source> source) {
-    attach(dynamic_cast<SimpleSource *>(source.get()));
+    SimpleSource *p_simple_source = vega_dynamic_cast_ptr<SimpleSource>(source.get());
+    attach(p_simple_source);
 }
 
 void SimpleScene::remove(SharedPtr<Source> source) {
-    detach(dynamic_cast<SimpleSource *>(source.get()));
+    SimpleSource *p_simple_source = vega_dynamic_cast_ptr<SimpleSource>(source.get());
+    detach(p_simple_source);
 }
 
 Listener &SimpleScene::getListener() {
