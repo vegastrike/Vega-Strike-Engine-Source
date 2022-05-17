@@ -112,6 +112,7 @@ public:
 
     domNodeType *LoadXML(const char *filename) {
         topnode = nullptr;
+        VS_LOG(debug, (boost::format("%1% called with filename '%2%'") % __func__ % filename));
         //Not really nice but should do its job
         unsigned int length = strlen(filename);
         VSFileSystem::VSFile f;
