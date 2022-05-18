@@ -25,7 +25,7 @@
 
 #include "configuration/game_config.h"
 
-std::string vega_config::GetGameConfig().EscapedString(const std::string &input) {
+std::string vega_config::GameConfig::EscapedString(const std::string &input) {
     std::string rv;
     std::string::size_type rp = 0;
     std::string::size_type n = input.length();
@@ -65,12 +65,12 @@ std::string vega_config::GetGameConfig().EscapedString(const std::string &input)
     return rv;
 }
 
-boost::shared_ptr<pt::iptree> vega_config::GetGameConfig().variables_() {
+boost::shared_ptr<pt::iptree> vega_config::GameConfig::variables_() {
     static boost::shared_ptr<pt::iptree> variables_tree = boost::make_shared<pt::iptree>();
     return variables_tree;
 }
 
-void vega_config::GetGameConfig().LoadGameConfig(const std::string &filename) {
+void vega_config::GameConfig::LoadGameConfig(const std::string &filename) {
     pt::ptree temp_ptree;
     if (boost::filesystem::exists(filename)) {
         VS_LOG(debug, (boost::format("%1%: Found game config at '%2%'") % __func__ % filename));
@@ -122,15 +122,4 @@ void vega_config::GetGameConfig().LoadGameConfig(const std::string &filename) {
 vega_config::GameConfig &vega_config::GetGameConfig() {
     static GameConfig kSingleton{};
     return kSingleton;
-}
-
-template<>
-float vega_config::GetGameConfig()::GetVar(const std::string &path, float default_value) {
-    double result = variables_()->get(path, static_cast<double>(default_value));
-    return static_cast<float>(result);
-}
-
-template<typename T>
-T vega_config::GetGameConfig()::GetVar(const std::string &path, T default_value) {
-    return variables_()->get(path, default_value);
 }

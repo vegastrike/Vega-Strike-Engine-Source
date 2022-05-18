@@ -104,9 +104,9 @@ void Damageable::ApplyDamage(const Vector &pnt,
     Unit *unit = static_cast<Unit *>(this);
 
     //We also do the following lock on client side in order not to display shield hits
-    const bool no_dock_damage = vega_config::GetGameConfig().GetVariable("physics.no_damage_to_docked_ships", true);
+    const bool no_dock_damage = vega_config::GetGameConfig().GetBool("physics.no_damage_to_docked_ships", true);
     const bool apply_difficulty_enemy_damage =
-            vega_config::GetGameConfig().GetVariable("physics.difficulty_based_enemy_damage", true);
+            vega_config::GetGameConfig().GetBool("physics.difficulty_based_enemy_damage", true);
 
 
     // Stop processing if the affected unit isn't this unit
@@ -207,10 +207,10 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Eject cargo
         const float cargo_eject_percent =
-                vega_config::GetGameConfig().GetVariable("physics.eject_cargo_percent", 1.0f);
-        const unsigned int max_dump_cargo =
-                vega_config::GetGameConfig().GetVariable("physics.max_dumped_cargo", 15);
-        unsigned int dumped_cargo = 0;
+                vega_config::GetGameConfig().GetFloat("physics.eject_cargo_percent", 1.0f);
+        const uint32_t max_dump_cargo =
+                vega_config::GetGameConfig().GetUInt32_T("physics.max_dumped_cargo", 15U);
+        uint32_t dumped_cargo = 0;
 
         for (unsigned int i = 0; i < unit->numCargo(); ++i) {
             if (rand() < (RAND_MAX * cargo_eject_percent) &&
@@ -223,11 +223,11 @@ void Damageable::ApplyDamage(const Vector &pnt,
         // Eject Pilot
         // Can't use this as we can't reach negative hull damage
         //static float hull_dam_to_eject    =
-        //    vega_config::GetGameConfig().GetVariable( "physics", "hull_damage_to_eject", 100.0 );
+        //    vega_config::GetGameConfig().GetFloat( "physics", "hull_damage_to_eject", 100.0F );
         const float auto_eject_percent =
-                vega_config::GetGameConfig().GetVariable("physics.autoeject_percent", 0.5f);
+                vega_config::GetGameConfig().GetFloat("physics.autoeject_percent", 0.5f);
         const bool player_autoeject =
-                vega_config::GetGameConfig().GetVariable("physics.player_autoeject", true);
+                vega_config::GetGameConfig().GetBool("physics.player_autoeject", true);
 
         if (shot_at_is_player) {
             if (player_autoeject
@@ -329,7 +329,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Damage internal systems
-    const bool system_damage_on_armor = vega_config::GetGameConfig().GetVariable("physics.system_damage_on_armor", false);
+    const bool system_damage_on_armor = vega_config::GetGameConfig().GetBool("physics.system_damage_on_armor", false);
     bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
@@ -542,15 +542,15 @@ void Damageable::leach(float damShield, float damShieldRecharge, float damEnRech
 }
 
 void Damageable::RegenerateShields(const float difficulty, const bool player_ship) {
-    static bool shields_in_spec = vega_config::GetGameConfig().GetVariable("physics.shields_in_spec", false);
-    static float discharge_per_second =
-            vega_config::GetGameConfig().GetVariable("physics.speeding_discharge", 0.25f);
+    const bool shields_in_spec = vega_config::GetGameConfig().GetBool("physics.shields_in_spec", false);
+    const float discharge_per_second =
+            vega_config::GetGameConfig().GetFloat("physics.speeding_discharge", 0.25f);
     //approx
     const float discharge_rate = (1 - (1 - discharge_per_second) * simulation_atom_var);
-    static float min_shield_discharge =
-            vega_config::GetGameConfig().GetVariable("physics.min_shield_speeding_discharge", 0.1f);
-    static float nebshields =
-            vega_config::GetGameConfig().GetVariable("physics.nebula_shield_recharge", 0.5f);
+    const float min_shield_discharge =
+            vega_config::GetGameConfig().GetFloat("physics.min_shield_speeding_discharge", 0.1f);
+    const float nebshields =
+            vega_config::GetGameConfig().GetFloat("physics.nebula_shield_recharge", 0.5f);
 
     Unit *unit = static_cast<Unit *>(this);
 

@@ -45,10 +45,6 @@ namespace pt = boost::property_tree;
 
 namespace vega_config {
 
-class GameConfig;
-
-extern GameConfig& GetGameConfig();
-
 class GameConfig {
 private:
     // This is probably unique enough to ensure no collision
@@ -62,24 +58,69 @@ public:
     static void LoadGameConfig(const std::string &filename);
 
     template<typename T>
-    T GetVar(std::string const &path, T default_value);
-
-    template<typename T>
-    inline T GetVariable(std::string const & path, T default_value) {
-        return GetVar(path, default_value);
+    T GetVariable(std::string const & path, T default_value) {
+        return variables_()->get(path, default_value);
     }
 
     inline std::string GetEscapedString(std::string const & path, std::string const & default_value) {
-        return EscapedString(GetVar(path, default_value));
+        return EscapedString(variables_()->get(path, default_value));
     }
 
     inline std::string GetString(std::string const & path, std::string const & default_value) {
-        return GetVar(path, default_value);
+        return variables_()->get(path, default_value);
+    }
+
+    inline float GetFloat(std::string const & path, float default_value) {
+        double result = variables_()->get(path, static_cast<double>(default_value));
+        return static_cast<float>(result);
+    }
+
+    inline double GetDouble(std::string const & path, double default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline size_t GetSize_T(std::string const & path, uintmax_t default_value) {
+        return variables_()->get(path, static_cast<size_t>(default_value);
+    }
+
+    inline uint8_t GetUInt8_T(std::string const & path, uint8_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline uint16_t GetUInt16_T(std::string const & path, uint16_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline uint32_t GetUInt32_T(std::string const & path, uint32_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline uintmax_t GetUIntMax_T(std::string const & path, uintmax_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int8_t GetInt8_T(std::string const & path, int8_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int16_t GetInt16_T(std::string const & path, int16_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int32_t GetInt32_T(std::string const & path, int32_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline intmax_t GetIntMax_T(std::string const & path, intmax_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline bool GetBool(std::string const & path, bool default_value) {
+        return variables_()->get(path, default_value);
     }
 };
 
-template<>
-float GameConfig::GetVar(std::string const &path, float default_value);
+extern GameConfig& GetGameConfig();
 
 }
 
