@@ -80,7 +80,7 @@ public:
     }
 
     inline size_t GetSize_T(std::string const & path, uintmax_t default_value) {
-        return variables_()->get(path, static_cast<size_t>(default_value);
+        return variables_()->get(path, static_cast<size_t>(default_value));
     }
 
     inline uint8_t GetUInt8_T(std::string const & path, uint8_t default_value) {
