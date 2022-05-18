@@ -411,7 +411,7 @@ void Planet::InitPlanet(QVector x,
         bool inside_out,
         unsigned int lights_num) {
     // TODO: Move to configuration()
-    const float bodyradius = GameConfig::GetVariable("graphics.star_body_radius", 0.33f);
+    const float bodyradius = vega_config::GetGameConfig().GetVariable("graphics.star_body_radius", 0.33f);
 
     if (lights_num) {
         radius *= bodyradius;

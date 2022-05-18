@@ -27,7 +27,6 @@
 #define GAME_CONFIG_H
 
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
@@ -44,33 +43,44 @@
 
 namespace pt = boost::property_tree;
 
+namespace vega_config {
+
+class GameConfig;
+
+extern GameConfig& GetGameConfig();
+
 class GameConfig {
 private:
     // This is probably unique enough to ensure no collision
-//    constexpr static const char DEFAULT_ERROR_VALUE[] {"GameConfig::GetVar DEFAULT_ERROR_VALUE"};
+//    constexpr static const char DEFAULT_ERROR_VALUE[] {"vega_config::GetGameConfig().GetVar DEFAULT_ERROR_VALUE"};
 
-    template<class T>
-    static inline T GetVar(std::string const & path, T default_value) {
-        return variables_()->get(path, default_value);
-    }
     static std::string EscapedString(std::string const & input);
     static boost::shared_ptr<pt::iptree> variables_();
 
 public:
+
     static void LoadGameConfig(const std::string &filename);
 
-    template<class T>
-    static inline T GetVariable(std::string const & path, T default_value) {
+    template<typename T>
+    T GetVar(std::string const &path, T default_value);
+
+    template<typename T>
+    inline T GetVariable(std::string const & path, T default_value) {
         return GetVar(path, default_value);
     }
 
-    static inline std::string GetEscapedString(std::string const & path, std::string const & default_value) {
+    inline std::string GetEscapedString(std::string const & path, std::string const & default_value) {
         return EscapedString(GetVar(path, default_value));
     }
 
-    static inline std::string GetString(std::string const & path, std::string const & default_value) {
+    inline std::string GetString(std::string const & path, std::string const & default_value) {
         return GetVar(path, default_value);
     }
 };
+
+template<>
+float GameConfig::GetVar(std::string const &path, float default_value);
+
+}
 
 #endif // GAME_CONFIG_H

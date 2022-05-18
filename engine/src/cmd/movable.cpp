@@ -455,9 +455,9 @@ float Movable::GetMaxWarpFieldStrength(float rampmult) const {
     }
     v *= minmultiplier;
     float vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
-    if (vmag > configuration()->physics.warp_max_effective_velocity) {
-        v *= configuration()->physics.warp_max_effective_velocity / vmag; //HARD LIMIT
-        minmultiplier *= configuration()->physics.warp_max_effective_velocity / vmag;
+    if (vmag > configuration()->physics.warp_max_ef_vel) {
+        v *= configuration()->physics.warp_max_ef_vel / vmag; //HARD LIMIT
+        minmultiplier *= configuration()->physics.warp_max_ef_vel / vmag;
     }
     return minmultiplier;
 }

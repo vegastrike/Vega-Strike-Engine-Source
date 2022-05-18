@@ -309,7 +309,7 @@ struct Physics {
     float warp_stretch_decel_cutoff{};
     float warp_multiplier_min{};
     float warp_multiplier_max{};
-    float warp_max_effective_velocity{};
+    float warp_max_ef_vel{};
     float fuel_conversion{};
     bool unit_table{};
     float capship_size{};
