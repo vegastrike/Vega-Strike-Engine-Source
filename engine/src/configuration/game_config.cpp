@@ -65,18 +65,21 @@ std::string GameConfig::EscapedString(const std::string &input) {
     return rv;
 }
 
-boost::shared_ptr<pt::ptree> GameConfig::variables_() {
-    static boost::shared_ptr<pt::ptree> VARIABLES_MAP = boost::make_shared<pt::ptree>();
-    return VARIABLES_MAP;
+boost::shared_ptr<pt::iptree> GameConfig::variables_() {
+    static boost::shared_ptr<pt::iptree> variables_tree = boost::make_shared<pt::iptree>();
+    return variables_tree;
 }
 
 void GameConfig::LoadGameConfig(const std::string &filename) {
     pt::ptree temp_ptree;
-    if (!boost::filesystem::exists(filename)) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("void GameConfig::LoadGameConfig(const std::string &filename): Could not find vegastrike.config at '%1%'") % filename));
+    if (boost::filesystem::exists(filename)) {
+        VS_LOG(debug, (boost::format("%1%: Found game config at '%2%'") % __func__ % filename));
+    } else {
+        VS_LOG_AND_FLUSH(fatal, (boost::format("%1%: Could not find game config at '%2%'") % __func__ % filename));
 //        VSExit
     }
-    pt::read_xml(filename, temp_ptree);
+    pt::read_xml(filename, temp_ptree, boost::property_tree::xml_parser::no_comments);
+//    pt::write_xml(filename + ".out.xml", temp_ptree);
     for (const auto& iterator : temp_ptree.get_child("vegaconfig.variables.")) {
         if (boost::iequals(iterator.first, "section")) {
             std::string section_name = iterator.second.get<std::string>("<xmlattr>.name", "");
@@ -91,6 +94,7 @@ void GameConfig::LoadGameConfig(const std::string &filename) {
                         continue;
                     }
                     std::string variable_value = iterator2.second.get<std::string>("<xmlattr>.value", "");
+                    VS_LOG(debug, (boost::format("%1%: putting value %2% in the tree at %3%") % __func__ % variable_value % (section_name + "." + variable_name)));
                     variables_()->put(section_name + "." + variable_name, variable_value);
                 } else if (boost::iequals(iterator2.first, "section")) {
                     std::string subsection_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
@@ -112,4 +116,5 @@ void GameConfig::LoadGameConfig(const std::string &filename) {
             }
         }
     }
+//    pt::write_xml(filename + ".variables_.out.xml", variables_()->);
 }

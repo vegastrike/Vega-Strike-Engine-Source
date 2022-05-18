@@ -269,7 +269,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     // C
     physics.warp_multiplier_max = GameConfig::GetVariable("physics.warpMultiplierMax", 300000000.0F);
     // Pi^2 * C
-    physics.warp_max_effective_velocity = GameConfig::GetVariable("physics.warpMaxEfVal", 2960881320.0F);
+    physics.warp_max_effective_velocity = GameConfig::GetVariable("physics.warpMaxEfVal", 2.96088e+09F);
+    VS_LOG(debug, (boost::format("%1%: physics.warp_max_effective_velocity: %2%") % __func__ % physics.warp_max_effective_velocity));
+    VS_LOG(debug, (boost::format("%1%: GameConfig::GetVariable(\"physics.warpMaxEfVal\", %2%): %3%") % __func__ % 54.0F % GameConfig::GetVariable("physics.warpMaxEfVel", 54.0F)));
     physics.fuel_conversion = GameConfig::GetVariable("physics.FuelConversion", 0.00144F);
     physics.unit_table = GameConfig::GetVariable("physics.UnitTable", false);
     physics.capship_size = GameConfig::GetVariable("physics.capship_size", 500.0F);

@@ -54,7 +54,7 @@ private:
         return variables_()->get(path, default_value);
     }
     static std::string EscapedString(std::string const & input);
-    static boost::shared_ptr<pt::ptree> variables_();
+    static boost::shared_ptr<pt::iptree> variables_();
 
 public:
     static void LoadGameConfig(const std::string &filename);
