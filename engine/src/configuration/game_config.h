@@ -55,7 +55,7 @@ private:
 
 public:
 
-    static void LoadGameConfig(const std::string &filename);
+    void LoadGameConfig(const std::string &filename);
 
     template<typename T>
     T GetVariable(std::string const & path, T default_value) {
