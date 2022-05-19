@@ -4945,8 +4945,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 break;
         }
     }
-    //const Unit::Computer uc  = playerUnit->ViewComputerData();
-    //const Unit::Computer buc = blankUnit->ViewComputerData();
+    //const Unit::ComputerConfig uc  = playerUnit->ViewComputerData();
+    //const Unit::ComputerConfig buc = blankUnit->ViewComputerData();
     const Computer &uc = playerUnit->ViewComputerData();
     const Computer &buc = blankUnit->ViewComputerData();
     if (!mode) {

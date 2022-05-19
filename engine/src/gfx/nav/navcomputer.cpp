@@ -1027,7 +1027,7 @@ bool NavComputer::toggleVisibility(const EventCommandId &command, Control *contr
 void NavComputer::recalcTitle() {
     //Generic nav title for the display.
 
-    string baseTitle = "Navigational Computer";
+    string baseTitle = "Navigational ComputerConfig";
     baseTitle += " (";
     baseTitle += displayModeInfo[m_currentDisplay].title;
     baseTitle += ")";

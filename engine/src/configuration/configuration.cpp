@@ -81,9 +81,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
             collision_hacks.cargo_deals_collide_damage);
 
     // computer substruct
-    computer.default_lock_cone = GetGameConfig().GetFloat("physics.lock_cone", computer.default_lock_cone);
-    computer.default_max_range = GetGameConfig().GetFloat("graphics.hud.radarRange", computer.default_max_range);
-    computer.default_tracking_cone = GetGameConfig().GetFloat("physics.autotracking", computer.default_tracking_cone);
+    computer_config_.default_lock_cone = GetGameConfig().GetFloat("physics.lock_cone", computer_config_.default_lock_cone);
+    computer_config_.default_max_range = GetGameConfig().GetFloat("graphics.hud.radarRange", computer_config_.default_max_range);
+    computer_config_.default_tracking_cone = GetGameConfig().GetFloat("physics.autotracking", computer_config_.default_tracking_cone);
 
     // fuel substruct
     fuel.afterburner_fuel_usage =
@@ -192,7 +192,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.hud.print_request_docking = GetGameConfig().GetBool("graphics.hud.print_request_docking", true);
     graphics_config_.hud.print_ship_type = GetGameConfig().GetBool("graphics.hud.print_ship_type", true);
     graphics_config_.hud.projectile_means_missile = GetGameConfig().GetBool("graphics.hud.projectile_means_missile", false);
-    graphics_config_.hud.radar_range = GetGameConfig().GetFloat("graphics.hud.radarRange", 20000.0F);    // TODO: Deduplicate this with computer.default_max_range
+    graphics_config_.hud.radar_range = GetGameConfig().GetFloat("graphics.hud.radarRange", 20000.0F);    // TODO: Deduplicate this with computer_config_.default_max_range
     graphics_config_.hud.radar_type = GetGameConfig().GetString("graphics.hud.radarType", "WC");
     graphics_config_.hud.radar_search_extra_radius = GetGameConfig().GetFloat("graphics.hud.radar_search_extra_radius", 1000.0F);
     graphics_config_.hud.rotating_bracket_inner = GetGameConfig().GetBool("graphics.hud.RotatingBracketInner", true);
@@ -271,8 +271,8 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     // C
     physics.warp_multiplier_max = GetGameConfig().GetFloat("physics.warpMultiplierMax", 300000000.0F);
     // Pi^2 * C
-    physics.warp_max_ef_vel = (GetGameConfig().GetFloat("physics.warpMaxEfVal", 2.96088e+09F));
-    VS_LOG(debug, (boost::format("%1%: physics.warp_max_ef_vel: %2%") % __func__ % physics.warp_max_ef_vel));
+    physics.effective_max_warp_velocity = GetGameConfig().GetFloat("physics.warpMaxEfVal", 2.96088e+09F);
+    VS_LOG(debug, (boost::format("%1%: physics.effective_max_warp_velocity: %2%") % __func__ % physics.effective_max_warp_velocity));
     VS_LOG(debug, (boost::format("%1%: GetGameConfig().GetFloat(\"physics.warpMaxEfVal\", %2%): %3%") % __func__ % 54.0F % GetGameConfig().GetFloat("physics.warpMaxEfVel", 54.0F)));
     physics.fuel_conversion = GetGameConfig().GetFloat("physics.FuelConversion", 0.00144F);
     physics.unit_table = GetGameConfig().GetBool("physics.UnitTable", false);
@@ -324,7 +324,7 @@ vegastrike_configuration::CollisionHacks::CollisionHacks() :
         cargo_deals_collide_damage(false) {
 }
 
-vegastrike_configuration::Computer::Computer() :
+vegastrike_configuration::ComputerConfig::ComputerConfig() :
         default_lock_cone(0.8f),
         default_max_range(20000.0f),
         default_tracking_cone(0.93f) {
@@ -365,6 +365,6 @@ vegastrike_configuration::Weapons::Weapons() :
 }
 
 std::shared_ptr<Configuration> configuration() {
-    static const std::shared_ptr<Configuration> CONFIGURATION = std::make_shared<Configuration>();
-    return CONFIGURATION;
+    static const std::shared_ptr<Configuration> kConfiguration = std::make_shared<Configuration>();
+    return kConfiguration;
 }

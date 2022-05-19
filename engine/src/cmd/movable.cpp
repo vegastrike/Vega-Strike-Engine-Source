@@ -439,7 +439,7 @@ float Movable::GetMaxWarpFieldStrength(float rampmult) const {
 
     //inverse fractional effect of ship vs real big object
     float minmultiplier = configuration()->physics.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
-    Unit *nearest_unit = NULL;
+    Unit *nearest_unit = nullptr;
     minmultiplier = unit->CalculateNearestWarpUnit(minmultiplier, &nearest_unit, true);
     float minWarp = configuration()->physics.warp_multiplier_min * graphicOptions.MinWarpMultiplier;
     float maxWarp = configuration()->physics.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
@@ -455,9 +455,9 @@ float Movable::GetMaxWarpFieldStrength(float rampmult) const {
     }
     v *= minmultiplier;
     float vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
-    if (vmag > configuration()->physics.warp_max_ef_vel) {
-        v *= configuration()->physics.warp_max_ef_vel / vmag; //HARD LIMIT
-        minmultiplier *= configuration()->physics.warp_max_ef_vel / vmag;
+    if (vmag > configuration()->physics.effective_max_warp_velocity) {
+        v *= configuration()->physics.effective_max_warp_velocity / vmag; //HARD LIMIT
+        minmultiplier *= configuration()->physics.effective_max_warp_velocity / vmag;
     }
     return minmultiplier;
 }

@@ -88,14 +88,14 @@ struct CollisionHacks {
 };
 
 // Also radar
-struct Computer {
+struct ComputerConfig {
     // Note: below is probably a stale comment
     // DO NOT CHANGE see unit_customize.cpp
     float default_lock_cone;
     float default_max_range;
     float default_tracking_cone;
 
-    Computer();
+    ComputerConfig();
 };
 
 struct DataConfig {
@@ -309,7 +309,7 @@ struct Physics {
     float warp_stretch_decel_cutoff{};
     float warp_multiplier_min{};
     float warp_multiplier_max{};
-    float warp_max_ef_vel{};
+    float effective_max_warp_velocity{};
     float fuel_conversion{};
     bool unit_table{};
     float capship_size{};
@@ -348,7 +348,8 @@ struct Weapons {
 
 }
 
-// not using namespace vegastrike_configuration, because Computer would be ambiguous
+// not using namespace vegastrike_configuration, because ComputerConfig would be ambiguous
+// UPDATE 2022-05-19 stephengtuggy -- Computer renamed to ComputerConfig, so no longer ambiguous
 
 class Configuration {
 public:
@@ -359,7 +360,7 @@ public:
     vegastrike_configuration::AIConfig ai;
     vegastrike_configuration::AudioConfig audio_config_;
     vegastrike_configuration::CollisionHacks collision_hacks;
-    vegastrike_configuration::Computer computer;
+    vegastrike_configuration::ComputerConfig computer_config_;
     vegastrike_configuration::Fuel fuel;
     vegastrike_configuration::GraphicsConfig graphics_config_;
     vegastrike_configuration::Logging logging;

@@ -38,7 +38,7 @@ class NavigationSystem;
 //Setting descriptor seacrhes
 class NavComputer : public WindowController {
 public:
-//The Computer displays that are possible.
+//The ComputerConfig displays that are possible.
     enum DisplayMode {
         LIST = 0,       //
         EDIT,         //

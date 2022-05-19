@@ -48,7 +48,7 @@ public:
 
     static int dirty;
 
-//The Computer displays that are possible.
+//The ComputerConfig displays that are possible.
     enum DisplayMode {
         CARGO = 0,            //Buy and sell cargo.
         UPGRADE,            //Buy and sell ship upgrades.
