@@ -313,7 +313,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
 
 // Each of the following constructors MUST specify default values for ALL struct elements - will be subsequently overridden by user specified values, if any
 
-vegastrike_configuration::CollisionHacks::CollisionHacks() :
+vega_config::CollisionHacks::CollisionHacks() :
         collision_hack_distance(10000.0F),
         collision_damage_to_ai(false),
         crash_dock_hangar(false),
@@ -324,13 +324,13 @@ vegastrike_configuration::CollisionHacks::CollisionHacks() :
         cargo_deals_collide_damage(false) {
 }
 
-vegastrike_configuration::ComputerConfig::ComputerConfig() :
+vega_config::ComputerConfig::ComputerConfig() :
         default_lock_cone(0.8f),
         default_max_range(20000.0f),
         default_tracking_cone(0.93f) {
 }
 
-vegastrike_configuration::Fuel::Fuel() :
+vega_config::Fuel::Fuel() :
         afterburner_fuel_usage(4.0f),
         fmec_exit_velocity_inverse(0.0000002f),
         fuel_efficiency(1.0f),
@@ -339,11 +339,11 @@ vegastrike_configuration::Fuel::Fuel() :
         reactor_uses_fuel(false) {
 }
 
-vegastrike_configuration::Logging::Logging() :
+vega_config::Logging::Logging() :
         verbose_debug(false) {
 }
 
-vegastrike_configuration::Physics::Physics() :
+vega_config::Physics::Physics() :
         bleed_factor(2.0f),
         collision_scale_factor(1.0f),
         inelastic_scale(0.8f),
@@ -355,11 +355,11 @@ vegastrike_configuration::Physics::Physics() :
         minimum_time(0.1f) {
 }
 
-vegastrike_configuration::Warp::Warp() :
+vega_config::Warp::Warp() :
         insystem_jump_cost(0.1f) {
 }
 
-vegastrike_configuration::Weapons::Weapons() :
+vega_config::Weapons::Weapons() :
         can_fire_in_cloak(false),
         can_fire_in_spec(false) {
 }

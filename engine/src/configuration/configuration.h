@@ -30,7 +30,7 @@
 #include <memory>
 #include <string>
 
-namespace vegastrike_configuration {
+namespace vega_config {
 // Config Structs Declaration
 
 struct GeneralConfig {
@@ -348,25 +348,25 @@ struct Weapons {
 
 }
 
-// not using namespace vegastrike_configuration, because ComputerConfig would be ambiguous
+// not using namespace vega_config, because ComputerConfig would be ambiguous
 // UPDATE 2022-05-19 stephengtuggy -- Computer renamed to ComputerConfig, so no longer ambiguous
 
 class Configuration {
 public:
     Configuration();
     void OverrideDefaultsWithUserConfiguration();
-    vegastrike_configuration::GeneralConfig general_config_;
-    vegastrike_configuration::DataConfig data_config_;
-    vegastrike_configuration::AIConfig ai;
-    vegastrike_configuration::AudioConfig audio_config_;
-    vegastrike_configuration::CollisionHacks collision_hacks;
-    vegastrike_configuration::ComputerConfig computer_config_;
-    vegastrike_configuration::Fuel fuel;
-    vegastrike_configuration::GraphicsConfig graphics_config_;
-    vegastrike_configuration::Logging logging;
-    vegastrike_configuration::Physics physics;
-    vegastrike_configuration::Warp warp;
-    vegastrike_configuration::Weapons weapons;
+    vega_config::GeneralConfig general_config_;
+    vega_config::DataConfig data_config_;
+    vega_config::AIConfig ai;
+    vega_config::AudioConfig audio_config_;
+    vega_config::CollisionHacks collision_hacks;
+    vega_config::ComputerConfig computer_config_;
+    vega_config::Fuel fuel;
+    vega_config::GraphicsConfig graphics_config_;
+    vega_config::Logging logging;
+    vega_config::Physics physics;
+    vega_config::Warp warp;
+    vega_config::Weapons weapons;
 };
 
 extern std::shared_ptr<Configuration> configuration();
