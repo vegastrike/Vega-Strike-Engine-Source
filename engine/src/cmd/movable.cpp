@@ -439,12 +439,11 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 //    QVector qv = v.Cast();
 
     //inverse fractional effect of ship vs real big object
-    double minimum_multiplier = static_cast<double>(configuration()->physics_config_.warp_multiplier_max) * static_cast<double>(graphicOptions.MaxWarpMultiplier);
-    float minimum_multiplier_as_float = static_cast<float>(minimum_multiplier);
+    float minimum_multiplier = configuration()->physics_config_.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit = nullptr;
-    minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier_as_float, &nearest_unit, true);
-    double minWarp = configuration()->physics_config_.warp_multiplier_min * graphicOptions.MinWarpMultiplier;
-    double maxWarp = configuration()->physics_config_.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
+    minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
+    float minWarp = configuration()->physics_config_.warp_multiplier_min * graphicOptions.MinWarpMultiplier;
+    float maxWarp = configuration()->physics_config_.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
         minimum_multiplier = minWarp;
     }
@@ -456,8 +455,9 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
         minimum_multiplier = 1;
     }
     v *= minimum_multiplier;
-    double vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
-    const double warp_max_effective_velocity = vega_config::GetGameConfig().GetDouble("physics.warpMaxEfVel", M_PI * M_PI * 300000000.0);
+    float vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
+    static float default_max_warp_effective_velocity = M_PIf * M_PIf * 300000000.0f;
+    const float warp_max_effective_velocity = vega_config::GetGameConfig().GetFloat("physics.warpMaxEfVel", default_max_warp_effective_velocity);
     if (vmag > warp_max_effective_velocity) {
         v *= warp_max_effective_velocity / vmag; //HARD LIMIT
         minimum_multiplier *= warp_max_effective_velocity / vmag;
