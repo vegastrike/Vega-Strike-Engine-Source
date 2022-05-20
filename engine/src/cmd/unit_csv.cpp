@@ -650,7 +650,7 @@ void LoadCockpit(Unit *thus, const string &cockpit) {
 }
 
 float getFuelConversion() {
-    return configuration()->physics.fuel_conversion;
+    return configuration()->physics_config_.fuel_conversion;
 }
 
 const std::string EMPTY_STRING("");
@@ -910,8 +910,8 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
             computer.max_roll_right,
             computer.max_roll_left);
 
-    const float game_accel = configuration()->physics.game_accel;
-    const float game_speed = configuration()->physics.game_speed;
+    const float game_accel = configuration()->physics_config_.game_accel;
+    const float game_speed = configuration()->physics_config_.game_speed;
     limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
     limits.forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
     limits.retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
@@ -1144,7 +1144,7 @@ CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &
 }
 
 void Unit::WriteUnit(const char *modifications) {
-    const bool UNITTAB = configuration()->physics.unit_table;
+    const bool UNITTAB = configuration()->physics_config_.unit_table;
     if (UNITTAB) {
         bool bad = false;
         if (!modifications) {
@@ -1204,7 +1204,7 @@ static string tos(int val) {
 }
 
 string Unit::WriteUnitString() {
-    const bool UNITTAB = configuration()->physics.unit_table;
+    const bool UNITTAB = configuration()->physics_config_.unit_table;
     string ret = "";
     if (UNITTAB) {
         //this is the fillin part
@@ -1412,8 +1412,8 @@ string Unit::WriteUnitString() {
                 unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / VS_PI);
                 unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / VS_PI);
                 unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / VS_PI);
-                const float game_accel = configuration()->physics.game_accel;
-                const float game_speed = configuration()->physics.game_speed;
+                const float game_accel = configuration()->physics_config_.game_accel;
+                const float game_speed = configuration()->physics_config_.game_speed;
                 unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
                 unit["Forward_Accel"] = tos(limits.forward / (game_accel * game_speed));
                 unit["Retro_Accel"] = tos(limits.retro / (game_accel * game_speed));

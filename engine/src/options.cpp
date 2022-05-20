@@ -290,7 +290,7 @@ void vs_options::init() {
     startDockedTo = vs_config->getVariable("AI", "startDockedTo", "MiningBase");
     dockOnLoad = XMLSupport::parse_bool(vs_config->getVariable("AI", "dockOnLoad", "true"));
 
-    /* Physics Options */
+    /* PhysicsConfig Options */
     Drone = vs_config->getVariable("physics", "Drone", "drone");
     max_missions = XMLSupport::parse_int(vs_config->getVariable("physics", "max_missions", "4"));
     game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1.0"));

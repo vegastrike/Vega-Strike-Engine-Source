@@ -5322,7 +5322,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 ((playerUnit->maxEnergyData() - maxshield) * RSconverter), 0, "MJ");
         //note: I found no function to get max warp energy, but since we're docked they are the same
         if (!subunitlevel) {
-            PRETTY_ADDU(statcolor + "Warp capacitor bank storage: #-c",
+            PRETTY_ADDU(statcolor + "WarpConfig capacitor bank storage: #-c",
                     playerUnit->warpCapData() * RSconverter * Wconv,
                     0,
                     "MJ");
@@ -5349,7 +5349,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 if (playerUnit->warpCapData() < uj.energy) {
                     text += "#n##c1:.3:.3#" + prefix
                             +
-                                    "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
+                                    "WARNING: WarpConfig capacitor banks under capacity for jump: upgrade warp capacitance#-c";
                 }
             }
         }
@@ -5763,7 +5763,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         if (uj.drive != -2 && playerUnit->warpCapData() < uj.energy) {
             text += "#n##c1:.3:.3#" + prefix
                     +
-                            "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
+                            "WARNING: WarpConfig capacitor banks under capacity for jump: upgrade warp capacitance#-c";
         }
 
         if (num_shields) {

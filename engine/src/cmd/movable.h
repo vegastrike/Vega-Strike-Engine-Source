@@ -235,7 +235,7 @@ public:
     //Sets if forces should resolve on this unit or not
     void SetResolveForces(bool);
 
-    float GetMaxWarpFieldStrength(float rampmult = 1.f) const;
+    double GetMaxWarpFieldStrength(float rampmult = 1.f) const;
     void DecreaseWarpEnergy(bool insystem, float time = 1.0f);
     void IncreaseWarpEnergy(bool insystem, float time = 1.0f);
     //Rotates about the axis

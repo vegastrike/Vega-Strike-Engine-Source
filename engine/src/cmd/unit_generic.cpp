@@ -130,7 +130,7 @@ void Unit::SetNebula(Nebula *neb) {
 }
 
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
-    const float capship_size = configuration()->physics.capship_size;
+    const float capship_size = configuration()->physics_config_.capship_size;
 
     if (this == target || target->CloakVisible() < .8) {
         return false;
@@ -414,7 +414,7 @@ void Unit::Init(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber) {
-    const bool UNITTAB = configuration()->physics.unit_table;
+    const bool UNITTAB = configuration()->physics_config_.unit_table;
     CSVRow unitRow;
     // TODO: something with the following line
     this->Unit::Init();
@@ -624,13 +624,13 @@ static float tmpsqr(float x) {
 }
 
 float CloseEnoughCone(Unit *me) {
-    return configuration()->physics.near_autotrack_cone;
+    return configuration()->physics_config_.near_autotrack_cone;
 }
 
 bool CloseEnoughToAutotrack(Unit *me, Unit *targ, float &cone) {
     if (targ) {
         const float close_enough_to_autotrack =
-                tmpsqr(configuration()->physics.close_enough_to_autotrack);
+                tmpsqr(configuration()->physics_config_.close_enough_to_autotrack);
         float dissqr = (me->curr_physical_state.position.Cast()
                 - targ->curr_physical_state.position.Cast()).MagnitudeSquared();
         float movesqr = close_enough_to_autotrack
@@ -842,7 +842,7 @@ extern signed char ComputeAutoGuarantee(Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
 
 double howFarToJump() {
-    return configuration()->physics.distance_to_warp;
+    return configuration()->physics_config_.distance_to_warp;
 }
 
 QVector SystemLocation(std::string system) {
@@ -893,7 +893,7 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
                                         i->first.length()) == i->first
                                         && whereto.substr(i->first.length() + 1)
                                                 == j->first) {
-                                    tmp /= configuration()->physics.target_distance_to_warp_bonus;
+                                    tmp /= configuration()->physics_config_.target_distance_to_warp_bonus;
                                 }
                             }
                         }
@@ -1026,7 +1026,7 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
     const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
-    const bool nojumpinSPEC = configuration()->physics.no_spec_jump;
+    const bool nojumpinSPEC = configuration()->physics_config_.no_spec_jump;
     bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
             && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && graphicOptions.InWarp
             && nojumpinSPEC;
@@ -1089,7 +1089,7 @@ Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
     if ((player_cockpit) == nullptr) {
-        difficulty = pow(g_game.difficulty, configuration()->physics.difficulty_speed_exponent);
+        difficulty = pow(g_game.difficulty, configuration()->physics_config_.difficulty_speed_exponent);
     }
     return player_cockpit;
 }
@@ -1159,7 +1159,7 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 
     WCWarpIsFuelHack(true);
 
-    float fuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_thrust : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_thrust : 1;
     if (fabs(amt1.i) > fuelclamp * limits.pitch) {
         Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
     }
@@ -1189,8 +1189,8 @@ bool Unit::CombatMode() {
 }
 
 Vector Unit::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    float fuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_thrust : 1;
-    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? configuration()->physics.no_fuel_afterburn : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? configuration()->physics_config_.no_fuel_afterburn : 1;
     float limit =
             afterburn ? (abfuelclamp
                     * (computer.max_ab_speed()
@@ -1257,7 +1257,7 @@ Vector Unit::MaxThrust(const Vector &amt1) {
 // TODO: refactor soon. Especially access to the fuel variable
 Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
-    const bool finegrainedFuelEfficiency = configuration()->physics.variable_fuel_consumption;
+    const bool finegrainedFuelEfficiency = configuration()->physics_config_.variable_fuel_consumption;
     if (WCfuelhack) {
         if (fuel > warpenergy) {
             fuel = warpenergy;
@@ -1283,8 +1283,8 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     }
     Vector Res = amt1;
 
-    float fuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_thrust : 1;
-    float abfuelclamp = (fuel <= 0) ? configuration()->physics.no_fuel_afterburn : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_afterburn : 1;
     if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
         Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
     }
@@ -1301,7 +1301,7 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k < -limits.retro) {
         Res.k = -limits.retro;
     }
-    const float Lithium6constant = configuration()->physics.deuterium_relative_efficiency_lithium;
+    const float Lithium6constant = configuration()->physics_config_.deuterium_relative_efficiency_lithium;
     //1/5,000,000 m/s
     const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
     if (afterburntype == 2) {
@@ -1434,8 +1434,8 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
     randnum = rand01();
-    const float inv_min_dam = 1.0F - configuration()->physics.min_damage;
-    const float inv_max_dam = 1.0F - configuration()->physics.max_damage;
+    const float inv_min_dam = 1.0F - configuration()->physics_config_.min_damage;
+    const float inv_max_dam = 1.0F - configuration()->physics_config_.max_damage;
     if (dam < inv_max_dam) {
         dam = inv_max_dam;
     }
@@ -1477,19 +1477,19 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         } else if (randnum >= .4) {
             limits.retro *= dam;
         } else if (randnum >= .3275) {
-            const float maxdam = configuration()->physics.max_radar_cone_damage;
+            const float maxdam = configuration()->physics_config_.max_radar_cone_damage;
             computer.radar.maxcone += (1 - dam);
             if (computer.radar.maxcone > maxdam) {
                 computer.radar.maxcone = maxdam;
             }
         } else if (randnum >= .325) {
-            const float maxdam = configuration()->physics.max_radar_lock_cone_damage;
+            const float maxdam = configuration()->physics_config_.max_radar_lock_cone_damage;
             computer.radar.lockcone += (1 - dam);
             if (computer.radar.lockcone > maxdam) {
                 computer.radar.lockcone = maxdam;
             }
         } else if (randnum >= .25) {
-            const float maxdam = configuration()->physics.max_radar_track_cone_damage;
+            const float maxdam = configuration()->physics_config_.max_radar_track_cone_damage;
             computer.radar.trackingcone += (1 - dam);
             if (computer.radar.trackingcone > maxdam) {
                 computer.radar.trackingcone = maxdam;
@@ -1506,7 +1506,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         damages |= Damages::COMPUTER_DAMAGED;
         return;
     }
-    if (rand01() < configuration()->physics.thruster_hit_chance) {
+    if (rand01() < configuration()->physics_config_.thruster_hit_chance) {
         //DAMAGE ROLL/YAW/PITCH/THRUST
         float orandnum = rand01() * .82 + .18;
         if (randnum >= .9) {

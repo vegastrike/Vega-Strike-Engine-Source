@@ -310,7 +310,7 @@ int main(int argc, char *argv[]) {
     // now that the user config file has been loaded from disk, update the global configuration struct values
     configuration()->OverrideDefaultsWithUserConfiguration();
 
-    VS_LOG(debug, (boost::format("physics.effective_max_warp_velocity as far as GameConfig is concerned: %1%") % configuration()->physics.effective_max_warp_velocity));
+    VS_LOG(debug, (boost::format("physics.effective_max_warp_velocity as far as GameConfig is concerned: %1%") % configuration()->warp.max_effective_velocity));
     VS_LOG(debug, (boost::format("physics.warpMaxEfVel as far as vs_config is concerned: %1%") % vs_config->getVariable("physics", "warpMaxEfVel", "0.0")));
 
     // If no debug argument is supplied, set to what the config file has.

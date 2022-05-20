@@ -43,7 +43,7 @@ const float THRESHOLD = 0.01;
 /**
  * The moveto order attempts to calculate the best way to apply thrust (within the computer bound limits) to get a starship to place B and stopped.
  * It uses an integral of acceleration and velocity over time to solve for
- * time when to decelerate.  Is  inaccurate within 1 physics frame, and must
+ * time when to decelerate.  Is  inaccurate within 1 physics_config_ frame, and must
  * use switchbacks and then once they have been met sets terminating X,Y, and Z
  * to figure out how many switchbacks it has made
  * , missing the target and coming back over it.
@@ -104,8 +104,8 @@ public:
 };
 /**
  * This AI script attempts to change headings to face a given direction
- * again it is inaccurate to within 1 physics frame, though calculating thrust
- * at 1/3 the way through a physics frame has made this effect of wobbling
+ * again it is inaccurate to within 1 physics_config_ frame, though calculating thrust
+ * at 1/3 the way through a physics_config_ frame has made this effect of wobbling
  * all but subside! switchbacks keep track of how many times it has almost
  * but passed over target destination
  */

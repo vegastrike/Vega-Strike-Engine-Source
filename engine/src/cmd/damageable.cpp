@@ -365,7 +365,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
     // It's actually easier to read this condition than the equivalent form
-    if (!(hull_damage || (configuration()->physics.system_damage_on_armor && armor_damage))) {
+    if (!(hull_damage || (configuration()->physics_config_.system_damage_on_armor && armor_damage))) {
         return;
     }
 
@@ -380,8 +380,8 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
         return;
     }
 
-    unit->DamageRandSys(configuration()->physics.indiscriminate_system_destruction * rand01() +
-                    (1 - configuration()->physics.indiscriminate_system_destruction) * (1 - ((*current_hull) > 0 ? hull_damage / (*current_hull) : 1.0f)),
+    unit->DamageRandSys(configuration()->physics_config_.indiscriminate_system_destruction * rand01() +
+                    (1 - configuration()->physics_config_.indiscriminate_system_destruction) * (1 - ((*current_hull) > 0 ? hull_damage / (*current_hull) : 1.0f)),
             attack_vector, 1.0f, 1.0f);
 }
 
@@ -405,7 +405,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
 
     // TODO: Same condition as DamageRandomSystem - move up and merge
-    if (!(hull_damage || (configuration()->physics.system_damage_on_armor && armor_damage))) {
+    if (!(hull_damage || (configuration()->physics_config_.system_damage_on_armor && armor_damage))) {
         return;
     }
 
@@ -441,7 +441,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     cargo.category = "upgrades/Damaged/" + cargo_category.substr(prefix_length);
 
     // TODO: find a better name for whatever this is. Right now it's not not downgrade
-    if (configuration()->physics.separate_system_flakiness_component) {
+    if (configuration()->physics_config_.separate_system_flakiness_component) {
         return;
     }
 

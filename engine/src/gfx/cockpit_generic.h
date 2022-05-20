@@ -74,16 +74,16 @@ public:
     enum EVENTID {
         EVENTID_FIRST,
 
-        /// Warp is possible at this time
+        /// WarpConfig is possible at this time
         WARP_READY = EVENTID_FIRST,
 
-        /// Warp ceased to be possible at this time
+        /// WarpConfig ceased to be possible at this time
         WARP_UNREADY,
 
-        /// Warp started
+        /// WarpConfig started
         WARP_ENGAGED,
 
-        /// Warp stopped
+        /// WarpConfig stopped
         WARP_DISENGAGED,
 
         /// Asap autopilot engaged
@@ -119,7 +119,7 @@ public:
         /// Jump triggered yet not ready
         JUMP_FAILED,
 
-        /// Weapons lock warning active
+        /// WeaponsConfig lock warning active
         LOCK_WARNING,
 
         /// Missile lock warning acgive
@@ -134,13 +134,13 @@ public:
         /// Governor disabled
         FLIGHT_COMPUTER_DISABLED,
 
-        /// Warp loop, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
+        /// WarpConfig loop, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
         WARP_LOOP0,
         WARP_LOOP9 = WARP_LOOP0 + 9,
         /// Last warp level
         WRAP_LOOPLAST = WARP_LOOP9,
 
-        /// Warp threshold, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
+        /// WarpConfig threshold, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
         WARP_SKIP0,
         WARP_SKIP9 = WARP_SKIP0 + 9,
         /// Last warp level

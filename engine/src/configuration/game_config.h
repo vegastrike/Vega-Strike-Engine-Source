@@ -71,8 +71,7 @@ public:
     }
 
     inline float GetFloat(std::string const & path, float default_value) {
-        double result = variables_()->get(path, static_cast<double>(default_value));
-        return static_cast<float>(result);
+        return variables_()->get(path, default_value);
     }
 
     inline double GetDouble(std::string const & path, double default_value) {
@@ -95,6 +94,10 @@ public:
         return variables_()->get(path, default_value);
     }
 
+    inline uint64_t GetUInt64_T(std::string const & path, uint64_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
     inline uintmax_t GetUIntMax_T(std::string const & path, uintmax_t default_value) {
         return variables_()->get(path, default_value);
     }
@@ -108,6 +111,10 @@ public:
     }
 
     inline int32_t GetInt32_T(std::string const & path, int32_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int64_t GetInt64_T(std::string const & path, int64_t default_value) {
         return variables_()->get(path, default_value);
     }
 

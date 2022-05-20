@@ -84,7 +84,7 @@ struct Statistics {
 /**
  * Star System
  * Scene management for a star system
- * Per-Frame Drawing & Physics simulation
+ * Per-Frame Drawing & PhysicsConfig simulation
  **/
 class StarSystem {
 public:
@@ -96,7 +96,7 @@ public:
 protected:
 
     // Fields
-    ///Physics is divided into 3 stages spread over 3 frames
+    ///PhysicsConfig is divided into 3 stages spread over 3 frames
     enum PHYSICS_STAGE { MISSION_SIMULATION, PROCESS_UNIT, PHY_NUM }
             current_stage = MISSION_SIMULATION;
 
@@ -108,7 +108,7 @@ protected:
     string filename;
     un_iter sigIter;
 
-    ///to track the next given physics frame
+    ///to track the next given physics_config_ frame
     double time = 0;
 
     /// Everything to be drawn. Folded missiles in here oneday
@@ -120,7 +120,7 @@ protected:
     ///The moving, fading stars
     Stars *stars = nullptr;
 
-    /// Objects subject to global gravitron physics (disabled)
+    /// Objects subject to global gravitron physics_config_ (disabled)
     // TODO: investigate and remove
     unsigned char no_collision_time = 0;
 
@@ -218,7 +218,7 @@ public:
 /// returns xy sorted bounding spheres of all units in current view
     ClickList *getClickList();
 ///Adds to draw list
-///Draws a frame of action, interpolating between physics frames
+///Draws a frame of action, interpolating between physics_config_ frames
     void Draw(bool DrawCockpit = true);
 
 ///re-enables the included lights and terrains

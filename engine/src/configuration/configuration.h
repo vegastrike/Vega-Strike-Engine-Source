@@ -266,7 +266,7 @@ struct Logging {
     Logging();
 };
 
-struct Physics {
+struct PhysicsConfig {
     float bleed_factor;
     float collision_scale_factor;
     float inelastic_scale;
@@ -309,7 +309,6 @@ struct Physics {
     float warp_stretch_decel_cutoff{};
     float warp_multiplier_min{};
     float warp_multiplier_max{};
-    float effective_max_warp_velocity{};
     float fuel_conversion{};
     bool unit_table{};
     float capship_size{};
@@ -330,20 +329,20 @@ struct Physics {
     float max_radar_track_cone_damage{};
     float thruster_hit_chance{};
 
-    Physics();
+    PhysicsConfig();
 };
 
 // Covers both SPEC and jumps
-struct Warp {
-    float insystem_jump_cost;
+struct WarpConfig {
+    float insystem_jump_cost{};
 
-    Warp();
+    WarpConfig();
 };
 
-struct Weapons {
-    bool can_fire_in_cloak;
-    bool can_fire_in_spec;
-    Weapons();
+struct WeaponsConfig {
+    bool can_fire_in_cloak{};
+    bool can_fire_in_spec{};
+    WeaponsConfig();
 };
 
 }
@@ -364,9 +363,9 @@ public:
     vega_config::Fuel fuel;
     vega_config::GraphicsConfig graphics_config_;
     vega_config::Logging logging;
-    vega_config::Physics physics;
-    vega_config::Warp warp;
-    vega_config::Weapons weapons;
+    vega_config::PhysicsConfig physics_config_;
+    vega_config::WarpConfig warp;
+    vega_config::WeaponsConfig weapons;
 };
 
 extern std::shared_ptr<Configuration> configuration();
