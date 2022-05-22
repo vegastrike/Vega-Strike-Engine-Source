@@ -125,7 +125,9 @@ void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game) {
 
             std::string key = (saved_game ? "player_ship" : line[0]);
 
-            UnitCSVFactory::units[key] = unit_attributes;
+            if(!key.empty()) {
+                UnitCSVFactory::units[key] = unit_attributes;
+            }
         }
         data.erase(0, pos + delimiter.length());
     }

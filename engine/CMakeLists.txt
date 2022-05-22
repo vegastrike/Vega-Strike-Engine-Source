@@ -941,6 +941,8 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_const_cache.cpp
     src/cmd/unit_csv.cpp
     src/cmd/unit_csv_factory.cpp
+    src/cmd/unit_json_factory.cpp
+    src/cmd/json.cpp
     src/cmd/unit_functions_generic.cpp
     src/cmd/unit_generic.cpp
     src/cmd/fg_util.cpp
@@ -1708,6 +1710,7 @@ IF (USE_GTEST)
 ADD_EXECUTABLE(
     ${TEST_NAME}
     src/cmd/tests/csv_tests.cpp
+    src/cmd/tests/json_tests.cpp
     src/configuration/tests/configuration_tests.cpp
     src/damage/tests/health_tests.cpp
     src/damage/tests/layer_tests.cpp

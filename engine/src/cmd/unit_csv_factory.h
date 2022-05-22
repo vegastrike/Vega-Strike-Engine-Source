@@ -51,6 +51,7 @@ class UnitCSVFactory {
         return unit_attributes[attribute_key];
     }
 
+    friend class UnitJSONFactory;
 public:
     static void ProcessCSV(const std::string &d, bool saved_game);
 

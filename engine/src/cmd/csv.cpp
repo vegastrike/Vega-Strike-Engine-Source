@@ -29,6 +29,7 @@
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "unit_csv_factory.h"
+#include "unit_json_factory.h"
 
 using std::string;
 
@@ -192,7 +193,7 @@ CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root) {
     if (f.GetFilename() == "units_description.csv" ||
             f.GetFilename() == "master_part_list.csv") {
     } else if (f.GetFilename() == "units.csv") {
-        factory.ProcessCSV(data, false);
+        UnitJSONFactory::ParseJSON(f.GetFullPath());
     } else {
         factory.ProcessCSV(data, true);
     }
