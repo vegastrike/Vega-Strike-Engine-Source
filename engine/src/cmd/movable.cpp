@@ -456,7 +456,7 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     }
     v *= minimum_multiplier;
     float vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
-    static float default_max_warp_effective_velocity = M_PIf * M_PIf * 300000000.0f;
+    static float default_max_warp_effective_velocity = static_cast<float>(M_PI * M_PI * 300000000.0);
     const float warp_max_effective_velocity = vega_config::GetGameConfig().GetFloat("physics.warpMaxEfVel", default_max_warp_effective_velocity);
     if (vmag > warp_max_effective_velocity) {
         v *= warp_max_effective_velocity / vmag; //HARD LIMIT
