@@ -25,6 +25,7 @@
 
 #include <gtest/gtest.h>
 #include "configuration/game_config.h"
+#include "vs_logging.h"
 
 #include <string>
 
@@ -80,5 +81,11 @@ TEST(LoadConfig, Sanity) {
     EXPECT_FLOAT_EQ(test_float2, 4.2F) << "Expected 4.2 but got " << test_float2;
     EXPECT_EQ(test_string2, "hello");
     EXPECT_EQ(escaped_string2, "#FF0000Hello\r\nthere!#000000");
+
+    VS_LOG_AND_FLUSH(fatal, "Starting GetFloat performance test");
+    for (int i = 0; i < 1000000; ++i) {
+        vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 11.1F);
+    }
+    VS_LOG_AND_FLUSH(fatal, "Finished GetFloat performance test");
 
 }
