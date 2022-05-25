@@ -329,6 +329,10 @@ struct PhysicsConfig {
     float max_radar_lock_cone_damage{};
     float max_radar_track_cone_damage{};
     float thruster_hit_chance{};
+    float friendly_auto_radius{};
+    float neutral_auto_radius{};
+    float hostile_auto_radius{};
+    float min_asteroid_distance{};
 
     PhysicsConfig();
 };

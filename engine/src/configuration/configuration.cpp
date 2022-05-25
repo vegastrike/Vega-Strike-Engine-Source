@@ -291,6 +291,10 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.max_radar_lock_cone_damage = GetGameConfig().GetFloat("physics.max_radar_lockcone_damage", 0.95F);
     physics_config_.max_radar_track_cone_damage = GetGameConfig().GetFloat("physics.max_radar_trackcone_damage", 0.98F);
     physics_config_.thruster_hit_chance = GetGameConfig().GetFloat("physics.thruster_hit_chance", 0.25F);
+    physics_config_.friendly_auto_radius = GetGameConfig().GetFloat("physics.friendly_auto_radius", 0.0F) * physics_config_.game_speed;
+    physics_config_.neutral_auto_radius = GetGameConfig().GetFloat("physics.neutral_auto_radius", 0.0F) * physics_config_.game_speed;
+    physics_config_.hostile_auto_radius = GetGameConfig().GetFloat("physics.hostile_auto_radius", 1000.0F) * physics_config_.game_speed;
+    physics_config_.min_asteroid_distance = GetGameConfig().GetFloat("physics.min_asteroid_distance", -100.0F);
 
     // These calculations depend on the physics.game_speed and physics.game_accel values to be set already;
     // that's why they're down here instead of with the other graphics settings
