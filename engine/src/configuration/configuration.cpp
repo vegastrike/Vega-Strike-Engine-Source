@@ -49,6 +49,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     data_config_.master_part_list = GetGameConfig().GetString("data.master_part_list", "master_part_list");
     data_config_.using_templates = GetGameConfig().GetBool("data.usingtemplates", true);
 
+    ai.always_obedient                                  = GetGameConfig().GetBool("AI.always_obedient", true);
     ai.assist_friend_in_need                            = GetGameConfig().GetBool("AI.assist_friend_in_need", true);
     ai.ease_to_anger                                    = GetGameConfig().GetFloat("AI.EaseToAnger", -0.5F);
     ai.ease_to_appease                                  = GetGameConfig().GetFloat("AI.EaseToAppease", 0.5F);

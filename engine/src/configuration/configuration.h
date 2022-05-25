@@ -42,6 +42,7 @@ struct GeneralConfig {
 };
 
 struct AIConfig {
+    bool always_obedient{};
     bool assist_friend_in_need{};
     float ease_to_anger{};
     float ease_to_appease{};
