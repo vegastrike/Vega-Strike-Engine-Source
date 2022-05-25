@@ -209,7 +209,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         const float cargo_eject_percent =
                 vega_config::GetGameConfig().GetFloat("physics.eject_cargo_percent", 1.0f);
         const uint32_t max_dump_cargo =
-                vega_config::GetGameConfig().GetUInt32_T("physics.max_dumped_cargo", 15U);
+                vega_config::GetGameConfig().GetUInt32("physics.max_dumped_cargo", 15U);
         uint32_t dumped_cargo = 0;
 
         for (unsigned int i = 0; i < unit->numCargo(); ++i) {

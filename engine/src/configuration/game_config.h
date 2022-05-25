@@ -78,47 +78,47 @@ public:
         return variables_()->get(path, default_value);
     }
 
-    inline size_t GetSize_T(std::string const & path, uintmax_t default_value) {
+    inline size_t GetSizeT(std::string const & path, uintmax_t default_value) {
         return variables_()->get(path, static_cast<size_t>(default_value));
     }
 
-    inline uint8_t GetUInt8_T(std::string const & path, uint8_t default_value) {
+    inline uint8_t GetUInt8(std::string const & path, uint8_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uint16_t GetUInt16_T(std::string const & path, uint16_t default_value) {
+    inline uint16_t GetUInt16(std::string const & path, uint16_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uint32_t GetUInt32_T(std::string const & path, uint32_t default_value) {
+    inline uint32_t GetUInt32(std::string const & path, uint32_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uint64_t GetUInt64_T(std::string const & path, uint64_t default_value) {
+    inline uint64_t GetUInt64(std::string const & path, uint64_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uintmax_t GetUIntMax_T(std::string const & path, uintmax_t default_value) {
+    inline uintmax_t GetUIntMaxT(std::string const & path, uintmax_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int8_t GetInt8_T(std::string const & path, int8_t default_value) {
+    inline int8_t GetInt8(std::string const & path, int8_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int16_t GetInt16_T(std::string const & path, int16_t default_value) {
+    inline int16_t GetInt16(std::string const & path, int16_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int32_t GetInt32_T(std::string const & path, int32_t default_value) {
+    inline int32_t GetInt32(std::string const & path, int32_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int64_t GetInt64_T(std::string const & path, int64_t default_value) {
+    inline int64_t GetInt64(std::string const & path, int64_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline intmax_t GetIntMax_T(std::string const & path, intmax_t default_value) {
+    inline intmax_t GetIntMaxT(std::string const & path, intmax_t default_value) {
         return variables_()->get(path, default_value);
     }
 

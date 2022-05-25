@@ -32,7 +32,7 @@
 TEST(LoadConfig, Sanity) {
     // Test without configuration
     const bool default_bool = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
-    const int32_t default_int_32_t = vega_config::GetGameConfig().GetInt32_T("test.int_variable", 1);
+    const int32_t default_int_32_t = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);
     const float default_float = vega_config::GetGameConfig().GetFloat("test.float_variable", 7.8F);
     const std::string default_string = vega_config::GetGameConfig().GetString("test.string_variable", "World");
     const std::string default_escaped_string = vega_config::GetGameConfig().GetEscapedString("test.default_escaped_string", "#00FF00Hi\\\r\\\nthere!#000000");
@@ -48,7 +48,7 @@ TEST(LoadConfig, Sanity) {
 
     // Test again
     const bool test_bool = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
-    const int test_int32_t = vega_config::GetGameConfig().GetInt32_T("test.int_variable", 1);
+    const int test_int32_t = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);
     const float test_float = vega_config::GetGameConfig().GetFloat("test.float_variable", 7.8F);
     const std::string test_string = vega_config::GetGameConfig().GetString("test.string_variable", "World");
     const std::string escaped_string = vega_config::GetGameConfig().GetEscapedString("test.escaped_string_variable", "#00FF00Hi\\\r\\\nthere!#000000");
@@ -60,7 +60,8 @@ TEST(LoadConfig, Sanity) {
 
     // Test subsection functionality
     const bool subsection_bool = vega_config::GetGameConfig().GetBool("test.subsection.subsection_boolean_variable", false);
-    const int32_t subsection_int_32_t = vega_config::GetGameConfig().GetInt32_T("test.subsection.subsection_int_variable", 2);
+    const int32_t subsection_int_32_t =
+            vega_config::GetGameConfig().GetInt32("test.subsection.subsection_int_variable", 2);
     const float subsection_float = vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 8.9F);
     const std::string subsection_string = vega_config::GetGameConfig().GetString("test.subsection.subsection_string_variable", "World");
     const std::string subsection_escaped_string = vega_config::GetGameConfig().GetEscapedString("test.subsection.subsection_escaped_string_variable", "#00FF00Hi\\\r\\\nthere!#000000");
@@ -72,7 +73,7 @@ TEST(LoadConfig, Sanity) {
 
     // Another main section
     const bool test_bool2 = vega_config::GetGameConfig().GetBool("test2.boolean_variable2", true);
-    const int32_t test_int32_t_2 = vega_config::GetGameConfig().GetInt32_T("test2.int_variable2", 3);
+    const int32_t test_int32_t_2 = vega_config::GetGameConfig().GetInt32("test2.int_variable2", 3);
     const float test_float2 = vega_config::GetGameConfig().GetFloat("test2.float_variable2", 10.0F);
     const std::string test_string2 = vega_config::GetGameConfig().GetString("test2.string_variable2", "World");
     const std::string escaped_string2 = vega_config::GetGameConfig().GetEscapedString("test2.escaped_string_variable2", "#00FF00Hi\\\r\\\nthere!#000000");

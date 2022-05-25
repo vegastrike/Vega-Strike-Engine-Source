@@ -52,18 +52,18 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     ai.assist_friend_in_need                            = GetGameConfig().GetBool("AI.assist_friend_in_need", true);
     ai.ease_to_anger                                    = GetGameConfig().GetFloat("AI.EaseToAnger", -0.5F);
     ai.ease_to_appease                                  = GetGameConfig().GetFloat("AI.EaseToAppease", 0.5F);
-    ai.hull_damage_anger                                = GetGameConfig().GetInt32_T("AI.HullDamageAnger", 10);
+    ai.hull_damage_anger                                = GetGameConfig().GetInt32("AI.HullDamageAnger", 10);
     ai.hull_percent_for_comm                            = GetGameConfig().GetFloat("AI.HullPercentForComm", 0.75F);
     ai.lowest_negative_comm_choice                      = GetGameConfig().GetFloat("AI.LowestNegativeCommChoice", -0.00001F);
     ai.lowest_positive_comm_choice                      = GetGameConfig().GetFloat("AI.LowestPositiveCommChoice", 0.0F);
     ai.mood_swing_level                                 = GetGameConfig().GetFloat("AI.MoodSwingLevel", 0.2F);
     ai.random_response_range                            = GetGameConfig().GetFloat("AI.RandomResponseRange", 0.8F);
-    ai.shield_damage_anger                              = GetGameConfig().GetInt32_T("AI.ShieldDamageAnger", 1);
-    ai.jump_without_energy = GetGameConfig().GetBool("AI.jump_without_energy", false);
-    ai.friend_factor = -GetGameConfig().GetFloat("AI.friend_factor", 0.1F);
-    ai.kill_factor = -GetGameConfig().GetFloat("AI.kill_factor", 0.2F);
+    ai.shield_damage_anger                              = GetGameConfig().GetInt32("AI.ShieldDamageAnger", 1);
+    ai.jump_without_energy                              = GetGameConfig().GetBool("AI.jump_without_energy", false);
+    ai.friend_factor                                    = -GetGameConfig().GetFloat("AI.friend_factor", 0.1F);
+    ai.kill_factor                                      = -GetGameConfig().GetFloat("AI.kill_factor", 0.2F);
 
-    audio_config_.every_other_mount = GetGameConfig().GetBool("audio.every_other_mount", false);
+    audio_config_.every_other_mount                     = GetGameConfig().GetBool("audio.every_other_mount", false);
     audio_config_.shuffle_songs.clear_history_on_list_change = GetGameConfig().GetBool("audio.shuffle_songs.clear_history_on_list_change", false);
 
     // collision_hacks substruct
@@ -109,7 +109,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.atmosphere_diffuse = GetGameConfig().GetFloat("graphics.atmosphere_diffuse", 1.0F);
     graphics_config_.default_engine_activation = GetGameConfig().GetFloat("graphics.default_engine_activation", 0.00048828125F);
     graphics_config_.explosion_animation = GetGameConfig().GetString("graphics.explosion_animation", "explosion_orange.ani");
-    graphics_config_.shield_detail = GetGameConfig().GetInt32_T("graphics.shield_detail", 16);
+    graphics_config_.shield_detail = GetGameConfig().GetInt32("graphics.shield_detail", 16);
     graphics_config_.shield_texture = GetGameConfig().GetString("graphics.shield_texture", "shield.bmp");
     graphics_config_.shield_technique = GetGameConfig().GetString("graphics.shield_technique", "");
 
@@ -159,7 +159,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.hud.draw_vdu_view_shields = GetGameConfig().GetBool("graphics.hud.draw_vdu_view_shields", true);
     graphics_config_.hud.draw_weapon_sprite = GetGameConfig().GetBool("graphics.hud.draw_weapon_sprite", false);
     graphics_config_.hud.enemy_near_message = GetGameConfig().GetEscapedString("graphics.hud.EnemyNearMessage", "#ff0000Enemy Near#000000");
-    graphics_config_.hud.gun_list_columns = GetGameConfig().GetInt32_T("graphics.hud.gun_list_columns", 1);
+    graphics_config_.hud.gun_list_columns = GetGameConfig().GetInt32("graphics.hud.gun_list_columns", 1);
     graphics_config_.hud.invert_friendly_shields = GetGameConfig().GetBool("graphics.hud.invert_friendly_shields", false);
     graphics_config_.hud.invert_friendly_sprite = GetGameConfig().GetBool("graphics.hud.invert_friendly_sprite", false);
     graphics_config_.hud.invert_target_shields = GetGameConfig().GetBool("graphics.hud.invert_target_shields", false);
@@ -252,7 +252,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.warp_energy_multiplier = GetGameConfig().GetFloat("physics.warp_energy_multiplier", 0.12F);
     physics_config_.player_warp_energy_multiplier = GetGameConfig().GetFloat("physics.player_warp_energy_multiplier", 0.12F);
     physics_config_.vsd_mj_yield = GetGameConfig().GetFloat("physics.VSD_MJ_yield", 5.4F);
-    physics_config_.max_ecm = GetGameConfig().GetSize_T("physics.max_ecm", 4U);
+    physics_config_.max_ecm = GetGameConfig().GetSizeT("physics.max_ecm", 4U);
     physics_config_.max_lost_target_live_time = GetGameConfig().GetFloat("physics.max_lost_target_live_time", 30.0F);
     physics_config_.percent_missile_match_target_velocity = GetGameConfig().GetFloat("physics.percent_missile_match_target_velocity", 1.0F);
     physics_config_.game_speed = GetGameConfig().GetFloat("physics.game_speed", 1.0F);
