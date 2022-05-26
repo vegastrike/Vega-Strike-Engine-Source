@@ -1028,7 +1028,7 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     draw_line_to_targets_target = configuration()->graphics_config_.hud.draw_line_to_targets_target;
     draw_line_to_itts = configuration()->graphics_config_.hud.draw_line_to_itts;
     always_itts = configuration()->graphics_config_.hud.draw_always_itts;
-    steady_itts = configuration()->physics.steady_itts;
+    steady_itts = configuration()->physics_config_.steady_itts;
     last_locktime = last_mlocktime = -FLT_MAX;
 
     radarDisplay = Radar::Factory(Radar::Type::NullDisplay);
