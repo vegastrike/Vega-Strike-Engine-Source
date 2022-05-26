@@ -97,6 +97,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     fuel.fuel_equals_warp = GetGameConfig().GetBool("physics.fuel_equals_warp", fuel.fuel_equals_warp);
     fuel.normal_fuel_usage = GetGameConfig().GetFloat("physics.FuelUsage", fuel.normal_fuel_usage);
     fuel.reactor_uses_fuel = GetGameConfig().GetBool("physics.reactor_uses_fuel", fuel.reactor_uses_fuel);
+    fuel.vsd_mj_yield = GetGameConfig().GetFloat("physics.VSD_MJ_yield", 5.4F);
 
     // graphics substruct
     graphics_config_.automatic_landing_zone_warning = GetGameConfig().GetString("graphics.automatic_landing_zone_warning", "comm_docking.ani");
@@ -197,7 +198,6 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.hud.print_request_docking = GetGameConfig().GetBool("graphics.hud.print_request_docking", true);
     graphics_config_.hud.print_ship_type = GetGameConfig().GetBool("graphics.hud.print_ship_type", true);
     graphics_config_.hud.projectile_means_missile = GetGameConfig().GetBool("graphics.hud.projectile_means_missile", false);
-    graphics_config_.hud.radar_range = GetGameConfig().GetFloat("graphics.hud.radarRange", 20000.0F);    // TODO: Deduplicate this with computer_config_.default_max_range
     graphics_config_.hud.radar_type = GetGameConfig().GetString("graphics.hud.radarType", "WC");
     graphics_config_.hud.radar_search_extra_radius = GetGameConfig().GetFloat("graphics.hud.radar_search_extra_radius", 1000.0F);
     graphics_config_.hud.rotating_bracket_inner = GetGameConfig().GetBool("graphics.hud.RotatingBracketInner", true);
@@ -256,7 +256,6 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.shield_maintenance_charge = GetGameConfig().GetFloat("physics.shield_maintenance_charge", 0.25F);
     physics_config_.warp_energy_multiplier = GetGameConfig().GetFloat("physics.warp_energy_multiplier", 0.12F);
     physics_config_.player_warp_energy_multiplier = GetGameConfig().GetFloat("physics.player_warp_energy_multiplier", 0.12F);
-    physics_config_.vsd_mj_yield = GetGameConfig().GetFloat("physics.VSD_MJ_yield", 5.4F);
     physics_config_.max_ecm = GetGameConfig().GetSizeT("physics.max_ecm", 4U);
     physics_config_.max_lost_target_live_time = GetGameConfig().GetFloat("physics.max_lost_target_live_time", 30.0F);
     physics_config_.percent_missile_match_target_velocity = GetGameConfig().GetFloat("physics.percent_missile_match_target_velocity", 1.0F);

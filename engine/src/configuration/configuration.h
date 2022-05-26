@@ -128,6 +128,7 @@ struct Fuel {
     bool fuel_equals_warp;
     float normal_fuel_usage;
     bool reactor_uses_fuel;
+    float vsd_mj_yield{};
 
     Fuel();
 };
@@ -297,7 +298,6 @@ struct PhysicsConfig {
     float shield_maintenance_charge{};
     float warp_energy_multiplier{};
     float player_warp_energy_multiplier{};
-    float vsd_mj_yield{};
     uintmax_t max_ecm{};
     float max_lost_target_live_time{};
     float percent_missile_match_target_velocity{};

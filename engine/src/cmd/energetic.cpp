@@ -271,7 +271,7 @@ void Energetic::ExpendFuel() {
         return;
     }
 
-    const float fuel_usage = configuration()->physics_config_.fmec_factor * recharge * simulation_atom_var;
+    const float fuel_usage = configuration()->fuel.fmec_exit_velocity_inverse * recharge * simulation_atom_var;
     fuel = std::max(0.0f, fuel - fuel_usage);
 
     if (!FINITE(fuel)) {
@@ -378,5 +378,5 @@ float Energetic::WarpEnergyMultiplier(const bool player_ship) {
 }
 
 float Energetic::VSDPercent() {
-    return configuration()->physics_config_.vsd_mj_yield / 100;
+    return configuration()->fuel.vsd_mj_yield / 100;
 }
