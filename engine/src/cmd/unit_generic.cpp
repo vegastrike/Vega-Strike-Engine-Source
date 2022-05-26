@@ -1159,7 +1159,7 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 
     WCWarpIsFuelHack(true);
 
-    float fuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_thrust : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
     if (fabs(amt1.i) > fuelclamp * limits.pitch) {
         Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
     }
@@ -1189,8 +1189,8 @@ bool Unit::CombatMode() {
 }
 
 Vector Unit::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    float fuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_thrust : 1;
-    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? configuration()->physics_config_.no_fuel_afterburn : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
     float limit =
             afterburn ? (abfuelclamp
                     * (computer.max_ab_speed()
@@ -1257,7 +1257,7 @@ Vector Unit::MaxThrust(const Vector &amt1) {
 // TODO: refactor soon. Especially access to the fuel variable
 Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
-    const bool finegrainedFuelEfficiency = configuration()->physics_config_.variable_fuel_consumption;
+    const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
     if (WCfuelhack) {
         if (fuel > warpenergy) {
             fuel = warpenergy;
@@ -1283,8 +1283,8 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     }
     Vector Res = amt1;
 
-    float fuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_thrust : 1;
-    float abfuelclamp = (fuel <= 0) ? configuration()->physics_config_.no_fuel_afterburn : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
     if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
         Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
     }
@@ -1301,7 +1301,7 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k < -limits.retro) {
         Res.k = -limits.retro;
     }
-    const float Lithium6constant = configuration()->physics_config_.deuterium_relative_efficiency_lithium;
+    const float Lithium6constant = configuration()->fuel.deuterium_relative_efficiency_lithium;
     //1/5,000,000 m/s
     const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
     if (afterburntype == 2) {

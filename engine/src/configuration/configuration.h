@@ -129,6 +129,15 @@ struct Fuel {
     float normal_fuel_usage;
     bool reactor_uses_fuel;
     float vsd_mj_yield{};
+    float no_fuel_thrust{};
+    float no_fuel_afterburn{};
+    bool variable_fuel_consumption{};
+    float deuterium_relative_efficiency_lithium{};
+    float fmec_factor{};
+    float reactor_idle_efficiency{};
+    float min_reactor_efficiency{};
+    float ecm_energy_cost{};
+    float fuel_conversion{};
 
     Fuel();
 };
@@ -290,10 +299,6 @@ struct PhysicsConfig {
     bool separate_system_flakiness_component{};
     float shield_energy_capacitance{};
     bool use_max_shield_energy_usage{};
-    float fmec_factor{};
-    float reactor_idle_efficiency{};
-    float min_reactor_efficiency{};
-    float ecm_energy_cost{};
     bool shields_in_spec{};
     float shield_maintenance_charge{};
     float warp_energy_multiplier{};
@@ -314,7 +319,6 @@ struct PhysicsConfig {
     float warp_stretch_decel_cutoff{};
     float warp_multiplier_min{};
     float warp_multiplier_max{};
-    float fuel_conversion{};
     bool unit_table{};
     float capship_size{};
     float near_autotrack_cone{};
@@ -323,10 +327,6 @@ struct PhysicsConfig {
     float target_distance_to_warp_bonus{};
     bool no_spec_jump{};
     float difficulty_speed_exponent{};
-    float no_fuel_thrust{};
-    float no_fuel_afterburn{};
-    bool variable_fuel_consumption{};
-    float deuterium_relative_efficiency_lithium{};
     float min_damage{};
     float max_damage{};
     float max_radar_cone_damage{};

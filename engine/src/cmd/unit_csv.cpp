@@ -650,7 +650,7 @@ void LoadCockpit(Unit *thus, const string &cockpit) {
 }
 
 float getFuelConversion() {
-    return configuration()->physics_config_.fuel_conversion;
+    return configuration()->fuel.fuel_conversion;
 }
 
 const std::string EMPTY_STRING("");

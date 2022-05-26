@@ -287,7 +287,7 @@ void Energetic::MaintainECM() {
         return;
     }
 
-    float sim_atom_ecm = configuration()->physics_config_.ecm_energy_cost * unit->ecm * simulation_atom_var;
+    float sim_atom_ecm = configuration()->fuel.ecm_energy_cost * unit->ecm * simulation_atom_var;
     ExpendEnergy(sim_atom_ecm);
 }
 

@@ -98,6 +98,17 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     fuel.normal_fuel_usage = GetGameConfig().GetFloat("physics.FuelUsage", fuel.normal_fuel_usage);
     fuel.reactor_uses_fuel = GetGameConfig().GetBool("physics.reactor_uses_fuel", fuel.reactor_uses_fuel);
     fuel.vsd_mj_yield = GetGameConfig().GetFloat("physics.VSD_MJ_yield", 5.4F);
+    fuel.no_fuel_thrust = GetGameConfig().GetFloat("physics.NoFuelThrust", 0.4F);
+    fuel.no_fuel_afterburn = GetGameConfig().GetFloat("physics.NoFuelAfterburn", 0.1F);
+    fuel.variable_fuel_consumption = GetGameConfig().GetBool("physics.VariableFuelConsumption", false);
+    // Also known as Lithium6constant
+    fuel.deuterium_relative_efficiency_lithium = GetGameConfig().GetFloat("physics.DeuteriumRelativeEfficiency_Lithium", 1.0F);
+    //Fuel Mass in metric tons expended per generation of 100MJ
+    fuel.fmec_factor = GetGameConfig().GetFloat("physics.FMEC_factor", 0.000000008F);
+    fuel.reactor_idle_efficiency = GetGameConfig().GetFloat("physics.reactor_idle_efficiency", 0.98F);
+    fuel.min_reactor_efficiency = GetGameConfig().GetFloat("physics.min_reactor_efficiency", 0.00001F);
+    fuel.ecm_energy_cost = GetGameConfig().GetFloat("physics.ecm_energy_cost", 0.05F);
+    fuel.fuel_conversion = GetGameConfig().GetFloat("physics.FuelConversion", 0.00144F);
 
     // graphics substruct
     graphics_config_.automatic_landing_zone_warning = GetGameConfig().GetString("graphics.automatic_landing_zone_warning", "comm_docking.ani");
@@ -247,11 +258,6 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.separate_system_flakiness_component = GetGameConfig().GetBool("physics.separate_system_flakiness_component", false);
     physics_config_.shield_energy_capacitance = GetGameConfig().GetFloat("physics.shield_energy_capacitance", 0.2F);
     physics_config_.use_max_shield_energy_usage = GetGameConfig().GetBool("physics.use_max_shield_energy_usage", false);
-    //Fuel Mass in metric tons expended per generation of 100MJ
-    physics_config_.fmec_factor = GetGameConfig().GetFloat("physics.FMEC_factor", 0.000000008F);
-    physics_config_.reactor_idle_efficiency = GetGameConfig().GetFloat("physics.reactor_idle_efficiency", 0.98F);
-    physics_config_.min_reactor_efficiency = GetGameConfig().GetFloat("physics.min_reactor_efficiency", 0.00001F);
-    physics_config_.ecm_energy_cost = GetGameConfig().GetFloat("physics.ecm_energy_cost", 0.05F);
     physics_config_.shields_in_spec = GetGameConfig().GetBool("physics.shields_in_spec", false);
     physics_config_.shield_maintenance_charge = GetGameConfig().GetFloat("physics.shield_maintenance_charge", 0.25F);
     physics_config_.warp_energy_multiplier = GetGameConfig().GetFloat("physics.warp_energy_multiplier", 0.12F);
@@ -274,7 +280,6 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.warp_multiplier_min = GetGameConfig().GetFloat("physics.warpMultiplierMin", 9.86968440109F);
     // C
     physics_config_.warp_multiplier_max = GetGameConfig().GetFloat("physics.warpMultiplierMax", 300000000.0F);
-    physics_config_.fuel_conversion = GetGameConfig().GetFloat("physics.FuelConversion", 0.00144F);
     physics_config_.unit_table = GetGameConfig().GetBool("physics.UnitTable", false);
     physics_config_.capship_size = GetGameConfig().GetFloat("physics.capship_size", 500.0F);
     physics_config_.near_autotrack_cone = GetGameConfig().GetFloat("physics.near_autotrack_cone", 0.9F);
@@ -283,11 +288,6 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.target_distance_to_warp_bonus = GetGameConfig().GetFloat("physics.target_distance_to_warp_bonus", 1.33F);
     physics_config_.no_spec_jump = GetGameConfig().GetBool("physics.noSPECJUMP", true);
     physics_config_.difficulty_speed_exponent = GetGameConfig().GetFloat("physics.difficulty_speed_exponent", 0.2F);
-    physics_config_.no_fuel_thrust = GetGameConfig().GetFloat("physics.NoFuelThrust", 0.4F);
-    physics_config_.no_fuel_afterburn = GetGameConfig().GetFloat("physics.NoFuelAfterburn", 0.1F);
-    physics_config_.variable_fuel_consumption = GetGameConfig().GetBool("physics.VariableFuelConsumption", false);
-    // Also known as Lithium6constant
-    physics_config_.deuterium_relative_efficiency_lithium = GetGameConfig().GetFloat("physics.DeuteriumRelativeEfficiency_Lithium", 1.0F);
     physics_config_.min_damage = GetGameConfig().GetFloat("physics.min_damage", 0.001F);
     physics_config_.max_damage = GetGameConfig().GetFloat("physics.max_damage", 0.999F);
     physics_config_.max_radar_cone_damage = GetGameConfig().GetFloat("physics.max_radar_cone_damage", 0.9F);
