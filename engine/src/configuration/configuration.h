@@ -340,6 +340,7 @@ struct PhysicsConfig {
 // Covers both SPEC and jumps
 struct WarpConfig {
     float insystem_jump_cost{};
+    float max_effective_velocity{};
 
     WarpConfig();
 };
@@ -369,7 +370,7 @@ public:
     vega_config::GraphicsConfig graphics_config_;
     vega_config::Logging logging;
     vega_config::PhysicsConfig physics_config_;
-    vega_config::WarpConfig warp;
+    vega_config::WarpConfig warp_config_;
     vega_config::WeaponsConfig weapons;
 };
 

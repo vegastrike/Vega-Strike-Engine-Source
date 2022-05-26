@@ -304,8 +304,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
             / physics_config_.game_speed * physics_config_.game_accel;
     graphics_config_.in_system_jump_animation = GetGameConfig().GetString("graphics.insys_jump_animation", "warp.ani");
 
-    // warp substruct
-    warp.insystem_jump_cost = GetGameConfig().GetFloat("physics.insystem_jump_cost", warp.insystem_jump_cost);
+    // warp_config_ substruct
+    warp_config_.insystem_jump_cost = GetGameConfig().GetFloat("physics.insystem_jump_cost", warp_config_.insystem_jump_cost);
+    warp_config_.max_effective_velocity = GetGameConfig().GetFloat("physics.warpMaxEfVel", static_cast<float>(M_PI * M_PI * 300000000.0));
 
     // weapons substruct
     weapons.can_fire_in_cloak = GetGameConfig().GetBool("physics.can_fire_in_cloak", weapons.can_fire_in_cloak);
