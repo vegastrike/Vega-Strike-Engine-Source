@@ -32,7 +32,6 @@
 #include <fstream>
 #include <iterator>
 
-#include <unistd.h>
 #include <stdio.h>
 #include <limits.h>
 
@@ -44,14 +43,6 @@ TEST(JSON, Sanity) {
     // I changed much of the game code for the game, rather to figure out why it isn't working.
 
     std::map<std::string, std::map<std::string, std::string>> json_units;
-
-
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, sizeof(cwd)) != nullptr) {
-        std::cerr << cwd << "\n";
-    } else {
-
-    }
 
     UnitJSONFactory::ParseJSON("../../data/units/units.csv");
 
