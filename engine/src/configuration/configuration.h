@@ -282,7 +282,6 @@ struct Logging {
 };
 
 struct PhysicsConfig {
-    float bleed_factor;
     float collision_scale_factor;
     float inelastic_scale;
     float kilojoules_per_damage;
@@ -301,24 +300,14 @@ struct PhysicsConfig {
     bool use_max_shield_energy_usage{};
     bool shields_in_spec{};
     float shield_maintenance_charge{};
-    float warp_energy_multiplier{};
-    float player_warp_energy_multiplier{};
     uintmax_t max_ecm{};
     float max_lost_target_live_time{};
     float percent_missile_match_target_velocity{};
     float game_speed{};
     float game_accel{};
     float velocity_max{};
-    float warp_ramp_up_time{};
-    float computer_warp_ramp_up_time{};
-    float warp_ramp_down_time{};
-    float warp_memory_effect{};
     float max_player_rotation_rate{};
     float max_non_player_rotation_rate{};
-    float warp_stretch_cutoff{};
-    float warp_stretch_decel_cutoff{};
-    float warp_multiplier_min{};
-    float warp_multiplier_max{};
     bool unit_table{};
     float capship_size{};
     float near_autotrack_cone{};
@@ -347,6 +336,17 @@ struct PhysicsConfig {
 struct WarpConfig {
     float insystem_jump_cost{};
     float max_effective_velocity{};
+    float bleed_factor{};
+    float warp_energy_multiplier{};
+    float player_warp_energy_multiplier{};
+    float warp_ramp_up_time{};
+    float computer_warp_ramp_up_time{};
+    float warp_ramp_down_time{};
+    float warp_memory_effect{};
+    float warp_stretch_cutoff{};
+    float warp_stretch_decel_cutoff{};
+    float warp_multiplier_min{};
+    float warp_multiplier_max{};
 
     WarpConfig();
 };

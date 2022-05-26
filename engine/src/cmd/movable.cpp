@@ -56,8 +56,8 @@ Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
     const Vector default_angular_velocity(configuration()->general_config_.pitch,
             configuration()->general_config_.yaw,
             configuration()->general_config_.roll);
-    cutsqr = configuration()->physics_config_.warp_stretch_cutoff * configuration()->physics_config_.warp_stretch_cutoff;
-    outcutsqr = configuration()->physics_config_.warp_stretch_decel_cutoff * configuration()->physics_config_.warp_stretch_decel_cutoff;
+    cutsqr = configuration()->warp_config_.warp_stretch_cutoff * configuration()->warp_config_.warp_stretch_cutoff;
+    outcutsqr = configuration()->warp_config_.warp_stretch_decel_cutoff * configuration()->warp_config_.warp_stretch_decel_cutoff;
 
     Identity(cumulative_transformation_matrix);
     cumulative_transformation = identity_transformation;
@@ -180,19 +180,19 @@ void Movable::AddVelocity(float difficulty) {
 
     bool playa = isPlayerShip();
 
-    float warprampuptime = playa ? configuration()->physics_config_.warp_ramp_up_time : configuration()->physics_config_.computer_warp_ramp_up_time;
+    float warprampuptime = playa ? configuration()->warp_config_.warp_ramp_up_time : configuration()->warp_config_.computer_warp_ramp_up_time;
     //WarpConfig Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
         if (graphicOptions.InWarp == 1) {             //WarpConfig Turning on
             graphicOptions.RampCounter = warprampuptime;
         } else {                                        //WarpConfig Turning off
-            graphicOptions.RampCounter = configuration()->physics_config_.warp_ramp_down_time;
+            graphicOptions.RampCounter = configuration()->warp_config_.warp_ramp_down_time;
         }
         //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
         if (oldrampcounter != 0 && graphicOptions.RampCounter != 0) {
             if (graphicOptions.InWarp == 1) {             //WarpConfig is turning on before it turned off
-                graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->physics_config_.warp_ramp_down_time);
+                graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->warp_config_.warp_ramp_down_time);
             } else {                                        //WarpConfig is turning off before it turned on
                 graphicOptions.RampCounter *= (1 - oldrampcounter / warprampuptime);
             }
@@ -206,8 +206,8 @@ void Movable::AddVelocity(float difficulty) {
             if (graphicOptions.RampCounter <= 0) {
                 graphicOptions.RampCounter = 0;
             }
-            if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > configuration()->physics_config_.warp_ramp_down_time) {
-                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration()->physics_config_.warp_ramp_down_time;
+            if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > configuration()->warp_config_.warp_ramp_down_time) {
+                graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration()->warp_config_.warp_ramp_down_time;
             }
             if (graphicOptions.InWarp == 1 && graphicOptions.RampCounter > warprampuptime) {
                 graphicOptions.RampCounter = warprampuptime;
@@ -217,7 +217,7 @@ void Movable::AddVelocity(float difficulty) {
                             / warprampuptime)
                             * (graphicOptions.RampCounter
                                     / warprampuptime)) : (graphicOptions.RampCounter
-                    / configuration()->physics_config_.warp_ramp_down_time) * (graphicOptions.RampCounter / configuration()->physics_config_.warp_ramp_down_time);
+                    / configuration()->warp_config_.warp_ramp_down_time) * (graphicOptions.RampCounter / configuration()->warp_config_.warp_ramp_down_time);
         }
         graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
     } else {
@@ -232,7 +232,7 @@ void Movable::AddVelocity(float difficulty) {
     }
 
     graphicOptions.WarpFieldStrength =
-            lastWarpField * configuration()->physics_config_.warp_memory_effect + (1.0 - configuration()->physics_config_.warp_memory_effect) * graphicOptions.WarpFieldStrength;
+            lastWarpField * configuration()->warp_config_.warp_memory_effect + (1.0 - configuration()->warp_config_.warp_memory_effect) * graphicOptions.WarpFieldStrength;
     curr_physical_state.position = curr_physical_state.position + (v * simulation_atom_var * difficulty).Cast();
     //now we do this later in update physics
     //I guess you have to, to be robust}
@@ -339,7 +339,7 @@ Vector Movable::ResolveForces(const Transformation &trans, const Matrix &transma
         Vector p, q, r;
         GetOrientation(p, q, r);
 
-        float tmpsec = oldbig ? configuration()->physics_config_.warp_stretch_decel_cutoff : configuration()->physics_config_.warp_stretch_cutoff;
+        float tmpsec = oldbig ? configuration()->warp_config_.warp_stretch_decel_cutoff : configuration()->warp_config_.warp_stretch_cutoff;
         UniverseUtil::playAnimationGrow(configuration()->graphics_config_.in_system_jump_animation,
                 realPosition().Cast() + Velocity * tmpsec + v * radial_size,
                 radial_size * 8,
@@ -439,11 +439,11 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 //    QVector qv = v.Cast();
 
     //inverse fractional effect of ship vs real big object
-    float minimum_multiplier = configuration()->physics_config_.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
+    float minimum_multiplier = configuration()->warp_config_.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit = nullptr;
     minimum_multiplier = unit->CalculateNearestWarpUnit(minimum_multiplier, &nearest_unit, true);
-    float minWarp = configuration()->physics_config_.warp_multiplier_min * graphicOptions.MinWarpMultiplier;
-    float maxWarp = configuration()->physics_config_.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
+    float minWarp = configuration()->warp_config_.warp_multiplier_min * graphicOptions.MinWarpMultiplier;
+    float maxWarp = configuration()->warp_config_.warp_multiplier_max * graphicOptions.MaxWarpMultiplier;
     if (minimum_multiplier < minWarp) {
         minimum_multiplier = minWarp;
     }

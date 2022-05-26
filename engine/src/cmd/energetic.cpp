@@ -59,7 +59,7 @@ void Energetic::decreaseWarpEnergy(bool insys, float time) {
     if (configuration()->fuel.fuel_equals_warp) {
         this->warpenergy = this->fuel;
     }
-    this->warpenergy -= (insys ? jump.insysenergy / configuration()->physics_config_.bleed_factor : jump.energy) * time;
+    this->warpenergy -= (insys ? jump.insysenergy / configuration()->warp_config_.bleed_factor : jump.energy) * time;
     if (this->warpenergy < 0) {
         this->warpenergy = 0;
     }
@@ -79,7 +79,7 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 
     //FIXME FIXME FIXME
     // Roy Falk - fix what?
-    float bleed = jump.insysenergy / configuration()->physics_config_.bleed_factor * simulation_atom_var;
+    float bleed = jump.insysenergy / configuration()->warp_config_.bleed_factor * simulation_atom_var;
     if (warpenergy > bleed) {
         warpenergy -= bleed;
     } else {
@@ -271,7 +271,7 @@ void Energetic::ExpendFuel() {
         return;
     }
 
-    const float fuel_usage = configuration()->fuel.fmec_exit_velocity_inverse * recharge * simulation_atom_var;
+    const float fuel_usage = configuration()->fuel.fmec_factor * recharge * simulation_atom_var;
     fuel = std::max(0.0f, fuel - fuel_usage);
 
     if (!FINITE(fuel)) {
@@ -374,7 +374,7 @@ float Energetic::WarpEnergyMultiplier(const bool player_ship) {
     if (flight_group && !player_ship) {
         player = _Universe->isPlayerStarship(flight_group->leader.GetUnit()) != nullptr;
     }
-    return player ? configuration()->physics_config_.player_warp_energy_multiplier : configuration()->physics_config_.warp_energy_multiplier;
+    return player ? configuration()->warp_config_.player_warp_energy_multiplier : configuration()->warp_config_.warp_energy_multiplier;
 }
 
 float Energetic::VSDPercent() {

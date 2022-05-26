@@ -236,7 +236,6 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     logging.verbose_debug = GetGameConfig().GetBool("data.verbose_debug", logging.verbose_debug);
 
     // physics substruct
-    physics_config_.bleed_factor = GetGameConfig().GetFloat("physics.warpbleed", physics_config_.bleed_factor);
     physics_config_.collision_scale_factor =
             GetGameConfig().GetFloat("physics.collision_damage_scale", physics_config_.collision_scale_factor);
     physics_config_.inelastic_scale = GetGameConfig().GetFloat("physics.inelastic_scale", physics_config_.inelastic_scale);
@@ -260,26 +259,14 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.use_max_shield_energy_usage = GetGameConfig().GetBool("physics.use_max_shield_energy_usage", false);
     physics_config_.shields_in_spec = GetGameConfig().GetBool("physics.shields_in_spec", false);
     physics_config_.shield_maintenance_charge = GetGameConfig().GetFloat("physics.shield_maintenance_charge", 0.25F);
-    physics_config_.warp_energy_multiplier = GetGameConfig().GetFloat("physics.warp_energy_multiplier", 0.12F);
-    physics_config_.player_warp_energy_multiplier = GetGameConfig().GetFloat("physics.player_warp_energy_multiplier", 0.12F);
     physics_config_.max_ecm = GetGameConfig().GetSizeT("physics.max_ecm", 4U);
     physics_config_.max_lost_target_live_time = GetGameConfig().GetFloat("physics.max_lost_target_live_time", 30.0F);
     physics_config_.percent_missile_match_target_velocity = GetGameConfig().GetFloat("physics.percent_missile_match_target_velocity", 1.0F);
     physics_config_.game_speed = GetGameConfig().GetFloat("physics.game_speed", 1.0F);
     physics_config_.game_accel = GetGameConfig().GetFloat("physics.game_accel", 1.0F);
     physics_config_.velocity_max = GetGameConfig().GetFloat("physics.velocity_max", 10000.0F);
-    physics_config_.warp_ramp_up_time = GetGameConfig().GetFloat("physics.warprampuptime", 5.0F);
-    physics_config_.computer_warp_ramp_up_time = GetGameConfig().GetFloat("physics.computerwarprampuptime", 10.0F);
-    physics_config_.warp_ramp_down_time = GetGameConfig().GetFloat("physics.warprampdowntime", 0.5F);
-    physics_config_.warp_memory_effect = GetGameConfig().GetFloat("physics.WarpMemoryEffect", 0.9F);
     physics_config_.max_player_rotation_rate = GetGameConfig().GetFloat("physics.maxplayerrot", 24.0F);
     physics_config_.max_non_player_rotation_rate = GetGameConfig().GetFloat("physics.maxNPCrot", 360.0F);
-    physics_config_.warp_stretch_cutoff = GetGameConfig().GetFloat("physics.warp_stretch_cutoff", 500000.0F) * physics_config_.game_speed;
-    physics_config_.warp_stretch_decel_cutoff = GetGameConfig().GetFloat("physics.warp_stretch_decel_cutoff", 500000.0F) * physics_config_.game_speed;
-    // Pi^2
-    physics_config_.warp_multiplier_min = GetGameConfig().GetFloat("physics.warpMultiplierMin", 9.86968440109F);
-    // C
-    physics_config_.warp_multiplier_max = GetGameConfig().GetFloat("physics.warpMultiplierMax", 300000000.0F);
     physics_config_.unit_table = GetGameConfig().GetBool("physics.UnitTable", false);
     physics_config_.capship_size = GetGameConfig().GetFloat("physics.capship_size", 500.0F);
     physics_config_.near_autotrack_cone = GetGameConfig().GetFloat("physics.near_autotrack_cone", 0.9F);
@@ -311,6 +298,19 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
 
     // warp_config_ substruct
     warp_config_.insystem_jump_cost = GetGameConfig().GetFloat("physics.insystem_jump_cost", warp_config_.insystem_jump_cost);
+    warp_config_.bleed_factor = GetGameConfig().GetFloat("physics.warpbleed", 2.0F);
+    warp_config_.warp_energy_multiplier = GetGameConfig().GetFloat("physics.warp_energy_multiplier", 0.12F);
+    warp_config_.player_warp_energy_multiplier = GetGameConfig().GetFloat("physics.player_warp_energy_multiplier", 0.12F);
+    warp_config_.warp_ramp_up_time = GetGameConfig().GetFloat("physics.warprampuptime", 5.0F);
+    warp_config_.computer_warp_ramp_up_time = GetGameConfig().GetFloat("physics.computerwarprampuptime", 10.0F);
+    warp_config_.warp_ramp_down_time = GetGameConfig().GetFloat("physics.warprampdowntime", 0.5F);
+    warp_config_.warp_memory_effect = GetGameConfig().GetFloat("physics.WarpMemoryEffect", 0.9F);
+    warp_config_.warp_stretch_cutoff = GetGameConfig().GetFloat("physics.warp_stretch_cutoff", 500000.0F) * physics_config_.game_speed;
+    warp_config_.warp_stretch_decel_cutoff = GetGameConfig().GetFloat("physics.warp_stretch_decel_cutoff", 500000.0F) * physics_config_.game_speed;
+    // Pi^2
+    warp_config_.warp_multiplier_min = GetGameConfig().GetFloat("physics.warpMultiplierMin", 9.86968440109F);
+    // C
+    warp_config_.warp_multiplier_max = GetGameConfig().GetFloat("physics.warpMultiplierMax", 300000000.0F);
     warp_config_.max_effective_velocity = GetGameConfig().GetFloat("physics.warpMaxEfVel", static_cast<float>(M_PI * M_PI * 300000000.0));
 
     // weapons substruct
@@ -351,7 +351,6 @@ vega_config::Logging::Logging() :
 }
 
 vega_config::PhysicsConfig::PhysicsConfig() :
-        bleed_factor(2.0f),
         collision_scale_factor(1.0f),
         inelastic_scale(0.8f),
         kilojoules_per_damage(5400.0f),
