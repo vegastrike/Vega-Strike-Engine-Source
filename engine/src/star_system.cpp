@@ -903,8 +903,8 @@ void StarSystem::RequestPhysics(Unit *un, unsigned int queue) {
 //randomization on priority changes, so we're fine.
 void StarSystem::UpdateUnitsPhysics(bool firstframe) {
     static int batchcount = SIM_QUEUE_SIZE - 1;
-    double collidetime = 0.0;
-    double bolttime = 0.0;
+//    double collidetime = 0.0;
+//    double bolttime = 0.0;
     targetpick = 0.0;
     aggfire = 0.0;
     numprocessed = 0;
@@ -928,9 +928,9 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
             }
             throw;
         }
-        double c0 = queryTime();
+//        double c0 = queryTime();
         Bolt::UpdatePhysics(this);
-        double cc = queryTime();
+//        double cc = queryTime();
         last_collisions.clear();
         collide_map[Unit::UNIT_BOLT]->flatten();
         if (Unit::NUM_COLLIDE_MAPS > 1) {
@@ -953,9 +953,9 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                 iter.moveBefore(physics_buffer[newloc]);
             }
         }
-        double dd = queryTime();
-        collidetime += dd - cc;
-        bolttime += cc - c0;
+//        double dd = queryTime();
+//        collidetime += dd - cc;
+//        bolttime += cc - c0;
         current_sim_location = (current_sim_location + 1) % SIM_QUEUE_SIZE;
         ++physicsframecounter;
         totalprocessed += theunitcounter;
