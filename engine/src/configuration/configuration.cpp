@@ -90,8 +90,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     // fuel substruct
     fuel.afterburner_fuel_usage =
             GetGameConfig().GetFloat("physics.AfterburnerFuelUsage", fuel.afterburner_fuel_usage);
-    fuel.fmec_exit_velocity_inverse =
-            1.0F / GetGameConfig().GetFloat("physics.FMEC_exit_vel", fuel.fmec_exit_velocity_inverse);
+    fuel.fmec_exit_velocity_inverse = GetGameConfig().GetFloat("physics.FMEC_exit_vel_inverse", 0.0000002F);
+//    fuel.fmec_exit_velocity_inverse =
+//            1.0F / GetGameConfig().GetFloat("physics.FMEC_exit_vel", 1.0F / 0.0000002F);
     fuel.fuel_efficiency =
             GetGameConfig().GetFloat("physics.LithiumRelativeEfficiency_Lithium", fuel.fuel_efficiency);
     fuel.fuel_equals_warp = GetGameConfig().GetBool("physics.fuel_equals_warp", fuel.fuel_equals_warp);
@@ -339,7 +340,6 @@ vega_config::ComputerConfig::ComputerConfig() :
 
 vega_config::Fuel::Fuel() :
         afterburner_fuel_usage(4.0f),
-        fmec_exit_velocity_inverse(0.0000002f),
         fuel_efficiency(1.0f),
         fuel_equals_warp(false),
         normal_fuel_usage(1.0f),

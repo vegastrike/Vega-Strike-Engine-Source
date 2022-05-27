@@ -118,7 +118,7 @@ struct Fuel {
      * of fuel are used to produce 100MJ (one units.csv energy recharge unit) of recharge.
      * At some point, it wouldn't kill us to renormalize the engine and dataset to both just use SI units, but that's not a priority.
      */
-    float fmec_exit_velocity_inverse;
+    float fmec_exit_velocity_inverse{};
 
     /* This used to be Lithium6constant.
      * There's some relevant context that's been removed from the original name of this variable "Lithium6constant" --
