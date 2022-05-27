@@ -94,7 +94,7 @@ void vega_config::GameConfig::LoadGameConfig(const std::string &filename) {
                         continue;
                     }
                     std::string variable_value = iterator2.second.get<std::string>("<xmlattr>.value", "");
-                    VS_LOG(debug, (boost::format("%1%: putting value %2% in the tree at %3%") % __func__ % variable_value % (section_name + "." + variable_name)));
+//                    VS_LOG(debug, (boost::format("%1%: putting value %2% in the tree at %3%") % __func__ % variable_value % (section_name + "." + variable_name)));
                     variables_()->put(section_name + "." + variable_name, variable_value);
                 } else if (boost::iequals(iterator2.first, "section")) {
                     std::string subsection_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
