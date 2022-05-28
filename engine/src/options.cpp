@@ -27,24 +27,6 @@ extern VegaConfig *vs_config;
 
 void vs_options::init() {
     /* General Options */
-    write_savegame_on_exit =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "write_savegame_on_exit", "true"));
-    times_to_show_help_screen =
-            XMLSupport::parse_int(vs_config->getVariable("general", "times_to_show_help_screen", "3"));
-    remember_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "remember_savegame", "true"));
-    new_game_save_name = vs_config->getVariable("general", "new_game_save_name", "New_Game");
-    quick_savegame_summaries_buffer =
-            XMLSupport::parse_int(vs_config->getVariable("general", "quick_savegame_summaries_buffer", "16384"));
-    empty_mission = vs_config->getVariable("general", "empty_mission", "internal.mission");
-    custompython = vs_config->getVariable("general", "custompython", "import custom;custom.processMessage");
-    quick_savegame_summaries =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "quick_savegame_summaries", "true"));
-    garbagecollectfrequency = XMLSupport::parse_int(vs_config->getVariable("general", "garbagecollectfrequency", "20"));
-    numoldsystems = XMLSupport::parse_int(vs_config->getVariable("general", "numoldsystems", "6"));
-    deleteoldsystems = XMLSupport::parse_bool(vs_config->getVariable("general", "deleteoldsystems", "true"));
-    vsdebug = XMLSupport::parse_int(vs_config->getVariable("general", "verbose_output", "0"));
-    while_loading_starsystem =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "while_loading_starsystem", "false"));
     default_mission = vs_config->getVariable("general", "default_mission", "test/test1.mission");
     galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));

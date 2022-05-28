@@ -421,12 +421,12 @@ void Universe::StartDraw() {
 
     //remove systems not recently visited?
     static int sorttime = 0;
-    if (game_options()->garbagecollectfrequency != 0) {
+    if (configuration()->general_config_.garbage_collect_frequency != 0) {
         //don't want to delete something when there is something pending to jump therexo
         if (PendingJumpsEmpty()) {
-            if ((++sorttime) % game_options()->garbagecollectfrequency == 1) {
+            if ((++sorttime) % configuration()->general_config_.garbage_collect_frequency == 1) {
                 SortStarSystems(star_system, _active_star_systems.back());
-                if (star_system.size() > game_options()->numoldsystems && game_options()->deleteoldsystems) {
+                if (star_system.size() > configuration()->general_config_.num_old_systems && configuration()->general_config_.delete_old_systems) {
                     if (std::find(_active_star_systems.begin(), _active_star_systems.end(),
                             star_system.back()) == _active_star_systems.end()) {
                         delete star_system.back();
@@ -643,7 +643,7 @@ void Universe::UnloadStarSystem(StarSystem *s) {
 
 void Universe::Generate1(const char *file, const char *jumpback) {
     int count = 0;
-    if (game_options()->while_loading_starsystem) {
+    if (configuration()->general_config_.while_loading_star_system) {
         ss_generating(true);
     }
     VSFile f;

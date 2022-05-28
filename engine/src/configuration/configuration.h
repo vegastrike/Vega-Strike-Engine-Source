@@ -34,12 +34,24 @@ namespace vega_config {
 // Config Structs Declaration
 
 struct GeneralConfig {
+    GeneralConfig() = default;
+
     float pitch{0.0F};
     float yaw{0.0F};
     float roll{0.0F};
     bool force_anonymous_mission_names{true};
-
-    GeneralConfig() = default;
+    bool write_savegame_on_exit{true};
+    int32_t times_to_show_help_screen{3};
+    bool remember_savegame{true};
+    std::string new_game_save_name{"New_Game"};
+    size_t quick_savegame_summaries_buffer{16384U};
+    std::string empty_mission{"internal.mission"};
+    std::string custom_python{"import custom;custom.processMessage"};
+    bool quick_savegame_summaries{true};
+    int32_t garbage_collect_frequency{20};
+    uint32_t num_old_systems{6U};
+    bool delete_old_systems{true};
+    bool while_loading_star_system{false};
 };
 
 struct AIConfig {
@@ -302,8 +314,10 @@ struct GraphicsConfig {
 };
 
 struct Logging {
-    bool verbose_debug;
-    Logging();
+    Logging() = default;
+
+    int8_t vsdebug{0};
+    bool verbose_debug{false};
 };
 
 struct PhysicsConfig {

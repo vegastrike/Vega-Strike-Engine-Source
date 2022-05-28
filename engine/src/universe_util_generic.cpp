@@ -799,7 +799,7 @@ void receivedCustom(int cp, bool trusted, string cmd, string args, string id) {
     securepythonstr(cmd);
     securepythonstr(args);
     securepythonstr(id);
-    string pythonCode = game_options()->custompython + "(" + (trusted ? "True" : "False")
+    string pythonCode = configuration()->general_config_.custom_python + "(" + (trusted ? "True" : "False")
             + ", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
     VS_LOG(info, "Executing python command: ");
     VS_LOG(info, (boost::format("    %1%") % pythonCode));
@@ -938,7 +938,7 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
             "",
             true,
             false,
-            game_options()->quick_savegame_summaries,
+            configuration()->general_config_.quick_savegame_summaries,
             true,
             true,
             campaign_score_vars);
@@ -989,7 +989,7 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
             }
         }
     }
-    if (!game_options()->quick_savegame_summaries) {
+    if (!configuration()->general_config_.quick_savegame_summaries) {
         bool hit = false;
         for (set<string>::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
             string var = *it;

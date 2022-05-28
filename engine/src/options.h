@@ -41,19 +41,6 @@ public:
     void init();
 
 /* General Options */
-    bool write_savegame_on_exit{};
-    int times_to_show_help_screen{};
-    bool remember_savegame{};
-    std::string new_game_save_name;
-    int quick_savegame_summaries_buffer{};
-    std::string empty_mission;
-    std::string custompython;
-    bool quick_savegame_summaries{};
-    int garbagecollectfrequency{};
-    uint numoldsystems{};
-    bool deleteoldsystems{};
-    char vsdebug{};
-    bool while_loading_starsystem{};
     std::string default_mission;
     std::string galaxy;
     bool command_interpretor{};

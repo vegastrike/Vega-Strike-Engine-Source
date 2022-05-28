@@ -261,7 +261,7 @@ void TextMessageKey(const KBData &, KBSTATE newState) {
 void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
-        if (game_options()->write_savegame_on_exit) {
+        if (configuration()->general_config_.write_savegame_on_exit) {
             _Universe->WriteSaveGame(true);              //gotta do important stuff first
         }
         for (size_t i = 0; i < active_missions.size(); ++i) {
@@ -773,7 +773,7 @@ void IncrementStartupVariable() {
         var = getSaveData(0, "436457r1K3574r7uP71m35", 0);
         putSaveData(0, "436457r1K3574r7uP71m35", 0, var + 1);
     }
-    if (var <= game_options()->times_to_show_help_screen) {
+    if (var <= configuration()->general_config_.times_to_show_help_screen) {
         GameCockpit::NavScreen(KBData(), PRESS);
     }          //HELP FIXME
 }

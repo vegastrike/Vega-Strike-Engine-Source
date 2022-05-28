@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {
-        g_game.vsdebug = game_options()->vsdebug;
+        g_game.vsdebug = configuration()->logging.vsdebug;
     }
 
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.

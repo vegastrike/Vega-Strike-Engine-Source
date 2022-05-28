@@ -46,6 +46,20 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     general_config_.yaw = GetGameConfig().GetFloat("general.yaw", general_config_.yaw);
     general_config_.roll = GetGameConfig().GetFloat("general.roll", general_config_.roll);
     general_config_.force_anonymous_mission_names = GetGameConfig().GetBool("general.force_anonymous_mission_names", general_config_.force_anonymous_mission_names);
+    general_config_.write_savegame_on_exit = GetGameConfig().GetBool("general.write_savegame_on_exit", general_config_.write_savegame_on_exit);
+    general_config_.times_to_show_help_screen = GetGameConfig().GetInt32("general.times_to_show_help_screen", general_config_.times_to_show_help_screen);
+    general_config_.remember_savegame = GetGameConfig().GetBool("general.remember_savegame", general_config_.remember_savegame);
+    general_config_.new_game_save_name = GetGameConfig().GetString("general.new_game_save_name", general_config_.new_game_save_name);
+    // FIXME: This seems like a security risk, to have a buffer size be configurable externally -- stephengtuggy 2022-05-28
+    general_config_.quick_savegame_summaries_buffer = GetGameConfig().GetSizeT("general.quick_savegame_summaries_buffer", general_config_.quick_savegame_summaries_buffer);
+    general_config_.empty_mission = GetGameConfig().GetString("general.empty_mission", general_config_.empty_mission);
+    general_config_.custom_python = GetGameConfig().GetString("general.custompython", general_config_.custom_python);
+    general_config_.quick_savegame_summaries = GetGameConfig().GetBool("general.quick_savegame_summaries", general_config_.quick_savegame_summaries);
+    general_config_.garbage_collect_frequency = GetGameConfig().GetInt32("general.garbagecollectfrequency", general_config_.garbage_collect_frequency);
+    general_config_.num_old_systems = GetGameConfig().GetUInt32("general.numoldsystems", general_config_.num_old_systems);
+    general_config_.delete_old_systems = GetGameConfig().GetBool("general.deleteoldsystems", general_config_.delete_old_systems);
+    // vsdebug moved to logging section -- stephengtuggy 2022-05-28
+    general_config_.while_loading_star_system = GetGameConfig().GetBool("general.while_loading_starsystem", general_config_.while_loading_star_system);
 
     data_config_.master_part_list = GetGameConfig().GetString("data.master_part_list", data_config_.master_part_list);
     data_config_.using_templates = GetGameConfig().GetBool("data.usingtemplates", data_config_.using_templates);
@@ -249,6 +263,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.hud.untarget_beyond_cone = GetGameConfig().GetBool("graphics.hud.untarget_beyond_cone", graphics_config_.hud.untarget_beyond_cone);
 
     // logging substruct
+    logging.vsdebug = GetGameConfig().GetInt8("general.verbose_output", logging.vsdebug);
     logging.verbose_debug = GetGameConfig().GetBool("data.verbose_debug", logging.verbose_debug);
 
     // physics substruct
@@ -380,10 +395,6 @@ vega_config::Fuel::Fuel() :
         fuel_equals_warp(false),
         normal_fuel_usage(1.0f),
         reactor_uses_fuel(false) {
-}
-
-vega_config::Logging::Logging() :
-        verbose_debug(false) {
 }
 
 vega_config::PhysicsConfig::PhysicsConfig() :
