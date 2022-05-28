@@ -34,44 +34,45 @@ namespace vega_config {
 // Config Structs Declaration
 
 struct GeneralConfig {
-    float pitch{};
-    float yaw{};
-    float roll{};
-    bool force_anonymous_mission_names{};
+    float pitch{0.0F};
+    float yaw{0.0F};
+    float roll{0.0F};
+    bool force_anonymous_mission_names{true};
 
     GeneralConfig() = default;
 };
 
 struct AIConfig {
-    bool always_obedient{};
-    bool assist_friend_in_need{};
-    float ease_to_anger{};
-    float ease_to_appease{};
-    int32_t hull_damage_anger{};
-    float hull_percent_for_comm{};
-    float lowest_negative_comm_choice{};
-    float lowest_positive_comm_choice{};
-    float mood_swing_level{};
-    float random_response_range{};
-    int32_t shield_damage_anger{};
-    bool jump_without_energy{};
-    float friend_factor{};
-    float kill_factor{};
-    float escort_distance{};
-    float turn_leader_distance{};
-    float time_to_recommand_wing{};
+    bool always_obedient{true};
+    bool assist_friend_in_need{true};
+    float ease_to_anger{-0.5F};
+    float ease_to_appease{0.5F};
+    int32_t hull_damage_anger{10};
+    float hull_percent_for_comm{0.75F};
+    float lowest_negative_comm_choice{-0.00001F};
+    float lowest_positive_comm_choice{0.0F};
+    float mood_swing_level{0.2F};
+    float random_response_range{0.8F};
+    int32_t shield_damage_anger{1};
+    bool jump_without_energy{false};
+    float friend_factor{0.1F};
+    float kill_factor{0.2F};
+    float escort_distance{10.0F};
+    float turn_leader_distance{5.0F};
+    float time_to_recommand_wing{100.0F};
+    double min_relationship{-20.0};
 
     AIConfig() = default;
 };
 
 struct ShuffleSongsConfig {
-    bool clear_history_on_list_change{};
+    bool clear_history_on_list_change{false};
 
     ShuffleSongsConfig() = default;
 };
 
 struct AudioConfig {
-    bool every_other_mount{};
+    bool every_other_mount{false};
     ShuffleSongsConfig shuffle_songs;
 
     AudioConfig() = default;
@@ -104,18 +105,18 @@ struct ComputerConfig {
 };
 
 struct DataConfig {
-    std::string master_part_list{};
-    bool using_templates{};
+    std::string master_part_list{"master_part_list"};
+    bool using_templates{true};
 
     DataConfig() = default;
 };
 
 struct EjectConfig {
-    float eject_cargo_percent{};
-    uint32_t max_dumped_cargo{};
-    float hull_damage_to_eject{};
-    float auto_eject_percent{};
-    bool player_auto_eject{};
+    float eject_cargo_percent{1.0F};
+    uint32_t max_dumped_cargo{15U};
+    float hull_damage_to_eject{100.0F}; // TODO: Make use of this setting in actual code
+    float auto_eject_percent{0.5F};
+    bool player_auto_eject{true};
 
     EjectConfig() = default;
 };
@@ -131,7 +132,7 @@ struct Fuel {
      * of fuel are used to produce 100MJ (one units.csv energy recharge unit) of recharge.
      * At some point, it wouldn't kill us to renormalize the engine and dataset to both just use SI units, but that's not a priority.
      */
-    float fmec_exit_velocity_inverse{};
+    float fmec_exit_velocity_inverse{0.0000002F};
 
     /* This used to be Lithium6constant.
      * There's some relevant context that's been removed from the original name of this variable "Lithium6constant" --
@@ -141,123 +142,123 @@ struct Fuel {
     bool fuel_equals_warp;
     float normal_fuel_usage;
     bool reactor_uses_fuel;
-    float vsd_mj_yield{};
-    float no_fuel_thrust{};
-    float no_fuel_afterburn{};
-    bool variable_fuel_consumption{};
-    float deuterium_relative_efficiency_lithium{};
-    float fmec_factor{};
-    float reactor_idle_efficiency{};
-    float min_reactor_efficiency{};
-    float ecm_energy_cost{};
-    float fuel_conversion{};
+    float vsd_mj_yield{5.4F};
+    float no_fuel_thrust{0.4F};
+    float no_fuel_afterburn{0.1F};
+    bool variable_fuel_consumption{false};
+    float deuterium_relative_efficiency_lithium{1.0F};
+    float fmec_factor{0.000000008F};
+    float reactor_idle_efficiency{0.98F};
+    float min_reactor_efficiency{0.00001F};
+    float ecm_energy_cost{0.05F};
+    float fuel_conversion{0.00144F};
 
     Fuel();
 };
 
 struct HudConfig {
-    bool draw_rendered_crosshairs{};
-    std::string already_near_message{};
-    float armor_hull_size{};
-    std::string asteroids_near_message{};
-    bool basename_colon_basename{};
-    float box_line_thickness{};
-    bool completed_objectives_last{};
-    bool crosshairs_on_chase_cam{};
-    bool crosshairs_on_padlock{};
-    std::string damage_report_heading{};
-    bool debug_position{};
-    float diamond_line_thickness{};
-    float diamond_rotation_speed{};
-    float diamond_size{};
-    bool display_relative_velocity{};
-    bool display_warp_energy_if_no_jump_drive{};
-    bool draw_all_target_boxes{};
-    bool draw_always_itts{};
-    bool draw_line_to_itts{};
-    bool draw_line_to_target{};
-    bool draw_line_to_targets_target{};
-    bool draw_nav_symbol{};
-    bool draw_tactical_target{};
-    bool draw_targeting_boxes{};
-    bool draw_targeting_boxes_inside{};
-    bool draw_arrow_on_chase_cam{};
-    bool draw_arrow_on_pan_cam{};
-    bool draw_arrow_on_pan_target{};
-    bool draw_arrow_to_target{};
-    bool draw_blips_on_both_radar{};
-    bool draw_damage_sprite{};
-    bool draw_gravitational_objects{};
-    bool draw_nav_grid{};
-    bool draw_significant_blips{};
-    bool draw_star_direction{};
-    bool draw_unit_on_chase_cam{};
-    bool draw_vdu_view_shields{};
-    bool draw_weapon_sprite{};
-    std::string enemy_near_message{};
-    int32_t gun_list_columns{};
-    bool invert_friendly_shields{};
-    bool invert_friendly_sprite{};
-    bool invert_target_shields{};
-    bool invert_target_sprite{};
-    bool invert_view_shields{};
-    bool itts_for_beams{};
-    bool itts_for_lockable{};
-    float itts_line_to_mark_alpha{};
-    bool itts_use_average_gun_speed{};
-    bool lock_center_crosshair{};
-    float lock_confirm_line_length{};
-    std::string manifest_heading{};
-    float max_missile_bracket_size{};
+    bool draw_rendered_crosshairs{true};
+    std::string already_near_message{"#ff0000Already Near#000000"};
+    float armor_hull_size{0.55F};
+    std::string asteroids_near_message{"#ff0000Asteroids Near#000000"};
+    bool basename_colon_basename{true};
+    float box_line_thickness{1.0F};
+    bool completed_objectives_last{true};
+    bool crosshairs_on_chase_cam{false};
+    bool crosshairs_on_padlock{false};
+    std::string damage_report_heading{"#00ff00DAMAGE REPORT\\n\\n"};
+    bool debug_position{false};
+    float diamond_line_thickness{1.0F};
+    float diamond_rotation_speed{1.0F};
+    float diamond_size{2.05F};
+    bool display_relative_velocity{true};
+    bool display_warp_energy_if_no_jump_drive{true};
+    bool draw_all_target_boxes{false};
+    bool draw_always_itts{false};
+    bool draw_line_to_itts{false};
+    bool draw_line_to_target{false};
+    bool draw_line_to_targets_target{false};
+    bool draw_nav_symbol{false};
+    bool draw_tactical_target{false};
+    bool draw_targeting_boxes{true};
+    bool draw_targeting_boxes_inside{true};
+    bool draw_arrow_on_chase_cam{true};
+    bool draw_arrow_on_pan_cam{false};
+    bool draw_arrow_on_pan_target{false};
+    bool draw_arrow_to_target{true};
+    bool draw_blips_on_both_radar{false};
+    bool draw_damage_sprite{true};
+    bool draw_gravitational_objects{true};
+    bool draw_nav_grid{true};
+    bool draw_significant_blips{true};
+    bool draw_star_direction{true};
+    bool draw_unit_on_chase_cam{true};
+    bool draw_vdu_view_shields{true};
+    bool draw_weapon_sprite{false};
+    std::string enemy_near_message{"#ff0000Enemy Near#000000"};
+    int32_t gun_list_columns{1};
+    bool invert_friendly_shields{false};
+    bool invert_friendly_sprite{false};
+    bool invert_target_shields{false};
+    bool invert_target_sprite{false};
+    bool invert_view_shields{false};
+    bool itts_for_beams{false};
+    bool itts_for_lockable{false};
+    float itts_line_to_mark_alpha{0.1F};
+    bool itts_use_average_gun_speed{true};
+    bool lock_center_crosshair{false};
+    float lock_confirm_line_length{1.5F};
+    std::string manifest_heading{"Manifest\\n"};
+    float max_missile_bracket_size{2.05F};
     std::string message_prefix{};
-    float min_missile_bracket_size{};
-    float min_lock_box_size{};
-    float min_radar_blip_size{};
-    float min_target_box_size{};
+    float min_missile_bracket_size{1.05F};
+    float min_lock_box_size{0.001F};
+    float min_radar_blip_size{0.0F};
+    float min_target_box_size{0.01F};
     std::string mounts_list_empty{};
-    float nav_cross_line_thickness{};
-    std::string not_included_in_damage_report{};
-    bool out_of_cone_distance{};
-    float padlock_view_lag{};
-    float padlock_view_lag_fix_zone{};
-    std::string planet_near_message{};
-    bool print_damage_percent{};
-    bool print_faction{};
-    bool print_fg_name{};
-    bool print_fg_sub_id{};
-    bool print_request_docking{};
-    bool print_ship_type{};
-    bool projectile_means_missile{};
-    float radar_range{};
-    std::string radar_type{};
-    float radar_search_extra_radius{};
-    bool rotating_bracket_inner{};
-    float rotating_bracket_size{};
-    float rotating_bracket_width{};
-    float scale_relationship_color{};
-    bool shield_vdu_fade{};
+    float nav_cross_line_thickness{1.0F};
+    std::string not_included_in_damage_report{"plasteel_hull tungsten_hull isometal_hull"};
+    bool out_of_cone_distance{false};
+    float padlock_view_lag{1.5F};
+    float padlock_view_lag_fix_zone{0.0872F};
+    std::string planet_near_message{"#ff0000Planetary Hazard Near#000000"};
+    bool print_damage_percent{true};
+    bool print_faction{true};
+    bool print_fg_name{true};
+    bool print_fg_sub_id{false};
+    bool print_request_docking{true};
+    bool print_ship_type{true};
+    bool projectile_means_missile{false};
+//    float radar_range{};  // I believe this has been moved to computer_config_.default_max_range -- stephengtuggy 2022-05-28
+    std::string radar_type{"WC"};
+    float radar_search_extra_radius{1000.0F};
+    bool rotating_bracket_inner{true};
+    float rotating_bracket_size{0.58F};
+    float rotating_bracket_width{0.1F};
+    float scale_relationship_color{10.0F};
+    bool shield_vdu_fade{true};
     float shield_vdu_thresh[3]{};
-    bool show_negative_blips_as_positive{};
-    bool simple_manifest{};
-    std::string starship_near_message{};
-    bool switch_to_target_mode_on_key{};
-    bool switch_back_from_comms{};
-    float tac_target_foci{};
-    float tac_target_length{};
-    float tac_target_thickness{};
-    float text_background_alpha{};
-    bool top_view{};
-    bool untarget_beyond_cone{};
+    bool show_negative_blips_as_positive{true};
+    bool simple_manifest{false};
+    std::string starship_near_message{"#ff0000Starship Near#000000"};
+    bool switch_to_target_mode_on_key{true};
+    bool switch_back_from_comms{true};
+    float tac_target_foci{0.5F};
+    float tac_target_length{0.1F};
+    float tac_target_thickness{1.0F};
+    float text_background_alpha{0.0625F};
+    bool top_view{false};
+    bool untarget_beyond_cone{false};
 
     HudConfig() = default;
 };
 
 struct GlowFlickerConfig {
-    float flicker_time{};
-    float flicker_off_time{};
-    float min_flicker_cycle{};
-    float num_times_per_second_on{};
-    float hull_for_total_dark{};
+    float flicker_time{30.0F};
+    float flicker_off_time{2.0F};
+    float min_flicker_cycle{2.0F};
+    float num_times_per_second_on{0.66F};
+    float hull_for_total_dark{0.04F};
 
     GlowFlickerConfig() = default;
 };
@@ -265,37 +266,37 @@ struct GlowFlickerConfig {
 struct GraphicsConfig {
     HudConfig hud;
     GlowFlickerConfig glow_flicker;
-    std::string automatic_landing_zone_warning{};
-    std::string automatic_landing_zone_warning1{};
-    std::string automatic_landing_zone_warning2{};
-    std::string automatic_landing_zone_warning_text{};
-    bool draw_heading_marker{};
-    float missile_explosion_radius_mult{};
-    bool missile_sparkle{};
-    float in_system_jump_ani_second_ahead{};
-    float in_system_jump_ani_second_ahead_end{};
-    std::string in_system_jump_animation{};
-    float atmosphere_emmissive{};
-    float atmosphere_diffuse{};
-    float default_engine_activation{};
-    std::string explosion_animation{};
-    int32_t shield_detail{};
-    std::string shield_texture{};
-    std::string shield_technique{};
-    float fov{};
-    float reduced_vdus_width{};
-    float reduced_vdus_height{};
-    float star_body_radius{};
-    bool draw_star_glow{};
-    bool draw_star_body{};
-    float star_glow_radius{};
-    bool glow_ambient_star_light{};
-    bool glow_diffuse_star_light{};
-    int32_t planet_detail_stacks{};
-    std::string wormhole_unit{};
-    float city_light_strength{};
-    float day_city_light_strength{};
-    int32_t num_times_to_draw_shine{};
+    std::string automatic_landing_zone_warning{"comm_docking.ani"};
+    std::string automatic_landing_zone_warning1{"comm_docking.ani"};
+    std::string automatic_landing_zone_warning2{"comm_docking.ani"};
+    std::string automatic_landing_zone_warning_text{"Now Entering an \"Automatic Landing Zone\"."};
+    bool draw_heading_marker{false};
+    float missile_explosion_radius_mult{1.0F};
+    bool missile_sparkle{false};
+    float in_system_jump_ani_second_ahead{4.0F};
+    float in_system_jump_ani_second_ahead_end{0.03F};
+    std::string in_system_jump_animation{"warp.ani"};
+    float atmosphere_emmissive{1.0F};
+    float atmosphere_diffuse{1.0F};
+    float default_engine_activation{0.00048828125F};
+    std::string explosion_animation{"explosion_orange.ani"};
+    int32_t shield_detail{16};
+    std::string shield_texture{"shield.bmp"};
+    std::string shield_technique;
+    float fov{78.0F};
+    float reduced_vdus_width{0.0F};
+    float reduced_vdus_height{0.0F};
+    float star_body_radius{0.33F};
+    bool draw_star_glow{true};
+    bool draw_star_body{true};
+    float star_glow_radius{1.33F};
+    bool glow_ambient_star_light{false};
+    bool glow_diffuse_star_light{false};
+    int32_t planet_detail_stacks{24};
+    std::string wormhole_unit{"wormhole"};
+    float city_light_strength{10.0F};
+    float day_city_light_strength{0.0F};
+    int32_t num_times_to_draw_shine{2};
 
     GraphicsConfig() = default;
 };
@@ -315,57 +316,57 @@ struct PhysicsConfig {
     float minimum_mass;
     float minimum_time;             // between recorded player collisions
 
-    bool does_missile_bounce{};
-    float default_shield_tightness{};
-    bool system_damage_on_armor{};
-    float indiscriminate_system_destruction{};
-    bool separate_system_flakiness_component{};
-    float shield_energy_capacitance{};
-    bool use_max_shield_energy_usage{};
-    bool shields_in_spec{};
-    float shield_maintenance_charge{};
-    uintmax_t max_ecm{};
-    float max_lost_target_live_time{};
-    float percent_missile_match_target_velocity{};
-    float game_speed{};
-    float game_accel{};
-    float velocity_max{};
-    float max_player_rotation_rate{};
-    float max_non_player_rotation_rate{};
-    bool unit_table{};
-    float capship_size{};
-    float near_autotrack_cone{};
-    float close_enough_to_autotrack{};
-    float distance_to_warp{};
-    float target_distance_to_warp_bonus{};
-    bool no_spec_jump{};
-    float difficulty_speed_exponent{};
-    float min_damage{};
-    float max_damage{};
-    float max_radar_cone_damage{};
-    float max_radar_lock_cone_damage{};
-    float max_radar_track_cone_damage{};
-    float thruster_hit_chance{};
-    float friendly_auto_radius{};
-    float neutral_auto_radius{};
-    float hostile_auto_radius{};
-    float min_asteroid_distance{};
-    bool steady_itts{};
-    bool no_unit_collisions{};
-    bool difficulty_based_shield_recharge{};
-    bool engine_energy_takes_priority{};
-    float density_of_rock{};
-    float density_of_jump_point{};
-    float planet_dock_port_size{};
-    float planet_dock_port_min_size{};
-    float jump_mesh_radius_scale{};
-    bool planets_can_have_subunits{};
-    bool planets_always_neutral{};
-    bool no_damage_to_docked_ships{};
-    bool difficulty_based_enemy_damage{};
-    float speeding_discharge{};
-    float min_shield_speeding_discharge{};
-    float nebula_shield_recharge{};
+    bool does_missile_bounce{false};     // TODO: Why is this not being used anywhere?
+    float default_shield_tightness{0.0F};
+    bool system_damage_on_armor{false};
+    float indiscriminate_system_destruction{0.25F};
+    bool separate_system_flakiness_component{false};
+    float shield_energy_capacitance{0.2F};
+    bool use_max_shield_energy_usage{false};
+    bool shields_in_spec{false};
+    float shield_maintenance_charge{0.25F};
+    uintmax_t max_ecm{4U};
+    float max_lost_target_live_time{30.0F};
+    float percent_missile_match_target_velocity{1.0F};
+    float game_speed{1.0F};
+    float game_accel{1.0F};
+    float velocity_max{10000.0F};
+    float max_player_rotation_rate{24.0F};
+    float max_non_player_rotation_rate{360.0F};
+    bool unit_table{false};
+    float capship_size{500.0F};
+    float near_autotrack_cone{0.9F};
+    float close_enough_to_autotrack{4.0F};
+    float distance_to_warp{1000000000000.0F};
+    float target_distance_to_warp_bonus{1.33F};
+    bool no_spec_jump{true};
+    float difficulty_speed_exponent{0.2F};
+    float min_damage{0.001F};
+    float max_damage{0.999F};
+    float max_radar_cone_damage{0.9F};
+    float max_radar_lock_cone_damage{0.95F};
+    float max_radar_track_cone_damage{0.98F};
+    float thruster_hit_chance{0.25F};
+    float friendly_auto_radius{0.0F};
+    float neutral_auto_radius{0.0F};
+    float hostile_auto_radius{1000.0F};
+    float min_asteroid_distance{-100.0F};
+    bool steady_itts{false};
+    bool no_unit_collisions{false};
+    bool difficulty_based_shield_recharge{true};
+    bool engine_energy_takes_priority{true};
+    float density_of_rock{3.0F};
+    float density_of_jump_point{100000.0F};
+    float planet_dock_port_size{1.2F};
+    float planet_dock_port_min_size{300.0F};
+    float jump_mesh_radius_scale{0.5F};
+    bool planets_can_have_subunits{false};
+    bool planets_always_neutral{true};
+    bool no_damage_to_docked_ships{true};
+    bool difficulty_based_enemy_damage{true};
+    float speeding_discharge{0.25F};
+    float min_shield_speeding_discharge{0.1F};
+    float nebula_shield_recharge{0.5F};
 
     PhysicsConfig();
 };
@@ -378,22 +379,25 @@ struct UnitConfig {
 
 // Covers both SPEC and jumps
 struct WarpConfig {
-    float insystem_jump_cost{};
-    float max_effective_velocity{};
-    float bleed_factor{};
-    float warp_energy_multiplier{};
-    float player_warp_energy_multiplier{};
-    float warp_ramp_up_time{};
-    float computer_warp_ramp_up_time{};
-    float warp_ramp_down_time{};
-    float warp_memory_effect{};
-    float warp_stretch_cutoff{};
-    float warp_stretch_decel_cutoff{};
-    float warp_multiplier_min{};
-    float warp_multiplier_max{};
-    bool use_warp_energy_for_cloak{};
+    float insystem_jump_cost{0.1F};
+    // Pi^2 * C
+    float max_effective_velocity{2960881320.33F};
+    float bleed_factor{2.0F};
+    float warp_energy_multiplier{0.12F};
+    float player_warp_energy_multiplier{0.12F};
+    float warp_ramp_up_time{5.0F};
+    float computer_warp_ramp_up_time{10.0F};
+    float warp_ramp_down_time{0.5F};
+    float warp_memory_effect{0.9F};
+    float warp_stretch_cutoff{500000.0F};
+    float warp_stretch_decel_cutoff{500000.0F};
+    // Pi^2
+    float warp_multiplier_min{9.86968440109F};
+    // C
+    float warp_multiplier_max{300000000.0F};
+    bool use_warp_energy_for_cloak{true};
 
-    WarpConfig();
+    WarpConfig() = default;
 };
 
 struct WeaponsConfig {

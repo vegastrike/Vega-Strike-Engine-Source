@@ -127,8 +127,8 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
                                 factions[Myfaction]->faction[TheirFaction].relationship = 1;
                             }
                             if (factions[Myfaction]->faction[TheirFaction].relationship
-                                    < game_options()->min_relationship) {
-                                factions[Myfaction]->faction[TheirFaction].relationship = game_options()->min_relationship;
+                                    < configuration()->ai.min_relationship) {
+                                factions[Myfaction]->faction[TheirFaction].relationship = static_cast<float>(configuration()->ai.min_relationship);
                             }
                             if (!game_options()->AllowNonplayerFactionChange) {
                                 factions[TheirFaction]->faction[Myfaction].relationship =
