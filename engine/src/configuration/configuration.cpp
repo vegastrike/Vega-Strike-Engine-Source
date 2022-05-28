@@ -328,6 +328,8 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     eject_config_.auto_eject_percent = GetGameConfig().GetFloat("physics.autoeject_percent", 0.5F);
     eject_config_.player_auto_eject = GetGameConfig().GetBool("physics.player_autoeject", true);
 
+    unit_config_.default_aggressivity = GetGameConfig().GetFloat("unit.aggressivity", unit_config_.default_aggressivity);
+
     // warp_config_ substruct
     warp_config_.insystem_jump_cost = GetGameConfig().GetFloat("physics.insystem_jump_cost", warp_config_.insystem_jump_cost);
     warp_config_.bleed_factor = GetGameConfig().GetFloat("physics.warpbleed", 2.0F);

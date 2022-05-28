@@ -367,6 +367,12 @@ struct PhysicsConfig {
     PhysicsConfig();
 };
 
+struct UnitConfig {
+    UnitConfig() = default;
+
+    float default_aggressivity{2.01F};
+};
+
 // Covers both SPEC and jumps
 struct WarpConfig {
     float insystem_jump_cost{};
@@ -413,6 +419,7 @@ public:
     vega_config::GraphicsConfig graphics_config_;
     vega_config::Logging logging;
     vega_config::PhysicsConfig physics_config_;
+    vega_config::UnitConfig unit_config_;
     vega_config::WarpConfig warp_config_;
     vega_config::WeaponsConfig weapons;
 };

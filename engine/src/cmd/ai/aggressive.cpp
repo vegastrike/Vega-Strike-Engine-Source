@@ -222,11 +222,11 @@ static AIEvents::ElemAttrMap *getProperScript(Unit *me, Unit *targ, bool interru
             personalityseed);
 }
 
-static float aggressivity = 2.01;
+static float aggressivity = 2.01F;
 static int randomtemp;
 
 AggressiveAI::AggressiveAI(const char *filename, Unit *target)
-        : FireAt(), logic(getProperScript(NULL, NULL, "default", randomtemp = rand())) {
+        : FireAt(), logic(getProperScript(nullptr, nullptr, "default", randomtemp = rand())) {
     currentpriority = 0;
     last_jump_time = 0;
     nav = QVector(0, 0, 0);
@@ -238,11 +238,10 @@ AggressiveAI::AggressiveAI(const char *filename, Unit *target)
     last_time_insys = true;
     logiccurtime = logic->maxtime;     //set it to the time allotted
     obedient = true;
-    if (aggressivity == 2.01) {
-        static float defagg = XMLSupport::parse_float(vs_config->getVariable("unit", "aggressivity", "2"));
-        aggressivity = defagg;
+    if (aggressivity == 2.01F) {
+        aggressivity = configuration()->unit_config_.default_aggressivity;
     }
-    if (target != NULL) {
+    if (target != nullptr) {
         AttachOrder(target);
     }
     last_directive = filename;
