@@ -44,9 +44,9 @@ TEST(JSON, Sanity) {
 
     std::map<std::string, std::map<std::string, std::string>> json_units;
 
-    UnitJSONFactory::ParseJSON("../../data/units/units.csv");
+    UnitJSONFactory::ParseJSON("../src/cmd/tests/units.csv");
 
-    std::ifstream ifs("../../data/units/units.csv", std::ifstream::in);
+    std::ifstream ifs("../src/cmd/tests/units.csv", std::ifstream::in);
     std::stringstream buffer;
     buffer << ifs.rdbuf();
 
