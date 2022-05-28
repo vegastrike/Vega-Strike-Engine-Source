@@ -5036,8 +5036,8 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     UpdateCloak();
 
     // Recharge energy and shields
-    static bool apply_difficulty_shields = vega_config::GetGameConfig().GetBool("physics.difficulty_based_shield_recharge", true);
-    static bool energy_before_shield = vega_config::GetGameConfig().GetBool("physics.engine_energy_priority", true);
+    const bool apply_difficulty_shields = configuration()->physics_config_.difficulty_based_shield_recharge;
+    const bool energy_before_shield = configuration()->physics_config_.engine_energy_takes_priority;
 
     // Difficulty settings
     float difficulty_shields = 1.0f;
@@ -5330,8 +5330,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
 void Unit::UpdateCloak() {
     // Use warp power for cloaking (SPEC capacitor)
-    static bool warp_energy_for_cloak =
-            vega_config::GetGameConfig().GetBool("physics.warp_energy_for_cloak", true);
+    const bool warp_energy_for_cloak = configuration()->warp_config_.use_warp_energy_for_cloak;
 
     // We are not cloaked - exiting function
     if (cloaking < cloakmin) {

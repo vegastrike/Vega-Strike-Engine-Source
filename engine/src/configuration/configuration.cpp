@@ -130,6 +130,17 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.fov = GetGameConfig().GetFloat("graphics.fov", 78.0F);
     graphics_config_.reduced_vdus_width = GetGameConfig().GetFloat("graphics.reduced_vdus_width", 0.0F);
     graphics_config_.reduced_vdus_height = GetGameConfig().GetFloat("graphics.reduced_vdus_height", 0.0F);
+    graphics_config_.star_body_radius = GetGameConfig().GetFloat("graphics.star_body_radius", 0.33F);
+    graphics_config_.draw_star_glow = GetGameConfig().GetBool("graphics.draw_star_glow", true);
+    graphics_config_.draw_star_body = GetGameConfig().GetBool("graphics.draw_star_body", true);
+    graphics_config_.star_glow_radius = GetGameConfig().GetFloat("graphics.star_glow_radius", 1.33F);
+    graphics_config_.glow_ambient_star_light = GetGameConfig().GetBool("graphics.glow_ambient_star_light", false);
+    graphics_config_.glow_diffuse_star_light = GetGameConfig().GetBool("graphics.glow_diffuse_star_light", false);
+    graphics_config_.planet_detail_stacks = GetGameConfig().GetInt32("graphics.planet_detail", 24);
+    graphics_config_.wormhole_unit = GetGameConfig().GetString("graphics.wormhole", "wormhole");
+    graphics_config_.city_light_strength = GetGameConfig().GetFloat("graphics.city_light_strength", 10.0F);
+    graphics_config_.day_city_light_strength = GetGameConfig().GetFloat("graphics.day_city_light_strength", 0.0F);
+    graphics_config_.num_times_to_draw_shine = GetGameConfig().GetInt32("graphics.num_times_to_draw_shine", 2);
 
     graphics_config_.glow_flicker.flicker_time = GetGameConfig().GetFloat("graphics.glowflicker.time", 30.0F);
     graphics_config_.glow_flicker.flicker_off_time = GetGameConfig().GetFloat("graphics.glowflicker.off-time", 2.0F);
@@ -288,6 +299,20 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config_.min_asteroid_distance = GetGameConfig().GetFloat("physics.min_asteroid_distance", -100.0F);
     physics_config_.steady_itts = GetGameConfig().GetBool("physics.steady_itts", false);
     physics_config_.no_unit_collisions = GetGameConfig().GetBool("physics.no_unit_collisions", false);
+    physics_config_.difficulty_based_shield_recharge = GetGameConfig().GetBool("physics.difficulty_based_shield_recharge", true);
+    physics_config_.engine_energy_takes_priority = GetGameConfig().GetBool("physics.engine_energy_priority", true);
+    physics_config_.density_of_rock = GetGameConfig().GetFloat("physics.density_of_rock", 3.0F);
+    physics_config_.density_of_jump_point = GetGameConfig().GetFloat("physics.density_of_jump_point", 100000.0F);
+    physics_config_.planet_dock_port_size = GetGameConfig().GetFloat("physics.planet_port_size", 1.2F);
+    physics_config_.planet_dock_port_min_size = GetGameConfig().GetFloat("physics.planet_port_min_size", 300.0F);
+    physics_config_.jump_mesh_radius_scale = GetGameConfig().GetFloat("physics.jump_mesh_radius_scale", 0.5F);
+    physics_config_.planets_can_have_subunits = GetGameConfig().GetBool("physics.planets_can_have_subunits", false);
+    physics_config_.planets_always_neutral = GetGameConfig().GetBool("physics.planets_always_neutral", true);
+    physics_config_.no_damage_to_docked_ships = GetGameConfig().GetBool("physics.no_damage_to_docked_ships", true);
+    physics_config_.difficulty_based_enemy_damage = GetGameConfig().GetBool("physics.difficulty_based_enemy_damage", true);
+    physics_config_.speeding_discharge = GetGameConfig().GetFloat("physics.speeding_discharge", 0.25F);
+    physics_config_.min_shield_speeding_discharge = GetGameConfig().GetFloat("physics.min_shield_speeding_discharge", 0.1F);
+    physics_config_.nebula_shield_recharge = GetGameConfig().GetFloat("physics.nebula_shield_recharge", 0.5F);
 
     // These calculations depend on the physics.game_speed and physics.game_accel values to be set already;
     // that's why they're down here instead of with the other graphics settings
@@ -296,6 +321,12 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     graphics_config_.in_system_jump_ani_second_ahead_end = GetGameConfig().GetFloat("graphics.insys_jump_ani_second_ahead_end", 0.03F)
             / physics_config_.game_speed * physics_config_.game_accel;
     graphics_config_.in_system_jump_animation = GetGameConfig().GetString("graphics.insys_jump_animation", "warp.ani");
+
+    eject_config_.eject_cargo_percent = GetGameConfig().GetFloat("physics.eject_cargo_percent", 1.0F);
+    eject_config_.max_dumped_cargo = GetGameConfig().GetUInt32("physics.max_dumped_cargo", 15U);
+    eject_config_.hull_damage_to_eject = GetGameConfig().GetFloat("physics.hull_damage_to_eject", 100.0F);
+    eject_config_.auto_eject_percent = GetGameConfig().GetFloat("physics.autoeject_percent", 0.5F);
+    eject_config_.player_auto_eject = GetGameConfig().GetBool("physics.player_autoeject", true);
 
     // warp_config_ substruct
     warp_config_.insystem_jump_cost = GetGameConfig().GetFloat("physics.insystem_jump_cost", warp_config_.insystem_jump_cost);
@@ -313,6 +344,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     // C
     warp_config_.warp_multiplier_max = GetGameConfig().GetFloat("physics.warpMultiplierMax", 300000000.0F);
     warp_config_.max_effective_velocity = GetGameConfig().GetFloat("physics.warpMaxEfVel", static_cast<float>(M_PI * M_PI * 300000000.0));
+    warp_config_.use_warp_energy_for_cloak = GetGameConfig().GetBool("physics.warp_energy_for_cloak", true);
 
     // weapons substruct
     weapons.can_fire_in_cloak = GetGameConfig().GetBool("physics.can_fire_in_cloak", weapons.can_fire_in_cloak);

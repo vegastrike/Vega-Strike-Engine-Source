@@ -242,8 +242,7 @@ Planet::Planet(QVector x,
     }
     bool wormhole = dest.size() != 0;
     if (wormhole) {
-        // TODO: Move to configuration()
-        const std::string wormhole_unit = vs_config->getVariable("graphics", "wormhole", "wormhole");
+        const std::string& wormhole_unit = configuration()->graphics_config_.wormhole_unit;
         string stab(".stable");
         if (rand() > RAND_MAX * .99) {
             stab = ".unstable";
@@ -288,8 +287,7 @@ Planet::Planet(QVector x,
         wormhole = anytrue;
     }
     if (!wormhole) {
-        // TODO: Move to configuration()
-        const int stacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "planet_detail", "24"));
+        const int stacks = configuration()->graphics_config_.planet_detail_stacks;
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
         meshdata.push_back(new SphereMesh(radius,
                 stacks,
@@ -306,9 +304,7 @@ Planet::Planet(QVector x,
     }
     calculate_extent(false);
     if (wormhole) {
-        // TODO: Make this setting part of configuration()
-        const float
-                radscale = XMLSupport::parse_floatf(vs_config->getVariable("physics", "jump_mesh_radius_scale", ".5"));
+        const float radscale = configuration()->physics_config_.jump_mesh_radius_scale;
         radius *= radscale;
         corner_min.i = corner_min.j = corner_min.k = -radius;
         corner_max.i = corner_max.j = corner_max.k = radius;
@@ -318,31 +314,28 @@ Planet::Planet(QVector x,
         }
     }
     if (ligh.size() > 0) {
-        // TODO: Make these part of configuration()
-        const float
-                bodyradius = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "star_body_radius", ".33"));
-        const bool drawglow = XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_star_glow", "true"));
-
-        const bool drawstar = XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_star_body", "true"));
-        const float glowradius =
-                XMLSupport::parse_floatf(vs_config->getVariable("graphics", "star_glow_radius", "1.33")) / bodyradius;
+        const float bodyradius = configuration()->graphics_config_.star_body_radius;
+        const bool drawglow = configuration()->graphics_config_.draw_star_glow;
+        const bool drawstar = configuration()->graphics_config_.draw_star_body;
+        const float glowradius = configuration()->graphics_config_.star_glow_radius / bodyradius;
         if (drawglow) {
             GFXColor c = getMaterialEmissive(ourmat);
-            const bool spec =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "glow_ambient_star_light", "false"));
-            const bool diff =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "glow_diffuse_star_light", "false"));
+            const bool spec = configuration()->graphics_config_.glow_ambient_star_light;
+            const bool diff = configuration()->graphics_config_.glow_diffuse_star_light;
             if (diff) {
                 c = ligh[0].ligh.GetProperties(DIFFUSE);
             }
             if (spec) {
                 c = ligh[0].ligh.GetProperties(AMBIENT);
             }
+
+            // TODO: Refactor the below section of code
             vector<string>
                     shines = ParseDestinations(vs_config->getVariable("graphics", "star_shine", "shine.ani"));
             if (shines.empty()) {
                 shines.emplace_back("shine.ani");
             }
+
             shine = new Animation(shines[rand() % shines.size()].c_str(),
                     true,
                     .1,
@@ -410,8 +403,7 @@ void Planet::InitPlanet(QVector x,
         string fullname,
         bool inside_out,
         unsigned int lights_num) {
-    // TODO: Move to configuration()
-    const float bodyradius = vega_config::GetGameConfig().GetFloat("graphics.star_body_radius", 0.33f);
+    const float bodyradius = configuration()->graphics_config_.star_body_radius;
 
     if (lights_num) {
         radius *= bodyradius;
@@ -432,10 +424,8 @@ void Planet::InitPlanet(QVector x,
     this->fullname = name;
     this->radius = radius;
     this->gravity = gravity;
-    // TODO: Make these part of configuration()
-    const float densityOfRock = XMLSupport::parse_floatf(vs_config->getVariable("physics", "density_of_rock", "3"));
-    const float densityOfJumpPoint =
-            XMLSupport::parse_floatf(vs_config->getVariable("physics", "density_of_jump_point", "100000"));
+    const float densityOfRock = configuration()->physics_config_.density_of_rock;
+    const float densityOfJumpPoint = configuration()->physics_config_.density_of_jump_point;
     //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
     *current_hull = (4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint);
     this->Mass =
@@ -446,11 +436,8 @@ void Planet::InitPlanet(QVector x,
     colTrees = nullptr;
     SetAngularVelocity(rotvel);
     // The docking port is 20% bigger than the planet
-    // TODO: Make these part of configuration()
-    const float
-            planetdockportsize = XMLSupport::parse_floatf(vs_config->getVariable("physics", "planet_port_size", "1.2"));
-    const float planetdockportminsize =
-            XMLSupport::parse_floatf(vs_config->getVariable("physics", "planet_port_min_size", "300"));
+    const float planetdockportsize = configuration()->physics_config_.planet_dock_port_size;
+    const float planetdockportminsize = configuration()->physics_config_.planet_dock_port_min_size;
     if ((!atmospheric) && notJumppoint) {
         float dock = radius * planetdockportsize;
         if (dock - radius < planetdockportminsize) {
@@ -467,9 +454,7 @@ void Planet::InitPlanet(QVector x,
     }
     Unit *un = new Unit(tempname.c_str(), true, tmpfac);
 
-    // TODO: Move to configuration(). Should be OK for now, as long as it's not static
-    const bool smartplanets =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "planets_can_have_subunits", "false"));
+    const bool smartplanets = configuration()->physics_config_.planets_can_have_subunits;
     if (un->name != string("LOAD_FAILED")) {
         cargo = un->cargo;
         CargoVolume = un->CargoVolume;
@@ -485,9 +470,7 @@ void Planet::InitPlanet(QVector x,
             un->SetTurretAI();              //allows adding planetary defenses, also allows launching fighters from planets, interestingly
             un->name = "Defense_grid";
         }
-        // TODO: Move to configuration()
-        const bool neutralplanets =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "planets_always_neutral", "true"));
+        const bool neutralplanets = configuration()->physics_config_.planets_always_neutral;
         if (neutralplanets) {
             // TODO: Move to configuration()
             const int neutralfaction = FactionUtil::GetNeutralFaction();
@@ -515,8 +498,7 @@ void Planet::AddAtmosphere(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    // TODO: Move to configuration()
-    const int stacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "planet_detail", "24"));
+    const int stacks = configuration()->graphics_config_.planet_detail_stacks;
     meshdata.push_back(new SphereMesh(radius,
             stacks,
             stacks,
@@ -553,19 +535,15 @@ void Planet::AddCity(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    // TODO: Move to configuration()
-    const float
-            materialweight = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "city_light_strength", "10"));
-    const float daymaterialweight =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "day_city_light_strength", "0"));
+    const float materialweight = configuration()->graphics_config_.city_light_strength;
+    const float daymaterialweight = configuration()->graphics_config_.day_city_light_strength;
     GFXMaterial m{};
     setMaterialAmbient(m, 0.0);
     setMaterialDiffuse(m, materialweight);
     setMaterialSpecular(m, 0.0);
     setMaterialEmissive(m, daymaterialweight);
     m.power = 0.0;
-    // TODO: Move to configuration()
-    const int stacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "planet_detail", "24"));
+    const int stacks = configuration()->graphics_config_.planet_detail_stacks;
     meshdata.push_back(new CityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
             false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
     meshdata.back()->setEnvMap(GFXFALSE);
@@ -616,8 +594,7 @@ void Planet::AddRing(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    // TODO: Move to configuration()
-    int stacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "planet_detail", "24"));
+    int stacks = configuration()->graphics_config_.planet_detail_stacks;
     if (slices > 0) {
         stacks = stacks;
         if (stacks < 3) {
@@ -742,10 +719,8 @@ void Planet::Draw(const Transformation &quat, const Matrix &m) {
         MatrixToVectors(cumulative_transformation_matrix, p, q, r, c);
         shine->SetOrientation(p, q, r);
         shine->SetPosition(c);
-        // TODO: Move to configuration()
-        const int num_shine_drawing =
-                XMLSupport::parse_int(vs_config->getVariable("graphics", "num_times_to_draw_shine", "2"));
-        for (int i = 0; i < num_shine_drawing; ++i) {
+        const int32_t num_shine_drawing = configuration()->graphics_config_.num_times_to_draw_shine;
+        for (int32_t i = 0; i < num_shine_drawing; ++i) {
             shine->Draw();
         }
     }
@@ -914,6 +889,7 @@ void Planet::Kill(bool erasefromsave) {
         tmp->SetAI(new Order);
     }
     /* probably not FIXME...right now doesn't work on paged out systems... not a big deal */
+    /* WTH?? Why is that not a big deal? -- stephengtuggy 2022-05-27 */
     for (unsigned int i = 0; i < this->lights.size(); i++) {
         GFXDeleteLight(lights[i]);
     }

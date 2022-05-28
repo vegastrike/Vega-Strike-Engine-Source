@@ -104,10 +104,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
     Unit *unit = static_cast<Unit *>(this);
 
     //We also do the following lock on client side in order not to display shield hits
-    const bool no_dock_damage = vega_config::GetGameConfig().GetBool("physics.no_damage_to_docked_ships", true);
-    const bool apply_difficulty_enemy_damage =
-            vega_config::GetGameConfig().GetBool("physics.difficulty_based_enemy_damage", true);
-
+    const bool no_dock_damage = configuration()->physics_config_.no_damage_to_docked_ships;
+    const bool apply_difficulty_enemy_damage = configuration()->physics_config_.difficulty_based_enemy_damage;
 
     // Stop processing if the affected unit isn't this unit
     // How could this happen? Why even have two parameters (this and affected_unit)???
@@ -206,10 +204,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
 
         // Eject cargo
-        const float cargo_eject_percent =
-                vega_config::GetGameConfig().GetFloat("physics.eject_cargo_percent", 1.0f);
-        const uint32_t max_dump_cargo =
-                vega_config::GetGameConfig().GetUInt32("physics.max_dumped_cargo", 15U);
+        const float cargo_eject_percent = configuration()->eject_config_.eject_cargo_percent;
+        const uint32_t max_dump_cargo = configuration()->eject_config_.max_dumped_cargo;
         uint32_t dumped_cargo = 0;
 
         for (unsigned int i = 0; i < unit->numCargo(); ++i) {
@@ -222,12 +218,9 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Eject Pilot
         // Can't use this as we can't reach negative hull damage
-        //static float hull_dam_to_eject    =
-        //    vega_config::GetGameConfig().GetFloat( "physics", "hull_damage_to_eject", 100.0F );
-        const float auto_eject_percent =
-                vega_config::GetGameConfig().GetFloat("physics.autoeject_percent", 0.5f);
-        const bool player_autoeject =
-                vega_config::GetGameConfig().GetBool("physics.player_autoeject", true);
+//        const float hull_dam_to_eject = configuration()->eject_config_.hull_damage_to_eject;
+        const float auto_eject_percent = configuration()->eject_config_.auto_eject_percent;
+        const bool player_autoeject = configuration()->eject_config_.player_auto_eject;
 
         if (shot_at_is_player) {
             if (player_autoeject
@@ -542,15 +535,12 @@ void Damageable::leach(float damShield, float damShieldRecharge, float damEnRech
 }
 
 void Damageable::RegenerateShields(const float difficulty, const bool player_ship) {
-    const bool shields_in_spec = vega_config::GetGameConfig().GetBool("physics.shields_in_spec", false);
-    const float discharge_per_second =
-            vega_config::GetGameConfig().GetFloat("physics.speeding_discharge", 0.25f);
+    const bool shields_in_spec = configuration()->physics_config_.shields_in_spec;
+    const float discharge_per_second = configuration()->physics_config_.speeding_discharge;
     //approx
     const float discharge_rate = (1 - (1 - discharge_per_second) * simulation_atom_var);
-    const float min_shield_discharge =
-            vega_config::GetGameConfig().GetFloat("physics.min_shield_speeding_discharge", 0.1f);
-    const float nebshields =
-            vega_config::GetGameConfig().GetFloat("physics.nebula_shield_recharge", 0.5f);
+    const float min_shield_discharge = configuration()->physics_config_.min_shield_speeding_discharge;
+    const float nebshields = configuration()->physics_config_.nebula_shield_recharge;
 
     Unit *unit = static_cast<Unit *>(this);
 

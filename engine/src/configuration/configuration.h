@@ -107,6 +107,16 @@ struct DataConfig {
     DataConfig() = default;
 };
 
+struct EjectConfig {
+    float eject_cargo_percent{};
+    uint32_t max_dumped_cargo{};
+    float hull_damage_to_eject{};
+    float auto_eject_percent{};
+    bool player_auto_eject{};
+
+    EjectConfig() = default;
+};
+
 struct Fuel {
     float afterburner_fuel_usage;
     /* There are a pair of "FMEC" variables - they both involve "Fuel Mass to Energy Conversion" -
@@ -272,6 +282,17 @@ struct GraphicsConfig {
     float fov{};
     float reduced_vdus_width{};
     float reduced_vdus_height{};
+    float star_body_radius{};
+    bool draw_star_glow{};
+    bool draw_star_body{};
+    float star_glow_radius{};
+    bool glow_ambient_star_light{};
+    bool glow_diffuse_star_light{};
+    int32_t planet_detail_stacks{};
+    std::string wormhole_unit{};
+    float city_light_strength{};
+    float day_city_light_strength{};
+    int32_t num_times_to_draw_shine{};
 
     GraphicsConfig() = default;
 };
@@ -328,6 +349,20 @@ struct PhysicsConfig {
     float min_asteroid_distance{};
     bool steady_itts{};
     bool no_unit_collisions{};
+    bool difficulty_based_shield_recharge{};
+    bool engine_energy_takes_priority{};
+    float density_of_rock{};
+    float density_of_jump_point{};
+    float planet_dock_port_size{};
+    float planet_dock_port_min_size{};
+    float jump_mesh_radius_scale{};
+    bool planets_can_have_subunits{};
+    bool planets_always_neutral{};
+    bool no_damage_to_docked_ships{};
+    bool difficulty_based_enemy_damage{};
+    float speeding_discharge{};
+    float min_shield_speeding_discharge{};
+    float nebula_shield_recharge{};
 
     PhysicsConfig();
 };
@@ -347,6 +382,7 @@ struct WarpConfig {
     float warp_stretch_decel_cutoff{};
     float warp_multiplier_min{};
     float warp_multiplier_max{};
+    bool use_warp_energy_for_cloak{};
 
     WarpConfig();
 };
@@ -372,6 +408,7 @@ public:
     vega_config::AudioConfig audio_config_;
     vega_config::CollisionHacks collision_hacks;
     vega_config::ComputerConfig computer_config_;
+    vega_config::EjectConfig eject_config_;
     vega_config::Fuel fuel;
     vega_config::GraphicsConfig graphics_config_;
     vega_config::Logging logging;
