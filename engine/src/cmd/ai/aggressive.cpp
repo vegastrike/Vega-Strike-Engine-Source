@@ -308,7 +308,6 @@ bool AggressiveAI::ExecuteLogicItem(const AIEvents::AIEvresult &item) {
 bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
     float value = 0.0;
 
-    static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
     switch (abs(item.type)) {
         case DISTANCE:
             value = distance;
@@ -326,7 +325,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             } else {
                 value = 10000;
             }
-            value /= game_speed;     /*game_accel*/
+            value /= configuration()->physics_config_.game_speed;     /*game_accel*/
             break;
         }
         case THREAT:
@@ -684,14 +683,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            static float esc_percent = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "EscortDistance",
-                                    "10.0"));
-                            static float turn_leader = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "TurnLeaderDist",
-                                    "5.0"));
+                            const float esc_percent = configuration()->ai.escort_distance;
+                            const float turn_leader = configuration()->ai.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -768,14 +761,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            static float esc_percent = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "EscortDistance",
-                                    "10.0"));
-                            static float turn_leader = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "TurnLeaderDist",
-                                    "5.0"));
+                            const float esc_percent = configuration()->ai.escort_distance;
+                            const float turn_leader = configuration()->ai.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -941,10 +928,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             CommunicationMessage c(parent, leader, NULL, 0);
 //this order is only valid for cargo wingmen, other wingmen will not comply
                             c.SetCurrentState(c.fsm->GetYesNode(), NULL, 0);
-                            static float turn_leader = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "TurnLeaderDist",
-                                    "5.0"));
+                            const float turn_leader = configuration()->ai.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -1197,16 +1181,13 @@ static bool overridable(const std::string &s) {
 extern void LeadMe(Unit *un, string directive, string speech, bool changetarget);
 
 void AggressiveAI::ReCommandWing(Flightgroup *fg) {
-    static float time_to_recommand_wing = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "Targetting",
-            "TargetCommandierTime",
-            "100"));
-    static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data", "verbose_debug", "false"));
-    if (fg != NULL) {
+    const float time_to_recommand_wing = configuration()->ai.time_to_recommand_wing;
+    const bool verbose_debug = configuration()->logging.verbose_debug;
+    if (fg != nullptr) {
         Unit *lead;
         if (overridable(fg->directive)) {
             //computer won't override capital orders
-            if (NULL != (lead = fg->leader.GetUnit())) {
+            if (nullptr != (lead = fg->leader.GetUnit())) {
                 if (float ( rand())/RAND_MAX < simulation_atom_var / time_to_recommand_wing) {
                     if (parent->Threat() && (parent->FShieldData() < .2 || parent->RShieldData() < .2)) {
                         fg->directive = string("h");

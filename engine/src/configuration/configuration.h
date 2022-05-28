@@ -57,6 +57,9 @@ struct AIConfig {
     bool jump_without_energy{};
     float friend_factor{};
     float kill_factor{};
+    float escort_distance{};
+    float turn_leader_distance{};
+    float time_to_recommand_wing{};
 
     AIConfig() = default;
 };

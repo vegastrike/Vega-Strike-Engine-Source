@@ -64,6 +64,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     ai.jump_without_energy                              = GetGameConfig().GetBool("AI.jump_without_energy", false);
     ai.friend_factor                                    = -GetGameConfig().GetFloat("AI.friend_factor", 0.1F);
     ai.kill_factor                                      = -GetGameConfig().GetFloat("AI.kill_factor", 0.2F);
+    ai.escort_distance                                  = GetGameConfig().GetFloat("AI.Targetting.EscortDistance", 10.0F);
+    ai.turn_leader_distance                             = GetGameConfig().GetFloat("AI.Targetting.TurnLeaderDist", 5.0F);
+    ai.time_to_recommand_wing                           = GetGameConfig().GetFloat("AI.Targetting.TargetCommandierTime", 100.0F);
 
     audio_config_.every_other_mount                     = GetGameConfig().GetBool("audio.every_other_mount", false);
     audio_config_.shuffle_songs.clear_history_on_list_change = GetGameConfig().GetBool("audio.shuffle_songs.clear_history_on_list_change", false);
