@@ -44,5 +44,5 @@ TEST(JSON, Sanity) {
 
     std::map<std::string, std::map<std::string, std::string>> json_units;
 
-    UnitJSONFactory::ParseJSON("../src/cmd/tests/units.csv");
+    UnitJSONFactory::ParseJSON("test_assets/units.csv");
 }
