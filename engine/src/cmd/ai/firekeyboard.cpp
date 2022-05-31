@@ -1489,7 +1489,7 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
         if (!request) {
             mission->msgcenter->add("game",
                     "all",
-                    "[ComputerConfig] Cannot dock with insubstantidisabal object, target another object and retry.");
+                    "[Computer] Cannot dock with insubstantial object, target another object and retry.");
             abletodock(0);
             return;
         } else if (!wasdock) {

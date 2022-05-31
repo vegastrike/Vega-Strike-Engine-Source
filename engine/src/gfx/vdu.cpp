@@ -1337,7 +1337,7 @@ void VDU::DrawDamage(Unit *parent) {
         // Integrated system with boolean damage flags
         REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
         REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade
-        REPORTINTEGRATEDFLAG(Unit::COMPUTER_DAMAGED, "damage.names.computer_name", "Targetting ComputerConfig");
+        REPORTINTEGRATEDFLAG(Unit::COMPUTER_DAMAGED, "damage.names.computer_name", "Targetting Computer");
         REPORTINTEGRATEDFLAG(Unit::JUMP_DAMAGED, "damage.names.jump_name", ""); // default invisible, is an upgrade
         REPORTINTEGRATEDFLAG(Unit::CLOAK_DAMAGED, "damage.names.cloak_name", ""); // default invisible, is an upgrade
     }

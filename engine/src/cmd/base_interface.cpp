@@ -1209,7 +1209,7 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
 #ifndef BASE_MAKER
         rooms.back()->objs.push_back(new Room::BaseShip(-1, 0, 0, 0, 0, -1, 0, 1, 0, QVector(0, 0, 2), "default room"));
         BaseUtil::Launch(0, "default room", -1, -1, 1, 2, "ERROR: No rooms specified... - Launch");
-        BaseUtil::Comp(0, "default room", 0, -1, 1, 2, "ERROR: No rooms specified... - ComputerConfig",
+        BaseUtil::Comp(0, "default room", 0, -1, 1, 2, "ERROR: No rooms specified... - Computer",
                 "Cargo Upgrade Info ShipDealer News Missions");
 #endif
     }
@@ -1540,7 +1540,7 @@ void BaseInterface::Draw() {
     Unit *base = baseun.GetUnit();
     if (un && (!base)) {
         VS_LOG(error, "Error: Base NULL");
-        mission->msgcenter->add("game", "all", "[ComputerConfig] Docking unit destroyed. Emergency launch initiated.");
+        mission->msgcenter->add("game", "all", "[Computer] Docking unit destroyed. Emergency launch initiated.");
         for (size_t i = 0; i < un->pImage->dockedunits.size(); i++) {
             if (un->pImage->dockedunits[i]->uc.GetUnit() == base) {
                 un->FreeDockingPort(i);

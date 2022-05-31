@@ -111,7 +111,7 @@ public:
     //Computers limitation of speed
     float max_combat_speed;
     float max_combat_ab_speed;
-    //ComputerConfig's restrictions of YPR to limit space combat maneuvers
+    //Computer's restrictions of YPR to limit space combat maneuvers
     float max_yaw_left;
     float max_yaw_right;
     float max_pitch_down;
