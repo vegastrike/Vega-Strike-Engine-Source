@@ -181,19 +181,19 @@ void Movable::AddVelocity(float difficulty) {
     bool playa = isPlayerShip();
 
     float warprampuptime = playa ? configuration()->warp_config_.warp_ramp_up_time : configuration()->warp_config_.computer_warp_ramp_up_time;
-    //WarpConfig Turning on/off
+    //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
-        if (graphicOptions.InWarp == 1) {             //WarpConfig Turning on
+        if (graphicOptions.InWarp == 1) {             //Warp Turning on
             graphicOptions.RampCounter = warprampuptime;
-        } else {                                        //WarpConfig Turning off
+        } else {                                        //Warp Turning off
             graphicOptions.RampCounter = configuration()->warp_config_.warp_ramp_down_time;
         }
         //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
         if (oldrampcounter != 0 && graphicOptions.RampCounter != 0) {
-            if (graphicOptions.InWarp == 1) {             //WarpConfig is turning on before it turned off
+            if (graphicOptions.InWarp == 1) {             //Warp is turning on before it turned off
                 graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->warp_config_.warp_ramp_down_time);
-            } else {                                        //WarpConfig is turning off before it turned on
+            } else {                                        //Warp is turning off before it turned on
                 graphicOptions.RampCounter *= (1 - oldrampcounter / warprampuptime);
             }
         }

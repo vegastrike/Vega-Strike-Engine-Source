@@ -74,16 +74,16 @@ public:
     enum EVENTID {
         EVENTID_FIRST,
 
-        /// WarpConfig is possible at this time
+        /// Warp is possible at this time
         WARP_READY = EVENTID_FIRST,
 
-        /// WarpConfig ceased to be possible at this time
+        /// Warp ceased to be possible at this time
         WARP_UNREADY,
 
-        /// WarpConfig started
+        /// Warp started
         WARP_ENGAGED,
 
-        /// WarpConfig stopped
+        /// Warp stopped
         WARP_DISENGAGED,
 
         /// Asap autopilot engaged
@@ -134,13 +134,13 @@ public:
         /// Governor disabled
         FLIGHT_COMPUTER_DISABLED,
 
-        /// WarpConfig loop, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
+        /// Warp loop, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
         WARP_LOOP0,
         WARP_LOOP9 = WARP_LOOP0 + 9,
         /// Last warp level
         WRAP_LOOPLAST = WARP_LOOP9,
 
-        /// WarpConfig threshold, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
+        /// Warp threshold, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
         WARP_SKIP0,
         WARP_SKIP9 = WARP_SKIP0 + 9,
         /// Last warp level
