@@ -33,6 +33,7 @@ public:
 
 private:
     void parse(boost::property_tree::ptree tree);
+    void parseJSON(const std::string &weapon_text);
 };
 
 #endif // WEAPON_FACTORY_H
