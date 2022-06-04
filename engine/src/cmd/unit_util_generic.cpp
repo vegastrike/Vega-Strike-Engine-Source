@@ -361,7 +361,7 @@ void orbit(Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVec
             }
         }
         if (my_unit->faction != FactionUtil::GetFactionIndex("neutral")) {
-            Order *tmp = new Orders::FireAt(15.0);
+            Order *tmp = new Orders::FireAt(configuration()->ai.firing_config.aggressivity);
             my_unit->EnqueueAI(tmp);
             my_unit->SetTurretAI();
         }

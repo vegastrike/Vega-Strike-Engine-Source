@@ -101,7 +101,7 @@ static void TurretFAW(Unit *parent) {
     Unit *un;
     while (NULL != (un = *iter)) {
         if (!CheckAccessory(un)) {
-            un->EnqueueAIFirst(new Orders::FireAt(15.0f));
+            un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing_config.aggressivity));
             un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
         }
         TurretFAW(un);
