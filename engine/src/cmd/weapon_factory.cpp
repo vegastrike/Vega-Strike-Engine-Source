@@ -32,6 +32,7 @@
 #include "role_bitmask.h"
 #include "audiolib.h"
 #include "hashtable.h"
+#include "json.h"
 
 #include <iostream>
 
@@ -66,11 +67,143 @@ WeaponFactory::WeaponFactory(std::string filename) {
 
     // Iterate over root
     for (const auto &iterator : tree) {
-        parse(iterator.second);
+        //parse(iterator.second);
 
         // There should be only one root. Exiting
         break;
     }
+
+    const std::string json_filename = "weapons.json";
+
+    std::ifstream ifs(json_filename, std::ifstream::in);
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+
+    const std::string json_text = buffer.str();
+
+    std::vector<std::string> weapons = json::parsing::parse_array(json_text.c_str());
+    for (const std::string &weapon_text : weapons) {
+        parseJSON(weapon_text);
+    }
+}
+
+std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value) {
+    if(object.has_key(key)) {
+        std::string value = object.get(key);
+        value = value.substr(1, value.size() - 2);
+        return value;
+    }
+
+    return default_value;
+}
+
+float getJSONValue(const json::jobject& object, const std::string &key, const float &default_value) {
+    if(object.has_key(key)) {
+        try {
+            return std::stof(object.get(key));
+        } catch(...) {}
+        try {
+            return std::stoi(object.get(key));
+        } catch(...) {}
+    }
+
+    return default_value;
+}
+
+
+void WeaponFactory::parseJSON(const std::string &weapon_text) {
+    json::jobject weapon = json::jobject::parse(weapon_text);
+    WeaponInfo wi;
+    /*static float gun_speed =
+            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
+    static int gamma = (int) (20 * game_options()->weapon_gamma);*/
+
+
+    // Weapon Type
+    wi.type = getWeaponTypeFromString(getJSONValue(weapon, "type", ""));
+    wi.file = getFilenameFromWeaponType(wi.type);
+
+    // Name
+    wi.name = getJSONValue(weapon, "name", "Unknown");
+
+    // Mount Size
+    wi.size = getMountSize(getJSONValue(weapon, "mountsize", "Unknown_mount"));
+
+    // Energy
+    wi.energy_rate = getJSONValue(weapon, "Energy.rate", wi.energy_rate);
+    wi.stability = getJSONValue(weapon, "Energy.stability", wi.stability);
+    wi.refire_rate = getJSONValue(weapon, "Energy.refire", wi.refire_rate);
+    wi.lock_time = getJSONValue(weapon, "Energy.locktime", wi.lock_time);
+
+
+    // Damage
+    // TODO: weapon_list.xml laser has damage. Everything else has rate. Correct.
+    wi.damage = getJSONValue(weapon, "Damage.rate", wi.damage);
+    wi.phase_damage = getJSONValue(weapon, "Damage.phasedamage", wi.phase_damage);
+    wi.radius = getJSONValue(weapon, "Damage.radius", wi.radius);
+    wi.radial_speed = getJSONValue(weapon, "Damage.radialspeed", wi.radial_speed);
+    wi.long_range = getJSONValue(weapon, "Damage.longrange", wi.long_range);
+
+
+    // Distance
+    wi.volume = getJSONValue(weapon, "Distance.volume", wi.volume);
+    wi.speed = getJSONValue(weapon, "Distance.speed", wi.speed);
+    wi.pulse_speed = getJSONValue(weapon, "Distance.pulsespeed", wi.pulse_speed);
+    wi.range = getJSONValue(weapon, "Distance.range", wi.range);
+    wi.length = getJSONValue(weapon, "Distance.length", wi.length);
+
+
+    // TODO: this is a bug. It gets parsed into the same radius and radial_speed variables.
+    wi.radius = getJSONValue(weapon, "Distance.radius", wi.radius);
+    wi.radial_speed = getJSONValue(weapon, "Distance.radialspeed", wi.radial_speed);
+
+
+    // TODO: detonation range not implemented. Incorrectly assigns to pulse_speed...
+    //wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
+
+    // TODO: is this really necessary???
+    /*if(game_options()->gun_speed_adjusted_game_speed) {
+        if (wi.speed < 1000) {
+            wi.speed *= 1.0+gun_speed/1.25;
+        } else if (wi.speed < 2000) {
+            wi.speed *= 1.0+gun_speed/2.5;
+        } else if (wi.speed < 4000) {
+            wi.speed *= 1.0+gun_speed/6.0;
+        } else if (wi.speed < 8000) {
+            wi.speed *= 1.0+gun_speed/17.0;
+        }
+    }*/
+
+    // Appearance
+    wi.file = getJSONValue(weapon, "Appearance.file", wi.file);
+    wi.r = getJSONValue(weapon, "Appearance.r", wi.r);
+    wi.g = getJSONValue(weapon, "Appearance.g", wi.g);
+    wi.b = getJSONValue(weapon, "Appearance.b", wi.b);
+    wi.a = getJSONValue(weapon, "Appearance.a", wi.a);
+
+    // TODO: reenable? No idea why or what this is...
+    /*if ( (gamma > 0) && gamma_needed( gamma, counts, 32 ) ) {
+        //approximate the color func
+        wi.b = (wi.b+color_step*5)/255.;
+        wi.g = (wi.g+color_step/5)/255.;
+        wi.r = (wi.r+color_step*2)/255.;
+    }*/
+
+    // Sound
+    std::string sound_wave = getJSONValue(weapon, "Appearance.soundwav", "");
+    if (!sound_wave.empty()) {
+        // Missiles don't play the sound in a loop. Others do.
+        wi.sound = AUDCreateSoundWAV(sound_wave, wi.type != WEAPON_TYPE::PROJECTILE);
+    }
+
+    std::string sound_mp3 = getJSONValue(weapon, "Appearance.soundmp3", "");
+    if (!sound_mp3.empty()) {
+        // Missiles don't play the sound in a loop. Others do.
+        wi.sound = AUDCreateSoundMP3(sound_wave, wi.type != WEAPON_TYPE::PROJECTILE);
+    }
+
+    // Add new WeaponInfo to weapons table
+    lookuptable.Put(boost::to_upper_copy(wi.name), new WeaponInfo(wi));
 }
 
 void WeaponFactory::parse(ptree tree) {
