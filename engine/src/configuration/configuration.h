@@ -54,7 +54,25 @@ struct GeneralConfig {
     bool while_loading_star_system{false};
 };
 
+struct AIFiringConfig {
+    AIFiringConfig() = default;
+
+    float missile_probability{0.01F};
+    float aggressivity{15.0F};
+};
+
+struct AITargetingConfig {
+    AITargetingConfig() = default;
+
+    float escort_distance{10.0F};
+    float turn_leader_distance{5.0F};
+    float time_to_recommand_wing{100.0F};
+    float min_time_to_switch_targets{3.0F};
+};
+
 struct AIConfig {
+    AIConfig() = default;
+
     bool always_obedient{true};
     bool assist_friend_in_need{true};
     float ease_to_anger{-0.5F};
@@ -69,12 +87,10 @@ struct AIConfig {
     bool jump_without_energy{false};
     float friend_factor{0.1F};
     float kill_factor{0.2F};
-    float escort_distance{10.0F};
-    float turn_leader_distance{5.0F};
-    float time_to_recommand_wing{100.0F};
     double min_relationship{-20.0};
 
-    AIConfig() = default;
+    AIFiringConfig firing_config;
+    AITargetingConfig targeting_config;
 };
 
 struct ShuffleSongsConfig {

@@ -132,17 +132,13 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
 }
 
 void FireAt::ReInit(float aggressivitylevel) {
-    static float
-            missileprob = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "MissileProbability", ".01"));
-    static float mintimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinTimeToSwitchTargets", "3"));
     lastmissiletime = UniverseUtil::GetGameTime() - 65536.;
-    missileprobability = missileprob;
+    missileprobability = configuration()->ai.firing_config.missile_probability;
     delay = 0;
     agg = aggressivitylevel;
     distance = 1;
     //JS --- spreading target switch times
-    lastchangedtarg = 0.0 - targrand.uniformInc(0, 1) * mintimetoswitch;
+    lastchangedtarg = 0.0 - targrand.uniformInc(0, 1) * configuration()->ai.targeting_config.min_time_to_switch_targets;
     had_target = false;
 }
 
@@ -151,8 +147,7 @@ FireAt::FireAt(float aggressivitylevel) : CommunicatingAI(WEAPON, STARGET) {
 }
 
 FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET) {
-    static float aggr = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "Aggressivity", "15"));
-    ReInit(aggr);
+    ReInit(configuration()->ai.firing_config.aggressivity);
 }
 
 void FireAt::SignalChosenTarget() {

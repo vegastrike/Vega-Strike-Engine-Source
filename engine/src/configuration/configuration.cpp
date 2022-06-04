@@ -78,10 +78,15 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     ai.jump_without_energy                              = GetGameConfig().GetBool("AI.jump_without_energy", ai.jump_without_energy);
     ai.friend_factor                                    = -GetGameConfig().GetFloat("AI.friend_factor", ai.friend_factor);
     ai.kill_factor                                      = -GetGameConfig().GetFloat("AI.kill_factor", ai.kill_factor);
-    ai.escort_distance                                  = GetGameConfig().GetFloat("AI.Targetting.EscortDistance", ai.escort_distance);
-    ai.turn_leader_distance                             = GetGameConfig().GetFloat("AI.Targetting.TurnLeaderDist", ai.turn_leader_distance);
-    ai.time_to_recommand_wing                           = GetGameConfig().GetFloat("AI.Targetting.TargetCommandierTime", ai.time_to_recommand_wing);
     ai.min_relationship                                 = GetGameConfig().GetDouble("AI.min_relationship", ai.min_relationship);
+
+    ai.firing_config.missile_probability                = GetGameConfig().GetFloat("AI.Firing.MissileProbability", ai.firing_config.missile_probability);
+    ai.firing_config.aggressivity                       = GetGameConfig().GetFloat("AI.Firing.Aggressivity", ai.firing_config.aggressivity);
+
+    ai.targeting_config.escort_distance                 = GetGameConfig().GetFloat("AI.Targetting.EscortDistance", ai.targeting_config.escort_distance);
+    ai.targeting_config.turn_leader_distance            = GetGameConfig().GetFloat("AI.Targetting.TurnLeaderDist", ai.targeting_config.turn_leader_distance);
+    ai.targeting_config.time_to_recommand_wing          = GetGameConfig().GetFloat("AI.Targetting.TargetCommandierTime", ai.targeting_config.time_to_recommand_wing);
+    ai.targeting_config.min_time_to_switch_targets      = GetGameConfig().GetFloat("AI.Targetting.MinTimeToSwitchTargets", ai.targeting_config.min_time_to_switch_targets);
 
     audio_config_.every_other_mount                     = GetGameConfig().GetBool("audio.every_other_mount", audio_config_.every_other_mount);
     audio_config_.shuffle_songs.clear_history_on_list_change = GetGameConfig().GetBool("audio.shuffle_songs.clear_history_on_list_change", audio_config_.shuffle_songs.clear_history_on_list_change);
