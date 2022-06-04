@@ -257,7 +257,7 @@ struct HudConfig {
     bool print_request_docking{true};
     bool print_ship_type{true};
     bool projectile_means_missile{false};
-//    float radar_range{};  // I believe this has been moved to computer_config_.default_max_range -- stephengtuggy 2022-05-28
+//    float radar_range{};  // I believe this has been moved to computer_config.default_max_range -- stephengtuggy 2022-05-28
     std::string radar_type{"WC"};
     float radar_search_extra_radius{1000.0F};
     bool rotating_bracket_inner{true};
@@ -445,19 +445,19 @@ class Configuration {
 public:
     Configuration();
     void OverrideDefaultsWithUserConfiguration();
-    vega_config::GeneralConfig general_config_;
-    vega_config::DataConfig data_config_;
+    vega_config::GeneralConfig general_config;
+    vega_config::DataConfig data_config;
     vega_config::AIConfig ai;
-    vega_config::AudioConfig audio_config_;
+    vega_config::AudioConfig audio_config;
     vega_config::CollisionHacks collision_hacks;
-    vega_config::ComputerConfig computer_config_;
-    vega_config::EjectConfig eject_config_;
+    vega_config::ComputerConfig computer_config;
+    vega_config::EjectConfig eject_config;
     vega_config::Fuel fuel;
-    vega_config::GraphicsConfig graphics_config_;
+    vega_config::GraphicsConfig graphics_config;
     vega_config::Logging logging;
-    vega_config::PhysicsConfig physics_config_;
-    vega_config::UnitConfig unit_config_;
-    vega_config::WarpConfig warp_config_;
+    vega_config::PhysicsConfig physics_config;
+    vega_config::UnitConfig unit_config;
+    vega_config::WarpConfig warp_config;
     vega_config::WeaponsConfig weapons;
 };
 

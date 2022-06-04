@@ -92,7 +92,7 @@ using std::endl;
 using std::list;
 
 std::string getMasterPartListUnitName() {
-    return configuration()->data_config_.master_part_list;
+    return configuration()->data_config.master_part_list;
 }
 
 Unit *_masterPartList = nullptr;
@@ -130,7 +130,7 @@ void Unit::SetNebula(Nebula *neb) {
 }
 
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
-    const float capship_size = configuration()->physics_config_.capship_size;
+    const float capship_size = configuration()->physics_config.capship_size;
 
     if (this == target || target->CloakVisible() < .8) {
         return false;
@@ -414,7 +414,7 @@ void Unit::Init(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber) {
-    const bool UNITTAB = configuration()->physics_config_.unit_table;
+    const bool UNITTAB = configuration()->physics_config.unit_table;
     CSVRow unitRow;
     // TODO: something with the following line
     this->Unit::Init();
@@ -493,7 +493,7 @@ void Unit::Init(const char *filename,
     this->filename = filename;
     if (!foundFile) {
         bool istemplate = (string::npos != (string(filename).find(".template")));
-        if (!istemplate || (istemplate && configuration()->data_config_.using_templates)) {
+        if (!istemplate || (istemplate && configuration()->data_config.using_templates)) {
             VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();
@@ -624,13 +624,13 @@ static float tmpsqr(float x) {
 }
 
 float CloseEnoughCone(Unit *me) {
-    return configuration()->physics_config_.near_autotrack_cone;
+    return configuration()->physics_config.near_autotrack_cone;
 }
 
 bool CloseEnoughToAutotrack(Unit *me, Unit *targ, float &cone) {
     if (targ) {
         const float close_enough_to_autotrack =
-                tmpsqr(configuration()->physics_config_.close_enough_to_autotrack);
+                tmpsqr(configuration()->physics_config.close_enough_to_autotrack);
         float dissqr = (me->curr_physical_state.position.Cast()
                 - targ->curr_physical_state.position.Cast()).MagnitudeSquared();
         float movesqr = close_enough_to_autotrack
@@ -842,7 +842,7 @@ extern signed char ComputeAutoGuarantee(Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
 
 double howFarToJump() {
-    return configuration()->physics_config_.distance_to_warp;
+    return configuration()->physics_config.distance_to_warp;
 }
 
 QVector SystemLocation(std::string system) {
@@ -893,7 +893,7 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
                                         i->first.length()) == i->first
                                         && whereto.substr(i->first.length() + 1)
                                                 == j->first) {
-                                    tmp /= configuration()->physics_config_.target_distance_to_warp_bonus;
+                                    tmp /= configuration()->physics_config.target_distance_to_warp_bonus;
                                 }
                             }
                         }
@@ -1026,7 +1026,7 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
     const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
-    const bool nojumpinSPEC = configuration()->physics_config_.no_spec_jump;
+    const bool nojumpinSPEC = configuration()->physics_config.no_spec_jump;
     bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
             && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && graphicOptions.InWarp
             && nojumpinSPEC;
@@ -1089,7 +1089,7 @@ Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
     if ((player_cockpit) == nullptr) {
-        difficulty = pow(g_game.difficulty, configuration()->physics_config_.difficulty_speed_exponent);
+        difficulty = pow(g_game.difficulty, configuration()->physics_config.difficulty_speed_exponent);
     }
     return player_cockpit;
 }
@@ -1434,8 +1434,8 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
     randnum = rand01();
-    const float inv_min_dam = 1.0F - configuration()->physics_config_.min_damage;
-    const float inv_max_dam = 1.0F - configuration()->physics_config_.max_damage;
+    const float inv_min_dam = 1.0F - configuration()->physics_config.min_damage;
+    const float inv_max_dam = 1.0F - configuration()->physics_config.max_damage;
     if (dam < inv_max_dam) {
         dam = inv_max_dam;
     }
@@ -1477,19 +1477,19 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         } else if (randnum >= .4) {
             limits.retro *= dam;
         } else if (randnum >= .3275) {
-            const float maxdam = configuration()->physics_config_.max_radar_cone_damage;
+            const float maxdam = configuration()->physics_config.max_radar_cone_damage;
             computer.radar.maxcone += (1 - dam);
             if (computer.radar.maxcone > maxdam) {
                 computer.radar.maxcone = maxdam;
             }
         } else if (randnum >= .325) {
-            const float maxdam = configuration()->physics_config_.max_radar_lock_cone_damage;
+            const float maxdam = configuration()->physics_config.max_radar_lock_cone_damage;
             computer.radar.lockcone += (1 - dam);
             if (computer.radar.lockcone > maxdam) {
                 computer.radar.lockcone = maxdam;
             }
         } else if (randnum >= .25) {
-            const float maxdam = configuration()->physics_config_.max_radar_track_cone_damage;
+            const float maxdam = configuration()->physics_config.max_radar_track_cone_damage;
             computer.radar.trackingcone += (1 - dam);
             if (computer.radar.trackingcone > maxdam) {
                 computer.radar.trackingcone = maxdam;
@@ -1506,7 +1506,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         damages |= Damages::COMPUTER_DAMAGED;
         return;
     }
-    if (rand01() < configuration()->physics_config_.thruster_hit_chance) {
+    if (rand01() < configuration()->physics_config.thruster_hit_chance) {
         //DAMAGE ROLL/YAW/PITCH/THRUST
         float orandnum = rand01() * .82 + .18;
         if (randnum >= .9) {
@@ -5036,8 +5036,8 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     UpdateCloak();
 
     // Recharge energy and shields
-    const bool apply_difficulty_shields = configuration()->physics_config_.difficulty_based_shield_recharge;
-    const bool energy_before_shield = configuration()->physics_config_.engine_energy_takes_priority;
+    const bool apply_difficulty_shields = configuration()->physics_config.difficulty_based_shield_recharge;
+    const bool energy_before_shield = configuration()->physics_config.engine_energy_takes_priority;
 
     // Difficulty settings
     float difficulty_shields = 1.0f;
@@ -5330,7 +5330,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
 void Unit::UpdateCloak() {
     // Use warp power for cloaking (SPEC capacitor)
-    const bool warp_energy_for_cloak = configuration()->warp_config_.use_warp_energy_for_cloak;
+    const bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
 
     // We are not cloaked - exiting function
     if (cloaking < cloakmin) {

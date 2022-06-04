@@ -167,13 +167,13 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
 
 
 float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false) {
-    const float friendly_autodist = configuration()->physics_config_.friendly_auto_radius;
-    const float neutral_autodist = configuration()->physics_config_.neutral_auto_radius;
-    const float hostile_autodist = configuration()->physics_config_.hostile_auto_radius;
+    const float friendly_autodist = configuration()->physics_config.friendly_auto_radius;
+    const float neutral_autodist = configuration()->physics_config.neutral_auto_radius;
+    const float hostile_autodist = configuration()->physics_config.hostile_auto_radius;
     int upgradefaction = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
     if (un->isUnit() == Vega_UnitType::asteroid) {
-        return configuration()->physics_config_.min_asteroid_distance;
+        return configuration()->physics_config.min_asteroid_distance;
     }
     if (un->isUnit() == Vega_UnitType::planet
             || (un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup())) {

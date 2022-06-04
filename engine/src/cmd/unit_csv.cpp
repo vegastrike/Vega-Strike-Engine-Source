@@ -326,7 +326,7 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
         }
     }
     unsigned char parity = 0;
-    bool half_sounds = configuration()->audio_config_.every_other_mount;
+    bool half_sounds = configuration()->audio_config.every_other_mount;
     for (unsigned int a = first_new_mount; a < thus->mounts.size(); ++a) {
         if ((a & 1) == parity) {
             int b = a;
@@ -497,7 +497,7 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
 }
 
 void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
-    const float default_halo_activation = configuration()->graphics_config_.default_engine_activation;
+    const float default_halo_activation = configuration()->graphics_config.default_engine_activation;
     string::size_type where, when;
     string::size_type ofs = 0;
     while ((where = lights.find('{', ofs)) != string::npos) {
@@ -910,8 +910,8 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
             computer.max_roll_right,
             computer.max_roll_left);
 
-    const float game_accel = configuration()->physics_config_.game_accel;
-    const float game_speed = configuration()->physics_config_.game_speed;
+    const float game_accel = configuration()->physics_config.game_accel;
+    const float game_speed = configuration()->physics_config.game_speed;
     limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
     limits.forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
     limits.retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
@@ -1041,7 +1041,7 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
     if (pImage->explosion_type.get().length()) {
         cache_ani(pImage->explosion_type);
     } else {
-        const std::string expani = configuration()->graphics_config_.explosion_animation;
+        const std::string expani = configuration()->graphics_config.explosion_animation;
         cache_ani(expani);
     }
     AddLights(this, xml, UnitCSVFactory::GetVariable(unit_key, "Light", std::string()));
@@ -1050,9 +1050,9 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
         addShieldMesh(&xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
         meshdata.back() = xml.shieldmesh;
     } else {
-        const int shieldstacks = configuration()->graphics_config_.shield_detail;
-        const std::string& shieldtex = configuration()->graphics_config_.shield_texture;
-        const std::string& shieldtechnique = configuration()->graphics_config_.shield_technique;
+        const int shieldstacks = configuration()->graphics_config.shield_detail;
+        const std::string& shieldtex = configuration()->graphics_config.shield_texture;
+        const std::string& shieldtechnique = configuration()->graphics_config.shield_technique;
         meshdata.back() = new SphereMesh(rSize(),
                 shieldstacks,
                 shieldstacks,
@@ -1144,7 +1144,7 @@ CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &
 }
 
 void Unit::WriteUnit(const char *modifications) {
-    const bool UNITTAB = configuration()->physics_config_.unit_table;
+    const bool UNITTAB = configuration()->physics_config.unit_table;
     if (UNITTAB) {
         bool bad = false;
         if (!modifications) {
@@ -1204,7 +1204,7 @@ static string tos(int val) {
 }
 
 string Unit::WriteUnitString() {
-    const bool UNITTAB = configuration()->physics_config_.unit_table;
+    const bool UNITTAB = configuration()->physics_config.unit_table;
     string ret = "";
     if (UNITTAB) {
         //this is the fillin part
@@ -1412,8 +1412,8 @@ string Unit::WriteUnitString() {
                 unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / VS_PI);
                 unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / VS_PI);
                 unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / VS_PI);
-                const float game_accel = configuration()->physics_config_.game_accel;
-                const float game_speed = configuration()->physics_config_.game_speed;
+                const float game_accel = configuration()->physics_config.game_accel;
+                const float game_speed = configuration()->physics_config.game_speed;
                 unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
                 unit["Forward_Accel"] = tos(limits.forward / (game_accel * game_speed));
                 unit["Retro_Accel"] = tos(limits.retro / (game_accel * game_speed));

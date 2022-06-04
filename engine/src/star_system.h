@@ -108,7 +108,7 @@ protected:
     string filename;
     un_iter sigIter;
 
-    ///to track the next given physics_config_ frame
+    ///to track the next given physics frame
     double time = 0;
 
     /// Everything to be drawn. Folded missiles in here oneday
@@ -120,7 +120,7 @@ protected:
     ///The moving, fading stars
     Stars *stars = nullptr;
 
-    /// Objects subject to global gravitron physics_config_ (disabled)
+    /// Objects subject to global gravitron physics (disabled)
     // TODO: investigate and remove
     unsigned char no_collision_time = 0;
 
@@ -218,7 +218,7 @@ public:
 /// returns xy sorted bounding spheres of all units in current view
     ClickList *getClickList();
 ///Adds to draw list
-///Draws a frame of action, interpolating between physics_config_ frames
+///Draws a frame of action, interpolating between physics frames
     void Draw(bool DrawCockpit = true);
 
 ///re-enables the included lights and terrains

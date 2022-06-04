@@ -372,7 +372,7 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     NearestUnitLocator unitLocator;
 #ifdef VS_ENABLE_COLLIDE_KEY
     CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
-    const float unitRad = configuration()->graphics_config_.hud.radar_search_extra_radius;
+    const float unitRad = configuration()->graphics_config.hud.radar_search_extra_radius;
     CollideMap::iterator iter = cm->lower_bound( wherewrapper );
     if (iter != cm->end() && (*iter)->radius > 0)
         if ( (*iter)->ref.unit != parent )

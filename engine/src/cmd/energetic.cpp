@@ -49,7 +49,7 @@ Energetic::Energetic() : energy(0, 0),
         afterburntype(0) {
     jump.warpDriveRating = 0;
     jump.energy = 100;
-    jump.insysenergy = configuration()->warp_config_.insystem_jump_cost * jump.energy;
+    jump.insysenergy = configuration()->warp_config.insystem_jump_cost * jump.energy;
     jump.drive = -2;
     jump.delay = 5;
     jump.damage = 0;
@@ -59,7 +59,7 @@ void Energetic::decreaseWarpEnergy(bool insys, float time) {
     if (configuration()->fuel.fuel_equals_warp) {
         this->warpenergy = this->fuel;
     }
-    this->warpenergy -= (insys ? jump.insysenergy / configuration()->warp_config_.bleed_factor : jump.energy) * time;
+    this->warpenergy -= (insys ? jump.insysenergy / configuration()->warp_config.bleed_factor : jump.energy) * time;
     if (this->warpenergy < 0) {
         this->warpenergy = 0;
     }
@@ -79,7 +79,7 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 
     //FIXME FIXME FIXME
     // Roy Falk - fix what?
-    float bleed = jump.insysenergy / configuration()->warp_config_.bleed_factor * simulation_atom_var;
+    float bleed = jump.insysenergy / configuration()->warp_config.bleed_factor * simulation_atom_var;
     if (warpenergy > bleed) {
         warpenergy -= bleed;
     } else {
@@ -91,7 +91,7 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 float Energetic::energyData() const {
     float capacitance = const_cast<Energetic *>(this)->totalShieldEnergyCapacitance();
 
-    if (configuration()->physics_config_.max_shield_lowers_capacitance) {
+    if (configuration()->physics_config.max_shield_lowers_capacitance) {
         if (energy.MaxValue() <= capacitance) {
             return 0;
         }
@@ -238,7 +238,7 @@ float Energetic::totalShieldEnergyCapacitance() {
     float total_max_shield_value = shield->TotalMaxLayerValue();
     float total_current_shield_value = shield->TotalLayerValue();
 
-    return configuration()->physics_config_.shield_energy_capacitance * (configuration()->physics_config_.use_max_shield_energy_usage ? total_max_shield_value : total_current_shield_value);
+    return configuration()->physics_config.shield_energy_capacitance * (configuration()->physics_config.use_max_shield_energy_usage ? total_max_shield_value : total_current_shield_value);
 }
 
 // The original code was in unit_generic:5476 RegenShields and was simply
@@ -297,7 +297,7 @@ void Energetic::MaintainShields() {
     const bool in_warp = unit->graphicOptions.InWarp;
     const int shield_facets = unit->shield->number_of_facets;
 
-    if (in_warp && !configuration()->physics_config_.shields_in_spec) {
+    if (in_warp && !configuration()->physics_config.shields_in_spec) {
         return;
     }
 
@@ -309,8 +309,8 @@ void Energetic::MaintainShields() {
     const float efficiency = 1;
 
     const float shield_maintenance = unit->shield->GetRegeneration() * VSDPercent() *
-            efficiency / configuration()->physics_config_.shield_energy_capacitance * shield_facets *
-            configuration()->physics_config_.shield_maintenance_charge * simulation_atom_var;
+            efficiency / configuration()->physics_config.shield_energy_capacitance * shield_facets *
+            configuration()->physics_config.shield_maintenance_charge * simulation_atom_var;
 
     sufficient_energy_to_recharge_shields = shield_maintenance > energy;
 
@@ -327,7 +327,7 @@ void Energetic::ExpendEnergyToRechargeShields() {
         return;
     }
 
-    if (in_warp && !configuration()->physics_config_.shields_in_spec) {
+    if (in_warp && !configuration()->physics_config.shields_in_spec) {
         return;
     }
 
@@ -374,7 +374,7 @@ float Energetic::WarpEnergyMultiplier(const bool player_ship) {
     if (flight_group && !player_ship) {
         player = _Universe->isPlayerStarship(flight_group->leader.GetUnit()) != nullptr;
     }
-    return player ? configuration()->warp_config_.player_warp_energy_multiplier : configuration()->warp_config_.warp_energy_multiplier;
+    return player ? configuration()->warp_config.player_warp_energy_multiplier : configuration()->warp_config.warp_energy_multiplier;
 }
 
 float Energetic::VSDPercent() {

@@ -239,7 +239,7 @@ AggressiveAI::AggressiveAI(const char *filename, Unit *target)
     logiccurtime = logic->maxtime;     //set it to the time allotted
     obedient = true;
     if (aggressivity == 2.01F) {
-        aggressivity = configuration()->unit_config_.default_aggressivity;
+        aggressivity = configuration()->unit_config.default_aggressivity;
     }
     if (target != nullptr) {
         AttachOrder(target);
@@ -325,7 +325,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             } else {
                 value = 10000;
             }
-            value /= configuration()->physics_config_.game_speed;     /*game_accel*/
+            value /= configuration()->physics_config.game_speed;     /*game_accel*/
             break;
         }
         case THREAT:

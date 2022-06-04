@@ -126,7 +126,7 @@ void Unit::UpdateCollideQueue(StarSystem *ss, CollideMap::iterator hint[NUM_COLL
 }
 
 void Unit::CollideAll() {
-    if (isSubUnit() || killed || configuration()->physics_config_.no_unit_collisions) {
+    if (isSubUnit() || killed || configuration()->physics_config.no_unit_collisions) {
         return;
     }
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind) {

@@ -527,7 +527,7 @@ protected:
 public:
     QVector realPosition() override;
 
-    ///Updates physics_config_ given unit space transformations and if this is the last physics_config_ frame in the current gfx frame
+    ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
     void UpdatePhysics2(const Transformation &trans,
             const Transformation &old_physical_state,
             const Vector &accel,
@@ -573,7 +573,7 @@ public:
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
-    float shieldtight = configuration()->physics_config_.default_shield_tightness;
+    float shieldtight = configuration()->physics_config.default_shield_tightness;
 
 public:
     // TODO: move cloak to Cloakable?
@@ -630,7 +630,7 @@ public:
     // 0 = not stated, 1 = done
     float ExplodingProgress() const;
 
-    ///Resolves forces of given unit on a physics_config_ frame
+    ///Resolves forces of given unit on a physics frame
     Vector ResolveForces(const Transformation &, const Matrix &) override;
 
 //What's the size of this unit

@@ -84,15 +84,15 @@ signed char ComputeAutoGuarantee(Unit *un) {
 
 std::string GenerateAutoError(Unit *me, Unit *targ) {
     if (UnitUtil::isAsteroid(targ)) {
-        return configuration()->graphics_config_.hud.asteroids_near_message;
+        return configuration()->graphics_config.hud.asteroids_near_message;
     }
     if (targ->isPlanet()) {
-        return configuration()->graphics_config_.hud.planet_near_message;
+        return configuration()->graphics_config.hud.planet_near_message;
     }
     if (targ->getRelation(me) < 0) {
-        return configuration()->graphics_config_.hud.enemy_near_message;
+        return configuration()->graphics_config.hud.enemy_near_message;
     }
-    return configuration()->graphics_config_.hud.starship_near_message;
+    return configuration()->graphics_config.hud.starship_near_message;
 }
 
 ///////////////////////////////////////////////
@@ -266,7 +266,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (this != target) {
         if ((end - start).MagnitudeSquared()
                 < (static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
-            failuremessage = configuration()->graphics_config_.hud.already_near_message;
+            failuremessage = configuration()->graphics_config.hud.already_near_message;
             return false;
         }
         unit->warpenergy -= totpercent * unit->jump.insysenergy;

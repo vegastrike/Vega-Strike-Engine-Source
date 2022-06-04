@@ -107,7 +107,7 @@ void SphereDisplay::Draw(const Sensor &sensor,
     DrawBackground(sensor, rightRadar);
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it) {
-        const bool draw_both = configuration()->graphics_config_.hud.draw_blips_on_both_radar;
+        const bool draw_both = configuration()->graphics_config.hud.draw_blips_on_both_radar;
         if (it->GetPosition().z < 0 || draw_both) {
             // Draw tracks behind the ship
             DrawTrack(sensor, rightRadar, *it, true);
@@ -147,7 +147,7 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
         position.z = -position.z;
     }
     if (position.z < 0) {
-        if (configuration()->graphics_config_.hud.show_negative_blips_as_positive) {
+        if (configuration()->graphics_config.hud.show_negative_blips_as_positive) {
             position.z = -position.z;
         } else {
             position.z = 0.125;
