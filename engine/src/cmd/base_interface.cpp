@@ -1137,7 +1137,7 @@ double compute_light_dot(Unit *base, Unit *un) {
     } else {
         return 1;
     }
-    if (base_owner == NULL || base->isUnit() == _UnitType::planet) {
+    if (base_owner == NULL || base->isUnit() == Vega_UnitType::planet) {
         return ret;
     } else {
         return compute_light_dot(base_owner, un);

@@ -174,7 +174,8 @@ static void SwitchVDUTo(VDU::VDU_MODE v) {
 }
 
 void ExamineWhenTargetKey() {
-    if (game_options()->switchToTargetModeOnKey) {
+    //if (game_options()->switchToTargetModeOnKey) {
+    if (configuration()->graphics_config.hud.switch_to_target_mode_on_key) {
         int view = 0;
         int examine = 0;
         for (; view < 2; ++view) {
@@ -198,7 +199,8 @@ unsigned int textmessager = 0;
 static bool waszero = false;
 
 void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y) {
-    GameCockpit *gcp = static_cast< GameCockpit * > ( _Universe->AccessCockpit(textmessager));
+    GameCockpit *gcp = dynamic_cast< GameCockpit * > ( _Universe->AccessCockpit(textmessager));
+    assert(gcp != nullptr);
     gcp->editingTextMessage = true;
     if ((release
             && (waszero || ch == WSK_KP_ENTER || ch == WSK_ESCAPE)) || (release == false && (ch == ']' || ch == '['))) {
@@ -259,7 +261,7 @@ void TextMessageKey(const KBData &, KBSTATE newState) {
 void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
-        if (game_options()->write_savegame_on_exit) {
+        if (configuration()->general_config.write_savegame_on_exit) {
             _Universe->WriteSaveGame(true);              //gotta do important stuff first
         }
         for (size_t i = 0; i < active_missions.size(); ++i) {
@@ -771,7 +773,7 @@ void IncrementStartupVariable() {
         var = getSaveData(0, "436457r1K3574r7uP71m35", 0);
         putSaveData(0, "436457r1K3574r7uP71m35", 0, var + 1);
     }
-    if (var <= game_options()->times_to_show_help_screen) {
+    if (var <= configuration()->general_config.times_to_show_help_screen) {
         GameCockpit::NavScreen(KBData(), PRESS);
     }          //HELP FIXME
 }
@@ -886,7 +888,7 @@ void createObjects(std::vector<std::string> &fighter0name,
                                                                 grav->rSize() / 4),
                                                         vsrandom.uniformExc(-grav->rSize() / 4,
                                                                 grav->rSize() / 4));
-                                        if (grav->isUnit() != _UnitType::planet) {
+                                        if (grav->isUnit() != Vega_UnitType::planet) {
                                             newpos = UniverseUtil::SafeEntrancePoint(newpos);
                                         }
                                         cp->savegame->SetPlayerLocation(newpos);
@@ -983,12 +985,12 @@ void createObjects(std::vector<std::string> &fighter0name,
 void AddUnitToSystem(const SavedUnits *su) {
     Unit *un = NULL;
     switch (su->type) {
-        case _UnitType::enhancement:
+        case Vega_UnitType::enhancement:
             un =
                     new Enhancement(su->filename.get().c_str(), FactionUtil::GetFactionIndex(su->faction), string(""));
             un->SetPosition(QVector(0, 0, 0));
             break;
-        case _UnitType::unit:
+        case Vega_UnitType::unit:
         default:
             un = new Unit(su->filename.get().c_str(), false, FactionUtil::GetFactionIndex(su->faction));
             un->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));

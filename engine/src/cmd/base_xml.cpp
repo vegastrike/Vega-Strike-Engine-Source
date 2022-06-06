@@ -64,7 +64,7 @@ void BaseInterface::Load(const char *filename, const char *time_of_day_hint, con
         bool planet = false;
         Unit *baseun = this->baseun.GetUnit();
         if (baseun) {
-            planet = (baseun->isUnit() == _UnitType::planet);
+            planet = (baseun->isUnit() == Vega_UnitType::planet);
         }
         string basestring("bases/unit");
         if (planet) {

@@ -27,7 +27,6 @@
 #include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"   // Is this needed here? -- stephengtuggy 2021-09-06
 #include "vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
@@ -58,7 +57,7 @@ Unit *getAtmospheric(Unit *targ) {
         for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
                 (un = *i) != NULL;
                 ++i) {
-            if (un->isUnit() == _UnitType::planet) {
+            if (un->isUnit() == Vega_UnitType::planet) {
                 if ((targ->Position() - un->Position()).Magnitude() < targ->rSize() * .5) {
                     if (!(((Planet *) un)->isAtmospheric())) {
                         return un;
@@ -75,7 +74,7 @@ bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
         return false;
     }
 
-    if (targ->isUnit() == _UnitType::planet) {
+    if (targ->isUnit() == Vega_UnitType::planet) {
         if (((Planet *) targ)->isAtmospheric() && NoDockWithClear()) {
             targ = getAtmospheric(targ);
             if (!targ) {
@@ -133,17 +132,13 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
 }
 
 void FireAt::ReInit(float aggressivitylevel) {
-    static float
-            missileprob = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "MissileProbability", ".01"));
-    static float mintimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinTimeToSwitchTargets", "3"));
     lastmissiletime = UniverseUtil::GetGameTime() - 65536.;
-    missileprobability = missileprob;
+    missileprobability = configuration()->ai.firing_config.missile_probability;
     delay = 0;
     agg = aggressivitylevel;
     distance = 1;
     //JS --- spreading target switch times
-    lastchangedtarg = 0.0 - targrand.uniformInc(0, 1) * mintimetoswitch;
+    lastchangedtarg = 0.0 - targrand.uniformInc(0, 1) * configuration()->ai.targeting_config.min_time_to_switch_targets;
     had_target = false;
 }
 
@@ -152,8 +147,7 @@ FireAt::FireAt(float aggressivitylevel) : CommunicatingAI(WEAPON, STARGET) {
 }
 
 FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET) {
-    static float aggr = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "Aggressivity", "15"));
-    ReInit(aggr);
+    ReInit(configuration()->ai.firing_config.aggressivity);
 }
 
 void FireAt::SignalChosenTarget() {
@@ -201,7 +195,7 @@ struct TurretBin {
     void AssignTargets(const TargetAndRange &finalChoice, const Matrix &pos) {
         //go through modularly assigning as you go;
         int count = 0;
-        const unsigned long lotsize[2] = {listOfTargets[0].size(), listOfTargets[1].size()};
+        size_t lotsize[2] = {listOfTargets[0].size(), listOfTargets[1].size()};
         for (vector<RangeSortedTurrets>::iterator uniter = turret.begin(); uniter != turret.end(); ++uniter) {
             bool foundfinal = false;
             uniter->tur->Target(NULL);
@@ -219,8 +213,8 @@ struct TurretBin {
             }
             if (!foundfinal) {
                 for (unsigned int f = 0; f < 2 && !foundfinal; f++) {
-                    for (unsigned int i = 0; i < lotsize[f]; i++) {
-                        const int index = (count + i) % lotsize[f];
+                    for (size_t i = 0; i < lotsize[f]; i++) {
+                        const size_t index = (count + i) % lotsize[f];
                         if (listOfTargets[f][index].range < uniter->gunrange) {
                             if (CanFaceTarget(uniter->tur, finalChoice.t, pos)) {
                                 uniter->tur->Target(listOfTargets[f][index].t);
@@ -354,22 +348,22 @@ public:
 
 template<size_t numTuple>
 class ChooseTargetClass {
-    Unit *parent;
-    Unit *parentparent;
-    vector<TurretBin> *tbin;
+    Unit *parent{};
+    Unit *parentparent{};
+    vector<TurretBin> *tbin{};
     StaticTuple<float, numTuple> maxinnerrangeless;
     StaticTuple<float, numTuple> maxinnerrangemore;
-    float priority;
-    char rolepriority;
-    char maxrolepriority;
-    bool reachedMore;
-    bool reachedLess;
-    FireAt *fireat;
-    float gunrange;
-    int numtargets;
-    int maxtargets;
+    float priority{};
+    char rolepriority{};
+    char maxrolepriority{};
+    bool reachedMore{};
+    bool reachedLess{};
+    FireAt *fireat{};
+    float gunrange{};
+    int numtargets{};
+    int maxtargets{};
 public:
-    Unit *mytarg;
+    Unit *mytarg{};
 
     ChooseTargetClass() {
     }
@@ -584,7 +578,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
             "search_max_candidates",
             "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
     UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->GetComputerData().radar.maxrange, unitRad);
-    StaticTuple<float, 2> maxranges;
+    StaticTuple<float, 2> maxranges{};
 
     maxranges[0] = gunrange;
     maxranges[1] = missilerange;
@@ -699,7 +693,7 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
                     "18"))
                     / 180.);                                                                      //Roughly 18 degrees
     float temp = parent->TrackingGuns(missilelock);
-    bool isjumppoint = targ->isUnit() == _UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
+    bool isjumppoint = targ->isUnit() == Vega_UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
     float fangle = (fireangle_minagg + fireangle_maxagg * agg) / (1.0f + agg);
     bool retval =
             ((dist < firewhen)
@@ -776,7 +770,7 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
 }
 
 bool FireAt::isJumpablePlanet(Unit *targ) {
-    bool istargetjumpableplanet = targ->isUnit() == _UnitType::planet;
+    bool istargetjumpableplanet = targ->isUnit() == Vega_UnitType::planet;
     if (istargetjumpableplanet) {
         istargetjumpableplanet =
                 (!((Planet *) targ)->GetDestinations().empty()) && (parent->GetJumpStatus().drive >= 0);
@@ -810,7 +804,7 @@ void FireAt::Execute() {
     Order::Execute();
     done = tmp;
     Unit *targ;
-    if (parent->isUnit() == _UnitType::unit) {
+    if (parent->isUnit() == Vega_UnitType::unit) {
         static float
                 cont_update_time = XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandUpdateTime", "1"));
         //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25

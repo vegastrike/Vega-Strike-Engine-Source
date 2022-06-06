@@ -326,8 +326,8 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
         }
     }
     unsigned char parity = 0;
+    bool half_sounds = configuration()->audio_config.every_other_mount;
     for (unsigned int a = first_new_mount; a < thus->mounts.size(); ++a) {
-        static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable("audio", "every_other_mount", "false"));
         if ((a & 1) == parity) {
             int b = a;
             if ((a & 3) == 2 && (int) a < (thus->getNumMounts() - 1)) {
@@ -487,8 +487,8 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
             for (int i = 0; i < overlap; i++) {
                 thus->pImage
                         ->dockingports
-                        .push_back(DockingPorts(pos.Cast() * xml.unitscale, size * xml.unitscale, minsize
-                                * xml.unitscale, DockingPorts::Type::Value(type)));
+                        .emplace_back(pos.Cast() * xml.unitscale, size * xml.unitscale, minsize
+                                * xml.unitscale, DockingPorts::Type::Value(type));
             }
         } else {
             ofs = string::npos;
@@ -497,8 +497,7 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
 }
 
 void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
-    static float default_halo_activation =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "default_engine_activation", ".00048828125"));
+    const float default_halo_activation = configuration()->graphics_config.default_engine_activation;
     string::size_type where, when;
     string::size_type ofs = 0;
     while ((where = lights.find('{', ofs)) != string::npos) {
@@ -651,9 +650,7 @@ void LoadCockpit(Unit *thus, const string &cockpit) {
 }
 
 float getFuelConversion() {
-    static float
-            fuel_conversion = XMLSupport::parse_float(vs_config->getVariable("physics", "FuelConversion", ".00144"));
-    return fuel_conversion;
+    return configuration()->fuel.fuel_conversion;
 }
 
 const std::string EMPTY_STRING("");
@@ -865,7 +862,7 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
     // End shield section
 
 
-    static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics", "fuel_equals_warp", "false"));
+    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
     maxwarpenergy = warpenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f);
 
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
@@ -913,8 +910,8 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
             computer.max_roll_right,
             computer.max_roll_left);
 
-    static float game_accel = GameConfig::GetVariable("physics", "game_accel", 1.0f);
-    static float game_speed = GameConfig::GetVariable("physics", "game_speed", 1.0f);
+    const float game_accel = configuration()->physics_config.game_accel;
+    const float game_speed = configuration()->physics_config.game_speed;
     limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
     limits.forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
     limits.retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
@@ -1044,7 +1041,7 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
     if (pImage->explosion_type.get().length()) {
         cache_ani(pImage->explosion_type);
     } else {
-        static std::string expani = vs_config->getVariable("graphics", "explosion_animation", "explosion_orange.ani");
+        const std::string expani = configuration()->graphics_config.explosion_animation;
         cache_ani(expani);
     }
     AddLights(this, xml, UnitCSVFactory::GetVariable(unit_key, "Light", std::string()));
@@ -1053,9 +1050,9 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
         addShieldMesh(&xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
         meshdata.back() = xml.shieldmesh;
     } else {
-        static int shieldstacks = XMLSupport::parse_int(vs_config->getVariable("graphics", "shield_detail", "16"));
-        static std::string shieldtex = vs_config->getVariable("graphics", "shield_texture", "shield.bmp");
-        static std::string shieldtechnique = vs_config->getVariable("graphics", "shield_technique", "");
+        const int shieldstacks = configuration()->graphics_config.shield_detail;
+        const std::string& shieldtex = configuration()->graphics_config.shield_texture;
+        const std::string& shieldtechnique = configuration()->graphics_config.shield_technique;
         meshdata.back() = new SphereMesh(rSize(),
                 shieldstacks,
                 shieldstacks,
@@ -1147,7 +1144,7 @@ CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &
 }
 
 void Unit::WriteUnit(const char *modifications) {
-    static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
+    const bool UNITTAB = configuration()->physics_config.unit_table;
     if (UNITTAB) {
         bool bad = false;
         if (!modifications) {
@@ -1207,7 +1204,7 @@ static string tos(int val) {
 }
 
 string Unit::WriteUnitString() {
-    static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
+    const bool UNITTAB = configuration()->physics_config.unit_table;
     string ret = "";
     if (UNITTAB) {
         //this is the fillin part
@@ -1415,8 +1412,8 @@ string Unit::WriteUnitString() {
                 unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / VS_PI);
                 unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / VS_PI);
                 unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / VS_PI);
-                static float game_accel = XMLSupport::parse_float(vs_config->getVariable("physics", "game_accel", "1"));
-                static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
+                const float game_accel = configuration()->physics_config.game_accel;
+                const float game_speed = configuration()->physics_config.game_speed;
                 unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
                 unit["Forward_Accel"] = tos(limits.forward / (game_accel * game_speed));
                 unit["Retro_Accel"] = tos(limits.retro / (game_accel * game_speed));

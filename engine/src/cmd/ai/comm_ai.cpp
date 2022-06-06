@@ -54,40 +54,30 @@ CommunicatingAI::CommunicatingAI(int ttype,
         randomresponse(randomresp),
         mood(mood) {
     if (appease > 665 && appease < 667) {
-        static float appeas = XMLSupport::parse_float(vs_config->getVariable("AI", "EaseToAppease", ".5"));
-        this->appease = appeas;
+        this->appease = configuration()->ai.ease_to_appease;
     }
     if ((anger > 665 && anger < 667) || (anger > -667 && anger < -665)) {
-        static float ang = XMLSupport::parse_float(vs_config->getVariable("AI", "EaseToAnger", "-.5"));
-        this->anger = ang;
+        this->anger = configuration()->ai.ease_to_anger;
     }
     if (moodswingyness > 665 && moodswingyness < 667) {
-        static float ang1 = XMLSupport::parse_float(vs_config->getVariable("AI", "MoodSwingLevel", ".2"));
-        this->moodswingyness = ang1;
+        this->moodswingyness = configuration()->ai.mood_swing_level;
     }
     if (randomresp > 665 && moodswingyness < 667) {
-        static float ang2 = XMLSupport::parse_float(vs_config->getVariable("AI", "RandomResponseRange", ".8"));
-        this->randomresponse = ang2;
+        this->randomresponse = configuration()->ai.random_response_range;
     }
 }
 
 bool MatchingMood(const CommunicationMessage &c, float mood, float randomresponse, float relationship) {
-    static float pos_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestPositiveCommChoice",
-            "0"));
-    static float neg_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestNegativeCommChoice",
-            "-.00001"));
     const FSM::Node *n = (unsigned int) c.curstate
             < c.fsm->nodes.size() ? (&c.fsm->nodes[c.curstate]) : (&c.fsm->nodes[c.fsm
             ->getDefaultState(
                     relationship)]);
     std::vector<unsigned int>::const_iterator iend = n->edges.end();
     for (std::vector<unsigned int>::const_iterator i = n->edges.begin(); i != iend; ++i) {
-        if (c.fsm->nodes[*i].messagedelta >= pos_limit && relationship >= 0) {
+        if (c.fsm->nodes[*i].messagedelta >= configuration()->ai.lowest_positive_comm_choice && relationship >= 0) {
             return true;
         }
-        if (c.fsm->nodes[*i].messagedelta <= neg_limit && relationship < 0) {
+        if (c.fsm->nodes[*i].messagedelta <= configuration()->ai.lowest_negative_comm_choice && relationship < 0) {
             return true;
         }
     }
@@ -382,8 +372,7 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     NearestUnitLocator unitLocator;
 #ifdef VS_ENABLE_COLLIDE_KEY
     CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
-    static float unitRad =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radar_search_extra_radius", "1000" ) );
+    const float unitRad = configuration()->graphics_config.hud.radar_search_extra_radius;
     CollideMap::iterator iter = cm->lower_bound( wherewrapper );
     if (iter != cm->end() && (*iter)->radius > 0)
         if ( (*iter)->ref.unit != parent )

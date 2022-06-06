@@ -110,8 +110,8 @@ public:
 
     friend class PlanetaryOrbit;
 
-    enum _UnitType isUnit() const {
-        return _UnitType::planet;
+    enum Vega_UnitType isUnit() const {
+        return Vega_UnitType::planet;
     }
 
     // Methods
@@ -230,7 +230,7 @@ public:
         void advance() {
             if (current() != NULL) {
                 Unit *cur = *pos;
-                if (cur->isUnit() == _UnitType::planet) {
+                if (cur->isUnit() == Vega_UnitType::planet) {
                     for (un_iter tmp(((Planet *) cur)->satellites.createIterator()); !tmp.isDone(); ++tmp) {
                         localCollection.append((*tmp));
                     }

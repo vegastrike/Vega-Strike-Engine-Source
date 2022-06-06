@@ -165,13 +165,13 @@ Unit *launchJumppoint(string name_string,
         QVector pos,
         string squadlogo,
         string destinations) {
-    int clstype = _UnitType::unit;
+    int clstype = Vega_UnitType::unit;
     if (unittype_string == "planet") {
-        clstype = _UnitType::planet;
+        clstype = Vega_UnitType::planet;
     } else if (unittype_string == "asteroid") {
-        clstype = _UnitType::asteroid;
+        clstype = Vega_UnitType::asteroid;
     } else if (unittype_string == "nebula") {
-        clstype = _UnitType::nebula;
+        clstype = Vega_UnitType::nebula;
     }
     CreateFlightgroup cf;
     cf.fg = Flightgroup::newFlightgroup(name_string,
@@ -702,7 +702,7 @@ QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector pos, float radial_s
         {
             //fixme, make me faster, use collide map
             for (un_iter i = sts->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                if (UnitUtil::isAsteroid(un) || un->isUnit() == _UnitType::nebula) {
+                if (UnitUtil::isAsteroid(un) || un->isUnit() == Vega_UnitType::nebula) {
                     continue;
                 }
                 double dist = (pos - un->LocalPosition()).Magnitude() - un->rSize() -/*def_un_size-*/ radial_size;
@@ -799,7 +799,7 @@ void receivedCustom(int cp, bool trusted, string cmd, string args, string id) {
     securepythonstr(cmd);
     securepythonstr(args);
     securepythonstr(id);
-    string pythonCode = game_options()->custompython + "(" + (trusted ? "True" : "False")
+    string pythonCode = configuration()->general_config.custom_python + "(" + (trusted ? "True" : "False")
             + ", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
     VS_LOG(info, "Executing python command: ");
     VS_LOG(info, (boost::format("    %1%") % pythonCode));
@@ -938,7 +938,7 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
             "",
             true,
             false,
-            game_options()->quick_savegame_summaries,
+            configuration()->general_config.quick_savegame_summaries,
             true,
             true,
             campaign_score_vars);
@@ -989,7 +989,7 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
             }
         }
     }
-    if (!game_options()->quick_savegame_summaries) {
+    if (!configuration()->general_config.quick_savegame_summaries) {
         bool hit = false;
         for (set<string>::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
             string var = *it;

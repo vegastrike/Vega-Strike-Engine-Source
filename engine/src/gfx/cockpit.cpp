@@ -430,11 +430,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return target->energyData();
 
         case UnitImages<void>::WARPENERGY: {
-            static bool warpifnojump =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                            "hud",
-                            "display_warp_energy_if_no_jump_drive",
-                            "true"));
+            const bool warpifnojump = configuration()->graphics_config.hud.display_warp_energy_if_no_jump_drive;
             return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->warpEnergyData() : 0;
         }
         case UnitImages<void>::HULL:
@@ -512,11 +508,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MAXKPS:
         case UnitImages<void>::MAXCOMBATKPS:
         case UnitImages<void>::MAXCOMBATABKPS: {
-            static bool use_relative_velocity =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                            "hud",
-                            "display_relative_velocity",
-                            "true"));
+            const bool use_relative_velocity = configuration()->graphics_config.hud.display_relative_velocity;
             float value;
             switch (stat) {
                 case UnitImages<void>::KPS:
@@ -945,7 +937,7 @@ void GameCockpit::Delete() {
         delete text;
         text = nullptr;
     }
-    for (size_t i = 0; i < (int) mesh.size(); ++i) {
+    for (size_t i = 0; i < mesh.size(); ++i) {
         if (mesh[i] != nullptr) {
             delete mesh[i];
             mesh[i] = nullptr;
@@ -1031,33 +1023,21 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     }
     radarSprites[0] = radarSprites[1] = Pit[0] = Pit[1] = Pit[2] = Pit[3] = NULL;
 
-    static bool st_draw_all_boxes =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "drawAllTargetBoxes", "false"));
-    static bool st_draw_line_to_target =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "drawLineToTarget", "false"));
-    static bool st_draw_line_to_targets_target =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "drawLineToTargetsTarget", "false"));
-    static bool st_draw_line_to_itts =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "drawLineToITTS", "false"));
-    static bool st_always_itts =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "drawAlwaysITTS", "false"));
-    static bool st_steady_itts = XMLSupport::parse_bool(vs_config->getVariable("physics", "steady_itts", "false"));
-
-    draw_all_boxes = st_draw_all_boxes;
-    draw_line_to_target = st_draw_line_to_target;
-    draw_line_to_targets_target = st_draw_line_to_targets_target;
-    draw_line_to_itts = st_draw_line_to_itts;
-    always_itts = st_always_itts;
-    steady_itts = st_steady_itts;
+    draw_all_boxes = configuration()->graphics_config.hud.draw_all_target_boxes;
+    draw_line_to_target = configuration()->graphics_config.hud.draw_line_to_target;
+    draw_line_to_targets_target = configuration()->graphics_config.hud.draw_line_to_targets_target;
+    draw_line_to_itts = configuration()->graphics_config.hud.draw_line_to_itts;
+    always_itts = configuration()->graphics_config.hud.draw_always_itts;
+    steady_itts = configuration()->physics_config.steady_itts;
     last_locktime = last_mlocktime = -FLT_MAX;
 
     radarDisplay = Radar::Factory(Radar::Type::NullDisplay);
 
     //Compute the screen limits. Used to display the arrow pointing to the selected target.
-    static float st_projection_limit_y = XMLSupport::parse_float(vs_config->getVariable("graphics", "fov", "78"));
-    smooth_fov = st_projection_limit_y;
-    projection_limit_y = st_projection_limit_y;
-    //The angle betwwen the center of the screen and the border is half the fov.
+    const float limit_y = configuration()->graphics_config.fov;
+    smooth_fov = limit_y;
+    projection_limit_y = limit_y;
+    //The angle between the center of the screen and the border is half the fov.
     projection_limit_y = tan(projection_limit_y * M_PI / (180 * 2));
     projection_limit_x = projection_limit_y * g_game.aspect;
     //Precompute this division... performance.
@@ -1167,7 +1147,7 @@ void SuicideKey(const KBData &, KBSTATE k) {
             orig = newtime;
             Unit *un = NULL;
             if ((un = _Universe->AccessCockpit()->GetParent())) {
-                float armor[8];                 //short fix
+//                float armor[8];                 //short fix
                 un->Destroy();
             }
         }
@@ -1272,9 +1252,7 @@ int GameCockpit::Autopilot(Unit *target) {
                 QVector posB = un->LocalPosition();
                 bool movedatall = (posA - posB).Magnitude() > un->rSize();
                 if (autoMessage.length() == 0 && !movedatall) {
-                    autoMessage =
-                            XMLSupport::escaped_string(vs_config->getVariable("graphics", "hud", "AlreadyNearMessage",
-                                    "#ff0000Already Near#000000"));
+                    autoMessage = configuration()->graphics_config.hud.already_near_message;
                     retauto = false;
                 } else if ((retauto || retautoA) && movedatall) {
                     if (autopan) {
@@ -1509,9 +1487,8 @@ QVector SystemLocation(std::string system);
 double howFarToJump();
 
 void GameCockpit::Draw() {
-    static bool drawHeadingMarker = parse_bool(vs_config->getVariable("graphics", "draw_heading_marker", "false"));
-    static bool draw_star_destination_arrow =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_star_direction", "true"));
+    const bool draw_heading_marker = configuration()->graphics_config.draw_heading_marker;
+    const bool draw_star_destination_arrow = configuration()->graphics_config.hud.draw_star_direction;
     static GFXColor destination_system_color = vs_config->getColor("destination_system_color");
     Vector destination_system_location(0, 0, 0);
     cockpit_time += GetElapsedTime();
@@ -1531,10 +1508,8 @@ void GameCockpit::Draw() {
     if (nav_current != universe_current) {
         AccessNavSystem()->Setup();
     }
-    static bool draw_any_boxes =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "DrawTargettingBoxes", "true"));
-    static bool draw_boxes_inside_only =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "DrawTargettingBoxesInside", "true"));
+    const bool draw_any_boxes = configuration()->graphics_config.hud.draw_targeting_boxes;
+    const bool draw_boxes_inside_only = configuration()->graphics_config.hud.draw_targeting_boxes_inside;
     if (draw_any_boxes && screenshotkey == false && (draw_boxes_inside_only == false || view < CP_CHASE)) {
         Unit *player = GetParent();
         if (player) {
@@ -1579,7 +1554,7 @@ void GameCockpit::Draw() {
             }
         }
     }
-    if (drawHeadingMarker && view < CP_CHASE) {
+    if (draw_heading_marker && view < CP_CHASE) {
         DrawHeadingMarker(*this, textcol);
     }
     GFXEnable(TEXTURE0);
@@ -1739,25 +1714,19 @@ void GameCockpit::Draw() {
 
     Unit *un;
     float crosscenx = 0, crossceny = 0;
-    static bool crosshairs_on_chasecam =
-            parse_bool(vs_config->getVariable("graphics", "hud", "crosshairs_on_chasecam", "false"));
-    static bool crosshairs_on_padlock =
-            parse_bool(vs_config->getVariable("graphics", "hud", "crosshairs_on_padlock", "false"));
+    const bool crosshairs_on_chasecam = configuration()->graphics_config.hud.crosshairs_on_chase_cam;
+    const bool crosshairs_on_padlock = configuration()->graphics_config.hud.crosshairs_on_padlock;
     if ((view == CP_FRONT)
             || (view == CP_CHASE && crosshairs_on_chasecam)
             || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && crosshairs_on_padlock)) {
         if (Panel.size() > 0 && Panel.front() && screenshotkey == false) {
-            static bool drawCrosshairs =
-                    parse_bool(vs_config->getVariable("graphics", "hud", "draw_rendered_crosshairs",
-                            vs_config->getVariable("graphics",
-                                    "draw_rendered_crosshairs",
-                                    "true")));
+            const bool drawCrosshairs = configuration()->graphics_config.hud.draw_rendered_crosshairs;
             if (drawCrosshairs) {
                 float x, y, wid, hei;
                 Panel.front()->GetPosition(x, y);
                 Panel.front()->GetSize(wid, hei);
                 DrawCrosshairs(x, y, wid, hei, textcol);
-            } else if (!drawHeadingMarker) {
+            } else if (!draw_heading_marker) {
                 GFXBlendMode(SRCALPHA, INVSRCALPHA);
                 GFXEnable(TEXTURE0);
                 Panel.front()->Draw();                 //draw crosshairs
@@ -1919,9 +1888,7 @@ void GameCockpit::Draw() {
             }
             //process VDU, damage VDU, targetting VDU
             //////////////////// DISPLAY CURRENT POSITION ////////////////////
-            static bool debug_position =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "debug_position", "false"));
-            if (debug_position) {
+            if (configuration()->graphics_config.hud.debug_position) {
                 TextPlane tp;
                 char str[400];                 //don't make the sprintf format too big... :-P
                 Unit *you = parent.GetUnit();
@@ -1959,22 +1926,17 @@ void GameCockpit::Draw() {
             univmap[_Universe->CurrentCockpit()].Draw();
         }
         //Draw the arrow to the target.
-        static bool drawarrow =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_arrow_to_target", "true"));
-        static bool drawarrow_on_pancam =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_arrow_on_pancam", "false"));
-        static bool drawarrow_on_pantgt =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_arrow_on_pantgt", "false"));
-        static bool drawarrow_on_chasecam =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_arrow_on_chasecam", "true"));
         {
             Unit *parent = NULL;
-            if (drawarrow && (parent = this->parent.GetUnit())) {
+            if (configuration()->graphics_config.hud.draw_arrow_to_target && (parent = this->parent.GetUnit())) {
                 Radar::Sensor sensor(parent);
                 if ((view == CP_PAN
-                        && !drawarrow_on_pancam)
+                        && !configuration()->graphics_config.hud.draw_arrow_on_pan_cam)
                         || (view == CP_PANTARGET
-                                && !drawarrow_on_pantgt) || (view == CP_CHASE && !drawarrow_on_chasecam)) {
+                                && !configuration()->graphics_config.hud.draw_arrow_on_pan_target) || (view == CP_CHASE && !configuration()
+                        ->graphics_config
+                        .hud
+                        .draw_arrow_on_chase_cam)) {
                 } else {
                     DrawArrowToTarget(sensor, parent->Target(), projection_limit_x, projection_limit_y,
                                       inv_screen_aspect_ratio);
@@ -2510,15 +2472,10 @@ void GameCockpit::SetupViewPort(bool clip) {
             CrossProduct(tmp, r, q);
             //Padlock block
             if (view == CP_VIEWTARGET) {
-                static float PadlockViewLag =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "PadlockViewLag", "1.5"));
-                static float PadlockViewLag_inv = 1.f / PadlockViewLag;
-                static float PadlockViewLag_fix =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                "hud",
-                                "PadlockViewLagFixZone",
-                                "0.0872"));                                            //~5 deg
-                static float PadlockViewLag_fixcos = (float) cos(PadlockViewLag_fix);
+                const float padlock_view_lag = configuration()->graphics_config.hud.padlock_view_lag;
+                const float padlock_view_lag_inv = 1.0F / padlock_view_lag;
+                const float padlock_view_lag_fix = configuration()->graphics_config.hud.padlock_view_lag_fix_zone;
+                const float padlock_view_lag_fix_cos = (float) cos(padlock_view_lag_fix);
 
                 //pp,qq,rr <-- world-relative padlock target
                 //p_p,p_q,p_r <-- previous head orientation translated to new front orientation
@@ -2529,9 +2486,9 @@ void GameCockpit::SetupViewPort(bool clip) {
 
                 //Compute correction amount (vtphase), accounting for lag and fix-zone
                 un->UpdateHudMatrix(CP_VIEWTARGET);
-                bool fixzone = (rr.Dot(p_r) >= PadlockViewLag_fixcos) && (qq.Dot(p_q) >= PadlockViewLag_fixcos);
+                bool fixzone = (rr.Dot(p_r) >= padlock_view_lag_fix_cos) && (qq.Dot(p_q) >= padlock_view_lag_fix_cos);
                 float vtphase =
-                        1.0f - (float) pow(0.1, GetElapsedTime() * PadlockViewLag_inv * (fixzone ? 0.1f : 1.0f));
+                        1.0f - (float) pow(0.1, GetElapsedTime() * padlock_view_lag_inv * (fixzone ? 0.1f : 1.0f));
 
                 //Apply correction
                 _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(
@@ -2552,9 +2509,7 @@ void GameCockpit::SetupViewPort(bool clip) {
             un->UpdateHudMatrix(CP_TARGET);
             un->UpdateHudMatrix(CP_PANTARGET);
         }
-        static bool draw_unit_on_chasecam =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_unit_on_chasecam", "true"));
-        if (view == CP_CHASE && !draw_unit_on_chasecam) {
+        if (view == CP_CHASE && !configuration()->graphics_config.hud.draw_unit_on_chase_cam) {
         } else {
             ShoveCamBelowUnit(CP_CHASE, un, zoomfactor);
             //ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);

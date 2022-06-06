@@ -198,7 +198,7 @@ Unit *DockToSavedBases(int playernum, QVector &safevec) {
         }
     }
     if (closestUnit) {
-        if (UnitUtil::getSignificantDistance(plr, closestUnit) > 0 && closestUnit->isUnit() != _UnitType::planet) {
+        if (UnitUtil::getSignificantDistance(plr, closestUnit) > 0 && closestUnit->isUnit() != Vega_UnitType::planet) {
             dock_position = closestUnit->Position();
         }
         dock_position = UniverseUtil::SafeEntrancePoint(dock_position, plr->rSize());
@@ -376,7 +376,10 @@ void Universe::StartDraw() {
     StarSystem *lastStarSystem = NULL;
     for (i = 0; i < _cockpits.size(); ++i) {
         SetActiveCockpit(i);
-        float x, y, w, h;
+        float x{};
+        float y{};
+        float w{};
+        float h{};
         CalculateCoords(i, _cockpits.size(), x, y, w, h);
         AccessCamera()->SetSubwindow(x, y, w, h);
         if (_cockpits.size() > 1 && AccessCockpit(i)->activeStarSystem != lastStarSystem) {
@@ -386,7 +389,7 @@ void Universe::StartDraw() {
             lastStarSystem->SwapIn();
         }
         AccessCockpit()->SelectProperCamera();
-        if (_cockpits.size() > 0) {
+        if (!_cockpits.empty()) {
             AccessCamera()->UpdateGFX();
         }
         if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
@@ -418,12 +421,12 @@ void Universe::StartDraw() {
 
     //remove systems not recently visited?
     static int sorttime = 0;
-    if (game_options()->garbagecollectfrequency != 0) {
+    if (configuration()->general_config.garbage_collect_frequency != 0) {
         //don't want to delete something when there is something pending to jump therexo
         if (PendingJumpsEmpty()) {
-            if ((++sorttime) % game_options()->garbagecollectfrequency == 1) {
+            if ((++sorttime) % configuration()->general_config.garbage_collect_frequency == 1) {
                 SortStarSystems(star_system, _active_star_systems.back());
-                if (star_system.size() > game_options()->numoldsystems && game_options()->deleteoldsystems) {
+                if (star_system.size() > configuration()->general_config.num_old_systems && configuration()->general_config.delete_old_systems) {
                     if (std::find(_active_star_systems.begin(), _active_star_systems.end(),
                             star_system.back()) == _active_star_systems.end()) {
                         delete star_system.back();
@@ -640,7 +643,7 @@ void Universe::UnloadStarSystem(StarSystem *s) {
 
 void Universe::Generate1(const char *file, const char *jumpback) {
     int count = 0;
-    if (game_options()->while_loading_starsystem) {
+    if (configuration()->general_config.while_loading_star_system) {
         ss_generating(true);
     }
     VSFile f;

@@ -1,10 +1,8 @@
-/**
+/*
  * computer.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -72,9 +70,9 @@ Computer::RADARLIM::RADARLIM() :
         canlock(false),
         trackingactive(true) {
 
-    maxrange = configuration()->computer.default_max_range;
-    trackingcone = configuration()->computer.default_tracking_cone;
-    lockcone = configuration()->computer.default_lock_cone;
+    maxrange = configuration()->computer_config.default_max_range;
+    trackingcone = configuration()->computer_config.default_tracking_cone;
+    lockcone = configuration()->computer_config.default_lock_cone;
 }
 
 Computer::RADARLIM::Brand::Value Computer::RADARLIM::GetBrand() const {

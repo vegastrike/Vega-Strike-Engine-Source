@@ -61,10 +61,10 @@ float WeaponInfo::Refire() const {
 }
 
 bool WeaponInfo::isMissile() const {
-    if (game_options()->projectile_means_missile && this->type == WEAPON_TYPE::PROJECTILE) {
+    if (configuration()->graphics_config.hud.projectile_means_missile && this->type == WEAPON_TYPE::PROJECTILE) {
         return true;
     }
-    if (game_options()->projectile_means_missile == false && this->size >= MOUNT_SIZE::LIGHTMISSILE) {
+    if (!configuration()->graphics_config.hud.projectile_means_missile && this->size >= MOUNT_SIZE::LIGHTMISSILE) {
         return true;
     }
     return false;

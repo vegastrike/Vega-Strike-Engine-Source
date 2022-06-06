@@ -3,9 +3,8 @@
 /*
  * cockpit_gfx_utils.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
+ * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,15 +27,10 @@
 
 #include "cockpit_gfx_utils.h"
 
-#include "../configuration/game_config.h"
+#include "configuration/game_config.h"
+#include "configuration/configuration.h"
 #include "gfxlib.h"
 #include "vs_math.h"
-
-// Shared between several functions
-static const float absolute_minimum = GameConfig::GetVariable( "graphics", "hud", "min_lock_box_size", 0.001 );
-static const float start_reticle = GameConfig::GetVariable( "graphics", "hud", "MaxMissileBracketSize", 2.05 );
-static const float end_reticle = GameConfig::GetVariable( "graphics", "hud", "MinMissileBracketSize", 1.05 );
-static const float bracket_size = GameConfig::GetVariable( "graphics", "hud", "RotatingBracketSize", 0.58 );
 
 VertexBuilder<> GetCross(const QVector &location, const Vector& cam_p,
                            const Vector& cam_q, const float& size) {
@@ -142,24 +136,23 @@ VertexBuilder<> GetOpenRectangle(const QVector &location, const Vector& cam_p,
 
 
 /*
- * The locking icon will grow and shrink as lock as achieved.
+ * The locking icon will grow and shrink as lock is achieved.
  */
 VertexBuilder<> GetLockingIcon(const QVector &location, const Vector& cam_p,
                             const Vector& cam_q, const float& r_size,
                             const float& lock_percent) {
-    static const bool bracket_inner_or_outer = GameConfig::GetVariable( "graphics", "hud", "RotatingBracketInner", true );
-    static const float bracket_width = GameConfig::GetVariable( "graphics", "hud", "RotatingBracketWidth", 0.1 );                              //1.05;
+    const bool bracket_inner_or_outer = configuration()->graphics_config.hud.rotating_bracket_inner;
+    const float bracket_width = configuration()->graphics_config.hud.rotating_bracket_width;
 
-    const float bounded_r_size = std::max(r_size, absolute_minimum);
-    const float inner_distance = end_reticle + (start_reticle - end_reticle) * lock_percent;
-    const float outer_distance = inner_distance + bracket_size;
+    const float bounded_r_size = std::max(r_size, configuration()->graphics_config.hud.min_lock_box_size);
+    const float inner_distance = configuration()->graphics_config.hud.min_missile_bracket_size + (configuration()->graphics_config.hud.max_missile_bracket_size - configuration()->graphics_config.hud.min_missile_bracket_size) * lock_percent;
+    const float outer_distance = inner_distance + configuration()->graphics_config.hud.rotating_bracket_size;
     const float bracket_distance = (bracket_inner_or_outer ? inner_distance : outer_distance);
 
     const float adjusted_inner_distance = inner_distance * bounded_r_size;
     const float adjusted_outer_distance = outer_distance * bounded_r_size;
-    const float ajusted_bracket_distance = bracket_distance * bounded_r_size;
-    const float ajusted_bracket_width = bracket_width * bounded_r_size;
-
+    const float adjusted_bracket_distance = bracket_distance * bounded_r_size;
+    const float adjusted_bracket_width = bracket_width * bounded_r_size;
 
     static VertexBuilder<> verts;
     verts.clear();
@@ -167,26 +160,26 @@ VertexBuilder<> GetLockingIcon(const QVector &location, const Vector& cam_p,
     verts.insert( location + cam_p * adjusted_inner_distance );
     verts.insert( location + cam_p * adjusted_outer_distance );
 
-    verts.insert( location + cam_p * ajusted_bracket_distance + cam_q * ajusted_bracket_width );
-    verts.insert( location + cam_p * ajusted_bracket_distance - cam_q * ajusted_bracket_width );
+    verts.insert( location + cam_p * adjusted_bracket_distance + cam_q * adjusted_bracket_width );
+    verts.insert( location + cam_p * adjusted_bracket_distance - cam_q * adjusted_bracket_width );
 
     verts.insert( location - cam_p * adjusted_inner_distance );
     verts.insert( location - cam_p * adjusted_outer_distance );
 
-    verts.insert( location - cam_p * ajusted_bracket_distance + cam_q * ajusted_bracket_width );
-    verts.insert( location - cam_p * ajusted_bracket_distance-cam_q * ajusted_bracket_width );
+    verts.insert( location - cam_p * adjusted_bracket_distance + cam_q * adjusted_bracket_width );
+    verts.insert( location - cam_p * adjusted_bracket_distance-cam_q * adjusted_bracket_width );
 
     verts.insert( location + cam_q * adjusted_inner_distance );
     verts.insert( location + cam_q * adjusted_outer_distance );
 
-    verts.insert( location + cam_q * ajusted_bracket_distance + cam_p * ajusted_bracket_width );
-    verts.insert( location + cam_q * ajusted_bracket_distance - cam_p * ajusted_bracket_width );
+    verts.insert( location + cam_q * adjusted_bracket_distance + cam_p * adjusted_bracket_width );
+    verts.insert( location + cam_q * adjusted_bracket_distance - cam_p * adjusted_bracket_width );
 
     verts.insert( location - cam_q * adjusted_inner_distance );
     verts.insert( location - cam_q * adjusted_outer_distance );
 
-    verts.insert( location - cam_q * ajusted_bracket_distance + cam_p * ajusted_bracket_width );
-    verts.insert( location-cam_q * ajusted_bracket_distance - cam_p * ajusted_bracket_width );
+    verts.insert( location - cam_q * adjusted_bracket_distance + cam_p * adjusted_bracket_width );
+    verts.insert( location-cam_q * adjusted_bracket_distance - cam_p * adjusted_bracket_width );
 
     return verts;
 }
@@ -198,24 +191,25 @@ VertexBuilder<> GetLockingIcon(const QVector &location, const Vector& cam_p,
 VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& cam_p,
                             const Vector& cam_q, const Vector& cam_r,
                             const float& r_size, const float& lock_percent) {
-    static const float lock_line = GameConfig::GetVariable( "graphics", "hud", "LockConfirmLineLength", 1.5 );
-    static const float diamond_size = GameConfig::GetVariable( "graphics", "hud", "DiamondSize", 2.05 );
-    static const float theta_speed = GameConfig::GetVariable( "graphics", "hud", "DiamondRotationSpeed", 1.0 );
+    const float lock_line = configuration()->graphics_config.hud.lock_confirm_line_length;
+    const float diamond_size = configuration()->graphics_config.hud.diamond_size;
+    const float theta_speed = configuration()->graphics_config.hud.diamond_rotation_speed;
 
-    const float max = diamond_size * r_size * 0.75 * end_reticle;
-    const float coord = end_reticle+(start_reticle-end_reticle)*lock_percent;
-    const double rtot = 1./sqrtf( 2 );
+    const float max = diamond_size * r_size * 0.75f * configuration()->graphics_config.hud.min_missile_bracket_size;
+    const float coord = configuration()->graphics_config.hud.min_missile_bracket_size + (configuration()->graphics_config.hud.max_missile_bracket_size - configuration()->graphics_config.hud.min_missile_bracket_size) * lock_percent;
+    const double rtot = 1.0 / sqrtf(2.0);
 
     //this causes the rotation!
-    const float theta = 4*M_PI*lock_percent*theta_speed;
+    const float theta = 4.0 * M_PI * lock_percent * theta_speed;
     const Vector lock_box( -cos( theta )*rtot, -rtot, sin( theta )*rtot );
 
     QVector t_lock_box( rtot*lock_box.i+rtot*lock_box.j, rtot*lock_box.j-rtot*lock_box.i, lock_box.k );
+    // FIXME: Are i and j reversed here from what they should be? -- SGT 2022-05-08
     QVector s_lock_box( t_lock_box.j, t_lock_box.i, t_lock_box.k );
     t_lock_box = (t_lock_box.i*cam_p+t_lock_box.j*cam_q+t_lock_box.k*cam_r).Cast();
     s_lock_box = (s_lock_box.i*cam_p+s_lock_box.j*cam_q+s_lock_box.k*cam_r).Cast();
 
-    const double r_1_size = std::max(r_size * bracket_size, absolute_minimum);
+    const double r_1_size = std::max(r_size * configuration()->graphics_config.hud.rotating_bracket_size, configuration()->graphics_config.hud.min_lock_box_size);
 
     t_lock_box *= r_1_size;
     s_lock_box *= r_1_size;
@@ -272,14 +266,19 @@ VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& ca
 
 
 void SetThickness(ShapeType type) {
-    static float box_thickness = GameConfig::GetVariable( "graphics", "hud", "BoxLineThickness", 1.0 );
-    static float diamond_thickness = GameConfig::GetVariable( "graphics", "hud", "DiamondLineThickness", 1.0 );
-    static float cross_thickness = GameConfig::GetVariable( "graphics", "hud", "NavCrossLineThickness", 1.0 );
     switch(type) {
-    case ShapeType::Box: GFXLineWidth(box_thickness); break;
-    case ShapeType::Diamond: GFXLineWidth(diamond_thickness); break;
-    case ShapeType::Cross: GFXLineWidth(cross_thickness); break;
-    default: GFXLineWidth(1.0);
+        case ShapeType::Box:
+            GFXLineWidth(configuration()->graphics_config.hud.box_line_thickness);
+            break;
+        case ShapeType::Diamond:
+            GFXLineWidth(configuration()->graphics_config.hud.diamond_line_thickness);
+            break;
+        case ShapeType::Cross:
+            GFXLineWidth(configuration()->graphics_config.hud.nav_cross_line_thickness);
+            break;
+        default:
+            GFXLineWidth(1.0F);
+            break;
     }
 }
 

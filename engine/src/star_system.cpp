@@ -631,7 +631,7 @@ void StarSystem::AddUnit(Unit *unit) {
     if (stats.system_faction == FactionUtil::GetNeutralFaction()) {
         stats.CheckVitals(this);
     }
-    if (unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == _UnitType::asteroid) {
+    if (unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == Vega_UnitType::asteroid) {
         if (!gravitationalUnits().contains(unit)) {
             gravitationalUnits().prepend(unit);
         }
@@ -680,7 +680,7 @@ void StarSystem::ExecuteUnitAI() {
             VS_LOG_AND_FLUSH(fatal, "void StarSystem::ExecuteUnitAI(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
-            VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+            VegaStrikeLogging::vega_logger()->FlushLogs();
         }
         throw;
     }
@@ -903,10 +903,10 @@ void StarSystem::RequestPhysics(Unit *un, unsigned int queue) {
 //randomization on priority changes, so we're fine.
 void StarSystem::UpdateUnitsPhysics(bool firstframe) {
     static int batchcount = SIM_QUEUE_SIZE - 1;
-    double collidetime = 0;
-    double bolttime = 0;
-    targetpick = 0;
-    aggfire = 0;
+//    double collidetime = 0.0;
+//    double bolttime = 0.0;
+    targetpick = 0.0;
+    aggfire = 0.0;
     numprocessed = 0;
     stats.CheckVitals(this);
 
@@ -924,13 +924,13 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                         "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred");
                 PyErr_Print();
                 PyErr_Clear();
-                VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+                VegaStrikeLogging::vega_logger()->FlushLogs();
             }
             throw;
         }
-        double c0 = queryTime();
+//        double c0 = queryTime();
         Bolt::UpdatePhysics(this);
-        double cc = queryTime();
+//        double cc = queryTime();
         last_collisions.clear();
         collide_map[Unit::UNIT_BOLT]->flatten();
         if (Unit::NUM_COLLIDE_MAPS > 1) {
@@ -938,7 +938,7 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
         }
         Unit *unit;
         for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter);) {
-            int priority = unit->sim_atom_multiplier;
+            unsigned int priority = unit->sim_atom_multiplier;
             float backup = simulation_atom_var;
             //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg E: simulation_atom_var as backed up:  %1%") % simulation_atom_var));
             simulation_atom_var *= priority;
@@ -953,9 +953,9 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                 iter.moveBefore(physics_buffer[newloc]);
             }
         }
-        double dd = queryTime();
-        collidetime += dd - cc;
-        bolttime += cc - c0;
+//        double dd = queryTime();
+//        collidetime += dd - cc;
+//        bolttime += cc - c0;
         current_sim_location = (current_sim_location + 1) % SIM_QUEUE_SIZE;
         ++physicsframecounter;
         totalprocessed += theunitcounter;
@@ -1070,8 +1070,13 @@ void StarSystem::Update(float priority) {
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
     if (time > SIMULATION_ATOM * 2) {
+        VS_LOG(trace,
+                (boost::format(
+                        "%1% %2%: time, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
+                        % __FILE__ % __LINE__ % time % simulation_atom_var));
+        //Chew up all sim_atoms that have elapsed since last update
         while (time > SIMULATION_ATOM) {
-            //Chew up all sim_atoms that have elapsed since last update
+            VS_LOG(trace, (boost::format("%1% %2%: Chewing up a sim atom") % __FILE__ % __LINE__));
             ExecuteDirector();
             TerrainCollide();
             Unit::ProcessDeleteQueue();
@@ -1084,8 +1089,8 @@ void StarSystem::Update(float priority) {
             UpdateUnitsPhysics(firstframe);
 
             firstframe = false;
+            time -= SIMULATION_ATOM;
         }
-        time -= SIMULATION_ATOM;
     }
     assert(SIMULATION_ATOM == normal_simulation_atom);
     _Universe->popActiveStarSystem();
@@ -1107,19 +1112,29 @@ void StarSystem::Update(float priority, bool executeDirector) {
     ///just be sure to restore this at the end
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
-    double bolttime = 0;
+//    double bolttime = 0;
     if (time > simulation_atom_var) {
         if (time > simulation_atom_var * 2) {
             VS_LOG(trace,
                     (boost::format(
-                            "void StarSystem::Update( float priority, bool executeDirector ): time, %1$.6f, is more than twice simulation_atom_var, %2$.6f")
-                            % time % simulation_atom_var));
+                            "%1% %2%: time, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
+                            % __FILE__ % __LINE__ % time % simulation_atom_var));
         }
+
+//        double missionSimulationTimeSubtotal = 0.0;
+//        double processUnitTimeSubtotal = 0.0;
+//
+//        double updateUnitsPhysicsTimeSubtotal = 0.0;
+//        double updateMissilesTimeSubtotal = 0.0;
+//        double collideTableUpdateTimeSubtotal = 0.0;
+//        double updateCameraSoundsTimeSubtotal = 0.0;
+
         //Chew up all sim_atoms that have elapsed since last update
         // ** stephengtuggy 2020-07-23: We definitely need this block of code! **
         while (time > simulation_atom_var) {
             //VS_LOG(trace, "void StarSystem::Update( float priority, bool executeDirector ): Chewing up a sim atom");
             if (current_stage == MISSION_SIMULATION) {
+//                double missionSimulationStageStartTime = realTime();
                 TerrainCollide();
                 UpdateAnimatedTexture();
                 Unit::ProcessDeleteQueue();
@@ -1139,21 +1154,45 @@ void StarSystem::Update(float priority, bool executeDirector) {
                     //waste of frakkin time
                     active_missions[i]->BriefingUpdate();
                 }
+//                double missionSimulationStageEndTime = realTime();
+//                missionSimulationTimeSubtotal += (missionSimulationStageEndTime - missionSimulationStageStartTime);
+//                VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by MISSION_SIMULATION stage: %1%") % (missionSimulationStageEndTime - missionSimulationStageStartTime)));
                 current_stage = PROCESS_UNIT;
             } else if (current_stage == PROCESS_UNIT) {
+//                double processUnitStageStartTime = realTime();
                 UpdateUnitsPhysics(firstframe);
+//                double updateUnitsPhysicsDoneTime = realTime();
+//                updateUnitsPhysicsTimeSubtotal += (updateUnitsPhysicsDoneTime - processUnitStageStartTime);
                 UpdateMissiles(); //do explosions
+//                double updateMissilesDoneTime = realTime();
+//                updateMissilesTimeSubtotal += (updateMissilesDoneTime - updateUnitsPhysicsDoneTime);
                 collide_table->Update();
+//                double collideTableUpdateDoneTime = realTime();
+//                collideTableUpdateTimeSubtotal += (collideTableUpdateDoneTime - updateMissilesDoneTime);
                 if (this == _Universe->getActiveStarSystem(0)) {
                     UpdateCameraSnds();
                 }
-                bolttime = queryTime();
-                bolttime = queryTime() - bolttime;
+//                bolttime = queryTime();
+//                bolttime = queryTime() - bolttime;
+//                double processUnitStageEndTime = realTime();
+//                processUnitTimeSubtotal += (processUnitStageEndTime - processUnitStageStartTime);
+//                updateCameraSoundsTimeSubtotal += (processUnitStageEndTime - collideTableUpdateDoneTime);
+//                VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by PROCESS_UNIT stage: %1%") % (processUnitStageEndTime - processUnitStageStartTime)));
                 current_stage = MISSION_SIMULATION;
                 firstframe = false;
             }
             time -= simulation_atom_var;
         }
+
+//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by MISSION_SIMULATION: %3%") % __FILE__ % __LINE__ % missionSimulationTimeSubtotal));
+//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by PROCESS_UNIT: %3%") % __FILE__ % __LINE__ % processUnitTimeSubtotal));
+//
+//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating units' physics: %3%") % __FILE__ % __LINE__ % updateUnitsPhysicsTimeSubtotal));
+//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating missiles: %3%") % __FILE__ % __LINE__ % updateMissilesTimeSubtotal));
+//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating collide tables: %3%") % __FILE__ % __LINE__ % collideTableUpdateTimeSubtotal));
+//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating camera sounds: %3%") % __FILE__ % __LINE__ % updateCameraSoundsTimeSubtotal));
+
+//        double cycleThroughPlayersStartTime = realTime();
         unsigned int i = _Universe->CurrentCockpit();
         for (unsigned int j = 0; j < _Universe->numPlayers(); ++j) {
             if (_Universe->AccessCockpit(j)->activeStarSystem == this) {
@@ -1169,6 +1208,8 @@ void StarSystem::Update(float priority, bool executeDirector) {
             }
         }
         _Universe->SetActiveCockpit(i);
+//        double cycleThroughPlayersEndTime = realTime();
+//        VS_LOG(trace, (boost::format("%1% %2%: Time taken by cycling through active players / cockpits: %3%") % __FILE__ % __LINE__ % (cycleThroughPlayersEndTime - cycleThroughPlayersStartTime)));
     }
     if (sigIter.isDone()) {
         sigIter = draw_list.createIterator();
@@ -1434,9 +1475,9 @@ void StarSystem::UpdateMissiles() {
             for (un_iter ui = getUnitList().createIterator();
                     NULL != (un = (*ui));
                     ++ui) {
-                enum _UnitType type = un->isUnit();
+                enum Vega_UnitType type = un->isUnit();
                 if (collideroids || type
-                        != _UnitType::asteroid) {           // could check for more, unless someone wants planet-killer missiles, but what it would change?
+                        != Vega_UnitType::asteroid) {           // could check for more, unless someone wants planet-killer missiles, but what it would change?
                     discharged_missiles.back()->ApplyDamage(un);
                 }
             }

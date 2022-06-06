@@ -67,10 +67,10 @@ AIEvresult::AIEvresult(int type,
         static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI", "debug_level", "0"));
         if (aidebug) {
             for (int i = 0; i < 20; ++i) {
-                VS_LOG(warning, (boost::format("SERIOUS WARNING %1%") % this->script.c_str()));
+                VS_LOG(serious_warning, (boost::format("SERIOUS WARNING %1%") % this->script.c_str()));
             }
         }
-        VS_LOG(warning, (boost::format(
+        VS_LOG(serious_warning, (boost::format(
                 "SERIOUS WARNING in AI script: no fast method to perform %1$s when type %2$d is at least %3$f and at most %4$f with priority %5$f for %6$f time")
                 % this->script.c_str()
                 % type

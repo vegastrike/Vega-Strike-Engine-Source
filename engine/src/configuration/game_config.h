@@ -1,8 +1,8 @@
-/**
+/*
  * game_config.h
  *
- * Copyright (C) 2020-2022 Roy Falk, Stephen G. Tuggy, David Wales,
- * and other Vega Strike Contributors
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * David Wales, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,7 +27,6 @@
 #define GAME_CONFIG_H
 
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
@@ -37,126 +36,99 @@
 #include <map>
 #include <exception>
 #include <iostream>
+#include <cstdint>
+#include <type_traits>
+
+#include "vs_logging.h"
 
 namespace pt = boost::property_tree;
 
-using pt::ptree;
-
-// TODO: test this functionality, especially the subsection...
+namespace vega_config {
 
 class GameConfig {
 private:
-    static std::string DEFAULT_ERROR_VALUE;
+    // This is probably unique enough to ensure no collision
+//    constexpr static const char DEFAULT_ERROR_VALUE[] {"vega_config::GetGameConfig().GetVar DEFAULT_ERROR_VALUE"};
 
-    static inline std::string GetVar(std::string const &section, std::string const &name) {
-        std::string const key = section + "." + name;
-        if (variables()->count(key)) {
-            return variables()->at(key);
-        }
-        return DEFAULT_ERROR_VALUE;
-    }
-
-    static inline std::string GetVar(std::string const &section,
-            std::string const &sub_section,
-            std::string const &name) {
-        std::string const key = section + "." + sub_section + "." + name;
-        if (variables()->count(key)) {
-            return variables()->at(key);
-        }
-        return DEFAULT_ERROR_VALUE;
-    }
-
-    static std::shared_ptr<std::map<std::string, std::string>> variables();
+    static std::string EscapedString(std::string const & input);
+    static boost::shared_ptr<pt::iptree> variables_();
 
 public:
-    static void LoadGameConfig(const std::string &filename);
-    template<class T>
-    static inline T GetVariable(std::string const &section, std::string const &name, T default_value) = delete;
 
-    template<class T>
-    static inline T GetVariable(std::string const &section, std::string const &sub_section,
-            std::string const &name, T default_value) = delete;
+    void LoadGameConfig(const std::string &filename);
 
+    template<typename T>
+    T GetVariable(std::string const & path, T default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline std::string GetEscapedString(std::string const & path, std::string const & default_value) {
+        return EscapedString(variables_()->get(path, default_value));
+    }
+
+    inline std::string GetString(std::string const & path, std::string const & default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline float GetFloat(std::string const & path, float default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline double GetDouble(std::string const & path, double default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline size_t GetSizeT(std::string const & path, uintmax_t default_value) {
+        return variables_()->get(path, static_cast<size_t>(default_value));
+    }
+
+    inline uint8_t GetUInt8(std::string const & path, uint8_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline uint16_t GetUInt16(std::string const & path, uint16_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline uint32_t GetUInt32(std::string const & path, uint32_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline uint64_t GetUInt64(std::string const & path, uint64_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline uintmax_t GetUIntMaxT(std::string const & path, uintmax_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int8_t GetInt8(std::string const & path, int8_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int16_t GetInt16(std::string const & path, int16_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int32_t GetInt32(std::string const & path, int32_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline int64_t GetInt64(std::string const & path, int64_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline intmax_t GetIntMaxT(std::string const & path, intmax_t default_value) {
+        return variables_()->get(path, default_value);
+    }
+
+    inline bool GetBool(std::string const & path, bool default_value) {
+        return variables_()->get(path, default_value);
+    }
 };
 
-// Template Specialization
-template<>
-inline bool GameConfig::GetVariable(std::string const &section, std::string const &name, bool default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    boost::algorithm::to_lower(result);
-    return result == "true";
-}
+extern GameConfig& GetGameConfig();
 
-template<>
-inline float GameConfig::GetVariable(std::string const &section, std::string const &name, float default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return std::stof(result);
-}
-
-template<>
-inline double GameConfig::GetVariable(std::string const &section, std::string const &name, double default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return std::stod(result);
-}
-
-template<>
-inline int GameConfig::GetVariable(std::string const &section, std::string const &name, int default_value) {
-    std::string result = GetVar(section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return std::stoi(result);
-}
-
-// With Subsection
-template<>
-inline bool GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, bool default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    boost::algorithm::to_lower(result);
-    return result == "true";
-}
-
-template<>
-inline float GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, float default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return std::stof(result);
-}
-
-template<>
-inline double GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, double default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return std::stod(result);
-}
-
-template<>
-inline int GameConfig::GetVariable(std::string const &section, std::string const &sub_section,
-        std::string const &name, int default_value) {
-    std::string result = GetVar(section, sub_section, name);
-    if (result == DEFAULT_ERROR_VALUE) {
-        return default_value;
-    }
-    return std::stoi(result);
 }
 
 #endif // GAME_CONFIG_H

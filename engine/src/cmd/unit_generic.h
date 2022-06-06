@@ -3,14 +3,11 @@
 #ifndef __UNIT_GENERIC_H__
 #define __UNIT_GENERIC_H__
 
-/**
+/*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, Roy Falk,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk,
  * and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -79,6 +76,7 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 
+#include "configuration/configuration.h"
 #include "configuration/game_config.h"
 
 extern char *GetUnitDir(const char *filename);
@@ -108,7 +106,7 @@ class AsteroidGeneric;
  * Needed by star system to determine whether current unit
  * is orbitable
  */
-enum _UnitType {
+enum Vega_UnitType {
     unit,
     planet,
     building,
@@ -180,20 +178,18 @@ public:
 
 /*
  **************************************************************************************
- **** CONSTRUCTORS / DESCTRUCTOR                                                    ***
+ **** CONSTRUCTORS / DESTRUCTOR                                                     ***
  **************************************************************************************
  */
 
-protected:
 //forbidden
     Unit(const Unit &) = delete;
 
 //forbidden
     Unit &operator=(const Unit &) = delete;
 
-public:
     Unit();
-    virtual ~Unit();
+    ~Unit() override;
 
 /** Default constructor. This is just to figure out where default
  *  constructors are used. The useless argument will be removed
@@ -446,7 +442,7 @@ public:
 
 //Uses GFX so only in Unit class
     //virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
-    virtual std::string drawableGetName() override {
+    std::string drawableGetName() override {
         return name;
     }
 
@@ -469,7 +465,7 @@ public:
 public:
     bool TransferUnitToSystem(unsigned int whichJumpQueue,
             StarSystem *&previouslyActiveStarSystem,
-            bool DoSightAndSound);
+            bool DoSightAndSound) override;
 
     Computer computer;
     void SwitchCombatFlightMode();
@@ -532,14 +528,14 @@ public:
     QVector realPosition() override;
 
     ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
-    virtual void UpdatePhysics2(const Transformation &trans,
+    void UpdatePhysics2(const Transformation &trans,
             const Transformation &old_physical_state,
             const Vector &accel,
             float difficulty,
             const Matrix &transmat,
             const Vector &CumulativeVelocity,
             bool ResolveLast,
-            UnitCollection *uc = NULL);
+            UnitCollection *uc = NULL) override;
 
     // Act out a unit's turn
     void ActTurn();
@@ -577,9 +573,7 @@ public:
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
-    float shieldtight = GameConfig::GetVariable("physics",
-            "default_shield_tightness",
-            0);
+    float shieldtight = configuration()->physics_config.default_shield_tightness;
 
 public:
     // TODO: move cloak to Cloakable?
@@ -637,7 +631,7 @@ public:
     float ExplodingProgress() const;
 
     ///Resolves forces of given unit on a physics frame
-    Vector ResolveForces(const Transformation &, const Matrix &);
+    Vector ResolveForces(const Transformation &, const Matrix &) override;
 
 //What's the size of this unit
     float rSize() const {
@@ -1000,8 +994,8 @@ public:
     }
 
 //Is this class a unit
-    virtual enum _UnitType isUnit() const {
-        return _UnitType::unit;
+    virtual enum Vega_UnitType isUnit() const {
+        return Vega_UnitType::unit;
     }
 
     void Ref();
@@ -1014,11 +1008,11 @@ public:
 
 //sets the full name/fgid for planets
     bool isStarShip() const {
-        return isUnit() == _UnitType::unit;
+        return isUnit() == Vega_UnitType::unit;
     }
 
     bool isPlanet() const {
-        return isUnit() == _UnitType::planet;
+        return isUnit() == Vega_UnitType::planet;
     }
 
     bool isJumppoint() const {

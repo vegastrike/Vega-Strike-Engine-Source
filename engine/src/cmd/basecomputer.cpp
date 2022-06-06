@@ -1543,7 +1543,7 @@ void BaseComputer::recalcTitle() {
     Unit *baseUnit = m_base.GetUnit();
     string baseName;
     if (baseUnit) {
-        if (baseUnit->isUnit() == _UnitType::planet) {
+        if (baseUnit->isUnit() == Vega_UnitType::planet) {
             string temp = ((Planet *) baseUnit)->getHumanReadablePlanetType() + " Planet";
             // think "<planet type> <name of planet>"
             baseName = temp + " " + baseUnit->name;
@@ -4270,7 +4270,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
             }
         }
 
-        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+        VegaStrikeLogging::vega_logger()->FlushLogs();
 
         highest.clear();
         highest.resize(recordedHighestPrices.size());
@@ -4308,7 +4308,7 @@ string buildCargoDescription(const Cargo &item, BaseComputer &computer, float pr
         int cp = _Universe->whichPlayerStarship(computer.m_player.GetUnit());
         vector<string> highest, lowest;
 
-        const string &baseName = (computer.m_base.GetUnit()->isUnit() == _UnitType::planet) ?
+        const string &baseName = (computer.m_base.GetUnit()->isUnit() == Vega_UnitType::planet) ?
                 computer.m_base.GetUnit()->name.get()
                 : computer.m_base
                         .GetUnit()

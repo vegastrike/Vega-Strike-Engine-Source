@@ -84,7 +84,7 @@ struct Statistics {
 /**
  * Star System
  * Scene management for a star system
- * Per-Frame Drawing & Physics simulation
+ * Per-Frame Drawing & PhysicsConfig simulation
  **/
 class StarSystem {
 public:
@@ -96,7 +96,7 @@ public:
 protected:
 
     // Fields
-    ///Physics is divided into 3 stages spread over 3 frames
+    ///PhysicsConfig is divided into 3 stages spread over 3 frames
     enum PHYSICS_STAGE { MISSION_SIMULATION, PROCESS_UNIT, PHY_NUM }
             current_stage = MISSION_SIMULATION;
 

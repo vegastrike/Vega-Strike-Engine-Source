@@ -43,7 +43,7 @@ const float THRESHOLD = 0.01;
 /**
  * The moveto order attempts to calculate the best way to apply thrust (within the computer bound limits) to get a starship to place B and stopped.
  * It uses an integral of acceleration and velocity over time to solve for
- * time when to decelerate.  Is  inaccurate within 1 physics frame, and must
+ * time when to decelerate.  Is inaccurate within 1 physics frame, and must
  * use switchbacks and then once they have been met sets terminating X,Y, and Z
  * to figure out how many switchbacks it has made
  * , missing the target and coming back over it.

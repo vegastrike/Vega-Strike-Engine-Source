@@ -293,7 +293,7 @@ void StarSystem::LoadXML(const string filename, const Vector &centroid, const fl
     SystemFactory sys = SystemFactory(file, full_path, xml);
 
     for (auto &unit : xml->moons) {
-        if (unit->isUnit() == _UnitType::planet) {
+        if (unit->isUnit() == Vega_UnitType::planet) {
             Unit *un = nullptr;
             // This code here is completely unclear to me and should be refactored
             // TODO: remove the whole PlanetIterator thing and all custom iterators

@@ -313,9 +313,7 @@ std::string FSM::GetEdgesString(unsigned int curstate) {
     for (unsigned int i = 0; i < nodes[curstate].edges.size(); i++) {
         retval += tostring((int) ((i + 1) % 10)) + "." + nodes[nodes[curstate].edges[i]].messages[0] + "\n";
     }
-    static bool print_docking =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "print_request_docking", "true"));
-    if (print_docking) {
+    if (configuration()->graphics_config.hud.print_request_docking) {
         retval += "0. Request Docking Clearance";
     }
     return retval;
@@ -491,15 +489,14 @@ RGBstring GetRelationshipRGBstring(float rel) {
 }
 
 unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node) {
-    static float scale_rel_color =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "scale_relationship_color", "10.0"));
+    const float scale_rel_color = configuration()->graphics_config.hud.scale_relationship_color;
     static std::string
             ownname_RGBstr = colToString(vs_config->getColor("player_name", GFXColor(0.0, 0.2, 1.0))).str; // bluish
     unsigned int dummy = 0;
     string speech = node.GetMessage(dummy);
     string myname("[Static]");
     if (un != NULL) {
-        myname = un->isUnit() == _UnitType::planet ? un->name : un->getFullname();
+        myname = un->isUnit() == Vega_UnitType::planet ? un->name : un->getFullname();
         Flightgroup *fg = un->getFlightgroup();
         if (fg && fg->name != "base" && fg->name != "Base") {
             myname = fg->name + " " + XMLSupport::tostring(un->getFgSubnumber()) + ", " + un->getFullname();

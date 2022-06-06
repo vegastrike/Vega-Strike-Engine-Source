@@ -59,7 +59,7 @@ void MissileEffect::ApplyDamage(Unit *smaller) {
     float smaller_rsize = smaller->rSize();
     float distance = norm.Magnitude() - smaller_rsize;            // no better check than the bounding sphere for now
     if (distance
-            < radius) {                                   // "smaller->isUnit() != _UnitType::missile &&" was removed - why disable antimissiles?
+            < radius) {                                   // "smaller->isUnit() != Vega_UnitType::missile &&" was removed - why disable antimissiles?
         if (distance < 0) {
             distance =
                     0.f;
@@ -99,13 +99,13 @@ float MissileEffect::GetRadius() const {
 void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
     QVector norm = pos - un->Position();
     norm.Normalize();
-    float damage_left = 1.f;
+    float damage_left = 1.0F;
     if (un->hasSubUnits()) {
         /*
          * Compute damage aspect ratio of each subunit with their apparent size ( (radius/distance)^2 )
          * and spread damage across affected subunits based on their apparent size vs total spread surface
          */
-        double total_area = 0.0f;
+        double total_area = 0.0;
         {
             un_kiter ki = un->viewSubUnits();
             for (const Unit *subun; (subun = *ki); ++ki) {
@@ -123,7 +123,7 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                 total_area += (r * r) / (d * d);
             }
         }
-        if (total_area > 0) {
+        if (total_area > 0.0) {
             VS_LOG(info, (boost::format("Missile subunit damage of %1$.3f%%") % (total_area * (100.0 / 4.0 * M_PI))));
         }
         if (total_area < 4.0 * M_PI) {
@@ -150,7 +150,7 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
     }
     if (damage_left > 0) {
         VS_LOG(info,
-                (boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
+                (boost::format("Missile damaging %1$s/%2$s (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
                         % parent->name.get()
                         % ((un == parent) ? "." : un->name.get())
                         % distance
@@ -189,8 +189,7 @@ Missile::Missile(const char *filename,
         retarget(-1),
         had_target(false) {
     // TODO: why would a sparkling missile be four times as hard to kill???
-    static bool missilesparkle = XMLSupport::parse_bool(vs_config->getVariable("graphics", "missilesparkle", "false"));
-    if (missilesparkle) {
+    if (configuration()->graphics_config.missile_sparkle) {
         *current_hull *= 4;
     }
 }
@@ -208,10 +207,7 @@ void Missile::Discharge() {
 }
 
 float Missile::ExplosionRadius() {
-    static float missile_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "missile_explosion_radius_mult", "1"));
-
-    return radial_effect * (missile_multiplier);
+    return radial_effect * (configuration()->graphics_config.missile_explosion_radius_mult);
 }
 
 void Missile::Kill(bool erase) {
@@ -303,17 +299,16 @@ Unit *Missile::breakECMLock(Unit *target) {
     float r = rand();
     float rand_max = static_cast<float>(RAND_MAX);
     float ecm_value =
-            static_cast<float>(UnitUtil::getECM(target)) * SIMULATION_ATOM / 32768; // should it be simulation_atom_var?
+            static_cast<float>(UnitUtil::getECM(target)) * simulation_atom_var / 32768;
 
     if (r / rand_max < ecm_value) {
         return nullptr;
     }
 
     // Second check
-    static size_t max_ecm = static_cast<size_t>(GameConfig::GetVariable("physics", "max_ecm", 4));
-    size_t missile_hash = reinterpret_cast<size_t>(this) / 16383;
+    uintmax_t missile_hash = reinterpret_cast<uintmax_t>(this) / 16383ULL;
 
-    if (static_cast<int>(missile_hash % max_ecm) < UnitUtil::getECM(target)) {
+    if (static_cast<int>(missile_hash % configuration()->physics_config.max_ecm) < UnitUtil::getECM(target)) {
         return nullptr;
     }
 
@@ -337,9 +332,7 @@ bool Missile::proximityFuse(Unit *target) {
 
         //spiritplumber assumes that the missile is hitting a much larger object than itself
         // It seems spiritplumber is a former dev of the project.
-        static float percent_missile_match_target_velocity =
-                GameConfig::GetVariable("physics", "percent_missile_match_target_velocity", 1.0);
-        Velocity += percent_missile_match_target_velocity * (target->Velocity - Velocity);
+        Velocity += configuration()->physics_config.percent_missile_match_target_velocity * (target->Velocity - Velocity);
 
         Discharge();
         time = -1;
@@ -350,14 +343,11 @@ bool Missile::proximityFuse(Unit *target) {
 }
 
 bool Missile::useFuel(Unit *target, bool had_target) {
-    static float max_lost_target_live_time =
-            GameConfig::GetVariable("physics", "max_lost_target_live_time", 30);
-
     // An previous dev marked this as BROKEN
     // If we had a target but it's now gone, limit the missile's fuel
     // If we didn't have a target (dumbfire?), keep original fuel
     if (had_target && target == nullptr) {
-        time = std::min(time, max_lost_target_live_time);
+        time = std::min(time, configuration()->physics_config.max_lost_target_live_time);
     }
 
     // Reduce missile TTL/Fuel by tick

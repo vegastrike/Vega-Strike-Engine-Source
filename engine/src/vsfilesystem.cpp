@@ -66,6 +66,7 @@ struct dirent
 #include "configuration/game_config.h"
 
 #include <string>
+#include <utility>
 
 // from main.cpp
 extern bool legacy_data_dir_mode;
@@ -78,6 +79,7 @@ using std::endl;
 using std::string;
 
 int VSFS_DEBUG() {
+//    return 3;
     if (vs_config) {
         return (game_options()->debug_fs);
     }
@@ -622,7 +624,7 @@ void LoadConfig(string subdir) {
     bool foundweapons = false;
     //First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
     weapon_list = "weapon_list.xml";
-    if (subdir != "") {
+    if (!subdir.empty()) {
         modname = subdir;
         if (DirectoryExists(homedir + "/mods/" + subdir)) {
             if (FileExists(homedir + "/mods/" + subdir, config_file) >= 0) {
@@ -638,7 +640,7 @@ void LoadConfig(string subdir) {
             }
         }
         if (!found) {
-            VS_LOG(warning, (boost::format("WARNING : coudn't find a mod named '%1%' in homedir/mods") % subdir));
+            VS_LOG(warning, (boost::format("WARNING : couldn't find a mod named '%1%' in homedir/mods") % subdir));
         }
         if (DirectoryExists(moddir + "/" + subdir)) {
             if (FileExists(moddir + "/" + subdir, config_file) >= 0) {
@@ -657,7 +659,7 @@ void LoadConfig(string subdir) {
                 found = true;
             }
         } else {
-            VS_LOG(error, (boost::format("ERROR : coudn't find a mod named '%1%' in datadir/mods") % subdir));
+            VS_LOG(error, (boost::format("ERROR : couldn't find a mod named '%1%' in datadir/mods") % subdir));
         }
         //}
     }
@@ -684,7 +686,7 @@ void LoadConfig(string subdir) {
                 VSExit(1);
             }
         }
-    } else if (subdir != "") {
+    } else if (!subdir.empty()) {
         VS_LOG(info, (boost::format("Using Mod Directory %1%") % moddir));
         CreateDirectoryHome("mods");
         CreateDirectoryHome("mods/" + subdir);
@@ -697,13 +699,13 @@ void LoadConfig(string subdir) {
     }
 
     // This is a replacement for the old config xml files
-    GameConfig::LoadGameConfig(config_file);
+    vega_config::GetGameConfig().LoadGameConfig(config_file);
 
     vs_config = createVegaConfig(config_file.c_str());
 
     //Now check if there is a data directory specified in it
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
-    if (game_options()->datadir.size() > 0) {
+    if (!game_options()->datadir.empty()) {
         //We found a path to data in config file
         VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
         datadir = game_options()->datadir;
@@ -736,7 +738,7 @@ void InitMods() {
     struct dirent **dirlist;
     //new config program should insert hqtextures variable
     //with value "hqtextures" in data section.
-    if (game_options()->hqtextures.size() > 0) {
+    if (!game_options()->hqtextures.empty()) {
         //HQ Texture dir sits alongside data dir.
         selectcurrentdir = datadir + "/..";
         int ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
@@ -787,11 +789,11 @@ void InitMods() {
 }
 
 void InitPaths(string conf, string subdir) {
-    config_file = conf;
+    config_file = std::move(conf);
 
-    current_path.push_back("");
-    current_directory.push_back("");
-    current_subdirectory.push_back("");
+    current_path.emplace_back("");
+    current_directory.emplace_back("");
+    current_subdirectory.emplace_back("");
     current_type.push_back(UnknownFile);
 
     int i;
@@ -805,7 +807,7 @@ void InitPaths(string conf, string subdir) {
     // #ifndef WIN32
     InitHomeDirectory();
     // #endif
-    LoadConfig(subdir);
+    LoadConfig(std::move(subdir));
     /*
       Paths relative to datadir or homedir (both should have the same structure)
       Units are in sharedunits/unitname/, sharedunits/subunits/unitname/ or sharedunits/weapons/unitname/ or in sharedunits/faction/unitname/
@@ -821,7 +823,7 @@ void InitPaths(string conf, string subdir) {
     */
     for (i = 0; i < UnknownFile; i++) {
         vector<string> vec;
-        Directories.push_back("");
+        Directories.emplace_back("");
         SubDirectories.push_back(vec);
     }
 

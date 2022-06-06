@@ -665,7 +665,7 @@ void closeRenderer() {
 }
 
 void VSExit(int code) {
-    ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+    VegaStrikeLogging::vega_logger()->FlushLogs();
     exit(code);
 }
 

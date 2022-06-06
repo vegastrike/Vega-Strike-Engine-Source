@@ -127,10 +127,10 @@ Track::Type::Value Track::IdentifyType() const {
     assert(target);
 
     switch (target->isUnit()) {
-        case _UnitType::nebula:
+        case Vega_UnitType::nebula:
             return Type::Nebula;
 
-        case _UnitType::planet: {
+        case Vega_UnitType::planet: {
             const Planet *planet = static_cast<const Planet *>(target);
             if (planet->isJumppoint()) {
                 return Type::JumpPoint;
@@ -148,14 +148,14 @@ Track::Type::Value Track::IdentifyType() const {
         }
             break;
 
-        case _UnitType::asteroid:
+        case Vega_UnitType::asteroid:
             return Type::Asteroid;
 
-        case _UnitType::building:
+        case Vega_UnitType::building:
             // FIXME: Can this ever happen?
             return Type::Unknown;
 
-        case _UnitType::unit: {
+        case Vega_UnitType::unit: {
             if (target->IsBase()) {
                 return Type::Base;
             }
@@ -167,10 +167,10 @@ Track::Type::Value Track::IdentifyType() const {
             return Type::Ship;
         }
 
-        case _UnitType::enhancement:
+        case Vega_UnitType::enhancement:
             return Type::Cargo;
 
-        case _UnitType::missile:
+        case Vega_UnitType::missile:
             // FIXME: Is this correct?
             if (target->faction == FactionUtil::GetUpgradeFaction()) {
                 return Type::Cargo;

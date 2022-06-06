@@ -257,7 +257,7 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
                         (rd < g_game.znear) ? g_game.znear : rd);
                 float lod = pixradius * g_game.detaillevel;
                 if (meshdata[i]->getBlendDst() == ZERO) {
-                    if (unit->isUnit() == _UnitType::planet && pixradius > 10) {
+                    if (unit->isUnit() == Vega_UnitType::planet && pixradius > 10) {
                         Occlusion::addOccluder(TransformedPosition, mSize, true);
                     } else if (pixradius >= 10.0) {
                         Occlusion::addOccluder(TransformedPosition, mSize, false);

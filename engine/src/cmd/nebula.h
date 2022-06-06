@@ -32,8 +32,8 @@ public:
     // Constructors
     Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg = NULL, int fg_snumber = 0);
 
-    enum _UnitType isUnit() const {
-        return _UnitType::nebula;
+    enum Vega_UnitType isUnit() const {
+        return Vega_UnitType::nebula;
     }
 
 protected:

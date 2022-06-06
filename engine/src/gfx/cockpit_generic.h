@@ -119,7 +119,7 @@ public:
         /// Jump triggered yet not ready
         JUMP_FAILED,
 
-        /// Weapons lock warning active
+        /// WeaponsConfig lock warning active
         LOCK_WARNING,
 
         /// Missile lock warning acgive

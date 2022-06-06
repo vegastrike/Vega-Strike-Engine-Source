@@ -218,7 +218,7 @@ void SystemFactory::processRing(Star_XML *xml, Object &object, Planet *owner) {
     if (owner == nullptr) {
         return;
     }
-    if (unit->isUnit() != _UnitType::planet) {
+    if (unit->isUnit() != Vega_UnitType::planet) {
         return;
     }
 
@@ -431,7 +431,7 @@ void SystemFactory::processSpaceElevator(Object &object, Planet *owner) {
 
     Unit *unit = static_cast<Unit *>(owner);
 
-    if (owner == nullptr || unit->isUnit() != _UnitType::planet) {
+    if (owner == nullptr || unit->isUnit() != Vega_UnitType::planet) {
         return;
     }
 
@@ -587,7 +587,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
 
         if (unit->faction != neutralfaction) {
             unit->SetTurretAI(); //FIXME un de-referenced before allocation
-            unit->EnqueueAI(new Orders::FireAt(15)); //FIXME un de-referenced before allocation
+            unit->EnqueueAI(new Orders::FireAt(configuration()->ai.firing_config.aggressivity)); //FIXME un de-referenced before allocation
         }
     } else if (boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);

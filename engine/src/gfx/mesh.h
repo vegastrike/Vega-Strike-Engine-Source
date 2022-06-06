@@ -62,8 +62,8 @@ struct mesh_polygon {
 };
 /**
  * Mesh FX stores various lights that light up shield or hull for damage
- * They may be merged and they grow and shring based on their TTL and TTD and delta values
- * They must be updated every frame or every physics frame if not drawn (pass in time
+ * They may be merged and they grow and shrink based on their TTL and TTD and delta values
+ * They must be updated every frame or every physics frame if not drawn (pass in time)
  */
 class MeshFX : public GFXLight {
 public:

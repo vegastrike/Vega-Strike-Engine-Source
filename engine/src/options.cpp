@@ -27,24 +27,6 @@ extern VegaConfig *vs_config;
 
 void vs_options::init() {
     /* General Options */
-    write_savegame_on_exit =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "write_savegame_on_exit", "true"));
-    times_to_show_help_screen =
-            XMLSupport::parse_int(vs_config->getVariable("general", "times_to_show_help_screen", "3"));
-    remember_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "remember_savegame", "true"));
-    new_game_save_name = vs_config->getVariable("general", "new_game_save_name", "New_Game");
-    quick_savegame_summaries_buffer =
-            XMLSupport::parse_int(vs_config->getVariable("general", "quick_savegame_summaries_buffer", "16384"));
-    empty_mission = vs_config->getVariable("general", "empty_mission", "internal.mission");
-    custompython = vs_config->getVariable("general", "custompython", "import custom;custom.processMessage");
-    quick_savegame_summaries =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "quick_savegame_summaries", "true"));
-    garbagecollectfrequency = XMLSupport::parse_int(vs_config->getVariable("general", "garbagecollectfrequency", "20"));
-    numoldsystems = XMLSupport::parse_int(vs_config->getVariable("general", "numoldsystems", "6"));
-    deleteoldsystems = XMLSupport::parse_bool(vs_config->getVariable("general", "deleteoldsystems", "true"));
-    vsdebug = XMLSupport::parse_int(vs_config->getVariable("general", "verbose_output", "0"));
-    while_loading_starsystem =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "while_loading_starsystem", "false"));
     default_mission = vs_config->getVariable("general", "default_mission", "test/test1.mission");
     galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
@@ -117,8 +99,6 @@ void vs_options::init() {
     jumpgate = vs_config->getVariable("graphics", "jumpgate", "warp.ani");
     jumpanimationshrink = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpanimationshrink", ".95"));
     jumpgatesize = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpgatesize", "1.75"));
-    switchToTargetModeOnKey =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "switchToTargetModeOnKey", "true"));
     camera_pan_speed = XMLSupport::parse_float(vs_config->getVariable("graphics", "camera_pan_speed", "0.0001"));
     background = XMLSupport::parse_bool(vs_config->getVariable("graphics", "background", "true"));
     cockpit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit", "true"));
@@ -231,8 +211,6 @@ void vs_options::init() {
     warp_stretch_max_region0_speed =
             XMLSupport::parse_floatf(vs_config->getVariable("graphics", "warp_stretch_max_region0_speed", "100000"));
     weapon_gamma = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "weapon_gamma", "1.35"));
-    projectile_means_missile =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "projectile_means_missile", "false"));
     split_dead_subunits = XMLSupport::parse_bool(vs_config->getVariable("graphics", "split_dead_subunits", "true"));
     explosionforce = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "explosionforce", ".5"));
     explosiontorque = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "explosiontorque", ".001"));
@@ -290,7 +268,7 @@ void vs_options::init() {
     startDockedTo = vs_config->getVariable("AI", "startDockedTo", "MiningBase");
     dockOnLoad = XMLSupport::parse_bool(vs_config->getVariable("AI", "dockOnLoad", "true"));
 
-    /* Physics Options */
+    /* PhysicsConfig Options */
     Drone = vs_config->getVariable("physics", "Drone", "drone");
     max_missions = XMLSupport::parse_int(vs_config->getVariable("physics", "max_missions", "4"));
     game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1.0"));

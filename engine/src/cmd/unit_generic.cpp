@@ -75,6 +75,7 @@
 
 #include <math.h>
 #include <list>
+#include <cstdint>
 #include <boost/format.hpp>
 
 #ifdef _WIN32
@@ -91,14 +92,13 @@ using std::endl;
 using std::list;
 
 std::string getMasterPartListUnitName() {
-    static std::string mpl = vs_config->getVariable("data", "master_part_list", "master_part_list");
-    return mpl;
+    return configuration()->data_config.master_part_list;
 }
 
 Unit *_masterPartList = nullptr;
 
 Unit *getMasterPartList() {
-    if (_masterPartList == NULL) {
+    if (_masterPartList == nullptr) {
         static bool making = true;
         if (making) {
             making = false;
@@ -130,7 +130,7 @@ void Unit::SetNebula(Nebula *neb) {
 }
 
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
-    static float capship_size = GameConfig::GetVariable("physics", "capship_size", 500);
+    const float capship_size = configuration()->physics_config.capship_size;
 
     if (this == target || target->CloakVisible() < .8) {
         return false;
@@ -155,7 +155,7 @@ bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool loc
             || target->rSize() < computer.radar.mintargetsize) {
         Flightgroup *fg = target->getFlightgroup();
         if ((target->rSize() < capship_size || (!cap)) && (fg == NULL ? true : fg->name != "Base")) {
-            return target->isUnit() == _UnitType::planet;
+            return target->isUnit() == Vega_UnitType::planet;
         }
     }
     return true;
@@ -228,20 +228,20 @@ unsigned int apply_float_to_unsigned_int(float tmp) {
 }
 
 static list<Unit *> Unitdeletequeue;
-static Hashtable<long, Unit, 2095> deletedUn;
+static Hashtable<uintmax_t, Unit, 2095> deletedUn;
 int deathofvs = 1;
 
 void CheckUnit(Unit *un) {
-    if (deletedUn.Get((long) un) != NULL) {
+    if (deletedUn.Get((uintmax_t) un) != nullptr) {
         while (deathofvs) {
-            VS_LOG(info, (boost::format("%1% died") % ((long) un)));
+            VS_LOG(info, (boost::format("%1% died") % ((uintmax_t) un)));
         }
     }
 }
 
 void UncheckUnit(Unit *un) {
-    if (deletedUn.Get((long) un) != NULL) {
-        deletedUn.Delete((long) un);
+    if (deletedUn.Get((uintmax_t) un) != NULL) {
+        deletedUn.Delete((uintmax_t) un);
     }
 }
 
@@ -414,7 +414,7 @@ void Unit::Init(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber) {
-    static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
+    const bool UNITTAB = configuration()->physics_config.unit_table;
     CSVRow unitRow;
     // TODO: something with the following line
     this->Unit::Init();
@@ -493,8 +493,7 @@ void Unit::Init(const char *filename,
     this->filename = filename;
     if (!foundFile) {
         bool istemplate = (string::npos != (string(filename).find(".template")));
-        static bool usingtemplates = XMLSupport::parse_bool(vs_config->getVariable("data", "usingtemplates", "true"));
-        if (!istemplate || (istemplate && usingtemplates)) {
+        if (!istemplate || (istemplate && configuration()->data_config.using_templates)) {
             VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();
@@ -593,7 +592,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
     if (!isSubUnit() && update_collide_queue && (!Destroyed())) {
         //only do it in Unit::CollideAll UpdateCollideQueue();
     }
-    if (isUnit() == _UnitType::planet) {
+    if (isUnit() == Vega_UnitType::planet) {
         radial_size = tmpmax(tmpmax(corner_max.i, corner_max.j), corner_max.k);
     }
 }
@@ -625,15 +624,13 @@ static float tmpsqr(float x) {
 }
 
 float CloseEnoughCone(Unit *me) {
-    static float close_autotrack_cone =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "near_autotrack_cone", ".9"));
-    return close_autotrack_cone;
+    return configuration()->physics_config.near_autotrack_cone;
 }
 
 bool CloseEnoughToAutotrack(Unit *me, Unit *targ, float &cone) {
     if (targ) {
-        static float close_enough_to_autotrack =
-                tmpsqr(XMLSupport::parse_float(vs_config->getVariable("physics", "close_enough_to_autotrack", "4")));
+        const float close_enough_to_autotrack =
+                tmpsqr(configuration()->physics_config.close_enough_to_autotrack);
         float dissqr = (me->curr_physical_state.position.Cast()
                 - targ->curr_physical_state.position.Cast()).MagnitudeSquared();
         float movesqr = close_enough_to_autotrack
@@ -845,9 +842,7 @@ extern signed char ComputeAutoGuarantee(Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
 
 double howFarToJump() {
-    static float
-            tmp = XMLSupport::parse_float(vs_config->getVariable("physics", "distance_to_warp", "1000000000000.0"));
-    return tmp;
+    return configuration()->physics_config.distance_to_warp;
 }
 
 QVector SystemLocation(std::string system) {
@@ -898,11 +893,7 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
                                         i->first.length()) == i->first
                                         && whereto.substr(i->first.length() + 1)
                                                 == j->first) {
-                                    static float SystemWarpTargetBonus =
-                                            XMLSupport::parse_float(vs_config->getVariable("physics",
-                                                    "target_distance_to_warp_bonus",
-                                                    "1.33"));
-                                    tmp /= SystemWarpTargetBonus;
+                                    tmp /= configuration()->physics_config.target_distance_to_warp_bonus;
                                 }
                             }
                         }
@@ -1034,11 +1025,11 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 }
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
-    static bool ai_jump_cheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "jump_without_energy", "false"));
-    static bool nojumpinSPEC = XMLSupport::parse_bool(vs_config->getVariable("physics", "noSPECJUMP", "true"));
-    bool SPEC_interference = (NULL != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
-            && nojumpinSPEC : (NULL != _Universe->isPlayerStarship(this)) ? graphicOptions.InWarp
-            && nojumpinSPEC : false;
+    const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
+    const bool nojumpinSPEC = configuration()->physics_config.no_spec_jump;
+    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
+            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && graphicOptions.InWarp
+            && nojumpinSPEC;
     //only allow big with small
     if (!GetDestinations().empty()) {
         Cockpit *cp = _Universe->isPlayerStarship(smalle);
@@ -1052,7 +1043,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
                 &&          //we have power
                         (smalle->warpenergy >= smalle->GetJumpStatus().energy
                                 //or we're being cheap
-                                || (ai_jump_cheat && cp == NULL)
+                                || (ai_jump_cheat && cp == nullptr)
                         )))
                 || forcejump) {
             //or the jump is being forced?
@@ -1097,10 +1088,8 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
 Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
-    if ((player_cockpit) == NULL) {
-        static float
-                exp = XMLSupport::parse_float(vs_config->getVariable("physics", "difficulty_speed_exponent", ".2"));
-        difficulty = pow(g_game.difficulty, exp);
+    if ((player_cockpit) == nullptr) {
+        difficulty = pow(g_game.difficulty, configuration()->physics_config.difficulty_speed_exponent);
     }
     return player_cockpit;
 }
@@ -1166,13 +1155,11 @@ Vector Unit::MaxTorque(const Vector &torque) {
 }
 
 Vector Unit::ClampTorque(const Vector &amt1) {
-    static float staticfuelclamp = GameConfig::GetVariable("physics", "NoFuelThrust", 0.4);
-
     Vector Res = amt1;
 
     WCWarpIsFuelHack(true);
 
-    float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
     if (fabs(amt1.i) > fuelclamp * limits.pitch) {
         Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
     }
@@ -1202,11 +1189,8 @@ bool Unit::CombatMode() {
 }
 
 Vector Unit::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    static float staticfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelThrust", ".4"));
-    static float
-            staticabfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelAfterburn", ".1"));
-    float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
-    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? staticabfuelclamp : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
     float limit =
             afterburn ? (abfuelclamp
                     * (computer.max_ab_speed()
@@ -1272,12 +1256,8 @@ Vector Unit::MaxThrust(const Vector &amt1) {
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 // TODO: refactor soon. Especially access to the fuel variable
 Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
-    static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics", "fuel_equals_warp", "false"));
-    static float staticfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelThrust", ".4"));
-    static float
-            staticabfuelclamp = XMLSupport::parse_float(vs_config->getVariable("physics", "NoFuelAfterburn", ".1"));
-    static bool finegrainedFuelEfficiency =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "VariableFuelConsumption", "false"));
+    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
+    const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
     if (WCfuelhack) {
         if (fuel > warpenergy) {
             fuel = warpenergy;
@@ -1303,8 +1283,8 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     }
     Vector Res = amt1;
 
-    float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
-    float abfuelclamp = (fuel <= 0) ? staticabfuelclamp : 1;
+    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
     if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
         Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
     }
@@ -1321,11 +1301,9 @@ Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k < -limits.retro) {
         Res.k = -limits.retro;
     }
-    static float Lithium6constant =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "DeuteriumRelativeEfficiency_Lithium", "1"));
+    const float Lithium6constant = configuration()->fuel.deuterium_relative_efficiency_lithium;
     //1/5,000,000 m/s
-    static float FMEC_exit_vel_inverse =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "FMEC_exit_vel", "0.0000002"));
+    const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
     if (afterburntype == 2) {
         //Energy-consuming afterburner
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
@@ -1456,8 +1434,8 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
     randnum = rand01();
-    static float inv_min_dam = 1.0f - XMLSupport::parse_float(vs_config->getVariable("physics", "min_damage", ".001"));
-    static float inv_max_dam = 1.0f - XMLSupport::parse_float(vs_config->getVariable("physics", "min_damage", ".999"));
+    const float inv_min_dam = 1.0F - configuration()->physics_config.min_damage;
+    const float inv_max_dam = 1.0F - configuration()->physics_config.max_damage;
     if (dam < inv_max_dam) {
         dam = inv_max_dam;
     }
@@ -1495,26 +1473,23 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
             }
         } else if (randnum >= .5) {
             //THIS IS NOT YET SUPPORTED IN NETWORKING
-            computer.target = NULL;             //set the target to NULL
+            computer.target = nullptr;             //set the target to NULL
         } else if (randnum >= .4) {
             limits.retro *= dam;
         } else if (randnum >= .3275) {
-            static float
-                    maxdam = XMLSupport::parse_float(vs_config->getVariable("physics", "max_radar_cone_damage", ".9"));
+            const float maxdam = configuration()->physics_config.max_radar_cone_damage;
             computer.radar.maxcone += (1 - dam);
             if (computer.radar.maxcone > maxdam) {
                 computer.radar.maxcone = maxdam;
             }
         } else if (randnum >= .325) {
-            static float maxdam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "max_radar_lockcone_damage", ".95"));
+            const float maxdam = configuration()->physics_config.max_radar_lock_cone_damage;
             computer.radar.lockcone += (1 - dam);
             if (computer.radar.lockcone > maxdam) {
                 computer.radar.lockcone = maxdam;
             }
         } else if (randnum >= .25) {
-            static float maxdam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "max_radar_trackcone_damage", ".98"));
+            const float maxdam = configuration()->physics_config.max_radar_track_cone_damage;
             computer.radar.trackingcone += (1 - dam);
             if (computer.radar.trackingcone > maxdam) {
                 computer.radar.trackingcone = maxdam;
@@ -1531,9 +1506,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         damages |= Damages::COMPUTER_DAMAGED;
         return;
     }
-    static float thruster_hit_chance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "thruster_hit_chance", ".25"));
-    if (rand01() < thruster_hit_chance) {
+    if (rand01() < configuration()->physics_config.thruster_hit_chance) {
         //DAMAGE ROLL/YAW/PITCH/THRUST
         float orandnum = rand01() * .82 + .18;
         if (randnum >= .9) {
@@ -1759,7 +1732,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         un->Kill();
     }
 
-    //if (isUnit() != _UnitType::missile) {
+    //if (isUnit() != Vega_UnitType::missile) {
     //    VS_LOG(info, (boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get()));
     //}
 
@@ -1786,7 +1759,7 @@ void Unit::UnRef() {
     ucref--;
     if (killed && ucref == 0) {
 #ifdef CONTAINER_DEBUG
-        deletedUn.Put( (long) this, this );
+        deletedUn.Put( (uintmax_t) this, this );
 #endif
         //delete
         Unitdeletequeue.push_back(this);
@@ -2063,7 +2036,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         Vector p, q, r;
         this->GetOrientation(p, q, r);
         this->pImage->pExplosion->SetOrientation(p, q, r);
-        if (this->isUnit() != _UnitType::missile) {
+        if (this->isUnit() != Vega_UnitType::missile) {
             _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(this->Position(),
                     this->MaxShieldVal(),
                     0,
@@ -2088,7 +2061,7 @@ bool Unit::Explode(bool drawit, float timeit) {
 
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
-            if (this->isUnit() == _UnitType::unit) {
+            if (this->isUnit() == Vega_UnitType::unit) {
                 if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
                     static string shockani(game_options()->shockwave_animation);
                     static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
@@ -2123,7 +2096,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                         static float lasttime = 0;
                         float newtime = getNewTime();
                         if (newtime - lasttime > game_options()->time_between_music
-                                || (_Universe->isPlayerStarship(this) && this->isUnit() != _UnitType::missile
+                                || (_Universe->isPlayerStarship(this) && this->isUnit() != Vega_UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
@@ -2141,7 +2114,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         }
     }
     bool timealldone =
-            (this->pImage->timeexplode > game_options()->debris_time || this->isUnit() == _UnitType::missile
+            (this->pImage->timeexplode > game_options()->debris_time || this->isUnit() == Vega_UnitType::missile
                     || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty());
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -4397,7 +4370,7 @@ void Unit::TurretFAW() {
     Unit *un;
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
         if (!CheckAccessory(un)) {
-            un->EnqueueAIFirst(new Orders::FireAt(15.0f));
+            un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing_config.aggressivity));
             un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
         }
         un->TurretFAW();
@@ -5063,8 +5036,8 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     UpdateCloak();
 
     // Recharge energy and shields
-    static bool apply_difficulty_shields = GameConfig::GetVariable("physics", "difficulty_based_shield_recharge", true);
-    static bool energy_before_shield = GameConfig::GetVariable("physics", "engine_energy_priority", true);
+    const bool apply_difficulty_shields = configuration()->physics_config.difficulty_based_shield_recharge;
+    const bool energy_before_shield = configuration()->physics_config.engine_energy_takes_priority;
 
     // Difficulty settings
     float difficulty_shields = 1.0f;
@@ -5114,7 +5087,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     Unit *target = Unit::Target();
     bool increase_locking = false;
     if (target && cloaking < 0 /*-1 or -32768*/) {
-        if (target->isUnit() != _UnitType::planet) {
+        if (target->isUnit() != Vega_UnitType::planet) {
             Vector TargetPos(InvTransform(cumulative_transformation_matrix, (target->Position())).Cast());
             dist_sqr_to_target = TargetPos.MagnitudeSquared();
             TargetPos.Normalize();
@@ -5357,8 +5330,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
 void Unit::UpdateCloak() {
     // Use warp power for cloaking (SPEC capacitor)
-    static bool warp_energy_for_cloak =
-            GameConfig::GetVariable("physics", "warp_energy_for_cloak", true);
+    const bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
 
     // We are not cloaked - exiting function
     if (cloaking < cloakmin) {
@@ -5457,7 +5429,7 @@ extern string getCargoUnitName(const char *name);
 
 void Unit::UpgradeInterface(Unit *baseun) {
     string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
-    if (baseun->isUnit() != _UnitType::planet) {
+    if (baseun->isUnit() != Vega_UnitType::planet) {
         basename = baseun->name;
     }
     BaseUtil::LoadBaseInterfaceAtDock(basename, baseun, this);
@@ -5552,7 +5524,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
 
                 this->SetCurPosition(pos);
                 ActivateAnimation(jumpnode);
-                if (jumpnode->isUnit() == _UnitType::unit) {
+                if (jumpnode->isUnit() == Vega_UnitType::unit) {
                     QVector Offset(pos.i < 0 ? 1 : -1,
                             pos.j < 0 ? 1 : -1,
                             pos.k < 0 ? 1 : -1);
@@ -5569,7 +5541,7 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
             for (unsigned int jjj = 0; jjj < 2; ++jjj) {
                 for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
                         (tester = *i) != NULL; ++i) {
-                    if (tester->isUnit() == _UnitType::unit && tester != this) {
+                    if (tester->isUnit() == Vega_UnitType::unit && tester != this) {
                         if ((this->LocalPosition() - tester->LocalPosition()).Magnitude()
                                 < this->rSize() + tester->rSize()) {
                             this->SetCurPosition(this->LocalPosition() + this->cumulative_transformation_matrix.getR()

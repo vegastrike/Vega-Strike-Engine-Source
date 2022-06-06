@@ -62,7 +62,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
                               bool Diamond  )
 {
     SetThickness(ShapeType::Box);
-    static float rat = GameConfig::GetVariable( "graphics", "hud", "min_target_box_size", .01 );
+    const float rat = configuration()->graphics_config.hud.min_target_box_size;
     float len = (Loc).Magnitude();
     float curratio   = rSize/len;
     if (curratio < rat)
@@ -83,20 +83,16 @@ inline void DrawOneTargetBox( const QVector &Loc,
     }
 
     // Still locking on
-    lock_percent = std::max(0.0f, lock_percent);
-    if (lock_percent < .99) {
+    lock_percent = std::max(0.0F, lock_percent);
+    if (lock_percent < 0.99F) {
         //eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
-        static float diamondthick =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "DiamondLineThickness", "1" ) );                          //1.05;
-        glLineWidth( diamondthick );
-        static bool  center       =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "LockCenterCrosshair", "false" ) );
+        glLineWidth(configuration()->graphics_config.hud.diamond_line_thickness);
 
-        if (center) {
+        if (configuration()->graphics_config.hud.lock_center_crosshair) {
             verts = GetLockingIcon(Loc, CamP, CamQ, rSize, lock_percent);
             GFXDraw( GFXLINE, verts );
         } else {
-            if (lock_percent == 0) {
+            if (lock_percent == 0.0F) {
                 verts = GetAnimatedLockingIcon(Loc, CamP, CamQ, CamR, rSize, lock_percent);
 
                 static const unsigned char indices[] = {
@@ -352,10 +348,11 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
         return;
     GFXColorf( textcol );
     GFXColor     origbgcol = text->bgcol;
-    static float background_alpha    =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
+    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
     bool automatte = (0 == origbgcol.a);
-    if (automatte) text->bgcol = GFXColor( 0, 0, 0, background_alpha );
+    if (automatte) {
+        text->bgcol = GFXColor( 0, 0, 0, background_alpha );
+    }
     for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
         if (gauges[i]) {
             float sx, sy, px, py;
@@ -575,9 +572,7 @@ void DrawRadar(const Radar::Sensor& sensor, float  cockpit_time, float radar_tim
 
 void DrawTacticalTargetBox(const Radar::Sensor& sensor)
 {
-    static bool drawtactarg =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTacticalTarget", "false" ) );
-    if (!drawtactarg)
+    if (!configuration()->graphics_config.hud.draw_tactical_target)
         return;
     if (sensor.GetPlayer()->getFlightgroup() == NULL)
         return;
@@ -594,10 +589,9 @@ void DrawTacticalTargetBox(const Radar::Sensor& sensor)
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         GFXDisable( LIGHTING );
 
-        static float thethick = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetThickness", "1.0" ) );
-        static float fudge    = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetLength", "0.1" ) );
-        static float foci     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetFoci", "0.5" ) );
-        glLineWidth( (int) thethick );         //temp
+        const float fudge = configuration()->graphics_config.hud.tac_target_length;
+        const float foci = configuration()->graphics_config.hud.tac_target_foci;
+        glLineWidth( (int) configuration()->graphics_config.hud.tac_target_thickness);         //temp
         Radar::Track track = sensor.CreateTrack(target, Loc);
         GFXColorf(sensor.GetColor(track));
 
@@ -703,8 +697,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
     GFXDisable( DEPTHWRITE );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXDisable( LIGHTING );
-    static bool draw_nav_symbol = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
-    if (draw_nav_symbol) {
+    if (configuration()->graphics_config.hud.draw_nav_symbol) {
         DrawNavigationSymbol(player->GetComputerData().NavPoint, CamP, CamQ,
                              CamR.Cast().Dot( (player->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
     }
@@ -755,7 +748,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
     // FIXME: Replace with UnitUtil::isDockableUnit?
     if ( draw_target_nav_symbol
         && ( (target->faction == neutral
-              && target->isUnit() == _UnitType::unit) || target->isUnit() == _UnitType::asteroid
+              && target->isUnit() == Vega_UnitType::unit) || target->isUnit() == Vega_UnitType::asteroid
             || ( target->isPlanet() && ( (Planet*) target )->isAtmospheric()
                 && ( draw_jump_nav_symbol
                      || target->GetDestinations().empty() ) ) || !sensor.InRange(track)) ) {
@@ -777,14 +770,9 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
         float   mrange;
         float   err  =  .01*( 1 - player->CloakVisible() );
         float   scatter  = .25*player->rSize();
-        static bool ITTS_averageguns =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "ITTSUseAverageGunSpeed", "true" ) );
-        static bool ITTS_for_locks =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "ITTSForLockable", "false" ) );
-        static bool ITTS_for_beams =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "ITTSForBeams", "false" ) );
-        static bool line_to_itts_alpha =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "ITTSLineToMarkAlpha", "0.1" ) );
+        const bool itts_for_locks = configuration()->graphics_config.hud.itts_for_lockable;
+        const bool itts_for_beams = configuration()->graphics_config.hud.itts_for_beams;
+        const bool line_to_itts_alpha = configuration()->graphics_config.hud.itts_line_to_mark_alpha;
         QVector p = CamP.Cast();
         QVector q = CamQ.Cast();
         QVector offs = _Universe->AccessCamera()->GetPosition() - SCATTER_CUBE*scatter*10*err;
@@ -792,7 +780,7 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
         Vector PlayerPosition = player->Position();
         Vector PlayerVelocity = player->GetVelocity();
         GFXColor mntcolor;
-        if (ITTS_averageguns) {
+        if (configuration()->graphics_config.hud.itts_use_average_gun_speed) {
             player->getAverageGunSpeed( speed, range, mrange );
             iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, speed, steady_itts ) - offs;
             if (draw_line_to_itts)
@@ -804,8 +792,8 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
             if (draw_line_to_itts) {
                 for (int i = 0; i < nummounts; i++) {
                     if ( (player->mounts[i].status == Mount::ACTIVE)
-                        && (ITTS_for_beams || (player->mounts[i].type->type != WEAPON_TYPE::BEAM))
-                        && (ITTS_for_locks || (player->mounts[i].type->lock_time == 0)) )
+                        && (itts_for_beams || (player->mounts[i].type->type != WEAPON_TYPE::BEAM))
+                        && (itts_for_locks || (player->mounts[i].type->lock_time == 0)) )
                     {
                         iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->speed, steady_itts ) - offs;
                         DrawITTSLine( Loc, iLoc, GFXColor(trackcolor.r, trackcolor.g, trackcolor.b, line_to_itts_alpha) );
@@ -814,8 +802,8 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
             }
             for (int i = 0; i < nummounts; i++) {
                 if ( (player->mounts[i].status == Mount::ACTIVE)
-                    && (ITTS_for_beams || (player->mounts[i].type->type != WEAPON_TYPE::BEAM))
-                    && (ITTS_for_locks || (player->mounts[i].type->lock_time == 0)) )
+                    && (itts_for_beams || (player->mounts[i].type->type != WEAPON_TYPE::BEAM))
+                    && (itts_for_locks || (player->mounts[i].type->lock_time == 0)) )
                 {
                     mntcolor = MountColor( &player->mounts[i] );
                     iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->speed, steady_itts ) - offs;
@@ -857,9 +845,7 @@ void DrawTurretTargetBoxes(const Radar::Sensor& sensor)
         //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
         QVector     Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
         Radar::Track track = sensor.CreateTrack(target, Loc);
-        static bool draw_nav_symbol =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
-        if (draw_nav_symbol) {
+        if (configuration()->graphics_config.hud.draw_nav_symbol) {
             GFXColor4f( 1, 1, 1, 1 );
             DrawNavigationSymbol( subunit->GetComputerData().NavPoint, CamP, CamQ,
                                  CamR.Cast().Dot( (subunit->GetComputerData().NavPoint).Cast()

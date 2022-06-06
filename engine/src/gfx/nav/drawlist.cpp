@@ -205,8 +205,7 @@ void drawdescription(string text,
         displayname.SetText(text);
         displayname.SetCharSize(size_x, size_y);
     }
-    static float background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "text_background_alpha", "0.0625"));
+    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
     GFXColor tpbg = displayname.bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {

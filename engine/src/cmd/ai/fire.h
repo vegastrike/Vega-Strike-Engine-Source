@@ -36,13 +36,13 @@ namespace Orders {
 class FireAt : public CommunicatingAI {
 protected:
     bool ShouldFire(Unit *targ, bool &missilelock);
-    float missileprobability;
-    float lastmissiletime;
-    float delay;
-    float agg;
-    float distance;
-    float lastchangedtarg;
-    bool had_target;
+    float missileprobability{};
+    float lastmissiletime{};
+    float delay{};
+    float agg{};
+    float distance{};
+    float lastchangedtarg{};
+    bool had_target{};
     void FireWeapons(bool shouldfire, bool lockmissile);
     virtual void ChooseTargets(int num,
             bool force = false); //chooses n targets and puts the best to attack in unit's target container

@@ -97,7 +97,7 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
     float rho1 = 0.0;
     Unit *primary;
     for (un_iter iter = system->getUnitList().createIterator(); (primary = *iter) != NULL; ++iter) {
-        if (primary->isUnit() == _UnitType::planet && (currPlanet = (Planet *) primary)->hasLights()) {
+        if (primary->isUnit() == Vega_UnitType::planet && (currPlanet = (Planet *) primary)->hasLights()) {
             /* for now just assume all planets with lights are really bright */
             QVector direction = (currPlanet->Position() - position);
             direction.Normalize();

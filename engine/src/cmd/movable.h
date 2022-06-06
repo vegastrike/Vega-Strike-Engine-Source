@@ -1,10 +1,8 @@
-/**
+/*
  * movable.h
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
- * contributors
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * ministerofinformation, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -33,7 +31,7 @@
 #include "gfx/quaternion.h"
 #include "star_system.h"
 
-#include <float.h>
+#include <cfloat>
 
 struct Transformation;
 class Matrix;
@@ -139,29 +137,10 @@ protected:
     float Momentofinertia; // Was 0 but Init says 0.01
     Vector SavedAccel;
     Vector SavedAngAccel;
-    static bool configLoaded;
-    static float VELOCITY_MAX;
-    //for the heck of it.
-    static float humanwarprampuptime;
-    //for the heck of it.
-    static float compwarprampuptime;
-    static float warprampdowntime;
-    static float WARPMEMORYEFFECT;
-    static float maxplayerrotationrate;
-    static float maxnonplayerrotationrate;
-    static float warpstretchcutoff;
-    static float warpstretchoutcutoff;
-    static float sec;
-    static float endsec;
-    static float warpMultiplierMin;
-    static float warpMultiplierMax;
-    static float warpMaxEfVel;
-    static float cutsqr;
-    static float outcutsqr;
-    static std::string insys_jump_ani;
-    static float air_res_coef;
-    static float lateral_air_res_coef;
-
+    float cutsqr{0.0F};
+    float outcutsqr{0.0F};
+    float air_res_coef{0.0F};
+    float lateral_air_res_coef{0.0F};
 
 // Methods
 
@@ -256,7 +235,7 @@ public:
     //Sets if forces should resolve on this unit or not
     void SetResolveForces(bool);
 
-    float GetMaxWarpFieldStrength(float rampmult = 1.f) const;
+    double GetMaxWarpFieldStrength(float rampmult = 1.f) const;
     void DecreaseWarpEnergy(bool insystem, float time = 1.0f);
     void IncreaseWarpEnergy(bool insystem, float time = 1.0f);
     //Rotates about the axis

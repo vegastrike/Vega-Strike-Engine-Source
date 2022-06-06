@@ -101,7 +101,7 @@ static void TurretFAW(Unit *parent) {
     Unit *un;
     while (NULL != (un = *iter)) {
         if (!CheckAccessory(un)) {
-            un->EnqueueAIFirst(new Orders::FireAt(15.0f));
+            un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing_config.aggressivity));
             un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
         }
         TurretFAW(un);
@@ -222,11 +222,11 @@ static AIEvents::ElemAttrMap *getProperScript(Unit *me, Unit *targ, bool interru
             personalityseed);
 }
 
-static float aggressivity = 2.01;
+static float aggressivity = 2.01F;
 static int randomtemp;
 
 AggressiveAI::AggressiveAI(const char *filename, Unit *target)
-        : FireAt(), logic(getProperScript(NULL, NULL, "default", randomtemp = rand())) {
+        : FireAt(), logic(getProperScript(nullptr, nullptr, "default", randomtemp = rand())) {
     currentpriority = 0;
     last_jump_time = 0;
     nav = QVector(0, 0, 0);
@@ -238,11 +238,10 @@ AggressiveAI::AggressiveAI(const char *filename, Unit *target)
     last_time_insys = true;
     logiccurtime = logic->maxtime;     //set it to the time allotted
     obedient = true;
-    if (aggressivity == 2.01) {
-        static float defagg = XMLSupport::parse_float(vs_config->getVariable("unit", "aggressivity", "2"));
-        aggressivity = defagg;
+    if (aggressivity == 2.01F) {
+        aggressivity = configuration()->unit_config.default_aggressivity;
     }
-    if (target != NULL) {
+    if (target != nullptr) {
         AttachOrder(target);
     }
     last_directive = filename;
@@ -309,7 +308,6 @@ bool AggressiveAI::ExecuteLogicItem(const AIEvents::AIEvresult &item) {
 bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
     float value = 0.0;
 
-    static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
     switch (abs(item.type)) {
         case DISTANCE:
             value = distance;
@@ -327,7 +325,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             } else {
                 value = 10000;
             }
-            value /= game_speed;     /*game_accel*/
+            value /= configuration()->physics_config.game_speed;     /*game_accel*/
             break;
         }
         case THREAT:
@@ -569,11 +567,11 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
             last_directive = fg->directive;
         }
         if (fg->directive != last_directive) {
-            static bool forceobedient = XMLSupport::parse_bool(vs_config->getVariable("AI", "always_obedient", "true"));
-            if (forceobedient) {
+            if (configuration()->ai.always_obedient) {
                 obedient = true;
-            } else if (float ( rand())/RAND_MAX < (obedient ? (1 - logic->obedience) : logic->obedience))
-            obedient = !obedient;
+            } else if (float ( rand())/RAND_MAX < (obedient ? (1 - logic->obedience) : logic->obedience)) {
+                obedient = !obedient;
+            }
             if (obedient) {
                 eraseType(Order::FACING);
                 eraseType(Order::MOVEMENT);
@@ -685,14 +683,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            static float esc_percent = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "EscortDistance",
-                                    "10.0"));
-                            static float turn_leader = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "TurnLeaderDist",
-                                    "5.0"));
+                            const float esc_percent = configuration()->ai.targeting_config.escort_distance;
+                            const float turn_leader = configuration()->ai.targeting_config.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -769,14 +761,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             if (o) {
                                 o->Communicate(c);
                             }
-                            static float esc_percent = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "EscortDistance",
-                                    "10.0"));
-                            static float turn_leader = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "TurnLeaderDist",
-                                    "5.0"));
+                            const float esc_percent = configuration()->ai.targeting_config.escort_distance;
+                            const float turn_leader = configuration()->ai.targeting_config.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -942,10 +928,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup *fg) {
                             CommunicationMessage c(parent, leader, NULL, 0);
 //this order is only valid for cargo wingmen, other wingmen will not comply
                             c.SetCurrentState(c.fsm->GetYesNode(), NULL, 0);
-                            static float turn_leader = XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "Targetting",
-                                    "TurnLeaderDist",
-                                    "5.0"));
+                            const float turn_leader = configuration()->ai.targeting_config.turn_leader_distance;
                             int fgnum = parent->getFgSubnumber();
                             if (parent->getFlightgroup()) {
                                 int tempnum = 0;
@@ -1198,16 +1181,13 @@ static bool overridable(const std::string &s) {
 extern void LeadMe(Unit *un, string directive, string speech, bool changetarget);
 
 void AggressiveAI::ReCommandWing(Flightgroup *fg) {
-    static float time_to_recommand_wing = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "Targetting",
-            "TargetCommandierTime",
-            "100"));
-    static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data", "verbose_debug", "false"));
-    if (fg != NULL) {
+    const float time_to_recommand_wing = configuration()->ai.targeting_config.time_to_recommand_wing;
+    const bool verbose_debug = configuration()->logging.verbose_debug;
+    if (fg != nullptr) {
         Unit *lead;
         if (overridable(fg->directive)) {
             //computer won't override capital orders
-            if (NULL != (lead = fg->leader.GetUnit())) {
+            if (nullptr != (lead = fg->leader.GetUnit())) {
                 if (float ( rand())/RAND_MAX < simulation_atom_var / time_to_recommand_wing) {
                     if (parent->Threat() && (parent->FShieldData() < .2 || parent->RShieldData() < .2)) {
                         fg->directive = string("h");
@@ -1420,7 +1400,7 @@ static Unit *ChooseNearNavPoint(Unit *parent, Unit *suggestion, QVector location
 bool CloseEnoughToNavOrDest(Unit *parent, Unit *navUnit, QVector nav) {
     static float how_far_to_stop_moving =
             XMLSupport::parse_float(vs_config->getVariable("AI", "how_far_to_stop_navigating", "100"));
-    if (navUnit && navUnit->isUnit() != _UnitType::planet) {
+    if (navUnit && navUnit->isUnit() != Vega_UnitType::planet) {
         float dist = UnitUtil::getDistance(navUnit, parent);
         if (dist < SIMULATION_ATOM /*simulation_atom_var?*/ * parent->Velocity.Magnitude() * parent->predicted_priority
                 * how_far_to_stop_moving) {
@@ -1517,7 +1497,7 @@ void AggressiveAI::ExecuteNoEnemies() {
             if (!otherdest) {
                 navDestination = dest;
                 dir = unitdir * (dest->rSize() + parent->rSize());
-                if (dest->isUnit() == _UnitType::planet) {
+                if (dest->isUnit() == Vega_UnitType::planet) {
                     float planetpct = UniverseUtil::getPlanetRadiusPercent();
                     dir *= (planetpct + 1.0f);
                     dir += randVector() * parent->rSize() * 2 * randspacingfactor;

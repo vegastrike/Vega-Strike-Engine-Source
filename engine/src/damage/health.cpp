@@ -1,8 +1,8 @@
 /*
  * health.cpp
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -89,7 +89,7 @@ void Health::DealDamageComponent(int type, float &damage, float vulnerability, I
     }
 
     inflicted_damage.total_damage += adjusted_damage;
-    inflicted_damage.inflicted_damage_by_layer[layer] += adjusted_damage;
+    inflicted_damage.inflicted_damage_by_layer.at(layer) += adjusted_damage;
 
     if (health == 0 && !regenerative) {
         destroyed = true;

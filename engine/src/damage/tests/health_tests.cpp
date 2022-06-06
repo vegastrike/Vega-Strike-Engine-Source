@@ -1,8 +1,8 @@
 /*
  * health_tests.cpp
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,7 +35,7 @@ TEST(Shield, Sanity) {
     damage.normal_damage = 10;
     EXPECT_EQ(damage.normal_damage, 10);
 
-    Health health(100, 100, 25);
+    Health health(2, 100, 100, 25);
 
     EXPECT_EQ(health.health, 100);
     EXPECT_EQ(health.max_health, 100);
@@ -71,7 +71,7 @@ TEST(Armor, Sanity) {
     damage.normal_damage = 10;
     EXPECT_EQ(damage.normal_damage, 10);
 
-    Health health(100, 100, 0);
+    Health health(2, 100, 100, 0);
     health.vulnerabilities.normal_damage = 1;
 
     EXPECT_EQ(health.health, 100);

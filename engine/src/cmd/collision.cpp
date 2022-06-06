@@ -44,7 +44,7 @@ Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) 
     cockpit = _Universe->isPlayerStarship(unit); // smcp/thcp
     unit_type = unit->isUnit();
     is_player_ship = _Universe->isPlayerStarship(unit);
-    mass = std::max(unit->getMass(), configuration()->physics.minimum_mass);
+    mass = std::max(unit->getMass(), configuration()->physics_config.minimum_mass);
     position = unit->Position();
     velocity = unit->GetVelocity();
 }
@@ -52,21 +52,21 @@ Collision::Collision(Unit *unit, const QVector &location, const Vector &normal) 
 // This function handles the initial reaction of the unit to hitting the other unit
 // Note: I'm (@royfalk) changing the expected behavior here
 // Return value indicates whether to continue processing
-/*_UnitType::unit,
-_UnitType::planet,
-_UnitType::building,
-_UnitType::nebula,
-_UnitType::asteroid,
-_UnitType::enhancement,
-_UnitType::missile*/
+/*Vega_UnitType::unit,
+Vega_UnitType::planet,
+Vega_UnitType::building,
+Vega_UnitType::nebula,
+Vega_UnitType::asteroid,
+Vega_UnitType::enhancement,
+Vega_UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
     // Collision with a nebula does nothing
-    if (other_unit->isUnit() == _UnitType::nebula) {
+    if (other_unit->isUnit() == Vega_UnitType::nebula) {
         return;
     }
 
     // Collision with a enhancement improves your shield apparently
-    if (other_unit->isUnit() == _UnitType::enhancement) {
+    if (other_unit->isUnit() == Vega_UnitType::enhancement) {
         apply_force = true;
         return;
     }
@@ -83,39 +83,39 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
 
     switch (unit_type) {
         // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-        case _UnitType::missile:
+        case Vega_UnitType::missile:
             // Missile should explode when killed
             // If not, uncomment this
             //((Missile*)unit)->Discharge();
             unit->Kill();
             return;
 
-        case _UnitType::asteroid:
+        case Vega_UnitType::asteroid:
             apply_force = true;
             deal_damage = true;
             return;
 
             // Planets and Nebulas can't be killed right now
-        case _UnitType::planet:
-        case _UnitType::nebula:
+        case Vega_UnitType::planet:
+        case Vega_UnitType::nebula:
             return;
 
             // Buildings should not calculate actual damage
-        case _UnitType::building:
+        case Vega_UnitType::building:
             return;
 
             // Units (ships) should calculate actual damage
-        case _UnitType::unit:
+        case Vega_UnitType::unit:
             apply_force = true;
             deal_damage = true;
             return;
 
             // An enhancement upgrades the shields of the unit it collided with.
             // TODO: refactor this.
-        case _UnitType::enhancement:
+        case Vega_UnitType::enhancement:
             // We can't enhance rocks
-            if (other_unit->isUnit() == _UnitType::asteroid ||
-                    other_unit->isUnit() == _UnitType::planet) {
+            if (other_unit->isUnit() == Vega_UnitType::asteroid ||
+                    other_unit->isUnit() == Vega_UnitType::planet) {
                 apply_force = true;
                 return;
             }
@@ -140,7 +140,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             string fac( FactionUtil::GetFaction( unit->faction ) );*/
             unit->Kill();
 
-            //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
+            //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), Vega_UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
             apply_force = true;
             return;
     }
@@ -156,7 +156,7 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
     // so convert accordingly
     // assign half the change in energy to this unit, convert from KJ to VSD
     Damage damage(0.5 * (deltaKE_linear + deltaKE_angular) /
-            configuration()->physics.kilojoules_per_damage);
+            configuration()->physics_config.kilojoules_per_damage);
 
     unit->ApplyDamage(other_collision.location.Cast(),
             other_collision.normal,
@@ -233,7 +233,7 @@ void Collision::validateCollision(const QVector &relative_velocity,
         const QVector &w2_new) {
     //following two values should be identical. Due to FP math, should be nearly identical. Checks for both absolute and relative error, the former to shield slightly larger errors on very small values - can set tighter/looser bounds later
     double RestorativeVelAlongNormal =
-            -1 * (1 - configuration()->physics.inelastic_scale) * relative_velocity.Dot(normal1);
+            -1 * (1 - configuration()->physics_config.inelastic_scale) * relative_velocity.Dot(normal1);
     double ResultantVelAlongNormal =
             ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
     double normalizedError = abs(1.0 - ResultantVelAlongNormal / RestorativeVelAlongNormal);
@@ -298,22 +298,22 @@ void Collision::collide(Unit *unit1,
     // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues
     // should assert: mass >0; radial_size !=0; moment !=0; -- may require data set cleaning if asserted
     double I1 =
-            std::max(unit1->GetMoment(), configuration()->physics.minimum_mass) * unit1->radial_size * unit1->radial_size
+            std::max(unit1->GetMoment(), configuration()->physics_config.minimum_mass) * unit1->radial_size * unit1->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 1
     double I2 =
-            std::max(unit2->GetMoment(), configuration()->physics.minimum_mass) * unit2->radial_size * unit2->radial_size
+            std::max(unit2->GetMoment(), configuration()->physics_config.minimum_mass) * unit2->radial_size * unit2->radial_size
                     * 0.667; // deriving scalar moment of inertia for unit 2
     double I1_inverse = 1.0
             / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
     double I2_inverse = 1.0 / I2;
     double mass1 = std::max(unit1->GetMass(),
-            configuration()->physics
+            configuration()->physics_config
                     .minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
-    double mass2 = std::max(unit2->GetMass(), configuration()->physics.minimum_mass); // avoid subsequent divides by 0
+    double mass2 = std::max(unit2->GetMass(), configuration()->physics_config.minimum_mass); // avoid subsequent divides by 0
     double mass1_inverse = 1.0 / mass1;
     double mass2_inverse = 1.0 / mass2;
     // impulse magnitude, as per equation 5 in wiki -- note that  e = 1 - inelastic_scale, so 1+e = 1 + 1 -inelastic_scale = 2 - inelastic_scale
-    double impulse_magnitude = -1 * ((2 - configuration()->physics.inelastic_scale) * relative_velocity).Dot(normal1) /
+    double impulse_magnitude = -1 * ((2 - configuration()->physics_config.inelastic_scale) * relative_velocity).Dot(normal1) /
             (mass1_inverse + mass2_inverse +
                     ((I1_inverse * (location1_local.Cross(normal1))).Cross(location1_local)
                             + (I2_inverse * (location2_local.Cross(normal1))).Cross(location2_local)).Dot(normal1)
