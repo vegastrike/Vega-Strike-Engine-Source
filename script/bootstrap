@@ -562,7 +562,7 @@ then
                         clang
 elif [ "$LINUX_ID" == "manjaro" ]
 then
-    pamac install  cmake \
+    pacman -S --refresh --noconfirm cmake \
                    boost \
                    clang \
                    gcc \
