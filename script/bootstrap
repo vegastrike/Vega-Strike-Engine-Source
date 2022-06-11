@@ -5,7 +5,7 @@
 # @usage  : sudo script/bootstrap
 # @param  : none
 #====================================
-# Copyright (C) 2020-2021 Stephen G. Tuggy <sgt@stephengtuggy.com>
+# Copyright (C) 2020-2022 Stephen G. Tuggy
 #
 # This file is part of Vega Strike.
 #
@@ -25,7 +25,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2021-12-12 ---"
+echo "--- bootstrap | 2022-06-11 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
@@ -45,7 +45,7 @@ echo "LINUX_CODENAME = ${LINUX_CODENAME}"
 export LINUX_VERSION_ID=$(cat $OS_RELEASE_LOCATION | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '"\n')
 echo "LINUX_VERSION_ID = ${LINUX_VERSION_ID}"
 
-if [ $LINUX_ID == "debian" ] && [ $LINUX_CODENAME == "bullseye" ]
+if [ "$LINUX_ID" == "debian" ] && [ "$LINUX_CODENAME" == "bullseye" ]
 then
     apt-get update
     apt-get -qy install \
@@ -64,6 +64,7 @@ then
                     libopenal-dev \
                     libogg-dev \
                     libvorbis-dev \
+                    libglvnd-dev \
                     libgl1-mesa-dev \
                     libsdl1.2-dev \
                     libpostproc-dev \
@@ -74,13 +75,40 @@ then
                     libxmu-dev \
                     clang \
                     lsb-release
-elif [ $LINUX_ID == "debian" ] && [ $LINUX_CODENAME == "buster" ]
+elif [ "$LINUX_ID" == "debian" ] && [ "$LINUX_CODENAME" == "buster" ]
 then
     apt-get update
     apt-get -qy install \
                     git \
                     cmake \
-                    python-dev \
+                    build-essential \
+                    automake \
+                    autoconf \
+                    libpng16-16 \
+                    libpng-dev \
+                    libpng-tools \
+                    libjpeg62-turbo-dev \
+                    libexpat1-dev \
+                    libgtk-3-dev \
+                    libopenal-dev \
+                    libogg-dev \
+                    libvorbis-dev \
+                    libglvnd-dev \
+                    libgl1-mesa-dev \
+                    libsdl1.2-dev \
+                    libpostproc-dev \
+                    freeglut3-dev \
+                    libboost-python-dev \
+                    libboost-log-dev \
+                    libboost-regex-dev \
+                    libxmu-dev \
+                    clang \
+                    lsb-release
+elif [ "$LINUX_ID" == "debian" ] && [ "$LINUX_CODENAME" == "stretch" ]
+then
+    apt-get update
+    apt-get -qy install \
+                    git \
                     build-essential \
                     automake \
                     autoconf \
@@ -97,42 +125,15 @@ then
                     libsdl1.2-dev \
                     libpostproc-dev \
                     freeglut3-dev \
-                    libboost-python1.67-dev \
-                    libboost-log1.67-dev \
-                    libboost-regex1.67-dev \
-                    libxmu-dev \
-                    clang \
-                    lsb-release
-elif [ $LINUX_ID == "debian" ] && [ $LINUX_CODENAME == "stretch" ]
-then
-    apt-get update
-    apt-get -qy install \
-                    git \
-                    cmake \
-                    python-dev \
-                    build-essential \
-                    automake \
-                    autoconf \
-                    libpng16-16 \
-                    libpng-dev \
-                    libpng-tools \
-                    libjpeg62-turbo-dev \
-                    libexpat1-dev \
-                    libgtk-3-dev \
-                    libopenal-dev \
-                    libogg-dev \
-                    libvorbis-dev \
-                    libgl1-mesa-dev \
-                    libsdl1.2-dev \
-                    libpostproc-dev \
-                    freeglut3-dev \
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
                     libxmu-dev \
                     clang \
-                    lsb-release
-elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "impish" ]
+                    lsb-release \
+                    python3-pip
+    pip3 install --upgrade-strategy eager cmake
+elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "jammy" ]
 then
     apt-get update
     apt-get -qy install \
@@ -164,7 +165,39 @@ then
                     libxmu-dev \
                     clang \
                     lsb-release
-elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "hirsute" ]
+elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "impish" ]
+then
+    apt-get update
+    apt-get -qy install \
+                    git \
+                    cmake \
+                    python3-dev \
+                    build-essential \
+                    automake \
+                    autoconf \
+                    libpng16-16 \
+                    libpng-dev \
+                    libpng-tools \
+                    libjpeg-turbo8-dev \
+                    libexpat1-dev \
+                    libgdk-pixbuf-2.0-dev \
+                    libgtk-3-dev \
+                    libopenal-dev \
+                    libogg-dev \
+                    libvorbis-dev \
+                    libglvnd-dev \
+                    libgl1-mesa-dev \
+                    libsdl1.2-dev \
+                    libopengl0 \
+                    libpostproc-dev \
+                    freeglut3-dev \
+                    libboost-python-dev \
+                    libboost-log-dev \
+                    libboost-regex-dev \
+                    libxmu-dev \
+                    clang \
+                    lsb-release
+elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "hirsute" ]
 then
     apt-get update
     apt-get -qy install \
@@ -183,6 +216,7 @@ then
                     libopenal-dev \
                     libogg-dev \
                     libvorbis-dev \
+                    libglvnd-dev \
                     libgl1-mesa-dev \
                     libsdl1.2-dev \
                     libopengl0 \
@@ -194,7 +228,7 @@ then
                     libxmu-dev \
                     clang \
                     lsb-release
-elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "groovy" ]
+elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "groovy" ]
 then
     apt-get update
     apt-get -qy install \
@@ -213,6 +247,7 @@ then
                     libopenal-dev \
                     libogg-dev \
                     libvorbis-dev \
+                    libglvnd-dev \
                     libgl1-mesa-dev \
                     libsdl1.2-dev \
                     libopengl0 \
@@ -224,13 +259,12 @@ then
                     libxmu-dev \
                     clang \
                     lsb-release
-elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "focal" ]
+elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "focal" ]
 then
     apt-get update
     apt-get -qy install \
                     git \
                     cmake \
-                    python-dev \
                     build-essential \
                     automake \
                     autoconf \
@@ -243,47 +277,25 @@ then
                     libopenal-dev \
                     libogg-dev \
                     libvorbis-dev \
+                    libglvnd-dev \
                     libgl1-mesa-dev \
                     libsdl1.2-dev \
                     libopengl0 \
                     libpostproc-dev \
                     freeglut3-dev \
-                    libboost-python1.67-dev \
-                    libboost-log1.67-dev \
-                    libboost-regex1.67-dev \
-                    libxmu-dev \
-                    clang \
-                    lsb-release
-elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "bionic" ]
-then
-    apt-get update
-    apt-get -qy install \
-                    git \
-                    cmake \
-                    build-essential \
-                    python-dev \
-                    libgl1-mesa-glx \
-                    freeglut3-dev \
-                    libopenal-dev \
-                    libsdl-gfx1.2-dev \
-                    libvorbis-dev \
-                    libjpeg-dev \
-                    libpng-dev \
-                    libgtk-3-dev \
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
-elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "xenial" ]
+elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "bionic" ]
 then
     apt-get update
     apt-get -qy install \
                     git \
-                    cmake \
                     build-essential \
-                    python-dev \
+                    libglvnd-dev \
                     libgl1-mesa-glx \
                     freeglut3-dev \
                     libopenal-dev \
@@ -298,14 +310,37 @@ then
                     libxmu-dev \
                     clang \
                     lsb-release \
-                    python3-dev
-elif [ $LINUX_ID == "linuxmint" ] && [ $LINUX_CODENAME == "ulyana" ]
+                    python3-pip
+    pip3 install --upgrade-strategy eager cmake
+elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "xenial" ]
+then
+    apt-get update
+    apt-get -qy install \
+                    git \
+                    build-essential \
+                    libgl1-mesa-dev \
+                    freeglut3-dev \
+                    libopenal-dev \
+                    libsdl-gfx1.2-dev \
+                    libvorbis-dev \
+                    libjpeg-dev \
+                    libpng-dev \
+                    libgtk-3-dev \
+                    libboost-python-dev \
+                    libboost-log-dev \
+                    libboost-regex-dev \
+                    libxmu-dev \
+                    clang \
+                    lsb-release \
+                    python3-dev \
+                    python3-pip
+    pip3 install cmake
+elif [ "$LINUX_ID" == "linuxmint" ] && [ "$LINUX_CODENAME" == "ulyana" ]
 then
     apt-get update
     apt-get -qy install \
                     git \
                     cmake \
-                    python-dev \
                     build-essential \
                     automake \
                     autoconf \
@@ -318,22 +353,22 @@ then
                     libopenal-dev \
                     libogg-dev \
                     libvorbis-dev \
+                    libglvnd-dev \
                     libgl1-mesa-dev \
                     libsdl1.2-dev \
                     libopengl0 \
                     libpostproc-dev \
                     freeglut3-dev \
-                    libboost-python1.67-dev \
-                    libboost-log1.67-dev \
-                    libboost-regex1.67-dev \
+                    libboost-python-dev \
+                    libboost-log-dev \
+                    libboost-regex-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
-elif [ $LINUX_ID == "opensuse-leap" ] && ([ $LINUX_VERSION_ID == "15.2" ] || [ $LINUX_VERSION_ID == "15.3" ])
+elif [ "$LINUX_ID" == "opensuse-leap" ] && ([ $(echo "${LINUX_VERSION_ID}" | cut -f 1 -d '.') -eq 15 ] && [ $(echo "${LINUX_VERSION_ID}" | cut -f 2 -d '.') -ge 2 ])
 then
     zypper --non-interactive install -y \
                             libboost_log1_66_0-devel \
-                            libboost_python-py2_7-1_66_0-devel \
                             libboost_python-py3-1_66_0-devel \
                             libboost_system1_66_0-devel \
                             libboost_filesystem1_66_0-devel \
@@ -357,12 +392,11 @@ then
                             libexpat-devel \
                             libgtk-3-0 \
                             gtk3-devel \
-                            python-devel \
                             python3-devel \
                             git \
                             rpm-build \
                             clang
-elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 34 ] && [ $LINUX_VERSION_ID -lt 36 ])
+elif [ "$LINUX_ID" == "fedora" ] && ([ "$LINUX_VERSION_ID" -ge 34 ] && [ "$LINUX_VERSION_ID" -lt 36 ])
 then
     dnf install -y \
                         git \
@@ -382,7 +416,7 @@ then
                         rpm-build \
                         make \
                         clang
-elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 32 ] && [ $LINUX_VERSION_ID -lt 34 ])
+elif [ "$LINUX_ID" == "fedora" ] && ([ "$LINUX_VERSION_ID" -ge 32 ] && [ "$LINUX_VERSION_ID" -lt 34 ])
 then
     dnf install -y \
                         git \
@@ -402,13 +436,12 @@ then
                         rpm-build \
                         make \
                         clang
-elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 30 ] && [ $LINUX_VERSION_ID -lt 32 ])
+elif [ "$LINUX_ID" == "fedora" ] && ([ "$LINUX_VERSION_ID" -ge 30 ] && [ "$LINUX_VERSION_ID" -lt 32 ])
 then
     dnf install -y \
                         git \
                         cmake \
                         boost-devel \
-                        boost-python2-devel \
                         boost-python3-devel \
                         freeglut-devel \
                         gcc-c++ \
@@ -419,12 +452,11 @@ then
                         libpng-devel \
                         expat-devel \
                         gtk3-devel \
-                        python2-devel \
                         python3-devel \
                         rpm-build \
                         make \
                         clang
-elif [ $LINUX_ID == "centos" ] && [ $LINUX_VERSION_ID -eq 8 ]
+elif [ "$LINUX_ID" == "centos" ] && [ "$LINUX_VERSION_ID" -eq 8 ]
 then
     dnf -y install dnf-plugins-core
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
@@ -447,7 +479,7 @@ then
                         rpm-build \
                         make \
                         clang
-elif ([ $LINUX_ID == "rhel" ] || [ $LINUX_ID == "redhat" ]) && [ $LINUX_VERSION_ID -eq 8 ]
+elif ([ "$LINUX_ID" == "rhel" ] || [ "$LINUX_ID" == "redhat" ]) && [ "$LINUX_VERSION_ID" -eq 8 ]
 then
     dnf -y install dnf-plugins-core
     dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
@@ -471,7 +503,7 @@ then
                         rpm-build \
                         make \
                         clang
-elif [ $LINUX_ID == "rocky" ] && ([ $(echo ${LINUX_VERSION_ID} | cut -f 1 -d '.') -eq 8 ] && [ $(echo ${LINUX_VERSION_ID} | cut -f 2 -d '.') -ge 4 ])
+elif [ "$LINUX_ID" == "rocky" ] && ([ $(echo "${LINUX_VERSION_ID}" | cut -f 1 -d '.') -eq 8 ] && [ $(echo "${LINUX_VERSION_ID}" | cut -f 2 -d '.') -ge 4 ])
 then
     dnf -y install dnf-plugins-core
     dnf -y install epel-release
@@ -497,6 +529,28 @@ then
                         rpm-build \
                         make \
                         clang
+elif [ "$LINUX_ID" == "manjaro" ]
+then
+    pamac install  cmake \
+                   boost \
+                   clang \
+                   gcc \
+                   gcc-libs \
+                   sdl \
+                   expat \
+                   gtk3 \
+                   libglvnd \
+                   mesa \
+                   python \
+                   autoconf \
+                   automake \
+                   freeglut \
+                   git \
+                   libjpeg-turbo \
+                   libpng \
+                   libvorbis \
+                   libxmu \
+                   openal
 else
     echo "Unsupported Linux distribution"
     exit 2
