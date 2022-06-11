@@ -111,6 +111,12 @@ jobs:
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
+          - FROM:     'manjarolinux/base'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+          - FROM:     'manjarolinux/base'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
 
     steps:
     - name: Checkout repository
