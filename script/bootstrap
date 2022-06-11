@@ -427,7 +427,7 @@ then
                             git \
                             rpm-build \
                             clang
-elif [ "$LINUX_ID" == "fedora" ] && ([ "$LINUX_VERSION_ID" -ge 34 ] && [ "$LINUX_VERSION_ID" -lt 36 ])
+elif [ "$LINUX_ID" == "fedora" ] && ([ "$LINUX_VERSION_ID" -ge 34 ] && [ "$LINUX_VERSION_ID" -lt 37 ])
 then
     dnf install -y \
                         git \
