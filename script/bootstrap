@@ -25,7 +25,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2022-06-11 ---"
+echo "--- bootstrap | 2022-06-13 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
@@ -365,7 +365,7 @@ then
                     libxmu-dev \
                     clang \
                     lsb-release
-elif [ "$LINUX_ID" == "opensuse-leap" ] && ([ $(echo "${LINUX_VERSION_ID}" | cut -f 1 -d '.') -eq 15 ] && [ $(echo "${LINUX_VERSION_ID}" | cut -f 2 -d '.') -ge 2 ])
+elif [ "$LINUX_ID" == "opensuse-leap" ] && ([ "${LINUX_VERSION_ID}" == "15.2" ] || [ "${LINUX_VERSION_ID}" == "15.3" ])
 then
     zypper --non-interactive install -y \
                             libboost_log1_66_0-devel \
@@ -396,7 +396,38 @@ then
                             git \
                             rpm-build \
                             clang
-elif [ "$LINUX_ID" == "fedora" ] && ([ "$LINUX_VERSION_ID" -ge 34 ] && [ "$LINUX_VERSION_ID" -lt 36 ])
+elif [ "$LINUX_ID" == "opensuse-leap" ] && [ "${LINUX_VERSION_ID}" == "15.4" ]
+then
+    zypper --non-interactive install -y \
+                            libboost_log1_75_0-devel \
+                            libboost_python-py3-1_75_0-devel \
+                            libboost_system1_75_0-devel \
+                            libboost_filesystem1_75_0-devel \
+                            libboost_thread1_75_0-devel \
+                            libboost_regex1_75_0-devel \
+                            libboost_chrono1_75_0-devel \
+                            libboost_atomic1_75_0-devel \
+                            cmake \
+                            gcc-c++ \
+                            freeglut-devel \
+                            libopenal0 \
+                            openal-soft-devel \
+                            libSDL-1_2-0 \
+                            libSDL-devel \
+                            libvorbis-devel \
+                            libglvnd-devel \
+                            libjpeg-turbo \
+                            libjpeg62-devel \
+                            libpng16-devel \
+                            expat \
+                            libexpat-devel \
+                            libgtk-3-0 \
+                            gtk3-devel \
+                            python3-devel \
+                            git \
+                            rpm-build \
+                            clang
+elif [ "$LINUX_ID" == "fedora" ] && ([ "$LINUX_VERSION_ID" -ge 34 ] && [ "$LINUX_VERSION_ID" -lt 37 ])
 then
     dnf install -y \
                         git \
@@ -531,7 +562,7 @@ then
                         clang
 elif [ "$LINUX_ID" == "manjaro" ]
 then
-    pamac install  cmake \
+    pacman -S --refresh --noconfirm cmake \
                    boost \
                    clang \
                    gcc \
