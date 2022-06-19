@@ -87,9 +87,9 @@ jobs:
 
       - name: copy-build-artifacts-B
         run: |
-        mkdir -p bin
-        xcopy /y .\build\*.* .\bin\
-        xcopy /y .\build\objconv\*.* .\bin\
+          mkdir -p bin
+          xcopy /y .\build\*.* .\bin\
+          xcopy /y .\build\objconv\*.* .\bin\
         if: ! ${{ matrix.includeConfigurationInBinaryPath }}
 
       - name: Test
