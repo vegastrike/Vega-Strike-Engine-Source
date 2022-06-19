@@ -79,10 +79,10 @@ jobs:
       - name: copy-build-artifacts
         run: |
           mkdir bin
-          if exist .\build\*.* xcopy /y .\build\*.* .\bin\
-          if exist .\build\objconv\*.* xcopy /y .\build\objconv\*.* .\bin\
-          if exist .\build\Release\*.* xcopy /y .\build\Release\*.* .\bin\
-          if exist .\build\objconv\Release\*.* xcopy /y .\build\objconv\Release\*.* .\bin\
+          if exist (.\build\*.*) xcopy /y .\build\*.* .\bin\ .
+          if exist (.\build\objconv\*.*) xcopy /y .\build\objconv\*.* .\bin\ .
+          if exist (.\build\Release\*.*) xcopy /y .\build\Release\*.* .\bin\ .
+          if exist (.\build\objconv\Release\*.*) xcopy /y .\build\objconv\Release\*.* .\bin\ .
 
       - name: Test
         working-directory: ${{github.workspace}}/build
