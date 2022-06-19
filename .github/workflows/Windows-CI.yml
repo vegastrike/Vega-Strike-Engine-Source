@@ -80,14 +80,14 @@ jobs:
 
       - name: copy-build-artifacts
         run: |
-          mkdir -p bin
+          mkdir bin
           xcopy /y .\build\Release\*.* .\bin\
           xcopy /y .\build\objconv\Release\*.* .\bin\
         if: ${{ matrix.includeConfigurationInBinaryPath }}
 
       - name: copy-build-artifacts-B
         run: |
-          mkdir -p bin
+          mkdir bin
           xcopy /y .\build\*.* .\bin\
           xcopy /y .\build\objconv\*.* .\bin\
         if: ! ${{ matrix.includeConfigurationInBinaryPath }}
