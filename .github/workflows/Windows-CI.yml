@@ -24,10 +24,8 @@ jobs:
         include:
           - os:             windows-2019
             cmakeGenerator: VS16Win64
-            includeConfigurationInBinaryPath: true
           - os:             windows-2022
             cmakeGenerator: Ninja
-            includeConfigurationInBinaryPath: false
 
     env:
       buildDir: '${{ github.workspace }}/build/'
@@ -81,16 +79,10 @@ jobs:
       - name: copy-build-artifacts
         run: |
           mkdir bin
-          xcopy /y .\build\Release\*.* .\bin\
-          xcopy /y .\build\objconv\Release\*.* .\bin\
-        if: ${{ matrix.includeConfigurationInBinaryPath }}
-
-      - name: copy-build-artifacts-B
-        run: |
-          mkdir bin
-          xcopy /y .\build\*.* .\bin\
-          xcopy /y .\build\objconv\*.* .\bin\
-        if: ! ${{ matrix.includeConfigurationInBinaryPath }}
+          if exist .\build\*.* xcopy /y .\build\*.* .\bin\
+          if exist .\build\objconv\*.* xcopy /y .\build\objconv\*.* .\bin\
+          if exist .\build\Release\*.* xcopy /y .\build\Release\*.* .\bin\
+          if exist .\build\objconv\Release\*.* xcopy /y .\build\objconv\Release\*.* .\bin\
 
       - name: Test
         working-directory: ${{github.workspace}}/build
