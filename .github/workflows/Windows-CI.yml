@@ -82,7 +82,7 @@ jobs:
           $aPossibleBinaryDirs = @("build", "build\objconv", "build\Release", "build\objconv\Release")
           $aPossibleBinaryDirs | ForEach-Object {
             if (Test-Path $_) {
-              Copy-Item -Force $_\*.* .\bin
+              Copy-Item -Force -Verbose $_\*.* .\bin
             }
           }
 
