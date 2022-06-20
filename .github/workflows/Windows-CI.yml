@@ -79,10 +79,12 @@ jobs:
       - name: copy-build-artifacts
         run: |
           New-Item bin -Force -Type Directory
-          Copy-Item -Force .\build\*.* .\bin
-          Copy-Item -Force .\build\objconv\*.* .\bin
-          Copy-Item -Force .\build\Release\*.* .\bin
-          Copy-Item -Force .\build\objconv\Release\*.* .\bin
+          $aPossibleBinaryDirs = @("build", "build\objconv", "build\Release", "build\objconv\Release")
+          $aPossibleBinaryDirs | ForEach-Object {
+            if (Test-Path $_) {
+              Copy-Item -Force $_\*.* .\bin
+            }
+          }
 
       - name: Test
         working-directory: ${{github.workspace}}/build
