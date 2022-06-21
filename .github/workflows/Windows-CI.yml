@@ -16,7 +16,16 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: windows-2019
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os:             windows-2019
+            cmakeGenerator: VS16Win64
+          - os:             windows-2022
+            cmakeGenerator: Ninja
 
     env:
       buildDir: '${{ github.workspace }}/build/'
@@ -57,7 +66,7 @@ jobs:
           # Select the build configuration, typically Debug or Release. Used by CMakeListsTxtBasic mode.
           cmakeBuildType: Release
           # Specify the CMake generator to use. Possible values: Ninja: Ninja, NinjaMulti: Ninja Multi-Config UnixMakefiles: Unix Makefiles, VS16Win64: Visual Studio 2019 x64, VS16Arm64: Visual Studio 2019 ARM64, VS16Arm: Visual Studio 2019 ARM, VS16Win32: Visual Studio 2019 Win32, VS15Win64: Visual Studio 2017 x64, VS15Arm64: Visual Studio 2017 ARM64, VS15Arm: Visual Studio 2017 ARM, VS15Win32: Visual Studio 2017 Win32. Used by CMakeListsTxtBasic mode.
-          cmakeGenerator: VS16Win64
+          cmakeGenerator: ${{ matrix.cmakeGenerator }}
           # Set the build directory, i.e. where CMake generates the build system files. Defaults to `$(Build.ArtifactStagingDirectory)` for CMakeLists.txt, and to `$(Build.ArtifactStagingDirectory)/<configuration-name>` for CMakeSettings.json. Used by any mode.
           buildDirectory: ${{ env.buildDir }}
           # Provides a mean to provide all the CMake arguments. This is required when using CMakeLists.txt in Advanced mode. For CMakeSettings.json, the arguments are already inferred, but you can append your arguments providing them here.  Used by CMakeListsTxtAdvanced and CMakeSettingsJson modes.
@@ -69,9 +78,13 @@ jobs:
 
       - name: copy-build-artifacts
         run: |
-          mkdir bin
-          xcopy /y .\build\Release\*.* .\bin\
-          xcopy /y .\build\objconv\Release\*.* .\bin\
+          New-Item bin -Force -Type Directory
+          $aPossibleBinaryDirs = @("build", "build\objconv", "build\Release", "build\objconv\Release")
+          $aPossibleBinaryDirs | ForEach-Object {
+            if (Test-Path $_) {
+              Copy-Item -Force -Verbose $_\*.* .\bin
+            }
+          }
 
       - name: Test
         working-directory: ${{github.workspace}}/build
