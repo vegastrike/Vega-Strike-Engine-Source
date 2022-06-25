@@ -88,14 +88,16 @@ void vega_config::GameConfig::LoadGameConfig(const std::string &filename) {
             }
             pt::ptree inner_tree = iterator.second;
             for (const auto& iterator2 : inner_tree) {
+                std::ostringstream path_ostringstream{};
                 if (boost::iequals(iterator2.first, "var")) {
                     std::string variable_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
                     if (variable_name.empty()) {
                         continue;
                     }
                     std::string variable_value = iterator2.second.get<std::string>("<xmlattr>.value", "");
-//                    VS_LOG(debug, (boost::format("%1%: putting value %2% in the tree at %3%") % __func__ % variable_value % (section_name + "." + variable_name)));
-                    variables_()->put(section_name + "." + variable_name, variable_value);
+                    //VS_LOG(debug, (boost::format("%1%: putting value %2% in the tree at %3%") % __func__ % variable_value % (section_name + "." + variable_name)));
+                    path_ostringstream << section_name << "." << variable_name;
+                    variables_()->put(path_ostringstream.str(), variable_value);
                 } else if (boost::iequals(iterator2.first, "section")) {
                     std::string subsection_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
                     if (subsection_name.empty()) {
@@ -109,7 +111,8 @@ void vega_config::GameConfig::LoadGameConfig(const std::string &filename) {
                                 continue;
                             }
                             std::string variable_value2 = iterator3.second.get<std::string>("<xmlattr>.value", "");
-                            variables_()->put(section_name + "." + subsection_name + "." + variable_name2, variable_value2);
+                            path_ostringstream << section_name << "." << subsection_name << "." << variable_name2;
+                            variables_()->put(path_ostringstream.str(), variable_value2);
                         }
                     }
                 }
