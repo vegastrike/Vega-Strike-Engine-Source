@@ -23,7 +23,7 @@
 #ifndef _XML_SUPPORT_H_
 #define _XML_SUPPORT_H_
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #ifndef WIN32
 #include <sstream>
@@ -31,13 +31,13 @@
 #include "hashtable.h"
 #include <vector>
 #include <expat.h>
-#include <iostream>             //needed for cout calls in config_xml.cpp (and other places too i'm sure)
+#include <iostream>             //needed for cout calls in config_xml.cpp (and other places too I'm sure)
 #include "gfx/vec.h"
 
-#if defined (_MSC_VER) && defined (_WIN32) && (_MSC_VER >= 1400)
-//Disable useless "sprintf depricated" errors in Visual Studio 2005 Express.
-#pragma warning(disable : 4996)
-#endif
+//#if defined (_MSC_VER) && defined (_WIN32) && (_MSC_VER >= 1400)
+////Disable useless "sprintf deprecated" errors in Visual Studio 2005 Express.
+//#pragma warning(disable : 4996)
+//#endif
 
 #define ARRAY_LENGTH(a) ( sizeof (a)/sizeof (a[0]) )
 
@@ -55,7 +55,7 @@ struct Attribute {
 
 class AttributeList : public std::vector<Attribute> {
 public:
-    AttributeList(const XML_Char **atts);
+    explicit AttributeList(const XML_Char **atts);
 };
 float parse_floatf(const std::string &str);
 double parse_float(const std::string &str);
