@@ -22,11 +22,9 @@
 
 
 #include "xml_serializer.h"
-#include "cmd/unit_generic.h"
 #include "cmd/images.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"
-#include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 
@@ -141,15 +139,15 @@ static void Tab(VSFileSystem::VSFile &f, int level) {
 void XMLnode::Write(VSFileSystem::VSFile &f, void *mythis, int level) {
     Tab(f, level);
     f.Fprintf("<%s", val.c_str());
-    for (unsigned int i = 0; i < elements.size(); i++) {
-        elements[i].Write(f, mythis);
+    for (auto & element : elements) {
+        element.Write(f, mythis);
     }
     if (subnodes.empty()) {
         f.Fprintf("/>\n");
     } else {
         f.Fprintf(">\n");
-        for (unsigned int i = 0; i < subnodes.size(); i++) {
-            subnodes[i].Write(f, mythis, level + 1);
+        for (auto & subnode : subnodes) {
+            subnode.Write(f, mythis, level + 1);
         }
         Tab(f, level);
         f.Fprintf("</%s>\n", val.c_str());
@@ -169,24 +167,24 @@ void XMLSerializer::Write(const char *modificationname) {
         VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
         return;
     }
-    for (unsigned int i = 0; i < topnode.subnodes.size(); i++) {
-        topnode.subnodes[i].Write(f, mythis, 0);
+    for (auto & subnode : topnode.subnodes) {
+        subnode.Write(f, mythis, 0);
     }
     f.Close();
 }
 
 static string TabString(int level) {
-    string ret = "";
-    for (int i = 0; i < level; i++) {
+    string ret{};
+    for (int i = 0; i < level; ++i) {
         ret += '\t';
     }
     return ret;
 }
 
 string XMLSerializer::WriteString() {
-    string ret = "";
-    for (unsigned int i = 0; i < topnode.subnodes.size(); i++) {
-        ret += topnode.subnodes[i].WriteString(mythis, 0);
+    string ret{};
+    for (auto & subnode : topnode.subnodes) {
+        ret += subnode.WriteString(mythis, 0);
     }
     return ret;
 }
@@ -199,15 +197,15 @@ string XMLnode::WriteString(void *mythis, int level) {
     ret = TabString(level);
     ret = ret + "<" + val;
     ret += string(buffer);
-    for (unsigned int i = 0; i < elements.size(); i++) {
-        ret += elements[i].WriteString(mythis);
+    for (auto & element : elements) {
+        ret += element.WriteString(mythis);
     }
     if (subnodes.empty()) {
         ret += "/>\n";
     } else {
         ret += ">\n";
-        for (unsigned int i = 0; i < subnodes.size(); i++) {
-            ret += subnodes[i].WriteString(mythis, level + 1);
+        for (auto & subnode : subnodes) {
+            ret += subnode.WriteString(mythis, level + 1);
         }
         ret += TabString(level);
         ret = ret + "</" + val + ">\n";
@@ -229,12 +227,12 @@ XMLSerializer::XMLSerializer(const char *filename, const char *modificationname,
 }
 
 void XMLSerializer::AddTag(const std::string &tag) {
-    curnode->subnodes.push_back(XMLnode(tag, curnode));
+    curnode->subnodes.emplace_back(tag, curnode);
     curnode = &curnode->subnodes.back();
 }
 
 void XMLSerializer::AddElement(const std::string &element, XMLHandler *handler, const XMLType &input) {
-    curnode->elements.push_back(XMLElement(element, input, handler));
+    curnode->elements.emplace_back(element, input, handler);
 }
 
 void XMLSerializer::EndTag(const std::string endname) {
