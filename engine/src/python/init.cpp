@@ -185,9 +185,11 @@ void Python::init() {
     VS_LOG(info, "testing VS random");
     std::string changepath("import sys\nprint(sys.path)\n");
     VS_LOG(info, (boost::format("running %1%") % changepath));
-    char *temppython = strdup(changepath.c_str());
+    char *temppython = _strdup(changepath.c_str());
     PyRun_SimpleString(temppython);
     Python::reseterrors();
+    free(temppython);
+
     const std::string python_snippet_to_run{
             "import VS\n"
             "print("
@@ -197,9 +199,10 @@ void Python::init() {
             ")"
             ")"
     };
-    PyRun_SimpleString(python_snippet_to_run.c_str());
+    char *temp_python2 = _strdup(python_snippet_to_run.c_str());
+    PyRun_SimpleString(temp_python2);
     Python::reseterrors();
-    free(temppython);
+    free(temp_python2);
 #if (PY_VERSION_HEX < 0x03000000)
     InitDirector2();
     InitBase2();

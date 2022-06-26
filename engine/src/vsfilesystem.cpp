@@ -775,16 +775,18 @@ void InitMods() {
 
     selectcurrentdir = moddir;
     boost::filesystem::path mod_path(selectcurrentdir);
-    for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(mod_path)) {
-        const boost::filesystem::path& filename = entry.path().filename();
-        const std::string filename_string = filename.string();
-        if (filename_string == modname && is_directory(entry.status())) {
-            curpath.clear();
-            curpath.append(selectcurrentdir);
-            curpath.append("/");
-            curpath.append(filename_string);
-            VS_LOG(important_info, (boost::format("Adding mod path : %1%") % curpath));
-            Rootdir.push_back(curpath);
+    if (exists(mod_path)) {
+        for (boost::filesystem::directory_entry &entry : boost::filesystem::directory_iterator(mod_path)) {
+            const boost::filesystem::path &filename = entry.path().filename();
+            const std::string filename_string = filename.string();
+            if (filename_string == modname && is_directory(entry.status())) {
+                curpath.clear();
+                curpath.append(selectcurrentdir);
+                curpath.append("/");
+                curpath.append(filename_string);
+                VS_LOG(important_info, (boost::format("Adding mod path : %1%") % curpath));
+                Rootdir.push_back(curpath);
+            }
         }
     }
 
@@ -810,13 +812,15 @@ void InitMods() {
     curmodpath = homedir + "/mods/";
     selectcurrentdir = curmodpath;
     boost::filesystem::path mods_subtree_path(selectcurrentdir);
-    for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(mods_subtree_path)) {
-        const boost::filesystem::path& filename = entry.path().filename();
-        const std::string filename_string = filename.string();
-        if (filename_string == modname && is_directory(entry.status())) {
-            curpath = curmodpath + filename_string;
-            VS_LOG(important_info, (boost::format("Adding mod path : %1%") % curpath));
-            Rootdir.push_back(curpath);
+    if (exists(mods_subtree_path)) {
+        for (boost::filesystem::directory_entry &entry : boost::filesystem::directory_iterator(mods_subtree_path)) {
+            const boost::filesystem::path &filename = entry.path().filename();
+            const std::string filename_string = filename.string();
+            if (filename_string == modname && is_directory(entry.status())) {
+                curpath = curmodpath + filename_string;
+                VS_LOG(important_info, (boost::format("Adding mod path : %1%") % curpath));
+                Rootdir.push_back(curpath);
+            }
         }
     }
 
