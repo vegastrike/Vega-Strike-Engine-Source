@@ -24,19 +24,18 @@
 #include "vsfilesystem.h"
 
 #include <cstdio>
-#include <assert.h>
+#include <cassert>
 #include <cstdarg>
 #include <exception>
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <Shlobj.h>
 #include <direct.h>
-#include <config.h>
-#include <string.h>
+#include <cstring>
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-#include <stdlib.h>
+#include <cstdlib>
 struct dirent
 {
     char d_name[1];
@@ -90,10 +89,11 @@ char *CONFIGFILE;
 const size_t VS_PATH_BUF_SIZE = 65536;
 char pwd[VS_PATH_BUF_SIZE];
 VSVolumeType isin_bigvolumes = VSFSNone;
-std::string curmodpath = "";
+std::string curmodpath{};
 
 extern string GetUnitDir(string filename);
 
+//std::vector<dirent *> sortTheDirectoryEntries(dirent **p_dirent, const size_t num_entries, int (*compar)(const dirent **, const dirent **));
 std::string selectcurrentdir;
 
 int selectdirs(const struct dirent *entry) {
@@ -103,7 +103,7 @@ int selectdirs(const struct dirent *entry) {
     //Have to check if we have the full path or just relative (which would be a problem)
     std::string tmp = selectcurrentdir + '/' + entry->d_name;
     //cerr<<"Read directory entry : "<< tmp <<endl;
-    struct stat s;
+    struct stat s{};
     if (stat(tmp.c_str(), &s) < 0) {
         return 0;
     }
@@ -270,6 +270,7 @@ vector<int> UseVolumes;
 std::string failed;
 
 //Map of the currently opened PK3 volume/resource files
+// FIXME: Clang-Tidy: Initialization of 'pk3_opened_files' with static storage duration may throw an exception that cannot be caught
 vsUMap<std::string, CPK3 *> pk3_opened_files;
 
 /*
@@ -279,13 +280,13 @@ vsUMap<std::string, CPK3 *> pk3_opened_files;
  */
 
 std::string GetHashName(const std::string &name) {
-    std::string result("");
+    std::string result;
     result = current_path.back() + current_directory.back() + current_subdirectory.back() + name;
     return result;
 }
 
 std::string GetHashName(const std::string &name, const Vector &scale, int faction) {
-    std::string result("");
+    std::string result;
     result = current_path.back() + current_directory.back() + current_subdirectory.back() + name;
 
     result += XMLSupport::VectorToString(scale) + "|" + XMLSupport::tostring(faction);
@@ -349,7 +350,7 @@ FILE *vs_open(const char *filename, const char *mode) {
     FILE *fp;
     string fullpath = homedir + "/" + string(filename);
     if (!use_volumes && (string(mode) == "rb" || string(mode) == "r")) {
-        string output("");
+        string output;
         fp = fopen(fullpath.c_str(), mode);
         if (!fp) {
             fullpath = string(filename);
@@ -382,7 +383,7 @@ FILE *vs_open(const char *filename, const char *mode) {
     }
     return fp;
 
-    return NULL;
+    return nullptr;
 }
 
 size_t vs_read(void *ptr, size_t size, size_t nmemb, FILE *fp) {
@@ -439,8 +440,8 @@ bool vs_feof(FILE *fp) {
 
 long vs_getsize(FILE *fp) {
     if (!use_volumes) {
-        struct stat st;
-        if (fstat(fileno(fp), &st) == 0) {
+        struct stat st{};
+        if (fstat(_fileno(fp), &st) == 0) {
             return st.st_size;
         }
         return -1;
@@ -463,7 +464,7 @@ void InitHomeDirectory()
     size_t pathSize = 0;
     errno_t conversionResult = 0;
 
-    HRESULT getPathResult = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE | KF_FLAG_NO_ALIAS, NULL, &pszPath);
+    HRESULT getPathResult = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE | KF_FLAG_NO_ALIAS, nullptr, &pszPath);
     if (SUCCEEDED(getPathResult)) {
         conversionResult = wcstombs_s(&pathSize, mbcsPath, pszPath, VS_PATH_BUF_SIZE - 1);
         CoTaskMemFree(pszPath);
@@ -547,37 +548,37 @@ void InitDataDirectory() {
         data_paths.push_back(vegastrike_cwd + "/../Assets-Production");
         data_paths.push_back(vegastrike_cwd + "/../../Assets-Production");
     }
-    data_paths.push_back(".");
-    data_paths.push_back("..");
-    data_paths.push_back("../data");
-    data_paths.push_back("../../data");
-    data_paths.push_back("../Resources");
-    data_paths.push_back("../Resources/data");
-    data_paths.push_back("Assets-Production");
-    data_paths.push_back("../Assets-Production");
-    data_paths.push_back("../../Assets-Production");
+    data_paths.emplace_back(".");
+    data_paths.emplace_back("..");
+    data_paths.emplace_back("../data");
+    data_paths.emplace_back("../../data");
+    data_paths.emplace_back("../Resources");
+    data_paths.emplace_back("../Resources/data");
+    data_paths.emplace_back("Assets-Production");
+    data_paths.emplace_back("../Assets-Production");
+    data_paths.emplace_back("../../Assets-Production");
 
     //Win32 data should be "."
     char tmppath[VS_PATH_BUF_SIZE];
-    for (vector<string>::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++) {
+    for (auto & data_path : data_paths) {
         //Test if the dir exist and contains config_file
-        if (FileExists((*vsit), config_file) >= 0) {
-            VS_LOG(info, (boost::format("Found data in %1%") % (*vsit)));
-            if (NULL != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
-                if ((*vsit).substr(0, 1) == ".") {
-                    datadir = string(tmppath) + "/" + (*vsit);
+        if (FileExists(data_path, config_file) >= 0) {
+            VS_LOG(info, (boost::format("Found data in %1%") % data_path));
+            if (nullptr != _getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
+                if (data_path.substr(0, 1) == ".") {
+                    datadir = string(tmppath) + "/" + data_path;
                 } else {
-                    datadir = (*vsit);
+                    datadir = data_path;
                 }
             } else {
                 VS_LOG(error, "Cannot get current path: path too long");
             }
 
-            if (chdir(datadir.c_str()) < 0) {
+            if (_chdir(datadir.c_str()) < 0) {
                 VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
                 VSExit(1);
             }
-            if (NULL != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
+            if (nullptr != _getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
                 datadir = string(tmppath);
             } else {
                 VS_LOG(error, "Cannot get current path: path too long");
@@ -598,7 +599,7 @@ void InitDataDirectory() {
         version = fopen("Version.txt", "r");
     }
     if (version) {
-        string hsd = "";
+        string hsd;
         int c;
         while ((c = fgetc(version)) != EOF) {
             if (isspace(c)) {
@@ -741,51 +742,98 @@ void InitMods() {
     if (!game_options()->hqtextures.empty()) {
         //HQ Texture dir sits alongside data dir.
         selectcurrentdir = datadir + "/..";
-        int ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
-        if (ret >= 0) {
-            while (ret--) {
-                string dname(dirlist[ret]->d_name);
-                if (dname == game_options()->hqtextures) {
-                    curpath = selectcurrentdir + "/" + dname;
-                    VS_LOG(info, "\n\nAdding HQ Textures Pack\n\n");
-                    Rootdir.push_back(curpath);
-                }
-            }
-        }
-        free(dirlist);
-    }
-    selectcurrentdir = moddir;
-    int ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
-    if (ret < 0) {
-        return;
-    } else {
-        while (ret--) {
-            string dname(dirlist[ret]->d_name);
-            if (dname == modname) {
-                curpath = moddir + "/" + dname;
-                VS_LOG(info, (boost::format("Adding mod path : %1%") % curpath));
+        boost::filesystem::path p(selectcurrentdir);
+        for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(p)) {
+            const boost::filesystem::path& filename = entry.path().filename();
+            const std::string filename_string = filename.string();
+            if (filename_string == game_options()->hqtextures && is_directory(entry.status())) {
+                curpath.clear();
+                curpath.append(selectcurrentdir);
+                curpath.append("/");
+                curpath.append(filename_string);
+                VS_LOG(important_info, "\n\nAdding HQ Textures Pack\n\n");
                 Rootdir.push_back(curpath);
             }
         }
+
+//        int ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, nullptr);
+//        if (ret >= 0) {
+//            while (ret--) {
+//                string dname(dirlist[ret]->d_name);
+//                if (dname == game_options()->hqtextures) {
+//                    curpath.clear();
+//                    curpath.append(selectcurrentdir);
+//                    curpath.append("/");
+//                    curpath.append(dname);
+//                    VS_LOG(info, "\n\nAdding HQ Textures Pack\n\n");
+//                    Rootdir.push_back(curpath);
+//                }
+//            }
+//        }
+//        free(dirlist);
     }
-    free(dirlist);
-    //Scan for mods with standard data subtree
+
+    selectcurrentdir = moddir;
+    boost::filesystem::path mod_path(selectcurrentdir);
+    for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(mod_path)) {
+        const boost::filesystem::path& filename = entry.path().filename();
+        const std::string filename_string = filename.string();
+        if (filename_string == modname && is_directory(entry.status())) {
+            curpath.clear();
+            curpath.append(selectcurrentdir);
+            curpath.append("/");
+            curpath.append(filename_string);
+            VS_LOG(important_info, (boost::format("Adding mod path : %1%") % curpath));
+            Rootdir.push_back(curpath);
+        }
+    }
+
+//    int ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, nullptr);
+//    if (ret < 0) {
+//        return;
+//    } else {
+//        while (ret--) {
+//            string dname(dirlist[ret]->d_name);
+//            if (dname == modname) {
+//                curpath.clear();
+//                curpath.append(moddir);
+//                curpath.append("/");
+//                curpath.append(dname);
+//                VS_LOG(info, (boost::format("Adding mod path : %1%") % curpath));
+//                Rootdir.push_back(curpath);
+//            }
+//        }
+//    }
+//    free(dirlist);
+
+//Scan for mods with standard data subtree
     curmodpath = homedir + "/mods/";
     selectcurrentdir = curmodpath;
-    ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
-    if (ret < 0) {
-        return;
-    } else {
-        while (ret--) {
-            string dname(dirlist[ret]->d_name);
-            if (dname == modname) {
-                curpath = curmodpath + dname;
-                VS_LOG(info, (boost::format("Adding mod path : %1%") % curpath));
-                Rootdir.push_back(curpath);
-            }
+    boost::filesystem::path mods_subtree_path(selectcurrentdir);
+    for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(mods_subtree_path)) {
+        const boost::filesystem::path& filename = entry.path().filename();
+        const std::string filename_string = filename.string();
+        if (filename_string == modname && is_directory(entry.status())) {
+            curpath = curmodpath + filename_string;
+            VS_LOG(important_info, (boost::format("Adding mod path : %1%") % curpath));
+            Rootdir.push_back(curpath);
         }
     }
-    free(dirlist);
+
+//    ret = scandir(selectcurrentdir.c_str(), &dirlist, selectdirs, nullptr);
+//    if (ret < 0) {
+//        return;
+//    } else {
+//        while (ret--) {
+//            string dname(dirlist[ret]->d_name);
+//            if (dname == modname) {
+//                curpath = curmodpath + dname;
+//                VS_LOG(info, (boost::format("Adding mod path : %1%") % curpath));
+//                Rootdir.push_back(curpath);
+//            }
+//        }
+//    }
+//    free(dirlist);
 }
 
 void InitPaths(string conf, string subdir) {
@@ -847,26 +895,26 @@ void InitPaths(string conf, string subdir) {
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to files
     Directories[UnitFile] = sharedunits;
     //Have to put it in first place otherwise VS will find default unit file
-    SubDirectories[UnitFile].push_back("subunits");
-    SubDirectories[UnitFile].push_back("weapons");
-    SubDirectories[UnitFile].push_back("");
-    SubDirectories[UnitFile].push_back("factions/planets");
-    SubDirectories[UnitFile].push_back("factions/upgrades");
-    SubDirectories[UnitFile].push_back("factions/neutral");
-    SubDirectories[UnitFile].push_back("factions/aera");
-    SubDirectories[UnitFile].push_back("factions/confed");
-    SubDirectories[UnitFile].push_back("factions/pirates");
-    SubDirectories[UnitFile].push_back("factions/rlaan");
+    SubDirectories[UnitFile].emplace_back("subunits");
+    SubDirectories[UnitFile].emplace_back("weapons");
+    SubDirectories[UnitFile].emplace_back("");
+    SubDirectories[UnitFile].emplace_back("factions/planets");
+    SubDirectories[UnitFile].emplace_back("factions/upgrades");
+    SubDirectories[UnitFile].emplace_back("factions/neutral");
+    SubDirectories[UnitFile].emplace_back("factions/aera");
+    SubDirectories[UnitFile].emplace_back("factions/confed");
+    SubDirectories[UnitFile].emplace_back("factions/pirates");
+    SubDirectories[UnitFile].emplace_back("factions/rlaan");
 
     Directories[UnitSaveFile] = savedunitpath;
 
     Directories[MeshFile] = sharedmeshes;
-    SubDirectories[MeshFile].push_back("mounts");
-    SubDirectories[MeshFile].push_back("nav/default");
+    SubDirectories[MeshFile].emplace_back("mounts");
+    SubDirectories[MeshFile].emplace_back("nav/default");
 
     Directories[TextureFile] = sharedtextures;
-    SubDirectories[TextureFile].push_back("mounts");
-    SubDirectories[TextureFile].push_back("nav/default");
+    SubDirectories[TextureFile].emplace_back("mounts");
+    SubDirectories[TextureFile].emplace_back("nav/default");
 
     //We will also look in subdirectories with universe name
     Directories[SystemFile] = sharedsectors;
@@ -880,8 +928,8 @@ void InitPaths(string conf, string subdir) {
     Directories[VSSpriteFile] = sharedsprites;
 
     Directories[AiFile] = aidir;
-    SubDirectories[AiFile].push_back("events");
-    SubDirectories[AiFile].push_back("script");
+    SubDirectories[AiFile].emplace_back("events");
+    SubDirectories[AiFile].emplace_back("script");
 
     Directories[MissionFile] = "mission";
     Directories[CommFile] = "communications";
@@ -985,7 +1033,7 @@ void InitPaths(string conf, string subdir) {
 void CreateDirectoryAbs(const char *filename) {
     int err;
     if (!DirectoryExists(filename)) {
-        err = mkdir(filename
+        err = _mkdir(filename
 #if !defined (_WIN32) || defined (__CYGWIN__)
                 , 0xFFFFFFFF
 #endif
@@ -1020,7 +1068,7 @@ void CreateDirectoryData(const string &filename) {
 
 //Absolute directory -- DO NOT USE FOR TESTS IN VOLUMES !!
 bool DirectoryExists(const char *filename) {
-    struct stat s;
+    struct stat s{};
     if (stat(filename, &s) < 0) {
         return false;
     }
@@ -1046,14 +1094,14 @@ int FileExists(const string &root, const char *filename, VSFileType type, bool l
     } else {
         file = filename;
     }
-    const char *rootsep = (root == "" || root == "/") ? "" : "/";
+    const char *rootsep = (root.empty() || root == "/") ? "" : "/";
     if (!UseVolumes[type] || !lookinvolume) {
         if (type == UnknownFile) {
             fullpath = root + rootsep + file;
         } else {
             fullpath = root + rootsep + Directories[type] + "/" + file;
         }
-        struct stat s;
+        struct stat s{};
         if (stat(fullpath.c_str(), &s) >= 0) {
             if (s.st_mode & S_IFDIR) {
                 VS_LOG(error, " File is a directory ! ");
@@ -1203,8 +1251,13 @@ VSError LookForFile(const string &file, VSFileType type, VSFileMode mode) {
 }
 
 VSError LookForFile(VSFile &f, VSFileType type, VSFileMode mode) {
-    int found = -1, shared = false;
-    string filepath, curpath, dir, extra(""), subdir;
+    int found = -1;
+    bool shared = false;
+    string filepath;
+    string curpath;
+    string dir;
+    string extra;
+    string subdir;
     failed.erase();
     VSFileType curtype = type;
     //First try in the current path
@@ -1242,14 +1295,14 @@ VSError LookForFile(VSFile &f, VSFileType type, VSFileMode mode) {
     }
     //This test lists all the VSFileType that should be looked for in the current directory
     unsigned int i = 0, j = 0;
-    for (int LC = 0; LC < 2 && found < 0; (LC += (extra == "" ? 2 : 1)), extra = "") {
-        if (current_path.back() != ""
+    for (int LC = 0; LC < 2 && found < 0; (LC += (extra.empty() ? 2 : 1)), extra = "") {
+        if (!current_path.back().empty()
                 && (type == TextureFile || type == MeshFile || type == VSSpriteFile || type == AnimFile
                         || type == VideoFile)) {
             for (i = 0; found < 0 && i < Rootdir.size(); i++) {
                 curpath = Rootdir[i];
                 subdir = current_subdirectory.back();
-                if (extra != "") {
+                if (!extra.empty()) {
                     subdir += extra;
                 }
                 curtype = current_type.back();
@@ -1269,13 +1322,13 @@ VSError LookForFile(VSFile &f, VSFileType type, VSFileMode mode) {
         if (found < 0 && UseVolumes[curtype]) {
             curpath = homedir;
             subdir = "";
-            if (extra != "") {
+            if (!extra.empty()) {
                 subdir += extra;
             }
             found = FileExists(curpath, (subdir + "/" + f.GetFilename()).c_str(), type, false);
             for (j = 0; found < 0 && j < SubDirectories[curtype].size(); j++) {
                 subdir = SubDirectories[curtype][j];
-                if (extra != "") {
+                if (!extra.empty()) {
                     subdir += extra;
                 }
                 found = FileExists(curpath, (subdir + "/" + f.GetFilename()).c_str(), curtype, false);
@@ -1286,7 +1339,7 @@ VSError LookForFile(VSFile &f, VSFileType type, VSFileMode mode) {
         for (i = 0; found < 0 && i < Rootdir.size(); i++) {
             curpath = Rootdir[i];
             subdir = f.GetSubDirectory();
-            if (extra != "") {
+            if (!extra.empty()) {
                 subdir += extra;
             }
             found = FileExists(curpath, (subdir + "/" + f.GetFilename()).c_str(), curtype);
@@ -1299,7 +1352,7 @@ VSError LookForFile(VSFile &f, VSFileType type, VSFileMode mode) {
                     }
                     subdir += f.GetSubDirectory();
                 }
-                if (extra != "") {
+                if (!extra.empty()) {
                     subdir += extra;
                 }
                 found = FileExists(curpath, (subdir + "/" + f.GetFilename()).c_str(), curtype);
@@ -1313,7 +1366,7 @@ VSError LookForFile(VSFile &f, VSFileType type, VSFileMode mode) {
                 for (j = 0; found < 0 && j < SubDirectories[curtype].size(); j++) {
                     curpath = Rootdir[i];
                     subdir = SubDirectories[curtype][j];
-                    if (extra != "") {
+                    if (!extra.empty()) {
                         subdir += extra;
                     }
                     found = FileExists(curpath, (subdir + "/" + f.GetFilename()).c_str(), curtype);
@@ -1369,10 +1422,10 @@ const boost::filesystem::path GetSavePath() {
 //VOLUMES -> SO WE HAVE TO USE THE ALT_TYPE IN MOST OF THE TEST TO USE THE CORRECT FILE OPERATIONS
 
 void VSFile::private_init() {
-    fp = NULL;
+    fp = nullptr;
     size = 0;
-    pk3_file = NULL;
-    pk3_extracted_file = NULL;
+    pk3_file = nullptr;
+    pk3_extracted_file = nullptr;
     offset = 0;
     valid = false;
     file_type = alt_type = UnknownFile;
@@ -1490,7 +1543,7 @@ VSError VSFile::OpenReadOnly(const char *file, VSFileType type) {
         if (!UseVolumes[type]) {
             if (type == UnknownFile) {
                 //We look in the current_path or for a full relative path to either homedir or datadir
-                if (current_path.back() != "") {
+                if (!current_path.back().empty()) {
                     string filestr1 = current_directory.back()
                             + "/" + current_subdirectory.back() + "/" + string(file);
                     filestr = current_path.back() + "/" + filestr1;
@@ -1521,7 +1574,7 @@ VSError VSFile::OpenReadOnly(const char *file, VSFileType type) {
                     this->valid = false;
                     err = FileNotFound;
                 } else {
-                    if ((this->fp = fopen(filestr.c_str(), "rb")) == NULL) {
+                    if ((this->fp = fopen(filestr.c_str(), "rb")) == nullptr) {
                         VS_LOG_AND_FLUSH(fatal,
                                 (boost::format(
                                         "!!! SERIOUS ERROR : failed to open Unknown file %1% - this should not happen")
@@ -1753,7 +1806,7 @@ std::string VSFile::ReadFull() {
 
         char *content = new char[this->Size() + 1];
         content[this->Size()] = 0;
-        int readsize = fread(content, 1, this->Size(), this->fp);
+        size_t readsize = fread(content, 1, this->Size(), this->fp);
         if (this->Size() != readsize) {
             VS_LOG(error,
                     (boost::format("Only read %1% out of %2% bytes of %3%") % readsize % this->Size()
@@ -1895,11 +1948,12 @@ void VSFile::GoTo(long foffset)                //Does a VSFileSystem::Fseek( fp,
     }
 }
 
+// FIXME: Return type should be either unsigned long or size_t
 long VSFile::Size() {
     if (size == 0) {
         if (!UseVolumes[alt_type] || this->volume_type == VSFSNone || file_mode != ReadOnly) {
-            struct stat st;
-            if ((fp != NULL) && fstat(fileno(fp), &st) == 0) {
+            struct stat st{};
+            if ((fp != nullptr) && fstat(_fileno(fp), &st) == 0) {
                 return this->size = st.st_size;
             }
             return -1;
@@ -1963,7 +2017,7 @@ bool VSFile::Valid() {
 void VSFile::Close() {
     if (this->file_type >= ZoneBuffer && this->file_type != UnknownFile && this->pk3_extracted_file) {
         delete this->pk3_extracted_file;
-        this->pk3_extracted_file = NULL;
+        this->pk3_extracted_file = nullptr;
         return;
     }
     if (this->valid && this->file_mode == ReadOnly
@@ -1981,7 +2035,7 @@ void VSFile::Close() {
     }
     if (!UseVolumes[file_type] || this->volume_type == VSFSNone || file_mode != ReadOnly) {
         fclose(this->fp);
-        this->fp = NULL;
+        this->fp = nullptr;
     } else {
         if (q_volume_format == vfmtVSR) {
         } else if (q_volume_format == vfmtPK3) {
@@ -2125,81 +2179,97 @@ case a:           \
 #undef CASE
 }
 
-#if defined (_WIN32) && !defined (__CYGWIN__)
+//#if defined (_WIN32) && !defined (__CYGWIN__)
+//
+//int scandir( const char *dirname, struct dirent ***namelist, int (*select)( const struct dirent* ), int (*compar)(
+//                const struct dirent**,
+//                const struct dirent** ) )
+//{
+//    size_t len;
+//    char  *findIn;
+//    char  *d;
+//    WIN32_FIND_DATA find;
+//    HANDLE h;
+//    int    nDir = 0;
+//    int    NDir = 0;
+//    struct dirent **dir = nullptr;
+//    struct dirent *selectDir;
+//    unsigned long   ret;
+//
+//    len    = strlen( dirname );
+//    findIn = (char*) malloc( len+5 );
+//    strcpy( findIn, dirname );
+//    for (d = findIn; *d; d++)
+//        if (*d == '/') *d = '\\';
+//    if ( (len == 0) ) strcpy( findIn, ".\\*" );
+//    if ( (len == 1) && (d[-1] == '.') ) strcpy( findIn, ".\\*" );
+//    if ( (len > 0) && (d[-1] == '\\') ) {
+//        *d++ = '*';
+//        *d   = 0;
+//    }
+//    if ( (len > 1) && (d[-1] == '.') && (d[-2] == '\\') ) d[-1] = '*';
+//    if ( ( h = FindFirstFile( findIn, &find ) ) == INVALID_HANDLE_VALUE ) {
+//        ret = GetLastError();
+//        if (ret != ERROR_NO_MORE_FILES) {
+//            //TODO: return some error code
+//        }
+//        free( findIn );
+//        *namelist = dir;
+//        return nDir;
+//    }
+//    do {
+//        selectDir = (struct dirent*) malloc( sizeof (struct dirent)+strlen( find.cFileName ) );
+//        strcpy( selectDir->d_name, find.cFileName );
+//        if ( !select || (*select)(selectDir) ) {
+//            if (nDir == NDir) {
+//                struct dirent **tempDir = (dirent**) calloc( sizeof (struct dirent*), NDir+33 );
+//                if (NDir) {
+//                    memcpy( tempDir, dir, sizeof (struct dirent*) *NDir );
+//                }
+//                if (dir != nullptr) {
+//                    free( dir );
+//                    dir = nullptr;
+//                }
+//                dir   = tempDir;
+//                NDir += 32;
+//            }
+//            dir[nDir] = selectDir;
+//            nDir++;
+//            dir[nDir] = nullptr;
+//        } else {
+//            free( selectDir );
+//        }
+//    } while ( FindNextFile( h, &find ) );
+//    ret = GetLastError();
+//    if (ret != ERROR_NO_MORE_FILES) {
+//        //TODO: return some error code
+//    }
+//    FindClose( h );
+//
+//    free( findIn );
+//    if (compar) {
+//        //sortTheDirectoryEntries(dir, nDir, compar);
+//        qsort(dir, nDir, sizeof(*dir),
+//                (int (*)(const void *, const void *)) compar);
+//    }
+//    *namelist = dir;
+//    return nDir;
+//}
 
-int scandir( const char *dirname, struct dirent ***namelist, int (*select)( const struct dirent* ), int (*compar)(
-                const struct dirent**,
-                const struct dirent** ) )
-{
-    int    len;
-    char  *findIn, *d;
-    WIN32_FIND_DATA find;
-    HANDLE h;
-    int    nDir = 0, NDir = 0;
-    struct dirent **dir = 0, *selectDir;
-    unsigned long   ret;
+//std::vector<dirent *> sortTheDirectoryEntries(dirent **p_dirent, const size_t num_entries, int (*compar)(const dirent **, const dirent **)) {
+//    std::vector<dirent *> ret_val{};
+//    for (size_t i = 0; i < num_entries; ++i) {
+//        ret_val.emplace_back(p_dirent[i]);
+//    }
+//
+////    std::sort(ret_val.begin(), ret_val.end(), compar);
+//
+//    return ret_val;
+//}
 
-    len    = strlen( dirname );
-    findIn = (char*) malloc( len+5 );
-    strcpy( findIn, dirname );
-    for (d = findIn; *d; d++)
-        if (*d == '/') *d = '\\';
-    if ( (len == 0) ) strcpy( findIn, ".\\*" );
-    if ( (len == 1) && (d[-1] == '.') ) strcpy( findIn, ".\\*" );
-    if ( (len > 0) && (d[-1] == '\\') ) {
-        *d++ = '*';
-        *d   = 0;
-    }
-    if ( (len > 1) && (d[-1] == '.') && (d[-2] == '\\') ) d[-1] = '*';
-    if ( ( h = FindFirstFile( findIn, &find ) ) == INVALID_HANDLE_VALUE ) {
-        ret = GetLastError();
-        if (ret != ERROR_NO_MORE_FILES) {
-            //TODO: return some error code
-        }
-        free( findIn );
-        *namelist = dir;
-        return nDir;
-    }
-    do {
-        selectDir = (struct dirent*) malloc( sizeof (struct dirent)+strlen( find.cFileName ) );
-        strcpy( selectDir->d_name, find.cFileName );
-        if ( !select || (*select)(selectDir) ) {
-            if (nDir == NDir) {
-                struct dirent **tempDir = (dirent**) calloc( sizeof (struct dirent*), NDir+33 );
-                if (NDir) {
-                    memcpy( tempDir, dir, sizeof (struct dirent*) *NDir );
-                }
-                if (dir != nullptr) {
-                    free( dir );
-                    dir = nullptr;
-                }
-                dir   = tempDir;
-                NDir += 32;
-            }
-            dir[nDir] = selectDir;
-            nDir++;
-            dir[nDir] = 0;
-        } else {
-            free( selectDir );
-        }
-    } while ( FindNextFile( h, &find ) );
-    ret = GetLastError();
-    if (ret != ERROR_NO_MORE_FILES) {
-        //TODO: return some error code
-    }
-    FindClose( h );
+//int alphasort( struct dirent **a, struct dirent **b )
+//{
+//    return strcmp( (*a)->d_name, (*b)->d_name );
+//}
 
-    free( findIn );
-    if (compar)
-        qsort( dir, nDir, sizeof (*dir),
-               ( int (*)( const void*, const void* ) )compar );
-    *namelist = dir;
-    return nDir;
-}
-
-int alphasort( struct dirent **a, struct dirent **b )
-{
-    return strcmp( (*a)->d_name, (*b)->d_name );
-}
-
-#endif
+//#endif
