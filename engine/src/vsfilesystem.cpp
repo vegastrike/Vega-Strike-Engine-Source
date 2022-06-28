@@ -574,7 +574,7 @@ void InitDataDirectory() {
                 VS_LOG(error, "Cannot get current path: path too long");
             }
 
-            if (_chdir(datadir.c_str()) < 0) {
+            if (chdir(datadir.c_str()) < 0) {
                 VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
                 VSExit(1);
             }
@@ -1037,7 +1037,7 @@ void InitPaths(string conf, string subdir) {
 void CreateDirectoryAbs(const char *filename) {
     int err;
     if (!DirectoryExists(filename)) {
-        err = _mkdir(filename
+        err = mkdir(filename
 #if !defined (_WIN32) || defined (__CYGWIN__)
                 , 0xFFFFFFFF
 #endif
