@@ -441,7 +441,7 @@ bool vs_feof(FILE *fp) {
 long vs_getsize(FILE *fp) {
     if (!use_volumes) {
         struct stat st{};
-        if (fstat(_fileno(fp), &st) == 0) {
+        if (fstat(fileno(fp), &st) == 0) {
             return st.st_size;
         }
         return -1;
@@ -564,7 +564,7 @@ void InitDataDirectory() {
         //Test if the dir exist and contains config_file
         if (FileExists(data_path, config_file) >= 0) {
             VS_LOG(info, (boost::format("Found data in %1%") % data_path));
-            if (nullptr != _getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
+            if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
                 if (data_path.substr(0, 1) == ".") {
                     datadir = string(tmppath) + "/" + data_path;
                 } else {
@@ -578,7 +578,7 @@ void InitDataDirectory() {
                 VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
                 VSExit(1);
             }
-            if (nullptr != _getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
+            if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
                 datadir = string(tmppath);
             } else {
                 VS_LOG(error, "Cannot get current path: path too long");
@@ -1957,7 +1957,7 @@ long VSFile::Size() {
     if (size == 0) {
         if (!UseVolumes[alt_type] || this->volume_type == VSFSNone || file_mode != ReadOnly) {
             struct stat st{};
-            if ((fp != nullptr) && fstat(_fileno(fp), &st) == 0) {
+            if ((fp != nullptr) && fstat(fileno(fp), &st) == 0) {
                 return this->size = st.st_size;
             }
             return -1;
