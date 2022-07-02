@@ -1006,7 +1006,8 @@ string getSaveInfo(const std::string &filename, bool formatForTextbox) {
             ss << "Campaign Score: 0" << lf;
         }
     }
-    return ss.str();
+    const std::string ret_val{ss.str()};
+    return ret_val;
 }
 
 string getCurrentSaveGame() {
