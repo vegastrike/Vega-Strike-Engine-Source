@@ -2959,7 +2959,8 @@ void BaseComputer::loadLoadSaveControls() {
             const boost::filesystem::path& filename = entry.path().filename();
             const std::string filename_string = filename.string();
             if (is_regular_file(entry.status())) {
-                std::time_t last_write_time = boost::filesystem::last_write_time(filename);
+                const boost::filesystem::path& full_file_path{boost::filesystem::absolute(filename, savedir_path)};
+                std::time_t last_write_time = boost::filesystem::last_write_time(full_file_path);
                 save_files.emplace(std::make_pair(last_write_time, filename_string));
             }
         }
