@@ -2954,7 +2954,7 @@ void BaseComputer::loadLoadSaveControls() {
     if (playerUnit) {
         std::string savedir = VSFileSystem::homedir + "/save/";
         boost::filesystem::path savedir_path(savedir);
-        std::multimap<std::time_t, std::string, std::greater<>> save_files{};
+        std::multimap<std::time_t, std::string, std::greater<std::time_t>> save_files{};
         for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(savedir_path)) {
             const boost::filesystem::path& filename = entry.path().filename();
             const std::string filename_string = filename.string();
