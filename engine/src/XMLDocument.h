@@ -80,10 +80,10 @@ public:
      *  @remarks
      *   empty if type is not XET_CDATA or XET_COMMENT
      */
-    XMLElement(Type type, const std::string &data = std::string());
+    XMLElement(Type type, const std::string &data);
 
     /** Creates a CData element with 'cdata' as contents */
-    XMLElement(const std::string &cdata);
+    explicit XMLElement(const std::string &cdata);
 
     /** Creates a TAG element with specified tagName and attributes */
     XMLElement(const char *tagName, const char *const *attrValuePairList);
@@ -355,11 +355,10 @@ public:
     XMLElement root;
 
 public:
-    XMLDocument() : dirty(false), root(XMLElement::XET_ROOT) {
+    XMLDocument() : dirty(false), root(XMLElement::XET_ROOT, std::string()) {
     }
 
-    ~XMLDocument() {
-    }
+    ~XMLDocument() = default;
 
 public:
 
@@ -448,7 +447,7 @@ private:
     void *internals;
 
 public:
-    XMLSerializer(const char *encoding = 0, XMLDocument *doc = 0, XMLElement *elem = 0);
+    XMLSerializer(const char *encoding, XMLDocument *doc, XMLElement *elem);
     virtual ~XMLSerializer();
 
     /** Parse the specified data chunk from memory
@@ -514,7 +513,7 @@ public:
      *   they will be added as child elements of the specified element.
      *   Be certain to pass an element within doc... otherwise, results will be undefined.
      */
-    virtual bool initialise(const char *encoding = 0, XMLDocument *doc = 0, XMLElement *elem = 0);
+    virtual bool initialise(const char *encoding, XMLDocument *doc, XMLElement *elem);
 
     /** Close parsing - do cleanup, free memory, etc...
      *  @remarks
@@ -525,11 +524,9 @@ public:
 
 class XMLProcessor {
 public:
-    XMLProcessor() {
-    }
+    XMLProcessor() = default;
 
-    virtual ~XMLProcessor() {
-    }
+    virtual ~XMLProcessor() = default;
 
     /** Specify which instruction target this processor will handle */
     virtual const std::string &getTarget() const = 0;

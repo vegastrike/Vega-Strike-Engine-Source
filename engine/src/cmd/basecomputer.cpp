@@ -67,25 +67,17 @@ using VSFileSystem::SaveFile;
 
 //for directory thing
 #if defined (_WIN32) && !defined (__CYGWIN__)
-                                                                                                                        #include <direct.h>
-#include <config.h>
-#include <string.h>
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
-#include <windows.h>
-#include <stdlib.h>
-struct dirent
-{
-    char d_name[1];
-};
+#include <cstdlib>
 #else
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
-#include <dirent.h>
 #endif
 #include <sys/stat.h>
+#include "vega_cast_utils.hpp"
 
 using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 
@@ -2915,65 +2907,76 @@ void BaseComputer::loadNewsControls(void) {
     recalcTitle();
 }
 
-static int nodirs(const struct dirent *entry) {
-#if defined (_WIN32) || defined(__HAIKU__)
-                                                                                                                            //Have to check if we have the full path or just relative (which would be a problem)
-    std::string tmp = VSFileSystem::homedir + "/save/" + entry->d_name;
-    struct stat s;
-    if (stat( tmp.c_str(), &s ) < 0) {
-        return string( entry->d_name ) != "." && string( entry->d_name ) != "..";
-    }
-    if ( (s.st_mode & S_IFDIR) == 0 && string( entry->d_name ) != "." && string( entry->d_name ) != ".." ) {
-        return 1;
-    }
-#else
-    if (entry->d_type != DT_DIR && string(entry->d_name) != "." && string(entry->d_name) != "..") {
-        return 1;
-    }
-#endif
-    return 0;
-}
+//static int nodirs(const struct dirent *entry) {
+//#if defined (_WIN32) || defined(__HAIKU__)
+//                                                                                                                            //Have to check if we have the full path or just relative (which would be a problem)
+//    std::string tmp = VSFileSystem::homedir + "/save/" + entry->d_name;
+//    struct stat s;
+//    if (stat( tmp.c_str(), &s ) < 0) {
+//        return string( entry->d_name ) != "." && string( entry->d_name ) != "..";
+//    }
+//    if ( (s.st_mode & S_IFDIR) == 0 && string( entry->d_name ) != "." && string( entry->d_name ) != ".." ) {
+//        return 1;
+//    }
+//#else
+//    if (entry->d_type != DT_DIR && string(entry->d_name) != "." && string(entry->d_name) != "..") {
+//        return 1;
+//    }
+//#endif
+//    return 0;
+//}
 
-static int datesort(const void *v1, const void *v2) {
-    const struct dirent *d1 = *(const struct dirent **) v1;
-    const struct dirent *d2 = *(const struct dirent **) v2;
-    struct stat s1, s2;
-    std::string tmp = VSFileSystem::homedir + "/save/" + d1->d_name;
-    if (stat(tmp.c_str(), &s1)) {
-        return 0;
-    }
-    tmp = VSFileSystem::homedir + "/save/" + d2->d_name;
-    if (stat(tmp.c_str(), &s2)) {
-        return 0;
-    }
-    return s1.st_mtime - s2.st_mtime;
-}
+//static int datesort(const void *v1, const void *v2) {
+//    const struct dirent *d1 = *(const struct dirent **) v1;
+//    const struct dirent *d2 = *(const struct dirent **) v2;
+//    struct stat s1, s2;
+//    std::string tmp = VSFileSystem::homedir + "/save/" + d1->d_name;
+//    if (stat(tmp.c_str(), &s1)) {
+//        return 0;
+//    }
+//    tmp = VSFileSystem::homedir + "/save/" + d2->d_name;
+//    if (stat(tmp.c_str(), &s2)) {
+//        return 0;
+//    }
+//    return s1.st_mtime - s2.st_mtime;
+//}
 
-// #if (defined (__FREEBSD__)) || (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10) || defined(__HAIKU__)
-typedef int (*scancompare)(const struct dirent **v1, const struct dirent **v2);
-// #else
-// typedef int (*scancompare)( const void *v1, const void *v2 );
-// #endif
+//typedef int (*scancompare)(const struct dirent **v1, const struct dirent **v2);
 
+// 2022-06-26 Stephen G. Tuggy -- I think this comment is out of sync.
 //Load the controls for the News display.
-void BaseComputer::loadLoadSaveControls(void) {
-    SimplePicker *picker = static_cast< SimplePicker * > ( window()->findControlById("LoadSavePicker"));
-    assert(picker != NULL);
+void BaseComputer::loadLoadSaveControls() {
+    SimplePicker *picker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("LoadSavePicker"));
     picker->clear();
 
     //Get news from save game.
     Unit *playerUnit = m_player.GetUnit();
     if (playerUnit) {
-        struct dirent **dirlist;
         std::string savedir = VSFileSystem::homedir + "/save/";
-        int ret = scandir(savedir.c_str(), &dirlist, nodirs, (scancompare) &datesort);
-        while (ret-- > 0) {
-            picker->addCell(new SimplePickerCell(dirlist[ret]->d_name));
+        boost::filesystem::path savedir_path(savedir);
+        std::multimap<std::time_t, std::string, std::greater<std::time_t>> save_files{};
+        for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(savedir_path)) {
+            const boost::filesystem::path& filename = entry.path().filename();
+            const std::string filename_string = filename.string();
+            if (is_regular_file(entry.status())) {
+                const boost::filesystem::path& full_file_path{boost::filesystem::absolute(filename, savedir_path)};
+                std::time_t last_write_time = boost::filesystem::last_write_time(full_file_path);
+                save_files.emplace(std::make_pair(last_write_time, filename_string));
+            }
         }
+        for (const auto& x : save_files) {
+            picker->addCell(new SimplePickerCell(x.second));
+        }
+
+//        struct dirent **dirlist;
+//        std::string savedir = VSFileSystem::homedir + "/save/";
+//        int ret = scandir(savedir.c_str(), &dirlist, nodirs, (scancompare) &datesort);
+//        while (ret-- > 0) {
+//            picker->addCell(new SimplePickerCell(dirlist[ret]->d_name));
+//        }
     }
     //Make sure the description is empty.
-    StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
-    assert(desc != NULL);
+    StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     desc->setText("");
 
     //Make the title right.

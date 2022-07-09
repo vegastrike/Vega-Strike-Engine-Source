@@ -1,8 +1,8 @@
 /*
  * unit_generic.cpp
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -38,7 +38,8 @@ TEST(CSV, Sanity) {
     buffer << ifs.rdbuf();
 
     UnitCSVFactory factory;
-    factory.ProcessCSV(buffer.str(), false);
+    std::string csv_contents{buffer.str()};
+    factory.ProcessCSV(csv_contents, false);
 
     /*for (auto const& x : UnitCSVFactory::units)
     {

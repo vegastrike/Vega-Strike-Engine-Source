@@ -26,8 +26,10 @@
 #include <vector>
 #include <string>
 #include "vsfilesystem.h"
+
 using std::string;
 using std::vector;
+
 struct XMLType {
     union wordlength {
         int *i;
@@ -43,52 +45,52 @@ struct XMLType {
         int hardint;
         float hardfloat;
     }
-            w;
+            w{};
     std::string str;
 
-    XMLType(bool *mybool) {
+    explicit XMLType(bool *mybool) {
         w.b = mybool;
     }
 
-    XMLType(double *mydouble) {
+    explicit XMLType(double *mydouble) {
         w.d = mydouble;
     }
 
-    XMLType(int *myint) {
+    explicit XMLType(int *myint) {
         w.i = myint;
     }
 
-    XMLType(unsigned int *myuint) {
+    explicit XMLType(unsigned int *myuint) {
         w.ui = myuint;
     }
 
-    XMLType(int myhardint) {
+    explicit XMLType(int myhardint) {
         w.hardint = myhardint;
     }
 
-    XMLType(float myhardfloat) {
+    explicit XMLType(float myhardfloat) {
         w.hardfloat = myhardfloat;
     }
 
-    XMLType(float *myfloat) {
+    explicit XMLType(float *myfloat) {
         w.f = myfloat;
     }
 
-    XMLType(void *myvoid) {
+    explicit XMLType(void *myvoid) {
         w.p = myvoid;
     }
 
-    XMLType(char *mychar) {
+    explicit XMLType(char *mychar) {
         w.c = mychar;
     }
 
     //XMLType (short * mychar) {w.s=mychar;} // removing useless shorts - use integers instead
     //XMLType (unsigned short * mychar) {w.us=mychar;} // removing useless shorts - use integers instead
-    XMLType(unsigned char *mychar) {
+    explicit XMLType(unsigned char *mychar) {
         w.uc = mychar;
     }
 
-    XMLType(const std::string &s) : str(s) {
+    explicit XMLType(const std::string &s) : str(s) {
         w.p = &this->str;
     }
 
@@ -155,7 +157,7 @@ struct XMLnode {
     vector<XMLnode> subnodes;
 
     XMLnode() {
-        up = NULL;
+        up = nullptr;
     }
 
     XMLnode(const std::string &val, XMLnode *newup) {

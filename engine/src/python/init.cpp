@@ -183,12 +183,14 @@ void Python::init() {
     InitVS2();
 #endif
     VS_LOG(info, "testing VS random");
-    std::string changepath("import sys\nprint(sys.path)\n");
-    VS_LOG(info, (boost::format("running %1%") % changepath));
-    char *temppython = strdup(changepath.c_str());
+    std::string python_snippet_to_run_1("import sys\nprint(sys.path)\n");
+    VS_LOG(info, (boost::format("running %1%") % python_snippet_to_run_1));
+    char *temppython = strdup(python_snippet_to_run_1.c_str());
     PyRun_SimpleString(temppython);
     Python::reseterrors();
-    const std::string python_snippet_to_run{
+    free(temppython);
+
+    const std::string python_snippet_to_run_2{
             "import VS\n"
             "print("
             "\"Engine Version: {0} \\nAsset API Version: {1}\".format("
@@ -197,9 +199,10 @@ void Python::init() {
             ")"
             ")"
     };
-    PyRun_SimpleString(python_snippet_to_run.c_str());
+    char *temp_python2 = strdup(python_snippet_to_run_2.c_str());
+    PyRun_SimpleString(temp_python2);
     Python::reseterrors();
-    free(temppython);
+    free(temp_python2);
 #if (PY_VERSION_HEX < 0x03000000)
     InitDirector2();
     InitBase2();

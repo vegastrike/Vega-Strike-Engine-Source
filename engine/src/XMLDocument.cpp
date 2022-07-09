@@ -22,7 +22,7 @@
 
 #include "XMLDocument.h"
 
-#include <assert.h>
+#include <cassert>
 #include <fstream>
 #include <expat.h>
 #include <algorithm>
@@ -41,8 +41,8 @@ namespace XMLDOM {
 XMLElement::XMLElement() :
         mType(XET_CDATA),
         mAttributes(),
-        mParent(0),
-        mDocument(0),
+        mParent(nullptr),
+        mDocument(nullptr),
         mIdAttribute(mAttributes.end()),
         mNameAttribute(mAttributes.end()) {
 }
@@ -51,8 +51,8 @@ XMLElement::XMLElement(const std::string &cdata) :
         mType(XET_CDATA),
         mContents(cdata),
         mAttributes(),
-        mParent(0),
-        mDocument(0),
+        mParent(nullptr),
+        mDocument(nullptr),
         mIdAttribute(mAttributes.end()),
         mNameAttribute(mAttributes.end()) {
 }
@@ -60,8 +60,8 @@ XMLElement::XMLElement(const std::string &cdata) :
 XMLElement::XMLElement(Type type, const std::string &data) :
         mType(type), mContents((type == XET_CDATA || type == XET_COMMENT) ? data : std::string()),
         mAttributes(),
-        mParent(0),
-        mDocument(0),
+        mParent(nullptr),
+        mDocument(nullptr),
         mIdAttribute(mAttributes.end()),
         mNameAttribute(mAttributes.end()) {
 }
@@ -70,8 +70,8 @@ XMLElement::XMLElement(const char *tagName, const char *const *attrValuePairList
         mType(XET_TAG),
         mTagName(tagName),
         mAttributes(),
-        mParent(0),
-        mDocument(0),
+        mParent(nullptr),
+        mDocument(nullptr),
         mIdAttribute(mAttributes.end()),
         mNameAttribute(mAttributes.end()) {
     for (; (nAttr >= 2 && attrValuePairList[0] && attrValuePairList[1]); attrValuePairList += 2) {
@@ -83,8 +83,8 @@ XMLElement::XMLElement(const char *tagName, const char *const *attrValuePairList
         mType(XET_TAG),
         mTagName(tagName),
         mAttributes(),
-        mParent(0),
-        mDocument(0),
+        mParent(nullptr),
+        mDocument(nullptr),
         mIdAttribute(mAttributes.end()),
         mNameAttribute(mAttributes.end()) {
     for (; (attrValuePairList[0] && attrValuePairList[1]); attrValuePairList += 2) {
@@ -96,8 +96,8 @@ XMLElement::XMLElement(const std::string &tagName, const std::vector<std::string
         mType(XET_TAG),
         mTagName(tagName),
         mAttributes(),
-        mParent(0),
-        mDocument(0),
+        mParent(nullptr),
+        mDocument(nullptr),
         mIdAttribute(mAttributes.end()),
         mNameAttribute(mAttributes.end()) {
     for (std::vector<std::string>::size_type i = 0; i + 1 < attrValuePairList.size(); i += 2) {
@@ -109,16 +109,16 @@ XMLElement::XMLElement(const std::string &tagName, const std::map<std::string, s
         mType(XET_TAG),
         mTagName(tagName),
         mAttributes(attrValuePairList),
-        mParent(0),
-        mDocument(0),
+        mParent(nullptr),
+        mDocument(nullptr),
         mIdAttribute(mAttributes.find("id")),
         mNameAttribute(mAttributes.find("name")) {
 }
 
 XMLElement::~XMLElement() {
     clear();
-    mParent = 0;
-    mDocument = 0;
+    mParent = nullptr;
+    mDocument = nullptr;
 }
 
 void XMLElement::clear(bool doAttributes) {
@@ -167,7 +167,7 @@ std::string &XMLElement::contents() {
 const XMLElement *XMLElement::getChildById(const std::string &id) const {
     ElementMap::const_iterator cit = mById.find(id);
     if (cit == mById.end()) {
-        return 0;
+        return nullptr;
     } else {
         return cit->second;
     }
@@ -176,7 +176,7 @@ const XMLElement *XMLElement::getChildById(const std::string &id) const {
 XMLElement *XMLElement::getChildById(const std::string &id) {
     ElementMap::iterator cit = mById.find(id);
     if (cit == mById.end()) {
-        return 0;
+        return nullptr;
     } else {
         return cit->second;
     }
@@ -185,7 +185,7 @@ XMLElement *XMLElement::getChildById(const std::string &id) {
 const XMLElement *XMLElement::getChildByName(const std::string &name) const {
     ElementMap::const_iterator cit = mByName.find(name);
     if (cit == mByName.end()) {
-        return 0;
+        return nullptr;
     } else {
         return cit->second;
     }
@@ -194,7 +194,7 @@ const XMLElement *XMLElement::getChildByName(const std::string &name) const {
 XMLElement *XMLElement::getChildByName(const std::string &name) {
     ElementMap::iterator cit = mByName.find(name);
     if (cit == mByName.end()) {
-        return 0;
+        return nullptr;
     } else {
         return cit->second;
     }
@@ -333,7 +333,7 @@ const XMLElement *XMLElement::getChildByHierarchicalId(const std::string &id) co
     std::string::size_type sep = id.find('/');
     if (sep != std::string::npos) {
         const XMLElement *sub = getChildById(id.substr(0, sep));
-        return sub ? sub->getChildByHierarchicalId(id.substr(sep + 1)) : 0;
+        return sub ? sub->getChildByHierarchicalId(id.substr(sep + 1)) : nullptr;
     } else {
         return getChildById(id);
     }
@@ -343,7 +343,7 @@ XMLElement *XMLElement::getChildByHierarchicalId(const std::string &id) {
     std::string::size_type sep = id.find('/');
     if (sep != std::string::npos) {
         XMLElement *sub = getChildById(id.substr(0, sep));
-        return sub ? sub->getChildByHierarchicalId(id.substr(sep + 1)) : 0;
+        return sub ? sub->getChildByHierarchicalId(id.substr(sep + 1)) : nullptr;
     } else {
         return getChildById(id);
     }
@@ -353,7 +353,7 @@ const XMLElement *XMLElement::getChildByHierarchicalName(const std::string &name
     std::string::size_type sep = name.find('/');
     if (sep != std::string::npos) {
         const XMLElement *sub = getChildByName(name.substr(0, sep));
-        return sub ? sub->getChildByHierarchicalName(name.substr(sep + 1)) : 0;
+        return sub ? sub->getChildByHierarchicalName(name.substr(sep + 1)) : nullptr;
     } else {
         return getChildByName(name);
     }
@@ -363,7 +363,7 @@ XMLElement *XMLElement::getChildByHierarchicalName(const std::string &name) {
     std::string::size_type sep = name.find('/');
     if (sep != std::string::npos) {
         XMLElement *sub = getChildByName(name.substr(0, sep));
-        return sub ? sub->getChildByHierarchicalName(name.substr(sep + 1)) : 0;
+        return sub ? sub->getChildByHierarchicalName(name.substr(sep + 1)) : nullptr;
     } else {
         return getChildByName(name);
     }
@@ -381,11 +381,11 @@ struct XMLParserContext {
     typedef std::map<std::string, XMLProcessor *> ProcessorMap;
 
     ProcessorMap processors;
-    XMLSerializer *xparser;
-    XMLDocument *document;
-    XMLElement *current;
+    XMLSerializer *xparser{};
+    XMLDocument *document{};
+    XMLElement *current{};
 
-    XML_Parser parser;
+    XML_Parser parser{};
 };
 
 namespace ExpatHandlers {
@@ -469,7 +469,7 @@ static void Comment(void *userData, const XML_Char *data) {
 ******************************************************************/
 
 XMLSerializer::XMLSerializer(const char *encoding, XMLDocument *doc, XMLElement *elem) :
-        options(OPT_DEFAULT), internals(0) {
+        options(OPT_DEFAULT), internals(nullptr) {
     initialise(encoding, doc, elem);
 }
 
@@ -595,7 +595,7 @@ bool _exportXML(std::ostream &stream, XMLDocument *doc) {
     }
     //Output the rest of the document
     //NOTE: Although XML 1.1 requires that 'root' may only have one child,
-    //we cant't make that assumption because we count as elements comments
+    //we can't make that assumption because we count as elements comments
     //and other productions referred to as 'misc' by the standard.
     for (unsigned int i = 0; i < doc->root.numChildren(); ++i) {
         if (!_exportXML(stream, doc->root.getChild(i))) {
@@ -646,7 +646,7 @@ bool XMLSerializer::initialise(const char *encoding, XMLDocument *doc, XMLElemen
 }
 
 XMLDocument *XMLSerializer::close() {
-    XMLDocument *doc = 0;
+    XMLDocument *doc = nullptr;
     XMLParserContext *ctxt = (XMLParserContext *) internals;
     if (ctxt) {
         XML_ParserFree(ctxt->parser);
@@ -656,7 +656,7 @@ XMLDocument *XMLSerializer::close() {
         }
         delete ctxt;
     }
-    internals = 0;
+    internals = nullptr;
 
     return doc;
 }

@@ -21,11 +21,9 @@
  */
 
 #include <string>
-#include <sstream>
-#include <stdlib.h>
-#include <ctype.h>
-#include <assert.h>
-#include <stdarg.h>
+#include <cctype>
+#include <cassert>
+#include <cstdarg>
 #include "xml_support.h"
 
 #include <boost/tokenizer.hpp>
@@ -35,16 +33,16 @@ using std::string;
 
 string strtoupper(const string &foo) {
     string rval(foo);
-    for (string::iterator it = rval.begin(); it != rval.end(); ++it) {
-        *it = toupper(*it);
+    for (char & it : rval) {
+        it = toupper(it);
     }
     return rval;
 }
 
 string strtolower(const string &foo) {
     string rval(foo);
-    for (string::iterator it = rval.begin(); it != rval.end(); ++it) {
-        *it = tolower(*it);
+    for (char & it : rval) {
+        it = tolower(it);
     }
     return rval;
 }
@@ -77,16 +75,16 @@ const string &EnumMap::lookup(int val) const {
 }
 
 AttributeList::AttributeList(const XML_Char **atts) {
-    for (; *atts != NULL; atts += 2) {
+    for (; *atts != nullptr; atts += 2) {
         push_back(Attribute(atts[0], atts[1]));
     }
 }
 
 string replace_space(const string &str) {
     string retval(str);
-    for (string::iterator i = retval.begin(); i != retval.end(); i++) {
-        if (*i == ' ') {
-            *i = '_';
+    for (char & i : retval) {
+        if (i == ' ') {
+            i = '_';
         }
     }
     return retval;
