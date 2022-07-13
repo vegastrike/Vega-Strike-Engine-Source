@@ -30,10 +30,11 @@
 #include "universe_util.h"
 
 #include "ai/aggressive.h"
-#include "csv.h"
 #include "missile.h"
 #include "vs_random.h"
 #include "vs_logging.h"
+
+#include "json.h"
 
 // TODO: find out where this is and maybe refactor
 extern int SelectDockPort(Unit *, Unit *parent);
@@ -542,29 +543,36 @@ float Carrier::getCargoVolume(void) const {
     return result;
 }
 
+// TODO: get rid of this helper function and others like it.
+extern std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value);
+
 Unit *Carrier::makeMasterPartList() {
     unsigned int i;
-    static std::string mpl = vs_config->getVariable("data", "master_part_list", "master_part_list");
-    CSVTable *table = loadCSVTableList(mpl, VSFileSystem::UnknownFile, false);
-
     Unit *ret = new Unit();
     ret->name = "master_part_list";
-    if (table) {
-        vsUMap<std::string, int>::const_iterator it;
-        for (it = table->rows.begin(); it != table->rows.end(); ++it) {
-            CSVRow row(table, it->second);
-            Cargo carg;
-            carg.content = row["file"];
-            carg.category = row["categoryname"];
-            carg.volume = stof(row["volume"], 1);
-            carg.mass = stof(row["mass"], 1);
-            carg.quantity = 1;
-            carg.price = stoi(row["price"], 1);
-            carg.description = row["description"];
-            ret->cargo.push_back(carg);
-        }
-        delete table;
+
+    static std::string json_filename = "master_part_list.json"; //vs_config->getVariable("data", "master_part_list", "master_part_list");
+    std::ifstream ifs(json_filename, std::ifstream::in);
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+
+    const std::string json_text = buffer.str();
+
+    std::vector<std::string> parts = json::parsing::parse_array(json_text.c_str());
+    for (const std::string &part_text : parts) {
+        json::jobject part = json::jobject::parse(part_text);
+        Cargo carg;
+
+        carg.content = getJSONValue(part, "file", "");
+        carg.category = getJSONValue(part, "categoryname", "");
+        carg.volume = std::stof(getJSONValue(part, "volume", ""));
+        carg.mass = std::stof(getJSONValue(part, "mass", ""));
+        carg.quantity = 1;
+        carg.price = std::stoi(getJSONValue(part, "price", ""));
+        carg.description = getJSONValue(part, "description", "");
+        ret->cargo.push_back(carg);
     }
+
     UpdateMasterPartList(ret);
     if (!ret->GetCargo("Pilot", i)) {    //required items
         ret->AddCargo(Cargo("Pilot", "Contraband", 800, 1, .01, 1, 1.0, 1.0), true);
