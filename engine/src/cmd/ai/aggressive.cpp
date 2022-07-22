@@ -109,31 +109,6 @@ static void TurretFAW(Unit *parent) {
     }
 }
 
-static vsUMap<string, string> getAITypes() {
-    vsUMap<string, string> ret;
-    VSFileSystem::VSFile f;
-    VSFileSystem::VSError err = f.OpenReadOnly("VegaPersonalities.csv", VSFileSystem::AiFile);
-    if (err <= VSFileSystem::Ok) {
-        CSVTable table(f, f.GetRoot());
-        vsUMap<std::string, int>::iterator browser = table.rows.begin();
-        for (; browser != table.rows.end(); ++browser) {
-            string rowname = (*browser).first;
-            CSVRow row(&table, rowname);
-            for (unsigned int i = 1; i < table.key.size(); ++i) {
-                string hasher = rowname;
-                if (i != 1) {
-                    hasher = rowname + "%" + table.key[i];
-                }
-                string rawrow = row[i];
-                if (rawrow.length() > 0) {
-                    ret[hasher] = rawrow;
-                }
-            }
-        }
-        f.Close();
-    }
-    return ret;
-}
 
 static string select_from_space_list(string inp, unsigned int seed) {
     if (inp.length() == 0) {
@@ -173,7 +148,7 @@ static AIEvents::ElemAttrMap *getLogicOrInterrupt(string name,
         vsUMap<string, AIEvents::ElemAttrMap *> &mymap,
         int personalityseed) {
     string append = "agg";
-    static vsUMap<string, string> myappend = getAITypes();
+    static vsUMap<string, string> myappend;
     vsUMap<string, string>::iterator iter;
     string factionname = FactionUtil::GetFaction(faction);
     if ((iter = myappend.find(factionname + "%" + unittype)) != myappend.end()) {
