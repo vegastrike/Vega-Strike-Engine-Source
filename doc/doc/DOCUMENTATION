@@ -1,0 +1,20 @@
+-------------------------------
+Vegastrike Code Documentation
+-------------------------------
+
+
+Universe deals mostly with binding various star systems together, and keeping graphics on track.
+Star System deals with the current cameras, and the current lights, and keeping order when the scene may be changed (swithcing to a cam in a different star system for instance).
+
+
+Units are accessed through a UnitContainer or a UnitCollection depending on the number.  These structures keep reference counts and remove any "dead" units from them when accessed. Star system has the complete list of units and cycles through them to accomplish physics, etc.
+
+Included in this directory contains resources for generating documentation/degugging 
+
+For more Details please see the 
+  doxygen Documentation- {VS_root}/doc/VS_Doxygen.RDME .
+     {VS_root}/doc/doxygen - contains script for using Doxygen on vegastrike cpp & python coding, and is where output is located
+  GDB_python {VS_root}/doc/VS_Gdb_Python.RDME
+     {VS_root}/doc/gdb - for gdb with python debugging
+  Valgrind {VS_root}/doc/VS_Valgrind.RDME
+     {VS_root}/doc/valgrind - parts/scripts for running valgrind
