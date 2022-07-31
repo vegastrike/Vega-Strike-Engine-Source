@@ -87,7 +87,7 @@ static inline void SetQuadVertex(const QVector &loc,
     float maxsize = (psize > size) ? psize : size;
     float minsize = (psize <= size) ? psize : size;
 
-    //Squared, surface-linked decay - looks nicer, more real for emmisive gasses
+    //Squared, surface-linked decay - looks nicer, more real for emissive gasses
     //NOTE: maxsize/minsize allows for inverted growth (shrinkage) while still fading correctly. Cheers!
     GFXColor c = col * (col.a * trans * (minsize / ((maxsize > 0) ? maxsize : 1.f)));
     QVector l = loc - campos;
@@ -209,7 +209,7 @@ class IndexCompare {
     const std::vector<R> &ref;
 
 public:
-    IndexCompare(const std::vector<R> &ref_) : ref(ref_) {
+    explicit IndexCompare(const std::vector<R> &ref_) : ref(ref_) {
     }
 
     bool operator()(const T &a, const T &b) const {
@@ -384,7 +384,7 @@ void ParticleTrail::DrawAndUpdate() {
             std::sort(pointIndices.begin(), pointIndices.end(), dcomp);
 
             indices.clear();
-            indices.reserve(nindices * vertsPerParticle);
+            indices.reserve(static_cast<size_t>(nindices) * vertsPerParticle);
             {
                 for (unsigned short point_index : pointIndices) {
                     for (int i = 0; i < vertsPerParticle; ++i) {

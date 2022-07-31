@@ -129,7 +129,7 @@ public:
         float relSize;
 
         void init(const std::string &prefix);
-    } config;
+    } config{};
 
     explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType) {
     }
