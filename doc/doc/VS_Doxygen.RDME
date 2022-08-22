@@ -1,5 +1,5 @@
 The basic idea is first to Warn you will require lots of space if you proceed.
- The basic steps are in the VSE root directory  run "./doc/doxygen/doxygenConfig" and all the data will be in a subdir under /doc/doxygen. the VS_doxy.config is editable (please make a bakup of the config file first, just in case. Currently it is configured to run on VegaStrike github master >"INPUT" needs to be adjusted for appropriate directoy.
+ The basic steps are in the VSE root directory  run "doxygen ./doc/doxygen/VS_doxy.Config" and all the data will be in a subdir under /doc/doxygen. the VS_doxy.config is editable (please make a bakup of the config file first, just in case. Currently it is configured to run on VegaStrike github master >"INPUT" needs to be adjusted for appropriate directoy.
 
 Requires:  doxygen, Graphviz, Vegastrike {engine,assets} source packages. Lots of free storage.
 
