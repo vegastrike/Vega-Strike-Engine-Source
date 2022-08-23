@@ -44,6 +44,10 @@ public:
     Resource<T> operator+=(const T &value);
     Resource<T> operator-=(const T &value);
 
+    Resource<T> operator=(T &value);
+    Resource<T> operator+=(T &value);
+    Resource<T> operator-=(T &value);
+
     void Downgrade(const T &value);
     void DowngradeByPercent(const T &value);
 
