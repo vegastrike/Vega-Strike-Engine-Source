@@ -111,7 +111,10 @@ void Resource<T>::Zero() {
 template<typename T>
 Resource<T> Resource<T>::operator=(const T &value) {
     value_ = value;
-    value_ = std::min(max_value_, value_);
+    if(max_value_ != -1) {
+        value_ = std::min(max_value_, value_);
+    }
+
     value_ = std::max(min_value_, value_);
     return *this;
 }
@@ -124,6 +127,26 @@ Resource<T> Resource<T>::operator+=(const T &value) {
 
 template<typename T>
 Resource<T> Resource<T>::operator-=(const T &value) {
+    value_ = std::max(value_ - value, min_value_);
+    return *this;
+}
+
+template<typename T>
+Resource<T> Resource<T>::operator=(T &value) {
+    value_ = value;
+    value_ = std::min(max_value_, value_);
+    value_ = std::max(min_value_, value_);
+    return *this;
+}
+
+template<typename T>
+Resource<T> Resource<T>::operator+=(T &value) {
+    value_ = std::min(value_ + value, max_value_);
+    return *this;
+}
+
+template<typename T>
+Resource<T> Resource<T>::operator-=(T &value) {
     value_ = std::max(value_ - value, min_value_);
     return *this;
 }
@@ -205,3 +228,19 @@ template bool operator<=(const float &lhs, const Resource<float> &rhs);
 template bool operator>=(const float &lhs, const Resource<float> &rhs);
 template float operator/(const Resource<float> &lhs, const float &rhs);
 template float operator/(const float &lhs, const Resource<float> &rhs);
+
+template
+class Resource<double>;
+
+template bool operator==(const Resource<double> &lhs, const double &rhs);
+template bool operator>(const Resource<double> &lhs, const double &rhs);
+template bool operator<(const Resource<double> &lhs, const double &rhs);
+template bool operator<=(const Resource<double> &lhs, const double &rhs);
+template bool operator>=(const Resource<double> &lhs, const double &rhs);
+template bool operator==(const double &lhs, const Resource<double> &rhs);
+template bool operator>(const double &lhs, const Resource<double> &rhs);
+template bool operator<(const double &lhs, const Resource<double> &rhs);
+template bool operator<=(const double &lhs, const Resource<double> &rhs);
+template bool operator>=(const double &lhs, const Resource<double> &rhs);
+template double operator/(const Resource<double> &lhs, const double &rhs);
+template double operator/(const double &lhs, const Resource<double> &rhs);

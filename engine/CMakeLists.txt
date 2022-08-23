@@ -682,6 +682,8 @@ SET(LIBDAMAGE
 
 SET(LIBRESOURCE
     src/resource/resource.cpp
+    src/resource/store.cpp
+    src/resource/product.cpp
     )
 
 SET(LIBGUI_SOURCES
@@ -1623,6 +1625,8 @@ IF (USE_GTEST)
         src/damage/tests/health_tests.cpp
         src/damage/tests/layer_tests.cpp
         src/damage/tests/object_tests.cpp
+        src/resource/tests/buy_sell.cpp
+        src/resource/tests/resource_test.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
