@@ -1,10 +1,8 @@
-/**
+/*
  * particle.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -44,22 +42,26 @@ struct ParticlePoint {
     float size;
 };
 
+struct Particle {
+    Vector velocity{};
+    QVector location{};
+    GFXColor color{};
+    float size{};
+};
+
 /**
  * Particle system class, contains regularly updated geometry for all active
- * particles of the same kind. 
- * 
+ * particles of the same kind.
+ *
  * Can be instantiated statically.
  */
 class ParticleTrail {
-    std::vector<Vector, aligned_allocator<Vector> > particleVel;
-    std::vector<QVector, aligned_allocator<QVector> > particleLoc;
-    std::vector<GFXColor, aligned_allocator<GFXColor> > particleColor;
-    std::vector<float, aligned_allocator<float> > particleSize;
+    std::vector<Particle, aligned_allocator<Particle>> particles;
     std::vector<float> particleVert;
     std::vector<float> distances;
     std::vector<unsigned short> pointIndices;
     std::vector<unsigned short> indices;
-    unsigned int maxparticles;
+    unsigned int max_particles{};
     BLENDFUNC blendsrc, blenddst;
     float alphaMask;
     bool writeDepth, fadeColor;
@@ -79,10 +81,11 @@ class ParticleTrail {
         Texture *texture;
 
         explicit Config(const std::string &prefix);
+        Config();
         ~Config();
 
         void init();
-    } config;
+    } config{};
 
 public:
     ParticleTrail(const std::string &configPrefix,
@@ -126,7 +129,7 @@ public:
         float relSize;
 
         void init(const std::string &prefix);
-    } config;
+    } config{};
 
     explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType) {
     }
@@ -137,15 +140,15 @@ public:
 
     /**
      * Launches (maybe) a particle, according to:
-     * 
+     *
      * @param pos Emitter center
      * @param rSize Emitter radial size
-     * @param percent Emitter rate relative to configured rate (inverse rate, effective_rate = rate/percent) 
+     * @param percent Emitter rate relative to configured rate (inverse rate, effective_rate = rate/percent)
      * @param basevelocity Emitter velocity directly translated to particle velocity
      * @param velocity Particle velocity relative to emitter velocity
      * @param pSize Particle size - ignored if emitter configured with fixed particle size
      * @param color Particle color
-     * 
+     *
      */
     void doParticles(const QVector &pos,
             float rSize,
@@ -153,7 +156,7 @@ public:
             const Vector &basevelocity,
             const Vector &velocity,
             float pSize,
-            const GFXColor &color);
+            const GFXColor &color) const;
 };
 
 extern ParticleTrail particleTrail;
