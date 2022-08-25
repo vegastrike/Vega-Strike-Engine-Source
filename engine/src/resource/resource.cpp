@@ -23,59 +23,91 @@
 #include "resource.h"
 
 #include <algorithm>
+#include <iostream>
 
 /*
  * Constructors
  */
 template<typename T>
-Resource<T>::Resource(const T &value, const T &min_value):
+Resource<T>::Resource(const T &value, const T &min_value, const T &max_value):
         value_(value),
         min_value_(min_value),
-        max_value_(value),
-        adjusted_max_value_(value) {
-}
+        max_value_(max_value),
+        adjusted_max_value_(value),
+        no_max_(max_value==-1) {}
 
 /*
  * Methods
  */
 template<typename T>
 void Resource<T>::Downgrade(const T &value) {
+    if(no_max_) {   // Can't downgrade if there's no max
+        return;
+    }
+
     adjusted_max_value_ = std::max(min_value_, adjusted_max_value_ - value);
 }
 
 template<typename T>
 void Resource<T>::DowngradeByPercent(const T &value) {
+    if(no_max_) {   // Can't downgrade if there's no max
+        return;
+    }
+
     adjusted_max_value_ = std::max(min_value_, adjusted_max_value_ - (max_value_ * value));
 }
 
 template<typename T>
 T Resource<T>::Percent() const {
+    if(no_max_) {   // Can't calculate percent if there's no max
+        return -1;
+    }
+
     return value_ / max_value_;
 }
 
 template<typename T>
 void Resource<T>::ResetMaxValue() {
+    if(no_max_) {   // Can't reset max if there's no max
+        return;
+    }
+
     adjusted_max_value_ = max_value_;
 }
 
 template<typename T>
-void Resource<T>::Set(const T &value, const T &min_value) {
-    value_ = adjusted_max_value_ = max_value_ = value;
-    min_value_ = min_value;
+void Resource<T>::Set(const T &value) {
+    value_ = value;
+    if(!no_max_) {
+        value_ = std::min(max_value_, value_);
+    }
+    value_ = std::max(min_value_, value_);
 }
 
 template<typename T>
 void Resource<T>::SetMaxValue(const T &value) {
+    if(no_max_) {   // Can't set max if there's no max
+        return;
+    }
+
     adjusted_max_value_ = max_value_ = value;
 }
 
 template<typename T>
 void Resource<T>::Upgrade(const T &value) {
+    if(no_max_) {   // Can't upgrade max if there's no max
+        return;
+    }
+
     adjusted_max_value_ = std::min(max_value_, adjusted_max_value_ + value);
 }
 
 template<typename T>
 void Resource<T>::UpgradeByPercent(const T &value) {
+    if(no_max_) {   // Can't upgrade max if there's no max
+        return;
+    }
+
     adjusted_max_value_ = std::min(max_value_, adjusted_max_value_ + (max_value_ * value));
 }
 
@@ -101,27 +133,38 @@ T Resource<T>::AdjustedValue() const {
 
 template<typename T>
 void Resource<T>::Zero() {
-    value_ = max_value_ = adjusted_max_value_ = min_value_;
+    value_ = adjusted_max_value_ = min_value_;
 }
 
 /*
  * Overloaded operators
  */
 
-template<typename T>
+// TODO: implement this so it would actually work
+// Currently it isn't called. Possibly because a copy constructor is called instead or something
+
+/*template<typename T>
 Resource<T> Resource<T>::operator=(const T &value) {
+    std::cout << value << "\n";
     value_ = value;
+    std::cout << value_ << "\n";
     if(max_value_ != -1) {
         value_ = std::min(max_value_, value_);
     }
-
+    std::cout << value_ << "\n";
     value_ = std::max(min_value_, value_);
+    std::cout << value_ << "\n";
     return *this;
-}
+}*/
 
 template<typename T>
 Resource<T> Resource<T>::operator+=(const T &value) {
-    value_ = std::min(value_ + value, max_value_);
+    if(!no_max_) {   // Only applicable if there's max
+        value_ = std::min(value_ + value, max_value_);
+    } else {
+        value_ += value;
+    }
+
     return *this;
 }
 
@@ -131,17 +174,23 @@ Resource<T> Resource<T>::operator-=(const T &value) {
     return *this;
 }
 
-template<typename T>
+// Same as above operator
+/*template<typename T>
 Resource<T> Resource<T>::operator=(T &value) {
     value_ = value;
     value_ = std::min(max_value_, value_);
     value_ = std::max(min_value_, value_);
     return *this;
-}
+}*/
 
 template<typename T>
 Resource<T> Resource<T>::operator+=(T &value) {
-    value_ = std::min(value_ + value, max_value_);
+    if(!no_max_) {   // Only applicable if there's max
+        value_ = std::min(value_ + value, max_value_);
+    } else {
+        value_ += value;
+    }
+
     return *this;
 }
 
