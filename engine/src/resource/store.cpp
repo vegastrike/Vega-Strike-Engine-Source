@@ -26,13 +26,13 @@
 
 Store::Store(std::vector<Product> stock, double cash):
     stock_(stock),
-    cash_(Resource<double>(-1.0, 0.0)),
+    cash_(Resource<double>(cash, 0.0)),
     unlimited_funds_(cash == -1.0) {}
 
 
 void Store::Add(Product product, double quantity) {
     Product new_product = product;
-    new_product.quantity_ = quantity;
+    new_product.quantity_.Set(quantity);
     stock_.push_back(new_product);
 }
 
@@ -116,12 +116,12 @@ int Store::ProductIndex(std::string product_name) {
 
 bool Store::Sell(Customer& buyer, std::string product_name, double quantity)
 {
-    buyer.Buy(*this, product_name, quantity);
+    return buyer.Buy(*this, product_name, quantity);
 }
 
 void Store::SetFunds(double cash)
 {
-    cash_ = 1000.0; //cash;
+    cash_.Set(cash);
     unlimited_funds_ = false;
 }
 
