@@ -30,8 +30,41 @@
 #include <string>
 #include <utility>
 #include <boost/algorithm/string.hpp>
-
 #include <iostream>
+
+#include "vsfilesystem.h"
+
+const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
+                            "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
+                            "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	"Rapid_Mesh",	"BSP_Mesh",
+                            "Use_BSP", "Use_Rapid",	"NoDamageParticles", "Mass",	"Moment_Of_Inertia",
+                            "Fuel_Capacity",	"Hull", "Armor_Front_Top_Right",	"Armor_Front_Top_Left",
+                            "Armor_Front_Bottom_Right", "Armor_Front_Bottom_Left",	"Armor_Back_Top_Right",
+                            "Armor_Back_Top_Left", "Armor_Back_Bottom_Right",	"Armor_Back_Bottom_Left",	"Shield_Front_Top_Right",
+                            "Shield_Back_Top_Left",	"Shield_Front_Bottom_Right",	"Shield_Front_Bottom_Left",
+                            "Shield_Back_Top_Right",	"Shield_Front_Top_Left",	"Shield_Back_Bottom_Right",
+                            "Shield_Back_Bottom_Left",	"Shield_Recharge",	"Shield_Leak",	"Warp_Capacitor",
+                            "Primary_Capacitor",	"Reactor_Recharge",	"Jump_Drive_Present",	"Jump_Drive_Delay",
+                            "Wormhole",	"Outsystem_Jump_Cost",	"Warp_Usage_Cost",	"Afterburner_Type",
+                            "Afterburner_Usage_Cost",	"Maneuver_Yaw",	"Maneuver_Pitch",	"Maneuver_Roll",
+                            "Yaw_Governor",	"Pitch_Governor",	"Roll_Governor",	"Afterburner_Accel",
+                            "Forward_Accel",	"Retro_Accel",	"Left_Accel",	"Right_Accel",	"Top_Accel",
+                            "Bottom_Accel",	"Afterburner_Speed_Governor",	"Default_Speed_Governor",	"ITTS",
+                            "Radar_Color",	"Radar_Range",	"Tracking_Cone",	"Max_Cone", "Lock_Cone",	"Hold_Volume",
+                            "Can_Cloak",	"Cloak_Min",	"Cloak_Rate",	"Cloak_Energy",	"Cloak_Glass",	"Repair_Droid",
+                            "ECM_Rating",	"ECM_Resist",	"Ecm_Drain",	"Hud_Functionality",	"Max_Hud_Functionality",
+                            "Lifesupport_Functionality",	"Max_Lifesupport_Functionality",	"Comm_Functionality",
+                            "Max_Comm_Functionality",	"FireControl_Functionality",	"Max_FireControl_Functionality",
+                            "SPECDrive_Functionality",	"Max_SPECDrive_Functionality",	"Slide_Start",	"Slide_End",
+                            "Activation_Accel",	"Activation_Speed",	"Upgrades",	"Prohibited_Upgrades",
+                            "Sub_Units",	"Sound",	"Light",	"Mounts",	"Net_Comm",	"Dock",	"Cargo_Import",	"Cargo",
+                            "Explosion",	"Num_Animation_Stages",	"Upgrade_Storage_Volume",	"Heat_Sink_Rating",
+                            "Shield_Efficiency",	"Num_Chunks",	"Chunk_0",	"Collide_Subunits",	"Spec_Interdiction",
+                            "Tractorability",
+                            // These values are not in units.csv! There are probably more but I stopped mapping.
+                            // TODO: map all missing values using the commented out code below!
+                            "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space"};
+
 
 class UnitCSVFactory {
     static std::string DEFAULT_ERROR_VALUE;
@@ -44,6 +77,23 @@ class UnitCSVFactory {
 
         std::map<std::string, std::string> unit_attributes = UnitCSVFactory::units[unit_key];
 
+        // TODO: Use this code to find more missing key as shown above.
+        // Note: The following code can probably be cleaner with find...
+        /*bool attribute_found = false;
+
+        for(const std::string& key : keys) {
+            if(key == attribute_key) {
+                attribute_found = true;
+                break;
+            }
+        }
+
+        if (!attribute_found)
+        {
+            std::cout << attribute_key << " attribute not found.\n";
+            assert(0);
+        }*/
+
         if (unit_attributes.count(attribute_key) == 0) {
             return DEFAULT_ERROR_VALUE;
         }
@@ -53,10 +103,23 @@ class UnitCSVFactory {
 
     friend class UnitJSONFactory;
 public:
-    static void ProcessCSV(const std::string &d, bool saved_game);
+    static void ParseCSV(VSFileSystem::VSFile &file, bool saved_game);
 
     template<class T>
     static inline T GetVariable(std::string unit_key, std::string const &attribute_key, T default_value) = delete;
+    static bool HasVariable(std::string unit_key, std::string const &attribute_key) {
+        if (units.count(unit_key) == 0) {
+            return false;
+        }
+
+        std::map<std::string, std::string> unit_attributes = UnitCSVFactory::units[unit_key];
+
+        return (unit_attributes.count(attribute_key) > 0);
+    }
+
+    static bool HasUnit(std::string unit_key) {
+        return (units.count(unit_key) > 0);
+    }
 };
 
 // Template Specialization
@@ -136,5 +199,7 @@ inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &
         return default_value;
     }
 }
+
+std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std::string unit_faction);
 
 #endif // UNITCSVFACTORY_H

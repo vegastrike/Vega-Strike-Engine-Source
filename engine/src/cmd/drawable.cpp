@@ -39,12 +39,14 @@
 #include "options.h"
 #include "weapon_info.h"
 #include "beam.h"
-#include "csv.h"
 #include "unit_csv.h"
 #include "universe_util.h"
 
 #include <boost/algorithm/string.hpp>
 #include "vega_cast_utils.hpp"
+
+// Required definition of static variable
+std::string Drawable::root;
 
 // Dupe to same function in unit.cpp
 // TODO: remove duplication
@@ -859,8 +861,6 @@ void Drawable::Split(int level) {
     int nm = this->nummesh();
     string fac = FactionUtil::GetFaction(unit->faction);
 
-    CSVRow unit_stats(LookupUnitRow(unit->name, fac));
-    unsigned int num_chunks = unit_stats.success() ? atoi(unit_stats["Num_Chunks"].c_str()) : 0;
     if (nm <= 0 && num_chunks == 0) {
         return;
     }
@@ -869,13 +869,13 @@ void Drawable::Split(int level) {
     old.pop_back();
 
     vector<unsigned int> meshsizes;
-    if (num_chunks && unit_stats.success()) {
+    if (num_chunks) {
         size_t i;
         vector<Mesh *> nw;
         unsigned int which_chunk = rand() % num_chunks;
         string chunkname = UniverseUtil::LookupUnitStat(unit->name, fac, "Chunk_" + XMLSupport::tostring(which_chunk));
         string dir = UniverseUtil::LookupUnitStat(unit->name, fac, "Directory");
-        VSFileSystem::current_path.push_back(unit_stats.getRoot());
+        VSFileSystem::current_path.push_back(root);
         VSFileSystem::current_subdirectory.push_back("/" + dir);
         VSFileSystem::current_type.push_back(VSFileSystem::UnitFile);
         float randomstartframe = 0;

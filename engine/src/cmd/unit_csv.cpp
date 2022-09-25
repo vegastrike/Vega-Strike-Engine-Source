@@ -47,18 +47,6 @@
 #include "resource/resource.h"
 #include "unit_csv_factory.h"
 
-CSVRow LookupUnitRow(const string &unitname, const string &faction) {
-    string hashname = unitname + "__" + faction;
-    for (vector<CSVTable *>::reverse_iterator i = unitTables.rbegin(); i != unitTables.rend(); ++i) {
-        unsigned int where;
-        if ((*i)->RowExists(hashname, where)) {
-            return CSVRow((*i), where);
-        } else if ((*i)->RowExists(unitname, where)) {
-            return CSVRow((*i), where);
-        }
-    }
-    return CSVRow();
-}
 
 extern int GetModeFromName(const char *input_buffer);
 extern void pushMesh(std::vector<Mesh *> &mesh,
@@ -120,19 +108,21 @@ void AddMeshes(std::vector<Mesh *> &xmeshes,
         Flightgroup *fg,
         vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
+
+    // Clear counts vector
     if (counts) {
         counts->clear();
     }
+
+    // Reserve space in counts and xmeshes vectors based on number of opening braces
     {
-        int nelem = 0;
-        while ((ofs = meshes.find('{', ofs)) != string::npos) {
-            nelem++, ofs++;
-        }
+        // This code is proven to work for one mesh.
+        std::string::difference_type number_of_elements = std::count(meshes.begin(), meshes.end(), '{');
+
         if (counts) {
-            counts->reserve(nelem);
+            counts->reserve(number_of_elements);
         }
-        xmeshes.reserve(nelem);
-        ofs = 0;
+        xmeshes.reserve(number_of_elements);
     }
     while ((where = meshes.find('{', ofs)) != string::npos) {
         when = meshes.find('}', where + 1);         //matching closing brace
@@ -668,8 +658,7 @@ void YawPitchRollParser(std::string unit_key,
     left_pointer = (left_value > 0 ? left_value : main_value) * VS_PI / 180.;
 }
 
-void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
-    CSVTable *table = row.getParent();
+void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
     xml.unitModifications = modification.c_str();
     xml.randomstartframe = ((float) rand()) / RAND_MAX;
@@ -683,19 +672,9 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
     xml.unitscale = 1;
     xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
     string tmpstr;
-    csvRow = row[0];
+    csvRow = unit_identifier;
 
-    if (table && !table->optimizer_setup) {
-        static std::vector<std::string> keys;
-        static bool optimizer_keys_init = false;
-        if (!optimizer_keys_init) {
-            optimizer_keys_init = true;
-            VS_LOG(info, "Initializing optimizer");
-
-        }
-    }
-
-    std::string unit_key = (saved_game ? "player_ship" : row[0]);
+    std::string unit_key = (saved_game ? "player_ship" : unit_identifier);
 
     fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
 
@@ -1069,13 +1048,13 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
         xml.rapidmesh_str = UnitCSVFactory::GetVariable(unit_key, "Rapid_Mesh", std::string());
         vector<mesh_polygon> polies;
 
-        std::string collideTreeHash = VSFileSystem::GetHashName(modification + "#" + row[0]);
+        std::string collideTreeHash = VSFileSystem::GetHashName(modification + "#" + unit_identifier);
         this->colTrees = collideTrees::Get(collideTreeHash);
         if (this->colTrees) {
             this->colTrees->Inc();
         }
         csOPCODECollider *colShield = NULL;
-        string tmpname = row[0];       //key
+        string tmpname = unit_identifier;       //key
         if (!this->colTrees) {
             string val;
             xml.hasColTree = 1;
@@ -1125,6 +1104,9 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game) {
     }
     CheckAccessory(this);     //turns on the ceerazy rotation for any accessories
     this->setAverageGunSpeed();
+
+    // From drawable
+    this->num_chunks = UnitCSVFactory::GetVariable(unit_key, "Num_Chunks", 0);
 }
 
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
