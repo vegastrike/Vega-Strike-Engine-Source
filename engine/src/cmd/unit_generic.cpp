@@ -458,6 +458,25 @@ void Unit::Init(const char *filename,
     const std::string faction_name = FactionUtil::GetFactionName(faction);
     const std::string unit_key = GetUnitKeyFromNameAndFaction(filename, faction_name);
 
+    if (unit_key == "") {
+        // This is actually used for upgrade checks.
+        bool istemplate = (string::npos != (string(filename).find(".template")));
+        if (!istemplate || (istemplate && configuration()->data_config.using_templates)) {
+            VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
+        }
+        meshdata.clear();
+        meshdata.push_back(NULL);
+        this->fullname = filename;
+        this->name = string("LOAD_FAILED");
+        calculate_extent(false);
+        radial_size = 1;
+
+        pilot->SetComm(this);
+        return;
+    }
+
+    bool tmpbool;
+
     //load from table?
     //we have to set the root directory to where the saved unit would have come from.
     //saved only exists if taberr<=Ok && taberr!=Unspecified...that's why we pass in said boolean
