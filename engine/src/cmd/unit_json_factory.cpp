@@ -35,42 +35,8 @@
 #include "json.h"
 
 
-const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
-                            "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
-                            "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	"Rapid_Mesh",	"BSP_Mesh",
-                            "Use_BSP", "Use_Rapid",	"NoDamageParticles", "Mass",	"Moment_Of_Inertia",
-                            "Fuel_Capacity",	"Hull", "Armor_Front_Top_Right",	"Armor_Front_Top_Left",
-                            "Armor_Front_Bottom_Right", "Armor_Front_Bottom_Left",	"Armor_Back_Top_Right",
-                            "Armor_Back_Top_Left", "Armor_Back_Bottom_Right",	"Armor_Back_Bottom_Left",	"Shield_Front_Top_Right",
-                            "Shield_Back_Top_Left",	"Shield_Front_Bottom_Right",	"Shield_Front_Bottom_Left",
-                            "Shield_Back_Top_Right",	"Shield_Front_Top_Left",	"Shield_Back_Bottom_Right",
-                            "Shield_Back_Bottom_Left",	"Shield_Recharge",	"Shield_Leak",	"Warp_Capacitor",
-                            "Primary_Capacitor",	"Reactor_Recharge",	"Jump_Drive_Present",	"Jump_Drive_Delay",
-                            "Wormhole",	"Outsystem_Jump_Cost",	"Warp_Usage_Cost",	"Afterburner_Type",
-                            "Afterburner_Usage_Cost",	"Maneuver_Yaw",	"Maneuver_Pitch",	"Maneuver_Roll",
-                            "Yaw_Governor",	"Pitch_Governor",	"Roll_Governor",	"Afterburner_Accel",
-                            "Forward_Accel",	"Retro_Accel",	"Left_Accel",	"Right_Accel",	"Top_Accel",
-                            "Bottom_Accel",	"Afterburner_Speed_Governor",	"Default_Speed_Governor",	"ITTS",
-                            "Radar_Color",	"Radar_Range",	"Tracking_Cone",	"Max_Cone", "Lock_Cone",	"Hold_Volume",
-                            "Can_Cloak",	"Cloak_Min",	"Cloak_Rate",	"Cloak_Energy",	"Cloak_Glass",	"Repair_Droid",
-                            "ECM_Rating",	"ECM_Resist",	"Ecm_Drain",	"Hud_Functionality",	"Max_Hud_Functionality",
-                            "Lifesupport_Functionality",	"Max_Lifesupport_Functionality",	"Comm_Functionality",
-                            "Max_Comm_Functionality",	"FireControl_Functionality",	"Max_FireControl_Functionality",
-                            "SPECDrive_Functionality",	"Max_SPECDrive_Functionality",	"Slide_Start",	"Slide_End",
-                            "Activation_Accel",	"Activation_Speed",	"Upgrades",	"Prohibited_Upgrades",
-                            "Sub_Units",	"Sound",	"Light",	"Mounts",	"Net_Comm",	"Dock",	"Cargo_Import",	"Cargo",
-                            "Explosion",	"Num_Animation_Stages",	"Upgrade_Storage_Volume",	"Heat_Sink_Rating",
-                            "Shield_Efficiency",	"Num_Chunks",	"Chunk_0",	"Collide_Subunits",	"Spec_Interdiction",
-                            "Tractorability"};
-
-void UnitJSONFactory::ParseJSON(const std::string &filename) {
-    const std::string json_filename = filename.substr(0, filename.size()-3) + "json";
-
-    std::ifstream ifs(json_filename, std::ifstream::in);
-    std::stringstream buffer;
-    buffer << ifs.rdbuf();
-
-    const std::string json_text = buffer.str();
+void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file) {
+    const std::string json_text = file.ReadFull();
 
     std::vector<std::string> units = json::parsing::parse_array(json_text.c_str());
     // Iterate over root
@@ -88,6 +54,9 @@ void UnitJSONFactory::ParseJSON(const std::string &filename) {
                 unit_attributes[key] = "";
             }
         }
+
+        // Add root
+        unit_attributes["root"] = file.GetRoot();
 
         std::string unit_key = unit.get("Key");
         std::string stripped_unit_key = unit_key.substr(1, unit_key.size() - 2);

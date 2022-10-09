@@ -54,6 +54,8 @@
 #include "vs_logging.h"
 
 #include "weapon_factory.h"
+#include "unit_csv_factory.h"
+#include "unit_json_factory.h"
 
 #include <algorithm>
 #include <string>
@@ -269,8 +271,38 @@ static void AppendUnitTables(const string &csvfiles) {
 }
 
 void InitUnitTables() {
+    // Old Init
     AppendUnitTables(game_options()->modUnitCSV);
-    AppendUnitTables(game_options()->unitCSV);
+
+    // New Init
+    // Try to open units.json
+    VSFileSystem::VSFile jsonFile;
+    VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
+    if (err <= VSFileSystem::Ok) {
+        UnitJSONFactory::ParseJSON(jsonFile);
+
+    } else {
+        // Try units.csv
+        VSFileSystem::VSFile csvFile;
+        VSFileSystem::VSError err = csvFile.OpenReadOnly("units.csv", VSFileSystem::UnitFile);
+        if (err <= VSFileSystem::Ok) {
+            UnitCSVFactory::ParseCSV(csvFile, true);
+        } else {
+            std::cerr << "Unable to open units file. Aborting.\n";
+            abort();
+        }
+        csvFile.Close();
+    }
+
+    jsonFile.Close();
+
+    // TODO: where did this code snippet come from???
+    /*if (f.GetFilename() == "units_description.csv" ||
+        f.GetFilename() == "master_part_list.csv") {
+        // TODO: handle master_part_list
+    */
+
+
 }
 
 void CleanupUnitTables() {

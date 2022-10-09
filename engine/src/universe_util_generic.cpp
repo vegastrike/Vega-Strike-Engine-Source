@@ -46,6 +46,7 @@
 #include "linecollide.h"
 #include "cmd/unit_collide.h"
 #include "cmd/unit_find.h"
+#include "unit_csv_factory.h"
 
 #include "python/init.h"
 #include <Python.h>
@@ -759,12 +760,14 @@ Unit *launch(string name_string,
 }
 
 string LookupUnitStat(const string &unitname, const string &faction, const string &statname) {
-    CSVRow tmp(LookupUnitRow(unitname, faction));
-    if (tmp.success()) {
-        return tmp[statname];
-    } else {
-        return string();
+    const std::string unit_key = GetUnitKeyFromNameAndFaction(unitname, faction);
+
+    // No Unit Key Found
+    if(unit_key.size() == 0) {
+        return unit_key;
     }
+
+    return UnitCSVFactory::GetVariable(unit_key, statname, std::string());
 }
 
 static std::vector<Unit *> cachedUnits;

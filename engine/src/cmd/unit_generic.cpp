@@ -72,6 +72,7 @@
 #include "configuration/game_config.h"
 #include "resource/resource.h"
 #include "base_util.h"
+#include "unit_csv_factory.h"
 
 #include <math.h>
 #include <list>
@@ -406,7 +407,6 @@ void Unit::Init() {
 
 using namespace VSFileSystem;
 extern std::string GetReadPlayerSaveGame(int);
-CSVRow GetUnitRow(string filename, bool subu, int faction, bool readLast, bool &read);
 
 void Unit::Init(const char *filename,
         bool SubU,
@@ -414,8 +414,11 @@ void Unit::Init(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber) {
-    const bool UNITTAB = configuration()->physics_config.unit_table;
-    CSVRow unitRow;
+    // Deprecated UNITTAB and configuration()->physics_config.unit_table options.
+    // Game will always load units from the JSON or CSV files.
+    // The other option was not implemented wholly. It simply opened the file
+    // but didn't do anything with it. See VSFile f variable.
+
     // TODO: something with the following line
     this->Unit::Init();
     graphicOptions.SubUnit = SubU ? 1 : 0;
@@ -423,17 +426,11 @@ void Unit::Init(const char *filename,
     graphicOptions.RecurseIntoSubUnitsOnCollision = !isSubUnit();
     this->faction = faction;
     SetFg(flightgrp, fg_subnumber);
-    VSFile f;
-    VSFile f2;
-    VSError err = Unspecified;
-    VSFile unitTab;
-    VSError taberr = Unspecified;
-    bool foundFile = false;
     bool saved_game = false;
-    if (unitModifications.length() != 0) {
+    bool modified = (unitModifications.length() != 0);
+    if (modified) {
         string nonautosave = GetReadPlayerSaveGame(_Universe->CurrentCockpit());
         string filepath("");
-        //In network mode we only look in the save subdir in HOME
 
         if (nonautosave.empty()) {
             VSFileSystem::CreateDirectoryHome(VSFileSystem::savedunitpath + "/" + unitModifications);
@@ -445,53 +442,24 @@ void Unit::Init(const char *filename,
 
         //Try to open save
         if (filename[0]) {
-            taberr = unitTab.OpenReadOnly(filepath + ".csv", UnitSaveFile);
+            VSFile unitTab;
+            VSError taberr = unitTab.OpenReadOnly(filepath + ".csv", UnitSaveFile);
             if (taberr <= Ok) {
-                unitTables.push_back(new CSVTable(unitTab, unitTables.back()->rootdir));
+                UnitCSVFactory::ParseCSV(unitTab, true);
                 unitTab.Close();
                 saved_game = true;
             }
-            if (!UNITTAB) {
-                err = f.OpenReadOnly(filepath, UnitSaveFile);
-            }
         }
     }
 
-
-    //If save was not succesfull we try to open the unit file itself
-    if (filename[0]) {
-        string subdir = "factions/" + FactionUtil::GetFactionName(faction);
-        //begin deprecated code (5/11)
-        if (UNITTAB) {
-        } else {
-            if (err > Ok) {
-                f.SetSubDirectory(subdir);
-                //No save found loading default unit
-                err = f.OpenReadOnly(filename, UnitFile);
-                if (err > Ok) {
-                    f.SetSubDirectory("");
-                    err = f.OpenReadOnly(filename, UnitFile);
-                }
-            } else {
-                f2.SetSubDirectory(subdir);
-                //Save found so just opening default unit to get its directory for further loading
-                err = f2.OpenReadOnly(filename, UnitFile);
-                if (err > Ok) {
-                    f2.SetSubDirectory("");
-                    err = f2.OpenReadOnly(filename, UnitFile);
-                }
-            }
-        }
-        //end deprecated code
-    }
-
-    if (UNITTAB) {
-        unitRow = GetUnitRow(filename, SubU, faction, true, foundFile);
-    } else {
-        foundFile = (err <= Ok);
-    }
     this->filename = filename;
-    if (!foundFile) {
+    this->name = filename;
+
+    const std::string faction_name = FactionUtil::GetFactionName(faction);
+    const std::string unit_key = GetUnitKeyFromNameAndFaction(filename, faction_name);
+
+    if (unit_key == "") {
+        // This is actually used for upgrade checks.
         bool istemplate = (string::npos != (string(filename).find(".template")));
         if (!istemplate || (istemplate && configuration()->data_config.using_templates)) {
             VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
@@ -502,34 +470,31 @@ void Unit::Init(const char *filename,
         this->name = string("LOAD_FAILED");
         calculate_extent(false);
         radial_size = 1;
-        if ((taberr <= Ok && taberr != Unspecified)) {
-            delete unitTables.back();
-            unitTables.pop_back();
-        }
+
         pilot->SetComm(this);
         return;
     }
-    this->name = this->filename;
-    bool tmpbool;
-    if (UNITTAB) {
-        //load from table?
 
-        //we have to set the root directory to where the saved unit would have come from.
-        //saved only exists if taberr<=Ok && taberr!=Unspecified...that's why we pass in said boolean
-        VSFileSystem::current_path.push_back(taberr <= Ok && taberr
-                != Unspecified ? GetUnitRow(filename, SubU, faction, false,
-                tmpbool).getRoot() : unitRow.getRoot());
-        VSFileSystem::current_subdirectory.push_back("/" + unitRow["Directory"]);
-        VSFileSystem::current_type.push_back(UnitFile);
-        LoadRow(unitRow, unitModifications, saved_game);
-        VSFileSystem::current_type.pop_back();
-        VSFileSystem::current_subdirectory.pop_back();
-        VSFileSystem::current_path.pop_back();
-        if ((taberr <= Ok && taberr != Unspecified)) {
-            delete unitTables.back();
-            unitTables.pop_back();
-        }
-    }
+    bool tmpbool;
+
+    //load from table?
+    //we have to set the root directory to where the saved unit would have come from.
+    //saved only exists if taberr<=Ok && taberr!=Unspecified...that's why we pass in said boolean
+    // Despite the check, has always taken the data folder, simplifying
+    //VSFileSystem::current_path.push_back(taberr <= Ok && taberr
+    //        != Unspecified ? GetUnitRow(filename, SubU, faction, false,
+    //        tmpbool).getRoot() : unitRow.getRoot());
+    std::string root = UnitCSVFactory::GetVariable(unit_key, "root", std::string());
+    VSFileSystem::current_path.push_back(root);
+
+    std::string directory = UnitCSVFactory::GetVariable(unit_key, "Directory", std::string());
+    VSFileSystem::current_subdirectory.push_back("/" + directory);
+    VSFileSystem::current_type.push_back(UnitFile);
+    LoadRow(unit_key, unitModifications, saved_game);
+    VSFileSystem::current_type.pop_back();
+    VSFileSystem::current_subdirectory.pop_back();
+    VSFileSystem::current_path.pop_back();
+
     calculate_extent(false);
     pilot->SetComm(this);
 

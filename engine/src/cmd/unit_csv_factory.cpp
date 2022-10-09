@@ -93,9 +93,9 @@ std::vector<std::string> ProcessLine(std::string &line) {
     return cells;
 }
 
-void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game) {
+void UnitCSVFactory::ParseCSV(VSFileSystem::VSFile &file, bool saved_game) {
     std::vector<std::string> columns;
-    std::string data(d);
+    std::string data = file.ReadFull();
     std::string delimiter = "\n";
     size_t pos = 0;
     std::string token;
@@ -123,6 +123,9 @@ void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game) {
                 unit_attributes[columns[i]] = line[i];
             }
 
+            // Add root
+            unit_attributes["root"] = file.GetRoot();
+
             std::string key = (saved_game ? "player_ship" : line[0]);
 
             if(!key.empty()) {
@@ -131,4 +134,20 @@ void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game) {
         }
         data.erase(0, pos + delimiter.length());
     }
+}
+
+
+// TODO: place this somewhere else with similar code from unit_csv
+std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std::string unit_faction) {
+    std::string hash_name = unit_name + "__" + unit_faction;
+
+    if(UnitCSVFactory::HasUnit(hash_name)) {
+        return hash_name;
+    }
+
+    if(UnitCSVFactory::HasUnit(unit_name)) {
+        return unit_name;
+    }
+
+    return std::string();
 }

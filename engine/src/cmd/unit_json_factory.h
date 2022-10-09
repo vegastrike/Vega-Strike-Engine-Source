@@ -27,10 +27,12 @@
 
 #include <string>
 
+#include "vsfilesystem.h"
+
 class UnitJSONFactory {
     static std::string DEFAULT_ERROR_VALUE;
 
 public:
-    static void ParseJSON(const std::string &filename);
+    static void ParseJSON(VSFileSystem::VSFile &file);
 };
 #endif // UNITJSONFACTORY_H

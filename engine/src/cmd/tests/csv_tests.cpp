@@ -33,13 +33,13 @@
 TEST(CSV, Sanity) {
     // This may not work for all deployments.
     // Consider standardizing this.
-    std::ifstream ifs("../../data/units/units.csv", std::ifstream::in);
+    /*std::ifstream ifs("../../data/units/units.csv", std::ifstream::in);
     std::stringstream buffer;
     buffer << ifs.rdbuf();
 
     UnitCSVFactory factory;
     std::string csv_contents{buffer.str()};
-    factory.ProcessCSV(csv_contents, false);
+    factory.ProcessCSV(csv_contents, false);*/
 
     /*for (auto const& x : UnitCSVFactory::units)
     {

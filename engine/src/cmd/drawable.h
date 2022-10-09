@@ -65,7 +65,10 @@ protected:
 
     string uniqueUnitName;
 
+    unsigned int num_chunks;
 public:
+    static std::string root;
+
     double curtime;
 
     static unsigned int unitCount;

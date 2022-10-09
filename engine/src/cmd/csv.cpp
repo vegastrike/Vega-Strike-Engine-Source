@@ -187,17 +187,30 @@ CSVTable::CSVTable(const string &data, const string &root) {
 }
 
 CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root) {
-    std::string data = f.ReadFull();
-
-    UnitCSVFactory factory;
-    if (f.GetFilename() == "units_description.csv" ||
+    /*if (f.GetFilename() == "units_description.csv" ||
             f.GetFilename() == "master_part_list.csv") {
     } else if (f.GetFilename() == "units.csv") {
-        UnitJSONFactory::ParseJSON(f.GetFullPath());
-    } else {
-        factory.ProcessCSV(data, true);
-    }
+        VSFileSystem::VSFile jsonFile;
+        VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
+        if (err <= VSFileSystem::Ok) {
+            UnitJSONFactory::ParseJSON(jsonFile);
+        }
+        jsonFile.Close();
+    }*/
 
+    if (f.GetFilename() == "units_description.csv" ||
+        f.GetFilename() == "master_part_list.csv") {
+        // Not the CSV file we expect. Will crash unit_csv_factory
+    } /*else if (f.GetFilename() != "units.csv") {
+        // Open a saved game.
+        std::cerr << "Parsing " << f.GetFilename() << std::endl;
+        //abort();
+        UnitCSVFactory factory;
+        factory.ParseCSV(f, true);
+        f.Begin();
+    }*/
+
+    std::string data = f.ReadFull();
     this->rootdir = root;
     Init(data);
 }
