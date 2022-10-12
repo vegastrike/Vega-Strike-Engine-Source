@@ -76,7 +76,7 @@ ENDIF ()
 # This is an incrementing number similar to the Google Android API Version
 # allowing us to differentiate our Assets API across multiple versions.
 # If a release is missing this value, then version `1` can be assumed.
-SET(VEGASTRIKE_ASSETS_API_VERSION "1")
+SET(VEGASTRIKE_ASSETS_API_VERSION "2")
 
 IF (COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
