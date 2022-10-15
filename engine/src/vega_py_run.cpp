@@ -33,24 +33,22 @@ void VegaPyRunString(const std::string &py_snippet) {
         VS_LOG_AND_FLUSH(error, "VegaPyRunString: strdup failed");
         return;
     }
-    PyRun_SimpleString(py_snippet_temp);
-//    Python::reseterrors();
-    if (PyErr_Occurred()) {
-        VS_LOG_AND_FLUSH(error, "VegaPyRunString: Python error occurred");
-        PyErr_Print();
-        PyErr_Clear();
-        VegaStrikeLogging::vega_logger()->FlushLogs();
-    }
+    VegaPyRunString(py_snippet_temp);
     free(py_snippet_temp);
 }
 
 void VegaPyRunString(char *py_snippet) {
+#if defined(_WINDOWS) && defined(_DEBUG)
+    VS_LOG(info, (boost::format("Debug mode on Windows; not running %1%") % py_snippet));
+#else
     VS_LOG(info, (boost::format("running %1%") % py_snippet));
     PyRun_SimpleString(py_snippet);
+    //Python::reseterrors();
     if (PyErr_Occurred()) {
         VS_LOG_AND_FLUSH(error, "VegaPyRunString: Python error occurred");
         PyErr_Print();
         PyErr_Clear();
         VegaStrikeLogging::vega_logger()->FlushLogs();
     }
+#endif
 }
