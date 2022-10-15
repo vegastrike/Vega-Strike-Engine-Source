@@ -49,6 +49,7 @@
 #include "cmd/unit_generic.h"
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <direct.h>
+#include <vega_py_run.hpp>
 #endif
 class Unit;
 //FROM_PYTHON_SMART_POINTER(Unit)
@@ -107,11 +108,7 @@ void Python::initpaths() {
      *                       ",\""+VSFileSystem::datadir+DELIMSTR+basesdir + string("\"")+
      *                       "]\n");
      */
-    VS_LOG(info, (boost::format("running %1%") % changepath));
-    char *temppython = strdup(changepath.c_str());
-    PyRun_SimpleString(temppython);
-    Python::reseterrors();
-    free(temppython);
+    VegaPyRunString(changepath);
 }
 
 void Python::reseterrors() {
@@ -182,13 +179,10 @@ void Python::init() {
     InitBriefing2();
     InitVS2();
 #endif
-    VS_LOG(info, "testing VS random");
+    VS_LOG(important_info, "testing Python integration");
+//    VS_LOG(info, "testing VS random");
     std::string python_snippet_to_run_1("import sys\nprint(sys.path)\n");
-    VS_LOG(info, (boost::format("running %1%") % python_snippet_to_run_1));
-    char *temppython = strdup(python_snippet_to_run_1.c_str());
-    PyRun_SimpleString(temppython);
-    Python::reseterrors();
-    free(temppython);
+    VegaPyRunString(python_snippet_to_run_1);
 
     const std::string python_snippet_to_run_2{
             "import VS\n"
@@ -199,10 +193,7 @@ void Python::init() {
             ")"
             ")"
     };
-    char *temp_python2 = strdup(python_snippet_to_run_2.c_str());
-    PyRun_SimpleString(temp_python2);
-    Python::reseterrors();
-    free(temp_python2);
+    VegaPyRunString(python_snippet_to_run_2);
 #if (PY_VERSION_HEX < 0x03000000)
     InitDirector2();
     InitBase2();

@@ -40,6 +40,7 @@
 #include "star_system.h"
 #include "universe.h"
 #include "options.h"
+#include "vega_py_run.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -853,9 +854,8 @@ void SaveGame::LoadSavedMissions() {
     unsigned int i;
     vector<string> scripts = getMissionStringData("active_scripts");
     vector<string> missions = getMissionStringData("active_missions");
-    PyRun_SimpleString(
-            "import VS\nVS.loading_active_missions=True\nprint(\"Loading active missions \"+str(VS.loading_active_missions))\n");
-    //kill any leftovers so they don't get loaded twice.
+    VegaPyRunString("import VS\nVS.loading_active_missions=True\nprint(\"Loading active missions \"+str(VS.loading_active_missions))\n");
+    //kill any leftovers, so they don't get loaded twice.
     Mission *ignoreMission = Mission::getNthPlayerMission(_Universe->CurrentCockpit(), 0);
     for (i = active_missions.size() - 1; i > 0; --i) {      //don't terminate zeroth mission
         if (active_missions[i]->player_num == _Universe->CurrentCockpit()
@@ -880,7 +880,7 @@ void SaveGame::LoadSavedMissions() {
             }
         }
     }
-    PyRun_SimpleString("import VS\nVS.loading_active_missions=False\n");
+    VegaPyRunString("import VS\nVS.loading_active_missions=False\n");
     getMissionStringData("active_scripts") = scripts;
     getMissionStringData("active_missions") = missions;
 }
