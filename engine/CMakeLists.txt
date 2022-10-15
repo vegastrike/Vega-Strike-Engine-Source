@@ -858,6 +858,7 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_csv.cpp
     src/cmd/unit_csv_factory.cpp
     src/cmd/unit_json_factory.cpp
+    src/cmd/unit_optimize_factory.cpp
     src/cmd/json.cpp
     src/cmd/unit_functions_generic.cpp
     src/cmd/unit_generic.cpp

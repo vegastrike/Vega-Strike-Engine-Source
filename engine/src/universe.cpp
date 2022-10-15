@@ -56,6 +56,7 @@
 #include "weapon_factory.h"
 #include "unit_csv_factory.h"
 #include "unit_json_factory.h"
+#include "unit_optimize_factory.h"
 
 #include <algorithm>
 #include <string>
@@ -302,7 +303,15 @@ void InitUnitTables() {
         // TODO: handle master_part_list
     */
 
+    // Really New Init
+    VSFileSystem::VSFile newJsonFile;
+    err = newJsonFile.OpenReadOnly("ships.json", VSFileSystem::UnitFile);
+    if (err <= VSFileSystem::Ok) {
+        UnitOptimizeFactory::ParseJSON(newJsonFile);
 
+    }
+
+    newJsonFile.Close();
 }
 
 void CleanupUnitTables() {

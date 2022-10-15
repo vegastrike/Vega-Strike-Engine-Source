@@ -102,6 +102,7 @@ class UnitCSVFactory {
     }
 
     friend class UnitJSONFactory;
+    friend class UnitOptimizeFactory;
 public:
     static void ParseCSV(VSFileSystem::VSFile &file, bool saved_game);
 
