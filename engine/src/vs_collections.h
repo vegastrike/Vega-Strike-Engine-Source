@@ -1,4 +1,6 @@
 /*
+ * vs_collections.h
+ *
  * Copyright (C) 2020-2022 Stephen G. Tuggy and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
