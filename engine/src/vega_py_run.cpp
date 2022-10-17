@@ -28,7 +28,7 @@
 #include "vs_logging.h"
 
 void VegaPyRunString(const std::string &py_snippet) {
-    VS_LOG(info, (boost::format("running %1%") % py_snippet));
+    VS_LOG(important_info, (boost::format("running %1%") % py_snippet));
     char * py_snippet_temp = vega_str_dup(py_snippet.c_str());
     VegaPyRunString(py_snippet_temp);
     free(py_snippet_temp);
@@ -36,9 +36,9 @@ void VegaPyRunString(const std::string &py_snippet) {
 
 void VegaPyRunString(char *py_snippet) {
 #if defined(_WINDOWS) && defined(_DEBUG)
-    VS_LOG(info, (boost::format("Debug mode on Windows; not running %1%") % py_snippet));
+    VS_LOG(important_info, (boost::format("Debug mode on Windows; not running %1%") % py_snippet));
 #else
-    VS_LOG(info, (boost::format("running %1%") % py_snippet));
+    VS_LOG(important_info, (boost::format("running %1%") % py_snippet));
     PyRun_SimpleString(py_snippet);
     //Python::reseterrors();
     if (PyErr_Occurred()) {
