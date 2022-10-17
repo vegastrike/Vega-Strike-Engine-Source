@@ -861,7 +861,8 @@ SET(LIBCMD_SOURCES
     src/cmd/weapon_info.cpp
     src/cmd/mount_size.cpp
     src/cmd/weapon_type.cpp
-        src/vega_py_run.cpp src/vega_py_run.hpp)
+    src/vega_py_run.cpp
+)
 
 SET(LIBCMDSERVER_SOURCES
     src/cmd/atmosphere_server.cpp
