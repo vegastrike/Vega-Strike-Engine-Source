@@ -24,15 +24,12 @@
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include "vega_py_run.hpp"
+#include "vega_string_utils.hpp"
 #include "vs_logging.h"
 
 void VegaPyRunString(const std::string &py_snippet) {
     VS_LOG(info, (boost::format("running %1%") % py_snippet));
-    char * py_snippet_temp = strdup(py_snippet.c_str());
-    if (!py_snippet_temp) {
-        VS_LOG_AND_FLUSH(error, "VegaPyRunString: strdup failed");
-        return;
-    }
+    char * py_snippet_temp = vega_str_dup(py_snippet.c_str());
     VegaPyRunString(py_snippet_temp);
     free(py_snippet_temp);
 }
