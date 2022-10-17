@@ -54,7 +54,7 @@
 #include <memory>
 #include "init.h"
 #include "vs_logging.h"
-#include "vega_py_run.hpp"
+#include "vega_py_run.h"
 
 #define PYTHONCALLBACK(rtype, ptr, str) \
   boost::python::call_method<rtype>(ptr, str)

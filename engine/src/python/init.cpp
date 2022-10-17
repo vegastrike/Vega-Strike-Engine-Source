@@ -49,7 +49,7 @@
 #include "cmd/unit_generic.h"
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <direct.h>
-#include <vega_py_run.hpp>
+#include <vega_py_run.h>
 #endif
 class Unit;
 //FROM_PYTHON_SMART_POINTER(Unit)

@@ -23,7 +23,7 @@
 
 #include <algorithm>
 #include <Python.h>
-#include <vega_py_run.hpp>
+#include <vega_py_run.h>
 #include "base.h"
 #include "gldrv/winsys.h"
 #include "vsfilesystem.h"

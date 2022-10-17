@@ -46,7 +46,7 @@
 
 #include "utils.h"
 #include "vs_math.h"
-#include "vega_cast_utils.hpp"
+#include "vega_cast_utils.h"
 
 template<> Audio::SceneManager *Singleton<Audio::SceneManager>::_singletonInstance = 0;
 

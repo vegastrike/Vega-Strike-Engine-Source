@@ -29,7 +29,7 @@
 #include "main_loop.h"
 #include "vs_random.h"
 #include "python/python_class.h"
-#include "vega_py_run.hpp"
+#include "vega_py_run.h"
 #include <vector>
 
 #ifdef HAVE_SDL

@@ -20,8 +20,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_SRC_VEGA_CAST_UTILS_HPP_
-#define VEGA_STRIKE_SRC_VEGA_CAST_UTILS_HPP_
+#ifndef VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_
+#define VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_
 
 #include <typeinfo>
 #include <cstdlib>
@@ -60,4 +60,4 @@ inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
     return ret_val;
 }
 
-#endif //VEGA_STRIKE_SRC_VEGA_CAST_UTILS_HPP_
+#endif //VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_

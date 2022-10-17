@@ -40,7 +40,7 @@
 #include "star_system.h"
 #include "universe.h"
 #include "options.h"
-#include "vega_py_run.hpp"
+#include "vega_py_run.h"
 
 #include <iostream>
 #include <fstream>

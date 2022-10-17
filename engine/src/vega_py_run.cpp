@@ -23,8 +23,8 @@
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
-#include "vega_py_run.hpp"
-#include "vega_string_utils.hpp"
+#include "vega_py_run.h"
+#include "vega_string_utils.h"
 #include "vs_logging.h"
 
 void VegaPyRunString(const std::string &py_snippet) {

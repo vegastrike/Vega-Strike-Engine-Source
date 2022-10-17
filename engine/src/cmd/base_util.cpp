@@ -46,7 +46,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include <string>
 #include <cstdlib>
 #include <cassert>
-#include "vega_cast_utils.hpp"
+#include "vega_cast_utils.h"
 #include "audiolib.h"
 #include "base.h"
 #include "base_util.h"
