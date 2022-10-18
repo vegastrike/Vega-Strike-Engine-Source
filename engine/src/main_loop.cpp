@@ -84,6 +84,7 @@
 
 #ifndef NO_GFX
 #include "gldrv/gl_globals.h"
+#include "vs_exit.h"
 #endif
 
 #define KEYDOWN(name, key) (name[key]&0x80)

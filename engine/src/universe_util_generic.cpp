@@ -54,6 +54,8 @@
 
 #include "star_system.h"
 #include "universe.h"
+#include "vega_py_run.h"
+#include "vs_exit.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/chrono/time_point.hpp>
@@ -806,10 +808,9 @@ void receivedCustom(int cp, bool trusted, string cmd, string args, string id) {
             + ", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
     VS_LOG(info, "Executing python command: ");
     VS_LOG(info, (boost::format("    %1%") % pythonCode));
-    const char *cpycode = pythonCode.c_str();
     ::Python::reseterrors();
-    PyRun_SimpleString(const_cast< char * > (cpycode));
-    ::Python::reseterrors();
+    VegaPyRunString(pythonCode);
+//    ::Python::reseterrors();
     _Universe->popActiveStarSystem();
     _Universe->SetActiveCockpit(cp_orig);
 }

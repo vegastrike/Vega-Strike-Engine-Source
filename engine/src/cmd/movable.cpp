@@ -33,7 +33,7 @@
 
 #include <iostream>
 #include <string>
-#include <vega_cast_utils.hpp>
+#include <vega_cast_utils.h>
 
 float accelStarHandler(float &input) {
     return input / (configuration()->physics_config.game_speed * configuration()->physics_config.game_accel);

@@ -28,7 +28,7 @@
 //
 
 //#include <cassert>
-#include "vega_cast_utils.hpp"
+#include "vega_cast_utils.h"
 #include "SimpleScene.h"
 #include "SimpleSource.h"
 

@@ -28,7 +28,7 @@
 //
 // C++ Implementation: Audio::OpenALRenderableListener
 //
-#include "vega_cast_utils.hpp"
+#include "vega_cast_utils.h"
 #include "OpenALRenderableSource.h"
 #include "OpenALSimpleSound.h"
 #include "OpenALHelpers.h"

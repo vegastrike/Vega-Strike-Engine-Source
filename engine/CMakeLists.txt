@@ -330,10 +330,30 @@ ENDIF (CMAKE_VERSION VERSION_LESS "3.14")
 #        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
 #        )
 
-add_compile_definitions("NV_CUBE_MAP" "BOOST_PYTHON_NO_PY_SIGNATURES" "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CXX_COMPILER_ID:MSVC>:__x86_64__>" "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>" "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h>" "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>" "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>" "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>" "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>")
+add_compile_definitions("NV_CUBE_MAP"
+        "BOOST_PYTHON_NO_PY_SIGNATURES"
+        "BOOST_ALL_DYN_LINK"
+        "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>"
+        "$<$<CXX_COMPILER_ID:MSVC>:__x86_64__>"
+        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
+        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
+        )
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
+        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
+        )
 add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
-add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>" "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>" "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>" "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:Profiler>,$<CONFIG:RelWithDebInfo>>>:-Og>" "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:-g3>" "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-pg>" "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-g2>" "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Release>>:-O3>")
+add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
+        "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
+        "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:Profiler>,$<CONFIG:RelWithDebInfo>>>:-Og>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:-g3>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-pg>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-g2>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Release>>:-O3>"
+        )
 
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
@@ -861,6 +881,7 @@ SET(LIBCMD_SOURCES
     src/cmd/weapon_info.cpp
     src/cmd/mount_size.cpp
     src/cmd/weapon_type.cpp
+    src/vega_py_run.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES
@@ -1627,6 +1648,7 @@ IF (USE_GTEST)
         src/damage/tests/object_tests.cpp
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
+        src/exit_unit_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing

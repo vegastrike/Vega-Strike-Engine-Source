@@ -29,6 +29,7 @@
 #include "main_loop.h"
 #include "vs_random.h"
 #include "python/python_class.h"
+#include "vega_py_run.h"
 #include <vector>
 
 #ifdef HAVE_SDL
@@ -1510,10 +1511,7 @@ void RegisterPythonWithCommandInterpreter::runPy(string &argsin) {
         }
     }
 
-    char *temppython = strdup(pyRunString.c_str());     //copy to a char *
-    PyRun_SimpleString(temppython);     //run it
-    Python::reseterrors();
-    free(temppython);     //free the copy char *
+    VegaPyRunString(pyRunString);
 }
 
 //}}};
