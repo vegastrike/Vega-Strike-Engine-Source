@@ -1648,6 +1648,7 @@ IF (USE_GTEST)
         src/damage/tests/object_tests.cpp
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
+        src/exit_unit_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
