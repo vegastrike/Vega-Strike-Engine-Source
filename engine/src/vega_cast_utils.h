@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include "vs_logging.h"
 #include "vs_globals.h"
+#include "vs_exit.h"
 
 template<class TargetType, class SourceType>
 inline TargetType* vega_dynamic_cast_ptr(SourceType* from) {

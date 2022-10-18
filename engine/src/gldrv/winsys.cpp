@@ -49,6 +49,7 @@
 #include "vs_globals.h"
 #include "vs_logging.h"
 #include "options.h"
+#include "vs_exit.h"
 
 
 

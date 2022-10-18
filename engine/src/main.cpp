@@ -77,6 +77,7 @@
 #include "vs_logging.h"
 #include "options.h"
 #include "version.h"
+#include "vs_exit.h"
 
 /*
  * Globals

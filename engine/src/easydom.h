@@ -37,6 +37,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "vs_logging.h"
+#include "vs_exit.h"
 
 extern std::string parseCalike(char const *filename);
 

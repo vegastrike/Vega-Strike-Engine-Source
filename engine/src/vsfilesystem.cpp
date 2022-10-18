@@ -63,6 +63,7 @@ struct dirent
 #include <boost/filesystem.hpp>
 
 #include "configuration/game_config.h"
+#include "vs_exit.h"
 
 #include <string>
 #include <utility>

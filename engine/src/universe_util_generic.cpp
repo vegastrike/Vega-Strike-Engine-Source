@@ -55,6 +55,7 @@
 #include "star_system.h"
 #include "universe.h"
 #include "vega_py_run.h"
+#include "vs_exit.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/chrono/time_point.hpp>

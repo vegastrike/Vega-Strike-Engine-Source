@@ -41,6 +41,7 @@
 #include "universe.h"
 #include "options.h"
 #include "vega_py_run.h"
+#include "vs_exit.h"
 
 #include <iostream>
 #include <fstream>

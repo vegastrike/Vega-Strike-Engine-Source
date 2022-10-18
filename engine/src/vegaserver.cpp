@@ -34,6 +34,7 @@
 #include "cmd/unit_factory.h"
 
 #include "options.h"
+#include "vs_exit.h"
 //#ifndef _WIN32
 //#include <fenv.h>
 //#endif

@@ -31,6 +31,7 @@
 #include "configxml.h"
 #include "easydom.h"
 #include "vs_logging.h"
+#include "vs_exit.h"
 
 /* *********************************************************** */
 
