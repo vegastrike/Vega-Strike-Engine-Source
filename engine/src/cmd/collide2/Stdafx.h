@@ -46,7 +46,7 @@
 #include "opcodetypes.h"
 #include "opcodesysdef.h"
 #include "Opcode.h"
-#include "vs_collections.h"
+#include "vs_vector.h"
 
 #endif    // _STDAFX_H_
 
