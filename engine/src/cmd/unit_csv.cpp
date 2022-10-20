@@ -847,7 +847,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
     graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    energy.Set(UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f));
+    double capacitor = UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f);
+    energy = Resource<float>(capacitor, 0.0f, capacitor);
     recharge = UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f);
     jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false) ? -1 : -2;
     jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
