@@ -66,7 +66,7 @@ public:
                 ^ ((size_t) a((int) (((size_t) key.second) >> 4))));
     }
 };
-#ifdef __GNUC__
+#if defined(__GNUC__) || _MSC_VER >= 17
 //Minimum declaration needed by SharedPool.h
 template<class Key, class Traits = std::less<Key> >
 class hash_compare {
