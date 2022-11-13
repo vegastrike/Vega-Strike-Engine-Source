@@ -25,7 +25,7 @@
 #include <unordered_map>
 
 #define vsUMap     std::unordered_map
-#define vsHashComp std::hash_compare
+#define vsHashComp vega_std_overrides::hash_compare
 #define vsHash     std::hash
 class Unit;
 
@@ -66,7 +66,10 @@ public:
                 ^ ((size_t) a((int) (((size_t) key.second) >> 4))));
     }
 };
-#if defined(__GNUC__) || _MSC_VER >= 17
+
+}
+
+namespace vega_std_overrides {
 //Minimum declaration needed by SharedPool.h
 template<class Key, class Traits = std::less<Key> >
 class hash_compare {
@@ -74,7 +77,7 @@ public:
     static const size_t bucket_size = 4;
     static const size_t min_buckets = 8;
 };
-#endif
+
 }
 
 #endif //def _GNUHASH_H_
