@@ -1559,7 +1559,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
                     cargorand = (cargorand_o + i) % cargo.size();
                 } while ((cargo[cargorand].quantity == 0
                         || cargo[cargorand].mission) && (++i) < cargo.size());
-                cargo[cargorand].quantity *= float_to_int(dam);
+                cargo[cargorand].quantity = cargo[cargorand].quantity.Value() * float_to_int(dam);
             }
         }
         damages |= Damages::CARGOFUEL_DAMAGED;
@@ -1941,7 +1941,7 @@ void Unit::Cloak(bool loak) {
     if (loak) {
         static bool warp_energy_for_cloak =
                 XMLSupport::parse_bool(vs_config->getVariable("physics", "warp_energy_for_cloak", "true"));
-        if (cloakenergy < (warp_energy_for_cloak ? warpenergy : energy)) {
+        if (cloakenergy < (warp_energy_for_cloak ? warpenergy : energy.Value())) {
             cloakrate = (cloakrate >= 0) ? cloakrate : -cloakrate;
             //short fix
             if (cloaking < -1 && cloakrate != 0) {
@@ -4020,7 +4020,7 @@ int Unit::RepairCost() {
         ++cost;
     }
     for (i = 0; i < numCargo(); ++i) {
-        if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
+        if (GetCargo(i).category.find(DamagedCategory) == 0) {
             ++cost;
         }
     }
@@ -4098,10 +4098,10 @@ int Unit::RepairUpgrade() {
             XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
     if (ComponentBasedUpgrades) {
         for (unsigned int i = 0; i < numCargo(); ++i) {
-            if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
+            if (GetCargo(i).category.find(DamagedCategory) == 0) {
                 ++success;
                 static int damlen = strlen(DamagedCategory);
-                GetCargo(i).category = "upgrades/" + GetCargo(i).GetCategory().substr(damlen);
+                GetCargo(i).category = "upgrades/" + GetCargo(i).category.substr(damlen);
             }
         }
     } else if (ret) {
@@ -4109,8 +4109,8 @@ int Unit::RepairUpgrade() {
 
         Unit *mpl = getMasterPartList();
         for (unsigned int i = 0; i < mpl->numCargo(); ++i) {
-            if (mpl->GetCargo(i).GetCategory().find("upgrades") == 0) {
-                const Unit *up = loadUnitByCache(mpl->GetCargo(i).content, upfac);
+            if (mpl->GetCargo(i).category.find("upgrades") == 0) {
+                const Unit *up = loadUnitByCache(mpl->GetCargo(i).name, upfac);
                 //now we analyzify up!
                 // TODO: lib_damage
                 /*if (up->MaxShieldVal() == MaxShieldVal() && up->shield.recharge > shield.recharge) {
@@ -4140,9 +4140,9 @@ extern bool isWeapon(std::string name);
 //item must be non-null... but baseUnit or credits may be NULL.
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
-    double itemPrice = baseUnit ? baseUnit->PriceCargo(item->content) : item->price;
+    double itemPrice = baseUnit ? baseUnit->PriceCargo(item->name) : item->price;
     if (isWeapon(item->category)) {
-        const Unit *upgrade = getUnitFromUpgradeName(item->content, this->faction);
+        const Unit *upgrade = getUnitFromUpgradeName(item->name, this->faction);
         if (upgrade->getNumMounts()) {
             double price = itemPrice; //RepairPrice probably won't work for mounts.
             if (!credits || price <= (*credits)) {
@@ -4177,12 +4177,12 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
         return false;
     } else {
         Cargo sold;
-        bool notadditive = (item->GetContent().find("add_") != 0 && item->GetContent().find("mult_") != 0);
-        if (notadditive || item->GetCategory().find(DamagedCategory) == 0) {
+        bool notadditive = (item->name.find("add_") != 0 && item->name.find("mult_") != 0);
+        if (notadditive || item->category.find(DamagedCategory) == 0) {
             Cargo itemCopy = *item;                 //Copy this because we reload master list before we need it.
-            const Unit *un = getUnitFromUpgradeName(item->content, this->faction);
+            const Unit *un = getUnitFromUpgradeName(item->name, this->faction);
             if (un) {
-                double percentage = UnitUtil::PercentOperational(this, item->content, item->category, false);
+                double percentage = UnitUtil::PercentOperational(this, item->name, item->category, false);
                 double price = RepairPrice(percentage, itemPrice);
                 if (!credits || price <= (*credits)) {
                     if (credits) {
@@ -4191,11 +4191,11 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
                     if (notadditive) {
                         this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
                     }
-                    if (item->GetCategory().find(DamagedCategory) == 0) {
+                    if (item->category.find(DamagedCategory) == 0) {
                         unsigned int where;
-                        Cargo *c = this->GetCargo(item->content, where);
+                        Cargo *c = this->GetCargo(item->name, where);
                         if (c) {
-                            c->category = "upgrades/" + c->GetCategory().substr(strlen(DamagedCategory));
+                            c->category = "upgrades/" + c->category.substr(strlen(DamagedCategory));
                         }
                     }
                     return true;
@@ -4225,23 +4225,23 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
         bool removethis = true /*staticrem*/;
-        int mode = GetModeFromName(mylist[i].cargo.GetContent().c_str());
+        int mode = GetModeFromName(mylist[i].cargo.name.c_str());
         if (mode != 2 || (!downgrade)) {
             const Unit *NewPart =
-                    UnitConstCache::getCachedConst(StringIntKey(mylist[i].cargo.GetContent().c_str(), upgrfac));
+                    UnitConstCache::getCachedConst(StringIntKey(mylist[i].cargo.name.c_str(), upgrfac));
             if (!NewPart) {
                 NewPart = UnitConstCache::setCachedConst(StringIntKey(
-                                mylist[i].cargo.GetContent(),
+                                mylist[i].cargo.name,
                                 upgrfac),
-                        new Unit(mylist[i].cargo.GetContent().c_str(), false,
+                        new Unit(mylist[i].cargo.name.c_str(), false,
                                 upgrfac));
             }
             if (NewPart->name == string("LOAD_FAILED")) {
                 const Unit *NewPart =
-                        UnitConstCache::getCachedConst(StringIntKey(mylist[i].cargo.GetContent().c_str(), faction));
+                        UnitConstCache::getCachedConst(StringIntKey(mylist[i].cargo.name.c_str(), faction));
                 if (!NewPart) {
-                    NewPart = UnitConstCache::setCachedConst(StringIntKey(mylist[i].cargo.content, faction),
-                            new Unit(mylist[i].cargo.GetContent().c_str(),
+                    NewPart = UnitConstCache::setCachedConst(StringIntKey(mylist[i].cargo.name, faction),
+                            new Unit(mylist[i].cargo.name.c_str(),
                                     false, faction));
                 }
             }
@@ -4403,7 +4403,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                 renormprice *= (maxpricequantadj - minpricequantadj);
                 renormprice += 1;
                 if (renormprice > .001) {
-                    c.quantity /= float_to_int(renormprice);
+                    c.quantity = c.quantity.Value() / float_to_int(renormprice);
                     if (c.quantity < 1) {
                         c.quantity = 1;
                     }
@@ -4413,7 +4413,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
             if (c.price < minprice) {
                 c.price = minprice;
             }
-            c.quantity = abs(c.quantity);
+
             AddCargo(c, false);
         }
     }
@@ -4570,19 +4570,19 @@ void Unit::Repair() {
                 }
                 Cargo *carg = &GetCargo(next_repair_cargo);
                 float percentoperational = 1;
-                if (carg->GetCategory().find("upgrades/") == 0
-                        && carg->GetCategory().find(DamagedCategory) != 0
-                        && carg->GetContent().find("add_") != 0
-                        && carg->GetContent().find("mult_") != 0
+                if (carg->category.find("upgrades/") == 0
+                        && carg->category.find(DamagedCategory) != 0
+                        && carg->name.find("add_") != 0
+                        && carg->name.find("mult_") != 0
                         && ((percentoperational =
-                                UnitUtil::PercentOperational(this, carg->content, carg->category, true)) < 1.f)) {
+                                UnitUtil::PercentOperational(this, carg->name, carg->category, true)) < 1.f)) {
                     if (next_repair_time == -FLT_MAX) {
                         next_repair_time =
                                 UniverseUtil::GetGameTime() + repairtime * (1 - percentoperational) / repair_droid;
                     } else {
                         //ACtually fix the cargo here
                         static int upfac = FactionUtil::GetUpgradeFaction();
-                        const Unit *up = getUnitFromUpgradeName(carg->content, upfac);
+                        const Unit *up = getUnitFromUpgradeName(carg->name, upfac);
                         static std::string loadfailed("LOAD_FAILED");
                         if (up->name == loadfailed) {
                             VS_LOG(info,
@@ -4600,8 +4600,8 @@ void Unit::Repair() {
                                                     "Failed repair for unit %1%, cargo item %2%: %3% (%4%) - please report error")
                                                     % name.get().c_str()
                                                     % next_repair_cargo
-                                                    % carg->GetContent().c_str()
-                                                    % carg->GetCategory().c_str()));
+                                                    % carg->name.c_str()
+                                                    % carg->category.c_str()));
                                 }
                             }
                         }
@@ -5303,7 +5303,7 @@ void Unit::UpdateCloak() {
     }
 
     // Insufficient energy to cloak ship
-    if (cloakenergy * simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy)) {
+    if (cloakenergy * simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy.Value())) {
         Cloak(false);
         return;
     }

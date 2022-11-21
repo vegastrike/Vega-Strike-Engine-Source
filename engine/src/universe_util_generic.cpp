@@ -212,7 +212,7 @@ Cargo getRandCargo(int quantity, string category) {
     } else if (mpl->numCargo()) {
         for (unsigned int i = 0; i < 500; ++i) {
             ret = &mpl->GetCargo(rand() % max);
-            if (ret->GetContent().find("mission") == string::npos) {
+            if (ret->name.find("mission") == string::npos) {
                 break;
             }
         }

@@ -30,25 +30,26 @@
 
 #include "SharedPool.h"
 #include "gfxlib_struct.h"
+#include "product.h"
 
 #include <string>
 
-class Cargo {
+struct Cargo : public Product {
 public:
-    StringPool::Reference content;
-    StringPool::Reference category;
-    StringPool::Reference description;
-    int quantity;
-    float price;
+    //StringPool::Reference content; replaced by name in product
+    std::string category;       // TODO: move to product
+    std::string description;    // TODO: move to product
+    //int quantity;
+    //float price;
     float mass;
     float volume;
     bool mission;
-    bool installed;
+    bool installed; // TODO: move down to ShipModule
     float functionality;
-    float maxfunctionality;
+    float max_functionality;
     Cargo();
-    Cargo(std::string name, std::string cc, float pp, int qq, float mm, float vv, float func, float maxfunc);
-    Cargo(std::string name, std::string cc, float pp, int qq, float mm, float vv);
+    Cargo(std::string name, std::string category, float price, int quantity, float mass, float volume, float functionality = 1.0f, float max_functionality= 1.0f);
+
     float GetFunctionality();
     float GetMaxFunctionality();
     void SetFunctionality(float func);

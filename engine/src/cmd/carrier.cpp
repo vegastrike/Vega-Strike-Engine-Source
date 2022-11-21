@@ -61,10 +61,10 @@ static int stoi(const string &inp, int def = 0) {
 class CatCompare {
 public:
     bool operator()(const Cargo &a, const Cargo &b) {
-        std::string::const_iterator aiter = a.GetCategory().begin();
-        std::string::const_iterator aend = a.GetCategory().end();
-        std::string::const_iterator biter = b.GetCategory().begin();
-        std::string::const_iterator bend = b.GetCategory().end();
+        std::string::const_iterator aiter = a.category.begin();
+        std::string::const_iterator aend = a.category.end();
+        std::string::const_iterator biter = b.category.begin();
+        std::string::const_iterator bend = b.category.end();
         for (; aiter != aend && biter != bend; ++aiter, ++biter) {
             char achar = *aiter;
             char bchar = *biter;
@@ -99,8 +99,8 @@ std::string CargoToString(const Cargo &cargo) {
             + XMLSupport::tostring((float) cargo.price) + string("\" volume=\"")
             + XMLSupport::tostring((float) cargo.volume)
             + string(
-                    "\" quantity=\"") + XMLSupport::tostring((int) cargo.quantity) + string("\" file=\"")
-            + cargo.GetContent()
+                    "\" quantity=\"") + XMLSupport::tostring((int) cargo.quantity.Value()) + string("\" file=\"")
+            + cargo.name
             + missioncargo
             + string("\"/>\n");
 }
@@ -114,7 +114,7 @@ void Carrier::SortCargo() {
     Unit *un = (Unit *) this;
     std::sort(un->cargo.begin(), un->cargo.end());
     for (unsigned int i = 0; i + 1 < un->cargo.size(); ++i) {
-        if (un->cargo[i].content == un->cargo[i + 1].content) {
+        if (un->cargo[i].name == un->cargo[i + 1].name) {
             float tmpmass = un->cargo[i].quantity * un->cargo[i].mass
                     + un->cargo[i + 1].quantity * un->cargo[i + 1].mass;
             float tmpvolume = un->cargo[i].quantity * un->cargo[i].volume
@@ -142,10 +142,10 @@ std::string Carrier::cargoSerializer(const XMLType &input, void *mythis) {
     un->SortCargo();
     string retval("");
     if (!(un->cargo.empty())) {
-        retval = un->cargo[0].GetCategory() + string("\">\n") + CargoToString(un->cargo[0]);
+        retval = un->cargo[0].category + string("\">\n") + CargoToString(un->cargo[0]);
         for (unsigned int kk = 1; kk < un->cargo.size(); ++kk) {
             if (un->cargo[kk].category != un->cargo[kk - 1].category) {
-                retval += string("\t\t</Category>\n\t\t<Category file=\"") + un->cargo[kk].GetCategory() + string(
+                retval += string("\t\t</Category>\n\t\t<Category file=\"") + un->cargo[kk].category + string(
                         "\">\n");
             }
             retval += CargoToString(un->cargo[kk]);
@@ -179,7 +179,7 @@ void Carrier::EjectCargo(unsigned int index) {
             isplayer = true;
         }
         //we will have to check for this on undock to return to the parent unit!
-        dockedPilot.content = "return_to_cockpit";
+        dockedPilot.name = "return_to_cockpit";
         dockedPilot.mass = .1;
         dockedPilot.volume = 1;
         tmp = &dockedPilot;
@@ -191,7 +191,7 @@ void Carrier::EjectCargo(unsigned int index) {
             string playernum = string("player") + ((pilotnum == 0) ? string("") : XMLSupport::tostring(pilotnum));
             isplayer = true;
         }
-        ejectedPilot.content = "eject";
+        ejectedPilot.name = "eject";
         ejectedPilot.mass = .1;
         ejectedPilot.volume = 1;
         tmp = &ejectedPilot;
@@ -201,21 +201,21 @@ void Carrier::EjectCargo(unsigned int index) {
     }
     static float cargotime = XMLSupport::parse_float(vs_config->getVariable("physics", "cargo_live_time", "600"));
     if (tmp) {
-        string tmpcontent = tmp->content;
+        string tmpcontent = tmp->name;
         if (tmp->mission) {
             tmpcontent = "Mission_Cargo";
         }
         const int ulen = strlen("upgrades");
         //prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
-        if ((!tmp->mission) && memcmp(tmp->GetCategory().c_str(), "upgrades", ulen) == 0) {
+        if ((!tmp->mission) && memcmp(tmp->category.c_str(), "upgrades", ulen) == 0) {
             tmpcontent = "Space_Salvage";
         }
         //this happens if it's a ship
         if (tmp->quantity > 0) {
             const int sslen = strlen("starships");
             Unit *cargo = NULL;
-            if (tmp->GetCategory().length() >= (unsigned int) sslen) {
-                if ((!tmp->mission) && memcmp(tmp->GetCategory().c_str(), "starships", sslen) == 0) {
+            if (tmp->category.length() >= (unsigned int) sslen) {
+                if ((!tmp->mission) && memcmp(tmp->category.c_str(), "starships", sslen) == 0) {
                     string ans = tmpcontent;
                     string::size_type blank = ans.find(".blank");
                     if (blank != string::npos) {
@@ -481,7 +481,7 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
 
     static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
     if (usemass) {
-        unit->setMass(unit->getMass() + carg.quantity * carg.mass);
+        unit->setMass(unit->getMass() + carg.quantity.Value() * carg.mass);
     }
     unit->cargo.push_back(carg);
     if (sort) {
@@ -490,7 +490,7 @@ void Carrier::AddCargo(const Cargo &carg, bool sort) {
 }
 
 bool cargoIsUpgrade(const Cargo &c) {
-    return c.GetCategory().find("upgrades") == 0;
+    return c.category.find("upgrades") == 0;
 }
 
 float Carrier::getHiddenCargoVolume() const {
@@ -507,7 +507,7 @@ bool Carrier::CanAddCargo(const Cargo &carg) const {
     }
     //Test volume availability
     bool upgradep = cargoIsUpgrade(carg);
-    float total_volume = carg.quantity * carg.volume + (upgradep ? getUpgradeVolume() : getCargoVolume());
+    float total_volume = carg.quantity.Value() * carg.volume + (upgradep ? getUpgradeVolume() : getCargoVolume());
     if (total_volume <= (upgradep ? getEmptyUpgradeVolume() : getEmptyCargoVolume())) {
         return true;
     }
@@ -537,7 +537,7 @@ float Carrier::getCargoVolume(void) const {
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
         if (!cargoIsUpgrade(unit->cargo[i])) {
-            result += unit->cargo[i].quantity * unit->cargo[i].volume;
+            result += unit->cargo[i].quantity.Value() * unit->cargo[i].volume;
         }
     }
     return result;
@@ -563,7 +563,7 @@ Unit *Carrier::makeMasterPartList() {
         json::jobject part = json::jobject::parse(part_text);
         Cargo carg;
 
-        carg.content = getJSONValue(part, "file", "");
+        carg.name = getJSONValue(part, "file", "");
         carg.category = getJSONValue(part, "categoryname", "");
         carg.volume = std::stof(getJSONValue(part, "volume", ""));
         carg.mass = std::stof(getJSONValue(part, "mass", ""));
@@ -590,7 +590,7 @@ float Carrier::PriceCargo(const std::string &s) {
     Unit *unit = static_cast<Unit *>(this);
 
     Cargo tmp;
-    tmp.content = s;
+    tmp.name = s;
     vector<Cargo>::iterator mycargo = std::find(unit->cargo.begin(),
             unit->cargo.end(), tmp);
     if (mycargo == unit->cargo.end()) {
@@ -612,7 +612,7 @@ float Carrier::getUpgradeVolume(void) const {
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
         if (cargoIsUpgrade(unit->cargo[i])) {
-            result += unit->cargo[i].quantity * unit->cargo[i].volume;
+            result += unit->cargo[i].quantity.Value() * unit->cargo[i].volume;
         }
     }
     return result;
@@ -639,7 +639,7 @@ void Carrier::GetSortedCargoCat(const std::string &cat, size_t &begin, size_t &e
     beginningtype.category = cat;
     CatCompare Comp;
     lbound = std::lower_bound(Begin, End, beginningtype, Comp);
-    beginningtype.content = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
+    beginningtype.name = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
     ubound = std::upper_bound(Begin, End, beginningtype, Comp);
     begin = lbound - Begin;
     end = ubound - Begin;
@@ -667,14 +667,14 @@ const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
         if (ind) {
             if (*ind < unit->cargo.size()) {
                 Cargo *guess = const_cast<Cargo *>(&unit->cargo[*ind]);
-                if (guess->content == s) {
+                if (guess->name == s) {
                     i = *ind;
                     return guess;
                 }
             }
         }
         Cargo searchfor;
-        searchfor.content = s;
+        searchfor.name = s;
 
         // TODO: could not deduce the right var type. Resorted to auto
         //vector< Cargo >::iterator tmp = std::find( unit->cargo.begin(),
@@ -683,7 +683,7 @@ const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
         if (tmp == unit->cargo.end()) {
             return nullptr;
         }
-        if ((*tmp).content == searchfor.content) {
+        if ((*tmp).name == searchfor.name) {
             i = (tmp - unit->cargo.begin());
             if (this == mpl) {
                 unsigned int *tmp = new unsigned int;
@@ -699,7 +699,7 @@ const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
         return nullptr;
     }
     Cargo searchfor;
-    searchfor.content = s;
+    searchfor.name = s;
 
     // TODO: could not deduce the right var type. Resorted to auto
     auto tmp = (std::find(unit->cargo.begin(), unit->cargo.end(), searchfor));
@@ -719,7 +719,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
     const Unit *unit = static_cast<const Unit *>(this);
 
     ///FIXME somehow mangle string
-    string mangled = unit->cargo[i].content;
+    string mangled = unit->cargo[i].name;
     static float scramblingmanifest =
             XMLSupport::parse_float(vs_config->getVariable("general", "PercentageSpeedChangeToFaultSearch", ".5"));
     {
@@ -748,10 +748,10 @@ bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg,
         return false;
     }
     carg = unit->cargo[i];
-    if (quantity > unit->cargo[i].quantity) {
-        quantity = unit->cargo[i].quantity;
+    if (quantity > unit->cargo[i].quantity.Value()) {
+        quantity = unit->cargo[i].quantity.Value();
     }
-    carg.price = buyer->PriceCargo(unit->cargo[i].content);
+    carg.price = buyer->PriceCargo(unit->cargo[i].name);
     creds += quantity * carg.price;
 
     carg.quantity = quantity;
@@ -765,7 +765,7 @@ bool Carrier::SellCargo(const std::string &s, int quantity, float &creds, Cargo 
     const Unit *unit = static_cast<const Unit *>(this);
 
     Cargo tmp;
-    tmp.content = s;
+    tmp.name = s;
 
     // TODO: could not deduce the right var type. Resorted to auto
     auto mycargo = std::find(unit->cargo.begin(), unit->cargo.end(), tmp);
@@ -776,11 +776,11 @@ bool Carrier::SellCargo(const std::string &s, int quantity, float &creds, Cargo 
 }
 
 bool Carrier::BuyCargo(const Cargo &carg, float &creds) {
-    if (!CanAddCargo(carg) || creds < carg.quantity * carg.price) {
+    if (!CanAddCargo(carg) || creds < carg.quantity.Value() * carg.price) {
         return false;
     }
     AddCargo(carg);
-    creds -= carg.quantity * carg.price;
+    creds -= carg.quantity.Value() * carg.price;
 
     return true;
 }

@@ -282,11 +282,11 @@ void Enslave(Unit *parent, bool enslave) {
     for (i = numcargo; i > 0;) {
         Cargo *carg = &parent->GetCargo(--i);
         if (enslave) {
-            if (carg->GetCategory().find("Passengers") != string::npos && carg->content != "Hitchhiker") {
+            if (carg->category.find("Passengers") != string::npos && carg->name != "Hitchhiker") {
                 ToBeChanged.push_back(*carg);
                 parent->RemoveCargo(i, carg->quantity, true);
             }
-        } else if (carg->content == "Slaves" || carg->content == "Pilot") {
+        } else if (carg->name == "Slaves" || carg->name == "Pilot") {
             ToBeChanged.push_back(*carg);
             parent->RemoveCargo(i, carg->quantity, true);
         }

@@ -38,15 +38,15 @@ typedef Store Customer;
 class Store
 {
 public: // TODO: remove
-    std::vector<Product> stock_;
-    Resource<double> cash_;
-    bool unlimited_funds_;
+    std::vector<Product> stock;
+    Resource<double> cash;
+    bool unlimited_funds;
 public:
     Store(std::vector<Product> stock = std::vector<Product>(), double cash = -1.0);
 
-    void Add(Product product, double quantity);
-    void Add(int index, double quantity);
-    void Subtract(int index, double quantity);
+    void Add(Product product, const int quantity);
+    void Add(int index, int quantity);
+    void Subtract(int index, int quantity);
 
     bool InStock(std::string product_name);
     int ProductIndex(std::string product_name);

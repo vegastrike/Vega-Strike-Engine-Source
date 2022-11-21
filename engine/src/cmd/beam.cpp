@@ -576,14 +576,14 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     Cargo tmp;
                     bool isnotcargo = (c == NULL);
                     if (!isnotcargo) {
-                        if (c->GetCategory().find("upgrades") == 0) {
+                        if (c->category.find("upgrades") == 0) {
                             isnotcargo = true;
                         }
                     }
                     //add upgrades as space junk
                     if (isnotcargo) {
                         c = &tmp;
-                        tmp.content = "Space_Salvage";
+                        tmp.name = "Space_Salvage";
                         tmp.category = "Uncategorized_Cargo";
                         static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
                         tmp.price = spacejunk;
@@ -591,7 +591,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         tmp.mass = .001;
                         tmp.volume = 1;
                         if (target->faction != upgradesfaction) {
-                            tmp.content = target->name;
+                            tmp.name = target->name;
                             tmp.category = "starships";
                             static float starshipprice =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",

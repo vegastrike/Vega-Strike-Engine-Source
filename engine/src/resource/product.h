@@ -27,24 +27,15 @@
 
 #include "resource.h"
 
-class Product
+struct Product
 {
-protected:
-    std::string name_;
-    Resource<double> quantity_;  // Can be a fraction for things such as fuel, water, etc.
-    double unit_price_;          // Price per one of quantity
+    std::string name;
+    // TODO: Can be a fraction for things such as fuel, water, etc. But not for now.
+    Resource<int> quantity;
+    double price;          // Price per one of quantity
 
-    friend bool operator==(const Product &lhs, const std::string &rhs);
-    friend bool operator==(const std::string &lhs, const Product &rhs);
-    friend bool operator!=(const Product &lhs, const std::string &rhs);
-    friend bool operator!=(const std::string &lhs, const Product &rhs);
-    friend class Store;
-
-    // TODO: I'm not a fan of this. Clean this up (much) later
-    friend class Carrier;
-public:
     Product();
-    Product(const std::string &name, const double quantity, const double unit_price);
+    Product(const std::string &name, const double quantity, const double price);
     double add(double quantity);       // Return value - actual quantity
     double subtract(double quantity);
 };

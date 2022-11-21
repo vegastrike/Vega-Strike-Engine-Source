@@ -573,29 +573,29 @@ void RecomputeUnitUpgrades(Unit *un) {
     unsigned int i;
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if (c->GetContent().find("mult_") != 0
-                    && c->GetContent().find("add_") != 0) {
-                un->Upgrade(c->content, 0, 0, true, false);
+        if (c->category.find("upgrades") == 0 && c->category.find(DamagedCategory) != 0) {
+            if (c->name.find("mult_") != 0
+                    && c->name.find("add_") != 0) {
+                un->Upgrade(c->name, 0, 0, true, false);
             }
         }
     }
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if (c->GetContent().find("add_") == 0) {
-                for (int j = 0; j < c->quantity; ++j) {
-                    un->Upgrade(c->content, 0, 0, true, false);
+        if (c->category.find("upgrades") == 0 && c->category.find(DamagedCategory) != 0) {
+            if (c->name.find("add_") == 0) {
+                for (int j = 0; j < c->quantity.Value(); ++j) {
+                    un->Upgrade(c->name, 0, 0, true, false);
                 }
             }
         }
     }
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
-        if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if (c->GetContent().find("mult_") == 0) {
-                for (int j = 0; j < c->quantity; ++j) {
-                    un->Upgrade(c->content, 0, 0, true, false);
+        if (c->category.find("upgrades") == 0 && c->category.find(DamagedCategory) != 0) {
+            if (c->name.find("mult_") == 0) {
+                for (int j = 0; j < c->quantity.Value(); ++j) {
+                    un->Upgrade(c->name, 0, 0, true, false);
                 }
             }
         }
@@ -670,7 +670,7 @@ int hasCargo(const Unit *my_unit, string mycarg) {
     if (c == NULL) {
         return 0;
     }
-    return c->quantity;
+    return c->quantity.Value();
 }
 
 bool JumpTo(Unit *unit, string system) {

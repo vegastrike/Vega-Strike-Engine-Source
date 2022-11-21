@@ -40,13 +40,48 @@ class Resource {
 public:
     Resource(const T &value, const T &min_value = 0, const T &max_value = -1);
 
-    Resource<T> operator=(const T &value);
+    //Resource<T> operator=(const T &value);
     Resource<T> operator+=(const T &value);
     Resource<T> operator-=(const T &value);
 
     //Resource<T> operator=(T &value);
     Resource<T> operator+=(T &value);
     Resource<T> operator-=(T &value);
+
+    // Declare prefix and postfix increment operators.
+    // TODO: actually implement pre/postfix increment. Right now both implementations are the same!!!
+    // Prefix increment operator.
+    Resource<T>& operator++(){
+        T tmp_value = value_;
+        tmp_value++;
+        this->Set(tmp_value);
+        return *this;
+    }
+    // Postfix increment operator.
+    Resource<T> operator++(int) {
+        T tmp_value = value_;
+        tmp_value++;
+        this->Set(tmp_value);
+        return *this;
+    }
+
+    // Declare prefix and postfix decrement operators.
+    // Prefix decrement operator.
+    Resource<T>& operator--() {
+        T tmp_value = value_;
+        tmp_value--;
+        this->Set(tmp_value);
+        return *this;
+    }
+    // Postfix decrement operator.
+    Resource<T> operator--(int) {
+        T tmp_value = value_;
+        tmp_value--;
+        this->Set(tmp_value);
+        return *this;
+    }
+
+    operator T() { return value_; }
 
     void Downgrade(const T &value);
     void DowngradeByPercent(const T &value);
@@ -68,6 +103,8 @@ public:
 template<typename T>
 bool operator==(const Resource<T> &lhs, const T &rhs);
 template<typename T>
+bool operator==(const T &lhs, const Resource<T> &rhs);
+template<typename T>
 bool operator>(const Resource<T> &lhs, const T &rhs);
 template<typename T>
 bool operator<(const Resource<T> &lhs, const T &rhs);
@@ -75,8 +112,6 @@ template<typename T>
 bool operator<=(const Resource<T> &lhs, const T &rhs);
 template<typename T>
 bool operator>=(const Resource<T> &lhs, const T &rhs);
-template<typename T>
-bool operator==(const T &lhs, const Resource<T> &rhs);
 template<typename T>
 bool operator>(const T &lhs, const Resource<T> &rhs);
 template<typename T>
@@ -89,4 +124,5 @@ template<typename T>
 T operator/(const Resource<T> &lhs, const T &rhs);
 template<typename T>
 T operator/(const T &lhs, const Resource<T> &rhs);
+
 #endif // RESOURCE_H

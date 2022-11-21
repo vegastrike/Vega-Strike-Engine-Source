@@ -32,34 +32,20 @@
 Cargo::Cargo() {
     mass = 0;
     volume = 0;
-    price = 0;
-    quantity = 1;
     mission = false;
     installed = false;
-    functionality = maxfunctionality = 1.0f;
+    functionality = max_functionality = 1.0f;
 }
 
-Cargo::Cargo(std::string name, std::string cc, float pp, int qq, float mm, float vv, float func, float maxfunc) :
-        content(name), category(cc) {
-    quantity = qq;
-    price = pp;
-    mass = mm;
-    volume = vv;
-    mission = false;
-    installed = false;
-    functionality = func;
-    maxfunctionality = maxfunc;
-}
-
-Cargo::Cargo(std::string name, std::string cc, float pp, int qq, float mm, float vv) :
-        content(name), category(cc) {
-    quantity = qq;
-    price = pp;
-    mass = mm;
-    volume = vv;
-    mission = false;
-    installed = false;
-    functionality = maxfunctionality = 1.0f;
+Cargo::Cargo(std::string name, std::string category, float price, int quantity,
+             float mass, float volume, float functionality, float max_functionality) :
+        Product(name, quantity, price), category(category) {
+    this->mass = mass;
+    this->volume = volume;
+    this->mission = false;
+    this->installed = false;
+    this->functionality = functionality;
+    this->max_functionality = max_functionality;
 }
 
 float Cargo::GetFunctionality() {
@@ -67,7 +53,7 @@ float Cargo::GetFunctionality() {
 }
 
 float Cargo::GetMaxFunctionality() {
-    return maxfunctionality;
+    return max_functionality;
 }
 
 void Cargo::SetFunctionality(float func) {
@@ -75,7 +61,7 @@ void Cargo::SetFunctionality(float func) {
 }
 
 void Cargo::SetMaxFunctionality(float func) {
-    maxfunctionality = func;
+    max_functionality = func;
 }
 
 void Cargo::SetMissionFlag(bool flag) {
@@ -99,7 +85,7 @@ void Cargo::SetQuantity(int quantity) {
 }
 
 void Cargo::SetContent(const std::string &content) {
-    this->content = content;
+    this->name = content;
 }
 
 void Cargo::SetCategory(const std::string &category) {
@@ -115,27 +101,29 @@ const std::string &Cargo::GetCategory() const {
 }
 
 const std::string &Cargo::GetContent() const {
-    return content;
+    return name;
 }
 
 const std::string &Cargo::GetDescription() const {
     return description;
 }
 
+
+
 std::string Cargo::GetCategoryPython() {
-    return GetCategory();
+    return category;
 }
 
 std::string Cargo::GetContentPython() {
-    return GetContent();
+    return name;
 }
 
 std::string Cargo::GetDescriptionPython() {
-    return GetDescription();
+    return description;
 }
 
 int Cargo::GetQuantity() const {
-    return quantity;
+    return (quantity.Value());
 }
 
 float Cargo::GetVolume() const {
@@ -150,12 +138,13 @@ float Cargo::GetPrice() const {
     return price;
 }
 
+
 bool Cargo::operator==(const Cargo &other) const {
-    return content == other.content;
+    return name == other.name;
 }
 
 bool Cargo::operator<(const Cargo &other) const {
-    return (category == other.category) ? (content < other.content) : (category < other.category);
+    return (category == other.category) ? (name < other.name) : (category < other.category);
 }
 
 

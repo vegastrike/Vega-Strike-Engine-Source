@@ -577,18 +577,18 @@ static void AddCarg(Unit *thus, const string &cargos) {
             string::size_type elemstart = where + 1, elemend = when;
             ofs = when + 1;
 
-            carg.content = nextElementString(cargos, elemstart, elemend);
+            carg.name = nextElementString(cargos, elemstart, elemend);
             carg.category = nextElementString(cargos, elemstart, elemend);
             carg.price = nextElementFloat(cargos, elemstart, elemend);
             carg.quantity = nextElementInt(cargos, elemstart, elemend);
             carg.mass = nextElementFloat(cargos, elemstart, elemend);
             carg.volume = nextElementFloat(cargos, elemstart, elemend);
             carg.functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
-            carg.maxfunctionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
+            carg.max_functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
             carg.description = nextElementString(cargos, elemstart, elemend);
             carg.mission = nextElementBool(cargos, elemstart, elemend, false);
             carg.installed = nextElementBool(cargos, elemstart, elemend,
-                    carg.category.get().find("upgrades/") == 0);
+                    carg.category.find("upgrades/") == 0);
 
             thus->AddCargo(carg, false);
         } else {
@@ -1299,11 +1299,11 @@ string Unit::WriteUnitString() {
                                 c->mass,
                                 c->volume,
                                 c->functionality,
-                                c->maxfunctionality,
+                                c->max_functionality,
                                 c->mission ? "true" : "false",
                                 c->installed ? "true" : "false"
                         );
-                        carg += "{" + c->GetContent() + ";" + c->GetCategory() + tmp;
+                        carg += "{" + c->name + ";" + c->category + tmp;
                     }
                     unit["Cargo"] = carg;
                 }
@@ -1479,7 +1479,7 @@ void UpdateMasterPartList(Unit *ret) {
         std::vector<std::string> *addedcargodesc = &cp->savegame->getMissionStringData("master_part_list_description");
         for (unsigned int j = 0; j < addedcargoname->size(); ++j) {
             Cargo carg;
-            carg.content = (*addedcargoname)[j];
+            carg.name = (*addedcargoname)[j];
             carg.category = (j < addedcargocat->size() ? (*addedcargocat)[j] : std::string("Uncategorized"));
             carg.volume = (j < addedcargovol->size() ? XMLSupport::parse_float((*addedcargovol)[j]) : 1.0);
             carg.price = (j < addedcargoprice->size() ? XMLSupport::parse_float((*addedcargoprice)[j]) : 0.0);
@@ -1494,7 +1494,7 @@ void UpdateMasterPartList(Unit *ret) {
     {
         Cargo last_cargo;
         for (int i = ret->numCargo() - 1; i >= 0; --i) {
-            if (ret->GetCargo(i).content == last_cargo.content
+            if (ret->GetCargo(i).name == last_cargo.name
                     && ret->GetCargo(i).category == last_cargo.category) {
                 ret->RemoveCargo(i, ret->GetCargo(i).quantity, true);
             } else {

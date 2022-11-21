@@ -1600,7 +1600,7 @@ void Arrested(Unit *parent) {
                 Cargo *ci = &parent->GetCargo(i);
                 for (unsigned int j = 0; j < contra->numCargo(); ++j) {
                     Cargo *cj = &contra->GetCargo(j);
-                    if (ci->content == cj->content) {
+                    if (ci->name == cj->name) {
                         attack = true;
                         break;
                     }
@@ -2149,7 +2149,7 @@ void FireKeyboard::Execute() {
         }
         for (; offset < static_cast<int>(parent->numCargo()); ++offset) {
             Cargo *tmp = &parent->GetCargo(offset);
-            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->mission == false)) {
+            if (tmp->category.find("upgrades") == string::npos && (missiontoo || tmp->mission == false)) {
                 parent->EjectCargo(offset);
                 break;
             }

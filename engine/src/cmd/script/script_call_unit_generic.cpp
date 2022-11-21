@@ -257,7 +257,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 if (mpl->numCargo()) {
                     for (unsigned int i = 0; i < 500; i++) {
                         ret = &mpl->GetCargo(rand() % max);
-                        if (ret->GetContent().find("mission") == string::npos) {
+                        if (ret->name.find("mission") == string::npos) {
                             break;
                         }
                     }
@@ -270,7 +270,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_OBJECT;
                 viret->objectname = "string";
-                viret->object = &ret->content;
+                viret->object = &ret->name;
                 ((olist_t *) vireturn->object)->push_back(viret);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_OBJECT;
@@ -804,7 +804,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             viret->int_val = quantity;
         } else if (method_id == CMT_UNIT_addCargo) {
             Cargo carg;
-            carg.content = getStringArgument(node, mode, 1);
+            carg.name = getStringArgument(node, mode, 1);
             carg.category = getStringArgument(node, mode, 2);
             carg.price = getFloatArg(node, mode, 3);
             carg.quantity = getIntArg(node, mode, 4);

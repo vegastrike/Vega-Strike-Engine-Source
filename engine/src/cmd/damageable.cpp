@@ -417,12 +417,12 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     static std::string restricted_items = vs_config->getVariable("physics", "indestructable_cargo_items", "");
     int cargo_to_damage_index = rand() % unit->numCargo();
     Cargo &cargo = unit->GetCargo(cargo_to_damage_index);
-    const std::string &cargo_category = cargo.GetCategory();
+    const std::string &cargo_category = cargo.category;
 
     bool is_upgrade = cargo_category.find("upgrades/") == 0;
     bool already_damaged = cargo_category.find("upgrades/Damaged/") == 0;
     bool is_multiple = cargo_category.find("mult_") == 0;
-    bool is_restricted = restricted_items.find(cargo.GetContent()) == string::npos;
+    bool is_restricted = restricted_items.find(cargo.name) == string::npos;
 
     // The following comment was kept in the hopes someone else knows what it means
     //why not downgrade _add GetCargo(which).content.find("add_")!=0&&
@@ -438,7 +438,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
         return;
     }
 
-    const Unit *downgrade = loadUnitByCache(cargo.content, FactionUtil::GetFactionIndex("upgrades"));
+    const Unit *downgrade = loadUnitByCache(cargo.name, FactionUtil::GetFactionIndex("upgrades"));
     if (!downgrade) {
         return;
     }

@@ -17,8 +17,8 @@ TEST(Store, Sanity) {
     std::vector<Product> inventory = {used_car};
     customer.Stock(inventory);
     customer.SetFunds(1000);
-    EXPECT_EQ(customer.cash_.Value(), 1000.0);
-    EXPECT_FALSE(customer.unlimited_funds_);
+    EXPECT_EQ(customer.cash.Value(), 1000.0);
+    EXPECT_FALSE(customer.unlimited_funds);
 
     // Successful buy
     bool result = customer.Buy(store, "Milk", 1);
