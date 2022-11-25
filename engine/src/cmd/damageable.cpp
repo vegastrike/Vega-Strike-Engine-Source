@@ -417,7 +417,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     static std::string restricted_items = vs_config->getVariable("physics", "indestructable_cargo_items", "");
     int cargo_to_damage_index = rand() % unit->numCargo();
     Cargo &cargo = unit->GetCargo(cargo_to_damage_index);
-    const std::string &cargo_category = cargo.category;
+    const std::string &cargo_category = cargo.GetCategory();
 
     bool is_upgrade = cargo_category.find("upgrades/") == 0;
     bool already_damaged = cargo_category.find("upgrades/Damaged/") == 0;
@@ -431,7 +431,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     }
 
     const int prefix_length = strlen("upgrades/");
-    cargo.category = "upgrades/Damaged/" + cargo_category.substr(prefix_length);
+    cargo.SetCategory("upgrades/Damaged/" + cargo_category.substr(prefix_length));
 
     // TODO: find a better name for whatever this is. Right now it's not not downgrade
     if (configuration()->physics_config.separate_system_flakiness_component) {

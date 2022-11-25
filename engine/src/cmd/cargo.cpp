@@ -38,7 +38,8 @@ Cargo::Cargo() {
 }
 
 Cargo::Cargo(std::string name, std::string category, float price, int quantity,
-             float mass, float volume, float functionality, float max_functionality) :
+             float mass, float volume, float functionality, float max_functionality,
+             bool mission, bool installed) :
         Product(name, quantity, price), category(category) {
     this->mass = mass;
     this->volume = volume;
@@ -46,6 +47,8 @@ Cargo::Cargo(std::string name, std::string category, float price, int quantity,
     this->installed = false;
     this->functionality = functionality;
     this->max_functionality = max_functionality;
+    this->mission = mission;
+    this->installed = installed;
 }
 
 float Cargo::GetFunctionality() {
@@ -56,8 +59,16 @@ float Cargo::GetMaxFunctionality() {
     return max_functionality;
 }
 
+void Cargo::SetDescription(const std::string &description) {
+    this->description = description;
+}
+
 void Cargo::SetFunctionality(float func) {
     functionality = func;
+}
+
+void Cargo::SetInstalled(bool installed) {
+    this->installed = installed;
 }
 
 void Cargo::SetMaxFunctionality(float func) {
@@ -95,6 +106,11 @@ void Cargo::SetCategory(const std::string &category) {
 bool Cargo::GetMissionFlag() const {
     return this->mission;
 }
+
+bool Cargo::GetInstalled() const {
+    return this->installed;
+}
+
 
 const std::string &Cargo::GetCategory() const {
     return category;
@@ -137,6 +153,8 @@ float Cargo::GetMass() const {
 float Cargo::GetPrice() const {
     return price;
 }
+
+
 
 
 bool Cargo::operator==(const Cargo &other) const {

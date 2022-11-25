@@ -573,22 +573,27 @@ static void AddCarg(Unit *thus, const string &cargos) {
     }
     while ((where = cargos.find('{', ofs)) != string::npos) {
         if ((when = cargos.find('}', where + 1)) != string::npos) {
-            Cargo carg;
             string::size_type elemstart = where + 1, elemend = when;
             ofs = when + 1;
 
-            carg.name = nextElementString(cargos, elemstart, elemend);
-            carg.category = nextElementString(cargos, elemstart, elemend);
-            carg.price = nextElementFloat(cargos, elemstart, elemend);
-            carg.quantity = nextElementInt(cargos, elemstart, elemend);
-            carg.mass = nextElementFloat(cargos, elemstart, elemend);
-            carg.volume = nextElementFloat(cargos, elemstart, elemend);
-            carg.functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
-            carg.max_functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
-            carg.description = nextElementString(cargos, elemstart, elemend);
-            carg.mission = nextElementBool(cargos, elemstart, elemend, false);
-            carg.installed = nextElementBool(cargos, elemstart, elemend,
-                    carg.category.find("upgrades/") == 0);
+            std::string name = nextElementString(cargos, elemstart, elemend);
+            std::string category = nextElementString(cargos, elemstart, elemend);
+            float price = nextElementFloat(cargos, elemstart, elemend);
+            int quantity = nextElementInt(cargos, elemstart, elemend);
+            float mass = nextElementFloat(cargos, elemstart, elemend);
+            float volume = nextElementFloat(cargos, elemstart, elemend);
+            float functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
+            float max_functionality = nextElementFloat(cargos, elemstart, elemend, 1.f);
+            std::string description = nextElementString(cargos, elemstart, elemend);
+            bool mission = nextElementBool(cargos, elemstart, elemend, false);
+            bool installed = nextElementBool(cargos, elemstart, elemend,
+                    category.find("upgrades/") == 0);
+
+            Cargo carg(name, category, price, quantity, mass, volume, functionality,
+                       max_functionality, mission, installed);
+
+
+
 
             thus->AddCargo(carg, false);
         } else {
@@ -1295,15 +1300,15 @@ string Unit::WriteUnitString() {
                         char tmp[2048];
                         sprintf(tmp, ";%f;%d;%f;%f;%f;%f;;%s;%s}",
                                 c->price,
-                                c->quantity,
-                                c->mass,
-                                c->volume,
-                                c->functionality,
-                                c->max_functionality,
-                                c->mission ? "true" : "false",
-                                c->installed ? "true" : "false"
+                                c->quantity.Value(),
+                                c->GetMass(),
+                                c->GetVolume(),
+                                c->GetFunctionality(),
+                                c->GetMaxFunctionality(),
+                                c->GetMissionFlag() ? "true" : "false",
+                                c->GetInstalled() ? "true" : "false"
                         );
-                        carg += "{" + c->name + ";" + c->category + tmp;
+                        carg += "{" + c->name + ";" + c->GetCategory() + tmp;
                     }
                     unit["Cargo"] = carg;
                 }
@@ -1480,12 +1485,12 @@ void UpdateMasterPartList(Unit *ret) {
         for (unsigned int j = 0; j < addedcargoname->size(); ++j) {
             Cargo carg;
             carg.name = (*addedcargoname)[j];
-            carg.category = (j < addedcargocat->size() ? (*addedcargocat)[j] : std::string("Uncategorized"));
-            carg.volume = (j < addedcargovol->size() ? XMLSupport::parse_float((*addedcargovol)[j]) : 1.0);
+            carg.SetCategory((j < addedcargocat->size() ? (*addedcargocat)[j] : std::string("Uncategorized")));
+            carg.SetVolume((j < addedcargovol->size() ? XMLSupport::parse_float((*addedcargovol)[j]) : 1.0));
             carg.price = (j < addedcargoprice->size() ? XMLSupport::parse_float((*addedcargoprice)[j]) : 0.0);
-            carg.mass = (j < addedcargomass->size() ? XMLSupport::parse_float((*addedcargomass)[j]) : .01);
-            carg.description =
-                    (j < addedcargodesc->size() ? (*addedcargodesc)[j] : std::string("No Description Added"));
+            carg.SetMass((j < addedcargomass->size() ? XMLSupport::parse_float((*addedcargomass)[j]) : .01));
+            carg.SetDescription(
+                    (j < addedcargodesc->size() ? (*addedcargodesc)[j] : std::string("No Description Added")));
             carg.quantity = 1;
             ret->cargo.push_back(carg);
         }
@@ -1495,7 +1500,7 @@ void UpdateMasterPartList(Unit *ret) {
         Cargo last_cargo;
         for (int i = ret->numCargo() - 1; i >= 0; --i) {
             if (ret->GetCargo(i).name == last_cargo.name
-                    && ret->GetCargo(i).category == last_cargo.category) {
+                    && ret->GetCargo(i).GetCategory() == last_cargo.GetCategory()) {
                 ret->RemoveCargo(i, ret->GetCargo(i).quantity, true);
             } else {
                 last_cargo = ret->GetCargo(i);

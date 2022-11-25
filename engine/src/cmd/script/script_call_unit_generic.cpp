@@ -275,7 +275,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_OBJECT;
                 viret->objectname = "string";
-                viret->object = &ret->category;
+                viret->object = const_cast<std::string*>(&ret->GetCategory());
                 ((olist_t *) vireturn->object)->push_back(viret);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_FLOAT;
@@ -287,11 +287,11 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 ((olist_t *) vireturn->object)->push_back(viret);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_FLOAT;
-                viret->float_val = ret->mass;
+                viret->float_val = ret->GetMass();
                 ((olist_t *) vireturn->object)->push_back(viret);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_FLOAT;
-                viret->float_val = ret->volume;
+                viret->float_val = ret->GetVolume();
                 ((olist_t *) vireturn->object)->push_back(viret);
             }
         }
@@ -805,11 +805,11 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_addCargo) {
             Cargo carg;
             carg.name = getStringArgument(node, mode, 1);
-            carg.category = getStringArgument(node, mode, 2);
+            carg.SetCategory(getStringArgument(node, mode, 2));
             carg.price = getFloatArg(node, mode, 3);
             carg.quantity = getIntArg(node, mode, 4);
-            carg.mass = getFloatArg(node, mode, 5);
-            carg.volume = getFloatArg(node, mode, 6);
+            carg.SetMass(getFloatArg(node, mode, 5));
+            carg.SetVolume(getFloatArg(node, mode, 6));
             if (mode == SCRIPT_RUN) {
                 int i;
                 for (i = carg.quantity; i > 0 && !my_unit->CanAddCargo(carg); i--) {

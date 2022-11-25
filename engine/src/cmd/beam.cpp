@@ -576,7 +576,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     Cargo tmp;
                     bool isnotcargo = (c == NULL);
                     if (!isnotcargo) {
-                        if (c->category.find("upgrades") == 0) {
+                        if (c->GetCategory().find("upgrades") == 0) {
                             isnotcargo = true;
                         }
                     }
@@ -584,15 +584,15 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     if (isnotcargo) {
                         c = &tmp;
                         tmp.name = "Space_Salvage";
-                        tmp.category = "Uncategorized_Cargo";
+                        tmp.SetCategory("Uncategorized_Cargo");
                         static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
                         tmp.price = spacejunk;
                         tmp.quantity = 1;
-                        tmp.mass = .001;
-                        tmp.volume = 1;
+                        tmp.SetMass(.001);
+                        tmp.SetVolume(1);
                         if (target->faction != upgradesfaction) {
                             tmp.name = target->name;
-                            tmp.category = "starships";
+                            tmp.SetCategory("starships");
                             static float starshipprice =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
                                             "junk_starship_price",
@@ -607,8 +607,8 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                                             "1500"));
                             tmp.price = starshipprice;
                             tmp.quantity = 1;
-                            tmp.mass = starshipmass;
-                            tmp.volume = starshipvolume;
+                            tmp.SetMass(starshipmass);
+                            tmp.SetVolume(starshipvolume);
                         }
                     }
                     if (c != NULL) {

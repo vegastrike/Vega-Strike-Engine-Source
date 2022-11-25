@@ -1558,7 +1558,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
                 do {
                     cargorand = (cargorand_o + i) % cargo.size();
                 } while ((cargo[cargorand].quantity == 0
-                        || cargo[cargorand].mission) && (++i) < cargo.size());
+                        || cargo[cargorand].GetMissionFlag()) && (++i) < cargo.size());
                 cargo[cargorand].quantity = cargo[cargorand].quantity.Value() * float_to_int(dam);
             }
         }
@@ -3183,7 +3183,7 @@ double Unit::Upgrade(const std::string &file,
     unsigned int cargonum;
     Cargo *cargo = GetCargo(file, cargonum);
     if (cargo) {
-        cargo->installed = true;
+        cargo->SetInstalled(true);
     }
     char *unitdir = GetUnitDir(this->name.get().c_str());
     string templnam = string(unitdir) + ".template";
@@ -4020,7 +4020,7 @@ int Unit::RepairCost() {
         ++cost;
     }
     for (i = 0; i < numCargo(); ++i) {
-        if (GetCargo(i).category.find(DamagedCategory) == 0) {
+        if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
             ++cost;
         }
     }
@@ -4098,10 +4098,10 @@ int Unit::RepairUpgrade() {
             XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
     if (ComponentBasedUpgrades) {
         for (unsigned int i = 0; i < numCargo(); ++i) {
-            if (GetCargo(i).category.find(DamagedCategory) == 0) {
+            if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
                 ++success;
                 static int damlen = strlen(DamagedCategory);
-                GetCargo(i).category = "upgrades/" + GetCargo(i).category.substr(damlen);
+                GetCargo(i).SetCategory("upgrades/" + GetCargo(i).GetCategory().substr(damlen));
             }
         }
     } else if (ret) {
@@ -4109,7 +4109,7 @@ int Unit::RepairUpgrade() {
 
         Unit *mpl = getMasterPartList();
         for (unsigned int i = 0; i < mpl->numCargo(); ++i) {
-            if (mpl->GetCargo(i).category.find("upgrades") == 0) {
+            if (mpl->GetCargo(i).GetCategory().find("upgrades") == 0) {
                 const Unit *up = loadUnitByCache(mpl->GetCargo(i).name, upfac);
                 //now we analyzify up!
                 // TODO: lib_damage
@@ -4141,7 +4141,7 @@ extern bool isWeapon(std::string name);
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
     double itemPrice = baseUnit ? baseUnit->PriceCargo(item->name) : item->price;
-    if (isWeapon(item->category)) {
+    if (isWeapon(item->GetCategory())) {
         const Unit *upgrade = getUnitFromUpgradeName(item->name, this->faction);
         if (upgrade->getNumMounts()) {
             double price = itemPrice; //RepairPrice probably won't work for mounts.
@@ -4178,11 +4178,11 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
     } else {
         Cargo sold;
         bool notadditive = (item->name.find("add_") != 0 && item->name.find("mult_") != 0);
-        if (notadditive || item->category.find(DamagedCategory) == 0) {
+        if (notadditive || item->GetCategory().find(DamagedCategory) == 0) {
             Cargo itemCopy = *item;                 //Copy this because we reload master list before we need it.
             const Unit *un = getUnitFromUpgradeName(item->name, this->faction);
             if (un) {
-                double percentage = UnitUtil::PercentOperational(this, item->name, item->category, false);
+                double percentage = UnitUtil::PercentOperational(this, item->name, item->GetCategory(), false);
                 double price = RepairPrice(percentage, itemPrice);
                 if (!credits || price <= (*credits)) {
                     if (credits) {
@@ -4191,11 +4191,11 @@ bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
                     if (notadditive) {
                         this->Upgrade(un, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name, this->faction));
                     }
-                    if (item->category.find(DamagedCategory) == 0) {
+                    if (item->GetCategory().find(DamagedCategory) == 0) {
                         unsigned int where;
                         Cargo *c = this->GetCargo(item->name, where);
                         if (c) {
-                            c->category = "upgrades/" + c->category.substr(strlen(DamagedCategory));
+                            c->SetCategory("upgrades/" + c->GetCategory().substr(strlen(DamagedCategory)));
                         }
                     }
                     return true;
@@ -4364,7 +4364,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
     float minprice = FLT_MAX;
     float maxprice = 0;
     for (unsigned int j = 0; j < numcarg; ++j) {
-        if (GetUnitMasterPartList().GetCargo(j).category == category) {
+        if (GetUnitMasterPartList().GetCargo(j).GetCategory() == category) {
             float price = GetUnitMasterPartList().GetCargo(j).price;
             if (price < minprice) {
                 minprice = price;
@@ -4375,7 +4375,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
     }
     for (unsigned int i = 0; i < numcarg; ++i) {
         Cargo c = GetUnitMasterPartList().GetCargo(i);
-        if (c.category == category) {
+        if (c.GetCategory() == category) {
             static float aveweight =
                     fabs(XMLSupport::parse_float(vs_config->getVariable("cargo", "price_recenter_factor", "0")));
             c.quantity = float_to_int(quantity - quantdev);
@@ -4426,7 +4426,7 @@ std::string Unit::massSerializer(const XMLType &input, void *mythis) {
     for (unsigned int i = 0; i < un->cargo.size(); ++i) {
         if (un->cargo[i].quantity > 0) {
             if (usemass) {
-                mass -= un->cargo[i].mass * un->cargo[i].quantity;
+                mass -= un->cargo[i].GetMass() * un->cargo[i].quantity;
             }
         }
     }
@@ -4570,12 +4570,12 @@ void Unit::Repair() {
                 }
                 Cargo *carg = &GetCargo(next_repair_cargo);
                 float percentoperational = 1;
-                if (carg->category.find("upgrades/") == 0
-                        && carg->category.find(DamagedCategory) != 0
+                if (carg->GetCategory().find("upgrades/") == 0
+                        && carg->GetCategory().find(DamagedCategory) != 0
                         && carg->name.find("add_") != 0
                         && carg->name.find("mult_") != 0
                         && ((percentoperational =
-                                UnitUtil::PercentOperational(this, carg->name, carg->category, true)) < 1.f)) {
+                                UnitUtil::PercentOperational(this, carg->name, carg->GetCategory(), true)) < 1.f)) {
                     if (next_repair_time == -FLT_MAX) {
                         next_repair_time =
                                 UniverseUtil::GetGameTime() + repairtime * (1 - percentoperational) / repair_droid;
@@ -4601,7 +4601,7 @@ void Unit::Repair() {
                                                     % name.get().c_str()
                                                     % next_repair_cargo
                                                     % carg->name.c_str()
-                                                    % carg->category.c_str()));
+                                                    % carg->GetCategory().c_str()));
                                 }
                             }
                         }

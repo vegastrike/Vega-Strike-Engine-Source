@@ -2149,7 +2149,7 @@ void FireKeyboard::Execute() {
         }
         for (; offset < static_cast<int>(parent->numCargo()); ++offset) {
             Cargo *tmp = &parent->GetCargo(offset);
-            if (tmp->category.find("upgrades") == string::npos && (missiontoo || tmp->mission == false)) {
+            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->GetMissionFlag() == false)) {
                 parent->EjectCargo(offset);
                 break;
             }

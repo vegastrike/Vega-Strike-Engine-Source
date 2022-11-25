@@ -282,7 +282,7 @@ void Enslave(Unit *parent, bool enslave) {
     for (i = numcargo; i > 0;) {
         Cargo *carg = &parent->GetCargo(--i);
         if (enslave) {
-            if (carg->category.find("Passengers") != string::npos && carg->name != "Hitchhiker") {
+            if (carg->GetCategory().find("Passengers") != string::npos && carg->name != "Hitchhiker") {
                 ToBeChanged.push_back(*carg);
                 parent->RemoveCargo(i, carg->quantity, true);
             }

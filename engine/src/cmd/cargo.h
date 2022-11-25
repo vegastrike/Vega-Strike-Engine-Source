@@ -34,8 +34,8 @@
 
 #include <string>
 
-struct Cargo : public Product {
-public:
+class Cargo : public Product {
+protected:
     //StringPool::Reference content; replaced by name in product
     std::string category;       // TODO: move to product
     std::string description;    // TODO: move to product
@@ -47,12 +47,17 @@ public:
     bool installed; // TODO: move down to ShipModule
     float functionality;
     float max_functionality;
+
+public:
     Cargo();
-    Cargo(std::string name, std::string category, float price, int quantity, float mass, float volume, float functionality = 1.0f, float max_functionality= 1.0f);
+    Cargo(std::string name, std::string category, float price, int quantity, float mass, float volume,
+          float functionality = 1.0f, float max_functionality= 1.0f, bool mission = false, bool installed = false);
 
     float GetFunctionality();
     float GetMaxFunctionality();
+    void SetDescription(const std::string &description);
     void SetFunctionality(float func);
+    void SetInstalled(bool installed);
     void SetMaxFunctionality(float func);
     void SetMissionFlag(bool flag);
     void SetPrice(float price);
@@ -63,6 +68,7 @@ public:
     void SetCategory(const std::string &category);
 
     bool GetMissionFlag() const;
+    bool GetInstalled() const;
     const std::string &GetCategory() const;
     const std::string &GetContent() const;
     const std::string &GetDescription() const;

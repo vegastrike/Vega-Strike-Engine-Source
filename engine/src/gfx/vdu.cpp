@@ -1026,14 +1026,14 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     unsigned int maxCargo = 16;
     string lastCat;
     for (unsigned int i = 0; i < numCargo; i++) {
-        if ((target->GetCargo(i).category.find("upgrades/") != 0)
+        if ((target->GetCargo(i).GetCategory().find("upgrades/") != 0)
                 && (target->GetCargo(i).quantity > 0)) {
             Cargo ca = target->GetCargo(i);
             int cq = ca.quantity;
-            float cm = ca.mass;
-            float cv = ca.volume;
+            float cm = ca.GetMass();
+            float cv = ca.GetVolume();
             float cp = ca.price;
-            string cc = ca.category;
+            string cc = ca.GetCategory();
             cred += cq * (int) cp;
             vol += (int) ((float) cq * cv);
             load += (int) ((float) cq * cm);
@@ -1311,15 +1311,15 @@ void VDU::DrawDamage(Unit *parent) {
     for (unsigned int i = 0; i < numCargo; i++) {
         percent_working = 0.88;         //cargo.damage
         Cargo &the_cargo = parent->GetCargo(i);
-        bool damaged = the_cargo.category.find(DamagedCategory) == 0;
+        bool damaged = the_cargo.GetCategory().find(DamagedCategory) == 0;
         if (damaged
-                || (the_cargo.category.find("upgrades/") == 0
-                        && the_cargo.installed
+                || (the_cargo.GetCategory().find("upgrades/") == 0
+                        && the_cargo.GetInstalled()
                         && the_cargo.name.find("mult_") != 0
                         && the_cargo.name.find("add_") != 0
                         && non_repair_screen_cargo.find(the_cargo.name)
                                 == std::string::npos)) {
-            percent_working = UnitUtil::PercentOperational(parent, the_cargo.name, the_cargo.category, false);
+            percent_working = UnitUtil::PercentOperational(parent, the_cargo.name, the_cargo.GetCategory(), false);
             //retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.category+"\n");
             REPORTITEM(percent_working,
                     1.0,
