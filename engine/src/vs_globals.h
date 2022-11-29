@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "command.h"
+#include "vs_exit.h"
 
 class Universe;
 
@@ -38,7 +39,6 @@ extern Universe *_Universe;
 #endif
 
 extern void cleanup();
-extern void VSExit(int code);
 extern bool STATIC_VARS_DESTROYED;
 extern int loop_count;
 extern double avg_loop;

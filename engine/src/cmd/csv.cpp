@@ -30,6 +30,7 @@
 #include "vs_logging.h"
 #include "unit_csv_factory.h"
 #include "unit_json_factory.h"
+#include "vs_exit.h"
 
 using std::string;
 

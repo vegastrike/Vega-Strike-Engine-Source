@@ -1,4 +1,6 @@
 /*
+ * vega_cast_utils.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -20,13 +22,14 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_SRC_VEGA_CAST_UTILS_HPP_
-#define VEGA_STRIKE_SRC_VEGA_CAST_UTILS_HPP_
+#ifndef VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_
+#define VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_
 
 #include <typeinfo>
 #include <cstdlib>
 #include "vs_logging.h"
 #include "vs_globals.h"
+#include "vs_exit.h"
 
 template<class TargetType, class SourceType>
 inline TargetType* vega_dynamic_cast_ptr(SourceType* from) {
@@ -60,4 +63,4 @@ inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
     return ret_val;
 }
 
-#endif //VEGA_STRIKE_SRC_VEGA_CAST_UTILS_HPP_
+#endif //VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_

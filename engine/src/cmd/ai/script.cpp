@@ -39,6 +39,7 @@
 #include "universe_util.h"
 #include "configxml.h"
 #include "universe.h"
+#include "vs_exit.h"
 
 #include <assert.h>
 

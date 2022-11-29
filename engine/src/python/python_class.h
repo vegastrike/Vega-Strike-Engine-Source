@@ -54,6 +54,7 @@
 #include <memory>
 #include "init.h"
 #include "vs_logging.h"
+#include "vega_py_run.h"
 
 #define PYTHONCALLBACK(rtype, ptr, str) \
   boost::python::call_method<rtype>(ptr, str)
@@ -196,7 +197,7 @@ public:
 
     static PythonClass *FactoryString(char *code) {
         Python::reseterrors();
-        PyRun_SimpleString (code); //For some reason, PyRun_SimpleString() takes in a char *, not a const char *
+        VegaPyRunString(code);
         Python::reseterrors();
         return LastPythonClass();
     }

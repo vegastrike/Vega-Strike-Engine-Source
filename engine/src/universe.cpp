@@ -304,14 +304,14 @@ void InitUnitTables() {
     */
 
     // Really New Init
-    /*VSFileSystem::VSFile newJsonFile;
+    VSFileSystem::VSFile newJsonFile;
     err = newJsonFile.OpenReadOnly("ships.json", VSFileSystem::UnitFile);
     if (err <= VSFileSystem::Ok) {
         UnitOptimizeFactory::ParseJSON(newJsonFile);
 
     }
 
-    newJsonFile.Close();*/
+    newJsonFile.Close();
 }
 
 void CleanupUnitTables() {

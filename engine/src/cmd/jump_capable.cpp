@@ -31,6 +31,7 @@
 #include "universe_util.h"
 #include "gfx/warptrail.h"
 #include "vsfilesystem.h"
+#include "vs_exit.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);

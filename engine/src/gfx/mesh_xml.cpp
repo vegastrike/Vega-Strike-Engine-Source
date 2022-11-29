@@ -51,6 +51,7 @@
 #include "cmd/script/flightgroup.h"
 #include "hashtable.h"
 #include "vs_logging.h"
+#include "vs_exit.h"
 
 #ifdef max
 #undef max

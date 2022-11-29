@@ -43,7 +43,7 @@
 #include "universe_util.h"
 
 #include <boost/algorithm/string.hpp>
-#include "vega_cast_utils.hpp"
+#include "vega_cast_utils.h"
 
 // Required definition of static variable
 std::string Drawable::root;

@@ -59,6 +59,7 @@
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"
+#include "vs_exit.h"
 
 using std::hex;
 

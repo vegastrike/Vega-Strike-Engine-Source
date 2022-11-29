@@ -42,7 +42,7 @@
 #include <string>
 //#include <limits>
 #include <cassert>
-#include "vega_cast_utils.hpp"
+#include "vega_cast_utils.h"
 
 #include "utils.h"
 #include "vs_math.h"

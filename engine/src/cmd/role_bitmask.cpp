@@ -33,6 +33,7 @@
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "csv.h"
+#include "vs_exit.h"
 using std::string;
 using std::pair;
 using namespace VSFileSystem;   // FIXME -- Shouldn't import an entire namespace like this, at least according to Google Style Guide

@@ -77,7 +77,7 @@ using VSFileSystem::SaveFile;
 #include <sys/types.h>
 #endif
 #include <sys/stat.h>
-#include "vega_cast_utils.hpp"
+#include "vega_cast_utils.h"
 
 using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 

@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <Python.h>
+#include <vega_py_run.h>
 #include "base.h"
 #include "gldrv/winsys.h"
 #include "vsfilesystem.h"
@@ -616,8 +617,8 @@ void RunPython(const char *filnam) {
     if (filnam[0]) {
         if (filnam[0] == '#' && filnam[1] != '\0') {
             ::Python::reseterrors();
-            PyRun_SimpleString(const_cast< char * > (filnam));
-            ::Python::reseterrors();
+            VegaPyRunString(filnam);
+//            ::Python::reseterrors();
         } else {
             CompileRunPython(filnam);
         }
