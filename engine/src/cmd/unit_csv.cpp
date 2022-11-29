@@ -1299,8 +1299,8 @@ string Unit::WriteUnitString() {
                         Cargo *c = &GetCargo(i);
                         char tmp[2048];
                         sprintf(tmp, ";%f;%d;%f;%f;%f;%f;;%s;%s}",
-                                c->price,
-                                c->quantity.Value(),
+                                c->GetPrice(),
+                                c->GetQuantity(),
                                 c->GetMass(),
                                 c->GetVolume(),
                                 c->GetFunctionality(),
@@ -1308,7 +1308,7 @@ string Unit::WriteUnitString() {
                                 c->GetMissionFlag() ? "true" : "false",
                                 c->GetInstalled() ? "true" : "false"
                         );
-                        carg += "{" + c->name + ";" + c->GetCategory() + tmp;
+                        carg += "{" + c->GetName() + ";" + c->GetCategory() + tmp;
                     }
                     unit["Cargo"] = carg;
                 }
@@ -1484,14 +1484,14 @@ void UpdateMasterPartList(Unit *ret) {
         std::vector<std::string> *addedcargodesc = &cp->savegame->getMissionStringData("master_part_list_description");
         for (unsigned int j = 0; j < addedcargoname->size(); ++j) {
             Cargo carg;
-            carg.name = (*addedcargoname)[j];
+            carg.SetName((*addedcargoname)[j]);
             carg.SetCategory((j < addedcargocat->size() ? (*addedcargocat)[j] : std::string("Uncategorized")));
             carg.SetVolume((j < addedcargovol->size() ? XMLSupport::parse_float((*addedcargovol)[j]) : 1.0));
-            carg.price = (j < addedcargoprice->size() ? XMLSupport::parse_float((*addedcargoprice)[j]) : 0.0);
+            carg.SetPrice((j < addedcargoprice->size() ? XMLSupport::parse_float((*addedcargoprice)[j]) : 0.0));
             carg.SetMass((j < addedcargomass->size() ? XMLSupport::parse_float((*addedcargomass)[j]) : .01));
             carg.SetDescription(
                     (j < addedcargodesc->size() ? (*addedcargodesc)[j] : std::string("No Description Added")));
-            carg.quantity = 1;
+            carg.SetQuantity(1);
             ret->cargo.push_back(carg);
         }
     }
@@ -1499,9 +1499,9 @@ void UpdateMasterPartList(Unit *ret) {
     {
         Cargo last_cargo;
         for (int i = ret->numCargo() - 1; i >= 0; --i) {
-            if (ret->GetCargo(i).name == last_cargo.name
+            if (ret->GetCargo(i).GetName() == last_cargo.GetName()
                     && ret->GetCargo(i).GetCategory() == last_cargo.GetCategory()) {
-                ret->RemoveCargo(i, ret->GetCargo(i).quantity, true);
+                ret->RemoveCargo(i, ret->GetCargo(i).GetQuantity(), true);
             } else {
                 last_cargo = ret->GetCargo(i);
             }

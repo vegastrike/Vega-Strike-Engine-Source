@@ -27,7 +27,7 @@
 
 #include "json.h"
 
-void UnitOptimizeFactory::RecuriveParse(std::map<std::string, std::string> unit_attributes,
+void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit_attributes,
                    const std::string& json_text, bool is_root) {
     json::jobject json = json::jobject::parse(json_text);
 
@@ -54,7 +54,7 @@ void UnitOptimizeFactory::RecuriveParse(std::map<std::string, std::string> unit_
         std::vector<std::string> units = json::parsing::parse_array(json.get("units").c_str());
         // Iterate over root
         for (const std::string &unit_text : units) {
-            RecuriveParse(unit_attributes, unit_text, false);
+            RecursiveParse(unit_attributes, unit_text, false);
         }
     } else {
         // Add moment of intertia
@@ -79,5 +79,5 @@ void UnitOptimizeFactory::ParseJSON(VSFileSystem::VSFile &file) {
     // Add root
     unit_attributes["root"] = file.GetRoot();
 
-    RecuriveParse(unit_attributes, json_text, true);
+    RecursiveParse(unit_attributes, json_text, true);
 }

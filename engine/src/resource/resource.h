@@ -40,7 +40,6 @@ class Resource {
 public:
     Resource(const T &value, const T &min_value = 0, const T &max_value = -1);
 
-    //Resource<T> operator=(const T &value);
     Resource<T> operator+=(const T &value);
     Resource<T> operator-=(const T &value);
 

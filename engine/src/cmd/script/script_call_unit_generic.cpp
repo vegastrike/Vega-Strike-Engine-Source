@@ -257,7 +257,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 if (mpl->numCargo()) {
                     for (unsigned int i = 0; i < 500; i++) {
                         ret = &mpl->GetCargo(rand() % max);
-                        if (ret->name.find("mission") == string::npos) {
+                        if (ret->GetName().find("mission") == string::npos) {
                             break;
                         }
                     }
@@ -266,11 +266,11 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 }
             }
             if (ret) {
-                ret->quantity = quantity;
+                ret->SetQuantity(quantity);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_OBJECT;
                 viret->objectname = "string";
-                viret->object = &ret->name;
+                viret->object = ret->GetNameAddress();
                 ((olist_t *) vireturn->object)->push_back(viret);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_OBJECT;
@@ -279,7 +279,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 ((olist_t *) vireturn->object)->push_back(viret);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_FLOAT;
-                viret->float_val = ret->price;
+                viret->float_val = ret->GetPrice();
                 ((olist_t *) vireturn->object)->push_back(viret);
                 viret = newVarInst(VI_IN_OBJECT);
                 viret->type = VAR_INT;
@@ -804,27 +804,27 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             viret->int_val = quantity;
         } else if (method_id == CMT_UNIT_addCargo) {
             Cargo carg;
-            carg.name = getStringArgument(node, mode, 1);
+            carg.SetName(getStringArgument(node, mode, 1));
             carg.SetCategory(getStringArgument(node, mode, 2));
-            carg.price = getFloatArg(node, mode, 3);
-            carg.quantity = getIntArg(node, mode, 4);
+            carg.SetPrice(getFloatArg(node, mode, 3));
+            carg.SetQuantity(getIntArg(node, mode, 4));
             carg.SetMass(getFloatArg(node, mode, 5));
             carg.SetVolume(getFloatArg(node, mode, 6));
             if (mode == SCRIPT_RUN) {
                 int i;
-                for (i = carg.quantity; i > 0 && !my_unit->CanAddCargo(carg); i--) {
-                    carg.quantity = i;
+                for (i = carg.GetQuantity(); i > 0 && !my_unit->CanAddCargo(carg); i--) {
+                    carg.SetQuantity(i);
                 }
                 if (i > 0) {
-                    carg.quantity = i;
+                    carg.SetQuantity(i);
                     my_unit->AddCargo(carg);
                 } else {
-                    carg.quantity = 0;
+                    carg.SetQuantity(0);
                 }
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_INT;
-            viret->int_val = carg.quantity;
+            viret->int_val = carg.GetQuantity();
         } else if (method_id == CMT_UNIT_setPosition) {
             double x = getFloatArg(node, mode, 1);
             double y = getFloatArg(node, mode, 2);
@@ -866,10 +866,10 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     unsigned int index;
                     index = rand() % my_unit->numCargo();
                     Cargo c(my_unit->GetCargo(index));
-                    c.quantity = quantity;
+                    c.SetQuantity(quantity);
                     if (my_unit->CanAddCargo(c)) {
                         my_unit->AddCargo(c);
-                        my_unit->GetCargo(index).price *= percentagechange;
+                        my_unit->GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
                     }
                 }
             }
@@ -883,7 +883,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     unsigned int index;
                     index = rand() % my_unit->numCargo();
                     if (my_unit->RemoveCargo(index, 1, false)) {
-                        my_unit->GetCargo(index).price *= percentagechange;
+                        my_unit->GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
                     }
                 }
             }

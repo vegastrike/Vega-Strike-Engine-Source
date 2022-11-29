@@ -36,11 +36,9 @@
 
 class Cargo : public Product {
 protected:
-    //StringPool::Reference content; replaced by name in product
     std::string category;       // TODO: move to product
     std::string description;    // TODO: move to product
-    //int quantity;
-    //float price;
+
     float mass;
     float volume;
     bool mission;
@@ -82,6 +80,9 @@ public:
     bool operator==(const Cargo &other) const;
     bool operator<(const Cargo &other) const;
 
+    // Only for enslave
+    // TODO: replace this hack
+    int reduce() { quantity--; return quantity; }
 };
 
 // A stupid struct that is only for grouping 2 different types of variables together in one return value

@@ -33,7 +33,7 @@ class UnitOptimizeFactory
 {
 public:
     static void ParseJSON(VSFileSystem::VSFile &file);
-    static void RecuriveParse(std::map<std::string, std::string> unit_attributes,
+    static void RecursiveParse(std::map<std::string, std::string> unit_attributes,
                        const std::string& json_text, bool is_root);
 };
 

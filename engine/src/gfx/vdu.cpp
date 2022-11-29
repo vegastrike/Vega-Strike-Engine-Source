@@ -1027,12 +1027,12 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     string lastCat;
     for (unsigned int i = 0; i < numCargo; i++) {
         if ((target->GetCargo(i).GetCategory().find("upgrades/") != 0)
-                && (target->GetCargo(i).quantity > 0)) {
+                && (target->GetCargo(i).GetQuantity() > 0)) {
             Cargo ca = target->GetCargo(i);
-            int cq = ca.quantity;
+            int cq = ca.GetQuantity();
             float cm = ca.GetMass();
             float cv = ca.GetVolume();
-            float cp = ca.price;
+            float cp = ca.GetPrice();
             string cc = ca.GetCategory();
             cred += cq * (int) cp;
             vol += (int) ((float) cq * cv);
@@ -1315,11 +1315,11 @@ void VDU::DrawDamage(Unit *parent) {
         if (damaged
                 || (the_cargo.GetCategory().find("upgrades/") == 0
                         && the_cargo.GetInstalled()
-                        && the_cargo.name.find("mult_") != 0
-                        && the_cargo.name.find("add_") != 0
-                        && non_repair_screen_cargo.find(the_cargo.name)
+                        && the_cargo.GetName().find("mult_") != 0
+                        && the_cargo.GetName().find("add_") != 0
+                        && non_repair_screen_cargo.find(the_cargo.GetName())
                                 == std::string::npos)) {
-            percent_working = UnitUtil::PercentOperational(parent, the_cargo.name, the_cargo.GetCategory(), false);
+            percent_working = UnitUtil::PercentOperational(parent, the_cargo.GetName(), the_cargo.GetCategory(), false);
             //retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.category+"\n");
             REPORTITEM(percent_working,
                     1.0,

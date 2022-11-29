@@ -583,15 +583,15 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                     //add upgrades as space junk
                     if (isnotcargo) {
                         c = &tmp;
-                        tmp.name = "Space_Salvage";
+                        tmp.SetName("Space_Salvage");
                         tmp.SetCategory("Uncategorized_Cargo");
                         static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
-                        tmp.price = spacejunk;
-                        tmp.quantity = 1;
+                        tmp.SetPrice(spacejunk);
+                        tmp.SetQuantity(1);
                         tmp.SetMass(.001);
                         tmp.SetVolume(1);
                         if (target->faction != upgradesfaction) {
-                            tmp.name = target->name;
+                            tmp.SetName(target->name);
                             tmp.SetCategory("starships");
                             static float starshipprice =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
@@ -605,15 +605,15 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
                                             "junk_starship_volume",
                                             "1500"));
-                            tmp.price = starshipprice;
-                            tmp.quantity = 1;
+                            tmp.SetPrice(starshipprice);
+                            tmp.SetQuantity(1);
                             tmp.SetMass(starshipmass);
                             tmp.SetVolume(starshipvolume);
                         }
                     }
                     if (c != NULL) {
                         Cargo adder = *c;
-                        adder.quantity = 1;
+                        adder.SetQuantity(1);
                         if (un->CanAddCargo(adder)) {
                             un->AddCargo(adder);
                             if (_Universe->isPlayerStarship(un)) {

@@ -140,23 +140,6 @@ void Resource<T>::Zero() {
  * Overloaded operators
  */
 
-// TODO: implement this so it would actually work
-// Currently it isn't called. Possibly because a copy constructor is called instead or something
-
-//template<typename T>
-//Resource<T> Resource<T>::operator=(const T &value) {
-//    //std::cout << value << "\n";
-//    value_ = value;
-//    //std::cout << value_ << "\n";
-//    //if(max_value_ != -1) {
-//    //    value_ = std::min(max_value_, value_);
-//    //}
-//    //std::cout << value_ << "\n";
-//    value_ = std::max(min_value_, value_);
-//    //std::cout << value_ << "\n";
-//    return *this;
-//}
-
 template<typename T>
 Resource<T> Resource<T>::operator+=(const T &value) {
     if(!no_max_) {   // Only applicable if there's max
@@ -174,14 +157,6 @@ Resource<T> Resource<T>::operator-=(const T &value) {
     return *this;
 }
 
-// Same as above operator
-/*template<typename T>
-Resource<T> Resource<T>::operator=(T &value) {
-    value_ = value;
-    value_ = std::min(max_value_, value_);
-    value_ = std::max(min_value_, value_);
-    return *this;
-}*/
 
 template<typename T>
 Resource<T> Resource<T>::operator+=(T &value) {

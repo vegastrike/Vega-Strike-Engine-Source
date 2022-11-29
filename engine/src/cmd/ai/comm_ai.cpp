@@ -187,8 +187,8 @@ static int InList(std::string item, Unit *un) {
     float numcontr = 0;
     if (un) {
         for (unsigned int i = 0; i < un->numCargo(); i++) {
-            if (un->GetCargo(i).name == item) {
-                if (un->GetCargo(i).quantity > 0) {
+            if (un->GetCargo(i).GetName() == item) {
+                if (un->GetCargo(i).GetQuantity() > 0) {
                     numcontr++;
                 }
             }
@@ -205,7 +205,7 @@ void CommunicatingAI::UpdateContrabandSearch() {
         if (u && (u->faction != parent->faction)) {
             //don't scan your buddies
             if (which_cargo_item < (int) u->numCargo()) {
-                if (u->GetCargo(which_cargo_item).quantity > 0) {
+                if (u->GetCargo(which_cargo_item).GetQuantity() > 0) {
                     int which_carg_item_bak = which_cargo_item;
                     std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
                     static bool use_hidden_cargo_space =
@@ -230,14 +230,14 @@ void CommunicatingAI::UpdateContrabandSearch() {
                     Unit *contrabandlist = FactionUtil::GetContraband(parent->faction);
                     if (InList(item, contrabandlist) > 0) {
                         //inlist now returns an integer so that we can do this at all...
-                        if (HiddenTotal == 0 || u->GetCargo(which_carg_item_bak).quantity > HiddenTotal) {
+                        if (HiddenTotal == 0 || u->GetCargo(which_carg_item_bak).GetQuantity() > HiddenTotal) {
                             TerminateContrabandSearch(true);                             //BUCO this is where we want to check against free hidden cargo space.
                         } else {
                             unsigned int max = u->numCargo();
                             unsigned int quantity = 0;
                             for (unsigned int i = 0; i < max; ++i) {
-                                if (InList(u->GetCargo(i).name, contrabandlist) > 0) {
-                                    quantity += u->GetCargo(i).quantity;
+                                if (InList(u->GetCargo(i).GetName(), contrabandlist) > 0) {
+                                    quantity += u->GetCargo(i).GetQuantity();
                                     if (quantity > HiddenTotal) {
                                         TerminateContrabandSearch(true);
                                         break;

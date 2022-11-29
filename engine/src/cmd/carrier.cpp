@@ -96,11 +96,11 @@ std::string CargoToString(const Cargo &cargo) {
         missioncargo = string("\" missioncargo=\"") + XMLSupport::tostring(cargo.GetMissionFlag());
     }
     return string("\t\t\t<Cargo mass=\"") + XMLSupport::tostring((float) cargo.GetMass()) + string("\" price=\"")
-            + XMLSupport::tostring((float) cargo.price) + string("\" volume=\"")
+            + XMLSupport::tostring((float) cargo.GetPrice()) + string("\" volume=\"")
             + XMLSupport::tostring((float) cargo.GetVolume())
             + string(
-                    "\" quantity=\"") + XMLSupport::tostring((int) cargo.quantity.Value()) + string("\" file=\"")
-            + cargo.name
+                    "\" quantity=\"") + XMLSupport::tostring((int) cargo.GetQuantity()) + string("\" file=\"")
+            + cargo.GetName()
             + missioncargo
             + string("\"/>\n");
 }
