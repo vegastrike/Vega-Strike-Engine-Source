@@ -1787,7 +1787,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionTy
         const int maxQuantity = maxQuantityForPlayer(item, item.GetQuantity());
 
         //Total price display.
-        const double totalPrice = item.GetPrice() * maxQuantity;
+        const double totalPrice = (double)item.GetPrice() * (double)maxQuantity;
         std::string tempString = (boost::format("Total: #b#%1$.2f#-b") % totalPrice).str();
         StaticDisplay *totalDisplay = static_cast< StaticDisplay * > ( window()->findControlById("TotalPrice"));
         assert(totalDisplay != NULL);
@@ -1828,7 +1828,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo &item, TransactionTy
         commitAllButton->setCommand("SellAllCargo");
 
         //Total price display.
-        const double totalPrice = item.GetPrice() * item.GetQuantity() * (item.GetMissionFlag() ? 0 : 1);
+        const double totalPrice = (double)item.GetPrice() * (double)item.GetQuantity() * (double)(item.GetMissionFlag() ? 0 : 1);
         std::string tempString = (boost::format("Total: #b#%1$.2f#-b") % totalPrice).str();
         StaticDisplay *totalDisplay = static_cast< StaticDisplay * > ( window()->findControlById("TotalPrice"));
         assert(totalDisplay != NULL);
