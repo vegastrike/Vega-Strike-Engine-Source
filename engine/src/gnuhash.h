@@ -20,12 +20,13 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _GNUHASH_H_
-#define _GNUHASH_H_
+#ifndef VEGA_STRIKE_GNUHASH_H_
+#define VEGA_STRIKE_GNUHASH_H_
 #include <unordered_map>
+#include <cstddef>
 
 #define vsUMap     std::unordered_map
-#define vsHashComp std::hash_compare
+#define vsHashComp vega_std_overrides::hash_compare
 #define vsHash     std::hash
 class Unit;
 
@@ -66,7 +67,10 @@ public:
                 ^ ((size_t) a((int) (((size_t) key.second) >> 4))));
     }
 };
-#ifdef __GNUC__
+
+}
+
+namespace vega_std_overrides {
 //Minimum declaration needed by SharedPool.h
 template<class Key, class Traits = std::less<Key> >
 class hash_compare {
@@ -74,8 +78,8 @@ public:
     static const size_t bucket_size = 4;
     static const size_t min_buckets = 8;
 };
-#endif
+
 }
 
-#endif //def _GNUHASH_H_
+#endif //VEGA_STRIKE_GNUHASH_H_
 
