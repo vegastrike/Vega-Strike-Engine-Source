@@ -415,12 +415,8 @@ Mesh::~Mesh() {
             delete vlist;
             vlist = nullptr;
         }
-        for (size_t i = 0; i < Decal.size(); ++i) {
-            if (Decal[i] != nullptr) {
-                delete Decal[i];
-                Decal[i] = nullptr;
-            }
-        }
+        std::for_each(Decal.begin(), Decal.end(), [](Texture *pi) { delete pi; });
+        Decal.clear();
         if (squadlogos != nullptr) {
             delete squadlogos;
             squadlogos = nullptr;
