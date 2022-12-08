@@ -406,13 +406,10 @@ extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHash
 
 Mesh::~Mesh() {
     if (!orig || orig == this) {
-        for (int j = 0; j < NUM_MESH_SEQUENCE; j++) {
-            for (OrigMeshVector::iterator it = undrawn_meshes[j].begin(); it != undrawn_meshes[j].end(); ++it) {
-                if (it->orig == this) {
-                    undrawn_meshes[j].erase(it--);
-                    VS_LOG(debug, "stale mesh found in draw queue--removed!");
-                }
-            }
+        for (auto & undrawn_mesh : undrawn_meshes) {
+            auto first_to_remove = std::stable_partition(undrawn_mesh.begin(), undrawn_mesh.end(), [this](OrigMeshContainer pi) { return pi.orig != this; } );
+//            std::for_each(first_to_remove, undrawn_meshes[j].end(), [](OrigMeshContainer pi) { delete pi; } );
+            undrawn_mesh.erase(first_to_remove, undrawn_mesh.end());
         }
         if (vlist != nullptr) {
             delete vlist;
