@@ -1600,7 +1600,7 @@ void Arrested(Unit *parent) {
                 Cargo *ci = &parent->GetCargo(i);
                 for (unsigned int j = 0; j < contra->numCargo(); ++j) {
                     Cargo *cj = &contra->GetCargo(j);
-                    if (ci->content == cj->content) {
+                    if (ci->GetName() == cj->GetName()) {
                         attack = true;
                         break;
                     }
@@ -1659,7 +1659,7 @@ void Arrested(Unit *parent) {
                 parent->PrimeOrders(new Orders::DockingOps(owner, tmp, true, true));
                 arrested_list_do_not_dereference.insert(parent);
                 for (int i = parent->numCargo() - 1; i >= 0; --i) {
-                    parent->RemoveCargo(i, parent->GetCargo((unsigned int) i).quantity, true);
+                    parent->RemoveCargo(i, parent->GetCargo((unsigned int) i).GetQuantity(), true);
                 }
                 UniverseUtil::IOmessage(
                         0,
@@ -2149,7 +2149,7 @@ void FireKeyboard::Execute() {
         }
         for (; offset < static_cast<int>(parent->numCargo()); ++offset) {
             Cargo *tmp = &parent->GetCargo(offset);
-            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->mission == false)) {
+            if (tmp->GetCategory().find("upgrades") == string::npos && (missiontoo || tmp->GetMissionFlag() == false)) {
                 parent->EjectCargo(offset);
                 break;
             }

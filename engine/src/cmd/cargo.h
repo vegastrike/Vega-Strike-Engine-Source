@@ -30,28 +30,32 @@
 
 #include "SharedPool.h"
 #include "gfxlib_struct.h"
+#include "product.h"
 
 #include <string>
 
-class Cargo {
-public:
-    StringPool::Reference content;
-    StringPool::Reference category;
-    StringPool::Reference description;
-    int quantity;
-    float price;
+class Cargo : public Product {
+protected:
+    std::string category;       // TODO: move to product
+    std::string description;    // TODO: move to product
+
     float mass;
     float volume;
     bool mission;
-    bool installed;
+    bool installed; // TODO: move down to ShipModule
     float functionality;
-    float maxfunctionality;
+    float max_functionality;
+
+public:
     Cargo();
-    Cargo(std::string name, std::string cc, float pp, int qq, float mm, float vv, float func, float maxfunc);
-    Cargo(std::string name, std::string cc, float pp, int qq, float mm, float vv);
+    Cargo(std::string name, std::string category, float price, int quantity, float mass, float volume,
+          float functionality = 1.0f, float max_functionality= 1.0f, bool mission = false, bool installed = false);
+
     float GetFunctionality();
     float GetMaxFunctionality();
+    void SetDescription(const std::string &description);
     void SetFunctionality(float func);
+    void SetInstalled(bool installed);
     void SetMaxFunctionality(float func);
     void SetMissionFlag(bool flag);
     void SetPrice(float price);
@@ -62,6 +66,7 @@ public:
     void SetCategory(const std::string &category);
 
     bool GetMissionFlag() const;
+    bool GetInstalled() const;
     const std::string &GetCategory() const;
     const std::string &GetContent() const;
     const std::string &GetDescription() const;
@@ -75,6 +80,9 @@ public:
     bool operator==(const Cargo &other) const;
     bool operator<(const Cargo &other) const;
 
+    // Only for enslave
+    // TODO: replace this hack
+    int reduce() { quantity--; return quantity; }
 };
 
 // A stupid struct that is only for grouping 2 different types of variables together in one return value

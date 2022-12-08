@@ -574,18 +574,18 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if (c->GetContent().find("mult_") != 0
-                    && c->GetContent().find("add_") != 0) {
-                un->Upgrade(c->content, 0, 0, true, false);
+            if (c->GetName().find("mult_") != 0
+                    && c->GetName().find("add_") != 0) {
+                un->Upgrade(c->GetName(), 0, 0, true, false);
             }
         }
     }
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if (c->GetContent().find("add_") == 0) {
-                for (int j = 0; j < c->quantity; ++j) {
-                    un->Upgrade(c->content, 0, 0, true, false);
+            if (c->GetName().find("add_") == 0) {
+                for (int j = 0; j < c->GetQuantity(); ++j) {
+                    un->Upgrade(c->GetName(), 0, 0, true, false);
                 }
             }
         }
@@ -593,9 +593,9 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
-            if (c->GetContent().find("mult_") == 0) {
-                for (int j = 0; j < c->quantity; ++j) {
-                    un->Upgrade(c->content, 0, 0, true, false);
+            if (c->GetName().find("mult_") == 0) {
+                for (int j = 0; j < c->GetQuantity(); ++j) {
+                    un->Upgrade(c->GetName(), 0, 0, true, false);
                 }
             }
         }
@@ -641,16 +641,16 @@ int addCargo(Unit *my_unit, Cargo carg) {
         return 0;
     }
     int i;
-    for (i = carg.quantity; i > 0 && !my_unit->CanAddCargo(carg); i--) {
-        carg.quantity = i;
+    for (i = carg.GetQuantity(); i > 0 && !my_unit->CanAddCargo(carg); i--) {
+        carg.SetQuantity(i);
     }
     if (i > 0) {
-        carg.quantity = i;
+        carg.SetQuantity(i);
         my_unit->AddCargo(carg);
     } else {
-        carg.quantity = 0;
+        carg.SetQuantity(0);
     }
-    return carg.quantity;
+    return carg.GetQuantity();
 }
 
 int forceAddCargo(Unit *my_unit, Cargo carg) {
@@ -658,7 +658,7 @@ int forceAddCargo(Unit *my_unit, Cargo carg) {
         return 0;
     }
     my_unit->AddCargo(carg);
-    return carg.quantity;
+    return carg.GetQuantity();
 }
 
 int hasCargo(const Unit *my_unit, string mycarg) {
@@ -670,7 +670,7 @@ int hasCargo(const Unit *my_unit, string mycarg) {
     if (c == NULL) {
         return 0;
     }
-    return c->quantity;
+    return c->GetQuantity();
 }
 
 bool JumpTo(Unit *unit, string system) {
@@ -697,11 +697,12 @@ bool incrementCargo(Unit *my_unit, float percentagechange, int quantity) {
         unsigned int index;
         index = rand() % my_unit->numCargo();
         Cargo c(my_unit->GetCargo(index));
-        c.quantity = quantity;
-        if (c.price != 0) {
+        c.SetQuantity(quantity);
+        if (c.GetPrice() != 0) {
             if (my_unit->CanAddCargo(c)) {
                 my_unit->AddCargo(c);
-                my_unit->GetCargo(index).price *= percentagechange;
+                my_unit->GetCargo(index).SetPrice(
+                            my_unit->GetCargo(index).GetPrice() * percentagechange);
                 return true;
             }
         }
@@ -717,7 +718,7 @@ bool decrementCargo(Unit *my_unit, float percentagechange) {
         unsigned int index;
         index = rand() % my_unit->numCargo();
         if (my_unit->RemoveCargo(index, 1, false)) {
-            my_unit->GetCargo(index).price *= percentagechange;
+            my_unit->GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
         }
         return true;
     }
@@ -731,7 +732,7 @@ Cargo GetCargoIndex(const Unit *my_unit, int index) {
         }
     }
     Cargo ret;
-    ret.quantity = 0;
+    ret.SetQuantity(0);
     return ret;
 }
 
@@ -744,7 +745,7 @@ Cargo GetCargo(const Unit *my_unit, std::string cargname) {
         }
     }
     Cargo ret;
-    ret.quantity = 0;
+    ret.SetQuantity(0);
     return ret;
 }
 

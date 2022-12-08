@@ -25,23 +25,23 @@
 
 
 Store::Store(std::vector<Product> stock, double cash):
-    stock_(stock),
-    cash_(Resource<double>(cash, 0.0)),
-    unlimited_funds_(cash == -1.0) {}
+    stock(stock),
+    cash(Resource<double>(cash, 0.0)),
+    unlimited_funds(cash == -1.0) {}
 
 
-void Store::Add(Product product, double quantity) {
+void Store::Add(Product product, const int quantity) {
     Product new_product = product;
-    new_product.quantity_.Set(quantity);
-    stock_.push_back(new_product);
+    new_product.quantity.Set(quantity);
+    stock.push_back(new_product);
 }
 
-void Store::Add(int index, double quantity) {
-    stock_[index].quantity_ += quantity;
+void Store::Add(int index, int quantity) {
+    stock[index].quantity += quantity;
 }
 
-void Store::Subtract(int index, double quantity) {
-    stock_[index].quantity_ += quantity;
+void Store::Subtract(int index, int quantity) {
+    stock[index].quantity += quantity;
 }
 
 
@@ -54,16 +54,16 @@ bool Store::Buy(Customer& seller, std::string product_name, double quantity)
     }
 
     // Check if seller has enough to sell
-    Product product = seller.stock_[index];
-    if(product.quantity_ < quantity) {
+    Product product = seller.stock[index];
+    if(product.quantity < quantity) {
         return false;
     }
 
     // Calculate transaction cost
-    double total_cost = quantity * product.unit_price_;
+    double total_cost = quantity * product.price;
 
     // Check if buyer has enough funds
-    if(cash_ < total_cost && !unlimited_funds_) {
+    if(cash < total_cost && !unlimited_funds) {
         return false;
     }
 
@@ -76,12 +76,12 @@ bool Store::Buy(Customer& seller, std::string product_name, double quantity)
     }
 
     seller.Subtract(index, quantity);
-    if(!seller.unlimited_funds_) {
-        seller.cash_ += total_cost;
+    if(!seller.unlimited_funds) {
+        seller.cash += total_cost;
     }
 
-    if(!unlimited_funds_) {
-        cash_ -= total_cost;
+    if(!unlimited_funds) {
+        cash -= total_cost;
     }
 
     return true;
@@ -89,8 +89,8 @@ bool Store::Buy(Customer& seller, std::string product_name, double quantity)
 
 
 bool Store::InStock(std::string product_name) {
-    for(Product &in_store_product : stock_) {
-        if(in_store_product == product_name && in_store_product.quantity_ > 0.0) {
+    for(Product &in_store_product : stock) {
+        if(in_store_product == product_name && in_store_product.quantity > 0.0) {
             return true;
         }
     }
@@ -101,7 +101,7 @@ bool Store::InStock(std::string product_name) {
 int Store::ProductIndex(std::string product_name) {
     int index = 0;
 
-    for(Product &in_store_product : stock_) {
+    for(Product &in_store_product : stock) {
         if(in_store_product == product_name) {
             return index;
         }
@@ -121,11 +121,11 @@ bool Store::Sell(Customer& buyer, std::string product_name, double quantity)
 
 void Store::SetFunds(double cash)
 {
-    cash_.Set(cash);
-    unlimited_funds_ = false;
+    this->cash.Set(cash);
+    unlimited_funds = false;
 }
 
 void Store::Stock(std::vector<Product> stock)
 {
-    stock_.insert(stock_.end(), stock.begin(), stock.end());
+    stock.insert(stock.end(), stock.begin(), stock.end());
 }

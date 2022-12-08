@@ -1027,12 +1027,12 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     string lastCat;
     for (unsigned int i = 0; i < numCargo; i++) {
         if ((target->GetCargo(i).GetCategory().find("upgrades/") != 0)
-                && (target->GetCargo(i).quantity > 0)) {
+                && (target->GetCargo(i).GetQuantity() > 0)) {
             Cargo ca = target->GetCargo(i);
-            int cq = ca.quantity;
-            float cm = ca.mass;
-            float cv = ca.volume;
-            float cp = ca.price;
+            int cq = ca.GetQuantity();
+            float cm = ca.GetMass();
+            float cv = ca.GetVolume();
+            float cp = ca.GetPrice();
             string cc = ca.GetCategory();
             cred += cq * (int) cp;
             vol += (int) ((float) cq * cv);
@@ -1314,13 +1314,13 @@ void VDU::DrawDamage(Unit *parent) {
         bool damaged = the_cargo.GetCategory().find(DamagedCategory) == 0;
         if (damaged
                 || (the_cargo.GetCategory().find("upgrades/") == 0
-                        && the_cargo.installed
-                        && the_cargo.GetContent().find("mult_") != 0
-                        && the_cargo.GetContent().find("add_") != 0
-                        && non_repair_screen_cargo.find(the_cargo.GetContent())
+                        && the_cargo.GetInstalled()
+                        && the_cargo.GetName().find("mult_") != 0
+                        && the_cargo.GetName().find("add_") != 0
+                        && non_repair_screen_cargo.find(the_cargo.GetName())
                                 == std::string::npos)) {
-            percent_working = UnitUtil::PercentOperational(parent, the_cargo.content, the_cargo.category, false);
-            //retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
+            percent_working = UnitUtil::PercentOperational(parent, the_cargo.GetName(), the_cargo.GetCategory(), false);
+            //retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.category+"\n");
             REPORTITEM(percent_working,
                     1.0,
                     print_percent_working,

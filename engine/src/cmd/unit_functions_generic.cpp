@@ -282,13 +282,13 @@ void Enslave(Unit *parent, bool enslave) {
     for (i = numcargo; i > 0;) {
         Cargo *carg = &parent->GetCargo(--i);
         if (enslave) {
-            if (carg->GetCategory().find("Passengers") != string::npos && carg->content != "Hitchhiker") {
+            if (carg->GetCategory().find("Passengers") != string::npos && carg->GetName() != "Hitchhiker") {
                 ToBeChanged.push_back(*carg);
-                parent->RemoveCargo(i, carg->quantity, true);
+                parent->RemoveCargo(i, carg->GetQuantity(), true);
             }
-        } else if (carg->content == "Slaves" || carg->content == "Pilot") {
+        } else if (carg->GetName() == "Slaves" || carg->GetName() == "Pilot") {
             ToBeChanged.push_back(*carg);
-            parent->RemoveCargo(i, carg->quantity, true);
+            parent->RemoveCargo(i, carg->GetQuantity(), true);
         }
     }
     unsigned int dummy;
@@ -296,10 +296,11 @@ void Enslave(Unit *parent, bool enslave) {
     if (newCarg) {
         Cargo slave = *newCarg;
         for (i = 0; i < ToBeChanged.size(); ++i) {
-            slave.quantity = ToBeChanged[i].quantity;
-            while (parent->CanAddCargo(slave) == false && (--slave.quantity) > 0) {
+            slave.SetQuantity(ToBeChanged[i].GetQuantity());
+
+            while (parent->CanAddCargo(slave) == false && (slave.reduce()) > 0) {
             }
-            if (slave.quantity) {
+            if (slave.GetQuantity()) {
                 if (parent->CanAddCargo(slave)) {
                     parent->AddCargo(slave, true);
                 }

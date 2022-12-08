@@ -140,23 +140,6 @@ void Resource<T>::Zero() {
  * Overloaded operators
  */
 
-// TODO: implement this so it would actually work
-// Currently it isn't called. Possibly because a copy constructor is called instead or something
-
-/*template<typename T>
-Resource<T> Resource<T>::operator=(const T &value) {
-    std::cout << value << "\n";
-    value_ = value;
-    std::cout << value_ << "\n";
-    if(max_value_ != -1) {
-        value_ = std::min(max_value_, value_);
-    }
-    std::cout << value_ << "\n";
-    value_ = std::max(min_value_, value_);
-    std::cout << value_ << "\n";
-    return *this;
-}*/
-
 template<typename T>
 Resource<T> Resource<T>::operator+=(const T &value) {
     if(!no_max_) {   // Only applicable if there's max
@@ -174,14 +157,6 @@ Resource<T> Resource<T>::operator-=(const T &value) {
     return *this;
 }
 
-// Same as above operator
-/*template<typename T>
-Resource<T> Resource<T>::operator=(T &value) {
-    value_ = value;
-    value_ = std::min(max_value_, value_);
-    value_ = std::max(min_value_, value_);
-    return *this;
-}*/
 
 template<typename T>
 Resource<T> Resource<T>::operator+=(T &value) {
@@ -206,6 +181,11 @@ bool operator==(const Resource<T> &lhs, const T &rhs) {
 }
 
 template<typename T>
+bool operator==(const T &lhs, const Resource<T> &rhs) {
+    return lhs == rhs.Value();
+}
+
+template<typename T>
 bool operator>(const Resource<T> &lhs, const T &rhs) {
     return lhs.Value() > rhs;
 }
@@ -223,11 +203,6 @@ bool operator<=(const Resource<T> &lhs, const T &rhs) {
 template<typename T>
 bool operator>=(const Resource<T> &lhs, const T &rhs) {
     return !(lhs.Value() < rhs);
-}
-
-template<typename T>
-bool operator==(const T &lhs, const Resource<T> &rhs) {
-    return lhs == rhs.Value();
 }
 
 template<typename T>
@@ -278,6 +253,9 @@ template bool operator>=(const float &lhs, const Resource<float> &rhs);
 template float operator/(const Resource<float> &lhs, const float &rhs);
 template float operator/(const float &lhs, const Resource<float> &rhs);
 
+
+
+
 template
 class Resource<double>;
 
@@ -293,3 +271,19 @@ template bool operator<=(const double &lhs, const Resource<double> &rhs);
 template bool operator>=(const double &lhs, const Resource<double> &rhs);
 template double operator/(const Resource<double> &lhs, const double &rhs);
 template double operator/(const double &lhs, const Resource<double> &rhs);
+
+template
+class Resource<int>;
+
+template bool operator==(const Resource<int> &lhs, const int &rhs);
+template bool operator>(const Resource<int> &lhs, const int &rhs);
+template bool operator<(const Resource<int> &lhs, const int &rhs);
+template bool operator<=(const Resource<int> &lhs, const int &rhs);
+template bool operator>=(const Resource<int> &lhs, const int &rhs);
+template bool operator==(const int &lhs, const Resource<int> &rhs);
+template bool operator>(const int &lhs, const Resource<int> &rhs);
+template bool operator<(const int &lhs, const Resource<int> &rhs);
+template bool operator<=(const int &lhs, const Resource<int> &rhs);
+template bool operator>=(const int &lhs, const Resource<int> &rhs);
+template int operator/(const Resource<int> &lhs, const int &rhs);
+template int operator/(const int &lhs, const Resource<int> &rhs);

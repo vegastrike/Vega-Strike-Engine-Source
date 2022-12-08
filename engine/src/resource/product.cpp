@@ -24,11 +24,11 @@
 
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
 
-Product::Product(): name_(default_product_name), quantity_(1), unit_price_(0.0) {}
+Product::Product(): name(default_product_name), quantity(1), price(0.0) {}
 
 
-Product::Product(const std::string &name, const double quantity, const double unit_price) :
-    name_(name), quantity_(quantity), unit_price_(unit_price) {}
+Product::Product(const std::string &name, const double quantity, const double price) :
+    name(name), quantity(quantity), price(price) {}
 
 
 double Product::add(double quantity)
@@ -44,18 +44,18 @@ double Product::subtract(double quantity)
 
 
 bool operator==(const Product &lhs, const std::string &rhs) {
-    return lhs.name_ == rhs;
+    return lhs.name == rhs;
 }
 
 bool operator==(const std::string &lhs, const Product &rhs) {
-    return lhs == rhs.name_;
+    return lhs == rhs.name;
 }
 
 
 bool operator!=(const Product &lhs, const std::string &rhs) {
-    return lhs.name_ != rhs;
+    return lhs.name != rhs;
 }
 
 bool operator!=(const std::string &lhs, const Product &rhs) {
-    return lhs != rhs.name_;
+    return lhs != rhs.name;
 }
