@@ -436,18 +436,14 @@ Mesh::~Mesh() {
             meshHashTable.Delete(hash_name);
         }
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
-        vector<Mesh *>::iterator finder;
         if (hashers) {
-            for (size_t i = hashers->size() - 1; i >= 0; --i) {
-                if (hashers->at(i) == this) {
-                    hashers->erase(hashers->begin() + i);
-                    if (hashers->empty()) {
-                        bfxmHashTable.Delete(hash_name);
-                        delete hashers;
-                        hashers = nullptr;
-                        break;
-                    }
-                }
+            auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(), [this](Mesh * pi) { return pi != this; });
+//            std::for_each(first_to_remove, hashers->end(), [](Mesh * pi) { });
+            hashers->erase(first_to_remove, hashers->end());
+            if (hashers->empty()) {
+                bfxmHashTable.Delete(hash_name);
+                delete hashers;
+                hashers = nullptr;
             }
         }
         if (draw_queue != nullptr) {
