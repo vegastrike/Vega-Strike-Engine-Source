@@ -27,18 +27,6 @@ jobs:
           - FROM:     'ubuntu:jammy'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:impish'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'ubuntu:impish'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'ubuntu:impish'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:impish'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'LEGACY'
@@ -116,8 +104,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        # We must fetch at least the immediate parents so that if this is
-        # a pull request then we can checkout the head.
         fetch-depth: 2
         submodules: false
 
