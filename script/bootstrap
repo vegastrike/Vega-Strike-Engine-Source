@@ -29,7 +29,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2022-12-11 ---"
+echo "--- bootstrap | 2022-12-16 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -122,7 +122,6 @@ function bootstrapOnDebian()
     "buster")
       apt-get -qy install \
                       git \
-                      cmake \
                       build-essential \
                       automake \
                       autoconf \
@@ -146,6 +145,10 @@ function bootstrapOnDebian()
                       libxmu-dev \
                       clang \
                       lsb-release
+      echo "deb http://deb.debian.org/debian buster-backports main contrib" >> /etc/apt/sources.list
+      echo "deb-src http://deb.debian.org/debian buster-backports main contrib" >> /etc/apt/sources.list
+      apt-get update
+      apt-get -qy install cmake -t buster-backports
       ;;
     "stretch")
       apt-get -qy install \
