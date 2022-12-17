@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2008-2022 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2022 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -31,7 +31,7 @@
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "9")
@@ -77,40 +77,6 @@ ENDIF ()
 # allowing us to differentiate our Assets API across multiple versions.
 # If a release is missing this value, then version `1` can be assumed.
 SET(VEGASTRIKE_ASSETS_API_VERSION "2")
-
-IF (COMMAND cmake_policy)
-    CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF (COMMAND cmake_policy)
-
-# VERSION Policy
-IF (POLICY CMP0048)
-    CMAKE_POLICY (SET CMP0048 NEW)
-ENDIF (POLICY CMP0048)
-
-# Used to be that without this, CMake couldn't find pow() -- at least not on my Windows machine.
-IF (POLICY CMP0066)
-    CMAKE_POLICY (SET CMP0066 NEW)  #OLD
-ENDIF ()
-
-# FindOpenGL prefers GLVND by default when available. But there is an option to override that.
-IF (POLICY CMP0072)
-    CMAKE_POLICY (SET CMP0072 NEW)
-ENDIF (POLICY CMP0072)
-
-# find_package() uses <PackageName>_ROOT variables
-IF (POLICY CMP0074)
-    CMAKE_POLICY (SET CMP0074 NEW)
-ENDIF (POLICY CMP0074)
-
-# Include file check macros honor CMAKE_REQUIRED_LIBRARIES
-IF (POLICY CMP0075)
-    CMAKE_POLICY (SET CMP0075 NEW)
-ENDIF ()
-
-# MSVC runtime library flags are selected by an abstraction. Supported by CMake 3.15 and up
-IF (POLICY CMP0091)
-    CMAKE_POLICY (SET CMP0091 NEW)
-ENDIF ()
 
 PROJECT(Vega_Strike
     VERSION
@@ -301,30 +267,15 @@ ENDIF (DATADIR)
 # - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 #
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
-IF (CMAKE_VERSION VERSION_LESS "3.14")
-    MESSAGE("-- CMake version older than 3.14; falling back to old PIE logic")
-    IF (ENABLE_PIE)
-        MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-        ADD_COMPILE_OPTIONS("-fpie")
-        LINK_LIBRARIES("-pie")
-    ELSE (ENABLE_PIE)
-        MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-        IF (NOT MSVC)
-            ADD_COMPILE_OPTIONS("-fno-pie")
-            LINK_LIBRARIES("-no-pie")
-        ENDIF (NOT MSVC)
-    ENDIF (ENABLE_PIE)
-ELSE (CMAKE_VERSION VERSION_LESS "3.14")
-    MESSAGE("-- CMake version 3.14 or later; using preferred PIE logic")
-    UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-    IF (ENABLE_PIE)
-        MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-        SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-    ELSE (ENABLE_PIE)
-        MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-        SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-    ENDIF (ENABLE_PIE)
-ENDIF (CMAKE_VERSION VERSION_LESS "3.14")
+MESSAGE("-- Always using preferred PIE logic now")
+UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
+IF (ENABLE_PIE)
+    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ELSE (ENABLE_PIE)
+    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+    SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+ENDIF (ENABLE_PIE)
 
 #set_property(DIRECTORY APPEND PROPERTY
 #        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
