@@ -399,8 +399,6 @@ AnimatedTexture *createAnimatedTexture(char const *c, int i, enum FILTER f) {
     return new AnimatedTexture(c, i, f);
 }
 
-extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
-
 Mesh::~Mesh() {
     if (!orig || orig == this) {
         for (auto & undrawn_mesh : undrawn_meshes) {
@@ -425,13 +423,13 @@ Mesh::~Mesh() {
         if (meshHashTable.Get(hash_name) == this) {
             meshHashTable.Delete(hash_name);
         }
-        vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
+        vector<Mesh *> *hashers = bfxmHashTable()->Get(hash_name);
         if (hashers) {
             auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(), [this](Mesh * pi) { return pi != this; });
 //            std::for_each(first_to_remove, hashers->end(), [](Mesh * pi) { });
             hashers->erase(first_to_remove, hashers->end());
             if (hashers->empty()) {
-                bfxmHashTable.Delete(hash_name);
+                bfxmHashTable()->Delete(hash_name);
                 delete hashers;
                 hashers = nullptr;
             }

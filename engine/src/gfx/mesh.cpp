@@ -1,9 +1,8 @@
 /*
  * mesh.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -140,8 +139,6 @@ bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction)
     return false;
 }
 
-extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
-
 Mesh::Mesh(const Mesh &m) {
     VS_LOG(warning, "UNTESTED MESH COPY CONSTRUCTOR");
     this->orig = NULL;
@@ -149,7 +146,7 @@ Mesh::Mesh(const Mesh &m) {
     InitUnit();
     Mesh *oldmesh = meshHashTable.Get(hash_name);
     if (0 == oldmesh) {
-        vector<Mesh *> *vec = bfxmHashTable.Get(hash_name);
+        vector<Mesh *> *vec = bfxmHashTable()->Get(hash_name);
         for (unsigned int i = 0; i < vec->size(); ++i) {
             Mesh *mush = (*vec)[i]->orig ? (*vec)[i]->orig : (*vec)[i];
             if (mush == m.orig || mush == &m) {
@@ -179,7 +176,6 @@ void Mesh::setConvex(bool b) {
 }
 
 using namespace VSFileSystem;
-extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 
 Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *fg, bool orig) : hash_name(filename) {
     this->convex = false;
@@ -189,10 +185,10 @@ Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *
         delete cpy;         //wasteful, but hey
         if (orig != false) {
             orig = false;
-            std::vector<Mesh *> *tmp = bfxmHashTable.Get(this->orig->hash_name);
+            std::vector<Mesh *> *tmp = bfxmHashTable()->Get(this->orig->hash_name);
             if (tmp && tmp->size() && (*tmp)[0] == this->orig) {
                 if (this->orig->refcount == 1) {
-                    bfxmHashTable.Delete(this->orig->hash_name);
+                    bfxmHashTable()->Delete(this->orig->hash_name);
                     delete tmp;
                     orig = true;
                 }

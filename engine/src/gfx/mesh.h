@@ -1,12 +1,9 @@
 /*
  * mesh.h
  *
- * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2002-2019 Daniel Horn, klaussfreire, pheonixstorm, safemode, dan_w,
- *  ace123, jacks, and other Vega Strike contributors
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
- *  and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, klaussfreire, pheonixstorm,
+ * safemode, dan_w, ace123, jacks, pyramid3d, Stephen G. Tuggy, Roy Falk,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -454,6 +451,8 @@ public:
         this->mx = mx;
     }
 };
+
+extern std::shared_ptr<Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE>> bfxmHashTable();
 
 #endif
 

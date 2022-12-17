@@ -1303,7 +1303,11 @@ Mesh *Mesh::LoadMesh(const char *filename,
     return m[0];
 }
 
-Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
+std::shared_ptr<Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE>> bfxmHashTable() {
+    static const std::shared_ptr<Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE>> kBfxmHashTable
+            = std::make_shared<Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE>>();
+    return kBfxmHashTable;
+}
 
 vector<Mesh *> Mesh::LoadMeshes(const char *filename,
         const Vector &scale,
@@ -1318,10 +1322,10 @@ vector<Mesh *> Mesh::LoadMeshes(const char *filename,
      *  return ret;
      *  }*/
     string hash_name = VSFileSystem::GetHashName(filename, scale, faction);
-    vector<Mesh *> *oldmesh = bfxmHashTable.Get(hash_name);
+    vector<Mesh *> *oldmesh = bfxmHashTable()->Get(hash_name);
     if (oldmesh == 0) {
         hash_name = VSFileSystem::GetSharedMeshHashName(filename, scale, faction);
-        oldmesh = bfxmHashTable.Get(hash_name);
+        oldmesh = bfxmHashTable()->Get(hash_name);
     }
     if (0 != oldmesh) {
         vector<Mesh *> ret;
@@ -1369,7 +1373,7 @@ vector<Mesh *> Mesh::LoadMeshes(const char *filename,
             }
             (*newvec)[i] = retval[i]->orig ? retval[i]->orig : retval[i];
         }
-        bfxmHashTable.Put(hash_name, newvec);
+        bfxmHashTable()->Put(hash_name, newvec);
         return retval;
     } else {
         f.Close();
