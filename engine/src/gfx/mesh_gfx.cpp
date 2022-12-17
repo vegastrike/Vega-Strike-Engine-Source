@@ -39,7 +39,7 @@
 #include "gfx/technique.h"
 #include "mesh_xml.h"
 #include "gldrv/gl_globals.h"
-#include "gldrv/gl_light.h"
+//#include "gldrv/gl_light.h"
 #if defined (CG_SUPPORT)
 #include "cg_global.h"
 #endif
@@ -72,19 +72,17 @@ private:
     std::string _message;
 
 public:
-    Exception() {
-    }
+    Exception() = default;
 
     Exception(const Exception &other) : _message(other._message) {
     }
 
-    explicit Exception(const std::string &message) : _message(message) {
+    explicit Exception(std::string message) : _message(std::move(message)) {
     }
 
-    virtual ~Exception() {
-    }
+    ~Exception() override = default;
 
-    virtual const char *what() const noexcept {
+    const char *what() const noexcept override {
         return _message.c_str();
     }
 };
@@ -94,8 +92,7 @@ public:
     explicit MissingTexture(const string &msg) : Exception(msg) {
     }
 
-    MissingTexture() {
-    }
+    MissingTexture() = default;
 };
 
 class OrigMeshContainer {
@@ -109,8 +106,8 @@ public:
     unsigned int passno{14};
     int sequence{16};
 
-    OrigMeshContainer() {
-        orig = nullptr;
+    OrigMeshContainer() : orig(nullptr) {
+
     }
 
     OrigMeshContainer(Mesh *orig, float d, int passno) {
@@ -1580,7 +1577,7 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     GFXPopBlendMode();
 }
 
-#define GETDECAL(pass) ( (Decal[pass]) )
+#define GETDECAL(pass) ( (p_decal[pass]) )
 #define HASDECAL(pass) ( ( (NUM_PASSES > pass) && Decal[pass] ) )
 #define SAFEDECAL(pass) ( (HASDECAL( pass ) ? Decal[pass] : black) )
 
@@ -1612,35 +1609,35 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
     }
 
     //Map texture units
-    Texture *Decal[NUM_PASSES];
-    memset(Decal, 0, sizeof(Decal));
+    Texture *p_decal[NUM_PASSES];
+    memset(p_decal, 0, sizeof(p_decal));
     for (unsigned int tui = 0; tui < pass.getNumTextureUnits(); ++tui) {
         const Pass::TextureUnit &tu = pass.getTextureUnit(tui);
         switch (tu.sourceType) {
             case Pass::TextureUnit::File:
                 //Direct file sources go in tu.texture
-                Decal[tu.targetIndex] = tu.texture.get();
+                p_decal[tu.targetIndex] = tu.texture.get();
                 break;
             case Pass::TextureUnit::Decal:
                 if ((tu.sourceIndex < static_cast<int>(this->Decal.size())) && this->Decal[tu.sourceIndex]) {
                     //Mesh has the referenced decal
-                    Decal[tu.targetIndex] = this->Decal[tu.sourceIndex];
+                    p_decal[tu.targetIndex] = this->Decal[tu.sourceIndex];
                 } else {
                     //Mesh does not have the referenced decal, activate the default
                     switch (tu.defaultType) {
                         case Pass::TextureUnit::File:
                             //Direct file defaults go in tu.texture (direct file sources preclude defaults)
-                            Decal[tu.targetIndex] = tu.texture.get();
+                            p_decal[tu.targetIndex] = tu.texture.get();
                             break;
                         case Pass::TextureUnit::Decal:
-                            //Decal reference as default - risky, but may be cool
+                            //p_decal reference as default - risky, but may be cool
                             if ((tu.defaultIndex < static_cast<int>(this->Decal.size()))
                                     && this->Decal[tu.defaultIndex]) {
                                 //Valid reference, activate
-                                Decal[tu.targetIndex] = this->Decal[tu.defaultIndex];
+                                p_decal[tu.targetIndex] = this->Decal[tu.defaultIndex];
                             } else {
                                 //Invalid reference, activate global default (null)
-                                Decal[tu.targetIndex] = NULL;
+                                p_decal[tu.targetIndex] = nullptr;
                             }
                             break;
                         case Pass::TextureUnit::None: //chuck_starchaser
@@ -1751,14 +1748,14 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         if ((nomultienv && whichpass == ENVSPEC_PASS) || !whichpass || HASDECAL(whichpass)) {
             switch (whichpass) {
                 case BASE_PASS:
-                    SetupSpecMapFirstPass(Decal,
-                            DecalSize,
-                            myMatNum,
-                            getEnvMap(),
-                            polygon_offset,
-                            detailTexture,
-                            detailPlanes,
-                            skipglowpass,
+                    SetupSpecMapFirstPass(p_decal,
+                                          DecalSize,
+                                          myMatNum,
+                                          getEnvMap(),
+                                          polygon_offset,
+                                          detailTexture,
+                                          detailPlanes,
+                                          skipglowpass,
                             nomultienv
                                     && HASDECAL(ENVSPEC_TEX));
                     break;

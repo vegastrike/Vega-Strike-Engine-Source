@@ -122,7 +122,7 @@ void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
     y->setEnvMap(getEnvMap());
 
     y->forceCullFace(GFXFALSE);
-    x->forcelogos = x->squadlogos = NULL;
+    x->forcelogos = x->squadlogos = nullptr;
     x->numforcelogo = x->numsquadlogo = 0;
     x->setLighting(getLighting());
     x->setEnvMap(getEnvMap());
@@ -132,14 +132,14 @@ void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
         x->Decal.push_back(NULL);
     }
     {
-        for (unsigned int i = 0; i < Decal.size(); i++) {
-            if (Decal[i]) {
-                x->Decal[i] = Decal[i]->Clone();
+        for (unsigned int i2 = 0; i2 < Decal.size(); i2++) {
+            if (Decal[i2]) {
+                x->Decal[i2] = Decal[i2]->Clone();
             }
         }
     }
 
-    y->squadlogos = y->forcelogos = NULL;
+    y->squadlogos = y->forcelogos = nullptr;
     y->numforcelogo = y->numsquadlogo = 0;
     y->setLighting(getLighting());
     y->setEnvMap(getEnvMap());
