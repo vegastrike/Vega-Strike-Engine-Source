@@ -1,10 +1,8 @@
-/**
+/*
  * aux_texture.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
- * and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Roy Falk, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -63,11 +61,11 @@ Texture *Texture::Exists(string s) {
 }
 
 bool Texture::operator<(const Texture &b) const {
-    return Original() < b.Original();
+    return OriginalConst() < b.OriginalConst();
 }
 
 bool Texture::operator==(const Texture &b) const {
-    return Original() == b.Original();
+    return OriginalConst() == b.OriginalConst();
 }
 
 void Texture::setReference(Texture *other) {
@@ -104,9 +102,9 @@ void Texture::modold(const string &s, bool shared, string &hashname) {
     //oldtex->InitTexture();new calls this
     oldtex->name = -1;
     oldtex->refcount = 1;
-    oldtex->original = NULL;
-    oldtex->palette = NULL;
-    oldtex->data = NULL;
+    oldtex->original = nullptr;
+    oldtex->palette = nullptr;
+    oldtex->data = nullptr;
     texHashTable.Put(hashname, oldtex);
     original = oldtex;
 }
@@ -116,8 +114,8 @@ void Texture::InitTexture() {
     original = 0;
     refcount = 0;
     name = -1;
-    palette = NULL;
-    data = NULL;
+    palette = nullptr;
+    data = nullptr;
     mintcoord = Vector(0.0f, 0.0f, 0.0f);
     maxtcoord = Vector(1.0f, 1.0f, 1.0f);
     address_mode = DEFAULT_ADDRESS_MODE;
@@ -127,28 +125,28 @@ void Texture::setold() {
     //*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
     *original = *this;
     //memcpy (original, this, sizeof (Texture));
-    original->original = NULL;
+    original->original = nullptr;
     original->refcount++;
 }
 
-const Texture *Texture::Original() const {
+const vega_types::SharedPtr<const Texture> Texture::OriginalConst() const {
     if (original) {
-        return original->Original();
+        return original->OriginalConst();
     } else {
-        return this;
+        return shared_from_this();
     }
 }
 
-Texture *Texture::Original() {
+vega_types::SharedPtr<Texture> Texture::Original() {
     if (original) {
         return original->Original();
     } else {
-        return this;
+        return shared_from_this();
     }
 }
 
-Texture *Texture::Clone() {
-    Texture *retval = new Texture();
+vega_types::SharedPtr<Texture> Texture::Clone() {
+    vega_types::SharedPtr<Texture> retval = vega_types::MakeShared<Texture>();
     Texture *target = Original();
     *retval = *target;
     //memcpy (this, target, sizeof (Texture));

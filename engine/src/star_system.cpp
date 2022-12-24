@@ -1,4 +1,6 @@
 /*
+ * star_system.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -409,7 +411,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     // At this point, we've set all occluders
     // Mesh::ProcessXMeshes will query it
 
-    GFXColor tmpcol(0, 0, 0, 1);
+    vega_types::SharedPtr<GFXColor> tmpcol = vega_types::MakeShared<GFXColor>(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     double processmesh = queryTime();
     if (!game_options()->draw_near_stars_in_front_of_planets) {

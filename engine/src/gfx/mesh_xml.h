@@ -210,12 +210,12 @@ struct MeshXML {
     vector<int> *active_shade;
     vector<GFXVertex> *active_list;
     vector<int> *active_ind;
-    vector<Mesh *> lod;
+    vector<std::shared_ptr<Mesh> > lod;
     vector<float> lodsize;
     GFXVertex vertex;
     GFXMaterial material;
     int faction;
-    Mesh *mesh;
+    std::shared_ptr<Mesh> mesh;
 };
 
 #endif

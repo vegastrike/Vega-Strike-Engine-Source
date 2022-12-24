@@ -1,10 +1,8 @@
-/**
+/*
  * vsbox.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- *  contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,6 +25,10 @@
 
 #include "vsbox.h"
 #include "xml_support.h"
+
+#include "preferred_types.h"
+
+using namespace vega_types;
 
 /*
  *  inline ostream &operator<<(ostrstream os, const Vector &obj) {
@@ -107,12 +109,13 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     meshHashTable.Put(hash_key, this);
     orig = this;
     refcount++;
-    draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
+    draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
 #undef VERTEX
 }
 
 void Box::ProcessDrawQueue(int) {
-    if (!draw_queue[0].size()) {
+    SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>> draw_queue_item_0 = draw_queue->at(0);
+    if (draw_queue_item_0.empty()) {
         return;
     }
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -123,12 +126,12 @@ void Box::ProcessDrawQueue(int) {
     GFXDisable(DEPTHWRITE);
     GFXDisable(CULLFACE);
 
-    unsigned vnum = 24 * draw_queue[0].size();
+    unsigned vnum = 24 * draw_queue_item_0.size();
     std::vector<float> verts(vnum * (3 + 4));
-    std::vector<float>::iterator v = verts.begin();
-    while (draw_queue[0].size()) {
-        GFXLoadMatrixModel(draw_queue[0].back().mat);
-        draw_queue[0].pop_back();
+    auto v = verts.begin();
+    while (!draw_queue_item_0.empty()) {
+        GFXLoadMatrixModel(draw_queue_item_0.back().mat);
+        draw_queue_item_0.pop_back();
         *v++ = corner_max.i;
         *v++ = corner_min.j;
         *v++ = corner_max.k;

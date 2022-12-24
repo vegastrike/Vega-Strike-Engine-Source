@@ -1,4 +1,6 @@
 /*
+ * animation.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -64,7 +66,7 @@ public:
             bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
             1));
 
-    ~Animation();
+    ~Animation() override;
 
     void Draw();
 

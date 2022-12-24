@@ -1,10 +1,8 @@
-/**
+/*
  * ring.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -26,12 +24,17 @@
 
 
 #include "ring.h"
+
+#include <math.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "vsfilesystem.h"
 #include "xml_support.h"
 #include "ani_texture.h"
+#include "preferred_types.h"
+
+using namespace vega_types;
 
 extern int pixelscalesize; //from sphere.cpp
 
@@ -53,7 +56,7 @@ void RingMesh::InitRing(float iradius,
     if (numspheres < 1) {
         numspheres = 1;
     }
-    Mesh *oldmesh;
+    SharedPtr<SequenceContainer<SharedPtr<Mesh>>> oldmesh;
     char ab[3];
     ab[2] = '\0';
     ab[1] = b + '0';
@@ -64,21 +67,21 @@ void RingMesh::InitRing(float iradius,
     if (LoadExistant(hash_name, Vector(iradius, iradius, iradius), 0)) {
         return;
     }
-    oldmesh =
-            AllocNewMeshesEachInSizeofMeshSpace(numspheres);     //FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
+    this->orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>(numspheres);
     numlods = numspheres;
+    // Is this correct? -- Stephen G. Tuggy 2022-12-23
     meshHashTable.Put(hash_name = VSFileSystem::GetSharedMeshHashName(hash_name, Vector(iradius,
             iradius,
-            iradius), 0), oldmesh);
+            iradius), 0), oldmesh->front());
     this->orig = oldmesh;
     radialSize = oradius;     //MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
     //mn = Vector (radialSize,radialSize,radialSize);
     //mx = Vector (-radialSize,-radialSize,-radialSize);
     mn = Vector(0, 0, 0);
     mx = Vector(0, 0, 0);
-    vector<MeshDrawContext> *odq = NULL;
+    SharedPtr<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>> odq{nullptr};
     for (int l = 0; l < numspheres; l++) {
-        draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
+        draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
         if (!odq) {
             odq = draw_queue;
         }
@@ -87,15 +90,15 @@ void RingMesh::InitRing(float iradius,
         } else {
             slices -= 2;
         }
-        float theta, dtheta;
-        int i, j, imin, imax;
-        vlist = NULL;
+        float theta = NAN, dtheta = NAN;
+        int i = 0, j = 0, imin = 0, imax = 0;
+        vlist.reset();
         /* Code below adapted from gluSphere */
         dtheta = (theta_max - theta_min) / (GLfloat) slices;
-        int numQuadstrips = 2;
+        int const numQuadstrips = 2;
         imin = 0;
         imax = numQuadstrips;
-        int numvertex = (slices + 1) * 4;
+        int const numvertex = (slices + 1) * 4;
         GFXVertex *vertexlist = new GFXVertex[numvertex];
         GFXVertex *vl = vertexlist;
         enum POLYTYPE *modes = new enum POLYTYPE[numQuadstrips];

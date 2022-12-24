@@ -1,9 +1,8 @@
-/**
+/*
  * vsimage.h
  *
- * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
- *  and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Roy Falk,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * This file is part of Vega Strike.
  *
@@ -25,6 +24,7 @@
 #ifndef __VSIMAGE__H
 #define __VSIMAGE__H
 
+#include "preferred_types.h"
 #include "vsfilesystem.h"
 
 extern int PNG_HAS_PALETTE;
@@ -163,7 +163,7 @@ enum VSImageType { PngImage, BmpImage, JpegImage, DdsImage, Unrecognized };
  * ReadType will also set img_depth,sizeX,sizeY,img_alpha,type,mode.
  * That data is then returned to ReadImage which then returns that data to the caller.
  */
-class VSImage {
+class VSImage /* : public vega_types::EnableSharedFromThis<VSImage> */ {
 private:
     VSFileSystem::VSFile *img_file;
     VSFileSystem::VSFile *img_file2;
@@ -227,7 +227,7 @@ public:
     VSImage();
 //f2 is needed for bmp loading
     VSImage(VSFileSystem::VSFile *f, textureTransform *t = NULL, bool strip = false, VSFileSystem::VSFile *f2 = NULL);
-    ~VSImage();
+    virtual ~VSImage();
 
 //if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be messed
     unsigned char *palette;

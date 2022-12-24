@@ -11,7 +11,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -24,11 +24,12 @@
  */
 
 
-#ifndef _MESH_H_
-#define _MESH_H_
+#ifndef VEGA_STRIKE_GFX_MESH_H
+#define VEGA_STRIKE_GFX_MESH_H
 
 #include <string>
-#include <vector>
+#include <utility>
+#include "preferred_types.h"
 #include "xml_support.h"
 #include "quaternion.h"
 #include "matrix.h"
@@ -37,9 +38,9 @@
 #include "vsfilesystem.h"
 #include "cmd/unit_generic.h"
 #include "gfx/technique.h"
+#include "mesh_xml.h"
 
-using std::vector;
-using std::string;
+//using std::string;
 class Planet;
 class Unit;
 class Logo;
@@ -55,8 +56,10 @@ class BoundingBox;
 
 // Struct polygon format returned by GetPolys, usually a triangle
 struct mesh_polygon {
-    std::vector<Vector> v;
+    // TODO: Does this need to be contiguous? Leaving it as such for now
+    vega_types::ContiguousSequenceContainer<Vector> v;
 };
+
 /**
  * Mesh FX stores various lights that light up shield or hull for damage
  * They may be merged and they grow and shrink based on their TTL and TTD and delta values
@@ -86,25 +89,27 @@ public:
 ///updates the growth and death of the FX. Returns false if dead
     bool Update(float ttime); //if false::dead
 };
+
 /**
  * Stores relevant info needed to draw a mesh given only the orig
  */
 struct MeshDrawContext {
     ///The matrix in world space
     Matrix mat;
-    ///The special FX vector pointing to all active special FX
-    vector<MeshFX> *SpecialFX;
+    ///All the active special FX
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshFX>>> SpecialFX = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<MeshFX>>>();
     MeshFX xtraFX;
     bool useXtraFX;
     GFXColor CloakFX;
     enum CLK { NONE = 0x0, CLOAK = 0x1, FOG = 0x2, NEARINVIS = 0x4, GLASSCLOAK = 0x8, RENORMALIZE = 0x10 };
     char cloaked;
-    char mesh_seq;
+    char mesh_seq{};
     unsigned char damage;     //0 is perfect 255 is dead
-    MeshDrawContext(const Matrix &m) : mat(m), CloakFX(1, 1, 1, 1), cloaked(NONE), damage(0) {
-        useXtraFX = false;
+    explicit MeshDrawContext(const Matrix &m)
+            : mat(m), useXtraFX(false), CloakFX(1, 1, 1, 1), cloaked(NONE), damage(0) {
     }
 };
+
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
 
@@ -125,11 +130,12 @@ enum CLK_CONSTS { CLKSCALE = 2147483647 };
  * Also meshe contain Logos, flags based on squadron and faction that may be user-edited and appear in pleasing
  * places on the hull.
  */
-class Mesh {
+class Mesh : public vega_types::EnableSharedFromThis<Mesh> {
 private:
 //make sure to only use TempGetTexture when xml-> is valid \|/
-    Texture *TempGetTexture(struct MeshXML *, int index, std::string factionname) const;
-    Texture *TempGetTexture(struct MeshXML *, std::string filename, std::string factionname, GFXBOOL detail) const;
+    vega_types::SharedPtr<Texture> TempGetTexture(vega_types::SharedPtr<MeshXML> xml, int index, std::string factionname) const;
+    vega_types::SharedPtr<Texture>
+    TempGetTexture(vega_types::SharedPtr<MeshXML> xml, std::string filename, std::string factionname, GFXBOOL detail) const;
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
 ///Loads XML data into this mesh.
     void LoadXML(const char *filename,
@@ -137,13 +143,13 @@ private:
             int faction,
             class Flightgroup *fg,
             bool orig,
-            const vector<string> &overrideTexture);
+            const vega_types::SequenceContainer<std::string> &overrideTexture);
     void LoadXML(VSFileSystem::VSFile &f,
             const Vector &scale,
             int faction,
             class Flightgroup *fg,
             bool orig,
-            const vector<string> &overrideTexture);
+            const vega_types::SequenceContainer<std::string> &overrideTexture);
 ///loads binary data into this mesh
     void LoadBinary(const char *filename, int faction);
 ///Creates all logos with given XML data info
@@ -151,11 +157,11 @@ private:
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
     static void endElement(void *userData, const XML_Char *name);
 
-    void beginElement(struct MeshXML *xml, const string &name, const AttributeList &attributes);
-    void endElement(struct MeshXML *xml, const string &name);
+    void beginElement(struct MeshXML *xml, const std::string &name, const AttributeList &attributes);
+    void endElement(struct MeshXML *xml, const std::string &name);
 
 protected:
-    void PostProcessLoading(struct MeshXML *xml, const vector<string> &overrideTexture);
+    void PostProcessLoading(vega_types::SharedPtr<MeshXML> xml, const vega_types::SequenceContainer<string> &overrideTexture);
 
 public:
     void initTechnique(const string &technique);
@@ -166,28 +172,29 @@ public:
     }
 
     void setTechnique(TechniquePtr tech) {
-        technique = tech;
+        technique = std::move(tech);
     }
 
 private:
     Mesh(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg, bool orig,
-            const std::vector<std::string> &textureOverride = std::vector<std::string>());
+            const vega_types::SequenceContainer<std::string> &textureOverride = {});
 
 protected:
-//only may be called from subclass. orig request may be denied if unit was in past usage. (not likely in the case where a unit must be constructed in orig)
-    Mesh(std::string filename, const Vector &scalex, int faction, class Flightgroup *fg, bool orig = false);
+//only may be called from subclass. is_original request may be denied if unit was in past usage. (not likely in the case where a unit must be constructed in is_original)
+    Mesh(std::string filename, const Vector &scalex, int faction, class Flightgroup *fg, bool is_original = false);
 
 ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
 public:
-    bool LoadExistant(Mesh *mesh);
-    bool LoadExistant(const string filehash, const Vector &scale, int faction);
+    bool LoadExistant(vega_types::SharedPtr<Mesh> mesh);
+    bool LoadExistant(const std::string filehash, const Vector &scale, int faction);
 protected:
 ///the position of the center of this mesh for collision detection
     Vector local_pos;
 ///The hash table of all meshes
-    static Hashtable<std::string, Mesh, MESH_HASTHABLE_SIZE> meshHashTable;
-    static Hashtable<std::string, std::vector<int>, MESH_HASTHABLE_SIZE> animationSequences;
+    static SharedPtrHashtable<std::string, Mesh, MESH_HASTHABLE_SIZE> meshHashTable;
+    static SharedPtrHashtable<std::string, vega_types::SequenceContainer<int>, MESH_HASTHABLE_SIZE> animationSequences;
 ///The refcount:: how many meshes are referencing the appropriate original
+    // TODO: Replace with a standard library reference counting implementation. Probably make OriginalMesh its own class, too.
     int refcount;
 ///bounding box
     Vector mx;
@@ -197,25 +204,25 @@ protected:
 ///num lods contained in the array of Mesh "orig"
     int numlods;
     float framespersecond; //for animation
-    Mesh *orig;
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> orig;
 ///The size that this LOD (if original) comes into effect
     float lodsize;
 ///The number of force logos on this mesh (original)
-    Logo *forcelogos;
-    int numforcelogo;
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Logo>>> forcelogos;
+//    int numforcelogo;
 ///The number of squad logos on this mesh (original)
-    Logo *squadlogos;
-    int numsquadlogo;
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Logo>>> squadlogos;
+//    int numsquadlogo;
 ///tri,quad,line, strips, etc
-    GFXVertexList *vlist;
+    vega_types::SharedPtr<GFXVertexList> vlist;
 ///The number of the appropriate material for this mesh (default 0)
     unsigned int myMatNum;
 ///The technique used to render this mesh
     TechniquePtr technique;
 ///The decal relevant to this mesh
-    vector<Texture *> Decal;
-    Texture *detailTexture;
-    vector<Vector> detailPlanes;
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>> Decal;
+    vega_types::SharedPtr<Texture> detailTexture;
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Vector>>> detailPlanes;
     float polygon_offset;
 ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
     char envMapAndLit;
@@ -228,19 +235,19 @@ protected:
     enum BLENDFUNC blendDst;
 
 /// Support for reorganized rendering
-    vector<MeshDrawContext> *draw_queue;
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>> draw_queue;
 /// How transparent this mesh is (in what order should it be rendered in
     int draw_sequence;
 ///The name of this unit
-    string hash_name;
+    std::string hash_name;
 ///Setting all values to defaults (good for mesh copying and stuff)
     void InitUnit();
 ///Needs to have access to our class
     friend class OrigMeshContainer;
 ///The enabled light effects on this mesh
-    vector<MeshFX> LocalFX;
-///Returing the mesh relevant to "size" pixels LOD of this mesh
-    Mesh *getLOD(float lod, bool bBypassDamping = true);
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshFX>>> LocalFX;
+///Returning the mesh relevant to "size" pixels LOD of this mesh
+    vega_types::SharedPtr<Mesh> getLOD(float lod, bool bBypassDamping = true);
 
 private:
 ///Implement fixed-function draw queue processing (the referenced pass must be of Fixed type) - internal usage
@@ -256,8 +263,8 @@ public:
     Mesh();
     Mesh(const Mesh &m);
 
-    GFXVertexList *getVertexList() const;
-    void setVertexList(GFXVertexList *_vlist);
+    vega_types::SharedPtr<GFXVertexList> getVertexList() const;
+    void setVertexList(vega_types::SharedPtr<GFXVertexList> _vlist);
     float getFramesPerSecond() const;
     float getCurrentFrame() const;
     void setCurrentFrame(float);
@@ -289,13 +296,13 @@ public:
 ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
 //private:
 //public:
-    static Mesh *LoadMesh(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg,
-            const std::vector<std::string> &textureOverride = std::vector<std::string>());
-    static vector<Mesh *> LoadMeshes(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg,
-            const std::vector<std::string> &textureOverride = std::vector<std::string>());
-    static vector<Mesh *> LoadMeshes(VSFileSystem::VSFile &f, const Vector &scalex, int faction, class Flightgroup *fg,
+    static vega_types::SharedPtr<Mesh> LoadMesh(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg,
+                                    const vega_types::SequenceContainer<std::string> &textureOverride = {});
+    static vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> LoadMeshes(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg,
+            const vega_types::SequenceContainer<std::string> &textureOverride = {});
+    static vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> LoadMeshes(VSFileSystem::VSFile &f, const Vector &scalex, int faction, class Flightgroup *fg,
             std::string hash_name,
-            const std::vector<std::string> &textureOverride = std::vector<std::string>());
+            const vega_types::SequenceContainer<std::string> &textureOverride = {});
 
 ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
     void Fork(Mesh *&one, Mesh *&two, float a, float b, float c, float d);
@@ -304,23 +311,23 @@ public:
 
 ///Gets number of specialFX
     unsigned int numFX() const {
-        return LocalFX.size();
+        return LocalFX->size();
     }
 
 ///Turns on SpecialFX
     void EnableSpecialFX();
 
     unsigned int numTextures() const {
-        return Decal.size();
+        return Decal->size();
     }
 
-    Texture *texture(int i) const {
-        return Decal[i];
+    vega_types::SharedPtr<Texture> texture(int i) const {
+        return Decal->at(i);
     }
 
     void SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade = false);
 ///Gets all polygons in this mesh for collision computation
-    void GetPolys(vector<mesh_polygon> &);
+    void GetPolys(vega_types::SequenceContainer<mesh_polygon> &);
 ///Sets the material of this mesh to mat (affects original as well)
     void SetMaterial(const GFXMaterial &mat);
 //Gets the material back from the mesh.
@@ -384,9 +391,9 @@ public:
 
     void setEnvMap(GFXBOOL newValue, bool lodcascade = false) {
         envMapAndLit = (newValue ? (envMapAndLit | 0x1) : (envMapAndLit & (~0x1)));
-        if (lodcascade && orig) {
-            for (int i = 0; i < numlods; i++) {
-                orig[i].setEnvMap(newValue);
+        if (lodcascade && !orig->empty()) {
+            for (auto & original : *orig) {
+                original->setEnvMap(newValue);
             }
         }
     }
@@ -397,9 +404,9 @@ public:
 
     void setLighting(GFXBOOL newValue, bool lodcascade = false) {
         envMapAndLit = (newValue ? (envMapAndLit | 0x2) : (envMapAndLit & (~0x2)));
-        if (lodcascade && orig) {
-            for (int i = 0; i < numlods; i++) {
-                orig[i].setLighting(newValue);
+        if (lodcascade && !orig->empty()) {
+            for (auto & original : *orig) {
+                original->setLighting(newValue);
             }
         }
     }
@@ -452,7 +459,7 @@ public:
     }
 };
 
-extern std::shared_ptr<Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE>> bfxmHashTable();
+extern vega_types::SharedPtr<SharedPtrHashtable<std::string, vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>, MESH_HASTHABLE_SIZE>> bfxmHashTable();
 
 #endif
 

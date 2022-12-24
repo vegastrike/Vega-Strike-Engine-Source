@@ -1,10 +1,8 @@
-/**
+/*
  * mesh_poly.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -27,6 +25,7 @@
 
 #include "mesh.h"
 #include "aux_texture.h"
+#include "preferred_types.h"
 #if !defined (_WIN32) && !defined (__CYGWIN__) && !(defined (__APPLE__) || defined (MACOSX )) && !defined (BSD) && !defined(__HAIKU__)
 #include <values.h>
 #endif
@@ -37,6 +36,8 @@
 #define PUNK (0)
 
 #define WHICHSID(v) ( ( (v.x*a+v.y*b+v.z*c+d) > 0 )*2-1 )
+
+using namespace vega_types;
 
 static int whichside(GFXVertex *t, int numvertex, float a, float b, float c, float d) {
     int count = PUNK;
@@ -122,34 +123,34 @@ void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
     y->setEnvMap(getEnvMap());
 
     y->forceCullFace(GFXFALSE);
-    x->forcelogos = x->squadlogos = nullptr;
-    x->numforcelogo = x->numsquadlogo = 0;
+    x->forcelogos.reset();
+    x->squadlogos.reset();
     x->setLighting(getLighting());
     x->setEnvMap(getEnvMap());
     x->blendSrc = y->blendSrc = blendSrc;
     x->blendDst = y->blendDst = blendDst;
-    while (x->Decal.size() < Decal.size()) {
-        x->Decal.push_back(NULL);
+    while (x->Decal->size() < Decal->size()) {
+        x->Decal->push_back(nullptr);
     }
     {
-        for (unsigned int i2 = 0; i2 < Decal.size(); i2++) {
-            if (Decal[i2]) {
-                x->Decal[i2] = Decal[i2]->Clone();
+        for (unsigned int i2 = 0; i2 < Decal->size(); i2++) {
+            if (Decal->at(i2)) {
+                x->Decal->at(i2) = Decal->at(i2)->Clone();
             }
         }
     }
 
-    y->squadlogos = y->forcelogos = nullptr;
-    y->numforcelogo = y->numsquadlogo = 0;
+    y->squadlogos.reset();
+    y->forcelogos.reset();
     y->setLighting(getLighting());
     y->setEnvMap(getEnvMap());
-    while (y->Decal.size() < Decal.size()) {
-        y->Decal.push_back(NULL);
+    while (y->Decal->size() < Decal->size()) {
+        y->Decal->push_back(nullptr);
     }
     {
-        for (unsigned int i = 0; i < Decal.size(); i++) {
-            if (Decal[i]) {
-                y->Decal[i] = Decal[i]->Clone();
+        for (unsigned int i3 = 0; i3 < Decal->size(); i3++) {
+            if (Decal->at(i3)) {
+                y->Decal->at(i3) = Decal->at(i3)->Clone();
             }
         }
     }
@@ -186,8 +187,8 @@ void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
 
     y->orig = new Mesh[1];
     y->forceCullFace(GFXFALSE);
-    x->draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
-    y->draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
+    x->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+    y->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
     *y->orig = *y;
     *x->orig = *x;
     x->orig->refcount = 1;

@@ -1,10 +1,8 @@
-/**
+/*
  * sphere_generic.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -24,6 +22,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+#include <math.h>
 
 #include "sphere.h"
 #include "ani_texture.h"
@@ -38,24 +38,26 @@
 #include "gfx/camera.h"
 #include "universe.h"
 
-extern Texture *createTexture(const char *filename,
-        int stage = 0,
-        enum FILTER f1 = MIPMAP,
-        enum TEXTURE_TARGET t0 = TEXTURE2D,
-        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-        unsigned char c = GFXFALSE,
-        int i = 65536);
-extern Texture *createTexture(char const *ccc,
-        char const *cc,
-        int k = 0,
-        enum FILTER f1 = MIPMAP,
-        enum TEXTURE_TARGET t0 = TEXTURE2D,
-        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-        float f = 1,
-        int j = 0,
-        unsigned char c = GFXFALSE,
-        int i = 65536);
-extern AnimatedTexture *createAnimatedTexture(char const *c, int i, enum FILTER f);
+using namespace vega_types;
+
+extern SharedPtr<Texture> createTexture(const char *filename,
+                                        int stage = 0,
+                                        enum FILTER f1 = MIPMAP,
+                                        enum TEXTURE_TARGET t0 = TEXTURE2D,
+                                        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+                                        unsigned char c = GFXFALSE,
+                                        int i = 65536);
+extern SharedPtr<Texture> createTexture(char const *ccc,
+                                        char const *cc,
+                                        int k = 0,
+                                        enum FILTER f1 = MIPMAP,
+                                        enum TEXTURE_TARGET t0 = TEXTURE2D,
+                                        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+                                        float f = 1,
+                                        int j = 0,
+                                        unsigned char c = GFXFALSE,
+                                        int i = 65536);
+extern SharedPtr<AnimatedTexture> createAnimatedTexture(char const *c, int i, enum FILTER f);
 
 using XMLSupport::tostring;
 int pixelscalesize = 30;
@@ -110,7 +112,7 @@ void SphereMesh::InitSphere(float radius,
     if (numspheres < 1) {
         numspheres = 1;
     }
-    Mesh *oldmesh;
+    SharedPtr<SequenceContainer<SharedPtr<Mesh>>> oldmesh;
     char ab[3];
     ab[2] = '\0';
     ab[1] = b + '0';
@@ -122,21 +124,21 @@ void SphereMesh::InitSphere(float radius,
         return;
     } else {
     }
-    this->orig = AllocNewMeshesEachInSizeofMeshSpace(numspheres); //FIXME::RISKY::MIGHT HAVE...
-    //... DIFFERENT SIZES!!  DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
+    this->orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>(numspheres);
     oldmesh = this->orig;
     numlods = numspheres;
-    meshHashTable.Put(hash_name, oldmesh);
+    // Is this correct? -- Stephen G. Tuggy 2022-12-23
+    meshHashTable.Put(hash_name, oldmesh->front());
     radialSize = radius; //MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
     mn = Vector(-radialSize, -radialSize, -radialSize);
     mx = Vector(radialSize, radialSize, radialSize);
-    vector<MeshDrawContext> *odq = NULL;
+    SharedPtr<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>> odq{nullptr};
     for (int l = 0; l < numspheres; l++) {
-        draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
+        draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
         if (subclass || rho_max != M_PI || rho_min != 0.0 || theta_min != 0.0 || theta_max != 2 * M_PI) {
             odq = draw_queue;
         }
-        vlist = NULL;
+        vlist = nullptr;
         if (subclass) {
             if (stacks > 12) {
                 stacks -= 4;
@@ -145,14 +147,14 @@ void SphereMesh::InitSphere(float radius,
                 stacks -= 2;
                 slices -= 2;
             }
-            float drho, dtheta;
-            float x, y, z;
-            float s, t, ds, dt;
-            int i, j, imin, imax;
-            float nsign = Insideout ? -1.0 : 1.0;
-            float normalscale = reverse_normals ? -1.0 : 1.0;
-            int fir = 0; //Insideout?1:0;
-            int sec = 1; //Insideout?0:1;
+            float drho = NAN, dtheta = NAN;
+            float x = NAN, y = NAN, z = NAN;
+            float s = NAN, t = NAN, ds = NAN, dt = NAN;
+            int i = 0, j = 0, imin = 0, imax = 0;
+            float const nsign = Insideout ? -1.0 : 1.0;
+            float const normalscale = reverse_normals ? -1.0 : 1.0;
+            int const fir = 0; //Insideout?1:0;
+            int const sec = 1; //Insideout?0:1;
             /* Code below adapted from gluSphere */
             drho = (rho_max - rho_min) / (float) stacks;
             dtheta = (theta_max - theta_min) / (float) slices;
@@ -249,9 +251,9 @@ void SphereMesh::InitSphere(float radius,
         if (Insideout) {
             draw_sequence = 0;
         }
-        Mesh *oldorig = orig;
-        refcount = 1;
-        orig = NULL;
+        SharedPtr<SequenceContainer<SharedPtr<Mesh>>> const oldorig = orig;
+//        refcount = 1;
+        orig = nullptr;
         if (l >= 1) {
             lodsize = (numspheres + 1 - l) * pixelscalesize;
             if (l == 1) {
@@ -263,8 +265,8 @@ void SphereMesh::InitSphere(float radius,
             }
         }
         initTechnique(technique);
-        oldmesh[l] = *this;
-        refcount = 0;
+        oldmesh->at(l) = shared_from_this();
+//        refcount = 0;
         orig = oldorig;
         lodsize = FLT_MAX;
     }

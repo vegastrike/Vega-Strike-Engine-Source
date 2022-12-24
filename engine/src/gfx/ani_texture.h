@@ -1,4 +1,6 @@
 /*
+ * ani_texture.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -28,14 +30,15 @@
 #include "vsfilesystem.h"
 #include "vid_file.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include "../SharedPool.h"
 
 #include "audio/Types.h"
+#include "preferred_types.h"
 #include "audio/Source.h"
 
 class AnimatedTexture : public Texture {
-    Texture **Decal;
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>> Decal;
     unsigned int activebound; //For video mode
     double physicsactive;
     bool loadSuccess;
@@ -47,7 +50,7 @@ class AnimatedTexture : public Texture {
     bool detailTex;
     enum FILTER ismipmapped;
     int texstage;
-    SharedPtr<Audio::Source> timeSource;
+    vega_types::SharedPtr<Audio::Source> timeSource;
 
     vector<StringPool::Reference> frames; //Filenames for each frame
     vector<Vector> frames_maxtc; //Maximum tcoords for each frame
@@ -88,29 +91,29 @@ protected:
     bool done;
 
 public:
-    virtual void setTime(double tim);
+    void setTime(double tim) override;
 
-    virtual double curTime() const {
+    double curTime() const override {
         return curtime;
     }
 
-    virtual unsigned int numFrames() const {
+    unsigned int numFrames() const override {
         return numframes;
     }
 
-    virtual float framesPerSecond() const {
+    float framesPerSecond() const override {
         return 1 / timeperframe;
     }
 
-    virtual unsigned int numLayers() const;
+    unsigned int numLayers() const override;
 
-    virtual unsigned int numPasses() const;
+    unsigned int numPasses() const override;
 
-    virtual bool canMultiPass() const {
+    bool canMultiPass() const override {
         return true;
     }
 
-    virtual bool constFrameRate() const {
+    bool constFrameRate() const override {
         return constframerate;
     }
 
@@ -132,13 +135,13 @@ public:
 
     void Destroy();
 
-    virtual const Texture *Original() const;
+    const vega_types::SharedPtr<const Texture> OriginalConst() const override;
 
-    virtual Texture *Original();
+    virtual vega_types::SharedPtr<Texture> Original();
 
-    ~AnimatedTexture();
+    ~AnimatedTexture() override;
 
-    virtual Texture *Clone();
+    virtual vega_types::SharedPtr<Texture> Clone();
 
     virtual void MakeActive() {
         MakeActive(texstage, 0);
@@ -188,11 +191,11 @@ public:
         return (options & optLoop) != 0;
     }
 
-    SharedPtr<Audio::Source> GetTimeSource() const {
-        return (options & optSoundTiming) ? timeSource : SharedPtr<Audio::Source>();
+    vega_types::SharedPtr<Audio::Source> GetTimeSource() const {
+        return (options & optSoundTiming) ? timeSource : vega_types::SharedPtr<Audio::Source>();
     }
 
-    void SetTimeSource(SharedPtr<Audio::Source> source);
+    void SetTimeSource(vega_types::SharedPtr<Audio::Source> source);
 
     void ClearTimeSource();
 

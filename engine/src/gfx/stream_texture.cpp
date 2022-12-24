@@ -1,10 +1,8 @@
-/**
+/*
  * stream_texture.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -26,10 +24,11 @@
 
 
 #include "stream_texture.h"
+#include "preferred_types.h"
 
-StreamTexture *StreamTexture::Clone() {
+vega_types::SharedPtr<Texture> StreamTexture::Clone() {
     unsigned char *x = Map();
-    StreamTexture *ret = new StreamTexture(sizeX, sizeY, filtertype, x);
+    vega_types::SharedPtr<StreamTexture> ret = vega_types::MakeShared<StreamTexture>(sizeX, sizeY, filtertype, x);
     UnMap(false);
     return ret;
 }
@@ -82,5 +81,21 @@ StreamTexture::~StreamTexture() {
 
 void StreamTexture::MakeActive(int stage) {
     GFXSelectTexture(name, stage);
+}
+
+vega_types::SharedPtr<Texture> StreamTexture::Original() {
+    if (original) {
+        return original->Original();
+    } else {
+        return shared_from_this();
+    }
+}
+
+const vega_types::SharedPtr<const Texture> StreamTexture::OriginalConst() const {
+    if (original) {
+        return original->OriginalConst();
+    } else {
+        return shared_from_this();
+    }
 }
 

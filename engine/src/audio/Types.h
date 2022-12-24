@@ -1,10 +1,8 @@
-/**
+/*
  * Types.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,17 +26,18 @@
 //
 // C++ Interface: Audio::Codec
 //
-#ifndef __AUDIO_TYPES_H__INCLUDED__
-#define __AUDIO_TYPES_H__INCLUDED__
+#ifndef VEGA_STRIKE_AUDIO_TYPES_H
+#define VEGA_STRIKE_AUDIO_TYPES_H
 
 #include <boost/smart_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include "preferred_types.h"
 
-// Some compilers don't like template typedefs
-#define SharedPtr boost::shared_ptr
-#define WeakPtr boost::weak_ptr
-#define AutoPtr boost::scoped_ptr
-#define SharedFromThis boost::enable_shared_from_this
+//// Some compilers don't like template typedefs
+//#define SharedPtr boost::shared_ptr
+//#define WeakPtr boost::weak_ptr
+//#define AutoPtr boost::scoped_ptr
+//#define SharedFromThis boost::enable_shared_from_this
 
 #include "Vector.h"
 #include "Matrix.h"
@@ -122,4 +121,4 @@ public:
 
 };
 
-#endif//__AUDIO_TYPES_H__INCLUDED__
+#endif//VEGA_STRIKE_AUDIO_TYPES_H

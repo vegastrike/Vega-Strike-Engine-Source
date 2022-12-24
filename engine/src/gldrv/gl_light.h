@@ -1,4 +1,6 @@
 /*
+ * gl_light.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -22,12 +24,16 @@
 
 #ifndef _GL_LIGHT_H_
 #define _GL_LIGHT_H_
+
+#include <options.h>
 #include "gfxlib.h"
 #include "hashtable_3d.h"
 #include "gl_globals.h"
+
 extern GLint GFX_MAX_LIGHTS;
 extern GLint GFX_OPTIMAL_LIGHTS;
 extern GFXBOOL GFXLIGHTING;
+
 #define GFX_ATTENUATED 1
 //#define GFX_DIFFUSE 2
 //#define GFX_SPECULAR 4
@@ -36,6 +42,7 @@ extern GFXBOOL GFXLIGHTING;
 #define GFX_LIGHT_ENABLED 32
 #define GFX_LOCAL_LIGHT 64
 const unsigned int lighthuge = 20 * 20 * 20;
+
 /**
  * This stores the state of a given GL Light in its fullness
  * It inherits all values a light may have, and gains a number of functions
@@ -48,7 +55,7 @@ public:
     }
 
     ///assigns a GFXLight to a gfx_light
-    GFXLight operator=(const GFXLight &tmp);
+    gfx_light & operator=(const GFXLight &tmp);
 
     ///Returns the number this light is in the _llights list
     int lightNum();
@@ -146,28 +153,82 @@ struct OpenGLLights {
 ///Rekeys a frame, remembering trashing old lights activated last frame
 void light_rekey_frame();
 ///picks doubtless changed position
-void unpicklights();
-void removelightfromnewpick(int whichlight);
-///The curren tlight context
-extern int _currentContext;
-///The light data _llights points to one of these
-extern vector<vector<gfx_light> > _local_lights_dat;
-///The ambient lights that are around
-extern vector<GFXColor> _ambient_light;
-///The lights existing in a certain context. Points to _local_lights_dat
-extern vector<gfx_light> *_llights;
-///How many lights are enabled (for fast picking)
-extern int _GLLightsEnabled;
+void unpickLights();
+void removeLightFromNewPick(int whichlight);
 
-///currently stored GL lights!
-extern OpenGLLights *GLLights;
+class ManagerOfStaticLightsData {
+public:
+    ///The current light context
+    int current_context{};
+    ///The light data _llights points to one of these
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<gfx_light>>>>> local_lights_dat;
+    ///The ambient lights that are around
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<GFXColor>>> ambient_light;
+    ///The lights existing in a certain context. Points to local_lights_dat
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<gfx_light>>> l_lights;
+    ///How many lights are enabled (for fast picking)
+    int gl_lights_enabled{};
+    ///currently stored GL lights!
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<OpenGLLights>>> gl_lights;
+
+    // picked_lights was a list, but lists imply heavy reallocation, which is bad in critical sections
+    // ( and picked_lights is used in the most critical section: just before GFXVertexList::Draw() )
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<int>>>> picked_lights;
+    vega_types::SharedPtr<vega_types::SequenceContainer<int>> new_picked;
+    vega_types::SharedPtr<vega_types::SequenceContainer<int>> old_picked;
+
+public:
+    // Default constructor -- Only meant to be used from the staticLightsDataManager Meyers singleton function
+    ManagerOfStaticLightsData() {
+        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,
+                      1);     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
+        glGetIntegerv(GL_MAX_LIGHTS, &GFX_MAX_LIGHTS);
+        gl_lights = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<OpenGLLights>>>(GFX_MAX_LIGHTS);
+        for (GLint i = 0; i < GFX_MAX_LIGHTS; ++i) {
+            vega_types::SharedPtr<OpenGLLights> const new_light = vega_types::MakeShared<OpenGLLights>();
+            new_light->index = -1;
+            gl_lights->push_back(new_light);
+        }
+
+        picked_lights = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<int>>>>(2);
+        new_picked = picked_lights->at(0);
+        old_picked = picked_lights->at(1);
+
+        GFXSetCutoff(game_options()->lightcutoff);
+        GFXSetOptimalIntensity(game_options()->lightoptimalintensity, game_options()->lightsaturation);
+        GFXSetOptimalNumLights(game_options()->numlights);
+        GFXSetSeparateSpecularColor(game_options()->separatespecularcolor ? GFXTRUE : GFXFALSE);
+    }
+
+    ManagerOfStaticLightsData(ManagerOfStaticLightsData const &) = delete;
+    ManagerOfStaticLightsData(ManagerOfStaticLightsData &&) = delete;
+    ManagerOfStaticLightsData& operator=(ManagerOfStaticLightsData const &) = delete;
+    ManagerOfStaticLightsData& operator=(ManagerOfStaticLightsData &&) = delete;
+
+    ~ManagerOfStaticLightsData() = default;
+
+    void swapPicked() {
+        if (new_picked == picked_lights->at(0)) {
+            new_picked = picked_lights->at(1);
+            old_picked = picked_lights->at(0);
+        } else {
+            new_picked = picked_lights->at(0);
+            old_picked = picked_lights->at(1);
+        }
+    }
+
+    inline vega_types::SharedPtr<gfx_light> localLightAtIndex(const size_t i) {
+        return l_lights->at(i);
+    }
+};
+
+extern vega_types::SharedPtr<ManagerOfStaticLightsData> staticLightsDataManager();
 
 ///A sortable line collide object that will sort by object addr for dup elim
 struct LineCollideStar {
     LineCollide *lc;
 
-    LineCollideStar() {
-        lc = NULL;
+    LineCollideStar() : lc(nullptr) {
     }
 
     bool operator==(const LineCollideStar &b) const {

@@ -1,8 +1,8 @@
 /*
  * aux_texture.h
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -40,7 +40,7 @@
  *  to prevent the loading of duplicate textures
  */
 ;
-class Texture : public ::VSImage {
+class Texture : public ::VSImage, public vega_types::EnableSharedFromThis<Texture> {
     typedef unsigned int uint;
 public:
     void FileNotFound(const std::string &); //undoes what it did to hash table when file is not located
@@ -182,9 +182,9 @@ public:
             GFXBOOL nocache = false,
             enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
             Texture *main = 0);
-    virtual const Texture *Original() const;
-    virtual Texture *Original();
-    virtual Texture *Clone();
+    virtual const vega_types::SharedPtr<const Texture> OriginalConst() const;
+    virtual vega_types::SharedPtr<Texture> Original();
+    virtual vega_types::SharedPtr<Texture> Clone();
 
     ///Texture copy constructor that increases appropriate refcounts
     //Texture (Texture *t);

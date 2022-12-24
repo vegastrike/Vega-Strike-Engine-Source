@@ -1,4 +1,6 @@
 /*
+ * animation.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -36,17 +38,17 @@
 #include <algorithm>
 #include "../gldrv/gl_globals.h"
 #include "universe.h"
+#include "preferred_types.h"
 
-using std::vector;
-using std::stack;
+using namespace vega_types;
 
-static vector<Animation *> far_animationdrawqueue;
+static SequenceContainer<SharedPtr<Animation>> far_animationdrawqueue;
 
 bool AnimationsLeftInFarQueue() {
     return !far_animationdrawqueue.empty();
 }
 
-static vector<Animation *> animationdrawqueue;
+static SequenceContainer<SharedPtr<Animation>> animationdrawqueue;
 
 bool AnimationsLeftInQueue() {
     return !animationdrawqueue.empty();
