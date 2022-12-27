@@ -626,7 +626,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects, bool nocamerasetup) {
             }
             GFXEnable(DEPTHWRITE);
         }
-        for ( SequenceContainer<Logo *>::iterator it = undrawn_logos.begin(); it < undrawn_logos.end(); it++) {
+        for (auto it = undrawn_logos.begin(); it < undrawn_logos.end(); it++) {
             Logo *l = *it;
             l->ProcessDrawQueue();
             l->will_be_drawn = false;

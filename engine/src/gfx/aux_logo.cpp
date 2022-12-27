@@ -33,7 +33,7 @@
 #include "config_xml.h"
 #include "xml_support.h"
 
-vector<Logo *> undrawn_logos;
+vega_types::SequenceContainer<Logo *> undrawn_logos;
 Hashtable<int, Logo, 257>Logo::decalHash;
 
 Logo::Logo(int numberlogos,
