@@ -1,9 +1,8 @@
 /*
  * base_util.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -179,13 +178,13 @@ void Texture(int room, std::string index, std::string file, float x, float y) {
     p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
 }
 
-SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene) {
-    SharedPtr<Sound> sound = SceneManager::getSingleton()->getRenderer()->getSound(
+vega_types::SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene) {
+    vega_types::SharedPtr<Sound> sound = SceneManager::getSingleton()->getRenderer()->getSound(
             afile,
             VSFileSystem::VideoFile,
             true);
 
-    SharedPtr<Source> source = SceneManager::getSingleton()->createSource(
+    vega_types::SharedPtr<Source> source = SceneManager::getSingleton()->createSource(
             sound,
             false);
 
@@ -202,7 +201,7 @@ SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::st
     return source;
 }
 
-void DestroyVideoSoundStream(SharedPtr<Source> source, const std::string &scene) {
+void DestroyVideoSoundStream(vega_types::SharedPtr<Source> source, const std::string &scene) {
     if (source->isPlaying()) {
         source->stopPlaying();
     }
@@ -278,7 +277,7 @@ void SetVideoCallback(int room, std::string index, std::string callback) {
                 movie->setCallback(callback);
 
                 if (movie->soundsource.get() != NULL) {
-                    SharedPtr<SourceListener> transitionListener(
+                    vega_types::SharedPtr<SourceListener> transitionListener(
                             new VideoAudioStreamListener(room, index));
 
                     movie->soundsource->setSourceListener(transitionListener);
@@ -346,7 +345,7 @@ void PlayVideo(int room, std::string index) {
             if (newroom->objs[i]->index == index) {
                 BaseInterface::Room::BaseVSSprite
                         *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
-                SharedPtr<Source> source = p_base_vs_sprite->soundsource;
+                vega_types::SharedPtr<Source> source = p_base_vs_sprite->soundsource;
                 assert(source && source.get() != nullptr);
                 if (source && !source->isPlaying()) {
                     source->startPlaying();
@@ -366,7 +365,7 @@ void StopVideo(int room, std::string index) {
             if (newroom->objs[i]->index == index) {
                 BaseInterface::Room::BaseVSSprite
                         *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
-                SharedPtr<Source> source = p_base_vs_sprite->soundsource;
+                vega_types::SharedPtr<Source> source = p_base_vs_sprite->soundsource;
                 if (source && source->isPlaying()) {
                     source->stopPlaying();
                 }

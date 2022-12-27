@@ -55,6 +55,7 @@
 #include "vs_logging.h"
 #include "vs_exit.h"
 #include "preferred_types.h"
+#include "shared_ptr_hashtable.h"
 
 #ifdef max
 #undef max
@@ -168,13 +169,13 @@ const EnumMap MeshXML::attribute_map(MeshXML::attribute_names,
         sizeof(MeshXML::attribute_names) / sizeof(MeshXML::attribute_names[0]));
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-    MeshXML *xml = (MeshXML *) userData;
-    xml->mesh->beginElement(xml, name, AttributeList(atts));
+    MeshXML *xml = reinterpret_cast<MeshXML *>(userData);
+    xml->mesh->beginElement(static_cast<SharedPtr<MeshXML>>(xml), name, AttributeList(atts));
 }
 
 void Mesh::endElement(void *userData, const XML_Char *name) {
-    MeshXML *xml = (MeshXML *) userData;
-    xml->mesh->endElement(xml, std::string(name));
+    MeshXML *xml = reinterpret_cast<MeshXML *>(userData);
+    xml->mesh->endElement(static_cast<SharedPtr<MeshXML>>(xml), std::string(name));
 }
 
 enum BLENDFUNC parse_alpha(const char *tmp) {
@@ -304,7 +305,7 @@ bool shouldreflect(string r) {
     return false;
 }
 
-void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes) {
+void Mesh::beginElement(SharedPtr<MeshXML> xml, const string &name, const AttributeList &attributes) {
     static bool use_detail_texture =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_detail_texture", "true"));
     //static bool flatshadeit=false;
@@ -320,9 +321,9 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
     switch (elem) {
         case MeshXML::DETAILPLANE:
             if (use_detail_texture) {
-                Vector vec(detailPlanes.size() >= 2 ? 1 : 0,
-                        detailPlanes.size() == 1 ? 1 : 0,
-                        detailPlanes.size() == 0 ? 1 : 0);
+                Vector vec(detailPlanes->size() >= 2 ? 1 : 0,
+                        detailPlanes->size() == 1 ? 1 : 0,
+                        detailPlanes->size() == 0 ? 1 : 0);
                 for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                     switch (MeshXML::attribute_map.lookup((*iter).name)) {
                         case MeshXML::X:
@@ -339,8 +340,8 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                 }
                 static float detailscale =
                         XMLSupport::parse_float(vs_config->getVariable("graphics", "detail_texture_scale", "1"));
-                if (detailPlanes.size() < 6) {
-                    detailPlanes.push_back(vec * detailscale);
+                if (detailPlanes->size() < 6) {
+                    detailPlanes->push_back(vec * detailscale);
                 }
             }
             break;
@@ -722,7 +723,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
             assert(top == MeshXML::POLYGONS);
             //assert(xml->load_stage==4);
             xml->num_vertices = 2;
-            xml->linestrips.push_back(SequenceContainer<GFXVertex>());
+            xml->linestrips.push_back(ContiguousSequenceContainer<GFXVertex>());
             xml->active_list = &(xml->linestrips[xml->linestrips.size() - 1]);
             xml->lstrcnt = xml->linestripind.size();
             xml->active_ind = &xml->linestripind;
@@ -747,7 +748,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
             assert(top == MeshXML::POLYGONS);
             //assert(xml->load_stage==4);
             xml->num_vertices = 3;         //minimum number vertices
-            xml->tristrips.push_back(SequenceContainer<GFXVertex>());
+            xml->tristrips.push_back(ContiguousSequenceContainer<GFXVertex>());
             xml->active_list = &(xml->tristrips[xml->tristrips.size() - 1]);
             xml->tstrcnt = xml->tristripind.size();
             xml->active_ind = &xml->tristripind;
@@ -772,7 +773,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
             assert(top == MeshXML::POLYGONS);
             //assert(xml->load_stage==4);
             xml->num_vertices = 3;         //minimum number vertices
-            xml->trifans.push_back(SequenceContainer<GFXVertex>());
+            xml->trifans.push_back(ContiguousSequenceContainer<GFXVertex>());
             xml->active_list = &(xml->trifans[xml->trifans.size() - 1]);
             xml->tfancnt = xml->trifanind.size();
             xml->active_ind = &xml->trifanind;
@@ -797,7 +798,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
             assert(top == MeshXML::POLYGONS);
             //assert(xml->load_stage==4);
             xml->num_vertices = 4;         //minimum number vertices
-            xml->quadstrips.push_back(SequenceContainer<GFXVertex>());
+            xml->quadstrips.push_back(ContiguousSequenceContainer<GFXVertex>());
             xml->active_list = &(xml->quadstrips[xml->quadstrips.size() - 1]);
             xml->qstrcnt = xml->quadstripind.size();
             xml->active_ind = &xml->quadstripind;
@@ -850,12 +851,11 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         framespersecond = XMLSupport::parse_float((*iter).value);
                         break;
                     case MeshXML::LODFILE:
-                        xml->lod
-                                .push_back(new Mesh((*iter).value.c_str(),
+                        xml->lod.push_back(MakeShared<Mesh>(Mesh((*iter).value.c_str(),
                                         xml->lodscale,
                                         xml->faction,
                                         xml->fg,
-                                        true));                   //make orig mesh
+                                        true)));                   //make orig mesh
                         break;
                     case MeshXML::SIZE:
                         flotsize = XMLSupport::parse_float((*iter).value);
@@ -1046,7 +1046,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
     }
 }
 
-void Mesh::endElement(MeshXML *xml, const string &name) {
+void Mesh::endElement(SharedPtr<MeshXML> xml, const string &name) {
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup(name);
     assert(*xml->state_stack.rbegin() == elem);
     xml->state_stack.pop_back();
@@ -1302,7 +1302,7 @@ SharedPtr<Mesh> Mesh::LoadMesh(const char *filename,
     if (m.size() > 1) {
         VS_LOG(warning, (boost::format("Mesh %1% has %2% subcomponents. Only first used!") % filename % m.size()));
         for (unsigned int i = 1; i < m.size(); ++i) {
-            delete m[i];
+            m[i].reset();
         }
     }
     return m[0];
@@ -1342,9 +1342,13 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(const char *filename,
     if (0 != oldmesh) {
         SequenceContainer<SharedPtr<Mesh> > ret;
         for (unsigned int i = 0; i < oldmesh->size(); ++i) {
-            ret.push_back(new Mesh());
+            ret.push_back(MakeShared<Mesh>());
             SharedPtr<Mesh> const m = (*oldmesh)[i];
-            ret.back()->LoadExistant(m->orig ? m->orig : m);
+            if (m->orig && !m->orig->empty()) {
+                ret.back()->LoadExistant(m->orig->front());
+            } else {
+                ret.back()->LoadExistant(m);
+            }
         }
         return ret;
     }
@@ -1377,20 +1381,24 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(const char *filename,
                         scale,
                         faction);
         SequenceContainer<SharedPtr<Mesh> > retval(LoadMeshes(f, scale, faction, fg, hash_name, overrideTextures));
-        SequenceContainer<SharedPtr<Mesh> > *newvec = new SequenceContainer<SharedPtr<Mesh> >(retval);
+        SharedPtr<SequenceContainer<SharedPtr<Mesh>>> newvec = MakeShared<SequenceContainer<SharedPtr<Mesh>>>(retval);
         for (unsigned int i = 0; i < retval.size(); ++i) {
             retval[i]->hash_name = hash_name;
-            if (retval[i]->orig) {
-                retval[i]->orig->hash_name = hash_name;
+            if (retval[i]->orig && !retval[i]->orig->empty()) {
+                retval[i]->orig->front()->hash_name = hash_name;
             }
-            (*newvec)[i] = retval[i]->orig ? retval[i]->orig : retval[i];
+            if (retval[i]->orig && !retval[i]->orig->empty()) {
+                (*newvec)[i] = retval[i]->orig->front();
+            } else {
+                (*newvec)[i] = retval[i];
+            }
         }
         bfxmHashTable()->Put(hash_name, newvec);
         return retval;
     } else {
         f.Close();
         bool original = false;
-        SharedPtr<Mesh> m = new Mesh(filename, scale, faction, fg, original);
+        SharedPtr<Mesh> m = MakeShared<Mesh>(Mesh(filename, scale, faction, fg, original));
         SequenceContainer<SharedPtr<Mesh> > ret;
         ret.push_back(m);
         return ret;
@@ -1422,8 +1430,8 @@ void Mesh::LoadXML(VSFileSystem::VSFile &f,
         bool origthis,
         const SequenceContainer<string> &textureOverride) {
     SequenceContainer<unsigned int> ind;
-    MeshXML *xml = new MeshXML;
-    xml->mesh = this;
+    SharedPtr<MeshXML> xml = MakeShared<MeshXML>();
+    xml->mesh = shared_from_this();
     xml->fg = fg;
     xml->usenormals = false;
     xml->usetangents = false;
@@ -1437,7 +1445,7 @@ void Mesh::LoadXML(VSFileSystem::VSFile &f,
     xml->scale = scale;
     xml->lodscale = scale;
     XML_Parser parser = XML_ParserCreate(NULL);
-    XML_SetUserData(parser, xml);
+    XML_SetUserData(parser, xml.get());
     XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);
     XML_Parse(parser, (f.ReadFull()).c_str(), f.Size(), 1);
     XML_ParserFree(parser);
@@ -1449,19 +1457,20 @@ void Mesh::LoadXML(VSFileSystem::VSFile &f,
     PostProcessLoading(xml, textureOverride);
     numlods = xml->lod.size() + 1;
     if (origthis) {
-        orig = NULL;
+        orig = nullptr;
     } else {
-        orig = new Mesh[numlods];
-        unsigned int i;
-        for (i = 0; i < xml->lod.size(); i++) {
-            orig[i + 1] = *xml->lod[i];
-            orig[i + 1].lodsize = xml->lodsize[i];
+        orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>(numlods);
+        orig->push_back(shared_from_this());
+        for (unsigned int i = 0; i < xml->lod.size(); i++) {
+            auto tmp = xml->lod.at(i);
+            tmp->lodsize = xml->lodsize.at(i);
+            orig->push_back(tmp);
         }
     }
-    delete xml;
+    xml.reset();
 }
 
-static void SumNormal(SequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3, SequenceContainer<float> &weights) {
+static void SumNormal(ContiguousSequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3, ContiguousSequenceContainer<float> &weights) {
     Vector v1(vertices[i2].x - vertices[i1].x,
             vertices[i2].y - vertices[i1].y,
             vertices[i2].z - vertices[i1].z);
@@ -1490,7 +1499,7 @@ static void SumNormal(SequenceContainer<GFXVertex> &vertices, int i1, int i2, in
     weights[i3] += w;
 }
 
-static void SumLineNormal(SequenceContainer<GFXVertex> &vertices, int i1, int i2, SequenceContainer<float> &weights) {
+static void SumLineNormal(ContiguousSequenceContainer<GFXVertex> &vertices, int i1, int i2, ContiguousSequenceContainer<float> &weights) {
     Vector v1(vertices[i2].x - vertices[i1].x,
             vertices[i2].y - vertices[i1].y,
             vertices[i2].z - vertices[i1].z);
@@ -1509,12 +1518,12 @@ static void SumLineNormal(SequenceContainer<GFXVertex> &vertices, int i1, int i2
     weights[i2] += 1;
 }
 
-static void SumNormals(SequenceContainer<GFXVertex> &vertices,
-        SequenceContainer<int> &indices,
-        size_t begin,
-        size_t end,
-        POLYTYPE polytype,
-        SequenceContainer<float> &weights) {
+static void SumNormals(ContiguousSequenceContainer<GFXVertex> &vertices,
+                       ContiguousSequenceContainer<int> &indices,
+                       size_t begin,
+                       size_t end,
+                       POLYTYPE polytype,
+                       ContiguousSequenceContainer<float> &weights) {
     int flip = 0;
     size_t i;
     switch (polytype) {
@@ -1580,8 +1589,8 @@ static void SumNormals(SequenceContainer<GFXVertex> &vertices,
     }
 }
 
-static void ClearTangents(SequenceContainer<GFXVertex> &vertices) {
-    for (SequenceContainer<GFXVertex>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
+static void ClearTangents(ContiguousSequenceContainer<GFXVertex> &vertices) {
+    for (auto it = vertices.begin(); it != vertices.end(); ++it) {
         it->SetTangent(Vector(0, 0, 0), 0);
     }
 }
@@ -1594,7 +1603,7 @@ static float faceTSPolarity(const Vector &T, const Vector &B, const Vector &N) {
     }
 }
 
-static float faceTSWeight(SequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3) {
+static float faceTSWeight(ContiguousSequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3) {
     const GFXVertex &vtx1 = vertices[i1];
     const GFXVertex &vtx2 = vertices[i2];
     const GFXVertex &vtx3 = vertices[i3];
@@ -1610,7 +1619,7 @@ static float faceTSWeight(SequenceContainer<GFXVertex> &vertices, int i1, int i2
     return 1.f - fabsf(v1.Dot(v2));
 }
 
-static void computeTangentspace(SequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3, Vector &T, Vector &B, Vector &N) {
+static void computeTangentspace(ContiguousSequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3, Vector &T, Vector &B, Vector &N) {
     const GFXVertex &v1 = vertices[i1];
     const GFXVertex &v2 = vertices[i2];
     const GFXVertex &v3 = vertices[i3];
@@ -1640,7 +1649,7 @@ static void computeTangentspace(SequenceContainer<GFXVertex> &vertices, int i1, 
     N.Normalize();
 }
 
-static void SumTangent(SequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3, SequenceContainer<float> &weights) {
+static void SumTangent(ContiguousSequenceContainer<GFXVertex> &vertices, int i1, int i2, int i3, ContiguousSequenceContainer<float> &weights) {
     float w = faceTSWeight(vertices, i1, i2, i3);
     Vector T, B, N;
     computeTangentspace(vertices, i1, i2, i3, T, B, N);
@@ -1671,12 +1680,12 @@ static void SumTangent(SequenceContainer<GFXVertex> &vertices, int i1, int i2, i
     weights[i3] += w;
 }
 
-static void SumTangents(SequenceContainer<GFXVertex> &vertices,
-        SequenceContainer<int> &indices,
-        size_t begin,
-        size_t end,
-        POLYTYPE polytype,
-        SequenceContainer<float> &weights) {
+static void SumTangents(ContiguousSequenceContainer<GFXVertex> &vertices,
+                        ContiguousSequenceContainer<int> &indices,
+                        size_t begin,
+                        size_t end,
+                        POLYTYPE polytype,
+                        ContiguousSequenceContainer<float> &weights) {
     int flip = 0;
     size_t i;
     switch (polytype) {
@@ -1726,7 +1735,7 @@ static void SumTangents(SequenceContainer<GFXVertex> &vertices,
     }
 }
 
-static void NormalizeTangents(SequenceContainer<GFXVertex> &vertices, SequenceContainer<float> &weights) {
+static void NormalizeTangents(ContiguousSequenceContainer<GFXVertex> &vertices, ContiguousSequenceContainer<float> &weights) {
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         GFXVertex &v = vertices[i];
         float w = weights[i];
@@ -1748,7 +1757,7 @@ static void NormalizeTangents(SequenceContainer<GFXVertex> &vertices, SequenceCo
     }
 }
 
-static void NormalizeNormals(SequenceContainer<GFXVertex> &vertices, SequenceContainer<float> &weights) {
+static void NormalizeNormals(ContiguousSequenceContainer<GFXVertex> &vertices, ContiguousSequenceContainer<float> &weights) {
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         GFXVertex &v = vertices[i];
         float w = weights[i];
@@ -1776,7 +1785,7 @@ void Mesh::PostProcessLoading(SharedPtr<MeshXML> xml, const SequenceContainer<st
     if (!xml->usenormals) {
         ClearTangents(xml->vertices);
 
-        SequenceContainer<float> weights;
+        ContiguousSequenceContainer<float> weights;
         weights.resize(xml->vertices.size(), 0.f);
 
         size_t i, j, n;
@@ -1923,16 +1932,16 @@ void Mesh::PostProcessLoading(SharedPtr<MeshXML> xml, const SequenceContainer<st
             }
         }
     }
-    while (Decal.size() < xml->decals.size()) {
-        Decal.push_back(NULL);
+    while (Decal->size() < xml->decals.size()) {
+        Decal->push_back(NULL);
     }
     {
         for (unsigned int i = 0; i < xml->decals.size(); i++) {
-            Decal[i] = (TempGetTexture(xml, i, factionname));
+            Decal->at(i) = (TempGetTexture(xml, i, factionname));
         }
     }
-    while (Decal.back() == NULL && Decal.size() > 1) {
-        Decal.pop_back();
+    while (!Decal->back() && Decal->size() > 1) {
+        Decal->pop_back();
     }
     initTechnique(xml->technique);
 
@@ -1952,15 +1961,15 @@ void Mesh::PostProcessLoading(SharedPtr<MeshXML> xml, const SequenceContainer<st
         totalvertexsize += xml->linestrips[index].size();
     }
     index = 0;
-    SequenceContainer<GFXVertex> vertexlist(totalvertexsize);
+    ContiguousSequenceContainer<GFXVertex> vertexlist(totalvertexsize);
 
     mn = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
     mx = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
     radialSize = 0;
-    SequenceContainer<enum POLYTYPE> polytypes;
+    ContiguousSequenceContainer<enum POLYTYPE> polytypes;
     polytypes.insert(polytypes.begin(), totalvertexsize, GFXTRI);
     //enum POLYTYPE * polytypes= new enum POLYTYPE[totalvertexsize];//overkill but what the hell
-    SequenceContainer<int> poly_offsets;
+    ContiguousSequenceContainer<int> poly_offsets;
     poly_offsets.insert(poly_offsets.begin(), totalvertexsize, 0);
     int o_index = 0;
     if (xml->tris.size()) {
@@ -2026,8 +2035,8 @@ void Mesh::PostProcessLoading(SharedPtr<MeshXML> xml, const SequenceContainer<st
     if (!xml->usetangents) {
         ClearTangents(vertexlist);
 
-        SequenceContainer<float> weights;
-        SequenceContainer<int> indices(vertexlist.size());         //Oops, someday we'll use real indices
+        ContiguousSequenceContainer<float> weights;
+        ContiguousSequenceContainer<int> indices(vertexlist.size());         //Oops, someday we'll use real indices // FIXME -- Stephen G. Tuggy 2022-12-26
         weights.resize(vertexlist.size(), 0.f);
 
         size_t i, j, n;
@@ -2069,7 +2078,7 @@ void Mesh::PostProcessLoading(SharedPtr<MeshXML> xml, const SequenceContainer<st
         radialSize = .5 * (mx - mn).Magnitude();
     }
     if (xml->sharevert) {
-        vlist = new GFXVertexList(
+        vlist = MakeShared<GFXVertexList>(
                 (polytypes.size() ? &polytypes[0] : 0),
                 xml->vertices.size(),
                 (xml->vertices.size() ? &xml->vertices[0] : 0), o_index,
@@ -2087,7 +2096,7 @@ void Mesh::PostProcessLoading(SharedPtr<MeshXML> xml, const SequenceContainer<st
             unsigned int *ind;
             GFXOptimizeList(&vertexlist[0], totalvertexsize, &newv, &numopt, &ind);
             if (numopt < totalvertexsize * optvertexlimit) {
-                vlist = new GFXVertexList(
+                vlist = MakeShared<GFXVertexList>(
                         (polytypes.size() ? &polytypes[0] : 0),
                         numopt, newv, o_index,
                         (poly_offsets.size() ? &poly_offsets[0] : 0), false,
@@ -2101,13 +2110,13 @@ void Mesh::PostProcessLoading(SharedPtr<MeshXML> xml, const SequenceContainer<st
             if (vertexlist.size() == 0) {
                 vertexlist.resize(1);
             }
-            vlist = new GFXVertexList(
+            vlist = MakeShared<GFXVertexList>(
                     (polytypes.size() ? &polytypes[0] : 0),
                     totalvertexsize, &vertexlist[0], o_index,
                     (poly_offsets.size() ? &poly_offsets[0] : 0));
         }
     }
-    CreateLogos(xml, xml->faction, xml->fg);
+    CreateLogos(xml.get(), xml->faction, xml->fg);
     //Calculate bounding sphere
     if (mn.i == FLT_MAX) {
         mn = Vector(0, 0, 0);

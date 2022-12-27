@@ -52,7 +52,7 @@ extern SharedPtr<Logo> createLogo(int numberlogos,
                                   float *sizes,
                                   float *rotations,
                                   float offset,
-                                  Texture *Dec,
+                                  SharedPtr<Texture> Dec,
                                   Vector *Ref);
 
 #ifdef __cplusplus
@@ -525,15 +525,14 @@ void Mesh::LoadBinary(const char *filename, int faction) {
         rotations[ii] = readf(fp);
         offset[ii] = readf(fp);
     }
-    squadlogos =
-            createLogo(numsquadlogo,
+    squadlogos->push_back(createLogo(numsquadlogo,
                     center,
                     PolyNormal,
                     sizes,
                     rotations,
                     (float) 0.01,
                     FactionUtil::getSquadLogo(faction),
-                    Ref);
+                    Ref));
     delete[] Ref;
     int vert_offset[2];
     vert_offset[0] = NumTris * 3;

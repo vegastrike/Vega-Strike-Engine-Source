@@ -37,13 +37,13 @@ vector<Logo *> undrawn_logos;
 Hashtable<int, Logo, 257>Logo::decalHash;
 
 Logo::Logo(int numberlogos,
-        Vector *center,
-        Vector *normal,
-        float *size,
-        float *rotation,
-        float offset,
-        Texture *Dec,
-        Vector *Ref) {
+           Vector *center,
+           Vector *normal,
+           float *sizes,
+           float *rotations,
+           float offset,
+           vega_types::SharedPtr<Texture> Dec,
+           Vector *Ref) {
     offset = 0;
     refcount = -1;
     draw_queue = NULL;
@@ -62,8 +62,8 @@ Logo::Logo(int numberlogos,
             p = Ref[i];
             Normalize(p);
             ScaledCrossProduct(r, p, q);
-            ::Roll(rotation[i], p, q, r);
-            float tsize = size[i] * 0.50F;
+            ::Roll(rotations[i], p, q, r);
+            float tsize = sizes[i] * 0.50F;
             Vector tcenter = center[i] + translation;
             v4 = p * -tsize - q * tsize + tcenter;
             v3 = p * -tsize + q * tsize + tcenter;
@@ -79,8 +79,8 @@ Logo::Logo(int numberlogos,
             }
             ScaledCrossProduct(r, y, p);
             ScaledCrossProduct(r, p, q);
-            ::Roll(rotation[i], p, q, r);
-            float tsize = size[i] * 0.50F;
+            ::Roll(rotations[i], p, q, r);
+            float tsize = sizes[i] * 0.50F;
             Vector tcenter = center[i] + translation;
             v1 = q * tsize + tcenter;
             v2 = p * -tsize + tcenter;
@@ -99,7 +99,7 @@ Logo::Logo(int numberlogos,
     SetDecal(Dec);
 }
 
-void Logo::SetDecal(Texture *decal) {
+void Logo::SetDecal(vega_types::SharedPtr<Texture> decal) {
     Decal = decal;
     //Check which draw_queue to use:
     Logo *l;

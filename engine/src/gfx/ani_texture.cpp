@@ -493,11 +493,11 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
     }
 }
 
-AnimatedTexture *AnimatedTexture::CreateVideoTexture(const std::string &fname,
-                                                     int stage,
-                                                     enum FILTER ismipmapped,
-                                                     bool detailtex) {
-    AnimatedTexture *rv = new AnimatedTexture(stage, ismipmapped, detailtex);
+vega_types::SharedPtr<AnimatedTexture> AnimatedTexture::CreateVideoTexture(const std::string &fname,
+                                                                           int stage,
+                                                                           enum FILTER ismipmapped,
+                                                                           bool detailtex) {
+    vega_types::SharedPtr<AnimatedTexture> rv = vega_types::MakeShared<AnimatedTexture>(stage, ismipmapped, detailtex);
     VSFileSystem::VSFile f;
     VSError err = f.OpenReadOnly(fname, VSFileSystem::VideoFile);
     if (err <= Ok) {

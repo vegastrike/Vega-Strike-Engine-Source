@@ -23,6 +23,7 @@
  */
 
 
+#include <vega_cast_utils.h>
 #include "vsbox.h"
 #include "xml_support.h"
 
@@ -46,12 +47,13 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     setEnvMap(GFXFALSE);
     blendSrc = ONE;
     blendDst = ONE;
-    Box *oldmesh;
-    string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
-    if (0 != (oldmesh = (Box *) meshHashTable.Get(hash_key))) {
+    SharedPtr<Box> oldmesh;
+    std::string hash_key = std::string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
+    oldmesh = vega_dynamic_cast_shared_ptr<Box>(meshHashTable.Get(hash_key));
+    if (oldmesh) {
         *this = *oldmesh;
-        oldmesh->refcount++;
-        orig = oldmesh;
+//        oldmesh->refcount++;
+        orig->push_back(oldmesh);
         return;
     }
     int a = 0;
@@ -102,20 +104,20 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     enum POLYTYPE polys[2];
     polys[0] = GFXQUAD;
     polys[1] = GFXQUADSTRIP;
-    vlist = new GFXVertexList(polys, 18, vertices, 2, offsets);
+    vlist = MakeShared<GFXVertexList>(polys, 18, vertices, 2, offsets);
     //quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
     delete[] vertices;
 
-    meshHashTable.Put(hash_key, this);
-    orig = this;
-    refcount++;
+    meshHashTable.Put(hash_key, shared_from_this());
+    orig->push_back(shared_from_this());
+//    refcount++;
     draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
 #undef VERTEX
 }
 
 void Box::ProcessDrawQueue(int) {
     SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>> draw_queue_item_0 = draw_queue->at(0);
-    if (draw_queue_item_0.empty()) {
+    if (draw_queue_item_0->empty()) {
         return;
     }
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -126,12 +128,12 @@ void Box::ProcessDrawQueue(int) {
     GFXDisable(DEPTHWRITE);
     GFXDisable(CULLFACE);
 
-    unsigned vnum = 24 * draw_queue_item_0.size();
+    unsigned vnum = 24 * draw_queue_item_0->size();
     std::vector<float> verts(vnum * (3 + 4));
     auto v = verts.begin();
-    while (!draw_queue_item_0.empty()) {
-        GFXLoadMatrixModel(draw_queue_item_0.back().mat);
-        draw_queue_item_0.pop_back();
+    while (!draw_queue_item_0->empty()) {
+        GFXLoadMatrixModel(draw_queue_item_0->back()->mat);
+        draw_queue_item_0->pop_back();
         *v++ = corner_max.i;
         *v++ = corner_min.j;
         *v++ = corner_max.k;

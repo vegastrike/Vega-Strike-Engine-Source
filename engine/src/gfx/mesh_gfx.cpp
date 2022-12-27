@@ -380,7 +380,7 @@ SharedPtr<Logo> createLogo(int numberlogos,
                            float *sizes,
                            float *rotations,
                            float offset,
-                           Texture *Dec,
+                           SharedPtr<Texture> Dec,
                            Vector *Ref) {
     return MakeShared<Logo>(numberlogos, center, normal, sizes, rotations, offset, Dec, Ref);
 }
@@ -1322,10 +1322,10 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                     GFXShaderConstant(sp.id, getEnvMap() ? envmaprgba : noenvmaprgba);
                     break;
                 case Pass::ShaderParam::DetailPlane0:
-                    GFXShaderConstant(sp.id, (*detailPlanes->at(0)));
+                    GFXShaderConstant(sp.id, detailPlanes->at(0));
                     break;
                 case Pass::ShaderParam::DetailPlane1:
-                    GFXShaderConstant(sp.id, (*detailPlanes->at(1)));
+                    GFXShaderConstant(sp.id, detailPlanes->at(1));
                     break;
                 case Pass::ShaderParam::GameTime:
                     GFXShaderConstant(sp.id, UniverseUtil::GetGameTime());
@@ -1414,7 +1414,7 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
             for (size_t i = 0; i < c.SpecialFX->size(); i++) {
                 int light;
                 GFXLoadMatrixModel(c.mat);
-                GFXCreateLight(light, const_cast<const MeshFX &>(c.SpecialFX->at(i).get()), true);
+                GFXCreateLight(light, *(c.SpecialFX->at(i)), true);
                 lights.push_back(light);
             }
             if (c.useXtraFX) {
@@ -1514,11 +1514,11 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                 GFXDeleteLight(lights[fxLightsBase]);
             }
             size_t lastPass = technique->getNumPasses();
-            if (0 != forcelogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
-                forcelogos->Draw(c.mat);
+            if (forcelogos && !forcelogos->empty() && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+                forcelogos->front()->Draw(c.mat);
             }
-            if (0 != squadlogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
-                squadlogos->Draw(c.mat);
+            if (squadlogos && !squadlogos->empty() && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+                squadlogos->front()->Draw(c.mat);
             }
         }
     }
@@ -1540,8 +1540,8 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
 }
 
 #define GETDECAL(pass) ( (p_decal[pass]) )
-#define HASDECAL(pass) ( ( (NUM_PASSES > pass) && Decal[pass] ) )
-#define SAFEDECAL(pass) ( (HASDECAL( pass ) ? Decal[pass] : black) )
+#define HASDECAL(pass) ( ( (NUM_PASSES > pass) && Decal->at(pass) ) )
+#define SAFEDECAL(pass) ( (HASDECAL( pass ) ? Decal->at(pass).get() : black) )
 
 void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
     const Pass &pass = technique->getPass(techpass);
@@ -1581,9 +1581,9 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                 p_decal[tu.targetIndex] = tu.texture.get();
                 break;
             case Pass::TextureUnit::Decal:
-                if ((tu.sourceIndex < static_cast<int>(this->Decal.size())) && this->Decal[tu.sourceIndex]) {
+                if ((tu.sourceIndex < static_cast<int>(this->Decal->size())) && this->Decal->at(tu.sourceIndex)) {
                     //Mesh has the referenced decal
-                    p_decal[tu.targetIndex] = this->Decal[tu.sourceIndex];
+                    p_decal[tu.targetIndex] = this->Decal->at(tu.sourceIndex).get();
                 } else {
                     //Mesh does not have the referenced decal, activate the default
                     switch (tu.defaultType) {
@@ -1593,10 +1593,10 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                             break;
                         case Pass::TextureUnit::Decal:
                             //p_decal reference as default - risky, but may be cool
-                            if ((tu.defaultIndex < static_cast<int>(this->Decal.size()))
-                                    && this->Decal[tu.defaultIndex]) {
+                            if ((tu.defaultIndex < static_cast<int>(this->Decal->size()))
+                                    && this->Decal->at(tu.defaultIndex)) {
                                 //Valid reference, activate
-                                p_decal[tu.targetIndex] = this->Decal[tu.defaultIndex];
+                                p_decal[tu.targetIndex] = this->Decal->at(tu.defaultIndex).get();
                             } else {
                                 //Invalid reference, activate global default (null)
                                 p_decal[tu.targetIndex] = nullptr;
@@ -1715,8 +1715,8 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                                           myMatNum,
                                           getEnvMap(),
                                           polygon_offset,
-                                          detailTexture,
-                                          detailPlanes,
+                                          detailTexture.get(),
+                                          *detailPlanes,
                                           skipglowpass,
                             nomultienv
                                     && HASDECAL(ENVSPEC_TEX));
@@ -1744,21 +1744,21 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
             //TODO: right now only meshes of same kind get drawn in correct order - should fix this.
             static  SequenceContainer<int> indices;
             if (zsort) {
-                indices.resize(cur_draw_queue.size());
-                for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
+                indices.resize(cur_draw_queue->size());
+                for (int i = 0, n = cur_draw_queue->size(); i < n; ++i) {
                     indices[i] = i;
                 }
                 std::sort(indices.begin(), indices.end(),
                         MeshDrawContextPainterSort(sortctr, cur_draw_queue));
             }
             vlist->BeginDrawState();
-            for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
+            for (int i = 0, n = cur_draw_queue->size(); i < n; ++i) {
                 //Making it static avoids frequent reallocations - although may be troublesome for thread safety
                 //but... WTH... nothing is thread safe in VS.
                 //Also: Be careful with reentrancy... right now, this section is not reentrant.
                 static  SequenceContainer<int> specialfxlight;
 
-                MeshDrawContext &c = cur_draw_queue[zsort ? indices[i] : i];
+                MeshDrawContext &c = *(cur_draw_queue->at(zsort ? indices.at(i) : i));
                 if (c.mesh_seq != whichdrawqueue) {
                     continue;
                 }
@@ -1778,7 +1778,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                 SetupCloakState(c.cloaked, c.CloakFX, specialfxlight, damaged, myMatNum);
                 for (unsigned int j = 0; j < c.SpecialFX->size(); j++) {
                     int ligh;
-                    GFXCreateLight(ligh, (*c.SpecialFX)[j], true);
+                    GFXCreateLight(ligh, *(c.SpecialFX->at(j)), true);
                     specialfxlight.push_back(ligh);
                 }
                 if (c.useXtraFX) {
@@ -1798,17 +1798,17 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     GFXDeleteLight(specialfxlight[j]);
                 }
                 RestoreCloakState(c.cloaked, getEnvMap(), damaged);
-                if (0 != forcelogos && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
-                    forcelogos->Draw(c.mat);
+                if (forcelogos && !forcelogos->empty() && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+                    forcelogos->front()->Draw(c.mat);
                 }
-                if (0 != squadlogos && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
-                    squadlogos->Draw(c.mat);
+                if (squadlogos && !squadlogos->empty() && whichpass == BASE_PASS && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
+                    squadlogos->front()->Draw(c.mat);
                 }
             }
             vlist->EndDrawState();
             switch (whichpass) {
                 case BASE_PASS:
-                    RestoreFirstPassState(detailTexture, detailPlanes, skipglowpass, nomultienv);
+                    RestoreFirstPassState(detailTexture.get(), *detailPlanes, skipglowpass, nomultienv);
                     break;
                 case ENVSPEC_PASS:
                     if (!nomultienv) {
@@ -1887,9 +1887,9 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
 #undef HASDECAL
 
 void Mesh::CreateLogos(MeshXML *xml, int faction, Flightgroup *fg) {
-    numforcelogo = numsquadlogo = 0;
-    unsigned int index;
-    for (index = 0; index < xml->logos.size(); index++) {
+    unsigned int numforcelogo = 0;
+    unsigned int numsquadlogo = 0;
+    for (unsigned int index = 0; index < xml->logos.size(); index++) {
         if (xml->logos[index].type == 0) {
             numforcelogo++;
         }
@@ -1898,13 +1898,14 @@ void Mesh::CreateLogos(MeshXML *xml, int faction, Flightgroup *fg) {
         }
     }
     unsigned int nfl = numforcelogo;
-    Logo **tmplogo = NULL;
-    Texture *Dec = NULL;
-    for (index = 0, nfl = numforcelogo, tmplogo = &forcelogos, Dec = FactionUtil::getForceLogo(faction);
+    SharedPtr<SequenceContainer<SharedPtr<Logo>>> tmplogo = nullptr;
+    SharedPtr<Texture> Dec = nullptr;
+    unsigned int index;
+    for (index = 0, nfl = numforcelogo, tmplogo = forcelogos, Dec = FactionUtil::getForceLogo(faction);
             index < 2;
-            index++, nfl = numsquadlogo, tmplogo = &squadlogos, Dec =
-                    (fg == NULL ? FactionUtil::getSquadLogo(faction) : fg->squadLogo)) {
-        if (Dec == NULL) {
+            index++, nfl = numsquadlogo, tmplogo = squadlogos, Dec =
+                    (fg == nullptr ? FactionUtil::getSquadLogo(faction) : fg->squadLogo)) {
+        if (!Dec) {
             Dec = FactionUtil::getSquadLogo(faction);
         }
         if (nfl == 0) {
@@ -1974,7 +1975,7 @@ void Mesh::CreateLogos(MeshXML *xml, int faction, Flightgroup *fg) {
             }
         }
         totoffset /= nfl;
-        *tmplogo = new Logo(nfl, center, PolyNormal, sizes, rotations, totoffset, Dec, Ref);
+        tmplogo->push_back(MakeShared<Logo>(nfl, center, PolyNormal, sizes, rotations, totoffset, Dec, Ref));
         delete[] Ref;
         delete[] PolyNormal;
         delete[] center;
@@ -1988,7 +1989,7 @@ void Mesh::initTechnique(const std::string &xmltechnique) {
     if (xmltechnique.empty()) {
         //Load default technique, which depends:
         string effective;
-        if (Decal.size() > 1 || getEnvMap()) {
+        if (Decal->size() > 1 || getEnvMap()) {
             //Use shader-ified technique for multitexture or environment-mapped meshes
 #ifdef __APPLE__
             static string shader_technique = vs_config->getVariable( "graphics", "default_full_technique", "mac" );

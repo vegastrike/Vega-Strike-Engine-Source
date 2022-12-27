@@ -1,8 +1,8 @@
 /*
  * texture_manager.cpp
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk. Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -34,15 +34,15 @@ TextureManager &TextureManager::GetInstance() {
     return instance;                    // Instantiated on first use.
 }
 
-Texture *TextureManager::GetTexture(std::string const &name, enum FILTER mipmap) {
+vega_types::SharedPtr<Texture> TextureManager::GetTexture(std::string const &name, enum FILTER mipmap) {
     // This is weird. We already store textures in a hashmap but can't rely on it.
     // TODO: figure out how to rely on it.
-    Texture *texture = Texture::Exists(name);
+    vega_types::SharedPtr<Texture> texture = Texture::Exists(name);
 
     // Texture already exists
     if (!texture) {
         // Need to create texture
-        texture = new Texture(name.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
+        texture = vega_types::MakeShared<Texture>(name.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
         textures.push_back(texture);
     }
 

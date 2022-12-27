@@ -64,15 +64,15 @@ public:
     Vector mintcoord, maxtcoord;
 
     ///The original data that would represent this texture
-    Texture *original;
+    vega_types::SharedPtr<Texture> original;
 
     ///For re-biding
     bool bound;
     uint boundSizeX, boundSizeY;
     VSImageMode boundMode;
 
-    ///The number of references on the original data
-    int refcount;
+//    ///The number of references on the original data
+//    int refcount;
 
     ///The target this will go to (cubemap or otherwise)
     enum TEXTURE_TARGET texture_target;
@@ -240,10 +240,10 @@ public:
     }
 
     ///Whether or not the string exists as a texture
-    static Texture *Exists(std::string s);
+    static vega_types::SharedPtr<Texture> Exists(std::string s);
 
     ///Whether or not the color and alpha data already exist
-    static Texture *Exists(std::string s, std::string a);
+    static vega_types::SharedPtr<Texture> Exists(std::string s, std::string a);
 
     ///A way to sort the texture by the original address (to make sure like textures stick togehter
     bool operator<(const Texture &b) const;
@@ -252,7 +252,7 @@ public:
     bool operator==(const Texture &b) const;
 
     ///Make this instance a reference of "other"
-    void setReference(Texture *other);
+    void setReference(vega_types::SharedPtr<Texture> other);
 
     ///Binds the texture in the GFX library
     virtual void MakeActive() {

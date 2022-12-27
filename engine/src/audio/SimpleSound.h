@@ -1,10 +1,8 @@
-/**
+/*
  * SimpleSound.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -61,7 +59,7 @@ class Stream;
  */
 class SimpleSound : public Sound {
 private:
-    SharedPtr<Stream> stream;
+    vega_types::SharedPtr<Stream> stream;
     VSFileSystem::VSFileType type;
 
 protected:
@@ -104,7 +102,7 @@ protected:
      * @remarks Calling this when isStreamLoaded() returns false will raise an
      *      ResourceNotLoadedException.
      */
-    SharedPtr<Stream> getStream() const;
+    vega_types::SharedPtr<Stream> getStream() const;
 
     /** Read from the stream into the buffer
      * @remarks Will throw EndOfStreamException when the end of the stream

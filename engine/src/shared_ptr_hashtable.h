@@ -1,8 +1,8 @@
 /*
- * hashtable.h
+ * shared_ptr_hashtable.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,34 +19,31 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
-#ifndef VEGA_STRIKE_HASHTABLE_H
-#define VEGA_STRIKE_HASHTABLE_H
+#ifndef VEGA_STRIKE_SHARED_PTR_HASHTABLE_H
+#define VEGA_STRIKE_SHARED_PTR_HASHTABLE_H
 
-#include "gnuhash.h"
-#include <math.h>
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <utility>
-#include <memory>
-#include <deque>
 #include "preferred_types.h"
+#include <deque>
+#include <memory>
+#include <utility>
+#include <algorithm>
+#include <vector>
+#include <string>
+#include <math.h>
+#include "gnuhash.h"
 
 #define HASH_INTSIZE (sizeof (int)*8)
 #define HASH_SALT_0 0x7EF92C3B
 #define HASH_SALT_1 0x9B
 
-class Unit;
-//const int hashsize = 1001;
-//Hashtable doesn't grow
 template<class KEY, class VALUE, int SIZ>
-class Hashtable : public vsUMap<KEY, VALUE *> {
-    typedef std::pair<KEY, VALUE *> HashElement;
-    typedef vsUMap<KEY, VALUE *> supertype;
+class SharedPtrHashtable : public vsUMap<KEY, vega_types::SharedPtr<VALUE>> {
+    typedef std::pair<KEY, vega_types::SharedPtr<VALUE>> HashElement;
+    typedef vsUMap<KEY, vega_types::SharedPtr<VALUE>> supertype;
 public:
     static size_t hash(const int key) {
         unsigned int k = key;
@@ -68,18 +65,18 @@ public:
 
     static size_t hash(const std::string &key) {
         unsigned int k = 0;
-        for (typename std::string::const_iterator start = key.begin(); start != key.end(); ++start) {
-            k ^= (*start & HASH_SALT_1);
+        for (char ch : key) {
+            k ^= (ch & HASH_SALT_1);
             k ^= HASH_SALT_0;
             k = (((k >> 4) & 0xF) | (k << (HASH_INTSIZE - 4)));
-            k ^= *start;
+            k ^= ch;
         }
         k %= SIZ;
         return k;
     }
 
-    std::vector<VALUE *> GetAll() const {
-        std::vector<VALUE *> retval(this->size());
+    vega_types::SequenceContainer<vega_types::SharedPtr<VALUE>> GetAll() const {
+        vega_types::SequenceContainer<vega_types::SharedPtr<VALUE>> retval(this->size());
         typename supertype::const_iterator iter = this->begin();
         typename supertype::const_iterator end = this->end();
         size_t i = 0;
@@ -89,19 +86,21 @@ public:
         return retval;
     }
 
-    VALUE *Get(const KEY &key) const {
+    // TODO: Optimize?
+    vega_types::SharedPtr<VALUE> Get(const KEY &key) const {
         typename supertype::const_iterator iter = this->find(key);
         typename supertype::const_iterator end = this->end();
         if (iter != end) {
             return iter->second;
         }
-        return NULL;
+        return nullptr;
     }
 
-    void Put(const KEY &key, VALUE *value) {
+    void Put(const KEY &key, vega_types::SharedPtr<VALUE> value) {
         (*this)[key] = value;
     }
 
+    // TODO: Optimize?
     void Delete(const KEY &key) {
         typename supertype::iterator iter = this->find(key);
         if (iter == this->end()) {
@@ -111,5 +110,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_SHARED_PTR_HASHTABLE_H

@@ -126,7 +126,7 @@ struct OrigMeshLoader {
 
 #define BEGIN_GL_TRIANGLE_FAN(expectitems)                                                                                    \
     do {                                                                                                                        \
-        xml->trifans.push_back( std::vector< GFXVertex > () ); xml->active_list =                                                 \
+        xml->trifans.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () ); xml->active_list =                                                 \
             &xml->trifans.back(); xml->tfancnt = xml->trifanind.size(); xml->active_ind = &xml->trifanind; xml->active_list->reserve( \
             expectitems ); xml->active_ind->reserve( expectitems );                                                              \
     }                                                                                                                           \
@@ -134,7 +134,7 @@ struct OrigMeshLoader {
 
 #define BEGIN_GL_QUAD_STRIP(expectitems)                                                                                    \
     do {                                                                                                                      \
-        xml->num_vertices = 4; xml->quadstrips.push_back( vector< GFXVertex > () );                                             \
+        xml->num_vertices = 4; xml->quadstrips.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () );                                             \
         xml->active_list  = &xml->quadstrips.back(); xml->qstrcnt = xml->quadstripind.size(); xml->active_ind = &xml->quadstripind; \
         xml->active_list->reserve( expectitems ); xml->active_ind->reserve( expectitems );                                      \
     }                                                                                                                         \
@@ -142,7 +142,7 @@ struct OrigMeshLoader {
 
 #define BEGIN_GL_TRIANGLE_STRIP(expectitems)                                                                            \
     do {                                                                                                                  \
-        xml->num_vertices = 3; xml->tristrips.push_back( vector< GFXVertex > () );                                          \
+        xml->num_vertices = 3; xml->tristrips.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () );                                          \
         xml->tstrcnt = xml->tristripind.size(); xml->active_ind = &xml->tristripind; xml->active_list->reserve( expectitems ); \
         xml->active_ind->reserve( expectitems );                                                                           \
     }                                                                                                                     \
@@ -150,7 +150,7 @@ struct OrigMeshLoader {
 
 #define BEGIN_GL_LINE_STRIP(expectitems)                                                                                      \
     do {                                                                                                                        \
-        xml->num_vertices = 2; xml->linestrips.push_back( vector< GFXVertex > () );                                               \
+        xml->num_vertices = 2; xml->linestrips.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () );                                               \
         xml->active_list  = &xml->linestrips.back(); xml->lstrcnt = xml->linestripind.size();   xml->active_ind = &xml->linestripind; \
         xml->active_list->reserve( expectitems ); xml->active_ind->reserve( expectitems );                                        \
     }                                                                                                                           \
@@ -249,12 +249,13 @@ struct OrigMeshLoader {
     while (0)
 
 template<typename T>
-void reverse_vector(vector<T> &vec) {
-    vector<T> newvec;
-    for (; (!vec.empty()); vec.pop_back()) {
-        newvec.push_back(vec.back());
-    }
-    vec.swap(newvec);
+void reverseContiguousSequenceContainer(ContiguousSequenceContainer<T> &contiguous_sequence_container) {
+    std::reverse(contiguous_sequence_container.begin(), contiguous_sequence_container.end());
+}
+
+template<typename T>
+void reverseSequenceContainer(SequenceContainer<T> &sequence_container) {
+    std::reverse(sequence_container.begin(), sequence_container.end());
 }
 
 #ifdef STANDALONE
@@ -262,7 +263,7 @@ void reverse_vector(vector<T> &vec) {
 #define bxmfprintf fprintf
 #define bxmfopen fopen
 
-void Mesh::BFXMToXmesh( FILE *Inputfile, FILE *Outputfile, vector< Mesh* > &output, Vector overallscale, int fac )
+void Mesh::BFXMToXmesh( FILE *Inputfile, FILE *Outputfile, vega_types::ContiguousSequenceContainer< Mesh* > &output, Vector overallscale, int fac )
 {
     Flightgroup *fg = 0;
 
@@ -291,7 +292,7 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
 
 #endif
 
-    vector<OrigMeshLoader> meshes;
+    vega_types::ContiguousSequenceContainer<OrigMeshLoader> meshes;
     uint32bit word32index = 0;
     union chunk32 {
         uint32bit i32val;
@@ -488,7 +489,7 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
             } else {
                 mesh->detailTexture = 0;
             }
-            vector<Mesh_vec3f>
+            vega_types::ContiguousSequenceContainer<Mesh_vec3f>
                     Detailplanes;                     //store detail planes until finish printing mesh attributes
             uint32bit numdetailplanes = VSSwapHostIntToLittle(inmemfile[word32index].i32val); //number of detailplanes
             word32index += 1;
@@ -629,7 +630,7 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
             for (uint32bit detplane = 0; (unsigned int) detplane < Detailplanes.size(); detplane++) {
                 bxmfprintf(Outputfile, "<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n", Detailplanes[detplane].x,
                         Detailplanes[detplane].y, Detailplanes[detplane].z);
-                mesh->detailPlanes->push_back(MakeShared<Vector>(Detailplanes[detplane].x,
+                mesh->detailPlanes->push_back(Vector(Detailplanes[detplane].x,
                         Detailplanes[detplane].y,
                         Detailplanes[detplane].z));
             }
@@ -1030,28 +1031,28 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
 #endif
             if (reverse) {
                 //Reverse all vectors
-                vector<vector<GFXVertex> >::iterator iter;
-                reverse_vector(xml->lines);
-                reverse_vector(xml->lineind);
-                reverse_vector(xml->tris);
-                reverse_vector(xml->triind);
-                reverse_vector(xml->quads);
-                reverse_vector(xml->quadind);
+                vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> >::iterator iter;
+                reverseContiguousSequenceContainer(xml->lines);
+                reverseContiguousSequenceContainer(xml->lineind);
+                reverseContiguousSequenceContainer(xml->tris);
+                reverseContiguousSequenceContainer(xml->triind);
+                reverseContiguousSequenceContainer(xml->quads);
+                reverseContiguousSequenceContainer(xml->quadind);
                 for (iter = xml->trifans.begin(); iter != xml->trifans.end(); iter++) {
-                    reverse_vector(*iter);
+                    reverseContiguousSequenceContainer(*iter);
                 }
                 for (iter = xml->quadstrips.begin(); iter != xml->quadstrips.end(); iter++) {
-                    reverse_vector(*iter);
+                    reverseContiguousSequenceContainer(*iter);
                 }
                 for (iter = xml->tristrips.begin(); iter != xml->tristrips.end(); iter++) {
-                    reverse_vector(*iter);
+                    reverseContiguousSequenceContainer(*iter);
                 }
                 for (iter = xml->linestrips.begin(); iter != xml->linestrips.end(); iter++) {
-                    reverse_vector(*iter);
+                    reverseContiguousSequenceContainer(*iter);
                 }
-                reverse_vector(xml->quadstripind);
-                reverse_vector(xml->tristripind);
-                reverse_vector(xml->linestripind);
+                reverseContiguousSequenceContainer(xml->quadstripind);
+                reverseContiguousSequenceContainer(xml->tristripind);
+                reverseContiguousSequenceContainer(xml->linestripind);
             }
             bxmfprintf(Outputfile, "</Polygons>\n");
             //End Geometry

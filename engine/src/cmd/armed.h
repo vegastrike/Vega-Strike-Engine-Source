@@ -1,10 +1,8 @@
-/**
+/*
  * armed.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,7 +29,7 @@
 #include "gfx/vec.h"
 #include "movable.h"
 #include "mount.h"
-#include <vector>
+#include "preferred_types.h"
 
 struct WeaponInfo;
 class Unit;
@@ -39,10 +37,10 @@ class Unit;
 class Armed {
     // TODO: made this private
 public:
-    std::vector<Mount> mounts;
-    float gunspeed;
-    float gunrange;
-    float missilerange;
+    vega_types::SequenceContainer<Mount> mounts;
+    float gunspeed{};
+    float gunrange{};
+    float missilerange{};
     char turretstatus;
 
 protected:
@@ -52,7 +50,15 @@ protected:
 public:
     Armed();
 
-    //Fires all active guns that are or arent Missiles
+    Armed(const Armed & other) = delete;
+    Armed(Armed && other) noexcept;
+
+    Armed & operator=(const Armed & other) = delete;
+    Armed & operator=(Armed && other) noexcept;
+
+    virtual ~Armed() = default;
+
+    //Fires all active guns that are or aren't Missiles
     //if bitmask is (1<<31) then fire off autotracking of that type;
     void Fire(unsigned int bitmask, bool beams_target_owner = false);
 

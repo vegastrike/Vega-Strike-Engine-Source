@@ -1,7 +1,7 @@
 /*
  * stream_texture.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -47,7 +47,7 @@ StreamTexture::StreamTexture(int width, int height, enum FILTER filtertype, unsi
     this->sizeY = height;
     this->original = NULL;
     this->palette = NULL;
-    this->refcount = 0;
+//    this->refcount = 0;
     texture_target = TEXTURE2D;
     image_target = TEXTURE_2D;
     ismipmapped = filtertype;

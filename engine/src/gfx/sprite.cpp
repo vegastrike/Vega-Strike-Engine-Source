@@ -1,9 +1,8 @@
 /*
  * sprite.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -39,6 +38,7 @@
 #include "../gldrv/gl_globals.h"
 #include <assert.h>
 #include <math.h>
+#include "vega_cast_utils.h"
 #include "gnuhash.h"
 
 #ifdef _WIN32
@@ -72,14 +72,14 @@ static void cacheInsert(const char *file, VSSprite *spr) {
     sprite_cache.insert(std::pair<std::string, VSSprite *>(hashName, spr));
 }
 
-VSSprite::VSSprite(Texture *_surface,
-        float _xcenter,
-        float _ycenter,
-        float _width,
-        float _height,
-        float _s,
-        float _t,
-        bool _isAnimation) :
+VSSprite::VSSprite(vega_types::SharedPtr<Texture> _surface,
+                   float _xcenter,
+                   float _ycenter,
+                   float _width,
+                   float _height,
+                   float _s,
+                   float _t,
+                   bool _isAnimation) :
         xcenter(_xcenter),
         ycenter(_ycenter),
         widtho2(_width / 2),
@@ -87,8 +87,7 @@ VSSprite::VSSprite(Texture *_surface,
         maxs(_s),
         maxt(_t),
         rotation(0),
-        isAnimation(_isAnimation) {
-    surface = _surface;
+        surface(_surface), isAnimation(_isAnimation) {
 }
 
 VSSprite::VSSprite(const VSSprite &source) {
@@ -138,18 +137,18 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
 
         widtho2 /= 2;
         heighto2 /= -2;
-        surface = NULL;
+        surface = nullptr;
         if (g_game.use_sprites || force == GFXTRUE) {
             int len = strlen(texture);
             if (len > 4 && texture[len - 1] == 'i' && texture[len - 2] == 'n' && texture[len - 3] == 'a'
                     && texture[len - 4] == '.') {
-                surface = new AnimatedTexture(f, 0, texturefilter, GFXFALSE);
+                surface = vega_types::MakeShared<AnimatedTexture>(f, 0, texturefilter, GFXFALSE);
                 isAnimation = true;
             } else if (texturea[0] == '0') {
-                surface = new Texture(texture, 0, texturefilter, TEXTURE2D, TEXTURE_2D, GFXTRUE, 65536, GFXFALSE);
+                surface = vega_types::MakeShared<Texture>(texture, 0, texturefilter, TEXTURE2D, TEXTURE_2D, GFXTRUE, 65536, GFXFALSE);
                 isAnimation = false;
             } else {
-                surface = new Texture(texture,
+                surface = vega_types::MakeShared<Texture>(texture,
                         texturea,
                         0,
                         texturefilter,
@@ -163,11 +162,10 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
                 isAnimation = false;
             }
             if (!surface->LoadSuccess()) {
-                delete surface;
-                surface = NULL;
+                surface.reset();
                 VSSprite *newspr = new VSSprite();
                 *newspr = *this;
-                newspr->surface = NULL;
+                newspr->surface = nullptr;
                 cacheInsert(file, newspr);
             } else {
                 //Update cache
@@ -180,7 +178,7 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
         //Finally close file
         f.Close();
     } else {
-        cacheInsert(file, 0);         //Mark bad file
+        cacheInsert(file, nullptr);         //Mark bad file
         widtho2 = heighto2 = 0;
         xcenter = ycenter = 0;
     }
@@ -193,14 +191,13 @@ void VSSprite::ReadTexture(VSFileSystem::VSFile *f) {
         VS_LOG(error, "VSSprite::ReadTexture error : VSFile not valid");
         return;
     }
-    surface = new Texture(f);
+    surface = vega_types::MakeShared<Texture>(f);
 }
 
 VSSprite::~VSSprite() {
     VSDESTRUCT2
-    if (surface != nullptr) {
-        delete surface;
-        surface = nullptr;
+    if (surface) {
+        surface.reset();
     }
 }
 
@@ -325,29 +322,29 @@ void VSSprite::GetRotation(float &rot) {
     rot = rotation;
 }
 
-void VSSprite::SetTimeSource(SharedPtr<Audio::Source> source) {
+void VSSprite::SetTimeSource(vega_types::SharedPtr<Audio::Source> source) {
     if (isAnimation) {
-        ((AnimatedTexture *) surface)->SetTimeSource(source);
+        (vega_dynamic_cast_shared_ptr<AnimatedTexture>(surface))->SetTimeSource(source);
     }
 }
 
-SharedPtr<Audio::Source> VSSprite::GetTimeSource() const {
+vega_types::SharedPtr<Audio::Source> VSSprite::GetTimeSource() const {
     if (isAnimation) {
-        return ((AnimatedTexture *) surface)->GetTimeSource();
+        return (vega_dynamic_cast_shared_ptr<AnimatedTexture>(surface))->GetTimeSource();
     } else {
-        return SharedPtr<Audio::Source>();
+        return vega_types::SharedPtr<Audio::Source>();
     }
 }
 
 void VSSprite::ClearTimeSource() {
     if (isAnimation) {
-        ((AnimatedTexture *) surface)->ClearTimeSource();
+        (vega_dynamic_cast_shared_ptr<AnimatedTexture>(surface))->ClearTimeSource();
     }
 }
 
 bool VSSprite::Done() const {
     if (isAnimation) {
-        return ((AnimatedTexture *) surface)->Done();
+        return (vega_dynamic_cast_shared_ptr<AnimatedTexture>(surface))->Done();
     } else {
         return false;
     }
@@ -355,11 +352,11 @@ bool VSSprite::Done() const {
 
 void VSSprite::Reset() {
     if (isAnimation) {
-        ((AnimatedTexture *) surface)->Reset();
+        (vega_dynamic_cast_shared_ptr<AnimatedTexture>(surface))->Reset();
     }
 }
 
 bool VSSprite::LoadSuccess() const {
-    return surface != NULL && surface->LoadSuccess();
+    return surface != nullptr && surface->LoadSuccess();
 }
 

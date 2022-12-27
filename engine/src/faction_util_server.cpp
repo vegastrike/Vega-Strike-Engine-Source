@@ -1,4 +1,6 @@
 /*
+ * faction_util_server.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -43,22 +45,22 @@ Animation *FactionUtil::createAnimation(const char *anim) {
     return NULL;
 }
 
-Texture *FactionUtil::createTexture(const char *tex, const char *tmp, bool force) {
+vega_types::SharedPtr<Texture> FactionUtil::createTexture(const char *tex, const char *tmp, bool force) {
     return NULL;
 }
 
-Texture *FactionUtil::createTexture(const char *tex, bool force) {
+vega_types::SharedPtr<Texture> FactionUtil::createTexture(const char *tex, bool force) {
     return NULL;
 }
 
 void FactionUtil::LoadFactionPlaylists() {
 }
 
-Texture *FactionUtil::getForceLogo(int faction) {
+vega_types::SharedPtr<Texture> FactionUtil::getForceLogo(int faction) {
     return NULL;
 }
 
-Texture *FactionUtil::getSquadLogo(int faction) {
+vega_types::SharedPtr<Texture> FactionUtil::getSquadLogo(int faction) {
     return NULL;
 }
 

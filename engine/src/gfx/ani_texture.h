@@ -211,10 +211,10 @@ public:
     virtual bool LoadSuccess();
 
     //Some useful factory methods -- also defined in ani_texture.cpp
-    static AnimatedTexture *CreateVideoTexture(const std::string &fname,
-            int stage = 0,
-            enum FILTER ismipmapped = BILINEAR,
-            bool detailtex = false);
+    static vega_types::SharedPtr<AnimatedTexture> CreateVideoTexture(const std::string &fname,
+                                                                     int stage = 0,
+                                                                     enum FILTER ismipmapped = BILINEAR,
+                                                                     bool detailtex = false);
 };
 
 #endif

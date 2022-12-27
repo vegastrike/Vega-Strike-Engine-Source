@@ -64,14 +64,27 @@ template<typename T>
 using ContiguousSequenceContainer = boost::container::vector<T>;
 
 template<typename T>
+using Deque = boost::container::deque<T>;
+
+/// Leaving out the following, because it conflicts with the math-type Vector typename
+//template<typename T>
+//using Vector = boost::container::vector<T>;
+
+template<typename T>
 using Stack = std::stack<T>;
 
 template<typename K, typename V>
 using OrderedAssociativeContainer = boost::container::map<K, V>;
 template<typename K, typename V>
 using UnorderedAssociativeContainer = boost::container::flat_map<K, V>;
-template<typename K>
-using Set = boost::container::set<K>;
+
+template<typename K, typename V>
+using Map = boost::container::map<K, V>;
+template<typename K, typename V>
+using FlatMap = boost::container::flat_map<K, V>;
+
+template<class Key, class Compare = std::less<Key>>
+using Set = boost::container::set<Key, Compare>;
 
 }
 

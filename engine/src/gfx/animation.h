@@ -82,7 +82,7 @@ public:
 
     void DrawAsVSSprite(class VSSprite *spr);
 
-    static void ProcessDrawQueue(std::vector<Animation *> &, float);
+    static void ProcessDrawQueue(vega_types::SequenceContainer<vega_types::SharedPtr<Animation>> &animationdrawqueue, float limit);
 
     static void ProcessDrawQueue();
 

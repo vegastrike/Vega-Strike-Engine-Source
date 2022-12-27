@@ -79,23 +79,23 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(const int con_number);
 ///Sets active light context (restores all gllights in such context)
 void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number);
 ///Sets the ambient light value
-GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient(const SharedPtr<GFXColor> amb);
+GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient(const vega_types::SharedPtr<GFXColor> amb);
 ///Gets the ambient light value
-GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(SharedPtr<GFXColor> amb);
+GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(vega_types::SharedPtr<GFXColor> amb);
 ///picks and activates local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius);
 ///picks and does not activate local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center,
                                  const float radius,
-                                 SequenceContainer<int> &lights,
+                                 vega_types::SequenceContainer<int> &lights,
                                  const int maxlights,
                                  const bool pickglobals);
 ///activates local lights picked by GFXPickLight
 void /*GFXDRVAPI*/ GFXPickLights(vector<int>::const_iterator begin, vector<int>::const_iterator end);
 ///loads "lights" with all enabled global lights, computing occlusion to the specified position too
-void /*GFXDRVAPI*/ GFXGlobalLights(SequenceContainer<int> &lights, const Vector &center, const float radius);
+void /*GFXDRVAPI*/ GFXGlobalLights(vega_types::SequenceContainer<int> &lights, const Vector &center, const float radius);
 ///loads "lights" with all enabled global lights
-void /*GFXDRVAPI*/ GFXGlobalLights(SequenceContainer<int> &lights);
+void /*GFXDRVAPI*/ GFXGlobalLights(vega_types::SequenceContainer<int> &lights);
 ///Sets light position offset, use when centering the camera off-origin
 void /*GFXDRVAPI*/ GFXSetLightOffset(const QVector &offset);
 ///Sets light position offset, use when centering the camera off-origin

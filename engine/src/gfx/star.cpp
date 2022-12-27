@@ -1,9 +1,8 @@
 /*
  * star.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -41,6 +40,8 @@
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
+#include "vega_cast_utils.h"
+
 #endif
 
 #define SINX 1
@@ -672,16 +673,16 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
                 decal[curtexture] = new Texture("white.bmp", 0, near_stars_alpha ? NEAREST : BILINEAR);
             } else {
                 if (animations.size()) {
-                    AnimatedTexture *tmp =
-                            static_cast< AnimatedTexture * > ( animations[curtexture % animations.size()]->Clone());
+                    vega_types::SharedPtr<AnimatedTexture> tmp =
+                            vega_dynamic_cast_shared_ptr<AnimatedTexture>( animations[curtexture % animations.size()]->Clone());
                     int num = tmp->numFrames();
                     if (num) {
                         num = rand() % num;
                         tmp->setTime(num / tmp->framesPerSecond());
                     }
-                    decal[curtexture] = tmp;
+                    decal[curtexture] = tmp.get();
                 } else {
-                    decal[curtexture] = decal[rand() % curtexture]->Clone();
+                    decal[curtexture] = decal[rand() % curtexture]->Clone().get();
                 }
             }
         } else {

@@ -40,6 +40,7 @@
 #include "vegastrike.h"
 #include <cfloat>
 #include "preferred_types.h"
+#include "shared_ptr_hashtable.h"
 
 #define LOD_HYSTHERESIS_DIVIDER (20)
 #define LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR (1.1)
@@ -90,7 +91,7 @@ void Mesh::InitUnit() {
 //    numforcelogo = numsquadlogo = 0;
     myMatNum = 0;     //default material!
     //scale = Vector(1.0,1.0,1.0);
-    refcount = 1;     //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
+//    refcount = 1;     //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
     orig.reset();
 
     envMapAndLit = 0x3;
@@ -110,7 +111,7 @@ Mesh::Mesh() {
 
 bool Mesh::LoadExistant(SharedPtr<Mesh> oldmesh) {
     *this = *oldmesh;
-    oldmesh->refcount++;
+//    oldmesh->refcount++;
     orig->push_front(oldmesh);
     return true;
 }

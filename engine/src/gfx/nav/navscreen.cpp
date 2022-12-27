@@ -1,4 +1,6 @@
 /*
+ * navscreen.cpp
+ *
  * Copyright (C) 2001-2022 hellcatv, ace123, surfdargent, klaussfreire,
  * jacks, pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
@@ -70,8 +72,8 @@ NavigationSystem::NavigationSystem() {
     whattodraw = (1 | 2);
     pathman = new PathManager();
     navcomp = new NavComputer(this);
-    for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-        mesh[i] = NULL;
+    for (auto & i : mesh) {
+        i.reset();
     }
     factioncolours = NULL;
 }
@@ -80,14 +82,9 @@ NavigationSystem::~NavigationSystem() {
     draw = 0;
     //delete mesh;
     delete screenoccupation;
-    delete mesh[0];
-    delete mesh[1];
-    delete mesh[2];
-    delete mesh[3];
-    delete mesh[4];
-    delete mesh[5];
-    delete mesh[6];
-    delete mesh[7];
+    for (auto & i : mesh) {
+        i.reset();
+    }
     delete factioncolours;
 }
 
@@ -303,8 +300,8 @@ void NavigationSystem::Setup() {
         buttonskipby4_7[3] = .30;
 
         unsetbit(whattodraw, 4);
-        for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-            mesh[i] = NULL;
+        for (auto & i : mesh) {
+            i.reset();
         }
         VS_LOG(error, "ERROR: Map mesh file not found!!! Using default: blank mesh.");
         //end DUMMY VARS

@@ -124,15 +124,8 @@ Animation::Animation(const char *FileName,
 }
 
 Animation::~Animation() {
-    vector<Animation *>::iterator i;
-    while ((i =
-            std::find(far_animationdrawqueue.begin(), far_animationdrawqueue.end(),
-                    this)) != far_animationdrawqueue.end()) {
-        far_animationdrawqueue.erase(i);
-    }
-    while ((i = std::find(animationdrawqueue.begin(), animationdrawqueue.end(), this)) != animationdrawqueue.end()) {
-        animationdrawqueue.erase(i);
-    }
+    far_animationdrawqueue.erase(std::remove_if(far_animationdrawqueue.begin(), far_animationdrawqueue.end(), [this](const SharedPtr<Animation>& ptr) { return ptr.get() == this; }));
+    animationdrawqueue.erase(std::remove_if(animationdrawqueue.begin(), animationdrawqueue.end(), [this](const SharedPtr<Animation>& ptr) { return ptr.get() == this; }));
     VSDESTRUCT2
 }
 
@@ -185,7 +178,7 @@ bool Animation::NeedsProcessFarDrawQueue() {
     return AnimationsLeftInFarQueue();
 }
 
-void Animation::ProcessDrawQueue(std::vector<Animation *> &animationdrawqueue, float limit) {
+void Animation::ProcessDrawQueue(SequenceContainer<vega_types::SharedPtr<Animation>> &animationdrawqueue, float limit) {
     if (g_game.use_animations == 0 && g_game.use_textures == 0) {
         return;
     }
@@ -477,9 +470,9 @@ void Animation::Draw() {
                         (height > width ? height : width)) <
                 too_far_dist * g_game.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
-            animationdrawqueue.push_back(this);
+            animationdrawqueue.push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
         } else {
-            far_animationdrawqueue.push_back(this);
+            far_animationdrawqueue.push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
         }
     }
 }

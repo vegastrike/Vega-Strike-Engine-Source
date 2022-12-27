@@ -1,4 +1,6 @@
 /*
+ * faction_generic.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -73,9 +75,9 @@ public:
     std::string secondaryLogoName;
     std::string secondaryLogoAlphaName;
 ///Logos used by the ships of that faction
-    Texture *logo;
+    vega_types::SharedPtr<Texture> logo;
 //if the squadron doens't; have its own particular logo
-    Texture *secondaryLogo;
+    vega_types::SharedPtr<Texture> secondaryLogo;
 ///char * of the name
     char *factionname;
     struct comm_face_t {
@@ -104,8 +106,8 @@ public:
     Faction() {
         playlist = -1;
         citizen = false;
-        logo = secondaryLogo = NULL;
-        factionname = NULL;
+        logo = secondaryLogo = nullptr;
+        factionname = nullptr;
         sparkcolor[0] = .5;
         sparkcolor[1] = .5;
         sparkcolor[2] = 1;
@@ -168,12 +170,12 @@ const float *GetSparkColor(const int myfaction);
 unsigned int GetNumFactions();
 //Returns a conversation that a myfaction might have with a theirfaction
 FSM *GetConversation(const int myfaction, const int theirfaction);
-Texture *getForceLogo(int faction);
-Texture *getSquadLogo(int faction);
+vega_types::SharedPtr<Texture> getForceLogo(int faction);
+vega_types::SharedPtr<Texture> getSquadLogo(int faction);
 
 Animation *createAnimation(const char *anim);
-Texture *createTexture(const char *tex, const char *tmp, bool force = false);
-Texture *createTexture(const char *tex, bool force = false);
+vega_types::SharedPtr<Texture> createTexture(const char *tex, const char *tmp, bool force = false);
+vega_types::SharedPtr<Texture> createTexture(const char *tex, bool force = false);
 std::vector<class Animation *> *GetAnimation(int faction, int n, unsigned char &sex);
 Animation *GetRandExplosionAnimation(int whichfaction, std::string &which);
 void LoadFactionPlaylists();

@@ -1,10 +1,8 @@
 /*
  * nebula.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
- * and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Roy Falk, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -213,7 +211,7 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
         Vector randexpl(rand() % 2 * rSize() - rSize(), rand() % 2 * rSize() - rSize(), rand() % 2 * rSize() - rSize());
         if (((int) (explosiontime / simulation_atom_var)) != 0) {
             if (!(rand() % ((int) (explosiontime / simulation_atom_var)))) {
-                meshdata[i]->AddDamageFX(randexpl, Vector(0, 0, 0), .00001, color);
+                meshdata.at(i)->AddDamageFX(randexpl, Vector(0, 0, 0), .00001, color);
             }
         }
     }

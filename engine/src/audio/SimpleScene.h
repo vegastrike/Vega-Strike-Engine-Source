@@ -48,7 +48,7 @@ class SimpleSource;
  * @remarks This class implements the scene interface for a basic Scene manager.
  *
  */
-class SimpleScene : public Scene, public EnableSharedFromThis<SimpleScene> {
+class SimpleScene : public Scene, public vega_types::EnableSharedFromThis<SimpleScene> {
     typedef std::set<vega_types::SharedPtr<Source> > SourceSet;
 
     Listener listener;

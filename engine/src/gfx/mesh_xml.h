@@ -163,8 +163,8 @@ struct MeshXML {
     }
 
     ///All logos on this unit
-    vector<ZeLogo> logos;
-    vector<Names> state_stack;
+    vega_types::ContiguousSequenceContainer<ZeLogo> logos;
+    vega_types::ContiguousSequenceContainer<Names> state_stack;
     bool sharevert;
     bool usenormals;
     bool usetangents;
@@ -175,47 +175,47 @@ struct MeshXML {
     int vertex_state;
     Vector scale;
     Vector lodscale;
-    vector<ZeTexture> decals;
+    vega_types::ContiguousSequenceContainer<ZeTexture> decals;
     string technique;
     bool recalc_norm;
     int num_vertices;
-    vector<GFXVertex> vertices;
+    vega_types::ContiguousSequenceContainer<GFXVertex> vertices;
     ///keep count to make averaging easy
-    vector<int> vertexcount;
-    vector<GFXVertex> lines;
-    vector<GFXVertex> tris;
-    vector<GFXVertex> quads;
-    vector<vector<GFXVertex> > linestrips;
-    vector<vector<GFXVertex> > tristrips;
-    vector<vector<GFXVertex> > trifans;
-    vector<vector<GFXVertex> > quadstrips;
+    vega_types::ContiguousSequenceContainer<int> vertexcount;
+    vega_types::ContiguousSequenceContainer<GFXVertex> lines;
+    vega_types::ContiguousSequenceContainer<GFXVertex> tris;
+    vega_types::ContiguousSequenceContainer<GFXVertex> quads;
+    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > linestrips;
+    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > tristrips;
+    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > trifans;
+    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > quadstrips;
     int tstrcnt;
     int tfancnt;
     int qstrcnt;
     int lstrcnt;
-    vector<int> lineind;
-    vector<int> nrmllinstrip;
-    vector<int> linestripind;
+    vega_types::ContiguousSequenceContainer<int> lineind;
+    vega_types::ContiguousSequenceContainer<int> nrmllinstrip;
+    vega_types::ContiguousSequenceContainer<int> linestripind;
     ///for possible normal computation
-    vector<int> triind;
-    vector<int> nrmltristrip;
-    vector<int> tristripind;
-    vector<int> nrmltrifan;
-    vector<int> trifanind;
-    vector<int> nrmlquadstrip;
-    vector<int> quadstripind;
-    vector<int> quadind;
-    vector<int> trishade;
-    vector<int> quadshade;
-    vector<int> *active_shade;
-    vector<GFXVertex> *active_list;
-    vector<int> *active_ind;
-    vector<std::shared_ptr<Mesh> > lod;
-    vector<float> lodsize;
+    vega_types::ContiguousSequenceContainer<int> triind;
+    vega_types::ContiguousSequenceContainer<int> nrmltristrip;
+    vega_types::ContiguousSequenceContainer<int> tristripind;
+    vega_types::ContiguousSequenceContainer<int> nrmltrifan;
+    vega_types::ContiguousSequenceContainer<int> trifanind;
+    vega_types::ContiguousSequenceContainer<int> nrmlquadstrip;
+    vega_types::ContiguousSequenceContainer<int> quadstripind;
+    vega_types::ContiguousSequenceContainer<int> quadind;
+    vega_types::ContiguousSequenceContainer<int> trishade;
+    vega_types::ContiguousSequenceContainer<int> quadshade;
+    vega_types::ContiguousSequenceContainer<int> * active_shade;
+    vega_types::ContiguousSequenceContainer<GFXVertex> * active_list;
+    vega_types::ContiguousSequenceContainer<int> * active_ind;
+    vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<Mesh> > lod;
+    vega_types::ContiguousSequenceContainer<float> lodsize;
     GFXVertex vertex;
     GFXMaterial material;
     int faction;
-    std::shared_ptr<Mesh> mesh;
+    vega_types::SharedPtr<Mesh> mesh;
 };
 
 #endif

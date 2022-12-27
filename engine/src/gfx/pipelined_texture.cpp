@@ -36,7 +36,7 @@ const vega_types::SharedPtr<const Texture> PipelinedTexture::OriginalConst() con
     if (original) {
         return original->OriginalConst();
     } else {
-        return this;
+        return shared_from_this();
     }
 }
 
@@ -46,7 +46,7 @@ vega_types::SharedPtr<Texture> PipelinedTexture::Original() {
     if (original) {
         return original->Original();
     } else {
-        return this;
+        return shared_from_this();
     }
 }
 
@@ -64,7 +64,7 @@ PipelinedTexture::PipelinedTexture(unsigned int width, unsigned int height, unsi
     data = new unsigned char[4 * width * height];
     stage = 0;
     original = NULL;
-    refcount = 0;
+//    refcount = 0;
     texture_target = TEXTURE2D;
     image_target = TEXTURE_2D;
     GFXCreateTexture(sizeX, sizeY, (mode == _24BITRGBA) ? RGBA32 : ((mode == _8BIT) ? PALETTE8 : RGB32), &name, NULL,

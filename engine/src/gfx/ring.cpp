@@ -138,7 +138,7 @@ void RingMesh::InitRing(float iradius,
         //radialSize = .5*(mx-mn).Magnitude();//+.5*oradius;
         local_pos = (mx + mn) * .5;
         //local_pos.Set(0,0,0);
-        vlist = new GFXVertexList(modes, numvertex, vertexlist, numQuadstrips, QSOffsets);
+        vlist = MakeShared<GFXVertexList>(modes, numvertex, vertexlist, numQuadstrips, QSOffsets);
         delete[] vertexlist;
         delete[] modes;
         delete[] QSOffsets;
@@ -149,17 +149,17 @@ void RingMesh::InitRing(float iradius,
             if (texture[texlen - 1] == 'i' && texture[texlen - 2] == 'n'
                     && texture[texlen - 3] == 'a' && texture[texlen - 4] == '.') {
                 found_texture = true;
-                if (Decal.empty()) {
-                    Decal.push_back(NULL);
+                if (Decal->empty()) {
+                    Decal->push_back(nullptr);
                 }
-                Decal[0] = new AnimatedTexture(texture, 0, mipmap);
+                Decal->front() = MakeShared<AnimatedTexture>(texture, 0, mipmap);
             }
         }
         if (!found_texture) {
-            if (Decal.empty()) {
-                Decal.push_back(NULL);
+            if (Decal->empty()) {
+                Decal->push_back(nullptr);
             }
-            Decal[0] = new Texture(texture,
+            Decal->front() = MakeShared<Texture>(texture,
                     0,
                     mipmap,
                     TEXTURE2D,
@@ -167,9 +167,9 @@ void RingMesh::InitRing(float iradius,
                     g_game.use_planet_textures ? GFXTRUE : GFXFALSE);
         }
         setEnvMap(envMapping);
-        Mesh *oldorig = orig;
-        refcount = 1;
-        orig = NULL;
+        SharedPtr<SequenceContainer<SharedPtr<Mesh>>> oldorig = orig;
+//        refcount = 1;
+        orig.reset();
         if (l >= 1) {
             lodsize = (numspheres + 1 - l) * pixelscalesize;
             if (l == 1) {
@@ -180,8 +180,8 @@ void RingMesh::InitRing(float iradius,
                 lodsize *= 1.5;
             }
         }
-        oldmesh[l] = *this;
-        refcount = 0;
+        oldmesh->at(l) = shared_from_this();
+//        refcount = 0;
         orig = oldorig;
         lodsize = FLT_MAX;
     }

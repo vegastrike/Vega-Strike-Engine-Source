@@ -1,4 +1,6 @@
 /*
+ * main.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -203,7 +205,7 @@ void initALRenderer() {
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     if (g_game.sound_enabled) {
-        SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
+        vega_types::SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
         renderer->setMeterDistance(1.0);
         renderer->setDopplerFactor(0.0);
 
@@ -225,7 +227,7 @@ void initScenes() {
 
 void closeRenderer() {
     VS_LOG(info, "Shutting down renderer...");
-    Audio::SceneManager::getSingleton()->setRenderer(SharedPtr<Audio::Renderer>());
+    Audio::SceneManager::getSingleton()->setRenderer(vega_types::SharedPtr<Audio::Renderer>());
 }
 
 extern void InitUnitTables();

@@ -1,4 +1,6 @@
 /*
+ * unit_generic.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -274,7 +276,7 @@ char *GetUnitDir(const char *filename) {
  */
 Unit::Unit(int /*dummy*/) : Drawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO: delete
     Init();
@@ -283,18 +285,18 @@ Unit::Unit(int /*dummy*/) : Drawable(), Damageable(), Movable() {
 Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO:
     Init();
 }
 
-Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
+Unit::Unit(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &meshes, bool SubU, int fact)
         : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(fact);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     // TODO:
     Init();
 
@@ -302,7 +304,7 @@ Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
     graphicOptions.SubUnit = SubU;
     meshdata = meshes;
     meshes.clear();
-    meshdata.push_back(NULL);
+    meshdata.push_back(nullptr);
     calculate_extent(false);
     pilot->SetComm(this);
 }
@@ -319,7 +321,7 @@ Unit::Unit(const char *filename,
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(faction);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     Init(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber);
     pilot->SetComm(this);
 }
@@ -375,12 +377,6 @@ Unit::~Unit() {
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 0));
 #endif
-    for (size_t meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
-        if (meshdata[meshcount] != nullptr) {
-            delete meshdata[meshcount];
-            meshdata[meshcount] = nullptr;
-        }
-    }
     meshdata.clear();
 }
 
@@ -505,10 +501,10 @@ void Unit::Init(const char *filename,
     }
 }
 
-vector<Mesh *> Unit::StealMeshes() {
-    vector<Mesh *> ret;
+vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> Unit::StealMeshes() {
+    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> ret;
 
-    Mesh *shield = meshdata.empty() ? NULL : meshdata.back();
+    vega_types::SharedPtr<Mesh> shield = meshdata.empty() ? nullptr : meshdata.back();
     for (unsigned int i = 0; i <= nummesh(); ++i) {
         ret.push_back(meshdata[i]);
     }
@@ -3961,7 +3957,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
-    vector<Mount> savedWeap;
+    vega_types::SequenceContainer<Mount> savedWeap;
     savedWeap.swap(mounts);
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
     bool success = false;
@@ -4030,7 +4026,7 @@ int Unit::RepairCost() {
 int Unit::RepairUpgrade() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
-    vector<Mount> savedWeap;
+    vega_types::SequenceContainer<Mount> savedWeap;
     savedWeap.swap(mounts);
     int upfac = FactionUtil::GetUpgradeFaction();
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
@@ -4717,7 +4713,7 @@ static inline void parseFloat4(const std::string &s, float value[4]) {
 
 void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &overrides) {
     //for (vector<Mesh*>::iterator mesh = this->meshdata.begin(); mesh != this->meshdata.end(); ++mesh) {
-    for (Mesh *mesh : meshdata) {
+    for (vega_types::SharedPtr<Mesh> &mesh : meshdata) {
         if (mesh == nullptr) {
             continue;
         }

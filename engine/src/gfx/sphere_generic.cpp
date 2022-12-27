@@ -213,33 +213,33 @@ void SphereMesh::InitSphere(float radius,
             }
 #undef g_rho
 #undef g_theta
-            vlist = new GFXVertexList(modes, numvertex, vertexlist, numQuadstrips, QSOffsets);
+            vlist = MakeShared<GFXVertexList>(modes, numvertex, vertexlist, numQuadstrips, QSOffsets);
             delete[] vertexlist;
             delete[] modes;
             delete[] QSOffsets;
         } else {
-            vlist = new GFXSphereVertexList(radius, stacks > slices ? stacks : slices, Insideout, reverse_normals);
+            vlist = MakeShared<GFXSphereVertexList>(radius, stacks > slices ? stacks : slices, Insideout, reverse_normals);
         }
         SetBlendMode(a, b);
         string inputtex = texture;
         unsigned int count = 0;
-        if (Decal.empty()) {
-            Decal.push_back(NULL);
+        if (Decal->empty()) {
+            Decal->push_back(nullptr);
         }
         while (inputtex.length()) {
             string thistex = truncateByPipe(inputtex);
-            while (Decal.size() <= count) {
-                Decal.push_back(NULL);
+            while (Decal->size() <= count) {
+                Decal->push_back(nullptr);
             }
             if (thistex.find(".ani") != string::npos) {
-                Decal[count] = createAnimatedTexture(thistex.c_str(), 0, mipmap);
+                Decal->at(count) = createAnimatedTexture(thistex.c_str(), 0, mipmap);
             } else {
                 if (alpha) {
-                    Decal[count] =
+                    Decal->at(count) =
                             createTexture(thistex.c_str(), alpha, 0, mipmap, TEXTURE2D, TEXTURE_2D, 1, 0,
                                     (Insideout || g_game.use_planet_textures) ? GFXTRUE : GFXFALSE);
                 } else {
-                    Decal[count] =
+                    Decal->at(count) =
                             createTexture(
                                     thistex.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D,
                                     (Insideout || g_game.use_planet_textures) ? GFXTRUE : GFXFALSE);

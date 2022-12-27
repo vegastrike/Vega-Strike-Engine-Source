@@ -29,6 +29,7 @@
 #include <string>
 #include "endianness.h"
 #include "hashtable.h"
+#include "shared_ptr_hashtable.h"
 #include "vsfilesystem.h"
 #include "vsimage.h"
 #include "vs_globals.h"
@@ -41,15 +42,15 @@ using std::string;
 using namespace VSFileSystem;
 using namespace XMLSupport;
 ///holds all the textures in a huge hash table
-Hashtable<string, Texture, 4007> texHashTable;
-Hashtable<string, bool, 4007> badtexHashTable;
+SharedPtrHashtable<string, Texture, 4007> texHashTable;
+SharedPtrHashtable<string, bool, 4007> badtexHashTable;
 
-Texture *Texture::Exists(string s, string a) {
+vega_types::SharedPtr<Texture> Texture::Exists(string s, string a) {
     return Texture::Exists(s + a);
 }
 
-Texture *Texture::Exists(string s) {
-    Texture *tmp = texHashTable.Get(VSFileSystem::GetHashName(s));
+vega_types::SharedPtr<Texture> Texture::Exists(string s) {
+    vega_types::SharedPtr<Texture> tmp = texHashTable.Get(VSFileSystem::GetHashName(s));
     if (tmp == NULL) {
         string tmpo;
         tmp = texHashTable.Get(VSFileSystem::GetSharedTextureHashName(s));
@@ -68,9 +69,8 @@ bool Texture::operator==(const Texture &b) const {
     return OriginalConst() == b.OriginalConst();
 }
 
-void Texture::setReference(Texture *other) {
+void Texture::setReference(vega_types::SharedPtr<Texture> other) {
     original = other;
-    original->refcount++;
 
     //Copy shared attributes
     texfilename = other->texfilename;
@@ -86,8 +86,8 @@ void Texture::setReference(Texture *other) {
 
 GFXBOOL Texture::checkold(const string &s, bool shared, string &hashname) {
     hashname = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
-    Texture *oldtex = texHashTable.Get(hashname);
-    if (oldtex != NULL) {
+    vega_types::SharedPtr<Texture> oldtex = texHashTable.Get(hashname);
+    if (oldtex) {
         //*this = *oldtex;//will be obsoleted--unpredictable results with string()
         setReference(oldtex);
         return GFXTRUE;
@@ -98,10 +98,9 @@ GFXBOOL Texture::checkold(const string &s, bool shared, string &hashname) {
 
 void Texture::modold(const string &s, bool shared, string &hashname) {
     hashname = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
-    Texture *oldtex = new Texture;
+    vega_types::SharedPtr<Texture> oldtex = vega_types::MakeShared<Texture>();
     //oldtex->InitTexture();new calls this
     oldtex->name = -1;
-    oldtex->refcount = 1;
     oldtex->original = nullptr;
     oldtex->palette = nullptr;
     oldtex->data = nullptr;
@@ -112,7 +111,6 @@ void Texture::modold(const string &s, bool shared, string &hashname) {
 void Texture::InitTexture() {
     bound = false;
     original = 0;
-    refcount = 0;
     name = -1;
     palette = nullptr;
     data = nullptr;
@@ -126,7 +124,6 @@ void Texture::setold() {
     *original = *this;
     //memcpy (original, this, sizeof (Texture));
     original->original = nullptr;
-    original->refcount++;
 }
 
 const vega_types::SharedPtr<const Texture> Texture::OriginalConst() const {
@@ -147,16 +144,14 @@ vega_types::SharedPtr<Texture> Texture::Original() {
 
 vega_types::SharedPtr<Texture> Texture::Clone() {
     vega_types::SharedPtr<Texture> retval = vega_types::MakeShared<Texture>();
-    Texture *target = Original();
+    vega_types::SharedPtr<Texture> target = Original();
     *retval = *target;
     //memcpy (this, target, sizeof (Texture));
     if (retval->name != -1) {
         retval->original = target;
-        retval->original->refcount++;
     } else {
-        retval->original = NULL;
+        retval->original = nullptr;
     }
-    retval->refcount = 0;
     return retval;
     //assert (!original->original);
 }
@@ -167,25 +162,24 @@ void Texture::FileNotFound(const string &texfilename) {
 
     setbad(texfilename);
     name = -1;
-    data = NULL;
-    if (original != NULL) {
+    data = nullptr;
+    if (original) {
         original->name = -1;
-        delete original;
-        original = NULL;
+        original.reset();
     }
-    palette = NULL;
+    palette = nullptr;
 }
 
 bool Texture::checkbad(const string &s) {
     string hashname = VSFileSystem::GetSharedTextureHashName(s);
-    bool *found = NULL;
+    vega_types::SharedPtr<bool> found = nullptr;
     found = badtexHashTable.Get(hashname);
-    if (found != NULL) {
+    if (found) {
         return true;
     }
     hashname = VSFileSystem::GetHashName(s);
     found = badtexHashTable.Get(hashname);
-    if (found != NULL) {
+    if (found) {
         return true;
     }
     return false;
@@ -193,11 +187,11 @@ bool Texture::checkbad(const string &s) {
 
 void Texture::setbad(const string &s) {
     //Put both current path+texfile and shared texfile since they both have been looked for
-    static bool _TRUEVAL = true;
+    static vega_types::SharedPtr<bool> _TRUEVAL = vega_types::MakeShared<bool>(true);
     if (VSFileSystem::current_path.back() != "") {
-        badtexHashTable.Put(VSFileSystem::GetHashName(s), &_TRUEVAL);
+        badtexHashTable.Put(VSFileSystem::GetHashName(s), _TRUEVAL);
     }
-    badtexHashTable.Put(VSFileSystem::GetSharedTextureHashName(s), &_TRUEVAL);
+    badtexHashTable.Put(VSFileSystem::GetSharedTextureHashName(s), _TRUEVAL);
 }
 
 Texture::Texture(int stage,
@@ -539,7 +533,9 @@ void Texture::Load(const char *FileNameRGB,
 }
 
 Texture::~Texture() {
-    if (original == NULL) {
+    if (original) {
+        original.reset();
+    } else {
         /**DEPRECATED
          *     if(data != NULL)
          *     {
@@ -549,14 +545,9 @@ Texture::~Texture() {
          *     }
          */
         UnBind();
-        if (palette != NULL) {
+        if (palette != nullptr) {
             free(palette);
-            palette = NULL;
-        }
-    } else {
-        original->refcount--;
-        if (original->refcount == 0) {
-            delete original;
+            palette = nullptr;
         }
     }
 }

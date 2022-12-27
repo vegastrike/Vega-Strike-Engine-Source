@@ -1,12 +1,10 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-/**
+/*
  * cockpit.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -40,6 +38,8 @@ class VSSprite;
 class Gauge;
 class Unit;
 class NavigationSystem;
+class Mesh;
+
 #include "radar/radar.h"
 #include "radar/sensor.h"
 #include "vdu.h"
@@ -109,7 +109,7 @@ class GameCockpit : public Cockpit {
     float last_mlocktime;
     bool armor8;
     bool shield8;
-    std::vector<class Mesh *> mesh;
+    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> mesh;
     int soundfile;
     VSSprite *Pit[4];
     VSSprite *radarSprites[2];

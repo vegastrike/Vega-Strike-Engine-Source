@@ -48,7 +48,7 @@ namespace Audio {
  *      responsible for detaching itself when destroyed.
  *
  */
-class SimpleSource : public Source, public EnableSharedFromThis<SimpleSource> {
+class SimpleSource : public Source, public vega_types::EnableSharedFromThis<SimpleSource> {
 private:
     bool playing;
     SimpleScene *scene;

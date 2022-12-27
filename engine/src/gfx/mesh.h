@@ -39,6 +39,7 @@
 #include "cmd/unit_generic.h"
 #include "gfx/technique.h"
 #include "mesh_xml.h"
+#include "shared_ptr_hashtable.h"
 
 //using std::string;
 class Planet;
@@ -157,8 +158,8 @@ private:
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
     static void endElement(void *userData, const XML_Char *name);
 
-    void beginElement(struct MeshXML *xml, const std::string &name, const AttributeList &attributes);
-    void endElement(struct MeshXML *xml, const std::string &name);
+    void beginElement(vega_types::SharedPtr<MeshXML> xml, const std::string &name, const AttributeList &attributes);
+    void endElement(vega_types::SharedPtr<MeshXML> xml, const std::string &name);
 
 protected:
     void PostProcessLoading(vega_types::SharedPtr<MeshXML> xml, const vega_types::SequenceContainer<string> &overrideTexture);
@@ -193,9 +194,9 @@ protected:
 ///The hash table of all meshes
     static SharedPtrHashtable<std::string, Mesh, MESH_HASTHABLE_SIZE> meshHashTable;
     static SharedPtrHashtable<std::string, vega_types::SequenceContainer<int>, MESH_HASTHABLE_SIZE> animationSequences;
-///The refcount:: how many meshes are referencing the appropriate original
-    // TODO: Replace with a standard library reference counting implementation. Probably make OriginalMesh its own class, too.
-    int refcount;
+/////The refcount:: how many meshes are referencing the appropriate original
+////     TODO: Replace with a standard library reference counting implementation. Probably make OriginalMesh its own class, too.
+//    int refcount;
 ///bounding box
     Vector mx;
     Vector mn;
@@ -222,7 +223,7 @@ protected:
 ///The decal relevant to this mesh
     vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>> Decal;
     vega_types::SharedPtr<Texture> detailTexture;
-    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Vector>>> detailPlanes;
+    vega_types::SharedPtr<vega_types::SequenceContainer<Vector>> detailPlanes;
     float polygon_offset;
 ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
     char envMapAndLit;
@@ -305,7 +306,7 @@ public:
             const vega_types::SequenceContainer<std::string> &textureOverride = {});
 
 ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
-    void Fork(Mesh *&one, Mesh *&two, float a, float b, float c, float d);
+    void Fork(vega_types::SharedPtr<Mesh> &one, vega_types::SharedPtr<Mesh> &two, float a, float b, float c, float d);
 ///Destructor... kills orig if refcount of orig becomes zero
     virtual ~Mesh();
 

@@ -1,4 +1,6 @@
 /*
+ * weapon_info.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -81,9 +83,9 @@ WeaponInfo *getWeapon(const std::string &key) {
             string meshname = boost::to_lower_copy(key) + ".bfxm";
             if (CachedFileLookup(lookup_cache, meshname, MeshFile) <= Ok) {
                 WeaponMeshCache::setCachedMutable(wi->name, wi->gun =
-                        Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL));
+                        Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL).get());
                 WeaponMeshCache::setCachedMutable(wi->name + "_flare", wi->gun1 =
-                        Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL));
+                        Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL).get());
             }
         }
     }

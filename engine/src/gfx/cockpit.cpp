@@ -3,9 +3,8 @@
 /*
  * cockpit.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -937,12 +936,6 @@ void GameCockpit::Delete() {
         delete text;
         text = nullptr;
     }
-    for (size_t i = 0; i < mesh.size(); ++i) {
-        if (mesh[i] != nullptr) {
-            delete mesh[i];
-            mesh[i] = nullptr;
-        }
-    }
     mesh.clear();
     if (soundfile >= 0) {
         AUDStopPlaying(soundfile);
@@ -1562,7 +1555,7 @@ void GameCockpit::Draw() {
     GFXEnable(DEPTHWRITE);
 
     if (view < CP_CHASE) {
-        if (mesh.size()) {
+        if (!mesh.empty()) {
             Unit *par = GetParent();
             if (par) {
                 //cockpit is unaffected by FOV WARP-Link

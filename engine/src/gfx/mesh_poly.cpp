@@ -52,9 +52,9 @@ static int whichside(GFXVertex *t, int numvertex, float a, float b, float c, flo
 
 void updateMax(Vector &mn, Vector &mx, const GFXVertex &ver);
 
-void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
-    if (orig && orig != this) {
-        orig->Fork(x, y, a, b, c, d);
+void Mesh::Fork(SharedPtr<Mesh> &one, SharedPtr<Mesh> &two, float a, float b, float c, float d) {
+    if (orig && !orig->empty() && orig->front().get() != this) {
+        orig->front()->Fork(one, two, a, b, c, d);
         return;
     }
     int numtris, numquads;
@@ -108,109 +108,109 @@ void Mesh::Fork(Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
     free(Orig);
     enum POLYTYPE polytypes[2] = {GFXTRI, GFXQUAD};
     if ((!(numtqx[0] || numtqx[1])) || (!(numtqy[0] || numtqy[1]))) {
-        x = y = NULL;
+        one = two = nullptr;
         delete[] X;
         delete[] Y;
         return;
     }
-    x = new Mesh;
-    x->setLighting(getLighting());
-    x->setEnvMap(getEnvMap());
-    x->forceCullFace(GFXFALSE);
+    one = MakeShared<Mesh>();
+    one->setLighting(getLighting());
+    one->setEnvMap(getEnvMap());
+    one->forceCullFace(GFXFALSE);
 
-    y = new Mesh;
-    y->setLighting(getLighting());
-    y->setEnvMap(getEnvMap());
+    two = MakeShared<Mesh>();
+    two->setLighting(getLighting());
+    two->setEnvMap(getEnvMap());
 
-    y->forceCullFace(GFXFALSE);
-    x->forcelogos.reset();
-    x->squadlogos.reset();
-    x->setLighting(getLighting());
-    x->setEnvMap(getEnvMap());
-    x->blendSrc = y->blendSrc = blendSrc;
-    x->blendDst = y->blendDst = blendDst;
-    while (x->Decal->size() < Decal->size()) {
-        x->Decal->push_back(nullptr);
+    two->forceCullFace(GFXFALSE);
+    one->forcelogos.reset();
+    one->squadlogos.reset();
+    one->setLighting(getLighting());
+    one->setEnvMap(getEnvMap());
+    one->blendSrc = two->blendSrc = blendSrc;
+    one->blendDst = two->blendDst = blendDst;
+    while (one->Decal->size() < Decal->size()) {
+        one->Decal->push_back(nullptr);
     }
     {
         for (unsigned int i2 = 0; i2 < Decal->size(); i2++) {
             if (Decal->at(i2)) {
-                x->Decal->at(i2) = Decal->at(i2)->Clone();
+                one->Decal->at(i2) = Decal->at(i2)->Clone();
             }
         }
     }
 
-    y->squadlogos.reset();
-    y->forcelogos.reset();
-    y->setLighting(getLighting());
-    y->setEnvMap(getEnvMap());
-    while (y->Decal->size() < Decal->size()) {
-        y->Decal->push_back(nullptr);
+    two->squadlogos.reset();
+    two->forcelogos.reset();
+    two->setLighting(getLighting());
+    two->setEnvMap(getEnvMap());
+    while (two->Decal->size() < Decal->size()) {
+        two->Decal->push_back(nullptr);
     }
     {
         for (unsigned int i3 = 0; i3 < Decal->size(); i3++) {
             if (Decal->at(i3)) {
-                y->Decal->at(i3) = Decal->at(i3)->Clone();
+                two->Decal->at(i3) = Decal->at(i3)->Clone();
             }
         }
     }
     if (numtqx[0] && numtqx[1]) {
-        x->vlist = new GFXVertexList(polytypes, numtqx[0] + numtqx[1], X, 2, numtqx, true);
+        one->vlist = vega_types::MakeShared<GFXVertexList>(polytypes, numtqx[0] + numtqx[1], X, 2, numtqx, true);
     } else {
         int exist = 0;
         if (numtqx[1]) {
             exist = 1;
         }
         assert(numtqx[0] || numtqx[1]);
-        x->vlist = new GFXVertexList(&polytypes[exist], numtqx[exist], X, 1, &numtqx[exist], true, 0);
+        one->vlist = vega_types::MakeShared<GFXVertexList>(&(polytypes[exist]), numtqx[exist], X, 1, &(numtqx[exist]), true, nullptr);
     }
     if (numtqy[0] || numtqy[1]) {
-        y->vlist = new GFXVertexList(polytypes, numtqy[0] + numtqy[1], Y, 2, numtqy, true);
+        two->vlist = vega_types::MakeShared<GFXVertexList>(polytypes, numtqy[0] + numtqy[1], Y, 2, numtqy, true);
     } else {
         int exis = 0;
         if (numtqy[1]) {
             exis = 1;
         }
         assert(numtqx[0] || numtqx[1]);
-        y->vlist = new GFXVertexList(&polytypes[exis], numtqy[exis], Y, 1, &numtqy[exis], true, 0);
+        two->vlist = vega_types::MakeShared<GFXVertexList>(&polytypes[exis], numtqy[exis], Y, 1, &numtqy[exis], true, nullptr);
     }
-    x->local_pos = Vector(.5 * (xmin + xmax));
-    y->local_pos = Vector(.5 * (ymin + ymax));
-    x->radialSize = .5 * (xmax - xmin).Magnitude();
-    y->radialSize = .5 * (ymax - ymin).Magnitude();
-    x->mn = xmin;
-    x->mx = xmax;
-    y->mn = ymin;
-    y->mx = ymax;
-    x->orig = new Mesh[1];
-    x->forceCullFace(GFXFALSE);
+    one->local_pos = Vector(.5 * (xmin + xmax));
+    two->local_pos = Vector(.5 * (ymin + ymax));
+    one->radialSize = .5 * (xmax - xmin).Magnitude();
+    two->radialSize = .5 * (ymax - ymin).Magnitude();
+    one->mn = xmin;
+    one->mx = xmax;
+    two->mn = ymin;
+    two->mx = ymax;
+    one->orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>(1);
+    one->forceCullFace(GFXFALSE);
 
-    y->orig = new Mesh[1];
-    y->forceCullFace(GFXFALSE);
-    x->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
-    y->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
-    *y->orig = *y;
-    *x->orig = *x;
-    x->orig->refcount = 1;
-    y->orig->refcount = 1;
-    x->numforcelogo = 0;
-    x->forcelogos = NULL;
-    x->numsquadlogo = 0;
-    x->squadlogos = NULL;
-    x->numforcelogo = 0;
-    x->forcelogos = NULL;
-    x->numsquadlogo = 0;
-    x->squadlogos = NULL;
+    two->orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>(1);
+    two->forceCullFace(GFXFALSE);
+    one->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+    two->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+    two->orig->push_back(two->shared_from_this());
+    one->orig->push_back(one->shared_from_this());
+//    x->orig->refcount = 1;
+//    y->orig->refcount = 1;
+//    x->numforcelogo = 0;
+    one->forcelogos = MakeShared<SequenceContainer<SharedPtr<Logo>>>();
+//    x->numsquadlogo = 0;
+    one->squadlogos = MakeShared<SequenceContainer<SharedPtr<Logo>>>();
+//    y->numforcelogo = 0;
+    two->forcelogos = MakeShared<SequenceContainer<SharedPtr<Logo>>>();;
+//    y->numsquadlogo = 0;
+    two->squadlogos = MakeShared<SequenceContainer<SharedPtr<Logo>>>();
 
     delete[] X;
     delete[] Y;
 }
 
-void Mesh::GetPolys(vector<mesh_polygon> &polys) {
+void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
     int numtris;
     int numquads;
-    if (orig && orig != this) {
-        orig->GetPolys(polys);
+    if (orig && !orig->empty() && orig->front().get() != this) {
+        orig->front()->GetPolys(polys);
         return;
     }
     GFXVertex *tmpres;
