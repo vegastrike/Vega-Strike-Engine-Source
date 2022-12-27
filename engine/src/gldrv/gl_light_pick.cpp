@@ -68,6 +68,7 @@ static bool operator<(light_key tmp1, light_key tmp2) {
 
 static SharedPtr<priority_queue<light_key>> lightQ() {
     static const SharedPtr<priority_queue<light_key>> kLightQ = MakeShared<priority_queue<light_key>>();
+    return kLightQ;
 }
 
 void removeLightFromNewPick(int index) {

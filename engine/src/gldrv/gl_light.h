@@ -42,6 +42,7 @@ extern GFXBOOL GFXLIGHTING;
 #define GFX_LIGHT_ENABLED 32
 #define GFX_LOCAL_LIGHT 64
 const unsigned int lighthuge = 20 * 20 * 20;
+constexpr size_t kGfxMaxContexts = 64;
 
 /**
  * This stores the state of a given GL Light in its fullness
@@ -183,6 +184,8 @@ public:
         glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,
                       1);     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
         glGetIntegerv(GL_MAX_LIGHTS, &GFX_MAX_LIGHTS);
+        local_lights_dat = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<gfx_light>>>>>(kGfxMaxContexts);
+        ambient_light = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<GFXColor>>>();
         gl_lights = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<OpenGLLights>>>(GFX_MAX_LIGHTS);
         for (GLint i = 0; i < GFX_MAX_LIGHTS; ++i) {
             vega_types::SharedPtr<OpenGLLights> const new_light = vega_types::MakeShared<OpenGLLights>();
@@ -191,6 +194,8 @@ public:
         }
 
         picked_lights = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<int>>>>(2);
+        picked_lights->at(0) = vega_types::MakeShared<vega_types::SequenceContainer<int>>();
+        picked_lights->at(1) = vega_types::MakeShared<vega_types::SequenceContainer<int>>();
         new_picked = picked_lights->at(0);
         old_picked = picked_lights->at(1);
 

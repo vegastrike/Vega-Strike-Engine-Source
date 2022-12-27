@@ -309,7 +309,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(int light) {
 
 void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number) {
     SharedPtr<ManagerOfStaticLightsData> const static_lights_data_manager = staticLightsDataManager();
-    con_number = static_cast<int>(static_lights_data_manager->local_lights_dat->size());
+    con_number = static_cast<int>(static_lights_data_manager->local_lights_dat->size()) - 1;
     _currentContext = con_number;
     static_lights_data_manager->ambient_light->push_back(MakeShared<GFXColor>(0, 0, 0, 1));
     static_lights_data_manager->local_lights_dat->push_back(MakeShared<ContiguousSequenceContainer<SharedPtr<gfx_light>>>());
