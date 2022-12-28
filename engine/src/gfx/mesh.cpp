@@ -71,7 +71,7 @@ void Mesh::InitUnit() {
     convex = false;
     polygon_offset = 0;
     framespersecond = 0;
-//    numlods = 1;
+    numlods = 1;
     alphatest = 0;
     lodsize = FLT_MAX;
     forcelogos.reset();
@@ -354,7 +354,7 @@ void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade) {
             draw_sequence++;
         }
     }
-    if (orig && !orig->empty()) {
+    if (orig && !orig->empty() && orig->front()) {
         SharedPtr<Mesh> orig0 = orig->front();
         orig0->draw_sequence = draw_sequence;
         orig0->blendSrc = src;
