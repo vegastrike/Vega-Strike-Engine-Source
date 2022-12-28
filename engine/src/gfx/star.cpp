@@ -35,13 +35,12 @@
 #include "galaxy_xml.h"
 #include "universe.h"
 #include "vs_logging.h"
+#include "vega_cast_utils.h"
 
 #if defined (__APPLE__) || defined (MACOSX)
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
-#include "vega_cast_utils.h"
-
 #endif
 
 #define SINX 1
