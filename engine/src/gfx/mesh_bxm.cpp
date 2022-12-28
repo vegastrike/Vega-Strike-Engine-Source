@@ -82,11 +82,11 @@ Texture * LoadAnimation( string Name )
 #endif
 
 struct OrigMeshLoader {
-    Mesh *m;
+    SequenceContainer<SharedPtr<Mesh>> m;
     vector<float> sizes;
     unsigned int num;
 
-    OrigMeshLoader(): m(nullptr), num(0) {
+    OrigMeshLoader(): num(0) {
     }
 };
 
@@ -364,12 +364,16 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
                 VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //Number of meshes in the current record
         word32index = recordbeginword + (recordheaderlength / 4);
         meshes.push_back(OrigMeshLoader());
-        meshes.back().num = nummeshes;
-        meshes.back().m = new Mesh[nummeshes];
-        meshes.back().sizes.insert(meshes.back().sizes.begin(), nummeshes, 0);
+        auto back_mesh = meshes.back();
+        back_mesh.num = nummeshes;
+        back_mesh.m.clear();
+        while (back_mesh.m.size() < nummeshes) {
+            back_mesh.m.push_back(MakeShared<Mesh>());
+        }
+        back_mesh.sizes.insert(back_mesh.sizes.begin(), nummeshes, 0);
         //For each mesh
         for (uint32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
-            Mesh *mesh = &meshes.back().m[meshindex];
+            SharedPtr<Mesh> mesh = back_mesh.m.at(meshindex);
             mesh->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
             SharedPtr<MeshXML> xml = MakeShared<MeshXML>();
             xml->fg = fg;
@@ -686,7 +690,7 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
                 uint32bit index =
                         VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);                    //Mesh index
                 bxmfprintf(Outputfile, "<LOD size=\"%f\" meshfile=\"%d_%d.xmesh\"/>\n", size, recordindex, index);
-                meshes.back().sizes[LOD] = size;
+                back_mesh.sizes[LOD] = size;
                 word32index += 2;
             }
             //End LODs
@@ -1064,12 +1068,15 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
         //go to next record
         word32index = recordbeginword + (recordlength / 4);
         output.push_back(MakeShared<Mesh>());
-        *output.back() = *meshes.back().m;                 //use builtin
-        output.back()->orig->push_back(meshes.back().m->shared_from_this());    // TODO: Optimize data types
-        for (int i = 0; i < (int) meshes.back().sizes.size() - 1; ++i) {
-            output.back()->orig->at(i + 1)->lodsize = meshes.back().sizes.at(i);
+        *output.back() = *back_mesh.m.front();                 //use builtin
+        if (!output.back()->orig) {
+            output.back()->orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>();
         }
-        output.back()->numlods = output.back()->orig->front()->numlods = meshes.back().num;
+        output.back()->orig->push_back(back_mesh.m.front());
+        for (int i = 0; i < (int) back_mesh.sizes.size() - 1; ++i) {
+            output.back()->orig->at(i + 1)->lodsize = back_mesh.sizes.at(i);
+        }
+        output.back()->numlods = output.back()->orig->front()->numlods = back_mesh.num;
     }
     free(inmemfile);
     inmemfile = NULL;

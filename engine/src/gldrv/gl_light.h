@@ -184,9 +184,22 @@ public:
         glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,
                       1);     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
         glGetIntegerv(GL_MAX_LIGHTS, &GFX_MAX_LIGHTS);
-        local_lights_dat = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<gfx_light>>>>>(kGfxMaxContexts);
+        local_lights_dat = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<gfx_light>>>>>();
+        local_lights_dat->reserve(kGfxMaxContexts);
+        while (local_lights_dat->size() < kGfxMaxContexts) {
+            local_lights_dat->push_back(vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<gfx_light>>>());
+            local_lights_dat->back()->reserve(GFX_MAX_LIGHTS);
+            while (local_lights_dat->back()->size() < GFX_MAX_LIGHTS) {
+                local_lights_dat->back()->push_back(vega_types::MakeShared<gfx_light>());
+            }
+        }
         ambient_light = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<GFXColor>>>();
-        gl_lights = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<OpenGLLights>>>(GFX_MAX_LIGHTS);
+        ambient_light->reserve(GFX_MAX_LIGHTS);
+        while (ambient_light->size() < GFX_MAX_LIGHTS) {
+            ambient_light->push_back(vega_types::MakeShared<GFXColor>(0, 0, 0, 1));
+        }
+        gl_lights = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<OpenGLLights>>>();
+        gl_lights->reserve(GFX_MAX_LIGHTS);
         for (GLint i = 0; i < GFX_MAX_LIGHTS; ++i) {
             vega_types::SharedPtr<OpenGLLights> const new_light = vega_types::MakeShared<OpenGLLights>();
             new_light->index = -1;

@@ -83,6 +83,9 @@ void Mesh::InitUnit() {
     mn = Vector(0, 0, 0);
     mx = Vector(0, 0, 0);
     radialSize = 0;
+    if (!Decal) {
+        Decal = MakeShared<SequenceContainer<SharedPtr<Texture>>>();
+    }
     if (Decal->empty()) {
         Decal->push_back(nullptr);
     }
@@ -351,7 +354,7 @@ void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade) {
             draw_sequence++;
         }
     }
-    if (orig) {
+    if (orig && !orig->empty()) {
         SharedPtr<Mesh> orig0 = orig->front();
         orig0->draw_sequence = draw_sequence;
         orig0->blendSrc = src;
