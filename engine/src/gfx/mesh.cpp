@@ -224,44 +224,6 @@ Mesh::Mesh(const char *filename,
     if (LoadExistant(filename, scale, faction)) {
         return;
     }
-    bool shared = false;
-    VSFile f;
-    VSError err = Unspecified;
-    err = f.OpenReadOnly(filename, MeshFile);
-    if (err > Ok) {
-        VS_LOG(error, (boost::format("Cannot Open Mesh File %1$s\n") % filename));
-//cleanexit=1;
-//winsys_exit(1);
-        return;
-    }
-    shared = (err == Shared);
-
-    bool xml = true;
-    if (xml) {
-        //LoadXML(filename,scale,faction,fg,orig);
-        LoadXML(f, scale, faction, fg, orig, textureOverride);
-        oldmesh = this->orig;
-    } else {
-        //This must be changed someday
-        LoadBinary(shared ? (VSFileSystem::sharedmeshes + "/" + (filename)).c_str() : filename, faction);
-        oldmesh = MakeShared<SequenceContainer<SharedPtr<Mesh>>>();
-    }
-    if (err <= Ok) {
-        f.Close();
-    }
-    draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
-    if (!orig) {
-        hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename, scale, faction) : VSFileSystem::GetHashName(
-                filename,
-                scale,
-                faction);
-        meshHashTable.Put(hash_name, oldmesh->front());
-        oldmesh->at(0) = this->shared_from_this();
-        //*oldmesh = *this;
-        this->orig.reset();
-    } else {
-        this->orig.reset();
-    }
 }
 
 float const ooPI = 1.00F / 3.1415926535F;

@@ -170,12 +170,12 @@ const EnumMap MeshXML::attribute_map(MeshXML::attribute_names,
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
     MeshXML *xml = reinterpret_cast<MeshXML *>(userData);
-    xml->mesh->beginElement(static_cast<SharedPtr<MeshXML>>(xml), name, AttributeList(atts));
+    xml->mesh->beginElement(xml, name, AttributeList(atts));
 }
 
 void Mesh::endElement(void *userData, const XML_Char *name) {
     MeshXML *xml = reinterpret_cast<MeshXML *>(userData);
-    xml->mesh->endElement(static_cast<SharedPtr<MeshXML>>(xml), std::string(name));
+    xml->mesh->endElement(xml, std::string(name));
 }
 
 enum BLENDFUNC parse_alpha(const char *tmp) {
@@ -305,7 +305,7 @@ bool shouldreflect(string r) {
     return false;
 }
 
-void Mesh::beginElement(SharedPtr<MeshXML> xml, const string &name, const AttributeList &attributes) {
+void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes) {
     static bool use_detail_texture =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_detail_texture", "true"));
     //static bool flatshadeit=false;
@@ -851,11 +851,11 @@ void Mesh::beginElement(SharedPtr<MeshXML> xml, const string &name, const Attrib
                         framespersecond = XMLSupport::parse_float((*iter).value);
                         break;
                     case MeshXML::LODFILE:
-                        xml->lod.push_back(MakeShared<Mesh>(Mesh((*iter).value.c_str(),
+                        xml->lod.push_back(Mesh::createMesh((*iter).value.c_str(),
                                         xml->lodscale,
                                         xml->faction,
                                         xml->fg,
-                                        true)));                   //make orig mesh
+                                        true));                   //make orig mesh
                         break;
                     case MeshXML::SIZE:
                         flotsize = XMLSupport::parse_float((*iter).value);
@@ -1046,7 +1046,7 @@ void Mesh::beginElement(SharedPtr<MeshXML> xml, const string &name, const Attrib
     }
 }
 
-void Mesh::endElement(SharedPtr<MeshXML> xml, const string &name) {
+void Mesh::endElement(MeshXML *xml, const string &name) {
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup(name);
     assert(*xml->state_stack.rbegin() == elem);
     xml->state_stack.pop_back();
@@ -1398,8 +1398,8 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(const char *filename,
     } else {
         f.Close();
         bool original = false;
-        SharedPtr<Mesh> m = MakeShared<Mesh>(Mesh(filename, scale, faction, fg, original));
-        SequenceContainer<SharedPtr<Mesh> > ret;
+        SharedPtr<Mesh> m = Mesh::createMesh(filename, scale, faction, fg, original);
+        SequenceContainer<SharedPtr<Mesh>> ret;
         ret.push_back(m);
         return ret;
     }
@@ -1431,7 +1431,7 @@ void Mesh::LoadXML(VSFileSystem::VSFile &f,
         const SequenceContainer<string> &textureOverride) {
     SequenceContainer<unsigned int> ind;
     SharedPtr<MeshXML> xml = MakeShared<MeshXML>();
-    xml->mesh = shared_from_this();
+    xml->mesh = this;
     xml->fg = fg;
     xml->usenormals = false;
     xml->usetangents = false;

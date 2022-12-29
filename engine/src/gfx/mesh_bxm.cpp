@@ -488,7 +488,7 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
             READSTRING(inmemfile, word32index, detailtexturenamelen, detailtexturename);
             if (detailtexturename.size() != 0) {
                 bxmfprintf(Outputfile, " detailtexture=\"%s\" ", detailtexturename.c_str());
-                mesh->detailTexture = mesh->TempGetTexture(xml, detailtexturename, FactionUtil::GetFaction(
+                mesh->detailTexture = mesh->TempGetTexture(xml.get(), detailtexturename, FactionUtil::GetFaction(
                         xml->faction), GFXTRUE); //LoadTexture(detailtexturename);
             } else {
                 mesh->detailTexture = 0;

@@ -249,7 +249,7 @@ const int UNDRAWN_MESHES_SIZE = NUM_MESH_SEQUENCE;
 
 SharedPtr<SequenceContainer<SharedPtr<OrigMeshVector>>> undrawn_meshes = MakeShared<SequenceContainer<SharedPtr<OrigMeshVector>>>(NUM_MESH_SEQUENCE);
 
-SharedPtr<Texture> Mesh::TempGetTexture(SharedPtr<MeshXML> xml, std::string filename, std::string factionname,
+SharedPtr<Texture> Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string factionname,
                                         GFXBOOL detail) const {
     const FILTER fil = game_options()->detail_texture_trilinear ? TRILINEAR : MIPMAP;
     static bool factionalize_textures =

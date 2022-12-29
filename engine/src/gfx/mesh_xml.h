@@ -159,7 +159,7 @@ struct MeshXML {
             qstrcnt(0),
             lstrcnt(0),
             faction(0),
-            mesh(0) {
+            mesh(nullptr) {
     }
 
     ///All logos on this unit
@@ -215,7 +215,7 @@ struct MeshXML {
     GFXVertex vertex;
     GFXMaterial material;
     int faction;
-    vega_types::SharedPtr<Mesh> mesh;
+    Mesh * mesh;
 };
 
 #endif
