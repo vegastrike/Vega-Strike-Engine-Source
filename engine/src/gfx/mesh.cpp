@@ -39,6 +39,7 @@
 #include "hashtable.h"
 #include "vegastrike.h"
 #include <cfloat>
+#include <boost/utility/string_view.hpp>
 #include "preferred_types.h"
 #include "shared_ptr_hashtable.h"
 
@@ -213,14 +214,13 @@ Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *
     }
 }
 
-Mesh::Mesh(const char *filename,
-        const Vector &scale,
-        int faction,
-        Flightgroup *fg,
-        bool orig,
-        const  SequenceContainer<string> &textureOverride) : orig(nullptr), convex(false), hash_name(filename) {
+Mesh::Mesh(boost::string_view filename,
+           const Vector &scale,
+           int faction,
+           Flightgroup *fg,
+           bool is_original,
+           const  SequenceContainer<string> &textureOverride) : orig(nullptr), convex(false), hash_name(filename) {
     InitUnit();
-    SharedPtr<SequenceContainer<SharedPtr<Mesh>>> oldmesh;
     if (LoadExistant(filename, scale, faction)) {
         return;
     }

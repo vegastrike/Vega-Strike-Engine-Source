@@ -23,6 +23,7 @@
  */
 
 
+#include "vega_cast_utils.h"
 #include "sphere.h"
 #include "ani_texture.h"
 #include "vegastrike.h"
@@ -40,7 +41,7 @@ using XMLSupport::tostring;
 using namespace vega_types;
 
 void SphereMesh::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
-    static SharedPtr<GFXColor> const spherecol = MakeShared<GFXColor>(vs_config->getColor("planet_ambient"));
+    static SharedPtr<GFXColor> spherecol = MakeShared<GFXColor>(vs_config->getColor("planet_ambient"));
     SharedPtr<GFXColor> const tmpcol = MakeShared<GFXColor>(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(spherecol);
@@ -51,6 +52,18 @@ void SphereMesh::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort,
 
 void SphereMesh::SelectCullFace(int whichdrawqueue) {
     GFXEnable(CULLFACE);
+}
+
+vega_types::SharedPtr<SphereMesh>
+SphereMesh::constructSphereMesh(float radius, int stacks, int slices, const char *texture, const string &technique,
+                                const char *alpha, bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap,
+                                float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap,
+                                bool reverse_normals) {
+    SphereMesh return_value;
+    return_value.setConvex(true);
+    std::string hash_name = calculateSphereMeshHashName();
+//    SphereMesh return_value{radius, stacks, slices, texture, technique, alpha, insideout, a, b, envMap, rho_min, rho_max, theta_min, theta_max, mipmap, reverse_normals};
+    return vega_dynamic_cast_shared_ptr<SphereMesh>(return_value.shared_from_this());
 }
 
 void CityLights::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {

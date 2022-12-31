@@ -31,6 +31,10 @@
 #endif
 #include <float.h>
 #include <assert.h>
+
+#include <utility>
+#include <boost/utility/string_view.hpp>
+
 #define PBEHIND (-1)
 #define PFRONT (1)
 #define PUNK (0)
@@ -243,5 +247,53 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
         }
     }
     free(tmpres);
+}
+
+vega_types::SharedPtr<Mesh>
+Mesh::constructMesh(boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original,
+                    const SequenceContainer<string> &texture_override) {
+    Mesh return_value{filename, scale_x, faction, fg, is_original, texture_override};
+    bool shared = false;
+    return constructMeshPart2(return_value, filename, scale_x, faction, fg, is_original, texture_override, shared);
+}
+
+vega_types::SharedPtr<Mesh>
+Mesh::constructMeshPart2(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction,
+                         Flightgroup *fg, bool is_original, const SequenceContainer<string> &texture_override,
+                         bool &shared) {
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> old_mesh;
+    shared = false;
+    VSFileSystem::VSFile f;
+    VSFileSystem::VSError err = VSFileSystem::Unspecified;
+    std::string const filename_string = filename.to_string();
+    err = f.OpenReadOnly(filename_string, VSFileSystem::MeshFile);
+    if (err > VSFileSystem::Ok) {
+        VS_LOG(error, (boost::format("Cannot Open Mesh File %1$s\n") % filename));
+//cleanexit=1;
+//winsys_exit(1);
+        return nullptr;
+    }
+    shared = (err == VSFileSystem::Shared);
+
+    //LoadXML(filename,scale,faction,fg,orig);
+    mesh_in_question.LoadXML(f, scale_x, faction, fg, is_original, texture_override);
+    old_mesh = mesh_in_question.orig;
+    if (err <= VSFileSystem::Ok) {
+        f.Close();
+    }
+    mesh_in_question.draw_queue = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+
+    if (!mesh_in_question.orig || mesh_in_question.orig->empty() || !mesh_in_question.orig->front()) {
+        mesh_in_question.hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename_string, scale_x, faction) : VSFileSystem::GetHashName(
+                filename_string,
+                scale_x,
+                faction);
+        meshHashTable.Put(mesh_in_question.hash_name, old_mesh->front());
+        old_mesh->at(0) = mesh_in_question.shared_from_this();
+        *(old_mesh->at(0)) = mesh_in_question;
+    } else {
+        mesh_in_question.orig.reset();
+    }
+    return mesh_in_question.shared_from_this();
 }
 

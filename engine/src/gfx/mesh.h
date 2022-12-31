@@ -162,6 +162,7 @@ private:
     void endElement(MeshXML *xml, const std::string &name);
 
 protected:
+    static vega_types::SharedPtr<Mesh> constructMeshPart2(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original, const vega_types::SequenceContainer<std::string> &texture_override, bool &shared);
     void PostProcessLoading(vega_types::SharedPtr<MeshXML> xml, const vega_types::SequenceContainer<string> &overrideTexture);
 
 public:
@@ -176,15 +177,13 @@ public:
         technique = std::move(tech);
     }
 
-private:
-    Mesh(const char *filename, const Vector &scalex, int faction, class Flightgroup *fg, bool orig,
-            const vega_types::SequenceContainer<std::string> &textureOverride = {});
-
-    Mesh(std::string filename, const Vector &scalex, int faction, class Flightgroup *fg, bool is_original = false);
-
+//private:
 protected:
-////only may be called from subclass. is_original request may be denied if unit was in past usage. (not likely in the case where a unit must be constructed in is_original)
-//    Mesh(std::string filename, const Vector &scalex, int faction, class Flightgroup *fg, bool is_original = false);
+    Mesh(boost::string_view filename, const Vector &scalex, int faction, class Flightgroup *fg, bool is_original,
+         const vega_types::SequenceContainer<std::string> &textureOverride = {});
+
+    //only may be called from subclass. is_original request may be denied if unit was in past usage. (not likely in the case where a unit must be constructed in is_original)
+    Mesh(std::string filename, const Vector &scalex, int faction, class Flightgroup *fg, bool is_original = false);
 
 ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
 public:
@@ -203,13 +202,13 @@ protected:
     Vector mx;
     Vector mn;
 ///The radial size of this mesh
-    float radialSize;
+    float radialSize{};
 ///num lods contained in the array of Mesh "orig"
-    int numlods;
-    float framespersecond; //for animation
+    int numlods{};
+    float framespersecond{}; //for animation
     vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> orig;
 ///The size that this LOD (if original) comes into effect
-    float lodsize;
+    float lodsize{};
 ///The number of force logos on this mesh (original)
     vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Logo>>> forcelogos;
 //    int numforcelogo;
@@ -219,28 +218,28 @@ protected:
 ///tri,quad,line, strips, etc
     vega_types::SharedPtr<GFXVertexList> vlist;
 ///The number of the appropriate material for this mesh (default 0)
-    unsigned int myMatNum;
+    unsigned int myMatNum{};
 ///The technique used to render this mesh
     TechniquePtr technique;
 ///The decal relevant to this mesh
     vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>> Decal;
     vega_types::SharedPtr<Texture> detailTexture;
     vega_types::SharedPtr<vega_types::SequenceContainer<Vector>> detailPlanes;
-    float polygon_offset;
+    float polygon_offset{};
 ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
-    char envMapAndLit;
+    char envMapAndLit{};
 ///Whether this original will be drawn this frame
-    GFXBOOL will_be_drawn;
+    GFXBOOL will_be_drawn{};
 ///The blend functions
-    bool convex;
-    unsigned char alphatest;
+    bool convex{};
+    unsigned char alphatest{};
     enum BLENDFUNC blendSrc;
     enum BLENDFUNC blendDst;
 
 /// Support for reorganized rendering
     vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>> draw_queue;
 /// How transparent this mesh is (in what order should it be rendered in
-    int draw_sequence;
+    int draw_sequence{};
 ///The name of this unit
     std::string hash_name;
 ///Setting all values to defaults (good for mesh copying and stuff)
@@ -266,100 +265,8 @@ public:
     Mesh();
     Mesh(const Mesh &m);
 
-    static vega_types::SharedPtr<Mesh> createMesh(std::string file_name, const Vector &scale_x, int faction, class Flightgroup *fg, bool is_original) {
-        Mesh return_value{file_name, scale_x, faction, fg, is_original};
-        vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> oldmesh;
-        bool shared = false;
-        VSFileSystem::VSFile f;
-        VSFileSystem::VSError err = VSFileSystem::Unspecified;
-        std::string filename = return_value.hash_name;
-        err = f.OpenReadOnly(filename, VSFileSystem::MeshFile);
-        if (err > VSFileSystem::Ok) {
-            VS_LOG(error, (boost::format("Cannot Open Mesh File %1$s\n") % filename));
-//cleanexit=1;
-//winsys_exit(1);
-            return nullptr;
-        }
-        shared = (err == VSFileSystem::Shared);
-
-        const vega_types::SequenceContainer<std::string> &texture_override = {};
-
-        bool xml = true;
-        if (xml) {
-            //LoadXML(filename,scale,faction,fg,orig);
-            return_value.LoadXML(f, scale_x, faction, fg, is_original, texture_override);
-            oldmesh = return_value.orig;
-        } else {
-            //This must be changed someday
-            return_value.LoadBinary(shared ? (VSFileSystem::sharedmeshes + "/" + filename).c_str() : filename.c_str(), faction);
-            oldmesh = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>>();
-        }
-        if (err <= VSFileSystem::Ok) {
-            f.Close();
-        }
-        return_value.draw_queue = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
-
-        if (!return_value.orig || return_value.orig->empty() || !return_value.orig->front()) {
-            return_value.hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename, scale_x, faction) : VSFileSystem::GetHashName(
-                    filename,
-                    scale_x,
-                    faction);
-            meshHashTable.Put(return_value.hash_name, oldmesh->front());
-            oldmesh->at(0) = return_value.shared_from_this();
-            //*oldmesh = *this;
-            return_value.orig.reset();
-        } else {
-            return_value.orig.reset();
-        }
-        return return_value.shared_from_this();
-    }
-
-    static vega_types::SharedPtr<Mesh> createMesh(const char * file_name, const Vector &scale_x, int faction, class Flightgroup *fg, bool is_original,
-            const vega_types::SequenceContainer<std::string> &texture_override = {}) {
-        Mesh return_value{file_name, scale_x, faction, fg, is_original};
-        vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> oldmesh;
-        bool shared = false;
-        VSFileSystem::VSFile f;
-        VSFileSystem::VSError err = VSFileSystem::Unspecified;
-        std::string filename = return_value.hash_name;
-        err = f.OpenReadOnly(filename, VSFileSystem::MeshFile);
-        if (err > VSFileSystem::Ok) {
-            VS_LOG(error, (boost::format("Cannot Open Mesh File %1$s\n") % filename));
-//cleanexit=1;
-//winsys_exit(1);
-            return nullptr;
-        }
-        shared = (err == VSFileSystem::Shared);
-
-        bool xml = true;
-        if (xml) {
-            //LoadXML(filename,scale,faction,fg,orig);
-            return_value.LoadXML(f, scale_x, faction, fg, is_original, texture_override);
-            oldmesh = return_value.orig;
-        } else {
-            //This must be changed someday
-            return_value.LoadBinary(shared ? (VSFileSystem::sharedmeshes + "/" + filename).c_str() : filename.c_str(), faction);
-            oldmesh = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>>();
-        }
-        if (err <= VSFileSystem::Ok) {
-            f.Close();
-        }
-        return_value.draw_queue = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
-
-        if (!return_value.orig || return_value.orig->empty() || !return_value.orig->front()) {
-            return_value.hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename, scale_x, faction) : VSFileSystem::GetHashName(
-                    filename,
-                    scale_x,
-                    faction);
-            meshHashTable.Put(return_value.hash_name, oldmesh->front());
-            oldmesh->at(0) = return_value.shared_from_this();
-            //*oldmesh = *this;
-            return_value.orig.reset();
-        } else {
-            return_value.orig.reset();
-        }
-        return return_value.shared_from_this();
-    }
+    static vega_types::SharedPtr<Mesh> constructMesh(boost::string_view filename, const Vector &scale_x, int faction, class Flightgroup *fg, bool is_original,
+                                                     const vega_types::SequenceContainer<std::string> &texture_override = {});
 
     vega_types::SharedPtr<GFXVertexList> getVertexList() const;
     void setVertexList(vega_types::SharedPtr<GFXVertexList> _vlist);

@@ -109,6 +109,23 @@ public:
                 reverse_normals);
     }
 
+    static vega_types::SharedPtr<SphereMesh> constructSphereMesh(float radius,
+                                                                 int stacks,
+                                                                 int slices,
+                                                                 const char *texture,
+                                                                 const std::string &technique,
+                                                                 const char *alpha = NULL,
+                                                                 bool insideout = false,
+                                                                 const BLENDFUNC a = ONE,
+                                                                 const BLENDFUNC b = ZERO,
+                                                                 bool envMap = false,
+                                                                 float rho_min = 0.0,
+                                                                 float rho_max = M_PI,
+                                                                 float theta_min = 0.0,
+                                                                 float theta_max = 2 * M_PI,
+                                                                 FILTER mipmap = MIPMAP,
+                                                                 bool reverse_normals = false);
+
     void Draw(float lod, bool centered = false, const Matrix &m = identity_matrix);
     virtual void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr);
 };
