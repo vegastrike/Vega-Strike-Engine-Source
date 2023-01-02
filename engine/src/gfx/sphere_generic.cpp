@@ -78,18 +78,6 @@ float CityLights::GetS(float theta, float theta_min, float theta_max) const {
     return wrapx * SphereMesh::GetS(theta, theta_min, theta_max);
 }
 
-string truncateByPipe(string &input) {
-    string::size_type i = input.find("|");
-    string ret = input;
-    if (i != string::npos) {
-        ret = input.substr(0, i);
-        input = input.substr(i + 1);
-    } else {
-        input = "";
-    }
-    return ret;
-}
-
 void SphereMesh::InitSphere(float radius,
         int stacks,
         int slices,
@@ -285,6 +273,18 @@ void SphereMesh::Draw(float lod, bool centered, const Matrix &m) {
 
 void SphereMesh::RestoreCullFace(int whichdrawqueue) {
     //always right
+}
+
+std::string SphereMesh::truncateByPipe(std::string &input) {
+    string::size_type i = input.find("|");
+    string ret = input;
+    if (i != string::npos) {
+        ret = input.substr(0, i);
+        input = input.substr(i + 1);
+    } else {
+        input = "";
+    }
+    return ret;
 }
 
 float CityLights::wrapx = 1;

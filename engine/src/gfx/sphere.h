@@ -41,17 +41,17 @@ protected:
     virtual float GetT(float rho, float rho_min, float rho_max) const;
     virtual float GetS(float theta, float theta_min, float theta_max) const;
 
-    virtual Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) {
-        static_assert(sizeof(Mesh) == sizeof(*this), "Are SphereMesh and Mesh the same size in memory?");
-        return new SphereMesh[num];
-    }
+//    virtual Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) {
+//        static_assert(sizeof(Mesh) == sizeof(*this), "Are SphereMesh and Mesh the same size in memory?");
+//        return new SphereMesh[num];
+//    }
 
     void InitSphere(float radius,
             int stacks,
             int slices,
             const char *texture,
             const std::string &technique,
-            const char *alpha = NULL,
+            const char *alpha = nullptr,
             bool insideout = false,
             const BLENDFUNC a = ONE,
             const BLENDFUNC b = ZERO,
@@ -109,16 +109,17 @@ public:
                 reverse_normals);
     }
 
+    static std::string truncateByPipe(std::string &input);
     static vega_types::SharedPtr<SphereMesh> constructSphereMesh(float radius,
                                                                  int stacks,
                                                                  int slices,
                                                                  const char *texture,
                                                                  const std::string &technique,
                                                                  const char *alpha = NULL,
-                                                                 bool insideout = false,
+                                                                 bool inside_out = false,
                                                                  const BLENDFUNC a = ONE,
                                                                  const BLENDFUNC b = ZERO,
-                                                                 bool envMap = false,
+                                                                 bool env_map = false,
                                                                  float rho_min = 0.0,
                                                                  float rho_max = M_PI,
                                                                  float theta_min = 0.0,
@@ -128,6 +129,30 @@ public:
 
     void Draw(float lod, bool centered = false, const Matrix &m = identity_matrix);
     virtual void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr);
+
+    static std::string const
+    calculateHashName(const char *texture, const std::string &technique, int stacks, int slices, const BLENDFUNC a,
+                      const BLENDFUNC b, float rho_min, float rho_max);
+    static uint64_t const calculateHowManyLevelsOfDetail(int stacks, int slices);
+    static vega_types::SharedPtr<Mesh> loadFreshLevelOfDetail(SphereMesh &mesh,
+                                                              uint64_t l,
+                                                              float radius,
+                                                              int &stacks,
+                                                              int &slices,
+                                                              const char *texture,
+                                                              const string &technique,
+                                                              const char *alpha,
+                                                              bool inside_out,
+                                                              const BLENDFUNC a,
+                                                              const BLENDFUNC b,
+                                                              bool env_map,
+                                                              float rho_min,
+                                                              float rho_max,
+                                                              float theta_min,
+                                                              float theta_max,
+                                                              FILTER mipmap,
+                                                              bool reverse_normals,
+                                                              bool subclass);
 };
 
 class CityLights : public SphereMesh {
@@ -139,10 +164,10 @@ protected:
     virtual float GetT(float rho, float rho_min, float rho_max) const;
     virtual float GetS(float theta, float theta_min, float theta_max) const;
 
-    Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) override {
-        static_assert(sizeof(Mesh) == sizeof(*this), "Are CityLights and Mesh the same size in memory?");
-        return new CityLights[num];
-    }
+//    Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) override {
+//        static_assert(sizeof(Mesh) == sizeof(*this), "Are CityLights and Mesh the same size in memory?");
+//        return new CityLights[num];
+//    }
 
 public:
     CityLights() : SphereMesh() {
