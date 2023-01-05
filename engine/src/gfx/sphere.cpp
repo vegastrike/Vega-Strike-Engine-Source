@@ -1,7 +1,7 @@
 /*
  * sphere.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -291,11 +291,11 @@ SharedPtr<Mesh> SphereMesh::loadFreshLevelOfDetail(SphereMesh &mesh,
     if (l >= 1) {
         mesh.lodsize = (mesh.numlods + 1 - l) * pixelscalesize;
         if (l == 1) {
-            mesh.lodsize *= 2;
+            mesh.lodsize *= 2.0F;
         } else if (l == 2) {
-            mesh.lodsize *= 1.75;
+            mesh.lodsize *= 1.75F;
         } else if (l == 3) {
-            mesh.lodsize *= 1.5;
+            mesh.lodsize *= 1.5F;
         }
     }
     mesh.initTechnique(technique);
