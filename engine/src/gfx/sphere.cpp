@@ -36,6 +36,7 @@
 #endif
 #include "gfx/camera.h"
 #include "preferred_types.h"
+#include <array>
 
 using XMLSupport::tostring;
 using namespace vega_types;
