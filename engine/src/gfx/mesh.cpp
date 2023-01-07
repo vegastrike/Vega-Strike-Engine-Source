@@ -122,6 +122,9 @@ Mesh::Mesh() {
 bool Mesh::LoadExistant(SharedPtr<Mesh> oldmesh) {
     *this = *oldmesh;
 //    oldmesh->refcount++;
+    if (!orig) {
+        orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>();
+    }
     orig->push_front(oldmesh);
     return true;
 }

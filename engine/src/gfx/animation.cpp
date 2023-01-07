@@ -1,7 +1,7 @@
 /*
  * animation.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2023 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -42,16 +42,22 @@
 
 using namespace vega_types;
 
-static SequenceContainer<SharedPtr<Animation>> far_animationdrawqueue;
-
-bool AnimationsLeftInFarQueue() {
-    return !far_animationdrawqueue.empty();
+static SharedPtr<SequenceContainer<SharedPtr<Animation>>> farAnimationDrawQueue() {
+    static SharedPtr<SequenceContainer<SharedPtr<Animation>>> kFarAnimationDrawQueue = MakeShared<SequenceContainer<SharedPtr<Animation>>>();
+    return kFarAnimationDrawQueue;
 }
 
-static SequenceContainer<SharedPtr<Animation>> animationdrawqueue;
+bool AnimationsLeftInFarQueue() {
+    return !farAnimationDrawQueue()->empty();
+}
+
+static SharedPtr<SequenceContainer<SharedPtr<Animation>>> animationDrawQueue() {
+    static SharedPtr<SequenceContainer<SharedPtr<Animation>>> kAnimationDrawQueue = MakeShared<SequenceContainer<SharedPtr<Animation>>>();
+    return kAnimationDrawQueue;
+}
 
 bool AnimationsLeftInQueue() {
-    return !animationdrawqueue.empty();
+    return !animationDrawQueue()->empty();
 }
 
 static const unsigned char ani_up = 0x01;
@@ -124,8 +130,16 @@ Animation::Animation(const char *FileName,
 }
 
 Animation::~Animation() {
-    far_animationdrawqueue.erase(std::remove_if(far_animationdrawqueue.begin(), far_animationdrawqueue.end(), [this](const SharedPtr<Animation>& ptr) { return ptr.get() == this; }));
-    animationdrawqueue.erase(std::remove_if(animationdrawqueue.begin(), animationdrawqueue.end(), [this](const SharedPtr<Animation>& ptr) { return ptr.get() == this; }));
+    if (!destroying) {
+        destroying = true;
+        Animation * thus = this;
+        farAnimationDrawQueue()->erase(std::remove_if(farAnimationDrawQueue()->begin(),
+                                                    farAnimationDrawQueue()->end(),
+                                                    [thus](const SharedPtr<Animation> ptr) {
+                                                        return !ptr || ptr.get() == thus;
+                                                    }));
+        animationDrawQueue()->erase(std::remove_if(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> ptr) { return !ptr || ptr.get() == thus; }));
+    }
     VSDESTRUCT2
 }
 
@@ -157,7 +171,7 @@ void Animation::ProcessDrawQueue() {
     GFXEnable(TEXTURE0);
     GFXDisable(TEXTURE1);
     GFXDisable(DEPTHWRITE);
-    ProcessDrawQueue(animationdrawqueue, -FLT_MAX);
+    ProcessDrawQueue(animationDrawQueue(), -FLT_MAX);
 }
 
 bool Animation::NeedsProcessDrawQueue() {
@@ -171,54 +185,54 @@ void Animation::ProcessFarDrawQueue(float farval) {
     GFXEnable(TEXTURE0);
     GFXDisable(TEXTURE1);
 
-    ProcessDrawQueue(far_animationdrawqueue, farval);
+    ProcessDrawQueue(farAnimationDrawQueue(), farval);
 }
 
 bool Animation::NeedsProcessFarDrawQueue() {
     return AnimationsLeftInFarQueue();
 }
 
-void Animation::ProcessDrawQueue(SequenceContainer<vega_types::SharedPtr<Animation>> &animationdrawqueue, float limit) {
+void Animation::ProcessDrawQueue(SharedPtr<SequenceContainer<SharedPtr<Animation>>> animation_draw_queue, float limit) {
     if (g_game.use_animations == 0 && g_game.use_textures == 0) {
         return;
     }
     unsigned char alphamaps = ani_alpha;
     int i, j;     //NOT UNSIGNED
-    for (i = animationdrawqueue.size() - 1; i >= 0; i--) {
-        GFXColorf(animationdrawqueue[i]->mycolor);         //fixme, should we need this? we get som egreenie explosions
+    for (i = animation_draw_queue->size() - 1; i >= 0; i--) {
+        GFXColorf(animation_draw_queue->at(i)->mycolor);         //fixme, should we need this? we get som egreenie explosions
         Matrix result;
-        if (alphamaps != (animationdrawqueue[i]->options & ani_alpha)) {
-            alphamaps = (animationdrawqueue[i]->options & ani_alpha);
+        if (alphamaps != (animation_draw_queue->at(i)->options & ani_alpha)) {
+            alphamaps = (animation_draw_queue->at(i)->options & ani_alpha);
             GFXBlendMode((alphamaps != 0) ? SRCALPHA : ONE, (alphamaps != 0) ? INVSRCALPHA : ONE);
         }
         QVector campos = _Universe->AccessCamera()->GetPosition();
-        animationdrawqueue[i]->CalculateOrientation(result);
+        animation_draw_queue->at(i)->CalculateOrientation(result);
         if ((limit
                 <= -FLT_MAX) ||
-                (animationdrawqueue[i]->Position() - campos).Magnitude() - animationdrawqueue[i]->height > limit) {
+                (animation_draw_queue->at(i)->Position() - campos).Magnitude() - animation_draw_queue->at(i)->height > limit) {
             //other way was inconsistent about what was far and what was not--need to use the same test for putting to far queueu and drawing it--otherwise graphical glitches
             GFXFogMode(FOG_OFF);
-            animationdrawqueue[i]->DrawNow(result);
-            animationdrawqueue[i] =
+            animation_draw_queue->at(i)->DrawNow(result);
+            animation_draw_queue->at(i) =
                     0;             //Flag for deletion: gets called multiple times with decreasing values, and eventually is called with limit=-FLT_MAX.
         }
     }
     //Delete flagged ones
     i = 0;
-    while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i]) {
+    while (i < static_cast<int>(animation_draw_queue->size()) && animation_draw_queue->at(i)) {
         ++i;
     }
     j = i;
-    while (i < static_cast<int>(animationdrawqueue.size())) {
-        while (i < static_cast<int>(animationdrawqueue.size()) && !animationdrawqueue[i]) {
+    while (i < static_cast<int>(animation_draw_queue->size())) {
+        while (i < static_cast<int>(animation_draw_queue->size()) && !animation_draw_queue->at(i)) {
             ++i;
         }
-        while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i]) {
-            animationdrawqueue[j++] = animationdrawqueue[i++];
+        while (i < static_cast<int>(animation_draw_queue->size()) && animation_draw_queue->at(i)) {
+            animation_draw_queue->at(j++) = animation_draw_queue->at(i++);
         }
     }
     if (j >= 0) {
-        animationdrawqueue.resize(j);
+        animation_draw_queue->resize(j);
     }
 }
 
@@ -470,9 +484,9 @@ void Animation::Draw() {
                         (height > width ? height : width)) <
                 too_far_dist * g_game.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
-            animationdrawqueue.push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
+            animationDrawQueue()->push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
         } else {
-            far_animationdrawqueue.push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
+            farAnimationDrawQueue()->push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
         }
     }
 }

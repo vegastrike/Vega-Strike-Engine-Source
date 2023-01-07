@@ -1,7 +1,7 @@
 /*
  * animation.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2023 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -53,6 +53,7 @@ class Animation : public AnimatedTexture {
     unsigned char options;
 
     void InitAnimation();
+    bool destroying{};
 
 public:
     Animation();
@@ -82,7 +83,7 @@ public:
 
     void DrawAsVSSprite(class VSSprite *spr);
 
-    static void ProcessDrawQueue(vega_types::SequenceContainer<vega_types::SharedPtr<Animation>> &animationdrawqueue, float limit);
+    static void ProcessDrawQueue(vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Animation>>> animation_draw_queue, float limit);
 
     static void ProcessDrawQueue();
 

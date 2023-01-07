@@ -1073,6 +1073,9 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
             output.back()->orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>();
         }
         output.back()->orig->push_back(back_mesh.m.front());
+        for (size_t i = 0; i < back_mesh.num; ++i) {
+            output.back()->orig->push_back(MakeShared<Mesh>());
+        }
         for (int i = 0; i < (int) back_mesh.sizes.size() - 1; ++i) {
             output.back()->orig->at(i + 1)->lodsize = back_mesh.sizes.at(i);
         }
