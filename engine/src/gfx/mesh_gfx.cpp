@@ -403,6 +403,8 @@ SharedPtr<AnimatedTexture> createAnimatedTexture(char const *c, int i, enum FILT
 }
 
 Mesh::~Mesh() {
+    VS_LOG_AND_FLUSH(trace, "Mesh destructor called");
+
     if (!orig || (!orig->empty() && orig->at(0).get() == this)) {
         for (auto & undrawn_mesh : *undrawn_meshes) {
             auto first_to_remove = std::stable_partition(undrawn_mesh->begin(), undrawn_mesh->end(), [this](

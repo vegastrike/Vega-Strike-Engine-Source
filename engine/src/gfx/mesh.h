@@ -162,7 +162,7 @@ private:
     void endElement(MeshXML *xml, const std::string &name);
 
 protected:
-    static vega_types::SharedPtr<Mesh> constructMesh(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original, const vega_types::SequenceContainer<std::string> &texture_override, bool &shared);
+    static vega_types::SharedPtr<Mesh> constructMesh(vega_types::SharedPtr<Mesh> mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original, const vega_types::SequenceContainer<std::string> &texture_override, bool &shared);
     void PostProcessLoading(vega_types::SharedPtr<MeshXML> xml, const vega_types::SequenceContainer<string> &overrideTexture);
 
 public:

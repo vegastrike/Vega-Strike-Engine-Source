@@ -252,13 +252,14 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
 vega_types::SharedPtr<Mesh>
 Mesh::createMesh(boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original,
                  const SequenceContainer<string> &texture_override) {
-    Mesh return_value{filename, scale_x, faction, fg, is_original, texture_override};
+//    Mesh return_value{filename, scale_x, faction, fg, is_original, texture_override};
+    SharedPtr<Mesh> return_value = MakeShared<Mesh>();
     bool shared = false;
     return constructMesh(return_value, filename, scale_x, faction, fg, is_original, texture_override, shared);
 }
 
 vega_types::SharedPtr<Mesh>
-Mesh::constructMesh(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction,
+Mesh::constructMesh(SharedPtr<Mesh> mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction,
                     Flightgroup *fg, bool is_original, const SequenceContainer<string> &texture_override,
                     bool &shared) {
     vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> old_mesh;
@@ -276,25 +277,25 @@ Mesh::constructMesh(Mesh &mesh_in_question, boost::string_view filename, const V
     shared = (err == VSFileSystem::Shared);
 
     //LoadXML(filename,scale,faction,fg,orig);
-    mesh_in_question.LoadXML(f, scale_x, faction, fg, is_original, texture_override);
-    old_mesh = mesh_in_question.orig;
+    mesh_in_question->LoadXML(f, scale_x, faction, fg, is_original, texture_override);
+    old_mesh = mesh_in_question->orig;
     if (err <= VSFileSystem::Ok) {
         f.Close();
     }
-    mesh_in_question.draw_queue = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+    mesh_in_question->draw_queue = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
 
-    if (!mesh_in_question.orig || mesh_in_question.orig->empty() || !mesh_in_question.orig->front()) {
-        mesh_in_question.hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename_string, scale_x, faction) : VSFileSystem::GetHashName(
+    if (!mesh_in_question->orig || mesh_in_question->orig->empty() || !mesh_in_question->orig->front()) {
+        mesh_in_question->hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename_string, scale_x, faction) : VSFileSystem::GetHashName(
                 filename_string,
                 scale_x,
                 faction);
-        meshHashTable.Put(mesh_in_question.hash_name, old_mesh->front());
-        old_mesh->at(0) = mesh_in_question.shared_from_this();
-        *(old_mesh->at(0)) = mesh_in_question;
+        meshHashTable.Put(mesh_in_question->hash_name, old_mesh->front());
+        old_mesh->at(0) = mesh_in_question->shared_from_this();
+        *(old_mesh->at(0)) = *mesh_in_question;
     } else {
-        mesh_in_question.orig.reset();
+        mesh_in_question->orig.reset();
     }
-    return mesh_in_question.shared_from_this();
+    return mesh_in_question;
 }
 
 bool Mesh::LoadExistant(boost::string_view file_hash, const Vector &scale, int faction) {

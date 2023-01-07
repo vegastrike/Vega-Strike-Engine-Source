@@ -133,7 +133,7 @@ public:
     virtual void ProcessDrawQueue(size_t whichpass, int which, bool zsort, const QVector &sortctr);
 
 protected:
-    static vega_types::SharedPtr<SphereMesh> constructSphereMesh(SphereMesh &mesh,
+    static vega_types::SharedPtr<SphereMesh> constructSphereMesh(vega_types::SharedPtr<SphereMesh> mesh,
                                                                  float radius,
                                                                  int stacks,
                                                                  int slices,
@@ -155,7 +155,7 @@ protected:
     calculateHashName(const char *texture, const std::string &technique, int stacks, int slices, const BLENDFUNC a,
                       const BLENDFUNC b, float rho_min, float rho_max);
     static uint64_t const calculateHowManyLevelsOfDetail(int stacks, int slices);
-    static vega_types::SharedPtr<Mesh> loadFreshLevelOfDetail(SphereMesh &mesh,
+    static vega_types::SharedPtr<Mesh> loadFreshLevelOfDetail(vega_types::SharedPtr<SphereMesh> mesh,
                                                               uint64_t l,
                                                               float radius,
                                                               int &stacks,
@@ -231,7 +231,7 @@ public:
                                                               bool reversed_normals);
 
 protected:
-    static vega_types::SharedPtr<CityLights> constructCityLights(CityLights &city_lights,
+    static vega_types::SharedPtr<CityLights> constructCityLights(vega_types::SharedPtr<CityLights> city_lights,
                                                                  float radius,
                                                                  int stacks,
                                                                  int slices,
