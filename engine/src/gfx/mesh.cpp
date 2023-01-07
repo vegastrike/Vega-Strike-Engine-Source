@@ -1,7 +1,7 @@
 /*
  * mesh.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -121,16 +121,16 @@ bool Mesh::LoadExistant(SharedPtr<Mesh> oldmesh) {
 }
 
 bool Mesh::LoadExistant(const std::string filehash, const Vector &scale, int faction) {
-    SharedPtr<Mesh> oldmesh;
+    SharedPtr<Mesh> old_mesh;
 
     hash_name = VSFileSystem::GetHashName(filehash, scale, faction);
-    oldmesh = meshHashTable.Get(hash_name);
-    if (!oldmesh) {
+    old_mesh = meshHashTable.Get(hash_name);
+    if (!old_mesh) {
         hash_name = VSFileSystem::GetSharedMeshHashName(filehash, scale, faction);
-        oldmesh = meshHashTable.Get(hash_name);
+        old_mesh = meshHashTable.Get(hash_name);
     }
-    if (oldmesh) {
-        return LoadExistant(oldmesh);
+    if (old_mesh) {
+        return LoadExistant(old_mesh);
     }
     return false;
 }

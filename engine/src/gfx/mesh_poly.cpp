@@ -297,3 +297,18 @@ Mesh::constructMesh(Mesh &mesh_in_question, boost::string_view filename, const V
     return mesh_in_question.shared_from_this();
 }
 
+bool Mesh::LoadExistant(boost::string_view file_hash, const Vector &scale, int faction) {
+    SharedPtr<Mesh> old_mesh;
+
+    hash_name = VSFileSystem::GetHashName(file_hash, scale, faction);
+    old_mesh = meshHashTable.Get(hash_name);
+    if (!old_mesh) {
+        hash_name = VSFileSystem::GetSharedMeshHashName(file_hash, scale, faction);
+        old_mesh = meshHashTable.Get(hash_name);
+    }
+    if (old_mesh) {
+        return LoadExistant(old_mesh);
+    }
+    return false;
+}
+

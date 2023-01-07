@@ -189,6 +189,7 @@ protected:
 public:
     bool LoadExistant(vega_types::SharedPtr<Mesh> mesh);
     bool LoadExistant(const std::string filehash, const Vector &scale, int faction);
+    bool LoadExistant(boost::string_view file_hash, const Vector &scale, int faction);
 protected:
 ///the position of the center of this mesh for collision detection
     Vector local_pos;
