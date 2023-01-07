@@ -1,7 +1,7 @@
 /*
  * mesh_fx.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -141,9 +141,13 @@ void Mesh::AddDamageFX(const Vector &pnt, const Vector &norm, const float damage
 
 void Mesh::UpdateFX(float howmuchtime) {
     //adjusts lights by TTL, eventually removing them
-    for (int i = LocalFX->size() - 1; i >= 0; i--) {
-        if (!LocalFX->at(i)->Update(howmuchtime)) {
-            LocalFX->erase(LocalFX->begin() + i);
+    if (LocalFX && !LocalFX->empty()) {
+        for (int i = LocalFX->size() - 1; i >= 0; i--) {
+            if (!LocalFX->at(i)) {
+                LocalFX->erase(LocalFX->begin() + i);
+            } else if (!LocalFX->at(i)->Update(howmuchtime)) {
+                LocalFX->erase(LocalFX->begin() + i);
+            }
         }
     }
 }

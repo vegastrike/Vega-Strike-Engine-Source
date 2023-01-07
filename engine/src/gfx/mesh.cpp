@@ -90,6 +90,12 @@ void Mesh::InitUnit() {
     if (Decal->empty()) {
         Decal->push_back(nullptr);
     }
+    if (!LocalFX) {
+        LocalFX = MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<MeshFX>>>();
+    }
+    if (LocalFX->empty()) {
+        LocalFX->push_back(nullptr);
+    }
 
     //texturename[0] = -1;
 //    numforcelogo = numsquadlogo = 0;

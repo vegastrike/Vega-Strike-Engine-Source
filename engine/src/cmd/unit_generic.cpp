@@ -1,7 +1,7 @@
 /*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -416,7 +416,7 @@ void Unit::Init(const char *filename,
     // but didn't do anything with it. See VSFile f variable.
 
     // TODO: something with the following line
-    this->Unit::Init();
+    Init();
     graphicOptions.SubUnit = SubU ? 1 : 0;
     graphicOptions.Animating = 1;
     graphicOptions.RecurseIntoSubUnitsOnCollision = !isSubUnit();
