@@ -547,7 +547,7 @@ void Mesh::DrawNow(float lod, bool centered, const Matrix &m, int cloak, float n
 void Mesh::ProcessZFarMeshes(bool nocamerasetup) {
     int a = NUM_ZBUF_SEQ;
 
-    if (!undrawn_meshes->at(a)->empty()) {
+    if (undrawn_meshes && !undrawn_meshes->empty() && a < undrawn_meshes->size() && undrawn_meshes->at(a) && !undrawn_meshes->at(a)->empty()) {
         //clear Z buffer
         GFXClear(GFXFALSE, GFXTRUE, GFXFALSE);
 
@@ -591,7 +591,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects, bool nocamerasetup) {
     bool zcleared = false;
 
     for (int a = 0; a < NUM_ZBUF_SEQ; a++) {
-        if (undrawn_meshes->at(a)->empty() && undrawn_logos.empty()) {
+        if ((!undrawn_meshes || undrawn_meshes->empty() || a > undrawn_meshes->size() || !undrawn_meshes->at(a) || undrawn_meshes->at(a)->empty()) && undrawn_logos.empty()) {
             continue;
         }
         if (!zcleared) {

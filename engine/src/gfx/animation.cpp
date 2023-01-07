@@ -133,12 +133,10 @@ Animation::~Animation() {
     if (!destroying) {
         destroying = true;
         Animation * thus = this;
-        farAnimationDrawQueue()->erase(std::remove_if(farAnimationDrawQueue()->begin(),
-                                                    farAnimationDrawQueue()->end(),
-                                                    [thus](const SharedPtr<Animation> ptr) {
-                                                        return !ptr || ptr.get() == thus;
-                                                    }));
-        animationDrawQueue()->erase(std::remove_if(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> ptr) { return !ptr || ptr.get() == thus; }));
+        auto first_to_remove1 = std::stable_partition(farAnimationDrawQueue()->begin(), farAnimationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return ptr && ptr.get() != thus; });
+        farAnimationDrawQueue()->erase(first_to_remove1, farAnimationDrawQueue()->end());
+        auto first_to_remove2 = std::stable_partition(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return ptr && ptr.get() != thus; });
+        animationDrawQueue()->erase(first_to_remove2, animationDrawQueue()->end());
     }
     VSDESTRUCT2
 }
