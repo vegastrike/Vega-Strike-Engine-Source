@@ -1334,10 +1334,10 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(const char *filename,
      *  ret.push_back(m);
      *  return ret;
      *  }*/
-    string hash_name = VSFileSystem::GetHashName(filename, scale, faction);
+    string hash_name = VSFileSystem::GetHashName(boost::string_view(filename), scale, faction);
     SharedPtr<SequenceContainer<SharedPtr<Mesh>>> oldmesh = bfxmHashTable()->Get(hash_name);
     if (oldmesh == 0) {
-        hash_name = VSFileSystem::GetSharedMeshHashName(filename, scale, faction);
+        hash_name = VSFileSystem::GetSharedMeshHashName(boost::string_view(filename), scale, faction);
         oldmesh = bfxmHashTable()->Get(hash_name);
     }
     if (0 != oldmesh) {
@@ -1375,10 +1375,10 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(const char *filename,
         }
         f.GoTo(0);
         hash_name =
-                (err == VSFileSystem::Shared) ? VSFileSystem::GetSharedMeshHashName(filename, scale,
+                (err == VSFileSystem::Shared) ? VSFileSystem::GetSharedMeshHashName(boost::string_view(filename), scale,
                         faction)
                         : VSFileSystem::GetHashName(
-                        filename,
+                        boost::string_view(filename),
                         scale,
                         faction);
         SequenceContainer<SharedPtr<Mesh> > retval(LoadMeshes(f, scale, faction, fg, hash_name, overrideTextures));
