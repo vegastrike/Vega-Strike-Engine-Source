@@ -1,7 +1,7 @@
 /*
  * mesh_xml.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, chuck_starchaser, pyramid3d,
+ * Copyright (C) 2001-2023 Daniel Horn, chuck_starchaser, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -56,6 +56,7 @@
 #include "vs_exit.h"
 #include "preferred_types.h"
 #include "shared_ptr_hashtable.h"
+#include <boost/utility/string_view.hpp>
 
 #ifdef max
 #undef max
@@ -851,11 +852,11 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                         framespersecond = XMLSupport::parse_float((*iter).value);
                         break;
                     case MeshXML::LODFILE:
-                        xml->lod.push_back(Mesh::constructMesh((*iter).value.c_str(),
-                                                               xml->lodscale,
-                                                               xml->faction,
-                                                               xml->fg,
-                                                               true));                   //make orig mesh
+                        xml->lod.push_back(Mesh::createMesh((*iter).value.c_str(),
+                                                            xml->lodscale,
+                                                            xml->faction,
+                                                            xml->fg,
+                                                            true));                   //make orig mesh
                         break;
                     case MeshXML::SIZE:
                         flotsize = XMLSupport::parse_float((*iter).value);
@@ -1398,7 +1399,7 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(const char *filename,
     } else {
         f.Close();
         bool original = false;
-        SharedPtr<Mesh> m = Mesh::constructMesh(filename, scale, faction, fg, original);
+        SharedPtr<Mesh> m = Mesh::createMesh(filename, scale, faction, fg, original);
         SequenceContainer<SharedPtr<Mesh>> ret;
         ret.push_back(m);
         return ret;

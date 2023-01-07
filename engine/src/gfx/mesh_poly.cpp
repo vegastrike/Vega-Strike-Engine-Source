@@ -1,7 +1,7 @@
 /*
  * mesh_poly.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -250,17 +250,17 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
 }
 
 vega_types::SharedPtr<Mesh>
-Mesh::constructMesh(boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original,
-                    const SequenceContainer<string> &texture_override) {
+Mesh::createMesh(boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original,
+                 const SequenceContainer<string> &texture_override) {
     Mesh return_value{filename, scale_x, faction, fg, is_original, texture_override};
     bool shared = false;
-    return constructMeshPart2(return_value, filename, scale_x, faction, fg, is_original, texture_override, shared);
+    return constructMesh(return_value, filename, scale_x, faction, fg, is_original, texture_override, shared);
 }
 
 vega_types::SharedPtr<Mesh>
-Mesh::constructMeshPart2(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction,
-                         Flightgroup *fg, bool is_original, const SequenceContainer<string> &texture_override,
-                         bool &shared) {
+Mesh::constructMesh(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction,
+                    Flightgroup *fg, bool is_original, const SequenceContainer<string> &texture_override,
+                    bool &shared) {
     vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> old_mesh;
     shared = false;
     VSFileSystem::VSFile f;

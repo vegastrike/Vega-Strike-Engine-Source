@@ -1,7 +1,7 @@
 /*
  * mesh.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, klaussfreire, pheonixstorm,
+ * Copyright (C) 2001-2023 Daniel Horn, Alan Shieh, klaussfreire, pheonixstorm,
  * safemode, dan_w, ace123, jacks, pyramid3d, Stephen G. Tuggy, Roy Falk,
  * and other Vega Strike contributors
  *
@@ -162,7 +162,7 @@ private:
     void endElement(MeshXML *xml, const std::string &name);
 
 protected:
-    static vega_types::SharedPtr<Mesh> constructMeshPart2(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original, const vega_types::SequenceContainer<std::string> &texture_override, bool &shared);
+    static vega_types::SharedPtr<Mesh> constructMesh(Mesh &mesh_in_question, boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original, const vega_types::SequenceContainer<std::string> &texture_override, bool &shared);
     void PostProcessLoading(vega_types::SharedPtr<MeshXML> xml, const vega_types::SequenceContainer<string> &overrideTexture);
 
 public:
@@ -265,8 +265,8 @@ public:
     Mesh();
     Mesh(const Mesh &m);
 
-    static vega_types::SharedPtr<Mesh> constructMesh(boost::string_view filename, const Vector &scale_x, int faction, class Flightgroup *fg, bool is_original,
-                                                     const vega_types::SequenceContainer<std::string> &texture_override = {});
+    static vega_types::SharedPtr<Mesh> createMesh(boost::string_view filename, const Vector &scale_x, int faction, class Flightgroup *fg, bool is_original,
+                                                  const vega_types::SequenceContainer<std::string> &texture_override = {});
 
     vega_types::SharedPtr<GFXVertexList> getVertexList() const;
     void setVertexList(vega_types::SharedPtr<GFXVertexList> _vlist);

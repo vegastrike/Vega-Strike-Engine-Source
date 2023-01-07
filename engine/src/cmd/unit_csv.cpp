@@ -1,7 +1,7 @@
 /*
  * unit_csv.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -1040,15 +1040,15 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         const int shieldstacks = configuration()->graphics_config.shield_detail;
         const std::string& shieldtex = configuration()->graphics_config.shield_texture;
         const std::string& shieldtechnique = configuration()->graphics_config.shield_technique;
-        meshdata.back() = vega_types::MakeShared<SphereMesh>(rSize(),
-                shieldstacks,
-                shieldstacks,
-                shieldtex.c_str(),
-                shieldtechnique,
-                nullptr,
-                false,
-                ONE,
-                ONE);
+        meshdata.back() = SphereMesh::createSphereMesh(rSize(),
+                                                       shieldstacks,
+                                                       shieldstacks,
+                                                       shieldtex.c_str(),
+                                                       shieldtechnique,
+                                                       nullptr,
+                                                       false,
+                                                       ONE,
+                                                       ONE);
     }
     meshdata.back()->EnableSpecialFX();
     //Begin the Pow-w-w-war Zone Collide Tree Generation

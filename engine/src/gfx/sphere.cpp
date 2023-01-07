@@ -40,12 +40,12 @@
 using XMLSupport::tostring;
 using namespace vega_types;
 
-void SphereMesh::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
+void SphereMesh::ProcessDrawQueue(size_t whichpass, int which, bool zsort, const QVector &sortctr) {
     static SharedPtr<GFXColor> spherecol = MakeShared<GFXColor>(vs_config->getColor("planet_ambient"));
     SharedPtr<GFXColor> const tmpcol = MakeShared<GFXColor>(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(spherecol);
-    Mesh::ProcessDrawQueue(whichpass, whichdrawqueue, zsort, sortctr);
+    Mesh::ProcessDrawQueue(whichpass, which, zsort, sortctr);
     GFXLightContextAmbient(tmpcol);
     GFXPolygonOffset(0, 0);
 }
@@ -55,47 +55,29 @@ void SphereMesh::SelectCullFace(int whichdrawqueue) {
 }
 
 vega_types::SharedPtr<SphereMesh>
-SphereMesh::constructSphereMesh(float radius, int stacks, int slices, const char *texture, const string &technique,
-                                const char *alpha, bool inside_out, const BLENDFUNC a, const BLENDFUNC b, bool env_map,
-                                float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap,
-                                bool reverse_normals) {
+SphereMesh::createSphereMesh(float radius, int stacks, int slices, const char *texture, const string &technique,
+                             const char *alpha, bool inside_out, const BLENDFUNC a, const BLENDFUNC b, bool env_map,
+                             float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap,
+                             bool reverse_normals) {
     SphereMesh return_value;
-    return_value.setConvex(true);
-    const std::string hash_name = calculateHashName(texture, technique, stacks, slices, a, b, rho_min, rho_max);
-    const uint64_t num_levels_of_detail = calculateHowManyLevelsOfDetail(stacks, slices);
-    const vega_types::SharedPtr<Mesh> ptr_to_return_value = return_value.shared_from_this();
-    if (return_value.LoadExistant(hash_name, Vector(radius, radius, radius), 0)) {
-        return vega_dynamic_cast_shared_ptr<SphereMesh>(ptr_to_return_value);
-    } else {
-        return_value.orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>();
-        return_value.numlods = num_levels_of_detail;
-        return_value.radialSize = radius;
-        return_value.mn = Vector(-return_value.radialSize, -return_value.radialSize, -return_value.radialSize);
-        return_value.mx = Vector(return_value.radialSize, return_value.radialSize, return_value.radialSize);
-        for (uint64_t l = 0; l < num_levels_of_detail; ++l) {
-            return_value.orig->push_back(loadFreshLevelOfDetail(return_value,
-                                                                l,
-                                                                radius,
-                                                                stacks,
-                                                                slices,
-                                                                texture,
-                                                                technique,
-                                                                alpha,
-                                                                inside_out,
-                                                                a,
-                                                                b,
-                                                                env_map,
-                                                                rho_min,
-                                                                rho_max,
-                                                                theta_min,
-                                                                theta_max,
-                                                                mipmap,
-                                                                reverse_normals,
-                                                                false));
-        }
-        meshHashTable.Put(VSFileSystem::GetSharedMeshHashName(hash_name, Vector(radius, radius, radius), 0), ptr_to_return_value);
-        return vega_dynamic_cast_shared_ptr<SphereMesh>(ptr_to_return_value);
-    }
+    return constructSphereMesh(return_value,
+                               radius,
+                               stacks,
+                               slices,
+                               texture,
+                               technique,
+                               alpha,
+                               inside_out,
+                               a,
+                               b,
+                               env_map,
+                               rho_min,
+                               rho_max,
+                               theta_min,
+                               theta_max,
+                               mipmap,
+                               reverse_normals,
+                               false);
 }
 
 std::string const
@@ -307,7 +289,7 @@ SharedPtr<Mesh> SphereMesh::loadFreshLevelOfDetail(SphereMesh &mesh,
     return mesh.shared_from_this();
 }
 
-void CityLights::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
+void CityLights::ProcessDrawQueue(size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
     SharedPtr<GFXColor> const citycol = MakeShared<GFXColor>(1, 1, 1, 1);
     SharedPtr<GFXColor> const tmpcol = MakeShared<GFXColor>(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);

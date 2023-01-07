@@ -24,6 +24,7 @@
 
 
 #include <math.h>
+#include <vega_cast_utils.h>
 
 #include "sphere.h"
 #include "ani_texture.h"
@@ -287,6 +288,63 @@ std::string SphereMesh::truncateByPipe(std::string &input) {
     return ret;
 }
 
+SharedPtr<SphereMesh> SphereMesh::constructSphereMesh(SphereMesh &mesh,
+                                                      float radius,
+                                                      int stacks,
+                                                      int slices,
+                                                      const char *texture,
+                                                      const std::string &technique,
+                                                      const char *alpha,
+                                                      bool inside_out,
+                                                      const BLENDFUNC a,
+                                                      const BLENDFUNC b,
+                                                      bool env_map,
+                                                      float rho_min,
+                                                      float rho_max,
+                                                      float theta_min,
+                                                      float theta_max,
+                                                      FILTER mipmap,
+                                                      bool reverse_normals,
+                                                      bool subclass) {
+    mesh.setConvex(true);
+    const std::string hash_name = calculateHashName(texture, technique, stacks, slices, a, b, rho_min, rho_max);
+    const uint64_t num_levels_of_detail = calculateHowManyLevelsOfDetail(stacks, slices);
+    const vega_types::SharedPtr<Mesh> ptr_to_return_value = mesh.shared_from_this();
+    if (mesh.LoadExistant(hash_name, Vector(radius, radius, radius), 0)) {
+        return vega_dynamic_cast_shared_ptr<SphereMesh>(ptr_to_return_value);
+    } else {
+        mesh.orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>();
+        mesh.numlods = num_levels_of_detail;
+        mesh.radialSize = radius;
+        mesh.mn = Vector(-mesh.radialSize, -mesh.radialSize, -mesh.radialSize);
+        mesh.mx = Vector(mesh.radialSize, mesh.radialSize, mesh.radialSize);
+        for (uint64_t l = 0; l < num_levels_of_detail; ++l) {
+            mesh.orig->push_back(loadFreshLevelOfDetail(mesh,
+                                                        l,
+                                                        radius,
+                                                        stacks,
+                                                        slices,
+                                                        texture,
+                                                        technique,
+                                                        alpha,
+                                                        inside_out,
+                                                        a,
+                                                        b,
+                                                        env_map,
+                                                        rho_min,
+                                                        rho_max,
+                                                        theta_min,
+                                                        theta_max,
+                                                        mipmap,
+                                                        reverse_normals,
+                                                        subclass));
+        }
+        meshHashTable.Put(VSFileSystem::GetSharedMeshHashName(hash_name, Vector(radius, radius, radius), 0),
+                          ptr_to_return_value);
+        return vega_dynamic_cast_shared_ptr<SphereMesh>(ptr_to_return_value);
+    }
+}
+
 float CityLights::wrapx = 1;
 float CityLights::wrapy = 1;
 
@@ -328,5 +386,83 @@ CityLights::CityLights(float radius,
             filter,
             reversed_normals,
             zzwrapx != 1 || zzwrapy != 1);
+}
+
+vega_types::SharedPtr<CityLights> CityLights::createCityLights(float radius,
+                                                               int stacks,
+                                                               int slices,
+                                                               const char *texture,
+                                                               int zzwrapx,
+                                                               int zzwrapy,
+                                                               bool insideout,
+                                                               const BLENDFUNC a,
+                                                               const BLENDFUNC b,
+                                                               bool envMap,
+                                                               float rho_min,
+                                                               float rho_max,
+                                                               float theta_min,
+                                                               float theta_max,
+                                                               bool reversed_normals) {
+    CityLights return_value;
+    return constructCityLights(return_value,
+                               radius,
+                               stacks,
+                               slices,
+                               texture,
+                               zzwrapx,
+                               zzwrapy,
+                               insideout,
+                               a,
+                               b,
+                               envMap,
+                               rho_min,
+                               rho_max,
+                               theta_min,
+                               theta_max,
+                               reversed_normals,
+                               (zzwrapx != 1 || zzwrapy != 1));
+}
+
+vega_types::SharedPtr<CityLights> CityLights::constructCityLights(CityLights &city_lights,
+                                                                  float radius,
+                                                                  int stacks,
+                                                                  int slices,
+                                                                  const char *texture,
+                                                                  int zzwrapx,
+                                                                  int zzwrapy,
+                                                                  bool insideout,
+                                                                  const BLENDFUNC a,
+                                                                  const BLENDFUNC b,
+                                                                  bool envMap,
+                                                                  float rho_min,
+                                                                  float rho_max,
+                                                                  float theta_min,
+                                                                  float theta_max,
+                                                                  bool reversed_normals,
+                                                                  bool subclass) {
+    city_lights.setConvex(true);
+    CityLights::wrapx = zzwrapx;
+    CityLights::wrapy = zzwrapy;
+    FILTER const filter =
+            (FILTER) XMLSupport::parse_int(vs_config->getVariable("graphics", "CityLightFilter",
+                                                                  XMLSupport::tostring(((int) TRILINEAR))));
+    return vega_dynamic_cast_shared_ptr<CityLights>(constructSphereMesh(city_lights,
+                                                                        radius,
+                                                                        stacks,
+                                                                        slices,
+                                                                        texture,
+                                                                        "",
+                                                                        nullptr,
+                                                                        insideout,
+                                                                        a,
+                                                                        b,
+                                                                        envMap,
+                                                                        rho_min,
+                                                                        rho_max,
+                                                                        theta_min,
+                                                                        theta_max,
+                                                                        filter,
+                                                                        reversed_normals,
+                                                                        subclass));
 }
 

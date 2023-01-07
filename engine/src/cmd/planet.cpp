@@ -1,7 +1,7 @@
 /*
  * planet.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -287,15 +287,15 @@ Planet::Planet(QVector x,
     if (!wormhole) {
         const int stacks = configuration()->graphics_config.planet_detail_stacks;
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
-        meshdata.push_back(vega_types::MakeShared<SphereMesh>(radius,
-                stacks,
-                stacks,
-                textname.c_str(),
-                technique,
-                nullptr,
-                inside_out,
-                blendSrc,
-                blendDst));
+        meshdata.push_back(SphereMesh::createSphereMesh(radius,
+                                                        stacks,
+                                                        stacks,
+                                                        textname.c_str(),
+                                                        technique,
+                                                        nullptr,
+                                                        inside_out,
+                                                        blendSrc,
+                                                        blendDst));
         meshdata.back()->setEnvMap(GFXFALSE);
         meshdata.back()->SetMaterial(ourmat);
         meshdata.push_back(nullptr);
@@ -497,15 +497,15 @@ void Planet::AddAtmosphere(const std::string &texture,
     vega_types::SharedPtr<Mesh> shield = meshdata.back();
     meshdata.pop_back();
     const int stacks = configuration()->graphics_config.planet_detail_stacks;
-    meshdata.push_back(vega_types::MakeShared<SphereMesh>(radius,
-            stacks,
-            stacks,
-            texture.c_str(),
-            string(),
-            nullptr,
-            inside_out,
-            blendSrc,
-            blendDst));
+    meshdata.push_back(SphereMesh::createSphereMesh(radius,
+                                                    stacks,
+                                                    stacks,
+                                                    texture.c_str(),
+                                                    string(),
+                                                    nullptr,
+                                                    inside_out,
+                                                    blendSrc,
+                                                    blendDst));
     if (meshdata.back()) {
         //By klauss - this needs to be done for most atmospheres
         GFXMaterial a = {
@@ -542,7 +542,7 @@ void Planet::AddCity(const std::string &texture,
     setMaterialEmissive(m, daymaterialweight);
     m.power = 0.0;
     const int stacks = configuration()->graphics_config.planet_detail_stacks;
-    meshdata.push_back(vega_types::MakeShared<CityLights>(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
+    meshdata.push_back(CityLights::createCityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
             false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
     meshdata.back()->setEnvMap(GFXFALSE);
     meshdata.back()->SetMaterial(m);

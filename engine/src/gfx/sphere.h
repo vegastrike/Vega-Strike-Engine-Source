@@ -75,6 +75,7 @@ public:
     virtual void SelectCullFace(int whichdrawqueue);
     virtual void RestoreCullFace(int whichdrawqueue);
 
+protected:
     SphereMesh(float radius,
             int stacks,
             int slices,
@@ -109,8 +110,31 @@ public:
                 reverse_normals);
     }
 
+public:
     static std::string truncateByPipe(std::string &input);
-    static vega_types::SharedPtr<SphereMesh> constructSphereMesh(float radius,
+    static vega_types::SharedPtr<SphereMesh> createSphereMesh(float radius,
+                                                              int stacks,
+                                                              int slices,
+                                                              const char *texture,
+                                                              const std::string &technique,
+                                                              const char *alpha = NULL,
+                                                              bool inside_out = false,
+                                                              const BLENDFUNC a = ONE,
+                                                              const BLENDFUNC b = ZERO,
+                                                              bool env_map = false,
+                                                              float rho_min = 0.0,
+                                                              float rho_max = M_PI,
+                                                              float theta_min = 0.0,
+                                                              float theta_max = 2 * M_PI,
+                                                              FILTER mipmap = MIPMAP,
+                                                              bool reverse_normals = false);
+
+    void Draw(float lod, bool centered = false, const Matrix &m = identity_matrix);
+    virtual void ProcessDrawQueue(size_t whichpass, int which, bool zsort, const QVector &sortctr);
+
+protected:
+    static vega_types::SharedPtr<SphereMesh> constructSphereMesh(SphereMesh &mesh,
+                                                                 float radius,
                                                                  int stacks,
                                                                  int slices,
                                                                  const char *texture,
@@ -125,11 +149,8 @@ public:
                                                                  float theta_min = 0.0,
                                                                  float theta_max = 2 * M_PI,
                                                                  FILTER mipmap = MIPMAP,
-                                                                 bool reverse_normals = false);
-
-    void Draw(float lod, bool centered = false, const Matrix &m = identity_matrix);
-    virtual void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr);
-
+                                                                 bool reverse_normals = false,
+                                                                 bool subclass = false);
     static std::string const
     calculateHashName(const char *texture, const std::string &technique, int stacks, int slices, const BLENDFUNC a,
                       const BLENDFUNC b, float rho_min, float rho_max);
@@ -173,6 +194,7 @@ public:
     CityLights() : SphereMesh() {
     }
 
+protected:
     CityLights(float radius,
             int stacks,
             int slices,
@@ -188,7 +210,44 @@ public:
             float theta_min = 0.0,
             float theta_max = 2 * M_PI,
             bool inside_out = true);
-    virtual void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr);
+
+public:
+    virtual void ProcessDrawQueue(size_t whichpass, int which, bool zsort, const QVector &sortctr);
+
+    static vega_types::SharedPtr<CityLights> createCityLights(float radius,
+                                                              int stacks,
+                                                              int slices,
+                                                              const char *texture,
+                                                              int zzwrapx,
+                                                              int zzwrapy,
+                                                              bool insideout,
+                                                              const BLENDFUNC a,
+                                                              const BLENDFUNC b,
+                                                              bool envMap,
+                                                              float rho_min,
+                                                              float rho_max,
+                                                              float theta_min,
+                                                              float theta_max,
+                                                              bool reversed_normals);
+
+protected:
+    static vega_types::SharedPtr<CityLights> constructCityLights(CityLights &city_lights,
+                                                                 float radius,
+                                                                 int stacks,
+                                                                 int slices,
+                                                                 const char *texture,
+                                                                 int zzwrapx,
+                                                                 int zzwrapy,
+                                                                 bool insideout,
+                                                                 const BLENDFUNC a,
+                                                                 const BLENDFUNC b,
+                                                                 bool envMap,
+                                                                 float rho_min,
+                                                                 float rho_max,
+                                                                 float theta_min,
+                                                                 float theta_max,
+                                                                 bool reversed_normals,
+                                                                 bool subclass);
 };
 #endif
 
