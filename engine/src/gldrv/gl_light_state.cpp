@@ -214,7 +214,7 @@ gfx_light & gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can 
 
 int gfx_light::lightNum() {
     // FIXME (Stephen G. Tuggy 2022-12-21): This doesn't look right. Shouldn't it divide by the size of each element?
-    ptrdiff_t const tmp = (this - staticLightsDataManager()->l_lights->front().get());
+    size_t const tmp = staticLightsDataManager()->l_lights->index_of(std::find_if(staticLightsDataManager()->l_lights->begin(), staticLightsDataManager()->l_lights->end(), [this](SharedPtr<gfx_light> ptr) { return staticLightsDataManager()->localLightAtIndex(ptr->Target()).get() == this; }));
     assert(tmp >= 0 && tmp < staticLightsDataManager()->l_lights->size());
     assert(staticLightsDataManager()->localLightAtIndex(staticLightsDataManager()->gl_lights->at(target)->index).get() == this);
     return static_cast<int>(tmp);
