@@ -1,7 +1,7 @@
 /*
  * mesh_gfx.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, surfdargent, hellcatv, ace123,
+ * Copyright (C) 2001-2023 Daniel Horn, surfdargent, hellcatv, ace123,
  * klaussfreire, dan_w, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *

@@ -1,7 +1,7 @@
 /*
  * gl_light_state.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -213,10 +213,10 @@ gfx_light & gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can 
 }
 
 int gfx_light::lightNum() {
-    // FIXME (Stephen G. Tuggy 2022-12-21): This doesn't look right. Shouldn't it divide by the size of each element?
-    size_t const tmp = staticLightsDataManager()->l_lights->index_of(std::find_if(staticLightsDataManager()->l_lights->begin(), staticLightsDataManager()->l_lights->end(), [this](SharedPtr<gfx_light> ptr) { return staticLightsDataManager()->localLightAtIndex(ptr->Target()).get() == this; }));
+    auto iterator_to_this = std::find_if(staticLightsDataManager()->l_lights->begin(), staticLightsDataManager()->l_lights->end(), [this](SharedPtr<gfx_light> ptr) { return ptr.get() == this; });
+    size_t const tmp = iterator_to_this - staticLightsDataManager()->l_lights->begin();
     assert(tmp >= 0 && tmp < staticLightsDataManager()->l_lights->size());
-    assert(staticLightsDataManager()->localLightAtIndex(staticLightsDataManager()->gl_lights->at(target)->index).get() == this);
+    assert(staticLightsDataManager()->localLightAtIndex(tmp).get() == this);
     return static_cast<int>(tmp);
 } //which number it is in the main scheme of things
 
