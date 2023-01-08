@@ -1,7 +1,7 @@
 /*
  * shared_ptr_hashtable.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -44,6 +44,9 @@ template<class KEY, class VALUE, int SIZ>
 class SharedPtrHashtable : public vsUMap<KEY, vega_types::SharedPtr<VALUE>> {
     typedef std::pair<KEY, vega_types::SharedPtr<VALUE>> HashElement;
     typedef vsUMap<KEY, vega_types::SharedPtr<VALUE>> supertype;
+
+    bool destroying_hashtable{};
+
 public:
     static size_t hash(const int key) {
         unsigned int k = key;
@@ -102,11 +105,18 @@ public:
 
     // TODO: Optimize?
     void Delete(const KEY &key) {
+        if (destroying_hashtable) {
+            return;
+        }
         typename supertype::iterator iter = this->find(key);
         if (iter == this->end()) {
             return;
         }
         this->erase(iter);
+    }
+
+    ~SharedPtrHashtable() {
+        destroying_hashtable = true;
     }
 };
 
