@@ -69,8 +69,7 @@ const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction 
     const char *name = upgradeName.c_str();
     const Unit *partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetUpgradeFaction()));
     if (!partUnit) {
-        partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
-                        FactionUtil::GetUpgradeFaction()),
+        partUnit = UnitConstCache::setCachedConst(StringIntKey(name, FactionUtil::GetUpgradeFaction()),
                 new Unit(name, true, FactionUtil::GetUpgradeFaction()));
     }
     if (partUnit->name == "LOAD_FAILED") {

@@ -582,4 +582,104 @@ void Mount::SetMountOrientation(const Quaternion &t) {
     orient = t;
 }
 
+bool Mount::AddAmmo(const Mount *upgrading_mount, const Unit* weapon, bool perform_action) {
+    // Weapons don't match so ammo doesn't either
+    if(upgrading_mount->type->name != type->name) {
+        return false;
+    }
 
+    // If either is unlimited?
+    if(upgrading_mount->ammo == -1 || ammo == -1) {
+        return false;
+    }
+
+    int tmp_ammo = this->ammo;
+    tmp_ammo += upgrading_mount->ammo;
+
+    if(type->isMissile()) {
+        if (tmp_ammo * this->type->volume > this->volume) {
+            tmp_ammo = (int) floor(0.125 + ((0 + this->volume) / this->type->volume));
+        }
+    } else {
+        // TODO: make load_failed a single variable throughout
+        if (weapon == nullptr || weapon->name == "LOAD_FAILED") {
+            // this should not happen
+            VS_LOG(info,(boost::format("UpgradeMount(): FAILED to obtain weapon: %1%")
+                    % weapon->name));
+            return false;
+        }
+
+        int max_ammo = weapon->mounts[0].ammo;
+
+        if (tmp_ammo > max_ammo) {
+            tmp_ammo = max_ammo;
+        }
+    }
+
+    if (tmp_ammo <= this->ammo) {
+        return false;
+    }
+
+    if (perform_action) {
+            this->ammo = tmp_ammo;
+    }
+
+    return true;
+}
+
+
+// Almost certain the parameter is not required
+// A beam weapon has ammo=-1, everything else is >=0
+void Mount::Deactivate(bool is_ammo, bool is_missile_mount) {
+    status = Mount::UNCHOSEN;
+    if(!is_missile_mount) {
+        ammo = -1;
+    }
+}
+
+
+bool Mount::IsMissileMount() const {
+    int mount_size = as_integer(this->type->size);
+    return (mount_size & (
+            as_integer(MOUNT_SIZE::LIGHTMISSILE) |
+                    as_integer(MOUNT_SIZE::MEDIUMMISSILE) |
+                    as_integer(MOUNT_SIZE::HEAVYMISSILE) |
+                    as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE) |
+                    as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE) |
+                    as_integer(MOUNT_SIZE::SPECIALMISSILE))) != 0;
+}
+
+bool Mount::MountFits(const Mount upgrading_mount) const {
+    return ((unsigned int) (as_integer(upgrading_mount.type->size))
+                           == (as_integer(upgrading_mount.type->size) & this->size));
+}
+
+bool Mount::SameWeapon(const Mount* other_mount) const {
+    return other_mount->type->name == this->type->name;
+}
+
+bool Mount::CanUpgradeMount(const Mount* other_mount,
+                            Unit* unit,
+                            const bool is_ammo,
+                            int &numave,        // number of used parts?
+                            double &percentage,
+                            bool perform_upgrade) {
+    //If missile, can upgrade directly, if other type of ammo, needs actual gun to be present.
+    if (is_ammo && !other_mount->IsMissileMount()) {
+        return false;
+    }
+
+    ++numave;                                 //ok now we can compute percentage of used parts
+    Mount upmount(*other_mount);
+
+    //compute here
+    percentage += Percentage(&upmount);
+
+    //if we wish to modify the mounts
+    if (perform_upgrade) {
+        //switch this mount with the upgrador mount
+        ReplaceMounts(unit, &upmount);
+    }
+
+    return true;
+}

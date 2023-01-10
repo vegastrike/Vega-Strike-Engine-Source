@@ -153,13 +153,5 @@ bool isGunMount(const int mount) {
                     as_integer(MOUNT_SIZE::SPECIAL))) != 0;
 }
 
-bool isMissileMount(const int mount) {
-    return (mount & (
-            as_integer(MOUNT_SIZE::LIGHTMISSILE) |
-                    as_integer(MOUNT_SIZE::MEDIUMMISSILE) |
-                    as_integer(MOUNT_SIZE::HEAVYMISSILE) |
-                    as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE) |
-                    as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE) |
-                    as_integer(MOUNT_SIZE::SPECIALMISSILE))) != 0;
-}
+
 
