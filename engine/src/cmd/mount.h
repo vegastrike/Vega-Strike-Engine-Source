@@ -30,6 +30,9 @@
 #include "collide_map.h"
 #include "gfx/quaternion.h"
 
+// TODO: move to cpp
+#include "weapon_info.h"
+
 class Beam;
 struct WeaponInfo;
 class Unit;
@@ -61,6 +64,8 @@ public:
 //the size that this mount can hold. May be any bitwise combination of WeaponInfo::MOUNT_SIZE
     unsigned int size;                                           //short fix
 //-1 is infinite
+
+    // Ammo is candidate for Resource
     int ammo;                                            //short
     int volume;                                          //-1 is infinite //short fix
 //The data behind this weapon. May be accordingly damaged as time goes on
@@ -127,6 +132,19 @@ public:
     bool IsEmpty() const {
         return !(status == ACTIVE || status == INACTIVE);
     }
+
+    bool AddAmmo(const Mount *upgrading_mount, const Unit* weapon, bool perform_action);
+
+    void Deactivate(bool is_ammo, bool is_missile_mount);
+    bool IsMissileMount() const;
+    bool MountFits(const Mount upgrading_mount) const;
+    bool SameWeapon(const Mount* other_mount) const;
+    bool CanUpgradeMount(const Mount* other_mount,
+                         Unit* unit,
+                         const bool is_ammo,
+                         int &numave,        // number of used parts?
+                         double &percentage,
+                         bool perform_upgrade);
 };
 
 #endif // MOUNT_H

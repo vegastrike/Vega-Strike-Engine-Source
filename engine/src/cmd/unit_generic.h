@@ -75,6 +75,7 @@ void UncheckUnit( class Unit*un );
 #include "collide_map.h"
 #include "SharedPool.h"
 #include "role_bitmask.h"
+#include "upgradeable_unit.h"
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
@@ -134,7 +135,7 @@ struct PlanetaryOrbitData;
 
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
-        public Intelligent, public Movable, public JumpCapable, public Carrier {
+        public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
 protected:
 //How many lists are referencing us
     int ucref = 0;
@@ -252,13 +253,7 @@ public:
             bool downgrade,
             int &numave,
             double &percentage);
-    bool UpgradeMounts(const Unit *up,
-            int subunitoffset,
-            bool touchme,
-            bool downgrade,
-            int &numave,
-            const Unit *templ,
-            double &percentage);
+
 //the turrets and spinning parts fun fun stuff
     UnitCollection SubUnits;
 
@@ -280,6 +275,8 @@ public:
     bool isSubUnit() const {
         return graphicOptions.SubUnit ? true : false;
     }
+
+    //virtual void UpgradeUnit(const std::string &upgrades) {}
 
     void setFaceCamera();
     bool UpAndDownGrade(const Unit *up,
