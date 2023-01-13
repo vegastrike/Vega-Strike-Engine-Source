@@ -111,7 +111,7 @@ bool UpgradeableUnit::UpgradeMounts(const Unit *up,
 
     // All weapons come with one mount at least
     if(num_up_mounts == 0) {
-        return false;
+        return true;
     }
 
     int j = mountoffset;
