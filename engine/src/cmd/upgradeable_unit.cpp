@@ -1,3 +1,29 @@
+/*
+ * upgradeable_unit.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 #include "upgradeable_unit.h"
 
 
@@ -198,8 +224,8 @@ bool UpgradeableUnit::UpgradeMounts(const Unit *up,
                     continue;
                 }
                 ///search for right mount to remove starting from j. this is the right name
-                if (strcasecmp(unit->mounts[jkmod].type->name.c_str(),
-                               upgrading_mount->type->name.c_str()) == 0) {
+                if (boost::iequals(unit->mounts[jkmod].type->name.c_str(),
+                               upgrading_mount->type->name.c_str())) {
                     //we got one, but check if we're trying to sell non-existent ammo
                     if (is_ammo && unit->mounts[jkmod].ammo <= 0) {
                         //whether it's gun ammo or a missile, you can't remove ammo from an infinite source, and you can't remove ammo if there isn't any
