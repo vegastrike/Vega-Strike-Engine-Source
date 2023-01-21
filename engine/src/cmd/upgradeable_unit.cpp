@@ -37,6 +37,7 @@
 #include "faction_generic.h"
 #include "unit_generic.h"
 #include "weapon_info.h"
+#include "vega_cast_utils.h"
 
 std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     if(upgrades.size() == 0) {
@@ -109,7 +110,7 @@ void UpgradeableUnit::UpgradeUnit(const std::string &upgrades) {
         const int mode = GetModeFromName(upgrade.c_str());
 
         // TODO: change this when we make this a sub-class of unit
-        Unit *unit = static_cast<Unit *>(this);
+        Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
         unit->Upgrade(upgradee, mount_offset, subunit_offset, mode, true, percent, nullptr);
     }
 }
@@ -126,7 +127,7 @@ bool UpgradeableUnit::UpgradeMounts(const Unit *up,
                                     int &numave,        // number of used parts?
                                     double &percentage) // percentage of used parts
 {
-    Unit* unit = static_cast<Unit *>(this);
+    Unit* unit = vega_dynamic_cast_ptr<Unit>(this);
     const int num_mounts = unit->getNumMounts();
     const int num_up_mounts = up->getNumMounts();
 
