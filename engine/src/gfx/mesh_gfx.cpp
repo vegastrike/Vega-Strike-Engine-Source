@@ -560,12 +560,24 @@ void Mesh::ProcessZFarMeshes(bool nocamerasetup) {
 
         std::sort(undrawn_meshes->at(a)->begin(), undrawn_meshes->at(a)->end());
         for (auto it = undrawn_meshes->at(a)->begin(); it < undrawn_meshes->at(a)->end(); ++it) {
+            if (!it->get()) {
+                continue;
+            }
             SharedPtr<Mesh> const m = (*it)->orig;
+            if (!m) {
+                continue;
+            }
             m->ProcessDrawQueue((*it)->passno, a, (*it)->zsort, _Universe->AccessCamera()->GetPosition());
-            m->will_be_drawn &= (~(1 << a));           //not accurate anymore
+            m->will_be_drawn &= (~(1 << a));           // FIXME: not accurate anymore per older comment
         }
         for (auto it = undrawn_meshes->at(a)->begin(); it < undrawn_meshes->at(a)->end(); ++it) {
+            if (!it->get()) {
+                continue;
+            }
             SharedPtr<Mesh> const m = (*it)->orig;
+            if (!m) {
+                continue;
+            }
             m->draw_queue->at(a)->clear();
         }
         undrawn_meshes->at(a)->clear();
