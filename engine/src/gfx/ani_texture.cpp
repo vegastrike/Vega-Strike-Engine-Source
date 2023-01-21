@@ -1,7 +1,7 @@
 /*
  * ani_texture.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -359,12 +359,16 @@ const vega_types::SharedPtr<const Texture> AnimatedTexture::OriginalConst() cons
 
 vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
     vega_types::SharedPtr<AnimatedTexture> retval = vega_types::MakeShared<AnimatedTexture>();
-    if (Decal) {
+    if (Decal && !Decal->empty()) {
         *retval = *this;
         int nf = vidMode ? 1 : numframes;
         retval->Decal = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>>(nf);
         for (int i = 0; i < nf; ++i) {
-            retval->Decal->push_back(Decal->at(i)->Clone());
+            if (Decal->at(i)) {
+                retval->Decal->push_back(Decal->at(i)->Clone());
+            } else {
+                retval->Decal->push_back(nullptr);
+            }
         }
     } else if (vidSource) {
         *retval = *this;

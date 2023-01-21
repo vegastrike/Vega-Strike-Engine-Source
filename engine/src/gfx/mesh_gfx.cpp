@@ -407,9 +407,11 @@ Mesh::~Mesh() {
 
     if (!orig || (!orig->empty() && orig->at(0).get() == this)) {
         for (auto & undrawn_mesh : *undrawn_meshes) {
-            auto first_to_remove = std::stable_partition(undrawn_mesh->begin(), undrawn_mesh->end(), [this](
-                    SharedPtr<OrigMeshContainer> pi) { return pi->orig.get() != this; } );
-            undrawn_mesh->erase(first_to_remove, undrawn_mesh->end());
+            if (undrawn_mesh) {
+                auto first_to_remove = std::stable_partition(undrawn_mesh->begin(), undrawn_mesh->end(), [this](
+                        SharedPtr<OrigMeshContainer> pi) { return pi->orig.get() != this; });
+                undrawn_mesh->erase(first_to_remove, undrawn_mesh->end());
+            }
         }
         if (meshHashTable.Get(hash_name).get() == this) {
             meshHashTable.Delete(hash_name);
