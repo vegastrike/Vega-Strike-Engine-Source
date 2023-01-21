@@ -40,6 +40,7 @@ class UpgradeableUnit
 {
 public:
     UpgradeableUnit();
+    virtual ~UpgradeableUnit() {}
     void UpgradeUnit(const std::string &upgrades);
     bool UpgradeMounts(const Unit *up,
                   int subunitoffset,
