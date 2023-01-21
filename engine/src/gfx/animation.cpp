@@ -130,14 +130,14 @@ Animation::Animation(const char *FileName,
 }
 
 Animation::~Animation() {
-    if (!destroying) {
-        destroying = true;
-        Animation * thus = this;
-        auto first_to_remove1 = std::stable_partition(farAnimationDrawQueue()->begin(), farAnimationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return !ptr || ptr.get() != thus; });
-        farAnimationDrawQueue()->erase(first_to_remove1, farAnimationDrawQueue()->end());
-        auto first_to_remove2 = std::stable_partition(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return !ptr || ptr.get() != thus; });
-        animationDrawQueue()->erase(first_to_remove2, animationDrawQueue()->end());
-    }
+//    if (!destroying) {
+//        destroying = true;
+//        Animation * thus = this;
+//        auto first_to_remove1 = std::stable_partition(farAnimationDrawQueue()->begin(), farAnimationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return !ptr || ptr.get() != thus; });
+//        farAnimationDrawQueue()->erase(first_to_remove1, farAnimationDrawQueue()->end());
+//        auto first_to_remove2 = std::stable_partition(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return !ptr || ptr.get() != thus; });
+//        animationDrawQueue()->erase(first_to_remove2, animationDrawQueue()->end());
+//    }
     VSDESTRUCT2
 }
 
