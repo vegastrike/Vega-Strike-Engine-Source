@@ -387,10 +387,7 @@ vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
         retval->LoadVideoSource(f);
     } else if (Decal) {
         //LoadVideoSource adds to anis, otherwise we'll have to add ourselves
-        const vega_types::SharedPtr<const AnimatedTexture> to_insert = retval;
-        vega_types::SharedPtr<const Animation> as_animation_ptr = vega_dynamic_const_cast_shared_ptr<Animation>(to_insert);
-        vega_types::SharedPtr<const Animation> & as_animation_ptr_ref = as_animation_ptr;
-        anis.push_back(as_animation_ptr_ref);
+        anis.insert({retval});
     }
     return retval;
 }
@@ -502,7 +499,7 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
             mintcoord.y /= sizeY;
         }
 
-        anis.insert(this);
+        anis.insert({vega_dynamic_cast_shared_ptr<AnimatedTexture>(shared_from_this())});
     }
 }
 
@@ -676,7 +673,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
     original = NULL;
     loadSuccess = true;
 
-    anis.insert(this);
+    anis.insert({vega_dynamic_cast_shared_ptr<AnimatedTexture>(shared_from_this())});
 
     //Needed - must do housekeeping, tcoord stuff and the like.
     setTime(curtime);

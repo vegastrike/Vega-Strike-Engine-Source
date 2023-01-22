@@ -1,7 +1,7 @@
 /*
  * stream_texture.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,6 +25,7 @@
 
 #include "stream_texture.h"
 #include "preferred_types.h"
+#include "vega_cast_utils.h"
 
 vega_types::SharedPtr<Texture> StreamTexture::Clone() {
     unsigned char *x = Map();
@@ -87,7 +88,7 @@ vega_types::SharedPtr<Texture> StreamTexture::Original() {
     if (original) {
         return original->Original();
     } else {
-        return shared_from_this();
+        return vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
     }
 }
 
@@ -95,7 +96,7 @@ const vega_types::SharedPtr<const Texture> StreamTexture::OriginalConst() const 
     if (original) {
         return original->OriginalConst();
     } else {
-        return shared_from_this();
+        return vega_dynamic_const_cast_shared_ptr<Texture>(shared_from_this());
     }
 }
 

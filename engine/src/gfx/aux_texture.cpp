@@ -37,6 +37,8 @@
 #include "main_loop.h"
 #include "aux_texture.h"
 #include "configxml.h"
+#include "vega_cast_utils.h"
+#include "preferred_types.h"
 
 using std::string;
 using namespace VSFileSystem;
@@ -130,7 +132,7 @@ const vega_types::SharedPtr<const Texture> Texture::OriginalConst() const {
     if (original) {
         return original->OriginalConst();
     } else {
-        return shared_from_this();
+        return vega_dynamic_const_cast_shared_ptr<Texture>(shared_from_this());
     }
 }
 
@@ -138,7 +140,7 @@ vega_types::SharedPtr<Texture> Texture::Original() {
     if (original) {
         return original->Original();
     } else {
-        return shared_from_this();
+        return vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
     }
 }
 

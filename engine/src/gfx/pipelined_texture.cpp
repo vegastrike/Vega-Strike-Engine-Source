@@ -1,7 +1,7 @@
 /*
  * pipelined_texture.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -24,6 +24,7 @@
 
 
 #include "pipelined_texture.h"
+#include "vega_cast_utils.h"
 
 PipelinedTexture::PipelinedTexture() : Texture() {
 }
@@ -36,7 +37,7 @@ const vega_types::SharedPtr<const Texture> PipelinedTexture::OriginalConst() con
     if (original) {
         return original->OriginalConst();
     } else {
-        return shared_from_this();
+        return vega_dynamic_const_cast_shared_ptr<Texture>(shared_from_this());
     }
 }
 
@@ -46,7 +47,7 @@ vega_types::SharedPtr<Texture> PipelinedTexture::Original() {
     if (original) {
         return original->Original();
     } else {
-        return shared_from_this();
+        return vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
     }
 }
 
