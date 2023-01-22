@@ -48,7 +48,7 @@
 #include "weapon_info.h"
 #include "resource/resource.h"
 #include "unit_csv_factory.h"
-
+#include "upgradeable_unit.h"
 
 extern int GetModeFromName(const char *input_buffer);
 extern void pushMesh(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &mesh,
@@ -63,43 +63,7 @@ extern void pushMesh(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> 
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-static void UpgradeUnit(Unit *un, const std::string &upgrades) {
-    string::size_type when;
-    string::size_type ofs = 0;
-    while ((when = upgrades.find('{', ofs)) != string::npos) {
-        string::size_type where = upgrades.find('}', when + 1);
-        string upgrade = upgrades.substr(when + 1, ((where == string::npos) ? string::npos : where - when - 1));
-        ofs = ((where == string::npos) ? string::npos : where + 1);
 
-        unsigned int mountoffset = 0;
-        unsigned int subunitoffset = 0;
-        string::size_type where1 = upgrade.find(';');
-        string::size_type where2 = upgrade.rfind(';');
-        if (where1 != string::npos) {
-            mountoffset =
-                    XMLSupport::parse_int(upgrade.substr(where1 + 1, where2 != where1 ? where2 : upgrade.length()));
-            if (where2 != where1 && where2 != string::npos) {
-                subunitoffset = XMLSupport::parse_int(upgrade.substr(where2 + 1));
-            }
-        }
-        upgrade = upgrade.substr(0, where1);
-        if (upgrade.length() == 0) {
-            continue;
-        }
-        const Unit *upgradee = UnitConstCache::getCachedConst(StringIntKey(upgrade, FactionUtil::GetUpgradeFaction()));
-        if (!upgradee) {
-            upgradee = UnitConstCache::setCachedConst(StringIntKey(upgrade, FactionUtil::GetUpgradeFaction()),
-                    new Unit(upgrade.c_str(),
-                            true,
-                            FactionUtil::GetUpgradeFaction()));
-        }
-        double percent = 1.0;
-        un->Unit::Upgrade(upgradee,
-                mountoffset,
-                subunitoffset,
-                GetModeFromName(upgrade.c_str()), true, percent, NULL);
-    }
-}
 
 void AddMeshes(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &xmeshes,
                float &randomstartframe,
@@ -1007,7 +971,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     SPECDriveFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_SPECDrive_Functionality", 1.0f);
     computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
     computer.slide_end = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
-    UpgradeUnit(this, UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string()));
+
+    UpgradeUnit(UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string()));
+
+
     {
         std::string tractorability = UnitCSVFactory::GetVariable(unit_key, "Tractorability", std::string());
         unsigned char tflags;
