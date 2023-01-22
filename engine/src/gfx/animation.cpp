@@ -39,6 +39,7 @@
 #include "../gldrv/gl_globals.h"
 #include "universe.h"
 #include "preferred_types.h"
+#include "vega_cast_utils.h"
 
 using namespace vega_types;
 
@@ -130,14 +131,14 @@ Animation::Animation(const char *FileName,
 }
 
 Animation::~Animation() {
-//    if (!destroying) {
-//        destroying = true;
-//        Animation * thus = this;
-//        auto first_to_remove1 = std::stable_partition(farAnimationDrawQueue()->begin(), farAnimationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return !ptr || ptr.get() != thus; });
-//        farAnimationDrawQueue()->erase(first_to_remove1, farAnimationDrawQueue()->end());
-//        auto first_to_remove2 = std::stable_partition(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return !ptr || ptr.get() != thus; });
-//        animationDrawQueue()->erase(first_to_remove2, animationDrawQueue()->end());
-//    }
+    if (!destroying) {
+        destroying = true;
+        Animation * thus = this;
+        auto first_to_remove1 = std::stable_partition(farAnimationDrawQueue()->begin(), farAnimationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return ptr && ptr.get() != thus; });
+        farAnimationDrawQueue()->erase(first_to_remove1, farAnimationDrawQueue()->end());
+        auto first_to_remove2 = std::stable_partition(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return ptr && ptr.get() != thus; });
+        animationDrawQueue()->erase(first_to_remove2, animationDrawQueue()->end());
+    }
     VSDESTRUCT2
 }
 
@@ -482,9 +483,9 @@ void Animation::Draw() {
                         (height > width ? height : width)) <
                 too_far_dist * g_game.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
-            animationDrawQueue()->push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
+            animationDrawQueue()->emplace_back(vega_dynamic_cast_shared_ptr<Animation>(shared_from_this()));
         } else {
-            farAnimationDrawQueue()->push_back(static_cast<vega_types::SharedPtr<Animation>>(this));
+            farAnimationDrawQueue()->emplace_back(vega_dynamic_cast_shared_ptr<Animation>(shared_from_this()));
         }
     }
 }
