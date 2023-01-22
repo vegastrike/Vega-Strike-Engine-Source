@@ -477,15 +477,19 @@ void Animation::Draw() {
                 _Universe->AccessCamera()->GetR().k);
         static float too_far_dist = XMLSupport::parse_float(
                 vs_config->getVariable("graphics", "anim_far_percent", ".8"));
+        SharedPtr<VSImage> this_as_image = shared_from_this();
+        SharedPtr<Texture> this_as_texture = vega_dynamic_cast_shared_ptr<Texture>(this_as_image);
+        SharedPtr<AnimatedTexture> this_as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(this_as_texture);
+        SharedPtr<Animation> this_as_animation = vega_dynamic_cast_shared_ptr<Animation>(this_as_animated_texture);
         if (( /*R.Dot*/ (Position()
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
                 *
                         (height > width ? height : width)) <
                 too_far_dist * g_game.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
-            animationDrawQueue()->emplace_back(vega_dynamic_cast_shared_ptr<Animation>(shared_from_this()));
+            animationDrawQueue()->emplace_back(this_as_animation);
         } else {
-            farAnimationDrawQueue()->emplace_back(vega_dynamic_cast_shared_ptr<Animation>(shared_from_this()));
+            farAnimationDrawQueue()->emplace_back(this_as_animation);
         }
     }
 }

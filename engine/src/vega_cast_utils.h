@@ -1,7 +1,7 @@
 /*
  * vega_cast_utils.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -66,6 +66,11 @@ inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
 template<class TargetType, class SourceType>
 inline vega_types::SharedPtr<TargetType> vega_dynamic_cast_shared_ptr(vega_types::SharedPtr<SourceType> from) {
     return boost::dynamic_pointer_cast<TargetType>(from);
+}
+
+template<class TargetType, class SourceType>
+inline const vega_types::SharedPtr<TargetType const> vega_dynamic_const_cast_shared_ptr(const vega_types::SharedPtr<SourceType const> from) {
+    return boost::dynamic_pointer_cast<TargetType const>(from);
 }
 
 #endif //VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_

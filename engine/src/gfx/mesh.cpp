@@ -88,13 +88,13 @@ void Mesh::InitUnit() {
         Decal = MakeShared<SequenceContainer<SharedPtr<Texture>>>();
     }
     if (Decal->empty()) {
-        Decal->push_back(nullptr);
+        Decal->push_back({});
     }
     if (!LocalFX) {
         LocalFX = MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<MeshFX>>>();
     }
     if (LocalFX->empty()) {
-        LocalFX->push_back(nullptr);
+        LocalFX->push_back({});
     }
 
     //texturename[0] = -1;

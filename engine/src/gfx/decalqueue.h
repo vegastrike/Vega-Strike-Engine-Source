@@ -1,7 +1,7 @@
 /*
  * decalqueue.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,6 +25,10 @@
 
 #include "vs_globals.h"
 #include "gfx/aux_texture.h"
+#include "ani_texture.h"
+#include "animation.h"
+#include "preferred_types.h"
+#include "vega_cast_utils.h"
 
 #include <vector>
 #include <string>
@@ -60,13 +64,17 @@ public:
             }
 
             // Decal not in queue. Add
-            decals.push_back(texture);
+            vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
+            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+            decals.emplace_back(as_animation);
             return decals.size() - 1;
         }
 
         // Need to create texture
         texture = vega_types::MakeShared<Texture>(texname.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-        decals.push_back(texture);
+        vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
+        vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+        decals.emplace_back(as_animation);
         return decals.size() - 1;
     }
 };

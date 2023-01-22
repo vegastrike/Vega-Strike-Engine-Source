@@ -1,7 +1,7 @@
 /*
  * vsimage.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Roy Falk,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Roy Falk,
  * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * This file is part of Vega Strike.
@@ -87,7 +87,7 @@ typedef struct {
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
-#include <windows.h>
+#include <Windows.h>
 #include <wingdi.h>
 
 #endif
@@ -163,7 +163,7 @@ enum VSImageType { PngImage, BmpImage, JpegImage, DdsImage, Unrecognized };
  * ReadType will also set img_depth,sizeX,sizeY,img_alpha,type,mode.
  * That data is then returned to ReadImage which then returns that data to the caller.
  */
-class VSImage /* : public vega_types::EnableSharedFromThis<VSImage> */ {
+class VSImage : public vega_types::EnableSharedFromThis<VSImage> {
 private:
     VSFileSystem::VSFile *img_file;
     VSFileSystem::VSFile *img_file2;

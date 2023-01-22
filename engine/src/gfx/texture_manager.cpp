@@ -1,7 +1,7 @@
 /*
  * texture_manager.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, Roy Falk. Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk. Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -23,7 +23,10 @@
  */
 
 
+#include "animation.h"
 #include "texture_manager.h"
+#include "preferred_types.h"
+#include "vega_cast_utils.h"
 
 TextureManager::TextureManager() {
 
@@ -42,8 +45,13 @@ vega_types::SharedPtr<Texture> TextureManager::GetTexture(std::string const &nam
     // Texture already exists
     if (!texture) {
         // Need to create texture
+//        vega_types::SharedPtr<Animation> as_animation = vega_types::MakeShared<Animation>(name.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
         texture = vega_types::MakeShared<Texture>(name.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-        textures.push_back(texture);
+        textures.emplace_back(texture);
+//        vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
+//        vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+//        textures.emplace_back(vega_types::MakeShared<Texture>(name.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE));
+//        textures.emplace_back(as_animation);
     }
 
     return texture;

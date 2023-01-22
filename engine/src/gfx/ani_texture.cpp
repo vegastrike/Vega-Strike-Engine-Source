@@ -36,8 +36,10 @@
 #include "vs_random.h"
 #include "../gldrv/gl_globals.h"
 #include <math.h>
+#include "preferred_types.h"
+#include "vega_cast_utils.h"
 
-static vega_types::Set<AnimatedTexture *> anis;
+static vega_types::Set<vega_types::SharedPtr<AnimatedTexture>> anis;
 
 static inline unsigned int intmin(unsigned int a, unsigned int b) {
     return a < b ? a : b;
@@ -350,11 +352,11 @@ AnimatedTexture::AnimatedTexture(int stage, enum FILTER imm, bool detailtex) :
 }
 
 vega_types::SharedPtr<Texture> AnimatedTexture::Original() {
-    return Decal ? Decal->at(active)->Original() : shared_from_this();
+    return Decal ? Decal->at(active)->Original() : vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
 }
 
 const vega_types::SharedPtr<const Texture> AnimatedTexture::OriginalConst() const {
-    return Decal ? Decal->at(active)->OriginalConst() : shared_from_this();
+    return Decal ? Decal->at(active)->OriginalConst() : vega_dynamic_cast_shared_ptr<Texture const>(shared_from_this());
 }
 
 vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
@@ -364,11 +366,15 @@ vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
         int nf = vidMode ? 1 : numframes;
         retval->Decal = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>>(nf);
         for (int i = 0; i < nf; ++i) {
+            vega_types::SharedPtr<Texture> texture;
             if (Decal->at(i)) {
-                retval->Decal->push_back(Decal->at(i)->Clone());
+                texture = Decal->at(i)->Clone();
             } else {
-                retval->Decal->push_back(nullptr);
+                texture = nullptr;
             }
+            vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
+            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+            retval->Decal->emplace_back(as_animation);
         }
     } else if (vidSource) {
         *retval = *this;
@@ -381,7 +387,10 @@ vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
         retval->LoadVideoSource(f);
     } else if (Decal) {
         //LoadVideoSource adds to anis, otherwise we'll have to add ourselves
-        anis.insert(retval.get());
+        const vega_types::SharedPtr<const AnimatedTexture> to_insert = retval;
+        vega_types::SharedPtr<const Animation> as_animation_ptr = vega_dynamic_const_cast_shared_ptr<Animation>(to_insert);
+        vega_types::SharedPtr<const Animation> & as_animation_ptr_ref = as_animation_ptr;
+        anis.push_back(as_animation_ptr_ref);
     }
     return retval;
 }
@@ -398,7 +407,7 @@ AnimatedTexture::AnimatedTexture() {
 }
 
 void AnimatedTexture::Destroy() {
-    anis.erase(this);
+    anis.erase(vega_dynamic_cast_shared_ptr<AnimatedTexture>(shared_from_this()));
     if (vidSource) {
         delete vidSource;
         vidSource = 0;
@@ -570,7 +579,10 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
     int nf = (vidMode ? 1 : numframes);
     Decal = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>>(nf);
     if (vidMode) {
-        Decal->push_front(vega_types::MakeShared<Texture>());
+        vega_types::SharedPtr<Texture> texture = vega_types::MakeShared<Texture>();
+        vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
+        vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+        Decal->emplace_front(as_animation);
     }
     char temp[512] = "white.bmp";
     char file[512] = "white.bmp";

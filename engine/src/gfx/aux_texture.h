@@ -1,7 +1,7 @@
 /*
  * aux_texture.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -40,7 +40,7 @@
  *  to prevent the loading of duplicate textures
  */
 ;
-class Texture : public ::VSImage, public vega_types::EnableSharedFromThis<Texture> {
+class Texture : public ::VSImage /*, public vega_types::EnableSharedFromThis<Texture> */ {
     typedef unsigned int uint;
 public:
     void FileNotFound(const std::string &); //undoes what it did to hash table when file is not located
