@@ -41,7 +41,7 @@ void Store::Add(int index, int quantity) {
 }
 
 void Store::Subtract(int index, int quantity) {
-    stock[index].quantity += quantity;
+    stock[index].quantity -= quantity;
 }
 
 
@@ -90,12 +90,30 @@ bool Store::Buy(Customer& seller, std::string product_name, double quantity)
 
 bool Store::InStock(std::string product_name) {
     for(Product &in_store_product : stock) {
-        if(in_store_product == product_name && in_store_product.quantity > 0.0) {
-            return true;
+        if(in_store_product == product_name) {
+            return (in_store_product.quantity > 0.0);
         }
     }
 
     return false;
+}
+
+double Store::GetStock(std::string product_name) {
+    for(Product &in_store_product : stock) {
+        if(in_store_product == product_name ) {
+            return true;
+        }
+    }
+
+    return -1;
+}
+
+bool Store::InStock(const int index) {
+    return (stock[index].quantity > 0.0);
+}
+
+double Store::GetStock(const int index) {
+    return stock[index].quantity;
 }
 
 int Store::ProductIndex(std::string product_name) {

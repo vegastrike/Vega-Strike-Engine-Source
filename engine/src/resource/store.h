@@ -49,6 +49,10 @@ public:
     void Subtract(int index, int quantity);
 
     bool InStock(std::string product_name);
+    double GetStock(std::string product_name);
+    bool InStock(const int index);
+    double GetStock(const int index);
+
     int ProductIndex(std::string product_name);
 
     // These are from the point of view of the store/called class and also affect the other party
