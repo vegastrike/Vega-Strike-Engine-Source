@@ -372,8 +372,7 @@ vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
             } else {
                 texture = nullptr;
             }
-            vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
-            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(texture);
             retval->Decal->emplace_back(as_animation);
         }
     } else if (vidSource) {
@@ -576,10 +575,8 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
     int nf = (vidMode ? 1 : numframes);
     Decal = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>>(nf);
     if (vidMode) {
-        vega_types::SharedPtr<Texture> texture = vega_types::MakeShared<Texture>();
-        vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
-        vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
-        Decal->emplace_front(as_animation);
+        vega_types::SharedPtr<Animation> animation = vega_types::MakeShared<Animation>();
+        Decal->emplace_front(animation);
     }
     char temp[512] = "white.bmp";
     char file[512] = "white.bmp";

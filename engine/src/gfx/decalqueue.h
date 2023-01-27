@@ -64,16 +64,14 @@ public:
             }
 
             // Decal not in queue. Add
-            vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
-            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(texture);
             decals.emplace_back(as_animation);
             return decals.size() - 1;
         }
 
         // Need to create texture
         texture = vega_types::MakeShared<Texture>(texname.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-        vega_types::SharedPtr<AnimatedTexture> as_animated_texture = vega_dynamic_cast_shared_ptr<AnimatedTexture>(texture);
-        vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(as_animated_texture);
+        vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(texture);
         decals.emplace_back(as_animation);
         return decals.size() - 1;
     }
