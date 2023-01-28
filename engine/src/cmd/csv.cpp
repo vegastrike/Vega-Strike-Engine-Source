@@ -87,6 +87,8 @@ std::vector<string> readCSV(const string &s, string delim) {
     return l;
 }
 
+// TODO: do we need this? I assume this escapes the delimiter within the
+// current csv value.
 static string addQuote(string s, string delim = ",;") {
     if (s.find_first_of(delim + "\"") != string::npos) {
         if (s.find('\"') != string::npos) {
@@ -110,26 +112,24 @@ static string addQuote(string s, string delim = ",;") {
     return s;
 }
 
-string writeCSV(const std::vector<string> &key, const std::vector<string> &table, string delim) {
-    unsigned int i;
-    unsigned int wid = key.size();
-    string ret;
-    for (i = 0; i < wid; ++i) {
-        ret += addQuote(key[i], delim);
-        if (i + 1 < wid) {
-            ret += delim[0];
-        }
+string writeCSV(const std::map<std::string, std::string> &unit, string delim) {
+    std::string first_line;
+    std::string second_line;
+    for (auto const& pair : unit) {
+        first_line += addQuote(pair.first, delim);
+        first_line += delim[0];
+
+        second_line += addQuote(pair.second, delim);
+        second_line += delim[0];
     }
-    ret += '\n';
-    for (i = 0; i < table.size(); ++i) {
-        ret += addQuote(table[i], delim);
-        if (i + 1 % wid == 0) {
-            ret += '\n';
-        } else {
-            ret += delim[0];
-        }
-    }
-    return ret;
+
+    // Remove last delimiter. Assume delimiter length is 1
+    first_line.pop_back();
+    second_line.pop_back();
+
+    std::string csv = first_line + "\n" + second_line + "\n";
+
+    return csv;
 }
 
 void CSVTable::Init(const string &data) {
