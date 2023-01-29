@@ -101,10 +101,12 @@ bool Store::InStock(std::string product_name) {
 double Store::GetStock(std::string product_name) {
     for(Product &in_store_product : stock) {
         if(in_store_product == product_name ) {
-            return true;
+            return in_store_product.GetQuantity();
         }
     }
 
+    // An easy way to return an error, as product quantity is a resource
+    // and therefore, cannot be less than 0.
     return -1;
 }
 
