@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include <gnuhash.h>
+#include <map>
 
 #include "hashtable.h"
 #include "vsfilesystem.h"
