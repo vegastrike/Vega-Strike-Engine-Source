@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include <gnuhash.h>
+#include <map>
 
 #include "hashtable.h"
 #include "vsfilesystem.h"
@@ -35,9 +36,8 @@
 // delim should be read as separator and not to be confused with text delimiter see http://creativyst.com/Doc/Articles/CSV/CSV01.htm
 // separator values , and ; while delimiter is listed as quote or "
 std::vector<std::string> readCSV(const std::string &line, std::string delim = ",;");
-std::string writeCSV(const std::vector<std::string> &key,
-        const std::vector<std::string> &table,
-        std::string delim = ",;");
+std::string writeCSV(const std::map<std::string, std::string> &unit,
+        std::string delim = ",");
 
 class CSVTable {
 private:

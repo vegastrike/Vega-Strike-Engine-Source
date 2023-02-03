@@ -121,6 +121,11 @@ public:
     static bool HasUnit(std::string unit_key) {
         return (units.count(unit_key) > 0);
     }
+
+
+    static std::map<std::string, std::string> GetUnit(std::string key) {
+        return UnitCSVFactory::units[key];
+    }
 };
 
 // Template Specialization
