@@ -40,6 +40,12 @@ TEST(Store, Sanity) {
     SequenceContainer<Product> stock = {bread, milk, cigarettes, gold_bar };
     Store store(stock, 1000);
 
+    store.Add(0,10);
+    EXPECT_EQ(store.GetStock(0), 11);
+
+    store.Subtract(0,2);
+    EXPECT_EQ(store.GetStock(0), 9);
+
     Customer customer;
     SequenceContainer<Product> inventory = {used_car};
     customer.Stock(inventory);
