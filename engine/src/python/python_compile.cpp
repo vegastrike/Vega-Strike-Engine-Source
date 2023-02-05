@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * python_compile.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -24,7 +26,7 @@
 #include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>
-#include <eval.h>
+// #include <eval.h>
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
