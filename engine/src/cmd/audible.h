@@ -52,10 +52,11 @@ public:
     void playShieldDamageSound(const Vector &pnt);
     void playArmorDamageSound(const Vector &pnt);
     void playHullDamageSound(const Vector &pnt);
+    void playEngineSound();
 protected:
 
     void playExplosionDamageSound();
-    void playEngineSound();
+
 
     // TODO: make into a proper destructor
     void killSounds();
