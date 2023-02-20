@@ -26,6 +26,7 @@
 #include "carrier.h"
 
 #include "unit_generic.h"
+#include "ship.h"
 #include "universe.h"
 #include "universe_util.h"
 
@@ -228,7 +229,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         ++(fg->nr_ships);
                         ++(fg->nr_ships_left);
                     }
-                    cargo = new Unit(ans.c_str(), false, unit->faction, "", fg, fgsnumber);
+                    cargo = new Ship(ans.c_str(), false, unit->faction, "", fg, fgsnumber);
                     cargo->PrimeOrders();
                     cargo->SetAI(new Orders::AggressiveAI("default.agg.xml"));
                     cargo->SetTurretAI();
@@ -551,27 +552,37 @@ Unit *Carrier::makeMasterPartList() {
     Unit *ret = new Unit();
     ret->name = "master_part_list";
 
-    static std::string json_filename = "master_part_list.json"; //vs_config->getVariable("data", "master_part_list", "master_part_list");
-    std::ifstream ifs(json_filename, std::ifstream::in);
-    std::stringstream buffer;
-    buffer << ifs.rdbuf();
+    //vs_config->getVariable("data", "master_part_list", "master_part_list");
+    static std::string json_filenames[] = {
+        "master_part_list.json",
+        "master_ship_list.json",
+        "master_component_list.json",
+        "master_asteroid_list.json",
+    };
 
-    const std::string json_text = buffer.str();
+    for(const std::string& json_filename : json_filenames) {
+        std::ifstream ifs(json_filename, std::ifstream::in);
+        std::stringstream buffer;
+        buffer << ifs.rdbuf();
 
-    std::vector<std::string> parts = json::parsing::parse_array(json_text.c_str());
-    for (const std::string &part_text : parts) {
-        json::jobject part = json::jobject::parse(part_text);
-        Cargo carg;
+        const std::string json_text = buffer.str();
 
-        carg.name = getJSONValue(part, "file", "");
-        carg.SetCategory(getJSONValue(part, "categoryname", ""));
-        carg.SetVolume(std::stof(getJSONValue(part, "volume", "")));
-        carg.SetMass(std::stof(getJSONValue(part, "mass", "")));
-        carg.quantity = 1;
-        carg.price = std::stoi(getJSONValue(part, "price", ""));
-        carg.SetDescription(getJSONValue(part, "description", ""));
-        ret->cargo.push_back(carg);
+        std::vector<std::string> parts = json::parsing::parse_array(json_text.c_str());
+        for (const std::string &part_text : parts) {
+            json::jobject part = json::jobject::parse(part_text);
+            Cargo carg;
+
+            carg.name = getJSONValue(part, "file", "");
+            carg.SetCategory(getJSONValue(part, "categoryname", ""));
+            carg.SetVolume(std::stof(getJSONValue(part, "volume", "")));
+            carg.SetMass(std::stof(getJSONValue(part, "mass", "")));
+            carg.quantity = 1;
+            carg.price = std::stoi(getJSONValue(part, "price", ""));
+            carg.SetDescription(getJSONValue(part, "description", ""));
+            ret->cargo.push_back(carg);
+        }
     }
+
 
     UpdateMasterPartList(ret);
     if (!ret->GetCargo("Pilot", i)) {    //required items

@@ -1104,6 +1104,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/music.cpp
     src/cmd/nebula.cpp
     src/cmd/planet.cpp
+    src/cmd/ship.cpp
     src/cmd/script/c_alike/c_alike.tab.cpp
     src/cmd/script/c_alike/lex.yy.cpp
     src/cmd/script/director.cpp

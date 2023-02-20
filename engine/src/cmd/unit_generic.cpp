@@ -272,13 +272,15 @@ char *GetUnitDir(const char *filename) {
  **** UNIT STUFF
  **********************************************************************************
  */
-Unit::Unit(int /*dummy*/) : Drawable(), Damageable(), Movable() {
+// Called by Planet
+Unit::Unit(int dummy) : Drawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
     pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO: delete
     Init();
 }
+
 
 Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
@@ -289,6 +291,7 @@ Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation
     Init();
 }
 
+// Called by Missile
 Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
         : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
@@ -309,6 +312,7 @@ Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
 
 extern void update_ani_cache();
 
+// Called by Carrier and Mount
 Unit::Unit(const char *filename,
         bool SubU,
         int faction,
@@ -1059,87 +1063,7 @@ Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     return player_cockpit;
 }
 
-void Unit::FireEngines(const Vector &Direction /*unit vector... might default to "r"*/,
-        float FuelSpeed,
-        float FMass) {
-    FMass = ExpendFuel(FMass);
-    NetForce += Direction * (FuelSpeed * FMass / GetElapsedTime());
-}
 
-//applies a force for the whole gameturn upon the center of mass
-void Unit::ApplyForce(const Vector &Vforce) {
-    if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
-        NetForce += Vforce;
-    } else {
-        VS_LOG(error, "fatal force");
-    }
-}
-
-//applies a force for the whole gameturn upon the center of mass
-void Unit::ApplyLocalForce(const Vector &Vforce) {
-    if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
-        NetLocalForce += Vforce;
-    } else {
-        VS_LOG(error, "fatal local force");
-    }
-}
-
-void Unit::Accelerate(const Vector &Vforce) {
-    if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
-        NetForce += Vforce * Mass;
-    } else {
-        VS_LOG(error, "fatal force");
-    }
-}
-
-void Unit::ApplyTorque(const Vector &Vforce, const QVector &Location) {
-    //Not completely correct
-    NetForce += Vforce;
-    NetTorque += Vforce.Cross((Location - curr_physical_state.position).Cast());
-}
-
-void Unit::ApplyLocalTorque(const Vector &Vforce, const Vector &Location) {
-    NetForce += Vforce;
-    NetTorque += Vforce.Cross(Location);
-}
-
-//usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
-void Unit::ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location) {
-    NetTorque += Vforce.Cross(Location);
-}
-
-void Unit::ApplyLocalTorque(const Vector &torque) {
-    NetLocalTorque += ClampTorque(torque);
-}
-
-Vector Unit::MaxTorque(const Vector &torque) {
-    //torque is a normal
-    return torque * (Vector(copysign(limits.pitch, torque.i),
-            copysign(limits.yaw, torque.j),
-            copysign(limits.roll, torque.k)) * torque);
-}
-
-Vector Unit::ClampTorque(const Vector &amt1) {
-    Vector Res = amt1;
-
-    WCWarpIsFuelHack(true);
-
-    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    if (fabs(amt1.i) > fuelclamp * limits.pitch) {
-        Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
-    }
-    if (fabs(amt1.j) > fuelclamp * limits.yaw) {
-        Res.j = copysign(fuelclamp * limits.yaw, amt1.j);
-    }
-    if (fabs(amt1.k) > fuelclamp * limits.roll) {
-        Res.k = copysign(fuelclamp * limits.roll, amt1.k);
-    }
-    //1/5,000,000 m/s
-
-    ExpendMomentaryFuelUsage(Res.Magnitude());
-    WCWarpIsFuelHack(false);
-    return Res;
-}
 
 void Unit::SwitchCombatFlightMode() {
     if (computer.combat_mode) {
@@ -1153,20 +1077,7 @@ bool Unit::CombatMode() {
     return computer.combat_mode;
 }
 
-Vector Unit::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (fuel <= 0 || (energy < afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
-    float limit =
-            afterburn ? (abfuelclamp
-                    * (computer.max_ab_speed()
-                            - computer.max_speed()) + (fuelclamp * computer.max_speed())) : fuelclamp
-                    * computer.max_speed();
-    float tmp = velocity.Magnitude();
-    if (tmp > fabs(limit)) {
-        return velocity * (limit / tmp);
-    }
-    return velocity;
-}
+
 
 void Unit::ClearMounts() {
     for (unsigned int j = 0; j < mounts.size(); ++j) {
@@ -1185,193 +1096,7 @@ void Unit::ClearMounts() {
     }
 }
 
-Vector Unit::ClampAngVel(const Vector &velocity) {
-    Vector res(velocity);
-    if (res.i >= 0) {
-        if (res.i > computer.max_pitch_down) {
-            res.i = computer.max_pitch_down;
-        }
-    } else if (-res.i > computer.max_pitch_up) {
-        res.i = -computer.max_pitch_up;
-    }
-    if (res.j >= 0) {
-        if (res.j > computer.max_yaw_left) {
-            res.j = computer.max_yaw_left;
-        }
-    } else if (-res.j > computer.max_yaw_right) {
-        res.j = -computer.max_yaw_right;
-    }
-    if (res.k >= 0) {
-        if (res.k > computer.max_roll_left) {
-            res.k = computer.max_roll_left;
-        }
-    } else if (-res.k > computer.max_roll_right) {
-        res.k = -computer.max_roll_right;
-    }
-    return res;
-}
 
-Vector Unit::MaxThrust(const Vector &amt1) {
-    //amt1 is a normal
-    return amt1 * (Vector(copysign(limits.lateral, amt1.i),
-            copysign(limits.vertical, amt1.j),
-            amt1.k > 0 ? limits.forward : -limits.retro) * amt1);
-}
-
-//CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
-// TODO: refactor soon. Especially access to the fuel variable
-Vector Unit::ClampThrust(const Vector &amt1, bool afterburn) {
-    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
-    const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
-    if (WCfuelhack) {
-        if (fuel > warpenergy) {
-            fuel = warpenergy;
-        }
-        if (fuel < warpenergy) {
-            warpenergy = fuel;
-        }
-    }
-    float instantenergy = afterburnenergy * simulation_atom_var;
-    if ((afterburntype == 0) && energy < instantenergy) {
-        afterburn = false;
-    }
-    if ((afterburntype == 1) && fuel < 0) {
-        fuel = 0;
-        afterburn = false;
-    }
-    if ((afterburntype == 2) && warpenergy < 0) {
-        warpenergy = 0;
-        afterburn = false;
-    }
-    if (3 == afterburntype) {      //no afterburner -- we should really make these types an enum :-/
-        afterburn = false;
-    }
-    Vector Res = amt1;
-
-    float fuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (fuel <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
-    if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
-        Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
-    }
-    if (fabs(amt1.j) > fabs(fuelclamp * limits.vertical)) {
-        Res.j = copysign(fuelclamp * limits.vertical, amt1.j);
-    }
-    float ablimit =
-            afterburn
-                    ? ((limits.afterburn - limits.forward) * abfuelclamp + limits.forward * fuelclamp)
-                    : limits.forward;
-    if (amt1.k > ablimit) {
-        Res.k = ablimit;
-    }
-    if (amt1.k < -limits.retro) {
-        Res.k = -limits.retro;
-    }
-    const float Lithium6constant = configuration()->fuel.deuterium_relative_efficiency_lithium;
-    //1/5,000,000 m/s
-    const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
-    if (afterburntype == 2) {
-        //Energy-consuming afterburner
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        warpenergy -= afterburnenergy * Energetic::getFuelUsage(afterburn) * simulation_atom_var * Res.Magnitude()
-                * FMEC_exit_vel_inverse
-                / Lithium6constant;
-    }
-    if (3 == afterburntype || afterburntype == 1) {
-        //fuel-burning overdrive - uses afterburner efficiency. In NO_AFTERBURNER case, "afterburn" will always be false, so can reuse code.
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        fuel -=
-                ((afterburn
-                        && finegrainedFuelEfficiency) ? afterburnenergy : Energetic::getFuelUsage(afterburn))
-                        * simulation_atom_var * Res.Magnitude()
-                        * FMEC_exit_vel_inverse / Lithium6constant;
-#ifndef __APPLE__
-        if (ISNAN(fuel)) {
-            VS_LOG(error, "Fuel is NAN A");
-            fuel = 0;
-        }
-#endif
-    }
-    if (afterburntype == 0) {
-        //fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        fuel -= getFuelUsage(false) * simulation_atom_var * Res.Magnitude() * FMEC_exit_vel_inverse / Lithium6constant;
-#ifndef __APPLE__
-        if (ISNAN(fuel)) {
-            VS_LOG(error, "Fuel is NAN B");
-            fuel = 0;
-        }
-#endif
-    }
-    if ((afterburn) && (afterburntype == 0)) {
-        energy -= instantenergy;
-    }
-    if (WCfuelhack) {
-        if (fuel > warpenergy) {
-            fuel = warpenergy;
-        }
-        if (fuel < warpenergy) {
-            warpenergy = fuel;
-        }
-    }
-    return Res;
-}
-
-void Unit::LateralThrust(float amt) {
-    if (amt > 1.0) {
-        amt = 1.0;
-    }
-    if (amt < -1.0) {
-        amt = -1.0;
-    }
-    ApplyLocalForce(amt * limits.lateral * Vector(1, 0, 0));
-}
-
-void Unit::VerticalThrust(float amt) {
-    if (amt > 1.0) {
-        amt = 1.0;
-    }
-    if (amt < -1.0) {
-        amt = -1.0;
-    }
-    ApplyLocalForce(amt * limits.vertical * Vector(0, 1, 0));
-}
-
-void Unit::LongitudinalThrust(float amt) {
-    if (amt > 1.0) {
-        amt = 1.0;
-    }
-    if (amt < -1.0) {
-        amt = -1.0;
-    }
-    ApplyLocalForce(amt * limits.forward * Vector(0, 0, 1));
-}
-
-void Unit::YawTorque(float amt) {
-    if (amt > limits.yaw) {
-        amt = limits.yaw;
-    } else if (amt < -limits.yaw) {
-        amt = -limits.yaw;
-    }
-    ApplyLocalTorque(amt * Vector(0, 1, 0));
-}
-
-void Unit::PitchTorque(float amt) {
-    if (amt > limits.pitch) {
-        amt = limits.pitch;
-    } else if (amt < -limits.pitch) {
-        amt = -limits.pitch;
-    }
-    ApplyLocalTorque(amt * Vector(1, 0, 0));
-}
-
-void Unit::RollTorque(float amt) {
-    if (amt > limits.roll) {
-        amt = limits.roll;
-    } else if (amt < -limits.roll) {
-        amt = -limits.roll;
-    }
-    ApplyLocalTorque(amt * Vector(0, 0, 1));
-}
 
 /*
  **********************************************************************************
@@ -4689,66 +4414,7 @@ void Unit::UpdatePhysics2(const Transformation &trans,
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
 
 
-void Unit::Thrust(const Vector &amt1, bool afterburn) {
-    if (this->afterburntype == 0) {
-        afterburn = afterburn && this->energy > this->afterburnenergy * simulation_atom_var;
-    } //SIMULATION_ATOM; ?
-    if (this->afterburntype == 1) {
-        afterburn = afterburn && this->fuel > 0;
-    }
-    if (this->afterburntype == 2) {
-        afterburn = afterburn && this->warpenergy > 0;
-    }
 
-
-    //Unit::Thrust( amt1, afterburn );
-    {
-        Vector amt = ClampThrust(amt1, afterburn);
-        ApplyLocalForce(amt);
-    }
-
-    static bool must_afterburn_to_buzz =
-            XMLSupport::parse_bool(vs_config->getVariable("audio", "buzzing_needs_afterburner", "false"));
-    if (_Universe->isPlayerStarship(this) != NULL) {
-        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
-                "player_afterburner",
-                "sfx10.wav"), true);
-        static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
-        if (afterburn != AUDIsPlaying(playerengine)) {
-            if (afterburn) {
-                AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
-            } else {
-                AUDStopPlaying(playerengine);
-            }
-        }
-    } else if (afterburn || !must_afterburn_to_buzz) {
-        static float buzzingtime = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_time", "5"));
-        static float
-                buzzingdistance = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_distance", "5"));
-        static float lastbuzz = getNewTime();
-        Unit *playa = _Universe->AccessCockpit()->GetParent();
-        if (playa) {
-            if (UnitUtil::getDistance(this,
-                    playa) < buzzingdistance && playa->owner != this && this->owner != playa
-                    && this->owner != playa->owner) {
-                float ttime = getNewTime();
-                if (ttime - lastbuzz > buzzingtime) {
-                    Vector pvel = playa->GetVelocity();
-                    Vector vel = this->GetVelocity();
-                    pvel.Normalize();
-                    vel.Normalize();
-                    float dotprod = vel.Dot(pvel);
-                    if (dotprod < .86) {
-                        lastbuzz = ttime;
-                        //AUDPlay( this->sound->engine, this->Position(), this->GetVelocity(), 1 );
-                        playEngineSound();
-                    } else {
-                    }
-                }
-            }
-        }
-    }
-}
 
 Vector Unit::ResolveForces(const Transformation &trans, const Matrix &transmat) {
 #ifndef PERFRAMESOUND
