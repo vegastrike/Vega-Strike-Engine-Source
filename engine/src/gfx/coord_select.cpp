@@ -1,10 +1,8 @@
-/**
+/*
  * coord_select.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -50,8 +48,8 @@ void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int) {
     CoordinateSelectmousey = y;
 }
 
-CoordinateSelect::CoordinateSelect(QVector start) : LocSelAni("locationselect.ani", true, .5, MIPMAP, true),
-        LocalPosition(start) {
+CoordinateSelect::CoordinateSelect(QVector start) : LocalPosition(start) {
+    LocSelAni = Animation::createAnimation("locationselect.ani", true, .5, MIPMAP, true);
     CrosshairSize = 2;
     CoordinateSelectmousex = g_game.x_resolution / 2;
     CoordinateSelectmousey = g_game.y_resolution / 2;
@@ -109,8 +107,8 @@ void CoordinateSelect::Draw() {
 
     GFXPushBlendMode();
     GFXBlendMode(ONE, ONE);
-    LocSelAni.SetPosition(LocalPosition);
-    LocSelAni.Draw();
+    LocSelAni->SetPosition(LocalPosition);
+    LocSelAni->Draw();
     GFXPopBlendMode();
 }
 

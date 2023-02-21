@@ -1,7 +1,7 @@
 /*
  * faction_generic.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -173,7 +173,7 @@ FSM *GetConversation(const int myfaction, const int theirfaction);
 vega_types::SharedPtr<Texture> getForceLogo(int faction);
 vega_types::SharedPtr<Texture> getSquadLogo(int faction);
 
-Animation *createAnimation(const char *anim);
+vega_types::SharedPtr<Animation> createAnimation(const char *anim);
 vega_types::SharedPtr<Texture> createTexture(const char *tex, const char *tmp, bool force = false);
 vega_types::SharedPtr<Texture> createTexture(const char *tex, bool force = false);
 std::vector<class Animation *> *GetAnimation(int faction, int n, unsigned char &sex);

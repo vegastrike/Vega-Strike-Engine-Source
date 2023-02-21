@@ -3,7 +3,7 @@
 /*
  * cockpit.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -221,7 +221,7 @@ public:
         return soundfile;
     }
 
-    void SetCommAnimation(Animation *ani, Unit *un);
+    void SetCommAnimation(vega_types::SharedPtr<Animation> ani, Unit *un);
     void SetStaticAnimation();
 
     ///Accesses the current navigationsystem

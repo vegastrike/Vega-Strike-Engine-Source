@@ -50,22 +50,17 @@ class Animation : public AnimatedTexture {
 
     float width;
 
-    unsigned char options;
+    unsigned char options{};
 
-    void InitAnimation();
-    bool destroying{};
+protected:
+    static vega_types::SharedPtr<Animation> constructAnimation(vega_types::SharedPtr<Animation> animation, const char * filename, bool Rep = false, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
+                                                               bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1, 1));
 
 public:
     Animation();
 
-    Animation(VSFileSystem::VSFile *f, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP,
-            bool camorient =
-            false, bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-            1));
-
-    Animation(const char *, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
-            bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-            1));
+    static vega_types::SharedPtr<Animation> createAnimation(const char * filename, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
+                                                            bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1, 1));
 
     ~Animation() override;
 

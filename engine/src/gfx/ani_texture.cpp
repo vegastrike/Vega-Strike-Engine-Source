@@ -392,21 +392,9 @@ vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
 }
 
 AnimatedTexture::~AnimatedTexture() {
-    Destroy();
-    data = nullptr;
-    active = 0;
-    palette = nullptr;
-}
-
-AnimatedTexture::AnimatedTexture() {
-    AniInit();
-}
-
-void AnimatedTexture::Destroy() {
-    anis.erase(vega_dynamic_cast_shared_ptr<AnimatedTexture>(shared_from_this()));
     if (vidSource) {
         delete vidSource;
-        vidSource = 0;
+        vidSource = nullptr;
     }
     if (Decal) {
         int i, nf;
@@ -414,6 +402,13 @@ void AnimatedTexture::Destroy() {
         Decal->clear();
         Decal.reset();
     }
+    data = nullptr;
+    active = 0;
+    palette = nullptr;
+}
+
+AnimatedTexture::AnimatedTexture() {
+    AniInit();
 }
 
 void AnimatedTexture::Reset() {

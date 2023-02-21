@@ -82,63 +82,7 @@ void Animation::SetFaceCam(bool face) {
 
 using namespace VSFileSystem;
 
-Animation::Animation(VSFileSystem::VSFile *f,
-        bool Rep,
-        float priority,
-        enum FILTER ismipmapped,
-        bool camorient,
-        bool appear_near_by_radius,
-        const GFXColor &c) : mycolor(c) {
-}
-
-Animation::Animation(const char *FileName,
-        bool Rep,
-        float priority,
-        enum FILTER ismipmapped,
-        bool camorient,
-        bool appear_near_by_radius,
-        const GFXColor &c) : mycolor(c) {
-    Identity(local_transformation);
-    VSCONSTRUCT2('a')
-    //repeat = Rep;
-    options = 0;
-    if (Rep) {
-        options |= ani_repeat;
-    }
-    if (camorient) {
-        options |= ani_up;
-    }
-    if (appear_near_by_radius) {
-        options |= ani_close;
-    }
-    SetLoop(Rep);     //setup AnimatedTexture's loop flag - NOTE: Load() will leave it like this unless a force(No)Loop option is present
-    SetLoopInterp(Rep);     //Default interpolation method == looping method
-    VSFile f;
-    VSError err = f.OpenReadOnly(FileName, AnimFile);
-    if (err > Ok) {
-        //load success already set false
-    } else {
-        f.Fscanf("%f %f", &width, &height);
-        if (width > 0) {
-            options |= ani_alpha;
-        }
-        width = fabs(width * 0.5F);
-        height = height * 0.5F;
-        Load(f, 0, ismipmapped);
-        f.Close();
-    }
-    //VSFileSystem::ResetCurrentPath();
-}
-
 Animation::~Animation() {
-    if (!destroying) {
-        destroying = true;
-        Animation * thus = this;
-        auto first_to_remove1 = std::stable_partition(farAnimationDrawQueue()->begin(), farAnimationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return ptr && ptr.get() != thus; });
-        farAnimationDrawQueue()->erase(first_to_remove1, farAnimationDrawQueue()->end());
-        auto first_to_remove2 = std::stable_partition(animationDrawQueue()->begin(), animationDrawQueue()->end(), [thus](const SharedPtr<Animation> &ptr) { return ptr && ptr.get() != thus; });
-        animationDrawQueue()->erase(first_to_remove2, animationDrawQueue()->end());
-    }
     VSDESTRUCT2
 }
 
@@ -490,5 +434,47 @@ void Animation::Draw() {
             farAnimationDrawQueue()->emplace_back(this_as_animation);
         }
     }
+}
+
+vega_types::SharedPtr<Animation>
+Animation::createAnimation(const char *filename, bool Rep, float priority, enum FILTER ismipmapped, bool camorient,
+                           bool appear_near_by_radius, const GFXColor &col) {
+    SharedPtr<Animation> return_value = MakeShared<Animation>();
+    return constructAnimation(return_value, filename, Rep, priority, ismipmapped, camorient, appear_near_by_radius, col);
+}
+
+vega_types::SharedPtr<Animation>
+Animation::constructAnimation(vega_types::SharedPtr<Animation> animation, const char *filename, bool Rep,
+                              float priority, enum FILTER ismipmapped, bool camorient, bool appear_near_by_radius,
+                              const GFXColor &col) {
+    Identity(animation->local_transformation);
+    animation->options = 0;
+    if (Rep) {
+        animation->options |= ani_repeat;
+    }
+    if (camorient) {
+        animation->options |= ani_up;
+    }
+    if (appear_near_by_radius) {
+        animation->options |= ani_close;
+    }
+    animation->SetLoop(Rep);     //setup AnimatedTexture's loop flag - NOTE: Load() will leave it like this unless a force(No)Loop option is present
+    animation->SetLoopInterp(Rep);     //Default interpolation method == looping method
+    VSFile f;
+    VSError err = f.OpenReadOnly(filename, AnimFile);
+    if (err > Ok) {
+        //load success already set false
+    } else {
+        f.Fscanf("%f %f", &(animation->width), &(animation->height));
+        if (animation->width > 0) {
+            animation->options |= ani_alpha;
+        }
+        animation->width = fabs(animation->width * 0.5F);
+        animation->height = animation->height * 0.5F;
+        animation->Load(f, 0, ismipmapped);
+        f.Close();
+    }
+    //VSFileSystem::ResetCurrentPath();
+    return animation;
 }
 

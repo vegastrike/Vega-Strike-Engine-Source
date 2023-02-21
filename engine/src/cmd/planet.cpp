@@ -225,7 +225,7 @@ Planet::Planet(QVector x,
     atmospheric = false;
 
     inside = false;
-    shine = nullptr;
+    shine.reset();
     terrain = nullptr;
     terraintrans = nullptr;
 
@@ -334,7 +334,7 @@ Planet::Planet(QVector x,
                 shines.emplace_back("shine.ani");
             }
 
-            shine = new Animation(shines[rand() % shines.size()].c_str(),
+            shine = Animation::createAnimation(shines[rand() % shines.size()].c_str(),
                     true,
                     .1,
                     BILINEAR,
@@ -361,10 +361,6 @@ Planet::Planet(QVector x,
 }
 
 Planet::~Planet() {
-    if (shine != nullptr) {
-        delete shine;
-        shine = nullptr;
-    }
     if (terrain != nullptr) {
         delete terrain;
         terrain = nullptr;

@@ -1,7 +1,7 @@
 /*
  * main.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-static Animation *SplashScreen = NULL;
+static vega_types::SharedPtr<Animation> SplashScreen{};
 static bool BootstrapMyStarSystemLoading = true;
 
 void SetStarSystemLoading(bool value) {
@@ -410,29 +410,29 @@ bool GetStarSystemLoading() {
     return BootstrapMyStarSystemLoading;
 }
 
-void SetSplashScreen(Animation *ss) {
+void SetSplashScreen(vega_types::SharedPtr<Animation> ss) {
     SplashScreen = ss;
 }
 
-Animation *GetSplashScreen() {
+vega_types::SharedPtr<Animation> GetSplashScreen() {
     return SplashScreen;
 }
 
-void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
-    static Animation *ani = NULL;
+void bootstrap_draw(const std::string &message, vega_types::SharedPtr<Animation> newSplashScreen) {
+    static vega_types::SharedPtr<Animation> ani{};
     static bool reentryWatchdog = false;
     if (!BootstrapMyStarSystemLoading || reentryWatchdog) {
         return;
     }
     Music::MuzakCycle();     //Allow for loading music...
-    if (SplashScreen == NULL && newSplashScreen == NULL) {
+    if (!SplashScreen && !newSplashScreen) {
         //if there's no splashscreen, we don't draw on it
         //this happens, when the splash screens texture is loaded
         return;
     }
 
     reentryWatchdog = true;
-    if (newSplashScreen != NULL) {
+    if (newSplashScreen) {
         ani = newSplashScreen;
     }
     UpdateTime();
@@ -527,7 +527,7 @@ void bootstrap_first_loop() {
         vector<string> s = parse_space_string(game_options()->splash_screen);
         vector<string> sa = parse_space_string(game_options()->splash_audio);
         int snum = time(nullptr) % s.size();
-        SplashScreen = new Animation(s[snum].c_str(), false);
+        SplashScreen = Animation::createAnimation(s[snum].c_str(), false);
         if (!sa.empty() && sa[0].length()) {
             muzak->GotoSong(sa[snum % sa.size()]);
         }

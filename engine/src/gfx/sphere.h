@@ -46,23 +46,6 @@ protected:
 //        return new SphereMesh[num];
 //    }
 
-    void InitSphere(float radius,
-            int stacks,
-            int slices,
-            const char *texture,
-            const std::string &technique,
-            const char *alpha = nullptr,
-            bool insideout = false,
-            const BLENDFUNC a = ONE,
-            const BLENDFUNC b = ZERO,
-            bool envMap = false,
-            float rho_min = 0.0,
-            float rho_max = M_PI,
-            float theta_min = 0.0,
-            float theta_max = 2 * M_PI,
-            FILTER mipmap = MIPMAP,
-            bool reverse_normals = false,
-            bool subclass = false);
 public:
     SphereMesh() : Mesh() {
         setConvex(true);
@@ -74,41 +57,6 @@ public:
 
     virtual void SelectCullFace(int whichdrawqueue);
     virtual void RestoreCullFace(int whichdrawqueue);
-
-protected:
-    SphereMesh(float radius,
-            int stacks,
-            int slices,
-            const char *texture,
-            const std::string &technique,
-            const char *alpha = NULL,
-            bool insideout = false,
-            const BLENDFUNC a = ONE,
-            const BLENDFUNC b = ZERO,
-            bool envMap = false,
-            float rho_min = 0.0,
-            float rho_max = M_PI,
-            float theta_min = 0.0,
-            float theta_max = 2 * M_PI,
-            FILTER mipmap = MIPMAP,
-            bool reverse_normals = false) {
-        InitSphere(radius,
-                stacks,
-                slices,
-                texture,
-                technique,
-                alpha,
-                insideout,
-                a,
-                b,
-                envMap,
-                rho_min,
-                rho_max,
-                theta_min,
-                theta_max,
-                mipmap,
-                reverse_normals);
-    }
 
 public:
     static std::string truncateByPipe(std::string &input);
@@ -194,24 +142,6 @@ public:
     CityLights() : SphereMesh() {
     }
 
-protected:
-    CityLights(float radius,
-            int stacks,
-            int slices,
-            const char *texture,
-            int texturewrapx,
-            int texturewrapy,
-            bool insideout = false,
-            const BLENDFUNC a = ONE,
-            const BLENDFUNC b = ZERO,
-            bool envMap = false,
-            float rho_min = 0.0,
-            float rho_max = M_PI,
-            float theta_min = 0.0,
-            float theta_max = 2 * M_PI,
-            bool inside_out = true);
-
-public:
     virtual void ProcessDrawQueue(size_t whichpass, int which, bool zsort, const QVector &sortctr);
 
     static vega_types::SharedPtr<CityLights> createCityLights(float radius,

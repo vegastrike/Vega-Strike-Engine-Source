@@ -1,7 +1,7 @@
 /*
  * ani_texture.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -132,8 +132,6 @@ public:
     void LoadVideoSource(VSFileSystem::VSFile &f);
 
     virtual void LoadFrame(int num); //For video mode
-
-    void Destroy();
 
     const vega_types::SharedPtr<const Texture> OriginalConst() const override;
 

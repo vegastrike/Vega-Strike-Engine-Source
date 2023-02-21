@@ -1,9 +1,8 @@
 /*
  * pilot.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -175,10 +174,10 @@ float Pilot::GetEffectiveRelationship(const Unit *parent, const Unit *target) co
 
 extern float myroundclamp(float i);
 
-Animation *Pilot::getCommFace(Unit *parent, float mood, unsigned char &sex) {
-    vector<Animation *> *ani = getCommFaces(sex);
+vega_types::SharedPtr<Animation> Pilot::getCommFace(Unit *parent, float moon, unsigned char &gender) {
+    vector<Animation *> *ani = getCommFaces(gender);
     if (ani == NULL) {
-        ani = FactionUtil::GetRandCommAnimation(parent->faction, parent, sex);
+        ani = FactionUtil::GetRandCommAnimation(parent->faction, parent, gender);
         if (ani == NULL) {
             return NULL;
         }
@@ -186,9 +185,9 @@ Animation *Pilot::getCommFace(Unit *parent, float mood, unsigned char &sex) {
     if (ani->size() == 0) {
         return NULL;
     }
-    mood += .1;
-    mood *= (ani->size()) / .2;
-    unsigned int index = (unsigned int) myroundclamp(floor(mood));
+    moon += .1;
+    moon *= (ani->size()) / .2;
+    unsigned int index = (unsigned int) myroundclamp(floor(moon));
     if (index >= ani->size()) {
         index = ani->size() - 1;
     }

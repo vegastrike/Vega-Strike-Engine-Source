@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, pyramid3d,
+ * planet.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -46,7 +48,7 @@ class Texture;
 
 class Planet : public Unit {
 private:
-    Animation *shine = nullptr;
+    vega_types::SharedPtr<Animation> shine{};
 
 protected:
     Atmosphere *atmosphere = nullptr;

@@ -1,7 +1,7 @@
 /*
  * bolt.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -79,7 +79,7 @@ int Bolt::AddAnimation(BoltDrawManager *q, std::string file, QVector cur_positio
         decal = q->animations.size();
         q->animationname.push_back(file);
         q->animations
-                .push_back(new Animation(file.c_str(),
+                .push_back(Animation::createAnimation(file.c_str(),
                         true,
                         .1,
                         MIPMAP,
@@ -147,14 +147,14 @@ void Bolt::DrawAllBolts() {
 
 void Bolt::DrawAllBalls() {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
-    vector<Animation *>::iterator k = bolt_draw_manager.animations.begin();
+    auto k = bolt_draw_manager.animations.begin();
 
     for (auto &&ball_types : bolt_draw_manager.balls) {
         if (ball_types.size() == 0) {
             continue;
         }
 
-        Animation *cur = *k;
+        Animation *cur = (*k).get();
 
         float bolt_size = 2 * ball_types[0].type->radius * 2;
         bolt_size *= bolt_size;

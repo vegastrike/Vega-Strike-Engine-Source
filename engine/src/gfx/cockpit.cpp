@@ -3,7 +3,7 @@
 /*
  * cockpit.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -86,6 +86,7 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "cockpit_gfx.h"
+#include "preferred_types.h"
 
 #include <cstddef>
 #include <cfloat>
@@ -248,9 +249,9 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
                         "automatic_landing_zone_warning_text",
                         "Now Entering an \"Automatic Landing Zone\".");
                 UniverseUtil::IOmessage(0, "game", "all", message);
-                static Animation *ani0 = new Animation(autolandinga.c_str());
-                static Animation *ani1 = new Animation(autolandinga1.c_str());
-                static Animation *ani2 = new Animation(autolandinga2.c_str());
+                static vega_types::SharedPtr<Animation> ani0 = Animation::createAnimation(autolandinga.c_str());
+                static vega_types::SharedPtr<Animation> ani1 = Animation::createAnimation(autolandinga1.c_str());
+                static vega_types::SharedPtr<Animation> ani2 = Animation::createAnimation(autolandinga2.c_str());
                 static soundContainer warnsound;
                 static soundContainer warnsound1;
                 static soundContainer warnsound2;
@@ -1316,16 +1317,16 @@ static void DrawDamageFlash(int dtype) {
     };
 
     static bool init = false;
-    static Animation *aflashes[numtypes];
+    static vega_types::SharedPtr<Animation> aflashes[numtypes];
     static bool doflash[numtypes];
     if (!init) {
         init = true;
         for (int i = 0; i < numtypes; ++i) {
             doflash[i] = (flashes[i].length() > 0);
             if (doflash[i]) {
-                aflashes[i] = new Animation(flashes[i].c_str(), true, .1, BILINEAR, false, false);
+                aflashes[i] = Animation::createAnimation(flashes[i].c_str(), true, .1, BILINEAR, false, false);
             } else {
-                aflashes[i] = NULL;
+                aflashes[i].reset();
             }
         }
     }
@@ -2312,25 +2313,25 @@ void GameCockpit::ScrollAllVDU(int howmuch) {
 
 void GameCockpit::SetStaticAnimation() {
     static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
-    static Animation Statuc(comm_static.c_str());
-    for (unsigned int i = 0; i < vdu.size(); i++) {
-        if (vdu[i]->getMode() == VDU::COMM) {
-            vdu[i]->SetCommAnimation(&Statuc, NULL, true);
+    static vega_types::SharedPtr<Animation> Statuc = Animation::createAnimation(comm_static.c_str());
+    for (auto & i : vdu) {
+        if (i->getMode() == VDU::COMM) {
+            i->SetCommAnimation(Statuc, NULL, true);
         }
     }
 }
 
-void GameCockpit::SetCommAnimation(Animation *ani, Unit *un) {
+void GameCockpit::SetCommAnimation(vega_types::SharedPtr<Animation> ani, Unit *un) {
     bool seti = false;
-    for (unsigned int i = 0; i < vdu.size(); i++) {
-        if (vdu[i]->SetCommAnimation(ani, un, false)) {
+    for (auto & i : vdu) {
+        if (i->SetCommAnimation(ani, un, false)) {
             seti = true;
             break;
         }
     }
     if (!seti) {
-        for (unsigned int i = 0; i < vdu.size(); i++) {
-            if (vdu[i]->SetCommAnimation(ani, un, true)) {
+        for (auto & i : vdu) {
+            if (i->SetCommAnimation(ani, un, true)) {
                 break;
             }
         }

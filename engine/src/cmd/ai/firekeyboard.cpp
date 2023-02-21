@@ -1,9 +1,8 @@
 /*
  * firekeyboard.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -1527,9 +1526,9 @@ static void MyFunction() {
     //quit it--he's dead all ready
     static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
     //dead dead dead dead
-    static Animation Statuc(comm_static.c_str());
+    static vega_types::SharedPtr<Animation> Statuc = Animation::createAnimation(comm_static.c_str());
     //yep really dead
-    _Universe->AccessCockpit()->SetCommAnimation(&Statuc, NULL);
+    _Universe->AccessCockpit()->SetCommAnimation(Statuc.get(), NULL);
 }
 
 void FireKeyboard::ProcessCommMessage(class CommunicationMessage &c) {
