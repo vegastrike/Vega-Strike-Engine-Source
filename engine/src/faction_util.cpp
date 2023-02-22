@@ -88,12 +88,14 @@ int FactionUtil::GetNumAnimation(int faction) {
 
 //COMES FROM FACTION_XML.CPP
 
-std::vector<Animation *> *FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
+vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
+FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
     sex = factions.at(faction)->comm_face_sex[n];
-    return &factions.at(faction)->comm_faces[n].animations;
+    return factions.at(faction)->comm_faces[n].animations;
 }
 
-std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *un, unsigned char &sex) {
+vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
+FactionUtil::GetRandCommAnimation(int faction, Unit *un, unsigned char &sex) {
     bool dockable = UnitUtil::isDockableUnit(un);
     bool base = UnitUtil::getFlightgroupName(un) == "Base";
     int siz = factions.at(faction)->comm_faces.size();

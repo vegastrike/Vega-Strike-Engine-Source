@@ -25,6 +25,7 @@
 
 #include "gnuhash.h"
 #include <vector>
+#include "preferred_types.h"
 
 class Animation;
 class Unit;
@@ -37,8 +38,7 @@ class Pilot {
 public:
     explicit Pilot(int faction);
 
-    virtual ~Pilot() {
-    }
+    virtual ~Pilot() = default;
 
     void SetComm(Unit *comm_unit); //so we can specialize base sort of people
     vega_types::SharedPtr<Animation> getCommFace(Unit *parent, float moon, unsigned char &gender);
@@ -56,10 +56,10 @@ public:
     }                          //man it's rank in here
     typedef vsUMap<const void *, float> relationmap; //non dereferencable Unit to float
     relationmap effective_relationship;
-    std::vector<Animation *> *comm_face;
+    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> comm_face;
     float getAnger(const Unit *parent, const Unit *un) const;
 
-    std::vector<Animation *> *getCommFaces(unsigned char &sex) {
+    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> getCommFaces(unsigned char &sex) {
         sex = gender;
         return comm_face;
     }

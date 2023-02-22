@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * unit_functions_generic.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -148,11 +150,11 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
     } else if (UnitUtil::getRelationToFaction(un, faction) < 0 && faction != upgrades && faction != planets) {
         int whichcp = rand() % _Universe->numPlayers();
         Unit *whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
-        if (whichrecv != NULL) {
+        if (whichrecv != nullptr) {
             if (UnitUtil::getUnitSystemFile(whichrecv) == UnitUtil::getUnitSystemFile(un)) {
                 if (un->getAIState() && whichrecv->getAIState()) {
                     unsigned char sex;
-                    vector<Animation *> *anim = un->pilot->getCommFaces(sex);
+                    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> anim = un->pilot->getCommFaces(sex);
                     CommunicationMessage c(un, whichrecv, anim, sex);
                     c.SetCurrentState(c.fsm->GetScoreKillNode(), anim, sex);
                     whichrecv->getAIState()->Communicate(c);

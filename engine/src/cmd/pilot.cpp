@@ -35,13 +35,13 @@
 #include <vector>
 
 Pilot::Pilot(int faction) {
-    static float reaction = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "ReactionTime", ".2"));
-    static float ran = XMLSupport::parse_float(vs_config->getVariable("AI", "DefaultRank", ".01"));
+    static float reaction = XMLSupport::parse_floatf(vs_config->getVariable("AI", "Firing", "ReactionTime", ".2"));
+    static float ran = XMLSupport::parse_floatf(vs_config->getVariable("AI", "DefaultRank", ".01"));
     this->rank = ran;
 
     this->reaction_time = reaction;
     this->faction = faction;
-    comm_face = NULL;
+    comm_face.reset();
     gender = 0;
 }
 
@@ -58,23 +58,23 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
         bool abovezero = (*i).second + rel < 0;
         if (!abovezero) {
             static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+                    slowrel = XMLSupport::parse_floatf(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
             factor *= slowrel;
         }
         (*i).second += factor;
-        if (rel + factor < 0 && parent->Target() == NULL && parent->aistate) {
+        if (rel + factor < 0 && parent->Target() == nullptr && parent->aistate) {
             parent->aistate->ChooseTarget();
         }
     } else {
-        static float lessrel = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationEnemy", "-.05"));
+        static float lessrel = XMLSupport::parse_floatf(vs_config->getVariable("AI", "UnknownRelationEnemy", "-.05"));
         bool abovezero = (*i).second < lessrel;
         if (!abovezero) {
             static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+                    slowrel = XMLSupport::parse_floatf(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
             factor *= slowrel;
         }
         (*i).second += factor;
-        if ((*i).second < lessrel && parent->Target() == NULL && parent->aistate) {
+        if ((*i).second < lessrel && parent->Target() == nullptr && parent->aistate) {
             parent->aistate->ChooseTarget();
         }
     }
@@ -82,7 +82,7 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
 }
 
 void Pilot::DoHit(Unit *parent, void *aggressor, int faction) {
-    static float hitcost = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationHitCost", ".01"));
+    static float hitcost = XMLSupport::parse_floatf(vs_config->getVariable("AI", "UnknownRelationHitCost", ".01"));
     if (hitcost) {
         adjustSpecificRelationship(parent, aggressor, hitcost, faction);
         int whichCp = _Universe->whichPlayerStarship(parent);
@@ -131,7 +131,7 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
             }
             if (good) {
                 static float goodness_for_nocargo =
-                        XMLSupport::parse_float(vs_config->getVariable("AI", "pirate_bonus_for_empty_hold", ".75"));
+                        XMLSupport::parse_floatf(vs_config->getVariable("AI", "pirate_bonus_for_empty_hold", ".75"));
                 rel += goodness_for_nocargo;
             }
         }
@@ -175,18 +175,18 @@ float Pilot::GetEffectiveRelationship(const Unit *parent, const Unit *target) co
 extern float myroundclamp(float i);
 
 vega_types::SharedPtr<Animation> Pilot::getCommFace(Unit *parent, float moon, unsigned char &gender) {
-    vector<Animation *> *ani = getCommFaces(gender);
-    if (ani == NULL) {
+    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> ani = getCommFaces(gender);
+    if (!ani) {
         ani = FactionUtil::GetRandCommAnimation(parent->faction, parent, gender);
-        if (ani == NULL) {
-            return NULL;
+        if (!ani) {
+            return nullptr;
         }
     }
-    if (ani->size() == 0) {
-        return NULL;
+    if (ani->empty()) {
+        return nullptr;
     }
-    moon += .1;
-    moon *= (ani->size()) / .2;
+    moon += 0.1F;
+    moon *= (ani->size()) / 0.2F;
     unsigned int index = (unsigned int) myroundclamp(floor(moon));
     if (index >= ani->size()) {
         index = ani->size() - 1;

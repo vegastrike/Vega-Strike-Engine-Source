@@ -81,7 +81,7 @@ public:
 ///char * of the name
     char *factionname;
     struct comm_face_t {
-        std::vector<class Animation *> animations;
+        vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> animations;
         enum CHOICE { CNO, CYES, CEITHER };
         CHOICE dockable;
         CHOICE base;
@@ -123,7 +123,8 @@ namespace FactionUtil {
 extern int upgradefac;
 extern int neutralfac;
 extern int planetfac;
-std::vector<class Animation *> *GetRandCommAnimation(int faction, Unit *unit, unsigned char &sex);
+vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
+GetRandCommAnimation(int faction, Unit *un, unsigned char &sex);
 void SerializeFaction(FILE *file);
 std::string SerializeFaction();
 void LoadSerializedFaction(FILE *file);
@@ -176,7 +177,7 @@ vega_types::SharedPtr<Texture> getSquadLogo(int faction);
 vega_types::SharedPtr<Animation> createAnimation(const char *anim);
 vega_types::SharedPtr<Texture> createTexture(const char *tex, const char *tmp, bool force = false);
 vega_types::SharedPtr<Texture> createTexture(const char *tex, bool force = false);
-std::vector<class Animation *> *GetAnimation(int faction, int n, unsigned char &sex);
+vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> GetAnimation(int faction, int n, unsigned char &sex);
 Animation *GetRandExplosionAnimation(int whichfaction, std::string &which);
 void LoadFactionPlaylists();
 /** Still in faction_xml.cpp because createUnit **/

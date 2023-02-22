@@ -1,9 +1,8 @@
 /*
  * communication.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -330,7 +329,7 @@ float FSM::getDeltaRelation(int prevstate, unsigned int current_state) const {
 }
 
 void CommunicationMessage::Init(Unit *send, Unit *recv) {
-    if (send == NULL) {
+    if (send == nullptr) {
         return;
     }
     fsm = FactionUtil::GetConversation(send->faction, recv->faction);
@@ -355,37 +354,37 @@ float myroundclamp(float i) {
     return j;
 }
 
-void CommunicationMessage::SetAnimation(std::vector<Animation *> *ani, unsigned char sex) {
+void CommunicationMessage::SetAnimation(vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex) {
     this->sex = sex;     //for audio
     if (ani) {
-        if (ani->size() > 0) {
+        if (!ani->empty()) {
             float mood = fsm->getDeltaRelation(this->prevstate, this->curstate);
-            mood += .1;
-            mood *= (ani->size()) / .2;
+            mood += 0.1F;
+            mood *= (ani->size()) / 0.2F;
             unsigned int index = (unsigned int) myroundclamp(floor(mood));
             if (index >= ani->size()) {
                 index = ani->size() - 1;
             }
             this->ani = (*ani)[index];
         } else {
-            this->ani = NULL;
+            this->ani.reset();
         }
     } else {
-        this->ani = NULL;
+        this->ani.reset();
     }
 }
 
-void CommunicationMessage::SetCurrentState(int msg, std::vector<Animation *> *ani, unsigned char sex) {
+void CommunicationMessage::SetCurrentState(int msg, vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex) {
     curstate = msg;
     SetAnimation(ani, sex);
     assert(this->curstate >= 0);
 }
 
 CommunicationMessage::CommunicationMessage(Unit *send,
-        Unit *recv,
-        int messagechoice,
-        std::vector<Animation *> *ani,
-        unsigned char sex) {
+                                           Unit *recv,
+                                           int messagechoice,
+                                           vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani,
+                                           unsigned char sex) {
     Init(send, recv);
     prevstate = fsm->getDefaultState(send->getRelation(recv));
     if (fsm->nodes[prevstate].edges.size()) {
@@ -397,11 +396,11 @@ CommunicationMessage::CommunicationMessage(Unit *send,
 }
 
 CommunicationMessage::CommunicationMessage(Unit *send,
-        Unit *recv,
-        int laststate,
-        int thisstate,
-        std::vector<Animation *> *ani,
-        unsigned char sex) {
+                                           Unit *recv,
+                                           int laststate,
+                                           int thisstate,
+                                           vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani,
+                                           unsigned char sex) {
     Init(send, recv);
     prevstate = laststate;
     curstate = thisstate;
@@ -409,20 +408,20 @@ CommunicationMessage::CommunicationMessage(Unit *send,
     assert(this->curstate >= 0);
 }
 
-CommunicationMessage::CommunicationMessage(Unit *send, Unit *recv, std::vector<Animation *> *ani, unsigned char sex) {
+CommunicationMessage::CommunicationMessage(Unit *send, Unit *recv, vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex) {
     Init(send, recv);
     SetAnimation(ani, sex);
     assert(this->curstate >= 0);
 }
 
 CommunicationMessage::CommunicationMessage(Unit *send,
-        Unit *recv,
-        const CommunicationMessage &prevstate,
-        int curstate,
-        std::vector<Animation *> *ani,
-        unsigned char sex) {
+                                           Unit *recv,
+                                           const CommunicationMessage &prevsvtate,
+                                           int curstate,
+                                           vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani,
+                                           unsigned char sex) {
     Init(send, recv);
-    this->prevstate = prevstate.curstate;
+    this->prevstate = prevsvtate.curstate;
     if (fsm->nodes[this->prevstate].edges.size()) {
         this->edgenum = curstate % fsm->nodes[this->prevstate].edges.size();
         this->curstate = fsm->nodes[this->prevstate].edges[edgenum];

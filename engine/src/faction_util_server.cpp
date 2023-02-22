@@ -33,11 +33,13 @@ Faction::~Faction() {
     }
 }
 
-std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *, unsigned char &sex) {
+vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
+FactionUtil::GetRandCommAnimation(int faction, Unit *un, unsigned char &sex) {
     return NULL;
 }
 
-std::vector<Animation *> *FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
+vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
+FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
     return NULL;
 }
 
