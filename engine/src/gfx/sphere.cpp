@@ -146,7 +146,7 @@ SharedPtr<Mesh> SphereMesh::loadFreshLevelOfDetail(SharedPtr<SphereMesh> mesh,
     SharedPtr<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>> odq{nullptr};
     mesh->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>();
     odq = mesh->draw_queue;
-    mesh->vlist = nullptr;
+    mesh->vlist.reset();
     if (subclass) {
         if (stacks > 12) {
             stacks -= 4;

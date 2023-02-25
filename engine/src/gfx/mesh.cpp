@@ -76,7 +76,9 @@ void Mesh::InitUnit() {
     alphatest = 0;
     lodsize = FLT_MAX;
     forcelogos.reset();
+    forcelogos = MakeShared<SequenceContainer<SharedPtr<Logo>>>();
     squadlogos.reset();
+    squadlogos = MakeShared<SequenceContainer<SharedPtr<Logo>>>();
     local_pos = Vector(0, 0, 0);
     blendSrc = ONE;
     blendDst = ZERO;
