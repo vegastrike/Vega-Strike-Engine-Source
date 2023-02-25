@@ -1,7 +1,7 @@
 /*
  * sprite.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -142,13 +142,13 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
             int len = strlen(texture);
             if (len > 4 && texture[len - 1] == 'i' && texture[len - 2] == 'n' && texture[len - 3] == 'a'
                     && texture[len - 4] == '.') {
-                surface = vega_types::MakeShared<AnimatedTexture>(f, 0, texturefilter, GFXFALSE);
+                surface = AnimatedTexture::createAnimatedTexture(f, 0, texturefilter, GFXFALSE);
                 isAnimation = true;
             } else if (texturea[0] == '0') {
-                surface = vega_types::MakeShared<Texture>(texture, 0, texturefilter, TEXTURE2D, TEXTURE_2D, GFXTRUE, 65536, GFXFALSE);
+                surface = Texture::createTexture(texture, 0, texturefilter, TEXTURE2D, TEXTURE_2D, GFXTRUE, 65536, GFXFALSE);
                 isAnimation = false;
             } else {
-                surface = vega_types::MakeShared<Texture>(texture,
+                surface = Texture::createTexture(texture,
                         texturea,
                         0,
                         texturefilter,
@@ -191,7 +191,7 @@ void VSSprite::ReadTexture(VSFileSystem::VSFile *f) {
         VS_LOG(error, "VSSprite::ReadTexture error : VSFile not valid");
         return;
     }
-    surface = vega_types::MakeShared<Texture>(f);
+    surface = Texture::createTexture(f);
 }
 
 VSSprite::~VSSprite() {

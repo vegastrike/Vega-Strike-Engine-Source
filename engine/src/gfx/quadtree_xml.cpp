@@ -382,7 +382,7 @@ void QuadTree::LoadXML(const char *filename, const Vector &Scales, const float R
     for (i = 0; i < textures.size(); i++) {
         textures[i].scales = xml->scales;
         textures[i].scalet = xml->scalet;
-        std::string * tmp_filename = boost::get<std::string>(textures[i].tex);
+        std::string * tmp_filename = boost::get<std::string>(&(textures[i].tex));
         if (tmp_filename != nullptr || xml->animation[i].length() > 0) {
             vega_types::SharedPtr<Texture> tex{};
             if (xml->animation[i].length() > 0) {

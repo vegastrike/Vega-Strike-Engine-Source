@@ -70,7 +70,7 @@ public:
         }
 
         // Need to create texture
-        texture = vega_types::MakeShared<Texture>(texname.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
+        texture = Texture::createTexture(texname.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
         vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(texture);
         decals.emplace_back(as_animation);
         return decals.size() - 1;

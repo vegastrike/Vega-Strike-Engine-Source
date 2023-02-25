@@ -152,14 +152,14 @@ void RingMesh::InitRing(float iradius,
                 if (Decal->empty()) {
                     Decal->push_back(nullptr);
                 }
-                Decal->front() = MakeShared<AnimatedTexture>(texture, 0, mipmap);
+                Decal->front() = AnimatedTexture::createAnimatedTexture(texture, 0, mipmap);
             }
         }
         if (!found_texture) {
             if (Decal->empty()) {
                 Decal->push_back(nullptr);
             }
-            Decal->front() = MakeShared<Texture>(texture,
+            Decal->front() = Texture::createTexture(texture,
                     0,
                     mipmap,
                     TEXTURE2D,

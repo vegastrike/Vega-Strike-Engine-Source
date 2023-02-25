@@ -45,7 +45,7 @@ vega_types::SharedPtr<Texture> TextureManager::GetTexture(std::string const &nam
     // Texture already exists
     if (!texture) {
         // Need to create texture
-        texture = vega_types::MakeShared<Texture>(name.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
+        texture = Texture::createTexture(name.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
         textures.emplace_back(texture);
     }
 

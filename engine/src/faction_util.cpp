@@ -153,17 +153,17 @@ vega_types::SharedPtr<Animation> FactionUtil::createAnimation(const char *anim) 
 
 vega_types::SharedPtr<Texture> FactionUtil::createTexture(const char *tex, bool force) {
     if (force) {
-        return vega_types::MakeShared<Texture>(tex, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE);
+        return Texture::createTexture(tex, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE);
     } else {
-        return vega_types::MakeShared<Texture>(tex, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXFALSE);
+        return Texture::createTexture(tex, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXFALSE);
     }
 }
 
 vega_types::SharedPtr<Texture> FactionUtil::createTexture(const char *tex, const char *tmp, bool force) {
     if (force) {
-        return vega_types::MakeShared<Texture>(tex, tmp, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0, GFXTRUE);
+        return Texture::createTexture(tex, tmp, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0, GFXTRUE);
     } else {
-        return vega_types::MakeShared<Texture>(tex, tmp, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0, GFXFALSE);
+        return Texture::createTexture(tex, tmp, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0, GFXFALSE);
     }
 }
 

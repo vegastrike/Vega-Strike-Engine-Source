@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * window.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -194,7 +196,7 @@ void WindowManager::draw() {
     }
     //Emulate EndGUIFrame.
     static VSSprite MouseVSSprite("mouse.spr", BILINEAR, GFXTRUE);
-    static Texture dummy("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);
+    static vega_types::SharedPtr<Texture> dummy = Texture::createTexture("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);
     GFXDisable(CULLFACE);
     ConditionalCursorDraw(true);
     //Figure position of cursor sprite.
@@ -205,7 +207,7 @@ void WindowManager::draw() {
     MouseVSSprite.GetPosition(tempx, tempy);
     MouseVSSprite.SetPosition(tempx + loc.x + sizex / 2, tempy + loc.y + sizey / 2);
 
-    dummy.MakeActive();
+    dummy->MakeActive();
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXColorf(GUI_OPAQUE_WHITE());
 

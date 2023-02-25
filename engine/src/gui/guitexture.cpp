@@ -70,7 +70,8 @@ void GuiTexture::draw(const Rect &rect) const {
 
 //CONSTRUCTION
 GuiTexture::GuiTexture() :
-        m_texture(nullptr) = default;
+        m_texture(nullptr) {
+}
 
 GuiTexture::~GuiTexture() = default;
 

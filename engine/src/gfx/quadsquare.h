@@ -42,9 +42,8 @@
 #include <vector>
 #include "resizable.h"
 #include "nonlinear_transform.h"
+#include "aux_texture.h"
 #include <boost/variant.hpp>
-
-class Texture;
 
 struct TerrainTexture {
     BLENDFUNC blendSrc;
@@ -54,7 +53,7 @@ struct TerrainTexture {
     float scales;
     float scalet;
     unsigned char color{};
-    boost::variant<std::string, Texture> tex{};
+    boost::variant<std::string, vega_types::SharedPtr<Texture>> tex{};
 //    union {
 //        char *filename;
 //        Texture *t;

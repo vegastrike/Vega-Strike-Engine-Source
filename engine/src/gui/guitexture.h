@@ -25,6 +25,7 @@
 #ifndef __GUITEXTURE_H__
 #define __GUITEXTURE_H__
 #include <string>
+#include <gfx/aux_texture.h>
 #include "guidefs.h"
 
 #include "vegastrike.h"                 //For OpenGL/gl.h -> GLuint.

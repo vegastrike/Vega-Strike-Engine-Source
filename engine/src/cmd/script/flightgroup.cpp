@@ -1,7 +1,7 @@
 /*
  * flightgroup.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -46,9 +46,9 @@ Flightgroup *Flightgroup::newFlightgroup(const std::string &name,
     fg->Init(fgtmp, name, type, faction, order, num_ships, num_waves, mis);
     if (!logo_tex.empty()) {
         if (logo_alp.empty()) {
-            fg->squadLogo = vega_types::MakeShared<Texture>(logo_tex.c_str(), 0, MIPMAP);
+            fg->squadLogo = Texture::createTexture(logo_tex.c_str(), 0, MIPMAP);
         } else {
-            fg->squadLogo = vega_types::MakeShared<Texture>(logo_tex.c_str(), logo_alp.c_str(), 0, MIPMAP);
+            fg->squadLogo = Texture::createTexture(logo_tex.c_str(), logo_alp.c_str(), 0, MIPMAP);
         }
     }
     return fg;

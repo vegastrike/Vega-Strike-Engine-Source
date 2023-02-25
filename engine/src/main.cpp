@@ -440,9 +440,9 @@ void bootstrap_draw(const std::string &message, vega_types::SharedPtr<Animation>
     Matrix tmp;
     Identity(tmp);
     BootstrapMyStarSystemLoading = false;
-    static Texture dummy("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
+    static vega_types::SharedPtr<Texture> dummy = Texture::createTexture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
     BootstrapMyStarSystemLoading = true;
-    dummy.MakeActive();
+    dummy->MakeActive();
     GFXDisable(LIGHTING);
     GFXDisable(DEPTHTEST);
     GFXBlendMode(ONE, ZERO);

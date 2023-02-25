@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * glut_support.cpp
+ *
+ * Copyright (C) 2001-2023 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -196,10 +198,10 @@ extern void ConditionalCursorDraw(bool);
 void EndGUIFrame(MousePointerStyle pointerStyle) {
     static VSSprite MouseOverVSSprite("mouseover.spr", BILINEAR, GFXTRUE);
     static VSSprite MouseVSSprite("mouse.spr", BILINEAR, GFXTRUE);
-    static Texture dummy("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);
+    static vega_types::SharedPtr<Texture> dummy = Texture::createTexture("white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE);
 
     if (pointerStyle != MOUSE_POINTER_NONE) {
-        dummy.MakeActive();
+        dummy->MakeActive();
         GFXDisable(CULLFACE);
 
         VSSprite *whichSprite = &MouseVSSprite;

@@ -29,10 +29,11 @@
 float SphereTransformRenderlevel = 0;
 
 static void TerrainMakeActive(const TerrainTexture &text) {
-    Texture * t = boost::get<Texture>(text.tex);
+    const vega_types::SharedPtr<Texture> * t = boost::get<vega_types::SharedPtr<Texture>>(&(text.tex));
     if (t != nullptr) {
         GFXEnable(TEXTURE0);
-        t->MakeActive();
+        vega_types::SharedPtr<Texture> * t2 = const_cast<vega_types::SharedPtr<Texture> *>(t);
+        (*t2)->MakeActive();
     } else {
         GFXDisable(TEXTURE0);
     }
@@ -51,7 +52,7 @@ static void TerrainMakeClearActive(const TerrainTexture &text) {
 }
 
 static void TerrainMakeDeactive(const TerrainTexture &text) {
-    Texture * t = boost::get<Texture>(text.tex);
+    const vega_types::SharedPtr<Texture> * t = boost::get<vega_types::SharedPtr<Texture>>(&(text.tex));
     if (t != nullptr) {
         // TODO: What next? This function doesn't appear to actually do much of anything
     }
