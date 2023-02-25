@@ -595,7 +595,7 @@ void Planet::AddRing(const std::string &texture,
             stacks = 3;
         }
         for (int i = 0; i < slices; i++) {
-            meshdata.push_back(vega_types::MakeShared<RingMesh>(iradius,
+            meshdata.push_back(RingMesh::createRingMesh(iradius,
                     oradius,
                     stacks,
                     texture.c_str(),
