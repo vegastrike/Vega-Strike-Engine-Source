@@ -331,6 +331,9 @@ void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade) {
         orig0->blendSrc = src;
         orig0->blendDst = dst;
         if (lodcascade) {
+            while (orig->size() < numlods) {
+                orig->push_back(MakeShared<Mesh>());
+            }
             for (int i = 1; i < numlods; i++) {
                 orig->at(i)->draw_sequence = draw_sequence;
                 orig->at(i)->blendSrc = src;

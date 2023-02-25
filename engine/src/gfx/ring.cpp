@@ -256,7 +256,7 @@ const std::string RingMesh::calculateHashName(const char *texture,
     ab.at(2) = '\0';
     ab.at(1) = b + '0';
     ab.at(0) = a + '0';
-    std::string return_value = (boost::format("@@Ring#$1#$2$3#$4#$5") % texture % slices % ab.data() % theta_min % theta_max).str();
+    std::string return_value = (boost::format("@@Ring#%1%#%2%%3%#%4%#%5%") % texture % slices % ab.data() % theta_min % theta_max).str();
     return return_value;
 }
 
