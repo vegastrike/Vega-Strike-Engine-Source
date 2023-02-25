@@ -56,6 +56,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include "preferred_types.h"
+#include "ani_texture.h"
 
 using namespace vega_types;
 
@@ -258,10 +259,10 @@ SharedPtr<Texture> Mesh::TempGetTexture(MeshXML *xml, std::string filename, std:
     SharedPtr<Texture> ret{};
     std::string facplus = faction_prefix + filename;
     if (filename.find(".ani") != string::npos) {
-        ret = MakeShared<AnimatedTexture>(facplus.c_str(), 1, fil, detail);
+        ret = AnimatedTexture::createAnimatedTexture(facplus.c_str(), 1, fil, detail);
         if (!ret->LoadSuccess()) {
             ret.reset();
-            ret = MakeShared<AnimatedTexture>(filename.c_str(), 1, fil, detail);
+            ret = AnimatedTexture::createAnimatedTexture(filename.c_str(), 1, fil, detail);
             if (!ret->LoadSuccess()) {
                 ret.reset();
             } else {
@@ -271,10 +272,10 @@ SharedPtr<Texture> Mesh::TempGetTexture(MeshXML *xml, std::string filename, std:
             return ret;
         }
     }
-    ret = MakeShared<Texture>(facplus.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65536, detail);
+    ret = Texture::createTexture(facplus.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65536, detail);
     if (!ret->LoadSuccess()) {
         ret.reset();
-        ret = MakeShared<Texture>(filename.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65536, detail);
+        ret = Texture::createTexture(filename.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65536, detail);
     }
     return ret;
 }
@@ -323,33 +324,33 @@ SharedPtr<Texture> Mesh::TempGetTexture(SharedPtr<MeshXML> xml, int index, std::
     MeshXML::ZeTexture *zt = &(xml->decals[index]);
     if (zt->animated_name.length()) {
         string tempani = faction_prefix + zt->animated_name;
-        tex = MakeShared<AnimatedTexture>(tempani.c_str(), 0, BILINEAR);
+        tex = AnimatedTexture::createAnimatedTexture(tempani.c_str(), 0, BILINEAR);
         if (!tex->LoadSuccess()) {
             tex.reset();
-            tex = MakeShared<AnimatedTexture>(zt->animated_name.c_str(), 0, BILINEAR);
+            tex = AnimatedTexture::createAnimatedTexture(zt->animated_name.c_str(), 0, BILINEAR);
         }
     } else if (zt->decal_name.empty()) {
         tex.reset();
     } else {
         if (zt->alpha_name.empty()) {
             string temptex = faction_prefix + zt->decal_name;
-            tex = MakeShared<Texture>(
+            tex = Texture::createTexture(
                             temptex.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D,
                             (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
             if (!tex->LoadSuccess()) {
                 tex.reset();
-                tex = MakeShared<Texture>(
+                tex = Texture::createTexture(
                                 zt->decal_name.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D,
                                 (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
             }
         } else {
             string temptex = faction_prefix + zt->decal_name;
             string tempalp = faction_prefix + zt->alpha_name;
-            tex = MakeShared<Texture>(temptex.c_str(), tempalp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0,
+            tex = Texture::createTexture(temptex.c_str(), tempalp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0,
                             (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
             if (!tex->LoadSuccess()) {
                 tex.reset();
-                tex = MakeShared<Texture>(zt->decal_name.c_str(),
+                tex = Texture::createTexture(zt->decal_name.c_str(),
                                 zt->alpha_name.c_str(),
                                 0,
                                 MIPMAP,
@@ -371,7 +372,7 @@ SharedPtr<Texture> createTexture(const char *filename,
                                  enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
                                  unsigned char c = GFXFALSE,
                                  int i = 65536) {
-    return MakeShared<Texture>(filename, stage, f1, t0, t, c, i);
+    return Texture::createTexture(filename, stage, f1, t0, t, c, i);
 }
 
 SharedPtr<Logo> createLogo(int numberlogos,
@@ -395,11 +396,11 @@ SharedPtr<Texture> createTexture(char const *ccc,
                                  int j = 0,
                                  unsigned char c = GFXFALSE,
                                  int i = 65536) {
-    return MakeShared<Texture>(ccc, cc, k, f1, t0, t, f, j, c, i);
+    return Texture::createTexture(ccc, cc, k, f1, t0, t, f, j, c, i);
 }
 
 SharedPtr<AnimatedTexture> createAnimatedTexture(char const *c, int i, enum FILTER f) {
-    return MakeShared<AnimatedTexture>(c, i, f);
+    return AnimatedTexture::createAnimatedTexture(c, i, f);
 }
 
 Mesh::~Mesh() {
@@ -856,7 +857,7 @@ void RestoreFirstPassState(Texture *detailTexture,
     }
 }
 
-void SetupEnvmapPass(Texture *decal, unsigned int mat, int passno) {
+void SetupEnvmapPass(SharedPtr<Texture> decal, unsigned int mat, int passno) {
     assert(passno >= 0 && passno <= 2);
 
     //This is only used when there's no multitexturing... so don't use multitexturing
@@ -902,12 +903,12 @@ void RestoreEnvmapState() {
     GFXToggleTexture(false, 0);
 }
 
-void SetupSpecMapSecondPass(Texture *decal,
-        unsigned int mat,
-        BLENDFUNC blendsrc,
-        bool envMap,
-        const GFXColor &cloakFX,
-        float polygon_offset) {
+void SetupSpecMapSecondPass(SharedPtr<Texture> decal,
+                            unsigned int mat,
+                            BLENDFUNC blendsrc,
+                            bool envMap,
+                            const GFXColor &cloakFX,
+                            float polygon_offset) {
     GFXPushBlendMode();
     GFXSelectMaterialHighlights(mat,
             GFXColor(0, 0, 0, 0),
@@ -945,11 +946,11 @@ void SetupSpecMapSecondPass(Texture *decal,
     }
 }
 
-void SetupGlowMapFourthPass(Texture *decal,
-        unsigned int mat,
-        BLENDFUNC blendsrc,
-        const GFXColor &cloakFX,
-        float polygon_offset) {
+void SetupGlowMapFourthPass(SharedPtr<Texture> decal,
+                            unsigned int mat,
+                            BLENDFUNC blendsrc,
+                            const GFXColor &cloakFX,
+                            float polygon_offset) {
     GFXPushBlendMode();
     GFXSelectMaterialHighlights(mat,
             GFXColor(0, 0, 0, 0),
@@ -968,7 +969,7 @@ void SetupGlowMapFourthPass(Texture *decal,
     GFXDisable(TEXTURE1);
 }
 
-void SetupDamageMapThirdPass(Texture *decal, unsigned int mat, float polygon_offset) {
+void SetupDamageMapThirdPass(SharedPtr<Texture> decal, unsigned int mat, float polygon_offset) {
     GFXPushBlendMode();
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     if (decal) {
@@ -1382,7 +1383,7 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
             if (tu.defaultType == Pass::TextureUnit::Decal && tu.defaultIndex == 0) {
                 //Global default for decal 0 is white, this allows textureless objects
                 //that would otherwise not be possible
-                static Texture *white = new Texture("white.png");
+                static vega_types::SharedPtr<Texture> white = Texture::createTexture("white.png");
                 white->MakeActive(tu.targetIndex);
                 tuimask |= (1 << tu.targetIndex);
             } else {
@@ -1555,9 +1556,9 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     GFXPopBlendMode();
 }
 
-#define GETDECAL(pass) ( (p_decal[pass]) )
-#define HASDECAL(pass) ( ( (NUM_PASSES > pass) && Decal->at(pass) ) )
-#define SAFEDECAL(pass) ( (HASDECAL( pass ) ? Decal->at(pass).get() : black) )
+#define GETDECAL(pass) ( (p_decal[(pass)]) )
+#define HASDECAL(pass) ( ( (NUM_PASSES > (pass)) && Decal->at(pass) ) )
+#define SAFEDECAL(pass) ( (HASDECAL( pass ) ? Decal->at(pass) : black) )
 
 void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
     const Pass &pass = technique->getPass(techpass);
@@ -1673,7 +1674,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
     if (alphatest) {
         GFXAlphaTest(GEQUAL, alphatest / 255.0);
     }
-    static Texture *black = new Texture("blackclear.png");
+    static vega_types::SharedPtr<Texture> black = Texture::createTexture("blackclear.png");
     if (HASDECAL(BASE_TEX))
         GETDECAL(BASE_TEX)->MakeActive();
     GFXTextureEnv(0, GFXMODULATETEXTURE);     //Default diffuse mode

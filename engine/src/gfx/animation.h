@@ -46,7 +46,7 @@ class Animation : public AnimatedTexture {
 
     Matrix local_transformation;
 
-    float height; //half the height so you can do fancy vector translatons to campspace
+    float height; //half the height so you can do fancy vector translations to campspace
 
     float width;
 
@@ -59,7 +59,7 @@ protected:
 public:
     Animation();
 
-    static vega_types::SharedPtr<Animation> createAnimation(const char * filename, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
+    static vega_types::SharedPtr<Animation> createAnimation(const char * filename, bool Rep = false, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
                                                             bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1, 1));
 
     ~Animation() override;

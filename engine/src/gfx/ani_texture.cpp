@@ -64,7 +64,7 @@ static enum ADDRESSMODE parseAddressMode(const string &addrmodestr, ADDRESSMODE 
 }
 
 static void ActivateWhite(int stage) {
-    static Texture *white = new Texture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
+    static vega_types::SharedPtr<Texture> white = Texture::createTexture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
     if (white->LoadSuccess()) {
         white->MakeActive(stage);
     }
@@ -286,71 +286,6 @@ void AnimatedTexture::setTime(double tim) {
 
 using namespace VSFileSystem;
 
-AnimatedTexture::AnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtex) {
-    AniInit();
-    VSFile f;
-    VSError err = f.OpenReadOnly(file, AnimFile);
-    //bool setdir=false;
-    if (err <= Ok) {
-        float width, height;
-        f.Fscanf("%f %f", &width, &height);         //it's actually an animation in global animation shares
-        //setdir=true;
-    }
-    if (err <= Ok) {
-        Load(f, stage, imm, detailtex);
-        f.Close();
-    } else {
-        loadSuccess = false;
-        /*
-         *  if (setdir) {
-         *  VSFileSystem::vs_resetdir();
-         *  }
-         */
-    }
-}
-
-void AnimatedTexture::AniInit() {
-    Texture::InitTexture();
-
-    Decal = nullptr;
-    activebound = -1;
-    physicsactive = 0;
-    loadSuccess = false;
-    vidMode = false;
-    detailTex = false;
-    ismipmapped = BILINEAR;
-    texstage = 0;
-    vidSource = nullptr;
-
-    options = optLoop;
-
-    defaultAddressMode = DEFAULT_ADDRESS_MODE;
-
-    numframes = 1;
-    timeperframe = 1;
-    active = 0;
-    nextactive = 0;
-    active_fraction = 0;
-    curtime = lastcurtime = lastrealtime = 0;
-    constframerate = true;
-    done = false;
-}
-//AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
-//AniInit();
-//if (fp)
-//Load (fp,stage,imm,detailtex);
-//}
-
-AnimatedTexture::AnimatedTexture(VSFileSystem::VSFile &fp, int stage, enum FILTER imm, bool detailtex) {
-    AniInit();
-    Load(fp, stage, imm, detailtex);
-}
-
-AnimatedTexture::AnimatedTexture(int stage, enum FILTER imm, bool detailtex) :
-        Texture(stage, imm) {
-    AniInit();
-}
-
 vega_types::SharedPtr<Texture> AnimatedTexture::Original() {
     return Decal ? Decal->at(active)->Original() : vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
 }
@@ -407,8 +342,8 @@ AnimatedTexture::~AnimatedTexture() {
     palette = nullptr;
 }
 
-AnimatedTexture::AnimatedTexture() {
-    AniInit();
+AnimatedTexture::AnimatedTexture() : Texture() {
+//    AniInit();
 }
 
 void AnimatedTexture::Reset() {
@@ -501,7 +436,7 @@ vega_types::SharedPtr<AnimatedTexture> AnimatedTexture::CreateVideoTexture(const
                                                                            int stage,
                                                                            enum FILTER ismipmapped,
                                                                            bool detailtex) {
-    vega_types::SharedPtr<AnimatedTexture> rv = vega_types::MakeShared<AnimatedTexture>(stage, ismipmapped, detailtex);
+    vega_types::SharedPtr<AnimatedTexture> rv = AnimatedTexture::createAnimatedTexture(stage, ismipmapped, detailtex);
     VSFileSystem::VSFile f;
     VSError err = f.OpenReadOnly(fname, VSFileSystem::VideoFile);
     if (err <= Ok) {
@@ -617,7 +552,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
                                                                                             ""), defaultAddressMode);
                 if (alp[0] != '\0') {
                     Decal->at(j++) =
-                            vega_types::MakeShared<Texture>(file,
+                            Texture::createTexture(file,
                                                             alp,
                                                             stage,
                                                             ismipmapped,
@@ -631,7 +566,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
                                                             GFXFALSE,
                                                             addrmode);
                 } else {
-                    Decal->at(j++) = vega_types::MakeShared<Texture>(file,
+                    Decal->at(j++) = Texture::createTexture(file,
                                                                      stage,
                                                                      ismipmapped,
                                                                      TEXTURE2D,
@@ -777,4 +712,57 @@ void AnimatedTexture::SetTimeSource(vega_types::SharedPtr<Audio::Source> source)
 void AnimatedTexture::ClearTimeSource() {
     timeSource.reset();
     options &= ~optSoundTiming;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, const char *file, int stage, enum FILTER imm, bool detailtex) {
+    VSFile f;
+    VSError err = f.OpenReadOnly(file, AnimFile);
+    if (err <= Ok) {
+        float width, height;
+        f.Fscanf("%f %f", &width, &height);         //it's actually an animation in global animation shares
+    }
+    if (err <= Ok) {
+        animated_texture->Load(f, stage, imm, detailtex);
+        f.Close();
+    } else {
+        animated_texture->loadSuccess = false;
+        /*
+         *  if (setdir) {
+         *  VSFileSystem::vs_resetdir();
+         *  }
+         */
+    }
+    return animated_texture;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::createAnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtexture) {
+    vega_types::SharedPtr<AnimatedTexture> return_value = vega_types::MakeShared<AnimatedTexture>();
+    return constructAnimatedTexture(return_value, file, stage, imm, detailtexture);
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, int stage,
+                                          enum FILTER imm, bool detailtexture) {
+    return animated_texture;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::createAnimatedTexture(int stage, enum FILTER imm, bool detailtexture) {
+    vega_types::SharedPtr<AnimatedTexture> return_value = vega_types::MakeShared<AnimatedTexture>();
+    return constructAnimatedTexture(return_value, stage, imm, detailtexture);
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, VSFile &openedfile,
+                                          int stage, enum FILTER imm, bool detailtexture) {
+    animated_texture->Load(openedfile, stage, imm, detailtexture);
+    return animated_texture;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::createAnimatedTexture(VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture) {
+    vega_types::SharedPtr<AnimatedTexture> return_value;
+    return constructAnimatedTexture(return_value, openedfile, stage, imm, detailtexture);
 }

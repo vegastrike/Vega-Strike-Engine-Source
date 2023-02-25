@@ -1,7 +1,7 @@
 /*
  * star.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -653,7 +653,7 @@ static Vector GetConstVertex(const GFXColorVertex &c) {
 SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturenames,
         float size) : StarVlist(spread) {
     int curtexture = 0;
-    vector<AnimatedTexture *> animations;
+    vector<vega_types::SharedPtr<AnimatedTexture>> animations;
     static bool
             near_stars_alpha = XMLSupport::parse_bool(vs_config->getVariable("graphics", "near_stars_alpha", "false"));
     for (curtexture = 0; curtexture < NUM_ACTIVE_ANIMATIONS; ++curtexture) {
@@ -665,11 +665,11 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
             texturenames = "";
         }
         if (texturename.find(".ani") != string::npos) {
-            animations.push_back(new AnimatedTexture(texturename.c_str(), 0, near_stars_alpha ? NEAREST : BILINEAR));
+            animations.push_back(AnimatedTexture::createAnimatedTexture(texturename.c_str(), 0, near_stars_alpha ? NEAREST : BILINEAR));
             decal[curtexture] = animations.back();
         } else if (texturename.length() == 0) {
             if (curtexture == 0) {
-                decal[curtexture] = new Texture("white.bmp", 0, near_stars_alpha ? NEAREST : BILINEAR);
+                decal[curtexture] = Texture::createTexture("white.bmp", 0, near_stars_alpha ? NEAREST : BILINEAR);
             } else {
                 if (animations.size()) {
                     vega_types::SharedPtr<AnimatedTexture> tmp =
@@ -679,13 +679,13 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
                         num = rand() % num;
                         tmp->setTime(num / tmp->framesPerSecond());
                     }
-                    decal[curtexture] = tmp.get();
+                    decal[curtexture] = tmp;
                 } else {
-                    decal[curtexture] = decal[rand() % curtexture]->Clone().get();
+                    decal[curtexture] = decal[rand() % curtexture]->Clone();
                 }
             }
         } else {
-            decal[curtexture] = new Texture(texturename.c_str());
+            decal[curtexture] = Texture::createTexture(texturename.c_str());
         }
     }
     int numVerticesPer = near_stars_alpha ? 4 : 12;
@@ -813,16 +813,13 @@ void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
 }
 
 SpriteStarVlist::~SpriteStarVlist() {
-    for (int i = 0; i < NUM_ACTIVE_ANIMATIONS; ++i) {
-        if (decal[i] != nullptr) {
-            delete decal[i];
-            decal[i] = nullptr;
-        }
+    for (auto & i : decal) {
+        i.reset();
     }
-    for (int j = 0; j < NUM_ACTIVE_ANIMATIONS; ++j) {
-        if (vlist[j] != nullptr) {
-            delete vlist[j];
-            vlist[j] = nullptr;
+    for (auto & j : vlist) {
+        if (j != nullptr) {
+            delete j;
+            j = nullptr;
         }
     }
 }

@@ -1,7 +1,7 @@
 /*
  * mesh_bxm.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -69,14 +69,14 @@ FILE *aopen(...) {
 
 #else
 
-Texture * LoadTexture( string nam )
+vega_types::SharedPtr<Texture> LoadTexture( string nam )
 {
-    return new Texture( nam );
+    return Texture::createTexture( nam );
 }
 
-Texture * LoadAnimation( string Name )
+vega_types::SharedPtr<Texture> LoadAnimation( string Name )
 {
-    return new Animation( Name );
+    return Animation::createAnimation( Name );
 }
 
 #endif

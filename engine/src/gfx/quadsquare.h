@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * quadsquare.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -40,6 +42,7 @@
 #include <vector>
 #include "resizable.h"
 #include "nonlinear_transform.h"
+#include <boost/variant.hpp>
 
 class Texture;
 
@@ -50,16 +53,17 @@ struct TerrainTexture {
     bool reflect;
     float scales;
     float scalet;
-    unsigned char color;
-    union {
-        char *filename;
-        Texture *t;
-    }
-            tex;
+    unsigned char color{};
+    boost::variant<std::string, Texture> tex{};
+//    union {
+//        char *filename;
+//        Texture *t;
+//    }
+//            tex;
 
     TerrainTexture() {
         scales = scalet = 1;
-        tex.filename = NULL;
+        tex = "";
         material = 0;
         reflect = false;
         blendSrc = ONE;
@@ -137,7 +141,7 @@ public:
     unsigned char SubEnabledCount[2];          //e, s enabled reference counts.
     bool Static;
     bool Dirty;         //Set when vertex data has changed, but error/enabled data has not been recalculated.
-    quadsquare(quadcornerdata *pcd);
+    explicit quadsquare(quadcornerdata *pcd);
     ~quadsquare();
 ///Createsa  lookup table for the terrain texture
     void AddHeightMap(const quadcornerdata &cd, const HeightMapInfo &hm);

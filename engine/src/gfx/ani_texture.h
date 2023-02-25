@@ -38,28 +38,26 @@
 #include "audio/Source.h"
 
 class AnimatedTexture : public Texture {
-    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>> Decal;
-    unsigned int activebound; //For video mode
-    double physicsactive;
-    bool loadSuccess;
-
-    void AniInit();
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>> Decal{};
+    unsigned int activebound{-1U}; //For video mode
+    double physicsactive{0.0};
+    bool loadSuccess{false};
 
     //For video mode
-    bool vidMode;
-    bool detailTex;
-    enum FILTER ismipmapped;
-    int texstage;
+    bool vidMode{false};
+    bool detailTex{false};
+    enum FILTER ismipmapped{BILINEAR};
+    int texstage{0};
     vega_types::SharedPtr<Audio::Source> timeSource;
 
     vector<StringPool::Reference> frames; //Filenames for each frame
     vector<Vector> frames_maxtc; //Maximum tcoords for each frame
     vector<Vector> frames_mintc; //Minimum tcoords for each frame
 
-    VidFile *vidSource;
+    VidFile *vidSource{nullptr};
 
     StringPool::Reference wrapper_file_path;
-    VSFileSystem::VSFileType wrapper_file_type;
+    VSFileSystem::VSFileType wrapper_file_type{};
 
     //Options
     enum optionenum {
@@ -69,28 +67,36 @@ class AnimatedTexture : public Texture {
         optLoop = 0x08,
         optSoundTiming = 0x10
     };
-    unsigned char options;
+    unsigned char options{optLoop};
 
     //Implementation
     GFXColor multipass_interp_basecolor;
-    enum ADDRESSMODE defaultAddressMode; //default texture address mode, read from .ani
+    enum ADDRESSMODE defaultAddressMode{DEFAULT_ADDRESS_MODE}; //default texture address mode, read from .ani
 
 protected:
-    unsigned int numframes;
-    float timeperframe;
-    unsigned int active;
-    unsigned int nextactive; //It is computable, but it's much more convenient this way
-    float active_fraction; //For interpolated animations
-    double curtime;
+    unsigned int numframes{1U};
+    float timeperframe{1.0F};
+    unsigned int active{0U};
+    unsigned int nextactive{0U}; //It is computable, but it's much more convenient this way
+    float active_fraction{0U}; //For interpolated animations
+    double curtime{0.0};
 
     // for video de-jittering
-    double lastcurtime;
-    double lastrealtime;
+    double lastcurtime{0.0};
+    double lastrealtime{0.0};
 
-    bool constframerate;
-    bool done;
+    bool constframerate{true};
+    bool done{false};
+
+    static vega_types::SharedPtr<AnimatedTexture> constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, int stage, enum FILTER imm, bool detailtexture = false);
+    static vega_types::SharedPtr<AnimatedTexture> constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, const char * file, int stage, enum FILTER imm, bool detailtex);
+    static vega_types::SharedPtr<AnimatedTexture> constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture = false);
 
 public:
+    static vega_types::SharedPtr<AnimatedTexture> createAnimatedTexture(int stage, enum FILTER imm, bool detailtexture = false);
+    static vega_types::SharedPtr<AnimatedTexture> createAnimatedTexture(const char * file, int stage, enum FILTER imm, bool detailtexture = false);
+    static vega_types::SharedPtr<AnimatedTexture> createAnimatedTexture(VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture = false);
+
     void setTime(double tim) override;
 
     double curTime() const override {
@@ -102,7 +108,7 @@ public:
     }
 
     float framesPerSecond() const override {
-        return 1 / timeperframe;
+        return 1.0F / timeperframe;
     }
 
     unsigned int numLayers() const override;
@@ -118,12 +124,6 @@ public:
     }
 
     AnimatedTexture();
-
-    AnimatedTexture(int stage, enum FILTER imm, bool detailtexture = false);
-
-    AnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtexture = false);
-
-    AnimatedTexture(VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture = false);
 
     void Load(VSFileSystem::VSFile &f, int stage, enum FILTER ismipmapped, bool detailtex = false);
 

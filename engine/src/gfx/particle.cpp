@@ -1,7 +1,7 @@
 /*
  * particle.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -223,12 +223,7 @@ ParticleTrail::Config::Config(const std::string &prefix) {
     this->prefix = prefix;
 }
 
-ParticleTrail::Config::~Config() {
-    if (texture != nullptr) {
-        delete texture;
-        texture = nullptr;
-    }
-}
+ParticleTrail::Config::~Config() = default;
 
 void ParticleTrail::Config::init() {
     if (initialized) {
@@ -251,7 +246,7 @@ void ParticleTrail::Config::init() {
         psmooth = XMLSupport::parse_bool(vs_config->getVariable("graphics", prefix + "smooth", "false"));
     } else {
         std::string s = vs_config->getVariable("graphics", prefix + "texture", "supernova.bmp");
-        texture = new Texture(s.c_str());
+        texture = Texture::createTexture(s.c_str());
     }
 
     initialized = true;
@@ -339,7 +334,7 @@ void ParticleTrail::DrawAndUpdate() {
         glDisable(GL_POINT_SMOOTH);
         GFXPointSize(1);
     } else {
-        Texture *t = config.texture;
+        vega_types::SharedPtr<Texture> t = config.texture;
         const int vertsPerParticle = 12;
         bool dosort = blenddst != ONE && (blenddst != ZERO || !writeDepth);
 

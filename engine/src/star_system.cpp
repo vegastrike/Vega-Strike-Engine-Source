@@ -1,7 +1,7 @@
 /*
  * star_system.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -175,12 +175,12 @@ StarSystem::~StarSystem() {
     delete collide_map[Unit::UNIT_BOLT];
 
 #ifdef NV_CUBE_MAP
-    delete light_map[0];
-    delete light_map[1];
-    delete light_map[2];
-    delete light_map[3];
-    delete light_map[4];
-    delete light_map[5];
+    light_map[0].reset();
+    light_map[1].reset();
+    light_map[2].reset();
+    light_map[3].reset();
+    light_map[4].reset();
+    light_map[5].reset();
 #else
     delete light_map[0];
 #endif
@@ -189,8 +189,9 @@ StarSystem::~StarSystem() {
     delete stars;
 }
 
+// TODO: Refactor to return a vega_types::SharedPtr<Texture>?
 Texture *StarSystem::getLightMap() {
-    return light_map[0];
+    return light_map[0].get();
 }
 
 void StarSystem::activateLightMap(int stage) {
@@ -491,33 +492,27 @@ void NebulaUpdate(StarSystem *ss) {
 void StarSystem::createBackground(Star_XML *xml) {
 #ifdef NV_CUBE_MAP
     VS_LOG(info, "using NV_CUBE_MAP");
-    light_map[0] = new Texture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
+    light_map[0] = Texture::createTexture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
             GFXFALSE, game_options()->max_cubemap_size);
     if (light_map[0]->LoadSuccess() && light_map[0]->isCube()) {
-        light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = 0;
+        light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = nullptr;
     } else {
-        delete light_map[0];
-        light_map[0] =
-                new Texture((xml->backgroundname + "_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
+        light_map[0].reset();
+        light_map[0] = Texture::createTexture((xml->backgroundname + "_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
                         GFXFALSE, game_options()->max_cubemap_size);
-        light_map[1] =
-                new Texture((xml->backgroundname + "_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
+        light_map[1] = Texture::createTexture((xml->backgroundname + "_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
                         GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
-        light_map[2] =
-                new Texture((xml->backgroundname + "_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
+        light_map[2] = Texture::createTexture((xml->backgroundname + "_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
                         GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
-        light_map[3] =
-                new Texture((xml->backgroundname + "_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
+        light_map[3] = Texture::createTexture((xml->backgroundname + "_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
                         GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
-        light_map[4] =
-                new Texture((xml->backgroundname + "_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
+        light_map[4] = Texture::createTexture((xml->backgroundname + "_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
                         GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
-        light_map[5] =
-                new Texture((xml->backgroundname + "_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
+        light_map[5] = Texture::createTexture((xml->backgroundname + "_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
                         GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
     }
@@ -530,7 +525,7 @@ void StarSystem::createBackground(Star_XML *xml) {
         EnvironmentMapGeneratorMain( xml->backgroundname.c_str(), bglight.c_str(), 0, xml->reflectivity, 1 );
     else
         f.Close();
-    light_map[0] = new Texture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
+    light_map[0] = Texture::createTexture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
 #endif
 
     background = new Background(
