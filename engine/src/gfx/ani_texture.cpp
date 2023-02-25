@@ -763,6 +763,6 @@ AnimatedTexture::constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture>
 
 vega_types::SharedPtr<AnimatedTexture>
 AnimatedTexture::createAnimatedTexture(VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture) {
-    vega_types::SharedPtr<AnimatedTexture> return_value;
+    vega_types::SharedPtr<AnimatedTexture> return_value = vega_types::MakeShared<AnimatedTexture>();
     return constructAnimatedTexture(return_value, openedfile, stage, imm, detailtexture);
 }
