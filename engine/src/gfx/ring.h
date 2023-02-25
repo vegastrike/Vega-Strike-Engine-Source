@@ -27,28 +27,9 @@
 #define _RING_H_
 #include "mesh.h"
 #include "vegastrike.h"
+#include <array>
 
 class RingMesh : public Mesh {
-//    virtual Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) {
-//        static_assert(sizeof(Mesh) == sizeof(*this), "Are RingMesh and Mesh the same size in memory?");
-//        return new RingMesh[num];
-//    }
-
-//    virtual void InitRing(float iradius,
-//            float oradius,
-//            int slices,
-//            const char *texture,
-//            const QVector &r,
-//            const QVector &s,
-//            int texwrapx = 1,
-//            int texwrapy = 1,
-//            const BLENDFUNC a = ONE,
-//            const BLENDFUNC b = ZERO,
-//            bool envMap = false,
-//            float theta_min = 0.0,
-//            float theta_max = 2 * M_PI,
-//            FILTER mipmap = MIPMAP);
-
 protected:
 
     static vega_types::SharedPtr<RingMesh> constructRingMesh(vega_types::SharedPtr<RingMesh> ring_mesh,
