@@ -417,15 +417,15 @@ Mesh::~Mesh() {
         if (meshHashTable.Get(hash_name).get() == this) {
             meshHashTable.Delete(hash_name);
         }
-        SharedPtr<SequenceContainer<SharedPtr<Mesh>>> hashers = bfxmHashTable()->Get(hash_name);
-        if (hashers) {
-            auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(), [this](SharedPtr<Mesh> pi) { return pi.get() != this; });
-            hashers->erase(first_to_remove, hashers->end());
-            if (hashers->empty()) {
-                bfxmHashTable()->Delete(hash_name);
-                hashers.reset();
-            }
-        }
+//        SharedPtr<SequenceContainer<SharedPtr<Mesh>>> hashers = bfxmHashTable()->Get(hash_name);
+//        if (hashers) {
+//            auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(), [this](SharedPtr<Mesh> pi) { return pi.get() != this; });
+//            hashers->erase(first_to_remove, hashers->end());
+//            if (hashers->empty()) {
+//                bfxmHashTable()->Delete(hash_name);
+//                hashers.reset();
+//            }
+//        }
     }
 }
 
