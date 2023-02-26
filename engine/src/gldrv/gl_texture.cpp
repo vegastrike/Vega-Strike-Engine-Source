@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gl_texture.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -1091,12 +1093,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
 }
 
 void /*GFXDRVAPI*/ GFXDeleteTexture(int handle) {
-    if (handle < 0 || handle > textures.size()) {
+    if (handle < 0 || handle >= textures.size()) {
         return;
     }
     if (textures.at(handle).alive) {
         glDeleteTextures(1, &textures.at(handle).name);
-        for (size_t i = 0; i < sizeof(activetexture) / sizeof(int); ++i) {
+        for (size_t i = 0; i < sizeof(activetexture); ++i) {
             if (activetexture[i] == handle) {
                 activetexture[i] = -1;
             }

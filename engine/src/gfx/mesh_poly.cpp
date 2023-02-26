@@ -193,6 +193,10 @@ void Mesh::Fork(SharedPtr<Mesh> &one, SharedPtr<Mesh> &two, float a, float b, fl
     two->forceCullFace(GFXFALSE);
     one->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
     two->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+    for (uint32_t k = 0; k < NUM_ZBUF_SEQ + 1; ++k) {
+        one->draw_queue->at(k) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
+        two->draw_queue->at(k) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
+    }
     two->orig->push_back(two->shared_from_this());
     one->orig->push_back(one->shared_from_this());
 //    x->orig->refcount = 1;
@@ -283,6 +287,9 @@ Mesh::constructMesh(SharedPtr<Mesh> mesh_in_question, boost::string_view filenam
         f.Close();
     }
     mesh_in_question->draw_queue = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+    for (uint32_t i = 0; i < NUM_ZBUF_SEQ + 1; ++i) {
+        mesh_in_question->draw_queue->at(i) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
+    }
 
     if (!mesh_in_question->orig || mesh_in_question->orig->empty() || !mesh_in_question->orig->front()) {
         mesh_in_question->hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename_string, scale_x, faction) : VSFileSystem::GetHashName(

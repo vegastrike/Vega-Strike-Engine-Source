@@ -527,9 +527,9 @@ void bootstrap_first_loop() {
         vector<string> s = parse_space_string(game_options()->splash_screen);
         vector<string> sa = parse_space_string(game_options()->splash_audio);
         int snum = time(nullptr) % s.size();
-        SplashScreen = Animation::createAnimation(s[snum].c_str(), false);
-        if (!sa.empty() && sa[0].length()) {
-            muzak->GotoSong(sa[snum % sa.size()]);
+        SplashScreen = Animation::createAnimation(s.at(snum).c_str(), false);
+        if (!sa.empty() && sa.at(0).length()) {
+            muzak->GotoSong(sa.at(snum % sa.size()));
         }
         bs_tp = new TextPlane();
     }

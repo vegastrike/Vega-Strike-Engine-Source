@@ -477,11 +477,19 @@ void Mesh::Draw(float lod,
             ///all else == defaults, only ambient
         }
 
-        origmesh->draw_queue->at(static_cast<size_t>(p_context->mesh_seq))->push_back(p_context);
+        origmesh->draw_queue->at(p_context->mesh_seq)->push_back(p_context);
         if (!(origmesh->will_be_drawn & (1 << p_context->mesh_seq))) {
             origmesh->will_be_drawn |= (1 << p_context->mesh_seq);
             for (int passno = 0, npasses = origmesh->technique->getNumPasses(); passno < npasses; ++passno) {
-                undrawn_meshes->at(static_cast<size_t>(p_context->mesh_seq))->push_back(MakeShared<OrigMeshContainer>(origmesh,
+                for (uint32_t n = 0; n < undrawn_meshes->size(); ++n) {
+                    if (!undrawn_meshes->at(n)) {
+                        undrawn_meshes->at(n) = MakeShared<SequenceContainer<SharedPtr<OrigMeshContainer>>>();
+                    }
+                }
+                while (undrawn_meshes->size() < p_context->mesh_seq) {
+                    undrawn_meshes->push_back(MakeShared<SequenceContainer<SharedPtr<OrigMeshContainer>>>());
+                }
+                undrawn_meshes->at(p_context->mesh_seq)->push_back(MakeShared<OrigMeshContainer>(origmesh,
                         toofar - rSize(),
                                                                                                                      passno));
             }

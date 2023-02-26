@@ -1,7 +1,7 @@
 /*
  * vsbox.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -112,6 +112,9 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     orig->push_back(shared_from_this());
 //    refcount++;
     draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
+    for (uint32_t i = 0; i < NUM_ZBUF_SEQ + 1; ++i) {
+        draw_queue->at(i) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
+    }
 #undef VERTEX
 }
 

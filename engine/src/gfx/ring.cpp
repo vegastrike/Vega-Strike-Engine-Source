@@ -140,6 +140,9 @@ SharedPtr<Mesh> RingMesh::loadFreshLevelOfDetail(vega_types::SharedPtr<RingMesh>
     }
     SharedPtr<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>> odq{nullptr};
     ring_mesh->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>();
+    for (uint32_t i = 0; i < NUM_ZBUF_SEQ + 1; ++i) {
+        ring_mesh->draw_queue->at(i) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
+    }
     odq = ring_mesh->draw_queue;
     if (slices > 12) {
         slices -= 4;
