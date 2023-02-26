@@ -374,10 +374,7 @@ SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputf
         //For each mesh
         for (uint32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
             SharedPtr<Mesh> mesh = back_mesh.m.at(meshindex);
-            mesh->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
-            for (uint32_t i = 0; i < NUM_ZBUF_SEQ + 1; ++i) {
-                mesh->draw_queue->at(i) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
-            }
+            makeDrawQueue(mesh->draw_queue);
             SharedPtr<MeshXML> xml = MakeShared<MeshXML>();
             xml->fg = fg;
             xml->faction = fac;

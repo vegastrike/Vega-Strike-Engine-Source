@@ -144,10 +144,7 @@ SharedPtr<Mesh> SphereMesh::loadFreshLevelOfDetail(SharedPtr<SphereMesh> mesh,
                                                    bool reverse_normals,
                                                    bool subclass) {
     SharedPtr<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>> odq{nullptr};
-    mesh->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>();
-//    for (uint32_t i = 0; i < NUM_ZBUF_SEQ + 1; ++i) {
-//        mesh->draw_queue->at(i) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
-//    }
+    makeDrawQueue(mesh->draw_queue);
     odq = mesh->draw_queue;
     mesh->vlist.reset();
     if (subclass) {

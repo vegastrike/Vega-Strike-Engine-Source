@@ -27,6 +27,8 @@
 #ifndef VEGA_STRIKE_GFX_MESH_H
 #define VEGA_STRIKE_GFX_MESH_H
 
+#include <array>
+#include "vegastrike.h"
 #include <string>
 #include <utility>
 #include "preferred_types.h"
@@ -178,6 +180,9 @@ public:
     }
 
 //private:
+    static void makeDrawQueue(vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<
+            vega_types::SharedPtr<
+                    MeshDrawContext>>>>> &draw_queue_in_question);
 protected:
     Mesh(boost::string_view filename, const Vector &scalex, int faction, class Flightgroup *fg, bool is_original,
          const vega_types::SequenceContainer<std::string> &textureOverride = {});

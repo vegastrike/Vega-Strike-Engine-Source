@@ -23,6 +23,11 @@
  */
 
 
+#include "ani_texture.h"
+#include "xml_support.h"
+#include "config_xml.h"
+#include <vega_cast_utils.h>
+#include "ring.h"
 #include "aux_logo.h"
 #include "mesh.h"
 #include "camera.h"
@@ -423,3 +428,12 @@ BoundingBox* Mesh::getBoundingBox()
     return tbox;
 }
 */
+void Mesh::makeDrawQueue(SharedPtr<SequenceContainer<SharedPtr<SequenceContainer<
+        SharedPtr<
+                MeshDrawContext>>>>> &draw_queue_in_question) {
+    draw_queue_in_question = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>();
+    for (uint32_t idx = 0; idx < NUM_ZBUF_SEQ + 1; ++idx) {
+        draw_queue_in_question->push_back(MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>());
+    }
+    return;
+}

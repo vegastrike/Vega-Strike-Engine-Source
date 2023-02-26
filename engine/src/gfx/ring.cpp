@@ -34,6 +34,7 @@
 #include "xml_support.h"
 #include "ani_texture.h"
 #include "preferred_types.h"
+#include "mesh.h"
 
 using namespace vega_types;
 
@@ -139,10 +140,7 @@ SharedPtr<Mesh> RingMesh::loadFreshLevelOfDetail(vega_types::SharedPtr<RingMesh>
         num_spheres = 1;
     }
     SharedPtr<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>> odq{nullptr};
-    ring_mesh->draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>();
-    for (uint32_t idx = 0; idx < NUM_ZBUF_SEQ + 1; ++idx) {
-        ring_mesh->draw_queue->push_back(MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>());
-    }
+    makeDrawQueue(ring_mesh->draw_queue);
     odq = ring_mesh->draw_queue;
     if (slices > 12) {
         slices -= 4;

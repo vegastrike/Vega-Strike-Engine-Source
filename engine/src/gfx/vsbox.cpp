@@ -111,10 +111,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     meshHashTable.Put(hash_key, shared_from_this());
     orig->push_back(shared_from_this());
 //    refcount++;
-    draw_queue = MakeShared<SequenceContainer<SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>>>>(NUM_ZBUF_SEQ + 1);
-    for (uint32_t i = 0; i < NUM_ZBUF_SEQ + 1; ++i) {
-        draw_queue->at(i) = MakeShared<SequenceContainer<SharedPtr<MeshDrawContext>>>();
-    }
+    makeDrawQueue(draw_queue);
 #undef VERTEX
 }
 
