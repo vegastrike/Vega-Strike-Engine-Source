@@ -519,11 +519,9 @@ void Mission::doOrder(easyDomNode *node, Flightgroup *fg) {
 /* *********************************************************** */
 
 string Mission::getVariable(string name, string defaultval) {
-    for (auto siter = variables->subnodes.begin(); siter != variables->subnodes.end(); siter++) {
-        string scan_name = (*siter)->attr_value("name");
-        if (scan_name == name) {
-            return (*siter)->attr_value("value");
-        }
+    auto found = std::find_if(variables->subnodes.cbegin(), variables->subnodes.cend(), [name](easyDomNode * easy_dom_node) { return easy_dom_node->attr_value("name") == name; });
+    if (found != variables->subnodes.cend()) {
+        return (*found)->attr_value("value");
     }
     return defaultval;
 }
