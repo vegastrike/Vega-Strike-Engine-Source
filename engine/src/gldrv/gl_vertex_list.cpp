@@ -392,49 +392,59 @@ void GFXVertexList::GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenc
     int curtri = 0;
     int curquad = 3 * (*numtris);
     vert = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<GFXVertex>>();
-    size_t const num_elems_desired = ((*numtris) * 3 + 4 * (*numpolys - (*numtris)));
+    size_t num_elems_desired{};
+    for (size_t i = 0; i < numlists; ++i) {
+        num_elems_desired += offsets[i];
+    }
+//    size_t const num_elems_desired = ((*numtris) * 3 + 4 * (*numpolys - (*numtris)));
     vert->reserve(num_elems_desired);
     for (size_t idx = 0; idx < num_elems_desired; ++idx) {
-        vert->push_back({});
+        GFXVertex const gfx_vertex{};
+        vert->push_back(gfx_vertex);
     }
     for (size_t i = 0; i < numlists; ++i) {
         int j;
         switch (mode[i]) {
             case GFXTRI:
-                (*vtxcpy)(this, &(vert->data())[curtri], cur, offsets[i]);
+//                vert->reserve(cur + offsets[i]);
+                (*vtxcpy)(this, &(vert->data()[curtri]), cur, offsets[i]);
                 curtri += offsets[i];
                 break;
             case GFXTRIFAN:
             case GFXPOLY:
+//                vert->reserve(cur + offsets[i]);
                 for (j = 1; j < offsets[i] - 1; j++) {
-                    (*vtxcpy)(this, &(vert->data())[curtri++], cur, 1);
-                    (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j), 1);
-                    (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j + 1), 1);
+                    (*vtxcpy)(this, &(vert->data()[curtri++]), cur, 1);
+                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j), 1);
+                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j + 1), 1);
                 }
                 break;
             case GFXTRISTRIP:
+//                vert->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i]; j += 2) {
-                    (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j), 1);
+                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j - 2), 1);
+                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j - 1), 1);
+                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j), 1);
                     if (j + 1 < offsets[i]) {
                         //copy reverse
-                        (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j), 1);
-                        (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j - 1), 1);
-                        (*vtxcpy)(this, &(vert->data())[curtri++], (cur + j + 1), 1);
+                        (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j), 1);
+                        (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j - 1), 1);
+                        (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j + 1), 1);
                     }
                 }
                 break;
             case GFXQUAD:
-                (*vtxcpy)(this, &(vert->data())[curquad], (cur), offsets[i]);
+//                vert->reserve(cur + offsets[i]);
+                (*vtxcpy)(this, &(vert->data()[curquad]), (cur), offsets[i]);
                 curquad += offsets[i];
                 break;
             case GFXQUADSTRIP:
+//                vert->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i] - 1; j += 2) {
-                    (*vtxcpy)(this, &(vert->data())[curquad++], (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(vert->data())[curquad++], (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(vert->data())[curquad++], (cur + j + 1), 1);
-                    (*vtxcpy)(this, &(vert->data())[curquad++], (cur + j), 1);
+                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j - 2), 1);
+                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j - 1), 1);
+                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j + 1), 1);
+                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j), 1);
                 }
                 break;
             default:
