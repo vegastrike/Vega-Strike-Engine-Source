@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gfxlib_struct.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,10 +27,12 @@
 #define _GFXLIB_STRUCT
 #include "gfx/vec.h"
 #include "endianness.h"
+#include "preferred_types.h"
 
 #include <vector>
 #include <iterator>
 #include <functional>
+#include <boost/shared_ptr.hpp>
 
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char
@@ -1023,7 +1027,7 @@ public:
     void DrawOnce();
     virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-    virtual void GetPolys(GFXVertex **vert, int *numPolys, int *numTris);
+    virtual void GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> &vert, int *numpolys, int *numtris);
 };
 
 class /*GFXDRVAPI*/ GFXSphereVertexList : public GFXVertexList {
@@ -1048,7 +1052,7 @@ public:
     virtual void Draw();
     virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-    virtual void GetPolys(GFXVertex **vert, int *numPolys, int *numTris);
+    virtual void GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> &vert, int *numPolys, int *numTris);
 ///generates procedural planetdata to the actual detaillevel with the "plasma method"
     virtual void ProceduralModification();
 };
