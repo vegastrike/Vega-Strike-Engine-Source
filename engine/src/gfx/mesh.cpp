@@ -308,7 +308,7 @@ SharedPtr<Mesh> Mesh::getLOD(float lod, bool bBypassDamping) {
                             maxenlargement;
                 }                     //Avoid excessive enlargement of low-detail LOD levels, when LOD levels are far apart.
             }
-            if ((lod < (orig->at(i)->lodsize + lodoffs)) && (lod < maxlodsize)) {
+            if ((lod < maxlodsize) && (orig && !orig->empty() && i < orig->size() && lod < (orig->at(i)->lodsize + lodoffs))) {
                 maxlodsize = orig->at(i)->lodsize;
                 retval = orig->at(i);
             }
