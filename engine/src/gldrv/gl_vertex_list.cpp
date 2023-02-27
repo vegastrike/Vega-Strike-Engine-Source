@@ -370,12 +370,14 @@ const GFXColorVertex *GFXVertexList::GetColorVertex(int index) const {
     return data.colors + index;
 }
 
-void GFXVertexList::GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> &vert, int *numpolys, int *numtris) {
+vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVertexList::GetPolys(size_t &num_tris,
+                                                                                                  size_t &num_quads,
+                                                                                                  size_t &total_num_polys) {
     if (numVertices == 0) {
-        *numpolys = 0;
-        *numtris = 0;
-        vert = nullptr;
-        return;
+        num_tris = 0;
+        num_quads = 0;
+        total_num_polys = 0;
+        return nullptr;
     }
     this->Map(true, false);
     void (*vtxcpy)(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
@@ -387,64 +389,64 @@ void GFXVertexList::GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenc
                     ? IndVtxCopy
                     : VtxCopy);
     int cur = 0;
-    *numtris = numTris();
-    *numpolys = *numtris + numQuads();
+    num_tris = numTris();
+    num_quads = numQuads();
+    total_num_polys = num_tris + num_quads;
     int curtri = 0;
-    int curquad = 3 * (*numtris);
-    vert = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<GFXVertex>>();
+    int curquad = 3 * (num_tris);
     size_t num_elems_desired{};
     for (size_t i = 0; i < numlists; ++i) {
         num_elems_desired += offsets[i];
     }
-//    size_t const num_elems_desired = ((*numtris) * 3 + 4 * (*numpolys - (*numtris)));
-    vert->reserve(num_elems_desired);
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> return_value = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<GFXVertex>>(num_elems_desired);
+//    return_value->reserve(num_elems_desired);
     for (size_t idx = 0; idx < num_elems_desired; ++idx) {
-        GFXVertex const gfx_vertex{};
-        vert->push_back(gfx_vertex);
+        GFXVertex gfx_vertex{};
+        return_value->push_back(gfx_vertex);
     }
     for (size_t i = 0; i < numlists; ++i) {
         int j;
         switch (mode[i]) {
             case GFXTRI:
-//                vert->reserve(cur + offsets[i]);
-                (*vtxcpy)(this, &(vert->data()[curtri]), cur, offsets[i]);
+//                return_value->reserve(cur + offsets[i]);
+                (*vtxcpy)(this, &(return_value->data()[curtri]), cur, offsets[i]);
                 curtri += offsets[i];
                 break;
             case GFXTRIFAN:
             case GFXPOLY:
-//                vert->reserve(cur + offsets[i]);
+//                return_value->reserve(cur + offsets[i]);
                 for (j = 1; j < offsets[i] - 1; j++) {
-                    (*vtxcpy)(this, &(vert->data()[curtri++]), cur, 1);
-                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j), 1);
-                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j + 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curtri++]), cur, 1);
+                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j + 1), 1);
                 }
                 break;
             case GFXTRISTRIP:
-//                vert->reserve(cur + offsets[i]);
+//                return_value->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i]; j += 2) {
-                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 2), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
                     if (j + 1 < offsets[i]) {
                         //copy reverse
-                        (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j), 1);
-                        (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j - 1), 1);
-                        (*vtxcpy)(this, &(vert->data()[curtri++]), (cur + j + 1), 1);
+                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
+                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 1), 1);
+                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j + 1), 1);
                     }
                 }
                 break;
             case GFXQUAD:
-//                vert->reserve(cur + offsets[i]);
-                (*vtxcpy)(this, &(vert->data()[curquad]), (cur), offsets[i]);
+//                return_value->reserve(cur + offsets[i]);
+                (*vtxcpy)(this, &(return_value->data()[curquad]), (cur), offsets[i]);
                 curquad += offsets[i];
                 break;
             case GFXQUADSTRIP:
-//                vert->reserve(cur + offsets[i]);
+//                return_value->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i] - 1; j += 2) {
-                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j + 1), 1);
-                    (*vtxcpy)(this, &(vert->data()[curquad++]), (cur + j), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 2), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j + 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j), 1);
                 }
                 break;
             default:
@@ -453,6 +455,7 @@ void GFXVertexList::GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenc
         cur += offsets[i];
     }
     this->UnMap();
+    return return_value;
 }
 
 void GFXVertexList::LoadDrawState() {

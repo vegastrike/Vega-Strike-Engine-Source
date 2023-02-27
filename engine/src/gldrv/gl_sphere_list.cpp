@@ -54,16 +54,19 @@ void GFXSphereVertexList::BeginDrawState(GFXBOOL lock) {
     sphere->BeginDrawState(lock);
 }
 
-void GFXSphereVertexList::GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> &vert, int *RESTRICT numPolys, int *RESTRICT numTris) {
-    sphere->GetPolys(vert, numPolys, numTris);
-    int const numt = *numTris;
-    int const numq = *numPolys - numt;
-    int const verts = numt * 3 + numq * 4;
-    for (int i = 0; i < verts; ++i) {
-        vert->at(i).x *= radius;
-        vert->at(i).y *= radius;
-        vert->at(i).z *= radius;
+vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXSphereVertexList::GetPolys(size_t &num_tris,
+                                                                                                        size_t &num_quads,
+                                                                                                        size_t &total_num_polys) {
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> return_value =
+            sphere->GetPolys(num_tris,
+                             num_quads,
+                             total_num_polys);
+    for (auto& elem: *return_value) {
+        elem.x *= radius;
+        elem.y *= radius;
+        elem.z *= radius;
     }
+    return return_value;
 }
 
 void GFXSphereVertexList::EndDrawState(GFXBOOL lock) {

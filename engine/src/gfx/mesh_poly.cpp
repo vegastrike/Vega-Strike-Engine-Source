@@ -61,16 +61,16 @@ void Mesh::Fork(SharedPtr<Mesh> &one, SharedPtr<Mesh> &two, float a, float b, fl
         orig->front()->Fork(one, two, a, b, c, d);
         return;
     }
-    int numtris, numquads;
-    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> Orig{};
-    vlist->GetPolys(Orig, &numquads, &numtris);
-    numquads -= numtris;
+    size_t num_tris{};
+    size_t num_quads{};
+    size_t total_num_polys{};
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> Orig = vlist->GetPolys(num_tris, num_quads, total_num_polys);
     int numtqx[2] = {0, 0};
     int numtqy[2] = {0, 0};
 
-    GFXVertex *X = new GFXVertex[numquads * 4 + numtris * 3];
+    GFXVertex *X = new GFXVertex[Orig->size()];
     GFXVertex *xnow = X;
-    GFXVertex *Y = new GFXVertex[numquads * 4 + numtris * 3];
+    GFXVertex *Y = new GFXVertex[Orig->size()];
     GFXVertex *ynow = Y;
     Vector xmax, xmin, ymax, ymin;
     xmax = ymax = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -79,7 +79,7 @@ void Mesh::Fork(SharedPtr<Mesh> &one, SharedPtr<Mesh> &two, float a, float b, fl
     int i, j;
     int inc = 3;
     int offset = 0;
-    int last = numtris;
+    int last = num_tris;
     mesh_polygon tmppolygon;
     for (int l = 0; l < 2; l++) {
         for (i = 0; i < last; i++) {
@@ -106,8 +106,8 @@ void Mesh::Fork(SharedPtr<Mesh> &one, SharedPtr<Mesh> &two, float a, float b, fl
         numtqx[l] *= inc;
         numtqy[l] *= inc;
         inc = 4;
-        offset = numtris * 3;
-        last = numquads;
+        offset = num_tris * 3;
+        last = num_quads;
     }
     Orig.reset();
     enum POLYTYPE polytypes[2] = {GFXTRI, GFXQUAD};
@@ -211,15 +211,16 @@ void Mesh::Fork(SharedPtr<Mesh> &one, SharedPtr<Mesh> &two, float a, float b, fl
 }
 
 void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
-    int numtris;
-    int numquads;
     if (orig && !orig->empty() && orig->front().get() != this) {
         orig->front()->GetPolys(polys);
         return;
     }
-    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> tmpres{};
-    vlist->GetPolys(tmpres, &numquads, &numtris);
-    numquads -= numtris;
+    size_t num_tris{};
+    size_t num_quads{};
+    size_t total_num_polys{};
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> tmpres = vlist->GetPolys(num_tris,
+                                                                                                       num_quads,
+                                                                                                       total_num_polys);
     size_t cur = 0;
     size_t how_many = 0;
     for (size_t i = 0; i < vlist->GetNumLists(); ++i) {
@@ -294,7 +295,6 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
 //            vv.k = tmpres->at(how_many + i * inc + j).z;                     //+local_pos.k;
 //        }
 //    }
-    tmpres.reset();
 }
 
 vega_types::SharedPtr<Mesh>

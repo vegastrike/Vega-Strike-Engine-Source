@@ -1029,7 +1029,9 @@ public:
     void DrawOnce();
     virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-    virtual void GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> &vert, int *numpolys, int *numtris);
+    virtual vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GetPolys(size_t &num_tris,
+                                                                                               size_t &num_quads,
+                                                                                               size_t &total_num_polys);
 };
 
 class /*GFXDRVAPI*/ GFXSphereVertexList : public GFXVertexList {
@@ -1054,7 +1056,9 @@ public:
     virtual void Draw();
     virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-    virtual void GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> &vert, int *numPolys, int *numTris);
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GetPolys(size_t &num_tris,
+                                                                                       size_t &num_quads,
+                                                                                       size_t &total_num_polys) override;
 ///generates procedural planetdata to the actual detaillevel with the "plasma method"
     virtual void ProceduralModification();
 };
