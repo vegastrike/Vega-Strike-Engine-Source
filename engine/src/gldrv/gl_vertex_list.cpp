@@ -408,13 +408,11 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
         int j;
         switch (mode[i]) {
             case GFXTRI:
-//                return_value->reserve(cur + offsets[i]);
                 (*vtxcpy)(this, &(return_value->data()[curtri]), cur, offsets[i]);
                 curtri += offsets[i];
                 break;
             case GFXTRIFAN:
             case GFXPOLY:
-//                return_value->reserve(cur + offsets[i]);
                 for (j = 1; j < offsets[i] - 1; j++) {
                     (*vtxcpy)(this, &(return_value->data()[curtri++]), cur, 1);
                     (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
@@ -422,7 +420,6 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
                 }
                 break;
             case GFXTRISTRIP:
-//                return_value->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i]; j += 2) {
                     (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 2), 1);
                     (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 1), 1);
@@ -436,12 +433,10 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
                 }
                 break;
             case GFXQUAD:
-//                return_value->reserve(cur + offsets[i]);
                 (*vtxcpy)(this, &(return_value->data()[curquad]), (cur), offsets[i]);
                 curquad += offsets[i];
                 break;
             case GFXQUADSTRIP:
-//                return_value->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i] - 1; j += 2) {
                     (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 2), 1);
                     (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 1), 1);
