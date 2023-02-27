@@ -944,6 +944,8 @@ protected:
 ///Propagates modifications to the display list
 public:
     void RefreshDisplayList();
+    virtual POLYTYPE getPolyType(size_t idx) const;
+    virtual size_t getOffset(size_t idx) const;
 protected:
     virtual void Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
     void RenormalizeNormals();

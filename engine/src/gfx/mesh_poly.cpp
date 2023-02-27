@@ -218,34 +218,82 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
         return;
     }
     vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> tmpres{};
-    Vector vv;
     vlist->GetPolys(tmpres, &numquads, &numtris);
     numquads -= numtris;
-    int i;
-    int inc = 3;
-    int offset = 0;
-    int last = numtris;
-    mesh_polygon tmppolygon;
-    // Unroll this loop a bit to remove conditional 
-    for (i = 0; i < last; i++) {
-        polys.push_back(tmppolygon);
-        for (int j = 0; j < 3; j++, polys.back().v.push_back(vv)) {
-            vv.i = tmpres->at(offset + i * inc + j).x;                 //+local_pos.i;
-            vv.j = tmpres->at(offset + i * inc + j).y;                 //+local_pos.j;
-            vv.k = tmpres->at(offset + i * inc + j).z;                 //+local_pos.k;
+    size_t cur = 0;
+    size_t how_many = 0;
+    for (size_t i = 0; i < vlist->GetNumLists(); ++i) {
+        how_many = vlist->getOffset(i);
+        uint32_t inc = 1U;
+        switch (vlist->getPolyType(i)) {
+            case GFXTRI:
+                inc = 3U;
+                for (size_t j = cur; j < cur + how_many; j += inc) {
+                    mesh_polygon tmp_polygon{};
+                    Vector vv{};
+                    for (uint32_t k = j; k < j + inc; k++, tmp_polygon.v.push_back(vv)) {
+                        vv.i = tmpres->at(k).x;
+                        vv.j = tmpres->at(k).y;
+                        vv.k = tmpres->at(k).z;
+                    }
+                    polys.push_back(tmp_polygon);
+                }
+                break;
+            case GFXQUAD:
+                inc = 4U;
+                for (size_t j = cur; j < cur + how_many; j += inc) {
+                    mesh_polygon tmp_polygon{};
+                    Vector vv{};
+                    for (uint32_t k = j; k < j + inc; k++, tmp_polygon.v.push_back(vv)) {
+                        vv.i = tmpres->at(k).x;
+                        vv.j = tmpres->at(k).y;
+                        vv.k = tmpres->at(k).z;
+                    }
+                    polys.push_back(tmp_polygon);
+                }
+                break;
+            case GFXLINE:
+                break;
+            case GFXTRISTRIP:
+                break;
+            case GFXQUADSTRIP:
+                break;
+            case GFXTRIFAN:
+                break;
+            case GFXLINESTRIP:
+                break;
+            case GFXPOLY:
+                break;
+            case GFXPOINT:
+                break;
         }
+        cur += how_many;
     }
-    inc = 4;
-    offset = numtris * 3;
-    last = numquads;
-    for (i = 0; i < last; i++) {
-        polys.push_back(tmppolygon);
-        for (int j = 1; j < 4; j++, polys.back().v.push_back(vv)) {
-            vv.i = tmpres->at(offset + i * inc + j).x;                     //+local_pos.i;
-            vv.j = tmpres->at(offset + i * inc + j).y;                     //+local_pos.j;
-            vv.k = tmpres->at(offset + i * inc + j).z;                     //+local_pos.k;
-        }
-    }
+//    int i;
+//    int inc = 3;
+//    int how_many = 0;
+//    int last = numtris;
+//    mesh_polygon tmppolygon;
+//    // Unroll this loop a bit to remove conditional
+//    for (i = 0; i < last; i++) {
+//        polys.push_back(tmppolygon);
+//        for (int j = 0; j < 3; j++, polys.back().v.push_back(vv)) {
+//            vv.i = tmpres->at(how_many + i * inc + j).x;                 //+local_pos.i;
+//            vv.j = tmpres->at(how_many + i * inc + j).y;                 //+local_pos.j;
+//            vv.k = tmpres->at(how_many + i * inc + j).z;                 //+local_pos.k;
+//        }
+//    }
+//    inc = 4;
+//    how_many = numtris * 3;
+//    last = numquads;
+//    for (i = 0; i < last; i++) {
+//        polys.push_back(tmppolygon);
+//        for (int j = 1; j < 4; j++, polys.back().v.push_back(vv)) {
+//            vv.i = tmpres->at(how_many + i * inc + j).x;                     //+local_pos.i;
+//            vv.j = tmpres->at(how_many + i * inc + j).y;                     //+local_pos.j;
+//            vv.k = tmpres->at(how_many + i * inc + j).z;                     //+local_pos.k;
+//        }
+//    }
     tmpres.reset();
 }
 

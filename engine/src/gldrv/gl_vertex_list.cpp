@@ -457,3 +457,11 @@ void GFXVertexList::GetPolys(vega_types::SharedPtr<vega_types::ContiguousSequenc
 
 void GFXVertexList::LoadDrawState() {
 }
+
+POLYTYPE GFXVertexList::getPolyType(size_t idx) const {
+    return mode[idx];
+}
+
+size_t GFXVertexList::getOffset(size_t idx) const {
+    return offsets[idx];
+}
