@@ -420,9 +420,9 @@ Bolt *Bolt::BoltFromIndex(Collidable::CollideRef b) {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
     size_t ind = nondecal_index(b);
     if (b.bolt_index & 128) {
-        return &bolt_draw_manager.balls[b.bolt_index & 0x7f][ind];
+        return &bolt_draw_manager.balls.at(b.bolt_index & 0x7f).at(ind);
     } else {
-        return &bolt_draw_manager.bolts[b.bolt_index & 0x7f][ind];
+        return &bolt_draw_manager.bolts.at(b.bolt_index & 0x7f).at(ind);
     }
 }
 

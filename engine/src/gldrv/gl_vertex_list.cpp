@@ -444,6 +444,15 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
                     (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j), 1);
                 }
                 break;
+            case GFXLINE:
+                VS_LOG(trace, "GFXVertexList::GetPolys encountered a GFXLINE");
+                break;
+            case GFXLINESTRIP:
+                VS_LOG(trace, "GFXVertexList::GetPolys encountered a GFXLINESTRIIP");
+                break;
+            case GFXPOINT:
+                VS_LOG(trace, "GFXVertexList::GetPolys encountered a GFXPOINT");
+                break;
             default:
                 break;
         }
