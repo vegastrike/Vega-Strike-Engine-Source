@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 David Ranger, Mike Byron, Daniel Horn,
+ * guitexture.cpp
+ *
+ * Copyright (C) 2001-2023 David Ranger, Mike Byron, Daniel Horn,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -38,13 +40,13 @@ using namespace VSFileSystem;
 
 //Read a texture from a file and bind it.
 bool GuiTexture::read(const std::string &fileName) {
-    Texture *oldTexture(m_texture);
-    m_texture = new Texture(fileName.c_str(), 0, BILINEAR);
+    vega_types::SharedPtr<Texture> oldTexture(m_texture);
+    m_texture = Texture::createTexture(fileName.c_str(), 0, BILINEAR);
     if (m_texture && !m_texture->LoadSuccess() && oldTexture) {
-        delete m_texture;
+        m_texture.reset();
         m_texture = oldTexture;
     } else {
-        delete oldTexture;
+        oldTexture.reset();
     }
     return m_texture->LoadSuccess();
 }
@@ -52,7 +54,7 @@ bool GuiTexture::read(const std::string &fileName) {
 //Draw this texture, stretching to fit the rect.
 void GuiTexture::draw(const Rect &rect) const {
     //Don't draw unless there is something usable.
-    if (m_texture == NULL || !m_texture->LoadSuccess()) {
+    if (!m_texture || !m_texture->LoadSuccess()) {
         return;
     }
     m_texture->MakeActive();
@@ -67,14 +69,9 @@ void GuiTexture::draw(const Rect &rect) const {
 }
 
 //CONSTRUCTION
-GuiTexture::GuiTexture(void) :
+GuiTexture::GuiTexture() :
         m_texture(nullptr) {
 }
 
-GuiTexture::~GuiTexture(void) {
-    if (m_texture != nullptr) {
-        delete m_texture;
-        m_texture = nullptr;
-    }
-}
+GuiTexture::~GuiTexture() = default;
 

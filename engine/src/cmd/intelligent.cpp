@@ -1,8 +1,8 @@
-/**
+/*
  * intelligent.cpp
  *
- * Copyright (C) 2020 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -42,6 +42,7 @@
 #include "collide2/CSopcodecollider.h"
 
 #include <string>
+#include "vega_cast_utils.h"
 
 using std::string;
 
@@ -51,9 +52,7 @@ extern bool CheckAccessory(Unit *tur);
 // TODO: remove
 using namespace Orders;
 
-Intelligent::Intelligent() {
-
-}
+Intelligent::Intelligent() = default;
 
 void Intelligent::LoadAIScript(const std::string &s) {
     if (s.find(".py") != string::npos) {
@@ -107,7 +106,7 @@ bool Intelligent::EnqueueLastPythonAIScript() {
 }
 
 void Intelligent::PrimeOrders(Order *newAI) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (newAI) {
         if (aistate) {
@@ -121,7 +120,7 @@ void Intelligent::PrimeOrders(Order *newAI) {
 }
 
 void Intelligent::PrimeOrders() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (aistate) {
         aistate->Destroy();
@@ -132,7 +131,7 @@ void Intelligent::PrimeOrders() {
 }
 
 void Intelligent::PrimeOrdersLaunched() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (aistate) {
         aistate->Destroy();
@@ -147,7 +146,7 @@ void Intelligent::PrimeOrdersLaunched() {
 }
 
 void Intelligent::SetAI(Order *newAI) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     newAI->SetParent(unit);
     if (aistate) {
@@ -158,7 +157,7 @@ void Intelligent::SetAI(Order *newAI) {
 }
 
 void Intelligent::EnqueueAI(Order *newAI) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     newAI->SetParent(unit);
     if (aistate) {
@@ -169,7 +168,7 @@ void Intelligent::EnqueueAI(Order *newAI) {
 }
 
 void Intelligent::EnqueueAIFirst(Order *newAI) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     newAI->SetParent(unit);
     if (aistate) {
@@ -180,7 +179,7 @@ void Intelligent::EnqueueAIFirst(Order *newAI) {
 }
 
 void Intelligent::ExecuteAI() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Flightgroup *flightgroup = unit->flightgroup;
     if (flightgroup) {
         Unit *leader = flightgroup->leader.GetUnit();
@@ -198,17 +197,14 @@ void Intelligent::ExecuteAI() {
         aistate->Execute();
     }
     if (!unit->SubUnits.empty()) {
-        un_iter iter = unit->getSubUnits();
-        Unit *un;
-        while ((un = *iter)) {
-            un->ExecuteAI();                     //like dubya
-            ++iter;
+        for (un_iter iter = unit->getSubUnits(); !iter.isDone(); iter++) {
+            (*iter)->ExecuteAI();
         }
     }
 }
 
 string Intelligent::getFullAIDescription() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (getAIState()) {
         return unit->getFgID() + ":" + getAIState()->createFullOrderDescription(0).c_str();
@@ -218,13 +214,13 @@ string Intelligent::getFullAIDescription() {
 }
 
 float Intelligent::getRelation(const Unit *targ) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit * unit = vega_dynamic_const_cast_ptr<Unit>(this);
 
     return unit->pilot->GetEffectiveRelationship(unit, targ);
 }
 
 double Intelligent::getMinDis(const QVector &pnt) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit * unit = vega_dynamic_const_cast_ptr<Unit>(this);
 
     float minsofar = 1e+10;
     float tmpvar;
@@ -257,7 +253,7 @@ double Intelligent::getMinDis(const QVector &pnt) const {
 }
 
 void Intelligent::SetTurretAI() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     unit->turretstatus = 2;
     static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI", "independent_turrets", "false"));
@@ -286,7 +282,7 @@ void Intelligent::SetTurretAI() {
 }
 
 void Intelligent::DisableTurretAI() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     unit->turretstatus = 1;
     Unit *un;
@@ -301,11 +297,11 @@ void Intelligent::DisableTurretAI() {
     }
 }
 
-csOPCODECollider *Intelligent::getCollideTree(const Vector &RESTRICT scale, std::vector<mesh_polygon> *RESTRICT pol) {
-    Unit *unit = static_cast<Unit *>(this);
+csOPCODECollider *Intelligent::getCollideTree(const Vector &scale, vega_types::SequenceContainer<mesh_polygon> *pol) {
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (!pol) {
-        vector<mesh_polygon> polies;
+        vega_types::SequenceContainer<mesh_polygon> polies;
         for (unsigned int j = 0; j < unit->nummesh(); j++) {
             unit->meshdata[j]->GetPolys(polies);
         }

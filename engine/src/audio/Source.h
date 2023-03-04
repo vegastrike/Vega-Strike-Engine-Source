@@ -1,10 +1,8 @@
-/**
+/*
  * Source.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -61,11 +59,11 @@ class SourceListener;
  */
 class Source {
 private:
-    SharedPtr<Sound> soundPtr;
-    SharedPtr<RenderableSource> rendererDataPtr;
-    SharedPtr<UserData> userDataPtr;
+    vega_types::SharedPtr<Sound> soundPtr;
+    vega_types::SharedPtr<RenderableSource> rendererDataPtr;
+    vega_types::SharedPtr<UserData> userDataPtr;
     long userDataLong;
-    SharedPtr<SourceListener> sourceListenerPtr;
+    vega_types::SharedPtr<SourceListener> sourceListenerPtr;
 
 protected:
     LVector3 position;
@@ -127,7 +125,7 @@ protected:
 
 protected:
     /** Internal constructor used by derived classes */
-    Source(SharedPtr<Sound> sound, bool looping = false);
+    Source(vega_types::SharedPtr<Sound> sound, bool looping = false);
 
 public:
     virtual ~Source();
@@ -318,20 +316,20 @@ public:
     Timestamp getWouldbePlayingTime() const;
 
     /** Get renderer-specific data associated (and destroyed) with this sound source */
-    SharedPtr<RenderableSource> getRenderable() const {
+    vega_types::SharedPtr<RenderableSource> getRenderable() const {
         return rendererDataPtr;
     }
 
     /** Set renderer-specific data to be associated (and destroyed) with this sound source */
-    void setRenderable(SharedPtr<RenderableSource> ptr);
+    void setRenderable(vega_types::SharedPtr<RenderableSource> ptr);
 
     /** Get user-specific data associated (and destroyed) with this sound source */
-    SharedPtr<UserData> getUserDataPtr() const {
+    vega_types::SharedPtr<UserData> getUserDataPtr() const {
         return userDataPtr;
     }
 
     /** Set user-specific data to be associated (and destroyed) with this sound source */
-    void setUserDataLong(SharedPtr<UserData> ptr) {
+    void setUserDataLong(vega_types::SharedPtr<UserData> ptr) {
         userDataPtr = ptr;
     }
 
@@ -346,22 +344,22 @@ public:
     }
 
     /** Get an event listener associated with this sound source */
-    SharedPtr<SourceListener> getSourceListener() const {
+    vega_types::SharedPtr<SourceListener> getSourceListener() const {
         return sourceListenerPtr;
     }
 
     /** Set an event listener to be associated with this sound source */
-    void setSourceListener(SharedPtr<SourceListener> ptr) {
+    void setSourceListener(vega_types::SharedPtr<SourceListener> ptr) {
         sourceListenerPtr = ptr;
     }
 
     /** Get the associated sound stream */
-    SharedPtr<Sound> getSound() const {
+    vega_types::SharedPtr<Sound> getSound() const {
         return soundPtr;
     }
 
     /** Set the associated sound stream - Only for SceneManagers to call */
-    void setSound(SharedPtr<Sound> ptr) {
+    void setSound(vega_types::SharedPtr<Sound> ptr) {
         soundPtr = ptr;
         dirty.soundPtr = 1;
     }

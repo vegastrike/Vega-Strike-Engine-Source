@@ -1,10 +1,8 @@
-/**
+/*
  * Renderer.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -86,13 +84,13 @@ public:
      *      form.
      * @see CodecRegistry
      */
-    virtual SharedPtr<Sound> getSound(
+    virtual vega_types::SharedPtr<Sound> getSound(
             const std::string &name,
             VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
             bool streaming = false) = 0;
 
     /** Return whether the specified sound has been created using this renderer or not */
-    virtual bool owns(SharedPtr<Sound> sound) = 0;
+    virtual bool owns(vega_types::SharedPtr<Sound> sound) = 0;
 
     /** Attach a source to this renderer
      * @remarks A source may only be attached to one renderer. If the source was attached already,
@@ -100,7 +98,7 @@ public:
      *      @par Attachment may mean resource allocation. Either immediate or deferred. So it may
      *      fail if resources are scarce.
      */
-    virtual void attach(SharedPtr<Source> source) = 0;
+    virtual void attach(vega_types::SharedPtr<Source> source) = 0;
 
     /** Attach a listener to this renderer
      * @remarks A listener may only be attached to one renderer. If the listener was attached already,
@@ -108,17 +106,17 @@ public:
      *      @par Attachment may mean resource allocation. Either immediate or deferred. So it may
      *      fail if resources are scarce.
      */
-    virtual void attach(SharedPtr<Listener> listener) = 0;
+    virtual void attach(vega_types::SharedPtr<Listener> listener) = 0;
 
     /** Detach a source from this renderer.
      * @remarks Immediately frees any allocated resources.
      */
-    virtual void detach(SharedPtr<Source> source) = 0;
+    virtual void detach(vega_types::SharedPtr<Source> source) = 0;
 
     /** Detach a listener from this renderer.
      * @remarks Immediately frees any allocated resources.
      */
-    virtual void detach(SharedPtr<Listener> listener) = 0;
+    virtual void detach(vega_types::SharedPtr<Listener> listener) = 0;
 
     /** Sets the distance in world units that represents one meter.
      * @remarks This reference distance is required by environmental effect processing

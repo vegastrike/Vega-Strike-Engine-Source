@@ -1,10 +1,8 @@
-/**
+/*
  * Scene.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -70,12 +68,12 @@ public:
     /** Attach a source to this scene.
      * @remarks The must be stopped. Adding a playing source is an error.
      */
-    virtual void add(SharedPtr<Source> source) = 0;
+    virtual void add(vega_types::SharedPtr<Source> source) = 0;
 
     /** Detach a source from this scene
      * @remarks The source is implicitly stopped.
      */
-    virtual void remove(SharedPtr<Source> source) = 0;
+    virtual void remove(vega_types::SharedPtr<Source> source) = 0;
 
     /** Get the scene's listener */
     virtual Listener &getListener() = 0;

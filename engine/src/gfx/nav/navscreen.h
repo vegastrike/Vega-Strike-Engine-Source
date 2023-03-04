@@ -1,9 +1,8 @@
-/**
+/*
  * navscreen.h
  *
- * Copyright (C) 2003-2020 hellcatv, ace123, surfdargent, klaussfreire, jacks,
+ * Copyright (C) 2001-2022 hellcatv, ace123, surfdargent, klaussfreire, jacks,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -41,6 +40,8 @@
 
 #define NAVTOTALMESHCOUNT 8     //same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
+
+class Mesh;
 
 void Beautify(string systemfile, string &sector, string &system);
 class NavigationSystem {
@@ -172,7 +173,7 @@ private:
     CachedSectorIterator sectorIter;
     std::vector<unsigned> path;
     class navscreenoccupied *screenoccupation;
-    class Mesh *mesh[NAVTOTALMESHCOUNT];
+    vega_types::SharedPtr<Mesh> mesh[NAVTOTALMESHCOUNT];
     int reverse;
     int rotations; //tried to change to unsigned but gazillions of comparisons to int crop up --chuck_starchaser
     int axis;

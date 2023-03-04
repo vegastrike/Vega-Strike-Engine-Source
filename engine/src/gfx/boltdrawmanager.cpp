@@ -1,10 +1,8 @@
-/**
+/*
  * boltdrawmanager.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -59,23 +57,20 @@ BoltDrawManager::BoltDrawManager() {
     }
 }
 
-GFXVertexList *BoltDrawManager::boltmesh = NULL;
+GFXVertexList *BoltDrawManager::boltmesh = nullptr;
 
 BoltDrawManager::~BoltDrawManager() {
-    unsigned int i;
-    for (i = 0; i < animations.size(); i++) {
-        delete animations[i];
-    }
+    animations.clear();
 
-    for (i = 0; i < balls.size(); i++) {
-        for (int j = balls[i].size() - 1; j >= 0; j--) {
-            balls[i][j].Destroy(j);
+    for (auto & ball : balls) {
+        for (int j = ball.size() - 1; j >= 0; j--) {
+            ball[j].Destroy(j);
         }
     }
 
-    for (i = 0; i < bolts.size(); i++) {
-        for (int j = bolts[i].size() - 1; j >= 0; j--) {
-            bolts[i][j].Destroy(j);
+    for (auto & bolt : bolts) {
+        for (int j = bolt.size() - 1; j >= 0; j--) {
+            bolt[j].Destroy(j);
         }
     }
 }

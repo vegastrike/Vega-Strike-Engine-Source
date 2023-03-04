@@ -3,9 +3,8 @@
 /*
  * cockpit_gfx.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -557,9 +556,9 @@ void DrawRadar(const Radar::Sensor& sensor, float  cockpit_time, float radar_tim
                     if (rand01() > SWITCH_CONST)
                         radar_time = -cockpit_time;
                 } else {
-                    static Animation radar_ani( "static_round.ani", true, .1, BILINEAR );
-                    radar_ani.DrawAsVSSprite( radarSprites[0] );
-                    radar_ani.DrawAsVSSprite( radarSprites[1] );
+                    static vega_types::SharedPtr<Animation> radar_ani = Animation::createAnimation( "static_round.ani", true, .1, BILINEAR );
+                    radar_ani->DrawAsVSSprite( radarSprites[0] );
+                    radar_ani->DrawAsVSSprite( radarSprites[1] );
                 }
             } else if ( cockpit_time > ( ( 1-(-radar_time) )+damage ) ) {
                 if (rand01() > SWITCH_CONST)

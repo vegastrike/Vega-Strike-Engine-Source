@@ -1,10 +1,8 @@
-/**
+/*
  * flightgroup.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -42,7 +40,7 @@ public:
     UnitContainer leader; //I'm on the leader
     UnitContainer target; //this is my target, what i'm doing with it depends on things
     int leader_decision; //-1 if decision is made
-    Texture *squadLogo; //null if not there
+    vega_types::SharedPtr<Texture> squadLogo; //null if not there
     std::string
             directive; //"a" for attack target "b" for attack at will "h" for help out "f" for form up.... missions can get this..and set this
     std::string name; //flightgroup name
@@ -117,7 +115,7 @@ public:
         *this = other;
     }
 
-    Flightgroup &operator=(Flightgroup &other);
+    Flightgroup &operator=(Flightgroup const &other);
     ~Flightgroup();
 };
 

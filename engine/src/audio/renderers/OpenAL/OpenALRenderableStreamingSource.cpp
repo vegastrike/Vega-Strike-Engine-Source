@@ -1,9 +1,8 @@
 /*
  * OpenALRenderableStreamingSource.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -66,7 +65,7 @@ OpenALRenderableStreamingSource::~OpenALRenderableStreamingSource() {
 
 void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start) {
     if (!isPlayingImpl()) {
-        SharedPtr<Sound> sound = getSource()->getSound();
+        vega_types::SharedPtr<Sound> sound = getSource()->getSound();
 
         assert(sound->isStreaming() && "OpenALRenderableStreamingSource can only handle streaming sounds");
 
@@ -150,12 +149,12 @@ void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &scen
         // NOTE: Cannot use startPlaying because it stresses the buggy seek method
         //  Must fix that
 
-        SharedPtr<Sound> sound = source->getSound();
+        vega_types::SharedPtr<Sound> sound = source->getSound();
 
         if (!sound->isLoaded()) {
             sound->load();
         } else if (!buffering) {
-            OpenALStreamingSound *p_streaming_sound = vega_dynamic_cast_ptr<OpenALStreamingSound>(sound.get());
+            vega_types::SharedPtr<OpenALStreamingSound> p_streaming_sound = vega_dynamic_cast_shared_ptr<OpenALStreamingSound>(sound);
             p_streaming_sound->flushBuffers();
         }
 
@@ -223,7 +222,7 @@ void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &scen
 }
 
 void OpenALRenderableStreamingSource::queueALBuffers() {
-    SharedPtr<Sound> sound = getSource()->getSound();
+    vega_types::SharedPtr<Sound> sound = getSource()->getSound();
 
     if (!sound->isLoaded()) {
         sound->load();
@@ -233,7 +232,7 @@ void OpenALRenderableStreamingSource::queueALBuffers() {
 
     buffering = true;
 
-    OpenALStreamingSound *streamingSound = vega_dynamic_cast_ptr<OpenALStreamingSound>(sound.get());
+    vega_types::SharedPtr<OpenALStreamingSound> streamingSound = vega_dynamic_cast_shared_ptr<OpenALStreamingSound>(sound);
     Source *source = getSource();
     ALSourceHandle als = getALSource();
     ALint buffersProcessed = 0;

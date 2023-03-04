@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * fire.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -83,8 +85,8 @@ bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
             parent->Target(targ);
         }
     }
-    CommunicationMessage c(parent, targ, NULL, sex);
-    c.SetCurrentState(c.fsm->GetRequestLandNode(), NULL, sex);
+    CommunicationMessage c(parent, targ, nullptr, sex);
+    c.SetCurrentState(c.fsm->GetRequestLandNode(), nullptr, sex);
     Order *o = targ->getAIState();
     if (o) {
         o->Communicate(c);
@@ -122,7 +124,7 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
     }
     Unit *ssu;
     for (un_iter i = su->getSubUnits();
-            (ssu = *i) != NULL;
+            (ssu = *i) != nullptr;
             ++i) {
         if (!CanFaceTarget(ssu, targ, su->cumulative_transformation_matrix)) {
             return false;
@@ -196,17 +198,17 @@ struct TurretBin {
         //go through modularly assigning as you go;
         int count = 0;
         size_t lotsize[2] = {listOfTargets[0].size(), listOfTargets[1].size()};
-        for (vector<RangeSortedTurrets>::iterator uniter = turret.begin(); uniter != turret.end(); ++uniter) {
+        for (auto & uniter : turret) {
             bool foundfinal = false;
-            uniter->tur->Target(NULL);
-            uniter->tur->TargetTurret(NULL);
+            uniter.tur->Target(nullptr);
+            uniter.tur->TargetTurret(nullptr);
             if (finalChoice.t) {
-                if (finalChoice.range < uniter->gunrange
-                        && ROLES::getPriority(uniter->tur->getAttackPreferenceChar())[finalChoice.t->getUnitRoleChar()]
+                if (finalChoice.range < uniter.gunrange
+                        && ROLES::getPriority(uniter.tur->getAttackPreferenceChar())[finalChoice.t->getUnitRoleChar()]
                                 < 31) {
-                    if (CanFaceTarget(uniter->tur, finalChoice.t, pos)) {
-                        uniter->tur->Target(finalChoice.t);
-                        uniter->tur->TargetTurret(finalChoice.t);
+                    if (CanFaceTarget(uniter.tur, finalChoice.t, pos)) {
+                        uniter.tur->Target(finalChoice.t);
+                        uniter.tur->TargetTurret(finalChoice.t);
                         foundfinal = true;
                     }
                 }
@@ -215,10 +217,10 @@ struct TurretBin {
                 for (unsigned int f = 0; f < 2 && !foundfinal; f++) {
                     for (size_t i = 0; i < lotsize[f]; i++) {
                         const size_t index = (count + i) % lotsize[f];
-                        if (listOfTargets[f][index].range < uniter->gunrange) {
-                            if (CanFaceTarget(uniter->tur, finalChoice.t, pos)) {
-                                uniter->tur->Target(listOfTargets[f][index].t);
-                                uniter->tur->TargetTurret(listOfTargets[f][index].t);
+                        if (listOfTargets[f][index].range < uniter.gunrange) {
+                            if (CanFaceTarget(uniter.tur, finalChoice.t, pos)) {
+                                uniter.tur->Target(listOfTargets[f][index].t);
+                                uniter.tur->TargetTurret(listOfTargets[f][index].t);
                                 count++;
                                 foundfinal = true;
                                 break;
@@ -247,7 +249,7 @@ void AssignTBin(Unit *su, vector<TurretBin> &tbin) {
     {
         float ggspeed, ggrange, mmrange;
         Unit *ssu;
-        for (un_iter i = su->getSubUnits(); (ssu = *i) != NULL; ++i) {
+        for (un_iter i = su->getSubUnits(); (ssu = *i) != nullptr; ++i) {
             ssu->getAverageGunSpeed(ggspeed, ggrange, mmrange);
             if (ggspeed > gspeed) {
                 gspeed = ggspeed;
@@ -289,19 +291,19 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
     }
     if (gunrange <= 0) {
         static float mountless_gunrange =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MountlessGunRange", "300000000"));
+                XMLSupport::parse_floatf(vs_config->getVariable("AI", "Targetting", "MountlessGunRange", "300000000"));
         gunrange = mountless_gunrange;
     }     //probably a mountless capship. 50000 is chosen arbitrarily
     float inertial_priority = 0;
     {
         static float mass_inertial_priority_cutoff =
-                XMLSupport::parse_float(vs_config->getVariable("AI",
+                XMLSupport::parse_floatf(vs_config->getVariable("AI",
                         "Targetting",
                         "MassInertialPriorityCutoff",
                         "5000"));
         if (me->getMass() > mass_inertial_priority_cutoff) {
             static float mass_inertial_priority_scale =
-                    XMLSupport::parse_float(vs_config->getVariable("AI",
+                    XMLSupport::parse_floatf(vs_config->getVariable("AI",
                             "Targetting",
                             "MassInertialPriorityScale",
                             ".0000001"));
@@ -315,7 +317,7 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
         }
     }
     static float
-            threat_weight = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "ThreatWeight", ".5"));
+            threat_weight = XMLSupport::parse_floatf(vs_config->getVariable("AI", "Targetting", "ThreatWeight", ".5"));
     float threat_priority = (me->Threat() == targ) ? threat_weight : 0;
     threat_priority += (targ->Target() == me) ? threat_weight : 0;
     float role_priority01 = ((float) *rolepriority) / 31.;

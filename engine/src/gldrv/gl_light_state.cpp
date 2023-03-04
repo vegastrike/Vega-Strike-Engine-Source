@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gl_light_state.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,8 +23,9 @@
  */
 
 
-#include <assert.h>
+#include <cassert>
 #include <cstring>
+#include <boost/smart_ptr.hpp>
 //#include <vegastrike.h>
 #include "gl_globals.h"
 #include "hashtable_3d.h"
@@ -30,9 +33,12 @@
 
 #include <math.h>
 #include "gfx/matrix.h"
+#include "preferred_types.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338328
 #endif
+
+using namespace vega_types;
 
 QVector _light_offset(0, 0, 0);
 
@@ -45,11 +51,11 @@ QVector GFXGetLightOffset() {
 }
 
 void GFXUploadLightState(int max_light_location,
-        int active_light_array,
-        int apparent_light_size_array,
-        bool shader,
-        vector<int>::const_iterator begin,
-        vector<int>::const_iterator end) {
+                         int active_light_array,
+                         int apparent_light_size_array,
+                         bool shader,
+                         SequenceContainer<int>::const_iterator begin,
+                         SequenceContainer<int>::const_iterator end) {
     // FIXME: (klauss) Very bad thing: static variables initialized with heap-allocated arrays...
     static GLint *lightData = new GLint[GFX_MAX_LIGHTS];
     static float *lightSizes = new float[GFX_MAX_LIGHTS * 4];
@@ -63,8 +69,8 @@ void GFXUploadLightState(int max_light_location,
     size_t maxval = 0;
     size_t i = 0;
 
-    for (vector<int>::const_iterator lightit = begin; lightit != end; ++i, ++lightit) {
-        const gfx_light &light = (*_llights)[*lightit];
+    for (auto lightit = begin; lightit != end; ++i, ++lightit) {
+        const gfx_light &light = *(staticLightsDataManager()->localLightAtIndex(*lightit));
         if (light.enabled()) {
             lightData[i] = 1;
             maxval = i;
@@ -159,8 +165,8 @@ void GFXUploadLightState(int max_light_location,
         GFXLoadIdentity(MODEL);
         for (size_t i = 0; i <= maxval; ++i) {
             if (lightData[i]) {
-                const gfx_light &light = (*_llights)[*(begin + i)];
-                light.ContextSwitchClobberLight(GL_LIGHT0 + i, -1);
+                SharedPtr<gfx_light> const light = staticLightsDataManager()->localLightAtIndex(*(begin + i));
+                light->ContextSwitchClobberLight(GL_LIGHT0 + i, -1);
             }
         }
         GFXLoadMatrixModel(modelview);
@@ -181,10 +187,9 @@ void GFXUploadLightState(int max_light_location,
 const float atten0scale = 1;
 const float atten1scale = 1. / GFX_SCALE;
 const float atten2scale = 1. / (GFX_SCALE * GFX_SCALE);
-int _GLLightsEnabled = 0;
 Hashtable3d<LineCollideStar, 20, CTACC, lighthuge> lighttable;
 
-GFXLight gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can write a better copy operator
+gfx_light & gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can write a better copy operator
 //    memcpy( this, &tmp, sizeof (GFXLight) );
     this->target = tmp.target;
     this->options = tmp.options;
@@ -204,23 +209,24 @@ GFXLight gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can wri
     // } else {
     //     this->disable();
     // }
-    return tmp;
+    return *this;
 }
 
 int gfx_light::lightNum() {
-    int tmp = (this - &_llights->front());
-    assert(tmp >= 0 && tmp < (int) _llights->size());
-    //assert (&(*_llights)[GLLights[target].index]==this);
-    return tmp;
+    auto iterator_to_this = std::find_if(staticLightsDataManager()->l_lights->begin(), staticLightsDataManager()->l_lights->end(), [this](SharedPtr<gfx_light> ptr) { return ptr.get() == this; });
+    size_t const tmp = iterator_to_this - staticLightsDataManager()->l_lights->begin();
+    assert(tmp >= 0 && tmp < staticLightsDataManager()->l_lights->size());
+    assert(staticLightsDataManager()->localLightAtIndex(tmp).get() == this);
+    return static_cast<int>(tmp);
 } //which number it is in the main scheme of things
 
 int findLocalClobberable() {
     int clobberdisabled = -1;
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
-        if (GLLights[i].index == -1) {
+        if (staticLightsDataManager()->gl_lights->at(i)->index == -1) {
             return i;
         }
-        if (!(GLLights[i].options & OpenGLL::GLL_ON)) {
+        if (!(staticLightsDataManager()->gl_lights->at(i)->options & OpenGLL::GLL_ON)) {
             clobberdisabled = i;
         }
     }
@@ -232,13 +238,13 @@ static int findGlobalClobberable() {
     int clobberdisabled = -1;
     int clobberlocal = -1;
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
-        if (GLLights[i].index == -1) {
+        if (staticLightsDataManager()->gl_lights->at(i)->index == -1) {
             return i;
         }
-        if (GLLights[i].options & OpenGLL::GLL_LOCAL) {
+        if (staticLightsDataManager()->gl_lights->at(i)->options & OpenGLL::GLL_LOCAL) {
             clobberlocal = i;
         }
-        if (!(GLLights[i].options & OpenGLL::GLL_ON)) {
+        if (!(staticLightsDataManager()->gl_lights->at(i)->options & OpenGLL::GLL_ON)) {
             if (clobberlocal == i || clobberdisabled == -1) {
                 clobberdisabled = i;
             }
@@ -260,7 +266,7 @@ bool gfx_light::Create(const GFXLight &temp, bool global) {
         options &= (~GFX_LOCAL_LIGHT);
         foundclobberable = enabled() ? findGlobalClobberable() : findLocalClobberable();
         if (foundclobberable != -1) {
-            _GLLightsEnabled += (enabled() != 0);
+            staticLightsDataManager()->gl_lights_enabled += (enabled() != 0);
             ClobberGLLight(foundclobberable);
         }
     }
@@ -314,14 +320,14 @@ inline void gfx_light::ContextSwitchClobberLight(const GLenum gltarg, const int 
     glLightfvAttenuated(gltarg, GL_SPECULAR, specular, occlusion);
     glLightfv(gltarg, GL_AMBIENT, ambient);
     if (original != -1) {
-        gfx_light *orig = &((*_llights)[GLLights[original].index]);
+        SharedPtr<gfx_light> const orig = staticLightsDataManager()->localLightAtIndex(staticLightsDataManager()->gl_lights->at(original)->index);
         orig->target = -1;
-        GLLights[original].index = -1;
+        staticLightsDataManager()->gl_lights->at(original)->index = -1;
     }
 }
 
 inline void gfx_light::FinesseClobberLight(const GLenum gltarg, const int original) {
-    gfx_light *orig = &((*_llights)[GLLights[original].index]);
+    SharedPtr<gfx_light> const orig = staticLightsDataManager()->localLightAtIndex(staticLightsDataManager()->gl_lights->at(original)->index);
     if (attenuated()) {
         if (orig->attenuated()) {
             if (orig->attenuate[0] != attenuate[0]) {
@@ -356,33 +362,34 @@ inline void gfx_light::FinesseClobberLight(const GLenum gltarg, const int origin
         glLightfv(gltarg, GL_AMBIENT, ambient);
     }
     orig->target = -1;
-    GLLights[original].index = -1;
+    staticLightsDataManager()->gl_lights->at(original)->index = -1;
 }
 
 void gfx_light::ClobberGLLight(const int target) {
     this->target = target;
-    if (enabled() != ((GLLights[target].options & OpenGLL::GL_ENABLED) != 0)) {
+    SharedPtr<OpenGLLights> const gl_light = staticLightsDataManager()->gl_lights->at(target);
+    if (enabled() != ((gl_light->options & OpenGLL::GL_ENABLED) != 0)) {
         if (enabled()) {
             glEnable(GL_LIGHT0 + target);
-            GLLights[target].options |= OpenGLL::GL_ENABLED;
+            gl_light->options |= OpenGLL::GL_ENABLED;
         } else {
-            GLLights[target].options &= (~OpenGLL::GL_ENABLED);
+            gl_light->options &= (~OpenGLL::GL_ENABLED);
             glDisable(GL_LIGHT0 + target);
         }
     }
-    GLLights[target].options &= (OpenGLL::GL_ENABLED);     //turn off options
+    gl_light->options &= (OpenGLL::GL_ENABLED);     //turn off options
 #ifdef GFX_HARDWARE_LIGHTING
-    if (GLLights[target].index == -1) {
+    if (gl_light->index == -1) {
 #endif
-        ContextSwitchClobberLight(GL_LIGHT0 + target, GLLights[target].index);
+        ContextSwitchClobberLight(GL_LIGHT0 + target, gl_light->index);
 #ifdef GFX_HARDWARE_LIGHTING
     } else {
-        FinesseClobberLight(GL_LIGHT0 + target, GLLights[target].index);
+        FinesseClobberLight(GL_LIGHT0 + target, gl_light->index);
     }
 #endif
     this->target = target;
-    GLLights[target].index = lightNum();
-    GLLights[target].options |= OpenGLL::GLL_ON * enabled() + OpenGLL::GLL_LOCAL * LocalLight();
+    gl_light->index = lightNum();
+    gl_light->options |= OpenGLL::GLL_ON * enabled() + OpenGLL::GLL_LOCAL * LocalLight();
 }
 
 void gfx_light::ResetProperties(const enum LIGHT_TARGET light_targ, const GFXColor &color) {
@@ -460,12 +467,13 @@ void gfx_light::ResetProperties(const enum LIGHT_TARGET light_targ, const GFXCol
 
 void gfx_light::TrashFromGLLights() {
     assert(target >= 0);
-    assert((GLLights[target].options & OpenGLL::GLL_ON)
-            == 0);       //better be disabled so we know it's not in the table, etc
-    assert((&(*_llights)[GLLights[target].index]) == this);
-    removelightfromnewpick(GLLights[target].index);
-    GLLights[target].index = -1;
-    GLLights[target].options = OpenGLL::GLL_LOCAL;
+    auto gl_lights = staticLightsDataManager()->gl_lights.get();
+    assert(((gl_lights->at(target)->options) & OpenGLL::GLL_ON)
+            == 0);       //better be disabled so that we know it's not in the table, etc
+    assert(staticLightsDataManager()->l_lights->at(gl_lights->at(target)->index).get() == this);
+    removeLightFromNewPick(gl_lights->at(target)->index);
+    gl_lights->at(target)->index = -1;
+    gl_lights->at(target)->options = OpenGLL::GLL_LOCAL;
     target = -1;
 }
 
@@ -511,37 +519,37 @@ bool gfx_light::RemoveFromTable(bool shouldremove, const GFXLight &t) {
     return true;
 }
 
-//unimplemented
+//unimplemented -- O RLY? Looks implemented to me -- Stephen G. Tuggy 2022-12-21
 void gfx_light::Enable() {
     if (!enabled()) {
         if (LocalLight()) {
             AddToTable();
         } else {
             if (target == -1) {
-                int newtarg = findGlobalClobberable();
+                int const newtarg = findGlobalClobberable();
                 if (newtarg == -1) {
                     return;
                 }
-                _GLLightsEnabled++;
+                staticLightsDataManager()->gl_lights_enabled++;
                 ClobberGLLight(newtarg);
             }
             glEnable(GL_LIGHT0 + this->target);
-            GLLights[this->target].options |= OpenGLL::GL_ENABLED | OpenGLL::GLL_ON;
+            staticLightsDataManager()->gl_lights->at(this->target)->options |= OpenGLL::GL_ENABLED | OpenGLL::GLL_ON;
         }
         enable();
     }
 }
 
-//unimplemented
+//unimplemented -- O RLY? Looks implemented to me -- Stephen G. Tuggy 2022-12-21
 void gfx_light::Disable() {
     if (enabled()) {
         disable();
         if (target >= 0) {
-            if (GLLights[target].options & OpenGLL::GL_ENABLED) {
-                _GLLightsEnabled--;
+            if (staticLightsDataManager()->gl_lights->at(this->target)->options & OpenGLL::GL_ENABLED) {
+                staticLightsDataManager()->gl_lights_enabled--;
                 glDisable(GL_LIGHT0 + this->target);
             }
-            GLLights[this->target].options &= (~(OpenGLL::GL_ENABLED | OpenGLL::GLL_ON));
+            staticLightsDataManager()->gl_lights->at(this->target)->options &= (~(OpenGLL::GL_ENABLED | OpenGLL::GLL_ON));
         }
         if (LocalLight() && enabled()) {
             RemoveFromTable();
@@ -582,25 +590,26 @@ LineCollide gfx_light::CalculateBounds(bool &error) {
 }
 
 void light_rekey_frame() {
-    unpicklights();     //picks doubtless changed position
+    unpickLights();     //picks doubtless changed position
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
-        if (GLLights[i].options & OpenGLL::GL_ENABLED) {
-            if (GLLights[i].index >= 0) {
-                if ((*_llights)[GLLights[i].index].Target() == i) {
-                    (*_llights)[GLLights[i].index].SendGLPosition(
+        SharedPtr<OpenGLLights> const gl_light = staticLightsDataManager()->gl_lights->at(i);
+        if (gl_light->options & OpenGLL::GL_ENABLED) {
+            if (gl_light->index >= 0) {
+                if (staticLightsDataManager()->localLightAtIndex(gl_light->index)->Target() == i) {
+                    staticLightsDataManager()->localLightAtIndex(gl_light->index)->SendGLPosition(
                             GL_LIGHT0 + i);                       //send position transformed by current cam matrix
                 } else {
-                    unsigned int li = GLLights[i].index;
-                    if ((*_llights)[li].enabled() && ((*_llights)[li].Target() == -1)) {
-                        (*_llights)[li].ClobberGLLight(i);
+                    unsigned int li = gl_light->index;
+                    if (staticLightsDataManager()->localLightAtIndex(li)->enabled() && (staticLightsDataManager()->localLightAtIndex(li)->Target() == -1)) {
+                        staticLightsDataManager()->localLightAtIndex(li)->ClobberGLLight(i);
                     } else {
                         glDisable(GL_LIGHT0 + i);
-                        GLLights[i].index = -1;
+                        gl_light->index = -1;
                     }
                 }
             } else {
                 glDisable(GL_LIGHT0 + i);
-                GLLights[i].options &= (~OpenGLL::GL_ENABLED);
+                gl_light->options &= (~OpenGLL::GL_ENABLED);
             }
         }
     }

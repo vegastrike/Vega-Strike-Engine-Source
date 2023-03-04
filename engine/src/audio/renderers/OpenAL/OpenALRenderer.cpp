@@ -1,4 +1,6 @@
 /*
+ * OpenALRenderer.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -25,6 +27,7 @@
 // C++ Implementation: Audio::Renderer
 //
 
+#include <preferred_types.h>
 #include "OpenALRenderer.h"
 #include "BorrowedOpenALRenderer.h"
 #include "OpenALHelpers.h"
@@ -90,8 +93,8 @@ struct RendererData {
         }
     };
 
-    typedef std::map<SoundKey, SharedPtr<Sound> > SoundMap;
-    typedef std::map<SharedPtr<Sound>, SoundKey> ReverseSoundMap;
+    typedef vega_types::Map<SoundKey, vega_types::SharedPtr<Sound> > SoundMap;
+    typedef vega_types::Map<vega_types::SharedPtr<Sound>, SoundKey> ReverseSoundMap;
 
     SoundMap loadedSounds;
     ReverseSoundMap loadedSoundsReverse;
@@ -101,17 +104,17 @@ struct RendererData {
         int dopplerFactor: 1;
     } dirty;
 
-    SharedPtr<Sound> lookupSound(VSFileSystem::VSFileType type, const std::string &name) const {
+    vega_types::SharedPtr<Sound> lookupSound(VSFileSystem::VSFileType type, const std::string &name) const {
         SoundKey key(type, name);
         SoundMap::const_iterator it = loadedSounds.find(key);
         if (it != loadedSounds.end()) {
             return it->second;
         } else {
-            return SharedPtr<Sound>();
+            return vega_types::SharedPtr<Sound>();
         }
     }
 
-    SoundKey lookupSound(const SharedPtr<Sound> &sound) const {
+    SoundKey lookupSound(const vega_types::SharedPtr<Sound> &sound) const {
         ReverseSoundMap::const_iterator it = loadedSoundsReverse.find(sound);
         if (it != loadedSoundsReverse.end()) {
             return it->second;
@@ -120,13 +123,13 @@ struct RendererData {
         }
     }
 
-    void addSound(VSFileSystem::VSFileType type, const std::string &name, SharedPtr<Sound> sound) {
+    void addSound(VSFileSystem::VSFileType type, const std::string &name, vega_types::SharedPtr<Sound> sound) {
         SoundKey key(type, name);
         loadedSounds[key] = sound;
         loadedSoundsReverse[sound] = key;
     }
 
-    void unloadSound(const SharedPtr<Sound> &sound) {
+    void unloadSound(const vega_types::SharedPtr<Sound> &sound) {
         SoundKey key = lookupSound(sound);
         if (!key.isNull()) {
             loadedSounds.erase(key);
@@ -248,12 +251,12 @@ OpenALRenderer::OpenALRenderer() :
 OpenALRenderer::~OpenALRenderer() {
 }
 
-SharedPtr<Sound> OpenALRenderer::getSound(
+vega_types::SharedPtr<Sound> OpenALRenderer::getSound(
         const std::string &name,
         VSFileSystem::VSFileType type,
         bool streaming) {
     checkContext();
-    SharedPtr<Sound> sound = data->lookupSound(type, name);
+    vega_types::SharedPtr<Sound> sound = data->lookupSound(type, name);
     if (!sound.get() || streaming) {
         if (streaming) {
             // Streaming sounds cannot be cached, so if a streaming sound
@@ -262,26 +265,26 @@ SharedPtr<Sound> OpenALRenderer::getSound(
             data->addSound(
                     type,
                     name,
-                    sound = SharedPtr<Sound>(new OpenALStreamingSound(name, type))
+                    sound = vega_types::SharedPtr<Sound>(new OpenALStreamingSound(name, type))
             );
         } else {
             data->addSound(
                     type,
                     name,
-                    sound = SharedPtr<Sound>(new OpenALSimpleSound(name, type))
+                    sound = vega_types::SharedPtr<Sound>(new OpenALSimpleSound(name, type))
             );
         }
     }
     return sound;
 }
 
-bool OpenALRenderer::owns(SharedPtr<Sound> sound) {
+bool OpenALRenderer::owns(vega_types::SharedPtr<Sound> sound) {
     return !data->lookupSound(sound).isNull();
 }
 
-void OpenALRenderer::attach(SharedPtr<Source> source) {
+void OpenALRenderer::attach(vega_types::SharedPtr<Source> source) {
     checkContext();
-    source->setRenderable(SharedPtr<RenderableSource>(
+    source->setRenderable(vega_types::SharedPtr<RenderableSource>(
                     source->getSound()->isStreaming()
                             ? (RenderableSource *) new OpenALRenderableStreamingSource(source.get())
                             : (RenderableSource *) new OpenALRenderableSource(source.get())
@@ -289,20 +292,20 @@ void OpenALRenderer::attach(SharedPtr<Source> source) {
     );
 }
 
-void OpenALRenderer::attach(SharedPtr<Listener> listener) {
+void OpenALRenderer::attach(vega_types::SharedPtr<Listener> listener) {
     checkContext();
-    listener->setRenderable(SharedPtr<RenderableListener>(
+    listener->setRenderable(vega_types::SharedPtr<RenderableListener>(
             new OpenALRenderableListener(listener.get())));
 }
 
-void OpenALRenderer::detach(SharedPtr<Source> source) {
+void OpenALRenderer::detach(vega_types::SharedPtr<Source> source) {
     // Just clear it... RenderableListener's destructor will handle everything fine.
-    source->setRenderable(SharedPtr<RenderableSource>());
+    source->setRenderable(vega_types::SharedPtr<RenderableSource>());
 }
 
-void OpenALRenderer::detach(SharedPtr<Listener> listener) {
+void OpenALRenderer::detach(vega_types::SharedPtr<Listener> listener) {
     // Just clear it... RenderableListener's destructor will handle everything fine.
-    listener->setRenderable(SharedPtr<RenderableListener>());
+    listener->setRenderable(vega_types::SharedPtr<RenderableListener>());
 }
 
 void OpenALRenderer::setMeterDistance(Scalar distance) {

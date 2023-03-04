@@ -1,10 +1,8 @@
-/**
+/*
  * Source.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -37,7 +35,7 @@
 
 namespace Audio {
 
-Source::Source(SharedPtr<Sound> sound, bool _looping) :
+Source::Source(vega_types::SharedPtr<Sound> sound, bool _looping) :
         soundPtr(sound),
 
         // Some safe defaults
@@ -217,7 +215,7 @@ void Source::updateRenderable(int flags, const Listener &sceneListener) {
     }
 }
 
-void Source::setRenderable(SharedPtr<RenderableSource> ptr) {
+void Source::setRenderable(vega_types::SharedPtr<RenderableSource> ptr) {
     // Notify at/detachment to listener, if any
     if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantAttachEvents()) {
         sourceListenerPtr->onPreAttach(*this, ptr.get() != 0);
