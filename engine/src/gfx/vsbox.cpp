@@ -1,10 +1,8 @@
-/**
+/*
  * vsbox.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- *  contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,8 +23,13 @@
  */
 
 
+#include <vega_cast_utils.h>
 #include "vsbox.h"
 #include "xml_support.h"
+
+#include "preferred_types.h"
+
+using namespace vega_types;
 
 /*
  *  inline ostream &operator<<(ostrstream os, const Vector &obj) {
@@ -44,12 +47,13 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     setEnvMap(GFXFALSE);
     blendSrc = ONE;
     blendDst = ONE;
-    Box *oldmesh;
-    string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
-    if (0 != (oldmesh = (Box *) meshHashTable.Get(hash_key))) {
+    SharedPtr<Box> oldmesh;
+    std::string hash_key = std::string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
+    oldmesh = vega_dynamic_cast_shared_ptr<Box>(meshHashTable.Get(hash_key));
+    if (oldmesh) {
         *this = *oldmesh;
-        oldmesh->refcount++;
-        orig = oldmesh;
+//        oldmesh->refcount++;
+        orig->push_back(oldmesh);
         return;
     }
     int a = 0;
@@ -100,19 +104,20 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     enum POLYTYPE polys[2];
     polys[0] = GFXQUAD;
     polys[1] = GFXQUADSTRIP;
-    vlist = new GFXVertexList(polys, 18, vertices, 2, offsets);
+    vlist = MakeShared<GFXVertexList>(polys, 18, vertices, 2, offsets);
     //quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
     delete[] vertices;
 
-    meshHashTable.Put(hash_key, this);
-    orig = this;
-    refcount++;
-    draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
+    meshHashTable.Put(hash_key, shared_from_this());
+    orig->push_back(shared_from_this());
+//    refcount++;
+    makeDrawQueue(draw_queue);
 #undef VERTEX
 }
 
 void Box::ProcessDrawQueue(int) {
-    if (!draw_queue[0].size()) {
+    SharedPtr<SequenceContainer<SharedPtr<MeshDrawContext>>> draw_queue_item_0 = draw_queue->at(0);
+    if (draw_queue_item_0->empty()) {
         return;
     }
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -123,12 +128,12 @@ void Box::ProcessDrawQueue(int) {
     GFXDisable(DEPTHWRITE);
     GFXDisable(CULLFACE);
 
-    unsigned vnum = 24 * draw_queue[0].size();
+    unsigned vnum = 24 * draw_queue_item_0->size();
     std::vector<float> verts(vnum * (3 + 4));
-    std::vector<float>::iterator v = verts.begin();
-    while (draw_queue[0].size()) {
-        GFXLoadMatrixModel(draw_queue[0].back().mat);
-        draw_queue[0].pop_back();
+    auto v = verts.begin();
+    while (!draw_queue_item_0->empty()) {
+        GFXLoadMatrixModel(draw_queue_item_0->back()->mat);
+        draw_queue_item_0->pop_back();
         *v++ = corner_max.i;
         *v++ = corner_min.j;
         *v++ = corner_max.k;

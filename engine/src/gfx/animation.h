@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * animation.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -44,27 +46,23 @@ class Animation : public AnimatedTexture {
 
     Matrix local_transformation;
 
-    float height; //half the height so you can do fancy vector translatons to campspace
+    float height; //half the height so you can do fancy vector translations to campspace
 
     float width;
 
-    unsigned char options;
+    unsigned char options{};
 
-    void InitAnimation();
+protected:
+    static vega_types::SharedPtr<Animation> constructAnimation(vega_types::SharedPtr<Animation> animation, const char * filename, bool Rep = false, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
+                                                               bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1, 1));
 
 public:
     Animation();
 
-    Animation(VSFileSystem::VSFile *f, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP,
-            bool camorient =
-            false, bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-            1));
+    static vega_types::SharedPtr<Animation> createAnimation(const char * filename, bool Rep = false, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
+                                                            bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1, 1));
 
-    Animation(const char *, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
-            bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-            1));
-
-    ~Animation();
+    ~Animation() override;
 
     void Draw();
 
@@ -80,7 +78,7 @@ public:
 
     void DrawAsVSSprite(class VSSprite *spr);
 
-    static void ProcessDrawQueue(std::vector<Animation *> &, float);
+    static void ProcessDrawQueue(vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Animation>>> animation_draw_queue, float limit);
 
     static void ProcessDrawQueue();
 

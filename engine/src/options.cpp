@@ -1,4 +1,6 @@
 /*
+ * options.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -147,8 +149,7 @@ void vs_options::init() {
     splash_audio = vs_config->getVariable("graphics", "splash_audio", "");
     main_menu = XMLSupport::parse_bool(vs_config->getVariable("graphics", "main_menu", "false"));
     startup_cockpit_view = vs_config->getVariable("graphics", "startup_cockpit_view", "front");
-    detail_texture_trilinear =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "detail_texture_trilinear", "true"));
+    detail_texture_trilinear = game_options()->detail_texture_trilinear;
     lightcutoff = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "lightcutoff", ".06"));
     lightoptimalintensity =
             XMLSupport::parse_floatf(vs_config->getVariable("graphics", "lightoptimalintensity", ".06"));

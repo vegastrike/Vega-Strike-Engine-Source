@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Roy Falk, Nachum Barcohen, David Wales,
+ * tvector.h
+ *
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, Nachum Barcohen, David Wales,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -195,5 +197,5 @@ void Roll(float rad, TVector<S, T> &p, TVector<S, T> &q, TVector<S, T> &r);
 typedef TVector<float, double> Vector;
 typedef TVector<double, float> QVector;
 
-#endif // C++
+#endif // __cplusplus
 #endif // TVECTOR_H

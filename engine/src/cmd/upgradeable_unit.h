@@ -1,8 +1,8 @@
 /*
- * coord_select.h
+ * upgradeable_unit.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,27 +22,32 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "vec.h"
-#include "animation.h"
-#include "in_mouse.h"
-#include "preferred_types.h"
+#ifndef UPGRADEABLEUNIT_H
+#define UPGRADEABLEUNIT_H
 
-class CoordinateSelect {
-protected:
-    float CrosshairSize;
-    vega_types::SharedPtr<Animation> LocSelAni;
-    QVector LocalPosition;
-    void UpdateMouse();
+#include <string>
+#include <vector>
+
+
+class Unit;
+class Mount;
+
+// TODO: make this into a subclass of unit later
+
+class UpgradeableUnit
+{
 public:
-    static void MouseMoveHandle(KBSTATE, int, int, int, int, int);
-    explicit CoordinateSelect(QVector); //wish I could warp mouse pointer there
-    ~CoordinateSelect() = default;
-
-    inline QVector GetVector() {
-        return LocalPosition;
-    }
-
-    void Draw();
+    UpgradeableUnit();
+    virtual ~UpgradeableUnit() {}
+    void UpgradeUnit(const std::string &upgrades);
+    bool UpgradeMounts(const Unit *up,
+                  int subunitoffset,
+                  bool touchme,
+                  bool downgrade,
+                  int &numave,
+                  double &percentage);
 };
 
+#endif // UPGRADEABLEUNIT_H

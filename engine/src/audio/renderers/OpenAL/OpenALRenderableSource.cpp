@@ -1,10 +1,8 @@
-/**
+/*
  * OpenALRenderableSource.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -153,7 +151,7 @@ void OpenALRenderableSource::updateImpl(int flags, const Listener &sceneListener
 
 void OpenALRenderableSource::attachALBuffers() {
     if (!alBuffersAttached) {
-        SharedPtr<Sound> sound = getSource()->getSound();
+        vega_types::SharedPtr<Sound> sound = getSource()->getSound();
 
         if (!sound->isLoaded()) {
             sound->load();
@@ -162,7 +160,7 @@ void OpenALRenderableSource::attachALBuffers() {
         assert(!sound->isStreaming() && "OpenALRenderableSource can only handle streaming sounds");
 
         // Attachment to a simple sound, just assign the AL buffer to this AL source
-        OpenALSimpleSound *p_simple_sound = vega_dynamic_cast_ptr<OpenALSimpleSound>(sound.get());
+        vega_types::SharedPtr<OpenALSimpleSound> p_simple_sound = vega_dynamic_cast_shared_ptr<OpenALSimpleSound>(sound);
         ALBufferHandle alBuffer = p_simple_sound->getAlBuffer();
         ALSourceHandle alSource = getALSource();
         alSourcei(alSource, AL_BUFFER, alBuffer);

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * universe_util.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -52,8 +54,8 @@ extern void RespawnNow(Cockpit *cp);
 extern void TerminateCurrentBase(void);
 extern void SetStarSystemLoading(bool value);
 extern bool GetStarSystemLoading();
-extern void bootstrap_draw(const std::string &message, Animation *newSplashScreen);
-extern Animation *GetSplashScreen();
+extern void bootstrap_draw(const std::string &message, vega_types::SharedPtr<Animation> newSplashScreen);
+extern vega_types::SharedPtr<Animation> GetSplashScreen();
 extern const vector<string> &ParseDestinations(const string &value);
 
 using std::string;
@@ -133,8 +135,8 @@ void StopAllSounds(void) {
 }
 
 void cacheAnimation(string aniName) {
-    static vector<Animation *> anis;
-    anis.push_back(new Animation(aniName.c_str()));
+    static vector<vega_types::SharedPtr<Animation>> anis;
+    anis.push_back(Animation::createAnimation(aniName.c_str()));
 }
 
 void playAnimation(string aniName, QVector loc, float size) {
@@ -181,24 +183,23 @@ void saveGame(const string &savename) {
 }
 
 void showSplashScreen(const string &filename) {
-    static Animation *curSplash = 0;
+    static vega_types::SharedPtr<Animation> curSplash{};
     if (!filename.empty()) {
-        if (curSplash != nullptr) {
-            delete curSplash;
-            curSplash = nullptr;
+        if (curSplash) {
+            curSplash.reset();
         }
-        curSplash = new Animation(filename.c_str(), 0);
+        curSplash = Animation::createAnimation(filename.c_str(), false);
     } else if (!curSplash && !GetSplashScreen()) {
         static std::vector<std::string> s = ParseDestinations(game_options()->splash_screen);
         int snum = time(NULL) % s.size();
-        curSplash = new Animation(s[snum].c_str(), 0);
+        curSplash = Animation::createAnimation(s[snum].c_str(), false);
     }
     SetStarSystemLoading(true);
     bootstrap_draw("Loading...", curSplash);
 }
 
 void showSplashMessage(const string &text) {
-    bootstrap_draw(text, 0);
+    bootstrap_draw(text, nullptr);
 }
 
 void showSplashProgress(float progress) //DELETE ?

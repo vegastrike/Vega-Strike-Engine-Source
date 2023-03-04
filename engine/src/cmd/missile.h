@@ -1,10 +1,7 @@
-/**
+/*
  * missile.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +9,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -72,7 +69,7 @@ public:
             float radmult,
             float detonation_radius);
 
-    Missile(std::vector<Mesh *> m, bool b, int i) :
+    Missile(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &m, bool b, int i) :
             Unit(m, b, i) {
     }
 
@@ -98,14 +95,15 @@ public:
     bool proximityFuse(Unit *target);
     bool useFuel(Unit *target, bool had_target);
 
-private:
-    // TODO: consider if this is really necessary and if so, use = delete
-/// default constructor forbidden
-    Missile();
-/// copy constructor forbidden
-    Missile(const Missile &);
-/// assignment operator forbidden
-    Missile &operator=(const Missile &);
+    ~Missile() override = default;
+
+    // TODO: consider if this is really necessary
+    /// default constructor forbidden
+    Missile() = delete;
+    /// copy constructor forbidden
+    Missile(const Missile &) = delete;
+    /// assignment operator forbidden
+    Missile &operator=(const Missile &) = delete;
 };
 
 #endif

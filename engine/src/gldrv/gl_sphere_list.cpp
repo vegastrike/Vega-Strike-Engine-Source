@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gl_sphere_list.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -52,16 +54,19 @@ void GFXSphereVertexList::BeginDrawState(GFXBOOL lock) {
     sphere->BeginDrawState(lock);
 }
 
-void GFXSphereVertexList::GetPolys(GFXVertex **RESTRICT vert, int *RESTRICT numPolys, int *RESTRICT numTris) {
-    sphere->GetPolys(vert, numPolys, numTris);
-    int numt = *numTris;
-    int numq = *numPolys - numt;
-    int verts = numt * 3 + numq * 4;
-    for (int i = 0; i < verts; ++i) {
-        (*vert)[i].x *= radius;
-        (*vert)[i].y *= radius;
-        (*vert)[i].z *= radius;
+vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXSphereVertexList::GetPolys(size_t &num_tris,
+                                                                                                        size_t &num_quads,
+                                                                                                        size_t &total_num_polys) {
+    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> return_value =
+            sphere->GetPolys(num_tris,
+                             num_quads,
+                             total_num_polys);
+    for (auto& elem: *return_value) {
+        elem.x *= radius;
+        elem.y *= radius;
+        elem.z *= radius;
     }
+    return return_value;
 }
 
 void GFXSphereVertexList::EndDrawState(GFXBOOL lock) {

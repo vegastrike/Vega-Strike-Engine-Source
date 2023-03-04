@@ -1,6 +1,8 @@
 /*
+ * store.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Roy Falk, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,11 +25,9 @@
 #ifndef STORE_H
 #define STORE_H
 
-#include <vector>
-
+#include "preferred_types.h"
 #include "product.h"
 #include "resource.h"
-
 
 // A bit of hackery to keep the names separate for now.
 // In the future, there will probably be a significant difference
@@ -38,24 +38,28 @@ typedef Store Customer;
 class Store
 {
 public: // TODO: remove
-    std::vector<Product> stock;
+    vega_types::SequenceContainer<Product> stock;
     Resource<double> cash;
     bool unlimited_funds;
 public:
-    Store(std::vector<Product> stock = std::vector<Product>(), double cash = -1.0);
+    explicit Store(vega_types::SequenceContainer<Product> stock = vega_types::SequenceContainer<Product>(), double cash = -1.0);
 
     void Add(Product product, const int quantity);
     void Add(int index, int quantity);
     void Subtract(int index, int quantity);
 
     bool InStock(std::string product_name);
+    double GetStock(std::string product_name);
+    bool InStock(const int index);
+    double GetStock(const int index);
+
     int ProductIndex(std::string product_name);
 
     // These are from the point of view of the store/called class and also affect the other party
     bool Buy(Customer& seller, std::string product_name, double quantity);
     bool Sell(Customer& buyer, std::string product_name, double quantity);
     void SetFunds(double cash);
-    void Stock(std::vector<Product> stock);
+    void Stock(vega_types::SequenceContainer<Product> stock);
 };
 
 

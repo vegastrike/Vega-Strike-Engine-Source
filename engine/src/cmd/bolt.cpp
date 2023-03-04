@@ -1,8 +1,8 @@
 /*
  * bolt.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -79,7 +79,7 @@ int Bolt::AddAnimation(BoltDrawManager *q, std::string file, QVector cur_positio
         decal = q->animations.size();
         q->animationname.push_back(file);
         q->animations
-                .push_back(new Animation(file.c_str(),
+                .push_back(Animation::createAnimation(file.c_str(),
                         true,
                         .1,
                         MIPMAP,
@@ -123,7 +123,7 @@ void Bolt::DrawAllBolts() {
 
         Bolt bolt = bolt_types[0];
 
-        Texture *texture = TextureManager::GetInstance().GetTexture(bolt.bolt_name, MIPMAP);
+        vega_types::SharedPtr<Texture> texture = TextureManager::GetInstance().GetTexture(bolt.bolt_name, MIPMAP);
         if (!texture) {
             VS_LOG(error, (boost::format("No texture found for bolt named %1$s") % bolt.bolt_name));
             continue;
@@ -147,14 +147,14 @@ void Bolt::DrawAllBolts() {
 
 void Bolt::DrawAllBalls() {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
-    vector<Animation *>::iterator k = bolt_draw_manager.animations.begin();
+    auto k = bolt_draw_manager.animations.begin();
 
     for (auto &&ball_types : bolt_draw_manager.balls) {
         if (ball_types.size() == 0) {
             continue;
         }
 
-        Animation *cur = *k;
+        Animation *cur = (*k).get();
 
         float bolt_size = 2 * ball_types[0].type->radius * 2;
         bolt_size *= bolt_size;

@@ -4,7 +4,7 @@
 #define __UNIT_GENERIC_H__
 
 /*
- * unit_generic.cpp
+ * unit_generic.h
  *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk,
  * and other Vega Strike contributors
@@ -15,7 +15,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -75,6 +75,7 @@ void UncheckUnit( class Unit*un );
 #include "collide_map.h"
 #include "SharedPool.h"
 #include "role_bitmask.h"
+#include "upgradeable_unit.h"
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
@@ -134,7 +135,7 @@ struct PlanetaryOrbitData;
 
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
-        public Intelligent, public Movable, public JumpCapable, public Carrier {
+        public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
 protected:
 //How many lists are referencing us
     int ucref = 0;
@@ -188,6 +189,13 @@ public:
 //forbidden
     Unit &operator=(const Unit &) = delete;
 
+    // TODO: Implement
+    /// move constructor
+    Unit(Unit && other) noexcept = delete;
+
+    /// move assignment operator
+    Unit &operator=(Unit && other) noexcept = delete;
+
     Unit();
     ~Unit() override;
 
@@ -200,7 +208,7 @@ public:
 /** Constructor that creates aa mesh with meshes as submeshes (number
  *  of them) as either as subunit with faction faction
  */
-    Unit(std::vector<Mesh *> &meshes, bool Subunit, int faction);
+    Unit(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &meshes, bool Subunit, int faction);
 
 /** Constructor that creates a mesh from an XML file If it is a
  *  customizedUnit, it will check in that directory in the home dir for
@@ -252,13 +260,7 @@ public:
             bool downgrade,
             int &numave,
             double &percentage);
-    bool UpgradeMounts(const Unit *up,
-            int subunitoffset,
-            bool touchme,
-            bool downgrade,
-            int &numave,
-            const Unit *templ,
-            double &percentage);
+
 //the turrets and spinning parts fun fun stuff
     UnitCollection SubUnits;
 
@@ -280,6 +282,8 @@ public:
     bool isSubUnit() const {
         return graphicOptions.SubUnit ? true : false;
     }
+
+    //virtual void UpgradeUnit(const std::string &upgrades) {}
 
     void setFaceCamera();
     bool UpAndDownGrade(const Unit *up,
@@ -434,7 +438,7 @@ public:
             float activation);
 
 //Uses Mesh -> in NetUnit and Unit only
-    std::vector<Mesh *> StealMeshes();
+    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> StealMeshes();
 /* Begin and continue explosion
  *  Uses GFX so only in Unit class
  *  But should always return true on server side = assuming explosion time=0 here */
@@ -1038,10 +1042,10 @@ struct Unit::XML {
     float randomstartframe;
     float randomstartseconds;
     std::vector<Mount *> mountz;
-    std::vector<Mesh *> meshes;
+    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> meshes;
     std::vector<std::string> meshes_str;
-    Mesh *shieldmesh;
-    Mesh *rapidmesh;
+    vega_types::SharedPtr<Mesh> shieldmesh;
+    vega_types::SharedPtr<Mesh> rapidmesh;
     std::string shieldmesh_str;
     std::string rapidmesh_str;
     void *data;

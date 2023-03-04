@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * main.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -203,7 +205,7 @@ void initALRenderer() {
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     if (g_game.sound_enabled) {
-        SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
+        vega_types::SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
         renderer->setMeterDistance(1.0);
         renderer->setDopplerFactor(0.0);
 
@@ -225,7 +227,7 @@ void initScenes() {
 
 void closeRenderer() {
     VS_LOG(info, "Shutting down renderer...");
-    Audio::SceneManager::getSingleton()->setRenderer(SharedPtr<Audio::Renderer>());
+    Audio::SceneManager::getSingleton()->setRenderer(vega_types::SharedPtr<Audio::Renderer>());
 }
 
 extern void InitUnitTables();
@@ -397,7 +399,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-static Animation *SplashScreen = NULL;
+static vega_types::SharedPtr<Animation> SplashScreen{};
 static bool BootstrapMyStarSystemLoading = true;
 
 void SetStarSystemLoading(bool value) {
@@ -408,29 +410,29 @@ bool GetStarSystemLoading() {
     return BootstrapMyStarSystemLoading;
 }
 
-void SetSplashScreen(Animation *ss) {
+void SetSplashScreen(vega_types::SharedPtr<Animation> ss) {
     SplashScreen = ss;
 }
 
-Animation *GetSplashScreen() {
+vega_types::SharedPtr<Animation> GetSplashScreen() {
     return SplashScreen;
 }
 
-void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
-    static Animation *ani = NULL;
+void bootstrap_draw(const std::string &message, vega_types::SharedPtr<Animation> newSplashScreen) {
+    static vega_types::SharedPtr<Animation> ani{};
     static bool reentryWatchdog = false;
     if (!BootstrapMyStarSystemLoading || reentryWatchdog) {
         return;
     }
     Music::MuzakCycle();     //Allow for loading music...
-    if (SplashScreen == NULL && newSplashScreen == NULL) {
+    if (!SplashScreen && !newSplashScreen) {
         //if there's no splashscreen, we don't draw on it
         //this happens, when the splash screens texture is loaded
         return;
     }
 
     reentryWatchdog = true;
-    if (newSplashScreen != NULL) {
+    if (newSplashScreen) {
         ani = newSplashScreen;
     }
     UpdateTime();
@@ -438,9 +440,9 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     Matrix tmp;
     Identity(tmp);
     BootstrapMyStarSystemLoading = false;
-    static Texture dummy("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
+    static vega_types::SharedPtr<Texture> dummy = Texture::createTexture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
     BootstrapMyStarSystemLoading = true;
-    dummy.MakeActive();
+    dummy->MakeActive();
     GFXDisable(LIGHTING);
     GFXDisable(DEPTHTEST);
     GFXBlendMode(ONE, ZERO);
@@ -525,9 +527,9 @@ void bootstrap_first_loop() {
         vector<string> s = parse_space_string(game_options()->splash_screen);
         vector<string> sa = parse_space_string(game_options()->splash_audio);
         int snum = time(nullptr) % s.size();
-        SplashScreen = new Animation(s[snum].c_str(), false);
-        if (!sa.empty() && sa[0].length()) {
-            muzak->GotoSong(sa[snum % sa.size()]);
+        SplashScreen = Animation::createAnimation(s.at(snum).c_str(), false);
+        if (!sa.empty() && sa.at(0).length()) {
+            muzak->GotoSong(sa.at(snum % sa.size()));
         }
         bs_tp = new TextPlane();
     }

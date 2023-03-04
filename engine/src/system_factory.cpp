@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * system_factory.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -69,7 +71,7 @@ using std::endl;
 
 // TODO: put this in the header
 extern BLENDFUNC parse_alpha(const char *);
-extern void bootstrap_draw(const string &message, Animation *SplashScreen = nullptr);
+extern void bootstrap_draw(const string &message, vega_types::SharedPtr<Animation> newSplashScreen = nullptr);
 extern const vector<string> &ParseDestinations(const string &value);
 extern void GetLights(const vector<GFXLight> &origlights,
         vector<GFXLightLocal> &curlights,

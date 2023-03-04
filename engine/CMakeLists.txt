@@ -813,6 +813,7 @@ SET(LIBCMD_SOURCES
     src/cmd/json.cpp
     src/cmd/unit_functions_generic.cpp
     src/cmd/unit_generic.cpp
+    src/cmd/upgradeable_unit.cpp
     src/cmd/fg_util.cpp
     src/cmd/unit_util_generic.cpp
     src/cmd/unit_xml.cpp

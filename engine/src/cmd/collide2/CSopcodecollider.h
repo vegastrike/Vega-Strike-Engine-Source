@@ -78,7 +78,7 @@ private:
     * a linear list of vertexes that we reference in collision trees
     * radius is set in here as well
     */
-    void GeometryInitialize(const std::vector<mesh_polygon> &polygons);
+    void GeometryInitialize(const vega_types::SequenceContainer<mesh_polygon> &polygons);
 
     /* callback used to return vertex points when requested from opcode*/
     static void MeshCallback(uint32_t triangle_index,
@@ -88,7 +88,7 @@ private:
     static void RayCallback(const Opcode::CollisionFace &, void *);
 
     /* Radius around unit using center of unit and furthest part of unit */
-    float radius;
+    float radius{};
 
     /* Array of Point's corresponding to vertices of triangles given by mesh_polygon */
     Opcode::Point *vertholder;
@@ -111,7 +111,7 @@ private:
     // std::shared_ptr<VegaStrike::vs_vector<csCollisionPair>> pairs = std::make_shared<VegaStrike::vs_vector<csCollisionPair>>();
 
 public:
-    csOPCODECollider(const std::vector<mesh_polygon> &polygons);
+    explicit csOPCODECollider(vega_types::SequenceContainer<mesh_polygon> & polygons);
     virtual ~csOPCODECollider();
 
     /* Not used in 0.5 */
@@ -124,8 +124,8 @@ public:
 
     /* Collides the argument collider with this collider, returning true if it occurred */
     bool Collide(csOPCODECollider &pOtherCollider,
-            const csReversibleTransform *pThisTransform = 0,
-            const csReversibleTransform *pOtherTransform = 0);
+            const csReversibleTransform *pThisTransform = nullptr,
+            const csReversibleTransform *pOtherTransform = nullptr);
 
     /* Returns the pair array, as of 0.5 this is a global static var
     * The pair array contains the vertices that have collided as returned

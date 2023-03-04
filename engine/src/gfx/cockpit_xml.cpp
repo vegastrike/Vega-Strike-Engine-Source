@@ -1,4 +1,6 @@
 /*
+ * cockpit_xml.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -364,7 +366,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                         SetSoundFile((*iter).value);
                         break;
                     case MESH:
-                        mesh = Mesh::LoadMeshes((*iter).value.c_str(), Vector(1, 1, 1), 0, NULL);
+                        mesh = Mesh::LoadMeshes((*iter).value.c_str(), Vector(1, 1, 1), 0, nullptr);
                         break;
                     case FRONT:
                     case BACK:

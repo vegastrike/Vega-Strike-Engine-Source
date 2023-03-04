@@ -1,10 +1,8 @@
-/**
+/*
  * loc_select.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,35 +28,37 @@
 #include "gfxlib.h"
 #include "in_kb.h"
 #include "vs_globals.h"
-#include <stdio.h>
+#include "preferred_types.h"
 
 LocationSelect::LocationSelect(Vector start, Vector Plane1,
-        Vector Plane2 /*, System * par */ ) : LocSelAni("locationselect.ani",
-        true,
-        .5,
-        MIPMAP,
-        true),
-        LocSelUpAni("locationselect_up.ani",
-                true,
-                .5,
-                MIPMAP,
-                false) {
+        Vector Plane2 /*, System * par */ ) {
+    LocSelAni = Animation::createAnimation("locationselect.ani",
+                                           true,
+                                           .5,
+                                           MIPMAP,
+                                           true);
+    LocSelUpAni = Animation::createAnimation("locationselect_up.ani",
+                                             true,
+                                             .5,
+                                             MIPMAP,
+                                             false);
     //parentScene = par;
     CrosshairSize = 2;
     MoveLocation(start, Plane1, Plane2);
 }
 
 LocationSelect::LocationSelect(Vector start, Vector Plane1, Vector Plane2,
-        Vector Plane3 /*, Scene* par */ ) : LocSelAni("locationselect.ani",
-        true,
-        .5,
-        MIPMAP,
-        true),
-        LocSelUpAni("locationselect_up.ani",
-                true,
-                .5,
-                MIPMAP,
-                false) {
+        Vector Plane3 /*, Scene* par */ ) {
+    LocSelAni = Animation::createAnimation("locationselect.ani",
+                                           true,
+                                           .5,
+                                           MIPMAP,
+                                           true);
+    LocSelUpAni = Animation::createAnimation("locationselect_up.ani",
+                                             true,
+                                             .5,
+                                             MIPMAP,
+                                             false);
     //parentScene=par;
     CrosshairSize = 2;
     MoveLocation(start, Plane1, Plane2, Plane3);
@@ -242,10 +242,10 @@ void LocationSelect::Draw() {
 #endif
     }
     //draw the animation
-    LocSelUpAni.SetPosition(QVector(LocalPosition.i, LocalPosition.j, 0));
-    LocSelUpAni.Draw();
-    LocSelAni.SetPosition(LocalPosition);
-    LocSelAni.Draw();
+    LocSelUpAni->SetPosition(QVector(LocalPosition.i, LocalPosition.j, 0));
+    LocSelUpAni->Draw();
+    LocSelAni->SetPosition(LocalPosition);
+    LocSelAni->Draw();
     GFXPopBlendMode();
 }
 

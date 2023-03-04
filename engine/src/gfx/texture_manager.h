@@ -1,8 +1,8 @@
 /*
- * texture_manager.cpp
+ * texture_manager.h
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk. Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -31,12 +31,12 @@
 #include "gfx/aux_texture.h"
 
 class TextureManager {
-    std::vector<Texture *> textures;
+    vega_types::SequenceContainer<vega_types::SharedPtr<Texture>> textures;
 public:
     TextureManager();
 
     static TextureManager &GetInstance();
-    Texture *GetTexture(std::string const &name, enum FILTER mipmap);
+    vega_types::SharedPtr<Texture> GetTexture(std::string const &name, enum FILTER mipmap);
 };
 
 #endif // TEXTUREMANAGER_H

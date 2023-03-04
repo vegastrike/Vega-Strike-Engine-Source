@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * unit_csv.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -46,67 +48,31 @@
 #include "weapon_info.h"
 #include "resource/resource.h"
 #include "unit_csv_factory.h"
-
+#include "upgradeable_unit.h"
 
 extern int GetModeFromName(const char *input_buffer);
-extern void pushMesh(std::vector<Mesh *> &mesh,
-        float &randomstartframe,
-        float &randomstartseconds,
-        const char *filename,
-        const float scale,
-        int faction,
-        class Flightgroup *fg,
-        int startframe,
-        double texturestarttime);
+extern void pushMesh(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &mesh,
+                     float &randomstartframe,
+                     float &randomstartseconds,
+                     const char *filename,
+                     const float scale,
+                     int faction,
+                     class Flightgroup *fg,
+                     int startframe,
+                     double texturestarttime);
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-static void UpgradeUnit(Unit *un, const std::string &upgrades) {
-    string::size_type when;
-    string::size_type ofs = 0;
-    while ((when = upgrades.find('{', ofs)) != string::npos) {
-        string::size_type where = upgrades.find('}', when + 1);
-        string upgrade = upgrades.substr(when + 1, ((where == string::npos) ? string::npos : where - when - 1));
-        ofs = ((where == string::npos) ? string::npos : where + 1);
 
-        unsigned int mountoffset = 0;
-        unsigned int subunitoffset = 0;
-        string::size_type where1 = upgrade.find(';');
-        string::size_type where2 = upgrade.rfind(';');
-        if (where1 != string::npos) {
-            mountoffset =
-                    XMLSupport::parse_int(upgrade.substr(where1 + 1, where2 != where1 ? where2 : upgrade.length()));
-            if (where2 != where1 && where2 != string::npos) {
-                subunitoffset = XMLSupport::parse_int(upgrade.substr(where2 + 1));
-            }
-        }
-        upgrade = upgrade.substr(0, where1);
-        if (upgrade.length() == 0) {
-            continue;
-        }
-        const Unit *upgradee = UnitConstCache::getCachedConst(StringIntKey(upgrade, FactionUtil::GetUpgradeFaction()));
-        if (!upgradee) {
-            upgradee = UnitConstCache::setCachedConst(StringIntKey(upgrade, FactionUtil::GetUpgradeFaction()),
-                    new Unit(upgrade.c_str(),
-                            true,
-                            FactionUtil::GetUpgradeFaction()));
-        }
-        double percent = 1.0;
-        un->Unit::Upgrade(upgradee,
-                mountoffset,
-                subunitoffset,
-                GetModeFromName(upgrade.c_str()), true, percent, NULL);
-    }
-}
 
-void AddMeshes(std::vector<Mesh *> &xmeshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        float unitscale,
-        const std::string &meshes,
-        int faction,
-        Flightgroup *fg,
-        vector<unsigned int> *counts) {
+void AddMeshes(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &xmeshes,
+               float &randomstartframe,
+               float &randomstartseconds,
+               float unitscale,
+               const std::string &meshes,
+               int faction,
+               Flightgroup *fg,
+               vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
 
     // Clear counts vector
@@ -122,7 +88,7 @@ void AddMeshes(std::vector<Mesh *> &xmeshes,
         if (counts) {
             counts->reserve(number_of_elements);
         }
-        xmeshes.reserve(number_of_elements);
+//        xmeshes.reserve(number_of_elements);
     }
     while ((where = meshes.find('{', ofs)) != string::npos) {
         when = meshes.find('}', where + 1);         //matching closing brace
@@ -258,7 +224,7 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
         while ((ofs = mounts.find('{', ofs)) != string::npos) {
             nmountz++, ofs++;
         }
-        thus->mounts.reserve(nmountz + thus->mounts.size());
+//        thus->mounts.reserve(nmountz + thus->mounts.size());
         ofs = 0;
     }
     while ((where = mounts.find('{', ofs)) != string::npos) {
@@ -670,12 +636,12 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     xml.randomstartseconds = 0;
     xml.calculated_role = false;
     xml.damageiterator = 0;
-    xml.shieldmesh = NULL;
-    xml.rapidmesh = NULL;
+    xml.shieldmesh = nullptr;
+    xml.rapidmesh = nullptr;
     xml.hasColTree = true;
     xml.unitlevel = 0;
     xml.unitscale = 1;
-    xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
+    xml.data = nullptr;     //was uninitialized memory
     string tmpstr;
     csvRow = unit_identifier;
 
@@ -1005,7 +971,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     SPECDriveFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_SPECDrive_Functionality", 1.0f);
     computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
     computer.slide_end = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
-    UpgradeUnit(this, UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string()));
+
+    UpgradeUnit(UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string()));
+
+
     {
         std::string tractorability = UnitCSVFactory::GetVariable(unit_key, "Tractorability", std::string());
         unsigned char tflags;
@@ -1038,21 +1007,21 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         const int shieldstacks = configuration()->graphics_config.shield_detail;
         const std::string& shieldtex = configuration()->graphics_config.shield_texture;
         const std::string& shieldtechnique = configuration()->graphics_config.shield_technique;
-        meshdata.back() = new SphereMesh(rSize(),
-                shieldstacks,
-                shieldstacks,
-                shieldtex.c_str(),
-                shieldtechnique,
-                NULL,
-                false,
-                ONE,
-                ONE);
+        meshdata.back() = SphereMesh::createSphereMesh(rSize(),
+                                                       shieldstacks,
+                                                       shieldstacks,
+                                                       shieldtex.c_str(),
+                                                       shieldtechnique,
+                                                       nullptr,
+                                                       false,
+                                                       ONE,
+                                                       ONE);
     }
     meshdata.back()->EnableSpecialFX();
     //Begin the Pow-w-w-war Zone Collide Tree Generation
     {
         xml.rapidmesh_str = UnitCSVFactory::GetVariable(unit_key, "Rapid_Mesh", std::string());
-        vector<mesh_polygon> polies;
+        vega_types::SequenceContainer<mesh_polygon> polies;
 
         std::string collideTreeHash = VSFileSystem::GetHashName(modification + "#" + unit_identifier);
         this->colTrees = collideTrees::Get(collideTreeHash);
@@ -1076,7 +1045,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             if (xml.rapidmesh_str.length()) {
                 addRapidMesh(&xml, xml.rapidmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
             } else {
-                xml.rapidmesh = NULL;
+                xml.rapidmesh = nullptr;
             }
             polies.clear();
             if (xml.rapidmesh) {
@@ -1102,9 +1071,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
                     }
                 }
             }
-            if (xml.rapidmesh != nullptr) {
-                delete xml.rapidmesh;
-                xml.rapidmesh = nullptr;
+            if (xml.rapidmesh) {
+                xml.rapidmesh.reset();
             }
         }
     }
@@ -1194,283 +1162,267 @@ static string tos(int val) {
 string Unit::WriteUnitString() {
     const bool UNITTAB = configuration()->physics_config.unit_table;
     string ret = "";
-    if (UNITTAB) {
-        //this is the fillin part
-        //fixme
-        for (int i = unitTables.size() - 1; i >= 0; --i) {
-            unsigned int where;
-            string val;
-            if (unitTables[i]->RowExists(csvRow, where)) {
-                CSVRow row(unitTables[i], where);
-                vsUMap<string, string> unit;
-                for (unsigned int jj = 0; jj < row.size(); ++jj) {
-                    if (jj != 0) {
-                        unit[row.getKey(jj)] = row[jj];
-                    }
-                }
-                //mutable things
-                unit["Equipment_Space"] = XMLSupport::tostring(equipment_volume);
-                unit["Hold_Volume"] = XMLSupport::tostring(CargoVolume);
-                unit["Hidden_Hold_Volume"] = XMLSupport::tostring(HiddenCargoVolume);
-                unit["Upgrade_Storage_Volume"] = XMLSupport::tostring(UpgradeVolume);
-                string mountstr;
-                double unitScale = stof(unit["Unit_Scale"], 1);
-                {
-                    //mounts
-                    for (unsigned int j = 0; j < mounts.size(); ++j) {
-                        char mnt[1024];
-                        Matrix m;
-                        Transformation tr(mounts[j].GetMountOrientation(),
-                                mounts[j].GetMountLocation().Cast());
-                        tr.to_matrix(m);
-                        string printedname = mounts[j].type->name;
-                        if (mounts[j].status == Mount::DESTROYED || mounts[j].status == Mount::UNCHOSEN) {
-                            printedname = "";
-                        }
-                        mountstr += "{" + printedname + ";" + XMLSupport::tostring(mounts[j].ammo) + ";"
-                                + XMLSupport::tostring(
-                                        mounts[j].volume) + ";" + getMountSizeString(mounts[j].size);
-                        sprintf(mnt, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
-                                m.p.i / unitScale,
-                                m.p.j / unitScale,
-                                m.p.k / unitScale,
-                                (double) mounts[j].xyscale / unitScale,
-                                (double) mounts[j].zscale / unitScale,
-                                (double) m.getR().i,
-                                (double) m.getR().j,
-                                (double) m.getR().k,
-                                (double) m.getQ().i,
-                                (double) m.getQ().j,
-                                (double) m.getQ().k,
-                                (double) mounts[j].functionality,
-                                (double) mounts[j].maxfunctionality
-                        );
-                        mountstr += mnt;
-                    }
-                    unit["Mounts"] = mountstr;
-                }
-                {
-                    //subunits
-                    vector<SubUnitStruct> subunits = GetSubUnits(unit["Sub_Units"]);
-                    if (subunits.size()) {
-                        unsigned int k = 0;
-                        Unit *subun;
-                        for (; k < subunits.size(); ++k) {
-                            subunits[k].filename = "destroyed_blank";
-                        }
-                        k = 0;
-                        for (un_iter su = this->getSubUnits(); (subun = (*su)) != NULL; ++su, ++k) {
-                            unsigned int j = k;
-                            for (; j < subunits.size(); ++j) {
-                                if ((subun->Position() - subunits[j].pos).MagnitudeSquared() < .00000001) {
-                                    //we've got a hit
-                                    break;
-                                }
-                            }
-                            if (j >= subunits.size()) {
-                                j = k;
-                            }
-                            if (j < subunits.size()) {
-                                subunits[j].filename = subun->name;
-                            }
-                        }
-                        string str;
-                        for (k = 0; k < subunits.size(); ++k) {
-                            char tmp[1024];
-                            sprintf(tmp, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
-                                    subunits[k].pos.i,
-                                    subunits[k].pos.j,
-                                    subunits[k].pos.k,
-                                    subunits[k].R.i,
-                                    subunits[k].R.j,
-                                    subunits[k].R.k,
-                                    subunits[k].Q.i,
-                                    subunits[k].Q.j,
-                                    subunits[k].Q.k,
-                                    ((double) acos(subunits[k].restricted) * 180. / VS_PI));
-                            str += "{" + subunits[k].filename + tmp;
-                        }
-                        unit["Sub_Units"] = str;
-                    }
-                }
-                {
-                    string carg;
-                    for (unsigned int i = 0; i < numCargo(); ++i) {
-                        Cargo *c = &GetCargo(i);
-                        char tmp[2048];
-                        sprintf(tmp, ";%f;%d;%f;%f;%f;%f;;%s;%s}",
-                                c->GetPrice(),
-                                c->GetQuantity(),
-                                c->GetMass(),
-                                c->GetVolume(),
-                                c->GetFunctionality(),
-                                c->GetMaxFunctionality(),
-                                c->GetMissionFlag() ? "true" : "false",
-                                c->GetInstalled() ? "true" : "false"
-                        );
-                        carg += "{" + c->GetName() + ";" + c->GetCategory() + tmp;
-                    }
-                    unit["Cargo"] = carg;
-                }
-                unit["Mass"] = tos(Mass);
-                unit["Moment_Of_Inertia"] = tos(Momentofinertia);
-                unit["Fuel_Capacity"] = tos(fuel);
-                unit["Hull"] = tos(GetHullLayer().facets[0].health);
-                unit["Spec_Interdiction"] = tos(specInterdiction);
-
-                // TODO: lib_damage figure out if this is correctly assigned
-                unit["Armor_Front_Top_Left"] = tos(GetArmorLayer().facets[0].health);
-                unit["Armor_Front_Top_Right"] = tos(GetArmorLayer().facets[2].health);
-                unit["Armor_Back_Top_Left"] = tos(GetArmorLayer().facets[4].health);
-                unit["Armor_Back_Top_Right"] = tos(GetArmorLayer().facets[6].health);
-                unit["Armor_Front_Bottom_Left"] = tos(GetArmorLayer().facets[1].health);
-                unit["Armor_Front_Bottom_Right"] = tos(GetArmorLayer().facets[3].health);
-                unit["Armor_Back_Bottom_Left"] = tos(GetArmorLayer().facets[5].health);
-                unit["Armor_Back_Bottom_Right"] = tos(GetArmorLayer().facets[7].health);
-
-                int number_of_shield_emitters = shield->number_of_facets;
-                {
-                    unit["Shield_Front_Top_Right"] = "";
-                    unit["Shield_Front_Top_Left"] = "";
-                    unit["Shield_Back_Top_Right"] = "";
-                    unit["Shield_Back_Top_Left"] = "";
-                    unit["Shield_Front_Bottom_Right"] = "";
-                    unit["Shield_Front_Bottom_Left"] = "";
-                    unit["Shield_Back_Bottom_Right"] = "";
-                    unit["Shield_Back_Bottom_Left"] = "";
-
-                    switch (number_of_shield_emitters) {
-                        case 8:
-                            unit["Shield_Front_Top_Left"] = tos(GetShieldLayer().facets[0].max_health);
-                            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[1].max_health);
-                            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[2].max_health);
-                            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[3].max_health);
-                            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[4].max_health);
-                            unit["Shield_Back_Top_Right"] = tos(GetShieldLayer().facets[5].max_health);
-                            unit["Shield_Back_Bottom_Left"] = tos(GetShieldLayer().facets[6].max_health);
-                            unit["Shield_Back_Bottom_Right"] = tos(GetShieldLayer().facets[7].max_health);
-
-                            break;
-                        case 4:
-                            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-                            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
-                            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[2].max_health);
-                            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[3].max_health);
-
-                            break;
-                        case 2:
-                            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-                            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
-                            break;
-
-                        case 0:
-                            // No shields
-                            break;
-
-                        default:
-                            // This should not happen
-                            std::cout << number_of_shield_emitters << "\n";
-                            assert(0);
-                    }
-                }
-
-
-                //TODO: lib_damage shield leak and efficiency
-                unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
-                unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
-                unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
-                unit["Warp_Capacitor"] = tos(maxwarpenergy);
-                unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
-                unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
-                unit["Primary_Capacitor"] = tos(energy.MaxValue());
-                unit["Reactor_Recharge"] = tos(recharge);
-                unit["Jump_Drive_Present"] = tos(jump.drive >= -1);
-                unit["Jump_Drive_Delay"] = tos(jump.delay);
-                unit["Wormhole"] = tos(forcejump != 0);
-                unit["Outsystem_Jump_Cost"] = tos(jump.energy);
-                unit["Warp_Usage_Cost"] = tos(jump.insysenergy);
-                unit["Afterburner_Usage_Cost"] = tos(afterburnenergy);
-                unit["Afterburner_Type"] = tos(afterburntype);
-                unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (VS_PI));
-                unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (VS_PI));
-                unit["Maneuver_Roll"] = tos(limits.roll * 180 / (VS_PI));
-                unit["Yaw_Governor_Right"] = tos(computer.max_yaw_right * 180 / VS_PI);
-                unit["Yaw_Governor_Left"] = tos(computer.max_yaw_left * 180 / VS_PI);
-                unit["Pitch_Governor_Up"] = tos(computer.max_pitch_up * 180 / VS_PI);
-                unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / VS_PI);
-                unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / VS_PI);
-                unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / VS_PI);
-                const float game_accel = configuration()->physics_config.game_accel;
-                const float game_speed = configuration()->physics_config.game_speed;
-                unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
-                unit["Forward_Accel"] = tos(limits.forward / (game_accel * game_speed));
-                unit["Retro_Accel"] = tos(limits.retro / (game_accel * game_speed));
-                unit["Left_Accel"] = unit["Right_Accel"] = tos(limits.lateral / (game_accel * game_speed));
-                unit["Bottom_Accel"] = unit["Top_Accel"] = tos(limits.vertical / (game_accel * game_speed));
-                unit["Default_Speed_Governor"] = tos(computer.max_combat_speed / game_speed);
-                unit["Afterburner_Speed_Governor"] = tos(computer.max_combat_ab_speed / game_speed);
-                unit["ITTS"] = tos(computer.itts);
-                unit["Can_Lock"] = tos(computer.radar.canlock);
-                unit["Radar_Color"] = tos(computer.radar.capability);
-                unit["Radar_Range"] = tos(computer.radar.maxrange);
-                unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / VS_PI);
-                unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
-                unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
-                unit["Cloak_Min"] = tos(cloakmin / 2147483136.);
-                unit["Can_Cloak"] = tos(cloaking != -1);
-                unit["Cloak_Rate"] = tos(fabs(cloakrate / 2147483136.));
-                unit["Cloak_Energy"] = tos(cloakenergy);
-                unit["Cloak_Glass"] = tos(cloakglass);
-                unit["Repair_Droid"] = tos(repair_droid);
-                unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
-                unit["Hud_Functionality"] = WriteHudDamage(this);
-                unit["Max_Hud_Functionality"] = WriteHudDamageFunc(this);
-                unit["Heat_Sink_Rating"] = tos(this->HeatSink);
-                unit["Lifesupport_Functionality"] = tos(LifeSupportFunctionality);
-                unit["Max_Lifesupport_Functionality"] = tos(LifeSupportFunctionalityMax);
-                unit["Comm_Functionality"] = tos(CommFunctionality);
-                unit["Max_Comm_Functionality"] = tos(CommFunctionalityMax);
-                unit["Comm_Functionality"] = tos(CommFunctionality);
-                unit["Max_Comm_Functionality"] = tos(CommFunctionalityMax);
-                unit["FireControl_Functionality"] = tos(fireControlFunctionality);
-                unit["Max_FireControl_Functionality"] = tos(fireControlFunctionalityMax);
-                unit["SPECDrive_Functionality"] = tos(SPECDriveFunctionality);
-                unit["Max_SPECDrive_Functionality"] = tos(SPECDriveFunctionalityMax);
-                unit["Slide_Start"] = tos(computer.slide_start);
-                unit["Slide_End"] = tos(computer.slide_end);
-                unit["Cargo_Import"] = unit["Upgrades"] = "";                 //make sure those are empty
-                {
-                    std::string trac;
-                    if (isTractorable(tractorPush)) {
-                        trac += "p";
-                    }
-                    if (isTractorable(tractorIn)) {
-                        trac += "i";
-                    }
-                    if (trac.empty()) {
-                        trac = "-";
-                    }
-                    unit["Tractorability"] = trac;
-                }
-                vector<string> keys, values;
-                keys.push_back("Key");
-                values.push_back(csvRow);                 //key has to come first
-                mapToStringVec(unit, keys, values);
-                return writeCSV(keys, values);
-            }
-        }
-        VS_LOG(error,
-                (boost::format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str()
-                        % fullname.c_str()));
-    } else {
+    if (!UNITTAB) {
+        // Is this code doing something? Is it legacy?
+        // TODO: figure this out
         if (pImage->unitwriter) {
             ret = pImage->unitwriter->WriteString();
         }
         for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui) {
             ret = ret + ((*ui)->WriteUnitString());
         }
+        return ret;
     }
-    return ret;
+
+    std::map<std::string, std::string> unit = UnitCSVFactory::GetUnit(name);
+    string val;
+
+    //mutable things
+    unit["Equipment_Space"] = XMLSupport::tostring(equipment_volume);
+    unit["Hold_Volume"] = XMLSupport::tostring(CargoVolume);
+    unit["Hidden_Hold_Volume"] = XMLSupport::tostring(HiddenCargoVolume);
+    unit["Upgrade_Storage_Volume"] = XMLSupport::tostring(UpgradeVolume);
+    string mountstr;
+    double unitScale = stof(unit["Unit_Scale"], 1);
+    {
+        //mounts
+        for (unsigned int j = 0; j < mounts.size(); ++j) {
+            char mnt[1024];
+            Matrix m;
+            Transformation tr(mounts[j].GetMountOrientation(),
+                              mounts[j].GetMountLocation().Cast());
+            tr.to_matrix(m);
+            string printedname = mounts[j].type->name;
+            if (mounts[j].status == Mount::DESTROYED || mounts[j].status == Mount::UNCHOSEN) {
+                printedname = "";
+            }
+            mountstr += "{" + printedname + ";" + XMLSupport::tostring(mounts[j].ammo) + ";"
+                    + XMLSupport::tostring(
+                        mounts[j].volume) + ";" + getMountSizeString(mounts[j].size);
+            sprintf(mnt, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
+                    m.p.i / unitScale,
+                    m.p.j / unitScale,
+                    m.p.k / unitScale,
+                    (double) mounts[j].xyscale / unitScale,
+                    (double) mounts[j].zscale / unitScale,
+                    (double) m.getR().i,
+                    (double) m.getR().j,
+                    (double) m.getR().k,
+                    (double) m.getQ().i,
+                    (double) m.getQ().j,
+                    (double) m.getQ().k,
+                    (double) mounts[j].functionality,
+                    (double) mounts[j].maxfunctionality
+                    );
+            mountstr += mnt;
+        }
+        unit["Mounts"] = mountstr;
+    }
+    {
+        //subunits
+        vector<SubUnitStruct> subunits = GetSubUnits(unit["Sub_Units"]);
+        if (subunits.size()) {
+            unsigned int k = 0;
+            Unit *subun;
+            for (; k < subunits.size(); ++k) {
+                subunits[k].filename = "destroyed_blank";
+            }
+            k = 0;
+            for (un_iter su = this->getSubUnits(); (subun = (*su)) != NULL; ++su, ++k) {
+                unsigned int j = k;
+                for (; j < subunits.size(); ++j) {
+                    if ((subun->Position() - subunits[j].pos).MagnitudeSquared() < .00000001) {
+                        //we've got a hit
+                        break;
+                    }
+                }
+                if (j >= subunits.size()) {
+                    j = k;
+                }
+                if (j < subunits.size()) {
+                    subunits[j].filename = subun->name;
+                }
+            }
+            string str;
+            for (k = 0; k < subunits.size(); ++k) {
+                char tmp[1024];
+                sprintf(tmp, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
+                        subunits[k].pos.i,
+                        subunits[k].pos.j,
+                        subunits[k].pos.k,
+                        subunits[k].R.i,
+                        subunits[k].R.j,
+                        subunits[k].R.k,
+                        subunits[k].Q.i,
+                        subunits[k].Q.j,
+                        subunits[k].Q.k,
+                        ((double) acos(subunits[k].restricted) * 180. / VS_PI));
+                str += "{" + subunits[k].filename + tmp;
+            }
+            unit["Sub_Units"] = str;
+        }
+    }
+    {
+        string carg;
+        for (unsigned int i = 0; i < numCargo(); ++i) {
+            Cargo *c = &GetCargo(i);
+            char tmp[2048];
+            sprintf(tmp, ";%f;%d;%f;%f;%f;%f;;%s;%s}",
+                    c->GetPrice(),
+                    c->GetQuantity(),
+                    c->GetMass(),
+                    c->GetVolume(),
+                    c->GetFunctionality(),
+                    c->GetMaxFunctionality(),
+                    c->GetMissionFlag() ? "true" : "false",
+                    c->GetInstalled() ? "true" : "false"
+            );
+            carg += "{" + c->GetName() + ";" + c->GetCategory() + tmp;
+        }
+        unit["Cargo"] = carg;
+    }
+    unit["Mass"] = tos(Mass);
+    unit["Moment_Of_Inertia"] = tos(Momentofinertia);
+    unit["Fuel_Capacity"] = tos(fuel);
+    unit["Hull"] = tos(GetHullLayer().facets[0].health);
+    unit["Spec_Interdiction"] = tos(specInterdiction);
+
+    // TODO: lib_damage figure out if this is correctly assigned
+    unit["Armor_Front_Top_Left"] = tos(GetArmorLayer().facets[0].health);
+    unit["Armor_Front_Top_Right"] = tos(GetArmorLayer().facets[2].health);
+    unit["Armor_Back_Top_Left"] = tos(GetArmorLayer().facets[4].health);
+    unit["Armor_Back_Top_Right"] = tos(GetArmorLayer().facets[6].health);
+    unit["Armor_Front_Bottom_Left"] = tos(GetArmorLayer().facets[1].health);
+    unit["Armor_Front_Bottom_Right"] = tos(GetArmorLayer().facets[3].health);
+    unit["Armor_Back_Bottom_Left"] = tos(GetArmorLayer().facets[5].health);
+    unit["Armor_Back_Bottom_Right"] = tos(GetArmorLayer().facets[7].health);
+
+    int number_of_shield_emitters = shield->number_of_facets;
+    {
+        unit["Shield_Front_Top_Right"] = "";
+        unit["Shield_Front_Top_Left"] = "";
+        unit["Shield_Back_Top_Right"] = "";
+        unit["Shield_Back_Top_Left"] = "";
+        unit["Shield_Front_Bottom_Right"] = "";
+        unit["Shield_Front_Bottom_Left"] = "";
+        unit["Shield_Back_Bottom_Right"] = "";
+        unit["Shield_Back_Bottom_Left"] = "";
+
+        switch (number_of_shield_emitters) {
+        case 8:
+            unit["Shield_Front_Top_Left"] = tos(GetShieldLayer().facets[0].max_health);
+            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[1].max_health);
+            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[2].max_health);
+            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[3].max_health);
+            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[4].max_health);
+            unit["Shield_Back_Top_Right"] = tos(GetShieldLayer().facets[5].max_health);
+            unit["Shield_Back_Bottom_Left"] = tos(GetShieldLayer().facets[6].max_health);
+            unit["Shield_Back_Bottom_Right"] = tos(GetShieldLayer().facets[7].max_health);
+
+            break;
+        case 4:
+            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
+            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
+            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[2].max_health);
+            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[3].max_health);
+
+            break;
+        case 2:
+            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
+            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
+            break;
+
+        case 0:
+            // No shields
+            break;
+
+        default:
+            // This should not happen
+            std::cout << number_of_shield_emitters << "\n";
+            assert(0);
+        }
+    }
+
+
+    //TODO: lib_damage shield leak and efficiency
+    unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
+    unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
+    unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
+    unit["Warp_Capacitor"] = tos(maxwarpenergy);
+    unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
+    unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
+    unit["Primary_Capacitor"] = tos(energy.MaxValue());
+    unit["Reactor_Recharge"] = tos(recharge);
+    unit["Jump_Drive_Present"] = tos(jump.drive >= -1);
+    unit["Jump_Drive_Delay"] = tos(jump.delay);
+    unit["Wormhole"] = tos(forcejump != 0);
+    unit["Outsystem_Jump_Cost"] = tos(jump.energy);
+    unit["Warp_Usage_Cost"] = tos(jump.insysenergy);
+    unit["Afterburner_Usage_Cost"] = tos(afterburnenergy);
+    unit["Afterburner_Type"] = tos(afterburntype);
+    unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (VS_PI));
+    unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (VS_PI));
+    unit["Maneuver_Roll"] = tos(limits.roll * 180 / (VS_PI));
+    unit["Yaw_Governor_Right"] = tos(computer.max_yaw_right * 180 / VS_PI);
+    unit["Yaw_Governor_Left"] = tos(computer.max_yaw_left * 180 / VS_PI);
+    unit["Pitch_Governor_Up"] = tos(computer.max_pitch_up * 180 / VS_PI);
+    unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / VS_PI);
+    unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / VS_PI);
+    unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / VS_PI);
+    const float game_accel = configuration()->physics_config.game_accel;
+    const float game_speed = configuration()->physics_config.game_speed;
+    unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
+    unit["Forward_Accel"] = tos(limits.forward / (game_accel * game_speed));
+    unit["Retro_Accel"] = tos(limits.retro / (game_accel * game_speed));
+    unit["Left_Accel"] = unit["Right_Accel"] = tos(limits.lateral / (game_accel * game_speed));
+    unit["Bottom_Accel"] = unit["Top_Accel"] = tos(limits.vertical / (game_accel * game_speed));
+    unit["Default_Speed_Governor"] = tos(computer.max_combat_speed / game_speed);
+    unit["Afterburner_Speed_Governor"] = tos(computer.max_combat_ab_speed / game_speed);
+    unit["ITTS"] = tos(computer.itts);
+    unit["Can_Lock"] = tos(computer.radar.canlock);
+    unit["Radar_Color"] = tos(computer.radar.capability);
+    unit["Radar_Range"] = tos(computer.radar.maxrange);
+    unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / VS_PI);
+    unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
+    unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
+    unit["Cloak_Min"] = tos(cloakmin / 2147483136.);
+    unit["Can_Cloak"] = tos(cloaking != -1);
+    unit["Cloak_Rate"] = tos(fabs(cloakrate / 2147483136.));
+    unit["Cloak_Energy"] = tos(cloakenergy);
+    unit["Cloak_Glass"] = tos(cloakglass);
+    unit["Repair_Droid"] = tos(repair_droid);
+    unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
+    unit["Hud_Functionality"] = WriteHudDamage(this);
+    unit["Max_Hud_Functionality"] = WriteHudDamageFunc(this);
+    unit["Heat_Sink_Rating"] = tos(this->HeatSink);
+    unit["Lifesupport_Functionality"] = tos(LifeSupportFunctionality);
+    unit["Max_Lifesupport_Functionality"] = tos(LifeSupportFunctionalityMax);
+    unit["Comm_Functionality"] = tos(CommFunctionality);
+    unit["Max_Comm_Functionality"] = tos(CommFunctionalityMax);
+    unit["Comm_Functionality"] = tos(CommFunctionality);
+    unit["Max_Comm_Functionality"] = tos(CommFunctionalityMax);
+    unit["FireControl_Functionality"] = tos(fireControlFunctionality);
+    unit["Max_FireControl_Functionality"] = tos(fireControlFunctionalityMax);
+    unit["SPECDrive_Functionality"] = tos(SPECDriveFunctionality);
+    unit["Max_SPECDrive_Functionality"] = tos(SPECDriveFunctionalityMax);
+    unit["Slide_Start"] = tos(computer.slide_start);
+    unit["Slide_End"] = tos(computer.slide_end);
+    unit["Cargo_Import"] = unit["Upgrades"] = "";                 //make sure those are empty
+    {
+        std::string trac;
+        if (isTractorable(tractorPush)) {
+            trac += "p";
+        }
+        if (isTractorable(tractorIn)) {
+            trac += "i";
+        }
+        if (trac.empty()) {
+            trac = "-";
+        }
+        unit["Tractorability"] = trac;
+    }
+
+    return writeCSV(unit);
 }
 
 void UpdateMasterPartList(Unit *ret) {

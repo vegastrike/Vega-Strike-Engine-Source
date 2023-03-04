@@ -1,7 +1,7 @@
 /*
  * armed.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -23,6 +23,7 @@
  */
 
 
+#include "vega_cast_utils.h"
 #include "armed.h"
 
 #include "configuration/configuration.h"
@@ -38,22 +39,18 @@
 #include "vs_logging.h"
 #include "resource/resource.h"
 
-#include <vector>
-
-using std::vector;
-
 /**********************************************************************
  * Armed
  * ********************************************************************/
 
-typedef std::set<int> WeaponGroup;
+typedef vega_types::Set<int> WeaponGroup;
 
 template<bool FORWARD>
 class WeaponComparator {
 public:
     bool operator()(const WeaponGroup &a, const WeaponGroup &b) const {
         if (a.size() == b.size()) {
-            for (WeaponGroup::const_iterator iterA = a.begin(), iterB = b.begin();
+            for (auto iterA = a.begin(), iterB = b.begin();
                     iterA != a.end() && iterB != b.end();
                     ++iterA, ++iterB) {
                 if ((*iterA) < (*iterB)) {
@@ -70,7 +67,7 @@ public:
         }
     }
 
-    typedef std::set<WeaponGroup, WeaponComparator<FORWARD> > WeaponGroupSet;
+    typedef vega_types::Set<WeaponGroup, WeaponComparator<FORWARD> > WeaponGroupSet;
 
     static bool checkmount(Unit *un, int i, bool missile) {
         return un->mounts[i].status < Mount::DESTROYED && (un->mounts[i].type->isMissile() == missile)
@@ -86,9 +83,9 @@ public:
     }
 
     static void ToggleWeaponSet(Unit *un, bool missile) {
-        if (un->mounts.size() == 0) {
-            Unit *tur = NULL;
-            for (un_iter i = un->getSubUnits(); (tur = *i) != NULL; ++i) {
+        if (un->mounts.empty()) {
+            Unit *tur = nullptr;
+            for (un_iter i = un->getSubUnits(); (tur = *i) != nullptr; ++i) {
                 ToggleWeaponSet(tur, missile);
             }
             return;
@@ -98,10 +95,10 @@ public:
         WeaponGroup allWeapons;
         WeaponGroup allWeaponsNoSpecial;
         WeaponGroupSet myset;
-        unsigned int i;
+        unsigned int i = 0;
         typename WeaponGroupSet::const_iterator iter;
 
-        VS_LOG(info, (boost::format("ToggleWeaponSet: %s") % (FORWARD ? "true" : "false")));
+        VS_LOG(info, (boost::format("ToggleWeaponSet: %1$s") % (FORWARD ? "true" : "false")));
         for (i = 0; i < un->mounts.size(); ++i) {
             if (checkmount(un, i, missile)) {
                 WeaponGroup mygroup;
@@ -141,7 +138,7 @@ public:
         }
         myset.insert(allWeaponsNoSpecial);
         for (iter = myset.begin(); iter != myset.end(); ++iter) {
-            for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
+            for (auto iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
                 VS_LOG(info, (boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str()));
             }
         }
@@ -164,7 +161,7 @@ public:
             un->mounts[i].DeActive(missile);
         }
         VS_LOG(info, "ACTIVE: ");
-        for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
+        for (auto iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
             VS_LOG(info, (boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str()));
             un->mounts[*iter2].Activate(missile);
         }
@@ -176,8 +173,8 @@ public:
 /**********************************************************************
  * Armed
  * ********************************************************************/
-Armed::Armed() {
-    turretstatus = 0;
+Armed::Armed()
+        : turretstatus(0) {
 }
 
 ///cycles through the loop twice turning on all matching to ms weapons of size or after size
@@ -197,7 +194,7 @@ void Armed::ActivateGuns(const WeaponInfo *sz, bool ms) {
 }
 
 void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if ((unit->cloaking >= 0 && !configuration()->weapons.can_fire_in_cloak) ||
             (unit->graphicOptions.InWarp && !configuration()->weapons.can_fire_in_spec)) {
@@ -244,7 +241,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         const bool missile_and_want_to_fire_missiles = (mis && (weapon_type_bitmask & ROLES::FIRE_MISSILES));
         const bool gun_and_want_to_fire_guns = ((!mis) && (weapon_type_bitmask & ROLES::FIRE_GUNS));
         if (configuration()->logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
-            VSFileSystem::vs_fprintf(stderr, "\n about to fire locked missile \n");
+            VS_LOG(debug, "\n about to fire locked missile ");
         }
         bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
                 //&& ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
@@ -255,9 +252,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
                 (*i).UnFire();
                 continue;
             }
-        } else
-            //Only in non-networking mode
-        if (i->type->energy_rate > unit->energy) {
+        } else if (i->type->energy_rate > unit->energy) { //Only in non-networking mode
             if (!want_to_fire) {
                 i->UnFire();
             }
@@ -325,7 +320,7 @@ int Armed::LockMissile() const {
 }
 
 void Armed::LockTarget(bool myboo) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     unit->computer.radar.locked = myboo;
     if (myboo && unit->computer.radar.canlock == false && false == UnitUtil::isSignificant(unit->Target())) {
         unit->computer.radar.locked = false;
@@ -333,7 +328,7 @@ void Armed::LockTarget(bool myboo) {
 }
 
 QVector Armed::PositionITTS(const QVector &absposit, Vector velocity, float speed, bool steady_itts) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<Unit>(this);
     if (speed == FLT_MAX) {
         return unit->Position();
     }
@@ -412,7 +407,7 @@ void Armed::setAverageGunSpeed() {
 }
 
 bool Armed::TargetLocked(const Unit *checktarget) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<Unit>(this);
     if (!unit->computer.radar.locked) {
         return false;
     }
@@ -420,7 +415,7 @@ bool Armed::TargetLocked(const Unit *checktarget) const {
 }
 
 bool Armed::TargetTracked(const Unit *checktarget) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     static bool must_lock_to_autotrack = XMLSupport::parse_bool(
             vs_config->getVariable("physics", "must_lock_to_autotrack", "true"));
     bool we_do_track = unit->computer.radar.trackingactive
@@ -440,7 +435,7 @@ bool Armed::TargetTracked(const Unit *checktarget) {
 }
 
 void Armed::ToggleWeapon(bool missile, bool forward) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     if (forward) {
         WeaponComparator<true>::ToggleWeaponSet(unit, missile);
     } else {
@@ -449,7 +444,7 @@ void Armed::ToggleWeapon(bool missile, bool forward) {
 }
 
 float Armed::TrackingGuns(bool &missilelock) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<Unit>(this);
     float trackingcone = 0;
     missilelock = false;
     for (int i = 0; i < getNumMounts(); ++i) {
@@ -464,7 +459,7 @@ float Armed::TrackingGuns(bool &missilelock) {
 }
 
 void Armed::UnFire() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (this->getNumMounts() == 0) {
         Unit *tur = NULL;
@@ -483,4 +478,21 @@ void Armed::UnFire() {
         if (!unFireRequests.empty()) {
         }
     }
+}
+
+Armed::Armed(Armed &&other) noexcept
+        : mounts(std::move(other.mounts)),
+        gunspeed(other.gunspeed),
+        gunrange(other.gunrange),
+        missilerange(other.missilerange),
+        turretstatus(other.turretstatus) {
+}
+
+Armed &Armed::operator=(Armed &&other) noexcept {
+    mounts = std::move(other.mounts);
+    gunspeed = other.gunspeed;
+    gunrange = other.gunrange;
+    missilerange = other.missilerange;
+    turretstatus = other.turretstatus;
+    return *this;
 }

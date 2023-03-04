@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * star_system_xml.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -60,7 +62,7 @@ using std::map;
 using namespace XMLSupport;
 using namespace VSFileSystem;
 extern const vector<string> &ParseDestinations(const string &value);
-extern void bootstrap_draw(const string &message, Animation *SplashScreen = NULL);
+extern void bootstrap_draw(const string &message, vega_types::SharedPtr<Animation> newSplashScreen = NULL);
 extern void disableTerrainDraw(ContinuousTerrain *ct);
 
 using XMLSupport::EnumMap;

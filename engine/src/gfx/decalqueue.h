@@ -1,10 +1,8 @@
-/**
+/*
  * decalqueue.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -27,6 +25,10 @@
 
 #include "vs_globals.h"
 #include "gfx/aux_texture.h"
+#include "ani_texture.h"
+#include "animation.h"
+#include "preferred_types.h"
+#include "vega_cast_utils.h"
 
 #include <vector>
 #include <string>
@@ -42,33 +44,35 @@
 using std::vector;
 
 class DecalQueue {
-    vector<Texture *> decals;
+    vega_types::SequenceContainer<vega_types::SharedPtr<Texture>> decals;
 
 public:
-    inline Texture *GetTexture(const unsigned int reference) {
-        return decals[reference];
+    inline vega_types::SharedPtr<Texture> GetTexture(const unsigned int reference) {
+        return decals.at(reference);
     }
 
     unsigned int AddTexture(std::string const &texname, enum FILTER mipmap) {
-        Texture *texture = Texture::Exists(texname);
+        vega_types::SharedPtr<Texture> texture = Texture::Exists(texname);
 
         // Texture already exists
         if (texture) {
             // Check if DecalQueue has the decal in the vector.
             // If so, return the index.
-            vector<Texture *>::iterator it = std::find(decals.begin(), decals.end(), texture);
+            auto it = std::find(decals.begin(), decals.end(), texture);
             if (it != decals.end()) {
                 return std::distance(decals.begin(), it);
             }
 
             // Decal not in queue. Add
-            decals.push_back(texture);
+            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(texture);
+            decals.emplace_back(as_animation);
             return decals.size() - 1;
         }
 
         // Need to create texture
-        texture = new Texture(texname.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-        decals.push_back(texture);
+        texture = Texture::createTexture(texname.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE);
+        vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(texture);
+        decals.emplace_back(as_animation);
         return decals.size() - 1;
     }
 };

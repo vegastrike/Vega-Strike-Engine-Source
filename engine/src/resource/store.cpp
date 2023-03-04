@@ -1,6 +1,8 @@
 /*
+ * store.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Roy Falk, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,15 +25,19 @@
 
 #include "store.h"
 
+#include <utility>
 
-Store::Store(std::vector<Product> stock, double cash):
-    stock(stock),
+using namespace vega_types;
+
+
+Store::Store(SequenceContainer<Product> stock, double cash):
+    stock(std::move(stock)),
     cash(Resource<double>(cash, 0.0)),
     unlimited_funds(cash == -1.0) {}
 
 
 void Store::Add(Product product, const int quantity) {
-    Product new_product = product;
+    Product new_product = std::move(product);
     new_product.quantity.Set(quantity);
     stock.push_back(new_product);
 }
@@ -41,7 +47,7 @@ void Store::Add(int index, int quantity) {
 }
 
 void Store::Subtract(int index, int quantity) {
-    stock[index].quantity += quantity;
+    stock[index].quantity -= quantity;
 }
 
 
@@ -90,12 +96,32 @@ bool Store::Buy(Customer& seller, std::string product_name, double quantity)
 
 bool Store::InStock(std::string product_name) {
     for(Product &in_store_product : stock) {
-        if(in_store_product == product_name && in_store_product.quantity > 0.0) {
-            return true;
+        if(in_store_product == product_name) {
+            return (in_store_product.quantity > 0.0);
         }
     }
 
     return false;
+}
+
+double Store::GetStock(std::string product_name) {
+    for(Product &in_store_product : stock) {
+        if(in_store_product == product_name ) {
+            return in_store_product.GetQuantity();
+        }
+    }
+
+    // An easy way to return an error, as product quantity is a resource
+    // and therefore, cannot be less than 0.
+    return -1;
+}
+
+bool Store::InStock(const int index) {
+    return (stock[index].quantity > 0.0);
+}
+
+double Store::GetStock(const int index) {
+    return stock[index].quantity;
 }
 
 int Store::ProductIndex(std::string product_name) {
@@ -125,7 +151,7 @@ void Store::SetFunds(double cash)
     unlimited_funds = false;
 }
 
-void Store::Stock(std::vector<Product> stock)
+void Store::Stock(SequenceContainer<Product> stock)
 {
     stock.insert(stock.end(), stock.begin(), stock.end());
 }

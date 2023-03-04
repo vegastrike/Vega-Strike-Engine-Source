@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * unit_generic.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -73,6 +75,7 @@
 #include "resource/resource.h"
 #include "base_util.h"
 #include "unit_csv_factory.h"
+#include "preferred_types.h"
 
 #include <math.h>
 #include <list>
@@ -274,7 +277,7 @@ char *GetUnitDir(const char *filename) {
  */
 Unit::Unit(int /*dummy*/) : Drawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO: delete
     Init();
@@ -283,18 +286,18 @@ Unit::Unit(int /*dummy*/) : Drawable(), Damageable(), Movable() {
 Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO:
     Init();
 }
 
-Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
+Unit::Unit(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &meshes, bool SubU, int fact)
         : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(fact);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     // TODO:
     Init();
 
@@ -302,7 +305,7 @@ Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
     graphicOptions.SubUnit = SubU;
     meshdata = meshes;
     meshes.clear();
-    meshdata.push_back(NULL);
+    meshdata.push_back(nullptr);
     calculate_extent(false);
     pilot->SetComm(this);
 }
@@ -319,7 +322,7 @@ Unit::Unit(const char *filename,
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(faction);
-    pImage->cockpit_damage = NULL;
+    pImage->cockpit_damage = nullptr;
     Init(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber);
     pilot->SetComm(this);
 }
@@ -375,12 +378,6 @@ Unit::~Unit() {
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 0));
 #endif
-    for (size_t meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
-        if (meshdata[meshcount] != nullptr) {
-            delete meshdata[meshcount];
-            meshdata[meshcount] = nullptr;
-        }
-    }
     meshdata.clear();
 }
 
@@ -420,7 +417,7 @@ void Unit::Init(const char *filename,
     // but didn't do anything with it. See VSFile f variable.
 
     // TODO: something with the following line
-    this->Unit::Init();
+    Init();
     graphicOptions.SubUnit = SubU ? 1 : 0;
     graphicOptions.Animating = 1;
     graphicOptions.RecurseIntoSubUnitsOnCollision = !isSubUnit();
@@ -505,10 +502,10 @@ void Unit::Init(const char *filename,
     }
 }
 
-vector<Mesh *> Unit::StealMeshes() {
-    vector<Mesh *> ret;
+vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> Unit::StealMeshes() {
+    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> ret;
 
-    Mesh *shield = meshdata.empty() ? NULL : meshdata.back();
+    vega_types::SharedPtr<Mesh> shield = meshdata.empty() ? nullptr : meshdata.back();
     for (unsigned int i = 0; i <= nummesh(); ++i) {
         ret.push_back(meshdata[i]);
     }
@@ -1974,10 +1971,10 @@ void Unit::SetRecursiveOwner(Unit *target) {
 
 extern unsigned int AddAnimation(const QVector &, const float, bool, const string &, float percentgrow);
 extern string getRandomCachedAniString();
-extern Animation *GetVolatileAni(unsigned int);
+extern vega_types::SharedPtr<Animation> GetVolatileAni(unsigned int);
 
 bool Unit::Explode(bool drawit, float timeit) {
-    if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {
+    if (!this->pImage->pExplosion && this->pImage->timeexplode == 0) {
         //no explosion in unit data file && explosions haven't started yet
 
         //notify the director that a ship got destroyed
@@ -1990,13 +1987,13 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static Animation cache(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
+            static vega_types::SharedPtr<Animation> cache = Animation::createAnimation(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
             bleh = getRandomCachedAniString();
             if (bleh.size() == 0) {
                 bleh = game_options()->explosion_animation;
             }
         }
-        this->pImage->pExplosion = new Animation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
+        this->pImage->pExplosion = Animation::createAnimation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
         this->pImage->pExplosion->SetDimensions(this->ExplosionRadius(), this->ExplosionRadius());
         Vector p, q, r;
         this->GetOrientation(p, q, r);
@@ -2029,15 +2026,15 @@ bool Unit::Explode(bool drawit, float timeit) {
             if (this->isUnit() == Vega_UnitType::unit) {
                 if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
                     static string shockani(game_options()->shockwave_animation);
-                    static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
+                    static vega_types::SharedPtr<Animation> _shock_ani = Animation::createAnimation(shockani.c_str(), true, .1, MIPMAP, false);
 
-                    __shock__ani->SetFaceCam(false);
+                    _shock_ani->SetFaceCam(false);
                     unsigned int which = AddAnimation(this->Position(),
                             this->ExplosionRadius(),
                             true,
                             shockani,
                             game_options()->shockwave_growth);
-                    Animation *ani = GetVolatileAni(which);
+                    vega_types::SharedPtr<Animation> ani = GetVolatileAni(which);
                     if (ani) {
                         ani->SetFaceCam(false);
                         Vector p, q, r;
@@ -2088,14 +2085,13 @@ bool Unit::Explode(bool drawit, float timeit) {
         this->GetOrientation(p, q, r);
         this->pImage->pExplosion->SetOrientation(p, q, r);
         if (this->pImage->pExplosion->Done() && timealldone) {
-            delete this->pImage->pExplosion;
-            this->pImage->pExplosion = NULL;
+            this->pImage->pExplosion.reset();   // Resets the smart pointer, not the explosion animation
         }
         if (drawit && this->pImage->pExplosion) {
             this->pImage->pExplosion->Draw();
         }              //puts on draw queue... please don't delete
     }
-    bool alldone = this->pImage->pExplosion ? !this->pImage->pExplosion->Done() : false;
+    bool alldone = this->pImage->pExplosion && !this->pImage->pExplosion->Done();
     if (!this->SubUnits.empty()) {
         Unit *su;
         for (un_iter ui = this->getSubUnits(); (su = *ui); ++ui) {
@@ -2124,12 +2120,6 @@ float Unit::ExplodingProgress() const {
 
 void Unit::SetCollisionParent(Unit *name) {
     assert(0);                                         //deprecated... many less collisions with subunits out of the table
-#if 0
-                                                                                                                            for (int i = 0; i < numsubunit; ++i) {
-        subunits[i]->CollideInfo.object.u = name;
-        subunits[i]->SetCollisionParent( name );
-    }
-#endif
 }
 
 //This function should not be used on server side
@@ -2722,237 +2712,7 @@ bool Quit(const char *input_buffer) {
 
 using std::string;
 
-bool Unit::UpgradeMounts(const Unit *up,
-        int mountoffset,
-        bool touchme,
-        bool downgrade,
-        int &numave,
-        const Unit *templ,
-        double &percentage) {
-    int j;
-    int i;
-    bool cancompletefully = true;
-    for (i = 0, j = mountoffset; i < up->getNumMounts() && i < getNumMounts() /*i should be getNumMounts(), s'ok*/;
-            ++i, ++j) {
-        //only mess with this if the upgrador has active mounts
-        if (up->mounts[i].status == Mount::ACTIVE || up->mounts[i].status == Mount::INACTIVE) {
-            //make sure since we're offsetting the starting we don't overrun the mounts
-            bool isammo = (string::npos
-                    != string(up->name).find("_ammo"));             //is this ammo for a weapon rather than an actual weapon
-            bool ismissiletype = isMissileMount(as_integer(up->mounts[i].type->size));
 
-            int jmod = j % getNumMounts();
-            if (!downgrade) {
-                //if we wish to add guns instead of remove
-                if (up->mounts[i].type->name.find("_UPGRADE") == string::npos) {
-                    //check for capability increase rather than actual weapon upgrade
-                    //only look at this mount if it can fit in the rack
-                    if ((unsigned int) (as_integer(up->mounts[i].type->size))
-                            == (as_integer(up->mounts[i].type->size) & mounts[jmod].size)) {
-                        if (up->mounts[i].type->name != mounts[jmod].type->name || mounts[jmod].status
-                                == Mount::DESTROYED || mounts[jmod].status == Mount::UNCHOSEN) {
-                            //If missile, can upgrade directly, if other type of ammo, needs actual gun to be present.
-                            if (isammo && !ismissiletype) {
-                                cancompletefully = false;
-                            } else {
-                                ++numave;                                 //ok now we can compute percentage of used parts
-                                Mount upmount(up->mounts[i]);
-                                if (templ) {
-                                    if (templ->getNumMounts() > jmod) {
-                                        if (templ->mounts[jmod].volume != -1) {
-                                            if (upmount.ammo * upmount.type->volume > templ->mounts[jmod].volume) {
-                                                upmount.ammo =
-                                                        (int) ((templ->mounts[jmod].volume + 1) / upmount.type->volume);
-                                            }
-                                        }
-                                    }
-                                }
-                                //compute here
-                                percentage += mounts[jmod].Percentage(&upmount);
-                                //if we wish to modify the mounts
-                                if (touchme) {
-                                    //switch this mount with the upgrador mount
-                                    mounts[jmod].ReplaceMounts(this, &upmount);
-                                }
-                            }
-                        } else {
-                            if (isammo && up->mounts[i].type->name == mounts[jmod].type->name) {
-                                //if is ammo and is same weapon type
-                                int tmpammo = mounts[jmod].ammo;
-                                if (mounts[jmod].ammo != -1 && up->mounts[i].ammo != -1) {
-                                    tmpammo += up->mounts[i].ammo;
-                                    if (ismissiletype) {
-                                        if (templ) {
-                                            if (templ->getNumMounts() > jmod) {
-                                                if (templ->mounts[jmod].volume != -1) {
-                                                    if (templ->mounts[jmod].volume
-                                                            < mounts[jmod].type->volume * tmpammo) {
-                                                        tmpammo =
-                                                                (int) floor(.125
-                                                                        + ((0
-                                                                                + templ->mounts[jmod].volume)
-                                                                                / mounts[jmod].type
-                                                                                        ->volume));
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (tmpammo * mounts[jmod].type->volume > mounts[jmod].volume) {
-                                            tmpammo = (int) floor(
-                                                    .125 + ((0 + mounts[jmod].volume) / mounts[jmod].type->volume));
-                                        }
-                                    } else {
-                                        std::string ammoname = up->name.get();
-                                        std::size_t ammopos = ammoname.find("_ammo");
-                                        std::string weaponname = ammoname.substr(0, ammopos);
-
-                                        /* Do NOT delete this Unit because it will be either fetched
-                                        * from a cache or - if it has to be created - it will
-                                        * be automatically put in a cache.
-                                        * Deletion will corrupt the cache!
-                                        */
-                                        const Unit *weapon = getUnitFromUpgradeName(weaponname);
-
-                                        if (weapon == NULL || weapon->name == LOAD_FAILED) {
-                                            // this should not happen
-                                            VS_LOG(info,
-                                                    (boost::format("UpgradeMount(): FAILED to obtain weapon: %1%")
-                                                            % weaponname));
-                                            cancompletefully = false;
-                                            break;
-                                        }
-
-                                        int maxammo = weapon->mounts[0].ammo;
-
-                                        if (tmpammo > maxammo) {
-                                            tmpammo = maxammo;
-                                        }
-                                    }
-
-                                    if (tmpammo > mounts[jmod].ammo) {
-                                        cancompletefully = true;
-                                        if (touchme) {
-                                            mounts[jmod].ammo = tmpammo;
-                                        }
-                                    } else {
-                                        cancompletefully = false;
-                                    }
-                                }
-                            } else {
-                                cancompletefully = false;
-                            }
-                        }
-                    } else {
-                        //since we cannot fit the mount in the slot we cannot complete fully
-                        cancompletefully = false;
-                    }
-                } else {
-                    unsigned int siz = 0;
-                    siz = ~siz;
-                    if (templ) {
-                        if (templ->getNumMounts() > jmod) {
-                            siz = templ->mounts[jmod].size;
-                        }
-                    }
-                    if (((siz & up->mounts[i].size) | mounts[jmod].size) != mounts[jmod].size) {
-                        if (touchme) {
-                            mounts[jmod].size |= up->mounts[i].size;
-                        }
-                        ++numave;
-                        ++percentage;
-                    } else {
-                        cancompletefully = false;
-                    }
-                    //we need to |= the mount type
-                }
-            }             //DOWNGRADE
-            else {
-                if (up->mounts[i].type->name != "MOUNT_UPGRADE") {
-                    bool found = false;                     //we haven't found a matching gun to remove
-                    ///go through all guns
-                    for (unsigned int k = 0; k < (unsigned int) getNumMounts(); ++k) {
-                        //we want to start with bias
-                        int jkmod = (jmod + k) % getNumMounts();
-                        if (Mount::UNCHOSEN == mounts[jkmod].status) {
-                            //can't sell weapon that's already been sold/removed
-                            continue;
-                        }
-                        ///search for right mount to remove starting from j. this is the right name
-                        if (strcasecmp(mounts[jkmod].type->name.c_str(),
-                                up->mounts[i].type->name.c_str()) == 0) {
-                            //we got one, but check if we're trying to sell non-existent ammo
-                            if (isammo && mounts[jkmod].ammo <= 0) {
-                                //whether it's gun ammo or a missile, you can't remove ammo from an infinite source, and you can't remove ammo if there isn't any
-                                continue;
-                            } else {
-                                found = true;
-                            }
-                            ///calculate scrap value (if damaged)
-                            percentage += mounts[jkmod].Percentage(&up->mounts[i]);
-                            //if we modify
-                            if (touchme) {
-                                //if downgrading ammo based upgrade, checks for infinite ammo
-                                if (isammo && up->mounts[i].ammo && up->mounts[i].ammo != -1
-                                        && mounts[jkmod].ammo != -1) {
-                                    //remove upgrade-worth, else remove remaining
-                                    mounts[jkmod].ammo -=
-                                            (mounts[jkmod].ammo >= up->mounts[i].ammo) ? up->mounts[i].ammo
-                                                    : mounts[jkmod].ammo;
-                                    //if none left
-                                    if (!mounts[jkmod].ammo) {
-                                        ///deactivate weapon
-                                        if (ismissiletype) {
-                                            mounts[jkmod].status = Mount::UNCHOSEN;
-                                        }
-                                    }
-                                } else {
-                                    ///deactivate weapon
-                                    mounts[jkmod].status = Mount::UNCHOSEN;
-                                    mounts[jkmod].ammo = -1;                                     //remove all ammo
-                                }
-                            }
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        //we did not find a matching weapon to remove
-                        cancompletefully = false;
-                    }
-                } else {
-                    bool found = false;
-                    static bool downmount =
-                            XMLSupport::parse_bool(vs_config->getVariable("physics",
-                                    "can_downgrade_mount_upgrades",
-                                    "false"));
-                    if (downmount) {
-                        ///go through all guns
-                        for (unsigned int k = 0; k < (unsigned int) getNumMounts(); ++k) {
-                            //we want to start with bias
-                            int jkmod = (jmod + k) % getNumMounts();
-                            if ((up->mounts[i].size & mounts[jkmod].size) == (up->mounts[i].size)) {
-                                if (touchme) {
-                                    mounts[jkmod].size &= (~up->mounts[i].size);
-                                }
-                                ++percentage;
-                                ++numave;
-                                found = true;
-                            }
-                        }
-                    }
-                    if (!found) {
-                        cancompletefully = false;
-                    }
-                }
-            }
-        }
-    }
-    if (i < up->getNumMounts()) {
-        cancompletefully =
-                false;
-    }          //if we didn't reach the last mount that we wished to upgrade, we did not fully complete
-
-    return cancompletefully;
-}
 
 bool Unit::UpgradeSubUnits(const Unit *up,
         int subunitoffset,
@@ -3381,7 +3141,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     bool can_be_redeemed = false;
     bool needs_redemption = false;
     if (mountoffset >= 0) {
-        cancompletefully = UpgradeMounts(up, mountoffset, touchme, downgrade, numave, templ, percentage);
+        cancompletefully = UpgradeMounts(up, mountoffset, touchme, downgrade, numave, percentage);
     }
     bool cancompletefully1 = true;
     if (subunitoffset >= 0) {
@@ -3961,7 +3721,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
-    vector<Mount> savedWeap;
+    vega_types::SequenceContainer<Mount> savedWeap;
     savedWeap.swap(mounts);
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
     bool success = false;
@@ -4030,7 +3790,7 @@ int Unit::RepairCost() {
 int Unit::RepairUpgrade() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
-    vector<Mount> savedWeap;
+    vega_types::SequenceContainer<Mount> savedWeap;
     savedWeap.swap(mounts);
     int upfac = FactionUtil::GetUpgradeFaction();
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
@@ -4717,7 +4477,7 @@ static inline void parseFloat4(const std::string &s, float value[4]) {
 
 void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &overrides) {
     //for (vector<Mesh*>::iterator mesh = this->meshdata.begin(); mesh != this->meshdata.end(); ++mesh) {
-    for (Mesh *mesh : meshdata) {
+    for (vega_types::SharedPtr<Mesh> &mesh : meshdata) {
         if (mesh == nullptr) {
             continue;
         }
@@ -5271,7 +5031,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         this->Explode(true, 0);
 
         // Kill means it is done exploding and we can delete it
-        dead &= (pImage->pExplosion == NULL);
+        dead &= (!pImage->pExplosion);
         if (dead) {
             Kill();
         }
