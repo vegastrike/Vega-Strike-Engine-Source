@@ -397,12 +397,28 @@ bool Bolt::Collide(Unit *target) {
 
 Bolt *Bolt::BoltFromIndex(Collidable::CollideRef b) {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
-    size_t ind = nondecal_index(b);
+    size_t const ind = nondecal_index(b);
     try {
         if (b.bolt_index & 128) {
-            return &bolt_draw_manager.balls.at(b.bolt_index & 0x7f).at(ind);
+            uint8_t const ind_1 = b.bolt_index & 0x7f;
+            if (ind_1 >= bolt_draw_manager.balls.size()) {
+                return nullptr;
+            }
+            std::vector<Bolt> &ref_1 = bolt_draw_manager.balls.at(ind_1);
+            if (ind >= ref_1.size()) {
+                return nullptr;
+            }
+            return &(ref_1.at(ind));
         } else {
-            return &bolt_draw_manager.bolts.at(b.bolt_index & 0x7f).at(ind);
+            uint8_t const ind_1 = b.bolt_index & 0x7f;
+            if (ind_1 >= bolt_draw_manager.bolts.size()) {
+                return nullptr;
+            }
+            std::vector<Bolt> &ref_1 = bolt_draw_manager.bolts.at(ind_1);
+            if (ind >= ref_1.size()) {
+                return nullptr;
+            }
+            return &(ref_1.at(ind));
         }
     } catch (std::out_of_range& e) {
         VS_LOG(error, "std::out_of_range caught in Bolt::BoltFromIndex");
