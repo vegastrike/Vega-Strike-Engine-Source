@@ -402,20 +402,24 @@ Bolt *Bolt::BoltFromIndex(Collidable::CollideRef b) {
         if (b.bolt_index & 128) {
             uint8_t const ind_1 = b.bolt_index & 0x7f;
             if (ind_1 >= bolt_draw_manager.balls.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 1");
                 return nullptr;
             }
             std::vector<Bolt> &ref_1 = bolt_draw_manager.balls.at(ind_1);
             if (ind >= ref_1.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 2");
                 return nullptr;
             }
             return &(ref_1.at(ind));
         } else {
             uint8_t const ind_1 = b.bolt_index & 0x7f;
             if (ind_1 >= bolt_draw_manager.bolts.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 3");
                 return nullptr;
             }
             std::vector<Bolt> &ref_1 = bolt_draw_manager.bolts.at(ind_1);
             if (ind >= ref_1.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 4");
                 return nullptr;
             }
             return &(ref_1.at(ind));
