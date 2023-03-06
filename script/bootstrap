@@ -9,7 +9,7 @@
 # @param  : just one parameter, either a 1 or a 0, to indicate whether or not to
 #           UPDATE_ALL_SYSTEM_PACKAGES
 #====================================
-# Copyright (C) 2020-2022 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2020-2023 Stephen G. Tuggy and other Vega Strike contributors
 #
 # This file is part of Vega Strike.
 #
@@ -29,7 +29,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2022-12-16 ---"
+echo "--- bootstrap | 2023-03-05 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -381,6 +381,54 @@ function bootstrapOnUbuntu()
   esac
 }
 
+function bootstrapOnPopOS ()
+{
+  apt-get update
+
+  if [ "${UPDATE_ALL_SYSTEM_PACKAGES}" -eq 1 ]
+  then
+    apt-get -qy upgrade
+  fi
+
+  case "$LINUX_CODENAME" in
+    "jammy")
+      apt-get -qy install \
+                      git \
+                      cmake \
+                      python3-dev \
+                      build-essential \
+                      automake \
+                      autoconf \
+                      libpng16-16 \
+                      libpng-dev \
+                      libpng-tools \
+                      libjpeg-turbo8-dev \
+                      libexpat1-dev \
+                      libgdk-pixbuf-2.0-dev \
+                      libgtk-3-dev \
+                      libopenal-dev \
+                      libogg-dev \
+                      libvorbis-dev \
+                      libglvnd-dev \
+                      libgl1-mesa-dev \
+                      libsdl1.2-dev \
+                      libopengl0 \
+                      libpostproc-dev \
+                      freeglut3-dev \
+                      libboost-python-dev \
+                      libboost-log-dev \
+                      libboost-regex-dev \
+                      libxmu-dev \
+                      clang \
+                      lsb-release
+      ;;
+    *)
+      echo "Sorry, this version of Pop! OS is not currently supported"
+      exit 2
+      ;;
+  esac
+}
+
 function bootstrapOnLinuxMint ()
 {
   apt-get update
@@ -391,6 +439,37 @@ function bootstrapOnLinuxMint ()
   fi
 
   case "$LINUX_CODENAME" in
+    "vera")
+      apt-get -qy install \
+                      git \
+                      cmake \
+                      python3-dev \
+                      build-essential \
+                      automake \
+                      autoconf \
+                      libpng16-16 \
+                      libpng-dev \
+                      libpng-tools \
+                      libjpeg-turbo8-dev \
+                      libexpat1-dev \
+                      libgdk-pixbuf-2.0-dev \
+                      libgtk-3-dev \
+                      libopenal-dev \
+                      libogg-dev \
+                      libvorbis-dev \
+                      libglvnd-dev \
+                      libgl1-mesa-dev \
+                      libsdl1.2-compat-dev \
+                      libopengl0 \
+                      libpostproc-dev \
+                      freeglut3-dev \
+                      libboost-python-dev \
+                      libboost-log-dev \
+                      libboost-regex-dev \
+                      libxmu-dev \
+                      clang \
+                      lsb-release
+      ;;
     "vanessa")
       apt-get -qy install \
                       git \
@@ -1324,7 +1403,14 @@ function bootstrapOnManjaro ()
                    libpng \
                    libvorbis \
                    libxmu \
-                   openal
+                   openal \
+                   make
+}
+
+function bootstrapOnFuntoo ()
+{
+  ego sync
+  emerge openal
 }
 
 case "${LINUX_ID}" in
@@ -1333,6 +1419,9 @@ case "${LINUX_ID}" in
     ;;
   "ubuntu")
     bootstrapOnUbuntu
+    ;;
+  "pop")
+    bootstrapOnPopOS
     ;;
   "linuxmint")
     bootstrapOnLinuxMint
@@ -1357,6 +1446,9 @@ case "${LINUX_ID}" in
     ;;
   "manjaro")
     bootstrapOnManjaro
+    ;;
+  "funtoo")
+    bootstrapOnFuntoo
     ;;
   *)
     echo "Sorry, unrecognized/unsupported Linux distribution"
