@@ -26,7 +26,7 @@
 #include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>
-#if PY_VERSION_HEX < 0x03110000
+#if (PY_VERSION_HEX < 0x03110000)
 #include <eval.h>
 #endif
 #include "configxml.h"
@@ -100,6 +100,11 @@ PyObject *CompilePython(const std::string &name) {
 extern PyObject *PyInit_VS;
 
 void CompileRunPython(const std::string &filename) {
+#if (PY_VERSION_HEX >= 0x03110000)
+    Python::reseterrors();
+    InterpretPython(filename);
+    Python::reseterrors();
+#else
     static bool ndebug_libs = XMLSupport::parse_bool(vs_config->getVariable("AI", "compile_python", "true"));
     if (ndebug_libs) {
         Python::reseterrors();
@@ -129,6 +134,7 @@ void CompileRunPython(const std::string &filename) {
         InterpretPython(filename);
         Python::reseterrors();
     }
+#endif
 }
 
 PyObject *CreateTuple(const std::vector<PythonBasicType> &values) {
