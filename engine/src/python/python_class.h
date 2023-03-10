@@ -50,7 +50,7 @@
 #include "init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
-#if (PY_VERSION_HEX < 0x03110000)
+#if PY_VERSION_HEX < 0x030B0000
 #include <eval.h>
 #endif
 #include "python/python_compile.h"

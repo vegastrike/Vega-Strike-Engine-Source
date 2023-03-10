@@ -26,7 +26,7 @@
 #include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>
-#if (PY_VERSION_HEX < 0x03110000)
+#if ((PY_VERSION_HEX) < 0x030B0000)
 #include <eval.h>
 #endif
 #include "configxml.h"
@@ -100,7 +100,7 @@ PyObject *CompilePython(const std::string &name) {
 extern PyObject *PyInit_VS;
 
 void CompileRunPython(const std::string &filename) {
-#if (PY_VERSION_HEX >= 0x03110000)
+#if (PY_VERSION_HEX >= 0x030B0000)
     Python::reseterrors();
     InterpretPython(filename);
     Python::reseterrors();
