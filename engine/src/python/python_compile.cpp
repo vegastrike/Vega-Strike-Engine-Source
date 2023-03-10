@@ -26,7 +26,9 @@
 #include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>
-// #include <eval.h>
+#if PY_VERSION_HEX < 0x03110000
+#include <eval.h>
+#endif
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"

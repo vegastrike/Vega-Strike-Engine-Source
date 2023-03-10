@@ -37,7 +37,9 @@
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include <compile.h>
-// #include <eval.h>
+#if PY_VERSION_HEX < 0x03110000
+#include <eval.h>
+#endif
 #include <stdio.h>
 #include <math.h>
 
