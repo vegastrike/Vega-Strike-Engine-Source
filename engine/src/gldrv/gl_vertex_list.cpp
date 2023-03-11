@@ -392,8 +392,9 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
     num_tris = numTris();
     num_quads = numQuads();
     total_num_polys = num_tris + num_quads;
-    int curtri = 0;
-    int curquad = 3 * (num_tris);
+//    int curtri = 0;
+//    int curquad = 3 * (num_tris);
+    int cur_poly = 0;
     size_t num_elems_desired{};
     for (size_t i = 0; i < numlists; ++i) {
         num_elems_desired += offsets[i];
@@ -408,40 +409,40 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
         int j;
         switch (mode[i]) {
             case GFXTRI:
-                (*vtxcpy)(this, &(return_value->data()[curtri]), cur, offsets[i]);
-                curtri += offsets[i];
+                (*vtxcpy)(this, &(return_value->data()[cur_poly]), cur, offsets[i]);
+                cur_poly += offsets[i];
                 break;
             case GFXTRIFAN:
             case GFXPOLY:
                 for (j = 1; j < offsets[i] - 1; j++) {
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), cur, 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j + 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), cur, 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j + 1), 1);
                 }
                 break;
             case GFXTRISTRIP:
                 for (j = 2; j < offsets[i]; j += 2) {
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j - 2), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j - 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j), 1);
                     if (j + 1 < offsets[i]) {
                         //copy reverse
-                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
-                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 1), 1);
-                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j + 1), 1);
+                        (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j), 1);
+                        (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j - 1), 1);
+                        (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j + 1), 1);
                     }
                 }
                 break;
             case GFXQUAD:
-                (*vtxcpy)(this, &(return_value->data()[curquad]), (cur), offsets[i]);
-                curquad += offsets[i];
+                (*vtxcpy)(this, &(return_value->data()[cur_poly]), (cur), offsets[i]);
+                cur_poly += offsets[i];
                 break;
             case GFXQUADSTRIP:
                 for (j = 2; j < offsets[i] - 1; j += 2) {
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j + 1), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j - 2), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j - 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j + 1), 1);
+                    (*vtxcpy)(this, &(return_value->data()[cur_poly++]), (cur + j), 1);
                 }
                 break;
             case GFXLINE:
