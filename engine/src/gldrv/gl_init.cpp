@@ -157,6 +157,12 @@ typedef char*GET_GL_PTR_TYP;
     #if defined(__HAIKU__)
 typedef char * GET_GL_PTR_TYP;
         #define GET_GL_PROC glutGetProcAddress
+    #elif defined (__MACOSX__)
+        typedef const char * GET_GL_PTR_TYP;
+        void * vega_dlsym(GET_GL_PTR_TYP function_name) {
+            return dlsym(RTLD_SELF, function_name);
+        }
+        #define GET_GL_PROC vega_dlsym
     #else
 typedef GLubyte *GET_GL_PTR_TYP;
         #define GET_GL_PROC glXGetProcAddressARB
@@ -277,12 +283,27 @@ void init_opengl_extensions() {
 #ifndef __APPLE_PANTHER_GCC33_CLI__
         glLockArraysEXT_p = nullptr;
         glUnlockArraysEXT_p = nullptr;
+#else
+        glLockArraysEXT_p = nullptr;
+        glUnlockArraysEXT_p = nullptr;
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #endif
         VS_LOG(debug, "OpenGL::GL_EXT_compiled_vertex_array unsupported");
     }
 #endif
-#ifndef __APPLE__
+#if defined (__MACOSX__)
+    if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
+        glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
+                GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");
+        glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
+                GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawElementsEXT");
+        VS_LOG(trace, "OpenGL::GL_EXT_multi_draw_arrays supported");
+    } else {
+        glMultiDrawArrays_p = nullptr;
+        glMultiDrawElements_p = nullptr;
+        VS_LOG(debug, "OpenGL::GL_EXT_multi_draw_arrays unsupported");
+    }
+#else
     if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
         glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
                 GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");
@@ -296,13 +317,6 @@ void init_opengl_extensions() {
     }
 #endif
 
-#ifdef __APPLE__
-    glColorTable_p = (PFNGLCOLORTABLEEXTPROC)(dlsym(RTLD_SELF, "glColorTableEXT"));
-    glMultiTexCoord2fARB_p     = (PFNGLMULTITEXCOORD2FARBPROC)(dlsym(RTLD_SELF, "glMultiTexCoord2fARB"));
-    glMultiTexCoord4fARB_p     = (PFNGLMULTITEXCOORD4FARBPROC)(dlsym(RTLD_SELF, "glMultiTexCoord4fARB"));
-    glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC)(dlsym(RTLD_SELF, "glClientActiveTextureARB"));
-    glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC)(dlsym(RTLD_SELF, "glActiveTextureARB"));
-#else
 #ifndef NO_VBO_SUPPORT
     glBindBufferARB_p = (PFNGLBINDBUFFERARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glBindBuffer");
     glGenBuffersARB_p = (PFNGLGENBUFFERSARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glGenBuffers");
@@ -426,7 +440,6 @@ void init_opengl_extensions() {
         glDeleteProgram_p = (PFNGLDELETEPROGRAMPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glDeleteProgram");
     }
     //fixme
-#endif
 
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (vsExtensionSupported("GL_NV_fog_distance")) {
