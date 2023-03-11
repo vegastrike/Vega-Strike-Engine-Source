@@ -324,56 +324,35 @@ bool Bolt::Update(Collidable::CollideRef index) {
     return true;
 }
 
-class UpdateBolt {
-    CollideMap *collide_map;
-    StarSystem *starSystem;
-public:
-    UpdateBolt(StarSystem *ss, CollideMap *collide_map) {
-        this->starSystem = ss;
-        this->collide_map = collide_map;
-    }
-
-    void operator()(Collidable &collidable) {
+// We have to be careful about how and in what order we iterate, so that we don't end up
+// invalidating the iterator or similar -- Stephen G. Tuggy 2023-03-04
+void Bolt::UpdatePhysics(StarSystem *ss) {
+    CollideMap *cm = ss->collide_map[Unit::UNIT_BOLT];
+    for (int64_t i = cm->sorted.size() - 1; i >= 0; --i) {
+        Collidable &collidable = cm->sorted.at(i);
         if (collidable.radius < 0) {
             Bolt *thus = Bolt::BoltFromIndex(collidable.ref);
-            if (!collide_map->CheckCollisions(thus, collidable)) {
+            if (thus == nullptr) {
+                continue;
+            }
+            if (!cm->CheckCollisions(thus, collidable)) {
                 thus->Update(collidable.ref);
             }
         }
     }
-};
-
-namespace vsalg {
-//
-
-template<typename IT, typename F>
-void for_each(IT start, IT end, F f) {
-    //This way, deletion of current item is allowed
-    //- drawback: iterator copy each iteration
-    while (start != end) {
-        f(*start++);
+    for (int64_t i = cm->toflattenhints.size() - 1; i >= 0; --i) {
+        for (auto & collidable : cm->toflattenhints.at(i)) {
+            if (collidable.radius < 0) {
+                Bolt *thus = Bolt::BoltFromIndex(collidable.ref);
+                if (thus == nullptr) {
+                    continue;
+                }
+                if (!cm->CheckCollisions(thus, collidable)) {
+                    thus->Update(collidable.ref);
+                }
+            }
+        }
     }
-}
-
-//
-}
-
-class UpdateBolts {
-    UpdateBolt sub;
-public:
-    UpdateBolts(StarSystem *ss, CollideMap *collide_map) : sub(ss, collide_map) {
-    }
-
-    template<class T>
-    void operator()(T &collidableList) {
-        vsalg::for_each(collidableList.begin(), collidableList.end(), sub);
-    }
-};
-
-void Bolt::UpdatePhysics(StarSystem *ss) {
-    CollideMap *cm = ss->collide_map[Unit::UNIT_BOLT];
-    vsalg::for_each(cm->sorted.begin(), cm->sorted.end(), UpdateBolt(ss, cm));
-    vsalg::for_each(cm->toflattenhints.begin(), cm->toflattenhints.end(), UpdateBolts(ss, cm));
 }
 
 bool Bolt::Collide(Unit *target) {
@@ -418,16 +397,45 @@ bool Bolt::Collide(Unit *target) {
 
 Bolt *Bolt::BoltFromIndex(Collidable::CollideRef b) {
     BoltDrawManager &bolt_draw_manager = BoltDrawManager::GetInstance();
-    size_t ind = nondecal_index(b);
-    if (b.bolt_index & 128) {
-        return &bolt_draw_manager.balls[b.bolt_index & 0x7f][ind];
-    } else {
-        return &bolt_draw_manager.bolts[b.bolt_index & 0x7f][ind];
+    size_t const ind = nondecal_index(b);
+    try {
+        if (b.bolt_index & 128) {
+            uint8_t const ind_1 = b.bolt_index & 0x7f;
+            if (ind_1 >= bolt_draw_manager.balls.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 1");
+                return nullptr;
+            }
+            std::vector<Bolt> &ref_1 = bolt_draw_manager.balls.at(ind_1);
+            if (ind >= ref_1.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 2");
+                return nullptr;
+            }
+            return &(ref_1.at(ind));
+        } else {
+            uint8_t const ind_1 = b.bolt_index & 0x7f;
+            if (ind_1 >= bolt_draw_manager.bolts.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 3");
+                return nullptr;
+            }
+            std::vector<Bolt> &ref_1 = bolt_draw_manager.bolts.at(ind_1);
+            if (ind >= ref_1.size()) {
+                VS_LOG(trace, "Bolt::BoltFromIndex() returning nullptr case 4");
+                return nullptr;
+            }
+            return &(ref_1.at(ind));
+        }
+    } catch (std::out_of_range& e) {
+        VS_LOG(error, "std::out_of_range caught in Bolt::BoltFromIndex");
+        return nullptr;
     }
 }
 
 bool Bolt::CollideAnon(Collidable::CollideRef b, Unit *un) {
     Bolt *tmp = BoltFromIndex(b);
+    if (tmp == nullptr) {
+        // TODO: Should we return true or false here?
+        return false;
+    }
     if (tmp->Collide(un)) {
         tmp->Destroy(nondecal_index(b));
         return true;

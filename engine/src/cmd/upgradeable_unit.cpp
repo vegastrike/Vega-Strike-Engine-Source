@@ -91,12 +91,22 @@ void UpgradeableUnit::UpgradeUnit(const std::string &upgrades) {
 
     std::vector<std::string> upgrades_vector = ParseUnitUpgrades(upgrades);
 
-    for(const std::string& upgrade : upgrades_vector) {
+    for (const std::string& upgrade : upgrades_vector) {
         std::vector<std::string> upgrade_vector;
         boost::split(upgrade_vector, upgrade, boost::is_any_of(delimiter));
 
-        const unsigned int mount_offset = convert_to_int(upgrade_vector[1]);
-        const unsigned int subunit_offset = convert_to_int(upgrade_vector[2]);
+        unsigned int mount_offset = 0U;
+        unsigned int subunit_offset = 0U;
+        if (upgrade_vector.size() > 1) {
+            mount_offset = convert_to_int(upgrade_vector.at(1));
+        } else {
+            VS_LOG(warning, "mount_offset missing");
+        }
+        if (upgrade_vector.size() > 2) {
+            subunit_offset = convert_to_int(upgrade_vector.at(2));
+        } else {
+            VS_LOG(warning, "subunit_offset missing");
+        }
 
         const Unit *upgradee = UnitConstCache::getCachedConst(StringIntKey(upgrade, FactionUtil::GetUpgradeFaction()));
         if (!upgradee) {

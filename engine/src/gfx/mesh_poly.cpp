@@ -228,6 +228,9 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
         uint32_t inc = 1U;
         switch (vlist->getPolyType(i)) {
             case GFXTRI:
+            case GFXTRIFAN:
+            case GFXPOLY:
+            case GFXTRISTRIP:
                 inc = 3U;
                 for (size_t j = cur; j < cur + how_many; j += inc) {
                     mesh_polygon tmp_polygon{};
@@ -241,6 +244,7 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
                 }
                 break;
             case GFXQUAD:
+            case GFXQUADSTRIP:
                 inc = 4U;
                 for (size_t j = cur; j < cur + how_many; j += inc) {
                     mesh_polygon tmp_polygon{};
@@ -254,53 +258,22 @@ void Mesh::GetPolys(SequenceContainer<mesh_polygon> &polys) {
                 }
                 break;
             case GFXLINE:
-                break;
-            case GFXTRISTRIP:
-                break;
-            case GFXQUADSTRIP:
-                break;
-            case GFXTRIFAN:
+                VS_LOG(trace, "Mesh::GetPolys encountered a GFXLINE");
                 break;
             case GFXLINESTRIP:
-                break;
-            case GFXPOLY:
+                VS_LOG(trace, "Mesh::GetPolys encountered a GFXLINESTRIP");
                 break;
             case GFXPOINT:
+                VS_LOG(trace, "Mesh::GetPolys encountered a GFXPOINT");
                 break;
         }
         cur += how_many;
     }
-//    int i;
-//    int inc = 3;
-//    int how_many = 0;
-//    int last = numtris;
-//    mesh_polygon tmppolygon;
-//    // Unroll this loop a bit to remove conditional
-//    for (i = 0; i < last; i++) {
-//        polys.push_back(tmppolygon);
-//        for (int j = 0; j < 3; j++, polys.back().v.push_back(vv)) {
-//            vv.i = tmpres->at(how_many + i * inc + j).x;                 //+local_pos.i;
-//            vv.j = tmpres->at(how_many + i * inc + j).y;                 //+local_pos.j;
-//            vv.k = tmpres->at(how_many + i * inc + j).z;                 //+local_pos.k;
-//        }
-//    }
-//    inc = 4;
-//    how_many = numtris * 3;
-//    last = numquads;
-//    for (i = 0; i < last; i++) {
-//        polys.push_back(tmppolygon);
-//        for (int j = 1; j < 4; j++, polys.back().v.push_back(vv)) {
-//            vv.i = tmpres->at(how_many + i * inc + j).x;                     //+local_pos.i;
-//            vv.j = tmpres->at(how_many + i * inc + j).y;                     //+local_pos.j;
-//            vv.k = tmpres->at(how_many + i * inc + j).z;                     //+local_pos.k;
-//        }
-//    }
 }
 
 vega_types::SharedPtr<Mesh>
 Mesh::createMesh(boost::string_view filename, const Vector &scale_x, int faction, Flightgroup *fg, bool is_original,
                  const SequenceContainer<string> &texture_override) {
-//    Mesh return_value{filename, scale_x, faction, fg, is_original, texture_override};
     SharedPtr<Mesh> return_value = MakeShared<Mesh>();
     bool shared = false;
     return constructMesh(return_value, filename, scale_x, faction, fg, is_original, texture_override, shared);

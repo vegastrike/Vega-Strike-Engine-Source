@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * collide_map.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -137,7 +139,10 @@ public:
     void updateBackpointer(Collidable &collidable) {
         assert(collidable.radius != 0.0f);
         if (location_index != Unit::UNIT_ONLY && collidable.radius < 0) {
-            Bolt::BoltFromIndex(collidable.ref)->location = &collidable;
+            Bolt *p_bolt = Bolt::BoltFromIndex(collidable.ref);
+            if (p_bolt != nullptr) {
+                p_bolt->location = &collidable;
+            }
         } else {
             collidable.ref.unit->location[location_index] = &collidable;
         }
