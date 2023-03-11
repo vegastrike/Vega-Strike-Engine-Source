@@ -262,8 +262,8 @@ void init_opengl_extensions() {
         glUnlockArraysEXT_p = nullptr;
 #endif
 #else
-        glLockArraysEXT_p = dlsym(RTLD_SELF, "glLockArraysEXT");
-        glUnlockArraysEXT_p = dlsym(RTLD_SELF, "glUnlockArraysEXT");
+        glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC)(dlsym(RTLD_SELF, "glLockArraysEXT"));
+        glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC)(dlsym(RTLD_SELF, "glUnlockArraysEXT"));
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
         glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC)
@@ -297,11 +297,11 @@ void init_opengl_extensions() {
 #endif
 
 #ifdef __APPLE__
-    glColorTable_p = dlsym(RTLD_SELF, "glColorTableEXT");
-    glMultiTexCoord2fARB_p     = dlsym(RTLD_SELF, "glMultiTexCoord2fARB");
-    glMultiTexCoord4fARB_p     = dlsym(RTLD_SELF, "glMultiTexCoord4fARB");
-    glClientActiveTextureARB_p = dlsym(RTLD_SELF, "glClientActiveTextureARB");
-    glActiveTextureARB_p = dlsym(RTLD_SELF, "glActiveTextureARB");
+    glColorTable_p = (PFNGLCOLORTABLEEXTPROC)(dlsym(RTLD_SELF, "glColorTableEXT"));
+    glMultiTexCoord2fARB_p     = (PFNGLMULTITEXCOORD2FARBPROC)(dlsym(RTLD_SELF, "glMultiTexCoord2fARB"));
+    glMultiTexCoord4fARB_p     = (PFNGLMULTITEXCOORD4FARBPROC)(dlsym(RTLD_SELF, "glMultiTexCoord4fARB"));
+    glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC)(dlsym(RTLD_SELF, "glClientActiveTextureARB"));
+    glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC)(dlsym(RTLD_SELF, "glActiveTextureARB"));
 #else
 #ifndef NO_VBO_SUPPORT
     glBindBufferARB_p = (PFNGLBINDBUFFERARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glBindBuffer");
