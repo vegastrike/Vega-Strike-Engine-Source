@@ -346,8 +346,22 @@ void GFXVertexList::ColIndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offse
 }
 
 void GFXVertexList::IndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany) {
-    for (int i = 0; i < howmany; i++) {
+    for (int i = 0; i < howmany; ++i) {
+        if (i < 0) {
+            VS_LOG(error, (boost::format("GFXVertexList::IndVtxCopy: i is less than 0. Value of i: %1%") % i));
+            break;
+        }
         unsigned int j = thus->GetIndex(i + offset);
+        if (j < 0) {
+            VS_LOG(error, (boost::format("GFXVertexList::IndVtxCopy: j is less than 0. Value of j: %1%") % j));
+            break;
+        } else if (j == 0) {
+            VS_LOG(error, "GFXVertexList::IndVtxCopy: j is zero");
+            break;
+        } else if (j > thus->numVertices) {
+            VS_LOG(error, (boost::format("GFXVertexList::IndVtxCopy: j (%1%) exceeds numVertices (%2%)") % j % thus->numVertices));
+            break;
+        }
         dst[i].
                 SetTexCoord(thus->data.vertices[j].s, thus->data.vertices[j].t).
                 SetNormal(Vector(thus->data.vertices[j].i, thus->data.vertices[j].j, thus->data.vertices[j].k)).
