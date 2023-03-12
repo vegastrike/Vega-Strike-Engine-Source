@@ -352,13 +352,7 @@ void GFXVertexList::IndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, 
             break;
         }
         unsigned int j = thus->GetIndex(i + offset);
-        if (j < 0) {
-            VS_LOG(error, (boost::format("GFXVertexList::IndVtxCopy: j is less than 0. Value of j: %1%") % j));
-            break;
-        } else if (j == 0) {
-            VS_LOG(error, "GFXVertexList::IndVtxCopy: j is zero");
-            break;
-        } else if (j > thus->numVertices) {
+        if (j > thus->numVertices) {
             VS_LOG(error, (boost::format("GFXVertexList::IndVtxCopy: j (%1%) exceeds numVertices (%2%)") % j % thus->numVertices));
             break;
         }
