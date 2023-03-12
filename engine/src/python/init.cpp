@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * init.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -35,7 +37,9 @@
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include <compile.h>
+#if ((PY_VERSION_HEX) < 0x030B0000)
 #include <eval.h>
+#endif
 #include <stdio.h>
 #include <math.h>
 

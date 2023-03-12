@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Nachum Barcohen,
+ * python_class.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -48,7 +50,9 @@
 #include "init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
+#if PY_VERSION_HEX < 0x030B0000
 #include <eval.h>
+#endif
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
