@@ -64,7 +64,7 @@ PipelinedTexture::PipelinedTexture(unsigned int width, unsigned int height, unsi
     mode = _24BITRGBA;
     data = new unsigned char[4 * width * height];
     stage = 0;
-    original = NULL;
+    original = nullptr;
 //    refcount = 0;
     texture_target = TEXTURE2D;
     image_target = TEXTURE_2D;

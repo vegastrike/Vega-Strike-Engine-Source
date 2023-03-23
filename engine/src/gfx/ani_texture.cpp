@@ -597,7 +597,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
         wrapper_file_path = f.GetFilename();
         wrapper_file_type = f.GetType();
     }
-    original = NULL;
+    original = nullptr;
     loadSuccess = true;
 
     anis.insert({vega_dynamic_cast_shared_ptr<AnimatedTexture>(shared_from_this())});
