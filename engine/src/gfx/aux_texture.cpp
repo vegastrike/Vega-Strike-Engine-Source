@@ -159,13 +159,17 @@ vega_types::SharedPtr<Texture> Texture::Clone() {
     //assert (!original->original);
 }
 
-void Texture::FileNotFound(const string &texfilename) {
+void Texture::FileNotFound(const string &tex_filename) {
+    VS_LOG(warning, (boost::format("Texture::FileNotFound called with tex_filename: '%1%'") % tex_filename));
     //We may need to remove from texHashTable if we found the file but it is a bad one
-    texHashTable.Delete(texfilename);
+    texHashTable.Delete(tex_filename);
 
-    setbad(texfilename);
+    setbad(tex_filename);
     name = -1;
-    data = nullptr;
+    if (data) {
+        free(data);
+        data = nullptr;
+    }
     if (original) {
         original->name = -1;
         original.reset();
