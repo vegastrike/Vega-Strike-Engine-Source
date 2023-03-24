@@ -318,8 +318,10 @@ void Texture::Load(const char *FileName,
             }
         }
         if (main_texture) {
+            VS_LOG(debug, "Texture::Load -- main_texture is non-null");
             Bind(main_texture, maxdimension, detailtexture);
         } else {
+            VS_LOG(debug, "Texture::Load -- main_texture is null");
             Bind(maxdimension, detailtexture);
         }
         free(data);
