@@ -1039,22 +1039,22 @@ class /*GFXDRVAPI*/ GFXSphereVertexList : public GFXVertexList {
 protected:
     float radius;
     GFXVertexList *sphere;
-    virtual void Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
+    void Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets) override;
 public:
 ///creates a vertex list with 1 polytype and a given number of vertices
     GFXSphereVertexList(float radius, int detail, bool insideout, bool reverse_normals);
-    ~GFXSphereVertexList();
+    ~GFXSphereVertexList() override;
 
 ///Returns the array of vertices to be mutated
-    virtual VDAT *BeginMutate(int offset);
+    VDAT *BeginMutate(int offset) override;
 ///Ends mutation and refreshes display list
-    virtual void EndMutate(int newsize = 0);
+    void EndMutate(int newsize = 0) override;
 ///Loads the draw state (what is active) of a given vlist for mass drawing
 ///Specifies array pointers and loads the draw state of a given vlist for mass drawing
-    virtual void BeginDrawState(GFXBOOL lock = GFXTRUE);
+    void BeginDrawState(GFXBOOL lock = GFXTRUE) override;
 ///Draws a single copy of the mass-loaded vlist
-    virtual void Draw();
-    virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
+    void Draw() override;
+    void EndDrawState(GFXBOOL lock = GFXTRUE) override;
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
     vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GetPolys(size_t &num_tris,
                                                                                        size_t &num_quads,
