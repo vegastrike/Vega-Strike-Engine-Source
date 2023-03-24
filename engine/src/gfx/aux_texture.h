@@ -115,6 +115,7 @@ public:
 
 public:
 
+    // TODO: Separate into two constructors, one that takes no args and is public, and the other taking arguments and protected (or even removed altogether)
     ///Creates an unbounded texture. Set data and dimensions before binding. Or explicitly load a file.
     explicit Texture(int stage = 0,
             enum FILTER mipmap = MIPMAP,

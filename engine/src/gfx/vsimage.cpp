@@ -1,9 +1,8 @@
 /*
  * vsimage.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,7 +38,7 @@
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "vs_globals.h"
-#include <string.h>
+#include <cstring>
 #include <png.h>
 #include "posh.h"
 
@@ -81,37 +80,30 @@ LOCALCONST_DEF(VSImage, int, SIZEOF_BITMAPINFOHEADER, sizeof(DWORD) + sizeof(LON
         * sizeof(DWORD) + 2 * sizeof(LONG) + 2 * sizeof(DWORD))
 LOCALCONST_DEF(VSImage, int, SIZEOF_RGBQUAD, sizeof(BYTE) * 4)
 
-VSImage::VSImage() {
-    this->img_depth = 8;
-    this->img_color_type = 8;
-    this->sizeY = 1;
-    this->sizeX = 1;
-    this->Init();
-    this->mode = _24BIT;
-}
+VSImage::VSImage() : tt(nullptr), img_type(Unrecognized), img_depth(8), img_color_type(8), strip_16(false), mode(_24BIT), sizeX(1UL), sizeY(1UL) {}
 
-void VSImage::Init() {
-    this->tt = NULL;
-    this->img_type = Unrecognized;
-    //this->tex->palette = NULL;
-    this->strip_16 = false;
-}
+//void VSImage::Init() {
+//    this->tt = NULL;
+//    this->img_type = Unrecognized;
+//    //this->tex->palette = NULL;
+//    this->strip_16 = false;
+//}
+//
+//void VSImage::Init(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
+//    assert(f != NULL);
+//
+//    this->Init();
+//
+//    this->img_file = f;
+//    this->img_file2 = f2;
+//    this->tt = t;
+//    this->strip_16 = strip;
+//}
 
-void VSImage::Init(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
-    assert(f != NULL);
-
-    this->Init();
-
-    this->img_file = f;
-    this->img_file2 = f2;
-    this->tt = t;
-    this->strip_16 = strip;
-}
-
-VSImage::VSImage(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
-    this->mode = _24BIT;
-    this->Init(f, t, strip, f2);
-}
+//VSImage::VSImage(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
+//    this->mode = _24BIT;
+//    this->Init(f, t, strip, f2);
+//}
 
 VSImage::~VSImage() {
     //img_file? and tt should not be deleted since they are passed as args to the class
@@ -119,9 +111,18 @@ VSImage::~VSImage() {
 
 unsigned char *VSImage::ReadImage(VSFile *f, textureTransform *t, bool strip, VSFile *f2) {
     try {
-        this->Init(f, t, strip, f2);
+        this->mode = _24BIT;
+        assert(f != nullptr);
+        this->tt = nullptr;
+        this->img_type = Unrecognized;
+        this->strip_16 = false;
+        this->img_file = f;
+        this->img_file2 = f2;
+        this->tt = t;
+        this->strip_16 = strip;
+//        this->Init(f, t, strip, f2);
 
-        unsigned char *ret = NULL;
+        unsigned char *ret = nullptr;
         CheckFormat(img_file);
         switch (this->img_type) {
             case DdsImage:
@@ -136,16 +137,21 @@ unsigned char *VSImage::ReadImage(VSFile *f, textureTransform *t, bool strip, VS
             case BmpImage:
                 ret = this->ReadBMP();
                 break;
+            case Unrecognized:
+                VS_LOG(serious_warning, (boost::format("VSImage::ReadImage: Unrecognized img_type encountered (shouldn't happen). Image filename: '%1%'") % img_file->GetFilename()));
+                ret = nullptr;
+                break;
             default:
-                VS_LOG(info, img_file->GetFilename());
-                ret = NULL;
+                VS_LOG(serious_warning, (boost::format("VSImage::ReadImage: Invalid img_type encountered (shouldn't happen). Image filename: '%1%'") % img_file->GetFilename()));
+                ret = nullptr;
+                break;
         }
         return ret;
     }
     catch (...) {
         //ReadXXX() already handles exceptions. But, if any exception remains unhandled,
         //this handler will perform a dirty abortion (reclaims no memory, but doesn't crash at least)
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -171,7 +177,7 @@ VSError VSImage::CheckJPEGSignature(VSFile *file) {
     char sig[13];
     file->Begin();
     file->Read(sig, 13);
-    if (strncmp(sig + 6, "JFIF", 4)) {
+    if (strncmp(sig + 6, "JFIF", 4) != 0) {
         ret = BadFormat;
     }
     file->Begin();
@@ -245,12 +251,12 @@ static void png_cexcept_error(png_structp png_ptr, png_const_charp msg) {
 }
 
 unsigned char *VSImage::ReadPNG() {
-    png_bytepp row_pointers = NULL;
-    unsigned char *image = NULL;
+    png_bytepp row_pointers = nullptr;
+    unsigned char *image = nullptr;
 
     try {
-        TPngFileBuffer PngFileBuffer = {NULL, 0};
-        palette = NULL;
+        TPngFileBuffer PngFileBuffer = {nullptr, 0};
+        palette = nullptr;
         png_structp png_ptr;
         png_infop info_ptr;
         int interlace_type;
@@ -270,24 +276,24 @@ unsigned char *VSImage::ReadPNG() {
             PngFileBuffer.Pos = 8;
         }
         png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                NULL,
+                nullptr,
                 (png_error_ptr) png_cexcept_error,
-                (png_error_ptr) NULL);
-        if (png_ptr == NULL) {
+                (png_error_ptr) nullptr);
+        if (png_ptr == nullptr) {
             VS_LOG(error, "VSImage ERROR : PNG ptr == NULL !!!");
             VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         info_ptr = png_create_info_struct(png_ptr);
-        if (info_ptr == NULL) {
-            png_destroy_read_struct(&png_ptr, (png_infopp) NULL, (png_infopp) NULL);
+        if (info_ptr == nullptr) {
+            png_destroy_read_struct(&png_ptr, (png_infopp) nullptr, (png_infopp) nullptr);
             VS_LOG(error, "VSImage ERROR : PNG info_ptr == NULL !!!");
             VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         if (setjmp(png_jmpbuf(png_ptr))) {
             /* Free all of the memory associated with the png_ptr and info_ptr */
-            png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) NULL);
+            png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) nullptr);
             /* If we get here, we had a problem reading the file */
             VS_LOG(error, "VSImage ERROR : problem reading file/buffer -> setjmp !!!");
             VS_LOG_AND_FLUSH(error, img_file->GetFilename());
@@ -314,8 +320,8 @@ unsigned char *VSImage::ReadPNG() {
                 &this->img_depth,
                 &this->img_color_type,
                 &interlace_type,
-                NULL,
-                NULL);
+                nullptr,
+                nullptr);
         VS_LOG(trace, (boost::format("1. Loading a PNG file: width = %1% , height = %2% , depth = %3% , img "
                                      "color = %4% , interlace = %5% ")
                 % sizeX
@@ -349,8 +355,8 @@ unsigned char *VSImage::ReadPNG() {
                 &this->img_depth,
                 &this->img_color_type,
                 &interlace_type,
-                NULL,
-                NULL);
+                nullptr,
+                nullptr);
         VS_LOG(trace, (boost::format("2. Loading a PNG file : width = %1% , height = %2% , depth = %3% , "
                                      "img_color = %4% , interlace = %5%")
                 % sizeX
@@ -392,16 +398,16 @@ unsigned char *VSImage::ReadPNG() {
             VS_LOG(trace, "4. Doing a transformation ");
             result = (*tt)(this->img_depth, this->img_color_type, this->sizeX, this->sizeY, row_pointers);
             free(image);
-            image = NULL;
+            image = nullptr;
         } else {
             result = image;
         }
         free(row_pointers);
-        row_pointers = NULL;
+        row_pointers = nullptr;
         png_read_end(png_ptr, info_ptr);
-        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-        png_ptr = NULL;
-        info_ptr = NULL;
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+        png_ptr = nullptr;
+        info_ptr = nullptr;
         VS_LOG(trace, "Decompressing Done.");
         if (result) {
             this->AllocatePalette();
@@ -417,7 +423,7 @@ unsigned char *VSImage::ReadPNG() {
             free(row_pointers);
             row_pointers = nullptr;
         }
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -439,14 +445,14 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo) {
 }
 
 unsigned char *VSImage::ReadJPEG() {
-    unsigned char *image = NULL;
-    JSAMPARRAY row_pointers = NULL; //Output row buffer
+    unsigned char *image = nullptr;
+    JSAMPARRAY row_pointers = nullptr; //Output row buffer
 
     try {
         this->img_depth = 8;
-        jpeg_decompress_struct cinfo;
+        jpeg_decompress_struct cinfo{};
 
-        my_error_mgr jerr;
+        my_error_mgr jerr{};
 
         VS_LOG(debug, (boost::format("Loading JPEG: %1%") % this->img_file->GetFilename()));
 
@@ -521,10 +527,10 @@ unsigned char *VSImage::ReadJPEG() {
         if (tt) {
             result = (*tt)(this->img_depth, this->img_color_type, this->sizeX, this->sizeY, row_pointers);
             free(image);
-            image = NULL;
+            image = nullptr;
         }
         free(row_pointers);
-        row_pointers = NULL;
+        row_pointers = nullptr;
         if (result) {
             this->AllocatePalette();
         }
@@ -539,14 +545,14 @@ unsigned char *VSImage::ReadJPEG() {
             free(row_pointers);
             row_pointers = nullptr;
         }
-        return NULL;
+        return nullptr;
     }
 }
 
 unsigned char *VSImage::ReadBMP() {
-    unsigned char *data = NULL;
-    unsigned char *cdata = NULL;
-    unsigned char *adata = NULL;
+    unsigned char *data = nullptr;
+    unsigned char *cdata = nullptr;
+    unsigned char *adata = nullptr;
 
     try {
         VS_LOG(debug, (boost::format("Loading BMP: %1%") % this->img_file->GetFilename()));
@@ -597,13 +603,13 @@ unsigned char *VSImage::ReadBMP() {
                     & ~3;                //BMP rows must be aligned to 32 bits
             unsigned int stride = (sizeof(unsigned char) * ncomp * this->sizeX);
             data = (unsigned char *) malloc(stride * this->sizeY);
-            if (data == NULL) {
-                return NULL;
+            if (data == nullptr) {
+                return nullptr;
             }
             if (mode != _24BIT) {
                 cdata = (unsigned char *) malloc(cstride);
                 adata = (unsigned char *) malloc(astride);
-                if ((cdata == NULL) || (adata == NULL)) {
+                if ((cdata == nullptr) || (adata == nullptr)) {
                     throw ("memory");
                 }
                 unsigned char *row = data + (this->sizeY - 1) * stride;
@@ -619,9 +625,9 @@ unsigned char *VSImage::ReadBMP() {
                     }
                 }
                 free(cdata);
-                cdata = NULL;
+                cdata = nullptr;
                 free(adata);
-                adata = NULL;
+                adata = nullptr;
             } else {
                 unsigned char *row = data + (this->sizeY - 1) * stride;
                 unsigned long dummy;
@@ -641,7 +647,7 @@ unsigned char *VSImage::ReadBMP() {
             }
         } else if (le16_to_cpu(info.biBitCount) == 8) {
             mode = _8BIT;
-            data = NULL;
+            data = nullptr;
             data = (unsigned char *) malloc(sizeof(unsigned char) * sizeY * sizeX);
             this->palette = (unsigned char *) malloc(sizeof(unsigned char) * (256 * 4 + 1));
             memset(this->palette, 0, (256 * 4 + 1) * sizeof(unsigned char));
@@ -655,7 +661,7 @@ unsigned char *VSImage::ReadBMP() {
                 paltemp += 4;                 //pal size
             }
             if (!data) {
-                return NULL;
+                return nullptr;
             }
             for (int i = sizeY - 1; i >= 0; i--) {
                 for (unsigned int j = 0; j < sizeX; j++) {
@@ -678,8 +684,8 @@ unsigned char *VSImage::ReadBMP() {
             free(data);
             data = nullptr;
         }
-        return NULL;
-    };
+        return nullptr;
+    }
 }
 
 #define IS_POT(x) ( !( (x)& ( (x)-1 ) ) )
@@ -688,7 +694,7 @@ unsigned char *VSImage::ReadDDS() {
     ddsHeader header;
     unsigned int type = GL_RGB;
     int blockSize = 16;
-    unsigned char *s = NULL;
+    unsigned char *s = nullptr;
     unsigned int inputSize = 0;
     int width = 0;
     int height = 0;
@@ -836,7 +842,7 @@ unsigned char *VSImage::ReadDDS() {
             free(s);
             s = nullptr;
         }
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -908,7 +914,7 @@ VSError VSImage::WriteImage(VSFile *pf,
             VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             return VSFileSystem::BadFormat;
     }
-    this->img_file = NULL;
+    this->img_file = nullptr;
     this->img_depth = 0;
     this->sizeX = 0;
     this->sizeY = 0;
@@ -918,13 +924,13 @@ VSError VSImage::WriteImage(VSFile *pf,
 
 VSError VSImage::WritePNG(unsigned char *data) {
     png_structp png_ptr = png_create_write_struct
-            (PNG_LIBPNG_VER_STRING, (png_voidp) NULL, NULL, NULL);
+            (PNG_LIBPNG_VER_STRING, (png_voidp) nullptr, nullptr, nullptr);
     if (!png_ptr) {
         return BadFormat;
     }
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
-        png_destroy_write_struct(&png_ptr, (png_infopp) NULL);
+        png_destroy_write_struct(&png_ptr, (png_infopp) nullptr);
         return BadFormat;
     }
     if (setjmp(png_jmpbuf(png_ptr))) {
@@ -987,4 +993,26 @@ VSError VSImage::WriteJPEG(unsigned char *data) {
 
 VSError VSImage::WriteBMP(unsigned char *data) {
     return BadFormat;
+}
+
+vega_types::SharedPtr<VSImage>
+VSImage::constructVSImage(vega_types::SharedPtr<VSImage> vs_image, VSFileSystem::VSFile *f, textureTransform *t,
+                          bool strip, VSFileSystem::VSFile *f2) {
+    vs_image->mode = _24BIT;
+    assert(f != nullptr);
+    vs_image->tt = nullptr;
+    vs_image->img_type = Unrecognized;
+    vs_image->strip_16 = false;
+    vs_image->img_file = f;
+    vs_image->img_file2 = f2;
+    vs_image->tt = t;
+    vs_image->strip_16 = strip;
+
+    return vs_image;
+}
+
+vega_types::SharedPtr<VSImage>
+VSImage::createVSImage(VSFileSystem::VSFile *f, textureTransform *t, bool strip, VSFileSystem::VSFile *f2) {
+    vega_types::SharedPtr<VSImage> return_value = vega_types::MakeShared<VSImage>();
+    return constructVSImage(return_value, f, t, strip, f2);
 }

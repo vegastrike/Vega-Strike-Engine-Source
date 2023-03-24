@@ -276,8 +276,7 @@ void Texture::Load(const char *FileName,
     //this->texfilename = texfilename;
     //strcpy (filename,texfilename.c_str());
     VSFile f;
-    VSError err; //FIXME err not always initialized before use
-    err = Ok; //FIXME this line added temporarily by chuck_starchaser
+    VSError err = Ok;
     if (FileName) {
         if (FileName[0]) {
             err = f.OpenReadOnly(FileName, TextureFile);
@@ -289,7 +288,7 @@ void Texture::Load(const char *FileName,
         f.Close();
         err = Unspecified;
     }
-    if (err > Ok) { //FIXME err not guaranteed to have been initialized!
+    if (err > Ok) {
         FileNotFound(texfn);
         if (err2 <= Ok) {
             f2.Close();
@@ -306,9 +305,9 @@ void Texture::Load(const char *FileName,
     }
     //strcpy(filename, FileName);
     if (err2 > Ok) {
-        data = this->ReadImage(&f, NULL, true, NULL);
+        data = this->ReadImage(&f, nullptr, true, nullptr);
     } else {
-        data = this->ReadImage(&f, NULL, true, &f2);
+        data = this->ReadImage(&f, nullptr, true, &f2);
     }
     if (data) {
         if (mode >= _DXT1 && mode <= _DXT5) {

@@ -165,16 +165,16 @@ enum VSImageType { PngImage, BmpImage, JpegImage, DdsImage, Unrecognized };
  */
 class VSImage : public vega_types::EnableSharedFromThis<VSImage> {
 private:
-    VSFileSystem::VSFile *img_file;
-    VSFileSystem::VSFile *img_file2;
-    textureTransform *tt;
+    VSFileSystem::VSFile *img_file{};
+    VSFileSystem::VSFile *img_file2{};
+    textureTransform *tt{};
     VSImageType img_type;
 
     int img_depth;
     int img_color_type;
-    bool img_alpha;
-    bool strip_16;
-    bool flip;
+    bool img_alpha{};
+    bool strip_16{};
+    bool flip{};
 
 protected:
 
@@ -188,14 +188,21 @@ protected:
         SIDE_NEG_Z = 0x20
     };
 
-    char img_sides;
-    int img_nmips;
+    char img_sides{};
+    int img_nmips{};
 
 private:
 
-    void Init();
-    void Init(VSFileSystem::VSFile *f, textureTransform *t = NULL, bool strip = false, VSFileSystem::VSFile *f2 = NULL);
+//    void Init();
+//    void Init(VSFileSystem::VSFile *f, textureTransform *t = NULL, bool strip = false, VSFileSystem::VSFile *f2 = NULL);
 
+public:
+    static vega_types::SharedPtr<VSImage> createVSImage(VSFileSystem::VSFile *f, textureTransform *t = nullptr, bool strip = false, VSFileSystem::VSFile *f2 = nullptr);
+
+protected:
+    static vega_types::SharedPtr<VSImage> constructVSImage(vega_types::SharedPtr<VSImage> vs_image, VSFileSystem::VSFile *f, textureTransform *t = nullptr, bool strip = false, VSFileSystem::VSFile *f2 = nullptr);
+
+private:
     VSFileSystem::VSError CheckPNGSignature(VSFileSystem::VSFile *file);
     VSFileSystem::VSError CheckJPEGSignature(VSFileSystem::VSFile *file);
     VSFileSystem::VSError CheckBMPSignature(VSFileSystem::VSFile *file);
@@ -225,12 +232,12 @@ private:
 
 public:
     VSImage();
-//f2 is needed for bmp loading
-    VSImage(VSFileSystem::VSFile *f, textureTransform *t = NULL, bool strip = false, VSFileSystem::VSFile *f2 = NULL);
+////f2 is needed for bmp loading
+//    VSImage(VSFileSystem::VSFile *f, textureTransform *t = NULL, bool strip = false, VSFileSystem::VSFile *f2 = NULL);
     virtual ~VSImage();
 
 //if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be messed
-    unsigned char *palette;
+    unsigned char *palette{};
 
 /*
  * Position 3 and greater of VSImageMode are helper modes to differentiate the correct modes of DDS and PNG files.
@@ -261,16 +268,16 @@ public:
 
 //f2 is needed for bmp loading
     unsigned char *ReadImage(VSFileSystem::VSFile *f,
-            textureTransform *t = NULL,
+            textureTransform *t = nullptr,
             bool strip = false,
-            VSFileSystem::VSFile *f2 = NULL);
+            VSFileSystem::VSFile *f2 = nullptr);
 
     VSFileSystem::VSError WriteImage(char *filename,
             unsigned char *data,
             VSImageType type,
             unsigned int width,
             unsigned int height,
-            bool alpha = 1,
+            bool alpha = true,
             char bpp = 16,
             VSFileSystem::VSFileType ft = VSFileSystem::UnknownFile,
             bool flip = false);
@@ -279,7 +286,7 @@ public:
             VSImageType type,
             unsigned int width,
             unsigned int height,
-            bool alpha = 1,
+            bool alpha = true,
             char bpp = 16,
             bool flip = false);
 
