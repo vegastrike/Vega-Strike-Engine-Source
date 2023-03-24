@@ -21,8 +21,8 @@
  */
 
 
-#ifndef __VSIMAGE__H
-#define __VSIMAGE__H
+#ifndef VEGA_STRIKE_GFX_VSIMAGE_H
+#define VEGA_STRIKE_GFX_VSIMAGE_H
 
 #include "preferred_types.h"
 #include "vsfilesystem.h"
