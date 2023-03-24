@@ -135,25 +135,25 @@ public:
 
     const vega_types::SharedPtr<const Texture> OriginalConst() const override;
 
-    virtual vega_types::SharedPtr<Texture> Original();
+    vega_types::SharedPtr<Texture> Original() override;
 
     ~AnimatedTexture() override;
 
-    virtual vega_types::SharedPtr<Texture> Clone();
+    vega_types::SharedPtr<Texture> Clone() override;
 
-    virtual void MakeActive() {
+    void MakeActive() override {
         MakeActive(texstage, 0);
     }                                                   //MSVC bug seems to hide MakeActive() if we define MakeActive(int,int) - the suckers!
 
-    virtual void MakeActive(int stage) {
+    void MakeActive(int stage) override {
         MakeActive(stage, 0);
     }                                                         //MSVC bug seems to hide MakeActive(int) if we define MakeActive(int,int) - the suckers!
 
-    virtual void MakeActive(int stage, int pass);
+    void MakeActive(int stage, int pass) override;
 
-    bool SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst);
+    bool SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst) override;
 
-    bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst) {
+    bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst) override {
         return SetupPass(pass, texstage, src, dst);
     }
 
@@ -206,7 +206,7 @@ public:
 
     bool Done() const;
 
-    virtual bool LoadSuccess();
+    bool LoadSuccess() override;
 
     //Some useful factory methods -- also defined in ani_texture.cpp
     static vega_types::SharedPtr<AnimatedTexture> CreateVideoTexture(const std::string &fname,
