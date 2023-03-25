@@ -782,6 +782,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
         (",h", "High resolution (1024x768)")
         (",v", "Super high resolution (1280x1024)")
         ("help", "Show this help")
+        ("benchmark", boost::program_options::value<float>(), "???")
         ("net", "Networking Enabled (Experimental)")
         ("debug", boost::program_options::value<int>()->implicit_value(1), "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")
         ("test-audio", "Run audio tests")  // is handled in readCommandLineOptions, here is serves only for help message
@@ -845,6 +846,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
             coordinates >> PlayerLocation.j;
             coordinates.ignore(256, ',');
             coordinates >> PlayerLocation.k;
+            SetPlayerLoc(PlayerLocation, true);
         } catch (std::ios_base::failure &inputFailure) {
             std::cout << "Error reading coordinates for player location: " << inputFailure.what() << std::endl;
             exit(EXIT_FAILURE);
@@ -865,6 +867,9 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
     if (cmd_args.count("-v")) {
         g_game.y_resolution = 1024;
         g_game.x_resolution = 1280;
+    }
+    if (cmd_args.count("benchmark")) {
+        benchmark = cmd_args["benchmark"].as<float>();
     }
     if (cmd_args.count("net")) {
         ignore_network = false;
