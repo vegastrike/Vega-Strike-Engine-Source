@@ -164,17 +164,17 @@ void Texture(int room, std::string index, std::string file, float x, float y) {
         return;
     }
     newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file.c_str(), index));
+    BaseInterface::Room::BaseVSSprite
+            *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
 #ifdef BASE_MAKER
-    ( (BaseInterface::Room::BaseVSSprite*) newroom->objs.back() )->texfile = file;
+    p_base_vs_sprite->texfile = file;
 #endif
     float tx = 0, ty = 0;
     static bool
             addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "offset_sprites_by_pos", "true"));
     if (addspritepos) {
-        ((BaseInterface::Room::BaseVSSprite *) newroom->objs.back())->spr.GetPosition(tx, ty);
+        p_base_vs_sprite->spr.GetPosition(tx, ty);
     }
-    BaseInterface::Room::BaseVSSprite
-            *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
     p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
 }
 
