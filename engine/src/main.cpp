@@ -23,7 +23,8 @@
  */
 
 
-#include <Python.h>
+#define PY_SSIZE_T_CLEAN
+#include <Python.h> // TODO: Remove direct inclusion of this file?
 #include "audio/test.h"
 #if defined (HAVE_SDL)
 #include <SDL/SDL.h>

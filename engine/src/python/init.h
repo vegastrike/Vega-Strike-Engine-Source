@@ -1,4 +1,6 @@
 /*
+ * init.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -25,6 +27,7 @@
 #ifdef HAVE_PYTHON
 #ifndef PY_INIT_H_
 #define PY_INIT_H_
+#define PY_SSIZE_T_CLEAN
 #include "gfx/vec.h"
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800

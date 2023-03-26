@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * universe_util_generic.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <math.h>
 #include <sys/stat.h>
 #include "lin_time.h"
@@ -49,7 +52,7 @@
 #include "unit_csv_factory.h"
 
 #include "python/init.h"
-#include <Python.h>
+#include <Python.h> // TODO: Remove direct inclusion of this file?
 #include "options.h"
 
 #include "star_system.h"

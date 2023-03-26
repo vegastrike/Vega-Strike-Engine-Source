@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * unit_from_to_python.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -22,6 +24,7 @@
 
 #ifndef _UNIT_FROM_TO_PYTHON_H_
 #define _UNIT_FROM_TO_PYTHON_H_
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 //#include <boost/python/converter/arg_from_python.hpp>

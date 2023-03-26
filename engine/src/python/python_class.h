@@ -25,13 +25,14 @@
 
 #ifndef __PYTHON_CLASS_H__
 #define __PYTHON_CLASS_H__
+#define PY_SSIZE_T_CLEAN
 //This takes care of the fact that several systems use the _POSIX_C_SOURCES
 //variable and don't set them to the same thing.
 //Python.h sets and uses it
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
-#include <Python.h>
+#include <Python.h> // TODO: Remove direct inclusion of Python.h?
 
 #include <boost/version.hpp>
 

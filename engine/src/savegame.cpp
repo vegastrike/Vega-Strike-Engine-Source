@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * savegame.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,7 +23,8 @@
  */
 
 
-#include <Python.h>
+#define PY_SSIZE_T_CLEAN
+#include <Python.h> // TODO: Remove direct inclusion of this file?
 #include "cmd/unit_generic.h"
 #include "hashtable.h"
 #include <float.h>

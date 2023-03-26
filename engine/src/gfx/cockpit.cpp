@@ -28,6 +28,7 @@
 /// Draws cockpit parts
 /// Draws gauges, info strings, radar, ...
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>

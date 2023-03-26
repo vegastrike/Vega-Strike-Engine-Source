@@ -23,10 +23,11 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>
 
-#include <Python.h>
+#include <Python.h> // TODO: Remove direct inclusion of this file?
 #include <compile.h>
 #if ((PY_VERSION_HEX) < 0x030B0000)
 #include <eval.h>

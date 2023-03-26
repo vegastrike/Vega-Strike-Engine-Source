@@ -24,6 +24,7 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+#define PY_SSIZE_T_CLEAN
 #include "unit_generic.h"
 
 #include <set>

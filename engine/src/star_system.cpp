@@ -23,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <assert.h>
 #include "star_system.h"
 

@@ -26,6 +26,7 @@
 /// Keyboard parsing
 /// Parses keyboard commands
 
+#define PY_SSIZE_T_CLEAN
 #include <set>
 #include "firekeyboard.h"
 #include "flybywire.h"

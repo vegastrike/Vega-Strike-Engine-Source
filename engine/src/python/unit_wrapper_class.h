@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * unit_wrapper_class.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include "vs_logging.h"
 using std::string;
 //WARNING: Macro City ahead.  Please skip this section if you don't like macros.

@@ -23,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <list>
 #include <vector>
 #include "aggressive.h"

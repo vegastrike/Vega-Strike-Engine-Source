@@ -23,8 +23,9 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <algorithm>
-#include <Python.h>
+#include <Python.h> // TODO: Remove direct inclusion of this file?
 #include <vega_py_run.h>
 #include "base.h"
 #include "gldrv/winsys.h"

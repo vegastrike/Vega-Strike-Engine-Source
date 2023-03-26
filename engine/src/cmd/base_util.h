@@ -1,7 +1,7 @@
 /*
  * base_util.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -26,6 +26,7 @@
 #ifndef _BASE_UTIL_H_
 #define _BASE_UTIL_H_
 
+#define PY_SSIZE_T_CLEAN
 #include <string>
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
