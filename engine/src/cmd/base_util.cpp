@@ -163,7 +163,7 @@ void Texture(int room, std::string index, std::string file, float x, float y) {
     if (!newroom) {
         return;
     }
-    newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file.c_str(), index));
+    newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file, index));
     BaseInterface::Room::BaseVSSprite
             *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
 #ifdef BASE_MAKER
