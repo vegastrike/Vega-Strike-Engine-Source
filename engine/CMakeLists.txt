@@ -316,7 +316,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development)
+FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
 MESSAGE("++ Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE("++ Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
@@ -376,7 +376,8 @@ IF (USE_SYSTEM_BOOST)
         ENDIF (Boost_python3_FOUND)
 
         SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
+        SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+        MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
         SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
         INCLUDE_DIRECTORIES(${TST_INCLUDES})
     ELSE (Boost_FOUND)
@@ -791,6 +792,7 @@ TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
 ENDIF()
+target_compile_definitions(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
@@ -1073,6 +1075,7 @@ TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
+target_compile_definitions(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 
 SET(VEGASTRIKE_SOURCES
     ${LIBGUI_SOURCES}
@@ -1152,6 +1155,7 @@ IF (NOT DISABLE_CLIENT)
     IF (NEED_LINKING_AGAINST_LIBM)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
+    target_compile_definitions(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 
     ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)
 
