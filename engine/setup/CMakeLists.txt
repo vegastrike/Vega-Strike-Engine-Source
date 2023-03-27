@@ -35,6 +35,33 @@ IF ((NOT BEOS) AND (NOT WIN32))
 		../src/common/common.cpp
 		)
 
+    UNSET(Boost_FOUND)
+    UNSET(Boost_DIR)
+
+    IF (USE_SYSTEM_BOOST)
+        MESSAGE("++ Using System Boost")
+        FIND_PACKAGE(Boost)
+        IF (Boost_FOUND)
+            FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
+        ELSE (Boost_FOUND)
+            SET(USE_SYSTEM_BOOST OFF)
+        ENDIF (Boost_FOUND)
+    ENDIF (USE_SYSTEM_BOOST)
+
+    IF (NOT USE_SYSTEM_BOOST)
+        MESSAGE("++ Using Internal Boost")
+        # This is just to cleanup advanced variable viewing, since they're not used anyway
+        UNSET(Boost_INCLUDE_DIRS)
+        UNSET(Boost_LIBRARIES)
+        UNSET(Boost_INCLUDE_DIR)
+        UNSET(Boost_LIBRARY_DIRS)
+        SET(Boost_DIR ../ext/)
+        ADD_SUBDIRECTORY(${Boost_DIR} build)
+        MESSAGE("++ boost dir: ${Boost_DIR}")
+    ENDIF (NOT USE_SYSTEM_BOOST)
+
+    INCLUDE_DIRECTORIES(${Boost_DIR})
+
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
 
 	INSTALL(TARGETS vegasettings DESTINATION bin)
@@ -55,7 +82,7 @@ IF ((NOT BEOS) AND (NOT WIN32))
         ${Vega_Strike_BINARY_DIR}
         ${GTK3_INCLUDE_DIRS}
     )
-	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
+	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS} ${Boost_LIBRARIES})
 ELSE ((NOT BEOS) AND (NOT WIN32))
 	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
 ENDIF ((NOT BEOS) AND (NOT WIN32))
