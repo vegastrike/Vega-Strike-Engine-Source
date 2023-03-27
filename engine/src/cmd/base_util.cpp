@@ -160,6 +160,7 @@ int Room(std::string text) {
 }
 
 void Texture(int room, std::string index, std::string file, float x, float y) {
+    VS_LOG_AND_FLUSH(debug, (boost::format("BaseUtil::Texture called. room: %1%; index: '%2%'; file: '%3%'; x: %4%; y: %5%") % room % index % file % x % y));
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
