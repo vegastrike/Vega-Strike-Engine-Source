@@ -29,7 +29,9 @@
 
 #include <Python.h>
 #include <compile.h>
+#if (PY_VERSION_HEX < 0x030B0000)
 #include <eval.h>
+#endif
 #include <stdio.h>
 
 #include "python/python_class.h"

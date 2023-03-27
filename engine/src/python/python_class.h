@@ -49,7 +49,9 @@
 #include "init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
+#if (PY_VERSION_HEX < 0x030B0000)
 #include <eval.h>
+#endif
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
