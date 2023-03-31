@@ -793,6 +793,9 @@ IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
 ENDIF()
 target_compile_definitions(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+target_compile_definitions(vegastrike-OPcollide PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+target_compile_definitions(vegastrike-OPcollide PUBLIC _WIN32_WINNT=0x0A00)
+target_compile_definitions(vegastrike-OPcollide PUBLIC WINVER=0x0A00)
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
@@ -1076,6 +1079,9 @@ IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
 target_compile_definitions(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+target_compile_definitions(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+target_compile_definitions(vegastrike-engine_com PUBLIC _WIN32_WINNT=0x0A00)
+target_compile_definitions(vegastrike-engine_com PUBLIC WINVER=0x0A00)
 
 SET(VEGASTRIKE_SOURCES
     ${LIBGUI_SOURCES}
@@ -1156,6 +1162,9 @@ IF (NOT DISABLE_CLIENT)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
     target_compile_definitions(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+    target_compile_definitions(vegastrike-engine PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    target_compile_definitions(vegastrike-engine PUBLIC _WIN32_WINNT=0x0A00)
+    target_compile_definitions(vegastrike-engine PUBLIC WINVER=0x0A00)
 
     ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)
 
