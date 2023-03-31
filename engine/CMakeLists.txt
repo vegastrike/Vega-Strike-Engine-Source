@@ -1642,6 +1642,10 @@ IF (USE_GTEST)
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
     )
+    target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+    target_compile_definitions(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    target_compile_definitions(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
+    target_compile_definitions(vegastrike-testing PUBLIC WINVER=0x0A00)
 
     TARGET_LINK_LIBRARIES(
         ${TEST_NAME}
@@ -1650,6 +1654,10 @@ IF (USE_GTEST)
         Boost::log
         Boost::log_setup
     )
+    target_compile_definitions(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+    target_compile_definitions(${TEST_NAME} PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    target_compile_definitions(${TEST_NAME} PUBLIC _WIN32_WINNT=0x0A00)
+    target_compile_definitions(${TEST_NAME} PUBLIC WINVER=0x0A00)
 
     FILE(
         COPY "src/configuration/tests/vegastrike.config"
