@@ -81,6 +81,7 @@ IF ((NOT BEOS) AND (NOT WIN32))
         ${Vega_Strike_SOURCE_DIR}/src/common
         ${Vega_Strike_BINARY_DIR}
         ${GTK3_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIRS}
     )
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS} ${Boost_LIBRARIES})
 ELSE ((NOT BEOS) AND (NOT WIN32))
