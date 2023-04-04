@@ -43,6 +43,7 @@ IF ((NOT BEOS) AND (NOT WIN32))
         FIND_PACKAGE(Boost)
         IF (Boost_FOUND)
             FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
+            INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
         ELSE (Boost_FOUND)
             SET(USE_SYSTEM_BOOST OFF)
         ENDIF (Boost_FOUND)
@@ -55,12 +56,11 @@ IF ((NOT BEOS) AND (NOT WIN32))
         UNSET(Boost_LIBRARIES)
         UNSET(Boost_INCLUDE_DIR)
         UNSET(Boost_LIBRARY_DIRS)
-        SET(Boost_DIR ../ext/)
+        SET(Boost_DIR ../../ext/)
         ADD_SUBDIRECTORY(${Boost_DIR} build)
+        INCLUDE_DIRECTORIES(${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
         MESSAGE("++ boost dir: ${Boost_DIR}")
     ENDIF (NOT USE_SYSTEM_BOOST)
-
-    INCLUDE_DIRECTORIES(${Boost_DIR})
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
 
@@ -81,7 +81,6 @@ IF ((NOT BEOS) AND (NOT WIN32))
         ${Vega_Strike_SOURCE_DIR}/src/common
         ${Vega_Strike_BINARY_DIR}
         ${GTK3_INCLUDE_DIRS}
-        ${Boost_INCLUDE_DIRS}
     )
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS} ${Boost_LIBRARIES})
 ELSE ((NOT BEOS) AND (NOT WIN32))
