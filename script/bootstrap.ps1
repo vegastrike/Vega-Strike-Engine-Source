@@ -1,6 +1,6 @@
 # bootstrap.ps1
 
-# Copyright (C) 2021-2023 Stephen G. Tuggy
+# Copyright (C) 2021-2023 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -22,7 +22,9 @@
 # You can customize this directory location if desired, but it should be
 # something very short. Otherwise, you will run into problems.
 
-Set-Variable -Name VCKPG_PARENT_DIR -Value "C:\Projects"
+param(
+    [String]$VCPKG_PARENT_DIR = "C:\Projects"
+)
 Set-Variable -Name CMAKE_VERSION -Value "3.25.1"
 
 New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
@@ -37,6 +39,7 @@ $newPath = $path + ";$VCKPG_PARENT_DIR\vcpkg-local\downloads\tools\cmake-$CMAKE_
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', 'x64-windows', 'User')
+[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', 'x64-windows', 'User')
 [Environment]::SetEnvironmentVariable('PYTHONHOME', "$VCKPG_PARENT_DIR\vcpkg-local\packages\python3_x64-windows\tools\python3", 'User')
 
 Pop-Location
