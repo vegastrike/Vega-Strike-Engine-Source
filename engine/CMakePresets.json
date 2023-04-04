@@ -1,0 +1,72 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ninja-vcpkg-debug",
+      "displayName": "Ninja - Debug",
+      "description": "Configure with vcpkg toolchain and generate Ninja project files for Debug configuration",
+      "binaryDir": "${sourceDir}/builds/${presetName}",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "FILEPATH",
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        }
+      },
+      "environment": {
+        "VCPKG_ROOT": "../v"
+      }
+    },
+    {
+      "name": "ninja-vcpkg-release",
+      "displayName": "Ninja - Release",
+      "description": "Configure with vcpkg toolchain and generate Ninja project files for Release configuration",
+      "binaryDir": "${sourceDir}/builds/${presetName}",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "FILEPATH",
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        }
+      },
+      "environment": {
+        "VCPKG_ROOT": "../v"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ninja-vcpkg-debug",
+      "configurePreset": "ninja-vcpkg-debug",
+      "displayName": "Build ninja-vcpkg-debug",
+      "description": "Build with Ninja the Debug configuration",
+      "configuration": "Debug"
+    },
+    {
+      "name": "ninja-vcpkg-release",
+      "configurePreset": "ninja-vcpkg-release",
+      "displayName": "Build ninja-vcpkg-release",
+      "description": "Build with Ninja the Release configuration",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ninja-vcpkg-debug",
+      "configurePreset": "ninja-vcpkg-debug",
+      "configuration": "ninja-vcpkg-debug",
+      "description": "Test with Ninja the Debug configuration"
+    },
+    {
+      "name": "ninja-vcpkg-release",
+      "configurePreset": "ninja-vcpkg-release",
+      "configuration": "ninja-vcpkg-release",
+      "description": "Test with Ninja the Release configuration"
+    }
+  ]
+}
