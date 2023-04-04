@@ -29,17 +29,17 @@ Set-Variable -Name CMAKE_VERSION -Value "3.25.1"
 
 New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
 Push-Location "$VCKPG_PARENT_DIR"
-git clone https://github.com/stephengtuggy/vcpkg-local.git
-.\vcpkg-local\bootstrap-vcpkg.bat -disableMetrics
+git clone https://github.com/stephengtuggy/vcpkg-local.git ./v
+.\v\bootstrap-vcpkg.bat -disableMetrics
 
-[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCKPG_PARENT_DIR\vcpkg-local", 'User')
+[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCKPG_PARENT_DIR\v", 'User')
 
 $path = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$newPath = $path + ";$VCKPG_PARENT_DIR\vcpkg-local\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
+$newPath = $path + ";$VCKPG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', 'x64-windows', 'User')
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', 'x64-windows', 'User')
-[Environment]::SetEnvironmentVariable('PYTHONHOME', "$VCKPG_PARENT_DIR\vcpkg-local\packages\python3_x64-windows\tools\python3", 'User')
+[Environment]::SetEnvironmentVariable('PYTHONHOME', "$VCKPG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3", 'User')
 
 Pop-Location
