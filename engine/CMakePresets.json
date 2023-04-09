@@ -498,7 +498,7 @@
   ],
   "buildPresets": [
     {
-      "name": "linux-pie-enabled-glvnd-debug",
+      "name": "build-linux-pie-enabled-glvnd-debug",
       "configurePreset": "linux-pie-enabled-glvnd-debug",
       "displayName": "Linux, PIE Enabled, GLVND, Debug",
       "configuration": "Debug",
@@ -509,7 +509,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-glvnd-release",
+      "name": "build-linux-pie-enabled-glvnd-release",
       "configurePreset": "linux-pie-enabled-glvnd-release",
       "displayName": "Linux, PIE Enabled, GLVND, Release",
       "configuration": "Release",
@@ -520,7 +520,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-debug",
+      "name": "build-linux-pie-enabled-legacy-gl-debug",
       "configurePreset": "linux-pie-enabled-legacy-gl-debug",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
@@ -531,7 +531,7 @@
       }
     },
     {
-      "name": "linux-pie-enabled-legacy-gl-release",
+      "name": "build-linux-pie-enabled-legacy-gl-release",
       "configurePreset": "linux-pie-enabled-legacy-gl-release",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
       "configuration": "Release",
@@ -542,7 +542,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-debug",
+      "name": "build-linux-pie-disabled-glvnd-debug",
       "configurePreset": "linux-pie-disabled-glvnd-debug",
       "displayName": "Linux, PIE Disabled, GLVND, Debug",
       "configuration": "Debug",
@@ -553,7 +553,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-glvnd-release",
+      "name": "build-linux-pie-disabled-glvnd-release",
       "configurePreset": "linux-pie-disabled-glvnd-release",
       "displayName": "Linux, PIE Disabled, GLVND, Release",
       "configuration": "Release",
@@ -564,7 +564,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-debug",
+      "name": "build-linux-pie-disabled-legacy-gl-debug",
       "configurePreset": "linux-pie-disabled-legacy-gl-debug",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
       "configuration": "Debug",
@@ -575,7 +575,7 @@
       }
     },
     {
-      "name": "linux-pie-disabled-legacy-gl-release",
+      "name": "build-linux-pie-disabled-legacy-gl-release",
       "configurePreset": "linux-pie-disabled-legacy-gl-release",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
       "configuration": "Release",
@@ -586,7 +586,7 @@
       }
     },
     {
-      "name": "macos-pie-enabled-debug",
+      "name": "build-macos-pie-enabled-debug",
       "configurePreset": "macos-pie-enabled-debug",
       "displayName": "macOS, PIE Enabled, Debug",
       "configuration": "Debug",
@@ -597,7 +597,7 @@
       }
     },
     {
-      "name": "macos-pie-enabled-release",
+      "name": "build-macos-pie-enabled-release",
       "configurePreset": "macos-pie-enabled-release",
       "displayName": "macOS, PIE Enabled, Release",
       "configuration": "Release",
@@ -608,7 +608,7 @@
       }
     },
     {
-      "name": "macos-pie-disabled-debug",
+      "name": "build-macos-pie-disabled-debug",
       "configurePreset": "macos-pie-disabled-debug",
       "displayName": "macOS, PIE Disabled, Debug",
       "configuration": "Debug",
@@ -619,7 +619,7 @@
       }
     },
     {
-      "name": "macos-pie-disabled-release",
+      "name": "build-macos-pie-disabled-release",
       "configurePreset": "macos-pie-disabled-release",
       "displayName": "macOS, PIE Disabled, Release",
       "configuration": "Release",
@@ -630,7 +630,7 @@
       }
     },
     {
-      "name": "windows-ninja-pie-enabled-debug",
+      "name": "build-windows-ninja-pie-enabled-debug",
       "configurePreset": "windows-ninja-pie-enabled-debug",
       "displayName": "Windows, Ninja, PIE Enabled, Debug",
       "configuration": "Debug",
@@ -641,7 +641,7 @@
       }
     },
     {
-      "name": "windows-ninja-pie-enabled-release",
+      "name": "build-windows-ninja-pie-enabled-release",
       "configurePreset": "windows-ninja-pie-enabled-release",
       "displayName": "Windows, Ninja, PIE Enabled, Release",
       "configuration": "Release",
@@ -652,7 +652,7 @@
       }
     },
     {
-      "name": "windows-ninja-pie-disabled-debug",
+      "name": "build-windows-ninja-pie-disabled-debug",
       "configurePreset": "windows-ninja-pie-disabled-debug",
       "displayName": "Windows, Ninja, PIE Disabled, Debug",
       "configuration": "Debug",
@@ -663,7 +663,7 @@
       }
     },
     {
-      "name": "windows-ninja-pie-disabled-release",
+      "name": "build-windows-ninja-pie-disabled-release",
       "configurePreset": "windows-ninja-pie-disabled-release",
       "displayName": "Windows, Ninja, PIE Disabled, Release",
       "configuration": "Release",
@@ -674,7 +674,7 @@
       }
     },
     {
-      "name": "VS2019Win64-pie-enabled-debug",
+      "name": "build-VS2019Win64-pie-enabled-debug",
       "configurePreset": "VS2019Win64-pie-enabled-debug",
       "displayName": "VS2019Win64, PIE Enabled, Debug",
       "configuration": "Debug",
@@ -685,7 +685,7 @@
       }
     },
     {
-      "name": "VS2019Win64-pie-enabled-release",
+      "name": "build-VS2019Win64-pie-enabled-release",
       "configurePreset": "VS2019Win64-pie-enabled-release",
       "displayName": "VS2019Win64, PIE Enabled, Release",
       "configuration": "Release",
@@ -696,7 +696,7 @@
       }
     },
     {
-      "name": "VS2019Win64-pie-disabled-debug",
+      "name": "build-VS2019Win64-pie-disabled-debug",
       "configurePreset": "VS2019Win64-pie-disabled-debug",
       "displayName": "VS2019Win64, PIE Disabled, Debug",
       "configuration": "Debug",
@@ -707,7 +707,7 @@
       }
     },
     {
-      "name": "VS2019Win64-pie-disabled-release",
+      "name": "build-VS2019Win64-pie-disabled-release",
       "configurePreset": "VS2019Win64-pie-disabled-release",
       "displayName": "VS2019Win64, PIE Disabled, Release",
       "configuration": "Release",
@@ -718,7 +718,7 @@
       }
     },
     {
-      "name": "VS2022Win64-pie-enabled-debug",
+      "name": "build-VS2022Win64-pie-enabled-debug",
       "configurePreset": "VS2022Win64-pie-enabled-debug",
       "displayName": "VS2022Win64, PIE Enabled, Debug",
       "configuration": "Debug",
@@ -729,7 +729,7 @@
       }
     },
     {
-      "name": "VS2022Win64-pie-enabled-release",
+      "name": "build-VS2022Win64-pie-enabled-release",
       "configurePreset": "VS2022Win64-pie-enabled-release",
       "displayName": "VS2022Win64, PIE Enabled, Release",
       "configuration": "Release",
@@ -740,7 +740,7 @@
       }
     },
     {
-      "name": "VS2022Win64-pie-disabled-debug",
+      "name": "build-VS2022Win64-pie-disabled-debug",
       "configurePreset": "VS2022Win64-pie-disabled-debug",
       "displayName": "VS2022Win64, PIE Disabled, Debug",
       "configuration": "Debug",
@@ -751,7 +751,7 @@
       }
     },
     {
-      "name": "VS2022Win64-pie-disabled-release",
+      "name": "build-VS2022Win64-pie-disabled-release",
       "configurePreset": "VS2022Win64-pie-disabled-release",
       "displayName": "VS2022Win64, PIE Disabled, Release",
       "configuration": "Release",

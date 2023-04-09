@@ -21,14 +21,47 @@
 
 
 param(
-    [String]$BuildType = "Release"
+    [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
+    [Boolean]$EnablePIE = $false,
+    [String]$BuildType = "Release" # You can also specify "Debug"
 )
 
-cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=$BuildType
-cmake --build .\build\ --config $BuildType -v
+[String]$cmakePresetName = ""
+if ($Generator -ieq "Ninja") {
+    $cmakePresetName += "windows-ninja"
+} elseif ($Generator -ieq "VS2019Win64") {
+    $cmakePresetName += "VS2019Win64"
+} elseif ($Generator -ieq "VS2022Win64") {
+    $cmakePresetName += "VS2022Win64"
+} else {
+    Write-Error "Invalid value for Generator: $Generator"
+    exit 1
+}
+$cmakePresetName += "-"
+if ($EnablePIE) {
+    $cmakePresetName += "pie-enabled"
+} else {
+    $cmakePresetName += "pie-disabled"
+}
+$cmakePresetName += "-"
+if ($BuildType -ieq "Debug") {
+    $cmakePresetName += "debug"
+} elseif ($BuildType -ieq "Release") {
+    $cmakePresetName += "release"
+} else {
+    Write-Error "Unrecognized value for BuildType: $BuildType"
+    exit 1
+}
+
+[String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
+[String]$binaryDir = "$baseDir\build\$cmakePresetName"
+Push-Location $binaryDir
+cmake --preset $cmakePresetName
+cmake --build --preset "build-$cmakePresetName" -v
+Pop-Location
 
 New-Item bin -ItemType Directory -Force
-xcopy /y .\build\$BuildType\*.* .\bin\
-xcopy /y .\build\objconv\$BuildType\*.* .\bin\
+xcopy /y .\$binaryDir\$BuildType\*.* .\bin\
+xcopy /y .\$binaryDir\objconv\$BuildType\*.* .\bin\
 # Not building vegasettings for the moment
-# xcopy /y .\build\setup\$BuildType\*.* .\bin\
+# xcopy /y .\$binaryDir\setup\$BuildType\*.* .\bin\
