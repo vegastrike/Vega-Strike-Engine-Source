@@ -19,12 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
+
 # You can customize this directory location if desired, but it should be
 # something very short. Otherwise, you will run into problems.
-
 param(
     [String]$VCPKG_PARENT_DIR = "C:\Projects"
 )
+
 Set-Variable -Name CMAKE_VERSION -Value "3.25.1"
 
 New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
@@ -33,13 +34,21 @@ git clone https://github.com/stephengtuggy/vcpkg-local.git ./v
 .\v\bootstrap-vcpkg.bat -disableMetrics
 
 [Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCKPG_PARENT_DIR\v", 'User')
+$env:VCPKG_ROOT = "$VCKPG_PARENT_DIR\v"
 
 $path = [Environment]::GetEnvironmentVariable('PATH', 'User')
 $newPath = $path + ";$VCKPG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
+$env:PATH = $newPath
 
-[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', 'x64-windows', 'User')
-[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', 'x64-windows', 'User')
-[Environment]::SetEnvironmentVariable('PYTHONHOME', "$VCKPG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3", 'User')
+$triplet = 'x64-windows'
+[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', $triplet, 'User')
+$env:VCPKG_DEFAULT_TRIPLET = $triplet
+[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', $triplet, 'User')
+$env:VCPKG_DEFAULT_HOST_TRIPLET = $triplet
+
+$pythonHome = "$VCKPG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
+[Environment]::SetEnvironmentVariable('PYTHONHOME', $pythonHome, 'User')
+$env:PYTHONHOME = $pythonHome
 
 Pop-Location

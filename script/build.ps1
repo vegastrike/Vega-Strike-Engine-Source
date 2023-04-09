@@ -1,4 +1,6 @@
-# Copyright (C) 2021 Stephen G. Tuggy
+# build.ps1
+
+# Copyright (C) 2021-2023 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -17,10 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
-cmake --build .\build\ --config Release -v
+
+param(
+    [String]$BuildType = "Release"
+)
+
+cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=$BuildType
+cmake --build .\build\ --config $BuildType -v
+
 New-Item bin -ItemType Directory -Force
-xcopy /y .\build\Release\*.* .\bin\
-xcopy /y .\build\objconv\Release\*.* .\bin\
+xcopy /y .\build\$BuildType\*.* .\bin\
+xcopy /y .\build\objconv\$BuildType\*.* .\bin\
 # Not building vegasettings for the moment
-# xcopy /y .\build\setup\Release\*.* .\bin\
+# xcopy /y .\build\setup\$BuildType\*.* .\bin\
