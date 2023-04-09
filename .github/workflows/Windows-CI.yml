@@ -21,67 +21,67 @@ jobs:
         include:
           - os:              windows-2019
             cmake-generator: VS2019Win64
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Debug
           - os:              windows-2019
             cmake-generator: VS2019Win64
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Release
           - os:              windows-2019
             cmake-generator: VS2019Win64
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Debug
           - os:              windows-2019
             cmake-generator: VS2019Win64
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Release
           - os:              windows-2019
             cmake-generator: ninja
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Debug
           - os:              windows-2019
             cmake-generator: ninja
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Release
           - os:              windows-2019
             cmake-generator: ninja
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Debug
           - os:              windows-2019
             cmake-generator: ninja
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Release
           - os:              windows-2022
             cmake-generator: VS2022Win64
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Debug
           - os:              windows-2022
             cmake-generator: VS2022Win64
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Release
           - os:              windows-2022
             cmake-generator: VS2022Win64
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Debug
           - os:              windows-2022
             cmake-generator: VS2022Win64
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Release
           - os:              windows-2022
             cmake-generator: ninja
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Debug
           - os:              windows-2022
             cmake-generator: ninja
-            enable-pie:      true
+            enable-pie:      1
             build-type:      Release
           - os:              windows-2022
             cmake-generator: ninja
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Debug
           - os:              windows-2022
             cmake-generator: ninja
-            enable-pie:      false
+            enable-pie:      0
             build-type:      Release
 
     env:
