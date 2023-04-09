@@ -61,7 +61,9 @@ cmake --build --preset "build-$cmakePresetName" -v
 Pop-Location
 
 New-Item bin -ItemType Directory -Force
-xcopy /y .\$binaryDir\$BuildType\*.* .\bin\
-xcopy /y .\$binaryDir\objconv\$BuildType\*.* .\bin\
-# Not building vegasettings for the moment
-# xcopy /y .\$binaryDir\setup\$BuildType\*.* .\bin\
+$aPossibleBinaryDirs = @("$binaryDir","$binaryDir\$BuildType", "$binaryDir\$BuildType\objconv", "$binaryDir\objconv\$BuildType", "$binaryDir\$BuildType\setup", "$binaryDir\setup\$BuildType")
+$aPossibleBinaryDirs | ForEach-Object {
+    if (Test-Path $_) {
+        Copy-Item -Force -Verbose $_\*.* .\bin
+    }
+}
