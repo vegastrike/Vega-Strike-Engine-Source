@@ -24,8 +24,6 @@
 
 
 #include "mesh.h"
-//#include "aux_logo.h"
-//#include "aux_texture.h"
 #include <stdio.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
@@ -34,27 +32,28 @@
 #include "vs_logging.h"
 #include "vs_exit.h"
 
-using namespace VSFileSystem;   // FIXME -- Shouldn't include the entire namespace
+using namespace vega_types;
+using namespace VSFileSystem;
 
-extern Texture *createTexture(char const *ccc,
-        char const *cc,
-        int k = 0,
-        enum FILTER f1 = MIPMAP,
-        enum TEXTURE_TARGET t0 = TEXTURE2D,
-        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-        float f = 1,
-        int j = 0,
-        unsigned char c = GFXFALSE,
-        int i = 65536);
+extern SharedPtr<Texture> createTexture(char const *ccc,
+                                        char const *cc,
+                                        int k = 0,
+                                        enum FILTER f1 = MIPMAP,
+                                        enum TEXTURE_TARGET t0 = TEXTURE2D,
+                                        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+                                        float f = 1,
+                                        int j = 0,
+                                        unsigned char c = GFXFALSE,
+                                        int i = 65536);
 
-extern Logo *createLogo(int numberlogos,
-        Vector *center,
-        Vector *normal,
-        float *sizes,
-        float *rotations,
-        float offset,
-        Texture *Dec,
-        Vector *Ref);
+extern SharedPtr<Logo> createLogo(int numberlogos,
+                                  Vector *center,
+                                  Vector *normal,
+                                  float *sizes,
+                                  float *rotations,
+                                  float offset,
+                                  SharedPtr<Texture> Dec,
+                                  Vector *Ref);
 
 #ifdef __cplusplus
 extern "C"
@@ -270,21 +269,21 @@ void Mesh::LoadBinary(const char *filename, int faction) {
          *       vertexlist[ii].t = readf(fp);// *oo256;
          *  }*/
         if (AlphaMap) {
-            if (Decal.empty()) {
-                Decal.push_back(NULL);
+            if (Decal->empty()) {
+                Decal->push_back(nullptr);
             }
-            Decal[0] = createTexture(TexName, 0);
+            Decal->front() = createTexture(TexName, nullptr);
         } else {
-            if (Decal.empty()) {
-                Decal.push_back(NULL);
+            if (Decal->empty()) {
+                Decal->push_back(nullptr);
             }
-            Decal[0] = createTexture(TexName, 0);
+            Decal->front() = createTexture(TexName, nullptr);
         }
-        if (!Decal[0]) {
+        if (!Decal->front()) {
             objtex = GFXFALSE;
         }
     }
-    numforcelogo = readi(fp);
+    int numforcelogo = readi(fp);
     Vector *PolyNormal = new Vector[numforcelogo];
     Vector *center = new Vector[numforcelogo];
     float *sizes = new float[numforcelogo];
@@ -387,8 +386,8 @@ void Mesh::LoadBinary(const char *filename, int faction) {
         rotations[ii] = readf(fp);
         offset[ii] = readf(fp);
     }
-    forcelogos = createLogo(numforcelogo, center, PolyNormal, sizes, rotations, 0.01F, FactionUtil::getForceLogo(
-            faction), Ref);
+    forcelogos->push_back(createLogo(numforcelogo, center, PolyNormal, sizes, rotations, 0.01F, FactionUtil::getForceLogo(
+            faction), Ref));
     delete[] Ref;
     delete[] PolyNormal;
     delete[] center;
@@ -425,7 +424,7 @@ void Mesh::LoadBinary(const char *filename, int faction) {
         vertexlist[ii].j = vertexlist[ii + 1].j = vertexlist[ii + 2].j = vertexlist[ii + 3].j = Normal.j;
         vertexlist[ii].k = vertexlist[ii + 1].k = vertexlist[ii + 2].k = vertexlist[ii + 3].k = Normal.k;
     }
-    numsquadlogo = readi(fp);
+    int numsquadlogo = readi(fp);
     PolyNormal = new Vector[numsquadlogo];
     center = new Vector[numsquadlogo];
     sizes = new float[numsquadlogo];
@@ -526,15 +525,14 @@ void Mesh::LoadBinary(const char *filename, int faction) {
         rotations[ii] = readf(fp);
         offset[ii] = readf(fp);
     }
-    squadlogos =
-            createLogo(numsquadlogo,
+    squadlogos->push_back(createLogo(numsquadlogo,
                     center,
                     PolyNormal,
                     sizes,
                     rotations,
                     (float) 0.01,
                     FactionUtil::getSquadLogo(faction),
-                    Ref);
+                    Ref));
     delete[] Ref;
     int vert_offset[2];
     vert_offset[0] = NumTris * 3;
@@ -542,7 +540,7 @@ void Mesh::LoadBinary(const char *filename, int faction) {
     enum POLYTYPE modes[2];
     modes[0] = GFXTRI;
     modes[1] = GFXQUAD;
-    vlist = new GFXVertexList(modes, NumTris * 3 + NumQuads * 4, vertexlist, 2, vert_offset);
+    vlist = MakeShared<GFXVertexList>(modes, NumTris * 3 + NumQuads * 4, vertexlist, 2, vert_offset);
     //vlist = new GFXVertexList(numtris*4,0,numquads*4, vertexlist+numtris*3);
     /*long pos =*/ fp.GetPosition();
     myMatNum = readi(fp);

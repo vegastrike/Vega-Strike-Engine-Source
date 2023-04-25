@@ -1,10 +1,8 @@
-/**
+/*
  * OpenALStreamingSound.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -78,7 +76,7 @@ void OpenALStreamingSound::loadImpl(bool wait) {
             // Weird...
             getStream()->seek(0);
         }
-        SharedPtr<Stream> stream = getStream();
+        vega_types::SharedPtr<Stream> stream = getStream();
 
         // setup formatted buffer
         // if the format does not match an OpenAL built-in format, we must convert it.

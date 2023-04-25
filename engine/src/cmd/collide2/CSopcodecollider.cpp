@@ -44,7 +44,7 @@ using namespace VegaStrike;
 
 static vs_vector<csCollisionPair> pairs;
 
-csOPCODECollider::csOPCODECollider(const std::vector<mesh_polygon> &polygons) {
+csOPCODECollider::csOPCODECollider(vega_types::SequenceContainer<mesh_polygon> & polygons) {
     m_pCollisionModel = nullptr;
     vertholder = nullptr;
     //pairs.IncRef();
@@ -66,7 +66,7 @@ inline float max3(float a, float b, float c) {
     return (a > b ? (a > c ? a : (c > b ? c : b)) : (b > c ? b : c));
 }
 
-void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polygons) {
+void csOPCODECollider::GeometryInitialize(const vega_types::SequenceContainer<mesh_polygon> &polygons) {
     OPCODECREATE OPCC;
     unsigned int tri_count = 0;
     std::vector<Vector>::size_type vert_count = 0;

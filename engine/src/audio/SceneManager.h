@@ -1,10 +1,8 @@
-/**
+/*
  * SceneManager.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -84,16 +82,16 @@ struct SceneManagerData;
  */
 class SceneManager : public Singleton<SceneManager> {
 private:
-    AutoPtr<__impl::SceneManagerData> data;
+    vega_types::AutoPtr<__impl::SceneManagerData> data;
 
 public:
-    typedef VirtualIterator<SharedPtr<Scene> > SceneIterator;
+    typedef VirtualIterator<vega_types::SharedPtr<Scene> > SceneIterator;
 
 protected:
     /** Returns the renderer
      * @remarks Throws an exception if no renderer has been set
      */
-    const SharedPtr<Renderer> &internalRenderer() const;
+    const vega_types::SharedPtr<Renderer> &internalRenderer() const;
 
 public:
     /** Construct a new instance of the manager
@@ -110,12 +108,12 @@ public:
      * @note The sound must be associated to the correct renderer, or bad things will happen.
      * @see Renderer, which creates sounds.
      */
-    virtual SharedPtr<Source> createSource(SharedPtr<Sound> sound, bool looping = false);
+    virtual vega_types::SharedPtr<Source> createSource(vega_types::SharedPtr<Sound> sound, bool looping = false);
 
     /** Create a new source based on the specified template
      * @remarks All location information will hold unspecified values, so you have to fill them in.
      */
-    SharedPtr<Source> createSource(SharedPtr<SourceTemplate> tpl);
+    vega_types::SharedPtr<Source> createSource(vega_types::SharedPtr<SourceTemplate> tpl);
 
     /** Create a new source based on the specified template, but overriding its sound resource.
      * @remarks All location information will hold unspecified values, so you have to fill them in.
@@ -123,10 +121,10 @@ public:
      *      on many different streams. Eg: a "music" template for spawning music tracks, a "radio"
      *      template for spawning radio voiceovers, etc...
      */
-    SharedPtr<Source> createSource(SharedPtr<SourceTemplate> tpl, const std::string &name);
+    vega_types::SharedPtr<Source> createSource(vega_types::SharedPtr<SourceTemplate> tpl, const std::string &name);
 
     /** Destroy a source created with this manager */
-    virtual void destroySource(SharedPtr<Source> source);
+    virtual void destroySource(vega_types::SharedPtr<Source> source);
 
     /** Convenience API to play a source once and forget.
      * @param tpl The source template from which a source should be instanced
@@ -138,7 +136,7 @@ public:
      * @remarks The source should not be looping, and an exception will be thrown if it is.
      */
     void playSource(
-            SharedPtr<SourceTemplate> tpl,
+            vega_types::SharedPtr<SourceTemplate> tpl,
             const std::string &sceneName,
             LVector3 position,
             Vector3 direction,
@@ -156,7 +154,7 @@ public:
      * @remarks The source should not be looping, and an exception will be thrown if it is.
      */
     void playSource(
-            SharedPtr<SourceTemplate> tpl,
+            vega_types::SharedPtr<SourceTemplate> tpl,
             const std::string &soundName,
             const std::string &sceneName,
             LVector3 position,
@@ -165,10 +163,10 @@ public:
             Scalar radius);
 
     /** Create a new named scene */
-    virtual SharedPtr<Scene> createScene(const std::string &name);
+    virtual vega_types::SharedPtr<Scene> createScene(const std::string &name);
 
     /** Get an existing scene by its name */
-    virtual SharedPtr<Scene> getScene(const std::string &name) const;
+    virtual vega_types::SharedPtr<Scene> getScene(const std::string &name) const;
 
     /** Destroy an existing scene by its name */
     virtual void destroyScene(const std::string &name);
@@ -191,13 +189,13 @@ public:
      *      to the left (what would be required if the listeners of each scene
      *      were rotated, since they're "artificial" listeners).
      */
-    virtual SharedPtr<Listener> getRootListener() const;
+    virtual vega_types::SharedPtr<Listener> getRootListener() const;
 
     /** Get an iterator over all scenes */
-    virtual SharedPtr<SceneIterator> getSceneIterator() const;
+    virtual vega_types::SharedPtr<SceneIterator> getSceneIterator() const;
 
     /** Get an iterator over all active scenes */
-    virtual SharedPtr<SceneIterator> getActiveSceneIterator() const;
+    virtual vega_types::SharedPtr<SceneIterator> getActiveSceneIterator() const;
 
     /** Set a new renderer
      * @param renderer A new renderer to be used.
@@ -208,10 +206,10 @@ public:
      * @note Overriding implementations must call the base implementation, since
      *      getRenderer is not overridable.
      */
-    virtual void setRenderer(SharedPtr<Renderer> renderer);
+    virtual void setRenderer(vega_types::SharedPtr<Renderer> renderer);
 
     /** Get the current renderer */
-    SharedPtr<Renderer> getRenderer() const;
+    vega_types::SharedPtr<Renderer> getRenderer() const;
 
 
     /********* Scene cycle **********/
@@ -337,11 +335,11 @@ public:
     /*********** Notification events ************/
 
     /** Notify the scene manager of a source that starts or stops playing. */
-    virtual void notifySourcePlaying(SharedPtr<Source> source, SharedPtr<Scene> scene, bool playing);
+    virtual void notifySourcePlaying(vega_types::SharedPtr<Source> source, vega_types::SharedPtr<Scene> scene, bool playing);
 
 protected:
     /** Add a new scene @see createScene */
-    void addScene(SharedPtr<Scene> scene);
+    void addScene(vega_types::SharedPtr<Scene> scene);
 
     /** Synchronize activation state with the scenes */
     virtual void activationPhaseImpl();

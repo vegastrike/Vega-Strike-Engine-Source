@@ -1,10 +1,8 @@
-/**
+/*
  * audible.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Roy Falk,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,7 +24,8 @@
 
 
 #include "audible.h"
-
+#include "preferred_types.h"
+#include "vega_cast_utils.h"
 #include "gfx/vec.h"
 #include "vs_globals.h"
 #include "universe.h"
@@ -61,9 +60,9 @@ void Audible::addDefaultSounds() {
 void Audible::addSounds(std::string (*nextElement)(std::string &), std::string soundsString) {
     bool useDefaultSounds = false;
 
-    for (SoundType type : typesArray) {
+    for (SoundType const type : typesArray) {
         if (!useDefaultSounds) {
-            string soundString = nextElement(soundsString);
+            std::string const soundString = nextElement(soundsString);
             if (soundString.length()) {
                 sounds[type] = AUDCreateSoundWAV(soundString, false);
             } else {
@@ -77,12 +76,12 @@ void Audible::addSounds(std::string (*nextElement)(std::string &), std::string s
     }
 }
 
-void Audible::addSound(string soundString, SoundType type) {
+void Audible::addSound(std::string soundString, SoundType type) {
     sounds[type] = AUDCreateSoundWAV(soundString, false);
 }
 
 void Audible::adjustSound(SoundType type) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     AUDAdjustSound(sounds[type], unit->cumulative_transformation.position, unit->cumulative_velocity);
 }
 
@@ -96,27 +95,27 @@ void Audible::playSound(SoundType type) {
 
 void Audible::playShieldDamageSound(const Vector &pnt) {
     const int shieldSound = sounds[SoundType::shield];
-    static int playerShieldSound = AUDCreateSoundWAV(game_options()->player_shield_hit);
-    int currentPlayerSound = playerShieldSound != -1 ? playerShieldSound : shieldSound;
+    int const playerShieldSound = AUDCreateSoundWAV(game_options()->player_shield_hit);
+    int const currentPlayerSound = playerShieldSound != -1 ? playerShieldSound : shieldSound;
     playSound(pnt, shieldSound, currentPlayerSound);
 }
 
 void Audible::playArmorDamageSound(const Vector &pnt) {
     const int armorSound = sounds[SoundType::armor];
-    static int playerArmorSound = AUDCreateSoundWAV(game_options()->player_armor_hit);
-    int currentPlayerSound = playerArmorSound != -1 ? playerArmorSound : armorSound;
+    int const playerArmorSound = AUDCreateSoundWAV(game_options()->player_armor_hit);
+    int const currentPlayerSound = playerArmorSound != -1 ? playerArmorSound : armorSound;
     playSound(pnt, armorSound, currentPlayerSound);
 }
 
 void Audible::playHullDamageSound(const Vector &pnt) {
     const int hullSound = sounds[SoundType::hull];
-    static int playerHullSound = AUDCreateSoundWAV(game_options()->player_hull_hit);
-    int currentPlayerSound = playerHullSound != -1 ? playerHullSound : hullSound;
+    int const playerHullSound = AUDCreateSoundWAV(game_options()->player_hull_hit);
+    int const currentPlayerSound = playerHullSound != -1 ? playerHullSound : hullSound;
     playSound(pnt, hullSound, currentPlayerSound);
 }
 
 void Audible::playEngineSound() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     AUDPlay(sounds[SoundType::engine], unit->Position(), unit->GetVelocity(), 1);
 }
 
@@ -126,7 +125,7 @@ void Audible::playExplosionDamageSound() {
 
 void Audible::killSounds() {
     for (auto const &pair : sounds) {
-        int sound = pair.second;
+        int const sound = pair.second;
         if (sound != -1) {
             AUDStopPlaying(sound);
             AUDDeleteSound(sound);
@@ -135,7 +134,7 @@ void Audible::killSounds() {
 }
 
 void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (AUDIsPlaying(sound)) {
         AUDStopPlaying(sound);
@@ -153,11 +152,29 @@ void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
 // TODO: this is just a name I gave the method based on the fact it modifies
 // the sound based on the velocity and location
 void Audible::playDopplerSound(const Vector &pnt, int sound) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    QVector position = unit->ToWorldCoordinates(pnt).Cast() +
+    QVector const position = unit->ToWorldCoordinates(pnt).Cast() +
             unit->cumulative_transformation.position;
-    Vector velocity = unit->Velocity;
+    Vector const velocity = unit->Velocity;
     const float gain = 1;
     AUDPlay(sound, position, velocity, gain);
+}
+
+Audible::Audible(Audible &&other) noexcept
+        : sounds(std::move(other.sounds)),
+        defaultSoundNames(std::move(other.defaultSoundNames)) {
+}
+
+Audible &Audible::operator=(Audible &&other) noexcept {
+    if (&other != this) {
+        killSounds();
+    }
+    sounds = std::move(other.sounds);
+    defaultSoundNames = std::move(other.defaultSoundNames);
+    return *this;
+}
+
+Audible::~Audible() {
+    killSounds();
 }

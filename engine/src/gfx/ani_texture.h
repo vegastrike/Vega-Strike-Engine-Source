@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * ani_texture.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -28,35 +30,34 @@
 #include "vsfilesystem.h"
 #include "vid_file.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include "../SharedPool.h"
 
 #include "audio/Types.h"
+#include "preferred_types.h"
 #include "audio/Source.h"
 
 class AnimatedTexture : public Texture {
-    Texture **Decal;
-    unsigned int activebound; //For video mode
-    double physicsactive;
-    bool loadSuccess;
-
-    void AniInit();
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>> Decal{};
+    unsigned int activebound{-1U}; //For video mode
+    double physicsactive{0.0};
+    bool loadSuccess{false};
 
     //For video mode
-    bool vidMode;
-    bool detailTex;
-    enum FILTER ismipmapped;
-    int texstage;
-    SharedPtr<Audio::Source> timeSource;
+    bool vidMode{false};
+    bool detailTex{false};
+    enum FILTER ismipmapped{BILINEAR};
+    int texstage{0};
+    vega_types::SharedPtr<Audio::Source> timeSource;
 
     vector<StringPool::Reference> frames; //Filenames for each frame
     vector<Vector> frames_maxtc; //Maximum tcoords for each frame
     vector<Vector> frames_mintc; //Minimum tcoords for each frame
 
-    VidFile *vidSource;
+    VidFile *vidSource{nullptr};
 
     StringPool::Reference wrapper_file_path;
-    VSFileSystem::VSFileType wrapper_file_type;
+    VSFileSystem::VSFileType wrapper_file_type{};
 
     //Options
     enum optionenum {
@@ -66,61 +67,63 @@ class AnimatedTexture : public Texture {
         optLoop = 0x08,
         optSoundTiming = 0x10
     };
-    unsigned char options;
+    unsigned char options{optLoop};
 
     //Implementation
     GFXColor multipass_interp_basecolor;
-    enum ADDRESSMODE defaultAddressMode; //default texture address mode, read from .ani
+    enum ADDRESSMODE defaultAddressMode{DEFAULT_ADDRESS_MODE}; //default texture address mode, read from .ani
 
 protected:
-    unsigned int numframes;
-    float timeperframe;
-    unsigned int active;
-    unsigned int nextactive; //It is computable, but it's much more convenient this way
-    float active_fraction; //For interpolated animations
-    double curtime;
+    unsigned int numframes{1U};
+    float timeperframe{1.0F};
+    unsigned int active{0U};
+    unsigned int nextactive{0U}; //It is computable, but it's much more convenient this way
+    float active_fraction{0U}; //For interpolated animations
+    double curtime{0.0};
 
     // for video de-jittering
-    double lastcurtime;
-    double lastrealtime;
+    double lastcurtime{0.0};
+    double lastrealtime{0.0};
 
-    bool constframerate;
-    bool done;
+    bool constframerate{true};
+    bool done{false};
+
+    static vega_types::SharedPtr<AnimatedTexture> constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, int stage, enum FILTER imm, bool detailtexture = false);
+    static vega_types::SharedPtr<AnimatedTexture> constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, const char * file, int stage, enum FILTER imm, bool detailtex);
+    static vega_types::SharedPtr<AnimatedTexture> constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture = false);
 
 public:
-    virtual void setTime(double tim);
+    static vega_types::SharedPtr<AnimatedTexture> createAnimatedTexture(int stage, enum FILTER imm, bool detailtexture = false);
+    static vega_types::SharedPtr<AnimatedTexture> createAnimatedTexture(const char * file, int stage, enum FILTER imm, bool detailtexture = false);
+    static vega_types::SharedPtr<AnimatedTexture> createAnimatedTexture(VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture = false);
 
-    virtual double curTime() const {
+    void setTime(double tim) override;
+
+    double curTime() const override {
         return curtime;
     }
 
-    virtual unsigned int numFrames() const {
+    unsigned int numFrames() const override {
         return numframes;
     }
 
-    virtual float framesPerSecond() const {
-        return 1 / timeperframe;
+    float framesPerSecond() const override {
+        return 1.0F / timeperframe;
     }
 
-    virtual unsigned int numLayers() const;
+    unsigned int numLayers() const override;
 
-    virtual unsigned int numPasses() const;
+    unsigned int numPasses() const override;
 
-    virtual bool canMultiPass() const {
+    bool canMultiPass() const override {
         return true;
     }
 
-    virtual bool constFrameRate() const {
+    bool constFrameRate() const override {
         return constframerate;
     }
 
     AnimatedTexture();
-
-    AnimatedTexture(int stage, enum FILTER imm, bool detailtexture = false);
-
-    AnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtexture = false);
-
-    AnimatedTexture(VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture = false);
 
     void Load(VSFileSystem::VSFile &f, int stage, enum FILTER ismipmapped, bool detailtex = false);
 
@@ -130,15 +133,13 @@ public:
 
     virtual void LoadFrame(int num); //For video mode
 
-    void Destroy();
+    const vega_types::SharedPtr<const Texture> OriginalConst() const override;
 
-    virtual const Texture *Original() const;
+    virtual vega_types::SharedPtr<Texture> Original();
 
-    virtual Texture *Original();
+    ~AnimatedTexture() override;
 
-    ~AnimatedTexture();
-
-    virtual Texture *Clone();
+    virtual vega_types::SharedPtr<Texture> Clone();
 
     virtual void MakeActive() {
         MakeActive(texstage, 0);
@@ -188,11 +189,11 @@ public:
         return (options & optLoop) != 0;
     }
 
-    SharedPtr<Audio::Source> GetTimeSource() const {
-        return (options & optSoundTiming) ? timeSource : SharedPtr<Audio::Source>();
+    vega_types::SharedPtr<Audio::Source> GetTimeSource() const {
+        return (options & optSoundTiming) ? timeSource : vega_types::SharedPtr<Audio::Source>();
     }
 
-    void SetTimeSource(SharedPtr<Audio::Source> source);
+    void SetTimeSource(vega_types::SharedPtr<Audio::Source> source);
 
     void ClearTimeSource();
 
@@ -208,10 +209,10 @@ public:
     virtual bool LoadSuccess();
 
     //Some useful factory methods -- also defined in ani_texture.cpp
-    static AnimatedTexture *CreateVideoTexture(const std::string &fname,
-            int stage = 0,
-            enum FILTER ismipmapped = BILINEAR,
-            bool detailtex = false);
+    static vega_types::SharedPtr<AnimatedTexture> CreateVideoTexture(const std::string &fname,
+                                                                     int stage = 0,
+                                                                     enum FILTER ismipmapped = BILINEAR,
+                                                                     bool detailtex = false);
 };
 
 #endif

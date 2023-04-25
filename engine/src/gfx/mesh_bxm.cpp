@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * mesh_bxm.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -33,10 +35,13 @@
 #include "animation.h"
 #include "faction_generic.h"
 #endif
-#include <assert.h>
+#include <cassert>
 
 #include "vegastrike.h"
 #include "vs_logging.h"
+#include "preferred_types.h"
+
+using namespace vega_types;
 
 string inverseblend[16] = {
         "ZERO", "ZERO", "ONE", "SRCCOLOR", "INVSRCCOLOR", "SRCALPHA", "INVSRCALPHA",
@@ -53,7 +58,7 @@ int aprintf(...) {
 }
 
 FILE *aopen(...) {
-    return NULL;
+    return nullptr;
 }
 
 #ifndef STANDALONE
@@ -64,26 +69,24 @@ FILE *aopen(...) {
 
 #else
 
-Texture * LoadTexture( string nam )
+vega_types::SharedPtr<Texture> LoadTexture( string nam )
 {
-    return new Texture( nam );
+    return Texture::createTexture( nam );
 }
 
-Texture * LoadAnimation( string Name )
+vega_types::SharedPtr<Texture> LoadAnimation( string Name )
 {
-    return new Animation( Name );
+    return Animation::createAnimation( Name );
 }
 
 #endif
 
 struct OrigMeshLoader {
-    Mesh *m;
+    SequenceContainer<SharedPtr<Mesh>> m;
     vector<float> sizes;
     unsigned int num;
 
-    OrigMeshLoader() {
-        m = 0;
-        num = 0;
+    OrigMeshLoader(): num(0) {
     }
 };
 
@@ -94,62 +97,62 @@ struct OrigMeshLoader {
 //sets up the appropriate lists for the below functions to utilize
 #define BEGIN_GL_LINES(expectitems)                                                               \
     do {                                                                                            \
-        xml.active_list = &xml.lines; xml.active_ind = &xml.lineind; xml.num_vertices =             \
-            2; xml.active_list->reserve( 2*expectitems ); xml.active_ind->reserve( 2*expectitems ); \
+        xml->active_list = &xml->lines; xml->active_ind = &xml->lineind; xml->num_vertices =             \
+            2; xml->active_list->reserve( 2*expectitems ); xml->active_ind->reserve( 2*expectitems ); \
     }                                                                                               \
     while (0)
 
 #define BEGIN_GL_TRIANGLES(expectitems)                                                    \
     do {                                                                                     \
-        xml.active_list = &xml.tris; xml.active_ind = &xml.triind; xml.num_vertices = 3;     \
-        xml.active_list->reserve( 3*expectitems ); xml.active_ind->reserve( 3*expectitems ); \
+        xml->active_list = &xml->tris; xml->active_ind = &xml->triind; xml->num_vertices = 3;     \
+        xml->active_list->reserve( 3*expectitems ); xml->active_ind->reserve( 3*expectitems ); \
     }                                                                                        \
     while (0)
 
 #define BEGIN_GL_TRIANGLE(expectitems)       \
-    do {xml.trishade.push_back( flatshade ); } \
+    do {xml->trishade.push_back( flatshade ); } \
     while (0)
 
 #define BEGIN_GL_QUADS(expectitems)                                                               \
     do {                                                                                            \
-        xml.active_list = &xml.quads; xml.active_ind = &xml.quadind; xml.num_vertices =             \
-            4; xml.active_list->reserve( 4*expectitems ); xml.active_ind->reserve( 4*expectitems ); \
+        xml->active_list = &xml->quads; xml->active_ind = &xml->quadind; xml->num_vertices =             \
+            4; xml->active_list->reserve( 4*expectitems ); xml->active_ind->reserve( 4*expectitems ); \
     }                                                                                               \
     while (0)
 
 #define BEGIN_GL_QUAD(expectitems)            \
-    do {xml.quadshade.push_back( flatshade ); } \
+    do {xml->quadshade.push_back( flatshade ); } \
     while (0)
 
 #define BEGIN_GL_TRIANGLE_FAN(expectitems)                                                                                    \
     do {                                                                                                                        \
-        xml.trifans.push_back( std::vector< GFXVertex > () ); xml.active_list =                                                 \
-            &xml.trifans.back(); xml.tfancnt = xml.trifanind.size(); xml.active_ind = &xml.trifanind; xml.active_list->reserve( \
-            expectitems ); xml.active_ind->reserve( expectitems );                                                              \
+        xml->trifans.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () ); xml->active_list =                                                 \
+            &xml->trifans.back(); xml->tfancnt = xml->trifanind.size(); xml->active_ind = &xml->trifanind; xml->active_list->reserve( \
+            expectitems ); xml->active_ind->reserve( expectitems );                                                              \
     }                                                                                                                           \
     while (0)
 
 #define BEGIN_GL_QUAD_STRIP(expectitems)                                                                                    \
     do {                                                                                                                      \
-        xml.num_vertices = 4; xml.quadstrips.push_back( vector< GFXVertex > () );                                             \
-        xml.active_list  = &xml.quadstrips.back(); xml.qstrcnt = xml.quadstripind.size(); xml.active_ind = &xml.quadstripind; \
-        xml.active_list->reserve( expectitems ); xml.active_ind->reserve( expectitems );                                      \
+        xml->num_vertices = 4; xml->quadstrips.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () );                                             \
+        xml->active_list  = &xml->quadstrips.back(); xml->qstrcnt = xml->quadstripind.size(); xml->active_ind = &xml->quadstripind; \
+        xml->active_list->reserve( expectitems ); xml->active_ind->reserve( expectitems );                                      \
     }                                                                                                                         \
     while (0)
 
 #define BEGIN_GL_TRIANGLE_STRIP(expectitems)                                                                            \
     do {                                                                                                                  \
-        xml.num_vertices = 3; xml.tristrips.push_back( vector< GFXVertex > () );                                          \
-        xml.tstrcnt = xml.tristripind.size(); xml.active_ind = &xml.tristripind; xml.active_list->reserve( expectitems ); \
-        xml.active_ind->reserve( expectitems );                                                                           \
+        xml->num_vertices = 3; xml->tristrips.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () );                                          \
+        xml->tstrcnt = xml->tristripind.size(); xml->active_ind = &xml->tristripind; xml->active_list->reserve( expectitems ); \
+        xml->active_ind->reserve( expectitems );                                                                           \
     }                                                                                                                     \
     while (0)
 
 #define BEGIN_GL_LINE_STRIP(expectitems)                                                                                      \
     do {                                                                                                                        \
-        xml.num_vertices = 2; xml.linestrips.push_back( vector< GFXVertex > () );                                               \
-        xml.active_list  = &xml.linestrips.back(); xml.lstrcnt = xml.linestripind.size();   xml.active_ind = &xml.linestripind; \
-        xml.active_list->reserve( expectitems ); xml.active_ind->reserve( expectitems );                                        \
+        xml->num_vertices = 2; xml->linestrips.push_back( vega_types::ContiguousSequenceContainer< GFXVertex > () );                                               \
+        xml->active_list  = &xml->linestrips.back(); xml->lstrcnt = xml->linestripind.size();   xml->active_ind = &xml->linestripind; \
+        xml->active_list->reserve( expectitems ); xml->active_ind->reserve( expectitems );                                        \
     }                                                                                                                           \
     while (0)
 
@@ -160,38 +163,38 @@ struct OrigMeshLoader {
 #define END_GL_QUAD
 
 #define END_GL_TRIANGLE_FAN                                                   \
-    do {xml.nrmltrifan.reserve( xml.trifanind.size()*3 );                     \
-        for (unsigned int i = xml.tfancnt+2; i < xml.trifanind.size(); i++) { \
-            xml.nrmltrifan.push_back( xml.trifanind[xml.tfancnt] );           \
-            xml.nrmltrifan.push_back( xml.trifanind[i-1] );                   \
-            xml.nrmltrifan.push_back( xml.trifanind[i] );                     \
+    do {xml->nrmltrifan.reserve( xml->trifanind.size()*3 );                     \
+        for (unsigned int i = xml->tfancnt+2; i < xml->trifanind.size(); i++) { \
+            xml->nrmltrifan.push_back( xml->trifanind[xml->tfancnt] );           \
+            xml->nrmltrifan.push_back( xml->trifanind[i-1] );                   \
+            xml->nrmltrifan.push_back( xml->trifanind[i] );                     \
         }                                                                     \
     }                                                                         \
     while (0)
 
 #define END_GL_QUAD_STRIP                                                           \
-    do {xml.nrmlquadstrip.reserve( xml.quadstripind.size()*(4/2) );                 \
-        for (unsigned int i = xml.qstrcnt+3; i < xml.quadstripind.size(); i += 2) { \
-            xml.nrmlquadstrip.push_back( xml.quadstripind[i-3] );                   \
-            xml.nrmlquadstrip.push_back( xml.quadstripind[i-2] );                   \
-            xml.nrmlquadstrip.push_back( xml.quadstripind[i] );                     \
-            xml.nrmlquadstrip.push_back( xml.quadstripind[i-1] );                   \
+    do {xml->nrmlquadstrip.reserve( xml->quadstripind.size()*(4/2) );                 \
+        for (unsigned int i = xml->qstrcnt+3; i < xml->quadstripind.size(); i += 2) { \
+            xml->nrmlquadstrip.push_back( xml->quadstripind[i-3] );                   \
+            xml->nrmlquadstrip.push_back( xml->quadstripind[i-2] );                   \
+            xml->nrmlquadstrip.push_back( xml->quadstripind[i] );                     \
+            xml->nrmlquadstrip.push_back( xml->quadstripind[i-1] );                   \
         }                                                                           \
     }                                                                               \
     while (0)
 
 #define END_GL_TRIANGLE_STRIP                                                   \
-    do {xml.nrmltristrip.reserve( xml.tristripind.size()*3 );                   \
-        for (unsigned int i = xml.tstrcnt+2; i < xml.tristripind.size(); i++) { \
-            if ( (i-xml.tstrcnt)%2 ) {                                          \
-                xml.nrmltristrip.push_back( xml.tristripind[i-2] );             \
-                xml.nrmltristrip.push_back( xml.tristripind[i-1] );             \
-                xml.nrmltristrip.push_back( xml.tristripind[i] );               \
+    do {xml->nrmltristrip.reserve( xml->tristripind.size()*3 );                   \
+        for (unsigned int i = xml->tstrcnt+2; i < xml->tristripind.size(); i++) { \
+            if ( (i-xml->tstrcnt)%2 ) {                                          \
+                xml->nrmltristrip.push_back( xml->tristripind[i-2] );             \
+                xml->nrmltristrip.push_back( xml->tristripind[i-1] );             \
+                xml->nrmltristrip.push_back( xml->tristripind[i] );               \
             }                                                                   \
             else {                                                              \
-                xml.nrmltristrip.push_back( xml.tristripind[i-1] );             \
-                xml.nrmltristrip.push_back( xml.tristripind[i-2] );             \
-                xml.nrmltristrip.push_back( xml.tristripind[i] );               \
+                xml->nrmltristrip.push_back( xml->tristripind[i-1] );             \
+                xml->nrmltristrip.push_back( xml->tristripind[i-2] );             \
+                xml->nrmltristrip.push_back( xml->tristripind[i] );               \
             }                                                                   \
         }                                                                       \
     }                                                                           \
@@ -199,10 +202,10 @@ struct OrigMeshLoader {
 
 #define END_GL_LINE_STRIP                                                        \
     do {                                                                         \
-        xml.nrmllinstrip.reserve( xml.linestripind.size()*2 );                   \
-        for (unsigned int i = xml.lstrcnt+1; i < xml.linestripind.size(); i++) { \
-            xml.nrmllinstrip.push_back( xml.linestripind[i-1] );                 \
-            xml.nrmllinstrip.push_back( xml.linestripind[i] );                   \
+        xml->nrmllinstrip.reserve( xml->linestripind.size()*2 );                   \
+        for (unsigned int i = xml->lstrcnt+1; i < xml->linestripind.size(); i++) { \
+            xml->nrmllinstrip.push_back( xml->linestripind[i-1] );                 \
+            xml->nrmllinstrip.push_back( xml->linestripind[i] );                   \
         }                                                                        \
     }                                                                            \
     while (0)
@@ -229,29 +232,30 @@ struct OrigMeshLoader {
 
 #define DOVERTEX(num)                                             \
     do {                                                            \
-        vtx = xml.vertices[ind##num];                               \
-        if (!xml.sharevert) {                                       \
+        vtx = xml->vertices[ind##num];                               \
+        if (!xml->sharevert) {                                       \
             vtx.s = s##num;                                         \
             vtx.t = t##num;                                         \
         }                                                           \
-        xml.vertex = vtx;                                           \
-        xml.vertexcount[ind##num] += 1;                             \
-        if ( (!vtx.i) && (!vtx.j) && (!vtx.k) && !xml.recalc_norm ) \
-            xml.recalc_norm = true;                                 \
-        xml.active_list->push_back( xml.vertex );                   \
-        xml.active_ind->push_back( ind##num );                      \
-        xml.num_vertices--;                                         \
+        xml->vertex = vtx;                                           \
+        xml->vertexcount[ind##num] += 1;                             \
+        if ( (!vtx.i) && (!vtx.j) && (!vtx.k) && !xml->recalc_norm ) \
+            xml->recalc_norm = true;                                 \
+        xml->active_list->push_back( xml->vertex );                   \
+        xml->active_ind->push_back( ind##num );                      \
+        xml->num_vertices--;                                         \
         DLISTDOVERTEX( stat );                                      \
     }                                                               \
     while (0)
 
 template<typename T>
-void reverse_vector(vector<T> &vec) {
-    vector<T> newvec;
-    for (; (!vec.empty()); vec.pop_back()) {
-        newvec.push_back(vec.back());
-    }
-    vec.swap(newvec);
+void reverseContiguousSequenceContainer(ContiguousSequenceContainer<T> &contiguous_sequence_container) {
+    std::reverse(contiguous_sequence_container.begin(), contiguous_sequence_container.end());
+}
+
+template<typename T>
+void reverseSequenceContainer(SequenceContainer<T> &sequence_container) {
+    std::reverse(sequence_container.begin(), sequence_container.end());
 }
 
 #ifdef STANDALONE
@@ -259,7 +263,7 @@ void reverse_vector(vector<T> &vec) {
 #define bxmfprintf fprintf
 #define bxmfopen fopen
 
-void Mesh::BFXMToXmesh( FILE *Inputfile, FILE *Outputfile, vector< Mesh* > &output, Vector overallscale, int fac )
+void Mesh::BFXMToXmesh( FILE *Inputfile, FILE *Outputfile, vega_types::ContiguousSequenceContainer< Mesh* > &output, Vector overallscale, int fac )
 {
     Flightgroup *fg = 0;
 
@@ -269,26 +273,26 @@ static inline void fignoref(FILE *f, ...) {
 }
 
 static inline FILE *fignorefopen(const char *, const char *) {
-    return 0;
+    return nullptr;
 }
 
 #define bxmfprintf fignoref
 #define bxmfopen fignorefopen
 
-vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
+SequenceContainer<SharedPtr<Mesh>> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
         const Vector &scalex,
         int faction,
         class Flightgroup *fg,
         std::string hash_name,
-        const std::vector<std::string> &overrideTextures) {
+        const SequenceContainer<std::string> &overrideTextures) {
     Vector overallscale = scalex;
     int fac = faction;
-    FILE *Outputfile = 0;
-    vector<Mesh *> output;
+    FILE *Outputfile = nullptr;
+    SequenceContainer<SharedPtr<Mesh>> output;
 
 #endif
 
-    vector<OrigMeshLoader> meshes;
+    vega_types::ContiguousSequenceContainer<OrigMeshLoader> meshes;
     uint32bit word32index = 0;
     union chunk32 {
         uint32bit i32val;
@@ -360,24 +364,22 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                 VSSwapHostIntToLittle(inmemfile[word32index].i32val);                 //Number of meshes in the current record
         word32index = recordbeginword + (recordheaderlength / 4);
         meshes.push_back(OrigMeshLoader());
-        meshes.back().num = nummeshes;
-        meshes.back().m = new Mesh[nummeshes];
-        meshes.back().sizes.insert(meshes.back().sizes.begin(), nummeshes, 0);
+        auto back_mesh = meshes.back();
+        back_mesh.num = nummeshes;
+        back_mesh.m.clear();
+        while (back_mesh.m.size() < nummeshes) {
+            back_mesh.m.push_back(MakeShared<Mesh>());
+        }
+        back_mesh.sizes.insert(back_mesh.sizes.begin(), nummeshes, 0);
         //For each mesh
         for (uint32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
-            Mesh *mesh = &meshes.back().m[meshindex];
-            mesh->draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
-            MeshXML xml;
-            xml.fg = fg;
-            xml.faction = fac;
+            SharedPtr<Mesh> mesh = back_mesh.m.at(meshindex);
+            makeDrawQueue(mesh->draw_queue);
+            SharedPtr<MeshXML> xml = MakeShared<MeshXML>();
+            xml->fg = fg;
+            xml->faction = fac;
             if (recordindex > 0 || meshindex > 0) {
-                char filenamebuf[56
-                ];                     //Is more than enough characters - int can't be this big in decimal
-                int error = sprintf(filenamebuf, "%d_%d.xmesh", recordindex, meshindex);
-                if (error == -1) {                          //if wasn't enough characters - something is horribly wrong.
-                    exit(error);
-                }
-                string filename = string(filenamebuf);
+                std::string filename = (boost::format("%1%_%2%.xmesh") % recordindex % meshindex).str();
                 Outputfile = bxmfopen(filename.c_str(), "w+");
             }
             //Extract Mesh Header
@@ -464,11 +466,11 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                     inverseblend[bsrc % 16].c_str(),
                     inverseblend[bdst % 16].c_str(),
                     alphatest);
-            xml.scale = scale * overallscale;
-            xml.lodscale = overallscale;
-            xml.reverse = reverse;
-            xml.force_texture = forcetexture;
-            xml.sharevert = sharevert;
+            xml->scale = scale * overallscale;
+            xml->lodscale = overallscale;
+            xml->reverse = reverse;
+            xml->force_texture = forcetexture;
+            xml->sharevert = sharevert;
             if (alphatest <= 1 && alphatest >= 0) {
                 mesh->alphatest = (unsigned char) (alphatest * 255.0);
             } else if (alphatest > 1) {
@@ -486,12 +488,12 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             READSTRING(inmemfile, word32index, detailtexturenamelen, detailtexturename);
             if (detailtexturename.size() != 0) {
                 bxmfprintf(Outputfile, " detailtexture=\"%s\" ", detailtexturename.c_str());
-                mesh->detailTexture = mesh->TempGetTexture(&xml, detailtexturename, FactionUtil::GetFaction(
-                        xml.faction), GFXTRUE); //LoadTexture(detailtexturename);
+                mesh->detailTexture = mesh->TempGetTexture(xml.get(), detailtexturename, FactionUtil::GetFaction(
+                        xml->faction), GFXTRUE); //LoadTexture(detailtexturename);
             } else {
                 mesh->detailTexture = 0;
             }
-            vector<Mesh_vec3f>
+            vega_types::ContiguousSequenceContainer<Mesh_vec3f>
                     Detailplanes;                     //store detail planes until finish printing mesh attributes
             uint32bit numdetailplanes = VSSwapHostIntToLittle(inmemfile[word32index].i32val); //number of detailplanes
             word32index += 1;
@@ -547,26 +549,26 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                     bxmfprintf(Outputfile, "%d", texindex);
                 bxmfprintf(Outputfile, "=\"%s\" ", texname.c_str());
                 if (textype == TECHNIQUE) {
-                    xml.technique = texname;
+                    xml->technique = texname;
                 } else {
-                    while (mesh->Decal.size() <= (unsigned int) texindex) {
-                        mesh->Decal.push_back(0);
+                    while (mesh->Decal->size() <= (unsigned int) texindex) {
+                        mesh->Decal->push_back(0);
                     }
-                    while (xml.decals.size() <= (unsigned int) texindex) {
+                    while (xml->decals.size() <= (unsigned int) texindex) {
                         MeshXML::ZeTexture z;
-                        xml.decals.push_back(z);
+                        xml->decals.push_back(z);
                     }
                     switch (textype) {
                         case ALPHAMAP:
-                            xml.decals[texindex].alpha_name = texname;
+                            xml->decals[texindex].alpha_name = texname;
                             break;
                         case TEXTURE:
                             //mesh->Decal[texindex]=LoadTexture (texname);
-                            xml.decals[texindex].decal_name = texname;
+                            xml->decals[texindex].decal_name = texname;
                             break;
                         case ANIMATION:
                             //mesh->Decal[texindex]=LoadAnimation(texname);
-                            xml.decals[texindex].animated_name = texname;
+                            xml->decals[texindex].animated_name = texname;
                             break;
                     }
                 }
@@ -574,18 +576,18 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             /*
              *  for (int LC=0;LC<overrideTextures.size();++LC) {
              *  if (overrideTextures[LC]!="") {
-             *   while (xml.decals.size()<=LC) {
+             *   while (xml->decals.size()<=LC) {
              *     MeshXML::ZeTexture z;
-             *     xml.decals.push_back(z);
+             *     xml->decals.push_back(z);
              *   }
              *   if (overrideTextures[LC].find(".ani")!=string::npos) {
-             *     xml.decals[LC].decal_name="";
-             *     xml.decals[LC].animated_name=overrideTextures[LC];
-             *     xml.decals[LC].alpha_name="";
+             *     xml->decals[LC].decal_name="";
+             *     xml->decals[LC].animated_name=overrideTextures[LC];
+             *     xml->decals[LC].alpha_name="";
              *   }else {
-             *     xml.decals[LC].animated_name="";
-             *     xml.decals[LC].alpha_name="";
-             *     xml.decals[LC].decal_name=overrideTextures[LC];
+             *     xml->decals[LC].animated_name="";
+             *     xml->decals[LC].alpha_name="";
+             *     xml->decals[LC].decal_name=overrideTextures[LC];
              *   }
              *  }
              *  }*/
@@ -608,31 +610,31 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             static bool
                     forcelight = XMLSupport::parse_bool(vs_config->getVariable("graphics", "ForceLighting", "true"));
             mesh->setLighting(forcelight || lighting);
-            xml.usenormals = usenormals;
-            xml.material.ar = ar;
-            xml.material.ag = ag;
-            xml.material.ab = ab;
-            xml.material.aa = aa;
-            xml.material.dr = dr;
-            xml.material.dg = dg;
-            xml.material.db = db;
-            xml.material.da = da;
-            xml.material.er = er;
-            xml.material.eg = eg;
-            xml.material.eb = eb;
-            xml.material.ea = ea;
-            xml.material.sr = sr;
-            xml.material.sg = sg;
-            xml.material.sb = sb;
-            xml.material.sa = sa;
-            xml.material.power = power;
+            xml->usenormals = usenormals;
+            xml->material.ar = ar;
+            xml->material.ag = ag;
+            xml->material.ab = ab;
+            xml->material.aa = aa;
+            xml->material.dr = dr;
+            xml->material.dg = dg;
+            xml->material.db = db;
+            xml->material.da = da;
+            xml->material.er = er;
+            xml->material.eg = eg;
+            xml->material.eb = eb;
+            xml->material.ea = ea;
+            xml->material.sr = sr;
+            xml->material.sg = sg;
+            xml->material.sb = sb;
+            xml->material.sa = sa;
+            xml->material.power = power;
 #ifdef STANDALONE
-            mesh->myMatNum     = xml.material;
+            mesh->myMatNum     = xml->material;
 #endif
             for (uint32bit detplane = 0; (unsigned int) detplane < Detailplanes.size(); detplane++) {
                 bxmfprintf(Outputfile, "<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n", Detailplanes[detplane].x,
                         Detailplanes[detplane].y, Detailplanes[detplane].z);
-                mesh->detailPlanes.push_back(Vector(Detailplanes[detplane].x,
+                mesh->detailPlanes->push_back(Vector(Detailplanes[detplane].x,
                         Detailplanes[detplane].y,
                         Detailplanes[detplane].z));
             }
@@ -659,11 +661,11 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                 l.rotate = rotation;
                 l.size = size;
                 l.offset = offset;
-                xml.logos.push_back(l);
-                xml.logos.back().type = type;                         //and again!
-                xml.logos.back().rotate = rotation;
-                xml.logos.back().size = size;
-                xml.logos.back().offset = offset;
+                xml->logos.push_back(l);
+                xml->logos.back().type = type;                         //and again!
+                xml->logos.back().rotate = rotation;
+                xml->logos.back().size = size;
+                xml->logos.back().offset = offset;
 
                 word32index += 5;
                 for (uint32bit ref = 0; ref < numrefs; ref++) {
@@ -672,8 +674,8 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                     float32bit weight = VSSwapHostFloatToLittle(inmemfile[word32index
                             + 1].f32val);                             //reference weight
                     bxmfprintf(Outputfile, "\t<Ref point=\"%d\" weight=\"%f\"/>\n", refnum, weight);
-                    xml.logos.back().refpnt.push_back(refnum);
-                    xml.logos.back().refweight.push_back(weight);
+                    xml->logos.back().refpnt.push_back(refnum);
+                    xml->logos.back().refweight.push_back(weight);
                     word32index += 2;
                 }
                 bxmfprintf(Outputfile, "</Logo>\n");
@@ -688,7 +690,7 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                 uint32bit index =
                         VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);                    //Mesh index
                 bxmfprintf(Outputfile, "<LOD size=\"%f\" meshfile=\"%d_%d.xmesh\"/>\n", size, recordindex, index);
-                meshes.back().sizes[LOD] = size;
+                back_mesh.sizes[LOD] = size;
                 word32index += 2;
             }
             //End LODs
@@ -714,7 +716,7 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                         animname.c_str(),
                         FPS);
 
-                vector<int> *framerefs = new vector<int>;
+                SharedPtr<SequenceContainer<int>> framerefs = MakeShared<SequenceContainer<int>>();
                 mesh->framespersecond = FPS;
                 word32index += NUMFIELDSPERANIMATIONDEF;
                 uint32bit numframerefs =
@@ -739,8 +741,8 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             uint32bit numvertices =
                     VSSwapHostIntToLittle(inmemfile[word32index].i32val);                     //number of vertices
             word32index += 1;
-            xml.vertices.reserve(xml.vertices.size() + numvertices);
-            xml.vertexcount.reserve(xml.vertexcount.size() + numvertices);
+            xml->vertices.reserve(xml->vertices.size() + numvertices);
+            xml->vertexcount.reserve(xml->vertexcount.size() + numvertices);
             for (uint32bit vert = 0; vert < numvertices; vert++) {
                 float32bit x = VSSwapHostFloatToLittle(inmemfile[word32index].f32val);                         //x
                 float32bit y = VSSwapHostFloatToLittle(inmemfile[word32index + 1].f32val);                         //y
@@ -778,9 +780,9 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                         i,
                         j,
                         k);
-                xml.vertices.push_back(GFXVertex(Vector(x, y, z), Vector(i, j, k), s, t));
+                xml->vertices.push_back(GFXVertex(Vector(x, y, z), Vector(i, j, k), s, t));
                 //NOTE: postprocessing takes care of scale |-
-                xml.vertexcount.push_back(0);
+                xml->vertexcount.push_back(0);
             }
             bxmfprintf(Outputfile, "</Points>\n");
             //End Vertices
@@ -1033,45 +1035,51 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
 #endif
             if (reverse) {
                 //Reverse all vectors
-                vector<vector<GFXVertex> >::iterator iter;
-                reverse_vector(xml.lines);
-                reverse_vector(xml.lineind);
-                reverse_vector(xml.tris);
-                reverse_vector(xml.triind);
-                reverse_vector(xml.quads);
-                reverse_vector(xml.quadind);
-                for (iter = xml.trifans.begin(); iter != xml.trifans.end(); iter++) {
-                    reverse_vector(*iter);
+                vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> >::iterator iter;
+                reverseContiguousSequenceContainer(xml->lines);
+                reverseContiguousSequenceContainer(xml->lineind);
+                reverseContiguousSequenceContainer(xml->tris);
+                reverseContiguousSequenceContainer(xml->triind);
+                reverseContiguousSequenceContainer(xml->quads);
+                reverseContiguousSequenceContainer(xml->quadind);
+                for (iter = xml->trifans.begin(); iter != xml->trifans.end(); iter++) {
+                    reverseContiguousSequenceContainer(*iter);
                 }
-                for (iter = xml.quadstrips.begin(); iter != xml.quadstrips.end(); iter++) {
-                    reverse_vector(*iter);
+                for (iter = xml->quadstrips.begin(); iter != xml->quadstrips.end(); iter++) {
+                    reverseContiguousSequenceContainer(*iter);
                 }
-                for (iter = xml.tristrips.begin(); iter != xml.tristrips.end(); iter++) {
-                    reverse_vector(*iter);
+                for (iter = xml->tristrips.begin(); iter != xml->tristrips.end(); iter++) {
+                    reverseContiguousSequenceContainer(*iter);
                 }
-                for (iter = xml.linestrips.begin(); iter != xml.linestrips.end(); iter++) {
-                    reverse_vector(*iter);
+                for (iter = xml->linestrips.begin(); iter != xml->linestrips.end(); iter++) {
+                    reverseContiguousSequenceContainer(*iter);
                 }
-                reverse_vector(xml.quadstripind);
-                reverse_vector(xml.tristripind);
-                reverse_vector(xml.linestripind);
+                reverseContiguousSequenceContainer(xml->quadstripind);
+                reverseContiguousSequenceContainer(xml->tristripind);
+                reverseContiguousSequenceContainer(xml->linestripind);
             }
             bxmfprintf(Outputfile, "</Polygons>\n");
             //End Geometry
             //go to next mesh
             bxmfprintf(Outputfile, "</Mesh>\n");
-            mesh->PostProcessLoading(&xml, overrideTextures);
+            mesh->PostProcessLoading(xml, overrideTextures);
             word32index = meshbeginword + (meshlength / 4);
         }
         //go to next record
         word32index = recordbeginword + (recordlength / 4);
-        output.push_back(new Mesh());
-        *output.back() = *meshes.back().m;                 //use builtin
-        output.back()->orig = meshes.back().m;
-        for (int i = 0; i < (int) meshes.back().sizes.size() - 1; ++i) {
-            output.back()->orig[i + 1].lodsize = meshes.back().sizes[i];
+        output.push_back(MakeShared<Mesh>());
+        *output.back() = *back_mesh.m.front();                 //use builtin
+        if (!output.back()->orig) {
+            output.back()->orig = MakeShared<SequenceContainer<SharedPtr<Mesh>>>();
         }
-        output.back()->numlods = output.back()->orig->numlods = meshes.back().num;
+        output.back()->orig->push_back(back_mesh.m.front());
+        for (size_t i = 0; i < back_mesh.num; ++i) {
+            output.back()->orig->push_back(MakeShared<Mesh>());
+        }
+        for (int i = 0; i < (int) back_mesh.sizes.size() - 1; ++i) {
+            output.back()->orig->at(i + 1)->lodsize = back_mesh.sizes.at(i);
+        }
+        output.back()->numlods = output.back()->orig->front()->numlods = back_mesh.num;
     }
     free(inmemfile);
     inmemfile = NULL;

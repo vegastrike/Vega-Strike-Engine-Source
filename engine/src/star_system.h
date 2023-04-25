@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * star_system.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -36,6 +38,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "preferred_types.h"
 
 using std::vector;
 using std::string;
@@ -134,7 +137,7 @@ protected:
     ///The background associated with this system
     Background *background = nullptr;
     ///The Light Map corresponding for the BP for spheremapping
-    Texture *light_map[6];
+    vega_types::SharedPtr<Texture> light_map[6];
 public:
     // Constructors
     StarSystem(const string filename, const Vector &centroid = Vector(0, 0, 0), const float timeofyear = 0);

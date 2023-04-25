@@ -1,9 +1,8 @@
 /*
  * cockpit_generic.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -390,7 +389,7 @@ public:
     static void TurretControl(const KBData &, KBSTATE) {
     }
 
-    virtual void SetCommAnimation(Animation *ani, Unit *un) {
+    virtual void SetCommAnimation(vega_types::SharedPtr<Animation> ani, Unit *un) {
     }
 
     virtual void SetStaticAnimation() {

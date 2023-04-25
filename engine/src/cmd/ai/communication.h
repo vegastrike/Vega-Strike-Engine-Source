@@ -1,9 +1,8 @@
 /*
  * communication.h
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,6 +28,7 @@
 #include "cmd/unit_generic.h"
 #include "gfxlib_struct.h"
 #include "vs_logging.h"
+#include "preferred_types.h"
 
 class FSM {
 protected:
@@ -88,26 +88,26 @@ public:
 
 class CommunicationMessage {
     void Init(Unit *send, Unit *recv);
-    void SetAnimation(std::vector<class Animation *> *ani, unsigned char sex);
+    void SetAnimation(vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex);
 public:
-    FSM *fsm; //the finite state that this communcation stage is in
-    class Animation *ani;
-    unsigned char sex; //which sound should play
-    int prevstate;
-    int curstate;
-    int edgenum; //useful for server validation, -1 = did not move via an edge.
+    FSM *fsm{}; //the finite state that this communication stage is in
+    vega_types::SharedPtr<Animation> ani{};
+    unsigned char sex{}; //which sound should play
+    int prevstate{};
+    int curstate{};
+    int edgenum{}; //useful for server validation, -1 = did not move via an edge.
     UnitContainer sender;
-    CommunicationMessage(Unit *send, Unit *recv, std::vector<class Animation *> *ani, unsigned char sex);
-    CommunicationMessage(Unit *send, Unit *recv, int curstate, std::vector<class Animation *> *ani, unsigned char sex);
+    CommunicationMessage(Unit *send, Unit *recv, vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex);
+    CommunicationMessage(Unit *send, Unit *recv, int messagechoice, vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex);
     CommunicationMessage(Unit *send,
-            Unit *recv,
-            int prevvstate,
-            int curstate,
-            std::vector<class Animation *> *ani,
-            unsigned char sex);
+                         Unit *recv,
+                         int laststate,
+                         int thisstate,
+                         vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani,
+                         unsigned char sex);
     CommunicationMessage(Unit *send, Unit *recv, const CommunicationMessage &prevsvtate, int curstate,
-            std::vector<class Animation *> *ani, unsigned char sex);
-    void SetCurrentState(int message, std::vector<class Animation *> *ani, unsigned char sex);
+                         vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex);
+    void SetCurrentState(int msg, vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> ani, unsigned char sex);
 
     FSM::Node *getCurrentState() const {
         if (curstate < (int) fsm->nodes.size()) {

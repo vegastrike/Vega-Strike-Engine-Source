@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * ani_texture.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,9 +27,7 @@
 #include "ani_texture.h"
 #include "audiolib.h"
 
-#include <vector>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
 #include "lin_time.h"
 #include "vegastrike.h"
 #include "vsfilesystem.h"
@@ -35,11 +35,11 @@
 #include "vs_globals.h"
 #include "vs_random.h"
 #include "../gldrv/gl_globals.h"
-#include <set>
 #include <math.h>
+#include "preferred_types.h"
+#include "vega_cast_utils.h"
 
-using std::set;
-static set<AnimatedTexture *> anis;
+static vega_types::Set<vega_types::SharedPtr<AnimatedTexture>> anis;
 
 static inline unsigned int intmin(unsigned int a, unsigned int b) {
     return a < b ? a : b;
@@ -64,7 +64,7 @@ static enum ADDRESSMODE parseAddressMode(const string &addrmodestr, ADDRESSMODE 
 }
 
 static void ActivateWhite(int stage) {
-    static Texture *white = new Texture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
+    static vega_types::SharedPtr<Texture> white = Texture::createTexture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
     if (white->LoadSuccess()) {
         white->MakeActive(stage);
     }
@@ -90,15 +90,15 @@ void AnimatedTexture::MakeActive(int stage, int pass) {
         this->active_fraction = fraction;
         if (!vidMode) {
             if (GetInterpolateTCoord() && (active != nextactive)) {
-                if (Decal && Decal[active] && Decal[nextactive]) {
+                if (Decal && Decal->at(active) && Decal->at(nextactive)) {
                     this->maxtcoord =
-                            (1 - fraction) * Decal[active]->maxtcoord + fraction * Decal[nextactive]->maxtcoord;
+                            (1 - fraction) * Decal->at(active)->maxtcoord + fraction * Decal->at(nextactive)->maxtcoord;
                     this->mintcoord =
-                            (1 - fraction) * Decal[active]->mintcoord + fraction * Decal[nextactive]->mintcoord;
+                            (1 - fraction) * Decal->at(active)->mintcoord + fraction * Decal->at(nextactive)->mintcoord;
                 }
-            } else if (Decal && Decal[active]) {
-                this->maxtcoord = Decal[active]->maxtcoord;
-                this->mintcoord = Decal[active]->mintcoord;
+            } else if (Decal && Decal->at(active)) {
+                this->maxtcoord = Decal->at(active)->maxtcoord;
+                this->mintcoord = Decal->at(active)->mintcoord;
             }
         } else {
             if (GetInterpolateTCoord() && (active != nextactive)) {
@@ -120,21 +120,21 @@ void AnimatedTexture::MakeActive(int stage, int pass) {
             if (!vidMode) {
                 if (GetInterpolateFrames() && (active != nextactive)) {
                     if (gl_options.Multitexture && ((stage + 1) < static_cast<int>(gl_options.Multitexture))) {
-                        if (Decal && Decal[nextactive % numframes]) {
-                            Decal[nextactive % numframes]->MakeActive(stage + 1);
+                        if (Decal && Decal->at(nextactive % numframes)) {
+                            Decal->at(nextactive % numframes)->MakeActive(stage + 1);
                         } else {
                             ActivateWhite(stage + 1);
                         }
                         GFXTextureEnv(stage + 1, GFXINTERPOLATETEXTURE, active_fraction);
-                        if (Decal && Decal[active % numframes]) {
-                            Decal[active % numframes]->MakeActive(stage);
+                        if (Decal && Decal->at(active % numframes)) {
+                            Decal->at(active % numframes)->MakeActive(stage);
                         } else {
                             ActivateWhite(stage);
                         }
                         //GFXTextureEnv(stage,GFXMODULATETEXTURE);
                     } else {
-                        if (Decal && Decal[active % numframes]) {
-                            Decal[active % numframes]->MakeActive(stage);
+                        if (Decal && Decal->at(active % numframes)) {
+                            Decal->at(active % numframes)->MakeActive(stage);
                         } else {
                             ActivateWhite(stage);
                         }
@@ -147,19 +147,19 @@ void AnimatedTexture::MakeActive(int stage, int pass) {
                         //GFXTextureEnv(stage,GFXMODULATETEXTURE);
                     }
                 } else {
-                    if (Decal && Decal[active % numframes]) {
-                        Decal[active % numframes]->MakeActive(stage);
+                    if (Decal && Decal->at(active % numframes)) {
+                        Decal->at(active % numframes)->MakeActive(stage);
                     } else {
                         ActivateWhite(stage);
                     }
                 }
             } else if (!vidSource) {
                 //No frame interpolation anything supported
-                if (Decal && *Decal) {
+                if (Decal && Decal->front()) {
                     if (active != activebound) {
                         LoadFrame(active % numframes);
                     }
-                    (*Decal)->MakeActive(stage);
+                    Decal->front()->MakeActive(stage);
                 }
             } else {
                 try {
@@ -195,9 +195,9 @@ void AnimatedTexture::MakeActive(int stage, int pass) {
             break;
         case 1:
             if (!vidMode && GetInterpolateFrames() && (active != nextactive)
-                    && !(gl_options.Multitexture && ((stage + 1) < static_cast<int>(gl_options.Multitexture)))) {
-                if (Decal && Decal[nextactive % numframes]) {
-                    Decal[nextactive % numframes]->MakeActive(stage);
+                && !(gl_options.Multitexture && ((stage + 1) < static_cast<int>(gl_options.Multitexture)))) {
+                if (Decal && Decal->at(nextactive % numframes)) {
+                    Decal->at(nextactive % numframes)->MakeActive(stage);
                 } else {
                     ActivateWhite(stage);
                 }
@@ -210,6 +210,8 @@ void AnimatedTexture::MakeActive(int stage, int pass) {
             } else {
                 ActivateWhite(stage);
             }
+            break;
+        default:
             break;
     }
 }
@@ -234,16 +236,15 @@ bool AnimatedTexture::SetupPass(int pass, int stage, const enum BLENDFUNC src, c
 }
 
 void AnimatedTexture::UpdateAllPhysics() {
-    for (set<AnimatedTexture *>::iterator iter = anis.begin(); iter != anis.end(); iter++) {
-        (*iter)->physicsactive -= SIMULATION_ATOM;
+    for (auto ani: anis) {
+        ani->physicsactive -= SIMULATION_ATOM;
     }                      // simulation_atom_var?
 }
 
 void AnimatedTexture::UpdateAllFrame() {
     double elapsed = GetElapsedTime();
     double realtime = realTime();
-    for (set<AnimatedTexture *>::iterator iter = anis.begin(); iter != anis.end(); iter++) {
-        AnimatedTexture *ani = *iter;
+    for (auto ani: anis) {
         if (ani->options & optSoundTiming) {
             // lazy init
             if (ani->lastrealtime == 0) {
@@ -274,7 +275,7 @@ bool AnimatedTexture::Done() const {
     //return physicsactive<0;
     //Explosions aren't working right, and this would fix them.
     //I don't see the reason for using physics frames as reference, all AnimatedTextures
-    //I've seen are gaphic-only entities (bolts use their own time-keeping system, for instance)
+    //I've seen are graphic-only entities (bolts use their own time-keeping system, for instance)
     //If I'm wrong, and the above line is crucial, well... feel free to fix it.
     return vidSource ? done : curtime >= numframes * timeperframe;
 }
@@ -285,87 +286,29 @@ void AnimatedTexture::setTime(double tim) {
 
 using namespace VSFileSystem;
 
-AnimatedTexture::AnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtex) {
-    AniInit();
-    VSFile f;
-    VSError err = f.OpenReadOnly(file, AnimFile);
-    //bool setdir=false;
-    if (err <= Ok) {
-        float width, height;
-        f.Fscanf("%f %f", &width, &height);         //it's actually an animation in global animation shares
-        //setdir=true;
-    }
-    if (err <= Ok) {
-        Load(f, stage, imm, detailtex);
-        f.Close();
-    } else {
-        loadSuccess = false;
-        /*
-         *  if (setdir) {
-         *  VSFileSystem::vs_resetdir();
-         *  }
-         */
-    }
+vega_types::SharedPtr<Texture> AnimatedTexture::Original() {
+    return Decal ? Decal->at(active)->Original() : vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
 }
 
-void AnimatedTexture::AniInit() {
-    Texture::InitTexture();
-
-    Decal = NULL;
-    activebound = -1;
-    physicsactive = 0;
-    loadSuccess = false;
-    vidMode = false;
-    detailTex = false;
-    ismipmapped = BILINEAR;
-    texstage = 0;
-    vidSource = 0;
-
-    options = optLoop;
-
-    defaultAddressMode = DEFAULT_ADDRESS_MODE;
-
-    numframes = 1;
-    timeperframe = 1;
-    active = 0;
-    nextactive = 0;
-    active_fraction = 0;
-    curtime = lastcurtime = lastrealtime = 0;
-    constframerate = true;
-    done = false;
-}
-//AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
-//AniInit();
-//if (fp)
-//Load (fp,stage,imm,detailtex);
-//}
-
-AnimatedTexture::AnimatedTexture(VSFileSystem::VSFile &fp, int stage, enum FILTER imm, bool detailtex) {
-    AniInit();
-    Load(fp, stage, imm, detailtex);
+const vega_types::SharedPtr<const Texture> AnimatedTexture::OriginalConst() const {
+    return Decal ? Decal->at(active)->OriginalConst() : vega_dynamic_cast_shared_ptr<Texture const>(shared_from_this());
 }
 
-AnimatedTexture::AnimatedTexture(int stage, enum FILTER imm, bool detailtex) :
-        Texture(stage, imm) {
-    AniInit();
-}
-
-Texture *AnimatedTexture::Original() {
-    return Decal ? Decal[active]->Original() : this;
-}
-
-const Texture *AnimatedTexture::Original() const {
-    return Decal ? Decal[active]->Original() : this;
-}
-
-Texture *AnimatedTexture::Clone() {
-    AnimatedTexture *retval = new AnimatedTexture();
-    if (Decal) {
+vega_types::SharedPtr<Texture> AnimatedTexture::Clone() {
+    vega_types::SharedPtr<AnimatedTexture> retval = vega_types::MakeShared<AnimatedTexture>();
+    if (Decal && !Decal->empty()) {
         *retval = *this;
         int nf = vidMode ? 1 : numframes;
-        retval->Decal = new Texture *[nf];
-        for (int i = 0; i < nf; i++) {
-            retval->Decal[i] = Decal[i]->Clone();
+        retval->Decal = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>>(nf);
+        for (int i = 0; i < nf; ++i) {
+            vega_types::SharedPtr<Texture> texture;
+            if (Decal->at(i)) {
+                texture = Decal->at(i)->Clone();
+            } else {
+                texture = nullptr;
+            }
+            vega_types::SharedPtr<Animation> as_animation = vega_dynamic_cast_shared_ptr<Animation>(texture);
+            retval->Decal->emplace_back(as_animation);
         }
     } else if (vidSource) {
         *retval = *this;
@@ -378,37 +321,29 @@ Texture *AnimatedTexture::Clone() {
         retval->LoadVideoSource(f);
     } else if (Decal) {
         //LoadVideoSource adds to anis, otherwise we'll have to add ourselves
-        anis.insert(retval);
+        anis.insert({retval});
     }
     return retval;
 }
 
 AnimatedTexture::~AnimatedTexture() {
-    Destroy();
-    data = NULL;
-    active = 0;
-    palette = NULL;
-}
-
-AnimatedTexture::AnimatedTexture() {
-    AniInit();
-}
-
-void AnimatedTexture::Destroy() {
-    anis.erase(this);
     if (vidSource) {
         delete vidSource;
-        vidSource = 0;
+        vidSource = nullptr;
     }
     if (Decal) {
         int i, nf;
         nf = vidMode ? 1 : numframes;
-        for (i = 0; i < nf; i++) {
-            delete Decal[i];
-        }
-        delete[] Decal;
-        Decal = NULL;
+        Decal->clear();
+        Decal.reset();
     }
+    data = nullptr;
+    active = 0;
+    palette = nullptr;
+}
+
+AnimatedTexture::AnimatedTexture() : Texture() {
+//    AniInit();
 }
 
 void AnimatedTexture::Reset() {
@@ -493,15 +428,15 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile &f) {
             mintcoord.y /= sizeY;
         }
 
-        anis.insert(this);
+        anis.insert({vega_dynamic_cast_shared_ptr<AnimatedTexture>(shared_from_this())});
     }
 }
 
-AnimatedTexture *AnimatedTexture::CreateVideoTexture(const std::string &fname,
-        int stage,
-        enum FILTER ismipmapped,
-        bool detailtex) {
-    AnimatedTexture *rv = new AnimatedTexture(stage, ismipmapped, detailtex);
+vega_types::SharedPtr<AnimatedTexture> AnimatedTexture::CreateVideoTexture(const std::string &fname,
+                                                                           int stage,
+                                                                           enum FILTER ismipmapped,
+                                                                           bool detailtex) {
+    vega_types::SharedPtr<AnimatedTexture> rv = AnimatedTexture::createAnimatedTexture(stage, ismipmapped, detailtex);
     VSFileSystem::VSFile f;
     VSError err = f.OpenReadOnly(fname, VSFileSystem::VideoFile);
     if (err <= Ok) {
@@ -568,9 +503,10 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
 
     active = 0;
     int nf = (vidMode ? 1 : numframes);
-    Decal = new Texture *[nf];
+    Decal = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Texture>>>(nf);
     if (vidMode) {
-        Decal[0] = new Texture;
+        vega_types::SharedPtr<Animation> animation = vega_types::MakeShared<Animation>();
+        Decal->emplace_front(animation);
     }
     char temp[512] = "white.bmp";
     char file[512] = "white.bmp";
@@ -612,41 +548,41 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
                         XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "maxr", defMr))));
             } else {
                 enum ADDRESSMODE addrmode = parseAddressMode(XMLSupport::parse_option_value(opt,
-                        "addressMode",
-                        ""), defaultAddressMode);
+                                                                                            "addressMode",
+                                                                                            ""), defaultAddressMode);
                 if (alp[0] != '\0') {
-                    Decal[j++] =
-                            new Texture(file,
-                                    alp,
-                                    stage,
-                                    ismipmapped,
-                                    TEXTURE2D,
-                                    TEXTURE_2D,
-                                    1,
-                                    0,
-                                    (g_game.use_animations) ? GFXTRUE : GFXFALSE,
-                                    65536,
-                                    (detailtex ? GFXTRUE : GFXFALSE),
-                                    GFXFALSE,
-                                    addrmode);
+                    Decal->at(j++) =
+                            Texture::createTexture(file,
+                                                            alp,
+                                                            stage,
+                                                            ismipmapped,
+                                                            TEXTURE2D,
+                                                            TEXTURE_2D,
+                                                            1,
+                                                            0,
+                                                            (g_game.use_animations) ? GFXTRUE : GFXFALSE,
+                                                            65536,
+                                                            (detailtex ? GFXTRUE : GFXFALSE),
+                                                            GFXFALSE,
+                                                            addrmode);
                 } else {
-                    Decal[j++] = new Texture(file,
-                            stage,
-                            ismipmapped,
-                            TEXTURE2D,
-                            TEXTURE_2D,
-                            (g_game.use_animations) ? GFXTRUE : GFXFALSE,
-                            65536,
-                            (detailtex ? GFXTRUE : GFXFALSE),
-                            GFXFALSE,
-                            addrmode);
+                    Decal->at(j++) = Texture::createTexture(file,
+                                                                     stage,
+                                                                     ismipmapped,
+                                                                     TEXTURE2D,
+                                                                     TEXTURE_2D,
+                                                                     (g_game.use_animations) ? GFXTRUE : GFXFALSE,
+                                                                     65536,
+                                                                     (detailtex ? GFXTRUE : GFXFALSE),
+                                                                     GFXFALSE,
+                                                                     addrmode);
                 }
-                if (Decal[j - 1]) {
-                    Decal[j - 1]->mintcoord = Vector(
+                if (Decal->at(j - 1)) {
+                    Decal->at(j - 1)->mintcoord = Vector(
                             XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "mins", defms)),
                             XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "mint", defmt)),
                             XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "minr", defmr)));
-                    Decal[j - 1]->maxtcoord = Vector(
+                    Decal->at(j - 1)->maxtcoord = Vector(
                             XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "maxs", defMs)),
                             XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "maxt", defMt)),
                             XMLSupport::parse_float(XMLSupport::parse_option_value(opt, "maxr", defMr)));
@@ -664,14 +600,14 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
     original = NULL;
     loadSuccess = true;
 
-    anis.insert(this);
+    anis.insert({vega_dynamic_cast_shared_ptr<AnimatedTexture>(shared_from_this())});
 
     //Needed - must do housekeeping, tcoord stuff and the like.
     setTime(curtime);
 }
 
 void AnimatedTexture::LoadFrame(int frame) {
-    if (!vidMode || (Decal == NULL) || (*Decal == NULL)) {
+    if (!vidMode || !Decal || Decal->empty() || !Decal->front()) {
         return;
     }
     if ((frame < 0) || (frame >= static_cast<int>(numframes))) {
@@ -707,22 +643,23 @@ void AnimatedTexture::LoadFrame(int frame) {
             ((ismipmapped == BILINEAR) || (ismipmapped == TRILINEAR) || (ismipmapped == MIPMAP)) ? BILINEAR : NEAREST;
     loadSuccess = true;
     if (alp[0] != '\0') {
-        (*Decal)->Load(file,
-                alp,
-                texstage,
-                ismip2,
-                TEXTURE2D,
-                TEXTURE_2D,
-                1,
-                0,
-                (g_game.use_videos) ? GFXTRUE : GFXFALSE,
-                65536,
-                (detailTex ? GFXTRUE : GFXFALSE),
-                GFXTRUE,
-                addrmode);
+        Decal->front()->Load(file,
+                             alp,
+                             texstage,
+                             ismip2,
+                             TEXTURE2D,
+                             TEXTURE_2D,
+                             1,
+                             0,
+                             (g_game.use_videos) ? GFXTRUE : GFXFALSE,
+                             65536,
+                             (detailTex ? GFXTRUE : GFXFALSE),
+                             GFXTRUE,
+                             addrmode);
     } else if (numgets == 1) {
-        (*Decal)->Load(file, texstage, ismip2, TEXTURE2D, TEXTURE_2D, (g_game.use_videos) ? GFXTRUE : GFXFALSE, 65536,
-                (detailTex ? GFXTRUE : GFXFALSE), GFXTRUE, addrmode);
+        Decal->front()->Load(file, texstage, ismip2, TEXTURE2D, TEXTURE_2D, (g_game.use_videos) ? GFXTRUE : GFXFALSE,
+                             65536,
+                             (detailTex ? GFXTRUE : GFXFALSE), GFXTRUE, addrmode);
     } else {
         loadSuccess = false;
     }
@@ -731,8 +668,8 @@ void AnimatedTexture::LoadFrame(int frame) {
     }
     gl_options.compression = ocompression;
 
-    original = NULL;
-    loadSuccess = loadSuccess && (*Decal)->LoadSuccess();
+    original = nullptr;
+    loadSuccess = loadSuccess && Decal->front()->LoadSuccess();
     if (loadSuccess) {
         activebound = frame;
     }
@@ -744,7 +681,7 @@ bool AnimatedTexture::LoadSuccess() {
 
 unsigned int AnimatedTexture::numLayers() const {
     if (GetInterpolateFrames() && (active != nextactive) && gl_options.Multitexture
-            && ((texstage + 1) < static_cast<int>(gl_options.Multitexture))) {
+        && ((texstage + 1) < static_cast<int>(gl_options.Multitexture))) {
         return 2;
     } else {
         return 1;
@@ -763,7 +700,7 @@ unsigned int AnimatedTexture::numPasses() const {
     }
 }
 
-void AnimatedTexture::SetTimeSource(SharedPtr<Audio::Source> source) {
+void AnimatedTexture::SetTimeSource(vega_types::SharedPtr<Audio::Source> source) {
     timeSource = source;
     if (source) {
         options |= optSoundTiming;
@@ -775,4 +712,57 @@ void AnimatedTexture::SetTimeSource(SharedPtr<Audio::Source> source) {
 void AnimatedTexture::ClearTimeSource() {
     timeSource.reset();
     options &= ~optSoundTiming;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, const char *file, int stage, enum FILTER imm, bool detailtex) {
+    VSFile f;
+    VSError err = f.OpenReadOnly(file, AnimFile);
+    if (err <= Ok) {
+        float width, height;
+        f.Fscanf("%f %f", &width, &height);         //it's actually an animation in global animation shares
+    }
+    if (err <= Ok) {
+        animated_texture->Load(f, stage, imm, detailtex);
+        f.Close();
+    } else {
+        animated_texture->loadSuccess = false;
+        /*
+         *  if (setdir) {
+         *  VSFileSystem::vs_resetdir();
+         *  }
+         */
+    }
+    return animated_texture;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::createAnimatedTexture(const char *file, int stage, enum FILTER imm, bool detailtexture) {
+    vega_types::SharedPtr<AnimatedTexture> return_value = vega_types::MakeShared<AnimatedTexture>();
+    return constructAnimatedTexture(return_value, file, stage, imm, detailtexture);
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, int stage,
+                                          enum FILTER imm, bool detailtexture) {
+    return animated_texture;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::createAnimatedTexture(int stage, enum FILTER imm, bool detailtexture) {
+    vega_types::SharedPtr<AnimatedTexture> return_value = vega_types::MakeShared<AnimatedTexture>();
+    return constructAnimatedTexture(return_value, stage, imm, detailtexture);
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::constructAnimatedTexture(vega_types::SharedPtr<AnimatedTexture> animated_texture, VSFile &openedfile,
+                                          int stage, enum FILTER imm, bool detailtexture) {
+    animated_texture->Load(openedfile, stage, imm, detailtexture);
+    return animated_texture;
+}
+
+vega_types::SharedPtr<AnimatedTexture>
+AnimatedTexture::createAnimatedTexture(VSFile &openedfile, int stage, enum FILTER imm, bool detailtexture) {
+    vega_types::SharedPtr<AnimatedTexture> return_value = vega_types::MakeShared<AnimatedTexture>();
+    return constructAnimatedTexture(return_value, openedfile, stage, imm, detailtexture);
 }

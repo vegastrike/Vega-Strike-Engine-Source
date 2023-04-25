@@ -1,10 +1,8 @@
-/**
+/*
  * comm_ai.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -72,8 +70,8 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
             < c.fsm->nodes.size() ? (&c.fsm->nodes[c.curstate]) : (&c.fsm->nodes[c.fsm
             ->getDefaultState(
                     relationship)]);
-    std::vector<unsigned int>::const_iterator iend = n->edges.end();
-    for (std::vector<unsigned int>::const_iterator i = n->edges.begin(); i != iend; ++i) {
+    auto iend = n->edges.cend();
+    for (auto i = n->edges.cbegin(); i != iend; ++i) {
         if (c.fsm->nodes[*i].messagedelta >= configuration()->ai.lowest_positive_comm_choice && relationship >= 0) {
             return true;
         }
@@ -108,8 +106,8 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
         static int snumhits = XMLSupport::parse_int(vs_config->getVariable("AI", "ContrabandMadness", "5"));
         numhits = snumhits;
     }
-    CommunicationMessage hit(un, parent, NULL, 0);
-    hit.SetCurrentState(hit.fsm->GetHitNode(), NULL, 0);
+    CommunicationMessage hit(un, parent, nullptr, 0);
+    hit.SetCurrentState(hit.fsm->GetHitNode(), nullptr, 0);
     for (int i = 0; i < numhits; i++) {
         parent->getAIState()->Communicate(hit);
     }
@@ -118,12 +116,12 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
 void AllUnitsCloseAndEngage(Unit *un, int faction) {
     Unit *ally;
     static float contraband_assist_range =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "contraband_assist_range", "50000"));
+            XMLSupport::parse_floatf(vs_config->getVariable("physics", "contraband_assist_range", "50000"));
     float relation = 0;
     static float
-            minrel = XMLSupport::parse_float(vs_config->getVariable("AI", "max_faction_contraband_relation", "-.05"));
+            minrel = XMLSupport::parse_floatf(vs_config->getVariable("AI", "max_faction_contraband_relation", "-.05"));
     static float
-            adj = XMLSupport::parse_float(vs_config->getVariable("AI", "faction_contraband_relation_adjust", "-.025"));
+            adj = XMLSupport::parse_floatf(vs_config->getVariable("AI", "faction_contraband_relation_adjust", "-.025"));
     float delta;
     int cp = _Universe->whichPlayerStarship(un);
     if (cp != -1) {
@@ -161,7 +159,7 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
     //reports success or failure
     Unit *un;
     unsigned char gender;
-    std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
+    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> comm_face = parent->pilot->getCommFaces(gender);
     if ((un = contraband_searchee.GetUnit())) {
         CommunicationMessage c(parent, un, comm_face, gender);
         if (contraband_detected) {
@@ -176,7 +174,7 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
             o->Communicate(c);
         }
     }
-    contraband_searchee.SetUnit(NULL);
+    contraband_searchee.SetUnit(nullptr);
 }
 
 void CommunicatingAI::GetMadAt(Unit *un, int numHitsPerContrabandFail) {
@@ -211,12 +209,12 @@ void CommunicatingAI::UpdateContrabandSearch() {
                     static bool use_hidden_cargo_space =
                             XMLSupport::parse_bool(vs_config->getVariable("physics", "use_hidden_cargo_space", "true"));
                     static float speed_course_change =
-                            XMLSupport::parse_float(vs_config->getVariable("AI",
+                            XMLSupport::parse_floatf(vs_config->getVariable("AI",
                                     "PercentageSpeedChangeToStopSearch",
                                     "1"));
                     if (u->CourseDeviation(SpeedAndCourse, u->GetVelocity()) > speed_course_change) {
                         unsigned char gender;
-                        std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
+                        vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> comm_face = parent->pilot->getCommFaces(gender);
                         CommunicationMessage c(parent, u, comm_face, gender);
                         c.SetCurrentState(c.fsm->GetContrabandWobblyNode(), comm_face, gender);
                         Order *o;
@@ -289,7 +287,7 @@ void CommunicatingAI::InitiateContrabandSearch(float playaprob, float targprob) 
                 contraband_searchee.SetUnit(u);
                 SpeedAndCourse = u->GetVelocity();
                 unsigned char gender;
-                std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
+                vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> comm_face = parent->pilot->getCommFaces(gender);
                 CommunicationMessage c(parent, u, comm_face, gender);
                 c.SetCurrentState(c.fsm->GetContrabandInitiateNode(), comm_face, gender);
                 if (u->getAIState()) {
@@ -405,7 +403,7 @@ void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targpro
             FSM *fsm = FactionUtil::GetConversation(target->faction, this->parent->faction);
             int state = fsm->getDefaultState(parent->getRelation(target));
             unsigned char gender;
-            std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
+            vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> comm_face = parent->pilot->getCommFaces(gender);
             messagequeue.push_back(new CommunicationMessage(target, this->parent, state, state, comm_face, gender));
         }
     }
@@ -445,7 +443,7 @@ void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c) {
                         int b = selectCommunicationMessage(c, un);
                         Order *o = un->getAIState();
                         unsigned char gender;
-                        std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
+                        vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> comm_face = parent->pilot->getCommFaces(gender);
                         if (o) {
                             o->Communicate(CommunicationMessage(parent, un, c, b, comm_face, gender));
                         }

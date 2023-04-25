@@ -1,9 +1,8 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (c) 2001-2002 Daniel Horn
-# Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-# Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+# Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Benjamen Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -22,6 +21,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
+
+
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 IF ((NOT BEOS) AND (NOT WIN32))
 	#SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")

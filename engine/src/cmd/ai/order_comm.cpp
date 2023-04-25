@@ -1,10 +1,8 @@
-/**
+/*
  * order_comm.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -48,7 +46,7 @@ void Order::Communicate(const CommunicationMessage &c) {
     }
     Unit *un;
     bool already_communicated = false;
-    for (list<CommunicationMessage *>::iterator ii = messagequeue.begin(); ii != messagequeue.end(); ii++) {
+    for (auto ii = messagequeue.begin(); ii != messagequeue.end(); ii++) {
         un = (*ii)->sender.GetUnit();
         bool thisissender = (un == newC->sender.GetUnit());
         if (un == NULL || thisissender) {
@@ -66,7 +64,7 @@ void Order::Communicate(const CommunicationMessage &c) {
             static bool talk_more_helps =
                     XMLSupport::parse_bool(vs_config->getVariable("AI", "talking_faster_helps", "true"));
             static float
-                    talk_factor = XMLSupport::parse_float(vs_config->getVariable("AI", "talk_relation_factor", ".5"));
+                    talk_factor = XMLSupport::parse_floatf(vs_config->getVariable("AI", "talk_relation_factor", ".5"));
             if (talk_more_helps || !already_communicated) {
                 AdjustRelationTo(un, newC->getDeltaRelation() * talk_factor);
             }
@@ -90,13 +88,13 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
             RemoveMessageProcessed = true;
             Unit *un = messagequeue.back()->sender.GetUnit();
             if (un) {
-                CommunicationMessage c(parent, un, NULL, 0);
+                CommunicationMessage c(parent, un, nullptr, 0);
                 if (parent->getRelation(un) >= 0
                         || (parent->getFlightgroup() && parent->getFlightgroup()->name == "Base")) {
                     parent->RequestClearance(un);
-                    c.SetCurrentState(c.fsm->GetAbleToDockNode(), NULL, 0);
+                    c.SetCurrentState(c.fsm->GetAbleToDockNode(), nullptr, 0);
                 } else {
-                    c.SetCurrentState(c.fsm->GetUnAbleToDockNode(), NULL, 0);
+                    c.SetCurrentState(c.fsm->GetUnAbleToDockNode(), nullptr, 0);
                 }
                 Order *o = un->getAIState();
                 if (o) {

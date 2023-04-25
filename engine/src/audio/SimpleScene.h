@@ -1,10 +1,8 @@
-/**
+/*
  * SimpleScene.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -50,8 +48,8 @@ class SimpleSource;
  * @remarks This class implements the scene interface for a basic Scene manager.
  *
  */
-class SimpleScene : public Scene, public SharedFromThis<SimpleScene> {
-    typedef std::set<SharedPtr<Source> > SourceSet;
+class SimpleScene : public Scene, public vega_types::EnableSharedFromThis<SimpleScene> {
+    typedef std::set<vega_types::SharedPtr<Source> > SourceSet;
 
     Listener listener;
 
@@ -74,12 +72,12 @@ public:
     /** @copydoc Scene::add
      * @remarks source MUST be a SimpleSource
      */
-    virtual void add(SharedPtr<Source> source);
+    virtual void add(vega_types::SharedPtr<Source> source);
 
     /** @copydoc Scene::remove
      * @remarks source MUST be a SimpleSource
      */
-    virtual void remove(SharedPtr<Source> source);
+    virtual void remove(vega_types::SharedPtr<Source> source);
 
     /** @copydoc Scene::getListener */
     virtual Listener &getListener();
@@ -90,7 +88,7 @@ public:
     //
 
     /** Notify the scene of a source that starts or stops playing. */
-    virtual void notifySourcePlaying(SharedPtr<Source> source, bool playing);
+    virtual void notifySourcePlaying(vega_types::SharedPtr<Source> source, bool playing);
 
     /** Gets an iterator over active sources */
     SourceIterator getActiveSources();

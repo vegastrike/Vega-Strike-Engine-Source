@@ -1,10 +1,8 @@
-/**
+/*
  * pipelined_texture.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -26,6 +24,7 @@
 
 
 #include "pipelined_texture.h"
+#include "vega_cast_utils.h"
 
 PipelinedTexture::PipelinedTexture() : Texture() {
 }
@@ -34,13 +33,21 @@ unsigned char *PipelinedTexture::beginMutate() {
     return data;
 }
 
-Texture *PipelinedTexture::Original() {
+const vega_types::SharedPtr<const Texture> PipelinedTexture::OriginalConst() const {
+    if (original) {
+        return original->OriginalConst();
+    } else {
+        return vega_dynamic_const_cast_shared_ptr<Texture>(shared_from_this());
+    }
+}
+
+vega_types::SharedPtr<Texture> PipelinedTexture::Original() {
     //Had to duplicate the Texture::Original() function otherwise VC++ 6 would not compile anymore
     //reporting an undefined reference to Texture::Original()
     if (original) {
         return original->Original();
     } else {
-        return this;
+        return vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
     }
 }
 
@@ -58,7 +65,7 @@ PipelinedTexture::PipelinedTexture(unsigned int width, unsigned int height, unsi
     data = new unsigned char[4 * width * height];
     stage = 0;
     original = NULL;
-    refcount = 0;
+//    refcount = 0;
     texture_target = TEXTURE2D;
     image_target = TEXTURE_2D;
     GFXCreateTexture(sizeX, sizeY, (mode == _24BITRGBA) ? RGBA32 : ((mode == _8BIT) ? PALETTE8 : RGB32), &name, NULL,
@@ -115,8 +122,8 @@ void PipelinedTexture::Swap() {
     }
 }
 
-Texture *PipelinedTexture::Clone() {
-    PipelinedTexture *retval = new PipelinedTexture();
+vega_types::SharedPtr<Texture> PipelinedTexture::Clone() {
+    vega_types::SharedPtr<PipelinedTexture> retval = vega_types::MakeShared<PipelinedTexture>();
     *retval = *this;
     retval->last = last;
     retval->current = current;

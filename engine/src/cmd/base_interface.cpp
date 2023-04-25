@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * base_interface.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -1297,8 +1299,8 @@ void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, i
         }
         if ((playa && bas) && (auto_undock || (playa->name == "return_to_cockpit"))) {
             playa->UnDock(bas);
-            CommunicationMessage c(bas, playa, NULL, 0);
-            c.SetCurrentState(c.fsm->GetUnDockNode(), NULL, 0);
+            CommunicationMessage c(bas, playa, nullptr, 0);
+            c.SetCurrentState(c.fsm->GetUnDockNode(), nullptr, 0);
             if (playa->getAIState()) {
                 playa->getAIState()->Communicate(c);
             }
@@ -1345,12 +1347,12 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
                 static float
-                        velmul = XMLSupport::parse_float(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
+                        velmul = XMLSupport::parse_floatf(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
                 playa->SetVelocity(bas->Velocity * velmul + randyVector(-.25, .25).Cast());
             }
             playa->UnDock(bas);
-            CommunicationMessage c(bas, playa, NULL, 0);
-            c.SetCurrentState(c.fsm->GetUnDockNode(), NULL, 0);
+            CommunicationMessage c(bas, playa, nullptr, 0);
+            c.SetCurrentState(c.fsm->GetUnDockNode(), nullptr, 0);
             if (playa->getAIState()) {
                 playa->getAIState()->Communicate(c);
             }

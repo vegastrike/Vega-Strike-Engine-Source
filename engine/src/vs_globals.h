@@ -1,4 +1,6 @@
 /*
+ * vs_globals.h
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -22,6 +24,9 @@
 
 #ifndef __VS_GLOBALS_H_
 #define __VS_GLOBALS_H_
+
+#include "preferred_types.h"
+
 #include <vector>
 
 #include "command.h"

@@ -1,7 +1,7 @@
 /*
  * drawable.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
  * Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -72,12 +72,6 @@ Drawable::Drawable() :
 }
 
 Drawable::~Drawable() {
-    for (Mesh *mesh : meshdata) {
-        if (mesh != nullptr) {
-            delete mesh;
-            mesh = nullptr;
-        }
-    }
     meshdata.clear();
     clear();
 }
@@ -92,7 +86,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
         anifilename += string("_") + string(animationExt);
     }
 
-    std::vector<Mesh *> *meshes = new vector<Mesh *>();
+    vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> meshes = vega_types::MakeShared<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>>();
     int i = 1;
     char count[30] = "1";
     string dir = anifilename;
@@ -120,7 +114,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
         unit_name += count;
         string path = dir + "/" + unit_name + ".bfxm";
         if (VSFileSystem::FileExistsData(path, VSFileSystem::MeshFile) != -1) {
-            Mesh *m = Mesh::LoadMesh(path.c_str(), Vector(1, 1, 1), faction, flightgrp);
+            vega_types::SharedPtr<Mesh> m = Mesh::LoadMesh(path.c_str(), Vector(1, 1, 1), faction, flightgrp);
             meshes->push_back(m);
             #ifdef DEBUG_MESH_ANI
             VS_LOG(debug, (boost::format("Animated Mesh: %1% loaded - with: %2% vertices.") % path % m->getVertexList()->GetNumVertices()));
@@ -153,7 +147,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
                         % uniqueUnitName % numFrames));
         return true;
     } else {
-        delete meshes;
+        meshes.reset();
         return false;
     }
 }
@@ -232,14 +226,14 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
             unsigned int numKeyFrames = unit->graphicOptions.NumAnimationPoints;
             for (i = 0, n = nummesh(); i <= n; i++) {
                 //NOTE LESS THAN OR EQUALS...to cover shield mesh
-                if (this->meshdata[i] == NULL) {
+                if (!(this->meshdata.at(i))) {
                     continue;
                 }
-                if (i == n && (this->meshdata[i]->numFX() == 0 || unit->Destroyed())) {
+                if (i == n && (this->meshdata.at(i)->numFX() == 0 || unit->Destroyed())) {
                     continue;
                 }
 
-                if (this->meshdata[i]->getBlendDst() == ONE) {
+                if (this->meshdata.at(i)->getBlendDst() == ONE) {
                     if ((unit->invisible & unit->INVISGLOW) != 0) {
                         continue;
                     }
@@ -249,16 +243,16 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
                         }
                     }
                 }
-                QVector TransformedPosition = Transform(*ctm, meshdata[i]->Position().Cast());
+                QVector TransformedPosition = Transform(*ctm, meshdata.at(i)->Position().Cast());
 
                 //d can be used for level of detail shit
-                float mSize = meshdata[i]->rSize() * avgscale;
+                float mSize = meshdata.at(i)->rSize() * avgscale;
                 double d = (TransformedPosition - camerapos).Magnitude();
                 double rd = d - mSize;
                 float pixradius = Apparent_Size = mSize * perspectiveFactor(
                         (rd < g_game.znear) ? g_game.znear : rd);
                 float lod = pixradius * g_game.detaillevel;
-                if (meshdata[i]->getBlendDst() == ZERO) {
+                if (meshdata.at(i)->getBlendDst() == ZERO) {
                     if (unit->isUnit() == Vega_UnitType::planet && pixradius > 10) {
                         Occlusion::addOccluder(TransformedPosition, mSize, true);
                     } else if (pixradius >= 10.0) {
@@ -271,25 +265,25 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
                             minmeshradius + mSize);
                     if (frustd) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
-                        float currentFrame = meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw(lod, wmat, d,
+                        float currentFrame = meshdata.at(i)->getCurrentFrame();
+                        this->meshdata.at(i)->Draw(lod, wmat, d,
                                 i == this->meshdata.size() - 1 ? -1 : cloak,
                                 (camera->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1 : 0,
                                 chardamage);                                                                                                                                                            //cloakign and nebula
                         On_Screen = true;
                         unsigned int numAnimFrames = 0;
                         static const string default_animation;
-                        if (this->meshdata[i]->getFramesPerSecond()
-                                && (numAnimFrames = this->meshdata[i]->getNumAnimationFrames(default_animation))) {
+                        if (this->meshdata.at(i)->getFramesPerSecond()
+                                && (numAnimFrames = this->meshdata.at(i)->getNumAnimationFrames(default_animation))) {
                             float currentprogress = floor(
-                                    this->meshdata[i]->getCurrentFrame() * numKeyFrames / (float) numAnimFrames);
+                                    this->meshdata.at(i)->getCurrentFrame() * numKeyFrames / (float) numAnimFrames);
                             if (numKeyFrames
                                     && floor(currentFrame * numKeyFrames / (float) numAnimFrames) != currentprogress) {
                                 unit->graphicOptions.Animating = 0;
-                                meshdata[i]->setCurrentFrame(
+                                meshdata.at(i)->setCurrentFrame(
                                         .1 + currentprogress * numAnimFrames / (float) numKeyFrames);
                             } else if (!unit->graphicOptions.Animating) {
-                                meshdata[i]->setCurrentFrame(currentFrame);                                 //dont' budge
+                                meshdata.at(i)->setCurrentFrame(currentFrame);                                 //dont' budge
                             }
                         }
                     }
@@ -418,15 +412,15 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     }
     for (i = 0; i <= this->nummesh(); i++) {
         //NOTE LESS THAN OR EQUALS...to cover shield mesh
-        if (this->meshdata[i] == NULL) {
+        if (this->meshdata.at(i) == NULL) {
             continue;
         }
         QVector TransformedPosition = Transform(mat,
-                this->meshdata[i]->Position().Cast());
-        float d = GFXSphereInFrustum(TransformedPosition, this->meshdata[i]->clipRadialSize() * vlpqrScaleFactor);
+                this->meshdata.at(i)->Position().Cast());
+        float d = GFXSphereInFrustum(TransformedPosition, this->meshdata.at(i)->clipRadialSize() * vlpqrScaleFactor);
         if (d) {          //d can be used for level of detail
-            //this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
-            this->meshdata[i]->Draw(lod, mat, d, cloak);
+            //this->meshdata.at(i)->DrawNow(lod,false,mat,cloak);//cloakign and nebula
+            this->meshdata.at(i)->Draw(lod, mat, d, cloak);
         }
     }
     Unit *un;
@@ -525,7 +519,7 @@ void Drawable::UpdateFrames() {
     }
 }
 
-void Drawable::addAnimation(std::vector<Mesh *> *meshes, const char *name) {
+void Drawable::addAnimation(vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> meshes, const char *name) {
     if ((meshes->size() > 0) && animatedMesh) {
         vecAnimations.push_back(meshes);
         vecAnimationNames.push_back(string(name));
@@ -603,13 +597,6 @@ void Drawable::SetAniSpeed(float speed) {
 void Drawable::clear() {
     StopAnimation();
 
-    for (unsigned int i = 0; i < vecAnimations.size(); i++) {
-        for (unsigned int j = 0; j < vecAnimations[i]->size(); j++) {
-            delete vecAnimations[i]->at(j);
-        }
-        delete vecAnimations[i];
-        vecAnimations[i]->clear();
-    }
     vecAnimations.clear();
     vecAnimationNames.clear();
 
@@ -846,32 +833,21 @@ void Drawable::Split(int level) {
         }
     }
     Vector PlaneNorm;
-    for (unsigned int i = 0; i < nummesh();) {
-        if (this->meshdata[i]) {
-            if (this->meshdata[i]->getBlendDst() == ONE) {
-                delete this->meshdata[i];
-                this->meshdata.erase(this->meshdata.begin() + i);
-            } else {
-                i++;
-            }
-        } else {
-            this->meshdata.erase(this->meshdata.begin() + i);
-        }
-    }
+    this->meshdata.erase(std::remove_if(this->meshdata.begin(), this->meshdata.end(), [](const vega_types::SharedPtr<Mesh>& elem) { return !elem || elem->getBlendDst() == ONE; }), this->meshdata.end());
     int nm = this->nummesh();
     string fac = FactionUtil::GetFaction(unit->faction);
 
     if (nm <= 0 && num_chunks == 0) {
         return;
     }
-    vector<Mesh *> old = this->meshdata;
-    Mesh *shield = old.back();
+    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> old = this->meshdata;
+    vega_types::SharedPtr<Mesh> shield = old.back();
     old.pop_back();
 
     vector<unsigned int> meshsizes;
     if (num_chunks) {
         size_t i;
-        vector<Mesh *> nw;
+        vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> nw;
         unsigned int which_chunk = rand() % num_chunks;
         string chunkname = UniverseUtil::LookupUnitStat(unit->name, fac, "Chunk_" + XMLSupport::tostring(which_chunk));
         string dir = UniverseUtil::LookupUnitStat(unit->name, fac, "Directory");
@@ -890,29 +866,25 @@ void Drawable::Split(int level) {
         VSFileSystem::current_type.pop_back();
         VSFileSystem::current_subdirectory.pop_back();
         VSFileSystem::current_path.pop_back();
-        for (i = 0; i < old.size(); ++i) {
-            delete old[i];
-        }
         old.clear();
         old = nw;
     } else {
         for (int split = 0; split < level; split++) {
-            vector<Mesh *> nw;
+            vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> nw;
             size_t oldsize = old.size();
             for (size_t i = 0; i < oldsize; i++) {
                 PlaneNorm.Set(rand() - RAND_MAX / 2, rand() - RAND_MAX / 2, rand() - RAND_MAX / 2 + .5);
                 PlaneNorm.Normalize();
-                nw.push_back(NULL);
-                nw.push_back(NULL);
-                old[i]->Fork(nw[nw.size() - 2], nw.back(), PlaneNorm.i, PlaneNorm.j, PlaneNorm.k,
+                nw.push_back(nullptr);
+                nw.push_back(nullptr);
+                old.at(i)->Fork(nw[nw.size() - 2], nw.back(), PlaneNorm.i, PlaneNorm.j, PlaneNorm.k,
                         -PlaneNorm.Dot(old[i]->Position()));                                                                              //splits somehow right down the middle.
-                delete old[i];
-                old[i] = NULL;
-                if (nw[nw.size() - 2] == NULL) {
+                old.at(i).reset();
+                if (nw[nw.size() - 2] == nullptr) {
                     nw[nw.size() - 2] = nw.back();
                     nw.pop_back();
                 }
-                if (nw.back() == NULL) {
+                if (nw.back() == nullptr) {
                     nw.pop_back();
                 }
             }
@@ -923,19 +895,18 @@ void Drawable::Split(int level) {
             meshsizes.push_back(1);
         }
     }
-    old.push_back(NULL);     //push back shield
-    if (shield != nullptr) {
-        delete shield;
-        shield = nullptr;
+    old.push_back(nullptr);     //push back shield
+    if (shield) {
+        shield.reset();
     }
     nm = old.size() - 1;
     unsigned int k = 0;
-    vector<Mesh *> tempmeshes;
-    for (vector<Mesh *>::size_type i = 0; i < meshsizes.size(); i++) {
+    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> tempmeshes;
+    for (unsigned int const meshsize : meshsizes) {
         Unit *splitsub;
         tempmeshes.clear();
-        tempmeshes.reserve(meshsizes[i]);
-        for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k) {
+//        tempmeshes.reserve(meshsize);
+        for (unsigned int j = 0; j < meshsize && k < old.size(); ++j, ++k) {
             tempmeshes.push_back(old[k]);
         }
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
@@ -960,7 +931,7 @@ void Drawable::Split(int level) {
     }
     old.clear();
     this->meshdata.clear();
-    this->meshdata.push_back(NULL);     //the shield
+    this->meshdata.push_back(nullptr);     //the shield
     unit->Mass *= game_options()->debris_mass;
 }
 
@@ -970,7 +941,7 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
     // Not sure about shield percentage - more variance for more damage?
     // TODO: figure out the above comment
 
-    Mesh *mesh = meshdata.back();
+    vega_types::SharedPtr<Mesh> mesh = meshdata.back();
 
     if (!mesh) {
         return;

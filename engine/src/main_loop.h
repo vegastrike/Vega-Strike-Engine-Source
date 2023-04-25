@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * main_loop.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,7 +27,7 @@
 #define _MAIN_LOOP_H_
 #include "in.h"
 #include "cmd/unit_generic.h"
-void bootstrap_draw(const std::string &message, Animation *SplashScreen = NULL);
+void bootstrap_draw(const std::string &message, vega_types::SharedPtr<Animation> newSplashScreen = NULL);
 
 namespace CockpitKeys {
 void SkipMusicTrack(const KBData &, KBSTATE newState);

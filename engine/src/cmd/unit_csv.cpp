@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * unit_csv.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -49,28 +51,28 @@
 #include "upgradeable_unit.h"
 
 extern int GetModeFromName(const char *input_buffer);
-extern void pushMesh(std::vector<Mesh *> &mesh,
-        float &randomstartframe,
-        float &randomstartseconds,
-        const char *filename,
-        const float scale,
-        int faction,
-        class Flightgroup *fg,
-        int startframe,
-        double texturestarttime);
+extern void pushMesh(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &mesh,
+                     float &randomstartframe,
+                     float &randomstartseconds,
+                     const char *filename,
+                     const float scale,
+                     int faction,
+                     class Flightgroup *fg,
+                     int startframe,
+                     double texturestarttime);
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
 
 
-void AddMeshes(std::vector<Mesh *> &xmeshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        float unitscale,
-        const std::string &meshes,
-        int faction,
-        Flightgroup *fg,
-        vector<unsigned int> *counts) {
+void AddMeshes(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &xmeshes,
+               float &randomstartframe,
+               float &randomstartseconds,
+               float unitscale,
+               const std::string &meshes,
+               int faction,
+               Flightgroup *fg,
+               vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
 
     // Clear counts vector
@@ -86,7 +88,7 @@ void AddMeshes(std::vector<Mesh *> &xmeshes,
         if (counts) {
             counts->reserve(number_of_elements);
         }
-        xmeshes.reserve(number_of_elements);
+//        xmeshes.reserve(number_of_elements);
     }
     while ((where = meshes.find('{', ofs)) != string::npos) {
         when = meshes.find('}', where + 1);         //matching closing brace
@@ -222,7 +224,7 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
         while ((ofs = mounts.find('{', ofs)) != string::npos) {
             nmountz++, ofs++;
         }
-        thus->mounts.reserve(nmountz + thus->mounts.size());
+//        thus->mounts.reserve(nmountz + thus->mounts.size());
         ofs = 0;
     }
     while ((where = mounts.find('{', ofs)) != string::npos) {
@@ -634,12 +636,12 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     xml.randomstartseconds = 0;
     xml.calculated_role = false;
     xml.damageiterator = 0;
-    xml.shieldmesh = NULL;
-    xml.rapidmesh = NULL;
+    xml.shieldmesh = nullptr;
+    xml.rapidmesh = nullptr;
     xml.hasColTree = true;
     xml.unitlevel = 0;
     xml.unitscale = 1;
-    xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
+    xml.data = nullptr;     //was uninitialized memory
     string tmpstr;
     csvRow = unit_identifier;
 
@@ -1005,21 +1007,21 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         const int shieldstacks = configuration()->graphics_config.shield_detail;
         const std::string& shieldtex = configuration()->graphics_config.shield_texture;
         const std::string& shieldtechnique = configuration()->graphics_config.shield_technique;
-        meshdata.back() = new SphereMesh(rSize(),
-                shieldstacks,
-                shieldstacks,
-                shieldtex.c_str(),
-                shieldtechnique,
-                NULL,
-                false,
-                ONE,
-                ONE);
+        meshdata.back() = SphereMesh::createSphereMesh(rSize(),
+                                                       shieldstacks,
+                                                       shieldstacks,
+                                                       shieldtex.c_str(),
+                                                       shieldtechnique,
+                                                       nullptr,
+                                                       false,
+                                                       ONE,
+                                                       ONE);
     }
     meshdata.back()->EnableSpecialFX();
     //Begin the Pow-w-w-war Zone Collide Tree Generation
     {
         xml.rapidmesh_str = UnitCSVFactory::GetVariable(unit_key, "Rapid_Mesh", std::string());
-        vector<mesh_polygon> polies;
+        vega_types::SequenceContainer<mesh_polygon> polies;
 
         std::string collideTreeHash = VSFileSystem::GetHashName(modification + "#" + unit_identifier);
         this->colTrees = collideTrees::Get(collideTreeHash);
@@ -1043,7 +1045,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             if (xml.rapidmesh_str.length()) {
                 addRapidMesh(&xml, xml.rapidmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
             } else {
-                xml.rapidmesh = NULL;
+                xml.rapidmesh = nullptr;
             }
             polies.clear();
             if (xml.rapidmesh) {
@@ -1069,9 +1071,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
                     }
                 }
             }
-            if (xml.rapidmesh != nullptr) {
-                delete xml.rapidmesh;
-                xml.rapidmesh = nullptr;
+            if (xml.rapidmesh) {
+                xml.rapidmesh.reset();
             }
         }
     }

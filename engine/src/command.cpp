@@ -1,4 +1,6 @@
 /*
+ * command.cpp
+ *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Nachum Barcohen,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
@@ -21,6 +23,7 @@
  */
 
 
+#include "preferred_types.h"
 #include "command.h"
 #include <Python.h>
 #include <pyerrors.h>
@@ -48,6 +51,7 @@ using std::ios;
 using std::setiosflags;
 using std::setw;
 using std::exception;
+using namespace vega_types;
 
 //Introduction Comments {{{
 //The {{{ and }}} symbols are VIM Fold Markers.
@@ -388,7 +392,7 @@ class HoldCommands   //Hold the commands here{{{
         procs(const procs &in) {
             procs *blah = const_cast< procs * > (&in);
             proc = blah->proc;
-            for (vector<coms>::iterator iter = blah->rc.begin(); iter < blah->rc.end(); iter++) {
+            for (auto iter = blah->rc.begin(); iter < blah->rc.end(); iter++) {
                 rc.push_back((*(iter)));
             }
         }
