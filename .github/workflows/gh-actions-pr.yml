@@ -143,14 +143,15 @@ jobs:
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'manjarolinux/base'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'manjarolinux/base'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'GLVND'
+          # disabled as VS engine fails to build on Manjaro
+          # - FROM:     'manjarolinux/base'
+          #   COMPILER: 'clang'
+          #   USE_PYTHON_3: 'ON'
+          #   OpenGL_GL_PREFERENCE: 'LEGACY'
+          # - FROM:     'manjarolinux/base'
+          #   COMPILER: 'clang'
+          #   USE_PYTHON_3: 'ON'
+          #   OpenGL_GL_PREFERENCE: 'GLVND'
 
     steps:
     - name: Checkout repository
