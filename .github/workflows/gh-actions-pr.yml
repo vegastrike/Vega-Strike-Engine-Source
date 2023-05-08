@@ -135,12 +135,13 @@ jobs:
           - FROM:     'rockylinux:8.5'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'manjarolinux/base'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'manjarolinux/base'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
+         # Disabling Manjaro builds as there is an issue with the distro
+         # - FROM:     'manjarolinux/base'
+         #   COMPILER: 'clang'
+         #   OpenGL_GL_PREFERENCE: 'LEGACY'
+         # - FROM:     'manjarolinux/base'
+         #   COMPILER: 'clang'
+         #   OpenGL_GL_PREFERENCE: 'GLVND'
 
     steps:
     - name: Checkout repository
