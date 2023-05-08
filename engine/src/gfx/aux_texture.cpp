@@ -1,8 +1,10 @@
-/*
+/**
  * aux_texture.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Roy Falk, and other Vega Strike contributors
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
+ * and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -27,10 +29,8 @@
 #include <assert.h>
 #include "gfxlib.h"
 #include <string>
-#include <utility>
 #include "endianness.h"
 #include "hashtable.h"
-#include "shared_ptr_hashtable.h"
 #include "vsfilesystem.h"
 #include "vsimage.h"
 #include "vs_globals.h"
@@ -38,22 +38,20 @@
 #include "main_loop.h"
 #include "aux_texture.h"
 #include "configxml.h"
-#include "vega_cast_utils.h"
-#include "preferred_types.h"
 
 using std::string;
 using namespace VSFileSystem;
 using namespace XMLSupport;
 ///holds all the textures in a huge hash table
-SharedPtrHashtable<string, Texture, 4007> texHashTable;
-SharedPtrHashtable<string, bool, 4007> badtexHashTable;
+Hashtable<string, Texture, 4007> texHashTable;
+Hashtable<string, bool, 4007> badtexHashTable;
 
-vega_types::SharedPtr<Texture> Texture::Exists(string s, string a) {
+Texture *Texture::Exists(string s, string a) {
     return Texture::Exists(s + a);
 }
 
-vega_types::SharedPtr<Texture> Texture::Exists(string s) {
-    vega_types::SharedPtr<Texture> tmp = texHashTable.Get(VSFileSystem::GetHashName(s));
+Texture *Texture::Exists(string s) {
+    Texture *tmp = texHashTable.Get(VSFileSystem::GetHashName(s));
     if (tmp == NULL) {
         string tmpo;
         tmp = texHashTable.Get(VSFileSystem::GetSharedTextureHashName(s));
@@ -65,15 +63,16 @@ vega_types::SharedPtr<Texture> Texture::Exists(string s) {
 }
 
 bool Texture::operator<(const Texture &b) const {
-    return OriginalConst() < b.OriginalConst();
+    return Original() < b.Original();
 }
 
 bool Texture::operator==(const Texture &b) const {
-    return OriginalConst() == b.OriginalConst();
+    return Original() == b.Original();
 }
 
-void Texture::setReference(vega_types::SharedPtr<Texture> other) {
+void Texture::setReference(Texture *other) {
     original = other;
+    original->refcount++;
 
     //Copy shared attributes
     texfilename = other->texfilename;
@@ -89,8 +88,8 @@ void Texture::setReference(vega_types::SharedPtr<Texture> other) {
 
 GFXBOOL Texture::checkold(const string &s, bool shared, string &hashname) {
     hashname = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
-    vega_types::SharedPtr<Texture> oldtex = texHashTable.Get(hashname);
-    if (oldtex) {
+    Texture *oldtex = texHashTable.Get(hashname);
+    if (oldtex != NULL) {
         //*this = *oldtex;//will be obsoleted--unpredictable results with string()
         setReference(oldtex);
         return GFXTRUE;
@@ -101,60 +100,65 @@ GFXBOOL Texture::checkold(const string &s, bool shared, string &hashname) {
 
 void Texture::modold(const string &s, bool shared, string &hashname) {
     hashname = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
-    vega_types::SharedPtr<Texture> oldtex = vega_types::MakeShared<Texture>();
+    Texture *oldtex = new Texture;
     //oldtex->InitTexture();new calls this
     oldtex->name = -1;
-    oldtex->original = nullptr;
-    oldtex->palette = nullptr;
-    oldtex->data = nullptr;
+    oldtex->refcount = 1;
+    oldtex->original = NULL;
+    oldtex->palette = NULL;
+    oldtex->data = NULL;
     texHashTable.Put(hashname, oldtex);
     original = oldtex;
 }
 
-//void Texture::InitTexture() {
-//    bound = false;
-//    original = 0;
-//    name = -1;
-//    palette = nullptr;
-//    data = nullptr;
-//    mintcoord = Vector(0.0f, 0.0f, 0.0f);
-//    maxtcoord = Vector(1.0f, 1.0f, 1.0f);
-//    address_mode = DEFAULT_ADDRESS_MODE;
-//}
+void Texture::InitTexture() {
+    bound = false;
+    original = 0;
+    refcount = 0;
+    name = -1;
+    palette = NULL;
+    data = NULL;
+    mintcoord = Vector(0.0f, 0.0f, 0.0f);
+    maxtcoord = Vector(1.0f, 1.0f, 1.0f);
+    address_mode = DEFAULT_ADDRESS_MODE;
+}
 
 void Texture::setold() {
     //*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
     *original = *this;
     //memcpy (original, this, sizeof (Texture));
-    original->original = nullptr;
+    original->original = NULL;
+    original->refcount++;
 }
 
-const vega_types::SharedPtr<const Texture> Texture::OriginalConst() const {
-    if (original) {
-        return original->OriginalConst();
-    } else {
-        return vega_dynamic_const_cast_shared_ptr<Texture>(shared_from_this());
-    }
-}
-
-vega_types::SharedPtr<Texture> Texture::Original() {
+const Texture *Texture::Original() const {
     if (original) {
         return original->Original();
     } else {
-        return vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
+        return this;
     }
 }
 
-vega_types::SharedPtr<Texture> Texture::Clone() {
-    vega_types::SharedPtr<Texture> retval = vega_types::MakeShared<Texture>();
-    vega_types::SharedPtr<Texture> target = Original();
+Texture *Texture::Original() {
+    if (original) {
+        return original->Original();
+    } else {
+        return this;
+    }
+}
+
+Texture *Texture::Clone() {
+    Texture *retval = new Texture();
+    Texture *target = Original();
     *retval = *target;
     //memcpy (this, target, sizeof (Texture));
     if (retval->name != -1) {
         retval->original = target;
+        retval->original->refcount++;
     } else {
-        retval->original = nullptr;
+        retval->original = NULL;
     }
+    retval->refcount = 0;
     return retval;
     //assert (!original->original);
 }
@@ -165,24 +169,25 @@ void Texture::FileNotFound(const string &texfilename) {
 
     setbad(texfilename);
     name = -1;
-    data = nullptr;
-    if (original) {
+    data = NULL;
+    if (original != NULL) {
         original->name = -1;
-        original.reset();
+        delete original;
+        original = NULL;
     }
-    palette = nullptr;
+    palette = NULL;
 }
 
 bool Texture::checkbad(const string &s) {
     string hashname = VSFileSystem::GetSharedTextureHashName(s);
-    vega_types::SharedPtr<bool> found = nullptr;
+    bool *found = NULL;
     found = badtexHashTable.Get(hashname);
-    if (found) {
+    if (found != NULL) {
         return true;
     }
     hashname = VSFileSystem::GetHashName(s);
     found = badtexHashTable.Get(hashname);
-    if (found) {
+    if (found != NULL) {
         return true;
     }
     return false;
@@ -190,11 +195,11 @@ bool Texture::checkbad(const string &s) {
 
 void Texture::setbad(const string &s) {
     //Put both current path+texfile and shared texfile since they both have been looked for
-    static vega_types::SharedPtr<bool> TRUEVAL = vega_types::MakeShared<bool>(true);
-    if (!VSFileSystem::current_path.back().empty()) {
-        badtexHashTable.Put(VSFileSystem::GetHashName(s), TRUEVAL);
+    static bool _TRUEVAL = true;
+    if (VSFileSystem::current_path.back() != "") {
+        badtexHashTable.Put(VSFileSystem::GetHashName(s), &_TRUEVAL);
     }
-    badtexHashTable.Put(VSFileSystem::GetSharedTextureHashName(s), TRUEVAL);
+    badtexHashTable.Put(VSFileSystem::GetSharedTextureHashName(s), &_TRUEVAL);
 }
 
 Texture::Texture(int stage,
@@ -202,26 +207,92 @@ Texture::Texture(int stage,
         enum TEXTURE_TARGET target,
         enum TEXTURE_IMAGE_TARGET imagetarget,
         enum ADDRESSMODE address_mode) {
-//    InitTexture();
-    data = nullptr;
+    InitTexture();
+    data = NULL;
     ismipmapped = mipmap;
-    palette = nullptr;
+    palette = NULL;
     texture_target = target;
     image_target = imagetarget;
     this->stage = stage;
 }
 
+Texture::Texture(VSFile *f,
+        int stage,
+        enum FILTER mipmap,
+        enum TEXTURE_TARGET target,
+        enum TEXTURE_IMAGE_TARGET imagetarget,
+        GFXBOOL force_load,
+        int maxdimension,
+        GFXBOOL detailtexture,
+        GFXBOOL nocache,
+        enum ADDRESSMODE address_mode,
+        Texture *main) {
+    data = NULL;
+    ismipmapped = mipmap;
+    InitTexture();
+    palette = NULL;
+    texture_target = target;
+    image_target = imagetarget;
+    this->stage = stage;
+    data = this->ReadImage(f, NULL, true, NULL);
+    if (data) {
+        if (mode >= _DXT1 && mode <= _DXT5) {
+            if ((int) data[0] == 0) {
+                detailtexture = NEAREST;
+                ismipmapped = NEAREST;
+            }
+        }
+        if (main) {
+            Bind(main, maxdimension, detailtexture);
+        } else {
+            Bind(maxdimension, detailtexture);
+        }
+        free(data);
+        data = NULL;
+        if (!nocache) {
+            setold();
+        }
+    } else {
+        FileNotFound(texfilename);
+    }
+}
+
+Texture::Texture(const char *FileName,
+        int stage,
+        enum FILTER mipmap,
+        enum TEXTURE_TARGET target,
+        enum TEXTURE_IMAGE_TARGET imagetarget,
+        GFXBOOL force_load,
+        int maxdimension,
+        GFXBOOL detailtexture,
+        GFXBOOL nocache,
+        enum ADDRESSMODE address_mode,
+        Texture *main) {
+    InitTexture();
+    Load(FileName,
+            stage,
+            mipmap,
+            target,
+            imagetarget,
+            force_load,
+            maxdimension,
+            detailtexture,
+            nocache,
+            address_mode,
+            main);
+}
+
 void Texture::Load(const char *FileName,
-                   int stage,
-                   enum FILTER mipmap,
-                   enum TEXTURE_TARGET target,
-                   enum TEXTURE_IMAGE_TARGET imagetarget,
-                   GFXBOOL force_load,
-                   int maxdimension,
-                   GFXBOOL detailtexture,
-                   GFXBOOL nocache,
-                   enum ADDRESSMODE address_mode,
-                   vega_types::SharedPtr<Texture> main_texture) {
+        int stage,
+        enum FILTER mipmap,
+        enum TEXTURE_TARGET target,
+        enum TEXTURE_IMAGE_TARGET imagetarget,
+        GFXBOOL force_load,
+        int maxdimension,
+        GFXBOOL detailtexture,
+        GFXBOOL nocache,
+        enum ADDRESSMODE address_mode,
+        Texture *main) {
     if (data != nullptr) {
         free(data);
         data = nullptr;
@@ -313,13 +384,13 @@ void Texture::Load(const char *FileName,
                 ismipmapped = NEAREST;
             }
         }
-        if (main_texture) {
-            Bind(main_texture, maxdimension, detailtexture);
+        if (main) {
+            Bind(main, maxdimension, detailtexture);
         } else {
             Bind(maxdimension, detailtexture);
         }
         free(data);
-        data = nullptr;
+        data = NULL;
         if (!nocache) {
             setold();
         }
@@ -332,20 +403,51 @@ void Texture::Load(const char *FileName,
     }
 }
 
+Texture::Texture(const char *FileNameRGB,
+        const char *FileNameA,
+        int stage,
+        enum FILTER mipmap,
+        enum TEXTURE_TARGET target,
+        enum TEXTURE_IMAGE_TARGET imagetarget,
+        float alpha,
+        int zeroval,
+        GFXBOOL force_load,
+        int maxdimension,
+        GFXBOOL detailtexture,
+        GFXBOOL nocache,
+        enum ADDRESSMODE address_mode,
+        Texture *main) {
+    InitTexture();
+    Load(FileNameRGB,
+            FileNameA,
+            stage,
+            mipmap,
+            target,
+            imagetarget,
+            alpha,
+            zeroval,
+            force_load,
+            maxdimension,
+            detailtexture,
+            nocache,
+            address_mode,
+            main);
+}
+
 void Texture::Load(const char *FileNameRGB,
-                   const char *FileNameA,
-                   int stage,
-                   enum FILTER mipmap,
-                   enum TEXTURE_TARGET target,
-                   enum TEXTURE_IMAGE_TARGET imagetarget,
-                   float alpha,
-                   int zeroval,
-                   GFXBOOL force_load,
-                   int maxdimension,
-                   GFXBOOL detailtexture,
-                   GFXBOOL nocache,
-                   enum ADDRESSMODE address_mode,
-                   vega_types::SharedPtr<Texture> main_texture) {
+        const char *FileNameA,
+        int stage,
+        enum FILTER mipmap,
+        enum TEXTURE_TARGET target,
+        enum TEXTURE_IMAGE_TARGET imagetarget,
+        float alpha,
+        int zeroval,
+        GFXBOOL force_load,
+        int maxdimension,
+        GFXBOOL detailtexture,
+        GFXBOOL nocache,
+        enum ADDRESSMODE address_mode,
+        Texture *main) {
     if (data != nullptr) {
         free(data);
         data = nullptr;
@@ -419,13 +521,13 @@ void Texture::Load(const char *FileNameRGB,
                 ismipmapped = NEAREST;
             }
         }
-        if (main_texture) {
-            Bind(main_texture, maxdimension, detailtexture);
+        if (main) {
+            Bind(main, maxdimension, detailtexture);
         } else {
             Bind(maxdimension, detailtexture);
         }
         free(data);
-        data = nullptr;
+        data = NULL;
         if (!nocache) {
             setold();
         }
@@ -439,9 +541,7 @@ void Texture::Load(const char *FileNameRGB,
 }
 
 Texture::~Texture() {
-    if (original) {
-        original.reset();
-    } else {
+    if (original == NULL) {
         /**DEPRECATED
          *     if(data != NULL)
          *     {
@@ -451,9 +551,14 @@ Texture::~Texture() {
          *     }
          */
         UnBind();
-        if (palette != nullptr) {
+        if (palette != NULL) {
             free(palette);
-            palette = nullptr;
+            palette = NULL;
+        }
+    } else {
+        original->refcount--;
+        if (original->refcount == 0) {
+            delete original;
         }
     }
 }
@@ -559,7 +664,7 @@ int Texture::Bind(int maxdimension, GFXBOOL detailtexture) {
     return name;
 }
 
-int Texture::Bind(vega_types::SharedPtr<Texture> other, int maxdimension, GFXBOOL detailtexture) {
+int Texture::Bind(Texture *other, int maxdimension, GFXBOOL detailtexture) {
     UnBind();
 
     boundSizeX = other->boundSizeX;
@@ -576,7 +681,7 @@ void Texture::Prioritize(float priority) {
 }
 
 static void ActivateWhite(int stage) {
-    static vega_types::SharedPtr<Texture> white = Texture::createTexture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
+    static Texture *white = new Texture("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
     if (white->LoadSuccess()) {
         white->MakeActive(stage);
     }
@@ -610,114 +715,3 @@ void Texture::MakeActive(int stag, int pass) {
     }
 }
 
- vega_types::SharedPtr<Texture> Texture::constructTexture(vega_types::SharedPtr<Texture> texture,
-                                                       VSFileSystem::VSFile *f,
-                                                       int stage,
-                                                       enum FILTER mipmap,
-                                                       enum TEXTURE_TARGET target,
-                                                       enum TEXTURE_IMAGE_TARGET imagetarget,
-                                                       GFXBOOL force,
-                                                       int max_dimension_size,
-                                                       GFXBOOL detail_texture,
-                                                       GFXBOOL nocache,
-                                                       enum ADDRESSMODE address_mode,
-                                                       vega_types::SharedPtr<Texture> main_texture) {
-    texture->data = nullptr;
-    texture->ismipmapped = mipmap;
-    texture->palette = nullptr;
-    texture->texture_target = target;
-    texture->image_target = imagetarget;
-    texture->stage = stage;
-    texture->data = texture->ReadImage(f, nullptr, true, nullptr);
-    if (texture->data) {
-        if (texture->mode >= texture->_DXT1 && texture->mode <= texture->_DXT5) {
-            if ((int) texture->data[0] == 0) {
-                detail_texture = GFXFALSE;      //NEAREST;
-                texture->ismipmapped = NEAREST;
-            }
-        }
-        if (main_texture) {
-            texture->Bind(main_texture, max_dimension_size, detail_texture);
-        } else {
-            texture->Bind(max_dimension_size, detail_texture);
-        }
-        free(texture->data);
-        texture->data = nullptr;
-        if (!nocache) {
-            texture->setold();
-        }
-    } else {
-        texture->FileNotFound(texture->texfilename);
-    }
-    return texture;
-}
-
-vega_types::SharedPtr<Texture>
-Texture::constructTexture(vega_types::SharedPtr<Texture> texture, const char *FileName, int stage, enum FILTER mipmap,
-                          enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, unsigned char force_load,
-                          int max_dimension_size, unsigned char detail_texture, unsigned char nocache,
-                          enum ADDRESSMODE address_mode, vega_types::SharedPtr<Texture> main_texture) {
-    texture->Load(FileName,
-         stage,
-         mipmap,
-         target,
-         imagetarget,
-         force_load,
-         max_dimension_size,
-         detail_texture,
-         nocache,
-         address_mode,
-         main_texture);
-    return texture;
-}
-
-vega_types::SharedPtr<Texture>
-Texture::createTexture(VSFileSystem::VSFile *f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target,
-                       enum TEXTURE_IMAGE_TARGET imagetarget, unsigned char force, int max_dimension_size,
-                       unsigned char detail_texture, unsigned char nocache, enum ADDRESSMODE address_mode,
-                       vega_types::SharedPtr<Texture> main_texture) {
-    vega_types::SharedPtr<Texture> return_value = vega_types::MakeShared<Texture>();
-    return constructTexture(return_value, f, stage, mipmap, target, imagetarget, force, max_dimension_size, detail_texture, nocache, address_mode, std::move(main_texture));
-}
-
-vega_types::SharedPtr<Texture>
-Texture::createTexture(const char *FileNameRGB, const char *FileNameA, int stage, enum FILTER mipmap,
-                       enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval,
-                       unsigned char force_load, int max_dimension_size, unsigned char detail_texture,
-                       unsigned char nocache, enum ADDRESSMODE address_mode,
-                       vega_types::SharedPtr<Texture> main_texture) {
-    vega_types::SharedPtr<Texture> return_value = vega_types::MakeShared<Texture>();
-    return constructTexture(return_value, FileNameRGB, FileNameA, stage, mipmap, target, imagetarget, alpha, zeroval, force_load, max_dimension_size, detail_texture, nocache, address_mode, std::move(main_texture));
-}
-
-vega_types::SharedPtr<Texture>
-Texture::createTexture(const char *FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target,
-                       enum TEXTURE_IMAGE_TARGET imagetarget, unsigned char force, int max_dimension_size,
-                       unsigned char detail_texture, unsigned char nocache, enum ADDRESSMODE address_mode,
-                       vega_types::SharedPtr<Texture> main_texture) {
-    vega_types::SharedPtr<Texture> return_value = vega_types::MakeShared<Texture>();
-    return constructTexture(return_value, FileName, stage, mipmap, target, imagetarget, force, max_dimension_size, detail_texture, nocache, address_mode, std::move(main_texture));
-}
-
-vega_types::SharedPtr<Texture>
-Texture::constructTexture(vega_types::SharedPtr<Texture> texture, const char *FileNameRGB, const char *FileNameA,
-                          int stage, enum FILTER mipmap, enum TEXTURE_TARGET target,
-                          enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, unsigned char force_load,
-                          int max_dimension_size, unsigned char detail_texture, unsigned char nocache,
-                          enum ADDRESSMODE address_mode, vega_types::SharedPtr<Texture> main_texture) {
-    texture->Load(FileNameRGB,
-         FileNameA,
-         stage,
-         mipmap,
-         target,
-         imagetarget,
-         alpha,
-         zeroval,
-         force_load,
-         max_dimension_size,
-         detail_texture,
-         nocache,
-         address_mode,
-         main_texture);
-    return texture;
-}

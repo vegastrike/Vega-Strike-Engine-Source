@@ -1,8 +1,10 @@
-/*
+/**
  * pilot.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -25,7 +27,6 @@
 
 #include "gnuhash.h"
 #include <vector>
-#include "preferred_types.h"
 
 class Animation;
 class Unit;
@@ -38,10 +39,11 @@ class Pilot {
 public:
     explicit Pilot(int faction);
 
-    virtual ~Pilot() = default;
+    virtual ~Pilot() {
+    }
 
     void SetComm(Unit *comm_unit); //so we can specialize base sort of people
-    vega_types::SharedPtr<Animation> getCommFace(Unit *parent, float moon, unsigned char &gender);
+    Animation *getCommFace(Unit *parent, float moon, unsigned char &gender);
 
     float getReactionTime() {
         return reaction_time;
@@ -56,10 +58,10 @@ public:
     }                          //man it's rank in here
     typedef vsUMap<const void *, float> relationmap; //non dereferencable Unit to float
     relationmap effective_relationship;
-    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> comm_face;
+    std::vector<Animation *> *comm_face;
     float getAnger(const Unit *parent, const Unit *un) const;
 
-    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> getCommFaces(unsigned char &sex) {
+    std::vector<Animation *> *getCommFaces(unsigned char &sex) {
         sex = gender;
         return comm_face;
     }

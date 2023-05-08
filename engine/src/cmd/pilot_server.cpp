@@ -1,8 +1,10 @@
-/*
+/**
  * pilot_server.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -163,15 +165,15 @@ float Pilot::GetEffectiveRelationship(const Unit *parent, const Unit *target) co
 
 extern float myroundclamp(float i);
 
-vega_types::SharedPtr<Animation> Pilot::getCommFace(Unit *parent, float moon, unsigned char &gender) {
-    vector<Animation *> *ani = getCommFaces(gender);
+Animation *Pilot::getCommFace(Unit *parent, float mood, unsigned char &sex) {
+    vector<Animation *> *ani = getCommFaces(sex);
 //this #ifndef hack below by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
     if (ani->size() == 0) {
         return NULL;
     }
-    moon += .1;
-    moon *= (ani->size()) / .2;
-    unsigned int index = (unsigned int) myroundclamp(floor(moon));
+    mood += .1;
+    mood *= (ani->size()) / .2;
+    unsigned int index = (unsigned int) myroundclamp(floor(mood));
     if (index >= ani->size()) {
         index = ani->size() - 1;
     }

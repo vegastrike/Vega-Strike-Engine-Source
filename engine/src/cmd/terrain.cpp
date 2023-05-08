@@ -1,8 +1,10 @@
-/*
+/**
  * terrain.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -116,15 +118,15 @@ void Terrain::Collide() {
     }
 }
 
-static vega_types::SharedPtr<GFXColor> getTerrainColor() {
-    float col[4] = {0.1F, 0.1F, 0.1F, 1.0F};
-    return vega_types::MakeShared<GFXColor>(col[0], col[1], col[2], col[3]);
+static GFXColor getTerrainColor() {
+    float col[4] = {.1f, .1f, .1f, 1.0f};
+    return GFXColor(col[0], col[1], col[2], col[3]);
 }
 
 void Terrain::CollideAll() {
-    for (auto & terrain : allterrains) {
-        if (terrain->draw & TERRAINRENDER) {
-            terrain->Collide();
+    for (unsigned int i = 0; i < allterrains.size(); i++) {
+        if (allterrains[i]->draw & TERRAINRENDER) {
+            allterrains[i]->Collide();
         }
     }
 }
@@ -136,8 +138,8 @@ void Terrain::DeleteAll() {
 }
 
 void Terrain::Render() {
-    static vega_types::SharedPtr<GFXColor> terraincolor = getTerrainColor();
-    vega_types::SharedPtr<GFXColor> tmpcol = vega_types::MakeShared<GFXColor>(0, 0, 0, 1);
+    static GFXColor terraincolor(getTerrainColor());
+    GFXColor tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(terraincolor);
     QuadTree::Render();
@@ -145,13 +147,13 @@ void Terrain::Render() {
 }
 
 void Terrain::RenderAll() {
-    static vega_types::SharedPtr<GFXColor> terraincolor = getTerrainColor();
-    vega_types::SharedPtr<GFXColor> tmpcol = vega_types::MakeShared<GFXColor>(0, 0, 0, 1);
+    static GFXColor terraincolor(getTerrainColor());
+    GFXColor tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(terraincolor);
-    for (auto & terrain : allterrains) {
-        if (terrain->draw & TERRAINRENDER) {
-            terrain->Render();
+    for (unsigned int i = 0; i < allterrains.size(); i++) {
+        if (allterrains[i]->draw & TERRAINRENDER) {
+            allterrains[i]->Render();
         }
     }
     GFXLightContextAmbient(tmpcol);

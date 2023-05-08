@@ -1,6 +1,4 @@
 /*
- * gfxlib.h
- *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -48,7 +46,6 @@ using std::vector;
 
 #include "gfx/vec.h"
 #include "gfxlib_struct.h"
-#include "preferred_types.h"
 
 //Init functions
 
@@ -79,23 +76,23 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(const int con_number);
 ///Sets active light context (restores all gllights in such context)
 void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number);
 ///Sets the ambient light value
-GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient(const vega_types::SharedPtr<GFXColor> amb);
+GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient(const GFXColor &amb);
 ///Gets the ambient light value
-GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(vega_types::SharedPtr<GFXColor> amb);
+GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(GFXColor &amb);
 ///picks and activates local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius);
 ///picks and does not activate local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center,
-                                 const float radius,
-                                 vega_types::SequenceContainer<int> &lights,
-                                 const int maxlights,
-                                 const bool pickglobals);
+        const float radius,
+        vector<int> &lights,
+        const int maxlights,
+        const bool pickglobals);
 ///activates local lights picked by GFXPickLight
 void /*GFXDRVAPI*/ GFXPickLights(vector<int>::const_iterator begin, vector<int>::const_iterator end);
 ///loads "lights" with all enabled global lights, computing occlusion to the specified position too
-void /*GFXDRVAPI*/ GFXGlobalLights(vega_types::SequenceContainer<int> &lights, const Vector &center, const float radius);
+void /*GFXDRVAPI*/ GFXGlobalLights(vector<int> &lights, const Vector &center, const float radius);
 ///loads "lights" with all enabled global lights
-void /*GFXDRVAPI*/ GFXGlobalLights(vega_types::SequenceContainer<int> &lights);
+void /*GFXDRVAPI*/ GFXGlobalLights(vector<int> &lights);
 ///Sets light position offset, use when centering the camera off-origin
 void /*GFXDRVAPI*/ GFXSetLightOffset(const QVector &offset);
 ///Sets light position offset, use when centering the camera off-origin
@@ -449,7 +446,7 @@ template<typename ITYPE, int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
 void GFXDrawElements(POLYTYPE type,
         const VertexBuilder<float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1> &buffer,
         const std::vector<ITYPE> &indices) {
-    if (buffer.size() > 0 && !indices.empty()) {
+    if (buffer.size() > 0 && indices.size() > 0) {
         GFXDrawElements(type,
                 buffer.buffer_pointer(),
                 buffer.size(),
@@ -521,11 +518,11 @@ int GFXShaderConstantv(int name, unsigned int numvals, const int *value);
 bool GFXDefaultShaderSupported();
 void GFXReloadDefaultShader();
 void GFXUploadLightState(int max_light_location,
-                         int active_light_array,
-                         int apparent_light_size_array,
-                         bool shader,
-                         vega_types::SequenceContainer<int>::const_iterator begin,
-                         vega_types::SequenceContainer<int>::const_iterator end);
+        int active_light_array,
+        int apparent_light_size_array,
+        bool shader,
+        vector<int>::const_iterator begin,
+        vector<int>::const_iterator end);
 bool GFXShaderReloaded();
 int GFXGetProgramVersion();
 #endif

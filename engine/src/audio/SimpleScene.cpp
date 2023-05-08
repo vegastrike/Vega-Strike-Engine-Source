@@ -50,12 +50,12 @@ SimpleScene::~SimpleScene() {
     }
 }
 
-void SimpleScene::add(vega_types::SharedPtr<Source> source) {
+void SimpleScene::add(SharedPtr<Source> source) {
     SimpleSource *p_simple_source = vega_dynamic_cast_ptr<SimpleSource>(source.get());
     attach(p_simple_source);
 }
 
-void SimpleScene::remove(vega_types::SharedPtr<Source> source) {
+void SimpleScene::remove(SharedPtr<Source> source) {
     SimpleSource *p_simple_source = vega_dynamic_cast_ptr<SimpleSource>(source.get());
     detach(p_simple_source);
 }
@@ -64,7 +64,7 @@ Listener &SimpleScene::getListener() {
     return listener;
 }
 
-void SimpleScene::notifySourcePlaying(vega_types::SharedPtr<Source> source, bool playing) {
+void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing) {
     if (playing) {
         activeSources.insert(source);
     } else {

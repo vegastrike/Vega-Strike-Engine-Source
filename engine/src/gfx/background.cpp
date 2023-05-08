@@ -1,14 +1,15 @@
 /*
  * background.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -44,11 +45,11 @@ Background::Background(const char *file,
         const std::string &filename,
         const GFXColor &color_,
         bool degamma_)
-        : Enabled(true), degamma(degamma_), color(color_), stars(nullptr) {
+        : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
     static string starspritetextures = vs_config->getVariable("graphics", "far_stars_sprite_texture", "");
     static float starspritesize =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "far_stars_sprite_size", "2"));
+            XMLSupport::parse_float(vs_config->getVariable("graphics", "far_stars_sprite_size", "2"));
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
@@ -65,11 +66,10 @@ Background::Background(const char *file,
                         starspritetextures,
                         starspritesize);
     }
-    up = left = down = front = right = back = nullptr;
+    up = left = down = front = right = back = NULL;
 
-    SphereBackground = nullptr;
+    SphereBackground = NULL;
 
-    // FIXME -- This code will probably not compile any more if NV_CUBE_MAP is not defined -- SGT 2023-02-23
 #ifndef NV_CUBE_MAP
     static int max_cube_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_cubemap_size", "1024" ) );
     string     suffix = ".image";

@@ -1,7 +1,5 @@
 /*
- * gfxlib_struct.h
- *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -27,12 +25,10 @@
 #define _GFXLIB_STRUCT
 #include "gfx/vec.h"
 #include "endianness.h"
-#include "preferred_types.h"
 
 #include <vector>
 #include <iterator>
 #include <functional>
-#include <boost/shared_ptr.hpp>
 
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char
@@ -944,8 +940,6 @@ protected:
 ///Propagates modifications to the display list
 public:
     void RefreshDisplayList();
-    virtual POLYTYPE getPolyType(size_t idx) const;
-    virtual size_t getOffset(size_t idx) const;
 protected:
     virtual void Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
     void RenormalizeNormals();
@@ -1029,9 +1023,7 @@ public:
     void DrawOnce();
     virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-    virtual vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GetPolys(size_t &num_tris,
-                                                                                               size_t &num_quads,
-                                                                                               size_t &total_num_polys);
+    virtual void GetPolys(GFXVertex **vert, int *numPolys, int *numTris);
 };
 
 class /*GFXDRVAPI*/ GFXSphereVertexList : public GFXVertexList {
@@ -1056,9 +1048,7 @@ public:
     virtual void Draw();
     virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GetPolys(size_t &num_tris,
-                                                                                       size_t &num_quads,
-                                                                                       size_t &total_num_polys) override;
+    virtual void GetPolys(GFXVertex **vert, int *numPolys, int *numTris);
 ///generates procedural planetdata to the actual detaillevel with the "plasma method"
     virtual void ProceduralModification();
 };

@@ -1,7 +1,5 @@
 /*
- * unit_collide.h
- *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -325,7 +323,7 @@ struct collideTrees {
     csOPCODECollider *rapidColliders[collideTreesMaxTrees];
 
     bool usingColTree() const {
-        return rapidColliders[0] != nullptr;
+        return rapidColliders[0] != NULL;
     }
 
     csOPCODECollider *colTree(Unit *un,

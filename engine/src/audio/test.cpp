@@ -52,8 +52,6 @@ using namespace std;
 namespace Audio {
 namespace Test {
 
-using namespace vega_types;
-
 void initSceneManager() {
     cerr << "Creating scene manager..." << flush;
     new SceneManager();

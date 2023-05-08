@@ -1,6 +1,4 @@
 /*
- * hashtable.h
- *
  * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
@@ -23,23 +21,17 @@
  */
 
 
-#ifndef VEGA_STRIKE_HASHTABLE_H
-#define VEGA_STRIKE_HASHTABLE_H
-
+#ifndef _HASHTABLE_H_
+#define _HASHTABLE_H_
 #include "gnuhash.h"
 #include <math.h>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <utility>
-#include <memory>
-#include <deque>
-#include "preferred_types.h"
-
 #define HASH_INTSIZE (sizeof (int)*8)
 #define HASH_SALT_0 0x7EF92C3B
 #define HASH_SALT_1 0x9B
-
 class Unit;
 //const int hashsize = 1001;
 //Hashtable doesn't grow

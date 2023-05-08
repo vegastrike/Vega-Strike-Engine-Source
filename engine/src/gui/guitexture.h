@@ -1,7 +1,5 @@
 /*
- * guitexture.h
- *
- * Copyright (C) 2001-2023 Daniel Horn, Mike Byron, pyramid3d,
+ * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,11 +23,9 @@
 #ifndef __GUITEXTURE_H__
 #define __GUITEXTURE_H__
 #include <string>
-#include <gfx/aux_texture.h>
 #include "guidefs.h"
 
 #include "vegastrike.h"                 //For OpenGL/gl.h -> GLuint.
-#include "preferred_types.h"
 
 //The GuiTexture class encapsulates an OpenGL 2D texture.
 //There is a cache so that a texture is only read and bound once.
@@ -42,15 +38,15 @@ public:
     void draw(const Rect &rect) const;
 
 //CONSTRUCTION
-    GuiTexture();
-    ~GuiTexture();
+    GuiTexture(void);
+    ~GuiTexture(void);
 
 protected:
 //INTERNAL IMPLEMENTATION
 
 protected:
 //VARIABLES
-    vega_types::SharedPtr<Texture> m_texture{};
+    class Texture *m_texture;
 /*
  *  GLuint m_glName;		// Unique ID for this texture used in OpenGL.
  *  std::string m_fileName;	// Name of the file this came from.

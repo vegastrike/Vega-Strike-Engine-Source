@@ -1,8 +1,6 @@
 /*
- * resource.h
- *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Roy Falk, and other Vega Strike contributors.
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,8 +20,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_RESOURCE_RESOURCE_H
-#define VEGA_STRIKE_RESOURCE_RESOURCE_H
+#ifndef RESOURCE_H
+#define RESOURCE_H
 
 /**
  * @brief A resource is any part of the game that can be used up and filled up.
@@ -126,4 +124,4 @@ T operator/(const Resource<T> &lhs, const T &rhs);
 template<typename T>
 T operator/(const T &lhs, const Resource<T> &rhs);
 
-#endif // VEGA_STRIKE_RESOURCE_RESOURCE_H
+#endif // RESOURCE_H

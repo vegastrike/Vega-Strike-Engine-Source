@@ -1,7 +1,5 @@
 /*
- * faction_util_server.cpp
- *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -33,36 +31,34 @@ Faction::~Faction() {
     }
 }
 
-vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
-FactionUtil::GetRandCommAnimation(int faction, Unit *un, unsigned char &sex) {
+std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *, unsigned char &sex) {
     return NULL;
 }
 
-vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
-FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
+std::vector<Animation *> *FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
     return NULL;
 }
 
-vega_types::SharedPtr<Animation> FactionUtil::createAnimation(const char *anim) {
+Animation *FactionUtil::createAnimation(const char *anim) {
     return NULL;
 }
 
-vega_types::SharedPtr<Texture> FactionUtil::createTexture(const char *tex, const char *tmp, bool force) {
+Texture *FactionUtil::createTexture(const char *tex, const char *tmp, bool force) {
     return NULL;
 }
 
-vega_types::SharedPtr<Texture> FactionUtil::createTexture(const char *tex, bool force) {
+Texture *FactionUtil::createTexture(const char *tex, bool force) {
     return NULL;
 }
 
 void FactionUtil::LoadFactionPlaylists() {
 }
 
-vega_types::SharedPtr<Texture> FactionUtil::getForceLogo(int faction) {
+Texture *FactionUtil::getForceLogo(int faction) {
     return NULL;
 }
 
-vega_types::SharedPtr<Texture> FactionUtil::getSquadLogo(int faction) {
+Texture *FactionUtil::getSquadLogo(int faction) {
     return NULL;
 }
 

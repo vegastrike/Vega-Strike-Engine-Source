@@ -1,7 +1,5 @@
 /*
- * unit_generic.cpp
- *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -75,7 +73,6 @@
 #include "resource/resource.h"
 #include "base_util.h"
 #include "unit_csv_factory.h"
-#include "preferred_types.h"
 
 #include <math.h>
 #include <list>
@@ -277,7 +274,7 @@ char *GetUnitDir(const char *filename) {
  */
 Unit::Unit(int /*dummy*/) : Drawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = nullptr;
+    pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO: delete
     Init();
@@ -286,18 +283,18 @@ Unit::Unit(int /*dummy*/) : Drawable(), Damageable(), Movable() {
 Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = nullptr;
+    pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO:
     Init();
 }
 
-Unit::Unit(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &meshes, bool SubU, int fact)
+Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
         : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(fact);
-    pImage->cockpit_damage = nullptr;
+    pImage->cockpit_damage = NULL;
     // TODO:
     Init();
 
@@ -305,7 +302,7 @@ Unit::Unit(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &meshes, b
     graphicOptions.SubUnit = SubU;
     meshdata = meshes;
     meshes.clear();
-    meshdata.push_back(nullptr);
+    meshdata.push_back(NULL);
     calculate_extent(false);
     pilot->SetComm(this);
 }
@@ -322,7 +319,7 @@ Unit::Unit(const char *filename,
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(faction);
-    pImage->cockpit_damage = nullptr;
+    pImage->cockpit_damage = NULL;
     Init(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber);
     pilot->SetComm(this);
 }
@@ -378,6 +375,12 @@ Unit::~Unit() {
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 0));
 #endif
+    for (size_t meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
+        if (meshdata[meshcount] != nullptr) {
+            delete meshdata[meshcount];
+            meshdata[meshcount] = nullptr;
+        }
+    }
     meshdata.clear();
 }
 
@@ -417,7 +420,7 @@ void Unit::Init(const char *filename,
     // but didn't do anything with it. See VSFile f variable.
 
     // TODO: something with the following line
-    Init();
+    this->Unit::Init();
     graphicOptions.SubUnit = SubU ? 1 : 0;
     graphicOptions.Animating = 1;
     graphicOptions.RecurseIntoSubUnitsOnCollision = !isSubUnit();
@@ -502,10 +505,10 @@ void Unit::Init(const char *filename,
     }
 }
 
-vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> Unit::StealMeshes() {
-    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> ret;
+vector<Mesh *> Unit::StealMeshes() {
+    vector<Mesh *> ret;
 
-    vega_types::SharedPtr<Mesh> shield = meshdata.empty() ? nullptr : meshdata.back();
+    Mesh *shield = meshdata.empty() ? NULL : meshdata.back();
     for (unsigned int i = 0; i <= nummesh(); ++i) {
         ret.push_back(meshdata[i]);
     }
@@ -1971,10 +1974,10 @@ void Unit::SetRecursiveOwner(Unit *target) {
 
 extern unsigned int AddAnimation(const QVector &, const float, bool, const string &, float percentgrow);
 extern string getRandomCachedAniString();
-extern vega_types::SharedPtr<Animation> GetVolatileAni(unsigned int);
+extern Animation *GetVolatileAni(unsigned int);
 
 bool Unit::Explode(bool drawit, float timeit) {
-    if (!this->pImage->pExplosion && this->pImage->timeexplode == 0) {
+    if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {
         //no explosion in unit data file && explosions haven't started yet
 
         //notify the director that a ship got destroyed
@@ -1987,13 +1990,13 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static vega_types::SharedPtr<Animation> cache = Animation::createAnimation(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
+            static Animation cache(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
             bleh = getRandomCachedAniString();
             if (bleh.size() == 0) {
                 bleh = game_options()->explosion_animation;
             }
         }
-        this->pImage->pExplosion = Animation::createAnimation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
+        this->pImage->pExplosion = new Animation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
         this->pImage->pExplosion->SetDimensions(this->ExplosionRadius(), this->ExplosionRadius());
         Vector p, q, r;
         this->GetOrientation(p, q, r);
@@ -2026,15 +2029,15 @@ bool Unit::Explode(bool drawit, float timeit) {
             if (this->isUnit() == Vega_UnitType::unit) {
                 if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
                     static string shockani(game_options()->shockwave_animation);
-                    static vega_types::SharedPtr<Animation> _shock_ani = Animation::createAnimation(shockani.c_str(), true, .1, MIPMAP, false);
+                    static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
 
-                    _shock_ani->SetFaceCam(false);
+                    __shock__ani->SetFaceCam(false);
                     unsigned int which = AddAnimation(this->Position(),
                             this->ExplosionRadius(),
                             true,
                             shockani,
                             game_options()->shockwave_growth);
-                    vega_types::SharedPtr<Animation> ani = GetVolatileAni(which);
+                    Animation *ani = GetVolatileAni(which);
                     if (ani) {
                         ani->SetFaceCam(false);
                         Vector p, q, r;
@@ -2085,13 +2088,14 @@ bool Unit::Explode(bool drawit, float timeit) {
         this->GetOrientation(p, q, r);
         this->pImage->pExplosion->SetOrientation(p, q, r);
         if (this->pImage->pExplosion->Done() && timealldone) {
-            this->pImage->pExplosion.reset();   // Resets the smart pointer, not the explosion animation
+            delete this->pImage->pExplosion;
+            this->pImage->pExplosion = NULL;
         }
         if (drawit && this->pImage->pExplosion) {
             this->pImage->pExplosion->Draw();
         }              //puts on draw queue... please don't delete
     }
-    bool alldone = this->pImage->pExplosion && !this->pImage->pExplosion->Done();
+    bool alldone = this->pImage->pExplosion ? !this->pImage->pExplosion->Done() : false;
     if (!this->SubUnits.empty()) {
         Unit *su;
         for (un_iter ui = this->getSubUnits(); (su = *ui); ++ui) {
@@ -2120,6 +2124,12 @@ float Unit::ExplodingProgress() const {
 
 void Unit::SetCollisionParent(Unit *name) {
     assert(0);                                         //deprecated... many less collisions with subunits out of the table
+#if 0
+                                                                                                                            for (int i = 0; i < numsubunit; ++i) {
+        subunits[i]->CollideInfo.object.u = name;
+        subunits[i]->SetCollisionParent( name );
+    }
+#endif
 }
 
 //This function should not be used on server side
@@ -3721,7 +3731,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 bool Unit::ReduceToTemplate() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
-    vega_types::SequenceContainer<Mount> savedWeap;
+    vector<Mount> savedWeap;
     savedWeap.swap(mounts);
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
     bool success = false;
@@ -3790,7 +3800,7 @@ int Unit::RepairCost() {
 int Unit::RepairUpgrade() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
-    vega_types::SequenceContainer<Mount> savedWeap;
+    vector<Mount> savedWeap;
     savedWeap.swap(mounts);
     int upfac = FactionUtil::GetUpgradeFaction();
     const Unit *temprate = makeFinalBlankUpgrade(name, faction);
@@ -4477,7 +4487,7 @@ static inline void parseFloat4(const std::string &s, float value[4]) {
 
 void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &overrides) {
     //for (vector<Mesh*>::iterator mesh = this->meshdata.begin(); mesh != this->meshdata.end(); ++mesh) {
-    for (vega_types::SharedPtr<Mesh> &mesh : meshdata) {
+    for (Mesh *mesh : meshdata) {
         if (mesh == nullptr) {
             continue;
         }
@@ -5031,7 +5041,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         this->Explode(true, 0);
 
         // Kill means it is done exploding and we can delete it
-        dead &= (!pImage->pExplosion);
+        dead &= (pImage->pExplosion == NULL);
         if (dead) {
             Kill();
         }

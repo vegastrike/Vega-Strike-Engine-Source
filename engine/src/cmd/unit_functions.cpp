@@ -1,8 +1,10 @@
-/*
+/**
  * unit_functions.cpp
  *
- * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -64,7 +66,7 @@ int createSound(string file, bool val) {
 
 //From unit_xml.cpp
 using vsUMap;
-static vsUMap<std::string, vega_types::SharedPtr<Animation>> cached_ani;
+static vsUMap<std::string, Animation *> cached_ani;
 std::set<std::string> tempcache;
 
 void cache_ani(string s) {
@@ -72,10 +74,10 @@ void cache_ani(string s) {
 }
 
 void update_ani_cache() {
-    for (const auto & it : tempcache) {
-        if (cached_ani.find(it) == cached_ani.end()) {
-            cached_ani.insert(std::pair<std::string, vega_types::SharedPtr<Animation>>(it,
-                    Animation::createAnimation(it.c_str(),
+    for (std::set<std::string>::iterator it = tempcache.begin(); it != tempcache.end(); it++) {
+        if (cached_ani.find(*it) == cached_ani.end()) {
+            cached_ani.insert(std::pair<std::string, Animation *>(*it,
+                    new Animation((*it).c_str(),
                             false,
                             .1,
                             BILINEAR,
@@ -86,9 +88,9 @@ void update_ani_cache() {
 }
 
 std::string getRandomCachedAniString() {
-    if (!cached_ani.empty()) {
+    if (cached_ani.size()) {
         unsigned int rn = rand() % cached_ani.size();
-        auto j = cached_ani.begin();
+        vsUMap<std::string, Animation *>::iterator j = cached_ani.begin();
         for (unsigned int i = 0; i < rn; i++) {
             j++;
         }
@@ -98,16 +100,16 @@ std::string getRandomCachedAniString() {
     }
 }
 
-vega_types::SharedPtr<Animation> getRandomCachedAni() {
-    if (!cached_ani.empty()) {
+Animation *getRandomCachedAni() {
+    if (cached_ani.size()) {
         unsigned int rn = rand() % cached_ani.size();
-        auto j = cached_ani.begin();
+        vsUMap<std::string, Animation *>::iterator j = cached_ani.begin();
         for (unsigned int i = 0; i < rn; i++) {
             j++;
         }
         return (*j).second;
     } else {
-        return nullptr;
+        return NULL;
     }
 }
 

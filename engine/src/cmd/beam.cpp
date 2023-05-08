@@ -1,6 +1,4 @@
 /*
- * beam.cpp
- *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -697,7 +695,7 @@ void Beam::ProcessDrawQueue() {
     GFXDisable(TEXTURE1);
     BeamDrawContext c;
     for (unsigned int decal = 0; decal < beamdrawqueue.size(); decal++) {
-        vega_types::SharedPtr<Texture> tex = beamdecals.GetTexture(decal);
+        Texture *tex = beamdecals.GetTexture(decal);
         if (tex) {
             tex->MakeActive(0);
             GFXTextureEnv(0, GFXMODULATETEXTURE);

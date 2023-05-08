@@ -1,8 +1,10 @@
-/*
+/**
  * images.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -179,7 +181,7 @@ struct UnitImages {
     Vector CockpitCenter;
     VSSprite *pHudImage = nullptr;
     ///The explosion starts at null, when activated time explode is incremented and ends at null
-    vega_types::SharedPtr<Animation> pExplosion{};
+    Animation *pExplosion = nullptr;
     float timeexplode = 0;
 
     // TODO: use smart pointer
@@ -195,7 +197,7 @@ struct UnitImages {
     std::vector<Unit *> clearedunits;
     std::vector<DockedUnits *> dockedunits;
     UnitContainer DockedTo;
-    float unitscale{};     //for output
+    float unitscale;     //for output
     class XMLSerializer *unitwriter = nullptr;
 
     enum GAUGES {

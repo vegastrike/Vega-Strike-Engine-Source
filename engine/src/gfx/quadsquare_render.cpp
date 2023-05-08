@@ -1,8 +1,10 @@
-/*
+/**
  * quadsquare_render.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -29,11 +31,9 @@
 float SphereTransformRenderlevel = 0;
 
 static void TerrainMakeActive(const TerrainTexture &text) {
-    const vega_types::SharedPtr<Texture> * t = boost::get<vega_types::SharedPtr<Texture>>(&(text.tex));
-    if (t != nullptr) {
+    if (text.tex.t) {
         GFXEnable(TEXTURE0);
-        vega_types::SharedPtr<Texture> * t2 = const_cast<vega_types::SharedPtr<Texture> *>(t);
-        (*t2)->MakeActive();
+        text.tex.t->MakeActive();
     } else {
         GFXDisable(TEXTURE0);
     }
@@ -52,9 +52,7 @@ static void TerrainMakeClearActive(const TerrainTexture &text) {
 }
 
 static void TerrainMakeDeactive(const TerrainTexture &text) {
-    const vega_types::SharedPtr<Texture> * t = boost::get<vega_types::SharedPtr<Texture>>(&(text.tex));
-    if (t != nullptr) {
-        // TODO: What next? This function doesn't appear to actually do much of anything
+    if (text.tex.t) {
     }
 }
 

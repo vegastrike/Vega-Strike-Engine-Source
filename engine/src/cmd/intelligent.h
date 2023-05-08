@@ -1,8 +1,8 @@
-/*
+/**
  * intelligent.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) 2020 Roy Falk
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,29 +29,18 @@
 
 #include <vector>
 #include <string>
-//#include "gfx/mesh.h"
-#include "preferred_types.h"
 
 class Unit;
 class Order;
-class csOPCODECollider;
-struct mesh_polygon;
 
 class Intelligent {
 public:
     Intelligent();
-    virtual ~Intelligent() = default;
-
-    Intelligent(const Intelligent& other) = delete;
-    Intelligent& operator=(const Intelligent& other) = delete;
-
-    Intelligent(Intelligent&& other) = delete;
-    Intelligent& operator=(Intelligent&& other) = delete;
 
 public:
-    csOPCODECollider *getCollideTree(const Vector &scale = Vector(1,
+    class csOPCODECollider *getCollideTree(const Vector &scale = Vector(1,
             1,
-            1), vega_types::SequenceContainer<mesh_polygon> *pol = nullptr);
+            1), std::vector<struct mesh_polygon> * = NULL);
 //Because accessing in daughter classes member function from Unit * instances
     Order *aistate = nullptr;
 
