@@ -970,7 +970,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
     computer.slide_end = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
 
-    UpgradeUnit(UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string()));
+    UpgradeUnit(UnitCSVFactory::GetVariable(unit_key, "Cargo", std::string()));
 
 
     {
