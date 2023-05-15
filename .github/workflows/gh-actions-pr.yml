@@ -6,6 +6,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.allow_failure }}
 
     defaults:
       run:
@@ -14,6 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        allow_failure: false
         include:
           - FROM:     'ubuntu:jammy'
             COMPILER: 'gcc'
@@ -143,15 +145,16 @@ jobs:
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          # disabled as VS engine fails to build on Manjaro
-          # - FROM:     'manjarolinux/base'
-          #   COMPILER: 'clang'
-          #   USE_PYTHON_3: 'ON'
-          #   OpenGL_GL_PREFERENCE: 'LEGACY'
-          # - FROM:     'manjarolinux/base'
-          #   COMPILER: 'clang'
-          #   USE_PYTHON_3: 'ON'
-          #   OpenGL_GL_PREFERENCE: 'GLVND'
+          - FROM:     'manjarolinux/base'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: true
+          - FROM:     'manjarolinux/base'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: true
 
     steps:
     - name: Checkout repository
