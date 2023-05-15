@@ -13,7 +13,7 @@ jobs:
         shell: bash
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         allow_failure: false
         include:
