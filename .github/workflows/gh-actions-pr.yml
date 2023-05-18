@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        allow_failure: false
+        allow_failure: [false]
         include:
           - FROM:     'ubuntu:jammy'
             COMPILER: 'gcc'
