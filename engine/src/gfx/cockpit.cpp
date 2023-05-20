@@ -3,8 +3,9 @@
 /*
  * cockpit.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -86,7 +87,6 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "cockpit_gfx.h"
-#include "preferred_types.h"
 
 #include <cstddef>
 #include <cfloat>
@@ -249,9 +249,9 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
                         "automatic_landing_zone_warning_text",
                         "Now Entering an \"Automatic Landing Zone\".");
                 UniverseUtil::IOmessage(0, "game", "all", message);
-                static vega_types::SharedPtr<Animation> ani0 = Animation::createAnimation(autolandinga.c_str());
-                static vega_types::SharedPtr<Animation> ani1 = Animation::createAnimation(autolandinga1.c_str());
-                static vega_types::SharedPtr<Animation> ani2 = Animation::createAnimation(autolandinga2.c_str());
+                static Animation *ani0 = new Animation(autolandinga.c_str());
+                static Animation *ani1 = new Animation(autolandinga1.c_str());
+                static Animation *ani2 = new Animation(autolandinga2.c_str());
                 static soundContainer warnsound;
                 static soundContainer warnsound1;
                 static soundContainer warnsound2;
@@ -937,6 +937,12 @@ void GameCockpit::Delete() {
         delete text;
         text = nullptr;
     }
+    for (size_t i = 0; i < mesh.size(); ++i) {
+        if (mesh[i] != nullptr) {
+            delete mesh[i];
+            mesh[i] = nullptr;
+        }
+    }
     mesh.clear();
     if (soundfile >= 0) {
         AUDStopPlaying(soundfile);
@@ -1317,16 +1323,16 @@ static void DrawDamageFlash(int dtype) {
     };
 
     static bool init = false;
-    static vega_types::SharedPtr<Animation> aflashes[numtypes];
+    static Animation *aflashes[numtypes];
     static bool doflash[numtypes];
     if (!init) {
         init = true;
         for (int i = 0; i < numtypes; ++i) {
             doflash[i] = (flashes[i].length() > 0);
             if (doflash[i]) {
-                aflashes[i] = Animation::createAnimation(flashes[i].c_str(), true, .1, BILINEAR, false, false);
+                aflashes[i] = new Animation(flashes[i].c_str(), true, .1, BILINEAR, false, false);
             } else {
-                aflashes[i].reset();
+                aflashes[i] = NULL;
             }
         }
     }
@@ -1556,7 +1562,7 @@ void GameCockpit::Draw() {
     GFXEnable(DEPTHWRITE);
 
     if (view < CP_CHASE) {
-        if (!mesh.empty()) {
+        if (mesh.size()) {
             Unit *par = GetParent();
             if (par) {
                 //cockpit is unaffected by FOV WARP-Link
@@ -2313,25 +2319,25 @@ void GameCockpit::ScrollAllVDU(int howmuch) {
 
 void GameCockpit::SetStaticAnimation() {
     static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
-    static vega_types::SharedPtr<Animation> Statuc = Animation::createAnimation(comm_static.c_str());
-    for (auto & i : vdu) {
-        if (i->getMode() == VDU::COMM) {
-            i->SetCommAnimation(Statuc, NULL, true);
+    static Animation Statuc(comm_static.c_str());
+    for (unsigned int i = 0; i < vdu.size(); i++) {
+        if (vdu[i]->getMode() == VDU::COMM) {
+            vdu[i]->SetCommAnimation(&Statuc, NULL, true);
         }
     }
 }
 
-void GameCockpit::SetCommAnimation(vega_types::SharedPtr<Animation> ani, Unit *un) {
+void GameCockpit::SetCommAnimation(Animation *ani, Unit *un) {
     bool seti = false;
-    for (auto & i : vdu) {
-        if (i->SetCommAnimation(ani, un, false)) {
+    for (unsigned int i = 0; i < vdu.size(); i++) {
+        if (vdu[i]->SetCommAnimation(ani, un, false)) {
             seti = true;
             break;
         }
     }
     if (!seti) {
-        for (auto & i : vdu) {
-            if (i->SetCommAnimation(ani, un, true)) {
+        for (unsigned int i = 0; i < vdu.size(); i++) {
+            if (vdu[i]->SetCommAnimation(ani, un, true)) {
                 break;
             }
         }

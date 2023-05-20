@@ -1,6 +1,4 @@
 /*
- * gl_state.cpp
- *
  * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
@@ -326,7 +324,8 @@ struct BlendMode {
 }
         currBlendMode;
 
-vega_types::Stack<BlendMode> blendstack;
+using std::stack;
+stack<BlendMode> blendstack;
 
 void /*GFXDRVAPI*/ GFXGetBlendMode(enum BLENDFUNC &src, enum BLENDFUNC &dst) {
     src = currBlendMode.sfactor;

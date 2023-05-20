@@ -1,8 +1,9 @@
 /*
  * star.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,7 +36,6 @@
 #include "galaxy_xml.h"
 #include "universe.h"
 #include "vs_logging.h"
-#include "vega_cast_utils.h"
 
 #if defined (__APPLE__) || defined (MACOSX)
 #include <OpenGL/gl.h>
@@ -653,7 +653,7 @@ static Vector GetConstVertex(const GFXColorVertex &c) {
 SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturenames,
         float size) : StarVlist(spread) {
     int curtexture = 0;
-    vector<vega_types::SharedPtr<AnimatedTexture>> animations;
+    vector<AnimatedTexture *> animations;
     static bool
             near_stars_alpha = XMLSupport::parse_bool(vs_config->getVariable("graphics", "near_stars_alpha", "false"));
     for (curtexture = 0; curtexture < NUM_ACTIVE_ANIMATIONS; ++curtexture) {
@@ -665,15 +665,15 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
             texturenames = "";
         }
         if (texturename.find(".ani") != string::npos) {
-            animations.push_back(AnimatedTexture::createAnimatedTexture(texturename.c_str(), 0, near_stars_alpha ? NEAREST : BILINEAR));
+            animations.push_back(new AnimatedTexture(texturename.c_str(), 0, near_stars_alpha ? NEAREST : BILINEAR));
             decal[curtexture] = animations.back();
         } else if (texturename.length() == 0) {
             if (curtexture == 0) {
-                decal[curtexture] = Texture::createTexture("white.bmp", 0, near_stars_alpha ? NEAREST : BILINEAR);
+                decal[curtexture] = new Texture("white.bmp", 0, near_stars_alpha ? NEAREST : BILINEAR);
             } else {
                 if (animations.size()) {
-                    vega_types::SharedPtr<AnimatedTexture> tmp =
-                            vega_dynamic_cast_shared_ptr<AnimatedTexture>( animations[curtexture % animations.size()]->Clone());
+                    AnimatedTexture *tmp =
+                            static_cast< AnimatedTexture * > ( animations[curtexture % animations.size()]->Clone());
                     int num = tmp->numFrames();
                     if (num) {
                         num = rand() % num;
@@ -685,7 +685,7 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
                 }
             }
         } else {
-            decal[curtexture] = Texture::createTexture(texturename.c_str());
+            decal[curtexture] = new Texture(texturename.c_str());
         }
     }
     int numVerticesPer = near_stars_alpha ? 4 : 12;
@@ -813,13 +813,16 @@ void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
 }
 
 SpriteStarVlist::~SpriteStarVlist() {
-    for (auto & i : decal) {
-        i.reset();
+    for (int i = 0; i < NUM_ACTIVE_ANIMATIONS; ++i) {
+        if (decal[i] != nullptr) {
+            delete decal[i];
+            decal[i] = nullptr;
+        }
     }
-    for (auto & j : vlist) {
-        if (j != nullptr) {
-            delete j;
-            j = nullptr;
+    for (int j = 0; j < NUM_ACTIVE_ANIMATIONS; ++j) {
+        if (vlist[j] != nullptr) {
+            delete vlist[j];
+            vlist[j] = nullptr;
         }
     }
 }

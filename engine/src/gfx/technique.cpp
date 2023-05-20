@@ -1,8 +1,9 @@
 /*
  * technique.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -283,11 +284,11 @@ void Pass::compile() {
             //}
         }
 
-        for (auto & shaderParam : shaderParams) {
-            shaderParam.id = GFXNamedShaderConstant(prog, shaderParam.name.c_str());
-            if (shaderParam.id < 0) {
-                if (!shaderParam.optional) {
-                    throw ProgramCompileError("Cannot resolve shader constant \"" + shaderParam.name +
+        for (ShaderParamList::iterator it = shaderParams.begin(); it != shaderParams.end(); ++it) {
+            it->id = GFXNamedShaderConstant(prog, it->name.c_str());
+            if (it->id < 0) {
+                if (!it->optional) {
+                    throw ProgramCompileError("Cannot resolve shader constant \"" + it->name +
                             "\"");
                 } //else {
                 //  BOOST_LOG_TRIVIAL(info) << boost::format("Cannot resolve <<optional>> shader constant \"%1%\" in "
@@ -297,40 +298,40 @@ void Pass::compile() {
             }
         }
         int lastTU = -1;
-        for (auto & textureUnit : textureUnits) {
-            if (textureUnit.sourceType == TextureUnit::File) {
+        for (TextureUnitList::iterator tit = textureUnits.begin(); tit != textureUnits.end(); ++tit) {
+            if (tit->sourceType == TextureUnit::File) {
                 // Yep, we don't want to reload textures
-                if (!textureUnit.texture) {
-                    textureUnit.texture = Texture::createTexture(textureUnit.sourcePath.c_str());
-                    if (!textureUnit.texture->LoadSuccess()) {
+                if (tit->texture.get() == nullptr) {
+                    tit->texture.reset(new Texture(tit->sourcePath.c_str()));
+                    if (!tit->texture->LoadSuccess()) {
                         throw InvalidParameters(
-                                "Cannot load texture file \"" + textureUnit.sourcePath + "\"");
+                                "Cannot load texture file \"" + tit->sourcePath + "\"");
                     }
                 }
-            } else if (textureUnit.defaultType == TextureUnit::File) {
+            } else if (tit->defaultType == TextureUnit::File) {
                 // Yep, we don't want to reload textures
-                if (!textureUnit.texture) {
-                    textureUnit.texture = Texture::createTexture(textureUnit.defaultPath.c_str());
-                    if (!textureUnit.texture->LoadSuccess()) {
+                if (tit->texture.get() == nullptr) {
+                    tit->texture.reset(new Texture(tit->defaultPath.c_str()));
+                    if (!tit->texture->LoadSuccess()) {
                         throw InvalidParameters(
-                                "Cannot load texture file \"" + textureUnit.defaultPath + "\"");
+                                "Cannot load texture file \"" + tit->defaultPath + "\"");
                     }
                 }
             }
-            if (!textureUnit.targetParamName.empty()) {
-                textureUnit.targetParamId = GFXNamedShaderConstant(prog, textureUnit.targetParamName.c_str());
-                if (textureUnit.targetParamId < 0) {
-                    if (textureUnit.origTargetIndex >= 0) {
+            if (!tit->targetParamName.empty()) {
+                tit->targetParamId = GFXNamedShaderConstant(prog, tit->targetParamName.c_str());
+                if (tit->targetParamId < 0) {
+                    if (tit->origTargetIndex >= 0) {
                         throw ProgramCompileError(
-                                "Cannot resolve shader constant \"" + textureUnit.targetParamName + "\"");
+                                "Cannot resolve shader constant \"" + tit->targetParamName + "\"");
                     } else {
-                        textureUnit.targetIndex = -1;
+                        tit->targetIndex = -1;
                     }
                 } else {
-                    if (textureUnit.origTargetIndex < 0) {
-                        textureUnit.targetIndex = lastTU + 1;
+                    if (tit->origTargetIndex < 0) {
+                        tit->targetIndex = lastTU + 1;
                     }
-                    lastTU = std::max(textureUnit.targetIndex, lastTU);
+                    lastTU = std::max(tit->targetIndex, lastTU);
                 }
             }
         }

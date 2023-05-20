@@ -1,8 +1,10 @@
-/*
+/**
  * vdu.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ *  contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,7 +32,6 @@
 #include "sprite.h"
 #include <string>
 #include <vector>
-#include "preferred_types.h"
 
 class Unit;
 class TextPlane;
@@ -45,9 +46,9 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent);
 class GameCockpit;
 class VDU : public VSSprite {
 private:
-    vega_types::SharedPtr<Animation> comm_ani;
+    class Animation *comm_ani;
     UnitContainer communicating;
-    vega_types::SharedPtr<Animation> webcam;
+    class Animation *webcam;
     VIEWSTYLE viewStyle;
     float *StartArmor;
     float *maxhull;
@@ -132,7 +133,7 @@ public:
     void SwitchMode(Unit *parent);
     void SetViewingStyle(VIEWSTYLE vm);
     void Scroll(int howmuch);
-    bool SetCommAnimation(vega_types::SharedPtr<Animation> ani, Unit *un, bool force);
+    bool SetCommAnimation(Animation *ani, Unit *unit, bool force);
     Unit *GetCommunicating();
     bool CheckCommAnimation(Unit *un) const; //returns true if unit is talkin or uninterruptable going on
 };

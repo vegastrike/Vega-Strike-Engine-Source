@@ -1,8 +1,10 @@
-/*
+/**
  * mesh_xml.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ *  contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -159,12 +161,12 @@ struct MeshXML {
             qstrcnt(0),
             lstrcnt(0),
             faction(0),
-            mesh(nullptr) {
+            mesh(0) {
     }
 
     ///All logos on this unit
-    vega_types::ContiguousSequenceContainer<ZeLogo> logos;
-    vega_types::ContiguousSequenceContainer<Names> state_stack;
+    vector<ZeLogo> logos;
+    vector<Names> state_stack;
     bool sharevert;
     bool usenormals;
     bool usetangents;
@@ -175,47 +177,47 @@ struct MeshXML {
     int vertex_state;
     Vector scale;
     Vector lodscale;
-    vega_types::ContiguousSequenceContainer<ZeTexture> decals;
+    vector<ZeTexture> decals;
     string technique;
     bool recalc_norm;
     int num_vertices;
-    vega_types::ContiguousSequenceContainer<GFXVertex> vertices;
+    vector<GFXVertex> vertices;
     ///keep count to make averaging easy
-    vega_types::ContiguousSequenceContainer<int> vertexcount;
-    vega_types::ContiguousSequenceContainer<GFXVertex> lines;
-    vega_types::ContiguousSequenceContainer<GFXVertex> tris;
-    vega_types::ContiguousSequenceContainer<GFXVertex> quads;
-    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > linestrips;
-    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > tristrips;
-    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > trifans;
-    vega_types::ContiguousSequenceContainer<vega_types::ContiguousSequenceContainer<GFXVertex> > quadstrips;
+    vector<int> vertexcount;
+    vector<GFXVertex> lines;
+    vector<GFXVertex> tris;
+    vector<GFXVertex> quads;
+    vector<vector<GFXVertex> > linestrips;
+    vector<vector<GFXVertex> > tristrips;
+    vector<vector<GFXVertex> > trifans;
+    vector<vector<GFXVertex> > quadstrips;
     int tstrcnt;
     int tfancnt;
     int qstrcnt;
     int lstrcnt;
-    vega_types::ContiguousSequenceContainer<int> lineind;
-    vega_types::ContiguousSequenceContainer<int> nrmllinstrip;
-    vega_types::ContiguousSequenceContainer<int> linestripind;
+    vector<int> lineind;
+    vector<int> nrmllinstrip;
+    vector<int> linestripind;
     ///for possible normal computation
-    vega_types::ContiguousSequenceContainer<int> triind;
-    vega_types::ContiguousSequenceContainer<int> nrmltristrip;
-    vega_types::ContiguousSequenceContainer<int> tristripind;
-    vega_types::ContiguousSequenceContainer<int> nrmltrifan;
-    vega_types::ContiguousSequenceContainer<int> trifanind;
-    vega_types::ContiguousSequenceContainer<int> nrmlquadstrip;
-    vega_types::ContiguousSequenceContainer<int> quadstripind;
-    vega_types::ContiguousSequenceContainer<int> quadind;
-    vega_types::ContiguousSequenceContainer<int> trishade;
-    vega_types::ContiguousSequenceContainer<int> quadshade;
-    vega_types::ContiguousSequenceContainer<int> * active_shade;
-    vega_types::ContiguousSequenceContainer<GFXVertex> * active_list;
-    vega_types::ContiguousSequenceContainer<int> * active_ind;
-    vega_types::ContiguousSequenceContainer<vega_types::SharedPtr<Mesh> > lod;
-    vega_types::ContiguousSequenceContainer<float> lodsize;
+    vector<int> triind;
+    vector<int> nrmltristrip;
+    vector<int> tristripind;
+    vector<int> nrmltrifan;
+    vector<int> trifanind;
+    vector<int> nrmlquadstrip;
+    vector<int> quadstripind;
+    vector<int> quadind;
+    vector<int> trishade;
+    vector<int> quadshade;
+    vector<int> *active_shade;
+    vector<GFXVertex> *active_list;
+    vector<int> *active_ind;
+    vector<Mesh *> lod;
+    vector<float> lodsize;
     GFXVertex vertex;
     GFXMaterial material;
     int faction;
-    Mesh * mesh;
+    Mesh *mesh;
 };
 
 #endif

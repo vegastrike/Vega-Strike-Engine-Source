@@ -1,8 +1,10 @@
-/*
+/**
  * VirtualIterator.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -59,7 +61,7 @@ public:
     virtual iterator_type &operator++() = 0;
     virtual iterator_type &operator--() = 0;
 
-    virtual vega_types::SharedPtr<iterator_type> clone() const = 0;
+    virtual SharedPtr<iterator_type> clone() const = 0;
 
     /// End-of-sequence
     virtual bool eos() const = 0;
@@ -132,8 +134,8 @@ public:
         return *this;
     };
 
-    virtual vega_types::SharedPtr<iterator_type> clone() const {
-        return vega_types::SharedPtr<iterator_type>(new VirtualStandardIterator<_It>(*this));
+    virtual SharedPtr<iterator_type> clone() const {
+        return SharedPtr<iterator_type>(new VirtualStandardIterator<_It>(*this));
     };
 
     virtual bool eos() const {
@@ -219,8 +221,8 @@ public:
         return &(VirtualMappingIterator<_It, value_type>::it->second);
     };
 
-    virtual vega_types::SharedPtr<iterator_type> clone() const {
-        return vega_types::SharedPtr<iterator_type>(new VirtualValuesIterator(*this));
+    virtual SharedPtr<iterator_type> clone() const {
+        return SharedPtr<iterator_type>(new VirtualValuesIterator(*this));
     }
 };
 
@@ -254,8 +256,8 @@ public:
         return VirtualMappingIterator<_It, value_type>::it->first;
     };
 
-    virtual vega_types::SharedPtr<iterator_type> clone() const {
-        return vega_types::SharedPtr<iterator_type>(new VirtualKeysIterator(*this));
+    virtual SharedPtr<iterator_type> clone() const {
+        return SharedPtr<iterator_type>(new VirtualKeysIterator(*this));
     }
 };
 
@@ -314,8 +316,8 @@ public:
         return *this;
     }
 
-    virtual vega_types::SharedPtr<iterator_type> clone() const {
-        return vega_types::SharedPtr<iterator_type>(new ChainingIterator<_It1, _It2>(it1, it2));
+    virtual SharedPtr<iterator_type> clone() const {
+        return SharedPtr<iterator_type>(new ChainingIterator<_It1, _It2>(it1, it2));
     }
 
     virtual bool eos() const {

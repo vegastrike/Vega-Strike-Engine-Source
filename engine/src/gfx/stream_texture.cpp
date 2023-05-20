@@ -1,8 +1,10 @@
-/*
+/**
  * stream_texture.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -24,12 +26,10 @@
 
 
 #include "stream_texture.h"
-#include "preferred_types.h"
-#include "vega_cast_utils.h"
 
-vega_types::SharedPtr<Texture> StreamTexture::Clone() {
+StreamTexture *StreamTexture::Clone() {
     unsigned char *x = Map();
-    vega_types::SharedPtr<StreamTexture> ret = vega_types::MakeShared<StreamTexture>(sizeX, sizeY, filtertype, x);
+    StreamTexture *ret = new StreamTexture(sizeX, sizeY, filtertype, x);
     UnMap(false);
     return ret;
 }
@@ -48,7 +48,7 @@ StreamTexture::StreamTexture(int width, int height, enum FILTER filtertype, unsi
     this->sizeY = height;
     this->original = NULL;
     this->palette = NULL;
-//    this->refcount = 0;
+    this->refcount = 0;
     texture_target = TEXTURE2D;
     image_target = TEXTURE_2D;
     ismipmapped = filtertype;
@@ -82,21 +82,5 @@ StreamTexture::~StreamTexture() {
 
 void StreamTexture::MakeActive(int stage) {
     GFXSelectTexture(name, stage);
-}
-
-vega_types::SharedPtr<Texture> StreamTexture::Original() {
-    if (original) {
-        return original->Original();
-    } else {
-        return vega_dynamic_cast_shared_ptr<Texture>(shared_from_this());
-    }
-}
-
-const vega_types::SharedPtr<const Texture> StreamTexture::OriginalConst() const {
-    if (original) {
-        return original->OriginalConst();
-    } else {
-        return vega_dynamic_const_cast_shared_ptr<Texture>(shared_from_this());
-    }
 }
 

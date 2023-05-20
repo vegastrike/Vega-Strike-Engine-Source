@@ -1,8 +1,9 @@
 /*
  * script.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +11,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -27,7 +28,7 @@
 #include "navigation.h"
 #include "xml_support.h"
 #include "flybywire.h"
-#include <cstdio>
+#include <stdio.h>
 #include <vector>
 #include <stack>
 #include "vsfilesystem.h"
@@ -39,8 +40,8 @@
 #include "configxml.h"
 #include "universe.h"
 #include "vs_exit.h"
-#include <cassert>
-#include "preferred_types.h"
+
+#include <assert.h>
 
 using namespace XMLSupport;
 
@@ -127,8 +128,8 @@ struct AIScriptXML {
     char lin;
     QVector defaultvec;
     float defaultf;
-    vega_types::Stack<QVector> vectors;
-    vega_types::Stack<float> floats;
+    std::stack<QVector> vectors;
+    std::stack<float> floats;
     std::vector<Order *> orders;
 };
 

@@ -1,8 +1,10 @@
-/*
+/**
  * mesh_fx.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -125,29 +127,25 @@ void Mesh::AddDamageFX(const Vector &pnt, const Vector &norm, const float damage
 
     GFXColor tmp(col.r, col.g, col.b, col.a);
     float numsec = flickertime * ((damage < mindamage) ? mindamage : damage);
-    vega_types::SharedPtr<MeshFX> newFX = vega_types::MakeShared<MeshFX>(numsec, (startpotency - endpotency) / (numsec * rSize() * rSize()), true,
+    MeshFX newFX(numsec, (startpotency - endpotency) / (numsec * rSize() * rSize()), true,
             GFXColor(loc.i, loc.j, loc.k, 1),
             tmp,
             GFXColor(0, 0, 0, 1),
             tmp,
             GFXColor(1, 0, startpotency / (r_size * r_size)));
-    newFX->setSize(rSize());
-    if (LocalFX->size() >= MAXLOCALFX) {
-        LocalFX->at(rand() % (LocalFX->size()))->MergeLights(*newFX);
+    newFX.setSize(rSize());
+    if (LocalFX.size() >= MAXLOCALFX) {
+        LocalFX[(rand() % (LocalFX.size()))].MergeLights(newFX);
     } else {
-        LocalFX->push_back(newFX);
+        LocalFX.push_back(newFX);
     }
 }
 
 void Mesh::UpdateFX(float howmuchtime) {
     //adjusts lights by TTL, eventually removing them
-    if (LocalFX && !LocalFX->empty()) {
-        for (int i = LocalFX->size() - 1; i >= 0; i--) {
-            if (!LocalFX->at(i)) {
-                LocalFX->erase(LocalFX->begin() + i);
-            } else if (!LocalFX->at(i)->Update(howmuchtime)) {
-                LocalFX->erase(LocalFX->begin() + i);
-            }
+    for (int i = LocalFX.size() - 1; i >= 0; i--) {
+        if (!LocalFX[i].Update(howmuchtime)) {
+            LocalFX.erase(LocalFX.begin() + i);
         }
     }
 }
@@ -156,13 +154,11 @@ void Mesh::EnableSpecialFX() {
     draw_sequence = MESH_SPECIAL_FX_ONLY;
     setEnvMap(GFXFALSE);
     setLighting(GFXTRUE);
-    if (orig && !orig->empty() && orig->front()) {
-        vega_types::SharedPtr<Mesh> original0 = orig->front();
-        original0->draw_sequence = MESH_SPECIAL_FX_ONLY;
-        original0->blendSrc = ONE;
-        original0->blendDst = ONE;
-        original0->setEnvMap(GFXFALSE);
-        original0->setLighting(GFXTRUE);
+    if (orig) {
+        orig->draw_sequence = MESH_SPECIAL_FX_ONLY;
+        orig->blendSrc = orig->blendDst = ONE;
+        orig->setEnvMap(GFXFALSE);
+        orig->setLighting(GFXTRUE);
     }
     blendSrc = ONE;
     blendDst = ONE;

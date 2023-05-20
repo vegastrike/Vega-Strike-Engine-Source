@@ -1,8 +1,9 @@
-/*
+/**
  * unit_xml.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -146,42 +147,42 @@ void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int f
     xml->rapidmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
 }
 
-void pushMesh(vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &mesh,
-              float &randomstartframe,
-              float &randomstartseconds,
-              const char *filename,
-              const float scale,
-              int faction,
-              class Flightgroup *fg,
-              int startframe,
-              double texturestarttime) {
-    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> m = Mesh::LoadMeshes(filename, Vector(scale, scale, scale), faction, fg);
+void pushMesh(std::vector<Mesh *> &meshes,
+        float &randomstartframe,
+        float &randomstartseconds,
+        const char *filename,
+        const float scale,
+        int faction,
+        class Flightgroup *fg,
+        int startframe,
+        double texturestarttime) {
+    vector<Mesh *> m = Mesh::LoadMeshes(filename, Vector(scale, scale, scale), faction, fg);
     for (unsigned int i = 0; i < m.size(); ++i) {
-        mesh.push_back(m[i]);
+        meshes.push_back(m[i]);
         if (startframe >= 0) {
-            mesh.back()->setCurrentFrame(startframe);
+            meshes.back()->setCurrentFrame(startframe);
         } else if (startframe == -2) {
             float r = ((float) rand()) / RAND_MAX;
-            mesh.back()->setCurrentFrame(r * mesh.back()->getFramesPerSecond());
+            meshes.back()->setCurrentFrame(r * meshes.back()->getFramesPerSecond());
         } else if (startframe == -1) {
             if (randomstartseconds == 0) {
                 randomstartseconds =
-                        randomstartframe * mesh.back()->getNumLOD() / mesh.back()->getFramesPerSecond();
+                        randomstartframe * meshes.back()->getNumLOD() / meshes.back()->getFramesPerSecond();
             }
-            mesh.back()->setCurrentFrame(randomstartseconds * mesh.back()->getFramesPerSecond());
+            meshes.back()->setCurrentFrame(randomstartseconds * meshes.back()->getFramesPerSecond());
         }
         if (texturestarttime > 0) {
-            mesh.back()->setTextureCumulativeTime(texturestarttime);
+            meshes.back()->setTextureCumulativeTime(texturestarttime);
         } else {
-            float fps = mesh.back()->getTextureFramesPerSecond();
-            int frames = mesh.back()->getNumTextureFrames();
+            float fps = meshes.back()->getTextureFramesPerSecond();
+            int frames = meshes.back()->getNumTextureFrames();
             double ran = randomstartframe;
             if (fps > 0 && frames > 1) {
                 ran *= frames / fps;
             } else {
                 ran *= 1000;
             }
-            mesh.back()->setTextureCumulativeTime(ran);
+            meshes.back()->setTextureCumulativeTime(ran);
         }
     }
 }

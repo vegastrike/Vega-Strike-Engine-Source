@@ -1,7 +1,7 @@
 /*
  * damageable.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy and
+ * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -306,7 +306,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
             if (computer_ai_state != nullptr && player_ai_state &&
                     ai_is_unit && player_is_unit) {
                 unsigned char gender;
-                vega_types::SharedPtr<vector<vega_types::SharedPtr<Animation>>> anim = computer_ai->pilot->getCommFaces(gender);
+                vector<Animation *> *anim = computer_ai->pilot->getCommFaces(gender);
                 if (shooter_is_player && configuration()->ai.assist_friend_in_need) {
                     AllUnitsCloseAndEngage(player, computer_ai->faction);
                 }

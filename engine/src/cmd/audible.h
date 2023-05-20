@@ -1,8 +1,10 @@
-/*
+/**
  * audible.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Roy Falk,
- * Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,8 +27,8 @@
 #ifndef AUDIBLE_H
 #define AUDIBLE_H
 
-#include "gfx/vec.h"
-#include "preferred_types.h"
+#include "gfx/vec.h" // TODO: replace with class Vector;
+#include <map>
 #include <string>
 
 enum class SoundType {
@@ -35,20 +37,11 @@ enum class SoundType {
 
 class Audible {
 private:
-    vega_types::Map<SoundType, int> sounds;
-    vega_types::Map<SoundType, std::string> defaultSoundNames;
+    std::map<SoundType, int> sounds;
+    std::map<SoundType, std::string> defaultSoundNames;
 
 public:
     Audible();
-
-    Audible(const Audible &) = delete;
-    Audible(Audible && other) noexcept;
-
-    virtual ~Audible();
-
-    Audible & operator=(const Audible &) = delete;
-    Audible & operator=(Audible && other) noexcept;
-
     void addDefaultSounds();
     void addSounds(std::string (*nextElement)(std::string &), std::string soundsString);
     void addSound(std::string soundString, SoundType type);
@@ -64,6 +57,7 @@ protected:
     void playExplosionDamageSound();
     void playEngineSound();
 
+    // TODO: make into a proper destructor
     void killSounds();
 
 private:

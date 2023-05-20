@@ -1,7 +1,7 @@
 /*
  * vdu.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -176,7 +176,7 @@ VDU::VDU(const char *file, TextPlane *textp, unsigned short modes, short rwws, s
     if (_Universe->numPlayers() > 1) {
         posmodes &= (~VIEW);
     }
-    comm_ani.reset();
+    comm_ani = NULL;
     viewStyle = CP_TARGET;
     StartArmor = ma;
     maxhull = mh;
@@ -896,17 +896,17 @@ void VDU::DrawScanningMessage() {
     //tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
-bool VDU::SetCommAnimation(vega_types::SharedPtr<Animation> ani, Unit *un, bool force) {
-    if (!comm_ani || force) {
+bool VDU::SetCommAnimation(Animation *ani, Unit *un, bool force) {
+    if (comm_ani == NULL || force) {
         if (posmodes & COMM) {
-            if (ani && !comm_ani) {
+            if (ani != NULL && comm_ani == NULL) {
                 thismode.push_back(COMM);
-            } else if (comm_ani && thismode.size() > 1 && ani) {
+            } else if (comm_ani != NULL && thismode.size() > 1 && ani != NULL) {
                 thismode.back() = COMM;
             }
             if (ani) {
                 comm_ani = ani;
-                ani->Reset();   // NOTE: resets the Animation, not the pointer
+                ani->Reset();
             }
             communicating.SetUnit(un);
             return true;
@@ -921,7 +921,7 @@ Unit *VDU::GetCommunicating() {
             return communicating.GetUnit();
         }
     }
-    return nullptr;
+    return NULL;
 }
 
 void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
@@ -973,7 +973,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
 }
 
 void VDU::DrawComm() {
-    if (comm_ani) {
+    if (comm_ani != NULL) {
         GFXDisable(TEXTURE1);
         GFXEnable(TEXTURE0);
         GFXDisable(LIGHTING);
@@ -989,8 +989,8 @@ void VDU::DrawComm() {
                     thismode.back() = blah;
                 }
             }
-            communicating.SetUnit(nullptr);
-            comm_ani.reset();
+            communicating.SetUnit(NULL);
+            comm_ani = NULL;
         }
         GFXDisable(TEXTURE0);
     } else {
@@ -1693,10 +1693,10 @@ void VDU::DrawVDUObjectives(Unit *parent) {
 }
 
 bool VDU::SetWebcamAnimation() {
-    if (!comm_ani) {
+    if (comm_ani == NULL) {
         if (posmodes & WEBCAM) {
-            comm_ani = vega_types::MakeShared<Animation>();
-            communicating.SetUnit(nullptr);
+            comm_ani = new Animation();
+            communicating.SetUnit(NULL);
             thismode.push_back(WEBCAM);
             comm_ani->Reset();
             return true;
@@ -1753,10 +1753,10 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
     tp->SetPos(x - w, y + h);
     tp->SetSize(x + w, y - h - .5 * fabs(w / cols));
     targ = parent->GetComputerData().target.GetUnit();
-    if (thismode.back() != COMM && comm_ani) {
+    if (thismode.back() != COMM && comm_ani != NULL) {
         if (comm_ani->Done()) {
-            comm_ani.reset();
-            communicating.SetUnit(nullptr);
+            comm_ani = NULL;
+            communicating.SetUnit(NULL);
         }
     }
     float delautotime = UniverseUtil::GetGameTime() - parentcp->autoMessageTime;

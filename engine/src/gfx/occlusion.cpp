@@ -1,8 +1,10 @@
 /*
  * occlusion.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, Claudio Freire, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2012 Claudio Freire
+ * Copyright (C) 2019-2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -222,16 +224,16 @@ static float biggestLightSize;
 void /*GFXDRVAPI*/ start() {
     end();
 
-    vega_types::SequenceContainer<int> globalLights;
+    std::vector<int> globalLights;
     GFXGlobalLights(globalLights);
 
     float bigSize = 0.f;
     int bigLight = -1;
 
-    for (int const& globalLight : globalLights) {
-        const GFXLight &light = GFXGetLight(globalLight);
+    for (std::vector<int>::const_iterator it = globalLights.begin(); it != globalLights.end(); ++it) {
+        const GFXLight &light = GFXGetLight(*it);
         if (bigLight < 0 || light.size > bigSize) {
-            bigLight = globalLight;
+            bigLight = *it;
             bigSize = light.size;
         }
     }

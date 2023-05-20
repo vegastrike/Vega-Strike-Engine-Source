@@ -1,8 +1,10 @@
 /*
  * planet.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2019 Daniel Horn and other Vega Strike contributors
+ * Copyright (C) 2020-2021 pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -108,7 +110,7 @@ string GetElMeshName(string name, string faction, char direction) {
     return elevator_mesh;
 }
 
-static void SetFogMaterialColor(vega_types::SharedPtr<Mesh> thus, const GFXColor &color, const GFXColor &dcolor) {
+static void SetFogMaterialColor(Mesh *thus, const GFXColor &color, const GFXColor &dcolor) {
     GFXMaterial m{};
     setMaterialAmbient(m, 0.0);
     setMaterialDiffuse(m, configuration()->graphics_config.atmosphere_diffuse * dcolor);
@@ -118,7 +120,7 @@ static void SetFogMaterialColor(vega_types::SharedPtr<Mesh> thus, const GFXColor
     thus->SetMaterial(m);
 }
 
-vega_types::SharedPtr<Mesh> MakeFogMesh(const AtmosphericFogMesh &f, float radius) {
+Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius) {
     static int count = 0;
     count++;
     string nam = f.meshname + XMLSupport::tostring(count) + ".png";
@@ -145,9 +147,9 @@ vega_types::SharedPtr<Mesh> MakeFogMesh(const AtmosphericFogMesh &f, float radiu
         using VSFileSystem::TextureFile;
         image.WriteImage((char *) nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
     }
-    vega_types::SequenceContainer<std::string> override;
+    vector<string> override;
     override.push_back(nam);
-    vega_types::SharedPtr<Mesh> ret = Mesh::LoadMesh(f.meshname.c_str(),
+    Mesh *ret = Mesh::LoadMesh(f.meshname.c_str(),
             Vector(f.scale * radius, f.scale * radius, f.scale * radius),
             0,
             nullptr,
@@ -164,7 +166,7 @@ class AtmosphereHalo : public Unit {
 public:
     float planetRadius;
 
-    AtmosphereHalo(float radiusOfPlanet, vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> &meshes, int faction) :
+    AtmosphereHalo(float radiusOfPlanet, vector<Mesh *> &meshes, int faction) :
             Unit(meshes, true, faction) {
         planetRadius = radiusOfPlanet;
     }
@@ -225,7 +227,7 @@ Planet::Planet(QVector x,
     atmospheric = false;
 
     inside = false;
-    shine.reset();
+    shine = nullptr;
     terrain = nullptr;
     terraintrans = nullptr;
 
@@ -258,7 +260,7 @@ Planet::Planet(QVector x,
             if (jump->name != "LOAD_FAILED") {
                 anytrue = true;
                 radius = jump->rSize();
-                vega_types::SharedPtr<Mesh> shield = jump->meshdata.size() ? jump->meshdata.back() : nullptr;
+                Mesh *shield = jump->meshdata.size() ? jump->meshdata.back() : nullptr;
                 if (jump->meshdata.size()) {
                     jump->meshdata.pop_back();
                 }
@@ -287,15 +289,15 @@ Planet::Planet(QVector x,
     if (!wormhole) {
         const int stacks = configuration()->graphics_config.planet_detail_stacks;
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
-        meshdata.push_back(SphereMesh::createSphereMesh(radius,
-                                                        stacks,
-                                                        stacks,
-                                                        textname.c_str(),
-                                                        technique,
-                                                        nullptr,
-                                                        inside_out,
-                                                        blendSrc,
-                                                        blendDst));
+        meshdata.push_back(new SphereMesh(radius,
+                stacks,
+                stacks,
+                textname.c_str(),
+                technique,
+                nullptr,
+                inside_out,
+                blendSrc,
+                blendDst));
         meshdata.back()->setEnvMap(GFXFALSE);
         meshdata.back()->SetMaterial(ourmat);
         meshdata.push_back(nullptr);
@@ -308,7 +310,7 @@ Planet::Planet(QVector x,
         corner_max.i = corner_max.j = corner_max.k = radius;
         radial_size = radius;
         if (!meshdata.empty()) {
-            meshdata.front()->setVirtualBoundingBox(corner_min, corner_max, radius);
+            meshdata[0]->setVirtualBoundingBox(corner_min, corner_max, radius);
         }
     }
     if (ligh.size() > 0) {
@@ -334,7 +336,7 @@ Planet::Planet(QVector x,
                 shines.emplace_back("shine.ani");
             }
 
-            shine = Animation::createAnimation(shines[rand() % shines.size()].c_str(),
+            shine = new Animation(shines[rand() % shines.size()].c_str(),
                     true,
                     .1,
                     BILINEAR,
@@ -343,7 +345,7 @@ Planet::Planet(QVector x,
                     c);             //GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
             shine->SetDimensions(glowradius * radius, glowradius * radius);
             if (!drawstar) {
-                meshdata.front().reset();
+                delete meshdata[0];
                 meshdata.clear();
                 meshdata.push_back(nullptr);
             }
@@ -361,6 +363,10 @@ Planet::Planet(QVector x,
 }
 
 Planet::~Planet() {
+    if (shine != nullptr) {
+        delete shine;
+        shine = nullptr;
+    }
     if (terrain != nullptr) {
         delete terrain;
         terrain = nullptr;
@@ -490,18 +496,18 @@ void Planet::AddAtmosphere(const std::string &texture,
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
-    vega_types::SharedPtr<Mesh> shield = meshdata.back();
+    Mesh *shield = meshdata.back();
     meshdata.pop_back();
     const int stacks = configuration()->graphics_config.planet_detail_stacks;
-    meshdata.push_back(SphereMesh::createSphereMesh(radius,
-                                                    stacks,
-                                                    stacks,
-                                                    texture.c_str(),
-                                                    string(),
-                                                    nullptr,
-                                                    inside_out,
-                                                    blendSrc,
-                                                    blendDst));
+    meshdata.push_back(new SphereMesh(radius,
+            stacks,
+            stacks,
+            texture.c_str(),
+            string(),
+            nullptr,
+            inside_out,
+            blendSrc,
+            blendDst));
     if (meshdata.back()) {
         //By klauss - this needs to be done for most atmospheres
         GFXMaterial a = {
@@ -527,7 +533,7 @@ void Planet::AddCity(const std::string &texture,
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
-    vega_types::SharedPtr<Mesh> shield = meshdata.back();
+    Mesh *shield = meshdata.back();
     meshdata.pop_back();
     const float materialweight = configuration()->graphics_config.city_light_strength;
     const float daymaterialweight = configuration()->graphics_config.day_city_light_strength;
@@ -538,7 +544,7 @@ void Planet::AddCity(const std::string &texture,
     setMaterialEmissive(m, daymaterialweight);
     m.power = 0.0;
     const int stacks = configuration()->graphics_config.planet_detail_stacks;
-    meshdata.push_back(CityLights::createCityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
+    meshdata.push_back(new CityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
             false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
     meshdata.back()->setEnvMap(GFXFALSE);
     meshdata.back()->SetMaterial(m);
@@ -554,9 +560,9 @@ void Planet::AddFog(const std::vector<AtmosphericFogMesh> &v, bool opticalillusi
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
 #endif
-    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> fogs;
+    std::vector<Mesh *> fogs;
     for (unsigned int i = 0; i < v.size(); ++i) {
-        vega_types::SharedPtr<Mesh> fog = MakeFogMesh(v[i], rSize());
+        Mesh *fog = MakeFogMesh(v[i], rSize());
         fogs.push_back(fog);
     }
     Unit *fawg;
@@ -586,7 +592,7 @@ void Planet::AddRing(const std::string &texture,
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
-    vega_types::SharedPtr<Mesh> shield = meshdata.back();
+    Mesh *shield = meshdata.back();
     meshdata.pop_back();
     int stacks = configuration()->graphics_config.planet_detail_stacks;
     if (slices > 0) {
@@ -595,7 +601,7 @@ void Planet::AddRing(const std::string &texture,
             stacks = 3;
         }
         for (int i = 0; i < slices; i++) {
-            meshdata.push_back(RingMesh::createRingMesh(iradius,
+            meshdata.push_back(new RingMesh(iradius,
                     oradius,
                     stacks,
                     texture.c_str(),
@@ -642,9 +648,9 @@ Vector Planet::AddSpaceElevator(const std::string &name, const std::string &fact
     }
     Matrix ElevatorLoc(Vector(dir.j, dir.k, dir.i), dir, Vector(dir.k, dir.i, dir.j));
     scale = dir * radius + Vector(1, 1, 1) - dir;
-    vega_types::SharedPtr<Mesh> shield = meshdata.back();
+    Mesh *shield = meshdata.back();
     string elevator_mesh = GetElMeshName(name, faction, direction);     //filename
-    vega_types::SharedPtr<Mesh> tmp = meshdata.back() = Mesh::LoadMesh(elevator_mesh.c_str(),
+    Mesh *tmp = meshdata.back() = Mesh::LoadMesh(elevator_mesh.c_str(),
             scale,
             FactionUtil::
             GetFactionIndex(faction),

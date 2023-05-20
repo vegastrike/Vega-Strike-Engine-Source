@@ -1,8 +1,9 @@
-/*
+/**
  * drawable.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
+ * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -46,11 +47,11 @@ using std::map;
 class Drawable {
 public:
     //number of meshes (each with separate texture) this unit has
-    vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>> meshdata;
+    std::vector<Mesh *> meshdata;
     std::unique_ptr<HaloSystem> halos;
 
 protected:
-    vega_types::SequenceContainer<vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>>> vecAnimations;
+    vector<vector<Mesh *> *> vecAnimations;
     vector<string> vecAnimationNames;
 
     bool animatedMesh;
@@ -75,7 +76,7 @@ public:
     static std::map<string, Unit *> Units;
 
     Drawable();
-    virtual ~Drawable();
+    ~Drawable();
 
     bool DrawableInit(const char *filename,
             int faction,
@@ -116,7 +117,7 @@ public:
 
     bool isContinuousLoop() const;
 
-    void addAnimation(vega_types::SharedPtr<vega_types::SequenceContainer<vega_types::SharedPtr<Mesh>>> meshes, const char *name);
+    void addAnimation(std::vector<Mesh *> *meshes, const char *name);
 
     double framesPerSecond() const;
 

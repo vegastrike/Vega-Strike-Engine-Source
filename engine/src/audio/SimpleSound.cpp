@@ -1,8 +1,10 @@
-/*
+/**
  * SimpleSound.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -66,7 +68,7 @@ void SimpleSound::closeStream() {
     stream.reset();
 }
 
-vega_types::SharedPtr<Stream> SimpleSound::getStream() const {
+SharedPtr<Stream> SimpleSound::getStream() const {
     if (!isStreamLoaded()) {
         throw (ResourceNotLoadedException());
     }
