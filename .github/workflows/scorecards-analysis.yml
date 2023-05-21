@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.4.0
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
         with:
           persist-credentials: false
 
