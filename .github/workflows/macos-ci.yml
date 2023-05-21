@@ -22,6 +22,7 @@ jobs:
       matrix:
         os:
           - macos-11
+          - macos-12
         compiler:
           - clang
           - gcc
