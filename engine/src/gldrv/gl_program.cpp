@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gl_program.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -60,11 +62,11 @@ static ProgramCache::key_type cacheKey(const std::string &vp, const std::string 
         }
     }
     return std::pair<unsigned int, std::pair<std::string, std::string> >(defhash,
-            std::pair<std::string, std::string>(vp, fp));
+                                                                         std::pair<std::string, std::string>(vp, fp));
 }
 
 static bool validateLog(GLuint obj, bool shader,
-        bool allowSoftwareEmulation = false) {
+                        bool allowSoftwareEmulation = false) {
     // Retrieve compiler log
     const GLsizei LOGBUF = 1024;
     GLsizei infologLength = 0;
@@ -117,10 +119,10 @@ void printLog(GLuint obj, bool shader) {
 }
 
 static VSFileSystem::VSError getProgramSource(const std::string &path,
-        std::vector<std::string> &lines,
-        std::set<std::string> &processed_includes,
-        char *buf,
-        size_t buflen) {
+                                              std::vector<std::string> &lines,
+                                              std::set<std::string> &processed_includes,
+                                              char *buf,
+                                              size_t buflen) {
     std::string dirname = path.substr(0, path.find_last_of('/'));
 
     VSFileSystem::VSFile f;
@@ -163,8 +165,8 @@ static VSFileSystem::VSError getProgramSource(const std::string &path,
                     }
                 } else {
                     VS_LOG(warning, (boost::format("WARNING: broken include directive at file %1%, line %2% - skipping")
-                            % path.c_str()
-                            % lineno));
+                                     % path.c_str()
+                                     % lineno));
                 }
             } else {
                 // Append a line to the list
@@ -212,13 +214,13 @@ static std::string appendDefines(const std::string &prog, const char *extra_defi
 
     if (firstline.find("#version") != std::string::npos) {
         return firstline
-                + "\n" + std::string(extra_defines)
-                + "\n#line 1"
-                + prog.substr(nlpos);
+               + "\n" + std::string(extra_defines)
+               + "\n#line 1"
+               + prog.substr(nlpos);
     } else {
         return std::string(extra_defines)
-                + "\n#line 0\n"
-                + prog;
+               + "\n#line 0\n"
+               + prog;
     }
 }
 
@@ -282,8 +284,8 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
         } else if (!validateLog(vproghandle, true)) {
             printLog(vproghandle, true);
             VS_LOG(error,
-                    (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.")
-                            % vprogram));
+                   (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.")
+                    % vprogram));
             glDeleteShader_p(vproghandle);
             return 0;
         }
@@ -306,8 +308,8 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
             // FIXME: Should this be fproghandle instead of vproghandle? Same throughout this if block?
             printLog(vproghandle, true);
             VS_LOG(error,
-                    (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.")
-                            % vprogram));
+                   (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.")
+                    % vprogram));
             glDeleteShader_p(vproghandle);
             glDeleteShader_p(fproghandle);
             return 0;
@@ -329,9 +331,9 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
     } else if (!validateLog(sp, false)) {
         printLog(sp, false);
         VS_LOG(error,
-                (boost::format(
-                        "Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above for details.")
-                        % vprogram % fprogram));
+               (boost::format(
+                       "Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above for details.")
+                % vprogram % fprogram));
         glDeleteShader_p(vproghandle);
         glDeleteShader_p(fproghandle);
         glDeleteProgram_p(sp);
@@ -501,7 +503,7 @@ GameSpeed GFXGetFramerate() {
     gameplaydata[((unsigned int) gpdcounter++) % NUMFRAMESLOOK] = curframe;
     unsigned int i = 0;
     if (!(curframe == JUSTRIGHT
-            || (curframe == TOOFAST && defaultprog == hifiprog) || (curframe == TOOSLOW && defaultprog == 0))) {
+          || (curframe == TOOFAST && defaultprog == hifiprog) || (curframe == TOOSLOW && defaultprog == 0))) {
         for (; i < lim; ++i) {
             if (curframe != gameplaydata[((unsigned int) (gpdcounter - i)) % NUMFRAMESLOOK]) {
                 break;
@@ -718,4 +720,3 @@ int GFXNamedShaderConstant(char *progID, const char *name) {
 int GFXGetProgramVersion() {
     return programVersion;
 }
-

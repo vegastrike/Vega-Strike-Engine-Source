@@ -285,12 +285,27 @@ void init_opengl_extensions() {
 #ifndef __APPLE_PANTHER_GCC33_CLI__
         glLockArraysEXT_p   = nullptr;
         glUnlockArraysEXT_p = nullptr;
+#else
+        glLockArraysEXT_p = nullptr;
+        glUnlockArraysEXT_p = nullptr;
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #endif
         VS_LOG(debug, "OpenGL::GL_EXT_compiled_vertex_array unsupported");
     }
 #endif
-#ifndef __APPLE__
+#if defined (__MACOSX__)
+    if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
+        glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
+                GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");
+        glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
+                GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawElementsEXT");
+        VS_LOG(trace, "OpenGL::GL_EXT_multi_draw_arrays supported");
+    } else {
+        glMultiDrawArrays_p = nullptr;
+        glMultiDrawElements_p = nullptr;
+        VS_LOG(debug, "OpenGL::GL_EXT_multi_draw_arrays unsupported");
+    }
+#else
     if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
         glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
                 GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");
@@ -304,13 +319,6 @@ void init_opengl_extensions() {
     }
 #endif
 
-#ifdef __APPLE__
-    glColorTable_p = (PFNGLCOLORTABLEEXTPROC)(dlsym(RTLD_SELF, "glColorTableEXT"));
-    glMultiTexCoord2fARB_p     = (PFNGLMULTITEXCOORD2FARBPROC)(dlsym(RTLD_SELF, "glMultiTexCoord2fARB"));
-    glMultiTexCoord4fARB_p     = (PFNGLMULTITEXCOORD4FARBPROC)(dlsym(RTLD_SELF, "glMultiTexCoord4fARB"));
-    glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC)(dlsym(RTLD_SELF, "glClientActiveTextureARB"));
-    glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC)(dlsym(RTLD_SELF, "glActiveTextureARB"));
-#else
 #ifndef NO_VBO_SUPPORT
     glBindBufferARB_p = (PFNGLBINDBUFFERARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glBindBuffer");
     glGenBuffersARB_p = (PFNGLGENBUFFERSPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glGenBuffers");
@@ -434,7 +442,6 @@ void init_opengl_extensions() {
         glDeleteProgram_p = (PFNGLDELETEPROGRAMPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glDeleteProgram");
     }
     //fixme
-#endif
 
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (vsExtensionSupported("GL_NV_fog_distance")) {
@@ -621,7 +628,7 @@ void GFXInit(int argc, char **argv) {
     }
 
     bool vidsupported = (gl_options.rect_textures
-            || (vsExtensionSupported("GL_ARB_texture_non_power_of_two") && vsVendorMatch("nvidia")));
+                         || (vsExtensionSupported("GL_ARB_texture_non_power_of_two") && vsVendorMatch("nvidia")));
 
     gl_options.pot_video_textures = game_options()->pot_video_textures ? true : vidsupported;
 
