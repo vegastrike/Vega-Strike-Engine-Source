@@ -98,7 +98,7 @@
 #endif
 
 PFNGLBINDBUFFERARBPROC glBindBufferARB_p = nullptr;
-PFNGLGENBUFFERSARBPROC glGenBuffersARB_p = nullptr;
+PFNGLGENBUFFERSPROC glGenBuffersARB_p = nullptr;
 PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB_p = nullptr;
 PFNGLBUFFERDATAARBPROC glBufferDataARB_p = nullptr;
 PFNGLMAPBUFFERARBPROC glMapBufferARB_p = nullptr;
@@ -313,7 +313,7 @@ void init_opengl_extensions() {
 #else
 #ifndef NO_VBO_SUPPORT
     glBindBufferARB_p = (PFNGLBINDBUFFERARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glBindBuffer");
-    glGenBuffersARB_p = (PFNGLGENBUFFERSARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glGenBuffers");
+    glGenBuffersARB_p = (PFNGLGENBUFFERSPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glGenBuffers");
     glDeleteBuffersARB_p = (PFNGLDELETEBUFFERSARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glDeleteBuffers");
     glBufferDataARB_p = (PFNGLBUFFERDATAARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glBufferData");
     glMapBufferARB_p = (PFNGLMAPBUFFERARBPROC) GET_GL_PROC((GET_GL_PTR_TYP) "glMapBuffer");
