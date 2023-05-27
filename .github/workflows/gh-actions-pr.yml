@@ -15,120 +15,147 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        allow_failure: [false]
         include:
           - FROM:     'ubuntu:jammy'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'ubuntu:jammy'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'ubuntu:jammy'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'ubuntu:jammy'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'ubuntu:bionic'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'ubuntu:bionic'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'debian:buster'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'debian:buster'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'fedora:36'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'fedora:36'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'fedora:35'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'fedora:35'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'fedora:34'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'fedora:34'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
           - FROM:     'manjarolinux/base'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
