@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __VECTORIZABLE_H
-#define __VECTORIZABLE_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_VECTORIZABLE_H
+#define VEGA_STRIKE_ENGINE_GFX_VECTORIZABLE_H
 
 #include <boost/static_assert.hpp>
 
@@ -281,5 +279,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_VECTORIZABLE_H

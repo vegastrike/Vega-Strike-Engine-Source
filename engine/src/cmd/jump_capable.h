@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef JUMPCAPABLE_H
-#define JUMPCAPABLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
+#define VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 
 #include "star_system.h"
 #include "energetic.h"
@@ -62,4 +60,4 @@ public:
             bool DoSightAndSound);
 };
 
-#endif // JUMPCAPABLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H

@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEOBB_H__
-#define __ICEOBB_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OBB_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OBB_H
 
 // Forward declarations
 class LSS;
@@ -194,4 +194,4 @@ public:
     // i.e. rows = eigen vectors of the covariance matrix
 };
 
-#endif    // __ICEOBB_H__
+#endif    //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OBB_H

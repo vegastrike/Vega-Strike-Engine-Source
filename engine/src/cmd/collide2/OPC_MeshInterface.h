@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_MESHINTERFACE_H__
-#define __OPC_MESHINTERFACE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_MESHINTERFACE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_MESHINTERFACE_H
 
 struct VertexPointers {
     const Point *Vertex[3];
@@ -200,4 +200,4 @@ private:
     uint32_t mNbVerts;            //!< Number of vertices in the input model
 };
 
-#endif //__OPC_MESHINTERFACE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_MESHINTERFACE_H

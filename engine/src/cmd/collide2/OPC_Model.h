@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_MODEL_H__
-#define __OPC_MODEL_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_MODEL_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_MODEL_H
 
 class OPCODE_API Model : public BaseModel {
 public:
@@ -68,4 +68,4 @@ private:
     void Release();
 };
 
-#endif //__OPC_MODEL_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_MODEL_H

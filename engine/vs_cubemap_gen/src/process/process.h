@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __PROCESS_H__
-#define __PROCESS_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H
 /*
  * The purpose of this is to control the general processing: reading the input
  * textures into floating point memory textures, allocating memory textures for
@@ -35,6 +34,4 @@ class process {
 public
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H

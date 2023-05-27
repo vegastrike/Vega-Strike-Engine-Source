@@ -16,9 +16,8 @@
   License along with this library; if not, write to the Free
   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#ifndef __CSUTIL_ALGORITHMS_H__
-#define __CSUTIL_ALGORITHMS_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CSUTIL_ALGORITHMS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CSUTIL_ALGORITHMS_H
 
 /**\file
  * General Algorithms
@@ -113,4 +112,4 @@ Func;
 
 }
 
-#endif // __CSUTIL_ALGORITHMS_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CSUTIL_ALGORITHMS_H

@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_VSFILESYS_H
+#define VEGA_STRIKE_ENGINE_VSFILESYS_H
 
-
-#ifndef __VSFILESYS_H
-#define __VSFILESYS_H
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -646,4 +645,4 @@ std::string nameof(VSFileSystem::VSFileType type);
 //            int (*compar)( const struct dirent**, const struct dirent** ) );
 //#endif
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_VSFILESYS_H

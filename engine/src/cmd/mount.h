@@ -22,10 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef MOUNT_H
-#define MOUNT_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_MOUNT_H
+#define VEGA_STRIKE_ENGINE_CMD_SCRIPT_MOUNT_H
 
 #include "collide_map.h"
 #include "gfx/quaternion.h"
@@ -147,4 +145,4 @@ public:
                          bool perform_upgrade);
 };
 
-#endif // MOUNT_H
+#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_MOUNT_H

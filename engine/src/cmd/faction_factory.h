@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef FACTIONFACTORY_H
-#define FACTIONFACTORY_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_FACTION_FACTORY_H
+#define VEGA_STRIKE_ENGINE_CMD_FACTION_FACTORY_H
 
 #include <string>
 #include <boost/property_tree/ptree.hpp>
@@ -34,4 +33,4 @@ private:
     void parse(boost::property_tree::ptree tree);
 };
 
-#endif // FACTIONFACTORY_H
+#endif //VEGA_STRIKE_ENGINE_CMD_FACTION_FACTORY_H

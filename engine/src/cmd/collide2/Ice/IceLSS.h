@@ -11,8 +11,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICELSS_H__
-#define __ICELSS_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_LSS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_LSS_H
 
 class ICEMATHS_API LSS : public Segment {
 public:
@@ -79,4 +79,4 @@ public:
     float mRadius;    //!< Sphere radius
 };
 
-#endif // __ICELSS_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_LSS_H

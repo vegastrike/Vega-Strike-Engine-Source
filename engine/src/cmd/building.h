@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __BUILDING_H
-#define __BUILDING_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_BUILDING_H
+#define VEGA_STRIKE_ENGINE_CMD_BUILDING_H
 
 #include "unit_generic.h"
 
@@ -91,5 +89,4 @@ protected:
     Building &operator=(const Building &);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_BUILDING_H

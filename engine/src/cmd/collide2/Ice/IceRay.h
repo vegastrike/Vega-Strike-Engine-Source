@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICERAY_H__
-#define __ICERAY_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RAY_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RAY_H
 
 class ICEMATHS_API Ray {
 public:
@@ -105,4 +105,4 @@ inline_ void ComputeLocalRay(Ray &local_ray, const Ray &world_ray, const Matrix4
     ComputeLocalPoint(local_ray.mOrig, world_ray.mOrig, world);
 }
 
-#endif // __ICERAY_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RAY_H

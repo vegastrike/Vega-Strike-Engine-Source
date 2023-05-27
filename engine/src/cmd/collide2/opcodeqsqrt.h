@@ -25,8 +25,8 @@
 // is the problem.
 //#define CS_NO_QSQRT
 
-#ifndef __QSQRT_H__
-#define __QSQRT_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H
 
 #if (!defined (CS_NO_QSQRT)) && defined (CS_PROCESSOR_X86) && defined (CS_COMPILER_GCC)
 #include "Stdafx.h"
@@ -175,4 +175,4 @@ static inline float qisqrt(float x)
 
 #endif
 
-#endif // __QSQRT_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H

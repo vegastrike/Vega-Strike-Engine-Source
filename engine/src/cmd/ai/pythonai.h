@@ -23,7 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+// NO HEADER GUARD
 
 #include <Python.h>
 #include "fire.h"
@@ -49,4 +49,3 @@ public:
     static PythonAI *Factory(const std::string &file);
     virtual ~PythonAI();
 };
-

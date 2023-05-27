@@ -12,8 +12,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEMEMORYMACROS_H__
-#define __ICEMEMORYMACROS_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MEMORY_MACROS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MEMORY_MACROS_H
 
 #undef ZeroMemory
 #undef CopyMemory
@@ -143,4 +143,4 @@ inline void SAFE_DESTRUCT(T *&x) {                                            //
 //! Standard allocation cycle
 #define SAFE_ALLOC(ptr, type, count)    DELETEARRAY(ptr);    ptr = new type[count];    CHECKALLOC(ptr);
 
-#endif // __ICEMEMORYMACROS_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MEMORY_MACROS_H

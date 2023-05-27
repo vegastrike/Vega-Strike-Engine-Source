@@ -22,9 +22,7 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
+#ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_TYPES_H
+#define VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_TYPES_H
 
-#ifndef _MISSION_TYPES_H_
-#define _MISSION_TYPES_H_
-
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_TYPES_H

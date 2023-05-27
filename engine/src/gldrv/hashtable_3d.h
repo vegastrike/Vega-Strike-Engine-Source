@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GLDRV_HASHTABLE_3D_H
+#define VEGA_STRIKE_ENGINE_GLDRV_HASHTABLE_3D_H
 
-
-#ifndef _HASHTABLE_3D_H_
-#define _HASHTABLE_3D_H_
 #include "gfx/vec.h"
 #include <algorithm>
 #include <vector>
@@ -253,5 +252,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GLDRV_HASHTABLE_3D_H

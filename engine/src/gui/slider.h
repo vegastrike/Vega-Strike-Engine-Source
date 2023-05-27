@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __SLIDER_H__
-#define __SLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_GUI_SLIDER_H
+#define VEGA_STRIKE_ENGINE_GUI_SLIDER_H
 
 #include "gui/groupcontrol.h"
 
@@ -104,5 +103,4 @@ protected:
     Rect m_thumbRect; //Remembered position of the thumb.
 };
 
-#endif   //__SLIDER_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GUI_SLIDER_H

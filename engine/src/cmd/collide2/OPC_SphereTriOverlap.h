@@ -1,3 +1,4 @@
+// NO HEADER GUARD
 
 // This is collision detection. If you do another distance test for collision *response*,
 // if might be useful to simply *skip* the test below completely, and report a collision.

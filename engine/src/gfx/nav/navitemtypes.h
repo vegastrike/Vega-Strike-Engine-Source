@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _NAVITEMTYPES_H_
-#define _NAVITEMTYPES_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_ITEM_TYPES_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_ITEM_TYPES_H
 
 enum NAVITEMTYPES {
     navsun,
@@ -56,5 +54,4 @@ enum NAVITEMTYPES {
 #define navjumpsize 0.0125
 #define navambiguoussize 0.01
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_ITEM_TYPES_H

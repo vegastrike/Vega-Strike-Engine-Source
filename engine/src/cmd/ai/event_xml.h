@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_EVENT_XML_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_EVENT_XML_H
 
-
-#ifndef _CMD_AI_EVENT_XML_H_
-#define _CMD_AI_EVENT_XML_H_
 #include "xml_support.h"
 #include <string>
 #include <vector>
@@ -91,5 +90,5 @@ struct ElemAttrMap {
 };
 void LoadAI(const char *filename, ElemAttrMap &result, const std::string &faction);  //num seconds
 }
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_EVENT_XML_H

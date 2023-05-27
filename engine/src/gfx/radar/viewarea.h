@@ -1,5 +1,4 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /**
  * viewarea.h
  *
@@ -25,10 +24,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef VEGASTRIKE_GFX_RADAR_VIEWAREA_H
-#define VEGASTRIKE_GFX_RADAR_VIEWAREA_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H
+#define VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H
 
 #include "gfx/vec.h"
 #include "gfx/sprite.h"
@@ -55,4 +52,4 @@ struct ViewArea {
 
 } // namespace Radar
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H

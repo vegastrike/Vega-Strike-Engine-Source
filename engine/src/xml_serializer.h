@@ -20,8 +20,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _XML_SERIALIZER_H_
-#define _XML_SERIALIZER_H_
+#ifndef VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
+#define VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
+
 #include "xml_support.h"
 #include <vector>
 #include <string>
@@ -191,5 +192,6 @@ public:
         this->filename = fil;
     }
 };
-#endif
+
+#endif //VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
 

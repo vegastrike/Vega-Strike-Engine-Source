@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __ERRORS_H__
-#define __ERRORS_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_ERRORS_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_ERRORS_H
 
 #include <ostream>
 #include <fstream>
@@ -63,6 +62,4 @@ public:
     }
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_ERRORS_H

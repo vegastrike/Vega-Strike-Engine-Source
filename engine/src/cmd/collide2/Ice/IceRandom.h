@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICERANDOM_H__
-#define __ICERANDOM_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RANDOM_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RANDOM_H
 
 ICECORE_API void SRand(uint32_t seed);
 uint32_t Rand();
@@ -57,5 +57,4 @@ private:
     uint32_t mRnd;
 };
 
-#endif // __ICERANDOM_H__
-
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RANDOM_H

@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _CMD_COLLIDE_H_
-#define _CMD_COLLIDE_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLIDE_H
 
 #define SAFE_COLLIDE_DEBUG
 #include "gfx/vec.h"
@@ -344,5 +342,4 @@ struct collideTrees {
     static collideTrees *Get(const std::string &hash_key);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLIDE_H

@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __GROUPCONTROL_H__
-#define __GROUPCONTROL_H__
+#ifndef VEGA_STRIKE_ENGINE_GUI_GROUP_CONTROL_H
+#define VEGA_STRIKE_ENGINE_GUI_GROUP_CONTROL_H
 
 #include "gui/control.h"
 
@@ -87,5 +86,4 @@ protected:
     std::vector<Control *> m_controls;
 };
 
-#endif   //__GROUPCONTROL_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GUI_GROUP_CONTROL_H

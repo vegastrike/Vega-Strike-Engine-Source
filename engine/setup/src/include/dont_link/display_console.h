@@ -16,8 +16,8 @@
  **************************************************************************/
 
 // Check to see if we're already loaded
-#ifndef DISPLAY_CONSOLE_H
-#define DISPLAY_CONSOLE_H
+#ifndef VEGA_STRIKE_ENGINE_SETUP_DONT_LINK_DISPLAY_CONSOLE_H
+#define VEGA_STRIKE_ENGINE_SETUP_DONT_LINK_DISPLAY_CONSOLE_H
 
 #include "central.h"
 
@@ -25,4 +25,4 @@ void InitGraphics();
 void ShowMain();
 void ShowChoices(int val);
 
-#endif    //DISPLAY_CONSOLE_H
+#endif    //VEGA_STRIKE_ENGINE_SETUP_DONT_LINK_DISPLAY_CONSOLE_H

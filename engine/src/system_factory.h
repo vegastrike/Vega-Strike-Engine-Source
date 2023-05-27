@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef SYSTEM_FACTORY_H
-#define SYSTEM_FACTORY_H
+#ifndef VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H
+#define VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H
 
 #include "gfx/vec.h"
 #include "gfxlib_struct.h"
@@ -106,4 +105,4 @@ public:
     GFXColor initializeColor(Object object);
 };
 
-#endif // SYSTEM_FACTORY_H
+#endif //VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H

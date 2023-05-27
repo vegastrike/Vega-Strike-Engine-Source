@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICECONTAINER_H__
-#define __ICECONTAINER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_CONTAINER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_CONTAINER_H
 
 #define CONTAINER_STATS
 
@@ -257,4 +257,4 @@ private:
     float mGrowthFactor;        //!< Resize: new number of entries = old number * mGrowthFactor
 };
 
-#endif // __ICECONTAINER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_CONTAINER_H

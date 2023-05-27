@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_RENDERER_H
+#define VEGA_STRIKE_ENGINE_AUDIO_RENDERER_H
 
 //
 // C++ Interface: Audio::SceneManager
 //
-#ifndef __AUDIO_RENDERER_H__INCLUDED__
-#define __AUDIO_RENDERER_H__INCLUDED__
 
 #include <string>
 #include <map>
@@ -174,4 +173,4 @@ public:
 
 };
 
-#endif//__AUDIO_RENDERER_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERER_H

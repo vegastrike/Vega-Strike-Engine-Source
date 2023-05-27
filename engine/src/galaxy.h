@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef GALAXY_H
-#define GALAXY_H
+#ifndef VEGA_STRIKE_ENGINE_GALAXY_H
+#define VEGA_STRIKE_ENGINE_GALAXY_H
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -44,4 +43,4 @@ public:
     map<string, map<string, map<string, string>>> systems; // sectors-systems-variables
 };
 
-#endif // GALAXY_H
+#endif //VEGA_STRIKE_ENGINE_GALAXY_H

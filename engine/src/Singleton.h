@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_SINGLETON_H
+#define VEGA_STRIKE_ENGINE_SINGLETON_H
 
 //
 //C++ Template: Singleton<T>
 //
-#ifndef __SINGLETON_H__INCLUDED__
-#define __SINGLETON_H__INCLUDED__
 
 namespace InitializationFunctors {
 template<typename T>
@@ -81,5 +81,4 @@ public:
     }
 };
 
-#endif //__SINGLETON_H__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_SINGLETON_H

@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_IN_KB_DATA_H
+#define VEGA_STRIKE_ENGINE_IN_KB_DATA_H
 
-#ifndef _IN_KB_DATA_H_
-#define _IN_KB_DATA_H_
 #include <string>
 class KBData {
 public:
@@ -34,4 +34,5 @@ public:
         this->data = s;
     }
 };
-#endif
+
+#endif //VEGA_STRIKE_ENGINE_IN_KB_DATA_H

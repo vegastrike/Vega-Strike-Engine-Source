@@ -20,10 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef ANIMATION_H
-
-#define ANIMATION_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_ANIMATION_H
+#define VEGA_STRIKE_ENGINE_GFX_ANIMATION_H
 
 #include "lin_time.h"
 
@@ -101,5 +99,4 @@ public:
     void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_ANIMATION_H

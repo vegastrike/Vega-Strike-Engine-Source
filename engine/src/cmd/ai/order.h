@@ -23,11 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _CMD_ORDER_H
-
-#define _CMD_ORDER_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H
 
 #include "gfx/vec.h"
 #include "cmd/container.h"
@@ -270,5 +267,4 @@ private:
 
 } // namespace Orders
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H

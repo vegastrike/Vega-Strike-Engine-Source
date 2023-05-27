@@ -22,12 +22,9 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
-
-#ifndef __COMMAND_H__
-#define __COMMAND_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_COMMAND_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_COMMAND_H
 
 int command(int argc, char *argv[]);
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_COMMAND_H

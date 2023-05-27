@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_SIMPLESOURCE_H
+#define VEGA_STRIKE_ENGINE_AUDIO_SIMPLESOURCE_H
 
 //
 // C++ Interface: Audio::SimpleSource
 //
-#ifndef __AUDIO_SIMPLESOURCE_H__INCLUDED__
-#define __AUDIO_SIMPLESOURCE_H__INCLUDED__
 
 #include "Exceptions.h"
 #include "Types.h"
@@ -84,4 +83,4 @@ protected:
 
 };
 
-#endif//__AUDIO_SIMPLESOURCE_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_SIMPLESOURCE_H

@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _GFX_CLICK_LIST_H_
-#define _GFX_CLICK_LIST_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
+#define VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
 
 //#include "vegastrike.h"
 #include "gfx/matrix.h"
@@ -52,5 +50,4 @@ public:
     UnitCollection *requestIterator(int minX, int minY, int maxX, int maxY);
     Unit *requestShip(int mouseX, int mouseY);
 };
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H

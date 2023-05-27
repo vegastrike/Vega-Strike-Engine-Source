@@ -21,10 +21,8 @@
  *
  * Portions of this code from Tux Racer by Jasmin F. Patry www.tuxracer.com
  */
-
-
-#ifndef _VS_MATH_H_
-#define _VS_MATH_H_
+#ifndef VEGA_STRIKE_ENGINE_VS_MATH_H
+#define VEGA_STRIKE_ENGINE_VS_MATH_H
 
 #include <config.h>
 
@@ -35,21 +33,23 @@
 
 #ifdef HAVE_IEEEFP_H
     #include <ieeefp.h>
-#endif
+#endif //HAVE_IEEEFP_H
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
-#endif
+#endif //M_PI
+
 #ifndef PI
     #define PI M_PI
-#endif
+#endif //PI
+
 #ifndef M_1_PI
     #define M_1_PI (1/M_PI)
-#endif
+#endif //M_1_PI
 
 #define FINITE(x) ( std::isfinite( x ) )
 #define ISNAN(x) ( std:: isnan( x ) )
 
 #define VS_PI 3.1415926535897931
 
-#endif // _VS_MATH_H_
+#endif //VEGA_STRIKE_ENGINE_VS_MATH_H

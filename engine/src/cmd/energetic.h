@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef ENERGETIC_H
-#define ENERGETIC_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H
+#define VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H
 
 #include "resource/resource.h"
 
@@ -109,4 +107,4 @@ protected:
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };
 
-#endif // ENERGETIC_H
+#endif //VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H

@@ -19,13 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_SIMPLE_CONFIG_H
+#define VEGA_STRIKE_ENGINE_SIMPLE_CONFIG_H
 
 /*
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-
-#ifndef _VEGASIMPLECONFIG_H_
-#define _VEGASIMPLECONFIG_H_
 
 #include <expat.h>
 #include <string>
@@ -121,5 +120,5 @@ protected:
     }
 };
 
-#endif //_VEGACONFIG_H_
+#endif //VEGA_STRIKE_ENGINE_SIMPLE_CONFIG_H
 

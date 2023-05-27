@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
+#define VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 
-
-#ifndef NONLINEAR_TRANSFORM_H_
-#define NONLINEAR_TRANSFORM_H_
 #include "macosx_math.h"
 #include <math.h>
 #ifndef M_PI
@@ -160,5 +159,5 @@ public:
  *  }
  *  };
  */
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H

@@ -23,9 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef AUDIBLE_H
-#define AUDIBLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
+#define VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
 
 #include "gfx/vec.h" // TODO: replace with class Vector;
 #include <map>
@@ -65,4 +64,4 @@ private:
     void playDopplerSound(const Vector &pnt, int sound);
 };
 
-#endif // AUDIBLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H

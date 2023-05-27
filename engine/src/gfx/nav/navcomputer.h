@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __NAVCOMPUTER_H__
-#define __NAVCOMPUTER_H__
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H
 
 #include "navscreen.h"
 #include "navpath.h"
@@ -221,5 +219,4 @@ protected:
     Control *m_selectorModeGroups[SELECTOR_MODE_COUNT]; //Array of GroupControls, one for each selector mode.
 };
 
-#endif   //__NAVCOMPUTER_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H

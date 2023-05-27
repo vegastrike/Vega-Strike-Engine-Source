@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICERADIXSORT_H__
-#define __ICERADIXSORT_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RADIXSORT_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RADIXSORT_H
 
 //! Allocate histograms & offsets locally
 #define RADIX_LOCAL_RAM
@@ -75,4 +75,4 @@ private:
     bool Resize(uint32_t nb);
 };
 
-#endif // __ICERADIXSORT_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RADIXSORT_H

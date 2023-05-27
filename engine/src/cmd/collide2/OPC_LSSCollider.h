@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_LSSCOLLIDER_H__
-#define __OPC_LSSCOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_LSS_COLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_LSS_COLLIDER_H
 
 struct OPCODE_API LSSCache : VolumeCache {
     LSSCache() {
@@ -110,4 +110,4 @@ protected:
     Container mTouchedBoxes;
 };
 
-#endif // __OPC_LSSCOLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_LSS_COLLIDER_H

@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
+#define VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
 
-
-#ifndef _ASTEROID_H_
-#define _ASTEROID_H_
 #include "gfx/quaternion.h"
 #include "gfx/vec.h"
 #include "gfx/matrix.h"
@@ -58,5 +57,5 @@ private:
 /// assignment operator forbidden
     Asteroid &operator=(const Asteroid &);
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_ASTEROID_H

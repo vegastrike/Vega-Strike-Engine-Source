@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __CRITERIA_H__
-#define __CRITERIA_H__
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_CRITERIA_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_CRITERIA_H
 
 class CriteriaParent;
 
@@ -270,5 +268,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_NAV_CRITERIA_H

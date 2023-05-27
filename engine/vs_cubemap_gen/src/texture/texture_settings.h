@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __TEXTURE_SETTINGS_H__
-#define __TEXTURE_SETTINGS_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_TEXTURE_SETTINGS_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_TEXTURE_SETTINGS_H
 
 class texture_settings {
     //input params:
@@ -49,6 +47,4 @@ public:
     void init();
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_TEXTURE_SETTINGS_H

@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_MAIN_LOOP_H
+#define VEGA_STRIKE_ENGINE_MAIN_LOOP_H
 
-
-#ifndef _MAIN_LOOP_H_
-#define _MAIN_LOOP_H_
 #include "in.h"
 #include "cmd/unit_generic.h"
 void bootstrap_draw(const std::string &message, Animation *SplashScreen = NULL);
@@ -84,5 +83,4 @@ void InitializeInput();
 void main_loop();
 void restore_main_loop();
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_MAIN_LOOP_H

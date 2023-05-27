@@ -22,9 +22,8 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
-
-#ifndef __PRECOMPILED_STANDARD_INCLUDED__
-#define __PRECOMPILED_STANDARD_INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_OBJCONV_PRECOMPILED_STANDARD_H
+#define VEGA_STRIKE_ENGINE_OBJCONV_PRECOMPILED_STANDARD_H
 
 #include <string>
 #include <vector>
@@ -35,5 +34,4 @@
 #include <iostream>
 #include <iomanip>
 
-#endif//__PRECOMPILED_STANDARD_INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_OBJCONV_PRECOMPILED_STANDARD_H

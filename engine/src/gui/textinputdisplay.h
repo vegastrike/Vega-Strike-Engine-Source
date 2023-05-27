@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __TEXTINPUTDISPLAY_H__
-#define __TEXTINPUTDISPLAY_H__
+#ifndef VEGA_STRIKE_ENGINE_GUI_TEXT_INPUT_DISPLAY_H
+#define VEGA_STRIKE_ENGINE_GUI_TEXT_INPUT_DISPLAY_H
 
 #include "staticdisplay.h"
 #include <vector>
@@ -51,5 +50,4 @@ public:
     virtual void draw();
 };
 
-#endif   //__TEXTINPUTDISPLAY_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GUI_TEXT_INPUT_DISPLAY_H

@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICETRIANGLE_H__
-#define __ICETRIANGLE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRIANGLE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRIANGLE_H
 
 // Forward declarations
 class Moment;
@@ -79,4 +79,4 @@ public:
     void Inflate(float fat_coeff, bool constant_border);
 };
 
-#endif // __ICETRIANGLE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRIANGLE_H

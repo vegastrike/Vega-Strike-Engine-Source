@@ -22,6 +22,7 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
+// NO HEADER GUARD
 
 #undef GLX_SGIX_pbuffer
 #undef GLX_SGIX_fbconfig

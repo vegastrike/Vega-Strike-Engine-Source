@@ -31,6 +31,7 @@
  *  http://www.math.keio.ac.jp/matumoto/emt.html
  *  email: matumoto@math.keio.ac.jp
  */
+// NO HEADER GUARD
 
 /*
  * #define N 624

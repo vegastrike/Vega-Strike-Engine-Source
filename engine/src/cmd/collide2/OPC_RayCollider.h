@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_RAYCOLLIDER_H__
-#define __OPC_RAYCOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_RAY_COLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_RAY_COLLIDER_H
 
 class OPCODE_API CollisionFace {
 public:
@@ -257,4 +257,4 @@ protected:
     bool InitQuery(const Ray &world_ray, const Matrix4x4 *world = nullptr, uint32_t *face_id = nullptr);
 };
 
-#endif // __OPC_RAYCOLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_RAY_COLLIDER_H

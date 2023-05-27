@@ -25,8 +25,8 @@
  */
 
 
-#ifndef __UNIT_CONST_CACHE_H
-#define __UNIT_CONST_CACHE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
 #include "hashtable.h"
 #include <string>
 #include <gnuhash.h>
@@ -114,5 +114,4 @@ public:
 typedef ClassCache<Unit, StringIntKey> UnitConstCache;
 typedef ClassCache<Mesh, std::string> WeaponMeshCache;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H

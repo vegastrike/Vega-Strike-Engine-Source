@@ -23,13 +23,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_FORMAT_H
+#define VEGA_STRIKE_ENGINE_AUDIO_FORMAT_H
 //
 // C++ Interface: Audio::Codec
 //
-#ifndef __AUDIO_FORMAT_H__INCLUDED__
-#define __AUDIO_FORMAT_H__INCLUDED__
 
 namespace Audio {
 
@@ -78,4 +76,4 @@ struct Format {
 
 };
 
-#endif//__AUDIO_FORMAT_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_FORMAT_H

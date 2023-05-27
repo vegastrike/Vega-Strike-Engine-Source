@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GUI_GUI_TEXTURE_H
+#define VEGA_STRIKE_ENGINE_GUI_GUI_TEXTURE_H
 
-#ifndef __GUITEXTURE_H__
-#define __GUITEXTURE_H__
 #include <string>
 #include "guidefs.h"
 
@@ -54,5 +54,4 @@ protected:
  */
 };
 
-#endif   //__GUITEXTURE_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GUI_GUI_TEXTURE_H

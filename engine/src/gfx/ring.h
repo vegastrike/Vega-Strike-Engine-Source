@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_RING_H
+#define VEGA_STRIKE_ENGINE_GFX_RING_H
 
-
-#ifndef _RING_H_
-#define _RING_H_
 #include "mesh.h"
 #include "vegastrike.h"
 
@@ -86,5 +85,5 @@ public:
 
     virtual float clipRadialSize() const;
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_RING_H

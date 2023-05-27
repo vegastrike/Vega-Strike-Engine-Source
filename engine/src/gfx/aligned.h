@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __ALIGNED_H
-#define __ALIGNED_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_ALIGNED_H
+#define VEGA_STRIKE_ENGINE_GFX_ALIGNED_H
 
 #include <memory>
 #include <cstddef>
@@ -203,5 +202,4 @@ typename COLL::pointer coll_start_pointer(COLL &a) {
     return aligned_allocator_traits<typename COLL::allocator_type>::ifaligned_start_pointer(a.get_allocator(), a[0]);
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_ALIGNED_H

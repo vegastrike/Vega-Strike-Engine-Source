@@ -20,10 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef CS_COMPAT_H_
-#define CS_COMPAT_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
 
 
 //#define OPC_USE_CALLBACKS 1
@@ -65,4 +63,4 @@ struct iBase {
 #define CS_ASSERT assert
 
 #include "opcodetypes.h"
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H

@@ -22,10 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef DAMAGEABLE_H
-#define DAMAGEABLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
+#define VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 
 #include "damageable_object.h"
 #include "gfx/vec.h"
@@ -162,4 +160,4 @@ public:
     bool flickerDamage();
 };
 
-#endif // DAMAGEABLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H

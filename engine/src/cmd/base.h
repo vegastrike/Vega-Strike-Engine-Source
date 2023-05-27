@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_BASE_H
+#define VEGA_STRIKE_ENGINE_CMD_BASE_H
 
-
-#ifndef __BASE_H__
-#define __BASE_H__
 #include <vector>
 #include <string>
 #include "basecomputer.h"
@@ -420,5 +419,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_BASE_H

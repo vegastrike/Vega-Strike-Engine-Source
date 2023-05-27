@@ -1,5 +1,4 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /*
  * cockpit_gfx.h
  *
@@ -24,9 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef COCKPITGFX_H
-#define COCKPITGFX_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_H
+#define VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_H
 
 #include "gfx/vec.h"
 #include "gfx/radar/sensor.h"
@@ -99,4 +97,4 @@ void DrawTargetGauges( Unit *target, Gauge *gauges[] );
 
 float computeLockingSymbol( Unit *par );
 
-#endif // COCKPITGFX_H
+#endif //VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_H

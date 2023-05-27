@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H
 
-
-#ifndef _CMD_KEYBOARD_AI_H_
-#define _CMD_KEYBOARD_AI_H_
 #include "in.h"
 #include "order.h"
 #include "event_xml.h"
@@ -174,5 +173,4 @@ public:
     virtual ~FireKeyboard();
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H

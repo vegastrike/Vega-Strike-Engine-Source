@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_OBJCONV_TO_BFXM_H
+#define VEGA_STRIKE_ENGINE_OBJCONV_TO_BFXM_H
 
-#ifndef _TO_BFXM_H_
-#define _TO_BFXM_H_
 #include <string>
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
@@ -466,5 +466,4 @@ unsigned int appendmeshfromxml(XML memfile,
 void AddNormal(GFXVertex &outp, const GFXVertex &inp);
 void SetNormal(GFXVertex &outp, const GFXVertex &a, const GFXVertex &b, const GFXVertex &c);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_OBJCONV_TO_BFXM_H

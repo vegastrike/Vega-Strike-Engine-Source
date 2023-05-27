@@ -23,13 +23,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_PYTHON_MISSION_H
+#define VEGA_STRIKE_ENGINE_CMD_SCRIPT_PYTHON_MISSION_H
 
-
-#ifndef __PYTHON_MISSION_H__
-#define __PYTHON_MISSION_H__
 #include <string>
 #include <vector>
+
 class UnitContainer;
+
 class PythonMissionBaseClass {
 protected:
     virtual void Destructor();
@@ -48,5 +49,4 @@ public:
     virtual void UnPickle(std::string s);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_PYTHON_MISSION_H

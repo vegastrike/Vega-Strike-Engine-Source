@@ -23,14 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H
 
 /* unitCollection.h
  *
  *****/
-
-#ifndef _UNITCOLLECTION_H_
-#define _UNITCOLLECTION_H_
 
 //Collection type:
 //#define USE_OLD_COLLECTION
@@ -317,5 +315,4 @@ typedef UnitCollection::ConstIterator un_fkiter;
 #error "No collection type chosen in collection.h:10"
 #endif //USE_STL_COLLECTION
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H

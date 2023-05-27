@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __MESH_IO_H__INCLUDED_
-#define __MESH_IO_H__INCLUDED_
+#ifndef VEGA_STRIKE_ENGINE_GFX_MESH_IO_H
+#define VEGA_STRIKE_ENGINE_GFX_MESH_IO_H
 
 #define uint32bit unsigned int
 #define float32bit float
@@ -64,5 +62,4 @@ enum textype {
     TECHNIQUE
 };
 
-#endif //__MESH_IO_H__INCLUDED_
-
+#endif //VEGA_STRIKE_ENGINE_GFX_MESH_IO_H

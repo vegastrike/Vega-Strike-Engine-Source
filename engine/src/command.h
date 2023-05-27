@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef COMMANDINTERP
-#define COMMANDINTERP
+#ifndef VEGA_STRIKE_ENGINE_COMMAND_H
+#define VEGA_STRIKE_ENGINE_COMMAND_H
 
 #include <iostream>
 #include <string>
@@ -195,5 +194,6 @@ namespace ConsoleKeys {
 extern void BringConsole(const KBData &, KBSTATE a);
 }
 //#include "areas.h"
-#endif
+
+#endif //VEGA_STRIKE_ENGINE_COMMAND_H
 

@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_PALETTE_H
+#define VEGA_STRIKE_ENGINE_GFX_PALETTE_H
 
-
-#ifndef PALETTE_H_
-#define PALETTE_H_
 void ShiftPalette(unsigned char[], double, double, double, double, double, double);
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_PALETTE_H

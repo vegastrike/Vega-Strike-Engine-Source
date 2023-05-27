@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef GALAXY_XML_H_
-#define GALAXY_XML_H_
+#ifndef VEGA_STRIKE_ENGINE_GALAXY_XML_H
+#define VEGA_STRIKE_ENGINE_GALAXY_XML_H
 
 #include <string>
 #include <map>
@@ -132,5 +130,6 @@ class SubHeirarchy : public vsUMap<std::string, class SGalaxy> {};
 std::string getStarSystemFileName(const std::string &input);
 std::string getStarSystemName(const std::string &in);
 std::string getStarSystemSector(const std::string &in);
-#endif
+
+#endif //VEGA_STRIKE_ENGINE_GALAXY_XML_H
 

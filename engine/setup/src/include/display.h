@@ -28,8 +28,8 @@
  */
 
 // Check to see if we're already loaded
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H
+#define VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H
 
 #include "central.h"
 #include "version.h"
@@ -48,4 +48,4 @@ the latest drivers for your video card.\nIf you run into problems please \
 upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 \
 for sound and F11/F12 for music."
 
-#endif    //DISPLAY_H
+#endif    //VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H

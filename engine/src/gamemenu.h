@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __GAMEMENU_H__
-#define __GAMEMENU_H__
+#ifndef VEGA_STRIKE_ENGINE_GAME_MENU_H
+#define VEGA_STRIKE_ENGINE_GAME_MENU_H
 
 #include "gui/windowcontroller.h"
 #include "gui/simplepicker.h"
@@ -88,5 +87,5 @@ public:
     virtual bool confirmedNetSaveGame();
 };
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_GAME_MENU_H
 

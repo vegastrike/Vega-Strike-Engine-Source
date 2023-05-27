@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
 
-
-#ifndef _COLLIDE_MAP_H_
-#define _COLLIDE_MAP_H_
 #include "key_mutable_set.h"
 #include "vegastrike.h"
 #include "gfx/vec.h"
@@ -236,5 +235,5 @@ inline void set_null(CollideMap::iterator &it) {
 }
 
 #endif
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H

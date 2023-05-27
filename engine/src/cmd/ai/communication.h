@@ -22,10 +22,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_COMMUNICATION_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_COMMUNICATION_H
 
-
-#ifndef _COMMUNICATION_H_
-#define _COMMUNICATION_H_
 #include "cmd/unit_generic.h"
 #include "gfxlib_struct.h"
 #include "vs_logging.h"
@@ -142,5 +141,4 @@ inline std::string GetRelationshipColorString(float rel) {
 
 unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &node);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_COMMUNICATION_H

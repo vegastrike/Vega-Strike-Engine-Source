@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_SCRIPT_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_SCRIPT_H
 
-
-#ifndef _CMD_AISCRIPT_H_
-#define _CMD_AISCRIPT_H_
 #include "order.h"
 #include "navigation.h"
 #include "xml_support.h"
@@ -68,5 +67,4 @@ public:
     void Execute();
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_SCRIPT_H

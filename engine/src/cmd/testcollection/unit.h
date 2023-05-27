@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_TEST_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_TEST_H
 
-
-#ifndef __UNIT_TEST_H_
-#define __UNIT_TEST_H_
 #include <stdio.h>
 
 class Unit {
@@ -71,5 +70,5 @@ public:
         }
     }
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_TEST_H

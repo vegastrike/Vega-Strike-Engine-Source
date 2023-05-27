@@ -24,12 +24,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#define JPEG_SUPPORT
-#ifdef JPEG_SUPPORT   /* Always true? */
-#ifndef __JPEG_MEMORY_H
-#define __JPEG_MEMORY_H
+// NOTE: The code use to include a C Macro definition for JPEG_SUPPORT.
+//  After a little investigation:
+//      1. It was always defined so had no impact on this file
+//      2. After a search of the engine source nothing else used it aside from jpeg_memory.cpp
+//          which removing it did not really effect since it was always defined any way
+//  Therefore it was removed so that a single explicit header guard was obvious;
+//  as opposed to being hidden behind a second guard.
+#ifndef VEGA_STRIKE_ENGINE_GFX_JPEG_MEMORY_H
+#define VEGA_STRIKE_ENGINE_GFX_JPEG_MEMORY_H
 
 #include <stdio.h>
 #include <string.h>
@@ -103,6 +106,4 @@ extern void jpeg_memory_src(j_decompress_ptr cinfo, unsigned char *ptr, size_t s
 void jpeg_decompress(unsigned char *dst, unsigned char *src, int size, int *w, int *h);
 void jpeg_decompress_from_file(unsigned char *dst, char *file, int size, int *w, int *h);
 
-#endif
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_JPEG_MEMORY_H

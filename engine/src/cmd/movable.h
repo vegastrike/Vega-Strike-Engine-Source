@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef MOVABLE_H
-#define MOVABLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
+#define VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 
 #include "gfx/vec.h"
 #include "vs_limits.h"
@@ -249,4 +247,4 @@ public:
             Unit *superunit) = 0;
 };
 
-#endif // MOVABLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_MOVABLE_H

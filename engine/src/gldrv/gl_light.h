@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_LIGHT_H
+#define VEGA_STRIKE_ENGINE_GLDRV_GL_LIGHT_H
 
-#ifndef _GL_LIGHT_H_
-#define _GL_LIGHT_H_
 #include "gfxlib.h"
 #include "hashtable_3d.h"
 #include "gl_globals.h"
@@ -195,5 +195,4 @@ extern float intensity_cutoff;
 extern float optintense;
 extern float optsat;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GLDRV_GL_LIGHT_H

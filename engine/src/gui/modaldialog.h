@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __MODALDIALOG_H__
-#define __MODALDIALOG_H__
+#ifndef VEGA_STRIKE_ENGINE_GUI_MODAL_DIALOG_H
+#define VEGA_STRIKE_ENGINE_GUI_MODAL_DIALOG_H
 
 #include "windowcontroller.h"
 
@@ -146,5 +145,4 @@ protected:
     static void CreateControlsForListWindow(Window *w);
 };
 
-#endif   //__MODALDIALOG_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GUI_MODAL_DIALOG_H

@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_HYBRIDMODEL_H__
-#define __OPC_HYBRIDMODEL_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_HYBRIDMODEL_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_HYBRIDMODEL_H
 
 //! Leaf descriptor
 struct LeafTriangles {
@@ -121,4 +121,4 @@ private:
     void Release();
 };
 
-#endif // __OPC_HYBRIDMODEL_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_HYBRIDMODEL_H

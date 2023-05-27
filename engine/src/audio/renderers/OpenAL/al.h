@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __AL_INCLUDES__INCLUDED__
-#define __AL_INCLUDES__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_AL_H
+#define VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_AL_H
 
 #ifdef __APPLE__
 #include <al.h>
@@ -58,5 +56,4 @@ typedef ALuint ALBufferHandle;
 #define ALCstring ALCubyte*
 #endif
 
-#endif//__AL_INCLUDES__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_AL_H

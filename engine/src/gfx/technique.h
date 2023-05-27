@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __TECHNIQUE_H__INCLUDED__
-#define __TECHNIQUE_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H
+#define VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H
 
 #include "pass.h"
 
@@ -104,5 +102,4 @@ public:
     static TechniquePtr getTechnique(const string &name);
 };
 
-#endif //__TECHNIQUE_H__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H

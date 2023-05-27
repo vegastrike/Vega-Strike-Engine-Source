@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef _DEBUG_VS_H_
-#define _DEBUG_VS_H_
+#ifndef VEGA_STRIKE_ENGINE_DEBUG_VS_H
+#define VEGA_STRIKE_ENGINE_DEBUG_VS_H
 
 //#define VS_DEBUG
 //#define VS_DEBUG1
@@ -40,7 +39,7 @@ inline void VS_DEBUG_ERROR() {
 #define VSCONSTRUCT3(a)
 #define VSDESTRUCT3
 
-#else
+#else //VS_DEBUG
 void VS_DEBUG_ERROR();
 
 #error
@@ -72,17 +71,18 @@ extern Hashtable< long, char, 65535 >destructed;
 #ifdef VS_DEBUG2
 #define VSCONSTRUCT2( a ) VSCONST( a )
 #define VSDESTRUCT2 VSDEST
+
 #ifdef VS_DEBUG3
 #define VSCONSTRUCT3( a ) VSCONST( a )
 #define VSDESTRUCT3 VSDEST
-
-#else
+#else //VS_DEBUG3
 #define VSCONSTRUCT2( a )
 #define VSDESTRUCT2
 #define VSCONSTRUCT3( a )
 #define VSDESTRUCT3
-#endif
-#else
+#endif //VS_DEBUG3
+
+#else //VS_DEBUG2
 #define VSCONSTRUCT1( a )
 #define VSDESCRUCT1
 #define VSCONSTRUCT2( a )
@@ -90,7 +90,8 @@ extern Hashtable< long, char, 65535 >destructed;
 #define VSCONSTRUCT3( a )
 #define VSDESCRUCT3
 
-#endif
-#endif
-#endif
+#endif //VS_DEBUG2
 
+#endif //VS_DEBUG
+
+#endif //VEGA_STRIKE_ENGINE_DEBUG_VS_H

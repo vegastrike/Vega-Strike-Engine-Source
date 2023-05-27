@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __UNIT_CUSTOMIZE_CPP__
-#define __UNIT_CUSTOMIZE_CPP__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H
 
 #include "images.h"
 #include "universe.h"
@@ -68,5 +66,4 @@ bool Unit::UpgradeSubUnits(const Unit *up,
 
 extern char *GetUnitDir(const char *);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H

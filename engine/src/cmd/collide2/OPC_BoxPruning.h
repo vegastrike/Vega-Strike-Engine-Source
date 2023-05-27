@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_BOXPRUNING_H__
-#define __OPC_BOXPRUNING_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_BOXPRUNING_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_BOXPRUNING_H
 
 // Optimized versions
 FUNCTION OPCODE_API bool CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, const Axes &axes);
@@ -44,4 +44,4 @@ FUNCTION OPCODE_API bool BruteForceBipartiteBoxTest(uint32_t nb0,
         const AABB **array1,
         Pairs &pairs);
 
-#endif //__OPC_BOXPRUNING_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_BOXPRUNING_H

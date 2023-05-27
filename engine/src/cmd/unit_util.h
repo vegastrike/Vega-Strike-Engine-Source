@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __UNIT_UTIL_H__
-#define __UNIT_UTIL_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_UTIL_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_UTIL_H
 
 #include <string>
 #include "unit_generic.h"
@@ -93,4 +91,4 @@ void performDockingOperations(Unit *un, Unit *unitToDockWith, int actuallyDockP)
 float PercentOperational(Unit *un, string, string category, bool countHullAndArmorAsFull);
 }
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_UTIL_H

@@ -22,10 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _CG_GLOBAL_
-#define _CG_GLOBAL_
+#ifndef VEGA_STRIKE_ENGINE_CG_GLOBAL_H
+#define VEGA_STRIKE_ENGINE_CG_GLOBAL_H
 
 #if defined (CG_SUPPORT)
 
@@ -34,7 +32,7 @@
 #elif !defined (WIN32)
 #define UNIX 1
 
-#endif
+#endif //defined (__APPLE__) || defined (MACOSX)
 
 #include "gldrv/gl_globals.h"
 
@@ -45,7 +43,7 @@
 #include "gldrv/glx_undefined_extensions.h"
 #include <GL/glxext.h>
 
-#endif
+#endif //defined (UNIX)
 
 #include <string>
 
@@ -91,6 +89,6 @@ public:
 
 extern CG_Cloak *cloak_cg;
 
-#endif
-#endif
+#endif //defined (CG_SUPPORT)
 
+#endif //VEGA_STRIKE_ENGINE_CG_GLOBAL_H

@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEMATRIX4X4_H__
-#define __ICEMATRIX4X4_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MATRIX_4X4_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MATRIX_4X4_H
 
 // Forward declarations
 class PRS;
@@ -685,5 +685,4 @@ inline_ void TransformPoint3x3(Point &dest, const Point &source, const Matrix4x4
 
 void InvertPRMatrix(Matrix4x4 &dest, const Matrix4x4 &src);
 
-#endif // __ICEMATRIX4X4_H__
-
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MATRIX_4X4_H

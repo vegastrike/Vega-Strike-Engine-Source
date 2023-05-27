@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef LIMITS_H
-#define LIMITS_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_LIMITS_H
+#define VEGA_STRIKE_ENGINE_CMD_LIMITS_H
 
 #include "gfx/vec.h"
 
@@ -55,4 +53,4 @@ public:
     float limitmin = -1;
 };
 
-#endif // LIMITS_H
+#endif //VEGA_STRIKE_ENGINE_CMD_LIMITS_H

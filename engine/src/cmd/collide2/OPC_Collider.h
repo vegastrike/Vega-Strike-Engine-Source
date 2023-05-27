@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_COLLIDER_H__
-#define __OPC_COLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COLLIDER_H
 
 enum CollisionFlag {
     OPC_FIRST_CONTACT = (1 << 0),        //!< Report all contacts (false) or only first one (true)
@@ -200,4 +200,4 @@ protected:
     }
 };
 
-#endif // __OPC_COLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COLLIDER_H

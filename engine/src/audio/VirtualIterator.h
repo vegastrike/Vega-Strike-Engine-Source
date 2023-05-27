@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __AUDIO_VIRTUALITERATOR_H__INCLUDED__
-#define __AUDIO_VIRTUALITERATOR_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_VIRTUALITERATOR_H
+#define VEGA_STRIKE_ENGINE_AUDIO_VIRTUALITERATOR_H
 
 #include "Types.h"
 #include <iterator>
@@ -331,4 +329,4 @@ public:
 
 }
 
-#endif//__AUDIO_VIRTUALITERATOR_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_VIRTUALITERATOR_H

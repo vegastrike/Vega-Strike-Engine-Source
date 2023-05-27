@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef TURRET_H
-#define TURRET_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_TURRET_H
+#define VEGA_STRIKE_ENGINE_CMD_TURRET_H
 
 #include <string>
 #include <map>
@@ -42,4 +40,4 @@ std::map<std::string, std::string> parseTurretSizes();
 std::string getTurretSize(const std::string &size);
 Unit *CreateGenericTurret(std::string tur, int faction);
 
-#endif // TURRET_H
+#endif //VEGA_STRIKE_ENGINE_CMD_TURRET_H

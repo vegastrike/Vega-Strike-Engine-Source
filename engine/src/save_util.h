@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __SAVE_UTIL_H__
-#define __SAVE_UTIL_H__
+#ifndef VEGA_STRIKE_ENGINE_SAVE_UTIL_H
+#define VEGA_STRIKE_ENGINE_SAVE_UTIL_H
 
 #include <string>
 using std::string;
@@ -52,5 +51,5 @@ const std::vector<std::string> &getStringList(int playernum, const std::string &
 void saveStringList(int playernum, const std::string &mykey, const std::vector<std::string> &names);
 void saveDataList(int playernum, const std::string &mykey, const std::vector<float> &values);
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_SAVE_UTIL_H
 

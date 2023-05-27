@@ -1,5 +1,4 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /**
  * radar.h
  *
@@ -25,10 +24,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef VEGASTRIKE_GFX_RADAR_RADAR_H
-#define VEGASTRIKE_GFX_RADAR_RADAR_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_RADAR_H
+#define VEGA_STRIKE_ENGINE_GFX_RADAR_RADAR_H
 
 #include <string>
 #include <vector>
@@ -78,4 +75,4 @@ std::unique_ptr<Display> Factory(Type::Value);
 
 } // namespace Radar
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_RADAR_H

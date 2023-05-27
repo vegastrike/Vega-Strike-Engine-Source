@@ -19,8 +19,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_AABBCOLLIDER_H__
-#define __OPC_AABBCOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBCOLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBCOLLIDER_H
 
 struct OPCODE_API AABBCache : VolumeCache {
     AABBCache() : FatCoeff(1.1f) {
@@ -92,4 +92,4 @@ protected:
     Container mTouchedBoxes;
 };
 
-#endif // __OPC_AABBCOLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBCOLLIDER_H

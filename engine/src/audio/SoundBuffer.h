@@ -23,14 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_SOUND_BUFFER_H
+#define VEGA_STRIKE_ENGINE_AUDIO_SOUND_BUFFER_H
 
 //
 // C++ Interface: Audio::SoundBuffer
 //
-
-#ifndef __AUDIO__SOUND_BUFFER__INCLUDED__
-#define __AUDIO__SOUND_BUFFER__INCLUDED__
 
 #include "Exceptions.h"
 #include "Format.h"
@@ -156,4 +154,4 @@ public:
 
 };
 
-#endif//__AUDIO__SOUND_BUFFER__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_SOUND_BUFFER_H

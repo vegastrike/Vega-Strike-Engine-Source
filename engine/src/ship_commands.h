@@ -22,12 +22,10 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
-
-#ifndef __SHIP_COMMANDS_H__INCLUDED__
-#define __SHIP_COMMANDS_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H
+#define VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H
 
 extern void InitShipCommands();
 extern void UninitShipCommands();
 
-#endif //__SHIP_COMMANDS_H__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H

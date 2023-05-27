@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _SYSTEM_H_
-#define _SYSTEM_H_
+#ifndef VEGA_STRIKE_ENGINE_SYSTEM_H
+#define VEGA_STRIKE_ENGINE_SYSTEM_H
 
 #include "cmd/collection.h"
 #include "cmd/container.h"
@@ -234,5 +232,5 @@ public:
     int DoJumpingLeaveSightAndSound(Unit *un);
 };
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_SYSTEM_H
 

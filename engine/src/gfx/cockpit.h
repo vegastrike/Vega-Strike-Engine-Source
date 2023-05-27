@@ -1,5 +1,4 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /**
  * cockpit.h
  *
@@ -25,10 +24,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
+#define VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 
-
-#ifndef _COCKPIT_H_
-#define _COCKPIT_H_
 #include "gfx/cockpit_generic.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
@@ -270,5 +268,5 @@ protected:
     /// Override to use a specific kind of sound implementation
     SoundContainer *soundImpl(const SoundContainer &specs);
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_COCKPIT_H

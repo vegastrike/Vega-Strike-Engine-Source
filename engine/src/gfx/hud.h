@@ -20,10 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __HUD_H
-#define __HUD_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_HUD_H
+#define VEGA_STRIKE_ENGINE_GFX_HUD_H
 
 #include <string>
 #include "vec.h"
@@ -93,5 +91,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_HUD_H

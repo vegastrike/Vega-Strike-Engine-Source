@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICETYPES_H__
-#define __ICETYPES_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H
 
 #define USE_HANDLE_MANAGER
 
@@ -182,4 +182,4 @@ inline_ void TSetMax(T &a, const T &b) {
 #   define drand48()  ((double) (((double) rand()) / ((double) RAND_MAX)))
 #endif
 
-#endif // __ICETYPES_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TYPES_H

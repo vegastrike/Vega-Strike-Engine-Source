@@ -19,10 +19,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifdef MMORPGC_INC
-#else
+// NO HEADER GUARD
+// well, technically the MMPORGC_INC acts as one...
+#ifndef MMORPGC_INC
 #define MMORPGC_INC 1
+
 //linux version is int
 //extern commandI CommandInterpretor;
 class POSpack;
@@ -60,5 +61,5 @@ public:
 };
 
 int startThread(void *mmoc2use);
-#endif
+#endif //MMORPGC_INC
 

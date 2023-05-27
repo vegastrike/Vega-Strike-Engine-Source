@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_RENDERABLELISTENER_H
+#define VEGA_STRIKE_ENGINE_AUDIO_RENDERABLELISTENER_H
 
 //
 // C++ Interface: Audio::RenderableListener
 //
-#ifndef __AUDIO_RENDERABLELISTENER_H__INCLUDED__
-#define __AUDIO_RENDERABLELISTENER_H__INCLUDED__
 
 #include "Exceptions.h"
 #include "Types.h"
@@ -98,4 +97,4 @@ protected:
 
 };
 
-#endif//__AUDIO_RENDERABLELISTENER_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERABLELISTENER_H

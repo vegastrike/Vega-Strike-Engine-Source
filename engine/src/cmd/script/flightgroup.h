@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_FLIGHT_GROUP_H
+#define VEGA_STRIKE_ENGINE_CMD_SCRIPT_FLIGHT_GROUP_H
 
-
-#ifndef _FLIGHTGROUP_H_
-#define _FLIGHTGROUP_H_
 #include "cmd/container.h"
 #include "mission.h"
 #include <string>
@@ -131,5 +130,4 @@ public:
     class easyDomNode *domnode;
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_FLIGHT_GROUP_H

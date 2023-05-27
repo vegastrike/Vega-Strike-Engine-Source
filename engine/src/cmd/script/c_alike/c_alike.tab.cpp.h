@@ -19,10 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+// NO HEADER GUARD
 
 #ifndef YYSTYPE
 #define YYSTYPE int
 #endif
+
 #define    L_ID    257
 #define    L_FLOATCONST    258
 #define    L_INTCONST    259

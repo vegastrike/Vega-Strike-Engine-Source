@@ -46,8 +46,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_TREEBUILDERS_H__
-#define __OPC_TREEBUILDERS_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_TREE_BUILDERS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_TREE_BUILDERS_H
 
 //! Tree splitting rules
 enum SplittingRules {
@@ -238,4 +238,4 @@ public:
     const MeshInterface *mIMesh;            //!< Shortcut to an app-controlled mesh interface
 };
 
-#endif // __OPC_TREEBUILDERS_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_TREE_BUILDERS_H

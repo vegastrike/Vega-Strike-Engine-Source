@@ -19,6 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_STARDATE_H
+#define VEGA_STRIKE_ENGINE_STARDATE_H
 
 /// Provides functions for stardate and startime manipulation and conversion
 /// There are various time measurement systems in VS
@@ -34,9 +36,6 @@
  * Short date format is days.hours.minutes
  * Compact date format is days.hours
  */
-
-#ifndef __STARDATE_H
-#define __STARDATE_H
 
 #include <string>
 using std::string;
@@ -76,5 +75,5 @@ public:
     string TrekDateFromSDate(string sdate);
 };
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_STARDATE_H
 

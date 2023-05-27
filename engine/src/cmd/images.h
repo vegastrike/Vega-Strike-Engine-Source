@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _IMAGES_H
-#define _IMAGES_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_IMAGES_H
+#define VEGA_STRIKE_ENGINE_CMD_IMAGES_H
 
 #include <string>
 #include <vector>
@@ -311,5 +309,4 @@ struct unorigdest {
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_IMAGES_H

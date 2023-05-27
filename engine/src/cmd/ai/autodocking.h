@@ -1,3 +1,4 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 /**
  * autodocking.h
  *
@@ -23,12 +24,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
-#ifndef VEGASTRIKE_CMD_AI_AUTODOCKING_H
-#define VEGASTRIKE_CMD_AI_AUTODOCKING_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H
 
 #include <deque>
 #include <boost/shared_ptr.hpp>
@@ -114,4 +111,4 @@ private:
 
 } // namespace Orders
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H

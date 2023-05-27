@@ -11,8 +11,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEPREPROCESSOR_H__
-#define __ICEPREPROCESSOR_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PREPROCESSOR_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PREPROCESSOR_H
 
 // Check platform
 #if defined( _WIN32 ) || defined( WIN32 )
@@ -114,4 +114,4 @@
 #undef _X
 #endif
 
-#endif // __ICEPREPROCESSOR_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PREPROCESSOR_H

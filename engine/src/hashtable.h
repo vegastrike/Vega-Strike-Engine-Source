@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_HASHTABLE_H
+#define VEGA_STRIKE_ENGINE_HASHTABLE_H
 
-
-#ifndef _HASHTABLE_H_
-#define _HASHTABLE_H_
 #include "gnuhash.h"
 #include <math.h>
 #include <string>
@@ -32,9 +31,11 @@
 #define HASH_INTSIZE (sizeof (int)*8)
 #define HASH_SALT_0 0x7EF92C3B
 #define HASH_SALT_1 0x9B
+
 class Unit;
 //const int hashsize = 1001;
 //Hashtable doesn't grow
+
 template<class KEY, class VALUE, int SIZ>
 class Hashtable : public vsUMap<KEY, VALUE *> {
     typedef std::pair<KEY, VALUE *> HashElement;
@@ -103,5 +104,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_HASHTABLE_H

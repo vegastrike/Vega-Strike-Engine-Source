@@ -1,3 +1,4 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 /*
  * upgradeable_unit.h
  *
@@ -21,11 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
-#ifndef UPGRADEABLEUNIT_H
-#define UPGRADEABLEUNIT_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_UPGRADEABLE_UNIT_H
+#define VEGA_STRIKE_ENGINE_CMD_UPGRADEABLE_UNIT_H
 
 #include <string>
 #include <vector>
@@ -50,4 +48,4 @@ public:
                   double &percentage);
 };
 
-#endif // UPGRADEABLEUNIT_H
+#endif //VEGA_STRIKE_ENGINE_CMD_UPGRADEABLE_UNIT_H

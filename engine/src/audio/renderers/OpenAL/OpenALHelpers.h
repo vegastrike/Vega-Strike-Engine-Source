@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __OPENAL_HELPERS_H__INCLUDED__
-#define __OPENAL_HELPERS_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_HELPERS_H
+#define VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_HELPERS_H
 
 #include "../../Exceptions.h"
 #include "al.h"
@@ -47,4 +45,4 @@ ALenum asALFormat(const Format &format);
 }
 }
 
-#endif//__OPENAL_HELPERS_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_HELPERS_H

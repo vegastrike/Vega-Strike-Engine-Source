@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef _SDDS_H_
-#define _SDDS_H_
+#ifndef VEGA_STRIKE_ENGINE_GLDRV_SDDS_H
+#define VEGA_STRIKE_ENGINE_GLDRV_SDDS_H
 #include "gfxlib_struct.h"
 
 /*
@@ -37,5 +36,4 @@
 
 void ddsDecompress(unsigned char *&input, unsigned char *&output, TEXTUREFORMAT format, int height, int width);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GLDRV_SDDS_H

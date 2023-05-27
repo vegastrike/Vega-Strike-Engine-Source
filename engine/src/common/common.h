@@ -15,6 +15,7 @@
 *   (at your option) any later version.                                   *
 *                                                                         *
 ***************************************************************************/
+// NO HEADER GUARD
 
 
 /* This file is for common (as in shared between vegastrike, vegasettings as vsconfig) stuff
@@ -29,4 +30,3 @@
 std::string getdatadir();
 
 #endif
-

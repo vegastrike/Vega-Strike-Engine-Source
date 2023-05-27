@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _NAVSCREENOCCUPIED_H_
-#define _NAVSCREENOCCUPIED_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_OCCUPIED_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_OCCUPIED_H
 
 //#include "masks.h"
 
@@ -56,5 +54,5 @@ public:
     float findfreesector(float x, float y);
     float findfreefloat(int &sector, float &y);
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_OCCUPIED_H

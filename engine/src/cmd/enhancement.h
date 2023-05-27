@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
+#define VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
 
-
-#ifndef _ENHANCER_H_
-#define _ENHANCER_H_
 #include "savegame.h"
 #include "universe.h"
 #include "unit_generic.h"
@@ -59,5 +58,4 @@ protected:
     Enhancement &operator=(const Enhancement &);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_ENHANCER_H

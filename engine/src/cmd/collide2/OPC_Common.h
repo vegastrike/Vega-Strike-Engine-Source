@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_COMMON_H__
-#define __OPC_COMMON_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COMMON_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COMMON_H
 
 // [GOTTFRIED]: Just a small change for readability.
 #ifdef OPC_CPU_COMPARE
@@ -131,4 +131,4 @@ inline_ void TransformPoint(Point &dest, const Point &source, const Matrix3x3 &r
     dest.z = trans.z + source.x * rot.m[0][2] + source.y * rot.m[1][2] + source.z * rot.m[2][2];
 }
 
-#endif //__OPC_COMMON_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COMMON_H

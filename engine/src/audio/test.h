@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_TEST_H
+#define VEGA_STRIKE_ENGINE_AUDIO_TEST_H
 
 //
 // C++ Interface: Audio::Source
 //
-#ifndef __AUDIO_TEST_H__INCLUDED__
-#define __AUDIO_TEST_H__INCLUDED__
 
 namespace Audio {
     namespace Test {
@@ -37,4 +36,4 @@ namespace Audio {
     };
 };
 
-#endif//__AUDIO_TEST_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_TEST_H

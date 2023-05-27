@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_FLY_KEYBOARD_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_FLY_KEYBOARD_H
 
-
-#ifndef _IN_AI_H_
-#define _IN_AI_H_
 #include "in.h"
 #if defined (__APPLE__) || defined (MACOSX)
 #include <GLUT/glut.h>
@@ -106,5 +105,4 @@ public:
     void Execute();
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_FLY_KEYBOARD_H

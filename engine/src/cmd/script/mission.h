@@ -23,7 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_H
+#define VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_H
 
 /*
  *  xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
@@ -31,8 +32,6 @@
 /// Enumerates functions for python modules
 ///
 
-#ifndef _MISSION_H_
-#define _MISSION_H_
 #include <gnuhash.h>
 
 #include <expat.h>
@@ -769,5 +768,4 @@ private:
 #endif //VS_MIS_SEL
 };
 
-#endif //_MISSION_H_
-
+#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_H

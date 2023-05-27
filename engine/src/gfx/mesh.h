@@ -25,10 +25,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _MESH_H_
-#define _MESH_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_MESH_H
+#define VEGA_STRIKE_ENGINE_GFX_MESH_H
 
 #include <string>
 #include <vector>
@@ -455,5 +453,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_MESH_H

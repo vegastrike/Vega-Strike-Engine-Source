@@ -22,15 +22,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_INIT_H
+#define VEGA_STRIKE_ENGINE_GLDRV_GL_INIT_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#ifndef _GL_INIT_H_
-#define _GL_INIT_H_
 
 //#include "vegastrike.h"
 
@@ -84,5 +82,5 @@ extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GLDRV_GL_INIT_H

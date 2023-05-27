@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __PIPELINED_TEXTURE_H__INCLUDED_
-#define __PIPELINED_TEXTURE_H__INCLUDED_
+#ifndef VEGA_STRIKE_ENGINE_GFX_PIPELINED_TEXTURE_H
+#define VEGA_STRIKE_ENGINE_GFX_PIPELINED_TEXTURE_H
 
 #include "aux_texture.h"
 
@@ -57,5 +55,4 @@ public:
     void MakeLastActive();
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_PIPELINED_TEXTURE_H

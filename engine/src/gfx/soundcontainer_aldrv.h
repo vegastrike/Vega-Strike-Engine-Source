@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _SOUNDCONTAINER_ALDRV_H_
-#define _SOUNDCONTAINER_ALDRV_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_ALDRV_H
+#define VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_ALDRV_H
 
 #include <string>
 
@@ -57,5 +55,4 @@ protected:
     virtual bool isPlayingImpl() const;
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_ALDRV_H

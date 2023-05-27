@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef GUI_BUTTON_H
-#define GUI_BUTTON_H
+#ifndef VEGA_STRIKE_ENGINE_GUI_BUTTON_H
+#define VEGA_STRIKE_ENGINE_GUI_BUTTON_H
 
 //Version: 1.0 - Initial Release (Feb 18, 2002)
 
@@ -72,5 +71,4 @@ private:
     int Inside(float x, float y);
 };
 
-#endif    //GUI_BUTTON_H
-
+#endif    //VEGA_STRIKE_ENGINE_GUI_BUTTON_H

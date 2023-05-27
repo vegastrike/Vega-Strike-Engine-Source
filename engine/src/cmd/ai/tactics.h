@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_TACTICS_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_TACTICS_H
 
-
-#ifndef TACTICS_H_
-#define TACTICS_H_
 #include "order.h"
 
 class CloakFor : public Order {
@@ -41,5 +40,4 @@ public:
     ~CloakFor();
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_TACTICS_H

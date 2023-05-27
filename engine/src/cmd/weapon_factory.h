@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef WEAPON_FACTORY_H
-#define WEAPON_FACTORY_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
+#define VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
 
 #include <string>
 #include <boost/property_tree/ptree.hpp>
@@ -36,4 +34,4 @@ private:
     void parseJSON(const std::string &weapon_text);
 };
 
-#endif // WEAPON_FACTORY_H
+#endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H

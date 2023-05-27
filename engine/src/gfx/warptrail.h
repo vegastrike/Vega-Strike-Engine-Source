@@ -23,13 +23,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __WARPTRAIL_H__INCLUDED_
-#define __WARPTRAIL_H__INCLUDED_
+#ifndef VEGA_STRIKE_ENGINE_GFX_WARP_TRAIL_H
+#define VEGA_STRIKE_ENGINE_GFX_WARP_TRAIL_H
 
 void AddWarp(Unit *un, QVector beg, float tim);
 void WarpTrailDraw();
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_WARP_TRAIL_H

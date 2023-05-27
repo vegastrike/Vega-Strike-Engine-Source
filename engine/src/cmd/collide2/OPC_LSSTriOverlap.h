@@ -1,5 +1,6 @@
 // Following code from Magic-Software (http://www.magic-software.com/)
 // A bit modified for Opcode
+// NO HEADER GUARD
 
 static const float gs_fTolerance = 1e-05f;
 

@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef ARMED_H
-#define ARMED_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_ARMED_H
+#define VEGA_STRIKE_ENGINE_CMD_ARMED_H
 
 #include "gfx/vec.h"
 #include "movable.h"
@@ -83,4 +81,4 @@ public:
     void UnFire();
 };
 
-#endif // ARMED_H
+#endif //VEGA_STRIKE_ENGINE_CMD_ARMED_H

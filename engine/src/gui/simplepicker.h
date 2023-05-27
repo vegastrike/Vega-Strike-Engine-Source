@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __SIMPLEPICKER_H__
-#define __SIMPLEPICKER_H__
+#ifndef VEGA_STRIKE_ENGINE_GUI_SIMPLEPICKER_H
+#define VEGA_STRIKE_ENGINE_GUI_SIMPLEPICKER_H
 
 #include "picker.h"
 
@@ -167,5 +166,4 @@ protected:
     T m_value;
 };
 
-#endif   //__SIMPLEPICKER_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GUI_SIMPLEPICKER_H

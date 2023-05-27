@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+// NO HEADER GUARD
 
 #include <string>
 #include <vector>
@@ -30,30 +31,31 @@
 
 #ifdef _WIN32
     #include <hash_map>
-#else
+#else //_WIN32
     #if __GNUC__ != 2
         #include <ext/hash_map>
-    #endif
-#endif
+    #endif //__GNUC__ != 2
+#endif //_WIN32
 
 #include <boost/smart_ptr.hpp>
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
     #include <stdlib.h>
-#else
+#else //!defined (_WIN32) && !defined (__CYGWIN__)
     #ifndef NOMINMAX
+        //tells VCC not to generate min/max macros
         #define NOMINMAX
-    #endif //tells VCC not to generate min/max macros
+    #endif //NOMINMAX
     #include <windows.h>
-#endif
+#endif //!defined (_WIN32) && !defined (__CYGWIN__)
 
 #define GL_GLEXT_PROTOTYPES 1
 
 #if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>
     #include <OpenGL/glext.h>
-#else
+#else //defined (__APPLE__) || defined (MACOSX)
     #include <GL/gl.h>
     #include <GL/glext.h>
-#endif
+#endif //defined (__APPLE__) || defined (MACOSX)
 

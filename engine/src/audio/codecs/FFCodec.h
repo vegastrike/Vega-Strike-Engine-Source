@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_FFCODEC_H
+#define VEGA_STRIKE_ENGINE_AUDIO_FFCODEC_H
 
 //
 // C++ Interface: Audio::OggCodec
 //
-#ifndef __AUDIO_FFCODEC_H__INCLUDED__
-#define __AUDIO_FFCODEC_H__INCLUDED__
 
 #include "Codec.h"
 
@@ -56,4 +55,4 @@ public:
 
 };
 
-#endif//__AUDIO_FFCODEC_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_FFCODEC_H

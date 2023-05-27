@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _KEY_MUTABLE_SET_H_
-#define _KEY_MUTABLE_SET_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_KEY_MUTABLE_SET_H
+#define VEGA_STRIKE_ENGINE_CMD_KEY_MUTABLE_SET_H
 
 #include <set>
 #include <assert.h>
@@ -230,5 +228,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_KEY_MUTABLE_SET_H

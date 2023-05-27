@@ -12,8 +12,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEFPU_H__
-#define __ICEFPU_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_FPU_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_FPU_H
 
 #define    SIGN_BITMASK            0x80000000
 
@@ -72,4 +72,4 @@ inline_    bool IsValidFloat(float value) {
 
 #define CHECK_VALID_FLOAT(x)    OPASSERT(IsValidFloat(x));
 
-#endif // __ICEFPU_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_FPU_H

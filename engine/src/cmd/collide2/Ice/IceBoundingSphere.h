@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEBOUNDINGSPHERE_H__
-#define __ICEBOUNDINGSPHERE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_BOUNDING_SPHERE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_BOUNDING_SPHERE_H
 
 enum BSphereMethod {
     BS_NONE,
@@ -203,4 +203,4 @@ public:
     float mRadius;        //!< Sphere radius
 };
 
-#endif // __ICEBOUNDINGSPHERE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_BOUNDING_SPHERE_H

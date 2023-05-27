@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __BASECOMPUTER_H__
-#define __BASECOMPUTER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H
+#define VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H
 
 #include "gui/windowcontroller.h"
 #include "cmd/unit_generic.h"
@@ -325,5 +323,4 @@ protected:
 bool buyShip(Unit *base, Unit *player, std::string, bool myfleet, bool force_base_inventory, BaseComputer *);
 bool sellShip(Unit *base, Unit *player, std::string, BaseComputer *);
 
-#endif   //__BASECOMPUTER_H__
-
+#endif   //VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H

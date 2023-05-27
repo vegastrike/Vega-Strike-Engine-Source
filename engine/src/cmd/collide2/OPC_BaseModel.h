@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_BASEMODEL_H__
-#define __OPC_BASEMODEL_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_BASEMODEL_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_BASEMODEL_H
 
 //! Model creation structure
 struct OPCODE_API OPCODECREATE {
@@ -196,4 +196,4 @@ protected:
     bool CreateTree(bool no_leaf, bool quantized);
 };
 
-#endif //__OPC_BASEMODEL_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_BASEMODEL_H

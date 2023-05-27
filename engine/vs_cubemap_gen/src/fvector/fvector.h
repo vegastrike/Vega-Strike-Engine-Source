@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __FVECTOR_H__
-#define __FVECTOR_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_FVECTOR_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_FVECTOR_H
 
 //fvector used to be a class, but it's a struct for speed reasons, to appear as a POD to the compiler
 struct fvector {
@@ -35,6 +34,4 @@ struct fvector {
     void fast_renormalize();
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_FVECTOR_H

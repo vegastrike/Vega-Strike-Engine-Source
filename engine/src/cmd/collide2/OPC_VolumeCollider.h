@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_VOLUMECOLLIDER_H__
-#define __OPC_VOLUMECOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_VOLUMECOLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_VOLUMECOLLIDER_H
 
 struct OPCODE_API VolumeCache {
     VolumeCache() : Model(nullptr) {
@@ -146,4 +146,4 @@ protected:
     }
 };
 
-#endif // __OPC_VOLUMECOLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_VOLUMECOLLIDER_H

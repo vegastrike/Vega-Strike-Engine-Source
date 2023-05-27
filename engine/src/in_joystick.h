@@ -19,17 +19,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_JOYSTICK_H
+#define VEGA_STRIKE_ENGINE_JOYSTICK_H
 
 /*
  *  Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 #include "in_kb_data.h"
-#ifndef _JOYSTICK_H_
-#define _JOYSTICK_H_
 
 #if defined (HAVE_SDL)
 #include <SDL/SDL.h>
-#endif
+#endif //defined (HAVE_SDL)
 
 #include "vegastrike.h"
 //#include "glob.h"
@@ -80,9 +80,9 @@ public:
 
 #if defined (HAVE_SDL)
     SDL_Joystick *joy;
-#else
+#else //defined (HAVE_SDL)
     void   *otherdata; //bad form to have an ifdef in a struct
-#endif
+#endif //defined (HAVE_SDL)
     int nr_of_axes, nr_of_buttons, nr_of_hats;
     int hat_margin;
     size_t player;
@@ -93,9 +93,9 @@ public:
     JoyStick();
 #if defined (IRIX)        //could be POSIX type uchar_t?
     uchar_t digital_hat[MAX_DIGITAL_HATSWITCHES];
-#else
+#else //defined (IRIX)
     unsigned char digital_hat[MAX_DIGITAL_HATSWITCHES];
-#endif
+#endif //defined (IRIX)
 
     bool debug_digital_hatswitch;
 
@@ -117,5 +117,4 @@ void BindHatswitchKey(int hatswitch, int val_index, KBHandler handler, const KBD
 void BindDigitalHatswitchKey(int joystick, int hatswitch, int dir_index, KBHandler handler, const KBData &data);
 void UnbindDigitalHatswitchKey(int joystick, int hatswitch, int dir_index);
 
-#endif //_JOYSTICK_H_
-
+#endif //VEGA_STRIKE_ENGINE_JOYSTICK_H

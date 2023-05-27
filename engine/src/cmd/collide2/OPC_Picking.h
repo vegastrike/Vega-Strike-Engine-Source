@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_PICKING_H__
-#define __OPC_PICKING_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_PICKING_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_PICKING_H
 
 #ifdef OPC_RAYHIT_CALLBACK
 
@@ -48,4 +48,4 @@ OPCODE_API bool Picking(
         float min_dist, float max_dist, const Point &view_point, CullModeCallback callback, void *user_data);
 #endif
 
-#endif //__OPC_PICKING_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_PICKING_H

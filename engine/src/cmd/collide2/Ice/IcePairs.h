@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEPAIRS_H__
-#define __ICEPAIRS_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PAIRS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PAIRS_H
 
 //! A generic couple structure
 struct ICECORE_API Pair {
@@ -74,4 +74,4 @@ public:
     }
 };
 
-#endif // __ICEPAIRS_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PAIRS_H

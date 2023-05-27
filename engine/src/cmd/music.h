@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_MUSIC_H
+#define VEGA_STRIKE_ENGINE_CMD_MUSIC_H
 
-
-#ifndef _MUSIC_H_
-#define _MUSIC_H_
 #include "container.h"
 #include <vector>
 #include <string>
@@ -180,5 +179,4 @@ private:
 extern Music *muzak;
 extern int muzak_count;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_MUSIC_H

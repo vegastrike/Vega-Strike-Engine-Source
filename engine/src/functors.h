@@ -19,9 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+// NO HEADER GUARD
+
 #include <cstdlib>
+
 #ifdef FUNCTORS_INC
-#else
+#else //FUNCTORS_INC
 #define FUNCTORS_INC 1
 class Attributes {
 public:
@@ -294,7 +297,7 @@ public:
     }
 };
 
-#endif
+#endif //FUNCTORS_INC
 
 /*
  * Local variables:
@@ -304,4 +307,3 @@ public:
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

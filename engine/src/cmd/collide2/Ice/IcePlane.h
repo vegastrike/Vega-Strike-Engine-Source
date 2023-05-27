@@ -11,8 +11,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEPLANE_H__
-#define __ICEPLANE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PLANE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PLANE_H
 
 #define PLANE_EPSILON        (1.0e-7f)
 
@@ -144,4 +144,4 @@ inline_    void TransformPlane(Plane &plane, const Matrix4x4 &transform) {
     plane.d -= Point(transform.GetTrans()) | plane.n;
 }
 
-#endif // __ICEPLANE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_PLANE_H

@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef DAMAGEABLEOBJECT_H
-#define DAMAGEABLEOBJECT_H
+#ifndef VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_OBJECT_H
+#define VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_OBJECT_H
 
 #include "damage.h"
 #include "damageable_layer.h"
@@ -52,4 +50,4 @@ struct DamageableObject {
     void *(*residual_debris)(DamageableObject object);
 };
 
-#endif // DAMAGEABLEOBJECT_H
+#endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_OBJECT_H

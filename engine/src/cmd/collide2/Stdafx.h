@@ -27,8 +27,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _STDAFX_H_
-#define _STDAFX_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_STDAFX_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_STDAFX_H
 
 // Stephen G. Tuggy getting rid of this hack entirely
 // chuck starchaser shutting up the warnings about violations of strict aliasing...
@@ -48,5 +48,4 @@
 #include "Opcode.h"
 #include "vs_vector.h"
 
-#endif    // _STDAFX_H_
-
+#endif    //VEGA_STRIKE_ENGINE_CMD_COLLSION2_STDAFX_H

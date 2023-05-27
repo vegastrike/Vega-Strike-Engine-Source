@@ -36,9 +36,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef WINSYS_H
+#ifndef VEGA_STRIKE_ENGINE_GLDRV_WINSYS_H
+#define VEGA_STRIKE_ENGINE_GLDRV_WINSYS_H
 #define WINSYS_H 1
 #ifndef UCHAR_MAX
 #define UCHAR_MAX 255
@@ -352,7 +351,7 @@ void winsys_exit(int code);
 } /* extern "C" */
 #endif
 
-#endif /* WINSYS_H */
+#endif //VEGA_STRIKE_ENGINE_GLDRV_WINSYS_H
 
 /* Emacs Customizations
 ;;; Local Variables: ***

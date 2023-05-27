@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_FIND_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_FIND_H
 
-
-#ifndef _UNIT_FIND_H_
-#define _UNIT_FIND_H_
 #include "unit_util.h"
 
 template<class Locator>
@@ -320,5 +319,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_FIND_H

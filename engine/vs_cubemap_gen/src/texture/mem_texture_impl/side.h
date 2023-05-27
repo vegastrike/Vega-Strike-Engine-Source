@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __SIDE_H__
-#define __SIDE_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_SIDE_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_SIDE_H
 
 //this file presents:
 enum eSides { eLeft = 0, eRight, eUp, eDown, eFront, eBack };
@@ -63,6 +62,4 @@ public:
     }
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_SIDE_H

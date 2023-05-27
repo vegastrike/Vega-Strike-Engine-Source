@@ -1,5 +1,4 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /**
  * sphere_display.h
  *
@@ -25,10 +24,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef VEGASTRIKE_GFX_RADAR_SPHERE_DISPLAY_H
-#define VEGASTRIKE_GFX_RADAR_SPHERE_DISPLAY_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H
+#define VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H
 
 #include "sensor.h"
 #include "radar.h"
@@ -65,4 +62,4 @@ protected:
 
 } // namespace Radar
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H

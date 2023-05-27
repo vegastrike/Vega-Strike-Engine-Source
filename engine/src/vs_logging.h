@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef VEGASTRIKE_VS_LOGGING_H
-#define VEGASTRIKE_VS_LOGGING_H
+#ifndef VEGA_STRIKE_ENGINE_VS_LOGGING_H
+#define VEGA_STRIKE_ENGINE_VS_LOGGING_H
 
 #include <cstdint>
 
@@ -88,4 +86,4 @@ extern boost::shared_ptr<VegaStrikeLogger> vega_logger();
 
 } // namespace VegaStrikeLogging
 
-#endif // VEGASTRIKE_VS_LOGGING_H
+#endif //VEGA_STRIKE_ENGINE_VS_LOGGING_H

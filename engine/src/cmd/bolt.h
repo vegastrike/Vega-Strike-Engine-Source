@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_BOLT_H
+#define VEGA_STRIKE_ENGINE_CMD_BOLT_H
 
-
-#ifndef _CMD_BOLT_H_
-#define _CMD_BOLT_H_
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include "weapon_info.h"
@@ -95,4 +94,4 @@ public:
     }
 };
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_BOLT_H

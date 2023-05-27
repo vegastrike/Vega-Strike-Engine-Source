@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _NAVGETXMLDATA_H_
-#define _NAVGETXMLDATA_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_GET_XML_DATA_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_GET_XML_DATA_H
 
 #include <string>
 
@@ -34,5 +32,4 @@
 
 std::string retrievedata(std::string data, std::string type);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_GET_XML_DATA_H

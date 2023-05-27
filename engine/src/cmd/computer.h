@@ -23,9 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef COMPUTER_H
-#define COMPUTER_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_COMPUTER_H
+#define VEGA_STRIKE_ENGINE_CMD_COMPUTER_H
 
 #include "container.h"
 #include "config.h"
@@ -131,4 +130,4 @@ public:
     Computer();
 };
 
-#endif // COMPUTER_H
+#endif //VEGA_STRIKE_ENGINE_CMD_COMPUTER_H

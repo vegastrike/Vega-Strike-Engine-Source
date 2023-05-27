@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __WINDOWCONTROLLER_H__
-#define __WINDOWCONTROLLER_H__
+#ifndef VEGA_STRIKE_ENGINE_GUI_WINDOW_CONTROLLER_H
+#define VEGA_STRIKE_ENGINE_GUI_WINDOW_CONTROLLER_H
 
 #include "window.h"
 #include "control.h"
@@ -110,5 +109,4 @@ protected:
     static const WctlTableEntry WctlCommandTable[];
 };
 
-#endif   //__WINDOWCONTROLLER_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GUI_WINDOW_CONTROLLER_H

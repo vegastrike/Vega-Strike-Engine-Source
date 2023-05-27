@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _NEBULA_H_
-#define _NEBULA_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_NEBULA_H
+#define VEGA_STRIKE_ENGINE_CMD_NEBULA_H
 
 #include "unit_generic.h"
 
@@ -129,5 +127,4 @@ const XMLSupport::EnumMap element_map(element_names, MAXENAMES);
 const XMLSupport::EnumMap attribute_map(attribute_names, MAXANAMES);
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_NEBULA_H

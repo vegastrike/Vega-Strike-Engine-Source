@@ -27,8 +27,8 @@
  */
 
 
-#ifndef VEGASTRIKE_GFX_RADAR_SENSOR_H
-#define VEGASTRIKE_GFX_RADAR_SENSOR_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_SENSOR_H
+#define VEGA_STRIKE_ENGINE_GFX_RADAR_SENSOR_H
 
 #include <vector>
 #include "track.h"
@@ -101,4 +101,4 @@ protected:
 
 } // namespace Radar
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_SENSOR_H

@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef ABSTRACTCONFIG_H
-#define ABSTRACTCONFIG_H
+#ifndef VEGA_STRIKE_ENGINE_ABSTRACT_CONFIG_H
+#define VEGA_STRIKE_ENGINE_ABSTRACT_CONFIG_H
 
 #include <string>
 
@@ -37,4 +36,4 @@ public:
     AbstractConfig();
 };
 
-#endif // ABSTRACTCONFIG_H
+#endif //VEGA_STRIKE_ENGINE_ABSTRACT_CONFIG_H

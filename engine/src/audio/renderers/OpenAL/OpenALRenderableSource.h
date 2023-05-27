@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_SOURCE_H
+#define VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_SOURCE_H
 
 //
 // C++ Interface: Audio::OpenALRenderableSource
 //
-#ifndef __AUDIO_OPENALRENDERABLESOURCE_H__INCLUDED__
-#define __AUDIO_OPENALRENDERABLESOURCE_H__INCLUDED__
 
 #include "al.h"
 
@@ -88,4 +87,4 @@ protected:
 
 };
 
-#endif//__AUDIO_OPENALRENDERABLESOURCE_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_SOURCE_H

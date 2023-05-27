@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _UNIT_XML_H
-#define _UNIT_XML_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_XML_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_XML_H
 
 #include "unit_generic.h"
 
@@ -52,5 +50,4 @@ enum UNITLOADTYPE { DEFAULT, NO_MESH };
 
 extern UNITLOADTYPE current_unit_load_mode;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_XML_H

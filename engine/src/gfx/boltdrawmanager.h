@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef BOLTDRAWMANAGER_H
-#define BOLTDRAWMANAGER_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H
+#define VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H
 
 #include "gfx/decalqueue.h"
 #include "bolt.h"
@@ -64,4 +62,4 @@ public:
     static void Draw();
 };
 
-#endif // BOLTDRAWMANAGER_H
+#endif //VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H

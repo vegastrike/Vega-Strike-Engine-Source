@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEMATRIX3X3_H__
-#define __ICEMATRIX3X3_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MATRIX_3X3_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MATRIX_3X3_H
 
 // Forward declarations
 class Quat;
@@ -657,5 +657,4 @@ public:
     float m[3][3];
 };
 
-#endif // __ICEMATRIX3X3_H__
-
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MATRIX_3X3_H

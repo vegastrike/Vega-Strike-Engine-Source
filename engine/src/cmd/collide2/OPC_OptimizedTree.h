@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_OPTIMIZEDTREE_H__
-#define __OPC_OPTIMIZEDTREE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_OPTIMIZEDTREE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_OPTIMIZEDTREE_H
 
 //! Common interface for a node of an implicit tree
 #define IMPLEMENT_IMPLICIT_NODE(base_class, volume)                                         \
@@ -218,4 +218,4 @@ public:
     Point mExtentsCoeff;
 };
 
-#endif // __OPC_OPTIMIZEDTREE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_OPTIMIZEDTREE_H

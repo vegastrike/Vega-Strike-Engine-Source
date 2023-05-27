@@ -22,9 +22,8 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
-
-#ifndef UNIT_TYPE_H
-#define UNIT_TYPE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H
 
 // UnitType is already taken
 // TODO: rename to expected
@@ -38,4 +37,4 @@ enum class UnitTypeEnum {
     unit
 };
 
-#endif // UNIT_TYPE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H

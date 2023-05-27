@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _POINT_TO_CAM_H_
-#define _POINT_TO_CAM_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_POINT_TO_CAM_H
+#define VEGA_STRIKE_ENGINE_GFX_POINT_TO_CAM_H
 
 /**
  * Calculates the way a point-like sphere should be oriented, with a given
@@ -95,5 +93,4 @@ inline bool CalculateOrientation(QVector &Pos,
     return offz < .4 * g_game.zfar;
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_POINT_TO_CAM_H

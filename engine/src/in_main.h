@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef INMAIN_H
-#define INMAIN_H
+#ifndef VEGA_STRIKE_ENGINE_IN_MAIN_H
+#define VEGA_STRIKE_ENGINE_IN_MAIN_H
 
 #include "in_handler.h"
 
@@ -32,5 +31,5 @@ int TermInput();
 void AddListener(InputListener *il);
 void ActivateListener(InputListener *il);
 void RemoveListener(InputListener *il);
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_IN_MAIN_H

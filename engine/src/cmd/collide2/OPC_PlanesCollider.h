@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_PLANESCOLLIDER_H__
-#define __OPC_PLANESCOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_PLANESCOLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_PLANESCOLLIDER_H
 
 struct OPCODE_API PlanesCache : VolumeCache {
     PlanesCache() {
@@ -132,4 +132,4 @@ protected:
     Container mTouchedBoxes;
 };
 
-#endif // __OPC_PLANESCOLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_PLANESCOLLIDER_H

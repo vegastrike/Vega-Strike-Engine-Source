@@ -1,5 +1,5 @@
 /*
- * health_tests.cpp
+ * core_vector.h
  *
  * Copyright (C) 2021 Roy Falk
  * Copyright (C) 2022 Stephen G. Tuggy
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef COREVECTOR_H
-#define COREVECTOR_H
+#ifndef VEGA_STRIKE_ENGINE_DAMAGE_COREVECTOR_H
+#define VEGA_STRIKE_ENGINE_DAMAGE_COREVECTOR_H
 
 struct CoreVector {
     float i = 0, j = 0, k = 0;
@@ -36,4 +34,4 @@ struct CoreVector {
     }
 };
 
-#endif // COREVECTOR_H
+#endif //VEGA_STRIKE_ENGINE_DAMAGE_COREVECTOR_H

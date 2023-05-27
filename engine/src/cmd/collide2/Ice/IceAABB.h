@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEAABB_H__
-#define __ICEAABB_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AABB_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AABB_H
 
 // Forward declarations
 class Sphere;
@@ -598,4 +598,4 @@ inline_ void ComputeAABB(AABB &aabb, const Point *list, uint32_t nb_pts) {
     }
 }
 
-#endif    // __ICEAABB_H__
+#endif    //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AABB_H

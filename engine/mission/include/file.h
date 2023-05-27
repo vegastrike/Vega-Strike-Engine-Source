@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-// Check to see if we're already loaded
-#ifndef FILE_H
-#define FILE_H
+#ifndef VEGA_STRIKE_ENGINE_MISSION_FILE_H
+#define VEGA_STRIKE_ENGINE_MISSION_FILE_H
 
 #include "central.h"
 #include "easydom.h"
@@ -77,4 +75,4 @@ public:
     struct script_t script;
 };
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_MISSION_FILE_H

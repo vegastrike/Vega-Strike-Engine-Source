@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_AABBTREE_H__
-#define __OPC_AABBTREE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBTREE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBTREE_H
 
 #ifdef OPC_NO_NEG_VANILLA_TREE
 //! TO BE DOCUMENTED
@@ -150,4 +150,4 @@ private:
     uint32_t mTotalNbNodes;        //!< Number of nodes in the tree.
 };
 
-#endif // __OPC_AABBTREE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBTREE_H

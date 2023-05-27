@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_VS_GLOBALS_H
+#define VEGA_STRIKE_ENGINE_VS_GLOBALS_H
 
-#ifndef __VS_GLOBALS_H_
-#define __VS_GLOBALS_H_
 #include <vector>
 
 #include "command.h"
@@ -134,5 +134,4 @@ extern ForceFeedback *forcefeedback;
 
 extern double benchmark;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_VS_GLOBALS_H

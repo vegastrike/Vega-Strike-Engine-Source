@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __MESH_XML_H__INCLUDED_
-#define __MESH_XML_H__INCLUDED_
+#ifndef VEGA_STRIKE_ENGINE_GFX_MESH_XML_H
+#define VEGA_STRIKE_ENGINE_GFX_MESH_XML_H
 
 struct MeshXML {
     enum Names {
@@ -220,6 +218,4 @@ struct MeshXML {
     Mesh *mesh;
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_GFX_MESH_XML_H

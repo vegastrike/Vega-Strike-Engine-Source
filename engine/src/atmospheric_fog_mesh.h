@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef ATMOSPHERICFOGMESH_H
-#define ATMOSPHERICFOGMESH_H
+#ifndef VEGA_STRIKE_ENGINE_ATMOSPHERIC_FOG_MESH_H
+#define VEGA_STRIKE_ENGINE_ATMOSPHERIC_FOG_MESH_H
 
 #include <string>
 
@@ -45,4 +44,4 @@ struct AtmosphericFogMesh {
     AtmosphericFogMesh();
 };
 
-#endif // ATMOSPHERICFOGMESH_H
+#endif //VEGA_STRIKE_ENGINE_ATMOSPHERIC_FOG_MESH_H

@@ -22,8 +22,8 @@
 
 // Version 2.1
 
-#ifndef GENERAL_H
-#define GENERAL_H
+#ifndef VEGA_STRIKE_ENGINE_SETUP_GENERAL_H
+#define VEGA_STRIKE_ENGINE_SETUP_GENERAL_H
 
 //#define GLIB
 
@@ -83,10 +83,11 @@ char *GetString(GString *line);
 void SetString(GString **ptr, char *line);
 #endif    //GLIB
 char *NewString(const char *string);
-#endif    //GENERAL_H
 
 char *xml_pre_chomp_comment(char *string);
 char *xml_chomp_comment(char *string);
 #ifdef __cplusplus        //iostream is only used in debugging
 }
-#endif
+#endif //__cplusplus
+
+#endif    //VEGA_STRIKE_ENGINE_SETUP_GENERAL_H

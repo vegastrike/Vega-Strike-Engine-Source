@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_TURRET_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_TURRET_H
 
-
-#ifndef _TURRETAI_H_
-#define _TURRETAI_H_
 #include "navigation.h"
 namespace Orders {
 class TurretAI : public FaceTargetITTS {
@@ -41,5 +40,5 @@ public:
     virtual void getAverageGunSpeed(float &speed, float &range, float &mrange) const;
 };
 }
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_TURRET_H

@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _DRAWLIST_H_
-#define _DRAWLIST_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_LIST_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_LIST_H
 
 #include <stdlib.h>
 #include <string>
@@ -110,5 +108,4 @@ public:
     ~navdrawlist();
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_LIST_H

@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_FIRE_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_FIRE_H
 
-
-#ifndef _CMD_TARGET_AI_H_
-#define _CMD_TARGET_AI_H_
 #include "comm_ai.h"
 #include "event_xml.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
@@ -95,5 +94,5 @@ public:
     virtual ~FireAt();
 };
 }
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_FIRE_H

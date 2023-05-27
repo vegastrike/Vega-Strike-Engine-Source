@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __COMM_AI_H
-#define __COMM_AI_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_COMM_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_COMM_H
 
 #include "order.h"
 
@@ -73,5 +71,4 @@ public:
 
 void AllUnitsCloseAndEngage(Unit *un, int faction);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_COMM_H

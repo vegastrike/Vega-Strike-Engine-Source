@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _QUATERNION_H_
-#define _QUATERNION_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_QUATERNION_H
+#define VEGA_STRIKE_ENGINE_GFX_QUATERNION_H
 
 #include "vec.h"
 #include "matrix.h"
@@ -179,5 +177,4 @@ struct Transformation {
 
 const Transformation identity_transformation(identity_quaternion, QVector(0, 0, 0));
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_QUATERNION_H

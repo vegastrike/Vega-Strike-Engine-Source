@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef PASS_H
-#define PASS_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_PASS_H
+#define VEGA_STRIKE_ENGINE_GFX_PASS_H
 
 #include <string>
 #include <vector>
@@ -404,4 +402,4 @@ public:
     bool isCompiled(int programVersion) const;
 };
 
-#endif // PASS_H
+#endif //VEGA_STRIKE_ENGINE_GFX_PASS_H

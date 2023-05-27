@@ -23,12 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __SCREENSHOT_H__INCLUDED_
-#define __SCREENSHOT_H__INCLUDED_
+#ifndef VEGA_STRIKE_ENGINE_GFX_SCREENSHOT_H
+#define VEGA_STRIKE_ENGINE_GFX_SCREENSHOT_H
 
 void Screenshot(const KBData &, KBSTATE);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_SCREENSHOT_H

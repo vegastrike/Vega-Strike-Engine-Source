@@ -31,7 +31,8 @@
 #include <iostream>
 #include "vs_logging.h"
 
-#ifdef JPEG_SUPPORT
+// NOTE: There was a JPEG_SUPPORT C Macro wrapper here; however, it was always defined
+//  in jpeg_memory.h so removing it makes no difference.
 
 //Moved the following three functions here from the .h file
 /*----------------------------------------------------------------------------
@@ -257,6 +258,3 @@ void jpeg_decompress_from_file(unsigned char *dst, char *file, int size, int *w,
     jpeg_destroy_decompress(&cinfo);
     fclose(infile);
 }
-
-#endif
-

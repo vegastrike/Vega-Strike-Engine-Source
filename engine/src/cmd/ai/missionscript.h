@@ -23,14 +23,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_MISSION_SCRIPT_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_MISSION_SCRIPT_H
 
 /*
  *  AI for mission scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#ifndef _CMD_AI_MISSION_SCRIPT_H_
-#define _CMD_AI_MISSION_SCRIPT_H_
 
 #include "order.h"
 #include "navigation.h"
@@ -110,5 +109,4 @@ private:
     olist_t *my_orderlist;
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_MISSION_SCRIPT_H

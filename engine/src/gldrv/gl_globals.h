@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_GLOBALS_H
+#define VEGA_STRIKE_ENGINE_GLDRV_GL_GLOBALS_H
 
-#ifndef _GL_GLOBALS_H_
-#define _GL_GLOBALS_H_
 #include <queue>
 const static bool GFX_BUFFER_MAP_UNMAP = false;
 /* Hack for multitexture on Mac, here and in gl_init, ifdefined - griff */
@@ -237,7 +237,6 @@ extern int gl_batches_this_frame;
 //Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048
 #define GFX_SCALE 1./1024.
-#endif
 
 // Not all platforms define GL_TEXTURE_CUBE_MAP_EXT and friends
 // Some platforms define _ARB variants,
@@ -260,19 +259,20 @@ extern int gl_batches_this_frame;
 #           define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB
 #           define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB
 #           define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB
-#       endif
-#   endif
-#endif
+#       endif //GL_TEXTURE_CUBE_MAP_ARB
+#   endif //GL_TEXTURE_CUBE_MAP
+#endif //GL_TEXTURE_CUBE_MAP_EXT
 
 #ifndef GL_TEXTURE_RECTANGLE_ARB
 #   define GL_TEXTURE_RECTANGLE_ARB          0x84F5
 #   define GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB 0x84F8
-#endif
+#endif //GL_TEXTURE_RECTANGLE_ARB
 
 
 // Not all platforms define GL_FRAMEBUFFER_SRGB stuff
 #ifndef GL_FRAMEBUFFER_SRGB_EXT
 #   define GL_FRAMEBUFFER_SRGB_EXT 0x8DB9
 #   define GL_FRAMEBUFFER_SRGB_CAPABLE_EXT 0x8DBA
-#endif
+#endif //GL_FRAMEBUFFER_SRGB_EXT
 
+#endif //VEGA_STRIKE_ENGINE_GLDRV_GL_GLOBALS_H

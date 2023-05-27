@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
+// NO HEADER GUARD
 
 #include "vs_logging.h"
 using std::string;

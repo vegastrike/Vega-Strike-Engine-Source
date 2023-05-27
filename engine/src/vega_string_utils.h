@@ -21,9 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef VEGA_STRIKE_SRC_VEGA_STRING_UTILS_H_
-#define VEGA_STRIKE_SRC_VEGA_STRING_UTILS_H_
+#ifndef VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H
+#define VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H
 
 #include "vs_logging.h"
 #include "vs_exit.h"
@@ -33,7 +32,7 @@ inline char *vega_str_dup(const char *string) {
     return strdup(string);
 #elif defined (_WINDOWS)
     return _strdup(string);
-#else
+#else //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
     size_t buf_size = strlen(string) + 1;
     char *alloc;
     alloc = (char *)malloc(buf_size);
@@ -45,7 +44,7 @@ inline char *vega_str_dup(const char *string) {
     strncpy(alloc, string, buf_size);
     alloc[buf_size - 1] = '\0';
     return alloc;
-#endif
+#endif //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
 }
 
-#endif //VEGA_STRIKE_SRC_VEGA_STRING_UTILS_H_
+#endif //VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H

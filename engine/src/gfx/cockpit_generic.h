@@ -22,10 +22,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H
+#define VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H
 
-
-#ifndef _COCKPIT_GENERIC_H_
-#define _COCKPIT_GENERIC_H_
 #include "xml_support.h"
 #include "cmd/container.h"
 #include <vector>
@@ -471,5 +470,5 @@ protected:
     /// Override to use a specific kind of sound implementation
     virtual SoundContainer *soundImpl(const SoundContainer &specs);
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H

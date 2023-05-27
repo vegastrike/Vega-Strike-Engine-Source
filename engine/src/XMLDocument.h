@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __XMLDOCUMENT_H__INCLUDED__
-#define __XMLDOCUMENT_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_XMLDOCUMENT_H
+#define VEGA_STRIKE_ENGINE_XMLDOCUMENT_H
 
 #include <string>
 #include <map>
@@ -546,5 +545,5 @@ public:
 };
 }
 
-#endif //__XMLDOCUMENT_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_XMLDOCUMENT_H
 

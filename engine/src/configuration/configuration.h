@@ -23,8 +23,8 @@
  */
 
 
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
+#define VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
 
 #include <cstdint>
 #include <memory>
@@ -463,4 +463,4 @@ public:
 
 extern std::shared_ptr<Configuration> configuration();
 
-#endif // CONFIGURATION_H
+#endif //VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H

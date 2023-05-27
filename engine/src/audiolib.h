@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_LIB_H
+#define VEGA_STRIKE_ENGINE_AUDIO_LIB_H
 
-#ifndef _AUDIO_LIB_H_
-#define _AUDIO_LIB_H_
 #include "gfx/vec.h"
 #include <string>
 bool AUDInit();
@@ -80,5 +80,5 @@ float AUDGetCurrentPosition(const int sound);
 ///Gets current doppler val
 float AUDGetDoppler();
 //#define PERFRAMESOUND
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_AUDIO_LIB_H

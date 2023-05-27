@@ -19,25 +19,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-//#define HAVE_PYTHON
-
 #ifdef HAVE_PYTHON
-#ifndef PY_INIT_H_
-#define PY_INIT_H_
+
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_INIT_H
+#define VEGA_STRIKE_ENGINE_PYTHON_INIT_H
+
 #include "gfx/vec.h"
 #include <boost/version.hpp>
+
 #if BOOST_VERSION != 102800
+
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
-#endif
+#endif //defined (_MSC_VER) && _MSC_VER <= 1200
+
 #include <boost/python.hpp>
+
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
-#endif
-#else
+#endif // defined (_MSC_VER) && _MSC_VER <= 1200
+
+#else //defined (_MSC_VER) && _MSC_VER <= 1200
 #include <boost/python/detail/extension_class.hpp>
-#endif
+#endif // defined (_MSC_VER) && _MSC_VER <= 1200
+
 class Python {
 public:
     static void init();
@@ -62,6 +67,7 @@ struct my_builtin_to_python {
 };
 
 #ifndef BOOST_PYTHON_TO_PYTHON_BY_VALUE
+
 # define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T, expr) \
     template < class MYTYPE >                              \
     struct to_python_value;                                \
@@ -102,7 +108,9 @@ struct my_builtin_to_python {
 # define BOOST_PYTHON_TO_PYTHON_BY_VALUE(T, expr)   \
     BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE( T, expr ) \
     BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE( T, expr )
-#endif
+
+#endif //BOOST_PYTHON_TO_PYTHON_BY_VALUE
+
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(Vector,
         boost::python::to_python_value<boost::python::tuple>()(boost::python::make_tuple((double)
                         x.i,
@@ -117,7 +125,7 @@ BOOST_PYTHON_TO_PYTHON_BY_VALUE(QVector,
                         x.j,
                 (double)
                         x.k)));
-#else
+#else //BOOST_VERSION != 102800
 inline PyObject * to_python( Vector vec )
 {
     return to_python( boost::python::tuple( (double) vec.i, (double) vec.j, (double) vec.k ) );
@@ -139,7 +147,8 @@ inline QVector from_python( PyObject *p, boost::python::type< QVector >)
     PyArg_ParseTuple( p, "ddd", &vec.i, &vec.j, &vec.k );
     return vec;
 }
-#endif
+#endif //BOOST_VERSION != 102800
+
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 void InitBriefing();
@@ -151,7 +160,6 @@ void InitVS2();
 void InitBase();
 void InitBase2();
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_PYTHON_INIT_H
 
-#endif
-
+#endif //HAVE_PYTHON

@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEAXES_H__
-#define __ICEAXES_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AXES_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AXES_H
 
 enum PointComponent {
     _X = 0,
@@ -56,4 +56,4 @@ public:
     uint32_t mAxis2;
 };
 
-#endif // __ICEAXES_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AXES_H

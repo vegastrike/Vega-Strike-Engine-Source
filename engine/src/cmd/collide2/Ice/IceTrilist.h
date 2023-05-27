@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICETRILIST_H__
-#define __ICETRILIST_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRILIST_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRILIST_H
 
 class ICEMATHS_API TriList : public Container {
 public:
@@ -75,4 +75,4 @@ public:
     }
 };
 
-#endif //__ICETRILIST_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRILIST_H

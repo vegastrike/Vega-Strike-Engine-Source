@@ -23,13 +23,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
+#ifndef VEGA_STRIKE_ENGINE_GFX_VID_FILE_H
+#define VEGA_STRIKE_ENGINE_GFX_VID_FILE_H
 //
 //C++ Interface: vid_file
 //
-#ifndef __VID_FILE_H__INCLUDED__
-#define __VID_FILE_H__INCLUDED__
 
 #include <string>
 #include <vsfilesystem.h>
@@ -136,5 +134,4 @@ private:
     VidFileImpl *impl;
 };
 
-#endif //__VID_FILE_H__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_GFX_VID_FILE_H

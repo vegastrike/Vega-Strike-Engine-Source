@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef STORE_H
-#define STORE_H
+#ifndef VEGA_STRIKE_ENGINE_RESOURCE_STORE_H
+#define VEGA_STRIKE_ENGINE_RESOURCE_STORE_H
 
 #include <vector>
 
@@ -62,6 +61,4 @@ public:
     void Stock(std::vector<Product> stock);
 };
 
-
-
-#endif // STORE_H
+#endif //VEGA_STRIKE_ENGINE_RESOURCE_STORE_H

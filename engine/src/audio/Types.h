@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_TYPES_H
+#define VEGA_STRIKE_ENGINE_AUDIO_TYPES_H
 
 //
 // C++ Interface: Audio::Codec
 //
-#ifndef __AUDIO_TYPES_H__INCLUDED__
-#define __AUDIO_TYPES_H__INCLUDED__
 
 #include <boost/smart_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -122,4 +121,4 @@ public:
 
 };
 
-#endif//__AUDIO_TYPES_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_TYPES_H

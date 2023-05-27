@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef PLANETARY_ORBIT_H
-#define PLANETARY_ORBIT_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
+#define VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
 
 #include "gfx/vec.h"
 #include "star_system.h"
@@ -63,4 +61,4 @@ public:
     void Execute();
 };
 
-#endif // PLANETARY_ORBIT_H
+#endif //VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H

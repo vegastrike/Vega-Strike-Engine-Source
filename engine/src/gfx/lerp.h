@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _GFX_LERP_H_
-#define _GFX_LERP_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_LERP_H
+#define VEGA_STRIKE_ENGINE_GFX_LERP_H
 
 #include <assert.h>
 #include "vec.h"
@@ -40,5 +38,4 @@ inline Transformation linear_interpolate(const Transformation &a, const Transfor
     return linear_interpolate_uncapped(a, b, ((blend > 1.0) ? 1.0 : blend));
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_LERP_H

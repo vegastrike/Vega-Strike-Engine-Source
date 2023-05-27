@@ -1,6 +1,3 @@
-#ifndef UNITJSONFACTORY_H
-#define UNITJSONFACTORY_H
-
 /*
  * unit_json_factory.cpp
  *
@@ -24,6 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_JSON_FACTORY_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_JSON_FACTORY_H
 
 #include <string>
 
@@ -35,4 +34,4 @@ class UnitJSONFactory {
 public:
     static void ParseJSON(VSFileSystem::VSFile &file);
 };
-#endif // UNITJSONFACTORY_H
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_JSON_FACTORY_H

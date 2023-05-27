@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_INHANDLER_H
+#define VEGA_STRIKE_ENGINE_INHANDLER_H
 
-#ifndef INHANDLER_H
-#define INHANDLER_H
 #include "in_kb.h"
 //#include "cmd_unit.h"
 class Unit;
@@ -75,5 +75,5 @@ public:
 };
 
 //const InputListener End;
-#endif
+#endif //VEGA_STRIKE_ENGINE_INHANDLER_H
 

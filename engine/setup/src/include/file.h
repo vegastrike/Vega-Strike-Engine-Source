@@ -16,8 +16,8 @@
  **************************************************************************/
 
 // Check to see if we're already loaded
-#ifndef FILE_H
-#define FILE_H
+#ifndef VEGA_STRIKE_ENGINE_SETUP_FILE_H
+#define VEGA_STRIKE_ENGINE_SETUP_FILE_H
 
 #include "central.h"
 
@@ -27,4 +27,4 @@ void Modconfig(int setting, const char *name, const char *group);
 void EnableSetting(const char *name, const char *group);
 void DisableSetting(const char *name, const char *group);
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_SETUP_FILE_H

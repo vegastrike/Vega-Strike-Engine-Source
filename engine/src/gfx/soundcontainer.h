@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _SOUNDCONTAINER_H_
-#define _SOUNDCONTAINER_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_H
+#define VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_H
 
 #include <string>
 
@@ -110,5 +108,4 @@ protected:
 
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_H

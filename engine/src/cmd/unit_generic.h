@@ -1,7 +1,7 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
-#ifndef __UNIT_GENERIC_H__
-#define __UNIT_GENERIC_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+// Q: Why 2 header guards???
 
 /*
  * unit_generic.cpp
@@ -29,8 +29,8 @@
 
 /***** Unit is the Unit class without GFX/Sound with AI *****/
 
-#ifndef _UNIT_H_
-#define _UNIT_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
 #include "armed.h"
 #include "audible.h"
@@ -1081,7 +1081,7 @@ inline void UnitCollection::UnitIterator::GetNextValidUnit()
 
 extern std::set<std::string> GetListOfDowngrades();
 extern void ClearDowngradeMap();
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
 /*
  **************************************************************************************
@@ -1091,5 +1091,5 @@ extern void ClearDowngradeMap();
 
 
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
 

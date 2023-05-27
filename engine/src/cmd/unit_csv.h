@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __UNIT_CSV_H__
-#define __UNIT_CSV_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H
 
 extern void AddMeshes(std::vector<Mesh *> &xmeshes,
         float &randomstartframe,
@@ -37,5 +35,4 @@ extern void AddMeshes(std::vector<Mesh *> &xmeshes,
         Flightgroup *fg,
         vector<unsigned int> *counts = NULL);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_H

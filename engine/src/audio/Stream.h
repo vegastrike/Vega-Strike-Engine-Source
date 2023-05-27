@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_STREAM_H
+#define VEGA_STRIKE_ENGINE_AUDIO_STREAM_H
 
 //
 // C++ Interface: Audio::Codec
 //
-#ifndef __AUDIO_STREAM_H__INCLUDED__
-#define __AUDIO_STREAM_H__INCLUDED__
 
 #include <string>
 #include "Exceptions.h"
@@ -163,4 +162,4 @@ protected:
 
 };
 
-#endif//__AUDIO_STREAM_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_STREAM_H

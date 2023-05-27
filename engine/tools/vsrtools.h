@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VSR_TOOLS_H_
-#define VSR_TOOLS_H_
+#ifndef VEGA_STRIKE_ENGINE_TOOLS_VSR_H
+#define VEGA_STRIKE_ENGINE_TOOLS_VSR_H
 #include <stdint.h>
 /** The standard header found in all Vega Strike resource package files. */
 struct VSRHeader {
@@ -35,4 +35,4 @@ struct VSRPEntry {
     uint32_t offset;    ///The offset this file starts in the package.
     char filename[256];    ///The complete path to the file, terminating with '\0'.
 };
-#endif //VSR_TOOLS_H_
+#endif //VEGA_STRIKE_ENGINE_TOOLS_VSR_H

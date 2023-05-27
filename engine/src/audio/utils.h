@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __AUDIO_UTILS_H__INCLUDED__
-#define __AUDIO_UTILS_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_UTILS_H
+#define VEGA_STRIKE_ENGINE_AUDIO_UTILS_H
 
 #include "Types.h"
 #include "Exceptions.h"
@@ -94,5 +92,4 @@ T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap, T def
 
 }
 
-#endif//__AUDIO_UTILS_H__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_AUDIO_UTILS_H

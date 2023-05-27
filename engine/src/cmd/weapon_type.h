@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef WEAPONTYPE_H
-#define WEAPONTYPE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H
+#define VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H
 
 #include <string>
 
@@ -37,4 +35,4 @@ enum class WEAPON_TYPE {
 WEAPON_TYPE getWeaponTypeFromString(std::string type);
 std::string getFilenameFromWeaponType(WEAPON_TYPE type);
 
-#endif // WEAPONTYPE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H

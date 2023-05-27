@@ -21,14 +21,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef VEGA_STRIKE_SRC_VEGA_PY_RUN_H_
-#define VEGA_STRIKE_SRC_VEGA_PY_RUN_H_
+#ifndef VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H
+#define VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H
 
 #include <string>
 
 void VegaPyRunString(char * py_snippet);
 void VegaPyRunString(const std::string& py_snippet);
 
-#endif //VEGA_STRIKE_SRC_VEGA_PY_RUN_H_
+#endif //VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H

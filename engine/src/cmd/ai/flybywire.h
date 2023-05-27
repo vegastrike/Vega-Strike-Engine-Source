@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_FLY_BY_WIRE_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_FLY_BY_WIRE_H
 
-
-#ifndef _CMD_FLYBYWIRE_H_
-#define _CMD_FLYBYWIRE_H_
 #include "order.h"
 #include "vs_globals.h"
 namespace Orders {
@@ -232,5 +231,5 @@ private:
     FlyByWire(const FlyByWire &);
     FlyByWire &operator=(const FlyByWire &);
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_FLY_BY_WIRE_H

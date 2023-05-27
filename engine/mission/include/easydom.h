@@ -24,8 +24,8 @@
   easyDom - easy DOM for expat - written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
 
-#ifndef _EASYDOM_H_
-#define _EASYDOM_H_
+#ifndef VEGA_STRIKE_ENGINE_MISSION_EASYDOM_H
+#define VEGA_STRIKE_ENGINE_MISSION_EASYDOM_H
 
 #include <expat.h>
 #include <string>
@@ -260,4 +260,4 @@ public:
     domNodeType *topnode;
 };
 
-#endif // _EASYDOM_H_
+#endif //VEGA_STRIKE_ENGINE_MISSION_EASYDOM_H

@@ -1,6 +1,3 @@
-#ifndef UNITOPTIMIZEFACTORY_H
-#define UNITOPTIMIZEFACTORY_H
-
 /*
  * unit_optimize_factory.cpp
  *
@@ -24,6 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_OPTIMIZE_FACTORY_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_OPTIMIZE_FACTORY_H
 
 #include <map>
 #include <string>
@@ -38,4 +37,4 @@ public:
                        const std::string& json_text, bool is_root);
 };
 
-#endif // UNITOPTIMIZEFACTORY_H
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_OPTIMIZE_FACTORY_H

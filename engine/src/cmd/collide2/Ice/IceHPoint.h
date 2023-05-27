@@ -11,8 +11,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEHPOINT_H__
-#define __ICEHPOINT_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_HPOINT_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_HPOINT_H
 
 class ICEMATHS_API HPoint : public Point {
 public:
@@ -305,5 +305,4 @@ public:
     float w;
 };
 
-#endif // __ICEHPOINT_H__
-
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_HPOINT_H

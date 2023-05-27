@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H
 
-
-#ifndef _IKARUS_H_
-#define _IKARUS_H_
 namespace Orders {
 class Ikarus : public AggressiveAI {
     void ExecuteStrategy(Unit *target);
@@ -44,5 +43,4 @@ public:
 };
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H

@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_STREAMING_SOUND_H
+#define VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_STREAMING_SOUND_H
 
 //
 // C++ Interface: Audio::OpenALSimpleSound
 //
-#ifndef __AUDIO_OPENALSTREAMINGSOUND_H__INCLUDED__
-#define __AUDIO_OPENALSTREAMINGSOUND_H__INCLUDED__
 
 #include "../../Exceptions.h"
 #include "../../Types.h"
@@ -139,4 +138,4 @@ public:
 
 };
 
-#endif//__AUDIO_OPENALSTREAMINGSOUND_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_STREAMING_SOUND_H

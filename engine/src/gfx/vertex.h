@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef GFXVERTEX_H
-#define GFXVERTEX_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_VERTEX_H
+#define VEGA_STRIKE_ENGINE_GFX_VERTEX_H
 
 struct glVertex {
     float s;
@@ -59,5 +57,4 @@ struct glVertex {
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_VERTEX_H

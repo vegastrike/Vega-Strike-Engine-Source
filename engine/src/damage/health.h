@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef HEALTH_H
-#define HEALTH_H
+#ifndef VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H
+#define VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H
 
 #include "damage.h"
 
@@ -115,4 +113,4 @@ public:
     void Update(float health);
 };
 
-#endif // HEALTH_H
+#endif //VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H

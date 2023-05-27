@@ -19,14 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_IN_KB_H
+#define VEGA_STRIKE_ENGINE_IN_KB_H
 
-#ifndef INKB_H
-#define INKB_H
 //#ifdef HAVE_SDL
 //#include <SDL/SDL_keysym.h>
 //const int KEYMAP_SIZE =SDLK_LAST;
 //const int KEY_SPECIAL_OFFSET=0;
-//#else
+//#else //HAVE_SDL
 
 enum KB_MODIFIER_ENUM {
     KB_MOD_ALT = 1,
@@ -39,11 +39,13 @@ enum KB_MODIFIER_ENUM {
 #include "gldrv/winsys.h"
 const int KEYMAP_SIZE = WSK_LAST;
 const int LAST_MODIFIER = KB_MOD_MASK + 1;
-#else
+#else //NO_GFX
 const int KEYMAP_SIZE   = 0;
 const int LAST_MODIFIER = 0;
-#endif
-//#endif
+#endif //NO_GFX
+
+//#endif //HAVE_SDL
+
 #include "in.h"
 
 unsigned int getActiveModifiers();
@@ -56,5 +58,5 @@ void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler han
 void UnbindKey(int key, unsigned int modifiers);
 void InitKB();
 void RestoreKB();
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_IN_KB_H

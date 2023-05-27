@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __COLOR_H__
-#define __COLOR_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_COLOR_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_COLOR_H
 
 /* Note: This "color.h" file is NOT meant as a general color library, by any stretch. Only those color
  * manipulation functions that are used in vs_cubemap_gen are implemented. We try to be minimalistic
@@ -93,6 +92,4 @@ struct dRGBAcol {
     }
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_COLOR_H

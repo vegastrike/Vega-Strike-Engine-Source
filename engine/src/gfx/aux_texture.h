@@ -21,10 +21,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_TEXTURE_H
+#define VEGA_STRIKE_ENGINE_GFX_TEXTURE_H
 
-
-#ifndef _TEXTURE_H_
-#define _TEXTURE_H_
 #include "vsimage.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
@@ -282,5 +281,4 @@ public:
     virtual void Prioritize(float);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_TEXTURE_H

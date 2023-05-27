@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _GFX_SPHERE_H_
-#define _GFX_SPHERE_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_SPHERE_H
+#define VEGA_STRIKE_ENGINE_GFX_SPHERE_H
 
 #include "mesh.h"
 #include "quaternion.h"
@@ -150,5 +148,5 @@ public:
             bool inside_out = true);
     virtual void ProcessDrawQueue(int whichpass, int which, bool zsort, const QVector &sortctr);
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_SPHERE_H

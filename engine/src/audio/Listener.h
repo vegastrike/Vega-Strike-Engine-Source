@@ -23,13 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_AUDIO_LISTENER_H
+#define VEGA_STRIKE_ENGINE_AUDIO_LISTENER_H
 
 //
 // C++ Interface: Audio::Scene
 //
-#ifndef __AUDIO_LISTENER_H__INCLUDED__
-#define __AUDIO_LISTENER_H__INCLUDED__
 
 #include "Exceptions.h"
 #include "Types.h"
@@ -227,4 +226,4 @@ public:
 
 };
 
-#endif//__AUDIO_LISTENER_H__INCLUDED__
+#endif //VEGA_STRIKE_ENGINE_AUDIO_LISTENER_H

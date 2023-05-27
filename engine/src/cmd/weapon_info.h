@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef WEAPON_INFO_H
-#define WEAPON_INFO_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_WEAPON_INFO_H
+#define VEGA_STRIKE_ENGINE_CMD_WEAPON_INFO_H
 
 #include "weapon_type.h"
 #include "gfx/vec.h"
@@ -116,4 +114,4 @@ private:
 
 WeaponInfo *getWeapon(const std::string &key);
 
-#endif // WEAPON_INFO_H
+#endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_INFO_H

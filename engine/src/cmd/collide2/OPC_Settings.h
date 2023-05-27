@@ -19,8 +19,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_SETTINGS_H__
-#define __OPC_SETTINGS_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SETTINGS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SETTINGS_H
 
 //! Use CPU comparisons (comment that line to use standard FPU compares)
 #if defined(CS_PROCESSOR_X86)
@@ -53,4 +53,4 @@
 
 // NB: no compilation flag to enable/disable stats since they're actually needed in the box/box overlap test
 
-#endif //__OPC_SETTINGS_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SETTINGS_H

@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef _WrapGFX_H
-#define _WrapGFX_H
+#ifndef VEGA_STRIKE_ENGINE_UNIVERSE_H
+#define VEGA_STRIKE_ENGINE_UNIVERSE_H
 
 #include "gfx/camera.h"
 #include "star_system.h"
@@ -137,5 +137,5 @@ public:
     UnitCollection &getActiveStarSystemUnitList();
     unsigned int numPlayers();
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_UNIVERSE_H

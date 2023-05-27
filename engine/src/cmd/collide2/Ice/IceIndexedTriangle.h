@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEINDEXEDTRIANGLE_H__
-#define __ICEINDEXEDTRIANGLE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_INDEXED_TRIANGLE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_INDEXED_TRIANGLE_H
 
 // An indexed triangle class.
 class IndexedTriangle {
@@ -81,4 +81,4 @@ public:
     bool Equal(const IndexedTriangle &tri) const;
 };
 
-#endif // __ICEINDEXEDTRIANGLE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_INDEXED_TRIANGLE_H

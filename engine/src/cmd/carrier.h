@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef CARRIER_H
-#define CARRIER_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_CARRIER_H
+#define VEGA_STRIKE_ENGINE_CMD_CARRIER_H
 
 #include "cargo.h"
 
@@ -67,4 +65,4 @@ public:
     float getHiddenCargoVolume(void) const;
 };
 
-#endif // CARRIER_H
+#endif //VEGA_STRIKE_ENGINE_CMD_CARRIER_H

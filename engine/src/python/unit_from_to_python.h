@@ -20,9 +20,11 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _UNIT_FROM_TO_PYTHON_H_
-#define _UNIT_FROM_TO_PYTHON_H_
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H
+#define VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H
+
 #include <boost/version.hpp>
+
 #if BOOST_VERSION != 102800
 //#include <boost/python/converter/arg_from_python.hpp>
 
@@ -84,7 +86,7 @@ struct default_result_converter::apply<Unit *> {
  */
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
-#else
+#else //BOOST_VERSION != 102800
 TO_PYTHON_SMART_POINTER( UnitWrapper );
 TO_PYTHON_SMART_POINTER( Cargo );
 
@@ -100,6 +102,6 @@ inline Unit * from_python( PyObject *p, boost::python::type< Unit* >)
     return uw.GetUnit();
 }
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
-#endif
-#endif
+#endif //BOOST_VERSION != 102800
 
+#endif //VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H

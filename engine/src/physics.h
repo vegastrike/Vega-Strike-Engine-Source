@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef PHYSICS_H
-#define PHYSICS_H
+#ifndef VEGA_STRIKE_ENGINE_PHYSICS_H
+#define VEGA_STRIKE_ENGINE_PHYSICS_H
 
 #include "vs_math.h"
 #include "gfx/vec.h"
@@ -84,5 +83,5 @@ public:
     virtual void Update();
 };
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_PHYSICS_H
 

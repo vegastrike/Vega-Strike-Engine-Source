@@ -19,8 +19,8 @@
 */
 
 
-#ifndef __CS_VECTOR3_H__
-#define __CS_VECTOR3_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
 #include "cmd/collide2/Stdafx.h"
 #include "cmd/collide2/opcodesysdef.h"
 
@@ -270,4 +270,4 @@ public:
     }
 };
 
-#endif // __CS_VECTOR3_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H

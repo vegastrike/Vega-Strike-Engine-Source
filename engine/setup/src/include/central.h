@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-// Check to see if we're already loaded
-#ifndef CENTRAL_H
-#define CENTRAL_H
+#ifndef VEGA_STRIKE_ENGINE_SETUP_CENTRAL_H
+#define VEGA_STRIKE_ENGINE_SETUP_CENTRAL_H
 
 // Which interface to use. Only have one of these uncommented
 // If you're using 'build' to compile, you will need to move any files not being linked to dont_link
@@ -86,4 +84,4 @@ extern struct catagory CATS;
 extern struct group GROUPS;
 extern struct global_settings CONFIG;
 
-#endif    //CENTRAL_H
+#endif    //VEGA_STRIKE_ENGINE_SETUP_CENTRAL_H

@@ -1,5 +1,4 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /**
  * track.h
  *
@@ -25,10 +24,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef VEGASTRIKE_GFX_RADAR_TRACK_H
-#define VEGASTRIKE_GFX_RADAR_TRACK_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_TRACK_H
+#define VEGA_STRIKE_ENGINE_GFX_RADAR_TRACK_H
 
 #include "gfx/vec.h"
 
@@ -116,4 +113,4 @@ protected:
 
 } // namespace Radar
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_TRACK_H

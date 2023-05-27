@@ -16,8 +16,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICESEGMENT_H__
-#define __ICESEGMENT_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_SEGMENT_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_SEGMENT_H
 
 class ICEMATHS_API Segment {
 public:
@@ -80,4 +80,4 @@ public:
     Point mP1;        //!< End of segment
 };
 
-#endif // __ICESEGMENT_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_SEGMENT_H

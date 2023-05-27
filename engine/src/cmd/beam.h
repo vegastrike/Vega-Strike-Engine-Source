@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_BEAM_H
+#define VEGA_STRIKE_ENGINE_CMD_BEAM_H
 
-
-#ifndef _CMD_BEAM_H_
-#define _CMD_BEAM_H_
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "gfx/matrix.h"
@@ -115,5 +114,4 @@ public:
             Unit *superunit);
 
 };
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_BEAM_H

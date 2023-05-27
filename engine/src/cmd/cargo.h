@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef CARGO_H
-#define CARGO_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_CARGO_H
+#define VEGA_STRIKE_ENGINE_CMD_CARGO_H
 
 #include "SharedPool.h"
 #include "gfxlib_struct.h"
@@ -96,4 +94,4 @@ public:
     }
 };
 
-#endif // CARGO_H
+#endif //VEGA_STRIKE_ENGINE_CMD_CARGO_H

@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _UNITCONTAINER_H_
-#define _UNITCONTAINER_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNITCONTAINER_H
+#define VEGA_STRIKE_ENGINE_CMD_UNITCONTAINER_H
 
 #include "debug_vs.h"
 
@@ -75,5 +73,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNITCONTAINER_H

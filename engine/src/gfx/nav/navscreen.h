@@ -22,10 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _NAVSCREEN_H_
-#define _NAVSCREEN_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H
 
 #include "gui/glut_support.h"
 #include "navscreenoccupied.h"
@@ -377,5 +375,4 @@ public:
 //float Delta(float a, float b);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H

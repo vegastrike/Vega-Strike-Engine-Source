@@ -25,10 +25,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_VEC_H
+#define VEGA_STRIKE_ENGINE_GFX_VEC_H
 
-
-#ifndef _3DMANIP_H_
-#define _3DMANIP_H_
 #include "macosx_math.h"
 #include <math.h>
 
@@ -36,5 +35,4 @@
 
 #include "tvector.h"
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_VEC_H

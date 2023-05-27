@@ -24,8 +24,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_TREECOLLIDER_H__
-#define __OPC_TREECOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_TREECOLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_TREECOLLIDER_H
 
 //! This structure holds cached information used by the algorithm.
 //! Two model pointers and two colliding primitives are cached. Model pointers are assigned
@@ -284,4 +284,4 @@ protected:
     }
 };
 
-#endif // __OPC_TREECOLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_TREECOLLIDER_H
