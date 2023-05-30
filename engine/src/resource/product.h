@@ -1,8 +1,6 @@
 /*
- * product.h
- *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Roy Falk, and other Vega Strike contributors.
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,8 +20,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_RESOURCE_PRODUCT_H
-#define VEGA_STRIKE_RESOURCE_PRODUCT_H
+#ifndef PRODUCT_H
+#define PRODUCT_H
 
 #include <string>
 
@@ -68,4 +66,4 @@ bool operator==(const std::string &lhs, const Product &rhs);
 bool operator!=(const Product &lhs, const std::string &rhs);
 bool operator!=(const std::string &lhs, const Product &rhs);
 
-#endif // VEGA_STRIKE_RESOURCE_PRODUCT_H
+#endif // PRODUCT_H

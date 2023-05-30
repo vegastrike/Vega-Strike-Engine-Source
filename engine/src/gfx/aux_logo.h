@@ -41,7 +41,7 @@ class Logo {
     int numlogos;
 //glVertex **LogoCorner;
     GFXVertexList *vlist;
-    vega_types::SharedPtr<Texture> Decal;
+    Texture *Decal;
     static Hashtable<int, Logo, 257> decalHash;
 
     Logo() {
@@ -59,13 +59,13 @@ protected:
 
 public:
     Logo(int numberlogos,
-         Vector *center,
-         Vector *normal,
-         float *sizes,
-         float *rotations,
-         float offset,
-         vega_types::SharedPtr<Texture> Dec,
-         Vector *Ref);
+            Vector *center,
+            Vector *normal,
+            float *sizes,
+            float *rotations,
+            float offset,
+            Texture *Dec,
+            Vector *Ref);
 
     Logo(const Logo &rval) {
         *this = rval;
@@ -73,7 +73,7 @@ public:
 
     ~Logo();
 
-    void SetDecal(vega_types::SharedPtr<Texture> decal);
+    void SetDecal(Texture *decal);
 
     void Draw(const Matrix &m);
 };

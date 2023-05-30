@@ -1,7 +1,5 @@
 /*
- * star_system_jump.cpp
- *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -38,16 +36,15 @@
 #include "cmd/images.h"
 #include "cmd/script/flightgroup.h"
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "options.h"
-#include "preferred_types.h"
 
 void CacheJumpStar(bool destroy) {
-    static vega_types::SharedPtr<Animation> cachedani = Animation::createAnimation(game_options()->jumpgate.c_str(), true, .1, MIPMAP, false);
+    static Animation *cachedani = new Animation(game_options()->jumpgate.c_str(), true, .1, MIPMAP, false);
     if (destroy) {
-        cachedani.reset();
+        delete cachedani;
+        cachedani = nullptr;
     }
 }
 
@@ -55,22 +52,22 @@ extern std::vector<unorigdest *> pendingjump;
 static std::vector<unsigned int> AnimationNulls;
 class ResizeAni {
 public:
-    vega_types::SharedPtr<Animation> a;
+    Animation *a;
     float percent;
 
-    ResizeAni(vega_types::SharedPtr<Animation> ani, float percent) {
-        a = std::move(ani);
+    ResizeAni(Animation *ani, float percent) {
+        a = ani;
         this->percent = percent;
     }
 };
 static std::vector<ResizeAni> JumpAnimations;
 static std::vector<ResizeAni> VolatileJumpAnimations;
 
-vega_types::SharedPtr<Animation> GetVolatileAni(unsigned int which) {
+Animation *GetVolatileAni(unsigned int which) {
     if (which < VolatileJumpAnimations.size()) {
         return VolatileJumpAnimations[which].a;
     }
-    return nullptr;
+    return NULL;
 }
 
 unsigned int AddAnimation(const QVector &pos,
@@ -80,7 +77,7 @@ unsigned int AddAnimation(const QVector &pos,
         float percentgrow) {
     std::vector<ResizeAni> *ja = mvolatile ? &VolatileJumpAnimations : &JumpAnimations;
 
-    vega_types::SharedPtr<Animation> ani = Animation::createAnimation(name.c_str(), true, .1, MIPMAP, false);
+    Animation *ani = new Animation(name.c_str(), true, .1, MIPMAP, false);
     unsigned int i;
     if (mvolatile || AnimationNulls.empty()) {
         i = ja->size();
@@ -102,44 +99,45 @@ static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool 
 
 void StarSystem::VolitalizeJumpAnimation(const int ani) {
     if (ani != -1) {
-        VolatileJumpAnimations.emplace_back(JumpAnimations[ani].a, game_options()->jumpanimationshrink);
-        JumpAnimations[ani].a.reset();
+        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, game_options()->jumpanimationshrink));
+        JumpAnimations[ani].a = NULL;
         AnimationNulls.push_back(ani);
     }
 }
 
 void StarSystem::DrawJumpStars() {
-    for (auto & kk : pendingjump) {
-        int k = kk->animation;
+    for (unsigned int kk = 0; kk < pendingjump.size(); ++kk) {
+        int k = pendingjump[kk]->animation;
         if (k != -1) {
-            Unit *un = kk->un.GetUnit();
+            Unit *un = pendingjump[kk]->un.GetUnit();
             if (un) {
                 Vector p, q, r;
                 un->GetOrientation(p, q, r);
 
                 JumpAnimations[k].a
                         ->SetPosition(
-                                un->Position() + r.Cast() * un->rSize() * (kk->delay + .25));
+                                un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
                 float dd = un->rSize() * game_options()->jumpgatesize
-                        * (un->GetJumpStatus().delay - kk->delay) / (float) un->GetJumpStatus().delay;
+                        * (un->GetJumpStatus().delay - pendingjump[kk]->delay) / (float) un->GetJumpStatus().delay;
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
         }
     }
-    for (auto & JumpAnimation : JumpAnimations) {
-        if (JumpAnimation.a) {
-            JumpAnimation.a->Draw();
+    for (size_t i = 0; i < JumpAnimations.size(); ++i) {
+        if (JumpAnimations[i].a) {
+            JumpAnimations[i].a->Draw();
         }
     }
     for (size_t i = 0; i < VolatileJumpAnimations.size(); ++i) {
         if (VolatileJumpAnimations[i].a) {
-            float wid, hei;
-            VolatileJumpAnimations[i].a->GetDimensions(wid, hei);
-            VolatileJumpAnimations[i].a->SetDimensions(VolatileJumpAnimations[i].percent * wid,
-                    VolatileJumpAnimations[i].percent * hei);
+            float hei, wid;
+            VolatileJumpAnimations[i].a->GetDimensions(hei, wid);
+            VolatileJumpAnimations[i].a->SetDimensions(VolatileJumpAnimations[i].percent * hei,
+                    VolatileJumpAnimations[i].percent * wid);
             if (VolatileJumpAnimations[i].a->Done()) {
-                VolatileJumpAnimations[i].a.reset();
+                delete VolatileJumpAnimations[i].a;
+                VolatileJumpAnimations[i].a = nullptr;
                 VolatileJumpAnimations.erase(VolatileJumpAnimations.begin() + i);
                 --i;
             } else {

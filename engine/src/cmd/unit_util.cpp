@@ -1,8 +1,10 @@
-/*
+/**
  * unit_util.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -28,12 +30,12 @@
 #include "gfx/cockpit.h"
 #include "planet.h"
 #include "gfx/animation.h"
+#include "config_xml.h"
 #include "unit_util.h"
+#include "config_xml.h"
 #include "vs_globals.h"
 #include "pilot.h"
 #include "universe.h"
-#include "preferred_types.h"
-#include "shared_ptr_hashtable.h"
 
 using std::string;
 namespace UnitUtil {
@@ -67,8 +69,8 @@ int communicateTo(Unit *my_unit, Unit *other_unit, float mood) {
     Cockpit *tmp;
     if ((tmp = _Universe->isPlayerStarship(my_unit))) {
         if (other_unit) {
-            vega_types::SharedPtr<Animation> ani = other_unit->pilot->getCommFace(other_unit, mood, sex);
-            if (ani) {
+            Animation *ani = other_unit->pilot->getCommFace(other_unit, mood, sex);
+            if (NULL != ani) {
                 tmp->SetCommAnimation(ani, other_unit);
             }
         }
@@ -82,10 +84,10 @@ bool commAnimation(Unit *my_unit, string anim) {
     }
     Cockpit *tmp;
     if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-        static SharedPtrHashtable<std::string, Animation, 63> AniHashTable;
-        vega_types::SharedPtr<Animation> vid = AniHashTable.Get(anim);
-        if (!vid) {
-            vid = Animation::createAnimation(anim.c_str());
+        static Hashtable<std::string, Animation, 63> AniHashTable;
+        Animation *vid = AniHashTable.Get(anim);
+        if (NULL == vid) {
+            vid = new Animation(anim.c_str());
             AniHashTable.Put(anim, vid);
         }
         tmp->SetCommAnimation(vid, NULL);

@@ -1,8 +1,9 @@
 /*
  * flightgroup.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -46,33 +47,26 @@ Flightgroup *Flightgroup::newFlightgroup(const std::string &name,
     fg->Init(fgtmp, name, type, faction, order, num_ships, num_waves, mis);
     if (!logo_tex.empty()) {
         if (logo_alp.empty()) {
-            fg->squadLogo = Texture::createTexture(logo_tex.c_str(), 0, MIPMAP);
+            fg->squadLogo = new Texture(logo_tex.c_str(), 0, MIPMAP);
         } else {
-            fg->squadLogo = Texture::createTexture(logo_tex.c_str(), logo_alp.c_str(), 0, MIPMAP);
+            fg->squadLogo = new Texture(logo_tex.c_str(), logo_alp.c_str(), 0, MIPMAP);
         }
     }
     return fg;
 }
 
 Flightgroup::~Flightgroup() {
-    // TODO: This isn't really necessary anymore. Remove eventually
-    if (squadLogo) {
-        squadLogo.reset();
+    if (squadLogo != nullptr) {
+        delete squadLogo;
+        squadLogo = nullptr;
     }
 }
 
-Flightgroup &Flightgroup::operator=(Flightgroup const &other) {
+Flightgroup &Flightgroup::operator=(Flightgroup &other) {
     VS_LOG(warning, "warning: may not work properly");
-
-    // Self-assignment
-    if (&other == this) {
-        return *this;
-    }
-
-    // Non-self-assignment
     if (squadLogo) {
         squadLogo = other.squadLogo->Clone();
     }
-    return *this;
+    return other;
 }
 

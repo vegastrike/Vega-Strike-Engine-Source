@@ -1,6 +1,4 @@
 /*
- * universe.cpp
- *
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -484,7 +482,6 @@ void Universe::StartDraw() {
 }
 
 void Universe::StartGFX() {
-    static const vega_types::SharedPtr<GFXColor> default_ambient_light = vega_types::MakeShared<GFXColor>(0, 0, 0, 1);
     GFXBeginScene();
     GFXMaterial mat;
     setMaterialAmbient(mat, 1.0, 1.0, 1.0, 1.0);
@@ -498,7 +495,7 @@ void Universe::StartGFX() {
     int ligh;
     GFXCreateLightContext(ligh);
     GFXSetLightContext(ligh);
-    GFXLightContextAmbient(default_ambient_light);
+    GFXLightContextAmbient(GFXColor(0, 0, 0, 1));
     GFXEndScene();
 }
 

@@ -1,7 +1,5 @@
 /*
- * gl_vertex_list.cpp
- *
- * Copyright (C) 2001-2023 Daniel Horn, Alan Shieh, pyramid3d,
+ * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -370,14 +368,12 @@ const GFXColorVertex *GFXVertexList::GetColorVertex(int index) const {
     return data.colors + index;
 }
 
-vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVertexList::GetPolys(size_t &num_tris,
-                                                                                                  size_t &num_quads,
-                                                                                                  size_t &total_num_polys) {
+void GFXVertexList::GetPolys(GFXVertex **vert, int *numpolys, int *numtris) {
     if (numVertices == 0) {
-        num_tris = 0;
-        num_quads = 0;
-        total_num_polys = 0;
-        return nullptr;
+        *numpolys = 0;
+        *numtris = 0;
+        *vert = 0;
+        return;
     }
     this->Map(true, false);
     void (*vtxcpy)(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
@@ -388,65 +384,54 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
             : ((changed & HAS_INDEX)
                     ? IndVtxCopy
                     : VtxCopy);
+    //int offst = (changed&HAS_COLOR)?sizeof(GFXColorVertex):sizeof(GFXVertex);
+    int i;
     int cur = 0;
-    num_tris = numTris();
-    num_quads = numQuads();
-    total_num_polys = num_tris + num_quads;
+    GFXVertex *res;
+    *numtris = numTris();
+    *numpolys = *numtris + numQuads();
     int curtri = 0;
-    int curquad = 3 * (num_tris);
-    size_t num_elems_desired{};
-    for (size_t i = 0; i < numlists; ++i) {
-        num_elems_desired += offsets[i];
-    }
-    vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> return_value = vega_types::MakeShared<vega_types::ContiguousSequenceContainer<GFXVertex>>(num_elems_desired);
-//    return_value->reserve(num_elems_desired);
-    for (size_t idx = 0; idx < num_elems_desired; ++idx) {
-        GFXVertex gfx_vertex{};
-        return_value->push_back(gfx_vertex);
-    }
-    for (size_t i = 0; i < numlists; ++i) {
+    int curquad = 3 * (*numtris);
+    res = (GFXVertex *) malloc(((*numtris) * 3 + 4 * (*numpolys - (*numtris))) * sizeof(GFXVertex));
+    *vert = res;
+    for (i = 0; i < numlists; i++) {
         int j;
         switch (mode[i]) {
             case GFXTRI:
-//                return_value->reserve(cur + offsets[i]);
-                (*vtxcpy)(this, &(return_value->data()[curtri]), cur, offsets[i]);
+                (*vtxcpy)(this, &res[curtri], cur, offsets[i]);
                 curtri += offsets[i];
                 break;
             case GFXTRIFAN:
             case GFXPOLY:
-//                return_value->reserve(cur + offsets[i]);
                 for (j = 1; j < offsets[i] - 1; j++) {
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), cur, 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j + 1), 1);
+                    (*vtxcpy)(this, &res[curtri++], cur, 1);
+                    (*vtxcpy)(this, &res[curtri++], (cur + j), 1);
+                    (*vtxcpy)(this, &res[curtri++], (cur + j + 1), 1);
                 }
                 break;
             case GFXTRISTRIP:
-//                return_value->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i]; j += 2) {
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
+                    (*vtxcpy)(this, &res[curtri++], (cur + j - 2), 1);
+                    (*vtxcpy)(this, &res[curtri++], (cur + j - 1), 1);
+                    (*vtxcpy)(this, &res[curtri++], (cur + j), 1);
                     if (j + 1 < offsets[i]) {
                         //copy reverse
-                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j), 1);
-                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j - 1), 1);
-                        (*vtxcpy)(this, &(return_value->data()[curtri++]), (cur + j + 1), 1);
+                        (*vtxcpy)(this, &res[curtri++], (cur + j), 1);
+                        (*vtxcpy)(this, &res[curtri++], (cur + j - 1), 1);
+                        (*vtxcpy)(this, &res[curtri++], (cur + j + 1), 1);
                     }
                 }
                 break;
             case GFXQUAD:
-//                return_value->reserve(cur + offsets[i]);
-                (*vtxcpy)(this, &(return_value->data()[curquad]), (cur), offsets[i]);
+                (*vtxcpy)(this, &res[curquad], (cur), offsets[i]);
                 curquad += offsets[i];
                 break;
             case GFXQUADSTRIP:
-//                return_value->reserve(cur + offsets[i]);
                 for (j = 2; j < offsets[i] - 1; j += 2) {
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 2), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j - 1), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j + 1), 1);
-                    (*vtxcpy)(this, &(return_value->data()[curquad++]), (cur + j), 1);
+                    (*vtxcpy)(this, &res[curquad++], (cur + j - 2), 1);
+                    (*vtxcpy)(this, &res[curquad++], (cur + j - 1), 1);
+                    (*vtxcpy)(this, &res[curquad++], (cur + j + 1), 1);
+                    (*vtxcpy)(this, &res[curquad++], (cur + j), 1);
                 }
                 break;
             default:
@@ -455,16 +440,7 @@ vega_types::SharedPtr<vega_types::ContiguousSequenceContainer<GFXVertex>> GFXVer
         cur += offsets[i];
     }
     this->UnMap();
-    return return_value;
 }
 
 void GFXVertexList::LoadDrawState() {
-}
-
-POLYTYPE GFXVertexList::getPolyType(size_t idx) const {
-    return mode[idx];
-}
-
-size_t GFXVertexList::getOffset(size_t idx) const {
-    return offsets[idx];
 }

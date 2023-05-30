@@ -1,7 +1,7 @@
 /*
  * particle.h
  *
- * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -30,7 +30,6 @@
 #include <string>
 #include <memory>
 #include <string>
-#include <preferred_types.h>
 #include "aligned.h"
 #include "vec.h"
 #include "gfxlib_struct.h"
@@ -79,7 +78,7 @@ class ParticleTrail {
         float ptrans;
         float pfade;
         float psize;
-        vega_types::SharedPtr<Texture> texture;
+        Texture *texture;
 
         explicit Config(const std::string &prefix);
         Config();

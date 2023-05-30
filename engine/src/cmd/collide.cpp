@@ -1,8 +1,8 @@
 /*
  * collide.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy
- * and other Vega Strike contributors
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -97,10 +97,10 @@ void collideTrees::Dec() {
     refcount--;
     if (refcount == 0) {
         unitColliders.Delete(hash_key);
-        for (auto & rapidCollider : rapidColliders) {
-            if (rapidCollider) {
-                delete rapidCollider;
-                rapidCollider = nullptr;
+        for (unsigned int i = 0; i < collideTreesMaxTrees; ++i) {
+            if (rapidColliders[i]) {
+                delete rapidColliders[i];
+                rapidColliders[i] = nullptr;
             }
         }
         if (colShield) {

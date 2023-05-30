@@ -1,6 +1,4 @@
 /*
- * gl_light.cpp
- *
  * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
@@ -23,6 +21,8 @@
  */
 
 
+#include <stack>
+using std::stack;
 #include <assert.h>
 #include "vs_globals.h"
 #include "gfxlib.h"
@@ -30,22 +30,22 @@
 #include "config_xml.h"
 #include "options.h"
 
-#include "preferred_types.h"
-
-using namespace vega_types;
-
 GLint GFX_MAX_LIGHTS = 8;
 GLint GFX_OPTIMAL_LIGHTS = 4;
 GFXBOOL GFXLIGHTING = GFXFALSE;
 
 int _currentContext = 0;
+vector<vector<gfx_light> > _local_lights_dat;
+vector<GFXColor> _ambient_light;
+vector<gfx_light> *_llights = NULL;
 
-static Stack<bool *> GlobalEffects;
-static Stack<bool *> GlobalEffectsFreelist;
-static Stack<SharedPtr<GFXColor>> GlobalEffectsAmbient;
+//currently stored GL lights!
+OpenGLLights *GLLights = NULL; //{-1,-1,-1,-1,-1,-1,-1,-1};
+static stack<bool *> GlobalEffects;
+static stack<bool *> GlobalEffectsFreelist;
+static stack<GFXColor> GlobalEffectsAmbient;
 
 void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
-    static const SharedPtr<GFXColor> default_ambient_light = MakeShared<GFXColor>(0, 0, 0, 1);
     bool *tmp;
     if (GlobalEffectsFreelist.empty()) {
         tmp = new bool[GFX_MAX_LIGHTS];
@@ -54,16 +54,16 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
         GlobalEffectsFreelist.pop();
     }
 
-    unpickLights();     //costly but necessary to get rid of pesky local enables that shouldn't be tagged to get re-enabled
+    unpicklights();     //costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
-        tmp[i] = (0 != (staticLightsDataManager()->gl_lights->at(i)->options & OpenGLL::GL_ENABLED));
-        if (staticLightsDataManager()->gl_lights->at(i)->options & OpenGLL::GL_ENABLED) {
+        tmp[i] = (0 != (GLLights[i].options & OpenGLL::GL_ENABLED));
+        if (GLLights[i].options & OpenGLL::GL_ENABLED) {
             glDisable(GL_LIGHT0 + i);
         }
     }
     GlobalEffects.push(tmp);
-    GlobalEffectsAmbient.push(staticLightsDataManager()->ambient_light->at(_currentContext));
-    GFXLightContextAmbient(default_ambient_light);
+    GlobalEffectsAmbient.push(_ambient_light[_currentContext]);
+    GFXLightContextAmbient(GFXColor(0, 0, 0, 1));
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
@@ -242,143 +242,145 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(const GFXBOOL spec) {
     return GFXTRUE;
 }
 
-GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient(const SharedPtr<GFXColor> amb) {
-    if (static_cast<size_t>(_currentContext) >= staticLightsDataManager()->ambient_light->size()) {
+GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient(const GFXColor &amb) {
+    if (_currentContext >= static_cast<int>(_ambient_light.size())) {
         return GFXFALSE;
     }
-    (staticLightsDataManager()->ambient_light->at(_currentContext)) = amb;
-    float tmp[4] = {amb->r, amb->g, amb->b, amb->a};
+    (_ambient_light[_currentContext]) = amb;
+    //(_ambient_light[_currentContext])[1]=amb.g;
+    //(_ambient_light[_currentContext])[2]=amb.b;
+    //(_ambient_light[_currentContext])[3]=amb.a;
+    float tmp[4] = {amb.r, amb.g, amb.b, amb.a};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, tmp);
     return GFXTRUE;
 }
 
-GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(SharedPtr<GFXColor> amb) {
-    if (static_cast<size_t>(_currentContext) >= staticLightsDataManager()->ambient_light->size()) {
+GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient(GFXColor &amb) {
+    if (_currentContext >= static_cast<int>(_ambient_light.size())) {
         return GFXFALSE;
     }
-    *amb = *(staticLightsDataManager()->ambient_light->at(_currentContext));
+    amb = (_ambient_light[_currentContext]);
     return GFXTRUE;
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateLight(int &light, const GFXLight &templatecopy, const bool global) {
-    SharedPtr<ContiguousSequenceContainer<SharedPtr<gfx_light>>> const & lights = staticLightsDataManager()->l_lights;
-    int const n = static_cast<int>(lights->size());
-    for (light = 0; light < n; ++light) {
-        if (lights->at(light)->Target() == -2) {
+    for (light = 0; light < static_cast<int>(_llights->size()); light++) {
+        if ((*_llights)[light].Target() == -2) {
             break;
         }
     }
-    if (light == n) {
-        lights->push_back(MakeShared<gfx_light>());
+    if (light == static_cast<int>(_llights->size())) {
+        _llights->push_back(gfx_light());
     }
-    return lights->at(light)->Create(templatecopy, global);
+    return (*_llights)[light].Create(templatecopy, global);
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLight(const int light) {
-    staticLightsDataManager()->l_lights->at(light)->Kill();
+    (*_llights)[light].Kill();
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET lt, const GFXColor &color) {
-    if (staticLightsDataManager()->l_lights->at(light)->Target() == -2) {
+    if ((*_llights)[light].Target() == -2) {
         return GFXFALSE;
     }
-    staticLightsDataManager()->l_lights->at(light)->ResetProperties(lt, color);
+    (*_llights)[light].ResetProperties(lt, color);
 
     return GFXTRUE;
 }
 
 const GFXLight & /*GFXDRVAPI*/ GFXGetLight(const int light) {
-    return *(staticLightsDataManager()->l_lights->at(light));
+    return (*_llights)[light];
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(int light) {
-    if (staticLightsDataManager()->l_lights->at(light)->Target() == -2) {
+    assert(light >= 0 && light <= static_cast<int>(_llights->size()));
+    //return FALSE;
+    if ((*_llights)[light].Target() == -2) {
         return GFXFALSE;
     }
-    staticLightsDataManager()->l_lights->at(light)->Enable();
+    (*_llights)[light].Enable();
     return GFXTRUE;
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(int light) {
-    if (staticLightsDataManager()->l_lights->at(light)->Target() == -2) {
+    assert(light >= 0 && light <= static_cast<int>(_llights->size()));
+    if ((*_llights)[light].Target() == -2) {
         return GFXFALSE;
     }
-    staticLightsDataManager()->l_lights->at(light)->Disable();
+    (*_llights)[light].Disable();
     return GFXTRUE;
 }
 
+static void SetupGLLightGlobals();
+
 void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number) {
-    SharedPtr<ManagerOfStaticLightsData> const static_lights_data_manager = staticLightsDataManager();
-    con_number = static_cast<int>(static_lights_data_manager->local_lights_dat->size()) - 1;
+    static GFXBOOL LightInit = GFXFALSE;
+    if (!LightInit) {
+        LightInit = GFXTRUE;
+        SetupGLLightGlobals();
+    }
+    con_number = _local_lights_dat.size();
     _currentContext = con_number;
-    while (static_lights_data_manager->ambient_light->size() < static_lights_data_manager->local_lights_dat->size()) {
-        static_lights_data_manager->ambient_light->push_back(MakeShared<GFXColor>(0, 0, 0, 1));
-    }
-    while (static_lights_data_manager->local_lights_dat->size() < static_lights_data_manager->local_lights_dat->size()) {
-        static_lights_data_manager->local_lights_dat->push_back(MakeShared<ContiguousSequenceContainer<SharedPtr<gfx_light>>>());
-        while (static_lights_data_manager->local_lights_dat->back()->size() < GFX_MAX_LIGHTS) {
-            static_lights_data_manager->local_lights_dat->back()->push_back(MakeShared<gfx_light>());
-        }
-    }
+    _ambient_light.push_back(GFXColor(0, 0, 0, 1));
+    _local_lights_dat.push_back(vector<gfx_light>());
     GFXSetLightContext(con_number);
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
-    staticLightsDataManager()->local_lights_dat->at(con_number)->clear();
-    staticLightsDataManager()->local_lights_dat->at(con_number).reset();    // Should this be added? SGT 2022-12-18
+    _local_lights_dat[con_number] = vector<gfx_light>();
 }
 
 void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
-    unpickLights();
+    unpicklights();
     int GLLindex = 0;
+    unsigned int i;
     lighttable.Clear();
     _currentContext = con_number;
-    staticLightsDataManager()->l_lights = staticLightsDataManager()->local_lights_dat->at(con_number);
-    SharedPtr<GFXColor> ambient_light_tmp = staticLightsDataManager()->ambient_light->at(con_number);
-    float ambient_light_color_array[4] = {ambient_light_tmp->r, ambient_light_tmp->g, ambient_light_tmp->b, ambient_light_tmp->a};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light_color_array);
-    //reset all lights so they aren't in GLLights
-    for (const auto& light : *(staticLightsDataManager()->l_lights)) {
-        light->Target() = -1;
+    _llights = &_local_lights_dat[con_number];
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (GLfloat *) &(_ambient_light[con_number]));
+    //reset all lights so they arean't in GLLights
+    for (i = 0; i < _llights->size(); i++) {
+        (*_llights)[i].Target() = -1;
     }
-    for (size_t i = 0; i < staticLightsDataManager()->l_lights->size() && GLLindex < GFX_MAX_LIGHTS; ++i) {
-        SharedPtr<gfx_light> const & light = staticLightsDataManager()->l_lights->at(i);
-        if (light->enabled()) {
-            if (light->LocalLight()) {
-                light->AddToTable();
+    for (i = 0; i < _llights->size() && GLLindex < GFX_MAX_LIGHTS; i++) {
+        if ((*_llights)[i].enabled()) {
+            if ((*_llights)[i].LocalLight()) {
+                (*_llights)[i].AddToTable();
             } else {
-                staticLightsDataManager()->gl_lights->at(GLLindex)->index = -1;                 //make it clobber completely! no trace of old light.
-                light->ClobberGLLight(GLLindex);
-                ++GLLindex;
+                GLLights[GLLindex].index = -1;                 //make it clobber completley! no trace of old light.
+                (*_llights)[i].ClobberGLLight(GLLindex);
+                GLLindex++;
             }
         }
     }
-    for (; GLLindex < GFX_MAX_LIGHTS; ++GLLindex) {
-        staticLightsDataManager()->gl_lights->at(GLLindex)->index = -1;
-        staticLightsDataManager()->gl_lights->at(GLLindex)->options = OpenGLL::GLL_OFF;
+    for (; GLLindex < GFX_MAX_LIGHTS; GLLindex++) {
+        GLLights[GLLindex].index = -1;
+        GLLights[GLLindex].options = OpenGLL::GLL_OFF;
         glDisable(GL_LIGHT0 + GLLindex);
     }
 }
 
 void GFXDestroyAllLights() {
     lighttable.Clear();
-    staticLightsDataManager()->gl_lights.reset();
+    if (GLLights != nullptr) {
+        free(GLLights);
+        GLLights = nullptr;
+    }
 }
 
-// This code moved to ManagerOfStaticLightsData constructor
-//static void SetupGLLightGlobals() {
-//    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,
-//            1);     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
-//    glGetIntegerv(GL_MAX_LIGHTS, &GFX_MAX_LIGHTS);
-//    if (!GLLights) {
-//        GLLights = (OpenGLLights *) malloc(sizeof(OpenGLLights) * GFX_MAX_LIGHTS);
-//        for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
-//            GLLights[i].index = -1;
-//        }
-//    }
-//
-//    GFXSetCutoff(game_options()->lightcutoff);
-//    GFXSetOptimalIntensity(game_options()->lightoptimalintensity, game_options()->lightsaturation);
-//    GFXSetOptimalNumLights(game_options()->numlights);
-//    GFXSetSeparateSpecularColor(game_options()->separatespecularcolor ? GFXTRUE : GFXFALSE);
-//}
+static void SetupGLLightGlobals() {
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,
+            1);     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
+    glGetIntegerv(GL_MAX_LIGHTS, &GFX_MAX_LIGHTS);
+    if (!GLLights) {
+        GLLights = (OpenGLLights *) malloc(sizeof(OpenGLLights) * GFX_MAX_LIGHTS);
+        for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
+            GLLights[i].index = -1;
+        }
+    }
+
+    GFXSetCutoff(game_options()->lightcutoff);
+    GFXSetOptimalIntensity(game_options()->lightoptimalintensity, game_options()->lightsaturation);
+    GFXSetOptimalNumLights(game_options()->numlights);
+    GFXSetSeparateSpecularColor(game_options()->separatespecularcolor ? GFXTRUE : GFXFALSE);
+}

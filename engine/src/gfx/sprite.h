@@ -1,6 +1,4 @@
 /*
- * sprite.h
- *
  * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, klaussfreire,
  * surfdargent, dan_w, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -47,11 +45,11 @@ class VSSprite {
     float heighto2;
     float maxs, maxt;
     float rotation;
-    vega_types::SharedPtr<Texture> surface;
+    Texture *surface;
     bool isAnimation;
 
 //For private use only
-    VSSprite() : surface(nullptr) {
+    VSSprite() : surface(0) {
     }
 
 public:
@@ -59,14 +57,14 @@ public:
     VSSprite(const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE);
 //Construct a sprite out of a preloaded texture
 //@Note will take ownership of 'surface'
-    VSSprite(vega_types::SharedPtr<Texture> _surface,
-             float _xcenter,
-             float _ycenter,
-             float _width,
-             float _height,
-             float _s = 0.f,
-             float _t = 0.f,
-             bool _isAnimation = false);
+    VSSprite(Texture *surface,
+            float xcenter,
+            float ycenter,
+            float width,
+            float height,
+            float s = 0.f,
+            float t = 0.f,
+            bool isAnimation = false);
     VSSprite(const VSSprite &source);
     ~VSSprite();
 //Return true if sprite was loaded successfully
@@ -100,19 +98,19 @@ public:
     void GetPosition(float &x1, float &y1);
     void SetSize(float s1, float s2);
     void GetSize(float &x1, float &y1);
-    void SetTimeSource(vega_types::SharedPtr<Audio::Source> source);
+    void SetTimeSource(SharedPtr<Audio::Source> source);
     void ClearTimeSource();
     bool Done() const;
     void Reset();
-    vega_types::SharedPtr<Audio::Source> GetTimeSource() const;
+    SharedPtr<Audio::Source> GetTimeSource() const;
 
 //float &Rotation(){return rotation;};
     Texture *getTexture() {
-        return surface.get();
+        return surface;
     }
 
     const Texture *getTexture() const {
-        return surface.get();
+        return surface;
     }
 };
 

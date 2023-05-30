@@ -1,8 +1,10 @@
-/*
+/**
  * quadtree_xml.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -204,13 +206,13 @@ void QuadTree::beginElement(const std::string &name, const AttributeList &attrib
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
                     case FFILE:
-                        textures.back().tex = (*iter).value;
+                        textures.back().tex.filename = strdup((*iter).value.c_str());
                         break;
                     case ALPHAFILE:
-                        xml->alpha.back() = (*iter).value;
+                        xml->alpha.back() = (*iter).value.c_str();
                         break;
                     case ANIMATIONFILE:
-                        xml->animation.back() = (*iter).value;
+                        xml->animation.back() = (*iter).value.c_str();
                         break;
                     case BLEND:
                         sscanf(((*iter).value).c_str(), "%s %s", csrc, cdst);
@@ -382,23 +384,22 @@ void QuadTree::LoadXML(const char *filename, const Vector &Scales, const float R
     for (i = 0; i < textures.size(); i++) {
         textures[i].scales = xml->scales;
         textures[i].scalet = xml->scalet;
-        std::string * tmp_filename = boost::get<std::string>(&(textures[i].tex));
-        if (tmp_filename != nullptr || xml->animation[i].length() > 0) {
-            vega_types::SharedPtr<Texture> tex{};
+        if (textures[i].tex.filename || xml->animation[i].length() > 0) {
+            Texture *tex;
             if (xml->animation[i].length() > 0) {
-                tex = AnimatedTexture::createAnimatedTexture(xml->animation[i].c_str(), 0, MIPMAP);
+                tex = new AnimatedTexture(xml->animation[i].c_str(), 0, MIPMAP);
             } else {
                 if (xml->alpha[i].length() > 0) {
-                    tex = Texture::createTexture(tmp_filename->c_str(), xml->alpha[i].c_str());
+                    tex = new Texture(textures[i].tex.filename, xml->alpha[i].c_str());
                 } else {
-                    tex = Texture::createTexture(tmp_filename->c_str());
+                    tex = new Texture(textures[i].tex.filename);
                 }
-//                free(tmp_filename);
+                free(textures[i].tex.filename);
             }
-            textures[i].tex = tex;
+            textures[i].tex.t = tex;
             GFXSetMaterial(textures[i].material, xml->mat[i]);
         } else {
-            textures[i].tex = "";   //NULL;
+            textures[i].tex.t = NULL;
         }
     }
     bool biggest = true;

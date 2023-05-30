@@ -1,8 +1,10 @@
-/*
+/**
  * mesh_server.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -24,7 +26,6 @@
 
 
 #include "mesh.h"
-using namespace vega_types;
 
 #ifdef __cplusplus
 extern "C"
@@ -59,12 +60,11 @@ void Mesh::SelectCullFace(int whichdrawqueue) {
 void Mesh::CreateLogos(struct MeshXML *, int faction, Flightgroup *fg) {
 }
 
-SharedPtr<Texture> Mesh::TempGetTexture(SharedPtr<MeshXML> xml, std::string filename, std::string factionname,
-                                        GFXBOOL detail) const {
+Texture *Mesh::TempGetTexture(struct MeshXML *, std::string filename, std::string factionname, GFXBOOL detail) const {
     return NULL;
 }
 
-SharedPtr<Texture> Mesh::TempGetTexture(SharedPtr<MeshXML> xml, int index, std::string factionname) const {
+Texture *Mesh::TempGetTexture(struct MeshXML *, int index, std::string factionname) const {
     return NULL;
 }
 
@@ -73,45 +73,45 @@ const GFXMaterial &Mesh::GetMaterial() const {
     return tmp;
 }
 
-SharedPtr<Texture> createTexture(const char *filename,
-                                 int stage = 0,
-                                 enum FILTER f1 = MIPMAP,
-                                 enum TEXTURE_TARGET t0 = TEXTURE2D,
-                                 enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-                                 unsigned char c = GFXFALSE,
-                                 int i = 65536) {
+Texture *createTexture(const char *filename,
+        int stage = 0,
+        enum FILTER f1 = MIPMAP,
+        enum TEXTURE_TARGET t0 = TEXTURE2D,
+        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+        unsigned char c = GFXFALSE,
+        int i = 65536) {
     return NULL;
 }
 
-SharedPtr<Texture> createTexture(char const *ccc,
-                                 char const *cc,
-                                 int k = 0,
-                                 enum FILTER f1 = MIPMAP,
-                                 enum TEXTURE_TARGET t0 = TEXTURE2D,
-                                 enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-                                 float f = 1,
-                                 int j = 0,
-                                 unsigned char c = GFXFALSE,
-                                 int i = 65536) {
+Texture *createTexture(char const *ccc,
+        char const *cc,
+        int k = 0,
+        enum FILTER f1 = MIPMAP,
+        enum TEXTURE_TARGET t0 = TEXTURE2D,
+        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
+        float f = 1,
+        int j = 0,
+        unsigned char c = GFXFALSE,
+        int i = 65536) {
     return NULL;
 }
 
-SharedPtr<AnimatedTexture> createAnimatedTexture(char const *c, int i, enum FILTER f) {
+AnimatedTexture *createAnimatedTexture(char const *c, int i, enum FILTER f) {
     return NULL;
 }
 
-SharedPtr<Logo> createLogo(int numberlogos,
-                           Vector *center,
-                           Vector *normal,
-                           float *sizes,
-                           float *rotations,
-                           float offset,
-                           Texture *Dec,
-                           Vector *Ref) {
+Logo *createLogo(int numberlogos,
+        Vector *center,
+        Vector *normal,
+        float *sizes,
+        float *rotations,
+        float offset,
+        Texture *Dec,
+        Vector *Ref) {
     return NULL;
 }
 
-extern Hashtable<std::string, std::deque<std::shared_ptr<Mesh>>, MESH_HASTHABLE_SIZE> bfxmHashTable;
+extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 
 Mesh::~Mesh() {
     if (!orig || orig == this) {

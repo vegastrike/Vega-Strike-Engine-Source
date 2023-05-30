@@ -1,6 +1,4 @@
 /*
- * easydom.h
- *
  * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
@@ -290,7 +288,7 @@ public:
         }
     }
 
-    vega_types::Stack<domNodeType *> nodestack;
+    std::stack<domNodeType *> nodestack;
 
     domNodeType *topnode;
 };

@@ -1,8 +1,10 @@
-/*
+/**
  * base_util.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike Contributors
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -153,8 +155,8 @@ bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory);
 bool SellShip(std::string name);
 
 //Sound streaming
-vega_types::SharedPtr<Audio::Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene);
-void DestroyVideoSoundStream(vega_types::SharedPtr<Audio::Source> source, const std::string &scene);
+SharedPtr<Audio::Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene);
+void DestroyVideoSoundStream(SharedPtr<Audio::Source> source, const std::string &scene);
 
 //GUI events
 void SetEventData(Dictionary data);

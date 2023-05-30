@@ -1,7 +1,7 @@
 /*
  * script_call_unit_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -944,8 +944,8 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 Cockpit *tmp;
                 if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-                    vega_types::SharedPtr<Animation> ani = other_unit->pilot->getCommFace(other_unit, mood, sex);
-                    if (ani) {
+                    Animation *ani = other_unit->pilot->getCommFace(other_unit, mood, sex);
+                    if (NULL != ani) {
                         tmp->SetCommAnimation(ani, NULL);
                     }
                 }

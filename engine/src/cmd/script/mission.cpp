@@ -1,7 +1,5 @@
 /*
- * mission.cpp
- *
- * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -519,9 +517,12 @@ void Mission::doOrder(easyDomNode *node, Flightgroup *fg) {
 /* *********************************************************** */
 
 string Mission::getVariable(string name, string defaultval) {
-    auto found = std::find_if(variables->subnodes.cbegin(), variables->subnodes.cend(), [name](easyDomNode * easy_dom_node) { return easy_dom_node->attr_value("name") == name; });
-    if (found != variables->subnodes.cend()) {
-        return (*found)->attr_value("value");
+    vector<easyDomNode *>::const_iterator siter;
+    for (siter = variables->subnodes.begin(); siter != variables->subnodes.end(); siter++) {
+        string scan_name = (*siter)->attr_value("name");
+        if (scan_name == name) {
+            return (*siter)->attr_value("value");
+        }
     }
     return defaultval;
 }

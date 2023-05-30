@@ -1,8 +1,10 @@
-/*
+/**
  * star.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ *  contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,8 +30,6 @@
 #include "gfxlib.h"
 
 #include "gfxlib_struct.h"
-#include "aux_texture.h"
-
 const int STARnumvlist = 27;
 #include <string>
 
@@ -98,19 +98,19 @@ public:
 
 class SpriteStarVlist : public StarVlist {
     GFXVertexList *vlist[NUM_ACTIVE_ANIMATIONS];
-    vega_types::SharedPtr<Texture> decal[NUM_ACTIVE_ANIMATIONS];
+    class Texture *decal[NUM_ACTIVE_ANIMATIONS];
 public:
     SpriteStarVlist(int num, float spread, std::string our_system_name, std::string texturename, float size);
-    ~SpriteStarVlist() override;
-    int NumTextures() override;
+    ~SpriteStarVlist();
+    int NumTextures();
     bool BeginDrawState(const QVector &center,
             const Vector &vel,
             const Vector &angular_vel,
             bool rotate,
             bool yawpitch,
-            int whichTexture) override;
-    void Draw(bool, int whichTexture) override;
-    void EndDrawState(bool, int whichTexture) override;
+            int whichTexture);
+    void Draw(bool, int whichTexture);
+    void EndDrawState(bool, int whichTexture);
 };
 
 class Stars {

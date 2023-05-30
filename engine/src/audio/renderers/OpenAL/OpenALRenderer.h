@@ -1,8 +1,10 @@
-/*
+/**
  * OpenALRenderer.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -53,7 +55,7 @@ struct RendererData;
  */
 class OpenALRenderer : public Renderer {
 protected:
-    vega_types::AutoPtr<__impl::OpenAL::RendererData> data;
+    AutoPtr<__impl::OpenAL::RendererData> data;
 
 public:
     /** Initialize the renderer with default or config-driven settings. */
@@ -62,25 +64,25 @@ public:
     virtual ~OpenALRenderer();
 
     /** @copydoc Renderer::getSound */
-    virtual vega_types::SharedPtr<Sound> getSound(
+    virtual SharedPtr<Sound> getSound(
             const std::string &name,
             VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
             bool streaming = false);
 
     /** @copydoc Renderer::owns */
-    virtual bool owns(vega_types::SharedPtr<Sound> sound);
+    virtual bool owns(SharedPtr<Sound> sound);
 
     /** @copydoc Renderer::attach(SharedPtr<Source>) */
-    virtual void attach(vega_types::SharedPtr<Source> source);
+    virtual void attach(SharedPtr<Source> source);
 
     /** @copydoc Renderer::attach(SharedPtr<Listener>) */
-    virtual void attach(vega_types::SharedPtr<Listener> listener);
+    virtual void attach(SharedPtr<Listener> listener);
 
     /** @copydoc Renderer::detach(SharedPtr<Source>) */
-    virtual void detach(vega_types::SharedPtr<Source> source);
+    virtual void detach(SharedPtr<Source> source);
 
     /** @copydoc Renderer::detach(SharedPtr<Listener>) */
-    virtual void detach(vega_types::SharedPtr<Listener> listener);
+    virtual void detach(SharedPtr<Listener> listener);
 
     /** @copydoc Renderer::setMeterDistance */
     virtual void setMeterDistance(Scalar distance);

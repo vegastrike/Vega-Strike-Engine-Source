@@ -1,8 +1,10 @@
-/*
+/**
  * SimpleSource.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -48,7 +50,7 @@ namespace Audio {
  *      responsible for detaching itself when destroyed.
  *
  */
-class SimpleSource : public Source, public vega_types::EnableSharedFromThis<SimpleSource> {
+class SimpleSource : public Source, public SharedFromThis<SimpleSource> {
 private:
     bool playing;
     SimpleScene *scene;
@@ -57,7 +59,7 @@ public:
     virtual ~SimpleSource();
 
     /** Construct a simple source */
-    SimpleSource(vega_types::SharedPtr<Sound> sound, bool looping = false);
+    SimpleSource(SharedPtr<Sound> sound, bool looping = false);
 
     /** Notify attachment to a scene */
     void notifySceneAttached(SimpleScene *scene);

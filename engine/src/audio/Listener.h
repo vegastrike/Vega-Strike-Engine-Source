@@ -1,8 +1,10 @@
-/*
+/**
  * Listener.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -55,8 +57,8 @@ class Listener {
 
     Scalar gain;
 
-    vega_types::SharedPtr<UserData> userDataPtr;
-    vega_types::SharedPtr<RenderableListener> rendererDataPtr;
+    SharedPtr<UserData> userDataPtr;
+    SharedPtr<RenderableListener> rendererDataPtr;
 
     Matrix3 worldToLocal;
 
@@ -185,23 +187,23 @@ public:
 
 
     /** Get renderer-specific data associated (and destroyed) with this sound source */
-    vega_types::SharedPtr<RenderableListener> getRenderable() const {
+    SharedPtr<RenderableListener> getRenderable() const {
         return rendererDataPtr;
     }
 
     /** Set renderer-specific data to be associated (and destroyed) with this sound source */
-    void setRenderable(vega_types::SharedPtr<RenderableListener> ptr) {
+    void setRenderable(SharedPtr<RenderableListener> ptr) {
         rendererDataPtr = ptr;
         dirty.setAll();
     }
 
     /** Get user-specific data associated (and destroyed) with this listener */
-    vega_types::SharedPtr<UserData> getUserData() const {
+    SharedPtr<UserData> getUserData() const {
         return userDataPtr;
     }
 
     /** Set user-specific data to be associated (and destroyed) with this listener */
-    void setUserData(vega_types::SharedPtr<UserData> ptr) {
+    void setUserData(SharedPtr<UserData> ptr) {
         userDataPtr = ptr;
     }
 

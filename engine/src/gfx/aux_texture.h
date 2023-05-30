@@ -1,8 +1,8 @@
 /*
  * aux_texture.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -40,12 +40,7 @@
  *  to prevent the loading of duplicate textures
  */
 ;
-class Texture : public ::VSImage /*, public vega_types::EnableSharedFromThis<Texture> */ {
-    Texture(const char *FileNameRGB, const char *FileNameA, int stage, FILTER mipmap, TEXTURE_TARGET target,
-            TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, unsigned char force_load,
-            int max_dimension_size, unsigned char detail_texture, unsigned char nocache, ADDRESSMODE address_mode,
-            Texture *SDL_main);
-
+class Texture : public ::VSImage {
     typedef unsigned int uint;
 public:
     void FileNotFound(const std::string &); //undoes what it did to hash table when file is not located
@@ -57,10 +52,10 @@ public:
     enum FILTER ismipmapped;
 
     ///The data of this texture (used in between functions, deleted)
-    unsigned char *data{nullptr};
+    unsigned char *data;
 
     ///The GFXname of this texture
-    int name = -1;
+    int name;
 
     ///The multitexture stage of this texture
     int stage;
@@ -69,22 +64,22 @@ public:
     Vector mintcoord, maxtcoord;
 
     ///The original data that would represent this texture
-    vega_types::SharedPtr<Texture> original{};
+    Texture *original;
 
     ///For re-biding
-    bool bound{false};
-    uint boundSizeX{}, boundSizeY{};
-    VSImageMode boundMode{};
+    bool bound;
+    uint boundSizeX, boundSizeY;
+    VSImageMode boundMode;
 
-//    ///The number of references on the original data
-//    int refcount;
+    ///The number of references on the original data
+    int refcount;
 
     ///The target this will go to (cubemap or otherwise)
     enum TEXTURE_TARGET texture_target;
     enum TEXTURE_IMAGE_TARGET image_target;
 
     ///The address mode being used with this texture
-    enum ADDRESSMODE address_mode{DEFAULT_ADDRESS_MODE};
+    enum ADDRESSMODE address_mode;
 
     ///Returns if this texture is actually already loaded
     GFXBOOL checkold(const std::string &s, bool shared, std::string &hashname);
@@ -95,11 +90,8 @@ public:
     bool checkbad(const std::string &s);
     void setbad(const std::string &s);
 
-//    ///Inits the class with default values
-//    void InitTexture();
-
-    ///Destructor for texture
-    ~Texture() override;
+    ///Inits the class with default values
+    void InitTexture();
 
 protected:
 
@@ -115,54 +107,35 @@ protected:
 public:
 
     ///Binds this texture to the same name as the given texture - for multipart textures
-    int Bind(vega_types::SharedPtr<Texture> other, int maxdimension = 65536, GFXBOOL detailtexture = GFXFALSE);
+    int Bind(Texture *other, int maxdimension = 65536, GFXBOOL detailtexture = GFXFALSE);
 
 public:
 
     ///Creates an unbounded texture. Set data and dimensions before binding. Or explicitly load a file.
-    explicit Texture(int stage = 0,
+    Texture(int stage = 0,
             enum FILTER mipmap = MIPMAP,
             enum TEXTURE_TARGET target = TEXTURE2D,
             enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
             enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE);
 
     ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
-    static vega_types::SharedPtr<Texture> createTexture(const char *FileNameRGB,
-            const char *FileNameA,
+    Texture(const char *,
+            const char *,
             int stage = 0,
             enum FILTER mipmap = MIPMAP,
             enum TEXTURE_TARGET target = TEXTURE2D,
             enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
             float alpha = 1,
             int zeroval = 0,
-            GFXBOOL force_load = GFXFALSE,
+            GFXBOOL force = GFXFALSE,
             int max_dimension_size = 65536,
             GFXBOOL detail_texture = GFXFALSE,
             GFXBOOL nocache = false,
             enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-            vega_types::SharedPtr<Texture> main_texture = nullptr);
-
-protected:
-    static vega_types::SharedPtr<Texture> constructTexture(vega_types::SharedPtr<Texture> texture,
-                                                           const char *FileNameRGB,
-                                                        const char *FileNameA,
-                                                        int stage = 0,
-                                                        enum FILTER mipmap = MIPMAP,
-                                                        enum TEXTURE_TARGET target = TEXTURE2D,
-                                                        enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
-                                                        float alpha = 1,
-                                                        int zeroval = 0,
-                                                        GFXBOOL force_load = GFXFALSE,
-                                                        int max_dimension_size = 65536,
-                                                        GFXBOOL detail_texture = GFXFALSE,
-                                                        GFXBOOL nocache = false,
-                                                        enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-                                                           vega_types::SharedPtr<Texture> main_texture = nullptr);
-
-public:
+            Texture *main = 0);
 
     ///Creates a texture with only color data as a single bitmap
-    static vega_types::SharedPtr<Texture> createTexture(const char *FileName,
+    Texture(const char *FileName,
             int stage = 0,
             enum FILTER mipmap = MIPMAP,
             enum TEXTURE_TARGET target = TEXTURE2D,
@@ -172,8 +145,8 @@ public:
             GFXBOOL detail_texture = GFXFALSE,
             GFXBOOL nocache = false,
             enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-                                                        vega_types::SharedPtr<Texture> main_texture = nullptr);
-    static vega_types::SharedPtr<Texture> createTexture(VSFileSystem::VSFile *f,
+            Texture *main = 0);
+    Texture(VSFileSystem::VSFile *f,
             int stage = 0,
             enum FILTER mipmap = MIPMAP,
             enum TEXTURE_TARGET target = TEXTURE2D,
@@ -183,68 +156,41 @@ public:
             GFXBOOL detail_texture = GFXFALSE,
             GFXBOOL nocache = false,
             enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-                                                        vega_types::SharedPtr<Texture> main_texture = nullptr);
-
-protected:
-
-    static vega_types::SharedPtr<Texture> constructTexture(vega_types::SharedPtr<Texture> texture,
-                                                           const char *FileName,
-                     int stage = 0,
-                     enum FILTER mipmap = MIPMAP,
-                     enum TEXTURE_TARGET target = TEXTURE2D,
-                     enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
-                     GFXBOOL force = GFXFALSE,
-                     int max_dimension_size = 65536,
-                     GFXBOOL detail_texture = GFXFALSE,
-                     GFXBOOL nocache = false,
-                     enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-                                                           vega_types::SharedPtr<Texture> main_texture = nullptr);
-    static vega_types::SharedPtr<Texture> constructTexture(vega_types::SharedPtr<Texture> texture,
-                                                           VSFileSystem::VSFile *f,
-                     int stage = 0,
-                     enum FILTER mipmap = MIPMAP,
-                     enum TEXTURE_TARGET target = TEXTURE2D,
-                     enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
-                     GFXBOOL force = GFXFALSE,
-                     int max_dimension_size = 65536,
-                     GFXBOOL detail_texture = GFXFALSE,
-                     GFXBOOL nocache = false,
-                     enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-                                                           vega_types::SharedPtr<Texture> main_texture = nullptr);
-
-public:
-
-    void Load(const char *FileNameRGB,
-              const char *FileNameA,
-              int stage = 0,
-              enum FILTER mipmap = MIPMAP,
-              enum TEXTURE_TARGET target = TEXTURE2D,
-              enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
-              float alpha = 1,
-              int zeroval = 0,
-              GFXBOOL force_load = GFXFALSE,
-              int maxdimension = 65536,
-              GFXBOOL detailtexture = GFXFALSE,
-              GFXBOOL nocache = false,
-              enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-              vega_types::SharedPtr<Texture> main_texture = 0);
+            Texture *main = 0);
+    void Load(const char *,
+            const char *,
+            int stage = 0,
+            enum FILTER mipmap = MIPMAP,
+            enum TEXTURE_TARGET target = TEXTURE2D,
+            enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
+            float alpha = 1,
+            int zeroval = 0,
+            GFXBOOL force = GFXFALSE,
+            int max_dimension_size = 65536,
+            GFXBOOL detail_texture = GFXFALSE,
+            GFXBOOL nocache = false,
+            enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
+            Texture *main = 0);
     void Load(const char *FileName,
-              int stage = 0,
-              enum FILTER mipmap = MIPMAP,
-              enum TEXTURE_TARGET target = TEXTURE2D,
-              enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
-              GFXBOOL force_load = GFXFALSE,
-              int maxdimension = 65536,
-              GFXBOOL detailtexture = GFXFALSE,
-              GFXBOOL nocache = false,
-              enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
-              vega_types::SharedPtr<Texture> main_texture = 0);
-    virtual const vega_types::SharedPtr<const Texture> OriginalConst() const;
-    virtual vega_types::SharedPtr<Texture> Original();
-    virtual vega_types::SharedPtr<Texture> Clone();
+            int stage = 0,
+            enum FILTER mipmap = MIPMAP,
+            enum TEXTURE_TARGET target = TEXTURE2D,
+            enum TEXTURE_IMAGE_TARGET imagetarget = TEXTURE_2D,
+            GFXBOOL force = GFXFALSE,
+            int max_dimension_size = 65536,
+            GFXBOOL detail_texture = GFXFALSE,
+            GFXBOOL nocache = false,
+            enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE,
+            Texture *main = 0);
+    virtual const Texture *Original() const;
+    virtual Texture *Original();
+    virtual Texture *Clone();
 
     ///Texture copy constructor that increases appropriate refcounts
     //Texture (Texture *t);
+
+    ///Destructor for texture
+    virtual ~Texture();
 
     virtual unsigned int numFrames() const {
         return 1;
@@ -294,10 +240,10 @@ public:
     }
 
     ///Whether or not the string exists as a texture
-    static vega_types::SharedPtr<Texture> Exists(std::string s);
+    static Texture *Exists(std::string s);
 
     ///Whether or not the color and alpha data already exist
-    static vega_types::SharedPtr<Texture> Exists(std::string s, std::string a);
+    static Texture *Exists(std::string s, std::string a);
 
     ///A way to sort the texture by the original address (to make sure like textures stick togehter
     bool operator<(const Texture &b) const;
@@ -306,7 +252,7 @@ public:
     bool operator==(const Texture &b) const;
 
     ///Make this instance a reference of "other"
-    void setReference(vega_types::SharedPtr<Texture> other);
+    void setReference(Texture *other);
 
     ///Binds the texture in the GFX library
     virtual void MakeActive() {

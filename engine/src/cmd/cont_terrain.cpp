@@ -1,8 +1,9 @@
 /*
  * cont_terrain.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -77,13 +78,13 @@ ContinuousTerrain::ContinuousTerrain(const char *filename, const Vector &Scales,
                 if (tmp[k] == '^') {
                     tmp[k] = '\0';
 
-                    vega_types::SequenceContainer<mesh_polygon> polies;
+                    vector<mesh_polygon> polies;
                     md[i].mesh = Mesh::LoadMesh(tmp, Vector(1, 1, 1), 0, NULL);
                     sscanf(tmp + i + 1, "%f,%f", &sizeX, &sizeZ);
                     md[i].mesh->GetPolys(polies);
                     sizeX = md[i].mesh->corner_max().i - md[i].mesh->corner_min().i;
                     sizeZ = md[i].mesh->corner_max().k - md[i].mesh->corner_min().k;
-                    md[i].collider = vega_types::MakeShared<csOPCODECollider>(polies);
+                    md[i].collider = new csOPCODECollider(polies);
                 }
                 if (tmp[k] == '\0') {
                     break;
@@ -158,10 +159,12 @@ ContinuousTerrain::~ContinuousTerrain() {
             data[i] = nullptr;
         }
         if (md[i].mesh != nullptr) {
-            md[i].mesh.reset();
+            delete md[i].mesh;
+            md[i].mesh = nullptr;
         }
         if (md[i].collider != nullptr) {
-            md[i].collider.reset();
+            delete md[i].collider;
+            md[i].collider = nullptr;
         }
     }
     if (dirty != nullptr) {

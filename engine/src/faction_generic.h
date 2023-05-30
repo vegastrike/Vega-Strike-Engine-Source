@@ -1,7 +1,5 @@
 /*
- * faction_generic.h
- *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -75,13 +73,13 @@ public:
     std::string secondaryLogoName;
     std::string secondaryLogoAlphaName;
 ///Logos used by the ships of that faction
-    vega_types::SharedPtr<Texture> logo;
+    Texture *logo;
 //if the squadron doens't; have its own particular logo
-    vega_types::SharedPtr<Texture> secondaryLogo;
+    Texture *secondaryLogo;
 ///char * of the name
     char *factionname;
     struct comm_face_t {
-        vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> animations;
+        std::vector<class Animation *> animations;
         enum CHOICE { CNO, CYES, CEITHER };
         CHOICE dockable;
         CHOICE base;
@@ -106,8 +104,8 @@ public:
     Faction() {
         playlist = -1;
         citizen = false;
-        logo = secondaryLogo = nullptr;
-        factionname = nullptr;
+        logo = secondaryLogo = NULL;
+        factionname = NULL;
         sparkcolor[0] = .5;
         sparkcolor[1] = .5;
         sparkcolor[2] = 1;
@@ -123,8 +121,7 @@ namespace FactionUtil {
 extern int upgradefac;
 extern int neutralfac;
 extern int planetfac;
-vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>>
-GetRandCommAnimation(int faction, Unit *un, unsigned char &sex);
+std::vector<class Animation *> *GetRandCommAnimation(int faction, Unit *unit, unsigned char &sex);
 void SerializeFaction(FILE *file);
 std::string SerializeFaction();
 void LoadSerializedFaction(FILE *file);
@@ -171,13 +168,13 @@ const float *GetSparkColor(const int myfaction);
 unsigned int GetNumFactions();
 //Returns a conversation that a myfaction might have with a theirfaction
 FSM *GetConversation(const int myfaction, const int theirfaction);
-vega_types::SharedPtr<Texture> getForceLogo(int faction);
-vega_types::SharedPtr<Texture> getSquadLogo(int faction);
+Texture *getForceLogo(int faction);
+Texture *getSquadLogo(int faction);
 
-vega_types::SharedPtr<Animation> createAnimation(const char *anim);
-vega_types::SharedPtr<Texture> createTexture(const char *tex, const char *tmp, bool force = false);
-vega_types::SharedPtr<Texture> createTexture(const char *tex, bool force = false);
-vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> GetAnimation(int faction, int n, unsigned char &sex);
+Animation *createAnimation(const char *anim);
+Texture *createTexture(const char *tex, const char *tmp, bool force = false);
+Texture *createTexture(const char *tex, bool force = false);
+std::vector<class Animation *> *GetAnimation(int faction, int n, unsigned char &sex);
 Animation *GetRandExplosionAnimation(int whichfaction, std::string &which);
 void LoadFactionPlaylists();
 /** Still in faction_xml.cpp because createUnit **/

@@ -1,8 +1,9 @@
 /*
  * firekeyboard.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -809,19 +810,19 @@ extern Unit *GetThreat(Unit *par, Unit *leader);
 void HelpOut(bool crit, std::string conv) {
     Unit *un = _Universe->AccessCockpit()->GetParent();
     if (un) {
-        Unit *par = nullptr;
-        DoSpeech(un, nullptr, FSM::Node::MakeNode(conv, .1));
+        Unit *par = NULL;
+        DoSpeech(un, NULL, FSM::Node::MakeNode(conv, .1));
         for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
                 (par = (*ui));
                 ++ui) {
             if ((crit && UnitUtil::getFactionRelation(par, un) > 0) || par->faction == un->faction) {
                 Unit *threat = GetThreat(par, un);
-                CommunicationMessage c(par, un, nullptr, 0);
+                CommunicationMessage c(par, un, NULL, 0);
                 if (threat) {
                     par->Target(threat);
-                    c.SetCurrentState(c.fsm->GetYesNode(), nullptr, 0);
+                    c.SetCurrentState(c.fsm->GetYesNode(), NULL, 0);
                 } else {
-                    c.SetCurrentState(c.fsm->GetNoNode(), nullptr, 0);
+                    c.SetCurrentState(c.fsm->GetNoNode(), NULL, 0);
                 }
                 Order *o = un->getAIState();
                 if (o) {
@@ -1372,14 +1373,14 @@ static bool SuperDock(Unit *parent, Unit *target) {
 
 static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity) {
     static float min_docking_relationship =
-            XMLSupport::parse_floatf(vs_config->getVariable("AI", "min_docking_relationship", "-.002"));
+            XMLSupport::parse_float(vs_config->getVariable("AI", "min_docking_relationship", "-.002"));
     static bool can_dock_to_enemy_base =
             XMLSupport::parse_bool(vs_config->getVariable("AI", "can_dock_to_enemy_base", "true"));
     static bool nojumpinSPEC = XMLSupport::parse_bool(vs_config->getVariable("physics", "noSPECJUMP", "true"));
     bool SPEC_interference = targ && parent && nojumpinSPEC
             && (targ->graphicOptions.InWarp || parent->graphicOptions.InWarp);
     unsigned char gender = 0;
-    vega_types::SharedPtr<std::vector<vega_types::SharedPtr<Animation>>> anim{};
+    vector<Animation *> *anim = NULL;
     if (SPEC_interference) {
         //FIXME js_NUDGE -- need some indicator of non-interaction because one or both objects are in SPEC.
         return false;
@@ -1425,7 +1426,7 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
             endt->graphicOptions.WarpRamping = 1;
         }
         endt->graphicOptions.InWarp = 0;
-        static float clearencetime = (XMLSupport::parse_floatf(vs_config->getVariable("general", "dockingtime", "20")));
+        static float clearencetime = (XMLSupport::parse_float(vs_config->getVariable("general", "dockingtime", "20")));
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
                 true,
@@ -1496,13 +1497,13 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
         }
         vectorOfKeyboardInput[playa].req = false;
     }
-    if (vectorOfKeyboardInput[playa].und && endt != nullptr) {
-        CommunicationMessage c(endt, parent, nullptr, 0);
+    if (vectorOfKeyboardInput[playa].und && endt != NULL) {
+        CommunicationMessage c(endt, parent, NULL, 0);
         if (UnDockNow(parent, endt)) {
-            c.SetCurrentState(c.fsm->GetUnDockNode(), nullptr, 0);
+            c.SetCurrentState(c.fsm->GetUnDockNode(), NULL, 0);
             abletodock(5);
         } else {
-            c.SetCurrentState(c.fsm->GetFailDockNode(), nullptr, 0);
+            c.SetCurrentState(c.fsm->GetFailDockNode(), NULL, 0);
             abletodock(4);
         }
         parent->getAIState()->Communicate(c);
@@ -1526,9 +1527,9 @@ static void MyFunction() {
     //quit it--he's dead all ready
     static string comm_static = vs_config->getVariable("graphics", "comm_static", "static.ani");
     //dead dead dead dead
-    static vega_types::SharedPtr<Animation> Statuc = Animation::createAnimation(comm_static.c_str());
+    static Animation Statuc(comm_static.c_str());
     //yep really dead
-    _Universe->AccessCockpit()->SetCommAnimation(Statuc, nullptr);
+    _Universe->AccessCockpit()->SetCommAnimation(&Statuc, NULL);
 }
 
 void FireKeyboard::ProcessCommMessage(class CommunicationMessage &c) {
@@ -2079,8 +2080,8 @@ void FireKeyboard::Execute() {
             if (targ) {
                 CommunicationMessage *mymsg = GetTargetMessageQueue(targ, resp);
                 FSM *fsm = FactionUtil::GetConversation(parent->faction, targ->faction);
-                if (mymsg == nullptr || mymsg->curstate >= static_cast<int>(fsm->nodes.size())) {
-                    CommunicationMessage c(parent, targ, i, nullptr, parent->pilot->getGender());
+                if (mymsg == NULL || mymsg->curstate >= static_cast<int>(fsm->nodes.size())) {
+                    CommunicationMessage c(parent, targ, i, NULL, parent->pilot->getGender());
                     unsigned int whichspeech = DoSpeech(targ, targ, *c.getCurrentState());
                     float gain;
                     int sound = c.getCurrentState()->GetSound(c.sex, whichspeech, gain);
@@ -2096,7 +2097,7 @@ void FireKeyboard::Execute() {
                     mymsg->fsm = fsm;
                     FSM::Node *n = mymsg->getCurrentState();
                     if (i < n->edges.size()) {
-                        CommunicationMessage c(parent, targ, *mymsg, i, nullptr, parent->pilot->getGender());
+                        CommunicationMessage c(parent, targ, *mymsg, i, NULL, parent->pilot->getGender());
                         unsigned int whichmessage = DoSpeech(targ, targ, *c.getCurrentState());
                         float gain;
                         int sound = c.getCurrentState()->GetSound(c.sex, whichmessage, gain);

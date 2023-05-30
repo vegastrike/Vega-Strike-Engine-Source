@@ -1,7 +1,5 @@
 /*
- * animation.cpp
- *
- * Copyright (C) 2001-2023 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -38,27 +36,20 @@
 #include <algorithm>
 #include "../gldrv/gl_globals.h"
 #include "universe.h"
-#include "preferred_types.h"
-#include "vega_cast_utils.h"
 
-using namespace vega_types;
+using std::vector;
+using std::stack;
 
-static SharedPtr<SequenceContainer<SharedPtr<Animation>>> farAnimationDrawQueue() {
-    static SharedPtr<SequenceContainer<SharedPtr<Animation>>> kFarAnimationDrawQueue = MakeShared<SequenceContainer<SharedPtr<Animation>>>();
-    return kFarAnimationDrawQueue;
-}
+static vector<Animation *> far_animationdrawqueue;
 
 bool AnimationsLeftInFarQueue() {
-    return !farAnimationDrawQueue()->empty();
+    return !far_animationdrawqueue.empty();
 }
 
-static SharedPtr<SequenceContainer<SharedPtr<Animation>>> animationDrawQueue() {
-    static SharedPtr<SequenceContainer<SharedPtr<Animation>>> kAnimationDrawQueue = MakeShared<SequenceContainer<SharedPtr<Animation>>>();
-    return kAnimationDrawQueue;
-}
+static vector<Animation *> animationdrawqueue;
 
 bool AnimationsLeftInQueue() {
-    return !animationDrawQueue()->empty();
+    return !animationdrawqueue.empty();
 }
 
 static const unsigned char ani_up = 0x01;
@@ -82,7 +73,64 @@ void Animation::SetFaceCam(bool face) {
 
 using namespace VSFileSystem;
 
+Animation::Animation(VSFileSystem::VSFile *f,
+        bool Rep,
+        float priority,
+        enum FILTER ismipmapped,
+        bool camorient,
+        bool appear_near_by_radius,
+        const GFXColor &c) : mycolor(c) {
+}
+
+Animation::Animation(const char *FileName,
+        bool Rep,
+        float priority,
+        enum FILTER ismipmapped,
+        bool camorient,
+        bool appear_near_by_radius,
+        const GFXColor &c) : mycolor(c) {
+    Identity(local_transformation);
+    VSCONSTRUCT2('a')
+    //repeat = Rep;
+    options = 0;
+    if (Rep) {
+        options |= ani_repeat;
+    }
+    if (camorient) {
+        options |= ani_up;
+    }
+    if (appear_near_by_radius) {
+        options |= ani_close;
+    }
+    SetLoop(Rep);     //setup AnimatedTexture's loop flag - NOTE: Load() will leave it like this unless a force(No)Loop option is present
+    SetLoopInterp(Rep);     //Default interpolation method == looping method
+    VSFile f;
+    VSError err = f.OpenReadOnly(FileName, AnimFile);
+    if (err > Ok) {
+        //load success already set false
+    } else {
+        f.Fscanf("%f %f", &width, &height);
+        if (width > 0) {
+            options |= ani_alpha;
+        }
+        width = fabs(width * 0.5F);
+        height = height * 0.5F;
+        Load(f, 0, ismipmapped);
+        f.Close();
+    }
+    //VSFileSystem::ResetCurrentPath();
+}
+
 Animation::~Animation() {
+    vector<Animation *>::iterator i;
+    while ((i =
+            std::find(far_animationdrawqueue.begin(), far_animationdrawqueue.end(),
+                    this)) != far_animationdrawqueue.end()) {
+        far_animationdrawqueue.erase(i);
+    }
+    while ((i = std::find(animationdrawqueue.begin(), animationdrawqueue.end(), this)) != animationdrawqueue.end()) {
+        animationdrawqueue.erase(i);
+    }
     VSDESTRUCT2
 }
 
@@ -114,7 +162,7 @@ void Animation::ProcessDrawQueue() {
     GFXEnable(TEXTURE0);
     GFXDisable(TEXTURE1);
     GFXDisable(DEPTHWRITE);
-    ProcessDrawQueue(animationDrawQueue(), -FLT_MAX);
+    ProcessDrawQueue(animationdrawqueue, -FLT_MAX);
 }
 
 bool Animation::NeedsProcessDrawQueue() {
@@ -128,54 +176,54 @@ void Animation::ProcessFarDrawQueue(float farval) {
     GFXEnable(TEXTURE0);
     GFXDisable(TEXTURE1);
 
-    ProcessDrawQueue(farAnimationDrawQueue(), farval);
+    ProcessDrawQueue(far_animationdrawqueue, farval);
 }
 
 bool Animation::NeedsProcessFarDrawQueue() {
     return AnimationsLeftInFarQueue();
 }
 
-void Animation::ProcessDrawQueue(SharedPtr<SequenceContainer<SharedPtr<Animation>>> animation_draw_queue, float limit) {
+void Animation::ProcessDrawQueue(std::vector<Animation *> &animationdrawqueue, float limit) {
     if (g_game.use_animations == 0 && g_game.use_textures == 0) {
         return;
     }
     unsigned char alphamaps = ani_alpha;
     int i, j;     //NOT UNSIGNED
-    for (i = animation_draw_queue->size() - 1; i >= 0; i--) {
-        GFXColorf(animation_draw_queue->at(i)->mycolor);         //fixme, should we need this? we get som egreenie explosions
+    for (i = animationdrawqueue.size() - 1; i >= 0; i--) {
+        GFXColorf(animationdrawqueue[i]->mycolor);         //fixme, should we need this? we get som egreenie explosions
         Matrix result;
-        if (alphamaps != (animation_draw_queue->at(i)->options & ani_alpha)) {
-            alphamaps = (animation_draw_queue->at(i)->options & ani_alpha);
+        if (alphamaps != (animationdrawqueue[i]->options & ani_alpha)) {
+            alphamaps = (animationdrawqueue[i]->options & ani_alpha);
             GFXBlendMode((alphamaps != 0) ? SRCALPHA : ONE, (alphamaps != 0) ? INVSRCALPHA : ONE);
         }
         QVector campos = _Universe->AccessCamera()->GetPosition();
-        animation_draw_queue->at(i)->CalculateOrientation(result);
+        animationdrawqueue[i]->CalculateOrientation(result);
         if ((limit
                 <= -FLT_MAX) ||
-                (animation_draw_queue->at(i)->Position() - campos).Magnitude() - animation_draw_queue->at(i)->height > limit) {
+                (animationdrawqueue[i]->Position() - campos).Magnitude() - animationdrawqueue[i]->height > limit) {
             //other way was inconsistent about what was far and what was not--need to use the same test for putting to far queueu and drawing it--otherwise graphical glitches
             GFXFogMode(FOG_OFF);
-            animation_draw_queue->at(i)->DrawNow(result);
-            animation_draw_queue->at(i) =
+            animationdrawqueue[i]->DrawNow(result);
+            animationdrawqueue[i] =
                     0;             //Flag for deletion: gets called multiple times with decreasing values, and eventually is called with limit=-FLT_MAX.
         }
     }
     //Delete flagged ones
     i = 0;
-    while (i < static_cast<int>(animation_draw_queue->size()) && animation_draw_queue->at(i)) {
+    while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i]) {
         ++i;
     }
     j = i;
-    while (i < static_cast<int>(animation_draw_queue->size())) {
-        while (i < static_cast<int>(animation_draw_queue->size()) && !animation_draw_queue->at(i)) {
+    while (i < static_cast<int>(animationdrawqueue.size())) {
+        while (i < static_cast<int>(animationdrawqueue.size()) && !animationdrawqueue[i]) {
             ++i;
         }
-        while (i < static_cast<int>(animation_draw_queue->size()) && animation_draw_queue->at(i)) {
-            animation_draw_queue->at(j++) = animation_draw_queue->at(i++);
+        while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i]) {
+            animationdrawqueue[j++] = animationdrawqueue[i++];
         }
     }
     if (j >= 0) {
-        animation_draw_queue->resize(j);
+        animationdrawqueue.resize(j);
     }
 }
 
@@ -421,60 +469,16 @@ void Animation::Draw() {
                 _Universe->AccessCamera()->GetR().k);
         static float too_far_dist = XMLSupport::parse_float(
                 vs_config->getVariable("graphics", "anim_far_percent", ".8"));
-        SharedPtr<VSImage> this_as_image = shared_from_this();
-        SharedPtr<Animation> this_as_animation = vega_dynamic_cast_shared_ptr<Animation>(this_as_image);
         if (( /*R.Dot*/ (Position()
                 - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
                 *
                         (height > width ? height : width)) <
                 too_far_dist * g_game.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
-            animationDrawQueue()->emplace_back(this_as_animation);
+            animationdrawqueue.push_back(this);
         } else {
-            farAnimationDrawQueue()->emplace_back(this_as_animation);
+            far_animationdrawqueue.push_back(this);
         }
     }
-}
-
-vega_types::SharedPtr<Animation>
-Animation::createAnimation(const char *filename, bool Rep, float priority, enum FILTER ismipmapped, bool camorient,
-                           bool appear_near_by_radius, const GFXColor &col) {
-    SharedPtr<Animation> return_value = MakeShared<Animation>();
-    return constructAnimation(return_value, filename, Rep, priority, ismipmapped, camorient, appear_near_by_radius, col);
-}
-
-vega_types::SharedPtr<Animation>
-Animation::constructAnimation(vega_types::SharedPtr<Animation> animation, const char *filename, bool Rep,
-                              float priority, enum FILTER ismipmapped, bool camorient, bool appear_near_by_radius,
-                              const GFXColor &col) {
-    Identity(animation->local_transformation);
-    animation->options = 0;
-    if (Rep) {
-        animation->options |= ani_repeat;
-    }
-    if (camorient) {
-        animation->options |= ani_up;
-    }
-    if (appear_near_by_radius) {
-        animation->options |= ani_close;
-    }
-    animation->SetLoop(Rep);     //setup AnimatedTexture's loop flag - NOTE: Load() will leave it like this unless a force(No)Loop option is present
-    animation->SetLoopInterp(Rep);     //Default interpolation method == looping method
-    VSFile f;
-    VSError err = f.OpenReadOnly(filename, AnimFile);
-    if (err > Ok) {
-        //load success already set false
-    } else {
-        f.Fscanf("%f %f", &(animation->width), &(animation->height));
-        if (animation->width > 0) {
-            animation->options |= ani_alpha;
-        }
-        animation->width = fabs(animation->width * 0.5F);
-        animation->height = animation->height * 0.5F;
-        animation->Load(f, 0, ismipmapped);
-        f.Close();
-    }
-    //VSFileSystem::ResetCurrentPath();
-    return animation;
 }
 
