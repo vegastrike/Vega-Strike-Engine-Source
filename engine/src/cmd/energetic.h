@@ -100,7 +100,6 @@ public:
     float warpenergy;    //short fix
     float constrained_charge_to_shields;
     bool sufficient_energy_to_recharge_shields;
-public:
 
     //fuel of this unit
     float fuel;
