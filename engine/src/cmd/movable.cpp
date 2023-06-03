@@ -476,7 +476,7 @@ void Movable::FireEngines(const Vector &Direction /*unit vector... might default
         float FMass) {
     Energetic *energetic = dynamic_cast<Energetic*>(this);
     FMass = energetic->ExpendFuel(FMass);
-    NetForce += Direction * (FuelSpeed * FMass / GetElapsedTime());
+    NetForce += Direction * ((double)FuelSpeed * (double)FMass / GetElapsedTime());
 }
 
 //applies a force for the whole gameturn upon the center of mass
