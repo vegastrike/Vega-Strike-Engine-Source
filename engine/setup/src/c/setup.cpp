@@ -31,6 +31,7 @@
 #endif
 #include <vector>
 #include <string>
+#include <boost/program_options.hpp>
 using std::string;
 using std::vector;
 char origpath[65536];
@@ -91,7 +92,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int n
     int  argc;
     argv = __argv; // did not realize this was actually still defined by MSVC
     argc = __argc; // same here
-    
+
 #else
 int main( int argc, char *argv[] )
 {
@@ -100,24 +101,30 @@ int main( int argc, char *argv[] )
     CONFIG.config_file = NULL;
     CONFIG.program_name = NULL;
     CONFIG.temp_file = NULL;
-    
+
     bogus_str = getcwd( origpath, 65535 ); //[MSVC-Warn]
     origpath[65535] = 0;
-    
+
     changeToProgramDirectory( argv[0] );
     {
+        boost::program_options::options_description setup_options("VS setup utility");
+        setup_options.add_options()
+            ;
+        boost::program_options::variables_map cmd_args;
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, setup_options), cmd_args);
+
         vector< string >data_paths;
-        
-        if (argc > 1) {
-            if (strcmp( argv[1], "--target" ) == 0 && argc > 2) {
-                data_paths.push_back( argv[2] );
-                fprintf(stdout, "Set data directory to %s\n", argv[2]);
-            } else {
-                fprintf( stderr, "Usage: vegasettings [--target DATADIR]\n" );
-                return 1;
-            }
+
+        if (cmd_args.count("target")) {
+            data_paths.push_back(cmd_args["target"].as<std::string>());
+            std::cout << "Set data directory to " << cmd_args["target"].as<std::string>() << std::endl;
         }
-        
+        else {
+            std::cerr << setup_options << std::endl;
+            return EXIT_FAILURE;
+        }
+
+
 #ifdef DATA_DIR
         data_paths.push_back( DATA_DIR );
 #endif

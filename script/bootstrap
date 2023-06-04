@@ -72,6 +72,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
@@ -101,6 +102,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
@@ -128,6 +130,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release \
@@ -162,69 +165,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
-                    libxmu-dev \
-                    clang \
-                    lsb-release
-elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "impish" ]
-then
-    apt-get update
-    apt-get -qy install \
-                    git \
-                    cmake \
-                    python3-dev \
-                    build-essential \
-                    automake \
-                    autoconf \
-                    libpng16-16 \
-                    libpng-dev \
-                    libpng-tools \
-                    libjpeg-turbo8-dev \
-                    libexpat1-dev \
-                    libgdk-pixbuf-2.0-dev \
-                    libgtk-3-dev \
-                    libopenal-dev \
-                    libogg-dev \
-                    libvorbis-dev \
-                    libglvnd-dev \
-                    libgl1-mesa-dev \
-                    libsdl1.2-dev \
-                    libopengl0 \
-                    libpostproc-dev \
-                    freeglut3-dev \
-                    libboost-python-dev \
-                    libboost-log-dev \
-                    libboost-regex-dev \
-                    libxmu-dev \
-                    clang \
-                    lsb-release
-elif [ "$LINUX_ID" == "ubuntu" ] && [ "$LINUX_CODENAME" == "hirsute" ]
-then
-    apt-get update
-    apt-get -qy install \
-                    git \
-                    cmake \
-                    python3-dev \
-                    build-essential \
-                    automake \
-                    autoconf \
-                    libpng16-16 \
-                    libpng-dev \
-                    libpng-tools \
-                    libjpeg62-dev \
-                    libexpat1-dev \
-                    libgtk-3-dev \
-                    libopenal-dev \
-                    libogg-dev \
-                    libvorbis-dev \
-                    libglvnd-dev \
-                    libgl1-mesa-dev \
-                    libsdl1.2-dev \
-                    libopengl0 \
-                    libpostproc-dev \
-                    freeglut3-dev \
-                    libboost-python-dev \
-                    libboost-log-dev \
-                    libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
@@ -256,6 +197,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
@@ -286,6 +228,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
@@ -307,6 +250,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release \
@@ -329,6 +273,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release \
@@ -362,6 +307,7 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
+                    libboost-program-options-dev \
                     libxmu-dev \
                     clang \
                     lsb-release
@@ -376,6 +322,7 @@ then
                             libboost_regex1_66_0-devel \
                             libboost_chrono1_66_0-devel \
                             libboost_atomic1_66_0-devel \
+                            libboost_program_options1_66_0-devel \
                             cmake \
                             gcc-c++ \
                             freeglut-devel \
@@ -407,6 +354,7 @@ then
                             libboost_regex1_75_0-devel \
                             libboost_chrono1_75_0-devel \
                             libboost_atomic1_75_0-devel \
+                            libboost_program_options1_75_0-devel \
                             cmake \
                             gcc-c++ \
                             freeglut-devel \

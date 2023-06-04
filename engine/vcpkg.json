@@ -14,6 +14,7 @@
     "boost-chrono",
     "boost-atomic",
     "boost-assign",
+    "boost-program-options",
     "expat",
     "freeglut",
     "libpng",
