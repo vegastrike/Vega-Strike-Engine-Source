@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_MISION_HASHTABLE_H
-#define VEGA_STRIKE_ENGINE_MISION_HASHTABLE_H
+#ifndef VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
+#define VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
 
 #include <math.h>
 #include <list>
@@ -110,4 +110,4 @@ public:
 */
 };
 
-#endif //VEGA_STRIKE_ENGINE_MISION_HASHTABLE_H
+#endif //VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
