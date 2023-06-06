@@ -282,13 +282,8 @@ void init_opengl_extensions() {
         VS_LOG(trace, "OpenGL::GL_EXT_compiled_vertex_array supported");
     } else {
 #ifdef __APPLE__
-#ifndef __APPLE_PANTHER_GCC33_CLI__
-        glLockArraysEXT_p   = nullptr;
-        glUnlockArraysEXT_p = nullptr;
-#else
         glLockArraysEXT_p = nullptr;
         glUnlockArraysEXT_p = nullptr;
-#endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #endif
         VS_LOG(debug, "OpenGL::GL_EXT_compiled_vertex_array unsupported");
     }
