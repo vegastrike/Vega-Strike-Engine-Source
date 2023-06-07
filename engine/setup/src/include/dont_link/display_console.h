@@ -2,7 +2,7 @@
  *                           display_console.h  -  description
  *                           ----------------------------
  *                           begin                : January 18, 2002
- *                           copyright            : (C) 2002 by David Ranger
+ *                           copyright            : (C) 2002 by David Ranger, (C) 2023 by Benjamen R. Meyer
  *                           email                : sabarok@start.com.au
  **************************************************************************/
 

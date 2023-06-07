@@ -4,7 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
  * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

@@ -2,7 +2,7 @@
  * gl_init.h
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * Copyright (C) 2020-2023 pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike
  * contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source

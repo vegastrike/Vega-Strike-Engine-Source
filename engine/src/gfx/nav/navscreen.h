@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2003-2020 hellcatv, ace123, surfdargent, klaussfreire, jacks,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

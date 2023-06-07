@@ -2,7 +2,7 @@
  * python_class.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

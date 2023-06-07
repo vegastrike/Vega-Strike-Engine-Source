@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, ace123, dan_w,
- * jacks, klaussfreire, pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Alan Shieh, ace123, dan_w,
+ * jacks, klaussfreire, pyramid3d, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source

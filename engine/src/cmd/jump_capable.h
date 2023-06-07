@@ -2,7 +2,7 @@
  * jump_capable.h
  *
  * Copyright (C) 2021 Roy Falk and David Wales
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

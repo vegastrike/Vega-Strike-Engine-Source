@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2005 by Marten Svanfeldt
-  Copyright (C) 2022 Stephen G. Tuggy
+  Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Library General Public

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Pierre Terdiman, Daniel Horn, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

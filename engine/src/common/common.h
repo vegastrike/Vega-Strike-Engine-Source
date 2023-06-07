@@ -4,7 +4,7 @@
 *    begin                : Wed Jun 26 2002
 *    copyright            : (C) 2002 by jhunt
 *    email                : jhunt@jaja
-*    copyright            : (C) 2022 by Stephen G. Tuggy
+*    copyright            : (C) 2023 by Stephen G. Tuggy, Benjamen R. Meyer
 ***************************************************************************/
 
 /***************************************************************************

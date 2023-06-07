@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
  *  and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * This file is part of Vega Strike.
  *

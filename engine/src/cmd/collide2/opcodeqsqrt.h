@@ -2,6 +2,7 @@
     Copyright (C) 2000 by Andrew Zabolotny (Intel version)
     Copyright (C) 2002 by Matthew Reda <reda@mac.com> (PowerPC version)
     Fast computation of sqrt(x) and 1/sqrt(x)
+    Copyright (C) 2023 by Benjamen R. Meyer
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public

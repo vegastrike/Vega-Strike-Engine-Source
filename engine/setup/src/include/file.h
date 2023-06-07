@@ -2,7 +2,7 @@
  *                           file.h  -  description
  *                           ----------------------------
  *                           begin                : January 18, 2002
- *                           copyright            : (C) 2002 by David Ranger
+ *                           copyright            : (C) 2002 by David Ranger, (C) 2023 By Benjamen R. Meyer
  *                           email                : sabarok@start.com.au
  **************************************************************************/
 

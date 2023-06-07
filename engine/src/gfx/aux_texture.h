@@ -2,7 +2,7 @@
  * aux_texture.h
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

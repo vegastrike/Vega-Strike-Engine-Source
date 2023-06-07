@@ -1,6 +1,7 @@
 /*
   Crystal Space General Algorithms
   Copyright (C)2005 by Marten Svanfeldt
+  Copyright (C)2023 by Benjamen R. Meyer
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Library General Public

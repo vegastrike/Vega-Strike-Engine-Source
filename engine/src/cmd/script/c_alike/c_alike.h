@@ -1,7 +1,7 @@
 /* 
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  * 
  * http://vegastrike.sourceforge.net/
  *

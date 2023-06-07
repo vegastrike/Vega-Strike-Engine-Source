@@ -26,7 +26,7 @@
 
 /*
  * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2020-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2023 Stephen G. Tuggy, Benjamen R. Meyer
  */
 
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODECOL_H

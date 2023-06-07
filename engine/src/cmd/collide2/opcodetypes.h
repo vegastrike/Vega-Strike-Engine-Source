@@ -2,7 +2,7 @@
     Copyright (C) 1998-2004 by Jorrit Tyberghein
     Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other
     Vega Strike contributors
-    Copyright (C) 2021-2022 Stephen G. Tuggy
+    Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public

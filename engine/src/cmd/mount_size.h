@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Roy Falk, David Wales, and Stephen G. Tuggy.
+ * Copyright (C) 2021-2023 Roy Falk, David Wales, and Stephen G. Tuggy, Benjamen R. Meyer.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

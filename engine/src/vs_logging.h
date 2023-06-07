@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Daniel Horn, Stephen G. Tuggy and
+ * Copyright (C) 2021-2023 Daniel Horn, Stephen G. Tuggy, Benjamen R. Meyer, and
  * other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
