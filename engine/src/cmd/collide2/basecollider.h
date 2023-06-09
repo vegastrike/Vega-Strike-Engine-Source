@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _BASECOLLIDER_H__
-#define _BASECOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_BASECOLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_BASECOLLIDER_H
 
 #define CS_MESH_COLLIDER   0
 #define CS_TERRAFORMER_COLLIDER  1
@@ -51,5 +49,4 @@ struct csCollisionPair {
     Opcode::Point a2, b2, c2;   // Second triangle
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_BASECOLLIDER_H

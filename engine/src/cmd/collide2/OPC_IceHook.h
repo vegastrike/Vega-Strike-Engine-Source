@@ -1,3 +1,4 @@
+// NO HEADER GUARD
 
 // Should be included by Opcode.h if needed
 

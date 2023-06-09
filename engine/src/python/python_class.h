@@ -2,7 +2,7 @@
  * python_class.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,38 +21,43 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
+#define VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
 
-
-#ifndef __PYTHON_CLASS_H__
-#define __PYTHON_CLASS_H__
 //This takes care of the fact that several systems use the _POSIX_C_SOURCES
 //variable and don't set them to the same thing.
 //Python.h sets and uses it
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
-#endif
+#endif //_POSIX_C_SOURCE
+
 #include <Python.h>
 
 #include <boost/version.hpp>
 
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
-#endif
+#endif //defined (_MSC_VER) && _MSC_VER <= 1200
+
 #include "boost/python/object.hpp"
 #include "boost/python/class.hpp"
 #include "boost/python/call_method.hpp"
 #include <boost/python.hpp>///module.hpp>
+
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
-#endif
+#endif //defined (_MSC_VER) && _MSC_VER <= 1200
+
 #define class_builder class_
 
 #include "init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
+
 #if PY_VERSION_HEX < 0x030B0000
 #include <eval.h>
-#endif
+#endif //PY_VERSION_HEX < 0x030B0000
+
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
@@ -132,10 +137,11 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) template <> PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
     ADD_FROM_PYTHON_FUNCTION(SuperClass)
 #define PYTHON_INIT_GLOBALS(name,Class) ADD_FROM_PYTHON_FUNCTION(Class)
-#else
+#else //FROM_PYTHON_ERRORS
 #define PYTHON_INIT_INHERIT_GLOBALS(name, SuperClass) template <> PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL;
 #define PYTHON_INIT_GLOBALS(name, Class)
-#endif
+#endif //FROM_PYTHON_ERRORS
+
 //These two functions purposely have opening/closing braces that don't match up
 
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE(name) {
@@ -146,9 +152,9 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 
 #if (PY_VERSION_HEX < 0x03000000)
 #define PYTHON_MODULE_INIT_FUNCTION(name) init##name
-#else
+#else // (PY_VERSION_HEX < 0x03000000)
 #define PYTHON_MODULE_INIT_FUNCTION(name) PyInit_##name
-#endif
+#endif // (PY_VERSION_HEX < 0x03000000)
 
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) PYTHON_MODULE_INIT_FUNCTION(name)()
@@ -298,5 +304,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H

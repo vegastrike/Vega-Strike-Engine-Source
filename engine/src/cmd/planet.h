@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,14 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_CMD_PLANET_H
+#define VEGA_STRIKE_ENGINE_CMD_PLANET_H
 
 /* planet.h
  *  ok *
  * Unit type that is a gravity source, and follows a set orbit pattern
  */
-#ifndef _PLANET_H_
-#define _PLANET_H_
 
 #include <stdio.h>
 #include "unit_generic.h"
@@ -291,5 +290,4 @@ private:
     friend bool operator==(const Planet &lhs, const Planet &rhs);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_PLANET_H

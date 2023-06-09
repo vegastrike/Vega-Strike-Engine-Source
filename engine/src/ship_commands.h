@@ -3,7 +3,7 @@
 *
 * Copyright (c) 2001-2002 Daniel Horn
 * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+* Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike Contributors
 *
 * https://github.com/vegastrike/Vega-Strike-Engine-Source
 *
@@ -22,12 +22,10 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
-
-#ifndef __SHIP_COMMANDS_H__INCLUDED__
-#define __SHIP_COMMANDS_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H
+#define VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H
 
 extern void InitShipCommands();
 extern void UninitShipCommands();
 
-#endif //__SHIP_COMMANDS_H__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_SHIP_COMMANDS_H

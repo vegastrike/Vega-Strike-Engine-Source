@@ -6,7 +6,7 @@
  *
  *  Copyright (C) Daniel Horn, chuck starchaser, and pheonixstorm
  *  Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- *  Copyright (C) 2021-2022 Stephen G. Tuggy
+ *  Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  *  https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,8 +27,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _STDAFX_H_
-#define _STDAFX_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_STDAFX_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_STDAFX_H
 
 // Stephen G. Tuggy getting rid of this hack entirely
 // chuck starchaser shutting up the warnings about violations of strict aliasing...
@@ -48,5 +48,4 @@
 #include "Opcode.h"
 #include "vs_vector.h"
 
-#endif    // _STDAFX_H_
-
+#endif    //VEGA_STRIKE_ENGINE_CMD_COLLSION2_STDAFX_H

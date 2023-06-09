@@ -1,7 +1,7 @@
 /*
  * vega_cast_utils.h
  *
- * Copyright (C) 2001-2022 Daniel Horn, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,9 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_
-#define VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_
+#ifndef VEGA_STRIKE_ENGINE_VEGA_CAST_UTILS_H
+#define VEGA_STRIKE_ENGINE_VEGA_CAST_UTILS_H
 
 #include <typeinfo>
 #include <cstdlib>
@@ -63,4 +62,4 @@ inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
     return ret_val;
 }
 
-#endif //VEGA_STRIKE_SRC_VEGA_CAST_UTILS_H_
+#endif //VEGA_STRIKE_ENGINE_VEGA_CAST_UTILS_H

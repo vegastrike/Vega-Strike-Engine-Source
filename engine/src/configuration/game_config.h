@@ -1,7 +1,7 @@
 /*
  * game_config.h
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2020-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
  * David Wales, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef GAME_CONFIG_H
-#define GAME_CONFIG_H
+#ifndef VEGA_STRIKE_ENGINE_CONFIG_GAME_CONFIG_H
+#define VEGA_STRIKE_ENGINE_CONFIG_GAME_CONFIG_H
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -131,4 +129,4 @@ extern GameConfig& GetGameConfig();
 
 }
 
-#endif // GAME_CONFIG_H
+#endif //VEGA_STRIKE_ENGINE_CONFIG_GAME_CONFIG_H

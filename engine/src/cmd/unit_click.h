@@ -4,7 +4,7 @@
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
  * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __UNIT_CLICK_CPP__
-#define __UNIT_CLICK_CPP__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CLICK_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_CLICK_H
 
 #include "vegastrike.h"
 #include "gfx/mesh.h"
@@ -89,5 +87,4 @@ bool Unit::querySphereClickList(int mouseX, int mouseY, float err, Camera *activ
     return false;
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CLICK_H

@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2004 by Jorrit Tyberghein
+    Copyright (C) 2023 by Benjamen R. Meyer
     Written by John Harger <jharger AT users.sourceforge.net>
 
     This library is free software; you can redistribute it and/or
@@ -17,9 +18,9 @@
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __CS_OPCODEEXTERN_H__
-#define __CS_OPCODEEXTERN_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_OPCODEEXTERN_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_OPCODEEXTERN_H
 
 #define CS_CRYSTALSPACE_EXPORT
 
-#endif // __OPCODE_EXTERN_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_OPCODEEXTERN_H

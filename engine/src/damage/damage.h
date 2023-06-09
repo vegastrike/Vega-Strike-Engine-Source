@@ -2,7 +2,7 @@
  * damage.h
  *
  * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef DAMAGE_H
-#define DAMAGE_H
+#ifndef VEGA_STRIKE_ENGINE_DAMAGE_DAMAGE_H
+#define VEGA_STRIKE_ENGINE_DAMAGE_DAMAGE_H
 
 #include <vector>
 
@@ -79,4 +77,4 @@ struct InflictedDamage {
     InflictedDamage() = delete;
 };
 
-#endif // DAMAGE_H
+#endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGE_H

@@ -26,12 +26,12 @@
 
 /*
  * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2020-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2023 Stephen G. Tuggy, Benjamen R. Meyer
  */
 
-#ifndef __VS_OPCODECOL_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODECOL_H
 #include "Stdafx.h"
-#define __VS_OPCODECOL_H__
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODECOL_H
 #include "csgeom2/opmatrix3.h"
 #include "csgeom2/opvector3.h"
 #include "csgeom2/opbox.h"
@@ -166,4 +166,4 @@ public:
     }
 };
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODECOL_H

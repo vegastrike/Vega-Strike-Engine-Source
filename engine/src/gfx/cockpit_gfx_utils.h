@@ -1,11 +1,10 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /*
  * cockpit_gfx_utils.h
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -24,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef COCKPIT_GFX_UTILS_H
-#define COCKPIT_GFX_UTILS_H
-
+#ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_UTILS_H
+#define VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_UTILS_H
 
 #include "vec.h"
 #include "gfxlib_struct.h"
@@ -57,4 +54,4 @@ VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& ca
 
 void SetThickness(ShapeType type);
 
-#endif // COCKPIT_GFX_UTILS_H
+#endif //VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_UTILS_H

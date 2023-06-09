@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  *  contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _STAR_H_
-#define _STAR_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_STAR_H
+#define VEGA_STRIKE_ENGINE_GFX_STAR_H
 #include "gfxlib.h"
 
 #include "gfxlib_struct.h"
@@ -128,5 +126,5 @@ public:
     void Draw();
     ~Stars();
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_STAR_H

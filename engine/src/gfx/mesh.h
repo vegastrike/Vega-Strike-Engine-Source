@@ -6,7 +6,7 @@
  *  ace123, jacks, and other Vega Strike contributors
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
  *  and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,10 +25,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _MESH_H_
-#define _MESH_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_MESH_H
+#define VEGA_STRIKE_ENGINE_GFX_MESH_H
 
 #include <string>
 #include <vector>
@@ -455,5 +453,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_MESH_H

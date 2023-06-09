@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Konstantinos Arvanitis,
- * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, Konstantinos Arvanitis,
+ * pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef COMMON_CODE_FOR_VSRP_TOOLS_
-#define COMMON_CODE_FOR_VSRP_TOOLS_
+#ifndef VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
+#define VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
 #include <stdio.h>
 #include <stdint.h>
 #include <string>
@@ -73,4 +73,4 @@ struct VSRMember {
     }
 };
 
-#endif //COMMON_CODE_FOR_VSRP_TOOLS_
+#endif //VEGA_STRIKE_ENGINE_TOOLS_COMMON_H

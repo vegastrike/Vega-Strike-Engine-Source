@@ -1,10 +1,11 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 /**
  * autodocking.h
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2002-2019 pyramid3d and other Vega Strike Contributors
  * Copyright (C) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,12 +24,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
-#ifndef VEGASTRIKE_CMD_AI_AUTODOCKING_H
-#define VEGASTRIKE_CMD_AI_AUTODOCKING_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H
+#define VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H
 
 #include <deque>
 #include <boost/shared_ptr.hpp>
@@ -114,4 +111,4 @@ private:
 
 } // namespace Orders
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H

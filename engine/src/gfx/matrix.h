@@ -4,7 +4,7 @@
  * Copyright (C) 2001-2002 Alan Shieh and Daniel Horn
  * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  *  contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,9 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef _MATRIX_H
-#define _MATRIX_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_MATRIX_H
+#define VEGA_STRIKE_ENGINE_GFX_MATRIX_H
 
 #include "vec.h"
 #include "endianness.h"
@@ -395,5 +394,4 @@ struct DrawContext {
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_MATRIX_H

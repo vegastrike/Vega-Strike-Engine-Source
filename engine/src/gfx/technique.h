@@ -4,7 +4,7 @@
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
  * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __TECHNIQUE_H__INCLUDED__
-#define __TECHNIQUE_H__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H
+#define VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H
 
 #include "pass.h"
 
@@ -104,5 +102,4 @@ public:
     static TechniquePtr getTechnique(const string &name);
 };
 
-#endif //__TECHNIQUE_H__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H

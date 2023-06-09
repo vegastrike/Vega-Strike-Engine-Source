@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __CONVERTER_API__INCLUDED__
-#define __CONVERTER_API__INCLUDED__
+#ifndef VEGA_STRIKE_ENGINE_OBJCONV_CONVERTER_H
+#define VEGA_STRIKE_ENGINE_OBJCONV_CONVERTER_H
 
 namespace Converter {
 typedef std::vector<std::string> ParameterList;
@@ -209,5 +208,4 @@ public:
 };
 }
 
-#endif //__CONVERTER_API__INCLUDED__
-
+#endif //VEGA_STRIKE_ENGINE_OBJCONV_CONVERTER_H

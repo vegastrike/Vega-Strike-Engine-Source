@@ -6,8 +6,8 @@
 */
 
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,8 +28,8 @@
  */
 
 // Check to see if we're already loaded
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H
+#define VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H
 
 #include "central.h"
 #include "version.h"
@@ -48,4 +48,4 @@ the latest drivers for your video card.\nIf you run into problems please \
 upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 \
 for sound and F11/F12 for music."
 
-#endif    //DISPLAY_H
+#endif    //VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H

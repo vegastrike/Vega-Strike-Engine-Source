@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,10 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef COLLISION_H
-#define COLLISION_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLISION_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLISION_H
 
 #include "gfx/vec.h"
 #include "unit_generic.h"
@@ -85,4 +83,4 @@ public:
 
 };
 
-#endif // COLLISION_H
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLISION_H

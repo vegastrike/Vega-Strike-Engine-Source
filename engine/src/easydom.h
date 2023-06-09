@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,14 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_EASYDOM_H
+#define VEGA_STRIKE_ENGINE_EASYDOM_H
 
 /*
  *  easyDom - easy DOM for expat - written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#ifndef _EASYDOM_H_
-#define _EASYDOM_H_
 #include <expat.h>
 #include <string>
 #include <vector>
@@ -293,5 +292,4 @@ public:
     domNodeType *topnode;
 };
 
-#endif //_EASYDOM_H_
-
+#endif //VEGA_STRIKE_ENGINE_EASYDOM_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -20,8 +20,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _XML_SERIALIZER_H_
-#define _XML_SERIALIZER_H_
+#ifndef VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
+#define VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
+
 #include "xml_support.h"
 #include <vector>
 #include <string>
@@ -191,5 +192,6 @@ public:
         this->filename = fil;
     }
 };
-#endif
+
+#endif //VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
 

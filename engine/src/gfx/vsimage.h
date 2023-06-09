@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
  *  and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * This file is part of Vega Strike.
  *
@@ -20,10 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __VSIMAGE__H
-#define __VSIMAGE__H
+#ifndef VEGA_STRIKE_ENGINE_GFX_VSIMAGE_H
+#define VEGA_STRIKE_ENGINE_GFX_VSIMAGE_H
 
 #include "vsfilesystem.h"
 
@@ -300,5 +298,4 @@ public:
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_VSIMAGE_H

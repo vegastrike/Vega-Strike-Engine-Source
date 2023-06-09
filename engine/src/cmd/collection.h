@@ -4,7 +4,7 @@
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
  * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,14 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H
 
 /* unitCollection.h
  *
  *****/
-
-#ifndef _UNITCOLLECTION_H_
-#define _UNITCOLLECTION_H_
 
 //Collection type:
 //#define USE_OLD_COLLECTION
@@ -317,5 +315,4 @@ typedef UnitCollection::ConstIterator un_fkiter;
 #error "No collection type chosen in collection.h:10"
 #endif //USE_STL_COLLECTION
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_COLLECTION_H

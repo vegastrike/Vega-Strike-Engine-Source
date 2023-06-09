@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2006 by Kapoulkine Arseny
-    Copyright (C) 2022 by Stephen G. Tuggy
+    Copyright (C) 2022-2023 by Stephen G. Tuggy, Benjamen R. Meyer
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -16,7 +16,7 @@
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
+// NO HEADER GUARD
 
 class csTerrainSegmentCellCollider {
 private:

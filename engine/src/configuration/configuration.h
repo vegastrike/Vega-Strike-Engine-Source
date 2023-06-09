@@ -1,8 +1,8 @@
 /*
  * configuration.h
  *
- * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, ministerofinformation,
- * David Wales, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021-2023 Daniel Horn, Roy Falk, ministerofinformation,
+ * David Wales, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,8 +23,8 @@
  */
 
 
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
+#define VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
 
 #include <cstdint>
 #include <memory>
@@ -463,4 +463,4 @@ public:
 
 extern std::shared_ptr<Configuration> configuration();
 
-#endif // CONFIGURATION_H
+#endif //VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H

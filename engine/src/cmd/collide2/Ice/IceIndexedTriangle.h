@@ -11,13 +11,14 @@
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
  * Updated by Stephen G. Tuggy 2022-01-06
+ * Updated by Benjamen R. Meyer 2023-05-027
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEINDEXEDTRIANGLE_H__
-#define __ICEINDEXEDTRIANGLE_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_INDEXED_TRIANGLE_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_INDEXED_TRIANGLE_H
 
 // An indexed triangle class.
 class IndexedTriangle {
@@ -81,4 +82,4 @@ public:
     bool Equal(const IndexedTriangle &tri) const;
 };
 
-#endif // __ICEINDEXEDTRIANGLE_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_INDEXED_TRIANGLE_H

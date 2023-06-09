@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef _XML_SUPPORT_H_
-#define _XML_SUPPORT_H_
+#ifndef VEGA_STRIKE_ENGINE_XML_SUPPORT_H
+#define VEGA_STRIKE_ENGINE_XML_SUPPORT_H
 
 #include <cstdio>
 #include <string>
@@ -145,12 +144,14 @@ inline std::string VectorToString(const Vector &v) {
     }
     return ret;
 }
-/*#else
+/*
+ * #else //WIN32
  *  inline template<class T> string tostring(T num) {
  *   return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
  *
  *  }
- #endif*/
+ * #endif //WIN32
+ */ 
 }
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_XML_SUPPORT_H

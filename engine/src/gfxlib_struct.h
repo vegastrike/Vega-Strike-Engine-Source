@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
+#define VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
 
-
-#ifndef _GFXLIB_STRUCT
-#define _GFXLIB_STRUCT
 #include "gfx/vec.h"
 #include "endianness.h"
 
@@ -32,7 +31,8 @@
 
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char
-#endif
+#endif //GFXBOOL
+
 #define GFXTRUE 1
 #define GFXFALSE 0
 
@@ -1319,5 +1319,4 @@ struct PickData {
     }
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H

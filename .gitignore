@@ -9,6 +9,7 @@ ext/
 packages/
 *.log
 *.bak
+*.sw?
 *.kdev4
 .vs/
 .vscode/

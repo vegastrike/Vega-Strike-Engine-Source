@@ -8,7 +8,7 @@
  * Copyright (C) 2000 Pierre Terdiman
  * Copyright (C) 2020 pyramid3d, LifWirser, Benjamen Meyer, Stephen G. Tuggy,
  * and other Vega Strike contributors.
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * This file is part of Vega Strike.
  *
@@ -29,8 +29,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEPOINT_H__
-#define __ICEPOINT_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_POINT_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_POINT_H
 
 // Forward declarations
 class HPoint;
@@ -773,4 +773,4 @@ public:
 FUNCTION ICEMATHS_API void Normalize1(Point &a);
 FUNCTION ICEMATHS_API void Normalize2(Point &a);
 
-#endif //__ICEPOINT_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_POINT_H

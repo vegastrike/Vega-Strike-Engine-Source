@@ -11,13 +11,14 @@
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
  * Updated by Stephen G. Tuggy 2022-01-06
+ * Updated by Benjamen R. Meyer 2023-05-27
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __ICEUTILS_H__
-#define __ICEUTILS_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_UTILS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_UTILS_H
 
 #define START_RUNONCE    { static bool __RunOnce__ = false;    if(!__RunOnce__){
 #define END_RUNONCE        __RunOnce__ = true;}}
@@ -295,4 +296,4 @@ inline_ void Compute3DCoords(uint32_t &u, uint32_t &v, uint32_t &w, uint32_t i, 
     Compute2DCoords(u, v, i - (w * nbu_nbv), nbu);
 }
 
-#endif // __ICEUTILS_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_UTILS_H

@@ -1,7 +1,7 @@
 /* 
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  * 
  * http://vegastrike.sourceforge.net/
  *
@@ -19,6 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+// NO HEADER GUARD
 
 /*
   c_alike scripting written by Alexander Rawass <alexannika@users.sourceforge.net>

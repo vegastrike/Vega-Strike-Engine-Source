@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
- * jacks, dan_w, ashieh, griwodz, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * jacks, dan_w, ashieh, griwodz, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -20,10 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef LOGO_H_
-#define LOGO_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_LOGO_H
+#define VEGA_STRIKE_ENGINE_GFX_LOGO_H
 
 #include "matrix.h"
 #include "gfxlib.h"
@@ -78,5 +76,4 @@ public:
     void Draw(const Matrix &m);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_LOGO_H

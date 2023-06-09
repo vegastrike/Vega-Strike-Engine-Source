@@ -19,13 +19,14 @@
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
  * Updated by Stephen G. Tuggy 2022-01-06
+ * Updated by Benjamen R. Meyer 2023-05-27
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
-#ifndef __OPC_SPHERECOLLIDER_H__
-#define __OPC_SPHERECOLLIDER_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SPHERE_COLLIDER_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SPHERE_COLLIDER_H
 
 struct OPCODE_API SphereCache : VolumeCache {
     SphereCache() : Center(0.0f, 0.0f, 0.0f), FatRadius2(0.0f), FatCoeff(1.1f) {
@@ -111,4 +112,4 @@ protected:
     Container mTouchedBoxes;
 };
 
-#endif // __OPC_SPHERECOLLIDER_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SPHERE_COLLIDER_H

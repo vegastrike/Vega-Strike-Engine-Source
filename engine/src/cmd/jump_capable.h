@@ -2,7 +2,7 @@
  * jump_capable.h
  *
  * Copyright (C) 2021 Roy Falk and David Wales
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef JUMPCAPABLE_H
-#define JUMPCAPABLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
+#define VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 
 #include "star_system.h"
 #include "energetic.h"
@@ -62,4 +60,4 @@ public:
             bool DoSightAndSound);
 };
 
-#endif // JUMPCAPABLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H

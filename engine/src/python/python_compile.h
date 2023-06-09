@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,14 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef _PYTHON_COMPILE_H_
-#define _PYTHON_COMPILE_H_
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_PYTHON_COMPILE_H
+#define VEGA_STRIKE_ENGINE_PYTHON_PYTHON_COMPILE_H
 
 //Resets variable for use by python config.h
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
-#endif
+#endif //_POSIX_C_SOURCE
 
 #include <Python.h>
 #include "hashtable.h"
@@ -92,5 +91,5 @@ public:
         return *myitem;
     }
 };
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_PYTHON_PYTHON_COMPILE_H

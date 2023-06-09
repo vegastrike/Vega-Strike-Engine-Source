@@ -1,7 +1,9 @@
 /*
  *  Copyright (c) 1998, 1999, 2000 Thai Open Source Software Center Ltd
+ *  Copyright (c) 2023 Benjamen R. Meyer
  *  See the file COPYING for copying permission.
  */
+// NO HEADER GUARD -- 3rd Party
 
 #ifndef XmlParse_INCLUDED
 #define XmlParse_INCLUDED 1

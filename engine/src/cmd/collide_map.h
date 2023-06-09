@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
 
-
-#ifndef _COLLIDE_MAP_H_
-#define _COLLIDE_MAP_H_
 #include "key_mutable_set.h"
 #include "vegastrike.h"
 #include "gfx/vec.h"
@@ -236,5 +235,5 @@ inline void set_null(CollideMap::iterator &it) {
 }
 
 #endif
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H

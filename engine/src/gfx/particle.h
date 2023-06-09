@@ -1,7 +1,7 @@
 /*
  * particle.h
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (c) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __PARTICLE_H
-#define __PARTICLE_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_PARTICLE_H
+#define VEGA_STRIKE_ENGINE_GFX_PARTICLE_H
 
 #include <vector>
 #include <string>
@@ -163,5 +161,4 @@ extern ParticleTrail particleTrail;
 extern ParticleTrail smokeTrail;
 extern ParticleTrail debrisTrail;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_PARTICLE_H

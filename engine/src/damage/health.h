@@ -1,7 +1,7 @@
 /*
  * health.h
  *
- * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2021-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef HEALTH_H
-#define HEALTH_H
+#ifndef VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H
+#define VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H
 
 #include "damage.h"
 
@@ -115,4 +113,4 @@ public:
     void Update(float health);
 };
 
-#endif // HEALTH_H
+#endif //VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H

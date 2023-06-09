@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-// Check to see if we're already loaded
-#ifndef CENTRAL_H
-#define CENTRAL_H
+#ifndef VEGA_STRIKE_ENGINE_MISSION_CENTRAL_H
+#define VEGA_STRIKE_ENGINE_MISSION_CENTRAL_H
 
 #define MISSION_VERSION "1.0.0.1"
 #define MISSION_PROGRAM "Vega Strike"
@@ -67,4 +65,4 @@ struct mission_data {
 extern glob_t *MISSIONS;
 extern struct mission_data DATA;
 
-#endif    //CENTRAL_H
+#endif //VEGA_STRIKE_ENGINE_MISSION_CENTRAL_H

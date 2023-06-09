@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef GLUT_SUPPORT_H
-#define GLUT_SUPPORT_H
+#ifndef VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H
+#define VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H
 
 /* If you have functions that perform the same operation, but use different parameters,
  * It may be best if you replace the following functions with wrappers to your own functions
@@ -46,5 +45,4 @@ void DrawGlutMouse(int mousex, int mousey, class VSSprite *spr);
 void EndGUIFrame(MousePointerStyle pointerStyle);
 extern int HAS_ALPHA;
 
-#endif    //GLUT_SUPPORT_H
-
+#endif    //VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H

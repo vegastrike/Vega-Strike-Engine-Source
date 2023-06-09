@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * This file is part of Vega Strike.
  *
@@ -20,10 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef CS_COMPAT_H_
-#define CS_COMPAT_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
 
 
 //#define OPC_USE_CALLBACKS 1
@@ -65,4 +63,4 @@ struct iBase {
 #define CS_ASSERT assert
 
 #include "opcodetypes.h"
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H

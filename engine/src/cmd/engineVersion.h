@@ -2,7 +2,7 @@
  * engineVersion.h
  *
  * Copyright (C) 2021 Benjamen Meyer
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef VS_ENGINE_VERSION_H__
-#define VS_ENGINE_VERSION_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_VERSION_H
+#define VEGA_STRIKE_ENGINE_CMD_VERSION_H
 
 #include <string>
 #include <stdint.h>
@@ -56,4 +54,4 @@ protected:
 };
 }
 
-#endif //VS_ENGINE_VERSION_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_VERSION_H

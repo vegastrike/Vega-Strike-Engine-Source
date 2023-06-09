@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,6 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_FORCE_FEEDBACK_H
+#define VEGA_STRIKE_ENGINE_FORCE_FEEDBACK_H
 
 /*
  *  Force Feedback support by Alexander Rawass <alexannika@users.sourceforge.net>
@@ -26,8 +28,6 @@
 
 //#define  HAVE_FORCE_FEEDBACK 1
 
-#ifndef _FORCE_FEEDBACK_H_
-#define _FORCE_FEEDBACK_H_
 #ifndef _WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -36,7 +36,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#endif
+#endif //_WIN32
+
 #include <stdio.h>
 
 #if HAVE_FORCE_FEEDBACK
@@ -51,7 +52,7 @@
 
 #define _is( x ) ( (int) ( 3.2768*( (float) x ) ) )
 
-#endif //have_force_feedback
+#endif //HAVE_FORCE_FEEDBACK
 
 #define ALL_EFFECTS 1
 
@@ -64,15 +65,15 @@ enum vseffects {
     eff_beam_on, eff_beam_off,     //beam
     eff_missile_jerk, eff_missile_vibrate,     //missile
     eff_hit_jerk, eff_hit_vibrate,     //shield hits
-#endif
+#endif //ALL_EFFECTS
     eff_force     //additional force
 };
 
 #if ALL_EFFECTS
 #define N_EFFECTS 15
-#else
+#else //ALL_EFFECTS
 #define N_EFFECTS 9
-#endif
+#endif //ALL_EFFECTS
 
 class ForceFeedback {
 public:
@@ -114,8 +115,7 @@ private:
         double min_effect_time;
 
         bool   is_played[N_EFFECTS];
-#endif //have_force_feedback
+#endif //HAVE_FORCE_FEEDBACK
 };
 
-#endif //_FORCE_FEEDBACK_H_
-
+#endif //VEGA_STRIKE_ENGINE_FORCE_FEEDBACK_H

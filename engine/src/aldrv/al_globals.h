@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef AL_GLOBALS_H_
-#define AL_GLOBALS_H_
+#ifndef VEGA_STRIKE_ENGINE_AL_GLOBALS_H
+#define VEGA_STRIKE_ENGINE_AL_GLOBALS_H
 
 /* #undef SOUND_DEBUG */
 
@@ -121,5 +119,4 @@ bool AUDLoadSoundFile(const char *s, struct AUDSoundProperties *info, bool use_f
 //It is up to the caller to free(info.wave) after using!!!
 int AUDBufferSound(const struct AUDSoundProperties *info, bool music);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_AL_GLOBALS_H

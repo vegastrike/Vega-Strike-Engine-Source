@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_FLIGHT_GROUP_H
+#define VEGA_STRIKE_ENGINE_CMD_SCRIPT_FLIGHT_GROUP_H
 
-
-#ifndef _FLIGHTGROUP_H_
-#define _FLIGHTGROUP_H_
 #include "cmd/container.h"
 #include "mission.h"
 #include <string>
@@ -131,5 +130,4 @@ public:
     class easyDomNode *domnode;
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_FLIGHT_GROUP_H

@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef ENERGETIC_H
-#define ENERGETIC_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H
+#define VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H
 
 #include "resource/resource.h"
 
@@ -108,4 +106,4 @@ public:
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };
 
-#endif // ENERGETIC_H
+#endif //VEGA_STRIKE_ENGINE_CMD_ENERGETIC_H

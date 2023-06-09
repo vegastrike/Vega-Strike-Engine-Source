@@ -4,7 +4,7 @@
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
  * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,14 +23,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_CMD_OLD_COLLECTION_H
+#define VEGA_STRIKE_ENGINE_CMD_OLD_COLLECTION_H
 
 /* unitCollection.h
  *
  *****/
 
-#ifndef _OLDCOLLECTION_H_
-#define _OLDCOLLECTION_H_
 #include <stdlib.h>
 
 class Unit;
@@ -406,5 +405,4 @@ typedef UnitCollection::ConstIterator un_kiter;
 typedef UnitCollection::ConstFastIterator un_fkiter;
 typedef UnitCollection::FastIterator un_fiter;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_OLD_COLLECTION_H

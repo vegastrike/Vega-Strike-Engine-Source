@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2012 Claudio Freire
  * Copyright (C) 2019-2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _VS_OCCLUSION_H_
-#define _VS_OCCLUSION_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
+#define VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
 
 #include "vs_globals.h"
 
@@ -68,4 +66,4 @@ float /*GFXDRVAPI*/ testOcclusion(const QVector &lightPos, float lightSize, cons
 
 }
 
-#endif//_VS_OCCLUSION_H_
+#endif //VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
