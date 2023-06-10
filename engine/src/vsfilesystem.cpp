@@ -1,8 +1,7 @@
-/**
+/*
  * vsfilesystem.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020-2021 pyramid3d, Nachum Barcohen, Roy Falk,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen, Roy Falk,
  * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -100,11 +99,7 @@ extern string GetUnitDir( string filename );
 
 string selectcurrentdir;
 
-#if defined (__APPLE__)
-int selectdirs( struct dirent *entry )
-#else
 int selectdirs( const struct dirent * entry )
-#endif
 {
     if (string( entry->d_name ) == "." && string( entry->d_name ) == "..")
         return 0;
