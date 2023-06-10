@@ -134,15 +134,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
       with:
-        # We must fetch at least the immediate parents so that if this is
-        # a pull request then we can checkout the head.
         fetch-depth: 2
         submodules: false
-
-    # where in a pull request we want to move to the head of the PR and not be at the
-    # merge commit; here we want to be at the HEAD of the ref
 
     - name: Extract tag name and short SHA
       shell: bash
