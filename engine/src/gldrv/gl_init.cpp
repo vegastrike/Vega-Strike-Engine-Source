@@ -1,9 +1,8 @@
-/**
+/*
  * gl_init.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -65,6 +64,7 @@
 #if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>
     #include <OpenGL/glext.h>
+    #include <dlfcn.h>
 #else
     #include <GL/gl.h>
     #include <GL/glext.h>
@@ -78,7 +78,7 @@
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 
-#if !defined (__APPLE__) && !defined (MACOSX) && !defined (WIN32)  && !defined (__HAIKU__)
+#if !defined (WIN32) && !defined (__HAIKU__) && !defined (__APPLE__) && !defined (MACOSX)
     # define GLX_GLXEXT_PROTOTYPES 1
     # define GLX_GLXEXT_LEGACY 1
     # include <GL/glx.h>
@@ -94,74 +94,76 @@
 #include "cg_global.h"
 #endif
 
-#if !defined (__APPLE__)
+NGLBINDBUFFERARBPROC glBindBufferARB_p = nullptr;
+PFNGLGENBUFFERSPROC glGenBuffersARB_p = nullptr;
+PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB_p = nullptr;
+PFNGLBUFFERDATAARBPROC glBufferDataARB_p = nullptr;
+PFNGLMAPBUFFERARBPROC glMapBufferARB_p = nullptr;
+PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB_p = nullptr;
 
-PFNGLBINDBUFFERARBPROC    glBindBufferARB_p    = 0;
-PFNGLGENBUFFERSARBPROC    glGenBuffersARB_p    = 0;
-PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB_p = 0;
-PFNGLBUFFERDATAARBPROC    glBufferDataARB_p    = 0;
-PFNGLMAPBUFFERARBPROC     glMapBufferARB_p     = 0;
-PFNGLUNMAPBUFFERARBPROC   glUnmapBufferARB_p   = 0;
+PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p = nullptr;
+PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p = nullptr;
+PFNGLCOLORTABLEEXTPROC glColorTable_p = nullptr;
+PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p = nullptr;
+PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB_p = nullptr;
 
-PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p = 0;
-PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p = 0;
-PFNGLCOLORTABLEEXTPROC glColorTable_p = 0;
-PFNGLMULTITEXCOORD2FARBPROC     glMultiTexCoord2fARB_p     = 0;
-PFNGLMULTITEXCOORD4FARBPROC     glMultiTexCoord4fARB_p     = 0;
+PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p = nullptr;
+PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p = nullptr;
+PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = nullptr;
+PFNGLMULTIDRAWARRAYSEXTPROC glMultiDrawArrays_p = nullptr;
+PFNGLMULTIDRAWELEMENTSEXTPROC glMultiDrawElements_p = nullptr;
 
-PFNGLLOCKARRAYSEXTPROC        glLockArraysEXT_p        = 0;
-PFNGLUNLOCKARRAYSEXTPROC      glUnlockArraysEXT_p      = 0;
-PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
-PFNGLMULTIDRAWARRAYSEXTPROC   glMultiDrawArrays_p      = 0;
-PFNGLMULTIDRAWELEMENTSEXTPROC glMultiDrawElements_p    = 0;
+PFNGLGETSHADERIVPROC glGetShaderiv_p = nullptr;
+PFNGLGETPROGRAMIVPROC glGetProgramiv_p = nullptr;
+PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog_p = nullptr;
+PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog_p = nullptr;
+PFNGLCREATESHADERPROC glCreateShader_p = nullptr;
+PFNGLSHADERSOURCEPROC glShaderSource_p = nullptr;
+PFNGLCOMPILESHADERPROC glCompileShader_p = nullptr;
+PFNGLCREATEPROGRAMPROC glCreateProgram_p = nullptr;
+PFNGLATTACHSHADERPROC glAttachShader_p = nullptr;
+PFNGLLINKPROGRAMPROC glLinkProgram_p = nullptr;
+PFNGLUSEPROGRAMPROC glUseProgram_p = nullptr;
+PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation_p = nullptr;
+PFNGLUNIFORM1FPROC glUniform1f_p = nullptr;
+PFNGLUNIFORM2FPROC glUniform2f_p = nullptr;
+PFNGLUNIFORM3FPROC glUniform3f_p = nullptr;
+PFNGLUNIFORM4FPROC glUniform4f_p = nullptr;
 
-PFNGLGETSHADERIVPROC        glGetShaderiv_p        = 0;
-PFNGLGETPROGRAMIVPROC       glGetProgramiv_p       = 0;
-PFNGLGETSHADERINFOLOGPROC   glGetShaderInfoLog_p   = 0;
-PFNGLGETPROGRAMINFOLOGPROC  glGetProgramInfoLog_p  = 0;
-PFNGLCREATESHADERPROC       glCreateShader_p       = 0;
-PFNGLSHADERSOURCEPROC       glShaderSource_p       = 0;
-PFNGLCOMPILESHADERPROC      glCompileShader_p      = 0;
-PFNGLCREATEPROGRAMPROC      glCreateProgram_p      = 0;
-PFNGLATTACHSHADERPROC       glAttachShader_p       = 0;
-PFNGLLINKPROGRAMPROC        glLinkProgram_p        = 0;
-PFNGLUSEPROGRAMPROC glUseProgram_p = 0;
-PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation_p = 0;
-PFNGLUNIFORM1FPROC     glUniform1f_p     = 0;
-PFNGLUNIFORM2FPROC     glUniform2f_p     = 0;
-PFNGLUNIFORM3FPROC     glUniform3f_p     = 0;
-PFNGLUNIFORM4FPROC     glUniform4f_p     = 0;
+PFNGLUNIFORM1IPROC glUniform1i_p = nullptr;
+PFNGLUNIFORM2IPROC glUniform2i_p = nullptr;
+PFNGLUNIFORM3IPROC glUniform3i_p = nullptr;
+PFNGLUNIFORM4IPROC glUniform4i_p = nullptr;
 
-PFNGLUNIFORM1IPROC     glUniform1i_p     = 0;
-PFNGLUNIFORM2IPROC     glUniform2i_p     = 0;
-PFNGLUNIFORM3IPROC     glUniform3i_p     = 0;
-PFNGLUNIFORM4IPROC     glUniform4i_p     = 0;
+PFNGLUNIFORM1FVPROC glUniform1fv_p = nullptr;
+PFNGLUNIFORM2FVPROC glUniform2fv_p = nullptr;
+PFNGLUNIFORM3FVPROC glUniform3fv_p = nullptr;
+PFNGLUNIFORM4FVPROC glUniform4fv_p = nullptr;
 
-PFNGLUNIFORM1FVPROC    glUniform1fv_p    = 0;
-PFNGLUNIFORM2FVPROC    glUniform2fv_p    = 0;
-PFNGLUNIFORM3FVPROC    glUniform3fv_p    = 0;
-PFNGLUNIFORM4FVPROC    glUniform4fv_p    = 0;
+PFNGLUNIFORM1IVPROC glUniform1iv_p = nullptr;
+PFNGLUNIFORM2IVPROC glUniform2iv_p = nullptr;
+PFNGLUNIFORM3IVPROC glUniform3iv_p = nullptr;
+PFNGLUNIFORM4IVPROC glUniform4iv_p = nullptr;
 
-PFNGLUNIFORM1IVPROC    glUniform1iv_p    = 0;
-PFNGLUNIFORM2IVPROC    glUniform2iv_p    = 0;
-PFNGLUNIFORM3IVPROC    glUniform3iv_p    = 0;
-PFNGLUNIFORM4IVPROC    glUniform4iv_p    = 0;
-
-PFNGLDELETESHADERPROC  glDeleteShader_p  = 0;
-PFNGLDELETEPROGRAMPROC glDeleteProgram_p = 0;
-
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+PFNGLDELETESHADERPROC glDeleteShader_p = nullptr;
+PFNGLDELETEPROGRAMPROC glDeleteProgram_p = nullptr;
 
 typedef void ( *(*get_gl_proc_fptr_t)(const GLubyte*) )();
 #ifdef _WIN32
-typedef char*GET_GL_PTR_TYP;
-#define GET_GL_PROC wglGetProcAddress
+    typedef char * GET_GL_PTR_TYP;
+    #define GET_GL_PROC wglGetProcAddress
 #else
 	#if defined(__HAIKU__)
 	    typedef char * GET_GL_PTR_TYP;
 		#define GET_GL_PROC glutGetProcAddress
+    #elif defined (__MACOSX__)
+        typedef const char * GET_GL_PTR_TYP;
+        void * vega_dlsym(GET_GL_PTR_TYP function_name) {
+            return dlsym(RTLD_SELF, function_name);
+        }
+        #define GET_GL_PROC vega_dlsym
 	#else
-		typedef GLubyte*GET_GL_PTR_TYP;
+		typedef GLubyte *GET_GL_PTR_TYP;
 		#define GET_GL_PROC glXGetProcAddressARB
 	#endif
 #endif
@@ -173,7 +175,7 @@ CG_Cloak *cloak_cg = new CG_Cloak();
 /* CENTRY */
 int vsExtensionSupported( const char *extension )
 {
-    static const GLubyte *extensions = NULL;
+    static const GLubyte *extensions = nullptr;
     const GLubyte *start;
     GLubyte *where, *terminator;
 
@@ -256,9 +258,12 @@ void init_opengl_extensions()
         glLockArraysEXT_p   = &glLockArraysEXT;
         glUnlockArraysEXT_p = &glUnlockArraysEXT;
 #else
-        glLockArraysEXT_p   = 0;
-        glUnlockArraysEXT_p = 0;
+        glLockArraysEXT_p   = nullptr;
+        glUnlockArraysEXT_p = nullptr;
 #endif
+#else
+        glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC)(dlsym(RTLD_SELF, "glLockArraysEXT"));
+        glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC)(dlsym(RTLD_SELF, "glUnlockArraysEXT"));
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
         glLockArraysEXT_p   = (PFNGLLOCKARRAYSEXTPROC)
@@ -269,40 +274,39 @@ void init_opengl_extensions()
         BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_compiled_vertex_array supported";
     } else {
 #ifdef __APPLE__
-#ifndef __APPLE_PANTHER_GCC33_CLI__
-        glLockArraysEXT_p   = 0;
-        glUnlockArraysEXT_p = 0;
-#endif /*__APPLE_PANTHER_GCC33_CLI__*/
+        glLockArraysEXT_p   = nullptr;
+        glUnlockArraysEXT_p = nullptr;
 #endif
         BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_compiled_vertex_array unsupported";
     }
 #endif
-#ifndef __APPLE__
-    if ( vsExtensionSupported( "GL_EXT_multi_draw_arrays" ) ) {
+#if defined (__MACOSX__)
+    if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
         glMultiDrawArrays_p   = (PFNGLMULTIDRAWARRAYSEXTPROC)
                                 GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawArraysEXT" );
         glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
                                 GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawElementsEXT" );
         BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_multi_draw_arrays supported";
     } else {
-        glMultiDrawArrays_p   = 0;
-        glMultiDrawElements_p = 0;
+        glMultiDrawArrays_p   = nullptr;
+        glMultiDrawElements_p = nullptr;
         BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_multi_draw_arrays unsupported";
     }
+#else
+    if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
+        glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
+                GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");
+        glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
+                GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawElementsEXT");
+        VS_LOG(trace, "OpenGL::GL_EXT_multi_draw_arrays supported");
+    } else {
+        glMultiDrawArrays_p = nullptr;
+        glMultiDrawElements_p = nullptr;
 #endif
 
-#ifdef __APPLE__
-#ifndef __APPLE__
-    glColorTable_p = glColorTableEXT;
-    glMultiTexCoord2fARB_p     = glMultiTexCoord2fARB;
-    glMultiTexCoord4fARB_p     = glMultiTexCoord4fARB;
-    glClientActiveTextureARB_p = glClientActiveTextureARB;
-    glActiveTextureARB_p = glActiveTextureARB;
-#endif /*__APPLE_PANTHER_GCC33_CLI__*/
-#else
 #ifndef NO_VBO_SUPPORT
     glBindBufferARB_p    = (PFNGLBINDBUFFERARBPROC) GET_GL_PROC( (GET_GL_PTR_TYP) "glBindBuffer" );
-    glGenBuffersARB_p    = (PFNGLGENBUFFERSARBPROC) GET_GL_PROC( (GET_GL_PTR_TYP) "glGenBuffers" );
+    glGenBuffersARB_p    = (PFNGLGENBUFFERSPROC) GET_GL_PROC( (GET_GL_PTR_TYP) "glGenBuffers" );
     glDeleteBuffersARB_p = (PFNGLDELETEBUFFERSARBPROC) GET_GL_PROC( (GET_GL_PTR_TYP) "glDeleteBuffers" );
     glBufferDataARB_p    = (PFNGLBUFFERDATAARBPROC) GET_GL_PROC( (GET_GL_PTR_TYP) "glBufferData" );
     glMapBufferARB_p     = (PFNGLMAPBUFFERARBPROC) GET_GL_PROC( (GET_GL_PTR_TYP) "glMapBuffer" );
@@ -385,7 +389,6 @@ void init_opengl_extensions()
     if (!glDeleteProgram_p)
         glDeleteProgram_p = (PFNGLDELETEPROGRAMPROC) GET_GL_PROC( (GET_GL_PTR_TYP) "glDeleteProgram" );
     //fixme
-#endif
 
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if ( vsExtensionSupported( "GL_NV_fog_distance" ) ) {
