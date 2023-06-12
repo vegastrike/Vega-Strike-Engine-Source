@@ -98,7 +98,7 @@
 #include "cg_global.h"
 #endif
 
-NGLBINDBUFFERARBPROC glBindBufferARB_p = nullptr;
+PFNGLBINDBUFFERARBPROC glBindBufferARB_p = nullptr;
 PFNGLGENBUFFERSPROC glGenBuffersARB_p = nullptr;
 PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB_p = nullptr;
 PFNGLBUFFERDATAARBPROC glBufferDataARB_p = nullptr;
