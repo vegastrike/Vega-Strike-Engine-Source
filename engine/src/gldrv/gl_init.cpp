@@ -302,10 +302,11 @@ void init_opengl_extensions()
                 GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");
         glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
                 GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawElementsEXT");
-        VS_LOG(trace, "OpenGL::GL_EXT_multi_draw_arrays supported");
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_multi_draw_arrays supported";
     } else {
         glMultiDrawArrays_p = nullptr;
         glMultiDrawElements_p = nullptr;
+    }
 #endif
 
 #ifndef NO_VBO_SUPPORT
