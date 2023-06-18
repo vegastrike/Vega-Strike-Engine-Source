@@ -1,9 +1,8 @@
 /*
  * base_util.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -24,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include <boost/version.hpp>
@@ -159,25 +159,26 @@ int Room(std::string text) {
     return BaseInterface::CurrentBase->rooms.size() - 1;
 }
 
-void Texture(int room, std::string index, std::string file, float x, float y) {
-    BaseInterface::Room *newroom = CheckRoom(room);
-    if (!newroom) {
-        return;
-    }
-    newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file.c_str(), index));
+    void Texture(int room, std::string index, std::string file, float x, float y) {
+        VS_LOG_AND_FLUSH(debug, (boost::format("BaseUtil::Texture called. room: %1%; index: '%2%'; file: '%3%'; x: %4%; y: %5%") % room % index % file % x % y));
+        BaseInterface::Room *newroom = CheckRoom(room);
+        if (!newroom) {
+            return;
+        }
+        newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file, index));
+        BaseInterface::Room::BaseVSSprite
+                *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
 #ifdef BASE_MAKER
-    ( (BaseInterface::Room::BaseVSSprite*) newroom->objs.back() )->texfile = file;
+        p_base_vs_sprite->texfile = file;
 #endif
-    float tx = 0, ty = 0;
-    static bool
-            addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "offset_sprites_by_pos", "true"));
-    if (addspritepos) {
-        ((BaseInterface::Room::BaseVSSprite *) newroom->objs.back())->spr.GetPosition(tx, ty);
+        float tx = 0, ty = 0;
+        static bool
+                addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "offset_sprites_by_pos", "true"));
+        if (addspritepos) {
+            p_base_vs_sprite->spr.GetPosition(tx, ty);
+        }
+        p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
     }
-    BaseInterface::Room::BaseVSSprite
-            *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
-    p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
-}
 
 SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene) {
     SharedPtr<Sound> sound = SceneManager::getSingleton()->getRenderer()->getSound(

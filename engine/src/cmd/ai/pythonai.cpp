@@ -23,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>
 
