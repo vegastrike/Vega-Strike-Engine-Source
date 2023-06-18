@@ -1,6 +1,6 @@
-# build.ps1
+# test.ps1
 
-# Copyright (C) 2021-2023 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2023 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -55,15 +55,6 @@ if ($BuildType -ieq "Debug") {
 
 [String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
 [String]$binaryDir = "$baseDir\build\$cmakePresetName"
-Push-Location $baseDir\engine
-cmake --preset $cmakePresetName
-cmake --build --preset "build-$cmakePresetName" -v
+Push-Location $binaryDir
+ctest -V -C $BuildType
 Pop-Location
-
-New-Item bin -ItemType Directory -Force
-$aPossibleBinaryDirs = @("$binaryDir","$binaryDir\$BuildType", "$binaryDir\$BuildType\objconv", "$binaryDir\objconv\$BuildType", "$binaryDir\$BuildType\setup", "$binaryDir\setup\$BuildType")
-$aPossibleBinaryDirs | ForEach-Object {
-    if (Test-Path $_) {
-        Copy-Item -Force -Verbose $_\*.* .\bin
-    }
-}
