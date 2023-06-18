@@ -186,7 +186,7 @@ jobs:
             allow_failure: true
 
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
         with:
           fetch-depth: 2
