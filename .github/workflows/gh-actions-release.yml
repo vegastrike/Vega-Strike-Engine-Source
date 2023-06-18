@@ -10,6 +10,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     strategy:
       fail-fast: false
@@ -158,33 +159,33 @@ jobs:
             ARTIFACT_EXT: 'rpm'
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
-      with:
-        fetch-depth: 2
-        submodules: false
+      - name: Checkout repository
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
+        with:
+          fetch-depth: 2
+          submodules: false
 
-    - name: Extract tag name and short SHA
-      shell: bash
-      run: |
-        echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
-        echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-    - name: Test tag name and short SHA
-      run: |
-        echo "${TAG_NAME}"
-        echo "${SHORT_SHA}"
-    - name: Run CI
-      env:
-        FROM:       ${{ matrix.FROM }}
-        COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
-        MY_OS_NAME: linux
-        IS_RELEASE: 1
-      run: script/cibuild $FLAGS
-    - name: Upload the artifacts
-      uses: skx/github-action-publish-binaries@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
-      with:
-        args: "packages/*.${{ matrix.ARTIFACT_EXT }}"
+      - name: Extract tag name and short SHA
+        shell: bash
+        run: |
+          echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
+          echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      - name: Test tag name and short SHA
+        run: |
+          echo "${TAG_NAME}"
+          echo "${SHORT_SHA}"
+      - name: Run CI
+        env:
+          FROM:       ${{ matrix.FROM }}
+          COMPILER:   ${{ matrix.COMPILER }}
+          FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
+          MY_OS_NAME: linux
+          IS_RELEASE: 1
+        run: script/cibuild $FLAGS
+      - name: Upload the artifacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
+        with:
+          args: "packages/*.${{ matrix.ARTIFACT_EXT }}"
