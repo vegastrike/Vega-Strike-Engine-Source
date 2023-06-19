@@ -21,9 +21,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
 #define VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
 
+#define PY_SSIZE_T_CLEAN
 //This takes care of the fact that several systems use the _POSIX_C_SOURCES
 //variable and don't set them to the same thing.
 //Python.h sets and uses it

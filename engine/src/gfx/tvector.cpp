@@ -1,9 +1,8 @@
 /*
  * tvector.cpp
  *
- * Copyright (C) 2020-2021 Roy Falk, Nachum Barcohen, Stephen G. Tuggy,
- *  Davie Wales, and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, Nachum Barcohen,
+ * Stephen G. Tuggy, Davie Wales, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -24,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include "tvector.h"
 #include "matrix.h"
 

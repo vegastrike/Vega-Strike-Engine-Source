@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * savegame.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include "cmd/unit_generic.h"
 #include "hashtable.h"
@@ -90,8 +93,8 @@ std::string GetHelperPlayerSaveGame(int num) {
                 f.Close();
             } else {
                 VS_LOG_AND_FLUSH(fatal,
-                        (boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%")
-                                % f.GetFullPath()));
+                                 (boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%")
+                                  % f.GetFullPath()));
                 VSExit(1);
             }
             err = f.OpenReadOnly("save.4.x.txt", UnknownFile);
@@ -270,8 +273,8 @@ std::vector<BYTE> readFile(std::string filename)
     vec.reserve(fileSize);
 
     std::copy(std::istream_iterator<BYTE>(file),
-            std::istream_iterator<BYTE>(),
-            std::back_inserter(vec));
+              std::istream_iterator<BYTE>(),
+              std::back_inserter(vec));
 
     file.close();
 
@@ -426,16 +429,16 @@ void CopySavedShips(std::string filename, int player_num, const std::vector<std:
                 dst.Write(srcdata);
             } else {
                 VS_LOG(error,
-                        (boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
-                                % starships[i]
-                                % srcnam
-                                % dstnam));
+                       (boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
+                        % starships[i]
+                        % srcnam
+                        % dstnam));
             }
         } else {
             VS_LOG(error,
-                    (boost::format("Error: Cannot Open Unit %1% from save file %2%.")
-                            % starships[i]
-                            % srcnam));
+                   (boost::format("Error: Cannot Open Unit %1% from save file %2%.")
+                    % starships[i]
+                    % srcnam));
         }
     }
 }
@@ -456,7 +459,7 @@ void WriteSaveGame(Cockpit *cp, bool auto_save) {
         cp->PackUnitInfo(packedInfo);
 
         cp->savegame->WriteSaveGame(cp->activeStarSystem->getFileName().c_str(),
-                un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num);
+                                    un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num);
         un->WriteUnit(cp->GetUnitModifications().c_str());
         if (GetWritePlayerSaveGame(player_num).length() && !auto_save) {
             cp->savegame->SetSavedCredits(_Universe->AccessCockpit()->credits);
@@ -718,9 +721,9 @@ void SaveGame::ReadMissionStringData(char *&buf, bool select_data, const std::se
         } else {
             // debugging attempt -- show why the allocation would fail
             VS_LOG(info,
-                    (boost::format(
-                            " SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)")
-                            % md_i_size % i));
+                   (boost::format(
+                           " SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)")
+                    % md_i_size % i));
         }
         for (int j = 0; j < md_i_size; j++) {
             if (skip) {
@@ -737,7 +740,7 @@ void SaveGame::ReadMissionStringData(char *&buf, bool select_data, const std::se
 void SaveGame::PurgeZeroStarships() // DELETE unused function?
 {
     for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(), ie = missionstringdata->m.end(); i != ie;
-            ++i) {
+         ++i) {
         if (fg_util::IsFGKey(i->first)) {
             if (fg_util::CheckFG(i->second)) {
                 // VS_LOG(info, (boost::format("correcting flightgroup %1% to have right landed ships") % i->first.c_str()));
@@ -784,7 +787,7 @@ void SaveGame::WriteMissionStringData(std::vector<char> &ret) {
         const string &key = (*i).first;
         unsigned int siz = (*i).second.size();
         if (key == "mission_descriptions" || key == "mission_scripts" || key == "mission_vars"
-                || key == "mission_names") {
+            || key == "mission_names") {
             //*** BLACKLIST ***
             //Don't bother to write these out since they waste a lot of space and aren't used.
             siz = 0; //Not writing them out altogether will cause saved games to break.
@@ -806,10 +809,10 @@ void SaveGame::ReadStardate(char *&buf) {
 }
 
 void SaveGame::ReadSavedPackets(char *&buf,
-        bool commitfactions,
-        bool skip_news,
-        bool select_data,
-        const std::set<std::string> &select_data_filter) {
+                                bool commitfactions,
+                                bool skip_news,
+                                bool select_data,
+                                const std::set<std::string> &select_data_filter) {
     int a = 0;
     char unitname[1024];
     char factname[1024];
@@ -860,7 +863,7 @@ void SaveGame::LoadSavedMissions() {
     Mission *ignoreMission = Mission::getNthPlayerMission(_Universe->CurrentCockpit(), 0);
     for (i = active_missions.size() - 1; i > 0; --i) {      //don't terminate zeroth mission
         if (active_missions[i]->player_num == _Universe->CurrentCockpit()
-                && active_missions[i] != ignoreMission) {
+            && active_missions[i] != ignoreMission) {
             active_missions[i]->terminateMission();
         }
     }
@@ -905,10 +908,10 @@ static char *tmprealloc(char *var, int &oldlength, int newlength) {
 #define MAXBUFFER 16384
 
 string SaveGame::WritePlayerData(const QVector &FP,
-        std::vector<std::string> unitname,
-        const char *systemname,
-        float credits,
-        std::string fact) {
+                                 std::vector<std::string> unitname,
+                                 const char *systemname,
+                                 float credits,
+                                 std::string fact) {
     string playerdata("");
     int MB = MAXBUFFER;
     char *tmp = (char *) malloc(MB);
@@ -989,12 +992,12 @@ string SaveGame::WriteDynamicUniverse() {
 using namespace VSFileSystem;
 
 string SaveGame::WriteSaveGame(const char *systemname,
-        const QVector &FP,
-        float credits,
-        std::vector<std::string> unitname,
-        int player_num,
-        std::string fact,
-        bool write) {
+                               const QVector &FP,
+                               float credits,
+                               std::vector<std::string> unitname,
+                               int player_num,
+                               std::string fact,
+                               bool write) {
     savestring = string("");
     VS_LOG(info, (boost::format("Writing Save Game %1%") % outputsavegame));
     savestring += WritePlayerData(FP, unitname, systemname, credits, fact);
@@ -1042,20 +1045,20 @@ void SaveGame::SetOutputFileName(const string &filename) {
 }
 
 void SaveGame::ParseSaveGame(const string &filename_p,
-        string &FSS,
-        const string &originalstarsystem,
-        QVector &PP,
-        bool &shouldupdatepos,
-        float &credits,
-        vector<string> &savedstarship,
-        int player_num,
-        const string &save_contents,
-        bool read,
-        bool commitfaction,
-        bool quick_read,
-        bool skip_news,
-        bool select_data,
-        const std::set<std::string> &select_data_filter) {
+                             string &FSS,
+                             const string &originalstarsystem,
+                             QVector &PP,
+                             bool &shouldupdatepos,
+                             float &credits,
+                             vector<string> &savedstarship,
+                             int player_num,
+                             const string &save_contents,
+                             bool read,
+                             bool commitfaction,
+                             bool quick_read,
+                             bool skip_news,
+                             bool select_data,
+                             const std::set<std::string> &select_data_filter) {
     const string &str = save_contents;     //alias
     string filename;
     //Now leave filename empty, use the default name regardless...

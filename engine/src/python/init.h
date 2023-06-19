@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * init.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,11 +21,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifdef HAVE_PYTHON
 
 #ifndef VEGA_STRIKE_ENGINE_PYTHON_INIT_H
 #define VEGA_STRIKE_ENGINE_PYTHON_INIT_H
 
+#define PY_SSIZE_T_CLEAN
 #include "gfx/vec.h"
 #include <boost/version.hpp>
 

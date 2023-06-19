@@ -23,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>

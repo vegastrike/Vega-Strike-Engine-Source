@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * collide_map.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -22,7 +24,8 @@
 
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include "vega_cast_utils.h"
 #include "collide_map.h"
 #include "unit_generic.h"
 #include "bolt.h"
@@ -36,27 +39,23 @@ void CollideArray::erase(iterator target) {
     count -= 1;
     if (target >= this->begin() && target < this->end()) {
         target->radius = 0;
-        target->ref.unit = NULL;
+        target->ref.unit = nullptr;
         size_t diff = (target - this->begin());
         if (this->unsorted.size() > diff) {
             //for secondary collide arrays that have no unsorted array
             iterator tmp = &*(this->unsorted.begin() + diff);
             tmp->radius = 0;
-            tmp->ref.unit = NULL;
+            tmp->ref.unit = nullptr;
         }
         return;
-    } else if (target == NULL) {
+    } else if (target == nullptr) {
         return;
     } else {
-        CollidableBackref *targ = static_cast< CollidableBackref * > (&*target);
-        std::list<CollidableBackref> *targlist = &toflattenhints[targ->toflattenhints_offset];
-        std::list<CollidableBackref>::iterator endlist = targlist->end();
-        for (std::list<CollidableBackref>::iterator i = targlist->begin(); i != endlist; ++i) {
-            if (&*i == target) {
-                targlist->erase(i);
-                return;
-            }
-        }
+        CollidableBackref *targ = vega_dynamic_cast_ptr<CollidableBackref>(&*target);
+        std::list<CollidableBackref> *targlist = &toflattenhints.at(targ->toflattenhints_offset);
+        auto first_to_remove = std::stable_partition(targlist->begin(), targlist->end(), [target](CollidableBackref &backref) { return &*backref != target; });
+//        std::for_each(first_to_remove, targlist->end(), [](CollidableBackref &backref) { delete backref; });
+        targlist->erase(first_to_remove, targlist->end());
     }
 }
 
@@ -97,12 +96,12 @@ class RadiusUpdate {
     double last_big_radius_key;
     CollideArray *cm;
 public:
-    RadiusUpdate(CollideArray *cm) {
+    explicit RadiusUpdate(CollideArray *cm_) {
         last_radius = 0;
         last_big_radius = 0;
         last_radius_key = 0;
         last_big_radius_key = 0;
-        this->cm = cm;
+        cm = cm_;
     }
 
     void operator()(const Collidable &collidable, size_t index) {
@@ -161,8 +160,8 @@ void CollideArray::flatten() {
             collideUpdate(*tmp, index);
         }
 
-        std::list<CollidableBackref>::iterator listend = toflattenhints[i].end();
-        for (std::list<CollidableBackref>::iterator j = toflattenhints[i].begin();
+        auto listend = toflattenhints[i].end();
+        for (auto j = toflattenhints[i].begin();
                 j != listend;
                 ++j) {
             if (j->radius != 0) {
@@ -180,7 +179,7 @@ void CollideArray::flatten() {
     if (location_index == Unit::UNIT_BOLT) {
         size_t i = 0;
         size_t size = sorted.size();
-        ResizableArray::iterator iter = sorted.begin();
+        auto iter = sorted.begin();
         UpdateBackpointers<Unit::UNIT_BOLT> update;
         RadiusUpdate<1, false> radUpdate(this);
         for (i = 0; i != size; ++i, ++iter) {
@@ -339,7 +338,7 @@ public:
                             break;
                         }
                     } else if (rad != 0) {
-                        if (canbebolt == true && BoltType(un)) {
+                        if (canbebolt && BoltType(un)) {
                             CollideMap::iterator tmptmore = ref.unit->location[Unit::UNIT_ONLY];
                             CollideMap::iterator tmptless = tmptmore;
                             ++tmptmore;
@@ -369,7 +368,7 @@ public:
                             }
                         }
                     } else if (rad != 0) {
-                        if (canbebolt == true && BoltType(un)) {
+                        if (canbebolt && BoltType(un)) {
                             CollideMap::iterator tmptmore = ref.unit->location[Unit::UNIT_ONLY];
                             CollideMap::iterator tmptless = tmptmore;
                             ++tmptmore;
@@ -402,7 +401,7 @@ public:
                 }
             } else if (rad != 0) {
                 //not null unit
-                if (canbebolt == true && BoltType(un)) {
+                if (canbebolt && BoltType(un)) {
                     CollideMap::iterator tmptmore = ref.unit->location[Unit::UNIT_ONLY];
                     CollideMap::iterator tmptless = tmptmore;
                     ++tmptmore;
@@ -585,7 +584,7 @@ bool CollideMap::CheckUnitCollisions(Bolt *bol, const Collidable &updated) {
 
 bool CollideMap::CheckCollisions(Unit *un, const Collidable &updated) {
     //need to check beams
-    if (un->activeStarSystem == NULL) {
+    if (un->activeStarSystem == nullptr) {
         un->activeStarSystem = _Universe->activeStarSystem();
     } else
         assert(un->activeStarSystem == _Universe->activeStarSystem());
@@ -594,7 +593,7 @@ bool CollideMap::CheckCollisions(Unit *un, const Collidable &updated) {
 
 bool CollideMap::CheckUnitCollisions(Unit *un, const Collidable &updated) {
     //need to check beams
-    if (un->activeStarSystem == NULL) {
+    if (un->activeStarSystem == nullptr) {
         un->activeStarSystem = _Universe->activeStarSystem();
     } else
         assert(un->activeStarSystem == _Universe->activeStarSystem());

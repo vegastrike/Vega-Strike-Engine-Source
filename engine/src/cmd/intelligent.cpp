@@ -1,8 +1,8 @@
-/**
+/*
  * intelligent.cpp
  *
- * Copyright (C) 2020 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,6 +27,7 @@
  * ships, space installations, missiles, drones, etc. */
 
 
+#define PY_SSIZE_T_CLEAN
 #include "intelligent.h"
 
 #include "ai/order.h"

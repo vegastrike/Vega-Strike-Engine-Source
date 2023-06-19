@@ -1,10 +1,8 @@
-/**
+/*
  * base_util.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,9 +21,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #ifndef VEGA_STRIKE_ENGINE_CMD_BASE_UTIL_H
 #define VEGA_STRIKE_ENGINE_CMD_BASE_UTIL_H
 
+#define PY_SSIZE_T_CLEAN
 #include <string>
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
