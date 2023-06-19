@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * mission.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -24,6 +26,7 @@
 /*
  *  xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <math.h>
 #include <stdlib.h>

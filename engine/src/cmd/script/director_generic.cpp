@@ -1,9 +1,8 @@
 /*
  * director_generic.cpp
  *
- * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen, Roy Falk,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * This file is part of Vega Strike.
  *
@@ -22,6 +21,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #ifdef HAVE_PYTHON
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>

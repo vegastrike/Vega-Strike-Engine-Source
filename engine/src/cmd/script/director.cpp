@@ -1,7 +1,7 @@
 /*
  * director.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -26,6 +26,7 @@
 /*
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>
 #include "python/python_class.h"
