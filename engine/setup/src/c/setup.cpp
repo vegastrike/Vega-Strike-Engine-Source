@@ -109,9 +109,23 @@ int main( int argc, char *argv[] )
     {
         boost::program_options::options_description setup_options("VS setup utility");
         setup_options.add_options()
+            ("target,d", boost::program_options::value<std::string>(), "Specify data directory, full path expected")
+            ("help", "Show this help")
             ;
         boost::program_options::variables_map cmd_args;
-        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, setup_options), cmd_args);
+        try {
+            boost::program_options::store(boost::program_options::parse_command_line(argc, argv, setup_options), cmd_args);
+        }
+        catch (const std::exception& exc) {
+            std::cerr << "Failed to parse arguments: " << exc.what() << std::endl;
+            std::cout << setup_options << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        if (cmd_args.count("help")) {
+            std::cout << setup_options;
+            exit(EXIT_SUCCESS);
+        }
 
         vector< string >data_paths;
 
