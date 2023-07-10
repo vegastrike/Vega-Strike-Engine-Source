@@ -24,11 +24,11 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
@@ -268,6 +268,9 @@ ENDIF (DATADIR)
 #
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
 MESSAGE("-- Always using preferred PIE logic now")
+
+include(CheckPIESupported)
+check_pie_supported()
 UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 IF (ENABLE_PIE)
     MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
@@ -789,6 +792,7 @@ ADD_LIBRARY(vegastrike-OPcollide
         )
 
 TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
+set_property(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
 ENDIF()
@@ -1077,6 +1081,7 @@ ADD_LIBRARY(vegastrike-engine_com
         )
 
 TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
+set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
@@ -1650,6 +1655,7 @@ IF (USE_GTEST)
             ${LIBVS_LOGGING}
             )
     target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+    set_property(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)
         target_compile_definitions(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
         target_compile_definitions(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
