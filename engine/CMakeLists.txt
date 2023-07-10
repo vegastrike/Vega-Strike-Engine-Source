@@ -635,8 +635,8 @@ CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_
 
 #end config.h generation
 
-INCLUDE_DIRECTORIES(APPEND ${TST_INCLUDES})
-include_directories(APPEND ${CMAKE_CURRENT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${TST_INCLUDES})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>" "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:config.h>")
 add_link_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
 
