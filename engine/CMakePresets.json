@@ -208,6 +208,12 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
+      },
+      "environment": {
+        "VERBOSE": "ON"
+      },
+      "cacheVariables": {
+        "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
     {
@@ -259,7 +265,7 @@
         "pie-disabled",
         "release"
       ],
-      "displayName": "macOS, Pie Enabled, Debug",
+      "displayName": "macOS, Pie Disabled, Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
