@@ -276,16 +276,16 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          #- FROM:     'rockylinux:8.7'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: false
-          #- FROM:     'rockylinux:8.7'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'ON'
-          #  allow_failure: false
+          - FROM:     'rockylinux:8.7'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
+          - FROM:     'rockylinux:8.7'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
           - FROM:     'rockylinux:8.6'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
