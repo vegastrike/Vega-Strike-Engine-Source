@@ -33,8 +33,8 @@
 #include "cmd/unit_generic.h"
 #include <boost/version.hpp>
 
-#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
+#if BOOST_VERSION != 102800
 typedef boost::python::dict BoostPythonDictionary;
 #else //BOOST_VERSION != 102800
 #include <boost/python/objects.hpp>

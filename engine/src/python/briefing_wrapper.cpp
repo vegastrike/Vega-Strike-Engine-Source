@@ -24,6 +24,7 @@
 
 #ifndef PYTHON_STUB
 #define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <math.h>
 #include "python_class.h"
 #include "cmd/briefing.h"

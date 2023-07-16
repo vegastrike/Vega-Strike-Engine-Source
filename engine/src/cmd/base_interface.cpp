@@ -24,8 +24,9 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#include <algorithm>
+#include <boost/python.hpp>
 #include <Python.h>
+#include <algorithm>
 #include <vega_py_run.h>
 #include "base.h"
 #include "gldrv/winsys.h"

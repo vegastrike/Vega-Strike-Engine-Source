@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -27,6 +27,7 @@
  *  xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 #define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <Python.h>
 #include <math.h>
 #include <stdlib.h>

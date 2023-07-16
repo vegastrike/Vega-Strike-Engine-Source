@@ -24,6 +24,7 @@
 
 
 #define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <assert.h>
 #include "star_system.h"
 
