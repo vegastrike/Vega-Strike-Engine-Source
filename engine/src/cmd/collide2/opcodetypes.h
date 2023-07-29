@@ -171,7 +171,7 @@ typedef int ptrdiff_t;
 #define _PTRDIFF_T_DEFINED
 #endif
 
-#if !defined(CS_HAVE_INTMAX_T)
+#if !defined(CS_HAVE_INTMAX_T) && !defined(__APPLE__)
 /// Greatest-width integer
 typedef int64 intmax_t;
 /// Greatest-width unsigned integer

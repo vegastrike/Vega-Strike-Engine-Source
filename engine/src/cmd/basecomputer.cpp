@@ -1,11 +1,10 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-/**
+/*
  * basecomputer.cpp
  *
- * Copyright (C) 2003 Mike Byron
- * Copyright (C) 2019-2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
- * contributors
+ * Copyright (C) 2001-2023 Daniel Horn, Mike Byron, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -2842,23 +2841,22 @@ void BaseComputer::loadNewsControls( void )
     recalcTitle();
 }
 
-#if defined (__APPLE__)
-static int nodirs( struct dirent *entry )
-#else
 static int nodirs( const struct dirent * entry )
-#endif
 {
 #if defined (_WIN32) || defined(__HAIKU__)
     //Have to check if we have the full path or just relative (which would be a problem)
-    std::string tmp = VSFileSystem::homedir+"/save/"+entry->d_name;
+    std::string tmp = VSFileSystem::homedir + "/save/" + entry->d_name;
     struct stat s;
-    if (stat( tmp.c_str(), &s ) < 0)
+    if (stat( tmp.c_str(), &s ) < 0) {
         return string( entry->d_name ) != "." && string( entry->d_name ) != "..";
-    if ( (s.st_mode&S_IFDIR) == 0 && string( entry->d_name ) != "." && string( entry->d_name ) != ".." )
+    }
+    if ( (s.st_mode & S_IFDIR) == 0 && string( entry->d_name ) != "." && string( entry->d_name ) != ".." ) {
         return 1;
+    }
 #else
-    if (entry->d_type != DT_DIR && string( entry->d_name ) != "." && string( entry->d_name ) != "..")
+    if (entry->d_type != DT_DIR && string( entry->d_name ) != "." && string( entry->d_name ) != "..") {
         return 1;
+    }
 #endif
     return 0;
 }
@@ -2877,11 +2875,7 @@ static int datesort( const void *v1, const void *v2 )
     return s1.st_mtime-s2.st_mtime;
 }
 
-#if (defined (__FREEBSD__)) || (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10) || defined(__HAIKU__)
 typedef int (*scancompare)( const struct dirent **v1, const struct dirent **v2 );
-#else
-typedef int (*scancompare)( const void *v1, const void *v2 );
-#endif
 
 //Load the controls for the News display.
 void BaseComputer::loadLoadSaveControls( void )
