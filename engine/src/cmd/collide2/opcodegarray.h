@@ -3,6 +3,7 @@
     Copyright (C) 1998,1999,2000 by Andrew Zabolotny <bit@eltech.ru>
     Copyright (C) 2020 pyramid3d
     Copyright (C) 2020 Stephen G. Tuggy
+    Copyright (C) 2023 Benjamen R. Meyer
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -18,9 +19,8 @@
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#ifndef __CS_GARRAY_H__
-#define __CS_GARRAY_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_GARRAY_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_GARRAY_H
 
 // Common macro for declarations below
 #define CS_TYPEDEF_GROWING_ARRAY_EXT(Name, Type, ExtraConstructor, Extra)   \
@@ -189,4 +189,4 @@
 #define CS_DECLARE_GROWING_ARRAY_REF(Name, Type)                            \
   CS_TYPEDEF_GROWING_ARRAY_REF(__##Name,Type) Name
 
-#endif // __CS_GARRAY_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_GARRAY_H

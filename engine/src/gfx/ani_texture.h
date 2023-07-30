@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __ANI_TEXTURE_H__
-#define __ANI_TEXTURE_H__
+#ifndef VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H
+#define VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H
 
 #include "aux_texture.h"
 #include "vsfilesystem.h"
@@ -214,5 +212,4 @@ public:
             bool detailtex = false);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H

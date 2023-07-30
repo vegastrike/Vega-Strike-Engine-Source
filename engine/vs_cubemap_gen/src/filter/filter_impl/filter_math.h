@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __FILTER_MATH_H__
-#define __FILTER_MATH_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_MATH_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_MATH_H
 
 #include <math.h>
 #include "../../units/units.h"
@@ -60,6 +59,4 @@ inline float flt_decay(Shininess shininess, fvector v1, fvector v2) {
     return powf(maxf(0.0, dotf(v1, v2)), shininess);
 }
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_MATH_H

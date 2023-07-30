@@ -1,5 +1,5 @@
-#ifndef JSON_H
-#define JSON_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_JSON_H
+#define VEGA_STRIKE_ENGINE_CMD_JSON_H
 
 /*! \file json.h
  * \brief Simpleson header file
@@ -847,4 +847,4 @@ namespace json
     };
 }
 
-#endif // !JSON_H
+#endif //VEGA_STRIKE_ENGINE_CMD_JSON_H

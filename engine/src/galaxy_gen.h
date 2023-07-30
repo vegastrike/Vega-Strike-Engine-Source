@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Evert Vorster,
- * Roy Falk, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Evert Vorster,
+ * Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GALAXY_GEN_H
+#define VEGA_STRIKE_ENGINE_GALAXY_GEN_H
 
-
-#ifndef _STARSYSGEN_H_
-#define _STARSYSGEN_H_
 #include <vector>
 #include <string>
 using std::string;
@@ -66,5 +65,5 @@ std::string getStarSystemSector(const std::string &in);
 string getUniversePath();
 void readnames(vector<string> &entity, const char *filename);
 void generateStarSystem(SystemInfo &si);
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GALAXY_GEN_H

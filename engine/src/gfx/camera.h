@@ -2,7 +2,7 @@
  * camera.h
  *
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,14 +21,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_GFX_CAMERA_H
+#define VEGA_STRIKE_ENGINE_GFX_CAMERA_H
 
 #include "matrix.h"
 #include "gfxlib.h"
 #include "physics.h"
 
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
 //class PlanetaryTransform; commented out by chuck_starchaser --never used
 #include "cmd/container.h"
 class Nebula;
@@ -185,5 +184,4 @@ public:
     void RestoreViewPort(float xoffset, float yoffset);
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_CAMERA_H

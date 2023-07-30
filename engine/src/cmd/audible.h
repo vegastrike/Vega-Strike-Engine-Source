@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,9 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef AUDIBLE_H
-#define AUDIBLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
+#define VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
 
 #include "gfx/vec.h" // TODO: replace with class Vector;
 #include <map>
@@ -52,10 +51,11 @@ public:
     void playShieldDamageSound(const Vector &pnt);
     void playArmorDamageSound(const Vector &pnt);
     void playHullDamageSound(const Vector &pnt);
+    void playEngineSound();
 protected:
 
     void playExplosionDamageSound();
-    void playEngineSound();
+
 
     // TODO: make into a proper destructor
     void killSounds();
@@ -65,4 +65,4 @@ private:
     void playDopplerSound(const Vector &pnt, int sound);
 };
 
-#endif // AUDIBLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H

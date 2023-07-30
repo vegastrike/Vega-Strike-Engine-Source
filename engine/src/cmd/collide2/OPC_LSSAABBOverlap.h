@@ -1,3 +1,4 @@
+// NO HEADER GUARD
 
 // Following code from Magic-Software (http://www.magic-software.com/)
 // A bit modified for Opcode

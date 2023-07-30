@@ -1,12 +1,12 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
-#ifndef __UNIT_GENERIC_H__
-#define __UNIT_GENERIC_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+// Q: Why 2 header guards???
 
 /*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk, Benjamen R. Meyer,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -29,8 +29,8 @@
 
 /***** Unit is the Unit class without GFX/Sound with AI *****/
 
-#ifndef _UNIT_H_
-#define _UNIT_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
 #include "armed.h"
 #include "audible.h"
@@ -189,6 +189,14 @@ public:
 //forbidden
     Unit &operator=(const Unit &) = delete;
 
+    // Called by Carrier::makeMasterPartList
+    // TODO: Implement
+    /// move constructor
+    Unit(Unit && other) noexcept = delete;
+
+    /// move assignment operator
+    Unit &operator=(Unit && other) noexcept = delete;
+
     Unit();
     ~Unit() override;
 
@@ -196,21 +204,24 @@ public:
  *  constructors are used. The useless argument will be removed
  *  again later.
  */
+
+    // Called by Planet
     Unit(int dummy);
 
 /** Constructor that creates aa mesh with meshes as submeshes (number
  *  of them) as either as subunit with faction faction
  */
+    // Called by Missile
     Unit(std::vector<Mesh *> &meshes, bool Subunit, int faction);
 
 /** Constructor that creates a mesh from an XML file If it is a
  *  customizedUnit, it will check in that directory in the home dir for
  *  the unit.
  */
+    // Called by Carrier and mount
 //Uses a lot of stuff that does not belong to here
     Unit(const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
             ""), Flightgroup *flightgroup = NULL, int fg_subnumber = 0);
-
 public:
 //Initialize many of the defaults inherant to the constructor
 
@@ -666,27 +677,9 @@ public:
     void SetGlowVisible(bool isvis);
 
 
-/**
- * Fire engine takes a unit vector for direction
- * and how fast the fuel speed and mass coming out are
- */
-/*unit vector... might default to "r"*/
-    void FireEngines(const Vector &Direction, float FuelSpeed, float FMass);
-//applies a force for the whole gameturn upon the center of mass
-    void ApplyForce(const Vector &Vforce);
-//applies a force for the whole gameturn upon the center of mass, using local coordinates
-    void ApplyLocalForce(const Vector &Vforce);
-//applies a force that is multipled by the mass of the ship
-    void Accelerate(const Vector &Vforce);
-//Apply a torque in world level coords
-    void ApplyTorque(const Vector &Vforce, const QVector &Location);
-//Applies a torque in local level coordinates
-    void ApplyLocalTorque(const Vector &Vforce, const Vector &Location);
-//usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
-    void ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location);
 
-//convenient shortcut to applying torques with vector and position
-    void ApplyLocalTorque(const Vector &torque);
+
+
 //Applies damage to the local area given by pnt
     float ApplyLocalDamage(const Vector &pnt,
             const Vector &normal,
@@ -700,32 +693,7 @@ public:
 //short fix
 //    virtual void ArmorDamageSound( const Vector &pnt ) {}
 //    virtual void HullDamageSound( const Vector &pnt ) {}
-//Clamps thrust to the limits struct
-    Vector ClampThrust(const Vector &thrust, bool afterburn);
-//Takes a unit vector for direction of thrust and scales to limits
-    Vector MaxThrust(const Vector &thrust);
-//Thrusts by ammt and clamps accordingly (afterburn or not)
-    virtual void Thrust(const Vector &amt, bool afterburn = false);
-//Applies lateral thrust
-    void LateralThrust(float amt);
-//Applies vertical thrust
-    void VerticalThrust(float amt);
-//Applies forward thrust
-    void LongitudinalThrust(float amt);
-//Clamps desired velocity to computer set limits
-    Vector ClampVelocity(const Vector &velocity, const bool afterburn);
-//Clamps desired angular velocity to computer set limits
-    Vector ClampAngVel(const Vector &vel);
-//Clamps desired torque to computer set limits of thrusters
-    Vector ClampTorque(const Vector &torque);
-//scales unit size torque to limits in that direction
-    Vector MaxTorque(const Vector &torque);
-//Applies a yaw of amt
-    void YawTorque(float amt);
-//Applies a pitch of amt
-    void PitchTorque(float amt);
-//Applies a roll of amt
-    void RollTorque(float amt);
+
 //executes a repair if the repair bot is up to it
     void Repair();
 
@@ -768,6 +736,7 @@ public:
  */
 
 public:
+    Unit *Threat();
 //not used yet
     StringPool::Reference target_fgid[3];
 
@@ -781,7 +750,7 @@ public:
     const Unit *Target() const;
     Unit *VelocityReference();
     const Unit *VelocityReference() const;
-    Unit *Threat();
+
 //Uses Universe stuff so only in Unit class
     void VelocityReference(Unit *targ);
     void TargetTurret(Unit *targ);
@@ -1081,7 +1050,7 @@ inline void UnitCollection::UnitIterator::GetNextValidUnit()
 
 extern std::set<std::string> GetListOfDowngrades();
 extern void ClearDowngradeMap();
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
 /*
  **************************************************************************************
@@ -1091,5 +1060,5 @@ extern void ClearDowngradeMap();
 
 
 
-#endif
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
 

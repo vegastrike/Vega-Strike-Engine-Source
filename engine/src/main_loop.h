@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,10 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_MAIN_LOOP_H
+#define VEGA_STRIKE_ENGINE_MAIN_LOOP_H
 
-
-#ifndef _MAIN_LOOP_H_
-#define _MAIN_LOOP_H_
 #include "in.h"
 #include "cmd/unit_generic.h"
 void bootstrap_draw(const std::string &message, Animation *SplashScreen = NULL);
@@ -84,5 +83,4 @@ void InitializeInput();
 void main_loop();
 void restore_main_loop();
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_MAIN_LOOP_H

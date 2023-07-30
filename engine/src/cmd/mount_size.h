@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Roy Falk, David Wales, and Stephen G. Tuggy.
+ * Copyright (C) 2021-2023 Roy Falk, David Wales, and Stephen G. Tuggy, Benjamen R. Meyer.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -18,10 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef MOUNT_SIZE_H
-#define MOUNT_SIZE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_MOUNT_SIZE_H
+#define VEGA_STRIKE_ENGINE_CMD_MOUNT_SIZE_H
 
 #include <string>
 
@@ -75,4 +73,4 @@ public:
     MountSize();
 };
 
-#endif // MOUNT_SIZE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_MOUNT_SIZE_H

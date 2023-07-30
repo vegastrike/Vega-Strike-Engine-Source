@@ -30,10 +30,14 @@
 #include "universe.h"
 #include "configuration/game_config.h"
 #include "vs_logging.h"
+#include "audiolib.h"
+#include "audible.h"
+
 
 #include <iostream>
 #include <string>
 #include <vega_cast_utils.h>
+#include <limits.h>
 
 float accelStarHandler(float &input) {
     return input / (configuration()->physics_config.game_speed * configuration()->physics_config.game_accel);
@@ -466,3 +470,362 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
     return minimum_multiplier;
 }
 
+
+void Movable::FireEngines(const Vector &Direction /*unit vector... might default to "r"*/,
+        float FuelSpeed,
+        float FMass) {
+    Energetic *energetic = dynamic_cast<Energetic*>(this);
+    FMass = energetic->ExpendFuel(FMass);
+    NetForce += Direction * ((double)FuelSpeed * (double)FMass / GetElapsedTime());
+}
+
+//applies a force for the whole gameturn upon the center of mass
+void Movable::ApplyForce(const Vector &Vforce) {
+    if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
+        NetForce += Vforce;
+    } else {
+        VS_LOG(error, "fatal force");
+    }
+}
+
+//applies a force for the whole gameturn upon the center of mass
+void Movable::ApplyLocalForce(const Vector &Vforce) {
+    if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
+        NetLocalForce += Vforce;
+    } else {
+        VS_LOG(error, "fatal local force");
+    }
+}
+
+void Movable::Accelerate(const Vector &Vforce) {
+    if (FINITE(Vforce.i) && FINITE(Vforce.j) && FINITE(Vforce.k)) {
+        NetForce += Vforce * Mass;
+    } else {
+        VS_LOG(error, "fatal force");
+    }
+}
+
+void Movable::ApplyTorque(const Vector &Vforce, const QVector &Location) {
+    //Not completely correct
+    NetForce += Vforce;
+    NetTorque += Vforce.Cross((Location - curr_physical_state.position).Cast());
+}
+
+void Movable::ApplyLocalTorque(const Vector &Vforce, const Vector &Location) {
+    NetForce += Vforce;
+    NetTorque += Vforce.Cross(Location);
+}
+
+//usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
+void Movable::ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location) {
+    NetTorque += Vforce.Cross(Location);
+}
+
+void Movable::ApplyLocalTorque(const Vector &torque) {
+    NetLocalTorque += ClampTorque(torque);
+}
+
+Vector Movable::MaxTorque(const Vector &torque) {
+    //torque is a normal
+    return torque * (Vector(copysign(limits.pitch, torque.i),
+            copysign(limits.yaw, torque.j),
+            copysign(limits.roll, torque.k)) * torque);
+}
+
+Vector Movable::ClampTorque(const Vector &amt1) {
+    Energetic *energetic = dynamic_cast<Energetic*>(this);
+    Vector Res = amt1;
+
+    energetic->WCWarpIsFuelHack(true);
+
+    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    if (fabs(amt1.i) > fuelclamp * limits.pitch) {
+        Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
+    }
+    if (fabs(amt1.j) > fuelclamp * limits.yaw) {
+        Res.j = copysign(fuelclamp * limits.yaw, amt1.j);
+    }
+    if (fabs(amt1.k) > fuelclamp * limits.roll) {
+        Res.k = copysign(fuelclamp * limits.roll, amt1.k);
+    }
+    //1/5,000,000 m/s
+
+    energetic->ExpendMomentaryFuelUsage(Res.Magnitude());
+    energetic->WCWarpIsFuelHack(false);
+    return Res;
+}
+
+
+Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
+    Energetic *energetic = dynamic_cast<Energetic*>(this);
+    Unit *unit = static_cast<Unit *>(this);
+
+    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (energetic->fuelData() <= 0 || (energetic->energy < unit->afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
+    float limit =
+            afterburn ? (abfuelclamp
+                    * (unit->computer.max_ab_speed()
+                            - unit->computer.max_speed()) + (fuelclamp * unit->computer.max_speed())) : fuelclamp
+                    * unit->computer.max_speed();
+    float tmp = velocity.Magnitude();
+    if (tmp > fabs(limit)) {
+        return velocity * (limit / tmp);
+    }
+    return velocity;
+}
+
+
+Vector Movable::ClampAngVel(const Vector &velocity) {
+    Unit *unit = static_cast<Unit *>(this);
+
+    Vector res(velocity);
+    if (res.i >= 0) {
+        if (res.i > unit->computer.max_pitch_down) {
+            res.i = unit->computer.max_pitch_down;
+        }
+    } else if (-res.i > unit->computer.max_pitch_up) {
+        res.i = -unit->computer.max_pitch_up;
+    }
+    if (res.j >= 0) {
+        if (res.j > unit->computer.max_yaw_left) {
+            res.j = unit->computer.max_yaw_left;
+        }
+    } else if (-res.j > unit->computer.max_yaw_right) {
+        res.j = -unit->computer.max_yaw_right;
+    }
+    if (res.k >= 0) {
+        if (res.k > unit->computer.max_roll_left) {
+            res.k = unit->computer.max_roll_left;
+        }
+    } else if (-res.k > unit->computer.max_roll_right) {
+        res.k = -unit->computer.max_roll_right;
+    }
+    return res;
+}
+
+Vector Movable::MaxThrust(const Vector &amt1) {
+    //amt1 is a normal
+    return amt1 * (Vector(copysign(limits.lateral, amt1.i),
+            copysign(limits.vertical, amt1.j),
+            amt1.k > 0 ? limits.forward : -limits.retro) * amt1);
+}
+
+//CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
+// TODO: refactor soon. Especially access to the fuel variable
+Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
+    Unit *unit = static_cast<Unit *>(this);
+
+    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
+    const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
+    if (WCfuelhack) {
+        if (unit->fuel > unit->warpenergy) {
+            unit->fuel = unit->warpenergy;
+        }
+        if (unit->fuel < unit->warpenergy) {
+            unit->warpenergy = unit->fuel;
+        }
+    }
+    float instantenergy = unit->afterburnenergy * simulation_atom_var;
+    if ((unit->afterburntype == 0) && unit->energy < instantenergy) {
+        afterburn = false;
+    }
+    if ((unit->afterburntype == 1) && unit->fuel < 0) {
+        unit->fuel = 0;
+        afterburn = false;
+    }
+    if ((unit->afterburntype == 2) && unit->warpenergy < 0) {
+        unit->warpenergy = 0;
+        afterburn = false;
+    }
+    if (3 == unit->afterburntype) {      //no afterburner -- we should really make these types an enum :-/
+        afterburn = false;
+    }
+    Vector Res = amt1;
+
+    float fuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
+    if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
+        Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
+    }
+    if (fabs(amt1.j) > fabs(fuelclamp * limits.vertical)) {
+        Res.j = copysign(fuelclamp * limits.vertical, amt1.j);
+    }
+    float ablimit =
+            afterburn
+                    ? ((limits.afterburn - limits.forward) * abfuelclamp + limits.forward * fuelclamp)
+                    : limits.forward;
+    if (amt1.k > ablimit) {
+        Res.k = ablimit;
+    }
+    if (amt1.k < -limits.retro) {
+        Res.k = -limits.retro;
+    }
+    const float Lithium6constant = configuration()->fuel.deuterium_relative_efficiency_lithium;
+    //1/5,000,000 m/s
+    const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
+    if (unit->afterburntype == 2) {
+        //Energy-consuming afterburner
+        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+        unit->warpenergy -= unit->afterburnenergy * Energetic::getFuelUsage(afterburn) * simulation_atom_var * Res.Magnitude()
+                * FMEC_exit_vel_inverse
+                / Lithium6constant;
+    }
+    if (3 == unit->afterburntype || unit->afterburntype == 1) {
+        //fuel-burning overdrive - uses afterburner efficiency. In NO_AFTERBURNER case, "afterburn" will always be false, so can reuse code.
+        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+        unit->fuel -=
+                ((afterburn
+                        && finegrainedFuelEfficiency) ? unit->afterburnenergy : Energetic::getFuelUsage(afterburn))
+                        * simulation_atom_var * Res.Magnitude()
+                        * FMEC_exit_vel_inverse / Lithium6constant;
+#ifndef __APPLE__
+        if (ISNAN(unit->fuel)) {
+            VS_LOG(error, "Fuel is NAN A");
+            unit->fuel = 0;
+        }
+#endif
+    }
+    if (unit->afterburntype == 0) {
+        //fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
+        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+        unit->fuel -= unit->getFuelUsage(false) * simulation_atom_var * Res.Magnitude() * FMEC_exit_vel_inverse / Lithium6constant;
+#ifndef __APPLE__
+        if (ISNAN(unit->fuel)) {
+            VS_LOG(error, "Fuel is NAN B");
+            unit->fuel = 0;
+        }
+#endif
+    }
+    if ((afterburn) && (unit->afterburntype == 0)) {
+        unit->energy -= instantenergy;
+    }
+    if (WCfuelhack) {
+        if (unit->fuel > unit->warpenergy) {
+            unit->fuel = unit->warpenergy;
+        }
+        if (unit->fuel < unit->warpenergy) {
+            unit->warpenergy = unit->fuel;
+        }
+    }
+    return Res;
+}
+
+void Movable::LateralThrust(float amt) {
+    if (amt > 1.0) {
+        amt = 1.0;
+    }
+    if (amt < -1.0) {
+        amt = -1.0;
+    }
+    ApplyLocalForce(amt * limits.lateral * Vector(1, 0, 0));
+}
+
+void Movable::VerticalThrust(float amt) {
+    if (amt > 1.0) {
+        amt = 1.0;
+    }
+    if (amt < -1.0) {
+        amt = -1.0;
+    }
+    ApplyLocalForce(amt * limits.vertical * Vector(0, 1, 0));
+}
+
+void Movable::LongitudinalThrust(float amt) {
+    if (amt > 1.0) {
+        amt = 1.0;
+    }
+    if (amt < -1.0) {
+        amt = -1.0;
+    }
+    ApplyLocalForce(amt * limits.forward * Vector(0, 0, 1));
+}
+
+void Movable::YawTorque(float amt) {
+    if (amt > limits.yaw) {
+        amt = limits.yaw;
+    } else if (amt < -limits.yaw) {
+        amt = -limits.yaw;
+    }
+    ApplyLocalTorque(amt * Vector(0, 1, 0));
+}
+
+void Movable::PitchTorque(float amt) {
+    if (amt > limits.pitch) {
+        amt = limits.pitch;
+    } else if (amt < -limits.pitch) {
+        amt = -limits.pitch;
+    }
+    ApplyLocalTorque(amt * Vector(1, 0, 0));
+}
+
+void Movable::RollTorque(float amt) {
+    if (amt > limits.roll) {
+        amt = limits.roll;
+    } else if (amt < -limits.roll) {
+        amt = -limits.roll;
+    }
+    ApplyLocalTorque(amt * Vector(0, 0, 1));
+}
+
+void Movable::Thrust(const Vector &amt1, bool afterburn) {
+    Unit *unit = static_cast<Unit *>(this);
+
+    if (unit->afterburntype == 0) {
+        afterburn = afterburn && unit->energy > unit->afterburnenergy * simulation_atom_var;
+    } //SIMULATION_ATOM; ?
+    if (unit->afterburntype == 1) {
+        afterburn = afterburn && unit->fuel > 0;
+    }
+    if (unit->afterburntype == 2) {
+        afterburn = afterburn && unit->warpenergy > 0;
+    }
+
+
+    //Unit::Thrust( amt1, afterburn );
+    {
+        Vector amt = ClampThrust(amt1, afterburn);
+        ApplyLocalForce(amt);
+    }
+
+    static bool must_afterburn_to_buzz =
+            XMLSupport::parse_bool(vs_config->getVariable("audio", "buzzing_needs_afterburner", "false"));
+    if (_Universe->isPlayerStarship(unit) != NULL) {
+        static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
+                "player_afterburner",
+                "sfx10.wav"), true);
+        static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
+        if (afterburn != AUDIsPlaying(playerengine)) {
+            if (afterburn) {
+                AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
+            } else {
+                AUDStopPlaying(playerengine);
+            }
+        }
+    } else if (afterburn || !must_afterburn_to_buzz) {
+        static float buzzingtime = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_time", "5"));
+        static float
+                buzzingdistance = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_distance", "5"));
+        static float lastbuzz = getNewTime();
+        Unit *playa = _Universe->AccessCockpit()->GetParent();
+        if (playa) {
+            if (UnitUtil::getDistance(unit,
+                    playa) < buzzingdistance && playa->owner != this && unit->owner != playa
+                    && unit->owner != playa->owner) {
+                float ttime = getNewTime();
+                if (ttime - lastbuzz > buzzingtime) {
+                    Vector pvel = playa->GetVelocity();
+                    Vector vel = this->GetVelocity();
+                    pvel.Normalize();
+                    vel.Normalize();
+                    float dotprod = vel.Dot(pvel);
+                    if (dotprod < .86) {
+                        lastbuzz = ttime;
+                        //AUDPlay( this->sound->engine, this->Position(), this->GetVelocity(), 1 );
+                        unit->playEngineSound();
+                    } else {
+                    }
+                }
+            }
+        }
+    }
+}

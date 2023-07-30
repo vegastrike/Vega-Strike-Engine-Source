@@ -4,7 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2003-2019 dan_w and other Vega Strike contributors
  * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFX_PALETTE_H
+#define VEGA_STRIKE_ENGINE_GFX_PALETTE_H
 
-
-#ifndef PALETTE_H_
-#define PALETTE_H_
 void ShiftPalette(unsigned char[], double, double, double, double, double, double);
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFX_PALETTE_H

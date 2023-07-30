@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, Alan Shieh, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef _HASHTABLE_H_
-#define _HASHTABLE_H_
+#ifndef VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
+#define VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
 
 #include <math.h>
 #include <list>
@@ -111,5 +110,4 @@ public:
 */
 };
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H

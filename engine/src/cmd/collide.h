@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,10 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __COLLIDE_FUNCS_H
-#define __COLLIDE_FUNCS_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H
 
 #include "gfx/vec.h"
 #include "linecollide.h"
@@ -38,5 +36,4 @@ bool EradicateCollideTable(LineCollide *lc, StarSystem *ss);
 void AddCollideQueue(LineCollide &tmp, StarSystem *ss);
 bool lcwithin(const LineCollide &lc, const LineCollide &tmp);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H

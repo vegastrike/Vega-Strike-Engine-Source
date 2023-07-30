@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,11 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
 // Version 2.2
-
-#ifndef GENERAL_H
-#define GENERAL_H
+#ifndef VEGA_STRIKE_ENGINE_MISSION_GENERAL_H
+#define VEGA_STRIKE_ENGINE_MISSION_GENERAL_H
 
 /* Don't forget, these defines can be set at compile time with the compile flag -D */
 
@@ -154,4 +152,4 @@ glob_t *FindFiles(char *path, char *extension);
 glob_t *FindDirs(char *path);
 #endif    // _G_GLOB
 
-#endif    // GENERAL_H
+#endif // VEGA_STRIKE_ENGINE_MISSION_GENERAL_H

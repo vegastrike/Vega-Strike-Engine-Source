@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Roy Falk, Nachum Barcohen, David Wales,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Roy Falk, Nachum Barcohen, David Wales,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef TVECTOR_H
-#define TVECTOR_H
+#ifndef VEGA_STRIKE_ENGINE_GFX_TVECTOR_H
+#define VEGA_STRIKE_ENGINE_GFX_TVECTOR_H
 
 #ifdef __cplusplus
 
@@ -196,4 +194,5 @@ typedef TVector<float, double> Vector;
 typedef TVector<double, float> QVector;
 
 #endif // C++
-#endif // TVECTOR_H
+
+#endif //VEGA_STRIKE_ENGINE_GFX_TVECTOR_H

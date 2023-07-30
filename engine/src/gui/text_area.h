@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef TEXT_AREA_H
-#define TEXT_AREA_H
+#ifndef VEGA_STRIKE_ENGINE_GUI_TEXT_AREA_H
+#define VEGA_STRIKE_ENGINE_GUI_TEXT_AREA_H
 
 //Version: 1.3  - February 27, 2002
 //Changes:
@@ -257,5 +256,4 @@ public:
 
 void LoadTextures(void);
 
-#endif    //TEXT_AREA_H
-
+#endif    //VEGA_STRIKE_ENGINE_GUI_TEXT_AREA_H

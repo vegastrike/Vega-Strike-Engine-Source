@@ -4,7 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
  * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,15 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_MSG_CENTER_H
+#define VEGA_STRIKE_ENGINE_CMD_SCRIPT_MSG_CENTER_H
 
 /*
  *  MessageCenter written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-
-#ifndef _MSGCENTER_H_
-
-#define _MSGCENTER_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -75,5 +72,4 @@ public:
     std::vector<gameMessage> messages;
 };
 
-#endif //_MSGCENTER_H_
-
+#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_MSG_CENTER_H

@@ -1,7 +1,7 @@
 /*
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
-    Copyright (C) 2021-2022 Stephen G Tuggy
+    Copyright (C) 2021-2023 Stephen G Tuggy, Benjamen R. Meyer
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,10 +17,8 @@
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-
-#ifndef __CS_BOX_H__
-#define __CS_BOX_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H
 
 #include "opvector3.h"
 
@@ -526,4 +524,4 @@ public:
     friend bool operator<(const csVector3 &point, const csBox3 &box);
 };
 
-#endif // __CS_BOX_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H

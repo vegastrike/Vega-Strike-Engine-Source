@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Claudio Freire, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, Claudio Freire, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,8 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef _VS_HEAP_H_
-#define _VS_HEAP_H_
+#ifndef VEGA_STRIKE_ENGINE_HEAP_H
+#define VEGA_STRIKE_ENGINE_HEAP_H
 
 #include <vector>
 #include <algorithm>
@@ -100,4 +100,4 @@ public:
 
 }
 
-#endif//_VS_HEAP_H_
+#endif //VEGA_STRIKE_ENGINE_HEAP_H

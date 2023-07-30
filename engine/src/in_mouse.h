@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_MOUSE_H
+#define VEGA_STRIKE_ENGINE_MOUSE_H
 
-#ifndef _MOUSE_H_
-#define _MOUSE_H_
 #include "in.h"
 
 extern int mousex, mousey;
@@ -34,5 +34,5 @@ void UnbindMouse(int key);
 int getMouseDrawFunc();
 void GetMouseDelta(int &dx, int &dy);
 int lookupMouseButton(int winsys_button); //returns 0 for left click, 1 for middle, 2 for right. ....
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_MOUSE_H

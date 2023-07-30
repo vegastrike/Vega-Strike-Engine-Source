@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2021-2023 Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef DAMAGEABLELAYER_H
-#define DAMAGEABLELAYER_H
+#ifndef VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H
+#define VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H
 
 #include <vector>
 
@@ -97,4 +95,4 @@ struct DamageableLayer {
     void UpdateRegeneration(const float &new_regeneration_value);
 };
 
-#endif // DAMAGEABLELAYER_H
+#endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H

@@ -4,7 +4,7 @@
  * Copyright (C) 2003 Mike Byron
  * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy, and other
  * Vega Strike contributors.
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef __NAVPATH_H__
-#define __NAVPATH_H__
+#ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_PATH_H
+#define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_PATH_H
 
 #include <vector>
 #include <deque>
@@ -427,5 +425,4 @@ private:
     PartType type;
 };
 
-#endif   //__NAVPATH_H__
-
+#endif   //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_PATH_H

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __UNIT_PHYSICS_CPP__
-#define __UNIT_PHYSICS_CPP__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
 
 #include "gfx/mesh.h"
 #include "lin_time.h"
@@ -158,5 +157,4 @@ Vector Unit::ResolveForces(const Transformation &trans, const Matrix &transmat) 
     return Movable::ResolveForces(trans, transmat);
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H

@@ -1,7 +1,7 @@
 /*
  * movable.h
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2020-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
  * ministerofinformation, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef MOVABLE_H
-#define MOVABLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
+#define VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 
 #include "gfx/vec.h"
 #include "vs_limits.h"
@@ -247,6 +245,56 @@ public:
             bool lastframe,
             UnitCollection *uc,
             Unit *superunit) = 0;
+
+    /**
+     * Fire engine takes a unit vector for direction
+     * and how fast the fuel speed and mass coming out are
+     */
+    /*unit vector... might default to "r"*/
+    void FireEngines(const Vector &Direction, float FuelSpeed, float FMass);
+    //applies a force for the whole gameturn upon the center of mass
+    void ApplyForce(const Vector &Vforce);
+    //applies a force for the whole gameturn upon the center of mass, using local coordinates
+    void ApplyLocalForce(const Vector &Vforce);
+    //applies a force that is multipled by the mass of the ship
+    void Accelerate(const Vector &Vforce);
+    //Apply a torque in world level coords
+    void ApplyTorque(const Vector &Vforce, const QVector &Location);
+    //Applies a torque in local level coordinates
+    void ApplyLocalTorque(const Vector &Vforce, const Vector &Location);
+    //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
+    void ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location);
+
+    //convenient shortcut to applying torques with vector and position
+    void ApplyLocalTorque(const Vector &torque);
+
+
+    //Clamps thrust to the limits struct
+    Vector ClampThrust(const Vector &thrust, bool afterburn);
+    //Takes a unit vector for direction of thrust and scales to limits
+    Vector MaxThrust(const Vector &thrust);
+    //Thrusts by ammt and clamps accordingly (afterburn or not)
+    virtual void Thrust(const Vector &amt, bool afterburn = false);
+    //Applies lateral thrust
+    void LateralThrust(float amt);
+    //Applies vertical thrust
+    void VerticalThrust(float amt);
+    //Applies forward thrust
+    void LongitudinalThrust(float amt);
+    //Clamps desired velocity to computer set limits
+    Vector ClampVelocity(const Vector &velocity, const bool afterburn);
+    //Clamps desired angular velocity to computer set limits
+    Vector ClampAngVel(const Vector &vel);
+    //Clamps desired torque to computer set limits of thrusters
+    Vector ClampTorque(const Vector &torque);
+    //scales unit size torque to limits in that direction
+    Vector MaxTorque(const Vector &torque);
+    //Applies a yaw of amt
+    void YawTorque(float amt);
+    //Applies a pitch of amt
+    void PitchTorque(float amt);
+    //Applies a roll of amt
+    void RollTorque(float amt);
 };
 
-#endif // MOVABLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_MOVABLE_H

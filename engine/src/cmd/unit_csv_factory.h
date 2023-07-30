@@ -2,7 +2,7 @@
  * unit_csv_factory.cpp
  *
  * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,10 +21,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef UNITCSVFACTORY_H
-#define UNITCSVFACTORY_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_FACTORY_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_FACTORY_H
 
 #include <map>
 #include <string>
@@ -208,4 +206,4 @@ inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &
 
 std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std::string unit_faction);
 
-#endif // UNITCSVFACTORY_H
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CSV_FACTORY_H

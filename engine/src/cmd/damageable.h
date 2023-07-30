@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,10 +22,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef DAMAGEABLE_H
-#define DAMAGEABLE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
+#define VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 
 #include "damageable_object.h"
 #include "gfx/vec.h"
@@ -162,4 +160,4 @@ public:
     bool flickerDamage();
 };
 
-#endif // DAMAGEABLE_H
+#endif //VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef RESOURCE_H
-#define RESOURCE_H
+#ifndef VEGA_STRIKE_ENGINE_RESOURCE_RESOURCE_H
+#define VEGA_STRIKE_ENGINE_RESOURCE_RESOURCE_H
 
 /**
  * @brief A resource is any part of the game that can be used up and filled up.
@@ -124,4 +123,4 @@ T operator/(const Resource<T> &lhs, const T &rhs);
 template<typename T>
 T operator/(const T &lhs, const Resource<T> &rhs);
 
-#endif // RESOURCE_H
+#endif //VEGA_STRIKE_ENGINE_RESOURCE_RESOURCE_H

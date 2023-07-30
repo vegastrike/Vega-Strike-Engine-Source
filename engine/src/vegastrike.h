@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,14 +21,12 @@
  *
  * Portions of this code from Tux Racer by Jasmin F. Patry www.tuxracer.com
  */
-
+#ifndef VEGA_STRIKE_ENGINE_VEGASTRIKE_H
+#define VEGA_STRIKE_ENGINE_VEGASTRIKE_H
 
 #ifdef __cplusplus
 #include <assert.h>
-#endif
-
-#ifndef _VEGASTRIKE_H_
-#define _VEGASTRIKE_H_
+#endif //__cplusplus
 
 extern float simulation_atom_var;
 extern float audio_atom_var;
@@ -61,26 +59,26 @@ extern float AUDIO_ATOM;
     #include <windows.h>
  //#include <wingdi.h>
     #include <time.h>
-#else
+#else //defined (WIN32) || defined (__CYGWIN__)
     #include <sys/time.h>
     #include <sys/stat.h>
     #include <unistd.h>
 //#include "command.h"
-#endif /* defined( WIN32 ) || defined( __CYGWIN__ ) */
+#endif //defined (WIN32) || defined (__CYGWIN__)
 
 #ifndef NO_GFX
     #if defined (__APPLE__) || defined (MACOSX)
         #include <OpenGL/gl.h>
         #include <OpenGL/glu.h>
         #include <GLUT/glut.h>
-    #else
+    #else //defined (__APPLE__) || defined (MACOSX)
         #define __glext_h_
         #include <GL/gl.h>
         #include <GL/glu.h>
         #include <GL/glut.h>
         #undef __glext_h_
-    #endif
-#endif
+    #endif //defined (__APPLE__) || defined (MACOSX)
+#endif //NO_GFX
 
 #define PROG_NAME "vegastrike"
 
@@ -88,9 +86,8 @@ extern float AUDIO_ATOM;
 
 //#define RANDOMIZE_SIM_ATOMS 1
 
-#endif
-
 #ifdef __cplusplus
 
-#endif
+#endif //__cplusplus
 
+#endif //VEGA_STRIKE_ENGINE_VEGASTRIKE_H

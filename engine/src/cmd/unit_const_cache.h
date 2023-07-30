@@ -4,7 +4,7 @@
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
  * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,8 +25,8 @@
  */
 
 
-#ifndef __UNIT_CONST_CACHE_H
-#define __UNIT_CONST_CACHE_H
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
 #include "hashtable.h"
 #include <string>
 #include <gnuhash.h>
@@ -114,5 +114,4 @@ public:
 typedef ClassCache<Unit, StringIntKey> UnitConstCache;
 typedef ClassCache<Mesh, std::string> WeaponMeshCache;
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H

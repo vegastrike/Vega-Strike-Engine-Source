@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __FILE_IO_H__
-#define __FILE_IO_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_FILE_IO_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_FILE_IO_H
 
 mem_texture &load_texture_png(std::string filename);
 mem_texture &load_texture_set_png
@@ -42,6 +41,4 @@ void nvcompress_set_png(...);
 void pack_dds_mip(...);
 void pack_dds_all(...);
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_FILE_IO_H

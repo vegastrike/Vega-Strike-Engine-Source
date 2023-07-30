@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,12 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+// NO HEADER GUARD
 
 #ifndef WHICH_UNIT_EXPORT_NUMBER
 #define WHICH_UNIT_EXPORT_NUMBER 0
-#endif
+#endif //WHICH_UNIT_EXPORT_NUMBER
+
 #if ((WHICH_UNIT_EXPORT_NUMBER == 3) || (WHICH_UNIT_EXPORT_NUMBER == 2))
-#else
+#else //((WHICH_UNIT_EXPORT_NUMBER == 3) || (WHICH_UNIT_EXPORT_NUMBER == 2))
 ////////////////////////////AUTOMATIC WRAP//////
 WRAPPED2(bool, AutoPilotTo, UnitWrapper, un, bool, ignore_energy_requirement,
 false )
@@ -127,9 +129,10 @@ WRAPPED0(float, GetHullPercent,
 0 )
 WRAPPED0(float, rSize,
 0 )
-#endif
-#if WHICH_UNIT_EXPORT_NUMBER == 1 || WHICH_UNIT_EXPORT_NUMBER == 3
-#else
+#endif // ((WHICH_UNIT_EXPORT_NUMBER == 3) || (WHICH_UNIT_EXPORT_NUMBER == 2))
+
+#if (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 3)
+#else // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 3)
 WRAPPED1(double, getMinDis, QVector, pnt,
 0 )  //for clicklist
 WRAPPED3(float, querySphere, QVector, start, QVector, end, float, my_unit_radius,
@@ -197,9 +200,10 @@ voidWRAPPED1( SetVelocity, Vector, v
 )
 voidWRAPPED1( SetAngularVelocity, Vector, v
 )
-#endif
-#if WHICH_UNIT_EXPORT_NUMBER == 1 || WHICH_UNIT_EXPORT_NUMBER == 2
-#else
+#endif // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 3)
+
+#if (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)
+#else // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)
 WRAPPED0(float, GetMoment,
 0 )
 WRAPPED0(float, GetMass,
@@ -339,5 +343,5 @@ WRAPPED0(int, RepairUpgrade,
 EXPORT_UTIL3(float, PercentOperational, std::string, content, std::string, category, bool, countHullAndArmorAsFull)
 WRAPPED1( Vector, MountPercentOperational,
 int, whichMount, Vector( -1.0f, -1.0f, -1.0f ))
-#endif
+#endif // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)
 

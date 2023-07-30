@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,8 +28,8 @@
 // Mar 05, 2002: Fixed the FindFiles() so it now checks sub directories
 // Mar 05, 2002: Fixed FindFiles() again
 
-#ifndef GENERAL_H
-#define GENERAL_H
+#ifndef VEGA_STRIKE_LAUNCHER_GENERAL_H
+#define VEGA_STRIKE_LAUNCHER_GENERAL_H
 
 /* Don't forget, these defines can be set at compile time with the compile flag -D */
 
@@ -177,4 +177,4 @@ glob_t *FindFiles(char *path, char *extension);
 glob_t *FindDirs(char *path);
 #endif    // _G_PATH
 
-#endif    // GENERAL_H
+#endif    // VEGA_STRIKE_LAUNCHER_GENERAL_H

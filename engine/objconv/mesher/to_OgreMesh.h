@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef _TO_OGREMESH_H_
-#define _TO_OGREMESH_H_
+#ifndef VEGA_STRIKE_ENGINE_OBJCONV_TO_OGREMESH_H
+#define VEGA_STRIKE_ENGINE_OBJCONV_TO_OGREMESH_H
 
 #include "to_BFXM.h"
 
@@ -55,5 +54,4 @@ void AutoEdgeList(void *outputcontext);     //a good idea - prepares the mesh fo
 void AutoTangents(void *outputcontext);     //prepares the mesh for normal mapping (only needed if the material uses normal mapping)
 }
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_OBJCONV_TO_OGREMESH_H

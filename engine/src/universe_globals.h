@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef UNIVERSE_GLOBALS_H
-#define UNIVERSE_GLOBALS_H
+#ifndef VEGA_STRIKE_ENGINE_UNIVERSE_GLOBALS_H
+#define VEGA_STRIKE_ENGINE_UNIVERSE_GLOBALS_H
 
 #include <vector>
 using std::vector;
@@ -41,4 +40,4 @@ extern vector<StarSystem *> _active_star_systems;
 // TODO: understand why we can't use active_star_system instead
 extern StarSystem *_script_system;
 
-#endif // UNIVERSE_GLOBALS_H
+#endif //VEGA_STRIKE_ENGINE_UNIVERSE_GLOBALS_H

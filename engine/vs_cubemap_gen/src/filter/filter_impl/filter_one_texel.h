@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __FILTER_ONE_TEX_H__
-#define __FILTER_ONE_TEX_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_ONE_TEX_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_ONE_TEX_H
 
 /*
 * This class is a functor that is created for each texel of the target texture. It's operator()() takes a ray
@@ -58,6 +57,4 @@ public:
     fRGBAcol operator()(fvector const *ray);
 };
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_ONE_TEX_H

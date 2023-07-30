@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2005 by Marten Svanfeldt
-  Copyright (C) 2022 Stephen G. Tuggy
+  Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Library General Public
@@ -16,10 +16,8 @@
   License along with this library; if not, write to the Free
   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-
-#ifndef __CS_MATH_H__
-#define __CS_MATH_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_MATH_H
+#define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_MATH_H
 
 #define HAVE_ISNORMAL 1
 
@@ -215,4 +213,4 @@ CS_FORCEINLINE bool csNormal(double d) {
 
 /** @} */
 
-#endif //__CS_MATH_H__
+#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_MATH_H

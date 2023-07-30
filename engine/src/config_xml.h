@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,13 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_CONFIG_XML_H
+#define VEGA_STRIKE_ENGINE_CONFIG_XML_H
 
 /*
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-
-#ifndef _VEGACONFIG_H_
-#define _VEGACONFIG_H_
 
 #include <expat.h>
 #include <string>
@@ -63,5 +62,4 @@ private:
     void checkHatswitch(int nr, configNode *node);
 };
 
-#endif //_VEGACONFIG_H_
-
+#endif //VEGA_STRIKE_ENGINE_CONFIG_XML_H

@@ -1,12 +1,15 @@
 bin/
 build/
 build-*/
+cmake-build/
+cmake-build-*/
 data/
 ext/
 *.pyc
 packages/
 *.log
 *.bak
+*.sw?
 *.kdev4
 .vs/
 .vscode/

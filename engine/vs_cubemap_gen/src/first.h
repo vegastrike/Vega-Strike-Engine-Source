@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,9 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef __FIRST_H__
-#define __FIRST_H__
+#ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_FIRST_H
+#define VEGA_STRIKE_ENGINE_CUBE_MAP_FIRST_H
 /* Always include this file first */
 
 
@@ -71,6 +70,4 @@ inline T operator-(T const &a, T const &b) {
 #include "units/steradians.h"
 #include "units/shininess.h"
 
-#endif
-
-
+#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_FIRST_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,10 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-
-// Check to see if we're already loaded
-#ifndef DISPLAY_GTK_H
-#define DISPLAY_GTK_H
+#ifndef VEGA_STRIKE_ENGINE_MISSION_DISPLAY_GTK_H
+#define VEGA_STRIKE_ENGINE_MISSION_DISPLAY_GTK_H
 
 #include "central.h"
 
@@ -41,4 +39,4 @@ void cb_unselect_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtre
 void cb_select_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree);
 void cb_selection_changed(GtkWidget *tree);
 
-#endif    //DISPLAY_GTK_H
+#endif //VEGA_STRIKE_ENGINE_MISSION_DISPLAY_GTK_H

@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#ifndef _GFX_ENV_MAP_GENT_H_
-#define _GFX_ENV_MAP_GENT_H_
+#ifndef VEGA_STRIKE_ENGINE_GFX_ENV_MAP_GENT_H
+#define VEGA_STRIKE_ENGINE_GFX_ENV_MAP_GENT_H
 void EnvironmentMapGeneratorMain(const char *inpt,
         const char *outpt,
         float a = 0,
@@ -34,5 +32,4 @@ void EnvironmentMapGeneratorMain(const char *inpt,
         float p = 1,
         bool w = false);
 
-#endif
-
+#endif //VEGA_STRIKE_ENGINE_GFX_ENV_MAP_GENT_H

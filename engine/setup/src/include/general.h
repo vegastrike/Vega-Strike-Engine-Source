@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,8 +22,8 @@
 
 // Version 2.1
 
-#ifndef GENERAL_H
-#define GENERAL_H
+#ifndef VEGA_STRIKE_ENGINE_SETUP_GENERAL_H
+#define VEGA_STRIKE_ENGINE_SETUP_GENERAL_H
 
 //#define GLIB
 
@@ -83,10 +83,11 @@ char *GetString(GString *line);
 void SetString(GString **ptr, char *line);
 #endif    //GLIB
 char *NewString(const char *string);
-#endif    //GENERAL_H
 
 char *xml_pre_chomp_comment(char *string);
 char *xml_chomp_comment(char *string);
 #ifdef __cplusplus        //iostream is only used in debugging
 }
-#endif
+#endif //__cplusplus
+
+#endif    //VEGA_STRIKE_ENGINE_SETUP_GENERAL_H

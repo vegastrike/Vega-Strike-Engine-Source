@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * ship.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,20 +21,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H
-#define VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H
 
-#include <string>
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-enum class WEAPON_TYPE {
-    UNKNOWN,
-    BEAM,
-    BALL,
-    BOLT,
-    PROJECTILE
-};
+#include "ship.h"
 
-WEAPON_TYPE getWeaponTypeFromString(std::string type);
-std::string getFilenameFromWeaponType(WEAPON_TYPE type);
+Ship::Ship()
+{
 
-#endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H
+}
+
+Ship::Ship(const char *filename,
+        bool SubU,
+        int faction,
+        std::string unitModifications,
+        Flightgroup *flightgrp,
+        int fg_subnumber)
+        : Unit(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber)
+{}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,25 +19,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_GFXLIB_H
+#define VEGA_STRIKE_ENGINE_GFXLIB_H
 
-#ifndef _GFXLIB_H
-#define _GFXLIB_H
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #ifdef GLDRV_EXPORTS
 #define GFXDRVAPI __declspec( dllexport )
-#else
+#else //GLDRV_EXPORTS 
 #define GFXDRVAPI __declspec( dllimport )
-#endif
-#else
+#endif //GLDRV_EXPORTS
+#else //defined (_WIN32) && !defined (__CYGWIN__)
 #define GFXDRVAPI
-#endif
-/*#if 0
+#endif //defined (_WIN32) && !defined (__CYGWIN__)
+
+/*
+ * #if 0
  * #if defined(__APPLE__) || defined(MACOSX)
  * #include <GLUT/glut.h>
  * #else
  * #include <GL/glut.h>
  * #endif
- #endif*/
+ * #endif
+ */
+
 #include <cstddef>
 #include <vector>
 class Matrix;
@@ -525,5 +529,5 @@ void GFXUploadLightState(int max_light_location,
         vector<int>::const_iterator end);
 bool GFXShaderReloaded();
 int GFXGetProgramVersion();
-#endif
 
+#endif //VEGA_STRIKE_ENGINE_GFXLIB_H
