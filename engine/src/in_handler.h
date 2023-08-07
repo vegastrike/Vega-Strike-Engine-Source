@@ -24,6 +24,9 @@
 
 #include "in_kb.h"
 //#include "cmd_unit.h"
+#include <map>
+#include <string>
+
 class Unit;
 
 typedef void (*INDISPATCH)(int x, int y);
@@ -31,7 +34,6 @@ typedef void (*INDISPATCH)(int x, int y);
 class InputListener {
 public:
     int *mousex, *mousey;
-    KBSTATE( *keystate )[KEYMAP_SIZE];
 
     Unit *parent;
 

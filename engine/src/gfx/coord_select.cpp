@@ -24,7 +24,6 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "cmd/unit_generic.h"
 #include "star_system.h"
 #include "loc_select.h"
@@ -38,10 +37,11 @@ int CoordinateSelectChange = 0;
 int CoordinateSelectmousex;
 int CoordinateSelectmousey;
 extern Vector MouseCoordinate(int mouseX, int mouseY);
-extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
+
+extern KBSTATE mouseButtonState;
 
 void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int) {
-    if (keyState[0]['z'] == DOWN) {
+    if (mouseButtonState == DOWN) {
         CoordinateSelectChange = 2;
     } else {
         CoordinateSelectChange = 1;

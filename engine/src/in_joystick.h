@@ -28,7 +28,7 @@
 #include "in_kb_data.h"
 
 #if defined (HAVE_SDL)
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #endif //defined (HAVE_SDL)
 
 #include "vegastrike.h"
