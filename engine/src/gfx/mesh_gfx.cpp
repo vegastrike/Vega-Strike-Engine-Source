@@ -438,9 +438,9 @@ Mesh::~Mesh() {
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
         vector<Mesh *>::iterator finder;
         if (hashers) {
-            for (size_t i = hashers->size() - 1; i >= 0; --i) {
-                if (hashers->at(i) == this) {
-                    hashers->erase(hashers->begin() + i);
+            for (auto hashItem = hashers->begin(); hashItem != hashers->end(); ++hashItem) {
+                if (*hashItem == this) {
+                    hashers->erase(hashItem);
                     if (hashers->empty()) {
                         bfxmHashTable.Delete(hash_name);
                         delete hashers;

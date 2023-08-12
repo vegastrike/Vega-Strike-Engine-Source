@@ -178,6 +178,8 @@ ENDIF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
 IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
+MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
+
 
 #IF (NOT BUILD_OPT)
 #    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
@@ -296,10 +298,12 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/conf
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
         )
 add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
+# for DEBUG remove all optimizations
 add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
-        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:Profiler>,$<CONFIG:RelWithDebInfo>>>:-Og>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Debug>>:-O0>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Profiler>,$<CONFIG:RelWithDebInfo>>>:-Og>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:-g3>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-pg>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-g2>"
