@@ -31,13 +31,13 @@
 
 void CloakFor::Execute() {
     if (time == 0) {
-        parent->Cloak(enable);
+        parent->cloak.Activate();
     }
     time += SIMULATION_ATOM;
     if (time > maxtime) {
         done = true;
         if (maxtime != 0) {
-            parent->Cloak(!enable);
+            parent->cloak.Deactivate();
         }
         return;
     }
@@ -48,7 +48,7 @@ CloakFor::~CloakFor() {
     VS_LOG_AND_FLUSH(trace, (boost::format("clk%1$x") % this));
 #endif
     if (parent && time <= maxtime) {
-        parent->Cloak(!enable);
+        parent->cloak.Deactivate();
     }
 }
 

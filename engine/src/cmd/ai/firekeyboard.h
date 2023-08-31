@@ -34,7 +34,6 @@
 #define NUMSAVEDTARGETS 10
 class FireKeyboard : public Order {
     bool itts;
-    bool cloaktoggle;
     bool refresh_target;
     float gunspeed;
     float gunrange;

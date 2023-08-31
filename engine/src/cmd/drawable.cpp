@@ -204,15 +204,10 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
     bool On_Screen = false;
     bool Unit_On_Screen = false;
     float Apparent_Size = 0.0f;
-    int cloak = unit->cloaking;
     Matrix wmat;
 
     if (!cam_setup_phase) {
         // Following stuff is only needed in actual drawing phase
-        if (unit->cloaking > unit->cloakmin) {
-            cloak = (int) (unit->cloaking - interpolation_blend_factor * unit->cloakrate * simulation_atom_var);
-            cloak = cloakVal(cloak, unit->cloakmin, unit->cloakrate, unit->cloakglass);
-        }
         if ((*unit->current_hull) < (*unit->max_hull)) {
             damagelevel = (*unit->current_hull) / (*unit->max_hull);
             chardamage = (255 - (unsigned char) (damagelevel * 255));
@@ -272,10 +267,9 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
                     if (frustd) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw(lod, wmat, d,
-                                i == this->meshdata.size() - 1 ? -1 : cloak,
+                        this->meshdata[i]->Draw(lod, wmat, d, unit->cloak,
                                 (camera->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1 : 0,
-                                chardamage);                                                                                                                                                            //cloakign and nebula
+                                chardamage); //cloaking and nebula
                         On_Screen = true;
                         unsigned int numAnimFrames = 0;
                         static const string default_animation;
@@ -349,8 +343,8 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
         return;
     }
 
-    DrawSubunits(On_Screen, wmat, cloak, avgscale, chardamage);
-    DrawHalo(On_Screen, Apparent_Size, wmat, cloak);
+    DrawSubunits(On_Screen, wmat, unit->cloak, avgscale, chardamage);
+    DrawHalo(On_Screen, Apparent_Size, wmat, unit->cloak);
     Sparkle(On_Screen, ctm);
 }
 
@@ -412,10 +406,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
         pos = mato.p;
         VectorAndPositionToMatrix(mat, p, q, r, pos);
     }
-    int cloak = unit->cloaking;
-    if (unit->cloaking > unit->cloakmin) {
-        cloak = cloakVal(cloak, unit->cloakmin, unit->cloakrate, unit->cloakglass);
-    }
+
     for (i = 0; i <= this->nummesh(); i++) {
         //NOTE LESS THAN OR EQUALS...to cover shield mesh
         if (this->meshdata[i] == NULL) {
@@ -426,7 +417,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
         float d = GFXSphereInFrustum(TransformedPosition, this->meshdata[i]->clipRadialSize() * vlpqrScaleFactor);
         if (d) {          //d can be used for level of detail
             //this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
-            this->meshdata[i]->Draw(lod, mat, d, cloak);
+            this->meshdata[i]->Draw(lod, mat, d, unit->cloak);
         }
     }
     Unit *un;
@@ -468,22 +459,20 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
                                 (d - gun->rSize() < g_game.znear) ? g_game.znear : d - gun->rSize());
                         ScaleMatrix(mmat, Vector(mahnt->xyscale, mahnt->xyscale, mahnt->zscale));
                         gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
-                        gun->Draw(lod, mmat, d, cloak,
-                                (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1
+                        gun->Draw(lod, mmat, d, unit->cloak, (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1
                                         : 0,
                                 chardamage,
                                 true);                                                                                                                                       //cloakign and nebula
                         if (mahnt->type->gun1) {
                             gun = mahnt->type->gun1;
                             gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
-                            gun->Draw(lod,
-                                    mmat,
-                                    d,
-                                    cloak,
-                                    (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula
+                            gun->Draw(lod, mmat,
+                                      d,
+                                      unit->cloak,
+                                      (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula
                                             != NULL) ? -1 : 0,
-                                    chardamage,
-                                    true);                                                                                                                               //cloakign and nebula
+                                      chardamage,
+                                      true);                                                                                                                               //cloakign and nebula
                         }
                     }
                 }
@@ -497,7 +486,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     if (!(unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE))) {
         halos->Draw(mat,
                 Scale,
-                cloak,
+                unit->cloak.Visible(),
                 0,
                 unit->GetHullPercent(),
                 velocity,
@@ -707,7 +696,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     }
 }
 
-void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak) {
+void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak cloak) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // Units not shown don't emit a halo
@@ -746,12 +735,12 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
     float hulld = unit->GetHull() > 0 ? damage_level : 1.0;
-    halos->Draw(wmat, Scale, cloak, nebd, hulld, velocity,
+    halos->Draw(wmat, Scale, unit->cloak.Visible(), nebd, hulld, velocity,
             linaccel, angaccel, maxaccel, cmas, unit->faction);
 
 }
 
-void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage) {
+void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float average_scale, unsigned char char_damage) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Transformation *ct = &unit->cumulative_transformation;
 
@@ -811,8 +800,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
             if (lod > 0.5 && pixradius > 2.5) {
                 ScaleMatrix(mat, Vector(mount->xyscale, mount->xyscale, mount->zscale));
                 gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
-                gun->Draw(lod, mat, d, cloak,
-                        (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1 : 0,
+                gun->Draw(lod, mat, d, cloak, (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1 : 0,
                         char_damage,
                         true);                                                                                                                                      //cloakign and nebula
             }

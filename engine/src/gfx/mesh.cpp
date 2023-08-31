@@ -50,7 +50,7 @@
 #include "lin_time.h"
 #include "mesh_xml.h"
 #include "gfx/technique.h"
-#include <float.h>
+#include <cfloat>
 #include <algorithm>
 
 #define LOD_HYSTHERESIS_DIVIDER (20)

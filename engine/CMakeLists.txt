@@ -827,6 +827,7 @@ SET(LIBCMD_SOURCES
 
     src/cmd/intelligent.cpp
     src/cmd/energetic.cpp
+    src/cmd/cloak.cpp
 
     src/cmd/planetary_orbit.cpp
 

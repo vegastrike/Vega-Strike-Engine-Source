@@ -63,7 +63,6 @@ extern bool toggle_pause();
 FireKeyboard::FireKeyboard(unsigned int whichplayer, unsigned int whichjoystick) : Order(WEAPON, 0) {
     memset(savedTargets, 0, sizeof(void *) * NUMSAVEDTARGETS);
     this->autotrackingtoggle = 1;
-    this->cloaktoggle = true;
     this->whichjoystick = whichjoystick;
     this->whichplayer = whichplayer;
     gunspeed = gunrange = .0001;
@@ -1779,8 +1778,7 @@ void FireKeyboard::Execute() {
     }
     if (f().cloakkey == PRESS) {
         f().cloakkey = DOWN;
-        parent->Cloak(cloaktoggle);
-        cloaktoggle = !cloaktoggle;
+        parent->cloak.Toggle();
     }
     if (f().lockkey == PRESS) {
         f().lockkey = DOWN;
