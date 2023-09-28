@@ -21,8 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
-
-
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 IF ((NOT BEOS) AND (NOT WIN32))
@@ -38,6 +36,7 @@ IF ((NOT BEOS) AND (NOT WIN32))
 		)
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
+	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 	INSTALL(TARGETS vegasettings DESTINATION bin)
 

@@ -29,12 +29,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 INCLUDE_DIRECTORIES("..")
 SET(TRISORT_SOURCES trisort.cpp)
 ADD_EXECUTABLE(vs-buildenv-trisort ${TRISORT_SOURCES})
+SET_TARGET_PROPERTIES(vs-buildenv-trisort PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 SET(ASTEROID_SOURCES asteroidgen.cpp)
 ADD_EXECUTABLE(vs-buildenv-asteroidgen ${ASTEROID_SOURCES})
+SET_TARGET_PROPERTIES(vs-buildenv-asteroidgen PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 SET(REPLACE_SOURCES replace.cpp)
 ADD_EXECUTABLE(vs-buildenv-replace ${REPLACE_SOURCES})
+SET_TARGET_PROPERTIES(vs-buildenv-replace PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 #find Expat
 FIND_PACKAGE(EXPAT REQUIRED)
@@ -70,12 +73,13 @@ SET(MESHER_SOURCES
     mesher/Modules/XMesh_to_BFXM.cpp
     mesher/Modules/XMesh_to_Ogre.cpp
     mesher/Modules/Wavefront_to_BFXM.cpp
-    ${Vega_Strike_SOURCE_DIR}/src/hashtable.cpp
-    ${Vega_Strike_SOURCE_DIR}/src/xml_support.cpp
+    ${Vega_Strike_SOURCE_DIR}/engine/src/hashtable.cpp
+    ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
 )
 
 INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
 ADD_EXECUTABLE(vega-meshtool ${MESHER_SOURCES})
+SET_TARGET_PROPERTIES(vega-meshtool PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # OGRE already looked for by parent
 # USE_SYSTEM_BOOST already set by main script
