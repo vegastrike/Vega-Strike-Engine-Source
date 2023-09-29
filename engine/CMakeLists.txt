@@ -35,25 +35,6 @@ MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 CONFIGURE_FILE(src/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h)
 CONFIGURE_FILE(src/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/setup/src/include/version.h)
 
-#(BenjamenMeyer) we probably don't need to do the below
-#UNSET(PYTHONLIBS_FOUND)
-#UNSET(Boost_FOUND)
-#UNSET(Boost_python3_FOUND)
-#UNSET(OPENGL_FOUND)
-#UNSET(OPENGL_GLU_FOUND)
-#UNSET(GLUT_FOUND)
-#UNSET(OPENAL_FOUND)
-#UNSET(SDL_FOUND)
-#UNSET(VORBIS_FOUND)
-#UNSET(JPEG_FOUND)
-#UNSET(PNG_FOUND)
-#UNSET(ZLIB_FOUND)
-#UNSET(EXPAT_FOUND)
-#UNSET(MATH_FOUND)
-#UNSET(FFMPEG_FOUND)
-#UNSET(OGRE_FOUND)
-#UNSET(Boost_DIR)
-
 SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
@@ -67,13 +48,6 @@ LIST(APPEND
     ${CMAKE_CURRENT_SOURCE_DIR}/src/resource
     ${Vega_Strike_BINARY_DIR}
 )
-# (BenjamenMeyer) This should already be in the include path
-#IF (NOT MSVC)
-#    LIST(APPEND
-#        VS_INCLUDE_DIRS
-#        /usr/include/harfbuzz/
-#    )
-#ENDIF (NOT MSVC)
 INCLUDE_DIRECTORIES(${VS_INCLUDE_DIRS})
 
 # The source files used to be listed here...
@@ -82,19 +56,12 @@ INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
 INCLUDE(CMakePushCheckState)
-# cmake_push_check_state()
-# UNSET(COMPILER_SPECIFIC_FLAGS)
 SET(SIZEOF_VOID_P CMAKE_SIZEOF_VOID_P)
-# SET(CMAKE_REQUIRED_LINK_OPTIONS "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}")
-# CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P) #BUILTIN_TYPES_ONLY)
-# cmake_pop_check_state()
-
 
 #Find Math
 INCLUDE(CheckSymbolExists)
 IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
     # cmake_push_check_state()
-    # UNSET(COMPILER_SPECIFIC_FLAGS)
     check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
     IF(NOT POW_FUNCTION_EXISTS)
         UNSET(POW_FUNCTION_EXISTS CACHE)
@@ -118,10 +85,6 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
 
-#IF (NOT BUILD_OPT)
-#    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
-#ENDIF (NOT BUILD_OPT)
-
 # Option to turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 
@@ -140,18 +103,6 @@ OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
 # Should we run gtest?
 OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 
-# (BenjamenMeyer) Disable the CPU optimizations - these are all really old CPUs
-# Provide boolean options for enabling various cpu optimizations.
-#OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
-#OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) " OFF )
-#OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)" OFF )
-#OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations" OFF )
-#OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)" OFF )
-#OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations" OFF )
-#OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations" OFF )
-#OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations" OFF )
-#OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine" OFF )
-
 SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
@@ -160,26 +111,6 @@ SET(DEFINES "-DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_ALL_DYN_LINK 
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
-
-# (BenjamenMeyer) Disable the CPU optimizations - these are all really old CPUs
-# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
-#IF (CPUAMD_k8)
-#    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -fprefetch-loop-arrays ")
-#ELSEIF (CPUAMD_K9)
-#    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-#ELSEIF (CPUINTEL_p4)
-#    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-#ELSEIF (CPUINTEL_prescott)
-#    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops " )
-#ELSEIF (CPUINTEL_nocona)
-#    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-#ELSEIF (CPUINTEL_core2)
-#    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-#ELSEIF (CPUINTEL_native)
-#    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-#ELSEIF (CPUAMD_vishera)
-#    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 ")
-#ENDIF (CPUAMD_k8)
 
 IF (CPU_SMP GREATER 1)
     SET(CPU_OPTS " ${CPU_OPTS} -ftree-parallelize-loops=${CPU_SMP} ")
@@ -217,10 +148,6 @@ ELSE (ENABLE_PIE)
     MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
-
-#set_property(DIRECTORY APPEND PROPERTY
-#        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
-#        )
 
 ADD_COMPILE_DEFINITIONS("NV_CUBE_MAP"
         "BOOST_PYTHON_NO_PY_SIGNATURES"
