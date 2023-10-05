@@ -80,7 +80,7 @@ function bootstrapOnDebian()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
                       libboost-python-dev \
@@ -109,7 +109,7 @@ function bootstrapOnDebian()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
                       libboost-python-dev \
@@ -136,7 +136,7 @@ function bootstrapOnDebian()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
                       libboost-python-dev \
@@ -166,7 +166,7 @@ function bootstrapOnDebian()
                       libogg-dev \
                       libvorbis-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
                       libboost-python-dev \
@@ -216,7 +216,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -247,7 +247,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -277,7 +277,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -307,7 +307,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -336,7 +336,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -411,7 +411,7 @@ function bootstrapOnPopOS ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -459,7 +459,7 @@ function bootstrapOnLinuxMint ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-compat-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -490,7 +490,7 @@ function bootstrapOnLinuxMint ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \
@@ -519,7 +519,7 @@ function bootstrapOnLinuxMint ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
-                      libsdl1.2-dev \
+                      libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
                       freeglut3-dev \

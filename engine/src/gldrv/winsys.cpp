@@ -51,7 +51,7 @@
 #include "options.h"
 #include "vs_exit.h"
 
-
+#include "SDL2/SDL_video.h"
 
 /*
  * Windowing System Abstraction Layer
@@ -68,6 +68,7 @@
  *******************************---------------------------------------------------------------------------
  */
 
+//static SDL_Window *window = NULL;
 static SDL_Surface *screen = NULL;
 
 static winsys_display_func_t display_func = NULL;
@@ -178,7 +179,8 @@ void winsys_set_passive_motion_func(winsys_motion_func_t func) {
  *  \date    Modified: 2000-10-19
  */
 void winsys_swap_buffers() {
-    SDL_GL_SwapBuffers();
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_GL_SwapWindow(current_window);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -189,7 +191,8 @@ void winsys_swap_buffers() {
  *  \date    Modified: 2000-10-19
  */
 void winsys_warp_pointer(int x, int y) {
-    SDL_WarpMouse(x, y);
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_WarpMouseInWindow(current_window, x, y);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -199,15 +202,15 @@ void winsys_warp_pointer(int x, int y) {
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2021-09-07 - stephengtuggy
  */
-static bool setup_sdl_video_mode() {
-    Uint32 video_flags = SDL_OPENGL;
-    int bpp = 0;
+static bool setup_sdl_video_mode(int *argc, char **argv) {
+    Uint32 video_flags = SDL_WINDOW_OPENGL;
+    int bpp = 0; // Bits per pixel?
     int width, height;
     if (gl_options.fullscreen) {
-        video_flags |= SDL_FULLSCREEN;
+        video_flags |= SDL_WINDOW_FULLSCREEN;
     } else {
 #ifndef _WIN32
-        video_flags |= SDL_RESIZABLE;
+        video_flags |= SDL_WINDOW_RESIZABLE;
 #endif
     }
     bpp = gl_options.color_depth;
@@ -242,16 +245,31 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
-#if SDL_VERSION_ATLEAST(1, 2, 10)
+//#if SDL_VERSION_ATLEAST(1, 2, 10)
     if (game_options()->gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-#endif
+//#endif
     width = g_game.x_resolution;
     height = g_game.y_resolution;
-    if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags)) == NULL) {
+
+
+    SDL_Window *window = SDL_CreateWindow("Vegastrike", 0, 0, width, height, video_flags);
+
+    if(!window) {
+        std::cerr << "No window\n" << std::flush;
+        VSExit(1);
+    }
+
+    SDL_GL_CreateContext(window);
+
+    screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
+    if (!screen) {
+
         VS_LOG(info, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()));
-        for (int counter = 0; screen == NULL && counter < 2; ++counter) {
+        VSExit(1);
+
+        /*for (int counter = 0; window == nullptr && counter < 2; ++counter) {
             for (int bpd = 4; bpd > 1; --bpd) {
                 SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, bpd * 8);
                 if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags | SDL_ANYFORMAT))
@@ -275,7 +293,7 @@ static bool setup_sdl_video_mode() {
         if (screen == NULL) {
             VS_LOG_AND_FLUSH(fatal, "FAILED to initialize video");
             VSExit(1);
-        }
+        }*/
     }
 
     std::string version = (const char *) glGetString(GL_RENDERER);
@@ -291,13 +309,13 @@ static bool setup_sdl_video_mode() {
         }
     }
 
-    VS_LOG(trace,
+    /*VS_LOG(trace,
             (boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode")
-                    % screen->w
-                    % screen->h
-                    % screen->pitch
-                    % screen->format->BitsPerPixel
-                    % screen->format->BytesPerPixel));
+                    % window->w
+                    % window->h
+                    % window->pitch
+                    % window->format->BitsPerPixel
+                    % window->format->BytesPerPixel));*/
 
     return true;
 }
@@ -327,7 +345,6 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
         VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
         exit(1);              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
-    SDL_EnableUNICODE(1);     //supposedly fixes int'l keyboards.
 
     //signal( SIGSEGV, SIG_DFL );
     SDL_Surface *icon = NULL;
@@ -336,7 +353,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
         icon = SDL_LoadBMP(icon_title);
     }
     if (icon) {
-        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, ((Uint32 *) (icon->pixels))[0]);
+        SDL_SetColorKey(icon, SDL_TRUE, ((Uint32 *) (icon->pixels))[0]);
     }
 #endif
     /*
@@ -349,12 +366,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 #endif
 
-    SDL_WM_SetCaption(window_title, window_title);
-    if (icon) {
-        SDL_WM_SetIcon(icon, 0);
-    }
-
-    if (!setup_sdl_video_mode()) {
+    if (!setup_sdl_video_mode(argc, argv)) {
         winsys_init(argc, argv, window_title, icon_title);
     } else {
         glutInit(argc, argv);
@@ -378,23 +390,6 @@ void winsys_cleanup() {
 
 void winsys_shutdown() {
     keepRunning = false;
-}
-
-/*---------------------------------------------------------------------------*/
-/*!
- *  Enables/disables key repeat messages from being generated
- *  \return
- *  \author  jfpatry
- *  \date    Created:  2000-10-19
- *  \date    Modified: 2000-10-19
- */
-void winsys_enable_key_repeat(bool enabled) {
-    if (enabled) {
-        SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
-                SDL_DEFAULT_REPEAT_INTERVAL);
-    } else {
-        SDL_EnableKeyRepeat(0, 0);
-    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -428,7 +423,6 @@ extern int shiftup(int);
 
 void winsys_process_events() {
     SDL_Event event;
-    unsigned int key;
     int x, y;
     bool state;
 
@@ -442,65 +436,25 @@ void winsys_process_events() {
         SDL_LockAudio();
         SDL_UnlockAudio();
         while (SDL_PollEvent(&event)) {
+
             state = false;
             switch (event.type) {
                 case SDL_KEYUP:
                     state = true;
                     //does same thing as KEYDOWN, but with different state.
                 case SDL_KEYDOWN:
+
                     if (keyboard_func) {
                         SDL_GetMouseState(&x, &y);
+//                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
+//                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
+//                                       % event.key.keysym.mod
+//                                       % event.key.keysym.sym
+//                                       % event.key.keysym.scancode
+//                                      ));
 
-                        bool maybe_unicode = game_options()->enable_unicode && !(event.key.keysym.sym & ~0xFF);
-                        bool is_unicode = maybe_unicode && event.key.keysym.unicode;
-
-                        //Fix up ctrl unicode codes
-                        if (is_unicode && event.key.keysym.unicode <= 0x1a && (event.key.keysym.sym & 0xFF) > 0x1a
-                                && event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) {
-                            event.key.keysym.unicode += 0x60; // 0x01 (^A) --> 0x61 (A)
-                        }
-
-                        //Translate untranslated release events
-                        if (state && maybe_unicode
-                                && keysym_to_unicode[event.key.keysym.sym & 0xFF]) {
-                            event.key.keysym.unicode = keysym_to_unicode[event.key.keysym.sym & 0xFF];
-                        }
-
-                        //Remember translation for translating release events
-                        if (is_unicode) {
-                            keysym_to_unicode[event.key.keysym.sym & 0xFF] = event.key.keysym.unicode;
-                        }
-
-                        //Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
-                        //Note: Thank god we'll have OIS for 0.5.x
-                        bool shifton = event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT | KMOD_CAPS);
-
-                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x unicode:%4$x sh:%5$c u:%6$c mu:%7$c")
-                                % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
-                                % event.key.keysym.mod
-                                % event.key.keysym.sym
-                                % event.key.keysym.unicode
-                                % ((shifton) ? 't' : 'f')
-                                % ((is_unicode) ? 't' : 'f')
-                                % ((maybe_unicode) ? 't' : 'f')));
-
-                        if (shifton && is_unicode
-                                && shiftup(shiftdown(event.key.keysym.unicode)) != event.key.keysym.unicode) {
-                            event.key.keysym.mod =
-                                    SDLMod(event.key.keysym.mod & ~(KMOD_LSHIFT | KMOD_RSHIFT | KMOD_CAPS));
-                            shifton = false;
-                        }
-                        //Choose unicode or symbolic, depending on whether ther is or not a unicode code
-                        //(unicode codes must be postprocessed to make sure application of the shiftup
-                        //modifier does not destroy it)
-                        key = is_unicode
-                                ? ((shifton)
-                                        ? shiftdown(event.key.keysym.unicode)
-                                        : event.key.keysym.unicode
-                                ) : event.key.keysym.sym;
                         //Send the event
-                        (*keyboard_func)(key,
-                                event.key.keysym.mod,
+                        (*keyboard_func)(event.key.keysym.sym, event.key.keysym.mod,
                                 state,
                                 x, y);
                     }
@@ -531,14 +485,14 @@ void winsys_process_events() {
                     }
                     break;
 
-                case SDL_VIDEORESIZE:
+                case SDL_WINDOWEVENT_RESIZED:
 #if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    g_game.x_resolution = event.resize.w;
-                    g_game.y_resolution = event.resize.h;
-                    setup_sdl_video_mode();
+                    g_game.x_resolution = event.window.data1;
+                    g_game.y_resolution = event.window.data2;
+                    //setup_sdl_video_mode(argc, argv);
                     if (reshape_func) {
-                        (*reshape_func)(event.resize.w,
-                                event.resize.h);
+                        (*reshape_func)(event.window.data1,
+                                event.window.data2);
                     }
 #endif
                     break;

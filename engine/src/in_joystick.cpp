@@ -42,6 +42,8 @@
 #endif
 
 #include "options.h"
+#include "SDL2/SDL_joystick.h"
+
 
 //Used for storing the max and min values of the tree Joystick Axes - Okona
 static int maxx = 1;
@@ -184,7 +186,7 @@ void InitJoystick() {
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
         if (i < num_joysticks) {
-            VS_LOG(info, (boost::format("    %1%\n") % SDL_JoystickName(i)));
+            VS_LOG(info, (boost::format("    %1%\n") % SDL_JoystickNameForIndex(i)));
         }
 #else
         if (i < num_joysticks) {

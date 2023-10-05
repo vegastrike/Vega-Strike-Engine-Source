@@ -29,14 +29,14 @@ using std::list;
 #include "in_joystick.h"
 #include "in_handler.h"
 
-extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
+#include <map>
+
 
 queue<InputListener *> activationreqqueue;
 list<InputListener *> listeners;
 InputListener *activelistener;
 
 void AddListener(InputListener *il) {
-    il->keystate = keyState;
     il->mousex = &mousex;
     il->mousey = &mousey;
     listeners.push_back(il);
@@ -51,7 +51,7 @@ void RemoveListener(InputListener *il) {
 }
 
 void ProcessInput(size_t whichplayer) {
-    ProcessKB(whichplayer);
+    ProcessKB();
     ProcessMouse();
     for (int i = 0; i < MAX_JOYSTICKS; i++) {
         if (joystick[i]->player == whichplayer) {
@@ -61,7 +61,6 @@ void ProcessInput(size_t whichplayer) {
 }
 
 void InitInput() {
-    InitKB();
     InitMouse();
     InitJoystick();
 }
