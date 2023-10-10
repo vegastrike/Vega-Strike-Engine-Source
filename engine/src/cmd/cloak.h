@@ -26,6 +26,7 @@
 #define CLOAK_H
 
 #include <string>
+#include <map>
 
 #include "energetic.h"
 #include "damageable_layer.h"
@@ -64,6 +65,7 @@ class Cloak
 public:
     Cloak();
     Cloak(std::string unit_key);
+    void Save(std::map<std::string, std::string>& unit);
 
     void Update(Energetic *energetic);
     void Toggle(); // Toggle cloak on/off
@@ -76,7 +78,7 @@ public:
         return (status == CloakingStatus::cloaking);
     }
 
-    bool Cloaked() {
+    bool Cloaked() const {
         return (status == CloakingStatus::cloaked);
     }
 
@@ -99,16 +101,21 @@ public:
         return glass;
     }
 
-    double Current() {
-        return current;
-    }
-
     double Energy() {
         return energy;
     }
 
+    // Is the ship visible
+    bool Visible() {
+        return !Cloaked();
+    }
+
+    double Current() const {
+        return current;
+    }
+
     //how visible the ship is from 0 to 1
-    double Visible() const {
+    double Visibility() const {
         return 1-current;
     }
 

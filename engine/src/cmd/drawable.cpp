@@ -486,7 +486,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     if (!(unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE))) {
         halos->Draw(mat,
                 Scale,
-                unit->cloak.Visible(),
+                unit->cloak.Visibility(),
                 0,
                 unit->GetHullPercent(),
                 velocity,
@@ -735,7 +735,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
     float hulld = unit->GetHull() > 0 ? damage_level : 1.0;
-    halos->Draw(wmat, Scale, unit->cloak.Visible(), nebd, hulld, velocity,
+    halos->Draw(wmat, Scale, unit->cloak.Visibility(), nebd, hulld, velocity,
             linaccel, angaccel, maxaccel, cmas, unit->faction);
 
 }

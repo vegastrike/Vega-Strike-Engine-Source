@@ -1365,12 +1365,7 @@ string Unit::WriteUnitString() {
     unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
     unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
 
-    // TODO: move to Cloak
-    unit["Cloak_Min"] = tos(cloak.minimum);
-    unit["Can_Cloak"] = tos(cloak.Capable());
-    unit["Cloak_Rate"] = tos(cloak.rate);
-    unit["Cloak_Energy"] = tos(cloak.energy);
-    unit["Cloak_Glass"] = tos(cloak.glass);
+    cloak.Save(unit);
     unit["Repair_Droid"] = tos(repair_droid);
     unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
     unit["Hud_Functionality"] = WriteHudDamage(this);
