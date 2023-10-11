@@ -32,6 +32,8 @@
 #include "vs_globals.h"
 #include <stdio.h>
 
+extern KBSTATE mouseButtonState;
+
 LocationSelect::LocationSelect(Vector start, Vector Plane1,
         Vector Plane2 /*, System * par */ ) : LocSelAni("locationselect.ani",
         true,
@@ -64,14 +66,13 @@ LocationSelect::LocationSelect(Vector start, Vector Plane1, Vector Plane2,
     MoveLocation(start, Plane1, Plane2, Plane3);
 }
 
-extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 Vector DeltaPosition(0, 0, 0);
 bool changed = false;
 bool vert = false;
 #define DELTA_MOVEMENT
 
 void LocationSelect::MouseMoveHandle(KBSTATE kk, int x, int y, int delx, int dely, int mod) {
-    if (keyState[0]['z'] == DOWN) {
+    if (mouseButtonState == DOWN) {
 #ifdef DELTA_MOVEMENT
         if (kk == PRESS) {
             DeltaPosition.k = dely;

@@ -23,6 +23,7 @@
         "opengl-registry",
         "openssl",
         "sdl1",
+        "sdl2",
         "zlib"
     ]
 }

@@ -38,6 +38,7 @@
 #include "unit_generic.h"
 #include "weapon_info.h"
 #include "vega_cast_utils.h"
+#include "vs_logging.h"
 
 std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     if(upgrades.size() == 0) {
@@ -139,6 +140,14 @@ bool UpgradeableUnit::UpgradeMounts(const Unit *up,
     // All weapons come with one mount at least
     if(num_up_mounts == 0) {
         return true;
+    }
+
+    // there needs to be some mounts to be able to mount to
+    if (num_mounts == 0) {
+        // would be nice to make this more meaningful but that's a little harder given
+        // the casting of `unit` from `this`.
+        VS_LOG(debug, "No mounts to attach to.");
+        return false;
     }
 
     int j = mountoffset;

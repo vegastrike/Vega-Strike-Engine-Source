@@ -595,8 +595,7 @@ void GFXInit(int argc, char **argv) {
     char vsname[12] = "Vega Strike";
     char vsicon[9] = "vega.ico";
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
-    /* Ingore key-repeat messages */
-    winsys_enable_key_repeat(false);
+
 
     glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
     static GFXColor clearcol = vs_config->getColor("space_background");;

@@ -758,7 +758,7 @@ void Pan(const KBData &, KBSTATE newState) {
 using namespace CockpitKeys;
 
 void InitializeInput() {
-    BindKey(27, 0, 0, Quit, KBData());     //always have quit on esc
+    BindKey(SDL_SCANCODE_ESCAPE, 0, 0, Quit, KBData());     //always have quit on esc
 }
 
 void IncrementStartupVariable() {
