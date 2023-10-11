@@ -160,9 +160,8 @@ void CollideArray::flatten() {
             collideUpdate(*tmp, index);
         }
 
-        auto listend = toflattenhints[i].end();
         for (auto j = toflattenhints[i].begin();
-                j != listend;
+                j != toflattenhints[i].end();
                 ++j) {
             if (j->radius != 0) {
                 sorted[--index] = *j;
