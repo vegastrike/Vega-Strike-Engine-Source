@@ -606,7 +606,7 @@ public:
 // how visible the ship is from 0 to 1
 // Need this function to expose it to python
     float CloakVisible() {
-        cloak.Visibility();
+        return cloak.Visibility();
     }
 
 //cloaks or decloaks the starship depending on the bool
