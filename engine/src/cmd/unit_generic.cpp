@@ -133,7 +133,7 @@ void Unit::SetNebula(Nebula *neb) {
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
     const float capship_size = configuration()->physics_config.capship_size;
 
-    if (this == target || !target->cloak.Visible()) {
+    if (this == target || target->cloak.Cloaked()) {
         return false;
     }
     if (cone && computer.radar.maxcone > -.98) {
@@ -3335,7 +3335,10 @@ bool Unit::UpAndDownGrade(const Unit *up,
             ++numave;
             ++percentage;
             if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name, up->cloak.current, ((char *) &this->cloak.current) - ((char *) this), tempdownmap);
+                AddToDowngradeMap(up->name,
+                                  up->cloak.current,
+                                  ((char *) &this->cloak.current) - ((char *) this),
+                                  tempdownmap);
             }
         }
         //NOTE: Afterburner type 2 (jmp)

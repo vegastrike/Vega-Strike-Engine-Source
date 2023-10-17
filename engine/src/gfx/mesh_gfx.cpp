@@ -508,9 +508,9 @@ void Mesh::Draw(float lod,
                 c.mesh_seq = 2; //MESH_SPECIAL_FX_ONLY;
             } else {
                 c.mesh_seq = 2;
-                c.CloakFX.r = (1-cloak.Current());
-                c.CloakFX.g = (1-cloak.Current());
-                c.CloakFX.b = (1-cloak.Current());
+                c.CloakFX.r = cloak.Visibility();
+                c.CloakFX.g = cloak.Visibility();
+                c.CloakFX.b = cloak.Visibility();
                 c.CloakFX.a = cloak.Current();
             }
         }

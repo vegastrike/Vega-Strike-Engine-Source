@@ -54,6 +54,15 @@ Cloak::Cloak(std::string unit_key)
     current = 0;
 }
 
+void Cloak::Save(std::map<std::string, std::string>& unit)
+{
+    unit["Cloak_Min"] = std::to_string(minimum);
+    unit["Can_Cloak"] = std::to_string(Capable());
+    unit["Cloak_Rate"] = std::to_string(rate);
+    unit["Cloak_Energy"] = std::to_string(energy);
+    unit["Cloak_Glass"] = std::to_string(glass);
+}
+
 void Cloak::Update(Energetic *energetic)
 {
     // Unit is not capable of cloaking or damaged or just not cloaking
