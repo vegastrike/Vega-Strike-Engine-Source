@@ -5236,15 +5236,15 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
     }
     if (!mode) {
-        PRETTY_ADDU(statcolor + "Tracking range: #-c", uc.radar.maxrange / 1000, 0, "km");
-        if ((acos(uc.radar.maxcone) * 360 / PI) < 359) {
-            PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(uc.radar.maxcone) * 2, 2, "radians");
+        PRETTY_ADDU(statcolor + "Tracking range: #-c", playerUnit->radar.GetMaxRange() / 1000, 0, "km");
+        if ((acos(playerUnit->radar.GetMaxCone()) * 360 / PI) < 359) {
+            PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(playerUnit->radar.GetMaxCone()) * 2, 2, "radians");
             text += expstatcolor + "#n#  (planar angle: 2 pi means full space)#-c";
         } else {
             text += "#n#" + prefix + statcolor + "Tracking cone: #-cOMNIDIRECTIONAL";
         }
-        PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c", acos(uc.radar.trackingcone) * 2, 2, "radians");
-        PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(uc.radar.lockcone) * 2, 2, "radians");
+        PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c", acos(playerUnit->radar.GetTrackingCone()) * 2, 2, "radians");
+        PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(playerUnit->radar.GetLockCone()) * 2, 2, "radians");
         if (!subunitlevel) {
             //Always zero PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
             text += "#n#" + prefix + statcolor + "ITTS (Intelligent Target Tracking System) support: #-c";
@@ -5255,10 +5255,10 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             }
             text += "#n#" + prefix + statcolor + "AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
             std::string afhh;
-            if (uc.radar.UseFriendFoe()) {
+            if (playerUnit->radar.UseFriendFoe()) {
                 afhh += "friendly/hostile ";
             }
-            if (uc.radar.UseThreatAssessment()) {
+            if (playerUnit->radar.UseThreatAssessment()) {
                 afhh += "threat ";
             }
             if (afhh.empty()) {
@@ -5268,42 +5268,43 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
         text.append("#n##n##c0:1:.5#" + prefix + "[ENERGY SUBSYSTEM]#n##-c");
     } else {
+        CRadar *radar = &playerUnit->radar;
+        std::string afhh;
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
-                if (MODIFIES_ALTEMPTY(replacement_mode, &uc, &buc, radar.maxrange, FLT_MAX)
-                        || MODIFIES_ALTEMPTY(replacement_mode, &uc, &buc, radar.maxcone, VS_PI)) {
-                    PRETTY_ADDU(statcolor + "Tracking range: #-c", uc.radar.maxrange / 1000, 0, "km");
-                    if ((acos(uc.radar.maxcone) * 360 / PI) < 359) {
-                        PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(uc.radar.maxcone) * 2, 2, "radians");
-                        text += statcolor + " (planar angle: 2 pi means full space)#-c";
-                    } else {
-                        text += "#n#" + prefix + statcolor + "Tracking cone: #-cOMNIDIRECTIONAL";
-                    }
-                    PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c",
-                            acos(uc.radar.trackingcone) * 2,
-                            2,
-                            "radians");
-                    PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(uc.radar.lockcone) * 2, 2, "radians");
-                    text += "#n#" + prefix + statcolor + "ITTS (Intelligent Target Tracking System) support: #-c";
-                    if (uc.itts) {
-                        text += "yes";
-                    } else {
-                        text += "no";
-                    }
-                    text += "#n#" + prefix + statcolor + "AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-                    std::string afhh;
-                    if (uc.radar.UseFriendFoe()) {
-                        afhh += "friendly/hostile ";
-                    }
-                    if (uc.radar.UseThreatAssessment()) {
-                        afhh += "threat ";
-                    }
-                    if (afhh.empty()) {
-                        afhh = "no";
-                    }
-                    text += afhh;
-                }
-                break;
+
+            PRETTY_ADDU(statcolor + "Tracking range: #-c", radar->GetMaxRange() / 1000, 0, "km");
+            if ((acos(radar->GetMaxCone()) * 360 / PI) < 359) {
+                PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(playerUnit->radar.GetMaxCone()) * 2, 2, "radians");
+                text += statcolor + " (planar angle: 2 pi means full space)#-c";
+            } else {
+                text += "#n#" + prefix + statcolor + "Tracking cone: #-cOMNIDIRECTIONAL";
+            }
+            PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c",
+                        acos(radar->GetTrackingCone()) * 2,
+                        2,
+                        "radians");
+            PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(radar->GetLockCone()) * 2, 2, "radians");
+            text += "#n#" + prefix + statcolor + "ITTS (Intelligent Target Tracking System) support: #-c";
+            if (uc.itts) {
+                text += "yes";
+            } else {
+                text += "no";
+            }
+            text += "#n#" + prefix + statcolor + "AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
+
+            if (radar->UseFriendFoe()) {
+                afhh += "friendly/hostile ";
+            }
+            if (radar->UseThreatAssessment()) {
+                afhh += "threat ";
+            }
+            if (afhh.empty()) {
+                afhh = "no";
+            }
+            text += afhh;
+
+            break;
             case 1:                 //Additive
                 break;
             case 2:                 //multiplicative

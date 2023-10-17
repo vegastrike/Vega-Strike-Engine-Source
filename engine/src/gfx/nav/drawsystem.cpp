@@ -449,7 +449,7 @@ void NavigationSystem::DrawSystem() {
                 //JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
                 if (currentselection.GetUnit()) {
                     (UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()))->Target(currentselection.GetUnit());
-                    (UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()))->LockTarget(currentselection.GetUnit());
+                    (UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()))->radar.Lock();
                 }
             }
         }

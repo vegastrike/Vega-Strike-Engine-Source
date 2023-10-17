@@ -77,6 +77,7 @@ void UncheckUnit( class Unit*un );
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
 #include "cloak.h"
+#include "components/radar.h"
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
@@ -480,6 +481,7 @@ public:
             bool DoSightAndSound) override;
 
     Computer computer;
+    CRadar radar;
     void SwitchCombatFlightMode();
     bool CombatMode();
 

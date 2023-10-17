@@ -874,53 +874,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     computer.max_combat_ab_speed =
             UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 0.0f) * game_speed;
     computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
-    computer.radar.canlock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
 
-
-    // The Radar_Color column in the units.csv has been changed from a
-    // boolean value to a string. The boolean values are supported for
-    // backwardscompatibility.
-    // When we save this setting, it is simply converted from an integer
-    // number to a string, and we need to support this as well.
-    std::string iffval = UnitCSVFactory::GetVariable(unit_key, "Radar_Color", std::string());
-
-    if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0")) {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-    } else if ((iffval == "TRUE") || (iffval == "1")) {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-    } else if (iffval == "THREAT") {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-    } else if (iffval == "BUBBLE_THREAT") {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_BUBBLE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-    } else if (iffval == "PLANE") {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-    } else if (iffval == "PLANE_THREAT") {
-        computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-    } else {
-        unsigned int value = stoi(iffval, 0);
-        if (value == 0) {
-            // Unknown value
-            computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-        } else {
-            computer.radar.capability = value;
-        }
-    }
-
-    computer.radar.maxrange = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", FLT_MAX);
-    computer.radar.maxcone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0f) * VS_PI / 180);
-    computer.radar.trackingcone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI / 180);
-    computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI / 180);
+    radar = CRadar(unit_key, &computer);
 
     cloak = Cloak(unit_key);
 
@@ -1358,12 +1313,7 @@ string Unit::WriteUnitString() {
     unit["Default_Speed_Governor"] = tos(computer.max_combat_speed / game_speed);
     unit["Afterburner_Speed_Governor"] = tos(computer.max_combat_ab_speed / game_speed);
     unit["ITTS"] = tos(computer.itts);
-    unit["Can_Lock"] = tos(computer.radar.canlock);
-    unit["Radar_Color"] = tos(computer.radar.capability);
-    unit["Radar_Range"] = tos(computer.radar.maxrange);
-    unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / VS_PI);
-    unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
-    unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
+
 
     cloak.Save(unit);
     unit["Repair_Droid"] = tos(repair_droid);
