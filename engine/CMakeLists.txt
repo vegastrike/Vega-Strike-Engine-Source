@@ -1314,9 +1314,16 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_DEBIAN_PACKAGE_VERSION "${VEGASTRIKE_PKG_VERSION_STR}")
         # Debian Version: /etc/debian_version - <name>/<junk>
         IF (NOT LSB_EXISTS)
+            # this still needs to be true so LSB variables are not used below
+            # even if we don't detect the /etc/debian_version file
             SET(USE_DEBIAN_VERSION TRUE)
-            FILE(READ "/etc/debian_version" DEBIAN_VERSION_DATA)
-            STRING(REGEX MATCH "^(.+)\/.*$" DEBIAN_VERSION_DATA DEBIAN_RELEASE_VERSION)
+            IF (EXISTS "/etc/debian_version")
+                FILE(READ "/etc/debian_version" DEBIAN_VERSION_DATA)
+                STRING(REGEX MATCH "^(.+)\/.*$" DEBIAN_VERSION_DATA DEBIAN_RELEASE_VERSION)
+            ELSE (EXISTS "/etc/debian_version")
+                MESSAGE("Detected dpkg-release but Debian Distro is unknown")
+                SET(DEBIAN_RELEASE_VERSION "Unknown")
+            ENDIF (EXISTS "/etc/debian_version")
         ELSE (NOT LSB_EXISTS)
             SET(USE_DEBIAN_VERSION FALSE)
             SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version ${LSB_LINUX_DISTRIBUTION_CODENAME}")
