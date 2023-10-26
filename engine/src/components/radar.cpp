@@ -54,7 +54,19 @@ CRadar::CRadar():
     lock_cone = configuration()->computer_config.default_lock_cone;
 }
 
-CRadar::CRadar(std::string unit_key, Computer* computer) {
+CRadar::CRadar(std::string unit_key, Computer* computer):
+        max_range(0),
+        max_cone(-1),
+        lock_cone(0),
+        tracking_cone(0),
+        min_target_size(0),
+        type(RadarType::SPHERE),
+        capabilities(RadarCapabilities::NONE),
+        locked(false),
+        can_lock(false),
+        tracking_active(true),
+        original(nullptr),
+        computer(nullptr) {
     can_lock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
 
     // TODO: fix this
@@ -99,9 +111,9 @@ CRadar::CRadar(std::string unit_key, Computer* computer) {
 
     tracking_active = true;
     max_range = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", FLT_MAX);
-    max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0f) * VS_PI / 180);
+    max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * VS_PI / 180);
     tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI / 180);
-    lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI / 180);
+    lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * VS_PI / 180);
     original = nullptr;
     this->computer = computer;
 }
@@ -115,8 +127,9 @@ void CRadar::WriteUnitString(std::map<std::string, std::string> &unit) {
     unit["Lock_Cone"] = std::to_string(acos(lock_cone) * 180. / VS_PI);
 }
 
-void CRadar::CRadar::Damage()
+void CRadar::Damage()
 {
+    return;
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> damage_distribution(0, 6);
@@ -155,7 +168,7 @@ void CRadar::CRadar::Damage()
 
 }
 
-void CRadar::CRadar::Repair()
+void CRadar::Repair()
 {
 
 }
@@ -179,11 +192,11 @@ void CRadar::Lock() {
         return;
     }
 
-    if(!UnitUtil::isSignificant(target)) {
+    /*if(!UnitUtil::isSignificant(target)) {
         std::cerr << "Target insignificant\n";
         this->locked = false;
         return;
-    }
+    }*/
 
     std::cout << "Target locked\n";
     this->locked = true;
