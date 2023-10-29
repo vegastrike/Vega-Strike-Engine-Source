@@ -365,13 +365,13 @@ void ParticleTrail::DrawAndUpdate()
     vector< Vector, aligned_allocator<Vector> >::iterator v = particleVel.begin();
     vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
     vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
-    vector< float, aligned_allocator<float> >::iterator sz = particleSize.begin();
+    auto sz = particleSize.begin();
     while ( col != particleColor.end() ) {
         if ( !(col->a > minalpha) ) {
             vector< Vector, aligned_allocator<Vector> >::iterator vlast = particleVel.end() - 1;
             vector< QVector, aligned_allocator<QVector> >::iterator loclast = particleLoc.end() - 1;
             vector< GFXColor, aligned_allocator<GFXColor> >::iterator collast = particleColor.end() - 1;
-            vector< float, aligned_allocator<float> >::iterator szlast = particleSize.end() - 1;
+            auto szlast = particleSize.end() - 1;
             if (col != collast) {
                 *v = *vlast;
                 *loc = *loclast;
@@ -406,7 +406,7 @@ void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float 
         vector< Vector, aligned_allocator<Vector> >::iterator vel = particleVel.begin();
         vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
         vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
-        vector< float, aligned_allocator<float> >::iterator sz = particleSize.begin();
+        auto sz = particleSize.begin();
         size_t off = ( (size_t) rand() ) % particleLoc.size();
         vel += off;
         loc += off;
