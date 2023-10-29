@@ -305,12 +305,14 @@ ELSE (ENABLE_PIE)
 ENDIF (ENABLE_PIE)
 
 IF (MSVC)
+    SET(COMPILER_SPECIFIC_CFLAGS " ")
     SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ ")
     SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
     SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
     SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
     SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
 ELSE (MSVC)
+    SET(COMPILER_SPECIFIC_CFLAGS " -Wno-unused-function -Wno-unused-variable ")
     SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Wall -std=c++11 -fvisibility=hidden ")
     SET(COMPILER_SPECIFIC_DEBUG_FLAGS "-Og -g3 ")
     SET(COMPILER_SPECIFIC_PROFILER_FLAGS "-Og -pg -g2 ")
@@ -325,7 +327,7 @@ SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_
     "Flags used by the C++ compiler during debug builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_CFLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
     "Flags used by the C compiler during debug builds."
     FORCE
 )
