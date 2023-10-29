@@ -77,7 +77,7 @@ void Mission::doIf( missionNode *node, int mode )
 
         int nr_subnodes = node->subnodes.size();
         if (nr_subnodes != 3) {
-            fatalError( node, mode, "an if-statement needs exact three subnodes, not "+nr_subnodes );
+            fatalError( node, mode, sprintf("an if-statement needs exact three subnodes, not %d", nr_subnodes ));
             printf( "nr_of_subnodes: %d\n", nr_subnodes );
 
             assert( 0 );
