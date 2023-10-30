@@ -76,9 +76,9 @@ void ParticleTrail::ChangeMax( unsigned int max )
 
 
 
-static inline void UpdateColor( std::vector< QVector, aligned_allocator<QVector> > &vloc,
-                                const std::vector< Vector, aligned_allocator<Vector> > &vvel,
-                                std::vector< GFXColor, aligned_allocator<GFXColor> > &vcol,
+static inline void UpdateColor( std::vector< QVector > &vloc,
+                                const std::vector< Vector > &vvel,
+                                std::vector< GFXColor > &vcol,
                                 const GFXColor& fadetime,
                                 const float time )
 {
@@ -284,7 +284,7 @@ void ParticleTrail::DrawAndUpdate()
             // Must sort
             distances.clear();
             distances.reserve(nparticles);
-            { for (std::vector<QVector, aligned_allocator<QVector> >::const_iterator it = particleLoc.begin(); it != particleLoc.end(); ++it) {
+            { for (auto it = particleLoc.begin(); it != particleLoc.end(); ++it) {
                 distances.push_back((campos - *it).MagnitudeSquared());
             } }
             IndexCompare<float, unsigned short> dcomp(distances);
@@ -362,15 +362,15 @@ void ParticleTrail::DrawAndUpdate()
     }
 
     // Remove dead particles anywhere
-    vector< Vector, aligned_allocator<Vector> >::iterator v = particleVel.begin();
-    vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
-    vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
+    auto v = particleVel.begin();
+    auto loc = particleLoc.begin();
+    auto col = particleColor.begin();
     auto sz = particleSize.begin();
     while ( col != particleColor.end() ) {
         if ( !(col->a > minalpha) ) {
-            vector< Vector, aligned_allocator<Vector> >::iterator vlast = particleVel.end() - 1;
-            vector< QVector, aligned_allocator<QVector> >::iterator loclast = particleLoc.end() - 1;
-            vector< GFXColor, aligned_allocator<GFXColor> >::iterator collast = particleColor.end() - 1;
+            auto vlast = particleVel.end() - 1;
+            auto loclast = particleLoc.end() - 1;
+            auto collast = particleColor.end() - 1;
             auto szlast = particleSize.end() - 1;
             if (col != collast) {
                 *v = *vlast;
@@ -403,9 +403,9 @@ void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float 
         return;
 
     if (particleLoc.size() > maxparticles) {
-        vector< Vector, aligned_allocator<Vector> >::iterator vel = particleVel.begin();
-        vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
-        vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
+        auto vel = particleVel.begin();
+        auto loc = particleLoc.begin();
+        auto col = particleColor.begin();
         auto sz = particleSize.begin();
         size_t off = ( (size_t) rand() ) % particleLoc.size();
         vel += off;
