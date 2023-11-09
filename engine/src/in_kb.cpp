@@ -30,43 +30,30 @@
 #include "in_kb_data.h"
 #include "universe.h"
 
-static void DefaultKBHandler(const KBData &, KBSTATE newState) // FIXME ?
-{
-    //do nothing
-}
 
-struct HandlerCall {
-    KBHandler function;
-    KBData data;
-
-    HandlerCall() {
-        function = DefaultKBHandler;
-    }
-};
-static HandlerCall keyBindings[LAST_MODIFIER][WSK_LAST];
-static unsigned int playerBindings[LAST_MODIFIER][WSK_LAST];
-KBSTATE keyState[LAST_MODIFIER][WSK_LAST];
+std::map<std::string, HandlerCall> keyBindings;
+std::map<std::string, unsigned int> playerBindings;
+KBSTATE mouseButtonState;
 
 static void kbGetInput(int key, int modifiers, bool release, int x, int y) {
-    ///FIXME If key is out of array index range, do nothing. This is a quick hack, the underlying cause of invalid parameters ever being given should probably be fixed instead
-    if (key < 0 || key >= WSK_LAST) {
-        return;
-    }
+    const std::string map_key = std::to_string(key) + "-" + std::to_string(modifiers);
+
     int i = _Universe->CurrentCockpit();
-    _Universe->SetActiveCockpit(playerBindings[modifiers][key]);
-    if ((keyState[modifiers][key] == RESET || keyState[modifiers][key] == UP) && !release) {
-        keyBindings[modifiers][key].function(keyBindings[modifiers][key].data, PRESS);
+    _Universe->SetActiveCockpit(playerBindings[map_key]);
+    if ((keyBindings[map_key].state == RESET || keyBindings[map_key].state == UP) && !release) {
+        keyBindings[map_key].function(keyBindings[map_key].data, PRESS);
     }
-    if ((keyState[modifiers][key] == DOWN || keyState[modifiers][key] == RESET) && release) {
-        keyBindings[modifiers][key].function(keyBindings[modifiers][key].data, RELEASE);
+    if ((keyBindings[map_key].state == DOWN || keyBindings[map_key].state == RESET) && release) {
+        keyBindings[map_key].function(keyBindings[map_key].data, RELEASE);
     }
-    keyState[modifiers][key] = release ? UP : DOWN;
+    keyBindings[map_key].state = release ? UP : DOWN;
     _Universe->SetActiveCockpit(i);
 }
 
 static bool kbHasBinding(int key, int modifiers) {
+    const std::string map_key = std::to_string(key) + "-" + std::to_string(modifiers);
     static HandlerCall defaultHandler;
-    return keyBindings[modifiers][key].function != defaultHandler.function;
+    return keyBindings[map_key].function != defaultHandler.function;
 }
 
 static const char _lomap[] = "0123456789-=\';/.,`\\";
@@ -106,7 +93,7 @@ void setActiveModifiers(unsigned int mask) {
 
 #ifdef SDL_WINDOWING
 
-void setActiveModifiersSDL(SDLMod mask) {
+void setActiveModifiersSDL(SDL_Keymod mask) {
     setActiveModifiers(
             ((mask & (KMOD_LSHIFT | KMOD_RSHIFT)) ? KB_MOD_SHIFT : 0)
                     | ((mask & (KMOD_LCTRL | KMOD_RCTRL)) ? KB_MOD_CTRL : 0)
@@ -126,21 +113,19 @@ unsigned int pullActiveModifiers() {
     return getActiveModifiers();
 }
 
-unsigned int getModifier(const char *mod_name) {
-    if (mod_name[0] == '\0') {
-        return 0;
+unsigned int getModifier(const std::string modifier) {
+    // TODO: convert to SDL_Keymod
+    unsigned int modifier_value = 0;
+    if (modifier.find("shift") != std::string::npos) {
+        modifier_value |= KB_MOD_SHIFT;
     }
-    unsigned int rv = 0;
-    if (strstr(mod_name, "shift") || strstr(mod_name, "uppercase") || strstr(mod_name, "caps")) {
-        rv |= KB_MOD_SHIFT;
+    if (modifier.find("ctrl") != std::string::npos) {
+        modifier_value |= KB_MOD_CTRL;
     }
-    if (strstr(mod_name, "ctrl") || strstr(mod_name, "cntrl") || strstr(mod_name, "control")) {
-        rv |= KB_MOD_CTRL;
+    if (modifier.find("alt") != std::string::npos) {
+        modifier_value |= KB_MOD_ALT;
     }
-    if (strstr(mod_name, "alt") || strstr(mod_name, "alternate")) {
-        rv |= KB_MOD_ALT;
-    }
-    return rv;
+    return modifier_value;
 }
 
 int getModifier(bool alton, bool cntrlon, bool shifton) {
@@ -178,19 +163,23 @@ void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, in
     kbGetInput(ch, curmod, release, x, y);
     if (release) {
         for (int i = 0; i < LAST_MODIFIER; ++i) {
+            const std::string shiftdown_key = std::to_string(shiftdown(ch)) + "-" + std::to_string(i);
+            const std::string shiftup_key = std::to_string(shiftup(ch)) + "-" + std::to_string(i);
+
             if (i != curmod) {
-                if (keyState[i][shiftdown(ch)] == DOWN) {
+                if (keyBindings[shiftdown_key].state == DOWN) {
                     kbGetInput(shiftdown(ch), i, release, x, y);
                 }
-                if (keyState[i][shiftup(ch)] == DOWN) {
+
+                if (keyBindings[shiftup_key].state == DOWN) {
                     kbGetInput(shiftup(ch), i, release, x, y);
                 }
             } else {
                 if (shifton) {
-                    if (((unsigned int) shiftdown(ch)) != ch && keyState[i][shiftdown(ch)] == DOWN) {
+                    if (((unsigned int) shiftdown(ch)) != ch && keyBindings[shiftdown_key].state == DOWN) {
                         kbGetInput(shiftdown(ch), i, release, x, y);
                     }
-                } else if (((unsigned int) shiftup(ch)) != ch && keyState[i][shiftup(ch)] == DOWN) {
+                } else if (((unsigned int) shiftup(ch)) != ch && keyBindings[shiftup_key].state == DOWN) {
                     kbGetInput(shiftup(ch), i, release, x, y);
                 }
             }
@@ -201,43 +190,36 @@ void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, in
 void RestoreKB() {
     for (int i = 0; i < LAST_MODIFIER; ++i) {
         for (int a = 0; a < KEYMAP_SIZE; a++) {
-            if (keyState[i][a] == DOWN) {
-                keyBindings[i][a].function(keyBindings[i][a].data, RELEASE);
-                keyState[i][a] = UP;
+            const std::string map_key = std::to_string(i) + "-" + std::to_string(a);
+
+            if (keyBindings[map_key].state == DOWN) {
+                keyBindings[map_key].function(keyBindings[map_key].data, RELEASE);
+                keyBindings[map_key].state = UP;
             }
         }
     }
     winsys_set_keyboard_func(glut_keyboard_cb);
 }
 
-void InitKB() {
-    for (int i = 0; i < LAST_MODIFIER; ++i) {
-        for (int a = 0; a < KEYMAP_SIZE; a++) {
-            keyState[i][a] = UP;
-            UnbindKey(a, i);
-        }
-    }
-    RestoreKB();
-}
 
-void ProcessKB(unsigned int player) {
-    for (int mod = 0; mod < LAST_MODIFIER; mod++) {
-        for (int a = 0; a < KEYMAP_SIZE; a++) {
-            if (playerBindings[mod][a] == player) {
-                keyBindings[mod][a].function(keyBindings[mod][a].data, keyState[mod][a]);
-            }
-        }
+
+void ProcessKB() {
+    for(const std::pair<std::string, HandlerCall>& binding : keyBindings) {
+        HandlerCall handler = binding.second;
+        KBSTATE state = keyBindings[binding.first].state;
+        binding.second.function(binding.second.data, state);
     }
 }
 
 void BindKey(int key, unsigned int mod, unsigned int player, KBHandler handler, const KBData &data) {
-    keyBindings[mod][key].function = handler;
-    keyBindings[mod][key].data = data;
-    playerBindings[mod][key] = player;
+    const std::string map_key = std::to_string(key) + "-" + std::to_string(mod);
+    HandlerCall handler_call;
+    handler_call.function = handler;
+    handler_call.data = data;
+    keyBindings[map_key] = handler_call;
+    playerBindings[map_key] = player;
     handler(std::string(), RESET);     //key is not used in handler
+    keyBindings[map_key].state = UP;
 }
 
-void UnbindKey(int key, unsigned int mod) {
-    keyBindings[mod][key] = HandlerCall();
-}
 

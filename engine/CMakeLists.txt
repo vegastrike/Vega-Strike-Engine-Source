@@ -118,11 +118,11 @@ SET(VEGASTRIKE_ASSETS_API_VERSION "2")
 #ENDIF ()
 
 PROJECT(Vega_Strike
-        VERSION
-        "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
-        LANGUAGES
-        CXX C
-        )
+    VERSION
+    "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
+    LANGUAGES
+    CXX C
+)
 
 # One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
@@ -161,22 +161,22 @@ INCLUDE(InstallRequiredSystemLibraries)
 
 IF (UNIX)
     INCLUDE_DIRECTORIES(
-            ${Vega_Strike_SOURCE_DIR}/src
-            ${Vega_Strike_SOURCE_DIR}/src/cmd
-            ${Vega_Strike_SOURCE_DIR}/src/damage
-            ${Vega_Strike_SOURCE_DIR}/src/resource
-            ${Vega_Strike_BINARY_DIR}
-            ${Vega_Strike_BINARY_DIR}/src
-            /usr/include/harfbuzz/
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_SOURCE_DIR}/src/damage
+        ${Vega_Strike_SOURCE_DIR}/src/resource
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        /usr/include/harfbuzz/
     )
 ELSE ()
     INCLUDE_DIRECTORIES(
-            ${Vega_Strike_SOURCE_DIR}/src
-            ${Vega_Strike_SOURCE_DIR}/src/cmd
-            ${Vega_Strike_SOURCE_DIR}/src/damage
-            ${Vega_Strike_SOURCE_DIR}/src/resource
-            ${Vega_Strike_BINARY_DIR}
-            ${Vega_Strike_BINARY_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_SOURCE_DIR}/src/damage
+        ${Vega_Strike_SOURCE_DIR}/src/resource
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
     )
 ENDIF ()
 
@@ -219,6 +219,8 @@ ENDIF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
 IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
+MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
+
 
 #IF (NOT BUILD_OPT)
 #    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
@@ -342,6 +344,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/conf
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
         )
 add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
+# for DEBUG remove all optimizations
 add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
@@ -508,16 +511,16 @@ IF (NOT DISABLE_CLIENT) ##########
 
     IF (NOT BEOS)
         #Find SDL
-        FIND_PACKAGE(SDL)
-        IF (SDL_FOUND)
-            SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
-            SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
-            MESSAGE("++ SDL Found")
+        FIND_PACKAGE(SDL2)
+        IF (SDL2_FOUND)
+            SET(TST_INCLUDES ${TST_INCLUDES} ${SDL2_INCLUDE_DIRS})
+            SET(TST_LIBS ${TST_LIBS} ${SDL2_LIBRARIES})
+            MESSAGE("++ SDL2 Found")
             SET(HAVE_SDL 1)
             SET(SDL_WINDOWING 1)
-        ELSE (SDL_FOUND)
-            MESSAGE("!! How will we render to OpenGL without SDL?")
-        ENDIF (SDL_FOUND)
+        ELSE (SDL2_FOUND)
+            MESSAGE("!! How will we render to OpenGL without SDL2?")
+        ENDIF (SDL2_FOUND)
     ENDIF (NOT BEOS)
 
     #find Vorbis
@@ -686,526 +689,527 @@ add_link_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_C
 
 # Now the source files are listed starting here!
 SET(LIBVS_LOGGING
-        src/vs_logging.cpp
-        )
+    src/vs_logging.cpp
+)
 
 SET(LIBCONFIG
-        src/abstract_config.cpp
-        src/configuration/configuration.cpp
-        src/configuration/game_config.cpp
-        )
+    src/abstract_config.cpp
+    src/configuration/configuration.cpp
+    src/configuration/game_config.cpp
+)
 
 SET(LIBDAMAGE
-        src/damage/damageable_layer.cpp
-        src/damage/damageable_object.cpp
-        src/damage/health.cpp
-        )
+    src/damage/damageable_layer.cpp
+    src/damage/damageable_object.cpp
+    src/damage/health.cpp
+)
 
 SET(LIBRESOURCE
-        src/resource/resource.cpp
-        src/resource/store.cpp
-        src/resource/product.cpp
-        )
+    src/resource/resource.cpp
+    src/resource/store.cpp
+    src/resource/product.cpp
+)
 
 SET(LIBGUI_SOURCES
-        src/gui/button.cpp
-        src/gui/control.cpp
-        src/gui/eventmanager.cpp
-        src/gui/eventresponder.cpp
-        src/gui/font.cpp
-        src/gui/glut_support.cpp
-        src/gui/groupcontrol.cpp
-        src/gui/guidefs.cpp
-        src/gui/guitexture.cpp
-        src/gui/modaldialog.cpp
-        src/gui/newbutton.cpp
-        src/gui/painttext.cpp
-        src/gui/picker.cpp
-        src/gui/scroller.cpp
-        src/gui/simplepicker.cpp
-        src/gui/slider.cpp
-        src/gui/staticdisplay.cpp
-        src/gui/text_area.cpp
-        src/gui/textinputdisplay.cpp
-        src/gui/window.cpp
-        src/gui/windowcontroller.cpp
-        )
+    src/gui/button.cpp
+    src/gui/control.cpp
+    src/gui/eventmanager.cpp
+    src/gui/eventresponder.cpp
+    src/gui/font.cpp
+    src/gui/glut_support.cpp
+    src/gui/groupcontrol.cpp
+    src/gui/guidefs.cpp
+    src/gui/guitexture.cpp
+    src/gui/modaldialog.cpp
+    src/gui/newbutton.cpp
+    src/gui/painttext.cpp
+    src/gui/picker.cpp
+    src/gui/scroller.cpp
+    src/gui/simplepicker.cpp
+    src/gui/slider.cpp
+    src/gui/staticdisplay.cpp
+    src/gui/text_area.cpp
+    src/gui/textinputdisplay.cpp
+    src/gui/window.cpp
+    src/gui/windowcontroller.cpp
+)
 
 SET(LIBPYTHON_SOURCES
-        src/python/init.cpp
-        src/python/python_compile.cpp
-        src/python/unit_exports.cpp
-        src/python/unit_exports1.cpp
-        src/python/unit_exports2.cpp
-        src/python/unit_exports3.cpp
-        src/python/unit_method_defs.cpp
-        src/python/unit_wrapper.cpp
-        src/python/universe_util_export.cpp
-        )
+    src/python/init.cpp
+    src/python/python_compile.cpp
+    src/python/unit_exports.cpp
+    src/python/unit_exports1.cpp
+    src/python/unit_exports2.cpp
+    src/python/unit_exports3.cpp
+    src/python/unit_method_defs.cpp
+    src/python/unit_wrapper.cpp
+    src/python/universe_util_export.cpp
+)
 
 SET(LIBSCRIPT_SOURCES
-        src/cmd/script/director_generic.cpp
-        src/cmd/script/mission_script.cpp
-        src/cmd/script/mission.cpp
-        src/cmd/script/msgcenter.cpp
-        src/cmd/script/pythonmission.cpp
-        src/cmd/script/script_call_olist.cpp
-        src/cmd/script/script_call_omap.cpp
-        src/cmd/script/script_call_order.cpp
-        src/cmd/script/script_call_string.cpp
-        src/cmd/script/script_call_unit_generic.cpp
-        src/cmd/script/script_callbacks.cpp
-        src/cmd/script/script_expression.cpp
-        src/cmd/script/script_generic.cpp
-        src/cmd/script/script_statement.cpp
-        src/cmd/script/script_util.cpp
-        src/cmd/script/script_variables.cpp
-        )
+    src/cmd/script/director_generic.cpp
+    src/cmd/script/mission_script.cpp
+    src/cmd/script/mission.cpp
+    src/cmd/script/msgcenter.cpp
+    src/cmd/script/pythonmission.cpp
+    src/cmd/script/script_call_olist.cpp
+    src/cmd/script/script_call_omap.cpp
+    src/cmd/script/script_call_order.cpp
+    src/cmd/script/script_call_string.cpp
+    src/cmd/script/script_call_unit_generic.cpp
+    src/cmd/script/script_callbacks.cpp
+    src/cmd/script/script_expression.cpp
+    src/cmd/script/script_generic.cpp
+    src/cmd/script/script_statement.cpp
+    src/cmd/script/script_util.cpp
+    src/cmd/script/script_variables.cpp
+)
 
 SET(LIBCMDSCRIPTSERVER_SOURCES
-        src/cmd/script/flightgroup_server.cpp
-        src/cmd/script/script_call_unit_server.cpp
-        src/cmd/script/c_alike/c_alike.tab.cpp
-        src/cmd/script/c_alike/lex.yy.cpp
-        )
+    src/cmd/script/flightgroup_server.cpp
+    src/cmd/script/script_call_unit_server.cpp
+    src/cmd/script/c_alike/c_alike.tab.cpp
+    src/cmd/script/c_alike/lex.yy.cpp
+)
 
 SET(LIBAI_SOURCES
-        src/cmd/ai/aggressive.cpp
-        src/cmd/ai/autodocking.cpp
-        src/cmd/ai/comm_ai.cpp
-        src/cmd/ai/communication_xml.cpp
-        src/cmd/ai/communication.cpp
-        src/cmd/ai/docking.cpp
-        src/cmd/ai/event_xml.cpp
-        src/cmd/ai/fire.cpp
-        src/cmd/ai/fireall.cpp
-        src/cmd/ai/flybywire.cpp
-        src/cmd/ai/hard_coded_scripts.cpp
-        src/cmd/ai/ikarus.cpp
-        src/cmd/ai/missionscript.cpp
-        src/cmd/ai/navigation.cpp
-        src/cmd/ai/order_comm.cpp
-        src/cmd/ai/order.cpp
-        src/cmd/ai/script.cpp
-        src/cmd/ai/tactics.cpp
-        src/cmd/ai/turretai.cpp
-        src/cmd/ai/warpto.cpp
-        src/cmd/ai/flykeyboard_generic.cpp
-        )
+    src/cmd/ai/aggressive.cpp
+    src/cmd/ai/autodocking.cpp
+    src/cmd/ai/comm_ai.cpp
+    src/cmd/ai/communication_xml.cpp
+    src/cmd/ai/communication.cpp
+    src/cmd/ai/docking.cpp
+    src/cmd/ai/event_xml.cpp
+    src/cmd/ai/fire.cpp
+    src/cmd/ai/fireall.cpp
+    src/cmd/ai/flybywire.cpp
+    src/cmd/ai/hard_coded_scripts.cpp
+    src/cmd/ai/ikarus.cpp
+    src/cmd/ai/missionscript.cpp
+    src/cmd/ai/navigation.cpp
+    src/cmd/ai/order_comm.cpp
+    src/cmd/ai/order.cpp
+    src/cmd/ai/script.cpp
+    src/cmd/ai/tactics.cpp
+    src/cmd/ai/turretai.cpp
+    src/cmd/ai/warpto.cpp
+    src/cmd/ai/flykeyboard_generic.cpp
+)
 
 ADD_LIBRARY(vegastrike-OPcollide
-        src/cmd/collide2/Ice/IceAABB.cpp
-        src/cmd/collide2/Ice/IceContainer.cpp
-        src/cmd/collide2/Ice/IceHPoint.cpp
-        src/cmd/collide2/Ice/IceIndexedTriangle.cpp
-        src/cmd/collide2/Ice/IceMatrix3x3.cpp
-        src/cmd/collide2/Ice/IceMatrix4x4.cpp
-        src/cmd/collide2/Ice/IceOBB.cpp
-        src/cmd/collide2/Ice/IcePlane.cpp
-        src/cmd/collide2/Ice/IcePoint.cpp
-        src/cmd/collide2/Ice/IceRandom.cpp
-        src/cmd/collide2/Ice/IceRay.cpp
-        src/cmd/collide2/Ice/IceRevisitedRadix.cpp
-        src/cmd/collide2/Ice/IceSegment.cpp
-        src/cmd/collide2/Ice/IceTriangle.cpp
-        src/cmd/collide2/Ice/IceUtils.cpp
-        src/cmd/collide2/csgeom2/opbox.cpp
-        src/cmd/collide2/csgeom2/opmatrix3.cpp
-        src/cmd/collide2/csgeom2/opvector3.cpp
-        src/cmd/collide2/OPC_AABBCollider.cpp
-        src/cmd/collide2/OPC_AABBTree.cpp
-        src/cmd/collide2/OPC_BaseModel.cpp
-        src/cmd/collide2/OPC_BoxPruning.cpp
-        src/cmd/collide2/OPC_Collider.cpp
-        src/cmd/collide2/OPC_Common.cpp
-        src/cmd/collide2/OPC_HybridModel.cpp
-        src/cmd/collide2/OPC_LSSCollider.cpp
-        src/cmd/collide2/OPC_MeshInterface.cpp
-        src/cmd/collide2/OPC_Model.cpp
-        src/cmd/collide2/OPC_OBBCollider.cpp
-        src/cmd/collide2/OPC_OptimizedTree.cpp
-        src/cmd/collide2/OPC_Picking.cpp
-        src/cmd/collide2/OPC_PlanesCollider.cpp
-        src/cmd/collide2/OPC_RayCollider.cpp
-        src/cmd/collide2/OPC_SphereCollider.cpp
-        src/cmd/collide2/OPC_SweepAndPrune.cpp
-        src/cmd/collide2/OPC_TreeBuilders.cpp
-        src/cmd/collide2/OPC_TreeCollider.cpp
-        src/cmd/collide2/OPC_VolumeCollider.cpp
-        src/cmd/collide2/CSopcodecollider.cpp
-        )
+    src/cmd/collide2/Ice/IceAABB.cpp
+    src/cmd/collide2/Ice/IceContainer.cpp
+    src/cmd/collide2/Ice/IceHPoint.cpp
+    src/cmd/collide2/Ice/IceIndexedTriangle.cpp
+    src/cmd/collide2/Ice/IceMatrix3x3.cpp
+    src/cmd/collide2/Ice/IceMatrix4x4.cpp
+    src/cmd/collide2/Ice/IceOBB.cpp
+    src/cmd/collide2/Ice/IcePlane.cpp
+    src/cmd/collide2/Ice/IcePoint.cpp
+    src/cmd/collide2/Ice/IceRandom.cpp
+    src/cmd/collide2/Ice/IceRay.cpp
+    src/cmd/collide2/Ice/IceRevisitedRadix.cpp
+    src/cmd/collide2/Ice/IceSegment.cpp
+    src/cmd/collide2/Ice/IceTriangle.cpp
+    src/cmd/collide2/Ice/IceUtils.cpp
+    src/cmd/collide2/csgeom2/opbox.cpp
+    src/cmd/collide2/csgeom2/opmatrix3.cpp
+    src/cmd/collide2/csgeom2/opvector3.cpp
+    src/cmd/collide2/OPC_AABBCollider.cpp
+    src/cmd/collide2/OPC_AABBTree.cpp
+    src/cmd/collide2/OPC_BaseModel.cpp
+    src/cmd/collide2/OPC_BoxPruning.cpp
+    src/cmd/collide2/OPC_Collider.cpp
+    src/cmd/collide2/OPC_Common.cpp
+    src/cmd/collide2/OPC_HybridModel.cpp
+    src/cmd/collide2/OPC_LSSCollider.cpp
+    src/cmd/collide2/OPC_MeshInterface.cpp
+    src/cmd/collide2/OPC_Model.cpp
+    src/cmd/collide2/OPC_OBBCollider.cpp
+    src/cmd/collide2/OPC_OptimizedTree.cpp
+    src/cmd/collide2/OPC_Picking.cpp
+    src/cmd/collide2/OPC_PlanesCollider.cpp
+    src/cmd/collide2/OPC_RayCollider.cpp
+    src/cmd/collide2/OPC_SphereCollider.cpp
+    src/cmd/collide2/OPC_SweepAndPrune.cpp
+    src/cmd/collide2/OPC_TreeBuilders.cpp
+    src/cmd/collide2/OPC_TreeCollider.cpp
+    src/cmd/collide2/OPC_VolumeCollider.cpp
+    src/cmd/collide2/CSopcodecollider.cpp
+)
 
 #TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 set_property(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
 ENDIF()
-target_compile_definitions(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
-    target_compile_definitions(vegastrike-OPcollide PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-    target_compile_definitions(vegastrike-OPcollide PUBLIC _WIN32_WINNT=0x0A00)
-    target_compile_definitions(vegastrike-OPcollide PUBLIC WINVER=0x0A00)
-    target_compile_definitions(vegastrike-OPcollide PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC _WIN32_WINNT=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
 
 SET(LIBCMD_SOURCES
-        src/cmd/alphacurve.cpp
-        src/cmd/cargo.cpp
-        src/cmd/carrier.cpp
-        src/cmd/collection.cpp
-        src/cmd/collide_map.cpp
-        src/cmd/collide.cpp
-        src/cmd/container.cpp
-        src/cmd/csv.cpp
-        src/cmd/mount.cpp
-        src/cmd/armed.cpp
-        src/cmd/audible.cpp
-        src/cmd/jump_capable.cpp
-        src/cmd/role_bitmask.cpp
-        src/cmd/unit_collide.cpp
-        src/cmd/unit_const_cache.cpp
-        src/cmd/unit_csv.cpp
-        src/cmd/unit_csv_factory.cpp
-        src/cmd/unit_json_factory.cpp
-        src/cmd/unit_optimize_factory.cpp
-        src/cmd/json.cpp
-        src/cmd/unit_functions_generic.cpp
-        src/cmd/unit_generic.cpp
-        src/cmd/upgradeable_unit.cpp
-        src/cmd/fg_util.cpp
-        src/cmd/unit_util_generic.cpp
-        src/cmd/unit_xml.cpp
-        src/cmd/engineVersion.cpp
+    src/cmd/alphacurve.cpp
+    src/cmd/cargo.cpp
+    src/cmd/carrier.cpp
+    src/cmd/collection.cpp
+    src/cmd/collide_map.cpp
+    src/cmd/collide.cpp
+    src/cmd/container.cpp
+    src/cmd/csv.cpp
+    src/cmd/mount.cpp
+    src/cmd/armed.cpp
+    src/cmd/audible.cpp
+    src/cmd/jump_capable.cpp
+    src/cmd/role_bitmask.cpp
+    src/cmd/unit_collide.cpp
+    src/cmd/unit_const_cache.cpp
+    src/cmd/unit_csv.cpp
+    src/cmd/unit_csv_factory.cpp
+    src/cmd/unit_json_factory.cpp
+    src/cmd/unit_optimize_factory.cpp
+    src/cmd/json.cpp
+    src/cmd/unit_functions_generic.cpp
+    src/cmd/unit_generic.cpp
+    src/cmd/upgradeable_unit.cpp
+    src/cmd/fg_util.cpp
+    src/cmd/unit_util_generic.cpp
+    src/cmd/unit_xml.cpp
+    src/cmd/engineVersion.cpp
 
-        src/cmd/collision.cpp
-        src/cmd/damageable.cpp
-        src/cmd/drawable.cpp
-        src/cmd/movable.cpp
-        src/cmd/computer.cpp
+    src/cmd/collision.cpp
+    src/cmd/damageable.cpp
+    src/cmd/drawable.cpp
+    src/cmd/movable.cpp
+    src/cmd/computer.cpp
 
-        src/cmd/intelligent.cpp
-        src/cmd/energetic.cpp
+    src/cmd/intelligent.cpp
+    src/cmd/energetic.cpp
 
-        src/cmd/planetary_orbit.cpp
+    src/cmd/planetary_orbit.cpp
 
-        src/cmd/weapon_factory.cpp
-        src/cmd/weapon_info.cpp
-        src/cmd/mount_size.cpp
-        src/cmd/weapon_type.cpp
-        src/vega_py_run.cpp
-        )
+    src/cmd/weapon_factory.cpp
+    src/cmd/weapon_info.cpp
+    src/cmd/mount_size.cpp
+    src/cmd/weapon_type.cpp
+    src/vega_py_run.cpp
+)
 
 SET(LIBCMDSERVER_SOURCES
-        src/cmd/atmosphere_server.cpp
-        src/cmd/base_util_server.cpp
-        src/cmd/beam_server.cpp
-        src/cmd/bolt_server.cpp
-        src/cmd/unit_factory_server.cpp
-        src/cmd/unit_functions_server.cpp
-        src/cmd/unit_util_server.cpp
-        src/cmd/unit_server.cpp
-        src/cmd/pilot_server.cpp
-        src/cmd/images_server.cpp
-        src/cmd/faction_xml_server.cpp
-        )
+    src/cmd/atmosphere_server.cpp
+    src/cmd/base_util_server.cpp
+    src/cmd/beam_server.cpp
+    src/cmd/bolt_server.cpp
+    src/cmd/unit_factory_server.cpp
+    src/cmd/unit_functions_server.cpp
+    src/cmd/unit_util_server.cpp
+    src/cmd/unit_server.cpp
+    src/cmd/pilot_server.cpp
+    src/cmd/images_server.cpp
+    src/cmd/faction_xml_server.cpp
+)
 
 SET(LIBGFXGENERIC_SOURCES
-        src/gfx/texture_manager.cpp
-        src/gfx/boltdrawmanager.cpp
-        src/gfx/cockpit_generic.cpp
-        src/gfx/lerp.cpp
-        src/gfx/matrix.cpp
-        src/gfx/mesh_bxm.cpp
-        src/gfx/mesh_poly.cpp
-        src/gfx/mesh_xml.cpp
-        src/gfx/mesh.cpp
-        src/gfx/quaternion.cpp
-        src/gfx/soundcontainer_generic.cpp
-        src/gfx/sphere_generic.cpp
-        src/gfx/tvector.cpp
-        )
+    src/gfx/texture_manager.cpp
+    src/gfx/boltdrawmanager.cpp
+    src/gfx/cockpit_generic.cpp
+    src/gfx/lerp.cpp
+    src/gfx/matrix.cpp
+    src/gfx/mesh_bxm.cpp
+    src/gfx/mesh_poly.cpp
+    src/gfx/mesh_xml.cpp
+    src/gfx/mesh.cpp
+    src/gfx/quaternion.cpp
+    src/gfx/soundcontainer_generic.cpp
+    src/gfx/sphere_generic.cpp
+    src/gfx/tvector.cpp
+)
 
 SET(LIBGFXCLIENT_SOURCES
-        src/gfx/ani_texture.cpp
-        src/gfx/animation.cpp
-        src/gfx/aux_logo.cpp
-        src/gfx/aux_palette.cpp
-        src/gfx/aux_texture.cpp
-        src/gfx/background.cpp
-        src/gfx/camera.cpp
-        src/gfx/cockpit_xml.cpp
-        src/gfx/cockpit.cpp
-        src/gfx/cockpit_gfx.cpp
-        src/gfx/cockpit_gfx_utils.cpp
-        src/gfx/coord_select.cpp
-        src/gfx/env_map_gent.cpp
-        src/gfx/gauge.cpp
-        src/gfx/halo_system.cpp
-        src/gfx/halo.cpp
-        src/gfx/hud.cpp
-        src/gfx/jpeg_memory.cpp
-        src/gfx/loc_select.cpp
-        src/gfx/masks.cpp
-        src/gfx/mesh_bin.cpp
-        src/gfx/mesh_fx.cpp
-        src/gfx/mesh_gfx.cpp
-        src/gfx/nav/criteria_xml.cpp
-        src/gfx/nav/criteria.cpp
-        src/gfx/nav/drawgalaxy.cpp
-        src/gfx/nav/drawlist.cpp
-        src/gfx/nav/drawsystem.cpp
-        src/gfx/nav/navcomputer.cpp
-        src/gfx/nav/navgetxmldata.cpp
-        src/gfx/nav/navpath.cpp
-        src/gfx/nav/navscreen.cpp
-        src/gfx/nav/navscreenoccupied.cpp
-        src/gfx/radar/bubble_display.cpp
-        src/gfx/radar/bubble_display.h
-        src/gfx/radar/dual_display.cpp
-        src/gfx/radar/dual_display.h
-        src/gfx/radar/null_display.h
-        src/gfx/radar/plane_display.cpp
-        src/gfx/radar/plane_display.h
-        src/gfx/radar/radar.cpp
-        src/gfx/radar/radar.h
-        src/gfx/radar/sensor.cpp
-        src/gfx/radar/sensor.h
-        src/gfx/radar/sphere_display.cpp
-        src/gfx/radar/sphere_display.h
-        src/gfx/radar/track.cpp
-        src/gfx/radar/track.h
-        src/gfx/radar/viewarea.cpp
-        src/gfx/radar/viewarea.h
-        src/gfx/particle.cpp
-        src/gfx/pipelined_texture.cpp
-        src/gfx/quadsquare_cull.cpp
-        src/gfx/quadsquare_render.cpp
-        src/gfx/quadsquare_update.cpp
-        src/gfx/quadsquare.cpp
-        src/gfx/quadtree_xml.cpp
-        src/gfx/quadtree.cpp
-        src/gfx/ring.cpp
-        src/gfx/occlusion.cpp
-        src/gfx/screenshot.cpp
-        src/gfx/soundcontainer.cpp
-        src/gfx/soundcontainer_aldrv.cpp
-        src/gfx/sphere.cpp
-        src/gfx/sprite.cpp
-        src/gfx/star.cpp
-        src/gfx/stream_texture.cpp
-        src/gfx/technique.cpp
-        src/gfx/pass.cpp
-        src/gfx/tex_transform.cpp
-        src/gfx/vdu.cpp
-        src/gfx/vid_file.cpp
-        src/ffmpeg_init.cpp
-        src/gfx/vsbox.cpp
-        src/gfx/vsimage.cpp
-        src/gfx/warptrail.cpp
-        )
+    src/gfx/ani_texture.cpp
+    src/gfx/animation.cpp
+    src/gfx/aux_logo.cpp
+    src/gfx/aux_palette.cpp
+    src/gfx/aux_texture.cpp
+    src/gfx/background.cpp
+    src/gfx/camera.cpp
+    src/gfx/cockpit_xml.cpp
+    src/gfx/cockpit.cpp
+    src/gfx/cockpit_gfx.cpp
+    src/gfx/cockpit_gfx_utils.cpp
+    src/gfx/coord_select.cpp
+    src/gfx/env_map_gent.cpp
+    src/gfx/gauge.cpp
+    src/gfx/halo_system.cpp
+    src/gfx/halo.cpp
+    src/gfx/hud.cpp
+    src/gfx/jpeg_memory.cpp
+    src/gfx/loc_select.cpp
+    src/gfx/masks.cpp
+    src/gfx/mesh_bin.cpp
+    src/gfx/mesh_fx.cpp
+    src/gfx/mesh_gfx.cpp
+    src/gfx/nav/criteria_xml.cpp
+    src/gfx/nav/criteria.cpp
+    src/gfx/nav/drawgalaxy.cpp
+    src/gfx/nav/drawlist.cpp
+    src/gfx/nav/drawsystem.cpp
+    src/gfx/nav/navcomputer.cpp
+    src/gfx/nav/navgetxmldata.cpp
+    src/gfx/nav/navpath.cpp
+    src/gfx/nav/navscreen.cpp
+    src/gfx/nav/navscreenoccupied.cpp
+    src/gfx/radar/bubble_display.cpp
+    src/gfx/radar/bubble_display.h
+    src/gfx/radar/dual_display.cpp
+    src/gfx/radar/dual_display.h
+    src/gfx/radar/null_display.h
+    src/gfx/radar/plane_display.cpp
+    src/gfx/radar/plane_display.h
+    src/gfx/radar/radar.cpp
+    src/gfx/radar/radar.h
+    src/gfx/radar/sensor.cpp
+    src/gfx/radar/sensor.h
+    src/gfx/radar/sphere_display.cpp
+    src/gfx/radar/sphere_display.h
+    src/gfx/radar/track.cpp
+    src/gfx/radar/track.h
+    src/gfx/radar/viewarea.cpp
+    src/gfx/radar/viewarea.h
+    src/gfx/particle.cpp
+    src/gfx/pipelined_texture.cpp
+    src/gfx/quadsquare_cull.cpp
+    src/gfx/quadsquare_render.cpp
+    src/gfx/quadsquare_update.cpp
+    src/gfx/quadsquare.cpp
+    src/gfx/quadtree_xml.cpp
+    src/gfx/quadtree.cpp
+    src/gfx/ring.cpp
+    src/gfx/occlusion.cpp
+    src/gfx/screenshot.cpp
+    src/gfx/soundcontainer.cpp
+    src/gfx/soundcontainer_aldrv.cpp
+    src/gfx/sphere.cpp
+    src/gfx/sprite.cpp
+    src/gfx/star.cpp
+    src/gfx/stream_texture.cpp
+    src/gfx/technique.cpp
+    src/gfx/pass.cpp
+    src/gfx/tex_transform.cpp
+    src/gfx/vdu.cpp
+    src/gfx/vid_file.cpp
+    src/ffmpeg_init.cpp
+    src/gfx/vsbox.cpp
+    src/gfx/vsimage.cpp
+    src/gfx/warptrail.cpp
+)
 
 SET(LIBGFXSERVER_SOURCES
-        src/gfx/sphere_server.cpp
-        src/gfx/vsbox_server.cpp
-        src/gfx/mesh_server.cpp
-        src/gfx/background_server.cpp
-        src/gfx/mesh_bin_server.cpp
-        )
+    src/gfx/sphere_server.cpp
+    src/gfx/vsbox_server.cpp
+    src/gfx/mesh_server.cpp
+    src/gfx/background_server.cpp
+    src/gfx/mesh_bin_server.cpp
+)
 
 SET(LIBROOTGENERIC_SOURCES
-        src/atmospheric_fog_mesh.cpp
-        src/configxml.cpp
-        src/easydom.cpp
-        src/endianness.cpp
-        src/macosx_math.cpp
-        src/faction_generic.cpp
-        src/faction_util_generic.cpp
-        src/galaxy.cpp
-        src/galaxy_gen.cpp
-        src/galaxy_xml.cpp
-        src/galaxy_utils.cpp
-        src/hashtable.cpp
-        src/lin_time.cpp
-        src/load_mission.cpp
-        src/pk3.cpp
-        src/posh.cpp
-        src/savegame.cpp
-        src/system_factory.cpp
-        src/star_system_generic.cpp
-        src/star_system_xml.cpp
-        src/stardate.cpp
-        src/universe_globals.cpp
-        src/universe_util_generic.cpp
-        src/vs_globals.cpp
-        src/vsfilesystem.cpp
-        src/xml_serializer.cpp
-        src/xml_support.cpp
-        src/XMLDocument.cpp
-        src/options.cpp
-        )
+    src/atmospheric_fog_mesh.cpp
+    src/configxml.cpp
+    src/easydom.cpp
+    src/endianness.cpp
+    src/macosx_math.cpp
+    src/faction_generic.cpp
+    src/faction_util_generic.cpp
+    src/galaxy.cpp
+    src/galaxy_gen.cpp
+    src/galaxy_xml.cpp
+    src/galaxy_utils.cpp
+    src/hashtable.cpp
+    src/lin_time.cpp
+    src/load_mission.cpp
+    src/pk3.cpp
+    src/posh.cpp
+    src/savegame.cpp
+    src/system_factory.cpp
+    src/star_system_generic.cpp
+    src/star_system_xml.cpp
+    src/stardate.cpp
+    src/universe_globals.cpp
+    src/universe_util_generic.cpp
+    src/vs_globals.cpp
+    src/vsfilesystem.cpp
+    src/xml_serializer.cpp
+    src/xml_support.cpp
+    src/XMLDocument.cpp
+    src/options.cpp
+)
 
 SET(LIBROOTCLIENT_SOURCES
-        src/cg_global.cpp
-        src/command.cpp
-        src/config_xml.cpp
-        src/debug_vs.cpp
-        src/faction_util.cpp
-        src/force_feedback.cpp
-        src/gamemenu.cpp
-        src/gfxlib_struct.cpp
-        src/in_joystick.cpp
-        src/in_kb.cpp
-        src/in_main.cpp
-        src/in_mouse.cpp
-        src/in_sdl.cpp
-        src/main_loop.cpp
-        src/physics.cpp
-        src/rendertext.cpp
-        src/ship_commands.cpp
-        src/star_system_jump.cpp
-        src/star_system.cpp
-        src/universe_util.cpp
-        src/universe.cpp
-        )
+    src/cg_global.cpp
+    src/command.cpp
+    src/config_xml.cpp
+    src/debug_vs.cpp
+    src/faction_util.cpp
+    src/force_feedback.cpp
+    src/gamemenu.cpp
+    src/gfxlib_struct.cpp
+    src/in_joystick.cpp
+    src/in_kb.cpp
+    src/sdl_key_converter.cpp
+    src/in_main.cpp
+    src/in_mouse.cpp
+    src/in_sdl.cpp
+    src/main_loop.cpp
+    src/physics.cpp
+    src/rendertext.cpp
+    src/ship_commands.cpp
+    src/star_system_jump.cpp
+    src/star_system.cpp
+    src/universe_util.cpp
+    src/universe.cpp
+)
 
 SET(LIBROOTSERVER_SOURCES
-        src/force_feedback_server.cpp
-        src/faction_util_server.cpp
-        src/gfxlib_struct_server.cpp
-        src/libaudioserver.cpp
-        src/libserver.cpp
-        src/universe_util_server.cpp
-        )
+    src/force_feedback_server.cpp
+    src/faction_util_server.cpp
+    src/gfxlib_struct_server.cpp
+    src/libaudioserver.cpp
+    src/libserver.cpp
+    src/universe_util_server.cpp
+)
 
 SET(LIBAUDIO_SOURCES
-        src/audio/CodecRegistry.cpp
-        src/audio/Listener.cpp
-        src/audio/RenderableListener.cpp
-        src/audio/RenderableSource.cpp
-        src/audio/Renderer.cpp
-        src/audio/Scene.cpp
-        src/audio/SceneManager.cpp
-        src/audio/SimpleScene.cpp
-        src/audio/SimpleSound.cpp
-        src/audio/SimpleSource.cpp
-        src/audio/SoundBuffer.cpp
-        src/audio/Sound.cpp
-        src/audio/Source.cpp
-        src/audio/SourceTemplate.cpp
-        src/audio/Stream.cpp
-        src/audio/test.cpp
-        src/audio/utils.cpp
-        src/audio/codecs/Codec.cpp
-        src/audio/codecs/FFCodec.cpp
-        src/audio/codecs/FFStream.cpp
-        src/audio/codecs/OggCodec.cpp
-        src/audio/codecs/OggData.cpp
-        src/audio/codecs/OggStream.cpp
-        src/audio/renderers/OpenAL/OpenALHelpers.cpp
-        src/audio/renderers/OpenAL/OpenALRenderableListener.cpp
-        src/audio/renderers/OpenAL/OpenALRenderableSource.cpp
-        src/audio/renderers/OpenAL/OpenALRenderableStreamingSource.cpp
-        src/audio/renderers/OpenAL/OpenALRenderer.cpp
-        src/audio/renderers/OpenAL/OpenALSimpleSound.cpp
-        src/audio/renderers/OpenAL/OpenALStreamingSound.cpp
-        )
+    src/audio/CodecRegistry.cpp
+    src/audio/Listener.cpp
+    src/audio/RenderableListener.cpp
+    src/audio/RenderableSource.cpp
+    src/audio/Renderer.cpp
+    src/audio/Scene.cpp
+    src/audio/SceneManager.cpp
+    src/audio/SimpleScene.cpp
+    src/audio/SimpleSound.cpp
+    src/audio/SimpleSource.cpp
+    src/audio/SoundBuffer.cpp
+    src/audio/Sound.cpp
+    src/audio/Source.cpp
+    src/audio/SourceTemplate.cpp
+    src/audio/Stream.cpp
+    src/audio/test.cpp
+    src/audio/utils.cpp
+    src/audio/codecs/Codec.cpp
+    src/audio/codecs/FFCodec.cpp
+    src/audio/codecs/FFStream.cpp
+    src/audio/codecs/OggCodec.cpp
+    src/audio/codecs/OggData.cpp
+    src/audio/codecs/OggStream.cpp
+    src/audio/renderers/OpenAL/OpenALHelpers.cpp
+    src/audio/renderers/OpenAL/OpenALRenderableListener.cpp
+    src/audio/renderers/OpenAL/OpenALRenderableSource.cpp
+    src/audio/renderers/OpenAL/OpenALRenderableStreamingSource.cpp
+    src/audio/renderers/OpenAL/OpenALRenderer.cpp
+    src/audio/renderers/OpenAL/OpenALSimpleSound.cpp
+    src/audio/renderers/OpenAL/OpenALStreamingSound.cpp
+)
 
 
 ADD_LIBRARY(vegastrike-engine_com
-        ${LIBVS_LOGGING}
-        ${LIBCONFIG}
-        ${LIBDAMAGE}
-        ${LIBRESOURCE}
-        ${LIBAI_SOURCES}
-        ${LIBCMD_SOURCES}
-        ${LIBNET_SOURCES}
-        ${LIBPYTHON_SOURCES}
-        ${LIBROOTGENERIC_SOURCES}
-        ${LIBSCRIPT_SOURCES}
-        ${LIBGFXGENERIC_SOURCES}
-        )
+    ${LIBVS_LOGGING}
+    ${LIBCONFIG}
+    ${LIBDAMAGE}
+    ${LIBRESOURCE}
+    ${LIBAI_SOURCES}
+    ${LIBCMD_SOURCES}
+    ${LIBNET_SOURCES}
+    ${LIBPYTHON_SOURCES}
+    ${LIBROOTGENERIC_SOURCES}
+    ${LIBSCRIPT_SOURCES}
+    ${LIBGFXGENERIC_SOURCES}
+)
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
 set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
-target_compile_definitions(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
-    target_compile_definitions(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-    target_compile_definitions(vegastrike-engine_com PUBLIC _WIN32_WINNT=0x0A00)
-    target_compile_definitions(vegastrike-engine_com PUBLIC WINVER=0x0A00)
-    target_compile_definitions(vegastrike-engine_com PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC _WIN32_WINNT=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
 
 SET(VEGASTRIKE_SOURCES
-        ${LIBGUI_SOURCES}
-        ${LIBNETCLIENT_SOURCES}
-        ${LIBROOTCLIENT_SOURCES}
-        ${LIBGFXCLIENT_SOURCES}
-        ${LIBAUDIO_SOURCES}
-        src/aldrv/al_globals.cpp
-        src/aldrv/al_init.cpp
-        src/aldrv/al_listen.cpp
-        src/aldrv/al_sound.cpp
-        src/cmd/ai/firekeyboard.cpp
-        src/cmd/ai/flyjoystick.cpp
-        src/cmd/ai/flykeyboard.cpp
-        src/cmd/asteroid.cpp
-        src/cmd/atmosphere.cpp
-        src/cmd/base_init.cpp
-        src/cmd/base_interface.cpp
-        src/cmd/base_util.cpp
-        src/cmd/base_write_python.cpp
-        src/cmd/base_write_xml.cpp
-        src/cmd/base_xml.cpp
-        src/cmd/basecomputer.cpp
-        src/cmd/beam.cpp
-        src/cmd/bolt.cpp
-        src/cmd/briefing.cpp
-        src/cmd/building.cpp
-        src/cmd/click_list.cpp
-        src/cmd/cont_terrain.cpp
-        src/cmd/missile.cpp
-        src/cmd/music.cpp
-        src/cmd/nebula.cpp
-        src/cmd/planet.cpp
-        src/cmd/ship.cpp
-        src/cmd/script/c_alike/c_alike.tab.cpp
-        src/cmd/script/c_alike/lex.yy.cpp
-        src/cmd/script/director.cpp
-        src/cmd/script/flightgroup.cpp
-        src/cmd/script/script_call_briefing.cpp
-        src/cmd/script/script_call_unit.cpp
-        src/cmd/terrain.cpp
-        src/cmd/unit_functions.cpp
-        src/cmd/unit_util.cpp
-        src/cmd/faction_xml.cpp
-        src/cmd/faction_factory.cpp
-        src/cmd/pilot.cpp
-        src/cmd/images.cpp
-        src/cmd/turret.cpp
-        src/gldrv/gl_program.cpp
-        src/gldrv/gl_clip.cpp
-        src/gldrv/gl_fog.cpp
-        src/gldrv/gl_globals.cpp
-        src/gldrv/gl_init.cpp
-        src/gldrv/gl_light_pick.cpp
-        src/gldrv/gl_light_state.cpp
-        src/gldrv/gl_light.cpp
-        src/gldrv/gl_material.cpp
-        src/gldrv/gl_matrix.cpp
-        src/gldrv/gl_misc.cpp
-        src/gldrv/gl_quad_list.cpp
-        src/gldrv/gl_sphere_list.cpp
-        src/gldrv/gl_state.cpp
-        src/gldrv/sdds.cpp
-        src/gldrv/gl_texture.cpp
-        src/gldrv/gl_vertex_list.cpp
-        src/gldrv/winsys.cpp
-        src/main.cpp
-        src/python/briefing_wrapper.cpp
-        )
+    ${LIBGUI_SOURCES}
+    ${LIBNETCLIENT_SOURCES}
+    ${LIBROOTCLIENT_SOURCES}
+    ${LIBGFXCLIENT_SOURCES}
+    ${LIBAUDIO_SOURCES}
+    src/aldrv/al_globals.cpp
+    src/aldrv/al_init.cpp
+    src/aldrv/al_listen.cpp
+    src/aldrv/al_sound.cpp
+    src/cmd/ai/firekeyboard.cpp
+    src/cmd/ai/flyjoystick.cpp
+    src/cmd/ai/flykeyboard.cpp
+    src/cmd/asteroid.cpp
+    src/cmd/atmosphere.cpp
+    src/cmd/base_init.cpp
+    src/cmd/base_interface.cpp
+    src/cmd/base_util.cpp
+    src/cmd/base_write_python.cpp
+    src/cmd/base_write_xml.cpp
+    src/cmd/base_xml.cpp
+    src/cmd/basecomputer.cpp
+    src/cmd/beam.cpp
+    src/cmd/bolt.cpp
+    src/cmd/briefing.cpp
+    src/cmd/building.cpp
+    src/cmd/click_list.cpp
+    src/cmd/cont_terrain.cpp
+    src/cmd/missile.cpp
+    src/cmd/music.cpp
+    src/cmd/nebula.cpp
+    src/cmd/planet.cpp
+    src/cmd/ship.cpp
+    src/cmd/script/c_alike/c_alike.tab.cpp
+    src/cmd/script/c_alike/lex.yy.cpp
+    src/cmd/script/director.cpp
+    src/cmd/script/flightgroup.cpp
+    src/cmd/script/script_call_briefing.cpp
+    src/cmd/script/script_call_unit.cpp
+    src/cmd/terrain.cpp
+    src/cmd/unit_functions.cpp
+    src/cmd/unit_util.cpp
+    src/cmd/faction_xml.cpp
+    src/cmd/faction_factory.cpp
+    src/cmd/pilot.cpp
+    src/cmd/images.cpp
+    src/cmd/turret.cpp
+    src/gldrv/gl_program.cpp
+    src/gldrv/gl_clip.cpp
+    src/gldrv/gl_fog.cpp
+    src/gldrv/gl_globals.cpp
+    src/gldrv/gl_init.cpp
+    src/gldrv/gl_light_pick.cpp
+    src/gldrv/gl_light_state.cpp
+    src/gldrv/gl_light.cpp
+    src/gldrv/gl_material.cpp
+    src/gldrv/gl_matrix.cpp
+    src/gldrv/gl_misc.cpp
+    src/gldrv/gl_quad_list.cpp
+    src/gldrv/gl_sphere_list.cpp
+    src/gldrv/gl_state.cpp
+    src/gldrv/sdds.cpp
+    src/gldrv/gl_texture.cpp
+    src/gldrv/gl_vertex_list.cpp
+    src/gldrv/winsys.cpp
+    src/main.cpp
+    src/python/briefing_wrapper.cpp
+)
 
 
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
@@ -1217,12 +1221,12 @@ IF (NOT DISABLE_CLIENT)
     IF (NEED_LINKING_AGAINST_LIBM)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
-    target_compile_definitions(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     IF (WIN32)
-        target_compile_definitions(vegastrike-engine PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-        target_compile_definitions(vegastrike-engine PUBLIC _WIN32_WINNT=0x0A00)
-        target_compile_definitions(vegastrike-engine PUBLIC WINVER=0x0A00)
-        target_compile_definitions(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     #ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)
@@ -1251,60 +1255,60 @@ ADD_SUBDIRECTORY(objconv)
 ## end debug output
 
 MARK_AS_ADVANCED(FORCE
-        Boost_DIR
-        AVCODEC_FOUND
-        AVFORMAT_FOUND
-        AVUTIL_FOUND
-        AVCODEC_LIBRARY
-        AVCODEC_INCLUDE_DIR
-        AVUTIL_INCLUDE_DIR
-        AVFORMAT_LIBRARY
-        AVUTIL_LIBRARY
-        SWSCALE_INCLUDE_DIR
-        SWSCALE_LIBRARY
-        AVFORMAT_INCLUDE_DIR
-        HAVE_AVFORMAT_H
-        HAVE_AVCODEC_H
-        HAVE_AVIO_H
-        HAVE_FFMPEG_SWSCALE_H
-        CMAKE_BACKWARDS_COMPATIBILITY
-        FFMPEG_INCLUDE_DIR
-        FFMPEG_FOUND
-        FFMPEG_LIBRARIES
-        FFMPEG_DEFINITIONS
-        GTK3_ATK_INCLUDE_DIR
-        GTK3_ATK_LIBRARY
-        GTK3_CAIRO_INCLUDE_DIR
-        GTK3_CAIRO_LIBRARY
-        GTK3_GDK_INCLUDE_DIR
-        GTK3_GDK_LIBRARY
-        GTK3_GDK_PIXBUF_LIBRARY
-        GTK3_GDK_PIXBUF_INCLUDE_DIR
-        GTK3_GLIBCONFIG_INCLUDE_DIR
-        GTK3_GLIB_INCLUDE_DIR
-        GTK3_GLIB_LIBRARY
-        GTK3_GMODULE_LIBRARY
-        GTK3_GOBJECT_LIBRARY
-        GTK3_PANGO_INCLUDE_DIR
-        GTK3_PANGO_LIBRARY
-        GTK3_GTHREAD_LIBRARY
-        GTK3_GTKGL_INCLUDE_DIR
-        GTK3_GTKGL_LIBRARY
-        GTK3_GTK_INCLUDE_DIR
-        GTK3_GTK_LIBRARY
-        LIBRARY_OUTPUT_PATH
-        OPENAL_INCLUDE_DIR
-        OPENAL_LIBRARY
-        SDLMAIN_LIBRARY
-        SDL_INCLUDE_DIR
-        SDL_LIBRARY
-        UTIL_LIB
-        ogg_INCLUDE_DIR
-        ogg_LIBRARY
-        vorbis_INCLUDE_DIR
-        vorbis_LIBRARY
-        vorbisfile_LIBRARY
-        )
+    Boost_DIR
+    AVCODEC_FOUND
+    AVFORMAT_FOUND
+    AVUTIL_FOUND
+    AVCODEC_LIBRARY
+    AVCODEC_INCLUDE_DIR
+    AVUTIL_INCLUDE_DIR
+    AVFORMAT_LIBRARY
+    AVUTIL_LIBRARY
+    SWSCALE_INCLUDE_DIR
+    SWSCALE_LIBRARY
+    AVFORMAT_INCLUDE_DIR
+    HAVE_AVFORMAT_H
+    HAVE_AVCODEC_H
+    HAVE_AVIO_H
+    HAVE_FFMPEG_SWSCALE_H
+    CMAKE_BACKWARDS_COMPATIBILITY
+    FFMPEG_INCLUDE_DIR
+    FFMPEG_FOUND
+    FFMPEG_LIBRARIES
+    FFMPEG_DEFINITIONS
+    GTK3_ATK_INCLUDE_DIR
+    GTK3_ATK_LIBRARY
+    GTK3_CAIRO_INCLUDE_DIR
+    GTK3_CAIRO_LIBRARY
+    GTK3_GDK_INCLUDE_DIR
+    GTK3_GDK_LIBRARY
+    GTK3_GDK_PIXBUF_LIBRARY
+    GTK3_GDK_PIXBUF_INCLUDE_DIR
+    GTK3_GLIBCONFIG_INCLUDE_DIR
+    GTK3_GLIB_INCLUDE_DIR
+    GTK3_GLIB_LIBRARY
+    GTK3_GMODULE_LIBRARY
+    GTK3_GOBJECT_LIBRARY
+    GTK3_PANGO_INCLUDE_DIR
+    GTK3_PANGO_LIBRARY
+    GTK3_GTHREAD_LIBRARY
+    GTK3_GTKGL_INCLUDE_DIR
+    GTK3_GTKGL_LIBRARY
+    GTK3_GTK_INCLUDE_DIR
+    GTK3_GTK_LIBRARY
+    LIBRARY_OUTPUT_PATH
+    OPENAL_INCLUDE_DIR
+    OPENAL_LIBRARY
+    SDLMAIN_LIBRARY
+    SDL_INCLUDE_DIR
+    SDL_LIBRARY
+    UTIL_LIB
+    ogg_INCLUDE_DIR
+    ogg_LIBRARY
+    vorbis_INCLUDE_DIR
+    vorbis_LIBRARY
+    vorbisfile_LIBRARY
+)
 INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 
 # CMake doesn't support doing symlinks directly; however,
@@ -1434,7 +1438,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1442,7 +1446,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1450,7 +1454,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSE ()
                     MESSAGE(SEND_WARNING "!! Unsupported Debian version.")
                 ENDIF ()
@@ -1464,7 +1468,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, ${VEGA_STRIKE_GLU_DEPENDENCY}, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, ${VEGA_STRIKE_GLU_DEPENDENCY}, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1472,7 +1476,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bookworm") # Apparently some versions of Debian have lsb_release after all
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.11")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1480,7 +1484,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bullseye")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1496,7 +1500,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1504,7 +1508,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "groovy")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1512,7 +1516,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "hirsute")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1520,7 +1524,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "ulyana")  # Linux Mint 20 codename "ulyana"
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1528,7 +1532,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "vanessa")  # Linux Mint 20 codename "vanessa"
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1536,7 +1540,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "impish")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1544,7 +1548,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "jammy")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1552,7 +1556,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}")
                 ELSE ()
                     MESSAGE(SEND_WARNING "!! Unsupported Debian derivative.")
                 ENDIF ()
@@ -1655,9 +1659,9 @@ ENDIF (INSTALL_GTEST OR USE_GTEST)
 IF (INSTALL_GTEST)
     INCLUDE(FetchContent)
     FetchContent_Declare(
-            googletest
-            GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG        release-1.11.0
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        release-1.11.0
     )
 
     FetchContent_GetProperties(googletest)
@@ -1682,25 +1686,25 @@ IF (USE_GTEST)
     SET(TEST_NAME ${PROJECT_NAME}_tests)
 
     ADD_EXECUTABLE(
-            ${TEST_NAME}
-            src/cmd/tests/csv_tests.cpp
-            src/cmd/tests/json_tests.cpp
-            src/configuration/tests/configuration_tests.cpp
-            src/damage/tests/health_tests.cpp
-            src/damage/tests/layer_tests.cpp
-            src/damage/tests/object_tests.cpp
-            src/resource/tests/buy_sell.cpp
-            src/resource/tests/resource_test.cpp
-            src/exit_unit_tests.cpp
+        ${TEST_NAME}
+        src/cmd/tests/csv_tests.cpp
+        src/cmd/tests/json_tests.cpp
+        src/configuration/tests/configuration_tests.cpp
+        src/damage/tests/health_tests.cpp
+        src/damage/tests/layer_tests.cpp
+        src/damage/tests/object_tests.cpp
+        src/resource/tests/buy_sell.cpp
+        src/resource/tests/resource_test.cpp
+        src/exit_unit_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
-            ${LIBCONFIG}
-            ${LIBDAMAGE}
-            ${LIBRESOURCE}
-            ${LIBCMD_SOURCES}
-            ${LIBVS_LOGGING}
-            )
+        ${LIBCONFIG}
+        ${LIBDAMAGE}
+        ${LIBRESOURCE}
+        ${LIBCMD_SOURCES}
+        ${LIBVS_LOGGING}
+    )
     target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     set_property(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)
@@ -1711,28 +1715,28 @@ IF (USE_GTEST)
     ENDIF()
 
     TARGET_LINK_LIBRARIES(
-            ${TEST_NAME}
-            gtest_main
-            vegastrike-testing
-            Boost::log
-            Boost::log_setup
+        ${TEST_NAME}
+        gtest_main
+        vegastrike-testing
+        Boost::log
+        Boost::log_setup
     )
-    target_compile_definitions(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     IF (WIN32)
-        target_compile_definitions(${TEST_NAME} PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-        target_compile_definitions(${TEST_NAME} PUBLIC _WIN32_WINNT=0x0A00)
-        target_compile_definitions(${TEST_NAME} PUBLIC WINVER=0x0A00)
-        target_compile_definitions(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     FILE(
-            COPY "src/configuration/tests/vegastrike.config"
-            DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+        COPY "src/configuration/tests/vegastrike.config"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
     )
 
     FILE(
-            COPY "src/cmd/tests/units.json"
-            DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+        COPY "src/cmd/tests/units.json"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
     )
 
     INCLUDE(GoogleTest)
