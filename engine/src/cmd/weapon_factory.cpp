@@ -41,6 +41,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 
+#include "vs_globals.h"
+
 namespace pt = boost::property_tree;
 namespace alg = boost::algorithm;
 
@@ -130,7 +132,7 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
     wi.size = getMountSize(getJSONValue(weapon, "mountsize", "Unknown_mount"));
 
     // Energy
-    wi.energy_rate = getJSONValue(weapon, "Energy.rate", wi.energy_rate);
+    wi.SetConsumption(getJSONValue(weapon, "Energy.rate", wi.GetConsumption()));
     wi.stability = getJSONValue(weapon, "Energy.stability", wi.stability);
     wi.refire_rate = getJSONValue(weapon, "Energy.refire", wi.refire_rate);
     wi.lock_time = getJSONValue(weapon, "Energy.locktime", wi.lock_time);
@@ -226,8 +228,7 @@ void WeaponFactory::parse(ptree tree) {
         // Mount Size
         wi.size = getMountSize(inner.get("<xmlattr>.mountsize", "Unknown_mount"));
 
-        // Energy
-        wi.energy_rate = inner.get("Energy.<xmlattr>.rate", wi.energy_rate);
+        wi.SetConsumption(inner.get("Energy.<xmlattr>.rate", wi.GetConsumption())); 
         wi.stability = inner.get("Energy.<xmlattr>.stability", wi.stability);
         wi.refire_rate = inner.get("Energy.<xmlattr>.refire", wi.refire_rate);
         wi.lock_time = inner.get("Energy.<xmlattr>.locktime", wi.lock_time);

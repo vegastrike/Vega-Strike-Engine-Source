@@ -17,4 +17,7 @@ TEST(Resource, Sanity) {
 
     resource -= 12.0f;
     EXPECT_EQ(resource.Value(), 0.0f);
+
+    Resource<double> dbl_resource = Resource<double>(0.0,0.0,0.0);
+    EXPECT_EQ(dbl_resource.Value(), 0.0);
 }

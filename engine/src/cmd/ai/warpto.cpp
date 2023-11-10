@@ -92,11 +92,13 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
     dir *= -1;
     float chasedot = dir.Dot(tarvel);
     if (dirveldot > mindirveldot) {
+        // TODO: this needs to be factored for mass and consumption.
+        // 0.33 and 1.5 are low values for larger ships
         static float min_energy_to_enter_warp =
                 XMLSupport::parse_float(vs_config->getVariable("AI", "min_energy_to_enter_warp", ".33"));
         static float min_warpfield_to_enter_warp =
                 XMLSupport::parse_float(vs_config->getVariable("AI", "min_warp_to_try", "1.5"));
-        if ((parent->warpEnergyData() > min_energy_to_enter_warp)
+        if ((parent->energy_manager.Percent(EnergyType::SPEC) > min_energy_to_enter_warp)
                 && (parent->GetMaxWarpFieldStrength(1) > min_warpfield_to_enter_warp)) {
             if (parent->graphicOptions.InWarp == 0) {
                 parent->graphicOptions.InWarp = 1;                 //don't want the AI thrashing

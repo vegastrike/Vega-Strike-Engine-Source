@@ -39,12 +39,14 @@
 #include "movable.h"
 #include "computer.h"
 #include "intelligent.h"
-#include "energetic.h"
 #include "carrier.h"
 #include "jump_capable.h"
 
 #include "mount.h"
 #include "damage/damage.h"
+
+// Components
+#include "components/afterburner.h"
 
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
@@ -76,7 +78,10 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
-#include "cloak.h"
+
+// Components
+#include "components/energy_manager.h"
+#include "components/cloak.h"
 #include "components/radar.h"
 
 #include "configuration/configuration.h"
@@ -136,7 +141,7 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
+class Unit : public Armed, public Audible, public Drawable, public Damageable,
         public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
 
 protected:
@@ -145,6 +150,8 @@ protected:
     StringPool::Reference csvRow;
 
 public:
+    // Components
+    EnergyManager energy_manager;
     Cloak cloak;
 
     /// Radar and related systems
@@ -985,6 +992,9 @@ public:
     // object_a->field_a = object_b->field_b;
     float temporary_upgrade_float_variable;
 
+    // Temporary python functions
+    double fuelData() { return energy_manager.GetLevel(EnergyType::Fuel); }
+    double energyData() { return energy_manager.GetLevel(EnergyType::Energy); }
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);

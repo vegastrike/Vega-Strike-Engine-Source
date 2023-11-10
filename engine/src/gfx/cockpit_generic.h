@@ -161,7 +161,7 @@ protected:
     float StartArmor[9]; //short fix
 
     ///saved values to compare with current values (might need more for damage)
-    float maxfuel, maxhull;
+    float maxhull;
 
     ///this is the parent that Cockpit will read data from
     UnitContainer parent;

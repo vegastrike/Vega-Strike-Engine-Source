@@ -1,5 +1,5 @@
 /*
- * component.h
+ * energy_types.cpp
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,37 +25,22 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#include "energy_types.h"
 
+EnergyType SaveToType(const int type) {
+    switch(type) {
+        case 0: return EnergyType::Energy;
+        case 1: return EnergyType::Fuel;
+        case 2: return EnergyType::SPEC;
+        default: return EnergyType::None;
+    }
+}
 
-class Component
-{
-protected:
-    bool installed = true;
-    bool enabled = true;
-    bool damaged = false;
-public:
-    Component();
-    virtual ~Component() {}
-
-    void Install() { installed = true; }
-    void Uninstall() { installed = false; }
-    bool Installed() { return installed; }
-
-    void Enable() { enabled = true; }
-    void Disable() { enabled = false; }
-    bool Enabled() { return enabled; }
-
-
-    //virtual void damage();
-    //virtual void fix();
-
-
-};
-
-// These functions reduce functionality by a uniform distribution 0-1.
-// The function name's number component is the chance of the damage occurring.
-double random20();
-
-#endif // COMPONENT_H
+std::string TypeToSave(EnergyType type) {
+    switch(type) {
+        case EnergyType::Energy: return "0";
+        case EnergyType::Fuel: return "1";
+        case EnergyType::SPEC: return "2";
+        default: return "3";
+    }
+}

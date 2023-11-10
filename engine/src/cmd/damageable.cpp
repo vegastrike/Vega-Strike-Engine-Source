@@ -189,7 +189,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Additional house cleaning
         unit->PrimeOrders();
-        unit->energy.Zero();
+        unit->energy_manager = EnergyManager();
         unit->Split(rand() % 3 + 1);
 
 
@@ -553,12 +553,21 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
         return;
     }
 
-    float shield_recharge = unit->constrained_charge_to_shields * simulation_atom_var;
+    EnergyContainer *energy = unit->energy_manager.GetContainer(EnergyType::Energy);
+
+    // Here we store the actual charge we'll use in RegenShields
+    // TODO: fix this. It's a hack just to build...
+    double max_shield_recharge = unit->shield->GetRegeneration();
+    double actual_recharge = max_shield_recharge * 
+                             energy->Powered(EnergyConsumerClassification::ShieldRegen);
+
+    float shield_recharge = actual_recharge * simulation_atom_var;
 
     if (unit->GetNebula() != nullptr) {
         shield_recharge *= nebshields;
     }
 
+    
     // Adjust other (enemy) ships for difficulty
     if (!player_ship) {
         shield_recharge *= difficulty;
@@ -566,8 +575,7 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
 
 
     // Discharge shields due to energy or SPEC or cloak
-    if ((in_warp && !shields_in_spec) || !unit->sufficient_energy_to_recharge_shields ||
-            unit->cloak.Active()) {
+    if ((in_warp && !shields_in_spec) || unit->cloak.Active()) {
         shield->Discharge(discharge_rate, min_shield_discharge);
     } else {
         // Shield regeneration

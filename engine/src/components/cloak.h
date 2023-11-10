@@ -28,7 +28,7 @@
 #include <string>
 #include <map>
 
-#include "energetic.h"
+#include "energy_container.h"
 #include "damageable_layer.h"
 
 enum class CloakingStatus {
@@ -40,7 +40,7 @@ enum class CloakingStatus {
     decloaking
 };
 
-class Cloak
+class Cloak : EnergyConsumer
 {
     friend class Unit;
 
@@ -65,9 +65,10 @@ class Cloak
 public:
     Cloak();
     Cloak(std::string unit_key);
+
     void Save(std::map<std::string, std::string>& unit);
 
-    void Update(Energetic *energetic);
+    void Update();
     void Toggle(); // Toggle cloak on/off
 
     bool Capable() const {

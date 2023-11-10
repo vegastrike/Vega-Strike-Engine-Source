@@ -191,7 +191,6 @@ void Cockpit::SetParent(Unit *unit, const char *filename, const char *unitmodnam
         if (StartArmor[7] == 0) {
             StartArmor[7] = 1;
         }
-        maxfuel = unit->fuelData();
         maxhull = unit->GetHull();
     }
 }
@@ -538,7 +537,7 @@ bool Cockpit::Update() {
                         "shield_energy_downpower_percent",
                         ".66666666666666"));
 
-        bool toolittleenergy = (par->energyData() <= minEnergyForShieldDownpower);
+        bool toolittleenergy = false; // TODO:(par->energyData() <= minEnergyForShieldDownpower);
         if (toolittleenergy) {
             secondsWithZeroEnergy += SIMULATION_ATOM;
             if (secondsWithZeroEnergy > minEnergyShieldTime) {

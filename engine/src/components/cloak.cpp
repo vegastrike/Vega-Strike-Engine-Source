@@ -23,12 +23,15 @@
  */
 
 #include "cloak.h"
+#include "energy_types.h"
+#include "energy_consumer.h"
 #include "unit_csv_factory.h"
 #include "vegastrike.h"
 #include "configuration/configuration.h"
 
-Cloak::Cloak()
-{
+Cloak::Cloak() : EnergyConsumer(EnergyType::Energy,
+                                EnergyConsumerClassification::Cloak, 
+                                EnergyConsumerType::Variable, 0.0) {
     status = CloakingStatus::disabled;
 
     energy = 0;
@@ -38,8 +41,9 @@ Cloak::Cloak()
     minimum = 0;
 }
 
-Cloak::Cloak(std::string unit_key)
-{
+Cloak::Cloak(std::string unit_key) : EnergyConsumer(EnergyType::Energy,
+                                                    EnergyConsumerClassification::Cloak, 
+                                                    EnergyConsumerType::Variable, 0.0) {
     if(UnitCSVFactory::GetVariable(unit_key, "Can_Cloak", false)) {
         status = CloakingStatus::ready;
     } else {
@@ -54,8 +58,7 @@ Cloak::Cloak(std::string unit_key)
     current = 0;
 }
 
-void Cloak::Save(std::map<std::string, std::string>& unit)
-{
+void Cloak::Save(std::map<std::string, std::string>& unit) {
     unit["Cloak_Min"] = std::to_string(minimum);
     unit["Can_Cloak"] = std::to_string(Capable());
     unit["Cloak_Rate"] = std::to_string(rate);
@@ -63,7 +66,7 @@ void Cloak::Save(std::map<std::string, std::string>& unit)
     unit["Cloak_Glass"] = std::to_string(glass);
 }
 
-void Cloak::Update(Energetic *energetic)
+void Cloak::Update()
 {
     // Unit is not capable of cloaking or damaged or just not cloaking
     if(status == CloakingStatus::disabled ||
@@ -72,22 +75,10 @@ void Cloak::Update(Energetic *energetic)
         return;
     }
 
-    // Use warp power for cloaking (SPEC capacitor)
-    const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
-    double available_energy = warp_energy_for_cloak ? energetic->warpenergy : energetic->energy.Value();
-
-
     // Insufficient energy to cloak ship
-    if(available_energy < this->energy) {
+    if(powered < 1.0) {
         status = CloakingStatus::decloaking;
-    } else {
-        // Subtract the energy used
-        if (warp_energy_for_cloak) {
-            energetic->warpenergy -= (simulation_atom_var * energy);
-        } else {
-            energetic->energy -= (simulation_atom_var * energy);
-        }
-    }
+    } 
 
     if(status == CloakingStatus::decloaking) {
         current = std::max(0.0, current - rate * simulation_atom_var);

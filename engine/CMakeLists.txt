@@ -661,7 +661,17 @@ SET(LIBRESOURCE
 
 SET(LIBCOMPONENT
     src/components/component.cpp
+    src/components/energy_types.cpp
+
+    src/components/afterburner.cpp
+    src/components/cloak.cpp
+    src/components/drive.cpp
+    src/components/energy_consumer.cpp
+    src/components/energy_container.cpp
+    src/components/energy_manager.cpp
+    src/components/jump_drive.cpp
     src/components/radar.cpp
+    src/components/reactor.cpp
     )
 
 SET(LIBGUI_SOURCES
@@ -833,8 +843,7 @@ SET(LIBCMD_SOURCES
     src/cmd/computer.cpp
 
     src/cmd/intelligent.cpp
-    src/cmd/energetic.cpp
-    src/cmd/cloak.cpp
+
 
     src/cmd/planetary_orbit.cpp
 
@@ -1628,12 +1637,15 @@ IF (USE_GTEST)
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
         src/exit_unit_tests.cpp
+        src/components/tests/energy_container_tests.cpp
+        src/components/tests/balancing_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBCONFIG}
         ${LIBDAMAGE}
         ${LIBRESOURCE}
+        ${LIBCOMPONENT}
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
     )

@@ -63,6 +63,10 @@ T Resource<T>::Percent() const {
         return -1;
     }
 
+    if(max_value_ == 0) {   // Can't calculate percent if divider is 0
+        return -1;
+    }
+
     return value_ / max_value_;
 }
 
@@ -82,6 +86,15 @@ void Resource<T>::Set(const T &value) {
         value_ = std::min(max_value_, value_);
     }
     value_ = std::max(min_value_, value_);
+}
+
+template<typename T>
+void Resource<T>::SetToMax() {
+    if(no_max_) {   // Can't set to max if there's no max
+        return;
+    }
+
+    value_ = max_value_;
 }
 
 template<typename T>
@@ -139,6 +152,17 @@ void Resource<T>::Zero() {
 /*
  * Overloaded operators
  */
+
+template<typename T>
+Resource<T> Resource<T>::operator=(const T &value) {
+    value_ = value;
+    if(!no_max_) {
+        value_ = std::min(max_value_, value_);
+    }
+    value_ = std::max(min_value_, value_);
+
+    return *this;
+}
 
 template<typename T>
 Resource<T> Resource<T>::operator+=(const T &value) {

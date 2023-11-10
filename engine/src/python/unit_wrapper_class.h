@@ -267,7 +267,7 @@ public:
         {
         CHECKME -1;
         }
-        return unit->GetJumpStatus().drive;
+        return unit->jump.drive;
     }
 
     void ApplyDamage(Vector pnt,

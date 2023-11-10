@@ -1,9 +1,8 @@
 /*
- * component.cpp
+ * jump_drive.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -23,23 +22,23 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+#ifndef JUMP_DRIVE_H
+#define JUMP_DRIVE_H
 
 #include "component.h"
+#include "energy_types.h"
+#include "energy_container.h"
 
-#include <random>
+class JumpDrive : public Component, public EnergyConsumer {
+    int destination;
+    double delay;
 
-Component::Component()
-{
+public:
+    JumpDrive();
+    JumpDrive(double consumption, double delay);
 
-}
+    bool Ready();
+    void SetDestination(int destination);
+};
 
-
-double random20()
-{
-    if(std::rand() < 0.2) {
-        return std::rand();
-    }
-
-    return 1.0;
-}
+#endif // JUMP_DRIVE_H

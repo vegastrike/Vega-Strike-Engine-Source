@@ -171,8 +171,8 @@ struct Fuel {
     float normal_fuel_usage;
     bool reactor_uses_fuel;
     float vsd_mj_yield{5.4F};
-    float no_fuel_thrust{0.4F};
-    float no_fuel_afterburn{0.1F};
+    double no_fuel_thrust{0.4};
+    double no_fuel_afterburn{0.1};
     bool variable_fuel_consumption{false};
     float deuterium_relative_efficiency_lithium{1.0F};
     float fmec_factor{0.000000008F};

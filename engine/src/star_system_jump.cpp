@@ -119,7 +119,7 @@ void StarSystem::DrawJumpStars() {
                                 un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
                 float dd = un->rSize() * game_options()->jumpgatesize
-                        * (un->GetJumpStatus().delay - pendingjump[kk]->delay) / (float) un->GetJumpStatus().delay;
+                        * (un->jump.delay - pendingjump[kk]->delay) / (float) un->jump.delay;
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
         }
@@ -158,7 +158,7 @@ int StarSystem::DoJumpingLeaveSightAndSound(Unit *un) {
     int ani;
     Vector p, q, r;
     un->GetOrientation(p, q, r);
-    ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->GetJumpStatus().delay + .25),
+    ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->jump.delay + .25),
             10 * un->rSize());
     static int jumpleave = AUDCreateSound(game_options()->jumpleave, false);
     AUDPlay(jumpleave, un->LocalPosition(), un->GetVelocity(), 1);

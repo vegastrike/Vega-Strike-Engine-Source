@@ -453,7 +453,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         if ((counter - last_jumped) > static_cast<unsigned>(jump_key_delay / SIMULATION_ATOM) || last_jumped == 0) {
             last_jumped = counter;
             parent->ActivateJumpDrive();
-            if (parent->GetJumpStatus().drive >= 0) {
+            if (parent->jump.drive >= 0) {
                 static soundContainer foobar;
                 if (foobar.sound == -2) {
                     static string str = vs_config->getVariable("cockpitaudio", "jump_engaged", "jump");

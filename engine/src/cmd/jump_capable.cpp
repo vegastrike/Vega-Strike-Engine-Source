@@ -98,12 +98,12 @@ std::string GenerateAutoError(Unit *me, Unit *targ) {
 
 ///////////////////////////////////////////////
 
-JumpCapable::JumpCapable() : activeStarSystem(nullptr) {
-};
+JumpCapable::JumpCapable() : activeStarSystem(nullptr),
+                             jump_drive() {};
 
 void JumpCapable::ActivateJumpDrive(int destination) {
     Unit *unit = static_cast<Unit *>(this);
-    if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && unit->jump.drive != -2) {
+    if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && jump.drive != -2) {
         unit->jump.drive = destination;
     }
 }
@@ -138,11 +138,15 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             return AutoPilotToErrorMessage(targ, ignore_energy_requirements, failuremessage, recursive_level);
         }
     }
-    if (unit->warpenergy < unit->jump.insysenergy) {
+
+    // TODO: move to energymanager.canpower and
+    // energycontainer.canpower
+    if (unit->energy_manager.GetLevel(EnergyType::SPEC) < jump_drive.GetConsumption()) {
         if (!ignore_energy_requirements) {
             return false;
         }
     }
+
     signed char Guaranteed = ComputeAutoGuarantee(unit);
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
@@ -270,7 +274,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             failuremessage = configuration()->graphics_config.hud.already_near_message;
             return false;
         }
-        unit->warpenergy -= totpercent * unit->jump.insysenergy;
+        
+        jump_drive.Use();
+
         if (unsafe == false && totpercent == 0) {
             end = endne;
         }
@@ -499,10 +505,6 @@ const std::vector<std::string> &JumpCapable::GetDestinations() const {
     return unit->pImage->destination;
 }
 
-const Energetic::UnitJump &JumpCapable::GetJumpStatus() const {
-    const Unit *unit = static_cast<const Unit *>(this);
-    return unit->jump;
-}
 
 StarSystem *JumpCapable::getStarSystem() {
     Unit *unit = static_cast<Unit *>(this);

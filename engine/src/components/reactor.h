@@ -1,5 +1,5 @@
 /*
- * component.h
+ * reactor.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,37 +25,29 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#ifndef REACTOR_H
+#define REACTOR_H
 
+#include "energy_container.h"
+#include "energy_consumer.h"
 
-class Component
+class Reactor: public EnergyConsumer
 {
-protected:
-    bool installed = true;
-    bool enabled = true;
-    bool damaged = false;
+    double capacity;
+    EnergyContainer *energy_container;
+    EnergyContainer *spec_energy_container;
+
+    friend class EnergyManager;
 public:
-    Component();
-    virtual ~Component() {}
-
-    void Install() { installed = true; }
-    void Uninstall() { installed = false; }
-    bool Installed() { return installed; }
-
-    void Enable() { enabled = true; }
-    void Disable() { enabled = false; }
-    bool Enabled() { return enabled; }
-
-
-    //virtual void damage();
-    //virtual void fix();
-
-
+    Reactor();
+    Reactor(EnergyType energy_type, 
+            double usage_factor,    // A general factor to tweak consumption (fixed per game)
+            double reactor_level,   // A measure of the reactor level (variable between models)
+            double capacity,        // How much energy does the reactor generate
+            EnergyContainer *energy_container,
+            EnergyContainer *spec_energy_container,
+            double simulation_atom_var);
+    double Generate();
 };
 
-// These functions reduce functionality by a uniform distribution 0-1.
-// The function name's number component is the chance of the damage occurring.
-double random20();
-
-#endif // COMPONENT_H
+#endif // REACTOR_H

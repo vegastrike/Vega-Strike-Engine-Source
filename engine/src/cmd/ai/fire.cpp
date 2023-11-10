@@ -773,7 +773,7 @@ bool FireAt::isJumpablePlanet(Unit *targ) {
     bool istargetjumpableplanet = targ->isUnit() == Vega_UnitType::planet;
     if (istargetjumpableplanet) {
         istargetjumpableplanet =
-                (!((Planet *) targ)->GetDestinations().empty()) && (parent->GetJumpStatus().drive >= 0);
+                (!((Planet *) targ)->GetDestinations().empty()) && (parent->jump.drive >= 0);
     }
     return istargetjumpableplanet;
 }

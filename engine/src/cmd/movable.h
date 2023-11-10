@@ -29,6 +29,9 @@
 #include "gfx/quaternion.h"
 #include "star_system.h"
 
+#include "components/afterburner.h"
+#include "components/drive.h"
+
 #include <cfloat>
 
 struct Transformation;
@@ -40,7 +43,8 @@ struct Quaternion;
 class Movable {
 
 protected:
-
+    Drive drive;
+    Afterburner afterburner;
 public:
     //mass of this unit (may change with cargo)
     // TODO: subclass with return Mass+fuel;

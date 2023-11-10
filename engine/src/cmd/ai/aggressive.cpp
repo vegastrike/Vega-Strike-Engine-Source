@@ -55,6 +55,7 @@
 #include "docking.h"
 #include "star_system.h"
 #include "universe.h"
+#include "jump_capable.h"
 
 extern double aggfire;
 
@@ -1292,7 +1293,7 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     int whichlist = 1;  //friendly
     std::string fgname = UnitUtil::getFlightgroupName(parent);
 
-    bool insys = (parent->GetJumpStatus().drive == -2) || fgname.find(insysString) != std::string::npos;
+    bool insys = (parent->jump.drive == -2) || fgname.find(insysString) != std::string::npos;
     std::string::size_type whereconvoy = fgname.find(arrowString);
     bool convoy = (whereconvoy != std::string::npos);
     size_t total_size = stats->navs[0].size() + stats->navs[whichlist].size();     //friendly and neutral
@@ -1640,9 +1641,9 @@ void AggressiveAI::Execute() {
     bool isjumpable = target ? (!target->GetDestinations().empty()) : false;
     if (!ProcessCurrentFgDirective(fg)) {
         if (isjumpable) {
-            if (parent->GetJumpStatus().drive < 0) {
+            if (parent->jump.drive < 0) {
                 parent->ActivateJumpDrive(0);
-                if (parent->GetJumpStatus().drive == -2) {
+                if (parent->jump.drive == -2) {
                     static bool AIjumpCheat =
                             XMLSupport::parse_bool(vs_config->getVariable("AI",
                                     "always_have_jumpdrive_cheat",
@@ -1657,7 +1658,7 @@ void AggressiveAI::Execute() {
                     } else {
                         parent->Target(NULL);
                     }
-                } else if (parent->GetJumpStatus().drive < 0) {
+                } else if (parent->jump.drive < 0) {
                     static bool
                             AIjumpCheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "jump_cheat", "true"));
                     if (AIjumpCheat) {
@@ -1733,7 +1734,7 @@ void AggressiveAI::Execute() {
 
     isjumpable = target ? (!target->GetDestinations().empty()) : false;
     if (!isjumpable) {
-        if (parent->GetJumpStatus().drive >= 0) {
+        if (parent->jump.drive >= 0) {
             parent->ActivateJumpDrive(-1);
         }
     }

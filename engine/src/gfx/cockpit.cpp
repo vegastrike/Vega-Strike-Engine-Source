@@ -418,20 +418,21 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                     return .25 * (armordat[0] + armordat[2] + armordat[4] + armordat[6]);
             }
         case UnitImages<void>::FUEL:
-            if (target->fuelData() > maxfuel) {
-                maxfuel = target->fuelData();
-            }
-            if (maxfuel > 0) {
-                return target->fuelData() / maxfuel;
-            }
-            return 0;
+            return target->energy_manager.Percent(EnergyType::Fuel);
 
         case UnitImages<void>::ENERGY:
-            return target->energyData();
+            return target->energy_manager.Percent(EnergyType::Energy);
 
         case UnitImages<void>::WARPENERGY: {
+            // TODO: check how WC deals with this.
+            // Code below should be relevant
+            //if (jump.energy > 0) {
+            //    return ((float) warpenergy) / ((float) jump.energy);
+            //}
+            
             const bool warpifnojump = configuration()->graphics_config.hud.display_warp_energy_if_no_jump_drive;
-            return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->warpEnergyData() : 0;
+            return (warpifnojump || target->jump.drive != -2) ? 
+                target->energy_manager.Percent(EnergyType::SPEC) : 0;
         }
         case UnitImages<void>::HULL:
             if (maxhull < target->GetHull()) {
@@ -727,9 +728,9 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::NOMINAL;
             }
         case UnitImages<void>::CANJUMP_MODAL:
-            if (-2 == target->GetJumpStatus().drive) {
+            if (-2 == target->jump.drive) {
                 return (float) UnitImages<void>::NODRIVE;
-            } else if (target->getWarpEnergy() < target->GetJumpStatus().energy) {
+            } else if (target->energy_manager.GetLevel(EnergyType::SPEC) < target->jump.energy) {
                 return (float) UnitImages<void>::NOTENOUGHENERGY;
             } else if (target->graphicOptions.InWarp) {          //FIXME
                 return (float) UnitImages<void>::OFF;
