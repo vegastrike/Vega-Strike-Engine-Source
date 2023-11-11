@@ -681,11 +681,11 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::NOTAPPLICABLE;
             }
         case UnitImages<void>::CLOAK_MODAL:
-            if (-1 == target->cloaking) {
+            if (!target->cloak.Capable() || target->cloak.Damaged()) {
                 return (float) UnitImages<void>::NOTAPPLICABLE;
-            } else if (((int) (-2147483647) - 1) == target->cloaking) {
+            } else if (target->cloak.Ready()) {
                 return (float) UnitImages<void>::READY;
-            } else if (target->cloaking == target->cloakmin) {
+            } else if (target->cloak.Cloaked()) {
                 return (float) UnitImages<void>::ACTIVE;
             } else {
                 return (float) UnitImages<void>::SWITCHING;
@@ -2702,26 +2702,29 @@ void GameCockpit::OnPauseEnd() {
 }
 
 void GameCockpit::updateRadar(Unit *ship) {
-    if (ship) {
-        // We may have bought a new radar brand while docked, so the actual
-        // radar display is instantiated when we undock.
-        switch (ship->GetComputerData().radar.GetBrand()) {
-            case Computer::RADARLIM::Brand::BUBBLE:
-                radarDisplay = Radar::Factory(Radar::Type::BubbleDisplay);
-                break;
-
-            case Computer::RADARLIM::Brand::PLANE:
-                radarDisplay = Radar::Factory(Radar::Type::PlaneDisplay);
-                break;
-
-            default:
-                radarDisplay = Radar::Factory(Radar::Type::SphereDisplay);
-                break;
-        }
-        // Send notification that I have undocked
-        radarDisplay->OnDockEnd();
+    if (!ship) {
+        return;
     }
 
+    // We may have bought a new radar brand while docked, so the actual
+    // radar display is instantiated when we undock.
+    RadarType type = ship->radar.GetType();
+    Radar::Type::Value displayType = Radar::Type::Value::NullDisplay;
+
+    if(type == RadarType::BUBBLE) {
+        displayType = Radar::Type::BubbleDisplay;
+    } else if(type == RadarType::PLANE) {
+        displayType = Radar::Type::PlaneDisplay;
+    } else if(type == RadarType::SPHERE) {
+        displayType = Radar::Type::SphereDisplay;
+    }
+
+    if(displayType != Radar::Type::Value::NullDisplay) {
+        radarDisplay = Radar::Factory(displayType);
+    }
+
+    // Send notification that I have undocked
+    radarDisplay->OnDockEnd();
 }
 
 void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) {

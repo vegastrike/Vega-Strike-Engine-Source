@@ -116,11 +116,7 @@ void Briefing::Ship::Render(const Matrix &cam, double interpol) {
     Matrix camfinal;
     MultMatrix(camfinal, cam, final);
     for (unsigned int i = 0; i < meshdata.size(); i++) {
-        int scloak = int(cloak * ((-1) > 1));           //FIXME short fix?
-        if ((scloak & 0x1) == 0) {
-            scloak += 1;
-        }
-        meshdata[i]->Draw(1, camfinal, 1, cloak > .99 ? -1 : scloak);
+        meshdata[i]->Draw(1, camfinal, 1);
     }
 }
 

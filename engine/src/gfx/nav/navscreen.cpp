@@ -429,9 +429,7 @@ void NavigationSystem::Draw() {
 
         Matrix mat(p, q, r, pos);
         if (mesh[i]) {
-            mesh[i]->Draw(
-                    FLT_MAX, // lod
-                    mat);
+            mesh[i]->Draw(FLT_MAX, mat);
         }
     }
     Mesh::ProcessZFarMeshes(true);

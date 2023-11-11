@@ -1325,7 +1325,7 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
         if (a != b) {
             int retrycount = maxrand;
             while (--retrycount > 0
-                    && (UnitUtil::getDistance(a, b) < parent->GetComputerData().radar.maxrange * 4 || a == b)) {
+                    && (UnitUtil::getDistance(a, b) < parent->radar.GetMaxRange() * 4 || a == b)) {
                 b = GetRandomNav(stats->navs, additionalrand[retrycount]);
             }
             if (retrycount != 0) {

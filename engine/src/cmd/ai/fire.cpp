@@ -430,7 +430,7 @@ public:
     }
 
     bool ShouldTargetUnit(Unit *un, float distance) {
-        if (un->CloakVisible() > .8) {
+        if (un->cloak.Visible()) {
             float rangetotarget = distance;
             float rel0 = parent->getRelation(un);
             float rel[] = {
@@ -577,7 +577,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
             "Targetting",
             "search_max_candidates",
             "64"));   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
-    UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->GetComputerData().radar.maxrange, unitRad);
+    UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->radar.GetMaxRange(), unitRad);
     StaticTuple<float, 2> maxranges{};
 
     maxranges[0] = gunrange;
@@ -629,7 +629,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     for (vector<TurretBin>::iterator k = tbin.begin(); k != tbin.end(); ++k) {
         k->AssignTargets(my_target, parent->cumulative_transformation_matrix);
     }
-    parent->LockTarget(false);
+    parent->radar.Unlock();
     if (wasnull) {
         if (mytarg) {
             nextframenumpollers[hastarg] += 2;
@@ -657,7 +657,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
         }
     }
     parent->Target(mytarg);
-    parent->LockTarget(true);
+    parent->radar.Lock();
     SignalChosenTarget();
 }
 
@@ -841,7 +841,7 @@ void FireAt::Execute() {
     bool istargetjumpableplanet = false;
     if ((targ = parent->Target())) {
         istargetjumpableplanet = isJumpablePlanet(targ);
-        if (targ->CloakVisible() > .8 && !targ->Destroyed()) {
+        if (targ->cloak.Visible() && !targ->Destroyed()) {
             had_target = true;
             if (parent->getNumMounts() > 0) {
                 if (!istargetjumpableplanet) {

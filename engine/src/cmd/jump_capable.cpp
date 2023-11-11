@@ -212,7 +212,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             XMLSupport::parse_bool(vs_config->getVariable("physics", "teleport_autopilot", "true"));
     bool unsafe = false;
     if ((!teleport_autopilot) && (!nanspace)) {
-        if (Guaranteed == Mission::AUTO_NORMAL && unit->CloakVisible() > .5) {
+        if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Cloaked()) {
             bool ignore_friendlies = true;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
                 static bool canflythruplanets =

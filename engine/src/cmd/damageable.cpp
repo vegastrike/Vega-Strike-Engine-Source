@@ -565,8 +565,9 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
     }
 
 
-    // Discharge shields due to energy or SPEC
-    if ((in_warp && !shields_in_spec) || !unit->sufficient_energy_to_recharge_shields) {
+    // Discharge shields due to energy or SPEC or cloak
+    if ((in_warp && !shields_in_spec) || !unit->sufficient_energy_to_recharge_shields ||
+            unit->cloak.Active()) {
         shield->Discharge(discharge_rate, min_shield_discharge);
     } else {
         // Shield regeneration

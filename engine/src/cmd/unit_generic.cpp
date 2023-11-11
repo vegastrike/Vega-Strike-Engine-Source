@@ -133,16 +133,16 @@ void Unit::SetNebula(Nebula *neb) {
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
     const float capship_size = configuration()->physics_config.capship_size;
 
-    if (this == target || target->CloakVisible() < .8) {
+    if (this == target || target->cloak.Cloaked()) {
         return false;
     }
-    if (cone && computer.radar.maxcone > -.98) {
+    if (cone && radar.max_cone > -.98) {
         QVector delta(target->Position() - Position());
         mm = delta.Magnitude();
         if ((!lock) || (!TargetLocked(target))) {
             double tempmm = mm - target->rSize();
             if (tempmm > 0.0001) {
-                if ((ToLocalCoordinates(Vector(delta.i, delta.j, delta.k)).k / tempmm) < computer.radar.maxcone
+                if ((ToLocalCoordinates(Vector(delta.i, delta.j, delta.k)).k / tempmm) < radar.max_cone
                         && cone) {
                     return false;
                 }
@@ -152,8 +152,8 @@ bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool loc
         mm = (target->Position() - Position()).Magnitude();
     }
     //owner==target?!
-    if (((mm - rSize() - target->rSize()) > computer.radar.maxrange)
-            || target->rSize() < computer.radar.mintargetsize) {
+    if (((mm - rSize() - target->rSize()) > radar.max_range)
+            || target->rSize() < radar.GetMinTargetSize()) {
         Flightgroup *fg = target->getFlightgroup();
         if ((target->rSize() < capship_size || (!cap)) && (fg == NULL ? true : fg->name != "Base")) {
             return target->isUnit() == Vega_UnitType::planet;
@@ -956,8 +956,11 @@ void Unit::UpdateSubunitPhysics(Unit *subunit,
             lastframe,
             uc,
             superunit);
-    //short fix
-    subunit->cloaking = (unsigned int) cloaking;
+
+    // TODO: make the subunit->cloak a pointer to parent->cloak
+    // Also, no reason why subunits should handle their own physics but that's
+    // much harder to refactor
+    subunit->cloak.status = cloak.status;
     if (Destroyed()) {
         subunit->Target(NULL);
         UnFire();                                        //don't want to go off shooting while your body's splitting everywhere
@@ -1151,41 +1154,14 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         } else if (randnum >= .775) {
             computer.itts = false;             //Set the computer to not have an itts
         } else if (randnum >= .7) {
-            // Gradually degrade radar capabilities
-            typedef Computer::RADARLIM::Capability Capability;
-            int &capability = computer.radar.capability;
-            if (capability & Capability::IFF_THREAT_ASSESSMENT) {
-                capability &= ~Capability::IFF_THREAT_ASSESSMENT;
-            } else if (capability & Capability::IFF_OBJECT_RECOGNITION) {
-                capability &= ~Capability::IFF_OBJECT_RECOGNITION;
-            } else if (capability & Capability::IFF_FRIEND_FOE) {
-                capability &= ~Capability::IFF_FRIEND_FOE;
-            }
+            radar.Damage();
         } else if (randnum >= .5) {
             //THIS IS NOT YET SUPPORTED IN NETWORKING
             computer.target = nullptr;             //set the target to NULL
         } else if (randnum >= .4) {
             limits.retro *= dam;
-        } else if (randnum >= .3275) {
-            const float maxdam = configuration()->physics_config.max_radar_cone_damage;
-            computer.radar.maxcone += (1 - dam);
-            if (computer.radar.maxcone > maxdam) {
-                computer.radar.maxcone = maxdam;
-            }
-        } else if (randnum >= .325) {
-            const float maxdam = configuration()->physics_config.max_radar_lock_cone_damage;
-            computer.radar.lockcone += (1 - dam);
-            if (computer.radar.lockcone > maxdam) {
-                computer.radar.lockcone = maxdam;
-            }
-        } else if (randnum >= .25) {
-            const float maxdam = configuration()->physics_config.max_radar_track_cone_damage;
-            computer.radar.trackingcone += (1 - dam);
-            if (computer.radar.trackingcone > maxdam) {
-                computer.radar.trackingcone = maxdam;
-            }
         } else if (randnum >= .175) {
-            computer.radar.maxrange *= dam;
+            radar.Damage();
         } else {
             int which = rand() % (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
             pImage->cockpit_damage[which] *= dam;
@@ -1293,14 +1269,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
     if (degrees >= 90 && degrees < 120) {
         //DAMAGE Shield
         //DAMAGE cloak
-        if (randnum >= .95) {
-            this->cloaking = -1;
-            damages |= Damages::CLOAK_DAMAGED;
-        } else if (randnum >= .78) {
-            cloakenergy += ((1 - dam) * recharge);
-            damages |= Damages::CLOAK_DAMAGED;
-        } else if (randnum >= .7) {
-            cloakmin += (rand() % (32000 - cloakmin));
+        if (randnum >= .7) {
+            this->cloak.Damage();
             damages |= Damages::CLOAK_DAMAGED;
         }
 
@@ -1624,7 +1594,7 @@ void Unit::Target(Unit *targ) {
                 }
 
                 computer.target.SetUnit(targ);
-                LockTarget(false);
+                radar.Unlock();
             }
         } else {
             if (jump.drive != -1) {
@@ -1661,25 +1631,12 @@ void Unit::SetOwner(Unit *target) {
     owner = target;
 }
 
-void Unit::Cloak(bool loak) {
-    damages |= Damages::CLOAK_DAMAGED;
-    if (loak) {
-        static bool warp_energy_for_cloak =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "warp_energy_for_cloak", "true"));
-        if (cloakenergy < (warp_energy_for_cloak ? warpenergy : energy.Value())) {
-            cloakrate = (cloakrate >= 0) ? cloakrate : -cloakrate;
-            //short fix
-            if (cloaking < -1 && cloakrate != 0) {
-                //short fix
-                cloaking = 2147483647;
-            } else {
-            }
-        }
+// Need this for python API. Do not delete.
+void Unit::ActivateCloak(bool enable) {
+    if(enable) {
+        cloak.Activate();
     } else {
-        cloakrate = (cloakrate >= 0) ? -cloakrate : cloakrate;
-        if (cloaking == cloakmin) {
-            ++cloaking;
-        }
+        cloak.Deactivate();
     }
 }
 
@@ -3257,14 +3214,14 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     "Radar_Range|Radar_Color|ITTS|Can_Lock|Max_Cone|Lock_Cone|Tracking_Cone")) {
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Radar_Range")) {
-            STDUPGRADECLAMP(computer.radar.maxrange,
-                    up->computer.radar.maxrange,
-                    use_template_maxrange ? templ->computer.radar.maxrange : FLT_MAX,
+            STDUPGRADECLAMP(radar.max_range,
+                    up->radar.max_range,
+                    use_template_maxrange ? templ->radar.max_range : FLT_MAX,
                     0);
         }
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Radar_Color"))
-            STDUPGRADE(computer.radar.capability, up->computer.radar.capability, templ->computer.radar.capability, 0);
+            STDUPGRADE(radar.capabilities, up->radar.capabilities, templ->radar.capabilities, 0);
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "ITTS")) {
             computer.itts = UpgradeBoolval(computer.itts,
@@ -3277,8 +3234,8 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Can_Lock")) {
-            computer.radar.canlock = UpgradeBoolval(computer.radar.canlock,
-                    up->computer.radar.canlock,
+            radar.can_lock = UpgradeBoolval(radar.can_lock,
+                    up->radar.can_lock,
                     touchme,
                     downgrade,
                     numave,
@@ -3289,41 +3246,41 @@ bool Unit::UpAndDownGrade(const Unit *up,
         bool ccf = cancompletefully;
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Max_Cone")) {
-            double myleak = 1 - computer.radar.maxcone;
-            double upleak = 1 - up->computer.radar.maxcone;
-            double templeak = 1 - (templ != NULL ? templ->computer.radar.maxcone : -1);
-            STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, computer.radar.maxcone);
+            double myleak = 1 - radar.max_cone;
+            double upleak = 1 - up->radar.max_cone;
+            double templeak = 1 - (templ != NULL ? templ->radar.max_cone : -1);
+            STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, radar.max_cone);
             if (touchme) {
-                computer.radar.maxcone = 1 - myleak;
+                radar.max_cone = 1 - myleak;
             }
         }
-        if (up->computer.radar.lockcone != lc) {
-            double myleak = 1 - computer.radar.lockcone;
-            double upleak = 1 - up->computer.radar.lockcone;
-            double templeak = 1 - (templ != NULL ? templ->computer.radar.lockcone : -1);
+        if (up->radar.lock_cone != lc) {
+            double myleak = 1 - radar.lock_cone;
+            double upleak = 1 - up->radar.lock_cone;
+            double templeak = 1 - (templ != NULL ? templ->radar.lock_cone : -1);
             if (templeak == 1 - lc) {
                 templeak = 2;
             }
             if (!csv_cell_null_check || force_change_on_nothing
                     || cell_has_recursive_data(upgrade_name, up->faction, "Lock_Cone")) {
-                STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, computer.radar.lockcone);
+                STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, radar.lock_cone);
                 if (touchme) {
-                    computer.radar.lockcone = 1 - myleak;
+                    radar.lock_cone = 1 - myleak;
                 }
             }
         }
-        if (up->computer.radar.trackingcone != tc) {
-            double myleak = 1 - computer.radar.trackingcone;
-            double upleak = 1 - up->computer.radar.trackingcone;
-            double templeak = 1 - (templ != NULL ? templ->computer.radar.trackingcone : -1);
+        if (up->radar.tracking_cone != tc) {
+            double myleak = 1 - radar.tracking_cone;
+            double upleak = 1 - up->radar.tracking_cone;
+            double templeak = 1 - (templ != NULL ? templ->radar.tracking_cone : -1);
             if (templeak == 1 - tc) {
                 templeak = 2;
             }
             if (!csv_cell_null_check || force_change_on_nothing
                     || cell_has_recursive_data(upgrade_name, up->faction, "Tracking_Cone")) {
-                STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, computer.radar.trackingcone);
+                STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, radar.tracking_cone);
                 if (touchme) {
-                    computer.radar.trackingcone = 1 - myleak;
+                    radar.tracking_cone = 1 - myleak;
                 }
             }
         }
@@ -3344,14 +3301,17 @@ bool Unit::UpAndDownGrade(const Unit *up,
                         tempdownmap);
             }
         }
-        if (cloaking != -1 && up->cloaking != -1) {
+        if (cloak.Capable() && up->cloak.Capable()) {
             if (touchme) {
-                cloaking = -1;
+                cloak.Disable();
             }
             ++numave;
             ++percentage;
             if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name, up->cloaking, ((char *) &this->cloaking) - ((char *) this), tempdownmap);
+                AddToDowngradeMap(up->name,
+                                  up->cloak.current,
+                                  ((char *) &this->cloak.current) - ((char *) this),
+                                  tempdownmap);
             }
         }
         //NOTE: Afterburner type 2 (jmp)
@@ -3380,16 +3340,17 @@ bool Unit::UpAndDownGrade(const Unit *up,
                 }
             }
         }
-        if ((cloaking == -1 && up->cloaking != -1) || force_change_on_nothing) {
+        if ((!cloak.Capable() && up->cloak.Capable()) || force_change_on_nothing) {
             if (touchme) {
-                cloaking = up->cloaking;
-                cloakmin = up->cloakmin;
-                cloakrate = up->cloakrate;
-                cloakglass = up->cloakglass;
-                cloakenergy = up->cloakenergy;
+                cloak.Enable();
+
+                cloak.minimum = up->cloak.minimum;
+                cloak.rate = up->cloak.rate;
+                cloak.glass = up->cloak.glass;
+                cloak.energy = up->cloak.energy;
             }
             ++numave;
-        } else if (cloaking != -1 && up->cloaking != -1) {
+        } else if (cloak.Capable() && up->cloak.Capable()) {
             cancompletefully = false;
         }
         //NOTE: Afterburner type 2 (jmp)
@@ -4259,95 +4220,7 @@ void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &ove
 
 std::map<string, Unit *> Drawable::Units;
 
-//helper func for Init
-string toLowerCase(string in) {
-    string out;
-    for (unsigned int i = 0; i < in.length(); i++) {
-        switch (in[i]) {
-            case 'A':
-                out += 'a';
-                break;
-            case 'B':
-                out += 'b';
-                break;
-            case 'C':
-                out += 'c';
-                break;
-            case 'D':
-                out += 'd';
-                break;
-            case 'E':
-                out += 'e';
-                break;
-            case 'F':
-                out += 'f';
-                break;
-            case 'G':
-                out += 'g';
-                break;
-            case 'H':
-                out += 'h';
-                break;
-            case 'I':
-                out += 'i';
-                break;
-            case 'J':
-                out += 'j';
-                break;
-            case 'K':
-                out += 'k';
-                break;
-            case 'L':
-                out += 'l';
-                break;
-            case 'M':
-                out += 'm';
-                break;
-            case 'N':
-                out += 'n';
-                break;
-            case 'O':
-                out += 'o';
-                break;
-            case 'P':
-                out += 'p';
-                break;
-            case 'Q':
-                out += 'q';
-                break;
-            case 'R':
-                out += 'r';
-                break;
-            case 'S':
-                out += 's';
-                break;
-            case 'T':
-                out += 't';
-                break;
-            case 'U':
-                out += 'u';
-                break;
-            case 'V':
-                out += 'v';
-                break;
-            case 'W':
-                out += 'w';
-                break;
-            case 'X':
-                out += 'x';
-                break;
-            case 'Y':
-                out += 'y';
-                break;
-            case 'Z':
-                out += 'z';
-                break;
-            default:
-                out += in[i];
-        }
-    }
-    return out;
-}
+
 
 unsigned int Drawable::unitCount = 0;
 
@@ -4434,7 +4307,18 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     if (fuel < 0) {
         fuel = 0;
     }
-    UpdateCloak();
+
+    static CloakingStatus previous_status = cloak.status;
+    cloak.Update(this);
+
+    // Play once per cloaking
+    if(cloak.Cloaking() && previous_status != CloakingStatus::cloaking) {
+        previous_status = cloak.status;
+        playSound(SoundType::cloaking);
+    } else if(cloak.Cloaked() && previous_status != CloakingStatus::cloaked) {
+        previous_status = cloak.status;
+        adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
+    }
 
     // Recharge energy and shields
     const bool apply_difficulty_shields = configuration()->physics_config.difficulty_based_shield_recharge;
@@ -4487,12 +4371,12 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     float dist_sqr_to_target = FLT_MAX;
     Unit *target = Unit::Target();
     bool increase_locking = false;
-    if (target && cloaking < 0 /*-1 or -32768*/) {
+    if (target && !cloak.Cloaked()) {
         if (target->isUnit() != Vega_UnitType::planet) {
             Vector TargetPos(InvTransform(cumulative_transformation_matrix, (target->Position())).Cast());
             dist_sqr_to_target = TargetPos.MagnitudeSquared();
             TargetPos.Normalize();
-            if (TargetPos.k > computer.radar.lockcone) {
+            if (TargetPos.k > radar.lock_cone) {
                 increase_locking = true;
             }
         }
@@ -4530,7 +4414,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         // TODO: simplify this if
         if (((false
                 && mounts[i].status
-                        == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE) && cloaking < 0
+                        == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE) && !cloak.Cloaked()
                 && mounts[i].ammo != 0) {
             if (player_cockpit) {
                 touched = true;
@@ -4594,23 +4478,26 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         }
         if (mounts[i].type->type == WEAPON_TYPE::BEAM) {
             if (mounts[i].ref.gun) {
-                Unit *autotarg =
-                        (isAutoTrackingMount(mounts[i].size)
-                                && (mounts[i].time_to_lock <= 0)
-                                && TargetTracked()) ? target : NULL;
-                float trackingcone = computer.radar.trackingcone;
-                if (CloseEnoughToAutotrack(this, target, trackingcone)) {
+                bool autoTrack = isAutoTrackingMount(mounts[i].size);
+                bool timeLocked = mounts[i].time_to_lock <= 0;
+                bool tracked = TargetTracked();
+                Unit *autotarg = (autoTrack && timeLocked && tracked) ? target : nullptr;
+
+                float tracking_cone = radar.tracking_cone;
+                // TODO: fix this or remove
+                /*if (CloseEnoughToAutotrack(this, target, tracking_cone)) {
                     if (autotarg) {
-                        if (computer.radar.trackingcone < trackingcone) {
-                            trackingcone = computer.radar.trackingcone;
+                        if (radar.tracking_cone < tracking_cone) {
+                            tracking_cone = radar.tracking_cone;
                         }
                     }
                     autotarg = target;
-                }
+                }*/
+
                 mounts[i].ref.gun->UpdatePhysics(cumulative_transformation,
                         cumulative_transformation_matrix,
                         autotarg,
-                        trackingcone,
+                        tracking_cone,
                         target,
                         (HeatSink ? HeatSink : 1.0f) * mounts[i].functionality,
                         this,
@@ -4630,11 +4517,11 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     && TargetTracked()) {
                 autotrack = computer.itts ? 2 : 1;
             }
-            float trackingcone = computer.radar.trackingcone;
-            if (CloseEnoughToAutotrack(this, target, trackingcone)) {
+            float tracking_cone = radar.tracking_cone;
+            if (CloseEnoughToAutotrack(this, target, tracking_cone)) {
                 if (autotrack) {
-                    if (trackingcone > computer.radar.trackingcone) {
-                        trackingcone = computer.radar.trackingcone;
+                    if (tracking_cone > radar.tracking_cone) {
+                        tracking_cone = radar.tracking_cone;
                     }
                 }
                 autotrack = 2;
@@ -4648,7 +4535,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             }
             if (!mounts[i].PhysicsAlignedFire(this, t1, m1, cumulative_velocity,
                     (!isSubUnit() || owner == NULL) ? this : owner, target, autotrack,
-                    trackingcone,
+                    tracking_cone,
                     hint)) {
                 const WeaponInfo *typ = mounts[i].type;
                 energy += typ->energy_rate * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1);
@@ -4729,55 +4616,6 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     }
 }
 
-void Unit::UpdateCloak() {
-    // Use warp power for cloaking (SPEC capacitor)
-    const bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
-
-    // We are not cloaked - exiting function
-    if (cloaking < cloakmin) {
-        return;
-    }
-
-    // Insufficient energy to cloak ship
-    if (cloakenergy * simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy.Value())) {
-        Cloak(false);
-        return;
-    }
-
-    // Cloaked ships don't have shields on
-    shield->Disable();
-
-    // We're cloaked
-    if (cloaking > cloakmin) {
-        adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
-
-        //short fix
-        // TODO: figure out what they have fixed
-        if ((cloaking == (2147483647)
-                && cloakrate > 0) || (cloaking == cloakmin + 1 && cloakrate < 0)) {
-            playSound(SoundType::cloaking);
-        }
-
-        //short fix
-        // TODO: figure out what they have fixed
-        cloaking -= (int) (cloakrate * simulation_atom_var);
-        if (cloaking <= cloakmin && cloakrate > 0) {
-            cloaking = cloakmin;
-        }
-        if (cloaking < 0 && cloakrate < 0) {
-            cloaking = -2147483647 - 1;
-        }
-    }
-
-    // Calculate energy drain
-    if (cloakrate > 0 || cloaking == cloakmin) {
-        if (warp_energy_for_cloak) {
-            warpenergy -= (simulation_atom_var * cloakenergy);
-        } else {
-            energy -= (simulation_atom_var * cloakenergy);
-        }
-    }
-}
 
 bool Unit::isPlayerShip() {
     return _Universe->isPlayerStarship(this) ? true : false;
