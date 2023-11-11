@@ -22,11 +22,33 @@
 #ifndef VEGA_STRIKE_ENGINE_IN_KB_H
 #define VEGA_STRIKE_ENGINE_IN_KB_H
 
+#include <map>
+#include <string>
+
+#include "in.h"
+#include "in_kb_data.h"
+
 //#ifdef HAVE_SDL
-//#include <SDL/SDL_keysym.h>
+#include <SDL2/SDL.h>
 //const int KEYMAP_SIZE =SDLK_LAST;
 //const int KEY_SPECIAL_OFFSET=0;
 //#else //HAVE_SDL
+
+static void DefaultKBHandler(const KBData &, KBSTATE newState) // FIXME ?
+{
+    //do nothing
+}
+
+struct HandlerCall {
+    KBHandler function;
+    KBData data;
+    KBSTATE state;
+
+    HandlerCall() {
+        function = DefaultKBHandler;
+    }
+};
+
 
 enum KB_MODIFIER_ENUM {
     KB_MOD_ALT = 1,
@@ -52,8 +74,8 @@ unsigned int getActiveModifiers();
 unsigned int pullActiveModifiers();
 void setActiveModifiers(unsigned int mask);
 
-unsigned int getModifier(const char *mod_name);
-void ProcessKB(unsigned int player);
+unsigned int getModifier(const std::string modifier);
+void ProcessKB();
 void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data);
 void UnbindKey(int key, unsigned int modifiers);
 void InitKB();
