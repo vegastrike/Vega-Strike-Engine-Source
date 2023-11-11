@@ -272,7 +272,7 @@ static BoostPythonDictionary GatherWeaponInfo(const WeaponInfo *wi) {
         rv["stability"] = wi->stability;
         rv["longRange"] = wi->long_range;
         rv["lockTime"] = wi->lock_time;
-        rv["energyRate"] = wi->energy_rate;
+        rv["energyRate"] = wi->GetConsumption(); // TODO: beam weapons div by sim_atom_var
         rv["refire"] = wi->Refire();
         rv["volume"] = wi->volume;
         rv["name"] = wi->name;

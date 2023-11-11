@@ -37,8 +37,10 @@ class Resource {
     T adjusted_max_value_;
     bool no_max_;
 public:
-    Resource(const T &value, const T &min_value = 0, const T &max_value = -1);
+    Resource(const T &value = 0, const T &min_value = 0, const T &max_value = -1);
 
+
+    Resource<T> operator=(const T &value);
     Resource<T> operator+=(const T &value);
     Resource<T> operator-=(const T &value);
 
@@ -87,6 +89,7 @@ public:
     T Percent() const;
     void ResetMaxValue();
     void Set(const T &value);
+    void SetToMax();
     void SetMaxValue(const T &value);
     void Upgrade(const T &value);
     void UpgradeByPercent(const T &value);

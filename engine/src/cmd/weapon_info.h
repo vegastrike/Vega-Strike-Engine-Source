@@ -29,10 +29,11 @@
 #include "weapon_type.h"
 #include "gfx/vec.h"
 #include "mount_size.h"
+#include "components/energy_consumer.h"
 
 #include <string>
 
-struct WeaponInfo {
+struct WeaponInfo : public EnergyConsumer {
     // Fields
     std::string name;
     WEAPON_TYPE type;
@@ -40,7 +41,7 @@ struct WeaponInfo {
 
     // Make const again
     /*const*/ float damage = 1.8;
-    /*const*/ float energy_rate = 18;
+    /*const*/ //float energy_rate = 18;
     /*const*/ float length = 5;
     /*const*/ float lock_time = 0;
     /*const*/ float long_range = .5;

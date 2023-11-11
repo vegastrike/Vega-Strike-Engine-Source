@@ -113,7 +113,7 @@ void Ikarus::Execute() {
     DecideTarget();
     if (!ProcessCurrentFgDirective(fg)) {
         Unit *target = parent->Target();
-        bool isjumpable = target ? ((!target->GetDestinations().empty()) && parent->GetJumpStatus().drive >= 0) : false;
+        bool isjumpable = target ? ((!target->GetDestinations().empty()) && parent->jump.drive >= 0) : false;
         if (isjumpable) {
             AfterburnTurnTowards(this, parent);
         } else {

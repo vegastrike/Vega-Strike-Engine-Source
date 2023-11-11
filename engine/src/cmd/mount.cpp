@@ -253,7 +253,8 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         if (type->type == WEAPON_TYPE::BEAM || type->isMissile()) {
             //Missiles and beams set to processed.
             processed = PROCESSED;
-        } else if (ref.refire < type->Refire() || type->energy_rate > caller->energy) {
+        } else if (ref.refire < type->Refire() ||
+                   type->GetConsumption() > caller->energy_manager.GetLevel(EnergyType::Energy)) { 
             //Wait until refire has expired and reactor has produced enough energy for the next bolt.
             return true;
         }              //Not ready to refire yet.  But don't stop firing.
@@ -289,6 +290,8 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 ammo--;
             }
         }
+
+        // TODO: why do we have energy.Deplete here and in armed.cpp???
         time_to_lock = type->lock_time;
         switch (type->type) {
             case WEAPON_TYPE::UNKNOWN:
@@ -299,7 +302,8 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 }
                 break;
             case WEAPON_TYPE::BOLT:
-                caller->energy -= type->energy_rate;
+                caller->energy_manager.Deplete(EnergyType::Energy, type->GetConsumption());
+                
                 hint[Unit::UNIT_BOLT] = Bolt(type,
                         mat,
                         velocity,
@@ -308,7 +312,8 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 break;
 
             case WEAPON_TYPE::BALL: {
-                caller->energy -= type->energy_rate;
+                caller->energy_manager.Deplete(EnergyType::Energy, type->GetConsumption());
+                
                 hint[Unit::UNIT_BOLT] =
                         BoltDrawManager::GetInstance().AddBall(type, mat, velocity, owner, hint[Unit::UNIT_BOLT]);
                 break;

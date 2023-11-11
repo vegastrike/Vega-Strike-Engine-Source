@@ -400,7 +400,9 @@ static void AddSubUnits(Unit *thus,
     for (int a = xml.units.size() - 1; a >= 0; a--) {
         bool randomspawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
         if (randomspawn) {
-            int chancetospawn = float_to_int(xml.units[a]->warpCapData());
+            // TODO: surely we could use something more relevant than max SPEC
+            // to determine chance to spawn...
+            int chancetospawn = float_to_int(xml.units[a]->energy_manager.GetMaxLevel(EnergyType::SPEC));
             if (chancetospawn > rand() % 100) {
                 thus->SubUnits.prepend(xml.units[a]);
             } else {
@@ -731,8 +733,17 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
     Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f);
     Momentofinertia = UnitCSVFactory::GetVariable(unit_key, "Moment_Of_Inertia", 1.0f);
-    fuel = UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0f);
+    
+    
+    energy_manager.SetCapacity(EnergyType::Fuel, 
+                               UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0f));
+    energy_manager.Refill(EnergyType::Fuel);
 
+    energy_manager.SetCapacity(EnergyType::Energy, 
+                               UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f));
+    energy_manager.SetCapacity(EnergyType::SPEC, 
+                               UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f));
+    
     // Hull
     float temp_hull = UnitCSVFactory::GetVariable(unit_key, "Hull", 0.0f);
     float hull_values[1] = {temp_hull};
@@ -810,15 +821,14 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // End shield section
 
 
-    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
-    maxwarpenergy = warpenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f);
+    
 
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
     graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    double capacitor = UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f);
-    energy = Resource<float>(capacitor, 0.0f, capacitor);
-    recharge = UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f);
+    
+    energy_manager.SetReactorCapacity(UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f));
+    
     jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false) ? -1 : -2;
     jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
@@ -828,14 +838,19 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
                     ? true : false) ? 1 : 0;
     jump.energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     jump.insysenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    if (WCfuelhack) {
-        fuel = warpenergy = warpenergy + jump.energy
-                * 0.1f;
-    }       //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
-    afterburnenergy = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
-    afterburntype = UnitCSVFactory::GetVariable(unit_key,
-            "Afterburner_Type",
-            0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
+    // TODO: is this really an issue
+    // this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
+    
+    // Afterburner
+    // TODO: 1. check AB cost values in json
+    //       2. tweak afterburner cost for playability
+    //       3. check WC
+    int afterburner_type_number = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Type", 0);
+    EnergyType afterburner_type = SaveToType(afterburner_type_number);
+    double afterburner_usage_factor = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 3.0);
+    afterburner = Afterburner(afterburner_type, afterburner_usage_factor, 1.0,
+                              Mass, simulation_atom_var);
+
     limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) * VS_PI / 180.0;
     limits.pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) * VS_PI / 180.0;
     limits.roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) * VS_PI / 180.0;
@@ -874,76 +889,11 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     computer.max_combat_ab_speed =
             UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 0.0f) * game_speed;
     computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
-    computer.radar.canlock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
 
+    radar = CRadar(unit_key, &computer);
 
-    // The Radar_Color column in the units.csv has been changed from a
-    // boolean value to a string. The boolean values are supported for
-    // backwardscompatibility.
-    // When we save this setting, it is simply converted from an integer
-    // number to a string, and we need to support this as well.
-    std::string iffval = UnitCSVFactory::GetVariable(unit_key, "Radar_Color", std::string());
+    cloak = Cloak(unit_key);
 
-    if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0")) {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-    } else if ((iffval == "TRUE") || (iffval == "1")) {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-    } else if (iffval == "THREAT") {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-    } else if (iffval == "BUBBLE_THREAT") {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_BUBBLE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-    } else if (iffval == "PLANE") {
-        computer.radar.capability = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-    } else if (iffval == "PLANE_THREAT") {
-        computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-    } else {
-        unsigned int value = stoi(iffval, 0);
-        if (value == 0) {
-            // Unknown value
-            computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-        } else {
-            computer.radar.capability = value;
-        }
-    }
-
-    computer.radar.maxrange = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", FLT_MAX);
-    computer.radar.maxcone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0f) * VS_PI / 180);
-    computer.radar.trackingcone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI / 180);
-    computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI / 180);
-
-    cloakmin = static_cast<int>(UnitCSVFactory::GetVariable(unit_key, "Cloak_Min", 0.0f) * 2147483136);
-    if (cloakmin < 0) {
-        cloakmin = 0;
-    }
-
-    cloakglass = UnitCSVFactory::GetVariable(unit_key, "Cloak_Glass", false);
-    if ((cloakmin & 0x1) && !cloakglass) {
-        cloakmin -= 1;
-    }
-
-    if ((cloakmin & 0x1) == 0 && cloakglass) {
-        cloakmin += 1;
-    }
-
-    if (!UnitCSVFactory::GetVariable(unit_key, "Can_Cloak", false)) {
-        cloaking = -1;
-    } else {
-        cloaking = (int) (-2147483647) - 1;
-    }
-
-    cloakrate = (int) (2147483136.0 * UnitCSVFactory::GetVariable(unit_key, "Cloak_Rate", 0.0f));     //short fix
-    cloakenergy = UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0f);
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
 
@@ -1282,7 +1232,12 @@ string Unit::WriteUnitString() {
     }
     unit["Mass"] = tos(Mass);
     unit["Moment_Of_Inertia"] = tos(Momentofinertia);
-    unit["Fuel_Capacity"] = tos(fuel);
+
+    // Components
+    unit["Fuel_Capacity"] = tos(energy_manager.GetMaxLevel(EnergyType::Fuel));
+    unit["Primary_Capacitor"] = tos(energy_manager.GetMaxLevel(EnergyType::Energy));
+    unit["Warp_Capacitor"] = tos(energy_manager.GetMaxLevel(EnergyType::SPEC));
+    
     unit["Hull"] = tos(GetHullLayer().facets[0].health);
     unit["Spec_Interdiction"] = tos(specInterdiction);
 
@@ -1347,18 +1302,21 @@ string Unit::WriteUnitString() {
     unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
     unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
     unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
-    unit["Warp_Capacitor"] = tos(maxwarpenergy);
+    
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
-    unit["Primary_Capacitor"] = tos(energy.MaxValue());
-    unit["Reactor_Recharge"] = tos(recharge);
+    
+    unit["Reactor_Recharge"] = tos(energy_manager.GetReactorCapacity());
     unit["Jump_Drive_Present"] = tos(jump.drive >= -1);
     unit["Jump_Drive_Delay"] = tos(jump.delay);
     unit["Wormhole"] = tos(forcejump != 0);
     unit["Outsystem_Jump_Cost"] = tos(jump.energy);
     unit["Warp_Usage_Cost"] = tos(jump.insysenergy);
-    unit["Afterburner_Usage_Cost"] = tos(afterburnenergy);
-    unit["Afterburner_Type"] = tos(afterburntype);
+    
+    // Afterburner
+    unit["Afterburner_Type"] = TypeToSave(afterburner.GetEnergyType());
+    unit["Afterburner_Usage_Cost"] = tos(afterburner.UsageFactor());
+    
     unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (VS_PI));
     unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (VS_PI));
     unit["Maneuver_Roll"] = tos(limits.roll * 180 / (VS_PI));
@@ -1378,17 +1336,9 @@ string Unit::WriteUnitString() {
     unit["Default_Speed_Governor"] = tos(computer.max_combat_speed / game_speed);
     unit["Afterburner_Speed_Governor"] = tos(computer.max_combat_ab_speed / game_speed);
     unit["ITTS"] = tos(computer.itts);
-    unit["Can_Lock"] = tos(computer.radar.canlock);
-    unit["Radar_Color"] = tos(computer.radar.capability);
-    unit["Radar_Range"] = tos(computer.radar.maxrange);
-    unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / VS_PI);
-    unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
-    unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
-    unit["Cloak_Min"] = tos(cloakmin / 2147483136.);
-    unit["Can_Cloak"] = tos(cloaking != -1);
-    unit["Cloak_Rate"] = tos(fabs(cloakrate / 2147483136.));
-    unit["Cloak_Energy"] = tos(cloakenergy);
-    unit["Cloak_Glass"] = tos(cloakglass);
+
+
+    cloak.Save(unit);
     unit["Repair_Droid"] = tos(repair_droid);
     unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
     unit["Hud_Functionality"] = WriteHudDamage(this);

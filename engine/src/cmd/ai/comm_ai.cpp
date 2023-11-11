@@ -364,7 +364,7 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     }
     //FIXME FOR TESTING ONLY
     //return parent->Target();
-    QVector where = parent->Position() + parent->GetComputerData().radar.maxrange * QVector(vsrandom.uniformInc(-1, 1),
+    QVector where = parent->Position() + parent->radar.GetMaxRange() * QVector(vsrandom.uniformInc(-1, 1),
             vsrandom.uniformInc(-1, 1),
             vsrandom.uniformInc(-1, 1));
     Collidable wherewrapper(0, 0, where);
@@ -393,7 +393,7 @@ void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targpro
     if (target != NULL) {
         if (UnitUtil::getUnitSystemFile(target) == UnitUtil::getUnitSystemFile(parent)
                 && UnitUtil::getFlightgroupName(parent) != "Base" && !isDockedAtAll(target)
-                && UnitUtil::getDistance(parent, target) <= target->GetComputerData().radar.maxrange) {
+                && UnitUtil::getDistance(parent, target) <= target->radar.GetMaxRange()) {
             //warning--odd hack they can talk to you if you can sense them--it's like SETI@home
             for (std::list<CommunicationMessage *>::iterator i = messagequeue.begin(); i != messagequeue.end(); i++) {
                 Unit *un = (*i)->sender.GetUnit();

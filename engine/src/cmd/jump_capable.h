@@ -25,7 +25,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 
 #include "star_system.h"
-#include "energetic.h"
+#include "components/jump_drive.h"
 
 #include <string>
 
@@ -34,8 +34,19 @@
 class JumpCapable {
 public:
     StarSystem *activeStarSystem;
-
+    JumpDrive jump_drive;
+    
 public:
+    struct UnitJump {
+        float warpDriveRating;
+        float energy;       //short fix
+        float insysenergy;  //short fix
+        signed char drive; // disabled
+        unsigned char delay;
+        unsigned char damage;
+        //negative means fuel
+    } jump{};
+
     JumpCapable();
 
     void ActivateJumpDrive(int destination = 0);
@@ -48,7 +59,6 @@ public:
     float CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const;
     void DeactivateJumpDrive();
     const std::vector<std::string> &GetDestinations() const;
-    const Energetic::UnitJump &GetJumpStatus() const;
     StarSystem *getStarSystem();
     const StarSystem *getStarSystem() const;
     Vector GetWarpRefVelocity() const;

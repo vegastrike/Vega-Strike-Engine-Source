@@ -508,7 +508,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_getEnergyData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->energyData();
+                res = my_unit->energy_manager.GetLevel(EnergyType::Energy);
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;

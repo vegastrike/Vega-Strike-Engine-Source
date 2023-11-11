@@ -55,7 +55,10 @@ Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
         corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
         corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
         radial_size(0),
-        Momentofinertia(0.01) {
+        Momentofinertia(0.01),
+        // TODO: make drive and afterburner parameters configurable somehow
+        drive(EnergyType::Fuel, 1.0, 1.0, 1.0, 0.1),
+        afterburner(EnergyType::Fuel, 3.0) { 
     cur_sim_queue_slot = rand() % SIM_QUEUE_SIZE;
     const Vector default_angular_velocity(configuration()->general_config.pitch,
             configuration()->general_config.yaw,
@@ -474,8 +477,7 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 void Movable::FireEngines(const Vector &Direction /*unit vector... might default to "r"*/,
         float FuelSpeed,
         float FMass) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
-    FMass = energetic->ExpendFuel(FMass);
+    // Note: this calculation no longer relies on translating fuel mass to motion
     NetForce += Direction * ((double)FuelSpeed * (double)FMass / GetElapsedTime());
 }
 
@@ -533,12 +535,10 @@ Vector Movable::MaxTorque(const Vector &torque) {
 }
 
 Vector Movable::ClampTorque(const Vector &amt1) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
     Vector Res = amt1;
 
-    energetic->WCWarpIsFuelHack(true);
-
-    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    // no_fuel_thrust = 0.4, so even with no fuel, we should keep flying
+    float fuelclamp = std::max(drive.Powered(), configuration()->fuel.no_fuel_thrust);
     if (fabs(amt1.i) > fuelclamp * limits.pitch) {
         Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
     }
@@ -550,23 +550,19 @@ Vector Movable::ClampTorque(const Vector &amt1) {
     }
     //1/5,000,000 m/s
 
-    energetic->ExpendMomentaryFuelUsage(Res.Magnitude());
-    energetic->WCWarpIsFuelHack(false);
     return Res;
 }
 
 
 Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = dynamic_cast<Unit*>(this);
 
-    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (energetic->fuelData() <= 0 || (energetic->energy < unit->afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
-    float limit =
-            afterburn ? (abfuelclamp
-                    * (unit->computer.max_ab_speed()
-                            - unit->computer.max_speed()) + (fuelclamp * unit->computer.max_speed())) : fuelclamp
-                    * unit->computer.max_speed();
+    // no_fuel_thrust = 0.4, so even with no fuel, we should keep flying
+    float fuelclamp = std::max(drive.Powered(), configuration()->fuel.no_fuel_thrust);
+    float abfuelclamp = std::max(afterburner.Powered(), configuration()->fuel.no_fuel_afterburn);
+    
+    float limit = afterburn ? (abfuelclamp * (unit->computer.max_ab_speed() - unit->computer.max_speed()) + (fuelclamp * unit->computer.max_speed())) : 
+                fuelclamp * unit->computer.max_speed();
     float tmp = velocity.Magnitude();
     if (tmp > fabs(limit)) {
         return velocity * (limit / tmp);
@@ -615,35 +611,19 @@ Vector Movable::MaxThrust(const Vector &amt1) {
 Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     Unit *unit = static_cast<Unit *>(this);
 
-    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
     const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
-    if (WCfuelhack) {
-        if (unit->fuel > unit->warpenergy) {
-            unit->fuel = unit->warpenergy;
-        }
-        if (unit->fuel < unit->warpenergy) {
-            unit->warpenergy = unit->fuel;
-        }
+    
+    // Delayed reaction
+    if(afterburn) {
+        afterburner.Use();
     }
-    float instantenergy = unit->afterburnenergy * simulation_atom_var;
-    if ((unit->afterburntype == 0) && unit->energy < instantenergy) {
-        afterburn = false;
-    }
-    if ((unit->afterburntype == 1) && unit->fuel < 0) {
-        unit->fuel = 0;
-        afterburn = false;
-    }
-    if ((unit->afterburntype == 2) && unit->warpenergy < 0) {
-        unit->warpenergy = 0;
-        afterburn = false;
-    }
-    if (3 == unit->afterburntype) {      //no afterburner -- we should really make these types an enum :-/
-        afterburn = false;
-    }
+
     Vector Res = amt1;
 
-    float fuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
+    // no_fuel_thrust = 0.4, so even with no fuel, we should keep flying
+    float fuelclamp = std::max(drive.Powered(), configuration()->fuel.no_fuel_thrust);
+    float abfuelclamp = std::max(afterburner.Powered(), configuration()->fuel.no_fuel_afterburn);
+    
     if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
         Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
     }
@@ -660,53 +640,7 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k < -limits.retro) {
         Res.k = -limits.retro;
     }
-    const float Lithium6constant = configuration()->fuel.deuterium_relative_efficiency_lithium;
-    //1/5,000,000 m/s
-    const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
-    if (unit->afterburntype == 2) {
-        //Energy-consuming afterburner
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->warpenergy -= unit->afterburnenergy * Energetic::getFuelUsage(afterburn) * simulation_atom_var * Res.Magnitude()
-                * FMEC_exit_vel_inverse
-                / Lithium6constant;
-    }
-    if (3 == unit->afterburntype || unit->afterburntype == 1) {
-        //fuel-burning overdrive - uses afterburner efficiency. In NO_AFTERBURNER case, "afterburn" will always be false, so can reuse code.
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->fuel -=
-                ((afterburn
-                        && finegrainedFuelEfficiency) ? unit->afterburnenergy : Energetic::getFuelUsage(afterburn))
-                        * simulation_atom_var * Res.Magnitude()
-                        * FMEC_exit_vel_inverse / Lithium6constant;
-#ifndef __APPLE__
-        if (ISNAN(unit->fuel)) {
-            VS_LOG(error, "Fuel is NAN A");
-            unit->fuel = 0;
-        }
-#endif
-    }
-    if (unit->afterburntype == 0) {
-        //fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->fuel -= unit->getFuelUsage(false) * simulation_atom_var * Res.Magnitude() * FMEC_exit_vel_inverse / Lithium6constant;
-#ifndef __APPLE__
-        if (ISNAN(unit->fuel)) {
-            VS_LOG(error, "Fuel is NAN B");
-            unit->fuel = 0;
-        }
-#endif
-    }
-    if ((afterburn) && (unit->afterburntype == 0)) {
-        unit->energy -= instantenergy;
-    }
-    if (WCfuelhack) {
-        if (unit->fuel > unit->warpenergy) {
-            unit->fuel = unit->warpenergy;
-        }
-        if (unit->fuel < unit->warpenergy) {
-            unit->warpenergy = unit->fuel;
-        }
-    }
+    
     return Res;
 }
 
@@ -770,16 +704,10 @@ void Movable::RollTorque(float amt) {
 void Movable::Thrust(const Vector &amt1, bool afterburn) {
     Unit *unit = static_cast<Unit *>(this);
 
-    if (unit->afterburntype == 0) {
-        afterburn = afterburn && unit->energy > unit->afterburnenergy * simulation_atom_var;
-    } //SIMULATION_ATOM; ?
-    if (unit->afterburntype == 1) {
-        afterburn = afterburn && unit->fuel > 0;
-    }
-    if (unit->afterburntype == 2) {
-        afterburn = afterburn && unit->warpenergy > 0;
-    }
-
+    // TODO: make sure we expand fuel in other places before deleting this.
+    // This will kick in after one atom.
+    //afterburner.Use();
+    //afterburn = afterburn && afterburner.Powered();
 
     //Unit::Thrust( amt1, afterburn );
     {

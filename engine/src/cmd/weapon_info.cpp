@@ -37,14 +37,23 @@ namespace alg = boost::algorithm;
 
 Hashtable<std::string, WeaponInfo, 257> lookuptable;
 
-WeaponInfo::WeaponInfo() {
+WeaponInfo::WeaponInfo(): EnergyConsumer(EnergyType::Energy, 
+                          EnergyConsumerClassification::BallWeapon, 
+                          EnergyConsumerType::Momentary,
+                          0.0) {
 }
 
-WeaponInfo::WeaponInfo(WEAPON_TYPE type) {
+WeaponInfo::WeaponInfo(WEAPON_TYPE type) : EnergyConsumer(EnergyType::Energy,
+                                           EnergyConsumerClassification::BallWeapon, 
+                                           EnergyConsumerType::Momentary,
+                                           0.0) {
     this->type = type;
 }
 
-WeaponInfo::WeaponInfo(const WeaponInfo &tmp) {
+WeaponInfo::WeaponInfo(const WeaponInfo &tmp) : EnergyConsumer(tmp.energy_type, 
+                                                tmp.classification, 
+                                                tmp.consumer_type,
+                                                0.0)  {
     *this = tmp;
 }
 
@@ -97,7 +106,7 @@ void WeaponInfo::netswap() {
     //size = VSSwapHostIntToLittle( size);
 
     damage = VSSwapHostFloatToLittle(damage);
-    energy_rate = VSSwapHostFloatToLittle(energy_rate);
+    consumption = VSSwapHostFloatToLittle(consumption);
     length = VSSwapHostFloatToLittle(length);
     lock_time = VSSwapHostFloatToLittle(lock_time);
     long_range = VSSwapHostFloatToLittle(long_range);

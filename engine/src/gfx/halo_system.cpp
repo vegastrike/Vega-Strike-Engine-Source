@@ -243,7 +243,9 @@ void HaloSystem::Draw(const Matrix &trans,
                     GFXColor(1, 1, 1, 1),
                     GFXColor(1, 1, 1, 1),
                     blend);
-            i->mesh->Draw(50000000000000.0, m, 1, alpha, nebdist, 0, false, &xtraFX);
+
+            static Cloak dummy_cloak;
+            i->mesh->Draw(50000000000000.0, m, alpha, dummy_cloak, nebdist, 0, false, &xtraFX);
 
             // If damaged, and halo is back-facing
             if (hullpercent < .99 && ((i->trans.getR().z / i->trans.getR().Magnitude()) > 0.707)) {

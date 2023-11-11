@@ -491,13 +491,13 @@ retryEraseItem:
 }
 
 void Mesh::Draw(float lod,
-        const Matrix &m,
-        float toofar,
-        int cloak,
-        float nebdist,
-        unsigned char hulldamage,
-        bool renormalize,
-        const MeshFX *mfx) //short fix
+                const Matrix &m,
+                float toofar,
+                Cloak cloak,
+                float nebdist,
+                unsigned char hulldamage,
+                bool renormalize,
+                const MeshFX *mfx) //short fix
 {
     Mesh *origmesh = getLOD(lod);
     if (origmesh->rSize() > 0) {
@@ -512,6 +512,8 @@ void Mesh::Draw(float lod,
         c.damage = hulldamage;
 
         c.mesh_seq = ((toofar + rSize()) > g_game.zfar) ? NUM_ZBUF_SEQ : draw_sequence;
+
+        // Cloaking and Nebula
         c.cloaked = MeshDrawContext::NONE;
         if (nebdist < 0) {
             c.cloaked |= MeshDrawContext::FOG;
@@ -519,30 +521,30 @@ void Mesh::Draw(float lod,
         if (renormalize) {
             c.cloaked |= MeshDrawContext::RENORMALIZE;
         }
-        if (cloak >= 0) {
+
+        // This should have gradually made the ship cloak go transparent
+        // for cloak.Glass but it does the same thing as the ordinary cloak.
+        // TODO: revisit this.
+        if(cloak.Active()) {
             c.cloaked |= MeshDrawContext::CLOAK;
-            if ((cloak & 0x1)) {
-                c.cloaked |= MeshDrawContext::GLASSCLOAK;
-                c.mesh_seq = MESH_SPECIAL_FX_ONLY;                 //draw near the end with lights
+            c.cloaked |= MeshDrawContext::GLASSCLOAK;
+
+            if (cloak.Glass()) {
+                c.CloakFX.a = cloak.Current();
+                c.mesh_seq = 2; //MESH_SPECIAL_FX_ONLY;
             } else {
                 c.mesh_seq = 2;
+                c.CloakFX.r = cloak.Visibility();
+                c.CloakFX.g = cloak.Visibility();
+                c.CloakFX.b = cloak.Visibility();
+                c.CloakFX.a = cloak.Current();
             }
-            if (cloak <= CLKSCALE / 2) {
-                c.cloaked |= MeshDrawContext::NEARINVIS;
-            }
-            float tmp = ((float) cloak) / CLKSCALE;
-            c.CloakFX.r = (c.cloaked & MeshDrawContext::GLASSCLOAK) ? tmp : 1;
-            c.CloakFX.g = (c.cloaked & MeshDrawContext::GLASSCLOAK) ? tmp : 1;
-            c.CloakFX.b = (c.cloaked & MeshDrawContext::GLASSCLOAK) ? tmp : 1;
-            c.CloakFX.a = tmp;
-            /*
-             *  c.CloakNebFX.ambient[0]=((float)cloak)/CLKSCALE;
-             *  c.CloakNebFX.ag=((float)cloak)/CLKSCALE;
-             *  c.CloakNebFX.ab=((float)cloak)/CLKSCALE;
-             *  c.CloakNebFX.aa=((float)cloak)/CLKSCALE;
-             */
-            ///all else == defaults, only ambient
         }
+
+        if (cloak.Cloaking()) {
+            c.cloaked |= MeshDrawContext::NEARINVIS;
+        }
+
         //c.mat[12]=pos.i;
         //c.mat[13]=pos.j;
         //c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!

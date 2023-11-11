@@ -39,12 +39,14 @@
 #include "movable.h"
 #include "computer.h"
 #include "intelligent.h"
-#include "energetic.h"
 #include "carrier.h"
 #include "jump_capable.h"
 
 #include "mount.h"
 #include "damage/damage.h"
+
+// Components
+#include "components/afterburner.h"
 
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
@@ -76,6 +78,11 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
+
+// Components
+#include "components/energy_manager.h"
+#include "components/cloak.h"
+#include "components/radar.h"
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
@@ -134,13 +141,18 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
+class Unit : public Armed, public Audible, public Drawable, public Damageable,
         public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
+
 protected:
 //How many lists are referencing us
     int ucref = 0;
     StringPool::Reference csvRow;
+
 public:
+    // Components
+    EnergyManager energy_manager;
+    Cloak cloak;
 
     /// Radar and related systems
     // TODO: take a deeper look at this much later...
@@ -476,6 +488,7 @@ public:
             bool DoSightAndSound) override;
 
     Computer computer;
+    CRadar radar;
     void SwitchCombatFlightMode();
     bool CombatMode();
 
@@ -584,20 +597,6 @@ public:
     float shieldtight = configuration()->physics_config.default_shield_tightness;
 
 public:
-    // TODO: move cloak to Cloakable?
-    ///How much energy cloaking takes per frame
-    float cloakenergy = 0;
-    ///how fast this starship decloaks/close...if negative, decloaking
-    int cloakrate = 100;   //short fix
-    ///If this unit cloaks like glass or like fading
-    bool cloakglass = false;
-
-    //-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
-    // Despite the above comment, Init() would set it to -1
-    int cloaking = -1;                              //short fix
-//the minimum cloaking value...
-    int cloakmin = cloakglass ? 1 : 0;              //short fix
-
     // TODO: move to jump_capable?
     ///if the unit is a wormhole
     bool forcejump = false;
@@ -613,16 +612,14 @@ public:
         return ToLocalCoordinates((un->Position() - Position()).Cast());
     }
 
-//how visible the ship is from 0 to 1
-    float CloakVisible() const {
-        if (cloaking < 0) {
-            return 1;
-        }
-        return ((float) cloaking) / 2147483647;
+// how visible the ship is from 0 to 1
+// Need this function to expose it to python
+    float CloakVisible() {
+        return cloak.Visibility();
     }
 
 //cloaks or decloaks the starship depending on the bool
-    virtual void Cloak(bool cloak);
+    virtual void ActivateCloak(bool cloak);
 //deletes
     void Kill(bool eraseFromSave = true, bool quitting = false);
 
@@ -995,6 +992,9 @@ public:
     // object_a->field_a = object_b->field_b;
     float temporary_upgrade_float_variable;
 
+    // Temporary python functions
+    double fuelData() { return energy_manager.GetLevel(EnergyType::Fuel); }
+    double energyData() { return energy_manager.GetLevel(EnergyType::Energy); }
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);

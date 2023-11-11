@@ -36,6 +36,8 @@
 class Unit;
 struct GFXColor;  // Edit from class to struct as defined in gfxlib_struct.
 
+// TODO: this is basically a wrapper over CRadar. Remove
+
 namespace Radar {
 
 // Sensor is a proxy for two types of information:

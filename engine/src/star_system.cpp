@@ -1313,7 +1313,7 @@ void StarSystem::ProcessPendingJumps() {
         bool dosightandsound = ((pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship(un));
         _Universe->setActiveStarSystem(pendingjump[kk]->orig);
         if (un->TransferUnitToSystem(kk, savedStarSystem, dosightandsound)) {
-            un->decreaseWarpEnergy(false, 1.0f);
+            // TODO: un->decreaseWarpEnergy(false, 1.0f);
         }
         if (dosightandsound) {
             _Universe->activeStarSystem()->DoJumpingComeSightAndSound(un);
@@ -1420,7 +1420,7 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
             ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound(un);
         }
         _Universe->AccessCockpit()->OnJumpBegin(un);
-        pendingjump.push_back(new unorigdest(un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
+        pendingjump.push_back(new unorigdest(un, jumppoint, this, ss, un->jump.delay, ani, justloaded,
                 save_coordinates ? ComputeJumpPointArrival(un->Position(),
                         this->getFileName(),
                         system) : QVector(0, 0, 0)));

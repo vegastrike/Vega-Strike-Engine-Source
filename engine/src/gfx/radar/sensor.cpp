@@ -51,19 +51,19 @@ Unit *Sensor::GetPlayer() const {
 bool Sensor::UseFriendFoe() const {
     assert(player);
 
-    return player->GetComputerData().radar.UseFriendFoe();
+    return player->radar.UseFriendFoe();
 }
 
 bool Sensor::UseObjectRecognition() const {
     assert(player);
 
-    return player->GetComputerData().radar.UseObjectRecognition();
+    return player->radar.UseObjectRecognition();
 }
 
 bool Sensor::UseThreatAssessment() const {
     assert(player);
 
-    return player->GetComputerData().radar.UseThreatAssessment();
+    return player->radar.UseThreatAssessment();
 }
 
 float Sensor::GetCloseRange() const {
@@ -73,19 +73,19 @@ float Sensor::GetCloseRange() const {
 float Sensor::GetMaxRange() const {
     assert(player);
 
-    return player->GetComputerData().radar.maxrange;
+    return player->radar.GetMaxRange();
 }
 
 float Sensor::GetMaxCone() const {
     assert(player);
 
-    return player->GetComputerData().radar.maxcone;
+    return player->radar.GetMaxCone();
 }
 
 float Sensor::GetLockCone() const {
     assert(player);
 
-    return player->GetComputerData().radar.lockcone;
+    return player->radar.GetLockCone();
 }
 
 Track Sensor::CreateTrack(const Unit *target) const {
@@ -154,7 +154,7 @@ public:
             if (!isCurrentTarget &&
                     !draw_significant_blips &&
                     (getTopLevelOwner() == target->owner) &&
-                    (distance > player->GetComputerData().radar.maxrange)) {
+                    (distance > player->radar.GetMaxRange())) {
                 return true;
             }
 

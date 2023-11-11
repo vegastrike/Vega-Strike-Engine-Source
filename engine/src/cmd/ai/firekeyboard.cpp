@@ -63,7 +63,6 @@ extern bool toggle_pause();
 FireKeyboard::FireKeyboard(unsigned int whichplayer, unsigned int whichjoystick) : Order(WEAPON, 0) {
     memset(savedTargets, 0, sizeof(void *) * NUMSAVEDTARGETS);
     this->autotrackingtoggle = 1;
-    this->cloaktoggle = true;
     this->whichjoystick = whichjoystick;
     this->whichplayer = whichplayer;
     gunspeed = gunrange = .0001;
@@ -1779,12 +1778,11 @@ void FireKeyboard::Execute() {
     }
     if (f().cloakkey == PRESS) {
         f().cloakkey = DOWN;
-        parent->Cloak(cloaktoggle);
-        cloaktoggle = !cloaktoggle;
+        parent->cloak.Toggle();
     }
     if (f().lockkey == PRESS) {
         f().lockkey = DOWN;
-        parent->LockTarget(!parent->TargetLocked());
+        parent->radar.ToggleLock();
     }
     if (f().ECMkey == PRESS) {
         f().ECMkey = DOWN;
@@ -1815,7 +1813,7 @@ void FireKeyboard::Execute() {
         f().targetskey = DOWN;
         ChooseTargets(parent, TargSig, false);
         refresh_target = true;
-        parent->LockTarget(true);
+        parent->radar.Lock();
     }
     if (f().targetukey == PRESS) {
         f().targetukey = DOWN;
@@ -1896,7 +1894,7 @@ void FireKeyboard::Execute() {
         f().rtargetskey = DOWN;
         ChooseTargets(parent, TargSig, true);
         refresh_target = true;
-        parent->LockTarget(true);
+        parent->radar.Lock();
     }
     if (f().rtargetukey == PRESS) {
         f().rtargetukey = DOWN;
@@ -2034,7 +2032,7 @@ void FireKeyboard::Execute() {
     }
     if (f().toggleautotracking == PRESS) {
         f().toggleautotracking = DOWN;
-        parent->GetComputerData().radar.trackingactive = !parent->GetComputerData().radar.trackingactive;
+        parent->radar.ToggleTracking();
     }
     if (f().misk == PRESS || f().rmisk == PRESS) {
         bool forward;
@@ -2060,7 +2058,7 @@ void FireKeyboard::Execute() {
             f().saveTargetKeys[i] = RELEASE;
             savedTargets[i] = parent->Target();
         }
-        if (f().restoreTargetKeys[i] == PRESS && parent->GetComputerData().radar.canlock) {
+        if (f().restoreTargetKeys[i] == PRESS && parent->radar.CanLock()) {
             f().restoreTargetKeys[i] = RELEASE;
             Unit *un;
             for (un_iter u = _Universe->activeStarSystem()->getUnitList().createIterator();
@@ -2178,9 +2176,11 @@ void FireKeyboard::Execute() {
             cp->EjectDock();
         }              //use specialized ejectdock in the future
     }
-    static bool actually_arrest = XMLSupport::parse_bool(vs_config->getVariable("AI", "arrest_energy_zero", "false"));
-    if (actually_arrest && parent->energyRechargeData() == 0) {
+
+    // TODO: something with this. It's very unlikely reactor will be 0
+    /*static bool actually_arrest = XMLSupport::parse_bool(vs_config->getVariable("AI", "arrest_energy_zero", "false"));
+    if (actually_arrest && parent->energy_manager.GetReactorCapacity() == 0) {
         Arrested(parent);
-    }
+    }*/
 }
 
