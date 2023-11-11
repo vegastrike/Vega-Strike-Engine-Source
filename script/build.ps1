@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
+cmake -B build -S .\ -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
 cmake --build .\build\ --config Release -v
 New-Item bin -ItemType Directory -Force
 xcopy /y .\build\Release\*.* .\bin\

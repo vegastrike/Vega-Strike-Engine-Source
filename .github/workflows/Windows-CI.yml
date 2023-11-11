@@ -58,7 +58,7 @@ jobs:
         uses: lukka/run-cmake@v3
         with:
           # Path to CMakeLists.txt. Used for both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes.
-          cmakeListsTxtPath: ${{ github.workspace }}/engine/CMakeLists.txt
+          cmakeListsTxtPath: ${{ github.workspace }}/CMakeLists.txt
           # Indicates whether to use vcpkg's CMake toolchain file if RUNVCPKG_VCPKG_ROOT environment variable is defined, for example by a previous run-vcpkg action execution. If the variable is defined, its content would be passed with '-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=<RUNVCPKG_VCPKG_ROOT>/scripts/buildsystems/vcpkg.cmake'. Used by any mode.
           useVcpkgToolchainFile: true
           # Specify the triplet used with vcpkg. Default value is RUNVCPKG_VCPKG_TRIPLET environment variable, which is set e.g. by the run-vcpkg. Possible values include any file name with no extension present in the vcpkgroot/trplet directory, e.g. x64-linux, x64-windows, x64-osx and so forth. Used by any mode.

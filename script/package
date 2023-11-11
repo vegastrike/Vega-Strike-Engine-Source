@@ -14,7 +14,6 @@
 ROOT_DIR=$(pwd)
 BUILD_DIR=$ROOT_DIR/build
 BIN_DIR=$ROOT_DIR/bin
-SRC_DIR=$ROOT_DIR/engine
 PACKAGE_DIR=$ROOT_DIR/packages
 VS_EXECUTABLE=${BUILD_DIR}/vegastrike-engine
 VS_CONFIG_EXECUTABLE=${BUILD_DIR}/setup/vegasettings
@@ -156,7 +155,7 @@ function buildPackages()
 {
 	# before running make package regen the Cmake data so that
 	# it picks up the dependencies just generated
-	cmake "${SRC_DIR}"
+	cmake "${ROOT_DIR}"
 	make package
 	make package_source
 }

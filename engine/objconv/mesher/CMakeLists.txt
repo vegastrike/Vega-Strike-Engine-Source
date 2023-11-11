@@ -42,14 +42,15 @@ IF (EXPAT_FOUND)
         Modules/XMesh_to_Ogre.cpp
         Modules/Wavefront_to_BFXM.cpp
         PrecompiledHeaders/Converter.cpp
-        ${Vega_Strike_SOURCE_DIR}/src/hashtable.cpp
-        ${Vega_Strike_SOURCE_DIR}/src/xml_support.cpp
+        ${Vega_Strike_SOURCE_DIR}/engine/src/hashtable.cpp
+        ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
     )
 
     # Still need to add CEGUI and OGRE find packages
     #if have OGRE to_OgreMesh.cpp
 
     ADD_EXECUTABLE(mesher ${MESHER_SOURCES})
+    SET_TARGET_PROPERTIES(mesher PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
     # OGRE already looked for by parent
     # USE_SYSTEM_BOOST already set by main script
