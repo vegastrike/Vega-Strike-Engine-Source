@@ -47,6 +47,7 @@
 #include "cmd/unit_collide.h"
 #include "cmd/unit_find.h"
 #include "unit_csv_factory.h"
+#include "manifest.h"
 
 #include "python/init.h"
 #include <Python.h>
@@ -198,36 +199,8 @@ Unit *launchJumppoint(string name_string,
     return tmp;
 }
 
-Cargo getRandCargo(int quantity, string category) {
-    Cargo *ret = NULL;
-    Unit *mpl = &GetUnitMasterPartList();
-    unsigned int max = mpl->numCargo();
-    if (!category.empty()) {
-        size_t Begin, End;
-        mpl->GetSortedCargoCat(category, Begin, End);
-        if (Begin < End) {
-            unsigned int i = Begin + (rand() % (End - Begin));
-            ret = &mpl->GetCargo(i);
-        } else {
-            VS_LOG(info, (boost::format("Cargo category %1% not found") % category));
-        }
-    } else if (mpl->numCargo()) {
-        for (unsigned int i = 0; i < 500; ++i) {
-            ret = &mpl->GetCargo(rand() % max);
-            if (ret->GetName().find("mission") == string::npos) {
-                break;
-            }
-        }
-    }
-    if (ret) {
-        Cargo tempret = *ret;
-        tempret.SetQuantity(quantity);
-        return tempret;                          //uses copy
-    } else {
-        Cargo newret;
-        newret.SetQuantity(0);
-        return newret;
-    }
+Cargo getRandCargo(int quantity, std::string category) {
+    return Manifest::MPL().GetRandomCargoFromCategory(category, quantity);
 }
 
 float GetGameTime() {

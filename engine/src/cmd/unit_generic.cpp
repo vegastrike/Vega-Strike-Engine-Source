@@ -73,6 +73,8 @@
 #include "resource/resource.h"
 #include "base_util.h"
 #include "unit_csv_factory.h"
+#include "savegame.h"
+#include "manifest.h"
 
 #include <math.h>
 #include <list>
@@ -92,22 +94,21 @@
 using std::endl;
 using std::list;
 
-std::string getMasterPartListUnitName() {
-    return configuration()->data_config.master_part_list;
-}
 
-Unit *_masterPartList = nullptr;
 
+// This is a left over kludge because I don't want to mess with python interfaces yet.
+// TODO: remove
 Unit *getMasterPartList() {
-    if (_masterPartList == nullptr) {
-        static bool making = true;
-        if (making) {
-            making = false;
-            _masterPartList = Unit::makeMasterPartList();
-            making = true;
+    static Unit ret;
+
+    if(ret.cargo.empty()) {
+        ret.name = "master_part_list";
+        for(const Cargo& c : Manifest::MPL().getItems()) {
+            ret.AddCargo(c);
         }
+
     }
-    return _masterPartList;
+    return &ret;
 }
 
 using namespace XMLSupport;
@@ -2035,7 +2036,6 @@ void Unit::PerformDockingOperations() {
 
 std::set<Unit *> arrested_list_do_not_dereference;
 
-void UpdateMasterPartList(Unit *);
 
 int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     if (utdw->pImage->dockingports.size() <= whichdockport) {
@@ -2058,7 +2058,7 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     if (this == _Universe->AccessCockpit()->GetParent()) {
         this->RestoreGodliness();
     }
-    UpdateMasterPartList(UniverseUtil::GetMasterPartList());
+    
     unsigned int cockpit = UnitUtil::isPlayerStarship(this);
 
     static float MinimumCapacityToRefuelOnLand =

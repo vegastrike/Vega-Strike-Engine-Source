@@ -41,7 +41,6 @@
 extern int SelectDockPort(Unit *, Unit *parent);
 extern void SwitchUnits(Unit *, Unit *);
 extern void abletodock(int dock);
-extern void UpdateMasterPartList(Unit *ret);
 
 // Replace with std:sto* here and at unit_csv.cpp
 static double stof(const string &inp, double def = 0) {
@@ -544,58 +543,7 @@ float Carrier::getCargoVolume(void) const {
     return result;
 }
 
-// TODO: get rid of this helper function and others like it.
-extern std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value);
 
-Unit *Carrier::makeMasterPartList() {
-    unsigned int i;
-    Unit *ret = new Unit();
-    ret->name = "master_part_list";
-
-    //vs_config->getVariable("data", "master_part_list", "master_part_list");
-    static std::string json_filenames[] = {
-        "master_part_list.json",
-        "master_ship_list.json",
-        "master_component_list.json",
-        "master_asteroid_list.json",
-    };
-
-    for(const std::string& json_filename : json_filenames) {
-        std::ifstream ifs(json_filename, std::ifstream::in);
-        std::stringstream buffer;
-        buffer << ifs.rdbuf();
-
-        const std::string json_text = buffer.str();
-
-        std::vector<std::string> parts = json::parsing::parse_array(json_text.c_str());
-        for (const std::string &part_text : parts) {
-            json::jobject part = json::jobject::parse(part_text);
-            Cargo carg;
-
-            carg.name = getJSONValue(part, "file", "");
-            carg.SetCategory(getJSONValue(part, "categoryname", ""));
-            carg.SetVolume(std::stof(getJSONValue(part, "volume", "")));
-            carg.SetMass(std::stof(getJSONValue(part, "mass", "")));
-            carg.quantity = 1;
-            carg.price = std::stoi(getJSONValue(part, "price", ""));
-            carg.SetDescription(getJSONValue(part, "description", ""));
-            ret->cargo.push_back(carg);
-        }
-    }
-
-
-    UpdateMasterPartList(ret);
-    if (!ret->GetCargo("Pilot", i)) {    //required items
-        ret->AddCargo(Cargo("Pilot", "Contraband", 800, 1, .01, 1, 1.0, 1.0), true);
-    }
-    if (!ret->GetCargo("Hitchhiker", i)) {
-        ret->AddCargo(Cargo("Hitchhiker", "Passengers", 42, 1, .01, 5.0, 1.0, 1.0), true);
-    }
-    if (!ret->GetCargo("Slaves", i)) {
-        ret->AddCargo(Cargo("Slaves", "Contraband", 800, 1, .01, 1, 1, 1), true);
-    }
-    return ret;
-}
 
 float Carrier::PriceCargo(const std::string &s) {
     Unit *unit = static_cast<Unit *>(this);
