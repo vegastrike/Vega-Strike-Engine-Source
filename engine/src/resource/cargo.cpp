@@ -27,9 +27,8 @@
 
 #include "cargo.h"
 
-#include "unit_generic.h"
 
-Cargo::Cargo() {
+Cargo::Cargo(): Product() {
     mass = 0;
     volume = 0;
     mission = false;
