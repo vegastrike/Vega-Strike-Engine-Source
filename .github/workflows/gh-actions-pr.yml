@@ -16,26 +16,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          #- FROM:     'ubuntu:mantic'
-          #  COMPILER: 'gcc'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
-          #  ENABLE_PIE: 'OFF'
-          #  allow_failure: false
-          #- FROM:     'ubuntu:mantic'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'LEGACY'
-          #  ENABLE_PIE: 'OFF'
-          #  allow_failure: false
-          #- FROM:     'ubuntu:mantic'
-          #  COMPILER: 'gcc'
-          #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'OFF'
-          #  allow_failure: false
-          #- FROM:     'ubuntu:mantic'
-          #  COMPILER: 'clang'
-          #  OpenGL_GL_PREFERENCE: 'GLVND'
-          #  ENABLE_PIE: 'OFF'
-          #  allow_failure: false
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
           - FROM:     'ubuntu:jammy'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'LEGACY'
