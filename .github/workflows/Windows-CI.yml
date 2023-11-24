@@ -22,67 +22,11 @@ jobs:
           - os:              windows-2019
             cmake-generator: VS2019Win64
             enable-pie:      1
-            build-type:      Debug
-          - os:              windows-2019
-            cmake-generator: VS2019Win64
-            enable-pie:      1
             build-type:      Release
-          - os:              windows-2019
-            cmake-generator: VS2019Win64
-            enable-pie:      0
-            build-type:      Debug
-          - os:              windows-2019
-            cmake-generator: VS2019Win64
-            enable-pie:      0
-            build-type:      Release
-          #          - os:              windows-2019
-          #            cmake-generator: ninja
-          #            enable-pie:      1
-          #            build-type:      Debug
-          #          - os:              windows-2019
-          #            cmake-generator: ninja
-          #            enable-pie:      1
-          #            build-type:      Release
-          #          - os:              windows-2019
-          #            cmake-generator: ninja
-          #            enable-pie:      0
-          #            build-type:      Debug
-          #          - os:              windows-2019
-          #            cmake-generator: ninja
-          #            enable-pie:      0
-          #            build-type:      Release
           - os:              windows-2022
             cmake-generator: VS2022Win64
             enable-pie:      1
             build-type:      Debug
-          - os:              windows-2022
-            cmake-generator: VS2022Win64
-            enable-pie:      1
-            build-type:      Release
-          - os:              windows-2022
-            cmake-generator: VS2022Win64
-            enable-pie:      0
-            build-type:      Debug
-          - os:              windows-2022
-            cmake-generator: VS2022Win64
-            enable-pie:      0
-            build-type:      Release
-    #          - os:              windows-2022
-    #            cmake-generator: ninja
-    #            enable-pie:      1
-    #            build-type:      Debug
-    #          - os:              windows-2022
-    #            cmake-generator: ninja
-    #            enable-pie:      1
-    #            build-type:      Release
-    #          - os:              windows-2022
-    #            cmake-generator: ninja
-    #            enable-pie:      0
-    #            build-type:      Debug
-    #          - os:              windows-2022
-    #            cmake-generator: ninja
-    #            enable-pie:      0
-    #            build-type:      Release
 
     env:
       # Indicates the location of vcpkg
@@ -140,7 +84,7 @@ jobs:
       - name: install-vcpkg
         #if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/stephengtuggy/vcpkg-local.git ${{ env.VCPKG_ROOT }}
+          git clone https://github.com/vegastrike/vcpkg-local.git ${{ env.VCPKG_ROOT }}
           ${{ env.VCPKG_ROOT }}\bootstrap-vcpkg.bat -disableMetrics
 
       - name: run-build-script
