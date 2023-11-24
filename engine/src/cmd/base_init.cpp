@@ -1,10 +1,8 @@
-/**
+/*
  * base_init.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,16 +23,17 @@
  */
 
 
-#include <math.h>
+#define PY_SSIZE_T_CLEAN
 
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
+#if BOOST_VERSION != 102800
 typedef boost::python::dict BoostPythonDictionary;
 #else
 #include <boost/python/objects.hpp>
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif
+#include <math.h>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>

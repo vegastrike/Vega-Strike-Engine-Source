@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * star_system.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,6 +23,8 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <assert.h>
 #include "star_system.h"
 

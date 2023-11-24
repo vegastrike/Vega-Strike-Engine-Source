@@ -1,9 +1,8 @@
 /*
  * tvector.cpp
  *
- * Copyright (C) 2020-2021 Roy Falk, Nachum Barcohen, Stephen G. Tuggy,
- *  Davie Wales, and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, Nachum Barcohen,
+ * Stephen G. Tuggy, Davie Wales, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,6 +23,8 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include "tvector.h"
 #include "matrix.h"
 
@@ -34,7 +35,6 @@
 #include <boost/python/converter/builtin_converters.hpp>
 #include "vegastrike.h"
 #include <math.h>
-#include <boost/python.hpp>
 #define _CZ (761.465325527)
 
 // Specialization comes first (actually only for declaration)
