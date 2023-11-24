@@ -29,7 +29,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2023-03-05 ---"
+echo "--- bootstrap | 2023-11-24 ---"
 echo "------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -80,12 +80,14 @@ function bootstrapOnDebian()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -109,12 +111,14 @@ function bootstrapOnDebian()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -136,12 +140,14 @@ function bootstrapOnDebian()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -151,33 +157,8 @@ function bootstrapOnDebian()
       apt-get -qy install cmake -t buster-backports
       ;;
     "stretch")
-      apt-get -qy install \
-                      git \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg62-turbo-dev \
-                      libexpat1-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libgl1-mesa-dev \
-                      libsdl2-dev \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release \
-                      python3-pip
-      python3 -m pip install --upgrade-strategy eager --upgrade pip
-      python3 -m pip install --upgrade-strategy eager cmake
+      echo "Sorry, Debian stretch is no longer supported"
+      exit 2
       ;;
     *)
       echo "Sorry, this version of Debian is unsupported"
@@ -196,6 +177,72 @@ function bootstrapOnUbuntu()
   fi
 
   case "$LINUX_CODENAME" in
+    "mantic")
+      apt-get -qy install \
+                      git \
+                      cmake \
+                      python3-dev \
+                      build-essential \
+                      automake \
+                      autoconf \
+                      libpng16-16 \
+                      libpng-dev \
+                      libpng-tools \
+                      libjpeg-turbo8-dev \
+                      libexpat1-dev \
+                      libgdk-pixbuf-2.0-dev \
+                      libgtk-3-dev \
+                      libopenal-dev \
+                      libogg-dev \
+                      libvorbis-dev \
+                      libglvnd-dev \
+                      libgl1-mesa-dev \
+                      libsdl1.2-dev \
+                      libsdl2-dev \
+                      libopengl0 \
+                      libpostproc-dev \
+                      freeglut3-dev \
+                      libboost-python-dev \
+                      libboost-log-dev \
+                      libboost-regex-dev \
+                      libboost-program-options-dev \
+                      libxmu-dev \
+                      clang \
+                      lsb-release
+      ;;
+    "lunar")
+      apt-get -qy install \
+                      git \
+                      cmake \
+                      python3-dev \
+                      build-essential \
+                      automake \
+                      autoconf \
+                      libpng16-16 \
+                      libpng-dev \
+                      libpng-tools \
+                      libjpeg-turbo8-dev \
+                      libexpat1-dev \
+                      libgdk-pixbuf-2.0-dev \
+                      libgtk-3-dev \
+                      libopenal-dev \
+                      libogg-dev \
+                      libvorbis-dev \
+                      libglvnd-dev \
+                      libgl1-mesa-dev \
+                      libsdl1.2-dev \
+                      libsdl2-dev \
+                      libopengl0 \
+                      libpostproc-dev \
+                      freeglut3-dev \
+                      libboost-python-dev \
+                      libboost-log-dev \
+                      libboost-regex-dev \
+                      libboost-program-options-dev \
+                      libxmu-dev \
+                      clang \
+                      lsb-release
+      ;;
     "jammy")
       apt-get -qy install \
                       git \
@@ -216,6 +263,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
@@ -223,67 +271,7 @@ function bootstrapOnUbuntu()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    "impish")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg-turbo8-dev \
-                      libexpat1-dev \
-                      libgdk-pixbuf-2.0-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
-      ;;
-    "hirsute")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg62-dev \
-                      libexpat1-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl2-dev \
-                      libopengl0 \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -307,6 +295,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
@@ -314,6 +303,7 @@ function bootstrapOnUbuntu()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -336,6 +326,7 @@ function bootstrapOnUbuntu()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
@@ -343,6 +334,7 @@ function bootstrapOnUbuntu()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -356,6 +348,7 @@ function bootstrapOnUbuntu()
                       freeglut3-dev \
                       libopenal-dev \
                       libsdl-gfx1.2-dev \
+                      libsdl2-gfx-dev \
                       libvorbis-dev \
                       libjpeg-dev \
                       libpng-dev \
@@ -363,12 +356,21 @@ function bootstrapOnUbuntu()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release \
                       python3-pip
       python3 -m pip install --upgrade-strategy eager --upgrade pip
       python3 -m pip install --upgrade-strategy eager cmake
+      ;;
+    "impish")
+      echo "Sorry, Ubuntu impish is no longer supported"
+      exit 2
+      ;;
+    "hirsute")
+      echo "Sorry, Ubuntu hirsute is no longer supported"
+      exit 2
       ;;
     "xenial")
       echo "Sorry, Ubuntu xenial is no longer supported"
@@ -411,6 +413,7 @@ function bootstrapOnPopOS ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
@@ -418,6 +421,7 @@ function bootstrapOnPopOS ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -459,6 +463,7 @@ function bootstrapOnLinuxMint ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-compat-dev \
                       libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
@@ -466,6 +471,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -490,6 +496,7 @@ function bootstrapOnLinuxMint ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
@@ -497,6 +504,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -519,6 +527,7 @@ function bootstrapOnLinuxMint ()
                       libvorbis-dev \
                       libglvnd-dev \
                       libgl1-mesa-dev \
+                      libsdl1.2-dev \
                       libsdl2-dev \
                       libopengl0 \
                       libpostproc-dev \
@@ -526,6 +535,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
@@ -550,6 +560,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_regex1_66_0-devel \
                               libboost_chrono1_66_0-devel \
                               libboost_atomic1_66_0-devel \
+                              libboost_program_options1_66_0-devel \
                               cmake \
                               gcc-c++ \
                               freeglut-devel \
@@ -557,6 +568,7 @@ function bootstrapOnOpenSuseLeap ()
                               openal-soft-devel \
                               libSDL-1_2-0 \
                               libSDL-devel \
+                              libSDL2-devel \
                               libvorbis-devel \
                               libglvnd-devel \
                               libjpeg-turbo \
@@ -581,6 +593,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_regex1_66_0-devel \
                               libboost_chrono1_66_0-devel \
                               libboost_atomic1_66_0-devel \
+                              libboost_program_options1_66_0-devel \
                               cmake \
                               gcc-c++ \
                               freeglut-devel \
@@ -588,6 +601,7 @@ function bootstrapOnOpenSuseLeap ()
                               openal-soft-devel \
                               libSDL-1_2-0 \
                               libSDL-devel \
+                              libSDL2-devel \
                               libvorbis-devel \
                               libglvnd-devel \
                               libjpeg-turbo \
@@ -612,6 +626,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_regex1_75_0-devel \
                               libboost_chrono1_75_0-devel \
                               libboost_atomic1_75_0-devel \
+                              libboost_program_options1_75_0-devel \
                               cmake \
                               gcc-c++ \
                               freeglut-devel \
@@ -619,6 +634,40 @@ function bootstrapOnOpenSuseLeap ()
                               openal-soft-devel \
                               libSDL-1_2-0 \
                               libSDL-devel \
+                              libSDL2-devel \
+                              libvorbis-devel \
+                              libglvnd-devel \
+                              libjpeg-turbo \
+                              libjpeg62-devel \
+                              libpng16-devel \
+                              expat \
+                              libexpat-devel \
+                              libgtk-3-0 \
+                              gtk3-devel \
+                              python3-devel \
+                              git \
+                              rpm-build \
+                              clang
+      ;;
+    "15.5")
+      zypper --non-interactive install -y \
+                              libboost_log1_75_0-devel \
+                              libboost_python-py3-1_75_0-devel \
+                              libboost_system1_75_0-devel \
+                              libboost_filesystem1_75_0-devel \
+                              libboost_thread1_75_0-devel \
+                              libboost_regex1_75_0-devel \
+                              libboost_chrono1_75_0-devel \
+                              libboost_atomic1_75_0-devel \
+                              libboost_program_options1_75_0-devel \
+                              cmake \
+                              gcc-c++ \
+                              freeglut-devel \
+                              libopenal0 \
+                              openal-soft-devel \
+                              libSDL-1_2-0 \
+                              libSDL-devel \
+                              libSDL2-devel \
                               libvorbis-devel \
                               libglvnd-devel \
                               libjpeg-turbo \
@@ -653,6 +702,7 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libjpeg-turbo-devel \
                           libpng-devel \
@@ -673,6 +723,7 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libjpeg-turbo-devel \
                           libpng-devel \
@@ -693,6 +744,7 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libjpeg-turbo-devel \
                           libpng-devel \
@@ -713,6 +765,7 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libjpeg-turbo-devel \
                           libpng-devel \
@@ -732,6 +785,7 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -752,6 +806,7 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -772,6 +827,7 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -792,6 +848,28 @@ function bootstrapOnFedora ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
+                          libvorbis-devel \
+                          libglvnd-devel \
+                          libjpeg-turbo-devel \
+                          libpng-devel \
+                          expat-devel \
+                          gtk3-devel \
+                          python3-devel \
+                          rpm-build \
+                          make \
+                          clang
+      ;;
+    38)
+      dnf install -y \
+                          git \
+                          cmake \
+                          boost-devel \
+                          freeglut-devel \
+                          gcc-c++ \
+                          openal-soft-devel \
+                          sdl12-compat-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -826,6 +904,7 @@ function bootstrapOnCentOS ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libjpeg-turbo-devel \
                           libpng-devel \
@@ -849,6 +928,7 @@ function bootstrapOnCentOS ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libjpeg-turbo-devel \
                           libpng-devel \
@@ -882,6 +962,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -906,6 +987,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -930,6 +1012,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -954,6 +1037,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -978,6 +1062,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1002,6 +1087,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1026,6 +1112,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1050,6 +1137,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1074,6 +1162,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1098,6 +1187,7 @@ function bootstrapOnRedHat ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1134,6 +1224,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1160,6 +1251,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1186,6 +1278,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1212,6 +1305,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1238,6 +1332,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1264,6 +1359,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1290,6 +1386,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1316,6 +1413,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           SDL-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1340,6 +1438,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1364,6 +1463,7 @@ function bootstrapOnRockyLinux ()
                           gcc-c++ \
                           openal-soft-devel \
                           sdl12-compat-devel \
+                          SDL2-devel \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1390,6 +1490,7 @@ function bootstrapOnManjaro ()
                    gcc \
                    gcc-libs \
                    sdl \
+                   sdl2 \
                    expat \
                    gtk3 \
                    libglvnd \
@@ -1410,7 +1511,60 @@ function bootstrapOnManjaro ()
 function bootstrapOnFuntoo ()
 {
   ego sync
-  emerge openal
+  # enable `autounmask-write` so that USE flags
+  # change in the image appropriately
+  emerge --autounmask-write \
+        cmake \
+        boost \
+        llvm \
+        clang \
+        gcc \
+        libsdl \
+        libsdl2 \
+        expat \
+        gtk3 \
+        libglvnd \
+        mesa \
+        python \
+        autoconf \
+        automake \
+        freeglut \
+        git \
+        libjpeg-turbo \
+        libpng \
+        libvorbis \
+        libXmu \
+        openal \
+        make
+}
+
+function bootstrapOnArch ()
+{
+  # NOTE: Arch requires GCC 12 right now
+  # also installing latest GCC.
+  pacman -Sy --noconfirm \
+        base-devel \
+        cmake \
+        boost \
+        llvm \
+        clang \
+        gcc \
+        gcc12 \
+        sdl \
+        sdl2 \
+        expat \
+        gtk3 \
+        libglvnd \
+        mesa \
+        python \
+        freeglut \
+        git \
+        libjpeg-turbo \
+        libpng \
+        libvorbis \
+        libxmu \
+        openal \
+        make
 }
 
 case "${LINUX_ID}" in
@@ -1449,6 +1603,9 @@ case "${LINUX_ID}" in
     ;;
   "funtoo")
     bootstrapOnFuntoo
+    ;;
+  "arch")
+    bootstrapOnArch
     ;;
   *)
     echo "Sorry, unrecognized/unsupported Linux distribution"
