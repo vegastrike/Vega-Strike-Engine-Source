@@ -25,6 +25,12 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Download benchmark bundle
+        env:
+           GH_TOKEN: ${{ github.token }}
+        run: |
+           gh release download -R octo-org/codeql-bundle --pattern 'codeql-bundle.tar.gz'
+
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2

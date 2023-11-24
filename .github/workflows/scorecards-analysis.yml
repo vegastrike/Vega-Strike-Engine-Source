@@ -27,6 +27,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Download benchmark bundle
+        env:
+           GH_TOKEN: ${{ github.token }}
+        run: |
+           gh release download -R octo-org/codeql-bundle --pattern 'codeql-bundle.tar.gz'
+
       - name: "Run analysis"
         uses: ossf/scorecard-action@v2.3.1
         with:
