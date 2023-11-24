@@ -26,11 +26,11 @@ param(
     [String]$VCPKG_PARENT_DIR = "C:\Projects"
 )
 
-Set-Variable -Name CMAKE_VERSION -Value "3.25.1"
+Set-Variable -Name CMAKE_VERSION -Value "3.26.1"
 
 New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
 Push-Location "$VCKPG_PARENT_DIR"
-git clone https://github.com/stephengtuggy/vcpkg-local.git ./v
+git clone https://github.com/vegastrike/vcpkg-local.git ./v
 .\v\bootstrap-vcpkg.bat -disableMetrics
 
 [Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCKPG_PARENT_DIR\v", 'User')
