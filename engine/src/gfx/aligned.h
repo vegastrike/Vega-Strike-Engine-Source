@@ -23,31 +23,30 @@
  */
 
 
-#ifndef __ALIGNED_H
-#define __ALIGNED_H
+#ifndef VEGA_STRIKE_GFX_ALIGNED_H
+#define VEGA_STRIKE_GFX_ALIGNED_H
 
 #include <memory>
 #include <cstddef>
 
-#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7)
-#define __alpn(x,a) x
-#define __alprn(x,a) x
-#define __alp(x) x
-#define __alpr(x) x
+#if defined(__cpp_lib_assume_aligned)
+    #define __alpn(x,a) std::assume_aligned<a>(x)
+    #define __alprn(x,a) std::assume_aligned<a>(x)
+    #define __alp(x) __alpn(x,16)
+    #define __alpr(x) __alprn(x,16)
+#elif __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7)
+    #define __alpn(x,a) x
+    #define __alprn(x,a) x
+    #define __alp(x) x
+    #define __alpr(x) x
 #else
-#define __alpn(x,a) ((typeof(x))(__builtin_assume_aligned(x,a)))
-#define __alprn(x,a) ((typeof(x) __restrict__)(__builtin_assume_aligned(x,a)))
-#define __alp(x) __alpn(x,16)
-#define __alpr(x) __alprn(x,16)
+    #define __alpn(x,a) ((typeof(x))(__builtin_assume_aligned(x,a)))
+    #define __alprn(x,a) ((typeof(x) __restrict__)(__builtin_assume_aligned(x,a)))
+    #define __alp(x) __alpn(x,16)
+    #define __alpr(x) __alprn(x,16)
 #endif
 
-#if defined(__GNUC__)
-#define _ALIGNED(x) __attribute__ ((aligned(x)))
-#else
-#if defined(_MSC_VER)
-#define _ALIGNED(x) __declspec(align(x))
-#endif
-#endif
+#define _ALIGNED(x) alignas(x)
 
 template <typename T, int ALIGN=16> class aligned_allocator : public std::allocator<T>
 {
@@ -59,9 +58,9 @@ public:
     typedef typename std::allocator<T>::value_type value_type;
     typedef typename std::allocator<T>::size_type size_type;
     typedef typename std::allocator<T>::difference_type difference_type;
-    
+
     static const int _OVERHEAD = (sizeof(T) + ALIGN-1) / ALIGN + sizeof(size_t);
-    
+
     aligned_allocator() {}
     template<typename A> explicit aligned_allocator(const A &other) : std::allocator<T>(other) {}
     
@@ -216,5 +215,5 @@ typename COLL::pointer coll_start_pointer(COLL &a)
     return aligned_allocator_traits<typename COLL::allocator_type>::ifaligned_start_pointer(a.get_allocator(), a[0]);
 }
 
-#endif
+#endif //VEGA_STRIKE_GFX_ALIGNED_H
 
