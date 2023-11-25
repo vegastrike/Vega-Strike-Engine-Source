@@ -1,10 +1,7 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Windows-CI
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
   pull_request:
 
@@ -22,80 +19,144 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os:             windows-2019
-            cmakeGenerator: VS16Win64
-          - os:             windows-2022
-            cmakeGenerator: Ninja
+          - os:              windows-2019
+            cmake-generator: VS2019Win64
+            enable-pie:      1
+            build-type:      Debug
+          - os:              windows-2019
+            cmake-generator: VS2019Win64
+            enable-pie:      1
+            build-type:      Release
+          - os:              windows-2019
+            cmake-generator: VS2019Win64
+            enable-pie:      0
+            build-type:      Debug
+          - os:              windows-2019
+            cmake-generator: VS2019Win64
+            enable-pie:      0
+            build-type:      Release
+          #          - os:              windows-2019
+          #            cmake-generator: ninja
+          #            enable-pie:      1
+          #            build-type:      Debug
+          #          - os:              windows-2019
+          #            cmake-generator: ninja
+          #            enable-pie:      1
+          #            build-type:      Release
+          #          - os:              windows-2019
+          #            cmake-generator: ninja
+          #            enable-pie:      0
+          #            build-type:      Debug
+          #          - os:              windows-2019
+          #            cmake-generator: ninja
+          #            enable-pie:      0
+          #            build-type:      Release
+          - os:              windows-2022
+            cmake-generator: VS2022Win64
+            enable-pie:      1
+            build-type:      Debug
+          - os:              windows-2022
+            cmake-generator: VS2022Win64
+            enable-pie:      1
+            build-type:      Release
+          - os:              windows-2022
+            cmake-generator: VS2022Win64
+            enable-pie:      0
+            build-type:      Debug
+          - os:              windows-2022
+            cmake-generator: VS2022Win64
+            enable-pie:      0
+            build-type:      Release
+    #          - os:              windows-2022
+    #            cmake-generator: ninja
+    #            enable-pie:      1
+    #            build-type:      Debug
+    #          - os:              windows-2022
+    #            cmake-generator: ninja
+    #            enable-pie:      1
+    #            build-type:      Release
+    #          - os:              windows-2022
+    #            cmake-generator: ninja
+    #            enable-pie:      0
+    #            build-type:      Debug
+    #          - os:              windows-2022
+    #            cmake-generator: ninja
+    #            enable-pie:      0
+    #            build-type:      Release
 
     env:
-      buildDir: '${{ github.workspace }}/build/'
+      # Indicates the location of vcpkg
+      VCPKG_ROOT: '${{ github.workspace }}/v'
+      # Tells vcpkg where binary packages are stored.
+      VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
+      ## Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
+      #VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      VCPKG_DEFAULT_TRIPLET: x64-windows
+      VCPKG_DEFAULT_HOST_TRIPLET: x64-windows
       PYTHONHOME: '${{ github.workspace }}/v/packages/python3_x64-windows/tools/python3'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Set env vars needed for vcpkg to leverage the GitHub Action cache as a storage
+      # for Binary Caching.
+      - uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 #v6.4.1
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
+
+      - name: "Create directory '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}'"
+        run: mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
+        shell: bash
 
       - name: install-cmake
-        uses: lukka/get-cmake@v3.21.2
+        uses: lukka/get-cmake@359fbae4b163fa01633e6de228fa7f2a31ab1fc7 #v3.26.1
+        with:
+          cmakeVersion: 3.26.1
+          ninjaVersion: 1.11.1
+
+      #      # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
+      #      # when it is being run afterward by CMake.
+      #      - name: restore-vcpkg
+      #        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 #v3.3.1
+      #        with:
+      #          # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
+      #          # built package archives (aka binary cache) which are located by VCPKG_DEFAULT_BINARY_CACHE env var.
+      #          # The other paths starting with '!' are exclusions: they contain temporary files generated during the build of the installed packages.
+      #          path: |
+      #            ${{ env.VCPKG_ROOT }}
+      #            !${{ env.VCPKG_ROOT }}/buildtrees
+      #            !${{ env.VCPKG_ROOT }}/packages
+      #            !${{ env.VCPKG_ROOT }}/downloads
+      #            !${{ env.VCPKG_ROOT }}/installed
+      #          # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
+      #          key: |
+      #            ${{ hashFiles( '.git/modules/vcpkg/HEAD' )}}
 
       - name: install-vcpkg
-        # You may pin to the exact commit or the version.
-        # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
-        uses: lukka/run-vcpkg@v7
-        with:
-          vcpkgDirectory: '${{ github.workspace }}/v'
-          setupOnly: true
-          vcpkgGitCommitId: '49a30e9db17a8edf7c2809940ee2036746b1b982'
-          vcpkgTriplet: 'x64-windows'
-          appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
-          additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
-
-      - name: run-cmake
-        # You may pin to the exact commit or the version.
-        # uses: lukka/run-cmake@7ba4481660f0f04c86cfa5f1f24b90effc97bde1
-        uses: lukka/run-cmake@v3
-        with:
-          # Path to CMakeLists.txt. Used for both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes.
-          cmakeListsTxtPath: ${{ github.workspace }}/engine/CMakeLists.txt
-          # Indicates whether to use vcpkg's CMake toolchain file if RUNVCPKG_VCPKG_ROOT environment variable is defined, for example by a previous run-vcpkg action execution. If the variable is defined, its content would be passed with '-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=<RUNVCPKG_VCPKG_ROOT>/scripts/buildsystems/vcpkg.cmake'. Used by any mode.
-          useVcpkgToolchainFile: true
-          # Specify the triplet used with vcpkg. Default value is RUNVCPKG_VCPKG_TRIPLET environment variable, which is set e.g. by the run-vcpkg. Possible values include any file name with no extension present in the vcpkgroot/trplet directory, e.g. x64-linux, x64-windows, x64-osx and so forth. Used by any mode.
-          vcpkgTriplet: x64-windows
-          # Select the build configuration, typically Debug or Release. Used by CMakeListsTxtBasic mode.
-          cmakeBuildType: Release
-          # Specify the CMake generator to use. Possible values: Ninja: Ninja, NinjaMulti: Ninja Multi-Config UnixMakefiles: Unix Makefiles, VS16Win64: Visual Studio 2019 x64, VS16Arm64: Visual Studio 2019 ARM64, VS16Arm: Visual Studio 2019 ARM, VS16Win32: Visual Studio 2019 Win32, VS15Win64: Visual Studio 2017 x64, VS15Arm64: Visual Studio 2017 ARM64, VS15Arm: Visual Studio 2017 ARM, VS15Win32: Visual Studio 2017 Win32. Used by CMakeListsTxtBasic mode.
-          cmakeGenerator: ${{ matrix.cmakeGenerator }}
-          # Set the build directory, i.e. where CMake generates the build system files. Defaults to `$(Build.ArtifactStagingDirectory)` for CMakeLists.txt, and to `$(Build.ArtifactStagingDirectory)/<configuration-name>` for CMakeSettings.json. Used by any mode.
-          buildDirectory: ${{ env.buildDir }}
-          # Provides a mean to provide all the CMake arguments. This is required when using CMakeLists.txt in Advanced mode. For CMakeSettings.json, the arguments are already inferred, but you can append your arguments providing them here.  Used by CMakeListsTxtAdvanced and CMakeSettingsJson modes.
-          cmakeAppendedArgs: ""
-          # Indicates whether to run 'cmake --build' after CMake project files have been generated successfully. Used by any mode.
-          buildWithCMake: true
-          # Additional parameters for both CMake and the make program (e.g. ninja or make).  Separate CMake arguments to the native make program arguments with '--', such as: '--clean-first --config Debug -- -j0'. Used by both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes
-          buildWithCMakeArgs: "--config Release"
-
-      - name: copy-build-artifacts
+        #if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          New-Item bin -Force -Type Directory
-          $aPossibleBinaryDirs = @("build", "build\objconv", "build\Release", "build\objconv\Release")
-          $aPossibleBinaryDirs | ForEach-Object {
-            if (Test-Path $_) {
-              Copy-Item -Force -Verbose $_\*.* .\bin
-            }
-          }
+          git clone https://github.com/stephengtuggy/vcpkg-local.git ${{ env.VCPKG_ROOT }}
+          ${{ env.VCPKG_ROOT }}\bootstrap-vcpkg.bat -disableMetrics
+
+      - name: run-build-script
+        working-directory: ${{ github.workspace }}
+        run: .\script\build.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
 
       - name: Test
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{ github.workspace }}
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
-        run: ctest -V -C Release
+        run: .\script\test.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
 
       - name: Upload test results
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #v3.1.2
         if: failure()
         with:
-            name: test_results_xml
-            path: ${{github.workspace}}/build/test-results/**/*.xml
+          name: test_results_xml
+          path: ${{ github.workspace }}/**/test-results/**/*.xml

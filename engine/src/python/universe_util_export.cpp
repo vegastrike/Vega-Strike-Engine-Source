@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * universe_util_export.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -20,6 +22,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 #include "python_class.h"
@@ -40,7 +43,7 @@ void StarSystemExports() {
 #define EXPORT_FACTION(name, aff) PYTHON_DEFINE_GLOBAL( VS, &FactionUtil::name, #name );
 #define voidEXPORT_FACTION(name) EXPORT_FACTION( name, 0 )
 
-    #include "star_system_exports.h"
+#include "star_system_exports.h"
 }
 
 #include <string>

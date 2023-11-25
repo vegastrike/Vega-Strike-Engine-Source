@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * unit_exports.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,6 +23,7 @@
  */
 // NO HEADER GUARD
 
+#define PY_SSIZE_T_CLEAN
 #include "python_class.h"
 
 #include "cmd/container.h"
@@ -30,8 +33,8 @@
 #include "cmd/unit_generic.h"
 #include <boost/version.hpp>
 
-#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
+#if BOOST_VERSION != 102800
 typedef boost::python::dict BoostPythonDictionary;
 #else //BOOST_VERSION != 102800
 #include <boost/python/objects.hpp>

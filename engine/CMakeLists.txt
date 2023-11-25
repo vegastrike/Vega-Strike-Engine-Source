@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2001-2022 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2023 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -24,11 +24,11 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
@@ -78,16 +78,55 @@ ENDIF ()
 # If a release is missing this value, then version `1` can be assumed.
 SET(VEGASTRIKE_ASSETS_API_VERSION "2")
 
+#IF (COMMAND cmake_policy)
+#    CMAKE_POLICY (SET CMP0003 NEW)
+#ENDIF (COMMAND cmake_policy)
+#
+## VERSION Policy
+#IF (POLICY CMP0048)
+#    CMAKE_POLICY (SET CMP0048 NEW)
+#ENDIF (POLICY CMP0048)
+#
+## Used to be that without this, CMake couldn't find pow() -- at least not on my Windows machine.
+#IF (POLICY CMP0066)
+#    CMAKE_POLICY (SET CMP0066 NEW)
+#ENDIF ()
+#
+## FindOpenGL prefers GLVND by default when available. But there is an option to override that.
+#IF (POLICY CMP0072)
+#    CMAKE_POLICY (SET CMP0072 NEW)
+#ENDIF (POLICY CMP0072)
+#
+## find_package() uses <PackageName>_ROOT variables
+#IF (POLICY CMP0074)
+#    CMAKE_POLICY (SET CMP0074 NEW)
+#ENDIF (POLICY CMP0074)
+#
+## Include file check macros honor CMAKE_REQUIRED_LIBRARIES
+#IF (POLICY CMP0075)
+#    CMAKE_POLICY (SET CMP0075 NEW)
+#ENDIF ()
+#
+## Concerning link time flags for turning on or off Position Independent Executables (PIE)
+#IF (POLICY CMP0083)
+#    CMAKE_POLICY (SET CMP0083 NEW)
+#ENDIF ()
+#
+## MSVC runtime library flags are selected by an abstraction. Supported by CMake 3.15 and up
+#IF (POLICY CMP0091)
+#    CMAKE_POLICY (SET CMP0091 NEW)
+#ENDIF ()
+
 PROJECT(Vega_Strike
     VERSION
-        "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
+    "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
     LANGUAGES
-        CXX C
+    CXX C
 )
 
 # One version header generator to rule them all
-CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/src/version.h)
-CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/setup/src/include/version.h)
+CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
+CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
@@ -120,24 +159,26 @@ SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
 
-IF (MSVC)
-INCLUDE_DIRECTORIES(
-    ${Vega_Strike_SOURCE_DIR}/src
-    ${Vega_Strike_SOURCE_DIR}/src/cmd
-    ${Vega_Strike_SOURCE_DIR}/src/damage
-    ${Vega_Strike_SOURCE_DIR}/src/resource
-    ${Vega_Strike_BINARY_DIR}
-)
-ELSE (MSVC)
-INCLUDE_DIRECTORIES(
-    ${Vega_Strike_SOURCE_DIR}/src
-    ${Vega_Strike_SOURCE_DIR}/src/cmd
-    ${Vega_Strike_SOURCE_DIR}/src/damage
-    ${Vega_Strike_SOURCE_DIR}/src/resource
-    ${Vega_Strike_BINARY_DIR}
-    /usr/include/harfbuzz/
-)
-ENDIF (MSVC)
+IF (UNIX)
+    INCLUDE_DIRECTORIES(
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_SOURCE_DIR}/src/damage
+        ${Vega_Strike_SOURCE_DIR}/src/resource
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+        /usr/include/harfbuzz/
+    )
+ELSE ()
+    INCLUDE_DIRECTORIES(
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_SOURCE_DIR}/src/damage
+        ${Vega_Strike_SOURCE_DIR}/src/resource
+        ${Vega_Strike_BINARY_DIR}
+        ${Vega_Strike_BINARY_DIR}/src
+    )
+ENDIF ()
 
 # The source files used to be listed here...
 
@@ -192,8 +233,10 @@ OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 # OPTION(VEGA_STRIKE_PREFER_LEGACY_OPENGL "Prefer legacy OpenGL implementation (such as Mesa's)? Or prefer GLVND?" OFF )
 IF (OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglu1-mesa")
-ELSE ()
+ELSEIF (OpenGL_GL_PREFERENCE STREQUAL "GLVND")
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglvnd0")
+ELSE ()
+    UNSET (VEGA_STRIKE_GLU_DEPENDENCY)
 ENDIF ()
 MESSAGE("** OpenGL_GL_PREFERENCE: ${OpenGL_GL_PREFERENCE}")
 
@@ -270,6 +313,9 @@ ENDIF (DATADIR)
 #
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
 MESSAGE("-- Always using preferred PIE logic now")
+
+include(CheckPIESupported)
+check_pie_supported()
 UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 IF (ENABLE_PIE)
     MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
@@ -302,6 +348,7 @@ add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
 add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Debug>>:-fstandalone-debug>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Debug>>:-O0>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Profiler>,$<CONFIG:RelWithDebInfo>>>:-Og>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:-g3>"
@@ -318,7 +365,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development)
+FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
 MESSAGE("++ Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE("++ Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
@@ -378,7 +425,8 @@ IF (USE_SYSTEM_BOOST)
         ENDIF (Boost_python3_FOUND)
 
         SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
+        SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+        MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
         SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
         INCLUDE_DIRECTORIES(${TST_INCLUDES})
     ELSE (Boost_FOUND)
@@ -633,9 +681,10 @@ CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_
 
 #end config.h generation
 
-INCLUDE_DIRECTORIES(APPEND ${TST_INCLUDES})
-include_directories(APPEND ${CMAKE_CURRENT_BINARY_DIR})
-add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>" "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:config.h>")
+INCLUDE_DIRECTORIES(${TST_INCLUDES})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
+                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:config.h>")
 add_link_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
 
 # Now the source files are listed starting here!
@@ -653,13 +702,13 @@ SET(LIBDAMAGE
     src/damage/damageable_layer.cpp
     src/damage/damageable_object.cpp
     src/damage/health.cpp
-    )
+)
 
 SET(LIBRESOURCE
     src/resource/resource.cpp
     src/resource/store.cpp
     src/resource/product.cpp
-    )
+)
 
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
@@ -789,9 +838,17 @@ ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/CSopcodecollider.cpp
 )
 
-TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
+#TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
+set_property(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
+ENDIF()
+TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+IF (WIN32)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC _WIN32_WINNT=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
 
 SET(LIBCMD_SOURCES
@@ -1072,9 +1129,17 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBGFXGENERIC_SOURCES}
 )
 
-TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
+#TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
+set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
+ENDIF()
+TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+IF (WIN32)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC _WIN32_WINNT=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
 
 SET(VEGASTRIKE_SOURCES
@@ -1152,19 +1217,26 @@ SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
 
-    TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
+    #TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
     IF (NEED_LINKING_AGAINST_LIBM)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
     ENDIF()
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    IF (WIN32)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+    ENDIF()
 
-    ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)
+    #ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)
 
     TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU ${TST_LIBS})
-    IF (MSVC)
+    #IF (MSVC)
         SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
-    ELSE (MSVC)
-        SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib -L/usr/local/lib ${TST_LFLAGS}")
-    ENDIF (MSVC)
+    #ELSE (MSVC)
+    #    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib -L/usr/local/lib ${TST_LFLAGS}")
+    #ENDIF (MSVC)
 ENDIF (NOT DISABLE_CLIENT)
 
 # Vssetup Sub build file
@@ -1640,6 +1712,14 @@ IF (USE_GTEST)
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
     )
+    target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    set_property(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+    IF (WIN32)
+        target_compile_definitions(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        target_compile_definitions(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
+        target_compile_definitions(vegastrike-testing PUBLIC WINVER=0x0A00)
+        target_compile_definitions(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+    ENDIF()
 
     TARGET_LINK_LIBRARIES(
         ${TEST_NAME}
@@ -1648,6 +1728,13 @@ IF (USE_GTEST)
         Boost::log
         Boost::log_setup
     )
+    TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    IF (WIN32)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+    ENDIF()
 
     FILE(
         COPY "src/configuration/tests/vegastrike.config"

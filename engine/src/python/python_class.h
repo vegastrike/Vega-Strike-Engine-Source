@@ -15,14 +15,18 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
 #define VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
+
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>///module.hpp>
 
 //This takes care of the fact that several systems use the _POSIX_C_SOURCES
 //variable and don't set them to the same thing.
@@ -42,7 +46,6 @@
 #include "boost/python/object.hpp"
 #include "boost/python/class.hpp"
 #include "boost/python/call_method.hpp"
-#include <boost/python.hpp>///module.hpp>
 
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector

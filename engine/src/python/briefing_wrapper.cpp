@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * briefing_wrapper.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,6 +23,8 @@
  */
 
 #ifndef PYTHON_STUB
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <math.h>
 #include "python_class.h"
 #include "cmd/briefing.h"

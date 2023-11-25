@@ -2,8 +2,8 @@ name: Fortify on Demand Scan
 
 # Controls when the action will run.
 on:
-#   push:
-#   pull_request:
+  #   push:
+  #   pull_request:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
 
       - name: Fortify on Demand Scan
         # You may pin to the exact commit or the version.

@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * unit_wrapper_class.h
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,6 +23,9 @@
  */
 // NO HEADER GUARD
 
+
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include "vs_logging.h"
 using std::string;
 //WARNING: Macro City ahead.  Please skip this section if you don't like macros.
@@ -162,15 +167,15 @@ public:
     boost::python::tuple GetOrientation() {
         {
         CHECKME VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0,
-                    0,
-                    0));
+                                                                                                                    0,
+                                                                                                                    0));
         }
         Vector p, q, r;
         unit->GetOrientation(p, q, r);
         return VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(p.i, p.j, p.k), VS_BOOST_MAKE_TUPLE(q.i,
-                q.j,
-                q.k),
-                VS_BOOST_MAKE_TUPLE(r.i, r.j, r.k));
+                                                                                           q.j,
+                                                                                           q.k),
+                                   VS_BOOST_MAKE_TUPLE(r.i, r.j, r.k));
     }
 
     boost::python::tuple rayCollide(QVector st, QVector en) {
@@ -232,23 +237,23 @@ public:
         Vector bigNormal, smallNormal;
         if (!unit->InsideCollideTree(smaller, bigpos, bigNormal, smallpos, smallNormal)) {
             bigpos = smallpos = QVector(0,
-                    0,
-                    0);
+                                        0,
+                                        0);
         }
         boost::python::tuple tup = VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(bigpos.i,
-                bigpos.j,
-                bigpos.k),
-                VS_BOOST_MAKE_TUPLE(bigNormal.i,
-                        bigNormal.j,
-                        bigNormal.k),
-                VS_BOOST_MAKE_TUPLE(smallpos.i,
-                        smallpos
-                                .j,
-                        smallpos
-                                .k),
-                VS_BOOST_MAKE_TUPLE(smallNormal.i,
-                        smallNormal.j,
-                        smallNormal.k));
+                                                                             bigpos.j,
+                                                                             bigpos.k),
+                                                         VS_BOOST_MAKE_TUPLE(bigNormal.i,
+                                                                             bigNormal.j,
+                                                                             bigNormal.k),
+                                                         VS_BOOST_MAKE_TUPLE(smallpos.i,
+                                                                             smallpos
+                                                                                     .j,
+                                                                             smallpos
+                                                                                     .k),
+                                                         VS_BOOST_MAKE_TUPLE(smallNormal.i,
+                                                                             smallNormal.j,
+                                                                             smallNormal.k));
         return tup;
     }
 
@@ -271,13 +276,13 @@ public:
     }
 
     void ApplyDamage(Vector pnt,
-            Vector normal,
-            float amt,
-            UnitWrapper dealer,
-            float r,
-            float g,
-            float b,
-            float a) {
+                     Vector normal,
+                     float amt,
+                     UnitWrapper dealer,
+                     float r,
+                     float g,
+                     float b,
+                     float a) {
         {
         CHECKME;
         }

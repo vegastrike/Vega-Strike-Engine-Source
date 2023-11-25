@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gl_texture.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -768,7 +770,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
     if (maxdimension == 65536) {
         maxdimension = gl_options.max_texture_dimension;
     }
-    VS_LOG(trace,
+    VS_LOG(debug,
             (boost::format(
                     "Transferring %1%x%2% texture, page %3% (eff: %4%x%5% - limited at %6% - %7% mips), onto name %8% (%9%)")
                     % textures[handle].iwidth
