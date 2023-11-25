@@ -1,4 +1,6 @@
 /*
+ * aligned.h
+ *
  * Copyright (C) 2001-2023 Daniel Horn, klaussfreire, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
@@ -25,25 +27,24 @@
 #include <memory>
 #include <cstddef>
 
-#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7)
-#define __alpn(x, a) x
-#define __alprn(x, a) x
-#define __alp(x) x
-#define __alpr(x) x
+#if defined(__cpp_lib_assume_aligned)
+    #define __alpn(x,a) std::assume_aligned<a>(x)
+    #define __alprn(x,a) std::assume_aligned<a>(x)
+    #define __alp(x) __alpn(x,16)
+    #define __alpr(x) __alprn(x,16)
+#elif __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7)
+    #define __alpn(x,a) x
+    #define __alprn(x,a) x
+    #define __alp(x) x
+    #define __alpr(x) x
 #else
-#define __alpn(x, a) ((typeof(x))(__builtin_assume_aligned(x,a)))
-#define __alprn(x, a) ((typeof(x) __restrict__)(__builtin_assume_aligned(x,a)))
-#define __alp(x) __alpn(x,16)
-#define __alpr(x) __alprn(x,16)
+    #define __alpn(x,a) ((typeof(x))(__builtin_assume_aligned(x,a)))
+    #define __alprn(x,a) ((typeof(x) __restrict__)(__builtin_assume_aligned(x,a)))
+    #define __alp(x) __alpn(x,16)
+    #define __alpr(x) __alprn(x,16)
 #endif
 
-#if defined(__GNUC__)
-#define _ALIGNED(x) __attribute__ ((aligned(x)))
-#else
-#if defined(_MSC_VER)
-#define _ALIGNED(x) __declspec(align(x))
-#endif
-#endif
+#define _ALIGNED(x) alignas(x)
 
 template<typename T, int ALIGN = 16>
 class aligned_allocator : public std::allocator<T> {
