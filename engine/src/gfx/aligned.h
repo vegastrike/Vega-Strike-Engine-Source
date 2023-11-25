@@ -48,6 +48,15 @@
 
 #define _ALIGNED(x) alignas(x)
 
+template<typename T, typename U>
+  using Rebind = typename std::allocator_traits<T>::template rebind_alloc<U>;
+
+template<typename T, typename = T>
+  struct HasRebind {
+    using value_type = T;
+    template<typename U> struct rebind { using other = HasRebind<U>; };
+  };
+
 template <typename T, int ALIGN=16> class aligned_allocator : public std::allocator<T>
 {
 public:
@@ -61,9 +70,15 @@ public:
 
     static const int _OVERHEAD = (sizeof(T) + ALIGN-1) / ALIGN + sizeof(size_t);
 
-    aligned_allocator() {}
-    template<typename A> explicit aligned_allocator(const A &other) : std::allocator<T>(other) {}
-    
+    aligned_allocator() = default;
+
+    template<typename U> struct rebind {
+        using value_type = T;
+        using other = aligned_allocator<U>;
+    };
+
+   template<typename A> explicit aligned_allocator(const A &other) : std::allocator<T>(other) {}
+
     typename std::allocator<T>::pointer address ( typename std::allocator<T>::reference x ) const
     {
         if (sizeof(T) % ALIGN) {
@@ -72,7 +87,7 @@ public:
             return __alpn(std::allocator<T>::address(x), ALIGN);
         }
     }
-    
+
     typename std::allocator<T>::const_pointer address ( typename std::allocator<T>::const_reference x ) const
     {
         if (sizeof(T) % ALIGN) {
