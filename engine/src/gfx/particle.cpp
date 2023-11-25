@@ -75,9 +75,9 @@ void ParticleTrail::ChangeMax( unsigned int max )
 
 
 
-static inline void UpdateColor( std::vector< QVector > &vloc,
-                                const std::vector< Vector > &vvel,
-                                std::vector< GFXColor > &vcol,
+static inline void UpdateColor( std::vector< QVector, aligned_allocator<QVector> > &vloc,
+                                const std::vector< Vector, aligned_allocator<Vector> > &vvel,
+                                std::vector< GFXColor, aligned_allocator<GFXColor> > &vcol,
                                 const GFXColor& fadetime,
                                 const float time )
 {
