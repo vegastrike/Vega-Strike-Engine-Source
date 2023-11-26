@@ -77,7 +77,8 @@ void Mission::doIf( missionNode *node, int mode )
 
         int nr_subnodes = node->subnodes.size();
         if (nr_subnodes != 3) {
-            fatalError( node, mode, "an if-statement needs exact three subnodes, not "+nr_subnodes );
+            std::string error_message = (boost::format("an if-statement needs exactly three subnodes, not %1%") % nr_subnodes).str();
+            fatalError( node, mode, error_message.c_str() );
             printf( "nr_of_subnodes: %d\n", nr_subnodes );
 
             assert( 0 );

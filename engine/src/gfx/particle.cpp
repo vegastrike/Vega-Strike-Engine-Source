@@ -1,27 +1,26 @@
-/**
-* particle.cpp
-*
-* Copyright (C) 2001-2002 Daniel Horn
-* Copyright (C) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (C) 2019-2022 Stephen G. Tuggy and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * particle.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "particle.h"
 #include "gfxlib.h"
@@ -284,7 +283,7 @@ void ParticleTrail::DrawAndUpdate()
             // Must sort
             distances.clear();
             distances.reserve(nparticles);
-            { for (std::vector<QVector, aligned_allocator<QVector> >::const_iterator it = particleLoc.begin(); it != particleLoc.end(); ++it) {
+            { for (auto it = particleLoc.begin(); it != particleLoc.end(); ++it) {
                 distances.push_back((campos - *it).MagnitudeSquared());
             } }
             IndexCompare<float, unsigned short> dcomp(distances);
@@ -340,7 +339,7 @@ void ParticleTrail::DrawAndUpdate()
     float mytime = GetElapsedTime();
     if (fadeColor) {
         float fadetimef = pfade * mytime;
-        GFXColor _ALIGNED(16) fadetime = GFXColor(fadetimef, fadetimef, fadetimef, fadetimef);
+        _ALIGNED(16) GFXColor fadetime = GFXColor(fadetimef, fadetimef, fadetimef, fadetimef);
         UpdateColor(particleLoc, particleVel, particleColor, fadetime, mytime);
     } else {
         UpdateAlpha(particleLoc, particleVel, particleColor, mytime, pfade);
@@ -362,16 +361,16 @@ void ParticleTrail::DrawAndUpdate()
     }
 
     // Remove dead particles anywhere
-    vector< Vector, aligned_allocator<Vector> >::iterator v = particleVel.begin();
-    vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
-    vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
-    vector< float, aligned_allocator<float> >::iterator sz = particleSize.begin();
+    auto v = particleVel.begin();
+    auto loc = particleLoc.begin();
+    auto col = particleColor.begin();
+    auto sz = particleSize.begin();
     while ( col != particleColor.end() ) {
         if ( !(col->a > minalpha) ) {
-            vector< Vector, aligned_allocator<Vector> >::iterator vlast = particleVel.end() - 1;
-            vector< QVector, aligned_allocator<QVector> >::iterator loclast = particleLoc.end() - 1;
-            vector< GFXColor, aligned_allocator<GFXColor> >::iterator collast = particleColor.end() - 1;
-            vector< float, aligned_allocator<float> >::iterator szlast = particleSize.end() - 1;
+            auto vlast = particleVel.end() - 1;
+            auto loclast = particleLoc.end() - 1;
+            auto collast = particleColor.end() - 1;
+            auto szlast = particleSize.end() - 1;
             if (col != collast) {
                 *v = *vlast;
                 *loc = *loclast;
@@ -403,10 +402,10 @@ void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float 
         return;
 
     if (particleLoc.size() > maxparticles) {
-        vector< Vector, aligned_allocator<Vector> >::iterator vel = particleVel.begin();
-        vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
-        vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
-        vector< float, aligned_allocator<float> >::iterator sz = particleSize.begin();
+        auto vel = particleVel.begin();
+        auto loc = particleLoc.begin();
+        auto col = particleColor.begin();
+        auto sz = particleSize.begin();
         size_t off = ( (size_t) rand() ) % particleLoc.size();
         vel += off;
         loc += off;
