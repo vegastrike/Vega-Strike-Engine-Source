@@ -22,8 +22,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef __PARTICLE_H
-#define __PARTICLE_H
+#ifndef VEGA_STRIKE_GFX_PARTICLE_H
+#define VEGA_STRIKE_GFX_PARTICLE_H
 
 #include <vector>
 #include <string>
@@ -50,10 +50,10 @@ struct ParticlePoint
  */
 class ParticleTrail
 {
-    std::vector< Vector > particleVel;
-    std::vector< QVector > particleLoc;
-    std::vector< GFXColor > particleColor;
-    std::vector< float > particleSize;
+    std::vector< Vector, aligned_allocator<Vector> > particleVel;
+    std::vector< QVector, aligned_allocator<QVector> > particleLoc;
+    std::vector< GFXColor, aligned_allocator<GFXColor> > particleColor;
+    std::vector< float, aligned_allocator<float> > particleSize;
     std::vector< float > particleVert;
     std::vector< float > distances;
     std::vector< unsigned short > pointIndices;
@@ -147,5 +147,5 @@ extern ParticleTrail particleTrail;
 extern ParticleTrail smokeTrail;
 extern ParticleTrail debrisTrail;
 
-#endif
+#endif //VEGA_STRIKKE_GFX_PARTICLE_H
 
