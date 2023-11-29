@@ -29,6 +29,7 @@
 #include "gui/windowcontroller.h"
 #include "cmd/unit_generic.h"
 #include "gui/simplepicker.h"
+#include "cargo_color.h"
 
 //The BaseComputer class displays an interactive screen that supports a
 //number of functions in a base.

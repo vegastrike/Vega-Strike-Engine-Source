@@ -80,6 +80,8 @@ void UncheckUnit( class Unit*un );
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
 
+#include "cargo_color.h"
+
 extern char *GetUnitDir(const char *filename);
 
 Unit *getMasterPartList();

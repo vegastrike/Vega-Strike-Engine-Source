@@ -708,7 +708,10 @@ SET(LIBRESOURCE
     src/resource/resource.cpp
     src/resource/store.cpp
     src/resource/product.cpp
-)
+    src/resource/cargo.cpp
+    src/resource/manifest.cpp
+    src/cmd/json.cpp
+    )
 
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
@@ -853,7 +856,6 @@ ENDIF()
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
-    src/cmd/cargo.cpp
     src/cmd/carrier.cpp
     src/cmd/collection.cpp
     src/cmd/collide_map.cpp
@@ -871,7 +873,6 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_csv_factory.cpp
     src/cmd/unit_json_factory.cpp
     src/cmd/unit_optimize_factory.cpp
-    src/cmd/json.cpp
     src/cmd/unit_functions_generic.cpp
     src/cmd/unit_generic.cpp
     src/cmd/upgradeable_unit.cpp
@@ -1702,6 +1703,7 @@ IF (USE_GTEST)
         src/damage/tests/object_tests.cpp
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
+        src/resource/tests/manifest_tests.cpp
         src/exit_unit_tests.cpp
     )
 
