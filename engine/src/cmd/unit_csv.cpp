@@ -1424,41 +1424,7 @@ string Unit::WriteUnitString() {
     return writeCSV(unit);
 }
 
-void UpdateMasterPartList(Unit *ret) {
-    for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
-        Cockpit *cp = _Universe->AccessCockpit(i);
-        std::vector<std::string> *addedcargoname = &cp->savegame->getMissionStringData("master_part_list_content");
-        std::vector<std::string> *addedcargocat = &cp->savegame->getMissionStringData("master_part_list_category");
-        std::vector<std::string> *addedcargovol = &cp->savegame->getMissionStringData("master_part_list_volume");
-        std::vector<std::string> *addedcargoprice = &cp->savegame->getMissionStringData("master_part_list_price");
-        std::vector<std::string> *addedcargomass = &cp->savegame->getMissionStringData("master_part_list_mass");
-        std::vector<std::string> *addedcargodesc = &cp->savegame->getMissionStringData("master_part_list_description");
-        for (unsigned int j = 0; j < addedcargoname->size(); ++j) {
-            Cargo carg;
-            carg.SetName((*addedcargoname)[j]);
-            carg.SetCategory((j < addedcargocat->size() ? (*addedcargocat)[j] : std::string("Uncategorized")));
-            carg.SetVolume((j < addedcargovol->size() ? XMLSupport::parse_float((*addedcargovol)[j]) : 1.0));
-            carg.SetPrice((j < addedcargoprice->size() ? XMLSupport::parse_float((*addedcargoprice)[j]) : 0.0));
-            carg.SetMass((j < addedcargomass->size() ? XMLSupport::parse_float((*addedcargomass)[j]) : .01));
-            carg.SetDescription(
-                    (j < addedcargodesc->size() ? (*addedcargodesc)[j] : std::string("No Description Added")));
-            carg.SetQuantity(1);
-            ret->cargo.push_back(carg);
-        }
-    }
-    std::sort(ret->cargo.begin(), ret->cargo.end());
-    {
-        Cargo last_cargo;
-        for (int i = ret->numCargo() - 1; i >= 0; --i) {
-            if (ret->GetCargo(i).GetName() == last_cargo.GetName()
-                    && ret->GetCargo(i).GetCategory() == last_cargo.GetCategory()) {
-                ret->RemoveCargo(i, ret->GetCargo(i).GetQuantity(), true);
-            } else {
-                last_cargo = ret->GetCargo(i);
-            }
-        }
-    }
-}
+
 
 
 

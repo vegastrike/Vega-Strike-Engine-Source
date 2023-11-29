@@ -87,7 +87,8 @@ WeaponFactory::WeaponFactory(std::string filename) {
     }
 }
 
-std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value) {
+// TODO: dup in MPL. Remove
+static std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value) {
     if(object.has_key(key)) {
         std::string value = object.get(key);
         value = value.substr(1, value.size() - 2);
@@ -97,7 +98,7 @@ std::string getJSONValue(const json::jobject& object, const std::string &key, co
     return default_value;
 }
 
-float getJSONValue(const json::jobject& object, const std::string &key, const float &default_value) {
+static float getJSONValue(const json::jobject& object, const std::string &key, const float &default_value) {
     if(object.has_key(key)) {
         try {
             return std::stof(object.get(key));
