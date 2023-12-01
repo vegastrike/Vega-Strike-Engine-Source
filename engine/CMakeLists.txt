@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2008-2022 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2008-2023 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -35,7 +35,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
 
 SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "8")
-SET(VEGASTRIKE_VERSION_PATCH "1")
+SET(VEGASTRIKE_VERSION_PATCH "2")
 
 IF (DEFINED ENV{SHORT_SHA} AND NOT "$ENV{SHORT_SHA}" STREQUAL "")
     SET(VEGASTRIKE_VERSION_TWEAK "$ENV{SHORT_SHA}")
@@ -435,7 +435,7 @@ FIND_PACKAGE(LinuxDistro REQUIRED)
 OPTION(USE_PYTHON_3 "Use Python 3 or Python 2.7 (default is 3)" ON)
 IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
-    SET(Python_ADDITIONAL_VERSIONS 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4)
+    SET(Python_ADDITIONAL_VERSIONS 3.12 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4)
 ELSE (USE_PYTHON_3)
     MESSAGE("++ Adding python 2.7 variant")
     SET(Python_ADDITIONAL_VERSIONS 2.7)

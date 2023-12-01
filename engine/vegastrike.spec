@@ -1,7 +1,7 @@
 # norootforbuild
 
 Name:           vegastrike
-Version:        0.8.0
+Version:        0.8.2
 Release:        1
 Summary:        3D OpenGL spaceflight simulator
 Group:          Amusements/Games
