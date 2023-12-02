@@ -54,7 +54,11 @@ jobs:
           check-latest: true
 
       - name: Install dependencies using homebrew
-        run: brew install boost boost-python3 gtk+3 gtkglext sdl
+        run: |
+          brew install python@3.12
+          brew install boost
+          brew install boost-python3
+          brew install gtk+3 gtkglext sdl
 
       # The following Apple-provided libraries are deprecated:
       # * OpenGL as of macOS 10.14
