@@ -47,6 +47,7 @@ public:
     Cargo GetRandomCargo(int quantity = 0);
     Cargo GetRandomCargoFromCategory(std::string category, int quantity = 0);
     Manifest GetCategoryManifest(std::string category);
+    Manifest GetMissionManifest();
 
     std::vector<Cargo> getItems() { return _items; }
     bool empty() { return _items.empty(); }

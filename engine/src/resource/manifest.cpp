@@ -131,15 +131,20 @@ Cargo Manifest::GetRandomCargo(int quantity) {
     return c;
 }
 
+
+
 Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) {
-    Manifest category_manifest = GetCategoryManifest(category);
+    Manifest manifest = GetCategoryManifest(category);
 
     // If category is empty, return randomly from MPL itself.
-    if(category_manifest._items.empty()) {
-        return GetRandomCargo(quantity);
+    if(manifest._items.empty()) {
+        manifest = GetMissionManifest();
+        if(manifest._items.empty()) {
+            return GetRandomCargo(quantity);
+        }
     }
 
-    return category_manifest.GetRandomCargo(quantity);
+    return manifest.GetRandomCargo(quantity);
 }
 
 Manifest Manifest::GetCategoryManifest(std::string category) {
@@ -148,6 +153,17 @@ Manifest Manifest::GetCategoryManifest(std::string category) {
     std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items), 
             [category](Cargo c) {
         return c.GetCategory() == category;
+    });
+
+    return manifest;
+}
+
+Manifest Manifest::GetMissionManifest() {
+    Manifest manifest;
+
+    std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items), 
+            [](Cargo c) {
+        return c.name.find("mission") != std::string::npos;
     });
 
     return manifest;
