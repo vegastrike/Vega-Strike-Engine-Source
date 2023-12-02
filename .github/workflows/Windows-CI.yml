@@ -49,6 +49,11 @@ jobs:
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
+      - name: Set up Python
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 #v4.7.1
+        with:
+          python-version: '3.11'
+
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -58,9 +63,9 @@ jobs:
         shell: bash
 
       - name: install-cmake
-        uses: lukka/get-cmake@359fbae4b163fa01633e6de228fa7f2a31ab1fc7 #v3.26.1
+        uses: lukka/get-cmake@4865386b66955d11be0abf8c112d0230023e742a #v3.27.9
         with:
-          cmakeVersion: 3.26.1
+          cmakeVersion: 3.27.9
           ninjaVersion: 1.11.1
 
       #      # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
