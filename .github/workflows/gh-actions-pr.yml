@@ -16,15 +16,25 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - FROM:     'ubuntu:jammy'
+          - FROM:     'ubuntu:mantic'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             allow_failure: false
-          - FROM:     'ubuntu:jammy'
+          - FROM:     'ubuntu:mantic'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
+            allow_failure: false
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'gcc'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
           - FROM:     'ubuntu:jammy'
             COMPILER: 'gcc'
@@ -39,16 +49,6 @@ jobs:
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'ubuntu:focal'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'ubuntu:focal'
-            COMPILER: 'gcc'
-            USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
           - FROM:     'ubuntu:focal'
@@ -56,22 +56,12 @@ jobs:
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'gcc'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'ubuntu:bionic'
+          - FROM:     'linuxmintd/mint21.1-amd64'
             COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'gcc'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'ubuntu:bionic'
+          - FROM:     'linuxmintd/mint21-amd64'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -79,17 +69,12 @@ jobs:
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'linuxmintd/mint20-amd64'
+          - FROM:     'debian:bookworm'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
-            allow_failure: false
-          - FROM:     'debian:bullseye'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
             allow_failure: false
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
@@ -99,68 +84,48 @@ jobs:
           - FROM:     'debian:buster'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            allow_failure: false
+          - FROM:     'opensuse/leap:15.5'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             allow_failure: false
-          - FROM:     'debian:buster'
+          - FROM:     'opensuse/leap:15.5'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'opensuse/leap'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'opensuse/leap'
+          - FROM:     'opensuse/leap:15.4'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'fedora:36'
+          - FROM:     'fedora:38'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             allow_failure: false
-          - FROM:     'fedora:36'
+          - FROM:     'fedora:38'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'fedora:35'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'fedora:35'
+          - FROM:     'fedora:37'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'fedora:34'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'fedora:34'
+          - FROM:     'rockylinux:9.1'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'rockylinux/rockylinux'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: false
-          - FROM:     'rockylinux/rockylinux'
+          - FROM:     'rockylinux/8.7'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'manjarolinux/base'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            allow_failure: true
           - FROM:     'manjarolinux/base'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
@@ -168,14 +133,12 @@ jobs:
             allow_failure: true
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
+    - name: Check out repository
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
       with:
         fetch-depth: 2
         submodules: false
 
-    # Ensure PRs are built against the PR Head
-    # As opposed to the merge commit
     - name: Move to PR HEAD
       run: git checkout ${{ github.event.pull_request.head.sha }}
 

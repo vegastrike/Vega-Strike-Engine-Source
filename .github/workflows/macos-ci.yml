@@ -21,7 +21,6 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-11
           - macos-12
         compiler:
           - clang
@@ -49,8 +48,8 @@ jobs:
         run: brew install boost-python3 gtk+3 gtkglext sdl
 
       # The following Apple-provided libraries are deprecated:
-      # * OpenGL as of MacOS 10.14
-      # * GLUT as of MacOS 10.9
+      # * OpenGL as of macOS 10.14
+      # * GLUT as of macOS 10.9
       - name: Optionally install homebrewed OpenGL and GLUT
         if: ${{ matrix.homebrew-gl }}
         run: |
@@ -60,20 +59,20 @@ jobs:
         # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
         # find /usr/local/lib/ -iname '*gl*.dylib'
 
-      # The Apple-provided OpenAL is deprecated as of MacOS 10.15
+      # The Apple-provided OpenAL is deprecated as of macOS 10.15
       - name: Optionally install homebrewed OpenAL
         if: ${{ matrix.homebrew-al }}
         run: brew install openal-soft
 
       - name: Check out repository
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
         with:
           fetch-depth: 2
           submodules: false
 
       - name: Conditionally relocate to PR HEAD
         if: github.event.pull_request
-        run: git checkout HEAD^2
+        run: git checkout ${{ github.event.pull_request.head.sha }}
 
       - name: Build it
         env:
