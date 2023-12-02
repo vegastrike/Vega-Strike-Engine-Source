@@ -349,6 +349,10 @@ int main(int argc, char *argv[]) {
 
     //might overwrite the default mission with the command line
     InitUnitTables();
+
+    // Initialise the master parts list before first use.
+    Manifest::MPL();
+
 #ifdef HAVE_PYTHON
     Python::init();
 
