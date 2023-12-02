@@ -44,6 +44,13 @@ jobs:
       # - libpng
       # - libvorbis
       # - python
+      #
+      # Note, though, that the Python version "varies between runners and can be changed unexpectedly",
+      # according to https://github.com/actions/setup-python#basic-usage . Hence the need to use setup-python.
+      - name: Set up Python
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 #v4.7.1
+        with:
+          python-version: '3.11'
       - name: Install dependencies using homebrew
         run: brew install boost-python3 gtk+3 gtkglext sdl
 

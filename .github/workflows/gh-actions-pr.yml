@@ -133,27 +133,32 @@ jobs:
             allow_failure: true
 
     steps:
-    - name: Check out repository
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
-      with:
-        fetch-depth: 2
-        submodules: false
+      #- name: Set up Python
+      #  uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 #v4.7.1
+      #  with:
+      #    python-version: '3.11'
 
-    - name: Move to PR HEAD
-      run: git checkout ${{ github.event.pull_request.head.sha }}
+      - name: Check out repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        with:
+          fetch-depth: 2
+          submodules: false
 
-    - name: Extract short SHA
-      shell: bash
-      run: |
-        echo "SHORT_SHA=`git rev-parse --short ${{ github.event.pull_request.head.sha }}`" >> $GITHUB_ENV
-    - name: Test short SHA
-      run: |
-        echo "${SHORT_SHA}"
-    - name: Run CI
-      env:
-        FROM:       ${{ matrix.FROM }}
-        COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '-DUSE_PYTHON_3=${{ matrix.USE_PYTHON_3 }} -DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
-        MY_OS_NAME: linux
-        IS_RELEASE: 0
-      run: script/cibuild $FLAGS
+      - name: Move to PR HEAD
+        run: git checkout ${{ github.event.pull_request.head.sha }}
+
+      - name: Extract short SHA
+        shell: bash
+        run: |
+          echo "SHORT_SHA=`git rev-parse --short ${{ github.event.pull_request.head.sha }}`" >> $GITHUB_ENV
+      - name: Test short SHA
+        run: |
+          echo "${SHORT_SHA}"
+      - name: Run CI
+        env:
+          FROM:       ${{ matrix.FROM }}
+          COMPILER:   ${{ matrix.COMPILER }}
+          FLAGS:      '-DUSE_PYTHON_3=${{ matrix.USE_PYTHON_3 }} -DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
+          MY_OS_NAME: linux
+          IS_RELEASE: 0
+        run: script/cibuild $FLAGS
