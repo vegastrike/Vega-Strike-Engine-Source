@@ -23,11 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_CMD_CARGO_H
-#define VEGA_STRIKE_ENGINE_CMD_CARGO_H
+#ifndef VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
+#define VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
 
-#include "SharedPool.h"
-#include "gfxlib_struct.h"
 #include "product.h"
 
 #include <string>
@@ -44,6 +42,7 @@ protected:
     float functionality;
     float max_functionality;
 
+    friend class Manifest;
 public:
     Cargo();
     Cargo(std::string name, std::string category, float price, int quantity, float mass, float volume,
@@ -83,15 +82,4 @@ public:
     int reduce() { quantity--; return quantity; }
 };
 
-// A stupid struct that is only for grouping 2 different types of variables together in one return value
-// Must come after Cargo for obvious reasons
-class CargoColor {
-public:
-    Cargo cargo;
-    GFXColor color;
-
-    CargoColor() : cargo(), color(1, 1, 1, 1) {
-    }
-};
-
-#endif //VEGA_STRIKE_ENGINE_CMD_CARGO_H
+#endif //VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
