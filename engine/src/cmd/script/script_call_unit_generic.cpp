@@ -68,9 +68,10 @@
 #include "star_system.h"
 #include "universe.h"
 #include "vs_logging.h"
+#include "manifest.h"
 
 extern const vector<string> &ParseDestinations(const string &value);
-extern Unit &GetUnitMasterPartList();
+
 extern bool PlanetHasLights(Unit *un);
 
 #if 0
@@ -243,57 +244,34 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         varInst *vireturn = NULL;
         vireturn = call_olist_new(node, mode);
         if (mode == SCRIPT_RUN) {
-            Cargo *ret = NULL;
-            Unit *mpl = &GetUnitMasterPartList();
-            unsigned int max = mpl->numCargo();
-            if (!category.empty()) {
-                size_t Begin, End;
-                mpl->GetSortedCargoCat(category, Begin, End);
-                if (Begin < End) {
-                    unsigned int i = Begin + (rand() % (End - Begin));
-                    ret = &mpl->GetCargo(i);
-                }
-            } else {
-                if (mpl->numCargo()) {
-                    for (unsigned int i = 0; i < 500; i++) {
-                        ret = &mpl->GetCargo(rand() % max);
-                        if (ret->GetName().find("mission") == string::npos) {
-                            break;
-                        }
-                    }
-                } else {
-                    ret = new Cargo(); //mem leak--won't happen
-                }
-            }
-            if (ret) {
-                ret->SetQuantity(quantity);
-                viret = newVarInst(VI_IN_OBJECT);
-                viret->type = VAR_OBJECT;
-                viret->objectname = "string";
-                viret->object = ret->GetNameAddress();
-                ((olist_t *) vireturn->object)->push_back(viret);
-                viret = newVarInst(VI_IN_OBJECT);
-                viret->type = VAR_OBJECT;
-                viret->objectname = "string";
-                viret->object = const_cast<std::string*>(&ret->GetCategory());
-                ((olist_t *) vireturn->object)->push_back(viret);
-                viret = newVarInst(VI_IN_OBJECT);
-                viret->type = VAR_FLOAT;
-                viret->float_val = ret->GetPrice();
-                ((olist_t *) vireturn->object)->push_back(viret);
-                viret = newVarInst(VI_IN_OBJECT);
-                viret->type = VAR_INT;
-                viret->int_val = quantity;
-                ((olist_t *) vireturn->object)->push_back(viret);
-                viret = newVarInst(VI_IN_OBJECT);
-                viret->type = VAR_FLOAT;
-                viret->float_val = ret->GetMass();
-                ((olist_t *) vireturn->object)->push_back(viret);
-                viret = newVarInst(VI_IN_OBJECT);
-                viret->type = VAR_FLOAT;
-                viret->float_val = ret->GetVolume();
-                ((olist_t *) vireturn->object)->push_back(viret);
-            }
+            Cargo c = Manifest::MPL().GetRandomCargoFromCategory(category, quantity);
+
+            viret = newVarInst(VI_IN_OBJECT);
+            viret->type = VAR_OBJECT;
+            viret->objectname = "string";
+            viret->object = c.GetNameAddress();
+            ((olist_t *) vireturn->object)->push_back(viret);
+            viret = newVarInst(VI_IN_OBJECT);
+            viret->type = VAR_OBJECT;
+            viret->objectname = "string";
+            viret->object = const_cast<std::string*>(&c.GetCategory());
+            ((olist_t *) vireturn->object)->push_back(viret);
+            viret = newVarInst(VI_IN_OBJECT);
+            viret->type = VAR_FLOAT;
+            viret->float_val = c.GetPrice();
+            ((olist_t *) vireturn->object)->push_back(viret);
+            viret = newVarInst(VI_IN_OBJECT);
+            viret->type = VAR_INT;
+            viret->int_val = quantity;
+            ((olist_t *) vireturn->object)->push_back(viret);
+            viret = newVarInst(VI_IN_OBJECT);
+            viret->type = VAR_FLOAT;
+            viret->float_val = c.GetMass();
+            ((olist_t *) vireturn->object)->push_back(viret);
+            viret = newVarInst(VI_IN_OBJECT);
+            viret->type = VAR_FLOAT;
+            viret->float_val = c.GetVolume();
+            ((olist_t *) vireturn->object)->push_back(viret);
         }
         debug(3, node, mode, "unit getRandCargo: ");
         printVarInst(3, vireturn);
