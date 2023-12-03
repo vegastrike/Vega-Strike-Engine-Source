@@ -107,6 +107,11 @@ IF (POLICY CMP0075)
     CMAKE_POLICY (SET CMP0075 NEW)
 ENDIF ()
 
+# Concerning link time flags for turning on or off Position Independent Executables (PIE)
+IF (POLICY CMP0083)
+    CMAKE_POLICY (SET CMP0083 NEW)
+ENDIF ()
+
 # MSVC runtime library flags are selected by an abstraction. Supported by CMake 3.15 and up
 IF (POLICY CMP0091)
     CMAKE_POLICY (SET CMP0091 NEW)
@@ -120,8 +125,8 @@ PROJECT(Vega_Strike
 )
 
 # One version header generator to rule them all
-CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/src/version.h)
-CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/setup/src/include/version.h)
+CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
+CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
