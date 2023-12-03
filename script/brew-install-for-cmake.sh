@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #====================================
 # @file   : brew-install-for-cmake.sh
 # @brief  : installs a package with Homebrew, keg-only, then registers that package's
@@ -29,11 +29,16 @@ set -e
 PACKAGE_SPEC="$1"
 LEAVE_LINKED="$2"
 
-HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_UPGRADE=1 brew install "$PACKAGE_SPEC"
-if [ ! "$LEAVE_LINKED" ] ; then
-  HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_UPGRADE=1 brew unlink "$PACKAGE_SPEC"
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_INSTALL_UPGRADE=1
+
+if ! brew list "$PACKAGE_SPEC" &>/dev/null; then
+  brew install "$PACKAGE_SPEC"
+  if [ ! "$LEAVE_LINKED" ] ; then
+    brew unlink "$PACKAGE_SPEC"
+  fi
 fi
-PACKAGE_INSTALLED_PREFIX=$(HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_UPGRADE=1 brew --prefix "$PACKAGE_SPEC")
+PACKAGE_INSTALLED_PREFIX=$(brew --prefix "$PACKAGE_SPEC")
 PACKAGE_INSTALLED_BIN="$PACKAGE_INSTALLED_PREFIX/bin"
 #PACKAGE_INSTALLED_INCLUDE="$PACKAGE_INSTALLED_PREFIX/include"
 #PACKAGE_INSTALLED_LIB="$PACKAGE_INSTALLED_PREFIX/lib"
