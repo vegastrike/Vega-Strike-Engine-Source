@@ -13,6 +13,9 @@
       "description": "Default build using Ninja generator",
       "generator": "Ninja",
       "binaryDir": "${sourceParentDir}/build/${presetName}",
+      "cacheVariables": {
+        "USE_PYTHON_3": "ON"
+      },
       "debug": {
         "output": true
       }
@@ -283,9 +286,6 @@
         "VCPKG_DEFAULT_HOST_TRIPLET": "x64-windows",
         "VCPKG_TARGET_TRIPLET": "x64-windows",
         "VCPKG_HOST_TRIPLET": "x64-windows"
-      },
-      "cacheVariables": {
-        "USE_PYTHON_3": "ON"
       },
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "debug": {
