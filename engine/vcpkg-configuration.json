@@ -2,14 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg-configuration.schema.json",
   "default-registry": {
     "kind": "git",
-    "baseline": "9edb1b8e590cc086563301d735cae4b6e732d2d2",
-    "repository": "https://github.com/microsoft/vcpkg"
-  },
-  "registries": [
-    {
-      "kind": "artifact",
-      "location": "https://github.com/microsoft/vcpkg-ce-catalog/archive/refs/heads/main.zip",
-      "name": "microsoft"
-    }
-  ]
+    "baseline": "45c660987c371515ddcc5c355e7989c0d652b85f",
+    "repository": "https://github.com/vegastrike/vcpkg-local"
+  }
 }

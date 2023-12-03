@@ -27,6 +27,7 @@
 #include "cmd/collection.h"
 #include "gfx/vec.h"
 #include "cmd/unit_util.h"
+#include "manifest.h"
 
 #include <string>
 #include <vector>
@@ -358,9 +359,6 @@ Unit *launch(std::string name_string,
         int nr_of_waves,
         QVector pos,
         std::string sqadlogo);
-
-///this gets a random cargo type (useful for cargo missions) from either any category if category is '' or else from a specific category  'Contraband'  comes to mind!
-Cargo getRandCargo(int quantity, std::string category);
 
 ///this gets the current game time since last start in seconds
 //float GetGameTime();

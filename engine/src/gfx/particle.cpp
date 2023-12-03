@@ -425,7 +425,7 @@ void ParticleTrail::DrawAndUpdate() {
     const float elapsed_time_as_float = static_cast<float>(elapsed_time_as_double);
     if (fadeColor) {
         float fadetimef = pfade * elapsed_time_as_double;
-        GFXColor _ALIGNED(16) fadetime = GFXColor(fadetimef, fadetimef, fadetimef, fadetimef);
+        _ALIGNED(16) GFXColor fadetime = GFXColor(fadetimef, fadetimef, fadetimef, fadetimef);
 
         for (auto & particle : particles) {
             particle.location += particle.velocity * elapsed_time_as_double;
