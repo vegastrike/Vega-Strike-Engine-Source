@@ -40,10 +40,6 @@ jobs:
           fetch-depth: 2
           submodules: false
 
-      - name: Conditionally relocate to PR HEAD
-        if: github.event.pull_request
-        run: git checkout ${{ github.event.pull_request.head.sha }}
-
       # The following dependencies are already present within macos-* images:
       # - clang (llvm)
       # - cmake
@@ -70,9 +66,7 @@ jobs:
           . ./script/brew-install-for-cmake.sh $PYTHON_VERSION_STRING
           . ./script/brew-install-for-cmake.sh boost
           . ./script/brew-install-for-cmake.sh boost-python3
-          . ./script/brew-install-for-cmake.sh gtk+3
-          . ./script/brew-install-for-cmake.sh gtkglext
-          . ./script/brew-install-for-cmake.sh sdl12-compat
+          brew install gtk+3 gtkglext sdl12-compat
 
       # The following Apple-provided libraries are deprecated:
       # * OpenGL as of macOS 10.14
@@ -80,12 +74,7 @@ jobs:
       - name: Optionally install homebrewed OpenGL and GLUT
         if: ${{ matrix.homebrew-gl }}
         run: |
-          . ./script/brew-install-for-cmake.sh mesa
-          . ./script/brew-install-for-cmake.sh mesa-glu
-          . ./script/brew-install-for-cmake.sh freeglut
-          brew link mesa
-          brew link mesa-glu
-          brew link freeglut
+          brew install mesa mesa-glu freeglut
           ln -s /usr/local/include/GL /usr/local/include/OpenGL
           ln -s /usr/local/include/GL /usr/local/include/GLUT
 
