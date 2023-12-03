@@ -39,10 +39,6 @@ jobs:
           fetch-depth: 2
           submodules: false
 
-      - name: Conditionally relocate to PR HEAD
-        if: github.event.pull_request
-        run: git checkout ${{ github.event.pull_request.head.sha }}
-
       # The following dependencies are already present within macos-* images:
       # - clang (llvm)
       # - cmake
@@ -66,12 +62,12 @@ jobs:
       - name: Install dependencies using homebrew
         run: |
           brew update
-          . ./script/brew-install-for-cmake.sh $PYTHON_VERSION_STRING
-          . ./script/brew-install-for-cmake.sh boost
-          . ./script/brew-install-for-cmake.sh boost-python3
-          . ./script/brew-install-for-cmake.sh gtk+3
-          . ./script/brew-install-for-cmake.sh gtkglext
-          . ./script/brew-install-for-cmake.sh sdl2
+          . ./script/brew-install-for-cmake.sh $PYTHON_VERSION_STRING 0
+          . ./script/brew-install-for-cmake.sh boost 0
+          . ./script/brew-install-for-cmake.sh boost-python3 0
+          . ./script/brew-install-for-cmake.sh gtk+3 1
+          . ./script/brew-install-for-cmake.sh gtkglext 1
+          . ./script/brew-install-for-cmake.sh sdl2 1
 
       # The following Apple-provided libraries are deprecated:
       # * OpenGL as of macOS 10.14
@@ -79,12 +75,9 @@ jobs:
       - name: Optionally install homebrewed OpenGL and GLUT
         if: ${{ matrix.homebrew-gl }}
         run: |
-          . ./script/brew-install-for-cmake.sh mesa
-          . ./script/brew-install-for-cmake.sh mesa-glu
-          . ./script/brew-install-for-cmake.sh freeglut
-          brew link mesa
-          brew link mesa-glu
-          brew link freeglut
+          . ./script/brew-install-for-cmake.sh mesa 1
+          . ./script/brew-install-for-cmake.sh mesa-glu 1
+          . ./script/brew-install-for-cmake.sh freeglut 1
           ln -s /usr/local/include/GL /usr/local/include/OpenGL
           ln -s /usr/local/include/GL /usr/local/include/GLUT
 
@@ -92,13 +85,13 @@ jobs:
       - name: Optionally install homebrewed OpenAL
         if: ${{ matrix.homebrew-al }}
         run: |
-          . ./script/brew-install-for-cmake.sh openal-soft
+          . ./script/brew-install-for-cmake.sh openal-soft 1
           export OPENALDIR=$(brew --prefix openal-soft)
 
       - name: Build it
         env:
           MY_OS_NAME: macos
-          FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
+          FLAGS:      '-DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_FIND_APPBUNDLE=LAST'
         run: script/cibuild $FLAGS
 
       - name: Test

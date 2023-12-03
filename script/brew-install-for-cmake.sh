@@ -4,7 +4,8 @@
 # @brief  : installs a package with Homebrew, keg-only, then registers that package's
 #           include, lib, bin, etc. directories for use by CMake
 # @usage  : script/brew-install-for-cmake.sh <package>
-# @param  : just one parameter, the brew formula name, optionally including a version suffix
+# @param  : first, the brew formula name, optionally including a version suffix
+#           second, a truthy value indicating whether or not to leave it linked
 #====================================
 # Copyright (C) 2023 Stephen G. Tuggy and other Vega Strike contributors
 #
@@ -26,12 +27,15 @@
 set -e
 
 PACKAGE_SPEC="$1"
+LEAVE_LINKED="$2"
 
-brew install "$PACKAGE_SPEC"
-brew unlink "$PACKAGE_SPEC"
-PACKAGE_INSTALLED_PREFIX=$(brew --prefix "$PACKAGE_SPEC")
+HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_UPGRADE=1 brew install "$PACKAGE_SPEC"
+if [ ! "$LEAVE_LINKED" ] ; then
+  HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_UPGRADE=1 brew unlink "$PACKAGE_SPEC"
+fi
+PACKAGE_INSTALLED_PREFIX=$(HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_UPGRADE=1 brew --prefix "$PACKAGE_SPEC")
 PACKAGE_INSTALLED_BIN="$PACKAGE_INSTALLED_PREFIX/bin"
 #PACKAGE_INSTALLED_INCLUDE="$PACKAGE_INSTALLED_PREFIX/include"
 #PACKAGE_INSTALLED_LIB="$PACKAGE_INSTALLED_PREFIX/lib"
-export PATH="$PACKAGE_INSTALLED_BIN:$PATH"
-export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
+. export PATH="$PACKAGE_INSTALLED_BIN:$PATH"
+. export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
