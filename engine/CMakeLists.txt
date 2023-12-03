@@ -133,9 +133,7 @@ SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 
 
-UNSET(PYTHONLIBS_FOUND)
 UNSET(Boost_FOUND)
-UNSET(Boost_python_FOUND)
 UNSET(Boost_python3_FOUND)
 UNSET(OPENGL_FOUND)
 UNSET(OPENGL_GLU_FOUND)
@@ -152,20 +150,30 @@ UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
-IF (MSVC)
+SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+INCLUDE(InstallRequiredSystemLibraries)
+
+IF (UNIX)
     INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_SOURCE_DIR}/src
+            ${Vega_Strike_SOURCE_DIR}/src/cmd
+            ${Vega_Strike_SOURCE_DIR}/src/damage
+            ${Vega_Strike_SOURCE_DIR}/src/resource
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
+            /usr/include/harfbuzz/
     )
-ELSE (MSVC)
+ELSE ()
     INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_BINARY_DIR}
-        /usr/include/harfbuzz/
+            ${Vega_Strike_SOURCE_DIR}/src
+            ${Vega_Strike_SOURCE_DIR}/src/cmd
+            ${Vega_Strike_SOURCE_DIR}/src/damage
+            ${Vega_Strike_SOURCE_DIR}/src/resource
+            ${Vega_Strike_BINARY_DIR}
+            ${Vega_Strike_BINARY_DIR}/src
     )
-ENDIF (MSVC)
+ENDIF ()
 
 # The source files used to be listed here...
 
@@ -219,8 +227,10 @@ OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 # OPTION(VEGA_STRIKE_PREFER_LEGACY_OPENGL "Prefer legacy OpenGL implementation (such as Mesa's)? Or prefer GLVND?" OFF )
 IF (OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglu1-mesa")
-ELSE ()
+ELSEIF (OpenGL_GL_PREFERENCE STREQUAL "GLVND")
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglvnd0")
+ELSE ()
+    UNSET (VEGA_STRIKE_GLU_DEPENDENCY)
 ENDIF ()
 MESSAGE("** OpenGL_GL_PREFERENCE: ${OpenGL_GL_PREFERENCE}")
 
@@ -307,7 +317,7 @@ ENDIF (ENABLE_PIE)
 IF (MSVC)
     SET(COMPILER_SPECIFIC_CFLAGS " ")
     SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ ")
-    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
+    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 -DBOOST_DEBUG_PYTHON ") # also used for release-with-debug -- can change later
     SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
     SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
     SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
@@ -435,27 +445,31 @@ FIND_PACKAGE(LinuxDistro REQUIRED)
 OPTION(USE_PYTHON_3 "Use Python 3 or Python 2.7 (default is 3)" ON)
 IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
-    SET(Python_ADDITIONAL_VERSIONS 3.12 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4)
+    FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
 ELSE (USE_PYTHON_3)
     MESSAGE("++ Adding python 2.7 variant")
-    SET(Python_ADDITIONAL_VERSIONS 2.7)
+    FIND_PACKAGE(Python2 REQUIRED COMPONENTS Development Interpreter)
 ENDIF (USE_PYTHON_3)
-# If we don't unset cache variables
-# ccmake won't pick up changes to the USE_PYTHON_3 option
-UNSET(PYTHON_INCLUDE_DIR CACHE)
-UNSET(PYTHON_LIBRARY CACHE)
-# The python version we want is set via Python_ADDITIONAL_VERSIONS
-MESSAGE("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
-FIND_PACKAGE(PythonLibs REQUIRED)
-MESSAGE("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})")
-MESSAGE("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
-IF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
-    SET(TST_INCLUDES ${PYTHON_INCLUDE_DIRS})
-    SET(TST_LIBS ${PYTHON_LIBRARIES})
+## If we don't unset cache variables
+## ccmake won't pick up changes to the USE_PYTHON_3 option
+#UNSET(PYTHON_INCLUDE_DIR CACHE)
+#UNSET(PYTHON_LIBRARY CACHE)
+## The python version we want is set via Python_ADDITIONAL_VERSIONS
+#MESSAGE("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
+#FIND_PACKAGE(PythonLibs REQUIRED)
+#MESSAGE("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})")
+#MESSAGE("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
+IF (Python3_FOUND)
+    SET(TST_INCLUDES ${Python3_INCLUDE_DIRS})
+    SET(TST_LIBS ${Python3_LIBRARIES})
     SET(HAVE_PYTHON 1)
-ELSE (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+ELSEIF (Python2_FOUND)
+    SET(TST_INCLUDES ${Python2_INCLUDE_DIRS})
+    SET(TST_LIBS ${Python2_LIBRARIES})
+    SET(HAVE_PYTHON 1)
+ELSE ()
     MESSAGE(FATAL_ERROR "Can't find python")
-ENDIF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+ENDIF ()
 
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
@@ -479,9 +493,9 @@ IF (USE_SYSTEM_BOOST)
         ELSE (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
             SET(Boost_1_67_Or_Later_Result FALSE)
         ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-        STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-        LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
-        LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+#        STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+#        LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
+#        LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
         MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
         MESSAGE("-- USE_PYTHON_3: ${USE_PYTHON_3}")
         IF (Boost_1_67_Or_Later_Result)
@@ -518,37 +532,38 @@ IF (USE_SYSTEM_BOOST)
         SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
         INCLUDE_DIRECTORIES(${TST_INCLUDES})
     ELSE (Boost_FOUND)
-        SET(USE_SYSTEM_BOOST OFF)
+        FATAL_ERROR("Cannot find Boost. Unable to continue.")
+#        SET(USE_SYSTEM_BOOST OFF)
     ENDIF (Boost_FOUND)
 ENDIF (USE_SYSTEM_BOOST)
 
-IF (NOT USE_SYSTEM_BOOST)
-    MESSAGE("++ Using Internal Boost")
-    # This is just to cleanup advanced variable viewing, since they're not used anyway
-    UNSET(Boost_INCLUDE_DIRS)
-    UNSET(Boost_LIBRARIES)
-    UNSET(Boost_INCLUDE_DIR)
-    UNSET(Boost_LIBRARY_DIRS)
-    SET(Boost_DIR ../ext/)
-    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
-    IF (USE_PYTHON_3)
-        MESSAGE("++ Using Internal Boost::python3")
-        SET(TST_LIBS ${TST_LIBS} boost_python3)
-    ELSE (USE_PYTHON_3)
-        MESSAGE("++ Using Internal Boost::python (py2)")
-        SET(TST_LIBS ${TST_LIBS} boost_python)
-    ENDIF (USE_PYTHON_3)
-    INCLUDE_DIRECTORIES(${TST_INCLUDES})
-    ADD_SUBDIRECTORY(${Boost_DIR} build)
-    MESSAGE("++ boost dir: ${Boost_DIR}")
-    #IF (NOT DISABLE_CLIENT)
-    #  ADD_DEPENDENCIES(vegastrike-engine boost_python)
-    #ENDIF (NOT DISABLE_CLIENT)
-    #IF (NOT DISABLE_SERVER)
-    #  ADD_DEPENDENCIES(vegaserver boost_python)
-    #ENDIF (NOT DISABLE_SERVER)
-ENDIF (NOT USE_SYSTEM_BOOST)
+#IF (NOT USE_SYSTEM_BOOST)
+#    MESSAGE("++ Using Internal Boost")
+#    # This is just to cleanup advanced variable viewing, since they're not used anyway
+#    UNSET(Boost_INCLUDE_DIRS)
+#    UNSET(Boost_LIBRARIES)
+#    UNSET(Boost_INCLUDE_DIR)
+#    UNSET(Boost_LIBRARY_DIRS)
+#    SET(Boost_DIR ../ext/)
+#    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
+#    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
+#    IF (USE_PYTHON_3)
+#        MESSAGE("++ Using Internal Boost::python3")
+#        SET(TST_LIBS ${TST_LIBS} boost_python3)
+#    ELSE (USE_PYTHON_3)
+#        MESSAGE("++ Using Internal Boost::python (py2)")
+#        SET(TST_LIBS ${TST_LIBS} boost_python)
+#    ENDIF (USE_PYTHON_3)
+#    INCLUDE_DIRECTORIES(${TST_INCLUDES})
+#    ADD_SUBDIRECTORY(${Boost_DIR} build)
+#    MESSAGE("++ boost dir: ${Boost_DIR}")
+#    #IF (NOT DISABLE_CLIENT)
+#    #  ADD_DEPENDENCIES(vegastrike-engine boost_python)
+#    #ENDIF (NOT DISABLE_CLIENT)
+#    #IF (NOT DISABLE_SERVER)
+#    #  ADD_DEPENDENCIES(vegaserver boost_python)
+#    #ENDIF (NOT DISABLE_SERVER)
+#ENDIF (NOT USE_SYSTEM_BOOST)
 
 IF (NOT DISABLE_CLIENT) ##########
 
@@ -775,6 +790,8 @@ CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_
 #end config.h generation
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
+INCLUDE_DIRECTORIES(${TST_INCLUDES})
+
 # Now the source files are listed starting here!
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
@@ -903,6 +920,19 @@ ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/OPC_VolumeCollider.cpp
     src/cmd/collide2/CSopcodecollider.cpp
 )
+
+#TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
+set_property(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+IF (NEED_LINKING_AGAINST_LIBM)
+    TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
+ENDIF()
+TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+IF (WIN32)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC _WIN32_WINNT=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+ENDIF()
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
@@ -1162,6 +1192,19 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBGFXGENERIC_SOURCES}
 )
 
+#TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
+set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+IF (NEED_LINKING_AGAINST_LIBM)
+    TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
+ENDIF()
+TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+IF (WIN32)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC _WIN32_WINNT=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC WINVER=0x0A00)
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+ENDIF()
+
 SET(VEGASTRIKE_SOURCES
     ${LIBGUI_SOURCES}
     ${LIBNETCLIENT_SOURCES}
@@ -1232,7 +1275,6 @@ SET(VEGASTRIKE_SOURCES
 
 #Setup shared lib and include listings for vegastrike-engine.
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
-INCLUDE_DIRECTORIES(${TST_INCLUDES})
 
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
@@ -1240,6 +1282,13 @@ IF (NOT DISABLE_CLIENT)
     TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
     IF (NEED_LINKING_AGAINST_LIBM)
         TARGET_LINK_LIBRARIES(vegastrike-engine m)
+    ENDIF()
+    TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    IF (WIN32)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)

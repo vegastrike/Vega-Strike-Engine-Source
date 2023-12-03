@@ -21,9 +21,6 @@ jobs:
       matrix:
         os:
           - macos-12
-        compiler:
-          - clang
-          - gcc
         python-version:
           - 3.12
         homebrew-gl:
@@ -64,17 +61,17 @@ jobs:
       #- name: Set up Python
       #  uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 #v4.7.1
       #  with:
-      #    python-version: '3.12'
+      #    python-version: ${{ matrix.python-version }}
       #    check-latest: true
 
       - name: Install dependencies using homebrew
         run: |
+          brew update
           . ./script/brew-install-for-cmake.sh $PYTHON_VERSION_STRING
           . ./script/brew-install-for-cmake.sh boost
           . ./script/brew-install-for-cmake.sh boost-python3
           . ./script/brew-install-for-cmake.sh gtk+3
           . ./script/brew-install-for-cmake.sh gtkglext
-          . ./script/brew-install-for-cmake.sh sdl2
           . ./script/brew-install-for-cmake.sh sdl12-compat
 
       # The following Apple-provided libraries are deprecated:
@@ -86,6 +83,9 @@ jobs:
           . ./script/brew-install-for-cmake.sh mesa
           . ./script/brew-install-for-cmake.sh mesa-glu
           . ./script/brew-install-for-cmake.sh freeglut
+          brew link mesa
+          brew link mesa-glu
+          brew link freeglut
           ln -s /usr/local/include/GL /usr/local/include/OpenGL
           ln -s /usr/local/include/GL /usr/local/include/GLUT
 
@@ -99,7 +99,6 @@ jobs:
       - name: Build it
         env:
           MY_OS_NAME: macos
-          COMPILER:   ${{ matrix.compiler }}
           FLAGS:      '-DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_FIND_APPBUNDLE=LAST'
         run: script/cibuild $FLAGS
 
