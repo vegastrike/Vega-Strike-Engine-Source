@@ -35,7 +35,17 @@ jobs:
     env:
       HOMEBREW_NO_INSTALL_UPGRADE: 1
       PYTHON_VERSION_STRING: "python@${{ matrix.python-version }}"
+
     steps:
+      - name: Check out repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        with:
+          fetch-depth: 2
+          submodules: false
+
+      - name: Conditionally relocate to PR HEAD
+        if: github.event.pull_request
+        run: git checkout ${{ github.event.pull_request.head.sha }}
 
       # The following dependencies are already present within macos-* images:
       # - clang (llvm)
@@ -85,16 +95,6 @@ jobs:
         run: |
           . ./script/brew-install-for-cmake.sh openal-soft
           export OPENALDIR=$(brew --prefix openal-soft)
-
-      - name: Check out repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
-        with:
-          fetch-depth: 2
-          submodules: false
-
-      - name: Conditionally relocate to PR HEAD
-        if: github.event.pull_request
-        run: git checkout ${{ github.event.pull_request.head.sha }}
 
       - name: Build it
         env:
