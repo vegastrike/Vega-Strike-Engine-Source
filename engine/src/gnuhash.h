@@ -26,6 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GNUHASH_H
 #define VEGA_STRIKE_ENGINE_GNUHASH_H
 #include <unordered_map>
+#include <cstddef>
 
 #define vsUMap     std::unordered_map
 #define vsHashComp vega_std_overrides::hash_compare

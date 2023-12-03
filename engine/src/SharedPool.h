@@ -126,7 +126,8 @@ public:
             return *this;
         }
 
-        explicit operator const T &() const {
+        // TODO: Uncomment the `explicit`, and then fix the resulting compile errors
+        /*explicit*/ operator const T &() const {
             return get();
         }
 

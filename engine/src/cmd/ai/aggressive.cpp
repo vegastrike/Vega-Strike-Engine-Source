@@ -1,9 +1,8 @@
-/**
+/*
  * aggressive.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -203,12 +202,12 @@ static AIEvents::ElemAttrMap * getProperScript( Unit *me, Unit *targ, bool inter
         int    fac = 0;
         if (me) {
             fac = me->faction;
-            nam = me->name;
+            nam = me->name.get();
         }
         return getProperLogicOrInterruptScript( "default", fac, nam, interrupt, personalityseed );
     }
     return getProperLogicOrInterruptScript( ROLES::getRoleEvents( me->attackPreference(),
-                                                                 targ->unitRole() ), me->faction, me->name, interrupt,
+                                                                 targ->unitRole() ), me->faction, me->name.get(), interrupt,
                                             personalityseed );
 }
 
