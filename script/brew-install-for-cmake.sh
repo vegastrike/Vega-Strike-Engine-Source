@@ -31,6 +31,7 @@ LEAVE_LINKED="$2"
 
 export HOMEBREW_NO_AUTO_UPDATE=1
 export HOMEBREW_NO_INSTALL_UPGRADE=1
+export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
 
 if ! brew list "$PACKAGE_SPEC" &>/dev/null; then
   brew install "$PACKAGE_SPEC"
