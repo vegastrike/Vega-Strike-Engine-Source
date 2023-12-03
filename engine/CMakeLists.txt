@@ -516,7 +516,7 @@ IF (USE_SYSTEM_BOOST)
         ENDIF (Boost_1_67_Or_Later_Result)
         UNSET(Boost_1_67_Or_Later_Result)
 
-#        UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
+        UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
         FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
         IF (Boost_python3_FOUND)
