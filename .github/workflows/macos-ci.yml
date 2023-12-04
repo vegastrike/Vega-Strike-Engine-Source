@@ -65,6 +65,7 @@ jobs:
       - name: Install dependencies using homebrew
         run: |
           brew update
+          . ./script/brew-install-for-cmake.sh openssl@3 0
           . ./script/brew-install-for-cmake.sh $PYTHON_VERSION_STRING 0
           . ./script/brew-install-for-cmake.sh boost 0
           . ./script/brew-install-for-cmake.sh boost-python3 0
