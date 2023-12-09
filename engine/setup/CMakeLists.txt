@@ -1,9 +1,8 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2002 Daniel Horn
-# Copyright (C) 2002-2019 pyramid3d and other Vega Strike Contributors
-# Copyright (C) 2019-2022 Stephen G. Tuggy and other Vega Strike Contributors
+# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -16,12 +15,15 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
+
+
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
 
 IF ((NOT BEOS) AND (NOT WIN32))
 	#SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
@@ -63,6 +65,7 @@ IF ((NOT BEOS) AND (NOT WIN32))
     ENDIF (NOT USE_SYSTEM_BOOST)
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
+    target_compile_definitions(vegasettings PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 
 	INSTALL(TARGETS vegasettings DESTINATION bin)
 

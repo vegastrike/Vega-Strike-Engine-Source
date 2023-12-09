@@ -16,12 +16,11 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
 
       - name: Fortify on Demand Scan
         # You may pin to the exact commit or the version.
-        # uses: fortify/gha-setup-fod-uploader@636f3c3a14aec1747eec5242a02c6349e4f3cce6
-        uses: fortify/gha-setup-fod-uploader@v1.0.1
+        uses: fortify/gha-setup-fod-uploader@16e5036c084b26cee63cb0c38cfc2101cc9fd13d #v1.1.3
         with:
           # FoDUploader version to use
           version: latest

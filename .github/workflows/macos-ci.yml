@@ -11,7 +11,6 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
 
     defaults:
       run:
@@ -21,19 +20,27 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-11
           - macos-12
-        compiler:
-          - clang
-          - gcc
+        python-version:
+          - 3.12
         homebrew-gl:
           - true
-          # - false
         homebrew-al:
           - true
           - false
 
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_UPGRADE: 1
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+      PYTHON_VERSION_STRING: "python@${{ matrix.python-version }}"
+
     steps:
+      - name: Check out repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        with:
+          fetch-depth: 2
+          submodules: false
 
       # The following dependencies are already present within macos-* images:
       # - clang (llvm)
@@ -45,42 +52,50 @@ jobs:
       # - libpng
       # - libvorbis
       # - python
+      #
+      # Note, though, that the Python version "varies between runners and can be changed unexpectedly",
+      # according to https://github.com/actions/setup-python#basic-usage .
+      # Hence the need to specify a particular Python version.
+      #- name: Set up Python
+      #  uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 #v4.7.1
+      #  with:
+      #    python-version: ${{ matrix.python-version }}
+      #    check-latest: true
+
       - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl
+        run: |
+          brew update
+          . ./script/brew-install-for-cmake.sh openssl@3 0
+          . ./script/brew-install-for-cmake.sh $PYTHON_VERSION_STRING 0
+          . ./script/brew-install-for-cmake.sh boost 0
+          . ./script/brew-install-for-cmake.sh boost-python3 0
+          . ./script/brew-install-for-cmake.sh gtk+3 1
+          . ./script/brew-install-for-cmake.sh gtkglext 1
+          . ./script/brew-install-for-cmake.sh sdl12-compat 1
 
       # The following Apple-provided libraries are deprecated:
-      # * OpenGL as of MacOS 10.14
-      # * GLUT as of MacOS 10.9
+      # * OpenGL as of macOS 10.14
+      # * GLUT as of macOS 10.9
       - name: Optionally install homebrewed OpenGL and GLUT
         if: ${{ matrix.homebrew-gl }}
         run: |
-          brew install mesa mesa-glu freeglut
+          . ./script/brew-install-for-cmake.sh mesa 1
+          . ./script/brew-install-for-cmake.sh mesa-glu 1
+          . ./script/brew-install-for-cmake.sh freeglut 1
           ln -s /usr/local/include/GL /usr/local/include/OpenGL
           ln -s /usr/local/include/GL /usr/local/include/GLUT
-        # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
-        # find /usr/local/lib/ -iname '*gl*.dylib'
 
-      # The Apple-provided OpenAL is deprecated as of MacOS 10.15
+      # The Apple-provided OpenAL is deprecated as of macOS 10.15
       - name: Optionally install homebrewed OpenAL
         if: ${{ matrix.homebrew-al }}
-        run: brew install openal-soft
-
-      - name: Check out repository
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
-        with:
-          fetch-depth: 2
-          submodules: false
-
-      - name: Conditionally relocate to PR HEAD
-        if: github.event.pull_request
-        run: git checkout HEAD^2
+        run: |
+          . ./script/brew-install-for-cmake.sh openal-soft 1
+          export OPENALDIR=$(brew --prefix openal-soft)
 
       - name: Build it
         env:
           MY_OS_NAME: macos
-          COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
-          OPENALDIR:  "/usr/local/opt/openal-soft"
+          FLAGS:      '-DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_FIND_APPBUNDLE=LAST'
         run: script/cibuild $FLAGS
 
 #      - name: Test

@@ -1,9 +1,8 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2002 Daniel Horn
-# Copyright (C) 2002-2019 pyramid3d and other Vega Strike Contributors
-# Copyright (C) 2019-2022 Stephen G. Tuggy and other Vega Strike Contributors
+# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -22,6 +21,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
+
+
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
 
 INCLUDE(GNUInstallDirs)
 # There is no good method for this. The preferred method of using the `TYPE` argument doesn't exist until CMake 3.14

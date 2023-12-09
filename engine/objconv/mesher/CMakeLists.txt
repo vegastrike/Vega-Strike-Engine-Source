@@ -1,9 +1,8 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2002 Daniel Horn
-# Copyright (C) 2002-2019 pyramid3d and other Vega Strike Contributors
-# Copyright (C) 2019-2022 Stephen G. Tuggy and other Vega Strike Contributors
+# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -16,12 +15,15 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
+
+
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
 
 FIND_PACKAGE(EXPAT REQUIRED)
 IF (EXPAT_FOUND)
@@ -50,10 +52,16 @@ IF (EXPAT_FOUND)
     #if have OGRE to_OgreMesh.cpp
 
     ADD_EXECUTABLE(mesher ${MESHER_SOURCES})
+    target_compile_definitions(mesher PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+    IF (WIN32)
+        target_compile_definitions(mesher PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        target_compile_definitions(mesher PUBLIC _WIN32_WINNT=0x0A00)
+        target_compile_definitions(mesher PUBLIC WINVER=0x0A00)
+    ENDIF()
 
     # OGRE already looked for by parent
     # USE_SYSTEM_BOOST already set by main script
-    MESSAGE("-- ${OGRE_FOUND} ${USE_SYSTEM_BOOST}"
+    MESSAGE("-- ${OGRE_FOUND} ${USE_SYSTEM_BOOST}")
     IF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
         # Ogre usage in mesher requires boost::system
         ADD_DEPENDENCIES(mesher boost_system)

@@ -15,6 +15,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ARTIFACT_EXT: 'deb'
+          - FROM:     'ubuntu:mantic'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:jammy'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
@@ -41,12 +51,12 @@ jobs:
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'tar.[xb]z*'
-          - FROM:     'ubuntu:bionic'
+          - FROM:     'linuxmintd/mint21.1-amd64'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
-          - FROM:     'ubuntu:bionic'
+          - FROM:     'linuxmintd/mint21-amd64'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -57,6 +67,11 @@ jobs:
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'deb'
           - FROM:     'linuxmintd/mint20-amd64'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ARTIFACT_EXT: 'deb'
+          - FROM:     'debian:bookworm'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -81,12 +96,42 @@ jobs:
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'deb'
-          - FROM:     'opensuse/leap'
+          - FROM:     'opensuse/leap:15.5'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'opensuse/leap'
+          - FROM:     'opensuse/leap:15.5'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'opensuse/leap:15.4'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'opensuse/leap:15.4'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'fedora:38'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'fedora:38'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'fedora:37'
+            COMPILER: 'clang'
+            USE_PYTHON_3: 'ON'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ARTIFACT_EXT: 'rpm'
+          - FROM:     'fedora:37'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -101,65 +146,60 @@ jobs:
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:35'
+          - FROM:     'rockylinux:9.1'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:35'
+          - FROM:     'rockylinux/9.1'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:34'
+          - FROM:     'rockylinux:8.7'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'fedora:34'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ARTIFACT_EXT: 'rpm'
-          - FROM:     'rockylinux/rockylinux'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ARTIFACT_EXT: 'rpm'
-          - FROM:     'rockylinux/rockylinux'
+          - FROM:     'rockylinux/8.7'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ARTIFACT_EXT: 'rpm'
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 #v3.5.3
-      with:
-        fetch-depth: 2
-        submodules: false
+      #- name: Set up Python
+      #  uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 #v4.7.1
+      #  with:
+      #    python-version: '3.11'
 
-    - name: Extract tag name and short SHA
-      shell: bash
-      run: |
-        echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
-        echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
-    - name: Test tag name and short SHA
-      run: |
-        echo "${TAG_NAME}"
-        echo "${SHORT_SHA}"
-    - name: Run CI
-      env:
-        FROM:       ${{ matrix.FROM }}
-        COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '-DUSE_PYTHON_3=${{ matrix.USE_PYTHON_3 }} -DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
-        MY_OS_NAME: linux
-        IS_RELEASE: 1
-      run: script/cibuild $FLAGS
-    - name: Upload the artifacts
-      uses: skx/github-action-publish-binaries@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
-      with:
-        args: "packages/*.${{ matrix.ARTIFACT_EXT }}"
+      - name: Check out repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        with:
+          fetch-depth: 2
+          submodules: false
+
+      - name: Extract tag name and short SHA
+        shell: bash
+        run: |
+          echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
+          echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      - name: Test tag name and short SHA
+        run: |
+          echo "${TAG_NAME}"
+          echo "${SHORT_SHA}"
+      - name: Run CI
+        env:
+          FROM:       ${{ matrix.FROM }}
+          COMPILER:   ${{ matrix.COMPILER }}
+          FLAGS:      '-DUSE_PYTHON_3=${{ matrix.USE_PYTHON_3 }} -DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
+          MY_OS_NAME: linux
+          IS_RELEASE: 1
+        run: script/cibuild $FLAGS
+      - name: Upload the artifacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
+        with:
+          args: "packages/*.${{ matrix.ARTIFACT_EXT }}"

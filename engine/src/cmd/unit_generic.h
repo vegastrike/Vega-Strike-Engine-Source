@@ -1,14 +1,14 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef __UNIT_GENERIC_H__
-#define __UNIT_GENERIC_H__
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
+// Q: Why 2 header guards???
 
-/**
+/*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Roy Falk, Benjamen R. Meyer, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,8 +30,8 @@
 
 /***** Unit is the Unit class without GFX/Sound with AI *****/
 
-#ifndef _UNIT_H_
-#define _UNIT_H_
+#ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_H
+#define VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
 #include "armed.h"
 #include "audible.h"
@@ -415,7 +415,7 @@ public:
 //Uses GFX so only in Unit class
     virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) override {}
     virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
-    virtual std::string drawableGetName() override { return name; }
+    virtual std::string drawableGetName() override { return name.get(); }
 
 //Sets the camera to be within this unit.
 //Uses Universe & GFX so not needed here -> only in Unit class

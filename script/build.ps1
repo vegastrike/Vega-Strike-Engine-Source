@@ -1,4 +1,6 @@
-# Copyright (C) 2021 Stephen G. Tuggy
+# build.ps1
+
+# Copyright (C) 2021-2023 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -17,10 +19,51 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release -DUSE_PYTHON_3=ON
-cmake --build .\build\ --config Release
+
+param(
+    [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
+    [Boolean]$EnablePIE = $false,
+    [String]$BuildType = "Release" # You can also specify "Debug"
+)
+
+[String]$cmakePresetName = ""
+if ($Generator -ieq "Ninja") {
+    $cmakePresetName += "windows-ninja"
+} elseif ($Generator -ieq "VS2019Win64") {
+    $cmakePresetName += "VS2019Win64"
+} elseif ($Generator -ieq "VS2022Win64") {
+    $cmakePresetName += "VS2022Win64"
+} else {
+    Write-Error "Invalid value for Generator: $Generator"
+    exit 1
+}
+$cmakePresetName += "-"
+if ($EnablePIE) {
+    $cmakePresetName += "pie-enabled"
+} else {
+    $cmakePresetName += "pie-disabled"
+}
+$cmakePresetName += "-"
+if ($BuildType -ieq "Debug") {
+    $cmakePresetName += "debug"
+} elseif ($BuildType -ieq "Release") {
+    $cmakePresetName += "release"
+} else {
+    Write-Error "Unrecognized value for BuildType: $BuildType"
+    exit 1
+}
+
+[String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
+[String]$binaryDir = "$baseDir\build\$cmakePresetName"
+Push-Location $baseDir\engine
+cmake --preset $cmakePresetName
+cmake --build --preset "build-$cmakePresetName" -v
+Pop-Location
+
 New-Item bin -ItemType Directory -Force
-xcopy /y .\build\Release\*.* .\bin\
-xcopy /y .\build\objconv\Release\*.* .\bin\
-# Not building vegasettings for the moment
-# xcopy /y .\build\setup\Release\*.* .\bin\
+$aPossibleBinaryDirs = @("$binaryDir","$binaryDir\$BuildType", "$binaryDir\$BuildType\objconv", "$binaryDir\objconv\$BuildType", "$binaryDir\$BuildType\setup", "$binaryDir\setup\$BuildType")
+$aPossibleBinaryDirs | ForEach-Object {
+    if (Test-Path $_) {
+        Copy-Item -Force -Verbose $_\*.* .\bin
+    }
+}
