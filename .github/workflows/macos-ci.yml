@@ -58,7 +58,7 @@ jobs:
       #    check-latest: true
 
       - name: Bootstrap it
-        run: . ./script/bootstrap--on-macos.sh
+        run: ./script/bootstrap--on-macos.sh
 
       - name: Build it
         env:
