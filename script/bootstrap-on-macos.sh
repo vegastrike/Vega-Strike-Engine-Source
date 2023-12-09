@@ -21,9 +21,10 @@
 
 set -e
 
-export HOMEBREW_NO_AUTO_UPDATE=1
 export HOMEBREW_NO_INSTALL_UPGRADE=1
 export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+
+brew bundle install --file=./Brewfile --no-upgrade
 
 declare -a keg_only_packages=("python@3.12" "boost" "boost-python3")
 
@@ -34,9 +35,6 @@ do
     export PATH="$PACKAGE_INSTALLED_BIN:$PATH"
     export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
 done
-
-brew update
-brew bundle install --file=./Brewfile
 
 ln -s /usr/local/include/GL /usr/local/include/OpenGL
 ln -s /usr/local/include/GL /usr/local/include/GLUT
