@@ -23,11 +23,6 @@ jobs:
           - macos-12
         python-version:
           - 3.12
-        homebrew-gl:
-          - true
-        homebrew-al:
-          - true
-          - false
 
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -62,35 +57,8 @@ jobs:
       #    python-version: ${{ matrix.python-version }}
       #    check-latest: true
 
-      - name: Install dependencies using homebrew
-        run: |
-          brew update
-          . ./script/brew-install-for-cmake.sh openssl@3 0
-          . ./script/brew-install-for-cmake.sh $PYTHON_VERSION_STRING 0
-          . ./script/brew-install-for-cmake.sh boost 0
-          . ./script/brew-install-for-cmake.sh boost-python3 0
-          . ./script/brew-install-for-cmake.sh gtk+3 1
-          . ./script/brew-install-for-cmake.sh gtkglext 1
-          . ./script/brew-install-for-cmake.sh sdl12-compat 1
-
-      # The following Apple-provided libraries are deprecated:
-      # * OpenGL as of macOS 10.14
-      # * GLUT as of macOS 10.9
-      - name: Optionally install homebrewed OpenGL and GLUT
-        if: ${{ matrix.homebrew-gl }}
-        run: |
-          . ./script/brew-install-for-cmake.sh mesa 1
-          . ./script/brew-install-for-cmake.sh mesa-glu 1
-          . ./script/brew-install-for-cmake.sh freeglut 1
-          ln -s /usr/local/include/GL /usr/local/include/OpenGL
-          ln -s /usr/local/include/GL /usr/local/include/GLUT
-
-      # The Apple-provided OpenAL is deprecated as of macOS 10.15
-      - name: Optionally install homebrewed OpenAL
-        if: ${{ matrix.homebrew-al }}
-        run: |
-          . ./script/brew-install-for-cmake.sh openal-soft 1
-          export OPENALDIR=$(brew --prefix openal-soft)
+      - name: Bootstrap it
+        run: . ./script/bootstrap--on-macos.sh
 
       - name: Build it
         env:
