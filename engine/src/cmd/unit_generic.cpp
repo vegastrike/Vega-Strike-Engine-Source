@@ -138,7 +138,7 @@ void Unit::SetNebula(Nebula *neb) {
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
     const float capship_size = configuration()->physics_config.capship_size;
 
-    if (this == target || target->CloakVisible() < .8) {
+    if (this == target || target->cloak.Cloaked()) {
         return false;
     }
     if (cone && computer.radar.maxcone > -.98) {
@@ -961,8 +961,11 @@ void Unit::UpdateSubunitPhysics(Unit *subunit,
             lastframe,
             uc,
             superunit);
-    //short fix
-    subunit->cloaking = (unsigned int) cloaking;
+
+    // TODO: make the subunit->cloak a pointer to parent->cloak
+    // Also, no reason why subunits should handle their own physics but that's
+    // much harder to refactor
+    subunit->cloak.status = cloak.status;
     if (Destroyed()) {
         subunit->Target(NULL);
         UnFire();                                        //don't want to go off shooting while your body's splitting everywhere
@@ -1298,14 +1301,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
     if (degrees >= 90 && degrees < 120) {
         //DAMAGE Shield
         //DAMAGE cloak
-        if (randnum >= .95) {
-            this->cloaking = -1;
-            damages |= Damages::CLOAK_DAMAGED;
-        } else if (randnum >= .78) {
-            cloakenergy += ((1 - dam) * recharge);
-            damages |= Damages::CLOAK_DAMAGED;
-        } else if (randnum >= .7) {
-            cloakmin += (rand() % (32000 - cloakmin));
+        if (randnum >= .7) {
+            this->cloak.Damage();
             damages |= Damages::CLOAK_DAMAGED;
         }
 
@@ -1666,25 +1663,12 @@ void Unit::SetOwner(Unit *target) {
     owner = target;
 }
 
-void Unit::Cloak(bool loak) {
-    damages |= Damages::CLOAK_DAMAGED;
-    if (loak) {
-        static bool warp_energy_for_cloak =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "warp_energy_for_cloak", "true"));
-        if (cloakenergy < (warp_energy_for_cloak ? warpenergy : energy.Value())) {
-            cloakrate = (cloakrate >= 0) ? cloakrate : -cloakrate;
-            //short fix
-            if (cloaking < -1 && cloakrate != 0) {
-                //short fix
-                cloaking = 2147483647;
-            } else {
-            }
-        }
+// Need this for python API. Do not delete.
+void Unit::ActivateCloak(bool enable) {
+    if(enable) {
+        cloak.Activate();
     } else {
-        cloakrate = (cloakrate >= 0) ? -cloakrate : cloakrate;
-        if (cloaking == cloakmin) {
-            ++cloaking;
-        }
+        cloak.Deactivate();
     }
 }
 
@@ -3348,14 +3332,17 @@ bool Unit::UpAndDownGrade(const Unit *up,
                         tempdownmap);
             }
         }
-        if (cloaking != -1 && up->cloaking != -1) {
+        if (cloak.Capable() && up->cloak.Capable()) {
             if (touchme) {
-                cloaking = -1;
+                cloak.Disable();
             }
             ++numave;
             ++percentage;
             if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name, up->cloaking, ((char *) &this->cloaking) - ((char *) this), tempdownmap);
+                AddToDowngradeMap(up->name,
+                                  up->cloak.current,
+                                  ((char *) &this->cloak.current) - ((char *) this),
+                                  tempdownmap);
             }
         }
         //NOTE: Afterburner type 2 (jmp)
@@ -3384,16 +3371,17 @@ bool Unit::UpAndDownGrade(const Unit *up,
                 }
             }
         }
-        if ((cloaking == -1 && up->cloaking != -1) || force_change_on_nothing) {
+        if ((!cloak.Capable() && up->cloak.Capable()) || force_change_on_nothing) {
             if (touchme) {
-                cloaking = up->cloaking;
-                cloakmin = up->cloakmin;
-                cloakrate = up->cloakrate;
-                cloakglass = up->cloakglass;
-                cloakenergy = up->cloakenergy;
+                cloak.Enable();
+
+                cloak.minimum = up->cloak.minimum;
+                cloak.rate = up->cloak.rate;
+                cloak.glass = up->cloak.glass;
+                cloak.energy = up->cloak.energy;
             }
             ++numave;
-        } else if (cloaking != -1 && up->cloaking != -1) {
+        } else if (cloak.Capable() && up->cloak.Capable()) {
             cancompletefully = false;
         }
         //NOTE: Afterburner type 2 (jmp)
@@ -4263,95 +4251,7 @@ void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &ove
 
 std::map<string, Unit *> Drawable::Units;
 
-//helper func for Init
-string toLowerCase(string in) {
-    string out;
-    for (unsigned int i = 0; i < in.length(); i++) {
-        switch (in[i]) {
-            case 'A':
-                out += 'a';
-                break;
-            case 'B':
-                out += 'b';
-                break;
-            case 'C':
-                out += 'c';
-                break;
-            case 'D':
-                out += 'd';
-                break;
-            case 'E':
-                out += 'e';
-                break;
-            case 'F':
-                out += 'f';
-                break;
-            case 'G':
-                out += 'g';
-                break;
-            case 'H':
-                out += 'h';
-                break;
-            case 'I':
-                out += 'i';
-                break;
-            case 'J':
-                out += 'j';
-                break;
-            case 'K':
-                out += 'k';
-                break;
-            case 'L':
-                out += 'l';
-                break;
-            case 'M':
-                out += 'm';
-                break;
-            case 'N':
-                out += 'n';
-                break;
-            case 'O':
-                out += 'o';
-                break;
-            case 'P':
-                out += 'p';
-                break;
-            case 'Q':
-                out += 'q';
-                break;
-            case 'R':
-                out += 'r';
-                break;
-            case 'S':
-                out += 's';
-                break;
-            case 'T':
-                out += 't';
-                break;
-            case 'U':
-                out += 'u';
-                break;
-            case 'V':
-                out += 'v';
-                break;
-            case 'W':
-                out += 'w';
-                break;
-            case 'X':
-                out += 'x';
-                break;
-            case 'Y':
-                out += 'y';
-                break;
-            case 'Z':
-                out += 'z';
-                break;
-            default:
-                out += in[i];
-        }
-    }
-    return out;
-}
+
 
 unsigned int Drawable::unitCount = 0;
 
@@ -4438,7 +4338,18 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     if (fuel < 0) {
         fuel = 0;
     }
-    UpdateCloak();
+
+    static CloakingStatus previous_status = cloak.status;
+    cloak.Update(this);
+
+    // Play once per cloaking
+    if(cloak.Cloaking() && previous_status != CloakingStatus::cloaking) {
+        previous_status = cloak.status;
+        playSound(SoundType::cloaking);
+    } else if(cloak.Cloaked() && previous_status != CloakingStatus::cloaked) {
+        previous_status = cloak.status;
+        adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
+    }
 
     // Recharge energy and shields
     const bool apply_difficulty_shields = configuration()->physics_config.difficulty_based_shield_recharge;
@@ -4491,7 +4402,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     float dist_sqr_to_target = FLT_MAX;
     Unit *target = Unit::Target();
     bool increase_locking = false;
-    if (target && cloaking < 0 /*-1 or -32768*/) {
+    if (target && !cloak.Cloaked()) {
         if (target->isUnit() != Vega_UnitType::planet) {
             Vector TargetPos(InvTransform(cumulative_transformation_matrix, (target->Position())).Cast());
             dist_sqr_to_target = TargetPos.MagnitudeSquared();
@@ -4534,7 +4445,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         // TODO: simplify this if
         if (((false
                 && mounts[i].status
-                        == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE) && cloaking < 0
+                        == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE) && !cloak.Cloaked()
                 && mounts[i].ammo != 0) {
             if (player_cockpit) {
                 touched = true;
@@ -4733,55 +4644,6 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     }
 }
 
-void Unit::UpdateCloak() {
-    // Use warp power for cloaking (SPEC capacitor)
-    const bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
-
-    // We are not cloaked - exiting function
-    if (cloaking < cloakmin) {
-        return;
-    }
-
-    // Insufficient energy to cloak ship
-    if (cloakenergy * simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy.Value())) {
-        Cloak(false);
-        return;
-    }
-
-    // Cloaked ships don't have shields on
-    shield->Disable();
-
-    // We're cloaked
-    if (cloaking > cloakmin) {
-        adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
-
-        //short fix
-        // TODO: figure out what they have fixed
-        if ((cloaking == (2147483647)
-                && cloakrate > 0) || (cloaking == cloakmin + 1 && cloakrate < 0)) {
-            playSound(SoundType::cloaking);
-        }
-
-        //short fix
-        // TODO: figure out what they have fixed
-        cloaking -= (int) (cloakrate * simulation_atom_var);
-        if (cloaking <= cloakmin && cloakrate > 0) {
-            cloaking = cloakmin;
-        }
-        if (cloaking < 0 && cloakrate < 0) {
-            cloaking = -2147483647 - 1;
-        }
-    }
-
-    // Calculate energy drain
-    if (cloakrate > 0 || cloaking == cloakmin) {
-        if (warp_energy_for_cloak) {
-            warpenergy -= (simulation_atom_var * cloakenergy);
-        } else {
-            energy -= (simulation_atom_var * cloakenergy);
-        }
-    }
-}
 
 bool Unit::isPlayerShip() {
     return _Universe->isPlayerStarship(this) ? true : false;

@@ -343,13 +343,13 @@ public:
 
 ///Draws lod pixel wide mesh at Transformation LATER
     void Draw(float lod,
-            const Matrix &m = identity_matrix,
-            float toofar = 1,
-            int cloak = -1,
-            float nebdist = 0,
-            unsigned char damage = 0,
-            bool renormalize_normals = false,
-            const MeshFX *mfx = NULL);  //short fix
+              const Matrix &m = identity_matrix,
+              float toofar = 1,
+              Cloak cloak = Cloak(),
+              float nebdist = 0,
+              unsigned char damage = 0,
+              bool renormalize_normals = false,
+              const MeshFX *mfx = NULL);  //short fix
 ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
     void DrawNow(float lod,
             bool centered,

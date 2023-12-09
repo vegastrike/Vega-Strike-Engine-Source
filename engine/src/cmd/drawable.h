@@ -32,6 +32,8 @@
 #include <string>
 #include <memory>
 
+#include "cloak.h"
+
 class Mesh;
 class Flightgroup;
 class Unit;
@@ -134,8 +136,8 @@ public:
     virtual std::string drawableGetName() = 0;
 
     void Sparkle(bool on_screen, Matrix *ctm);
-    void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak);
-    void DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage);
+    void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak cloak);
+    void DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float average_scale, unsigned char char_damage);
 
     //Split this mesh with into 2^level submeshes at arbitrary planes
     void Split(int level);

@@ -5565,17 +5565,17 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
     }
     //cloaking device? If we don't have one, no need to mention it ever exists, right?
-    if (playerUnit->cloaking != -1) {
+    if (playerUnit->cloak.Capable()) {
         if (!mode) {
             PRETTY_ADDU(statcolor + "Cloaking device available, energy usage: #-c",
-                    playerUnit->cloakenergy * RSconverter * Wconv,
+                    playerUnit->cloak.Energy() * RSconverter * Wconv,
                     0,
                     "MJ/s");
         } else {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "Installs a cloaking device.#n#  Activated energy usage: #-c",
-                            playerUnit->cloakenergy * RSconverter * Wconv,
+                            playerUnit->cloak.Energy() * RSconverter * Wconv,
                             0,
                             "MJ/s");
                     break;

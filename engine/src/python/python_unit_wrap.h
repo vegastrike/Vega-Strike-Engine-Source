@@ -80,7 +80,7 @@ WRAPPED3(bool, InRange, UnitWrapper, target, bool, cone, bool, cap,
 false )
 WRAPPED0(float, CloakVisible,
 false )
-voidWRAPPED1( Cloak,
+voidWRAPPED1( ActivateCloak,
 bool, cloak )
 voidWRAPPED0( RemoveFromSystem )
 WRAPPED4(QVector,
