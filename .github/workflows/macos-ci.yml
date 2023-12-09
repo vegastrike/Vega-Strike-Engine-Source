@@ -58,7 +58,9 @@ jobs:
       #    check-latest: true
 
       - name: Bootstrap it
-        run: brew bundle install --file=./Brewfile --force
+        run: |
+          brew update
+          brew bundle install --file=./Brewfile --force
 
       - name: Build it
         env:
