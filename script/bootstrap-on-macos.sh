@@ -31,11 +31,15 @@ set -e
 declare -a packages_to_install=("openssl@3" "python@3.12" "boost" "boost-python3" "gtk+3" "gtkglext" "sdl12-compat" "mesa" "mesa-glu" "freeglut" "openal-soft" "cmake" "expat" "jpeg" "libpng" "libvorbis")
 #declare -a keg_only_packages=("openssl@3" "python@3.12" "boost" "boost-python3")
 #declare -a non_keg_only_packages=("gtk+3" "gtkglext" "sdl12-compat" "mesa" "mesa-glu" "freeglut" "openal-soft" "cmake" "expat" "jpeg" "libpng" "libvorbis")
-declare -a links_to_delete=("2to3-3.12" "idle3.12" "pydoc3.12" "python3.12" "python3.12-config")
+declare -a links_to_delete=("2to3" "idle3" "pydoc3" "python3" "python3-config" "2to3-3.11" "idle3.11" "pydoc3.11" "python3.11" "python3.11-config" "2to3-3.12" "idle3.12" "pydoc3.12" "python3.12" "python3.12-config")
 
 for i in "${links_to_delete[@]}"
 do
-    rm "/usr/local/bin/$i"
+    link_path="/usr/local/bin/$i"
+    if [ -f "$link_path" ]
+    then
+        rm "/usr/local/bin/$i"
+    fi
 done
 
 brew update
