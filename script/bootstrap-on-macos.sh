@@ -35,8 +35,7 @@ declare -a links_to_delete=("2to3-3.12" "idle3.12" "pydoc3.12" "python3.12" "pyt
 
 for i in "${links_to_delete[@]}"
 do
-    link_full_path = "/usr/local/bin/$i"
-    rm "$link_full_path"
+    rm "/usr/local/bin/$i"
 done
 
 brew update
@@ -60,4 +59,5 @@ done
 
 ln -s /usr/local/include/GL /usr/local/include/OpenGL
 ln -s /usr/local/include/GL /usr/local/include/GLUT
-export OPENALDIR=$(brew --prefix openal-soft)
+OPENALDIR=$(brew --prefix openal-soft)
+export OPENALDIR
