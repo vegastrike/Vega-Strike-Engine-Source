@@ -23,7 +23,7 @@
 #include <sys/stat.h> //for mkdir
 #include <sys/types.h>
 
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <GLUT/glut.h>
     #include <OpenGL/glext.h>
 #else

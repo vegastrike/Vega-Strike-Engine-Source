@@ -30,7 +30,7 @@
 	#include <linux/slab.h>
 #elif defined(HAVE_LINUX_MALLOC_H)
 	#include <linux/malloc.h>
-#elif defined(__APPLE__) || defined(MACOSX)
+#elif defined(__APPLE__) && defined(__MACH__)
 	#include <sys/malloc.h>
 #elif defined(HAVE_MALLOC_H)
     	#include <malloc.h>

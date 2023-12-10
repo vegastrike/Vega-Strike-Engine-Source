@@ -15,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -41,31 +41,17 @@
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
-//#if !(defined(__APPLE__) || defined(MACOSX))
-//#define GL_GLEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_LEGACY 1
-
-//#   include <GL/glxext.h>
-//#   include <GL/glx.h>
-//#   include <GL/glxext.h>
-//#endif
-
 #include <stdlib.h>
 
 #else
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
-// #if defined (__APPLE__) || defined (MACOSX)
-// #include <GL/glew.h>
-// #else
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS_ARB 0x884F
-// #endif
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <OpenGL/gl.h>
     #include <OpenGL/glext.h>
     #include <dlfcn.h>
@@ -82,7 +68,7 @@
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 
-#if !defined (WIN32) && !defined (__HAIKU__) && !defined (__APPLE__) && !defined (MACOSX)
+#if !defined (WIN32) && !defined (__HAIKU__) && !(defined(__APPLE__) && defined(__MACH__))
     # define GLX_GLXEXT_PROTOTYPES 1
     # define GLX_GLXEXT_LEGACY 1
     # include <GL/glx.h>
@@ -160,7 +146,7 @@ typedef void ( *(*get_gl_proc_fptr_t)(const GLubyte*) )();
 	#if defined(__HAIKU__)
 	    typedef char * GET_GL_PTR_TYP;
 		#define GET_GL_PROC glutGetProcAddress
-    #elif defined (__MACOSX__)
+    #elif defined(__APPLE__) && defined(__MACH__)
         typedef const char * GET_GL_PTR_TYP;
         void * vega_dlsym(GET_GL_PTR_TYP function_name) {
             return dlsym(RTLD_SELF, function_name);
@@ -284,7 +270,7 @@ void init_opengl_extensions()
         BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_compiled_vertex_array unsupported";
     }
 #endif
-#if defined (__MACOSX__)
+#if defined(__APPLE__) && defined(__MACH__)
     if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
         glMultiDrawArrays_p   = (PFNGLMULTIDRAWARRAYSEXTPROC)
                                 GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawArraysEXT" );

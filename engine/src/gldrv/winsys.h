@@ -18,9 +18,8 @@
  *
  * Incorporated into Vega Strike
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  */
@@ -37,7 +36,7 @@
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 #   include <SDL/SDL.h>
 #elif defined( HAVE_GLUT )
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <GLUT/glut.h>
 #else
     #include <GL/glut.h>
