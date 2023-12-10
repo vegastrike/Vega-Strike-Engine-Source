@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # bootstrap-on-macos.sh
 #
@@ -21,20 +21,42 @@
 
 set -e
 
-export HOMEBREW_NO_INSTALL_UPGRADE=1
-export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+#export HOMEBREW_NO_INSTALL_UPGRADE=1
+#export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
 
-brew bundle install --file=./Brewfile --no-upgrade
+#brew bundle install --file=./Brewfile --no-upgrade
 
-declare -a keg_only_packages=("python@3.12" "boost" "boost-python3")
+#script/brew-install-for-cmake.sh
 
-for i in "${keg_only_packages[@]}"
+declare -a packages_to_install=("openssl@3" "python@3.12" "boost" "boost-python3" "gtk+3" "gtkglext" "sdl12-compat" "mesa" "mesa-glu" "freeglut" "openal-soft" "cmake" "expat" "jpeg" "libpng" "libvorbis")
+#declare -a keg_only_packages=("openssl@3" "python@3.12" "boost" "boost-python3")
+#declare -a non_keg_only_packages=("gtk+3" "gtkglext" "sdl12-compat" "mesa" "mesa-glu" "freeglut" "openal-soft" "cmake" "expat" "jpeg" "libpng" "libvorbis")
+declare -a links_to_delete=("2to3-3.12" "idle3.12" "pydoc3.12" "python3.12" "python3.12-config")
+
+for i in "${links_to_delete[@]}"
 do
-    PACKAGE_INSTALLED_PREFIX=$(brew --prefix "$i")
+    link_full_path = "/usr/local/bin/$i"
+    rm "$link_full_path"
+done
+
+brew update
+
+for j in "${packages_to_install[@]}"
+do
+    brew install "$j"
+    PACKAGE_INSTALLED_PREFIX=$(brew --prefix "$j")
     PACKAGE_INSTALLED_BIN="$PACKAGE_INSTALLED_PREFIX/bin"
     export PATH="$PACKAGE_INSTALLED_BIN:$PATH"
     export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
 done
+
+#for k in "${keg_only_packages[@]}"
+#do
+#    PACKAGE_INSTALLED_PREFIX=$(brew --prefix "$k")
+#    PACKAGE_INSTALLED_BIN="$PACKAGE_INSTALLED_PREFIX/bin"
+#    export PATH="$PACKAGE_INSTALLED_BIN:$PATH"
+#    export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
+#done
 
 ln -s /usr/local/include/GL /usr/local/include/OpenGL
 ln -s /usr/local/include/GL /usr/local/include/GLUT

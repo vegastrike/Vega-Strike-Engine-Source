@@ -26,8 +26,10 @@ jobs:
 
     env:
       #HOMEBREW_NO_AUTO_UPDATE: 1
-      HOMEBREW_NO_INSTALL_UPGRADE: 1
-      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+      #HOMEBREW_NO_INSTALL_UPGRADE: 1
+      #HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+      #HOMEBREW_DEBUG: 1
+      HOMEBREW_VERBOSE: 1
       PYTHON_VERSION_STRING: "python@${{ matrix.python-version }}"
 
     steps:
@@ -58,9 +60,7 @@ jobs:
       #    check-latest: true
 
       - name: Bootstrap it
-        run: |
-          brew update
-          brew bundle install --file=./Brewfile --force
+        run: script/bootstrap-on-macos.sh
 
       - name: Build it
         env:
