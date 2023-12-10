@@ -430,7 +430,7 @@ public:
     }
 
     bool ShouldTargetUnit(Unit *un, float distance) {
-        if (un->CloakVisible() > .8) {
+        if (un->cloak.Visible()) {
             float rangetotarget = distance;
             float rel0 = parent->getRelation(un);
             float rel[] = {
@@ -841,7 +841,7 @@ void FireAt::Execute() {
     bool istargetjumpableplanet = false;
     if ((targ = parent->Target())) {
         istargetjumpableplanet = isJumpablePlanet(targ);
-        if (targ->CloakVisible() > .8 && !targ->Destroyed()) {
+        if (targ->cloak.Visible() && !targ->Destroyed()) {
             had_target = true;
             if (parent->getNumMounts() > 0) {
                 if (!istargetjumpableplanet) {

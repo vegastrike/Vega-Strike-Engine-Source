@@ -922,28 +922,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     computer.radar.trackingcone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI / 180);
     computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI / 180);
 
-    cloakmin = static_cast<int>(UnitCSVFactory::GetVariable(unit_key, "Cloak_Min", 0.0f) * 2147483136);
-    if (cloakmin < 0) {
-        cloakmin = 0;
-    }
+    cloak = Cloak(unit_key);
 
-    cloakglass = UnitCSVFactory::GetVariable(unit_key, "Cloak_Glass", false);
-    if ((cloakmin & 0x1) && !cloakglass) {
-        cloakmin -= 1;
-    }
-
-    if ((cloakmin & 0x1) == 0 && cloakglass) {
-        cloakmin += 1;
-    }
-
-    if (!UnitCSVFactory::GetVariable(unit_key, "Can_Cloak", false)) {
-        cloaking = -1;
-    } else {
-        cloaking = (int) (-2147483647) - 1;
-    }
-
-    cloakrate = (int) (2147483136.0 * UnitCSVFactory::GetVariable(unit_key, "Cloak_Rate", 0.0f));     //short fix
-    cloakenergy = UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0f);
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
 
@@ -1384,11 +1364,8 @@ string Unit::WriteUnitString() {
     unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / VS_PI);
     unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
     unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
-    unit["Cloak_Min"] = tos(cloakmin / 2147483136.);
-    unit["Can_Cloak"] = tos(cloaking != -1);
-    unit["Cloak_Rate"] = tos(fabs(cloakrate / 2147483136.));
-    unit["Cloak_Energy"] = tos(cloakenergy);
-    unit["Cloak_Glass"] = tos(cloakglass);
+
+    cloak.Save(unit);
     unit["Repair_Droid"] = tos(repair_droid);
     unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
     unit["Hud_Functionality"] = WriteHudDamage(this);
