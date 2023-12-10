@@ -25,10 +25,6 @@ jobs:
           - 3.12
 
     env:
-      #HOMEBREW_NO_AUTO_UPDATE: 1
-      #HOMEBREW_NO_INSTALL_UPGRADE: 1
-      #HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
-      #HOMEBREW_DEBUG: 1
       HOMEBREW_VERBOSE: 1
       PYTHON_VERSION_STRING: "python@${{ matrix.python-version }}"
 
@@ -38,26 +34,6 @@ jobs:
         with:
           fetch-depth: 2
           submodules: false
-
-      # The following dependencies are already present within macos-* images:
-      # - clang (llvm)
-      # - cmake
-      # - expat
-      # - gcc
-      # - git
-      # - jpeg
-      # - libpng
-      # - libvorbis
-      # - python
-      #
-      # Note, though, that the Python version "varies between runners and can be changed unexpectedly",
-      # according to https://github.com/actions/setup-python#basic-usage .
-      # Hence the need to specify a particular Python version.
-      #- name: Set up Python
-      #  uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c #v5.0.0
-      #  with:
-      #    python-version: ${{ matrix.python-version }}
-      #    check-latest: true
 
       - name: Bootstrap it
         run: script/bootstrap-on-macos.sh
