@@ -141,7 +141,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     // TODO: move to energymanager.canpower and
     // energycontainer.canpower
-    if (unit->energy_manager.GetLevel(EnergyType::SPEC) < jump_drive.GetConsumption()) {
+    if (unit->energy_manager.GetLevel(EnergyType::FTL) < jump_drive.GetConsumption()) {
         if (!ignore_energy_requirements) {
             return false;
         }

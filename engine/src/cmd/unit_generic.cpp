@@ -988,7 +988,7 @@ extern void ActivateAnimation(Unit *jp);
 // Move to jump_enabled
 void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
     if (cp) {
-        if (un->energy_manager.GetLevel(EnergyType::SPEC) >= un->jump.energy) {
+        if (un->energy_manager.GetLevel(EnergyType::FTL) >= un->jump.energy) {
             if (un->jump.drive > -2) {
                 cp->jumpok = 1;
             }
@@ -1013,7 +1013,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
         //we have a drive
         if ((!SPEC_interference && (smalle->jump.drive >= 0
                 &&          //we have power
-                        (smalle->energy_manager.GetLevel(EnergyType::SPEC) >= smalle->jump.energy
+                        (smalle->energy_manager.GetLevel(EnergyType::FTL) >= smalle->jump.energy
                                 //or we're being cheap
                                 || (ai_jump_cheat && cp == nullptr)
                         )))
@@ -1040,7 +1040,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
             return false;
         }
         if ((!SPEC_interference && (jump.drive >= 0
-                && (energy_manager.GetLevel(EnergyType::SPEC) >= jump.energy || (ai_jump_cheat && cp == NULL))
+                && (energy_manager.GetLevel(EnergyType::FTL) >= jump.energy || (ai_jump_cheat && cp == NULL))
         )) || smalle->forcejump) {
             jump_drive.Use();
             DeactivateJumpDrive();

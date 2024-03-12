@@ -30,10 +30,14 @@
 
 #include <string>
 
+/* Discussion of FTL - yes, it isn't really faster. However, 
+* it would be easier for a new developer or someone from WC
+* to figure what it means.
+*/
 enum class EnergyType {
     Fuel,   // 1
     Energy, // 0 Capacitor
-    SPEC,   // 2 FTL
+    FTL,   // 2 FTL
     None    // 3 Free Energy
 };
 

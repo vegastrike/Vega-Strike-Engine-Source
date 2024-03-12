@@ -206,7 +206,7 @@ bool DockingOps::DockToTarget(Unit *utdw) {
         if (physicallyDock) {
             return parent->Dock(utdw);
         } else {
-            utdw->energy_manager.Refill(EnergyType::SPEC);
+            utdw->energy_manager.Refill(EnergyType::FTL);
             return true;
         }
     } else if (diss <= 1.2 * rad * rad) {
@@ -216,7 +216,7 @@ bool DockingOps::DockToTarget(Unit *utdw) {
             if (physicallyDock) {
                 return parent->Dock(utdw);
             } else {
-                parent->energy_manager.Refill(EnergyType::SPEC);
+                parent->energy_manager.Refill(EnergyType::FTL);
                 return true;
             }
         }

@@ -73,7 +73,7 @@ double getCloakConsumption(double factor, double mass) {
 EnergyManager::EnergyManager() {
     fuel = EnergyContainer(EnergyType::Fuel, 0.0);
     energy = EnergyContainer(EnergyType::Energy, 0.0);
-    spec_energy = EnergyContainer(EnergyType::SPEC, 0.0);
+    spec_energy = EnergyContainer(EnergyType::FTL, 0.0);
     reactor = Reactor(EnergyType::Fuel, 0.0, 0.0, 0.0, 
                       &energy, &spec_energy, 0.1);
 }
@@ -115,7 +115,7 @@ EnergyContainer* EnergyManager::GetContainer(const EnergyType type) {
             return &fuel;
         case EnergyType::Energy:
             return &energy;
-        case EnergyType::SPEC:
+        case EnergyType::FTL:
             return &spec_energy;
         default:
             return nullptr;
@@ -128,7 +128,7 @@ const EnergyContainer* EnergyManager::GetConstContainer(const EnergyType type) c
             return &fuel;
         case EnergyType::Energy:
             return &energy;
-        case EnergyType::SPEC:
+        case EnergyType::FTL:
             return &spec_energy;
     }
 }

@@ -32,7 +32,7 @@ JumpDrive::JumpDrive():
     delay(0.0){}
 
 JumpDrive::JumpDrive(double consumption, double delay) : 
-    EnergyConsumer(EnergyType::SPEC,
+    EnergyConsumer(EnergyType::FTL,
                    EnergyConsumerClassification::JumpDrive,
                    EnergyConsumerType::Variable, consumption),
                    delay(delay) {}

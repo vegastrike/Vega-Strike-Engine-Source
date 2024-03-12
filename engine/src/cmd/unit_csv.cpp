@@ -402,7 +402,7 @@ static void AddSubUnits(Unit *thus,
         if (randomspawn) {
             // TODO: surely we could use something more relevant than max SPEC
             // to determine chance to spawn...
-            int chancetospawn = float_to_int(xml.units[a]->energy_manager.GetMaxLevel(EnergyType::SPEC));
+            int chancetospawn = float_to_int(xml.units[a]->energy_manager.GetMaxLevel(EnergyType::FTL));
             if (chancetospawn > rand() % 100) {
                 thus->SubUnits.prepend(xml.units[a]);
             } else {
@@ -741,7 +741,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     energy_manager.SetCapacity(EnergyType::Energy, 
                                UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f));
-    energy_manager.SetCapacity(EnergyType::SPEC, 
+    energy_manager.SetCapacity(EnergyType::FTL, 
                                UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f));
     
     // Hull
@@ -1236,7 +1236,7 @@ string Unit::WriteUnitString() {
     // Components
     unit["Fuel_Capacity"] = tos(energy_manager.GetMaxLevel(EnergyType::Fuel));
     unit["Primary_Capacitor"] = tos(energy_manager.GetMaxLevel(EnergyType::Energy));
-    unit["Warp_Capacitor"] = tos(energy_manager.GetMaxLevel(EnergyType::SPEC));
+    unit["Warp_Capacitor"] = tos(energy_manager.GetMaxLevel(EnergyType::FTL));
     
     unit["Hull"] = tos(GetHullLayer().facets[0].health);
     unit["Spec_Interdiction"] = tos(specInterdiction);

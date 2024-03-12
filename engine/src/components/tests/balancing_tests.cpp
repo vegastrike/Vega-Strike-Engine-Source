@@ -60,7 +60,7 @@ EnergyManager setup(ContainersSetup containers_setup, ReactorSetup reactor_setup
     
     manager.SetCapacity(EnergyType::Fuel, containers_setup.fuel_capacity);
     manager.SetCapacity(EnergyType::Energy, containers_setup.energy_capacity);
-    manager.SetCapacity(EnergyType::SPEC, containers_setup.spec_capacity);
+    manager.SetCapacity(EnergyType::FTL, containers_setup.spec_capacity);
     manager.SetReactor(reactor_setup.capacity, reactor_setup.usage_factor, 
                        reactor_setup.level, simulation_atom_var);
 
@@ -85,7 +85,7 @@ double fuelBurn(ContainersSetup containers_setup, ReactorSetup reactor_setup,
             std::cout << i << " R: " << manager.GetReactorCapacity() << 
                               " F: " << manager.GetLevel(EnergyType::Fuel) << 
                               " E: " << manager.GetLevel(EnergyType::Energy) <<
-                              " S: " << manager.GetLevel(EnergyType::SPEC) << std::endl;
+                              " S: " << manager.GetLevel(EnergyType::FTL) << std::endl;
         }
         
         if(manager.GetLevel(EnergyType::Fuel) < 0.001) { 

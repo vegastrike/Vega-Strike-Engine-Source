@@ -31,6 +31,7 @@
 
 template<typename T>
 class Resource {
+protected:
     T value_;
     T min_value_;
     T max_value_;
@@ -83,22 +84,31 @@ public:
 
     operator T() { return value_; }
 
-    void Downgrade(const T &value);
-    void DowngradeByPercent(const T &value);
+    
 
-    T Percent() const;
+    double Percent() const;
     void ResetMaxValue();
     void Set(const T &value);
     void SetToMax();
     void SetMaxValue(const T &value);
-    void Upgrade(const T &value);
-    void UpgradeByPercent(const T &value);
+    
     void Zero();
 
     T Value() const;
     T MaxValue() const;
     T MinValue() const;
     T AdjustedValue() const;
+
+    // Damage & Repair
+    void Destroy();
+    bool Destroyed();
+    void RandomDamage();
+    void DamageByValue(const T &value);
+    void DamageByPercent(const T &value);
+    bool Damaged() const;
+    void RepairFully();
+    void RepairByValue(const T &value);
+    void RepairByPercent(const T &value);
 };
 
 template<typename T>

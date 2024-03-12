@@ -432,7 +432,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             
             const bool warpifnojump = configuration()->graphics_config.hud.display_warp_energy_if_no_jump_drive;
             return (warpifnojump || target->jump.drive != -2) ? 
-                target->energy_manager.Percent(EnergyType::SPEC) : 0;
+                target->energy_manager.Percent(EnergyType::FTL) : 0;
         }
         case UnitImages<void>::HULL:
             if (maxhull < target->GetHull()) {
@@ -730,7 +730,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::CANJUMP_MODAL:
             if (-2 == target->jump.drive) {
                 return (float) UnitImages<void>::NODRIVE;
-            } else if (target->energy_manager.GetLevel(EnergyType::SPEC) < target->jump.energy) {
+            } else if (target->energy_manager.GetLevel(EnergyType::FTL) < target->jump.energy) {
                 return (float) UnitImages<void>::NOTENOUGHENERGY;
             } else if (target->graphicOptions.InWarp) {          //FIXME
                 return (float) UnitImages<void>::OFF;

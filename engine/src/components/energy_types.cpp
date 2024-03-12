@@ -31,7 +31,7 @@ EnergyType SaveToType(const int type) {
     switch(type) {
         case 0: return EnergyType::Energy;
         case 1: return EnergyType::Fuel;
-        case 2: return EnergyType::SPEC;
+        case 2: return EnergyType::FTL;
         default: return EnergyType::None;
     }
 }
@@ -40,7 +40,7 @@ std::string TypeToSave(EnergyType type) {
     switch(type) {
         case EnergyType::Energy: return "0";
         case EnergyType::Fuel: return "1";
-        case EnergyType::SPEC: return "2";
+        case EnergyType::FTL: return "2";
         default: return "3";
     }
 }

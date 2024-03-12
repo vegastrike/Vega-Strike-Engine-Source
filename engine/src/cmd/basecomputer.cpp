@@ -5341,7 +5341,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         //note: I found no function to get max warp energy, but since we're docked they are the same
         if (!subunitlevel) {
             PRETTY_ADDU(statcolor + "Warp capacitor bank storage: #-c",
-                    playerUnit->energy_manager.GetMaxLevel(EnergyType::SPEC) * RSconverter * Wconv,
+                    playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) * RSconverter * Wconv,
                     0,
                     "MJ");
 
@@ -5364,7 +5364,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     PRETTY_ADDU(statcolor + "Delay: #-c", uj.delay, 0, "seconds");
                 if (uj.damage > 0)
                     PRETTY_ADDU(statcolor + "Damage to outsystem jump drive: #-c", uj.damage * VSDM, 0, "MJ");
-                if (playerUnit->energy_manager.GetMaxLevel(EnergyType::SPEC) < uj.energy) {
+                if (playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) < uj.energy) {
                     text += "#n##c1:.3:.3#" + prefix
                             +
                                     "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
@@ -5380,9 +5380,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
                     PRETTY_ADDU(statcolor + "Installs main capacitor bank with storage capacity: #-c",
                             (playerUnit->energy_manager.GetMaxLevel(EnergyType::Energy) * RSconverter), 0, "MJ");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::SPEC)))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::FTL)))
                     PRETTY_ADDU(statcolor + "Installs warp capacitor bank with storage capacity: #-c",
-                            playerUnit->energy_manager.GetMaxLevel(EnergyType::SPEC) * RSconverter * Wconv, 0, "MJ");
+                            playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) * RSconverter * Wconv, 0, "MJ");
                 if (buj.drive != uj.drive) {
                     text += statcolor +
                             "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
@@ -5397,9 +5397,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                             (playerUnit->energy_manager.GetMaxLevel(EnergyType::Energy) * RSconverter),
                             0,
                             "MJ of storage to main capacitor banks");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::SPEC)))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::FTL)))
                     PRETTY_ADDU(statcolor + "Adds #-c",
-                            playerUnit->energy_manager.GetMaxLevel(EnergyType::SPEC) * RSconverter * Wconv,
+                            playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) * RSconverter * Wconv,
                             0,
                             "MJ of storage to warp capacitor bank");
                 break;
@@ -5410,9 +5410,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
                     PRETTY_ADDU(statcolor + "Increases main capacitor bank storage by #-c",
                             100.0 * (playerUnit->energy_manager.GetMaxLevel(EnergyType::Energy) - 1), 0, "%");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::SPEC)))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::FTL)))
                     PRETTY_ADDU(statcolor + "Increases warp capacitor bank storage by #-c",
-                            (playerUnit->energy_manager.GetMaxLevel(EnergyType::SPEC) - 1) * 100, 0, "%");
+                            (playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) - 1) * 100, 0, "%");
                 break;
             default:                 //Failure
                 text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5778,7 +5778,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     +
                             "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
         }
-        if (uj.drive != -2 && playerUnit->energy_manager.GetMaxLevel(EnergyType::SPEC) < uj.energy) {
+        if (uj.drive != -2 && playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) < uj.energy) {
             text += "#n##c1:.3:.3#" + prefix
                     +
                             "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
