@@ -42,8 +42,8 @@ else
     else
         script/build -DCMAKE_BUILD_TYPE=Debug $FLAGS
     fi
-
-    pushd build
-    GTEST_OUTPUT=xml:test-results ctest -V
-    popd
 fi
+
+pushd build
+GTEST_OUTPUT=xml:test-results ctest -V
+popd
