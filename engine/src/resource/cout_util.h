@@ -1,7 +1,5 @@
 /*
- * drive.h
- *
- * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,23 +19,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef VEGA_STRIKE_ENGINE_RESOURCE_COUT_UTIL_H
+#define VEGA_STRIKE_ENGINE_RESOURCE_COUT_UTIL_H
 
-#ifndef DRIVE_H
-#define DRIVE_H
+#include <iostream>
 
-#include "component.h"
-#include "energy_container.h"
+void printPlayerMessage(std::string key,
+                        std::string message,
+                        std::string value) {
+    if(key == "player_ship") {
+        std::cout << message << " : " << value << std::endl;
+    } 
+}
 
 
-class Drive : //public Component, 
-    public EnergyConsumer {
-    double usage_factor;
-public:
-    Drive(EnergyType type, 
-          double usage_factor, 
-          double drive_level, 
-          double mass, 
-          double simulation_atom_var);
-};
-
-#endif // DRIVE_H
+#endif //VEGA_STRIKE_ENGINE_RESOURCE_COUT_UTIL_H

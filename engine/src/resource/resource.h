@@ -109,6 +109,10 @@ public:
     void RepairFully();
     void RepairByValue(const T &value);
     void RepairByPercent(const T &value);
+
+    T* ValuePtr() { return &value_; }
+    T* AdjustedMaxValuePtr() { return &adjusted_max_value_; }
+    T* MaxValuePtr() { return &max_value_; }
 };
 
 template<typename T>

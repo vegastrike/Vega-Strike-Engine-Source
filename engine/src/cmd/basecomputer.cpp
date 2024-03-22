@@ -1877,6 +1877,12 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
             bool CanDoSell = true;
             Unit *player = m_player.GetUnit();
             unsigned int numc = player->numCargo();
+
+            static bool must_fix_first =
+                                    XMLSupport::parse_bool(vs_config->getVariable("physics",
+                                            "must_repair_to_sell",
+                                            "true"));
+
             if (!isWeapon(item.GetCategory())) {
                 //weapons can always be sold
                 for (unsigned int i = 0; i < numc; ++i) {
@@ -1884,16 +1890,17 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                     if (c->GetCategory().find("upgrades/") == 0 && !isWeapon(c->GetCategory())) {
                         float po = UnitUtil::PercentOperational(player, c->GetName(), c->GetCategory(), false);
                         if (po > .02 && po < .98) {
-                            static bool must_fix_first =
-                                    XMLSupport::parse_bool(vs_config->getVariable("physics",
-                                            "must_repair_to_sell",
-                                            "true"));
-
                             CanDoSell = (emergency_downgrade_mode.length() != 0 || must_fix_first == false);
                         }
                     }
                 }
             }
+
+            // New component code
+            if(GetUpgradeType(item.GetName() + UPGRADES_SUFFIX) == UpgradeType::Shield) {
+                CanDoSell = (!player->shield_component.Damaged()) || !must_fix_first;
+            }
+
             if (CanDoSell) {
                 commitButton->setHidden(false);
                 commitButton->setLabel("Sell");
@@ -5461,8 +5468,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             PRETTY_ADDU(
                     substatcolor + armor_color_strings[i],
                     (mode && replacement_mode
-                            == 2) ? 100.0 * (playerUnit->armor->facets[armor_indices[i]].health - 1) :
-                            playerUnit->armor->facets[2].health * VSDM,
+                            == 2) ? 100.0 * (playerUnit->armor->facets[armor_indices[i]].health.Value() - 1) :
+                            playerUnit->armor->facets[i].health.Value() * VSDM,
                     0,
                     (2 == replacement_mode) ? "%" : "MJ");
         }
@@ -5547,17 +5554,17 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 shield->GetMaxHealth())) {
             for (int i = 0; i < num_shields; i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                        (100.0 * (playerUnit->shield->facets[i].max_health - 1)) :
-                        playerUnit->shield->facets[i].max_health * VSDM, 0,
+                        (100.0 * (playerUnit->shield->facets[i].health.MaxValue() - 1)) :
+                        playerUnit->shield->facets[i].health.MaxValue() * VSDM, 0,
                         (2 == replacement_mode) ? "%" : "MJ");
             }
         }
     }
 
-    const float regeneration = playerUnit->shield->GetRegeneration();
+    const double regeneration = playerUnit->shield->GetRegeneration();
     if (!mode) {
         PRETTY_ADDU(statcolor + "Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s");
-    } else if (replacement_mode != 0 || playerUnit->shield->GetRegeneration() != blankUnit->shield->GetRegeneration()) {
+    } else if (replacement_mode != 0 || regeneration) {
         switch (replacement_mode) {
             case 0:                         //Replacement or new Module
                 PRETTY_ADDU(statcolor + "Shield protection recharge speed set to: #-c", regeneration * VSDM, 0, "MJ/s");

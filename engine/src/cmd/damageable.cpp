@@ -43,6 +43,24 @@
 #include <algorithm>
 #include "configuration/configuration.h"
 
+Damageable::Damageable() : DamageableObject(),
+            hull(&(layers[0])),
+            armor(&(layers[1])),
+            shield(&(layers[2])),
+            current_hull(hull->facets[0].health.ValuePtr()),
+            max_hull(hull->facets[0].health.MaxValuePtr()),
+            upgrade_hull(0),
+            shield_regeneration(0),
+            killed(false),
+            shield_component(shield) {
+        if(shield) {
+            shield_component.shield_ = shield;
+        } else {
+            assert(0);
+        }
+        
+}
+
 bool Damageable::ShieldUp(const Vector &pnt) const {
     const int shield_min = 5;
 
@@ -469,19 +487,14 @@ void Damageable::Destroy() {
     }
 }
 
-// We only support 2 and 4 facet shields ATM
-// This doesn't have proper checks
-float ShieldData(const Damageable *unit, int facet_index) {
-    return (unit->shield->facets[facet_index].health) /
-            (unit->shield->facets[facet_index].max_health);
-}
+
 
 float Damageable::FShieldData() const {
     switch (shield->number_of_facets) {
         case 2:
-            return ShieldData(this, 0);
+            return shield->facets[0].Percent();
         case 4:
-            return ShieldData(this, 2);
+            return shield->facets[2].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
@@ -490,9 +503,9 @@ float Damageable::FShieldData() const {
 float Damageable::BShieldData() const {
     switch (shield->number_of_facets) {
         case 2:
-            return ShieldData(this, 1);
+            return shield->facets[1].Percent();
         case 4:
-            return ShieldData(this, 3);
+            return shield->facets[3].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
@@ -503,7 +516,7 @@ float Damageable::LShieldData() const {
         case 2:
             return 0.0f;
         case 4:
-            return ShieldData(this, 0);
+            return shield->facets[0].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
@@ -514,7 +527,7 @@ float Damageable::RShieldData() const {
         case 2:
             return 0.0f;
         case 4:
-            return ShieldData(this, 1);
+            return shield->facets[1].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
@@ -525,7 +538,7 @@ void Damageable::ArmorData(float armor[8]) const {
     Damageable *damageable = const_cast<Damageable *>(this);
     DamageableLayer armor_layer = damageable->GetArmorLayer();
     for (int i = 0; i < 8; i++) {
-        armor[i] = armor_layer.facets[i].health;
+        armor[i] = armor_layer.facets[i].health.Value();
     }
 }
 
@@ -576,11 +589,14 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
 
     // Discharge shields due to energy or SPEC or cloak
     if ((in_warp && !shields_in_spec) || unit->cloak.Active()) {
-        shield->Discharge(discharge_rate, min_shield_discharge);
+        shield->SetPower(0.0);
     } else {
-        // Shield regeneration
-        shield->Regenerate(shield_recharge);
+        // Figure out how to support partial power
+        shield->SetPower(1.0);
     }
+
+    // Shield regeneration
+    shield->Regenerate(shield_recharge);
 }
 
 float Damageable::MaxShieldVal() const {

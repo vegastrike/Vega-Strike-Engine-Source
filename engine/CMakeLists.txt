@@ -663,6 +663,10 @@ SET(LIBCOMPONENT
     src/components/component.cpp
     src/components/energy_types.cpp
 
+    src/components/armor.cpp
+    src/components/hull.cpp
+    src/components/shield.cpp
+
     src/components/afterburner.cpp
     src/components/cloak.cpp
     src/components/drive.cpp

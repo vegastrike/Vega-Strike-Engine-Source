@@ -32,6 +32,7 @@ Drive::Drive(EnergyType type,
              double drive_level, 
              double mass, 
              double simulation_atom_var):
+             //Component("", 0.0, 0.0, false),
              EnergyConsumer(type, 
                             EnergyConsumerClassification::Afterburner, 
                             EnergyConsumerType::Constant, 

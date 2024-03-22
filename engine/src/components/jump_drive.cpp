@@ -24,7 +24,8 @@
 
 #include "jump_drive.h"
 
-JumpDrive::JumpDrive(): 
+JumpDrive::JumpDrive():
+    //Component("", 0.0, 0.0, true),
     EnergyConsumer(EnergyType::None, 
                    EnergyConsumerClassification::JumpDrive,
                    EnergyConsumerType::Variable, 
@@ -32,13 +33,14 @@ JumpDrive::JumpDrive():
     delay(0.0){}
 
 JumpDrive::JumpDrive(double consumption, double delay) : 
+    //Component("", 0.0, 0.0, true),
     EnergyConsumer(EnergyType::FTL,
                    EnergyConsumerClassification::JumpDrive,
                    EnergyConsumerType::Variable, consumption),
                    delay(delay) {}
 
 bool JumpDrive::Ready() { 
-    return installed && enabled; 
+    return true;//installed && enabled; 
 }
 
 void JumpDrive::SetDestination(int destination) { 

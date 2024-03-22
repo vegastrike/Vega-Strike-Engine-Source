@@ -38,6 +38,7 @@
 #include "unit_generic.h"
 #include "weapon_info.h"
 #include "vega_cast_utils.h"
+#include "unit_csv_factory.h"
 
 std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     if(upgrades.size() == 0) {
@@ -81,6 +82,58 @@ unsigned int convert_to_int(std::string s) {
 UpgradeableUnit::UpgradeableUnit()
 {
 
+}
+
+extern int GetModeFromName(const char *input_buffer);
+
+
+UpgradeType GetUpgradeType(const std::string upgrade_key) {
+    std::string upgrade_type_string = UnitCSVFactory::GetVariable(upgrade_key, "Upgrade_Type", std::string());
+    std::string upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
+
+    if(upgrade_type_string.size() > 0) {
+        std::cout << "Upgrade key: " << upgrade_key << " " << upgrade_type_string << std::endl;
+    }
+    
+
+    if(upgrade_type_string.empty()) return UpgradeType::None;
+    
+    if(upgrade_type_string == "Armor") {
+
+        return UpgradeType::Armor;
+    }
+    //if(upgrade_type_string == "Hull") return UpgradeType::Hull;
+    if(upgrade_type_string == "Shield") return UpgradeType::Shield;
+
+    return UpgradeType::None;
+}
+
+
+UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_name,
+                     bool upgrade, bool apply) {
+    Unit* unit = vega_dynamic_cast_ptr<Unit>(this);
+    const std::string upgrade_key = upgrade_name + UPGRADES_SUFFIX;
+    const UpgradeType upgrade_type = GetUpgradeType(upgrade_key);
+    
+    UpgradeOperationResult result;
+
+
+
+    switch(upgrade_type) {
+        // case UpgradeType::Armor:
+        //     result.upgradeable = true;
+        //     result.success = unit->armor.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+        //     break;
+        case UpgradeType::Shield:
+            result.upgradeable = true;
+            result.success = unit->shield_component.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+        default:
+            //std::cout << "Unhandled type for " << upgrade_name << std::endl;
+            break;
+    }
+
+    return result;
 }
 
 extern int GetModeFromName(const char *input_buffer);

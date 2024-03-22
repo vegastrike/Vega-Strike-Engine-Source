@@ -31,7 +31,7 @@
 DamageableObject::DamageableObject() {
     Health hull_health = Health(1, 1, 0);
     Health armor_health = Health(0, 0, 0);
-    Health shield_health = Health(0, 0, 5);
+    Health shield_health = Health(2, 0, 0);
 
     DamageableLayer hull_layer = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
     DamageableLayer armor_layer = DamageableLayer(1, FacetConfiguration::eight, armor_health, false);

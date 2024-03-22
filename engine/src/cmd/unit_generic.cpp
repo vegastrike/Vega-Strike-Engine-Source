@@ -1277,7 +1277,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         }
 
         // TODO: lib_damage reenable
-        shield->ReduceLayerCapability(dam, 0.1);
+        shield_component.Damage();
 
         damages |= Damages::SHIELD_DAMAGED;
         return;
@@ -2831,6 +2831,15 @@ bool Unit::UpAndDownGrade(const Unit *up,
         const Unit *downgradelimit,
         bool force_change_on_nothing,
         bool gen_downgrade_list) {
+    // New Code
+    UpgradeOperationResult result = UpgradeUnit(up->name, !downgrade, touchme);
+    if(result.upgradeable) {
+        std::cout << "Upgraded successfully\n";
+        percentage = result.percent;
+        return result.success;
+    }
+
+    // Old Code
     percentage = 0;
 
     static bool
@@ -2988,7 +2997,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
     }
 
-    if (!csv_cell_null_check || force_change_on_nothing
+    /*if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Armor_Front_Top_Right")) {
         for (int i = 0; i < 8; i++) {
             STDUPGRADE(armor->facets[i].health,
@@ -2996,7 +3005,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     templ->armor->facets[i].health, 0);
             armor->facets[i].max_health = armor->facets[i].health;
         }
-    }
+    }*/
 
     // TODO: lib_damage all of this should be implemented better elsewhere
     // Probably in DamageableFactory
@@ -3004,7 +3013,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
     // Because of the complex macros taking partial expressions and building code from them,
     // this is the easiest way to refactor
-    float previous = shield->GetRegeneration();
+    /*float previous = shield->GetRegeneration();
 
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Shield_Recharge"))
@@ -3015,7 +3024,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     if (upgradedrecharge) {
 
         shield->UpdateRegeneration(shield_regeneration);
-    }
+    }*/
 
     // Upgrade hull health
     upgrade_hull = *current_hull;
@@ -3032,9 +3041,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
         STDUPGRADE(upgrade_hull, up->upgrade_hull, templ->upgrade_hull, 0);
     }
 
-    if ((hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed())) {
+    /*if ((hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed())) {
         hull->facets[0].max_health = hull->facets[0].health;
-    }
+    }*/
 
     //if (!csv_cell_null_check || force_change_on_nothing
       //      || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
@@ -3165,7 +3174,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
     bool upgradedshield = false;
 
-    if (!csv_cell_null_check || force_change_on_nothing
+    /*if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Shield_Front_Top_Right")) {
         if (shield->number_of_facets == up->shield->number_of_facets) {
             for (unsigned int i = 0; i < shield->number_of_facets; i++) {
@@ -3187,7 +3196,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
         } else if (up->FShieldData() > 0 || up->RShieldData() > 0 || up->LShieldData() > 0 || up->BShieldData() > 0) {
             cancompletefully = false;
         }
-    }
+    }*/
 
     // TODO: lib_damage. Disabled this until we restore efficiency and leak
     /*if (upgradedshield || upgradedrecharge) {

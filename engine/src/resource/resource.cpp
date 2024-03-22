@@ -87,7 +87,7 @@ void Resource<T>::SetMaxValue(const T &value) {
         return;
     }
 
-    adjusted_max_value_ = max_value_ = value;
+    value_ = adjusted_max_value_ = max_value_ = value;
 }
 
 

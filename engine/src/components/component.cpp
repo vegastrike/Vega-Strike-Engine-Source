@@ -26,20 +26,47 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "component.h"
+#include "unit_csv_factory.h"
 
-#include <random>
+Component::Component(std::string upgrade_name, double mass, double volume,
+                     bool integral):
+                     upgrade_name(upgrade_name),
+                     mass(mass), volume(volume),
+                     integral(integral) {}
 
-Component::Component()
-{
 
+void Component::Load(std::string upgrade_key, std::string unit_key, 
+                     Unit *unit) {
+    upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
+    this->upgrade_key = upgrade_key;
+    
+    mass = UnitCSVFactory::GetVariable(upgrade_key, "Mass", 0.0);
+    // TODO: volume = UnitCSVFactory::GetVariable(upgrade_key, "Volume", 0.0);
+    // TODO: bool integral = false;
 }
 
+// TODO: convert to std::pair<bool, double>
+bool Component::CanWillUpDowngrade(const std::string upgrade_key,
+                                   bool upgrade, bool apply) {
+    if(upgrade) {
+        if(apply) {
+            return Upgrade(upgrade_key);
+        } else {
+            return CanUpgrade(upgrade_key);
+        }
+    } else {
+        if(apply) {
+            return Downgrade();
+        } else {
+            return CanDowngrade();
+        }
+    }                                        
+}
 
-double random20()
-{
-    if(std::rand() < 0.2) {
-        return std::rand();
-    }
-
-    return 1.0;
+bool Component::Downgrade() {
+    upgrade_name = std::string();
+    upgrade_key = std::string();
+    
+    mass = 0.0;
+    volume = 0.0;
 }

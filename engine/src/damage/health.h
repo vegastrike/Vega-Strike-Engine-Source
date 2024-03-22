@@ -26,6 +26,8 @@
 
 #include "damage.h"
 
+#include "resource/resource.h"
+
 /**
  * @brief The Health struct represents the health of something.
  * It can be a shield, armor, hull or subsystem.
@@ -40,19 +42,18 @@
  * potentially without actually destroying the ship.
  */
 struct Health {
+    friend class Shield;
 public:
+
     int layer; // The layer we're in, for recording damage
-    float max_health;       // The absolute maximum, for a new, undamaged part
-    float adjusted_health;  // The current max, for a potentially damaged part
-    // or max health for shields when there's not enough power
-    // for them
-    // or shields are declining in SPEC
-    float health;
-    float max_regeneration;  // The absolute maximum, for a new, undamaged part
-    float regeneration; // The current capability of a potentially damaged part
+
+    Resource<double> health;
+    Resource<double> regeneration;
+    double power;   // 1.0 Full, 0.66 Two thirds, 0.0 Suppressed (FTL) or turned off
+
     bool regenerative;
     bool destroyed;
-    bool enabled;
+    
     Damage vulnerabilities;
     // TODO: implement "shield leaks"
 
@@ -70,47 +71,38 @@ public:
         destroying  // The DamageableObject is destroyed, potentially leaving debris behind
     } effect{};
 
-    Health(int layer, float health = 1, float regeneration = 0) :
-            Health(layer, health, health, regeneration) {
-    }
 
-    Health(int layer, float max_health, float health, float regeneration) :
+    Health(int layer, float health = 1, float regeneration = 0) :
             layer(layer),
-            max_health(max_health),
-            adjusted_health(max_health),
-            health(health),
-            max_regeneration(regeneration),
-            regeneration(regeneration),
+            health(health, 0, health),
+            regeneration(regeneration, 0, regeneration),
             regenerative(regeneration > 0) {
+        power = 1.0;     // Only relevant for regenerative objects (e.g. shields).
+        
         destroyed = false;
         if (layer == 0) {
             regenerative = false;
         }
-        enabled = regenerative; // Only relevant for regenerative objects (e.g. shields).
+        
         vulnerabilities.normal_damage = 1;
         vulnerabilities.phase_damage = 1;
     };
 
     float Percent() const {
-        return max_health != 0 ? health / max_health : 0.0f;
+        return health.Percent();
     }
 
-    void AdjustPower(const float &percent);
+    void AdjustPower(const double &percent);
     void AdjustPercentage();
     void DealDamage(Damage &damage, InflictedDamage &inflicted_damage);
-    void DealDamageComponent(int type, float &damage, float vulnerability, InflictedDamage &inflicted_damage);
-    void Disable();
+    void DealDamageComponent(int type, double &damage, float vulnerability, InflictedDamage &inflicted_damage);
     void Destroy();
-    void Enable();
-    void Enhance(float percent = 1.5f);
-    void ReduceLayerMaximum(const float &percent);
-    void ReduceLayerMaximumByOne();
-    void ReduceLayerMaximumByOnePercent();
-    void ReduceRegeneration(const float &percent);
+    void SetPower(const double power);
+    void Enhance(double percent = 1.5f);
     void Regenerate();
     void Regenerate(float recharge_rate);
     void SetHealth(float health);
-    void Update(float health);
+    void Update(float new_health);
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H

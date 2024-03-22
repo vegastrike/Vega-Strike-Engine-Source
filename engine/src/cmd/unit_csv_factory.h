@@ -59,6 +59,8 @@ const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
                             "Explosion",	"Num_Animation_Stages",	"Upgrade_Storage_Volume",	"Heat_Sink_Rating",
                             "Shield_Efficiency",	"Num_Chunks",	"Chunk_0",	"Collide_Subunits",	"Spec_Interdiction",
                             "Tractorability",
+                            // For component upgrade
+                            "Upgrade_Type", "Facets",
                             // These values are not in units.csv! There are probably more but I stopped mapping.
                             // TODO: map all missing values using the commented out code below!
                             "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space"};

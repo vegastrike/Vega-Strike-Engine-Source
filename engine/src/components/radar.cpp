@@ -141,11 +141,11 @@ void CRadar::Damage()
         capabilities = NONE;
     }
 
-    max_range = max_range * random20();
+    /*max_range = max_range * random20();
     max_cone = max_cone * random20();
     lock_cone = lock_cone * random20();
     tracking_cone = tracking_cone * random20();
-    min_target_size = min_target_size * random20();
+    min_target_size = min_target_size * random20();*/
 
     // Original cone damage
     /*const float maxdam = configuration()->physics_config.max_radar_cone_damage;

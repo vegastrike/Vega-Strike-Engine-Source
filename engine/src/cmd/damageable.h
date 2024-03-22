@@ -29,6 +29,9 @@
 #include "gfx/vec.h"
 #include "mount_size.h"
 
+#include "components/shield.h"
+#include <cassert>
+
 class Unit;
 struct GFXColor;
 
@@ -36,13 +39,17 @@ struct GFXColor;
  * @brief The Damageable class TODO
  */
 class Damageable : public DamageableObject {
+    friend class UpgradeableUnit;
+    
 public:
+    Shield shield_component;
+
     DamageableLayer *hull;
     DamageableLayer *armor;
     DamageableLayer *shield;
 
-    float *current_hull;
-    float *max_hull;
+    double *current_hull;
+    double *max_hull;
 
     // These are only used for upgrade due to macros
     // TODO: refactor
@@ -55,15 +62,7 @@ public:
 
     // Methods
 public:
-    Damageable() : hull(&layers[0]),
-            armor(&layers[1]),
-            shield(&layers[2]),
-            current_hull(&hull->facets[as_integer(FacetName::single)].health),
-            max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
-            upgrade_hull(0),
-            shield_regeneration(0),
-            killed(false) {
-    }
+    Damageable();
 
 protected:
     virtual ~Damageable() = default;

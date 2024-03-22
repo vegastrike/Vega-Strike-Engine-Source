@@ -28,34 +28,60 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include <string>
+
+/**
+ * LibComponent is currently tightly coupled to LibDamage and
+ * other various libraries in VegaStrike engine.
+ * Consider decoupling and subclassing every component in it.
+ */
+
+class Unit;
+
+// TODO: add complete list
+enum class ComponentType {
+    Hull, 
+    Armor, 
+    Shield,
+    Drive
+};
 
 class Component
 {
 protected:
-    bool installed = true;
-    bool enabled = true;
-    bool damaged = false;
+    std::string upgrade_name;   // Isometal Armor
+    std::string upgrade_key;    // armor03__upgrades
+    
+    double mass = 0;
+    double volume = 0;
+
+    bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
-    Component();
-    virtual ~Component() {}
+    Component(std::string upgrade_name, double mass, 
+              double volume, bool integral);
 
-    void Install() { installed = true; }
-    void Uninstall() { installed = false; }
-    bool Installed() { return installed; }
+    virtual void Load(std::string upgrade_key, std::string unit_key, 
+                      Unit *unit);      // Load from dictionary
+    //virtual std::string SaveToJSON() const = 0;   // Save component as JSON
 
-    void Enable() { enabled = true; }
-    void Disable() { enabled = false; }
-    bool Enabled() { return enabled; }
+    virtual std::string Describe() const = 0; // Describe component in base_computer 
 
+    // Handle the four cases of CanUpgrade/Upgrade/CanDowngrade/Downgrade
+    bool CanWillUpDowngrade(const std::string upgrade_key,
+                                           bool upgrade, bool apply);
 
-    //virtual void damage();
-    //virtual void fix();
+    virtual bool CanDowngrade() const = 0;
 
+    virtual bool Downgrade() = 0;
 
+    virtual bool CanUpgrade(const std::string upgrade_name) const = 0;
+
+    virtual bool Upgrade(const std::string upgrade_name) = 0;
+
+    virtual void Damage() = 0;
+    virtual void Repair() = 0;
+
+    virtual bool Damaged() const = 0;
+    virtual bool Installed() const = 0;
 };
-
-// These functions reduce functionality by a uniform distribution 0-1.
-// The function name's number component is the chance of the damage occurring.
-double random20();
-
 #endif // COMPONENT_H

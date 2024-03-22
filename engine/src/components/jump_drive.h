@@ -29,7 +29,8 @@
 #include "energy_types.h"
 #include "energy_container.h"
 
-class JumpDrive : public Component, public EnergyConsumer {
+class JumpDrive : //public Component, 
+    public EnergyConsumer {
     int destination;
     double delay;
 

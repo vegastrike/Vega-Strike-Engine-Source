@@ -743,11 +743,11 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
                                UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f));
     energy_manager.SetCapacity(EnergyType::FTL, 
                                UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f));
-    
+
     // Hull
     float temp_hull = UnitCSVFactory::GetVariable(unit_key, "Hull", 0.0f);
-    float hull_values[1] = {temp_hull};
-    hull->UpdateFacets(1, hull_values);
+    std::vector<double> hull_values = {temp_hull};
+    hull->UpdateFacets(hull_values);
 
     specInterdiction = UnitCSVFactory::GetVariable(unit_key, "Spec_Interdiction", 0.0f);
 
@@ -756,67 +756,21 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             "Armor_Front_Bottom_Left", "Armor_Front_Bottom_Right",
             "Armor_Back_Top_Left", "Armor_Back_Top_Right",
             "Armor_Back_Bottom_Left", "Armor_Back_Bottom_Right"};
-    float armor_values[8];
+    std::vector<double> armor_values;
     for (int i = 0; i < 8; i++) {
-        float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
-        armor_values[i] = tmp_armor_value;
+        double tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0);
+        armor_values.push_back(tmp_armor_value);
+
+        if(saved_game) {
+            std::cout << unit_key << " : " << armor_keys[i] << " = " << tmp_armor_value << std::endl;
+        }
     }
 
-    armor->UpdateFacets(8, armor_values);
+    armor->UpdateFacets(armor_values);
 
 
     // Load shield
-    // Some basic shield variables
-    // TODO: lib_damage figure out how leak and efficiency work
-    //char leak = static_cast<char>(UnitCSVFactory::GetVariable(unit_key, "Shield_Leak", 0.0f) * 100);
-
-    float regeneration = UnitCSVFactory::GetVariable(unit_key, "Shield_Recharge", 0.0f);
-
-    // This is necessary for upgrading shields, as it's done with an ugly macro in
-    // unit_generic STDUPGRADE
-    shield_regeneration = regeneration;
-    shield->UpdateRegeneration(regeneration);
-    //float efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
-
-    // Get shield count
-
-    int shield_count = 0;
-    float shield_values[4];
-    std::string shield_string_values[4];
-
-    // TODO: this mapping should really go away
-    // I love macros, NOT.
-    shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string());
-    shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string());
-    shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string());
-    shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string());
-
-    for (int i = 0; i < 4; i++) {
-        shield_values[i] = 0.0f;
-
-        if (shield_string_values[i].empty()) {
-            continue;
-        }
-
-        shield_values[i] = ::stof(shield_string_values[i]);
-        // Should add up to the shield type - quad or dual
-        shield_count++;
-    }
-
-    /*
-     We are making the following assumptions:
-     1. The CSV is correct
-     2. Dual shields are 0 front and 1 rear
-     3. Quad shields are front (0), rear(1), right(2) and left(3)
-     4. There is no support for 8 facet shields in the game.
-        This has more to do with the cockpit code than anything else
-     5. We map the above index to our own
-     */
-
-    if (shield_count == 4 || shield_count == 2) {
-        shield->number_of_facets = shield_count;
-        shield->UpdateFacets(shield_count, shield_values);
-    }
+    shield_component.Load("", unit_key, this);
 
     // End shield section
 
@@ -1252,7 +1206,8 @@ string Unit::WriteUnitString() {
     unit["Armor_Back_Bottom_Right"] = tos(GetArmorLayer().facets[7].health);
 
     int number_of_shield_emitters = shield->number_of_facets;
-    {
+    shield_component.SaveToCSV(unit);
+    /*{
         unit["Shield_Front_Top_Right"] = "";
         unit["Shield_Front_Top_Left"] = "";
         unit["Shield_Back_Top_Right"] = "";
@@ -1264,26 +1219,26 @@ string Unit::WriteUnitString() {
 
         switch (number_of_shield_emitters) {
         case 8:
-            unit["Shield_Front_Top_Left"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[1].max_health);
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[2].max_health);
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[3].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[4].max_health);
-            unit["Shield_Back_Top_Right"] = tos(GetShieldLayer().facets[5].max_health);
-            unit["Shield_Back_Bottom_Left"] = tos(GetShieldLayer().facets[6].max_health);
-            unit["Shield_Back_Bottom_Right"] = tos(GetShieldLayer().facets[7].max_health);
+            unit["Shield_Front_Top_Left"] = tos(GetShieldLayer().facets[0].health.MaxValue());
+            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[1].health.MaxValue());
+            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[2].health.MaxValue());
+            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[3].health.MaxValue());
+            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[4].health.MaxValue());
+            unit["Shield_Back_Top_Right"] = tos(GetShieldLayer().facets[5].health.MaxValue());
+            unit["Shield_Back_Bottom_Left"] = tos(GetShieldLayer().facets[6].health.MaxValue());
+            unit["Shield_Back_Bottom_Right"] = tos(GetShieldLayer().facets[7].health.MaxValue());
 
             break;
         case 4:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[2].max_health);
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[3].max_health);
+            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].health.MaxValue());
+            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].health.MaxValue());
+            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[2].health.MaxValue());
+            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[3].health.MaxValue());
 
             break;
         case 2:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
+            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].health.MaxValue());
+            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].health.MaxValue());
             break;
 
         case 0:
@@ -1295,7 +1250,7 @@ string Unit::WriteUnitString() {
             std::cout << number_of_shield_emitters << "\n";
             assert(0);
         }
-    }
+    }*/
 
 
     //TODO: lib_damage shield leak and efficiency

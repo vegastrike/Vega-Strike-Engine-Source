@@ -68,17 +68,15 @@ struct DamageableLayer {
     void AdjustPower(const float &percent);
     void DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage);
     void Destroy();
-    void Disable();
+    /*void Disable();
     void GradualDisable();
     void Discharge(float discharge_rate, float minimum_discharge);
     void Enable();
-    bool Enabled();
+    bool Enabled();*/
+    void SetPower(const double power);
     void Enhance();
 
     int GetFacetIndex(const CoreVector &attack_vector);
-
-    void ReduceLayerCapability(const float &percent,
-            const float &chance_to_reduce_regeneration);
 
     float TotalLayerValue();
     float TotalMaxLayerValue();
@@ -91,8 +89,10 @@ struct DamageableLayer {
     void Regenerate(float recharge_rate);
     void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
     float GetRegeneration();
-    void UpdateFacets(const unsigned int size, const float new_facets[4]);
-    void UpdateRegeneration(const float &new_regeneration_value);
+    void UpdateFacets(const std::vector<double> new_facets);
+    void UpdateRegeneration(const double &new_regeneration_value);
+
+    void DischargeShields();
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H

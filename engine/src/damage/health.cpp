@@ -29,7 +29,7 @@
 #include <iostream>
 #include <string>
 
-void Health::AdjustPower(const float &percent) {
+void Health::AdjustPower(const double &percent) {
     if (!regenerative) {
         // Not applicable for armor and hull
         return;
@@ -40,10 +40,7 @@ void Health::AdjustPower(const float &percent) {
         return;
     }
 
-    adjusted_health = max_health * percent;
-    if (adjusted_health < health) {
-        health = adjusted_health;
-    }
+    power = percent;
 }
 
 void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage) {
@@ -67,11 +64,11 @@ void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage) {
  * @param vulnerability - adjust for
  */
 // TODO: type is ugly hack
-void Health::DealDamageComponent(int type, float &damage, float vulnerability, InflictedDamage &inflicted_damage) {
+void Health::DealDamageComponent(int type, double &damage, float vulnerability, InflictedDamage &inflicted_damage) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
     // We also cap the actual damage at the current health
-    const float adjusted_damage = std::min(damage * vulnerability, health);
+    const float adjusted_damage = std::min(damage * vulnerability, health.Value());
 
     // We check if there's any damage left to pass on to the next layer
     damage -= adjusted_damage;
@@ -96,76 +93,72 @@ void Health::DealDamageComponent(int type, float &damage, float vulnerability, I
     }
 }
 
-void Health::Disable() {
-    if (regenerative && enabled) {
-        enabled = false;
-        health = 0.0f;
-    }
-}
-
 void Health::Destroy() {
     health = 0;
     destroyed = true;
 }
 
-void Health::Enable() {
-    if (regenerative && !enabled) {
-        enabled = true;
+/*  This is a bit kludgy. Set power via keyboard only works when not suppressed.
+*   If ship is in SPEC, power will be continuously set to 0.
+*   Therefore, if you set power to 1/3, go to SPEC and out again, power will be
+*   set to full again.
+*/
+void Health::SetPower(const double power) {
+    if (regenerative) {
+        this->power = power;
     }
 }
 
-void Health::Enhance(float percent) {
+
+/** Enhance adds some oomph to shields. 
+ * Originally, I thought to just make them 150% one time.
+ * However, this isn't really significant and it's hard to implement
+ * with the underlying Resource class, which checks for max values.
+ * Instead, this will upgrade the Max value of shields and repair them.
+ */
+void Health::Enhance(double percent) {
     // Don't enhance armor and hull
     if (!regenerative) {
         return;
     }
 
-    health = max_health * percent;
-}
-
-void Health::ReduceLayerMaximum(const float &percent) {
-    adjusted_health = std::max(0.0f, max_health * (1 - percent));
-    health = std::min(health, max_health);
-}
-
-void Health::ReduceLayerMaximumByOne() {
-    adjusted_health = std::max(0.0f, adjusted_health - 1);
-    health = std::min(health, adjusted_health);
-}
-
-void Health::ReduceLayerMaximumByOnePercent() {
-    float percent = adjusted_health / max_health - 0.01f;
-    max_health = std::max(0.0f, max_health * percent);
-}
-
-void Health::ReduceRegeneration(const float &percent) {
-    regeneration = std::max(0.0f, regeneration - max_regeneration * percent);
-}
-
-void Health::Regenerate() {
-    if (!enabled || destroyed || !regenerative) {
+    // Sanity checks. Don't want to use enhance to downgrade 
+    // and more than x100 is excessive.
+    if(percent < 1.0 || percent > 100.0) {
         return;
     }
 
-    health = std::min(adjusted_health, health + regeneration);
+    health.SetMaxValue(health.MaxValue() * percent);
+    regeneration.SetMaxValue(regeneration.MaxValue() * percent);
+}
+
+
+void Health::Regenerate() {
+    if (!regenerative) {
+        return;
+    }
+
+    if(health.Percent() < power) {
+        health++;
+    } else if(health.Percent() > power) {
+        health--;
+    }
 }
 
 void Health::Regenerate(float recharge_rate) {
-    if (!enabled || destroyed || !regenerative) {
+    /*if (!enabled || destroyed || !regenerative) {
         return;
     }
 
-    health = std::min(adjusted_health, health + recharge_rate);
+    health = std::min(adjusted_health, health + recharge_rate);*/
 }
 
 void Health::SetHealth(float health) {
-    health = std::min(max_health, health);
+   /* health = std::min(max_health, health);
     health = std::max(0.0f, health);
-    this->health = health;
+    this->health = health;*/
 }
 
-void Health::Update(float health) {
-    this->health = health;
-    max_health = health;
-    adjusted_health = health;
+void Health::Update(float new_health) {
+    this->health.SetMaxValue(new_health);
 }
