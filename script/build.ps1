@@ -23,7 +23,10 @@
 param(
     [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
     [Boolean]$EnablePIE = $false,
-    [String]$BuildType = "Release" # You can also specify "Debug"
+    [String]$BuildType = "Release", # You can also specify "Debug"
+    [Boolean]$IsRelease = $false,
+    [String]$GitTag = ""  # Git Tag, default empty string for PR builds
+    [String]$GitSha = ""  # Git Short SHA Reference, default empty string for PR builds
 )
 
 [String]$cmakePresetName = ""
@@ -66,4 +69,8 @@ $aPossibleBinaryDirs | ForEach-Object {
     if (Test-Path $_) {
         Copy-Item -Force -Verbose $_\*.* .\bin
     }
+}
+
+if ($IsRelease) {
+    Compress-Archive .\bin\* "VegaStrike_${GitTag}_${GitSha}.zip"
 }
