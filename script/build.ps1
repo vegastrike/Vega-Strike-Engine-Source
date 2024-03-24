@@ -25,9 +25,17 @@ param(
     [Boolean]$EnablePIE = $false,
     [String]$BuildType = "Release", # You can also specify "Debug"
     [Boolean]$IsRelease = $false,
-    [String]$GitTag = ""  # Git Tag, default empty string for PR builds
-    [String]$GitSha = ""  # Git Short SHA Reference, default empty string for PR builds
+    [String]$GitTag = "not-applicable"  # Git Tag, default empty string for PR builds
+    [String]$GitSha = "not-applicable"  # Git Short SHA Reference, default empty string for PR builds
 )
+
+# Hack around PowerShell not allowing empty string parameters
+if ($GitTag -ieq "not-applicable") {
+    $GitTag = ""
+}
+if ($GitSha -ieq "not-applicable" ) {
+    $GitSha = ""
+}
 
 [String]$cmakePresetName = ""
 if ($Generator -ieq "Ninja") {
