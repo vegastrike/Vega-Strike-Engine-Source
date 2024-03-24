@@ -44,20 +44,11 @@
 struct Health {
     friend class Shield;
 public:
-
     int layer; // The layer we're in, for recording damage
 
     Resource<double> health;
-    Resource<double> regeneration;
-    double power;   // 1.0 Full, 0.66 Two thirds, 0.0 Suppressed (FTL) or turned off
-
-    bool regenerative;
     bool destroyed;
-    
     Damage vulnerabilities;
-    // TODO: implement "shield leaks"
-
-
 public:
 
     /**
@@ -72,37 +63,22 @@ public:
     } effect{};
 
 
-    Health(int layer, float health = 1, float regeneration = 0) :
-            layer(layer),
-            health(health, 0, health),
-            regeneration(regeneration, 0, regeneration),
-            regenerative(regeneration > 0) {
-        power = 1.0;     // Only relevant for regenerative objects (e.g. shields).
-        
-        destroyed = false;
-        if (layer == 0) {
-            regenerative = false;
-        }
-        
-        vulnerabilities.normal_damage = 1;
-        vulnerabilities.phase_damage = 1;
-    };
+    Health(int layer, double health = 1, double regeneration = 0);
 
-    float Percent() const {
+    double Percent() const {
         return health.Percent();
     }
 
-    void AdjustPower(const double &percent);
-    void AdjustPercentage();
+    
     void DealDamage(Damage &damage, InflictedDamage &inflicted_damage);
-    void DealDamageComponent(int type, double &damage, float vulnerability, InflictedDamage &inflicted_damage);
     void Destroy();
-    void SetPower(const double power);
-    void Enhance(double percent = 1.5f);
-    void Regenerate();
-    void Regenerate(float recharge_rate);
-    void SetHealth(float health);
-    void Update(float new_health);
+    void SetHealth(double new_health);
+
+private:
+    void DealDamageComponent(int type, double &damage, 
+                             double vulnerability, 
+                             InflictedDamage &inflicted_damage);
+
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_HEALTH_H

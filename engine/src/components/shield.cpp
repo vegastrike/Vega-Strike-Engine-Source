@@ -32,6 +32,8 @@
 
 #include <random>
 
+const std::string SHIELD_RECHARGE = "Shield_Recharge";
+
 std::string shield_facets_eight[8] = {
     "Shield_Front_Top_Right",
     "Shield_Front_Top_Left",
@@ -59,7 +61,9 @@ std::string shield_facets_two[2] = {
 
 // Note that we need to define FacetConfiguration during load
 Shield::Shield(DamageableLayer* shield_): Component("", 0.0, 0.0, false),
-    shield_(shield_)
+    shield_(shield_), 
+    regeneration(0,0,0),
+    power(1.0,0.0,1.0)
     {}
 
 
@@ -70,12 +74,8 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
     //upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
     //int num_facets = UnitCSVFactory::GetVariable(upgrade_key, "Facets", 0);
     
-    printPlayerMessage(unit_key, "Old Facets", std::to_string(shield_->number_of_facets));
-    printPlayerMessage(unit_key, "Old Regeneration", std::to_string(shield_->GetRegeneration()));
-
     // Regeneration
-    const double regeneration = UnitCSVFactory::GetVariable(unit_key, "Shield_Recharge", 0.0);
-    printPlayerMessage(unit_key, "Regeneration", std::to_string(regeneration));
+    const double regeneration = UnitCSVFactory::GetVariable(unit_key, SHIELD_RECHARGE, 0.0);
 
     // Get shield count
 
@@ -113,8 +113,7 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
 
     shield_->number_of_facets = shield_values.size();
     shield_->UpdateFacets(shield_values);
-    shield_->UpdateRegeneration(regeneration);
-
+    this->regeneration.SetMaxValue(regeneration);
 
     // TODO: shield leakage & efficiency
 }
@@ -123,6 +122,9 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
 void Shield::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // TODO: lib_damage figure out if this is correctly assigned
     int number_of_shield_emitters = shield_->number_of_facets;
+
+    // TODO: This won't record damage to regeneration or shield facets
+    unit[SHIELD_RECHARGE] = std::to_string(regeneration.MaxValue());
 
     for(int i=0;i<8;i++) {
         unit[shield_facets_eight[i]] = "";
@@ -155,18 +157,36 @@ void Shield::SaveToCSV(std::map<std::string, std::string>& unit) const {
             std::cout << number_of_shield_emitters << "\n";
             assert(0);
     }
+
+    //TODO: lib_damage shield leak and efficiency
+    unit["Shield_Leak"] = std::to_string(0); //tos( shield.leak/100.0 );
+    unit["Shield_Efficiency"] = std::to_string(1); //tos( shield.efficiency );
 }
 
 std::string Shield::Describe() const {
     return std::string();
 }
 
+bool Shield::CanDowngrade() const {
+    return !Damaged();
+}
+
 bool Shield::CanUpgrade(const std::string upgrade_name) const {
     return !Damaged();
 }
 
-bool Shield::CanDowngrade() const {
-    return !Damaged();
+bool Shield::Downgrade() {
+    if(!CanDowngrade()) {
+        return false;
+    }
+    
+    regeneration.SetMaxValue(0.0);
+    power.SetMaxValue(0.0);
+
+    std::vector<double> empty_vector;
+    shield_->UpdateFacets(empty_vector);
+
+    return false;
 }
 
 bool Shield::Upgrade(const std::string upgrade_key) {
@@ -182,21 +202,18 @@ bool Shield::Upgrade(const std::string upgrade_key) {
 
     this->upgrade_key = upgrade_key;
     upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
-    std::cout << upgrade_key << " : " << upgrade_name << " : " << num_facets << std::endl;
 
     // Regeneration
-    double regeneration = UnitCSVFactory::GetVariable(upgrade_key, "Shield_Recharge", 0.0);
+    regeneration.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, SHIELD_RECHARGE, 0.0));
     
     std::vector<double> shield_values;
     if(num_facets == 2) {
         for (int i = 0; i < 2; i++) {
             shield_values.push_back(UnitCSVFactory::GetVariable(upgrade_key, shield_facets_two[i], 0.0));
-            shield_->facets[i].regeneration.SetMaxValue(regeneration);
         }
     } else if(num_facets == 4) {
         for (int i = 0; i < 4; i++) {
             shield_values.push_back(UnitCSVFactory::GetVariable(upgrade_key, shield_facets_four[i], 0.0));
-            shield_->facets[i].regeneration.SetMaxValue(regeneration);
         }
     } else {
         return false;
@@ -209,94 +226,122 @@ bool Shield::Upgrade(const std::string upgrade_key) {
     return true;
 }
 
-bool Shield::Downgrade() {
-    return false;
-}
+
 
 void Shield::Damage() {
-    /*for(Facet& facet : facets) {
-        facet.RandomDamage();
+    for(Health& facet : shield_->facets) {
+        facet.health.RandomDamage();
     }
 
     regeneration.RandomDamage();
 
     // This works fine as long as opacity is originally defined correctly.
     // For crappy shields, need opacity.max_value_ to be <1.0.
-    opacity.RandomDamage();    */ 
+    // TODO: opacity.RandomDamage();     
 } 
 
 void Shield::Repair() {
-    /*DamageableLayer::Repair();
+    for(Health& facet : shield_->facets) {
+        facet.health.RepairFully();
+    }
 
     regeneration.RepairFully();
-    opacity.RepairFully();*/
+    // TODO: opacity.RepairFully();
 }
 
 bool Shield::Damaged() const {
-    /*for(const Facet& facet : facets) {
-        if(facet.Damaged()) {
+    for(const Health& facet : shield_->facets) {
+        if(facet.health.Damaged()) {
             return true;
         }
     }
 
-    return regeneration.Damaged();*/
-    return false;
+    return regeneration.Damaged();
 }
 
 bool Shield::Installed() const {
-    return true; //regeneration.MaxValue() > 0;
+    return regeneration.MaxValue() > 0;
+}
+
+
+void Shield::AdjustPower(const double &percent) {
+    power.Set(percent);
 }
 
 
 void Shield::Disable() {
-    /*for (Facet facet : facets) {
-        facet.Set(0.0);
-    }
-
-    regeneration.Set(0.0);*/
+    power.Set(0.0);
 }
 
+// Zeros out shields but can immediately start recharging
+// Used for things like jump effects
 void Shield::Discharge() {
-    /*for (Facet &facet : facets) {
-        facet -= regeneration;
-    }*/
+    for (Health &facet : shield_->facets) {
+        facet.health.Set(0.0);
+    }
 }
 
 void Shield::Enable() {
-    //regeneration.Set(regeneration.AdjustedValue());
+    power.Set(1.0);
 }
 
 bool Shield::Enabled() const {
-    return true; // facets[0].Enabled();
+    return power.Value() > 0.0;
 }
 
 
-// This is meant to be used when colliding with an enhancement.
-// It enhances the shields.
-// Right now, it simply upgrades them forever. Needs further thought.
+
+/** Enhance adds some oomph to shields. 
+ * Originally, I thought to just make them 150% one time.
+ * However, this isn't really significant and it's hard to implement
+ * with the underlying Resource class, which checks for max values.
+ * Instead, this will upgrade the Max value of shields and repair them.
+ */
 // TODO: test, this functionality works, assuming it's actually supported.
 void Shield::Enhance() {
     // Boost shields to 150%
-    /*double enhancement_factor = 1.5;
+    double enhancement_factor = 1.5;
 
-    for(Facet& facet : facets) {
-        facet.SetMaxValue(facet.MaxValue() * enhancement_factor);
+    for(Health& facet : shield_->facets) {
+        facet.health.SetMaxValue(facet.health.MaxValue() * enhancement_factor);
     }
 
-    regeneration.SetMaxValue(regeneration.MaxValue() * enhancement_factor);*/
+    regeneration.SetMaxValue(regeneration.MaxValue() * enhancement_factor);
+}
+
+
+
+
+
+/*  This is a bit kludgy. Set power via keyboard only works when not suppressed.
+*   If ship is in SPEC, power will be continuously set to 0.
+*   Therefore, if you set power to 1/3, go to SPEC and out again, power will be
+*   set to full again.
+*/
+void Shield::SetPower(const double power) {
+    this->power = power;
+}
+
+// Do we need this?
+void Shield::SetPowerCap(const double power) {
+    this->power.SetAdjustedMaxValue(power);
+}
+
+
+
+double Shield::GetRegeneration() const {
+    return regeneration.Value();
 }
 
 void Shield::Regenerate() {
-    /*for(Facet& facet : facets) {
-        facet += regeneration;
-    }*/
-}
-
-void Shield::AdjustStrength(const double &percent) {
-    //double adjusted_percent = std::max(std::min(percent, 1.0f), 0.0f);
-
-    /*for (Facet facet : facets) {
-        // TODO:
-        //facet.(adjusted_percent);
-    }*/
+    for(Health& facet : shield_->facets) {
+        if(facet.health.Percent() < power) {
+            // If shield generator is damaged, regenerate less
+            facet.health += regeneration.Value(); 
+        } else if(facet.health.Percent() > power) {
+            // If in SPEC or cloaked, decrease shields as fast as possible
+            // to prevent a scenario where damaged shields work in SPEC.
+            facet.health -= regeneration.MaxValue();
+        }
+    }
 }

@@ -545,7 +545,7 @@ bool Cockpit::Update() {
 
                 // TODO: lib_damage
                 // check the input is in the expected 0 to 1 values
-                par->GetShieldLayer().AdjustPower(minEnergyShieldPercent);
+                par->shield_component.SetPowerCap(minEnergyShieldPercent);
             }
         } else {
             secondsWithZeroEnergy = 0;

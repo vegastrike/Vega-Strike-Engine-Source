@@ -126,7 +126,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             // TODO: someone from the "product" team needs to define the
             // exact behavior. Preferably after we sort the upgrade
             // code.
-            other_unit->shield->Enhance();
+            other_unit->shield_component.Enhance();
 
             /*double percent;
             char tempdata[sizeof(Shield)];

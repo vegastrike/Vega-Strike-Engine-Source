@@ -91,11 +91,6 @@ UpgradeType GetUpgradeType(const std::string upgrade_key) {
     std::string upgrade_type_string = UnitCSVFactory::GetVariable(upgrade_key, "Upgrade_Type", std::string());
     std::string upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
 
-    if(upgrade_type_string.size() > 0) {
-        std::cout << "Upgrade key: " << upgrade_key << " " << upgrade_type_string << std::endl;
-    }
-    
-
     if(upgrade_type_string.empty()) return UpgradeType::None;
     
     if(upgrade_type_string == "Armor") {

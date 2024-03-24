@@ -47,7 +47,6 @@ struct DamageableLayer {
     friend class Damageable;
     friend struct DamageableObject;
 
-    //static float damage_component_chance = 0.03;
     DamageableLayer(int layer_index,
             FacetConfiguration configuration,
             Health health_template,
@@ -55,8 +54,8 @@ struct DamageableLayer {
 
     DamageableLayer(int layer_index,
             FacetConfiguration configuration,
-            float health_array[],
-            float regeneration,
+            double health_array[],
+            double regeneration,
             bool core_layer);
 
     DamageableLayer(int layer_index,
@@ -65,34 +64,20 @@ struct DamageableLayer {
             bool core_layer);
     DamageableLayer();
 
-    void AdjustPower(const float &percent);
     void DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage);
     void Destroy();
-    /*void Disable();
-    void GradualDisable();
-    void Discharge(float discharge_rate, float minimum_discharge);
-    void Enable();
-    bool Enabled();*/
-    void SetPower(const double power);
-    void Enhance();
-
+    
     int GetFacetIndex(const CoreVector &attack_vector);
 
-    float TotalLayerValue();
-    float TotalMaxLayerValue();
-    float AverageLayerValue();
-    float AverageMaxLayerValue();
+    double TotalLayerValue();
+    double TotalMaxLayerValue();
+    double AverageLayerValue();
+    double AverageMaxLayerValue();
 
-    float GetMaxHealth();
-    float GetPercent(FacetName facet_name);
+    double GetMaxHealth();
+    double GetPercent(FacetName facet_name);
 
-    void Regenerate(float recharge_rate);
-    void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
-    float GetRegeneration();
     void UpdateFacets(const std::vector<double> new_facets);
-    void UpdateRegeneration(const double &new_regeneration_value);
-
-    void DischargeShields();
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H

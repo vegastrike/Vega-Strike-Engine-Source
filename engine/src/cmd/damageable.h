@@ -101,10 +101,6 @@ public:
         return layers[2];
     }
 
-    const float GetShieldRegeneration() const {
-        return shield->facets[as_integer(FacetName::left_top_front)].regeneration;
-    }
-
     virtual const float GetHullPercent() const {
         return hull->GetPercent(FacetName::single);
     }

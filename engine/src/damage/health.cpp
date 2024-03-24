@@ -29,19 +29,15 @@
 #include <iostream>
 #include <string>
 
-void Health::AdjustPower(const double &percent) {
-    if (!regenerative) {
-        // Not applicable for armor and hull
-        return;
-    }
 
-    if (percent > 1 || percent < 0) {
-        // valid values are between 0 and 1
-        return;
-    }
-
-    power = percent;
-}
+Health::Health(int layer, double health, double regeneration) :
+            layer(layer),
+            health(health, 0, health) {
+        destroyed = false;
+        
+        vulnerabilities.normal_damage = 1;
+        vulnerabilities.phase_damage = 1;
+    };
 
 void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage) {
     // If this layer is destroyed, it can no longer sustain damage
@@ -64,7 +60,7 @@ void Health::DealDamage(Damage &damage, InflictedDamage &inflicted_damage) {
  * @param vulnerability - adjust for
  */
 // TODO: type is ugly hack
-void Health::DealDamageComponent(int type, double &damage, float vulnerability, InflictedDamage &inflicted_damage) {
+void Health::DealDamageComponent(int type, double &damage, double vulnerability, InflictedDamage &inflicted_damage) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
     // We also cap the actual damage at the current health
@@ -88,7 +84,8 @@ void Health::DealDamageComponent(int type, double &damage, float vulnerability, 
     inflicted_damage.total_damage += adjusted_damage;
     inflicted_damage.inflicted_damage_by_layer.at(layer) += adjusted_damage;
 
-    if (health == 0 && !regenerative) {
+    // A bit hardcoded
+    if (layer < 2) {
         destroyed = true;
     }
 }
@@ -98,67 +95,7 @@ void Health::Destroy() {
     destroyed = true;
 }
 
-/*  This is a bit kludgy. Set power via keyboard only works when not suppressed.
-*   If ship is in SPEC, power will be continuously set to 0.
-*   Therefore, if you set power to 1/3, go to SPEC and out again, power will be
-*   set to full again.
-*/
-void Health::SetPower(const double power) {
-    if (regenerative) {
-        this->power = power;
-    }
-}
 
-
-/** Enhance adds some oomph to shields. 
- * Originally, I thought to just make them 150% one time.
- * However, this isn't really significant and it's hard to implement
- * with the underlying Resource class, which checks for max values.
- * Instead, this will upgrade the Max value of shields and repair them.
- */
-void Health::Enhance(double percent) {
-    // Don't enhance armor and hull
-    if (!regenerative) {
-        return;
-    }
-
-    // Sanity checks. Don't want to use enhance to downgrade 
-    // and more than x100 is excessive.
-    if(percent < 1.0 || percent > 100.0) {
-        return;
-    }
-
-    health.SetMaxValue(health.MaxValue() * percent);
-    regeneration.SetMaxValue(regeneration.MaxValue() * percent);
-}
-
-
-void Health::Regenerate() {
-    if (!regenerative) {
-        return;
-    }
-
-    if(health.Percent() < power) {
-        health++;
-    } else if(health.Percent() > power) {
-        health--;
-    }
-}
-
-void Health::Regenerate(float recharge_rate) {
-    /*if (!enabled || destroyed || !regenerative) {
-        return;
-    }
-
-    health = std::min(adjusted_health, health + recharge_rate);*/
-}
-
-void Health::SetHealth(float health) {
-   /* health = std::min(max_health, health);
-    health = std::max(0.0f, health);
-    this->health = health;*/
-}
-
-void Health::Update(float new_health) {
-    this->health.SetMaxValue(new_health);
+void Health::SetHealth(double new_health) {
+    this->health.Set(new_health);
 }

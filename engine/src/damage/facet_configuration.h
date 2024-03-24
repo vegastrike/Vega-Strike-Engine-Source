@@ -39,6 +39,7 @@
  * That is x,y,z. This is also how both core vector and Vector class are ordered.
  */
 enum class FacetConfiguration {
+    zero = 0,   // Armor or shield not installed
     one = 1,    // A single facet covering all directions
     two = 2,    // Front and rear
     four = 4,   // Front, rear, left and right

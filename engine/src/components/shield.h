@@ -44,8 +44,10 @@ class Unit;
 class Shield : public Component {
     DamageableLayer* shield_ = nullptr;
 
-    //Resource<double> regeneration;
+    Resource<double> regeneration;
+    Resource<double> power;   // 1.0 Full, 0.66 Two thirds, 0.0 Suppressed (FTL) or turned off
 
+    // TODO: implement "shield leaks" aka
     // TODO: implement opacity
     //Resource<double> opacity;
     friend class Damageable;
@@ -59,11 +61,8 @@ public:
     virtual std::string Describe() const; // Describe component in base_computer 
 
     virtual bool CanDowngrade() const;
-
-    virtual bool Downgrade();
-
     virtual bool CanUpgrade(const std::string upgrade_key)  const;
-
+    virtual bool Downgrade();
     virtual bool Upgrade(const std::string upgrade_key);
 
     virtual void Damage();
@@ -72,16 +71,17 @@ public:
     virtual bool Damaged() const;
     virtual bool Installed() const;
 
+    void AdjustPower(const double &percent);
     void Disable();
     void Discharge();
     void Enable();
     bool Enabled() const;
-
     void Enhance();     // see collision enhancement
-    //double GetRegeneration() const { return regeneration.Value(); }
+    double GetRegeneration() const;
     void Regenerate();
-    //void SetRegeneration(double new_value) { regeneration.SetMaxValue(new_value); }
-    void AdjustStrength(const double &percent);
+    
+    void SetPower(const double power);
+    void SetPowerCap(const double power);
 };
 
 

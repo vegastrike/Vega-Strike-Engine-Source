@@ -760,10 +760,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     for (int i = 0; i < 8; i++) {
         double tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0);
         armor_values.push_back(tmp_armor_value);
-
-        if(saved_game) {
-            std::cout << unit_key << " : " << armor_keys[i] << " = " << tmp_armor_value << std::endl;
-        }
     }
 
     armor->UpdateFacets(armor_values);
@@ -1062,6 +1058,7 @@ static string tos(int val) {
     return XMLSupport::tostring(val);
 }
 
+// Used by Base Computer Ship Info
 string Unit::WriteUnitString() {
     const bool UNITTAB = configuration()->physics_config.unit_table;
     string ret = "";
@@ -1253,10 +1250,7 @@ string Unit::WriteUnitString() {
     }*/
 
 
-    //TODO: lib_damage shield leak and efficiency
-    unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
-    unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
-    unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
+    
     
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);

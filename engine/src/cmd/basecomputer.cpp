@@ -3911,6 +3911,9 @@ bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) 
             Unit *playerUnit = m_player.GetUnit();
             Unit *baseUnit = m_base.GetUnit();
             if (baseUnit && playerUnit) {
+                // New code
+                UpgradeOperationResult result = playerUnit->UpgradeUnit(item->GetName(), false, true);
+
                 playerUnit->SellCargo(item->GetName(), quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
                 UnitUtil::RecomputeUnitUpgrades(playerUnit);
                 refresh();
@@ -5561,7 +5564,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
     }
 
-    const double regeneration = playerUnit->shield->GetRegeneration();
+    const double regeneration = playerUnit->shield_component.GetRegeneration();
     if (!mode) {
         PRETTY_ADDU(statcolor + "Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s");
     } else if (replacement_mode != 0 || regeneration) {
@@ -5770,7 +5773,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         float avail = (playerUnit->energy_manager.GetReactorCapacity() * RSconverter - maxshield * VSDM);
 
         int num_shields = playerUnit->shield->number_of_facets;
-        float regeneration = playerUnit->shield->GetRegeneration();
+        float regeneration = playerUnit->shield_component.GetRegeneration();
         float overhead = (shields_require_power) ?
                 (regeneration / shieldenergycap * shield_maintenance_cost
                         * num_shields * VSDM) : 0;

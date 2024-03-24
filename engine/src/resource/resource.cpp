@@ -90,7 +90,16 @@ void Resource<T>::SetMaxValue(const T &value) {
     value_ = adjusted_max_value_ = max_value_ = value;
 }
 
+template<typename T>
+void Resource<T>::SetAdjustedMaxValue(const T &value) {
+    if(no_max_) {   // Can't set max if there's no max
+        return;
+    }
 
+    // Unhandled edge case - value < min value
+    adjusted_max_value_ = std::min(value_, max_value_);
+    this->value_ = std::min(this->value_, adjusted_max_value_);
+}
 
 template<typename T>
 T Resource<T>::Value() const {

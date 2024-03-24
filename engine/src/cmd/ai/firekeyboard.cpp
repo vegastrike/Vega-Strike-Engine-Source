@@ -1731,7 +1731,7 @@ void FireKeyboard::Execute() {
 
     float f_result = f().shieldpowerstate;
     if (f_result != 1) {
-        parent->shield->AdjustPower(f_result);
+        parent->shield_component.SetPower(f_result);
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {

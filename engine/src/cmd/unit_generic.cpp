@@ -2834,7 +2834,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
     // New Code
     UpgradeOperationResult result = UpgradeUnit(up->name, !downgrade, touchme);
     if(result.upgradeable) {
-        std::cout << "Upgraded successfully\n";
         percentage = result.percent;
         return result.success;
     }

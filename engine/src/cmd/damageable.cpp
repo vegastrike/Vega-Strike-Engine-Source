@@ -570,7 +570,7 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
 
     // Here we store the actual charge we'll use in RegenShields
     // TODO: fix this. It's a hack just to build...
-    double max_shield_recharge = unit->shield->GetRegeneration();
+    double max_shield_recharge = unit->shield_component.GetRegeneration();
     double actual_recharge = max_shield_recharge * 
                              energy->Powered(EnergyConsumerClassification::ShieldRegen);
 
@@ -589,14 +589,15 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
 
     // Discharge shields due to energy or SPEC or cloak
     if ((in_warp && !shields_in_spec) || unit->cloak.Active()) {
-        shield->SetPower(0.0);
+        // "Damage" power
+        shield_component.SetPowerCap(0.0);
     } else {
         // Figure out how to support partial power
-        shield->SetPower(1.0);
+        shield_component.SetPowerCap(1.0);
     }
 
     // Shield regeneration
-    shield->Regenerate(shield_recharge);
+    shield_component.Regenerate(); // TODO: shield_recharge);
 }
 
 float Damageable::MaxShieldVal() const {

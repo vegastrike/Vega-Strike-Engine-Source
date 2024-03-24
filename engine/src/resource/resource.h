@@ -91,6 +91,7 @@ public:
     void Set(const T &value);
     void SetToMax();
     void SetMaxValue(const T &value);
+    void SetAdjustedMaxValue(const T &value);
     
     void Zero();
 

@@ -55,11 +55,17 @@ void Armor::Load(std::string upgrade_key, std::string unit_key,
     // Damageable Layer
     std::string upgrade_type_string = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
 
+    std::vector<double> armor_values;
+
     for(int i = 0;i < 8;i++) {
-        double armor_facet_current = UnitCSVFactory::GetVariable(unit_key, armor_facets[i], 0.0);
-        double armor_facet_max = UnitCSVFactory::GetVariable(upgrade_key, armor_facets[i], 0.0);
-        armor_layer_->facets[i].Update(armor_facet_max);
+        // TODO: implement 
+        //double armor_facet_max = UnitCSVFactory::GetVariable(upgrade_key, armor_facets[i], 0.0);
+        double armor_value = UnitCSVFactory::GetVariable(unit_key, 
+                                               armor_facets[i], 0.0);
+        armor_values.push_back(armor_value);
     }
+
+    armor_layer_->UpdateFacets(armor_values);
 }
 
 std::string Armor::SaveToJSON() const {
@@ -90,7 +96,7 @@ bool Armor::Downgrade() {
     //mass = 0;
     // volume = 0;
     for(int i = 0;i < 8;i++) {
-        armor_layer_->facets[i].Update(0.0f);
+        armor_layer_->facets[i].health.SetMaxValue(0.0);
     }
 
     return true;
@@ -119,12 +125,15 @@ bool Armor::Upgrade(const std::string upgrade_name) {
         return false;
     }
 
-    // TODO: read all 8 facets
+    std::vector<double> armor_values;
+
     for(int i = 0;i < 8;i++) {
-        double armor = UnitCSVFactory::GetVariable(upgrade_name, 
-                                               "Armor_Front_Top_Right", 0.0);
-        armor_layer_->facets[i].Update(armor);
+        double armor_value = UnitCSVFactory::GetVariable(upgrade_name, 
+                                               armor_facets[i], 0.0);
+        armor_values.push_back(armor_value);
     }
+
+    armor_layer_->UpdateFacets(armor_values);
 
     return true;
 }
