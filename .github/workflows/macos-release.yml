@@ -1,0 +1,108 @@
+name: 'MacOS-CI'
+
+on:
+  release:
+    types:
+      - created
+      - edited
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          #- macos-11
+          - macos-12
+        compiler:
+          - clang
+          - gcc
+        homebrew-gl:
+          - true
+          # - false
+        homebrew-al:
+          - true
+          - false
+
+    steps:
+
+      # The following dependencies are already present within macos-* images:
+      # - clang (llvm)
+      # - cmake
+      # - expat
+      # - gcc
+      # - git
+      # - jpeg
+      # - libpng
+      # - libvorbis
+      # - python
+      - name: Install dependencies using homebrew
+        run: brew install boost-python3 gtk+3 gtkglext sdl
+
+      # The following Apple-provided libraries are deprecated:
+      # * OpenGL as of macOS 10.14
+      # * GLUT as of macOS 10.9
+      - name: Optionally install homebrewed OpenGL and GLUT
+        if: ${{ matrix.homebrew-gl }}
+        run: |
+          brew install mesa mesa-glu freeglut
+          ln -s /usr/local/include/GL /usr/local/include/OpenGL
+          ln -s /usr/local/include/GL /usr/local/include/GLUT
+        # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
+        # find /usr/local/lib/ -iname '*gl*.dylib'
+
+      # The Apple-provided OpenAL is deprecated as of macOS 10.15
+      - name: Optionally install homebrewed OpenAL
+        if: ${{ matrix.homebrew-al }}
+        run: brew install openal-soft
+
+      - name: Check out repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        with:
+          fetch-depth: 2
+          submodules: false
+
+      - name: Extract tag name and short SHA
+        shell: bash
+        run: |
+          echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
+          echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      - name: Test tag name and short SHA
+        run: |
+          echo "${TAG_NAME}"
+          echo "${SHORT_SHA}"
+
+      - name: Build it
+        env:
+          MY_OS_NAME: macos
+          COMPILER:   ${{ matrix.compiler }}
+          FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
+          OPENALDIR:  "/usr/local/opt/openal-soft"
+          IS_RELEASE: 1
+        run: script/cibuild $FLAGS
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        env:
+          GTEST_OUTPUT: xml
+          GTEST_COLOR: 1
+        run: ctest -V
+
+      - name: Upload the artifacts
+        uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
+        with:
+          args: "packages/*.${{ matrix.ARTIFACT_EXT }}"

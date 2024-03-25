@@ -23,8 +23,19 @@
 param(
     [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
     [Boolean]$EnablePIE = $false,
-    [String]$BuildType = "Release" # You can also specify "Debug"
+    [String]$BuildType = "Release", # You can also specify "Debug"
+    [Boolean]$IsRelease = $false,
+    [String]$GitTag = "not-applicable", # Git Tag, default empty string for PR builds
+    [String]$GitSha = "not-applicable"  # Git Short SHA Reference, default empty string for PR builds
 )
+
+# Hack around PowerShell not allowing empty string parameters
+if ($GitTag -ieq "not-applicable") {
+    $GitTag = ""
+}
+if ($GitSha -ieq "not-applicable" ) {
+    $GitSha = ""
+}
 
 [String]$cmakePresetName = ""
 if ($Generator -ieq "Ninja") {
@@ -66,4 +77,8 @@ $aPossibleBinaryDirs | ForEach-Object {
     if (Test-Path $_) {
         Copy-Item -Force -Verbose $_\*.* .\bin
     }
+}
+
+if ($IsRelease) {
+    Compress-Archive .\bin\* "VegaStrike_${GitTag}_${GitSha}.zip"
 }
