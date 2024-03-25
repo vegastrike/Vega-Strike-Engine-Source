@@ -25,7 +25,7 @@ param(
     [Boolean]$EnablePIE = $false,
     [String]$BuildType = "Release", # You can also specify "Debug"
     [Boolean]$IsRelease = $false,
-    [String]$GitTag = "not-applicable"  # Git Tag, default empty string for PR builds
+    [String]$GitTag = "not-applicable", # Git Tag, default empty string for PR builds
     [String]$GitSha = "not-applicable"  # Git Short SHA Reference, default empty string for PR builds
 )
 
