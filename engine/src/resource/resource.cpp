@@ -78,7 +78,7 @@ void Resource<T>::SetToMax() {
         return;
     }
 
-    value_ = max_value_;
+    value_ = adjusted_max_value_ = max_value_;
 }
 
 template<typename T>

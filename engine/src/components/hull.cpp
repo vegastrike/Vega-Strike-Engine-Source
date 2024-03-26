@@ -45,6 +45,7 @@ void Hull::Load(std::string upgrade_key, std::string unit_key,
     double hull_current = UnitCSVFactory::GetVariable(unit_key, "hull", 1.0);
     double hull_max = UnitCSVFactory::GetVariable(upgrade_key, "hull", 1.0);
     hull_->facets[0].health.SetMaxValue(hull_max);
+    hull_->facets[0].health.Set(hull_current);
 }
 
 std::string Hull::SaveToJSON() const {
@@ -77,11 +78,11 @@ bool Hull::Upgrade(const std::string upgrade_name) {
 void Hull::Damage() {}
 
 void Hull::Repair() {
-    //hull_->facets[0].adjusted_health = hull_->facets[0].max_health;
+    hull_->facets[0].health.SetToMax();
 }
 
 bool Hull::Damaged() const {
-    return true;//hull_->facets[0].health < hull_->facets[0].max_health;
+    return hull_->facets[0].health.Damaged();
 }
 
 

@@ -104,7 +104,7 @@ class UnitCSVFactory {
     friend class UnitJSONFactory;
     friend class UnitOptimizeFactory;
 public:
-    static void ParseCSV(VSFileSystem::VSFile &file, bool saved_game);
+    static void ParseCSV(std::string data, std::string root, bool saved_game);
 
     template<class T>
     static inline T GetVariable(std::string unit_key, std::string const &attribute_key, T default_value) = delete;
@@ -126,6 +126,9 @@ public:
     static std::map<std::string, std::string> GetUnit(std::string key) {
         return UnitCSVFactory::units[key];
     }
+
+    static void LoadUnit(std::string key, 
+                         std::map<std::string,std::string> unit_map);
 };
 
 // Template Specialization

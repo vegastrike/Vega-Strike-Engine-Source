@@ -32,8 +32,11 @@
 #include "damage/damageable_layer.h"
 
 #include <string>
+#include <map>
 
 class Unit;
+
+extern const std::string armor_facets[];
 
 // TODO: make armor plating a multiplier.
 // e.g. light fighter has armor_area[8]
@@ -42,16 +45,15 @@ class Unit;
 // With better armor material, you multiply by more.
 
 class Armor : public Component {
-    DamageableLayer* armor_layer_;
+    DamageableLayer* armor_;
 
     friend class Unit;
 public:
-    Armor(DamageableLayer* armor_layer_);
+    Armor(DamageableLayer* armor_);
     
-    virtual void Load(std::string upgrade_key, std::string unit_key, 
-                      Unit *unit);      // Load from dictionary
-    virtual std::string SaveToJSON() const;   // Save component as JSON
-
+    // Load from dictionary
+    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
     virtual std::string Describe() const; // Describe component in base_computer 
 
     virtual bool CanDowngrade() const;

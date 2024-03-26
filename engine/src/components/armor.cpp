@@ -29,7 +29,6 @@
 
 #include "damageable_layer.h"
 #include "unit_csv_factory.h"
-#include "unit_generic.h"
 
 const std::string armor_facets[] = {
     "Moment_Of_Inertia",
@@ -44,12 +43,11 @@ const std::string armor_facets[] = {
 };
 
 Armor::Armor(DamageableLayer* armor_layer_): Component("", 0.0, 0.0, false),
-                                             armor_layer_(armor_layer_) {}
+                                             armor_(armor_layer_) {}
 
-void Armor::Load(std::string upgrade_key, std::string unit_key, 
-                      Unit *unit) {
+void Armor::Load(std::string upgrade_key, std::string unit_key) {
     // Component
-    Component::Load(upgrade_key, unit_key, unit);
+    Component::Load(upgrade_key, unit_key);
 
  
     // Damageable Layer
@@ -57,19 +55,26 @@ void Armor::Load(std::string upgrade_key, std::string unit_key,
 
     std::vector<double> armor_values;
 
+    // Max values from Upgrade
     for(int i = 0;i < 8;i++) {
-        // TODO: implement 
-        //double armor_facet_max = UnitCSVFactory::GetVariable(upgrade_key, armor_facets[i], 0.0);
-        double armor_value = UnitCSVFactory::GetVariable(unit_key, 
-                                               armor_facets[i], 0.0);
-        armor_values.push_back(armor_value);
+        double armor_facet_max = UnitCSVFactory::GetVariable(upgrade_key, armor_facets[i], 0.0);
+        armor_values.push_back(armor_facet_max);
     }
 
-    armor_layer_->UpdateFacets(armor_values);
+    armor_->UpdateFacets(armor_values);
+
+    // Current values from Save Game
+    for(int i = 0;i < 8;i++) {
+        double armor_value = UnitCSVFactory::GetVariable(unit_key, 
+                                               armor_facets[i], 0.0);
+        armor_->facets[i].health.Set(armor_value);
+    }
 }
 
-std::string Armor::SaveToJSON() const {
-    return std::string();
+void Armor::SaveToCSV(std::map<std::string, std::string>& unit) const {
+    for(int i=0;i<8;i++) {
+        unit[armor_facets[i]] = std::to_string(armor_->facets[i].health.Value());
+    }
 }
 
 std::string Armor::Describe() const {
@@ -96,7 +101,7 @@ bool Armor::Downgrade() {
     //mass = 0;
     // volume = 0;
     for(int i = 0;i < 8;i++) {
-        armor_layer_->facets[i].health.SetMaxValue(0.0);
+        armor_->facets[i].health.SetMaxValue(0.0);
     }
 
     return true;
@@ -133,7 +138,7 @@ bool Armor::Upgrade(const std::string upgrade_name) {
         armor_values.push_back(armor_value);
     }
 
-    armor_layer_->UpdateFacets(armor_values);
+    armor_->UpdateFacets(armor_values);
 
     return true;
 }

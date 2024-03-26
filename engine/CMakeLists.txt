@@ -1643,6 +1643,7 @@ IF (USE_GTEST)
         src/exit_unit_tests.cpp
         src/components/tests/energy_container_tests.cpp
         src/components/tests/balancing_tests.cpp
+        src/components/tests/armor_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing

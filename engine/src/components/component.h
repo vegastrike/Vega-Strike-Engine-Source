@@ -60,8 +60,9 @@ public:
     Component(std::string upgrade_name, double mass, 
               double volume, bool integral);
 
-    virtual void Load(std::string upgrade_key, std::string unit_key, 
-                      Unit *unit);      // Load from dictionary
+    // Load from units dictionary
+    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    
     //virtual std::string SaveToJSON() const = 0;   // Save component as JSON
 
     virtual std::string Describe() const = 0; // Describe component in base_computer 
@@ -83,5 +84,7 @@ public:
 
     virtual bool Damaged() const = 0;
     virtual bool Installed() const = 0;
+
+    void SetIntegral(bool integral);
 };
 #endif // COMPONENT_H

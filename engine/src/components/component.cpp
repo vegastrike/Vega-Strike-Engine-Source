@@ -35,8 +35,7 @@ Component::Component(std::string upgrade_name, double mass, double volume,
                      integral(integral) {}
 
 
-void Component::Load(std::string upgrade_key, std::string unit_key, 
-                     Unit *unit) {
+void Component::Load(std::string upgrade_key, std::string unit_key) {
     upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
     this->upgrade_key = upgrade_key;
     
@@ -69,4 +68,8 @@ bool Component::Downgrade() {
     
     mass = 0.0;
     volume = 0.0;
+}
+
+void Component::SetIntegral(bool integral) {
+    this->integral = integral;
 }
