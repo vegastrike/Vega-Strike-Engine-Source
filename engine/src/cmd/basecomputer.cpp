@@ -87,10 +87,8 @@ extern const char *DamagedCategory;
 // TODO: find a better home for this function
 // Basically max or current shield x 0.2
 float totalShieldEnergyCapacitance(Unit *unit) {
-    DamageableLayer *shield = unit->shield;
-
-    float total_max_shield_value = shield->TotalMaxLayerValue();
-    float total_current_shield_value = shield->TotalLayerValue();
+    float total_max_shield_value = unit->shield->TotalMaxLayerValue();
+    float total_current_shield_value = unit->shield->TotalLayerValue();
 
     return configuration()->physics_config.shield_energy_capacitance * (configuration()->physics_config.use_max_shield_energy_usage ? total_max_shield_value : total_current_shield_value);
 }
@@ -1898,7 +1896,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
 
             // New component code
             if(GetUpgradeType(item.GetName() + UPGRADES_SUFFIX) == UpgradeType::Shield) {
-                CanDoSell = (!player->shield_component.Damaged()) || !must_fix_first;
+                CanDoSell = (!player->shield->Damaged()) || !must_fix_first;
             }
 
             if (CanDoSell) {
@@ -5564,7 +5562,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
     }
 
-    const double regeneration = playerUnit->shield_component.GetRegeneration();
+    const double regeneration = playerUnit->shield->GetRegeneration();
     if (!mode) {
         PRETTY_ADDU(statcolor + "Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s");
     } else if (replacement_mode != 0 || regeneration) {
@@ -5773,7 +5771,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         float avail = (playerUnit->energy_manager.GetReactorCapacity() * RSconverter - maxshield * VSDM);
 
         int num_shields = playerUnit->shield->number_of_facets;
-        float regeneration = playerUnit->shield_component.GetRegeneration();
+        float regeneration = playerUnit->shield->GetRegeneration();
         float overhead = (shields_require_power) ?
                 (regeneration / shieldenergycap * shield_maintenance_cost
                         * num_shields * VSDM) : 0;

@@ -33,11 +33,9 @@
  */
 struct DamageableObject {
     int number_of_layers;
-    std::vector<DamageableLayer> layers;        // Typically shield/armor/hull
-    std::vector<DamageableObject> components;   // Propoulsion, life support,
+    std::vector<DamageableLayer*> layers;        // Typically shield/armor/hull
 
-    DamageableObject(std::vector<DamageableLayer> layers,
-            std::vector<DamageableObject> components);
+    DamageableObject(std::vector<DamageableLayer*> layers);
     DamageableObject();
 
     InflictedDamage DealDamage(const CoreVector &attack_vector, Damage &damage);

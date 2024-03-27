@@ -215,7 +215,7 @@ double DamageableLayer::GetMaxHealth() {
     return facets[0].health.MaxValue();
 }
 
-double DamageableLayer::GetPercent(FacetName facet_name) {
+double DamageableLayer::GetPercent(FacetName facet_name) const {
     if (number_of_facets == 0) {
         return 0.0f;
     }
@@ -227,7 +227,7 @@ double DamageableLayer::GetPercent(FacetName facet_name) {
         case FacetConfiguration::one:
         case FacetConfiguration::two:
         case FacetConfiguration::four:
-            numerator = facets[as_integer(facet_name)].health;
+            numerator = facets[as_integer(facet_name)].health.Value();
             denominator = facets[as_integer(facet_name)].health.MaxValue();
             return numerator / denominator;
 
@@ -271,9 +271,9 @@ double DamageableLayer::GetPercent(FacetName facet_name) {
 
     for (int i = 0; i < 4; i++) {
         int facet_index = indices_array[indices_index][i];
-        Health &facet = facets[facet_index];
-        aggregate_health += facet.health;
-        aggregate_max_health += facet.health.Value();
+        const Health &facet = facets[facet_index];
+        aggregate_health += facet.health.Value();
+        aggregate_max_health += facet.health.MaxValue();
     }
 
     percent = aggregate_health / aggregate_max_health;
@@ -297,6 +297,7 @@ void DamageableLayer::UpdateFacets(const std::vector<double> new_facets) {
         }
     }
 
+    
     switch (number_of_facets) {
         case 0: 
             configuration = FacetConfiguration::zero;

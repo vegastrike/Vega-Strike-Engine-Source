@@ -766,7 +766,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
 
     // Load shield
-    shield_component.Load("", unit_key, this);
+    shield->Load("", unit_key, this);
 
     // End shield section
 
@@ -1202,52 +1202,8 @@ string Unit::WriteUnitString() {
     unit["Armor_Back_Bottom_Left"] = tos(GetArmorLayer().facets[5].health);
     unit["Armor_Back_Bottom_Right"] = tos(GetArmorLayer().facets[7].health);
 
-    int number_of_shield_emitters = shield->number_of_facets;
-    shield_component.SaveToCSV(unit);
-    /*{
-        unit["Shield_Front_Top_Right"] = "";
-        unit["Shield_Front_Top_Left"] = "";
-        unit["Shield_Back_Top_Right"] = "";
-        unit["Shield_Back_Top_Left"] = "";
-        unit["Shield_Front_Bottom_Right"] = "";
-        unit["Shield_Front_Bottom_Left"] = "";
-        unit["Shield_Back_Bottom_Right"] = "";
-        unit["Shield_Back_Bottom_Left"] = "";
-
-        switch (number_of_shield_emitters) {
-        case 8:
-            unit["Shield_Front_Top_Left"] = tos(GetShieldLayer().facets[0].health.MaxValue());
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[1].health.MaxValue());
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[2].health.MaxValue());
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[3].health.MaxValue());
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[4].health.MaxValue());
-            unit["Shield_Back_Top_Right"] = tos(GetShieldLayer().facets[5].health.MaxValue());
-            unit["Shield_Back_Bottom_Left"] = tos(GetShieldLayer().facets[6].health.MaxValue());
-            unit["Shield_Back_Bottom_Right"] = tos(GetShieldLayer().facets[7].health.MaxValue());
-
-            break;
-        case 4:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].health.MaxValue());
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].health.MaxValue());
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[2].health.MaxValue());
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[3].health.MaxValue());
-
-            break;
-        case 2:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].health.MaxValue());
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].health.MaxValue());
-            break;
-
-        case 0:
-            // No shields
-            break;
-
-        default:
-            // This should not happen
-            std::cout << number_of_shield_emitters << "\n";
-            assert(0);
-        }
-    }*/
+    shield->SaveToCSV(unit);
+    
 
 
     

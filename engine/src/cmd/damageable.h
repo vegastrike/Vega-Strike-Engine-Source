@@ -39,23 +39,19 @@ struct GFXColor;
  * @brief The Damageable class TODO
  */
 class Damageable : public DamageableObject {
+    DamageableLayer hull_;
+    DamageableLayer armor_;
+    Shield shield_;
+
     friend class UpgradeableUnit;
     
 public:
-    Shield shield_component;
-
     DamageableLayer *hull;
     DamageableLayer *armor;
-    DamageableLayer *shield;
+    Shield *shield;
 
     double *current_hull;
     double *max_hull;
-
-    // These are only used for upgrade due to macros
-    // TODO: refactor
-    float upgrade_hull;
-
-    float shield_regeneration;
 
     //Is dead already?
     bool killed;
@@ -86,19 +82,19 @@ public:
     }
 
     const float GetShield(int facet = 0) const {
-        return shield->facets[facet].health;
+        return shield_.facets[facet].health.Value();
     }
 
     DamageableLayer &GetHullLayer() {
-        return layers[0];
+        return hull_;
     }
 
     DamageableLayer &GetArmorLayer() {
-        return layers[1];
+        return armor_;
     }
 
     DamageableLayer &GetShieldLayer() {
-        return layers[2];
+        return shield_;
     }
 
     virtual const float GetHullPercent() const {
@@ -106,7 +102,7 @@ public:
     }
 
     virtual const float GetShieldPercent() const {
-        return shield->GetPercent(FacetName::left_top_front);
+        return shield_.GetPercent(FacetName::left_top_front);
     }
 
     void ArmorData(float armor[8]) const;

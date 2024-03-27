@@ -41,9 +41,7 @@ class Unit;
  * DamageableLayer and Facet do not handle these at all.
  * Damage to the shield generator is handled here. 
  */
-class Shield : public Component {
-    DamageableLayer* shield_ = nullptr;
-
+class Shield : public Component, public DamageableLayer {
     Resource<double> regeneration;
     Resource<double> power;   // 1.0 Full, 0.66 Two thirds, 0.0 Suppressed (FTL) or turned off
 
@@ -52,7 +50,7 @@ class Shield : public Component {
     //Resource<double> opacity;
     friend class Damageable;
 public:
-    Shield(DamageableLayer* shield_);
+    Shield();
 
     virtual void Load(std::string upgrade_key, std::string unit_key, 
                       Unit *unit);      // Load from dictionary

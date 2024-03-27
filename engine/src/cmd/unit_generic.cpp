@@ -1278,7 +1278,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         }
 
         // TODO: lib_damage reenable
-        shield_component.Damage();
+        shield->Damage();
 
         damages |= Damages::SHIELD_DAMAGED;
         return;
@@ -3027,9 +3027,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
     }*/
 
     // Upgrade hull health
-    upgrade_hull = *current_hull;
+    //TODO: upgrade_hull = *current_hull;
 
-    if (up && up->current_hull) {
+    /*if (up && up->current_hull) {
         const_cast<Unit *>(up)->upgrade_hull = *up->current_hull;
     }
 
@@ -3039,7 +3039,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
     if (!csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data(upgrade_name, up->faction, "Hull")) {
         STDUPGRADE(upgrade_hull, up->upgrade_hull, templ->upgrade_hull, 0);
-    }
+    }*/
 
     /*if ((hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed())) {
         hull->facets[0].max_health = hull->facets[0].health;

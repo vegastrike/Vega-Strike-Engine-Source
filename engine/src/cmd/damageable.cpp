@@ -44,21 +44,24 @@
 #include "configuration/configuration.h"
 
 Damageable::Damageable() : DamageableObject(),
-            hull(&(layers[0])),
-            armor(&(layers[1])),
-            shield(&(layers[2])),
-            current_hull(hull->facets[0].health.ValuePtr()),
-            max_hull(hull->facets[0].health.MaxValuePtr()),
-            upgrade_hull(0),
-            shield_regeneration(0),
-            killed(false),
-            shield_component(shield) {
-        if(shield) {
-            shield_component.shield_ = shield;
-        } else {
-            assert(0);
-        }
-        
+                           killed(false),
+                           shield() {
+    // Damageable Constructor
+    Health hull_health = Health(1, 1, 0);
+    Health armor_health = Health(0, 0, 0);
+
+    hull_ = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
+    armor_ = DamageableLayer(1, FacetConfiguration::eight, armor_health, false);
+    
+    hull = &hull_;
+    armor = &armor_;
+    shield = &shield_;
+
+    layers = {hull, armor, shield};
+    number_of_layers = 3;
+
+    current_hull = hull->facets[0].health.ValuePtr();
+    max_hull = hull->facets[0].health.MaxValuePtr();
 }
 
 bool Damageable::ShieldUp(const Vector &pnt) const {
@@ -96,8 +99,8 @@ float Damageable::DealDamageToShield(const Vector &pnt, float &damage) {
     Damage dmg(damage);
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
     InflictedDamage inflicted_damage(3);
-    shield->DealDamage(attack_vector, dmg, inflicted_damage);
-    int facet_index = shield->GetFacetIndex(attack_vector);
+    shield_.DealDamage(attack_vector, dmg, inflicted_damage);
+    int facet_index = shield_.GetFacetIndex(attack_vector);
 
     float denominator = GetShield(facet_index) + GetHull();
     if (denominator == 0) {
@@ -490,44 +493,44 @@ void Damageable::Destroy() {
 
 
 float Damageable::FShieldData() const {
-    switch (shield->number_of_facets) {
+    switch (shield_.number_of_facets) {
         case 2:
-            return shield->facets[0].Percent();
+            return shield_.facets[0].Percent();
         case 4:
-            return shield->facets[2].Percent();
+            return shield_.facets[2].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
 }
 
 float Damageable::BShieldData() const {
-    switch (shield->number_of_facets) {
+    switch (shield_.number_of_facets) {
         case 2:
-            return shield->facets[1].Percent();
+            return shield_.facets[1].Percent();
         case 4:
-            return shield->facets[3].Percent();
+            return shield_.facets[3].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
 }
 
 float Damageable::LShieldData() const {
-    switch (shield->number_of_facets) {
+    switch (shield_.number_of_facets) {
         case 2:
             return 0.0f;
         case 4:
-            return shield->facets[0].Percent();
+            return shield_.facets[0].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
 }
 
 float Damageable::RShieldData() const {
-    switch (shield->number_of_facets) {
+    switch (shield_.number_of_facets) {
         case 2:
             return 0.0f;
         case 4:
-            return shield->facets[1].Percent();
+            return shield_.facets[1].Percent();
         default:
             return 0.0f; // We only support 2 and 4 facet shields ATM
     }
@@ -558,8 +561,8 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
     Unit *unit = static_cast<Unit *>(this);
 
     const bool in_warp = unit->graphicOptions.InWarp;
-    const int shield_facets = unit->shield->number_of_facets;
-    const float total_max_shields = unit->shield->TotalMaxLayerValue();
+    const int shield_facets = shield_.number_of_facets;
+    const float total_max_shields = shield_.TotalMaxLayerValue();
 
     // No point in all this code if there are no shields.
     if (shield_facets < 2 || total_max_shields == 0) {
@@ -570,7 +573,7 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
 
     // Here we store the actual charge we'll use in RegenShields
     // TODO: fix this. It's a hack just to build...
-    double max_shield_recharge = unit->shield_component.GetRegeneration();
+    double max_shield_recharge = shield_.GetRegeneration();
     double actual_recharge = max_shield_recharge * 
                              energy->Powered(EnergyConsumerClassification::ShieldRegen);
 
@@ -590,14 +593,14 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
     // Discharge shields due to energy or SPEC or cloak
     if ((in_warp && !shields_in_spec) || unit->cloak.Active()) {
         // "Damage" power
-        shield_component.SetPowerCap(0.0);
+        shield_.SetPowerCap(0.0);
     } else {
         // Figure out how to support partial power
-        shield_component.SetPowerCap(1.0);
+        shield_.SetPowerCap(1.0);
     }
 
     // Shield regeneration
-    shield_component.Regenerate(); // TODO: shield_recharge);
+    shield_.Regenerate(); // TODO: shield_recharge);
 }
 
 float Damageable::MaxShieldVal() const {

@@ -121,7 +121,7 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
         //     break;
         case UpgradeType::Shield:
             result.upgradeable = true;
-            result.success = unit->shield_component.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         default:
             //std::cout << "Unhandled type for " << upgrade_name << std::endl;

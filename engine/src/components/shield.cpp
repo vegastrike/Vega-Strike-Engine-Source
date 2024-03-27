@@ -60,11 +60,12 @@ std::string shield_facets_two[2] = {
 
 
 // Note that we need to define FacetConfiguration during load
-Shield::Shield(DamageableLayer* shield_): Component("", 0.0, 0.0, false),
-    shield_(shield_), 
-    regeneration(0,0,0),
-    power(1.0,0.0,1.0)
-    {}
+Shield::Shield(): 
+               Component("", 0.0, 0.0, false),
+               DamageableLayer(2, FacetConfiguration::zero, 
+                               Health(2, 0, 0), false),
+               regeneration(0,0,0),
+               power(1.0,0.0,1.0) {}
 
 
 
@@ -111,8 +112,7 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
      5. We map the above index to our own
      */
 
-    shield_->number_of_facets = shield_values.size();
-    shield_->UpdateFacets(shield_values);
+    UpdateFacets(shield_values);
     this->regeneration.SetMaxValue(regeneration);
 
     // TODO: shield leakage & efficiency
@@ -121,7 +121,7 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
 
 void Shield::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // TODO: lib_damage figure out if this is correctly assigned
-    int number_of_shield_emitters = shield_->number_of_facets;
+    int number_of_shield_emitters = number_of_facets;
 
     // TODO: This won't record damage to regeneration or shield facets
     unit[SHIELD_RECHARGE] = std::to_string(regeneration.MaxValue());
@@ -133,19 +133,19 @@ void Shield::SaveToCSV(std::map<std::string, std::string>& unit) const {
     switch (number_of_shield_emitters) {
         case 8:
             for(int i=0;i<8;i++) {
-                unit[shield_facets_eight[i]] = std::to_string(shield_->facets[i].health.MaxValue());
+                unit[shield_facets_eight[i]] = std::to_string(facets[i].health.MaxValue());
             }
             
             break;
         case 4:
             for(int i=0;i<4;i++) {
-                unit[shield_facets_four[i]] = std::to_string(shield_->facets[i].health.MaxValue());
+                unit[shield_facets_four[i]] = std::to_string(facets[i].health.MaxValue());
             }
 
             break;
         case 2:
-            unit[shield_facets_two[0]] = std::to_string(shield_->facets[0].health.MaxValue());
-            unit[shield_facets_two[1]] = std::to_string(shield_->facets[1].health.MaxValue());
+            unit[shield_facets_two[0]] = std::to_string(facets[0].health.MaxValue());
+            unit[shield_facets_two[1]] = std::to_string(facets[1].health.MaxValue());
             break;
 
         case 0:
@@ -184,7 +184,7 @@ bool Shield::Downgrade() {
     power.SetMaxValue(0.0);
 
     std::vector<double> empty_vector;
-    shield_->UpdateFacets(empty_vector);
+    UpdateFacets(empty_vector);
 
     return false;
 }
@@ -219,7 +219,7 @@ bool Shield::Upgrade(const std::string upgrade_key) {
         return false;
     }
     
-    shield_->UpdateFacets(shield_values);
+    UpdateFacets(shield_values);
 
     // TODO: shield leakage
 
@@ -229,7 +229,7 @@ bool Shield::Upgrade(const std::string upgrade_key) {
 
 
 void Shield::Damage() {
-    for(Health& facet : shield_->facets) {
+    for(Health& facet : facets) {
         facet.health.RandomDamage();
     }
 
@@ -241,7 +241,7 @@ void Shield::Damage() {
 } 
 
 void Shield::Repair() {
-    for(Health& facet : shield_->facets) {
+    for(Health& facet : facets) {
         facet.health.RepairFully();
     }
 
@@ -250,7 +250,7 @@ void Shield::Repair() {
 }
 
 bool Shield::Damaged() const {
-    for(const Health& facet : shield_->facets) {
+    for(const Health& facet : facets) {
         if(facet.health.Damaged()) {
             return true;
         }
@@ -276,7 +276,7 @@ void Shield::Disable() {
 // Zeros out shields but can immediately start recharging
 // Used for things like jump effects
 void Shield::Discharge() {
-    for (Health &facet : shield_->facets) {
+    for (Health &facet : facets) {
         facet.health.Set(0.0);
     }
 }
@@ -302,7 +302,7 @@ void Shield::Enhance() {
     // Boost shields to 150%
     double enhancement_factor = 1.5;
 
-    for(Health& facet : shield_->facets) {
+    for(Health& facet : facets) {
         facet.health.SetMaxValue(facet.health.MaxValue() * enhancement_factor);
     }
 
@@ -334,7 +334,7 @@ double Shield::GetRegeneration() const {
 }
 
 void Shield::Regenerate() {
-    for(Health& facet : shield_->facets) {
+    for(Health& facet : facets) {
         if(facet.health.Percent() < power) {
             // If shield generator is damaged, regenerate less
             facet.health += regeneration.Value(); 

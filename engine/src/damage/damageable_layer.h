@@ -75,7 +75,7 @@ struct DamageableLayer {
     double AverageMaxLayerValue();
 
     double GetMaxHealth();
-    double GetPercent(FacetName facet_name);
+    double GetPercent(FacetName facet_name) const;
 
     void UpdateFacets(const std::vector<double> new_facets);
 };
