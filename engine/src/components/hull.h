@@ -37,11 +37,10 @@
  * We keep these functions to make the hull a separate component.
  * It cannot be sold (downgraded) but can be repaired.
  */
-class Hull : public Component {
-    DamageableLayer* hull_;
+class Hull : public Component, public DamageableLayer {
     friend class Unit;
 public:
-    Hull(DamageableLayer *hull_);
+    Hull();
 
     virtual void Load(std::string upgrade_key, std::string unit_key, 
                       Unit *unit);      // Load from dictionary

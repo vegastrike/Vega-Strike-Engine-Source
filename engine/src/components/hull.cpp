@@ -29,8 +29,9 @@
 
 #include "unit_csv_factory.h"
 
-Hull::Hull(DamageableLayer *hull_): Component("", 0.0, 0.0, true),
-              hull_(hull_) {}
+Hull::Hull(): Component("", 0.0, 0.0, true),
+              DamageableLayer(0, FacetConfiguration::one, 
+                              Health(0, 1), true) {}
 
 void Hull::Load(std::string upgrade_key, std::string unit_key, 
                       Unit *unit) {
@@ -44,8 +45,8 @@ void Hull::Load(std::string upgrade_key, std::string unit_key,
     // Damageable Layer
     double hull_current = UnitCSVFactory::GetVariable(unit_key, "hull", 1.0);
     double hull_max = UnitCSVFactory::GetVariable(upgrade_key, "hull", 1.0);
-    hull_->facets[0].health.SetMaxValue(hull_max);
-    hull_->facets[0].health.Set(hull_current);
+    facets[0].health.SetMaxValue(hull_max);
+    facets[0].health.Set(hull_current);
 }
 
 std::string Hull::SaveToJSON() const {
@@ -78,11 +79,11 @@ bool Hull::Upgrade(const std::string upgrade_name) {
 void Hull::Damage() {}
 
 void Hull::Repair() {
-    hull_->facets[0].health.SetToMax();
+    facets[0].health.SetToMax();
 }
 
 bool Hull::Damaged() const {
-    return hull_->facets[0].health.Damaged();
+    return facets[0].health.Damaged();
 }
 
 

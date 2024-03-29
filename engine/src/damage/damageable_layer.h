@@ -55,7 +55,6 @@ struct DamageableLayer {
     DamageableLayer(int layer_index,
             FacetConfiguration configuration,
             double health_array[],
-            double regeneration,
             bool core_layer);
 
     DamageableLayer(int layer_index,

@@ -30,7 +30,7 @@
 #include <string>
 
 
-Health::Health(int layer, double health, double regeneration) :
+Health::Health(int layer, double health) :
             layer(layer),
             health(health, 0, health) {
         destroyed = false;

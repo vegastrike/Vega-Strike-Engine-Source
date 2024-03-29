@@ -44,7 +44,7 @@ const std::string armor_facets[] = {
 
 Armor::Armor(): Component("", 0.0, 0.0, false),
                 DamageableLayer(1, FacetConfiguration::eight, 
-                                Health(0,0,0), false) {}
+                                Health(0,0), false) {}
 
 void Armor::Load(std::string upgrade_key, std::string unit_key) {
     // Component

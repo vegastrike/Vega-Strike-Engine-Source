@@ -63,7 +63,7 @@ std::string shield_facets_two[2] = {
 Shield::Shield(): 
                Component("", 0.0, 0.0, false),
                DamageableLayer(2, FacetConfiguration::zero, 
-                               Health(2, 0, 0), false),
+                               Health(2, 0), false),
                regeneration(0,0,0),
                power(1.0,0.0,1.0) {}
 

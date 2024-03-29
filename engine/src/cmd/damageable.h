@@ -30,6 +30,7 @@
 #include "mount_size.h"
 
 #include "components/armor.h"
+#include "components/hull.h"
 #include "components/shield.h"
 #include <cassert>
 
@@ -40,7 +41,7 @@ struct GFXColor;
  * @brief The Damageable class TODO
  */
 class Damageable : public DamageableObject {
-    DamageableLayer hull_;
+    Hull hull_;
     Armor armor_;
     Shield shield_;
 

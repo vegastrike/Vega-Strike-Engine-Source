@@ -45,13 +45,9 @@
 
 Damageable::Damageable() : DamageableObject(),
                            killed(false),
-                           armor(),
-                           shield() {
-    // Damageable Constructor
-    Health hull_health = Health(1, 1, 0);
-
-    hull_ = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
-    
+                           hull_(),
+                           armor_(),
+                           shield_() {    
     hull = &hull_;
     armor = &armor_;
     shield = &shield_;

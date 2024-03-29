@@ -31,7 +31,7 @@
 
 // Demonstrate some basic assertions.
 TEST(Layer, Sanity) {
-    Health health(10, 10, 0);
+    Health health(10, 10);
     DamageableLayer layer = DamageableLayer(0, FacetConfiguration::four, health, true);
 
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(0, 0, 0)), 0);
@@ -55,7 +55,7 @@ TEST(Layer, Sanity) {
 }
 
 TEST(Layer, Sanity_2) {    
-    Health health(0, 10, 0);
+    Health health(0, 10);
     EXPECT_EQ(health.health.MaxValue(), 10);
     EXPECT_EQ(health.health.Value(), 10);
 

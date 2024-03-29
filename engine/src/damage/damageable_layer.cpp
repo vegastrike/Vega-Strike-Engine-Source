@@ -53,14 +53,13 @@ DamageableLayer::DamageableLayer(int layer_index,
 DamageableLayer::DamageableLayer(int layer_index,
         FacetConfiguration configuration,
         double health_array[],
-        double regeneration,
         bool core_layer) {
 
     int size = as_integer(configuration);
 
     std::vector<Health> facets;
     for (int i = 0; i < size; i++) {
-        Health health(layer_index, health_array[i], regeneration);
+        Health health(layer_index, health_array[i]);
         facets.push_back(health);
     }
 
@@ -291,7 +290,7 @@ void DamageableLayer::UpdateFacets(const std::vector<double> new_facets) {
     if(new_size != number_of_facets) {
         number_of_facets = new_size;
         facets.clear();
-        Health health = Health(layer_index, 0, 0);
+        Health health = Health(layer_index, 0);
         for(int i=0;i<number_of_facets;i++) {
             facets.push_back(health);
         }

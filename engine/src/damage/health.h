@@ -63,7 +63,7 @@ public:
     } effect{};
 
 
-    Health(int layer, double health = 1, double regeneration = 0);
+    Health(int layer, double health = 1);
 
     double Percent() const {
         return health.Percent();
