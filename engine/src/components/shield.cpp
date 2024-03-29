@@ -310,7 +310,14 @@ void Shield::Enhance() {
 }
 
 
+double Shield::GetPower() const {
+    return power.Value();
+}
 
+double Shield::GetPowerCap() const {
+    return power.AdjustedValue();
+}
+    
 
 
 /*  This is a bit kludgy. Set power via keyboard only works when not suppressed.
@@ -322,9 +329,11 @@ void Shield::SetPower(const double power) {
     this->power = power;
 }
 
-// Do we need this?
+
 void Shield::SetPowerCap(const double power) {
     this->power.SetAdjustedMaxValue(power);
+    // We need this as well, otherwise power will still be 0.
+    this->power.Set(power);
 }
 
 

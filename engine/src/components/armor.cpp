@@ -42,8 +42,9 @@ const std::string armor_facets[] = {
     "Armor_Back_Bottom_Left"
 };
 
-Armor::Armor(DamageableLayer* armor_layer_): Component("", 0.0, 0.0, false),
-                                             armor_(armor_layer_) {}
+Armor::Armor(): Component("", 0.0, 0.0, false),
+                DamageableLayer(1, FacetConfiguration::eight, 
+                                Health(0,0,0), false) {}
 
 void Armor::Load(std::string upgrade_key, std::string unit_key) {
     // Component
@@ -61,19 +62,19 @@ void Armor::Load(std::string upgrade_key, std::string unit_key) {
         armor_values.push_back(armor_facet_max);
     }
 
-    armor_->UpdateFacets(armor_values);
+    UpdateFacets(armor_values);
 
     // Current values from Save Game
     for(int i = 0;i < 8;i++) {
         double armor_value = UnitCSVFactory::GetVariable(unit_key, 
                                                armor_facets[i], 0.0);
-        armor_->facets[i].health.Set(armor_value);
+        facets[i].health.Set(armor_value);
     }
 }
 
 void Armor::SaveToCSV(std::map<std::string, std::string>& unit) const {
     for(int i=0;i<8;i++) {
-        unit[armor_facets[i]] = std::to_string(armor_->facets[i].health.Value());
+        unit[armor_facets[i]] = std::to_string(facets[i].health.Value());
     }
 }
 
@@ -101,7 +102,7 @@ bool Armor::Downgrade() {
     //mass = 0;
     // volume = 0;
     for(int i = 0;i < 8;i++) {
-        armor_->facets[i].health.SetMaxValue(0.0);
+        facets[i].health.SetMaxValue(0.0);
     }
 
     return true;
@@ -138,7 +139,7 @@ bool Armor::Upgrade(const std::string upgrade_name) {
         armor_values.push_back(armor_value);
     }
 
-    armor_->UpdateFacets(armor_values);
+    UpdateFacets(armor_values);
 
     return true;
 }
@@ -155,10 +156,16 @@ void Armor::Repair() {
 }
 
 bool Armor::Damaged() const {
-    return false;//(armor_layer_->TotalLayerValue()/armor_layer_->TotalMaxLayerValue()) < 100.0;
+    for(const Health& facet : facets) {
+        if(facet.health.Damaged()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
 bool Armor::Installed() const {
-    return true;//armor_layer_->facets[0].max_health > 0;
+    return TotalMaxLayerValue() > 0;
 }

@@ -174,7 +174,7 @@ int DamageableLayer::GetFacetIndex(const CoreVector &attack_vector) {
 
 
 
-double DamageableLayer::TotalLayerValue() {
+double DamageableLayer::TotalLayerValue() const {
     double total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.health.Value();
@@ -182,7 +182,7 @@ double DamageableLayer::TotalLayerValue() {
     return total_value;
 }
 
-double DamageableLayer::TotalMaxLayerValue() {
+double DamageableLayer::TotalMaxLayerValue() const {
     double total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.health.MaxValue();
@@ -190,7 +190,7 @@ double DamageableLayer::TotalMaxLayerValue() {
     return total_value;
 }
 
-double DamageableLayer::AverageLayerValue() {
+double DamageableLayer::AverageLayerValue() const {
     double total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.health.Value();
@@ -198,7 +198,7 @@ double DamageableLayer::AverageLayerValue() {
     return total_value / facets.size();
 }
 
-double DamageableLayer::AverageMaxLayerValue() {
+double DamageableLayer::AverageMaxLayerValue() const {
     double total_value = 0.0f;
     for (const Health &facet : facets) {
         total_value += facet.health.MaxValue();
@@ -207,7 +207,7 @@ double DamageableLayer::AverageMaxLayerValue() {
 }
 
 
-double DamageableLayer::GetMaxHealth() {
+double DamageableLayer::GetMaxHealth() const {
     if (number_of_facets == 0) {
         return 0.0f;
     }

@@ -44,12 +44,10 @@ extern const std::string armor_facets[];
 // With tungsten, you multiply each value by 1.
 // With better armor material, you multiply by more.
 
-class Armor : public Component {
-    DamageableLayer* armor_;
-
+class Armor : public Component, public DamageableLayer {
     friend class Unit;
 public:
-    Armor(DamageableLayer* armor_);
+    Armor();
     
     // Load from dictionary
     virtual void Load(std::string upgrade_key, std::string unit_key);      

@@ -69,12 +69,12 @@ struct DamageableLayer {
     
     int GetFacetIndex(const CoreVector &attack_vector);
 
-    double TotalLayerValue();
-    double TotalMaxLayerValue();
-    double AverageLayerValue();
-    double AverageMaxLayerValue();
+    double TotalLayerValue() const;
+    double TotalMaxLayerValue() const;
+    double AverageLayerValue() const;
+    double AverageMaxLayerValue() const;
 
-    double GetMaxHealth();
+    double GetMaxHealth() const;
     double GetPercent(FacetName facet_name) const;
 
     void UpdateFacets(const std::vector<double> new_facets);

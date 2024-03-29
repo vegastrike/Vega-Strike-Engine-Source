@@ -78,6 +78,8 @@ public:
     double GetRegeneration() const;
     void Regenerate();
     
+    double GetPower() const;
+    double GetPowerCap() const;
     void SetPower(const double power);
     void SetPowerCap(const double power);
 };

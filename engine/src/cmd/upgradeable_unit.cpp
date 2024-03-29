@@ -94,11 +94,12 @@ UpgradeType GetUpgradeType(const std::string upgrade_key) {
     if(upgrade_type_string.empty()) return UpgradeType::None;
     
     if(upgrade_type_string == "Armor") {
-
         return UpgradeType::Armor;
     }
     //if(upgrade_type_string == "Hull") return UpgradeType::Hull;
-    if(upgrade_type_string == "Shield") return UpgradeType::Shield;
+    if(upgrade_type_string == "Shield") {
+        return UpgradeType::Shield;
+    }
 
     return UpgradeType::None;
 }
@@ -115,10 +116,10 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
 
 
     switch(upgrade_type) {
-        // case UpgradeType::Armor:
-        //     result.upgradeable = true;
-        //     result.success = unit->armor.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
-        //     break;
+        case UpgradeType::Armor:
+            result.upgradeable = true;
+            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
         case UpgradeType::Shield:
             result.upgradeable = true;
             result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);

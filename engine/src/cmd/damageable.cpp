@@ -45,13 +45,12 @@
 
 Damageable::Damageable() : DamageableObject(),
                            killed(false),
+                           armor(),
                            shield() {
     // Damageable Constructor
     Health hull_health = Health(1, 1, 0);
-    Health armor_health = Health(0, 0, 0);
 
     hull_ = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
-    armor_ = DamageableLayer(1, FacetConfiguration::eight, armor_health, false);
     
     hull = &hull_;
     armor = &armor_;
@@ -550,6 +549,8 @@ void Damageable::leach(float damShield, float damShieldRecharge, float damEnRech
     // TODO: restore this lib_damage
 }
 
+
+
 void Damageable::RegenerateShields(const float difficulty, const bool player_ship) {
     const bool shields_in_spec = configuration()->physics_config.shields_in_spec;
     const float discharge_per_second = configuration()->physics_config.speeding_discharge;
@@ -600,7 +601,7 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
     }
 
     // Shield regeneration
-    shield_.Regenerate(); // TODO: shield_recharge);
+    shield_.Regenerate();     
 }
 
 float Damageable::MaxShieldVal() const {

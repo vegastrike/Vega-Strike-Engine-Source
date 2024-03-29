@@ -29,6 +29,7 @@
 #include "gfx/vec.h"
 #include "mount_size.h"
 
+#include "components/armor.h"
 #include "components/shield.h"
 #include <cassert>
 
@@ -40,14 +41,14 @@ struct GFXColor;
  */
 class Damageable : public DamageableObject {
     DamageableLayer hull_;
-    DamageableLayer armor_;
+    Armor armor_;
     Shield shield_;
 
     friend class UpgradeableUnit;
     
 public:
     DamageableLayer *hull;
-    DamageableLayer *armor;
+    Armor *armor;
     Shield *shield;
 
     double *current_hull;

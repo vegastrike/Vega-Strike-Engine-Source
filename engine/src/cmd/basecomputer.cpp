@@ -1895,8 +1895,11 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
             }
 
             // New component code
-            if(GetUpgradeType(item.GetName() + UPGRADES_SUFFIX) == UpgradeType::Shield) {
+            UpgradeType upgrade_type = GetUpgradeType(item.GetName() + UPGRADES_SUFFIX);
+            if(upgrade_type == UpgradeType::Shield) {
                 CanDoSell = (!player->shield->Damaged()) || !must_fix_first;
+            } else if (upgrade_type == UpgradeType::Armor) {
+                CanDoSell = (!player->armor->Damaged()) || !must_fix_first;
             }
 
             if (CanDoSell) {
