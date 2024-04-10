@@ -462,7 +462,7 @@ void Planet::InitPlanet(QVector x,
         VSSprite *tmp = pImage->pHudImage;
         pImage->pHudImage = un->GetImageInformation().pHudImage;
         un->GetImageInformation().pHudImage = tmp;
-        energy_manager.SetCapacity(EnergyType::FTL, un->energy_manager.GetMaxLevel(EnergyType::FTL));
+        ftl_energy.SetCapacity(un->ftl_energy.MaxLevel());
         if (smartplanets) {
             SubUnits.prepend(un);
             un->SetRecursiveOwner(this);

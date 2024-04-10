@@ -3,21 +3,25 @@
 #include "energy_container.h"
 #include "energy_manager.h"
 #include "reactor.h"
+#include "fuel.h"
 
 
 double simulation_atom_var = 0.1;
 
-struct ReactorSetup {
+struct EnergySetup {
     double capacity;
-    double level;
-    double usage_factor;
-};
-
-struct ContainersSetup {
     double fuel_capacity;
     double energy_capacity;
-    double spec_capacity;
+    double ftl_capacity;
+
+    EnergySetup(double capacity, double fuel_capacity, 
+                double energy_capacity,
+                double ftl_capacity):
+                capacity(capacity), fuel_capacity(fuel_capacity),
+                energy_capacity(energy_capacity), ftl_capacity(ftl_capacity) {}
 };
+
+
 
 struct ConsumerSetup {
     EnergyType energy_type;
@@ -27,7 +31,6 @@ struct ConsumerSetup {
 };
 
 double reactor_capacity = 15;
-double reactor_level = 1.0;
 
 double fuel_capacity = 3.51; // Robin
 double energy_capacity = 100.0; // capacitor 1
@@ -54,58 +57,66 @@ double Cloak = 10;
 double SPECDrive = 1;
 double JumpDrive = 1;
 
-EnergyManager setup(ContainersSetup containers_setup, ReactorSetup reactor_setup, 
-                    double simulation_atom_var) {
-    EnergyManager manager = EnergyManager();
-    
-    manager.SetCapacity(EnergyType::Fuel, containers_setup.fuel_capacity);
-    manager.SetCapacity(EnergyType::Energy, containers_setup.energy_capacity);
-    manager.SetCapacity(EnergyType::FTL, containers_setup.spec_capacity);
-    manager.SetReactor(reactor_setup.capacity, reactor_setup.usage_factor, 
-                       reactor_setup.level, simulation_atom_var);
+struct EnergyManager {
+    Fuel fuel;
+    EnergyContainer energy;
+    EnergyContainer ftl_energy;
+    Reactor reactor;
 
-    return manager;
-}
+    EnergyManager(EnergySetup setup, 
+                  double simulation_atom_var):
+                  fuel(), energy(), ftl_energy(),
+                  reactor(setup.capacity, &energy, &ftl_energy,
+                            simulation_atom_var) {
+        fuel.SetCapacity(setup.fuel_capacity);
+        energy.SetCapacity(setup.energy_capacity);
+        ftl_energy.SetCapacity(setup.ftl_capacity);
+    }
+};
 
-void setupConsumer(EnergyManager& manager, ConsumerSetup setup) {
-    manager.AddConsumer(setup.energy_type, setup.classification, setup.consumer_type, setup.consumption);
-}
 
-double fuelBurn(ContainersSetup containers_setup, ReactorSetup reactor_setup,
-                std::vector<ConsumerSetup> consumers_setup, int seconds,
+double fuelBurn(EnergySetup setup, 
+                std::vector<EnergyConsumer> energy_consumers, int seconds,
                 int print_every_n = 1000) {
     int run_time = seconds / simulation_atom_var;
-    EnergyManager manager = setup(containers_setup, reactor_setup, simulation_atom_var);
-    for(ConsumerSetup setup : consumers_setup) {
-        setupConsumer(manager, setup);
+    EnergyManager manager = EnergyManager(setup, simulation_atom_var);
+    
+    // Add fuel consumers
+
+
+    // Add energy consumers
+    for(EnergyConsumer consumer : energy_consumers) {
+        manager.energy.AddConsumer(consumer);
     }
 
     for(int i = 0;i<run_time;i++) {
         if(i%print_every_n == 0) {
-            std::cout << i << " R: " << manager.GetReactorCapacity() << 
-                              " F: " << manager.GetLevel(EnergyType::Fuel) << 
-                              " E: " << manager.GetLevel(EnergyType::Energy) <<
-                              " S: " << manager.GetLevel(EnergyType::FTL) << std::endl;
+            std::cout << i << " R: " << manager.reactor.Capacity() << 
+                              " F: " << manager.fuel.Level() << 
+                              " E: " << manager.energy.Level() <<
+                              " S: " << manager.ftl_energy.Level() << std::endl;
         }
         
-        if(manager.GetLevel(EnergyType::Fuel) < 0.001) { 
+        if(manager.fuel.Depleted()) { 
             std::cout << "Exhausted all fuel in " << i * simulation_atom_var / 60 << " minutes.\n";
             break;
         }
 
-        manager.Act();
+        manager.fuel.Act();
+        manager.reactor.Generate();
+        manager.energy.Act();
+        manager.ftl_energy.Act();
     }
 
-    return manager.Percent(EnergyType::Fuel);
+    return manager.fuel.Percent();
 };
 
 // This tests a fighter ship with level 1 equipment
 TEST(NoFuelBurn, Robin) {
-    ContainersSetup containers_setup = {3.51, 100.0, 200.0};
-    ReactorSetup reactor_setup = {15.0, reactor_usage_factor, 1.0};
+    EnergySetup setup = EnergySetup(15.0, 3.51, 100.0, 200.0);
     int seconds = 20 * 60; // 20 minutes gameplay
 
-    double result = fuelBurn(containers_setup, reactor_setup, std::vector<ConsumerSetup>(),
+    double result = fuelBurn(setup, std::vector<EnergyConsumer>(),
                              seconds);
 
     std::cout << "NoFuelBurn percent left: " << result * 100 << std::endl;
@@ -113,42 +124,38 @@ TEST(NoFuelBurn, Robin) {
 
 // This tests a fighter ship with level 1 equipment and steady 50MJ energy consumption
 TEST(FuelBurn, RobinNaive_1) {
-    ContainersSetup containers_setup = {3.51, 100.0, 200.0};
-    ReactorSetup reactor_setup = {15.0, reactor_usage_factor, 1.0};
-    std::vector<ConsumerSetup> consumers_setup = {
-        {EnergyType::Fuel, EnergyConsumerClassification::Drive, 
-        EnergyConsumerType::Constant, 0.0001},
-        {EnergyType::Fuel, EnergyConsumerClassification::Afterburner, 
-        EnergyConsumerType::Constant, 0.0001 * 3 * .05}, // Drive consumption x 3 but 5% of flight time
-        {EnergyType::Energy, EnergyConsumerClassification::LifeSupport, 
-        EnergyConsumerType::Constant, 50.0 * simulation_atom_var} // General consumer at 50 per second
+    EnergySetup setup = {15.0, 3.51, 100.0, 200.0};
+    std::vector<EnergyConsumer> consumers_setup = {
+        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Drive, 
+        EnergyConsumerType::Constant, 0.0001),
+        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Afterburner, 
+        EnergyConsumerType::Constant, 0.0001 * 3 * .05), // Drive consumption x 3 but 5% of flight time
+        EnergyConsumer(EnergyType::Energy, EnergyConsumerClassification::LifeSupport, 
+        EnergyConsumerType::Constant, 50.0 * simulation_atom_var) // General consumer at 50 per second
     };
     
     int seconds = 60 * 60; // 60 minutes gameplay
     
-    double result = fuelBurn(containers_setup, reactor_setup, consumers_setup,
-                             seconds);
+    double result = fuelBurn(setup, consumers_setup, seconds);
 
     std::cout << "NaiveFuelBurn_1 percent left: " << result * 100 << std::endl;
 }
 
 // This tests a fighter ship with level 1 equipment and steady 150MJ energy consumption
 TEST(FuelBurn, RobinNaive_2) {
-    ContainersSetup containers_setup = {3.51, 300.0, 200.0};
-    ReactorSetup reactor_setup = {44.0, reactor_usage_factor, 3.0};
-    std::vector<ConsumerSetup> consumers_setup = {
-        {EnergyType::Fuel, EnergyConsumerClassification::Drive, 
-        EnergyConsumerType::Constant, 0.0001},
-        {EnergyType::Fuel, EnergyConsumerClassification::Afterburner, 
-        EnergyConsumerType::Constant, 0.0001 * 3 * .05}, // Drive consumption x 3 but 5% of flight time
-        {EnergyType::Energy, EnergyConsumerClassification::LifeSupport, 
-        EnergyConsumerType::Constant, 150.0 * simulation_atom_var} // General consumer at 150 per second
+    EnergySetup setup = {44.0, 3.51, 300.0, 200.0};
+    std::vector<EnergyConsumer> consumers_setup = {
+        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Drive, 
+        EnergyConsumerType::Constant, 0.0001),
+        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Afterburner, 
+        EnergyConsumerType::Constant, 0.0001 * 3 * .05), // Drive consumption x 3 but 5% of flight time
+        EnergyConsumer(EnergyType::Energy, EnergyConsumerClassification::LifeSupport, 
+        EnergyConsumerType::Constant, 150.0 * simulation_atom_var) // General consumer at 50 per second
     };
     
     int seconds = 60 * 60; // 60 minutes gameplay
     
-    double result = fuelBurn(containers_setup, reactor_setup, consumers_setup,
-                             seconds);
+    double result = fuelBurn(setup, consumers_setup, seconds);
 
     std::cout << "NaiveFuelBurn_2 percent left: " << result * 100 << std::endl;
 }

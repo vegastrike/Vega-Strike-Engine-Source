@@ -251,14 +251,14 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
                 //&& ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
                 ((locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns);
         if ((*i).type->type == WEAPON_TYPE::BEAM) {
-            if ((*i).type->GetConsumption() * simulation_atom_var > unit->energy_manager.GetLevel(EnergyType::Energy)) {
+            if ((*i).type->GetConsumption() * simulation_atom_var > unit->energy.Level()) {
                 //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
                 (*i).UnFire();
                 continue;
             }
         } else
             //Only in non-networking mode
-        if (i->type->GetConsumption() > unit->energy_manager.GetLevel(EnergyType::Energy)) {
+        if (i->type->GetConsumption() > unit->energy.Level()) {
             if (!want_to_fire) {
                 i->UnFire();
             }
@@ -279,11 +279,11 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
                     if (i->ref.gun) {
                         if ((!i->ref.gun->Dissolved()) || i->ref.gun->Ready()) {
                             // TODO: switch to standard energy usage
-                            unit->energy_manager.Deplete(EnergyType::Energy, i->type->GetConsumption() * simulation_atom_var);
+                            unit->energy.Deplete(i->type->GetConsumption() * simulation_atom_var);
                         }
                     }
                 } else if (i->type->isMissile()) {    // FIXME  other than beams, only missiles are processed here?
-                    unit->energy_manager.Deplete(EnergyType::Energy, i->type->GetConsumption());
+                    unit->energy.Deplete(i->type->GetConsumption());
                 }
                 //IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
                 //fire only 1 missile at a time

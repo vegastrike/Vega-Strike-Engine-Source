@@ -673,6 +673,7 @@ SET(LIBCOMPONENT
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
     src/components/energy_manager.cpp
+    src/components/fuel.cpp
     src/components/jump_drive.cpp
     src/components/radar.cpp
     src/components/reactor.cpp

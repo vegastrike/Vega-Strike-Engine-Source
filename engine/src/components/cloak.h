@@ -28,6 +28,7 @@
 #include <string>
 #include <map>
 
+#include "component.h"
 #include "energy_container.h"
 #include "damageable_layer.h"
 
@@ -40,7 +41,7 @@ enum class CloakingStatus {
     decloaking
 };
 
-class Cloak : EnergyConsumer
+class Cloak : public Component, public EnergyConsumer
 {
     friend class Unit;
 
@@ -64,10 +65,28 @@ class Cloak : EnergyConsumer
 
 public:
     Cloak();
-    Cloak(std::string unit_key);
 
-    void Save(std::map<std::string, std::string>& unit);
+    // Virtual Functions
+    virtual void Load(std::string upgrade_key, std::string unit_key);
 
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+    virtual std::string Describe() const;
+
+    virtual bool CanDowngrade() const;
+
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_name) const;
+
+    virtual bool Upgrade(const std::string upgrade_name);
+
+    virtual void Damage();
+    virtual void Repair();
+
+    virtual bool Damaged() const;
+    virtual bool Installed() const;
+
+    // Other Functions
     void Update();
     void Toggle(); // Toggle cloak on/off
 
@@ -88,10 +107,6 @@ public:
         return (status == CloakingStatus::cloaking ||
                 status == CloakingStatus::cloaked ||
                 status == CloakingStatus::decloaking);
-    }
-
-    bool Damaged() {
-        return (status == CloakingStatus::damaged);
     }
 
     bool Ready() {
@@ -118,20 +133,6 @@ public:
     //how visible the ship is from 0 to 1
     double Visibility() const {
         return 1-current;
-    }
-
-    // TODO: more granular damage
-    // TODO: damageable component
-    void Damage() {
-        status = CloakingStatus::damaged;
-        current = 0;
-    }
-
-    void Repair() {
-        if(status == CloakingStatus::damaged) {
-            status = CloakingStatus::ready;
-            current = 0;
-        }
     }
 
     void Disable() {

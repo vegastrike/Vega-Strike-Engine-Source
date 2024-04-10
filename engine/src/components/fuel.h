@@ -1,9 +1,9 @@
 /*
- * reactor.h
+ * fuel.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (c) 2019-2024 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,35 +25,22 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef REACTOR_H
-#define REACTOR_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_FUEL_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_FUEL_H
 
 #include "component.h"
 #include "energy_container.h"
-#include "energy_consumer.h"
-#include "resource/resource.h"
 
-class EnergyManager;
-
-class Reactor: public Component, public EnergyConsumer
-{
-    Resource<double> capacity;          // Capacity per second
-    const double simulation_atom_var;   // Atom definition. typically 0.1 second
-    double atom_capacity;               // Capacity per atom
-
-    EnergyContainer *energy;
-    EnergyContainer *ftl_energy;
-
+/**
+ * This is a minimum implementation of fuel cell class.
+ * For now, a fuel cell cannot be upgraded, only repaired.
+ */
+class Fuel : public Component, public EnergyContainer {
+    friend class Unit;
 public:
-    Reactor();
-    Reactor(double capacity, // How much energy does the reactor generate
-                 EnergyContainer *energy,
-                 EnergyContainer *ftl_energy,
-                 double simulation_atom_var);
+    Fuel();
 
-
-    virtual void Load(std::string upgrade_key, std::string unit_key);      
-    
+    virtual void Load(std::string upgrade_key, std::string unit_key);      // Load from dictionary
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
 
     virtual std::string Describe() const; // Describe component in base_computer 
@@ -71,10 +58,6 @@ public:
 
     virtual bool Damaged() const;
     virtual bool Installed() const;
-
-    void Generate();
-    double Capacity() const;
-    double MaxCapacity() const;
 };
 
-#endif // REACTOR_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_FUEL_H

@@ -29,8 +29,11 @@
 #include "unit_csv_factory.h"
 #include "damage/damageable_layer.h"
 #include "resource/cout_util.h"
+#include "configuration/game_config.h"
 
 #include <random>
+
+extern float simulation_atom_var;
 
 const std::string SHIELD_RECHARGE = "Shield_Recharge";
 
@@ -64,19 +67,22 @@ Shield::Shield():
                Component("", 0.0, 0.0, false),
                DamageableLayer(2, FacetConfiguration::zero, 
                                Health(2, 0), false),
+               EnergyConsumer(EnergyType::Energy, 
+                              EnergyConsumerClassification::Shield,
+                              EnergyConsumerType::Constant, 0.0),
                regeneration(0,0,0),
                power(1.0,0.0,1.0) {}
 
 
 
 void Shield::Load(std::string upgrade_key, std::string unit_key, 
-                      Unit *unit) {
+                      Unit *unit, double difficulty) {
     //this->upgrade_key = upgrade_key;
     //upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
     //int num_facets = UnitCSVFactory::GetVariable(upgrade_key, "Facets", 0);
-    
+
     // Regeneration
-    const double regeneration = UnitCSVFactory::GetVariable(unit_key, SHIELD_RECHARGE, 0.0);
+    const double regeneration = UnitCSVFactory::GetVariable(unit_key, SHIELD_RECHARGE, 0.0) * difficulty;
 
     // Get shield count
 
@@ -96,7 +102,7 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
             continue;
         }
 
-        shield_values.push_back(std::stod(shield_string_values[i]));
+        shield_values.push_back(std::stod(shield_string_values[i]) * difficulty);
 
         // Should add up to the shield type - quad or dual
         shield_count++;
@@ -116,6 +122,11 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
     this->regeneration.SetMaxValue(regeneration);
 
     // TODO: shield leakage & efficiency
+
+    // Power draw for maintenance and regeneration
+    // TODO: implement fully
+    double c = TotalMaxLayerValue()/10 + regeneration;
+    consumption.SetMaxValue(c);
 }
 
 
@@ -186,7 +197,7 @@ bool Shield::Downgrade() {
     std::vector<double> empty_vector;
     UpdateFacets(empty_vector);
 
-    return false;
+    return true;
 }
 
 bool Shield::Upgrade(const std::string upgrade_key) {
@@ -342,15 +353,44 @@ double Shield::GetRegeneration() const {
     return regeneration.Value();
 }
 
-void Shield::Regenerate() {
+// TODO: add nebula parameter and apply some modifier
+void Shield::Regenerate(bool ftl, bool player_ship) {
+    // No point in all this code if there are no shields.
+    if(!Installed()) {
+        return;
+    }
+
+    // No point if shields are disabled. e.g. when cloaked
+    if(!Enabled()) {
+        return;
+    }
+
+    double actual_recharge = regeneration.Value() * powered * simulation_atom_var;
+    // TODO: adjust for nebula                             
+
+    // Discharge shields due to energy or SPEC or cloak
+    if (ftl && !shield_in_ftl) {
+        if(player_ship) {
+           static int i = 0;
+           printOnceInAHundred(i, "FTL", std::to_string(actual_recharge)); 
+        }
+
+        // "Damage" power
+        SetPowerCap(0.0);
+    } else {
+        // Figure out how to support partial power
+        SetPowerCap(1.0);
+    }
+
+    // Shield regeneration
     for(Health& facet : facets) {
         if(facet.health.Percent() < power) {
             // If shield generator is damaged, regenerate less
-            facet.health += regeneration.Value(); 
+            facet.health += actual_recharge; 
         } else if(facet.health.Percent() > power) {
             // If in SPEC or cloaked, decrease shields as fast as possible
             // to prevent a scenario where damaged shields work in SPEC.
-            facet.health -= regeneration.MaxValue();
+            facet.health -= actual_recharge;
         }
     }
 }

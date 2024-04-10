@@ -43,5 +43,15 @@ void printOnceInAHundred(int &i,
     if(i==100) i=0;
 }
 
+void printOnceInAHundred(int &i,
+                         std::string message,
+                         std::string value) {
+    if(i==0) {
+        printPlayerMessage("player_ship",message,value);
+    }
+    i++;
+    if(i==100) i=0;
+}
+
 
 #endif //VEGA_STRIKE_ENGINE_RESOURCE_COUT_UTIL_H

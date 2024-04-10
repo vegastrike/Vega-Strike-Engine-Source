@@ -29,6 +29,7 @@
 #define COMPONENT_H
 
 #include <string>
+#include <map>
 
 /**
  * LibComponent is currently tightly coupled to LibDamage and
@@ -63,7 +64,7 @@ public:
     // Load from units dictionary
     virtual void Load(std::string upgrade_key, std::string unit_key);      
     
-    //virtual std::string SaveToJSON() const = 0;   // Save component as JSON
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const = 0;
 
     virtual std::string Describe() const = 0; // Describe component in base_computer 
 

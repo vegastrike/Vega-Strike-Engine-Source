@@ -55,8 +55,7 @@ enum class EnergyConsumerClassification {
     // Energy
     LifeSupport, 
     Radar,
-    ShieldRegen,
-    ShieldMaintenance,
+    Shield,
     ECM,
     Cloak,
     BallWeapon,

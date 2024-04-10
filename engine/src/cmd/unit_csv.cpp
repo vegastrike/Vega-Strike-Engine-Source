@@ -402,7 +402,7 @@ static void AddSubUnits(Unit *thus,
         if (randomspawn) {
             // TODO: surely we could use something more relevant than max SPEC
             // to determine chance to spawn...
-            int chancetospawn = float_to_int(xml.units[a]->energy_manager.GetMaxLevel(EnergyType::FTL));
+            int chancetospawn = float_to_int(xml.units[a]->ftl_energy.MaxLevel());
             if (chancetospawn > rand() % 100) {
                 thus->SubUnits.prepend(xml.units[a]);
             } else {
@@ -645,6 +645,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     string tmpstr;
     csvRow = unit_identifier;
 
+    // What happens if we buy a new ship?
+    // We treat saved_game as is_player_ship!
     std::string unit_key = (saved_game ? "player_ship" : unit_identifier);
 
     fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
@@ -735,14 +737,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     Momentofinertia = UnitCSVFactory::GetVariable(unit_key, "Moment_Of_Inertia", 1.0f);
     
     
-    energy_manager.SetCapacity(EnergyType::Fuel, 
-                               UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0f));
-    energy_manager.Refill(EnergyType::Fuel);
-
-    energy_manager.SetCapacity(EnergyType::Energy, 
-                               UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f));
-    energy_manager.SetCapacity(EnergyType::FTL, 
-                               UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f));
+    fuel.Load("", unit_key);
+    energy.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0), true);
+    ftl_energy.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0), true);
 
     // Hull
     float temp_hull = UnitCSVFactory::GetVariable(unit_key, "Hull", 0.0f);
@@ -764,9 +761,17 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     armor->UpdateFacets(armor_values);
 
+    // Shield difficulty modifier (if applicable)
+    // Difficulty modifier to shield strength and regeneration
+    static const double apply_difficulty_modifier = 
+        configuration()->physics_config.difficulty_based_shield_recharge;
+    double difficulty_modifier = 1.0f;
+    if (apply_difficulty_modifier && !isPlayerShip()) {
+        difficulty_modifier = g_game.difficulty;
+    }
 
     // Load shield
-    shield->Load("", unit_key, this);
+    shield->Load("", unit_key, this, difficulty_modifier);
 
     // End shield section
 
@@ -776,8 +781,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
     graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    
-    energy_manager.SetReactorCapacity(UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f));
+    reactor.Load("", unit_key);
     
     jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false) ? -1 : -2;
     jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
@@ -842,7 +846,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     radar = CRadar(unit_key, &computer);
 
-    cloak = Cloak(unit_key);
+    cloak = Cloak();
+    cloak.Load("", unit_key);
 
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
@@ -1185,9 +1190,9 @@ string Unit::WriteUnitString() {
     unit["Moment_Of_Inertia"] = tos(Momentofinertia);
 
     // Components
-    unit["Fuel_Capacity"] = tos(energy_manager.GetMaxLevel(EnergyType::Fuel));
-    unit["Primary_Capacitor"] = tos(energy_manager.GetMaxLevel(EnergyType::Energy));
-    unit["Warp_Capacitor"] = tos(energy_manager.GetMaxLevel(EnergyType::FTL));
+    fuel.SaveToCSV(unit);
+    unit["Primary_Capacitor"] = tos(energy.MaxLevel());
+    unit["Warp_Capacitor"] = tos(ftl_energy.MaxLevel());
     
     unit["Hull"] = tos(GetHullLayer().facets[0].health);
     unit["Spec_Interdiction"] = tos(specInterdiction);
@@ -1211,7 +1216,7 @@ string Unit::WriteUnitString() {
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
     
-    unit["Reactor_Recharge"] = tos(energy_manager.GetReactorCapacity());
+    reactor.SaveToCSV(unit);
     unit["Jump_Drive_Present"] = tos(jump.drive >= -1);
     unit["Jump_Drive_Delay"] = tos(jump.delay);
     unit["Wormhole"] = tos(forcejump != 0);
@@ -1243,7 +1248,7 @@ string Unit::WriteUnitString() {
     unit["ITTS"] = tos(computer.itts);
 
 
-    cloak.Save(unit);
+    cloak.SaveToCSV(unit);
     unit["Repair_Droid"] = tos(repair_droid);
     unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
     unit["Hud_Functionality"] = WriteHudDamage(this);

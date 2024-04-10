@@ -5344,15 +5344,15 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         if (shields_require_power) {
             maxshield = 0;
         }
-        PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->energy_manager.GetReactorCapacity() * RSconverter, 0, "MJ/s");
+        PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
         PRETTY_ADDU(statcolor + "Weapon capacitor bank storage: #-c",
                 // TODO: this should be converted to variable vs constant
                 // Also, this is a shitty calculation. Why subtract shields and not ECM or life support?
-                ((playerUnit->energy_manager.GetMaxLevel(EnergyType::Energy) - maxshield) * RSconverter), 0, "MJ");
+                ((playerUnit->energy.MaxLevel() - maxshield) * RSconverter), 0, "MJ");
         //note: I found no function to get max warp energy, but since we're docked they are the same
         if (!subunitlevel) {
             PRETTY_ADDU(statcolor + "Warp capacitor bank storage: #-c",
-                    playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) * RSconverter * Wconv,
+                    playerUnit->ftl_energy.MaxLevel() * RSconverter * Wconv,
                     0,
                     "MJ");
 
@@ -5375,7 +5375,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     PRETTY_ADDU(statcolor + "Delay: #-c", uj.delay, 0, "seconds");
                 if (uj.damage > 0)
                     PRETTY_ADDU(statcolor + "Damage to outsystem jump drive: #-c", uj.damage * VSDM, 0, "MJ");
-                if (playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) < uj.energy) {
+                if (playerUnit->ftl_energy.MaxLevel() < uj.energy) {
                     text += "#n##c1:.3:.3#" + prefix
                             +
                                     "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
@@ -5385,45 +5385,45 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     } else {
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Installs reactor with recharge rate: #-c",
-                            playerUnit->energy_manager.GetReactorCapacity() * RSconverter, 0, "MJ/s");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
+                            playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Installs main capacitor bank with storage capacity: #-c",
-                            (playerUnit->energy_manager.GetMaxLevel(EnergyType::Energy) * RSconverter), 0, "MJ");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::FTL)))
+                            (playerUnit->energy.MaxLevel() * RSconverter), 0, "MJ");
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, ftl_energy.MaxLevel()))
                     PRETTY_ADDU(statcolor + "Installs warp capacitor bank with storage capacity: #-c",
-                            playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) * RSconverter * Wconv, 0, "MJ");
+                            playerUnit->ftl_energy.MaxLevel() * RSconverter * Wconv, 0, "MJ");
                 if (buj.drive != uj.drive) {
                     text += statcolor +
                             "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
                 }
                 break;
             case 1:                 //Additive
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Increases recharge rate by #-c",
-                            playerUnit->energy_manager.GetReactorCapacity() * RSconverter, 0, "MJ/s");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
+                            playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Adds #-c",
-                            (playerUnit->energy_manager.GetMaxLevel(EnergyType::Energy) * RSconverter),
+                            (playerUnit->energy.MaxLevel() * RSconverter),
                             0,
                             "MJ of storage to main capacitor banks");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::FTL)))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, ftl_energy.MaxLevel()))
                     PRETTY_ADDU(statcolor + "Adds #-c",
-                            playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) * RSconverter * Wconv,
+                            playerUnit->ftl_energy.MaxLevel() * RSconverter * Wconv,
                             0,
                             "MJ of storage to warp capacitor bank");
                 break;
             case 2:                 //multiplicative
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Increases reactor recharge rate by #-c",
-                            100.0 * (playerUnit->energy_manager.GetReactorCapacity() - 1), 0, "%");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetReactorCapacity()))
+                            100.0 * (playerUnit->reactor.Capacity() - 1), 0, "%");
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Increases main capacitor bank storage by #-c",
-                            100.0 * (playerUnit->energy_manager.GetMaxLevel(EnergyType::Energy) - 1), 0, "%");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energy_manager.GetMaxLevel(EnergyType::FTL)))
+                            100.0 * (playerUnit->energy.MaxLevel() - 1), 0, "%");
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, ftl_energy.MaxLevel()))
                     PRETTY_ADDU(statcolor + "Increases warp capacitor bank storage by #-c",
-                            (playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) - 1) * 100, 0, "%");
+                            (playerUnit->ftl_energy.MaxLevel() - 1) * 100, 0, "%");
                 break;
             default:                 //Failure
                 text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5771,32 +5771,32 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         PRETTY_ADDU(statcolor + "Minimum time to reach full overthrust speed: #-c",
                 playerUnit->getMass() * uc.max_ab_speed() / playerUnit->limits.afterburn, 2, "seconds");
         //reactor
-        float avail = (playerUnit->energy_manager.GetReactorCapacity() * RSconverter - maxshield * VSDM);
+        float avail = (playerUnit->reactor.Capacity() * RSconverter - maxshield * VSDM);
 
         int num_shields = playerUnit->shield->number_of_facets;
         float regeneration = playerUnit->shield->GetRegeneration();
         float overhead = (shields_require_power) ?
                 (regeneration / shieldenergycap * shield_maintenance_cost
                         * num_shields * VSDM) : 0;
-        float nrt = avail / (playerUnit->energy_manager.GetReactorCapacity() * RSconverter); // TODO -overhead);
+        float nrt = avail / (playerUnit->reactor.Capacity() * RSconverter); // TODO -overhead);
         PRETTY_ADDU(statcolor + "Reactor nominal replenish time: #-c", nrt, 2, "seconds");
         //shield related stuff
         //code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
         static float low_power_mode =
                 XMLSupport::parse_float(vs_config->getVariable("physics", "low_power_mode_energy", "10"));
-        if (playerUnit->energy_manager.GetReactorCapacity() - maxshield < low_power_mode) {
+        if (playerUnit->reactor.Capacity() - maxshield < low_power_mode) {
             text += "#n##c1:.3:.3#" + prefix
                     +
                             "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
         }
-        if (uj.drive != -2 && playerUnit->energy_manager.GetMaxLevel(EnergyType::FTL) < uj.energy) {
+        if (uj.drive != -2 && playerUnit->ftl_energy.MaxLevel() < uj.energy) {
             text += "#n##c1:.3:.3#" + prefix
                     +
                             "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
         }
 
         if (num_shields) {
-            if (regeneration * num_shields * VSDM / shieldenergycap > playerUnit->energy_manager.GetReactorCapacity()
+            if (regeneration * num_shields * VSDM / shieldenergycap > playerUnit->reactor.Capacity()
                     * RSconverter) {
                 text += "#n##c1:1:.1#" + prefix
                         + "WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
@@ -5805,7 +5805,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             if (shields_require_power) {
                 text += "#n#" + prefix + statcolor + "Reactor recharge slowdown caused by shield maintenance: #-c";
                 float maint_draw_percent = regeneration * VSDM * 100.0 / shieldenergycap * shield_maintenance_cost
-                        * num_shields / (playerUnit->energy_manager.GetReactorCapacity() * RSconverter);
+                        * num_shields / (playerUnit->reactor.Capacity() * RSconverter);
                 text += (boost::format("%1$.2f") % maint_draw_percent).str();
                 text += " %.";
                 if (maint_draw_percent > 60) {
@@ -5824,14 +5824,14 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         float maint_draw =
                 (shields_require_power && num_shields) ? (regeneration * VSDM / shieldenergycap
                         * shield_maintenance_cost * num_shields) : 0;
-        if (totalWeaponEnergyUsage < (playerUnit->energy_manager.GetReactorCapacity() * RSconverter - maint_draw)) {
+        if (totalWeaponEnergyUsage < (playerUnit->reactor.Capacity() * RSconverter - maint_draw)) {
             //waouh, impressive...
             text += "#n##c0:1:.2#" + prefix + "Your reactor produces more energy than your weapons can use!#-c";
         } else {
             PRETTY_ADDU(statcolor + "Reactor energy depletion time if weapons in continuous use: #-c",
-                    (playerUnit->energy_manager.GetReactorCapacity()
+                    (playerUnit->reactor.Capacity()
                             * RSconverter) / (totalWeaponEnergyUsage
-                            - ((playerUnit->energy_manager.GetReactorCapacity() * RSconverter - maint_draw))),
+                            - ((playerUnit->reactor.Capacity() * RSconverter - maint_draw))),
                     2,
                     "seconds");
         }

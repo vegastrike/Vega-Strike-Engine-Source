@@ -59,6 +59,10 @@ double EnergyContainer::Deplete(const double quantity) {
     return quantity + old_level - level.Value();
 }
 
+bool EnergyContainer::Depleted() const {
+    return (level.Value() < 0.01);
+}
+
 void EnergyContainer::SetCapacity(const double capacity, bool refill) {
     if(refill) {
         level = Resource<double>(capacity,0,capacity);
@@ -93,9 +97,7 @@ void EnergyContainer::Act() {
             continue;
         }
 
-        std::cout << TypeToSave(type) << " ol: " << level;
         level -= consumer.consumption;
-        std::cout << " nl: " << level << std::endl;
         consumer.powered = 1.0;
     }
 }
@@ -124,4 +126,8 @@ double EnergyContainer::Powered(EnergyConsumerClassification classification) {
     }
         
     return false;
+}
+
+void EnergyContainer::Refill() {
+    level.SetToMax();
 }

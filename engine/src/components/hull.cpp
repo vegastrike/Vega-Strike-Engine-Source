@@ -29,6 +29,8 @@
 
 #include "unit_csv_factory.h"
 
+const std::string HULL = "Hull";
+
 Hull::Hull(): Component("", 0.0, 0.0, true),
               DamageableLayer(0, FacetConfiguration::one, 
                               Health(0, 1), true) {}
@@ -49,8 +51,10 @@ void Hull::Load(std::string upgrade_key, std::string unit_key,
     facets[0].health.Set(hull_current);
 }
 
-std::string Hull::SaveToJSON() const {
-    return std::string();
+void Hull::SaveToCSV(std::map<std::string, std::string>& unit) const {
+    for(int i=0;i<8;i++) {
+        unit[HULL] = std::to_string(facets[0].health.Value());
+    }
 }
 
 std::string Hull::Describe() const {

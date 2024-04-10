@@ -254,7 +254,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
             //Missiles and beams set to processed.
             processed = PROCESSED;
         } else if (ref.refire < type->Refire() ||
-                   type->GetConsumption() > caller->energy_manager.GetLevel(EnergyType::Energy)) { 
+                   type->GetConsumption() > caller->energy.Level()) { 
             //Wait until refire has expired and reactor has produced enough energy for the next bolt.
             return true;
         }              //Not ready to refire yet.  But don't stop firing.
@@ -302,7 +302,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 }
                 break;
             case WEAPON_TYPE::BOLT:
-                caller->energy_manager.Deplete(EnergyType::Energy, type->GetConsumption());
+                caller->energy.Deplete(type->GetConsumption());
                 
                 hint[Unit::UNIT_BOLT] = Bolt(type,
                         mat,
@@ -312,7 +312,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 break;
 
             case WEAPON_TYPE::BALL: {
-                caller->energy_manager.Deplete(EnergyType::Energy, type->GetConsumption());
+                caller->energy.Deplete(type->GetConsumption());
                 
                 hint[Unit::UNIT_BOLT] =
                         BoltDrawManager::GetInstance().AddBall(type, mat, velocity, owner, hint[Unit::UNIT_BOLT]);

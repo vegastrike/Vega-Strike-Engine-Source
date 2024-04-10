@@ -276,6 +276,7 @@ Unit::Unit(int dummy) : Drawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
     pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
+
     // TODO: delete
     Init();
 }
@@ -507,6 +508,11 @@ void Unit::Init(const char *filename,
         SetAniSpeed(0.05);
         StartAnimation();
     }
+
+    //Components
+    fuel.AddConsumer(reactor);
+    energy.AddConsumer(shield_);
+    energy.AddConsumer(cloak);
 }
 
 vector<Mesh *> Unit::StealMeshes() {
@@ -989,7 +995,7 @@ extern void ActivateAnimation(Unit *jp);
 // Move to jump_enabled
 void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
     if (cp) {
-        if (un->energy_manager.GetLevel(EnergyType::FTL) >= un->jump.energy) {
+        if (un->ftl_energy.Level() >= un->jump.energy) {
             if (un->jump.drive > -2) {
                 cp->jumpok = 1;
             }
@@ -1014,7 +1020,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
         //we have a drive
         if ((!SPEC_interference && (smalle->jump.drive >= 0
                 &&          //we have power
-                        (smalle->energy_manager.GetLevel(EnergyType::FTL) >= smalle->jump.energy
+                        (smalle->ftl_energy.Level() >= smalle->jump.energy
                                 //or we're being cheap
                                 || (ai_jump_cheat && cp == nullptr)
                         )))
@@ -1041,7 +1047,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
             return false;
         }
         if ((!SPEC_interference && (jump.drive >= 0
-                && (energy_manager.GetLevel(EnergyType::FTL) >= jump.energy || (ai_jump_cheat && cp == NULL))
+                && (ftl_energy.Level() >= jump.energy || (ai_jump_cheat && cp == NULL))
         )) || smalle->forcejump) {
             jump_drive.Use();
             DeactivateJumpDrive();
@@ -4250,8 +4256,13 @@ void Unit::ActTurn() {
     Repair();
 
     // Power
-    energy_manager.Act();
+    fuel.Act();
+    reactor.Generate();
+    energy.Act();
 
+    shield_.Regenerate(graphicOptions.InWarp, isPlayerShip());
+
+    ftl_energy.Act();
 }
 
 void Unit::UpdatePhysics2(const Transformation &trans,
@@ -4338,7 +4349,8 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
     // Recharge energy and shields
     const bool apply_difficulty_shields = configuration()->physics_config.difficulty_based_shield_recharge;
-    const bool energy_before_shield = configuration()->physics_config.engine_energy_takes_priority;
+    // TODO: remove
+    //const bool energy_before_shield = configuration()->physics_config.engine_energy_takes_priority;
 
     // Difficulty settings
     float difficulty_shields = 1.0f;
@@ -4351,7 +4363,6 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     }*/
 
     bool is_player_ship = _Universe->isPlayerStarship(this);
-    RegenerateShields(difficulty_shields, is_player_ship);
     //ExpendEnergy(is_player_ship);
 
     /*if (!energy_before_shield) {

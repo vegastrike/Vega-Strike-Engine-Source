@@ -38,7 +38,7 @@ protected:
     EnergyConsumerClassification classification;
     EnergyConsumerType consumer_type;
     bool in_use;
-    double powered;
+    double powered; // 0.0-1.0 percentage powered 
     Resource<double> consumption;  // This is when powered and for simulation_atom_var
     
     friend class EnergyContainer;

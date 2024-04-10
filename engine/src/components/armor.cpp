@@ -109,7 +109,6 @@ bool Armor::Downgrade() {
 }
 
 bool Armor::CanUpgrade(const std::string upgrade_name) const {
-
     if(integral) {
         return false;
     }
@@ -150,8 +149,8 @@ bool Armor::Upgrade(const std::string upgrade_name) {
 void Armor::Damage() {}
 
 void Armor::Repair() {
-    for(int i = 0;i < 8;i++) {
-        //armor_layer_->facets[i].health = armor_layer_->facets[i].max_health;
+    for(Health& facet : facets) {
+        facet.health.SetToMax();
     }
 }
 

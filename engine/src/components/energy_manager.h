@@ -28,6 +28,7 @@
 #ifndef ENERGYMANAGER_H
 #define ENERGYMANAGER_H
 
+#include "component.h"
 #include "energy_types.h"
 #include "energy_container.h"
 #include "reactor.h"
@@ -41,14 +42,16 @@ double getShieldMaintenanceConsumption(double factor, int facets, double max_str
 double getShieldRegenConsumption(double factor, int facets, double max_strength);       // 10
 double getCloakConsumption(double factor, double mass);*/                                 // 25
 
-class EnergyManager {
-    EnergyContainer fuel;
-    EnergyContainer energy;
-    EnergyContainer spec_energy;
-    Reactor reactor;
+/*struct EnergyManager {
+    EnergyContainer *fuel;
+    EnergyContainer *energy;
+    EnergyContainer *ftl_energy;
+    Reactor *reactor;
 
-public:
-    EnergyManager();
+    EnergyManager(EnergyContainer *fuel,
+                  EnergyContainer *energy,
+                  EnergyContainer *ftl_energy,
+                  Reactor *reactor);
 
     void Act();
 
@@ -71,11 +74,7 @@ public:
     void SetCapacity(const EnergyType type, const double capacity);
     void Refill(const EnergyType type);
     double Percent(const EnergyType type) const;
-    double GetReactorCapacity() {return reactor.capacity; }
-    void SetReactorCapacity(const double capacity) { reactor.capacity = capacity; }
-    void SetReactor(const double capacity, const double usage_factor, 
-                    const double reactor_level, const double simulation_atom_var);
-};
+};*/
 
 
 #endif // ENERGYMANAGER_H

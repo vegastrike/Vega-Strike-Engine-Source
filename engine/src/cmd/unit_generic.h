@@ -82,7 +82,9 @@ void UncheckUnit( class Unit*un );
 // Components
 #include "components/energy_manager.h"
 #include "components/cloak.h"
+#include "components/fuel.h"
 #include "components/radar.h"
+#include "components/reactor.h"
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
@@ -151,7 +153,14 @@ protected:
 
 public:
     // Components
-    EnergyManager energy_manager;
+    Fuel fuel = Fuel();
+    EnergyContainer energy = EnergyContainer(EnergyType::Energy, 0.0);
+    EnergyContainer ftl_energy = EnergyContainer(EnergyType::FTL, 0.0);
+
+    // TODO: move this to a single constructor?!
+    Reactor reactor = Reactor(0.0,
+                    &energy, &ftl_energy,
+                    sim_atom_multiplier);
     Cloak cloak;
 
     /// Radar and related systems
@@ -993,8 +1002,8 @@ public:
     float temporary_upgrade_float_variable;
 
     // Temporary python functions
-    double fuelData() { return energy_manager.GetLevel(EnergyType::Fuel); }
-    double energyData() { return energy_manager.GetLevel(EnergyType::Energy); }
+    double fuelData() { return fuel.Level(); }
+    double energyData() { return energy.Level(); }
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);

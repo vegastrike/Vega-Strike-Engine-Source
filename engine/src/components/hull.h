@@ -44,7 +44,7 @@ public:
 
     virtual void Load(std::string upgrade_key, std::string unit_key, 
                       Unit *unit);      // Load from dictionary
-    virtual std::string SaveToJSON() const;   // Save component as JSON
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
 
     virtual std::string Describe() const; // Describe component in base_computer 
 

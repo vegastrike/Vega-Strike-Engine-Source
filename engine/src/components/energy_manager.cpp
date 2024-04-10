@@ -70,20 +70,19 @@ double getCloakConsumption(double factor, double mass) {
 
 ////////////////////////////////////////////////////////
 
-EnergyManager::EnergyManager() {
-    fuel = EnergyContainer(EnergyType::Fuel, 0.0);
-    energy = EnergyContainer(EnergyType::Energy, 0.0);
-    spec_energy = EnergyContainer(EnergyType::FTL, 0.0);
-    reactor = Reactor(EnergyType::Fuel, 0.0, 0.0, 0.0, 
-                      &energy, &spec_energy, 0.1);
-}
+/*EnergyManager::EnergyManager(EnergyContainer *fuel,
+                             EnergyContainer *energy,
+                             EnergyContainer *spec_energy,
+                             Reactor *reactor):
+                             fuel(fuel), energy(energy), 
+                             ftl_energy(ftl_energy), reactor(reactor) {}
 
 void EnergyManager::Act() {
-    fuel.Act();
-    double actual_reactor_usage = reactor.Generate();
-    fuel.Charge(reactor.consumption - actual_reactor_usage); 
-    energy.Act();
-    spec_energy.Act();
+    fuel->Act();
+    double actual_reactor_usage = reactor->Generate();
+    fuel->Charge(reactor->consumption - actual_reactor_usage); 
+    energy->Act();
+    ftl_energy->Act();
 }
 
 void EnergyManager::AddConsumer(EnergyType energy_type,
@@ -112,11 +111,11 @@ double EnergyManager::Deplete(EnergyConsumer consumer, const double quantity) {
 EnergyContainer* EnergyManager::GetContainer(const EnergyType type) {
     switch(type) {
         case EnergyType::Fuel:
-            return &fuel;
+            return fuel;
         case EnergyType::Energy:
-            return &energy;
+            return energy;
         case EnergyType::FTL:
-            return &spec_energy;
+            return ftl_energy;
         default:
             return nullptr;
     }
@@ -125,11 +124,11 @@ EnergyContainer* EnergyManager::GetContainer(const EnergyType type) {
 const EnergyContainer* EnergyManager::GetConstContainer(const EnergyType type) const {
     switch(type) {
         case EnergyType::Fuel:
-            return &fuel;
+            return fuel;
         case EnergyType::Energy:
-            return &energy;
+            return energy;
         case EnergyType::FTL:
-            return &spec_energy;
+            return ftl_energy;
     }
 }
 
@@ -169,4 +168,4 @@ void EnergyManager::SetReactor(const double capacity, const double usage_factor,
     this->reactor.consumption = Resource<double>(c, 0.0, c);
 
     fuel.AddConsumer(reactor);
-}
+}*/

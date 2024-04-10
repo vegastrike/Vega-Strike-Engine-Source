@@ -205,7 +205,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Additional house cleaning
         unit->PrimeOrders();
-        unit->energy_manager = EnergyManager();
+        // TODO: clear components
         unit->Split(rand() % 3 + 1);
 
 
@@ -547,58 +547,7 @@ void Damageable::leach(float damShield, float damShieldRecharge, float damEnRech
 
 
 
-void Damageable::RegenerateShields(const float difficulty, const bool player_ship) {
-    const bool shields_in_spec = configuration()->physics_config.shields_in_spec;
-    const float discharge_per_second = configuration()->physics_config.speeding_discharge;
-    //approx
-    const float discharge_rate = (1 - (1 - discharge_per_second) * simulation_atom_var);
-    const float min_shield_discharge = configuration()->physics_config.min_shield_speeding_discharge;
-    const float nebshields = configuration()->physics_config.nebula_shield_recharge;
 
-    Unit *unit = static_cast<Unit *>(this);
-
-    const bool in_warp = unit->graphicOptions.InWarp;
-    const int shield_facets = shield_.number_of_facets;
-    const float total_max_shields = shield_.TotalMaxLayerValue();
-
-    // No point in all this code if there are no shields.
-    if (shield_facets < 2 || total_max_shields == 0) {
-        return;
-    }
-
-    EnergyContainer *energy = unit->energy_manager.GetContainer(EnergyType::Energy);
-
-    // Here we store the actual charge we'll use in RegenShields
-    // TODO: fix this. It's a hack just to build...
-    double max_shield_recharge = shield_.GetRegeneration();
-    double actual_recharge = max_shield_recharge * 
-                             energy->Powered(EnergyConsumerClassification::ShieldRegen);
-
-    float shield_recharge = actual_recharge * simulation_atom_var;
-
-    if (unit->GetNebula() != nullptr) {
-        shield_recharge *= nebshields;
-    }
-
-    
-    // Adjust other (enemy) ships for difficulty
-    if (!player_ship) {
-        shield_recharge *= difficulty;
-    }
-
-
-    // Discharge shields due to energy or SPEC or cloak
-    if ((in_warp && !shields_in_spec) || unit->cloak.Active()) {
-        // "Damage" power
-        shield_.SetPowerCap(0.0);
-    } else {
-        // Figure out how to support partial power
-        shield_.SetPowerCap(1.0);
-    }
-
-    // Shield regeneration
-    shield_.Regenerate();     
-}
 
 float Damageable::MaxShieldVal() const {
     Damageable *damageable = const_cast<Damageable *>(this);

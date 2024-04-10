@@ -41,6 +41,7 @@ struct GFXColor;
  * @brief The Damageable class TODO
  */
 class Damageable : public DamageableObject {
+protected:
     Hull hull_;
     Armor armor_;
     Shield shield_;

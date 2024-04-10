@@ -41,6 +41,7 @@
  */
 class EnergyContainer
 {
+protected:
     EnergyType type;
     Resource<double> level;
     std::vector<EnergyConsumer> consumers;
@@ -63,11 +64,13 @@ public:
     double Charge(const double quantity);
 
     double Deplete(const double quantity);
+    bool Depleted() const;
 
-    void SetCapacity(const double capacity, bool refill);
+    void SetCapacity(const double capacity, bool refill = true);
     double Level() const;
     double MaxLevel() const;
     double Percent() const;
+    void Refill();
 
     void Zero();
 
