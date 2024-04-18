@@ -26,18 +26,18 @@ param(
     [String]$VCPKG_PARENT_DIR = "C:\Projects"
 )
 
-Set-Variable -Name CMAKE_VERSION -Value "3.26.1"
+Set-Variable -Name CMAKE_VERSION -Value "3.28"
 
-New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
-Push-Location "$VCKPG_PARENT_DIR"
+New-Item "$VCPKG_PARENT_DIR" -ItemType Directory -Force
+Push-Location "$VCPKG_PARENT_DIR"
 git clone https://github.com/vegastrike/vcpkg-local.git ./v
 .\v\bootstrap-vcpkg.bat -disableMetrics
 
-[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCKPG_PARENT_DIR\v", 'User')
-$env:VCPKG_ROOT = "$VCKPG_PARENT_DIR\v"
+[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCPKG_PARENT_DIR\v", 'User')
+$env:VCPKG_ROOT = "$VCPKG_PARENT_DIR\v"
 
 $path = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$newPath = $path + ";$VCKPG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
+$newPath = $path + ";$VCPKG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 $env:PATH = $newPath
 
@@ -47,7 +47,7 @@ $env:VCPKG_DEFAULT_TRIPLET = $triplet
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', $triplet, 'User')
 $env:VCPKG_DEFAULT_HOST_TRIPLET = $triplet
 
-$pythonHome = "$VCKPG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
+$pythonHome = "$VCPKG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
 [Environment]::SetEnvironmentVariable('PYTHONHOME', $pythonHome, 'User')
 $env:PYTHONHOME = $pythonHome
 

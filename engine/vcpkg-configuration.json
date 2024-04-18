@@ -1,8 +1,4 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg-configuration.schema.json",
-  "default-registry": {
-    "kind": "git",
-    "baseline": "45c660987c371515ddcc5c355e7989c0d652b85f",
-    "repository": "https://github.com/vegastrike/vcpkg-local"
-  }
+  "overlay-triplets": [ "./custom-triplets" ]
 }
