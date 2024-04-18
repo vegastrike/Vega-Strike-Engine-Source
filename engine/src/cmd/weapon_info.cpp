@@ -37,23 +37,14 @@ namespace alg = boost::algorithm;
 
 Hashtable<std::string, WeaponInfo, 257> lookuptable;
 
-WeaponInfo::WeaponInfo(): EnergyConsumer(EnergyType::Energy, 
-                          EnergyConsumerClassification::BallWeapon, 
-                          EnergyConsumerType::Momentary,
-                          0.0) {
+WeaponInfo::WeaponInfo(): EnergyConsumer(nullptr, false) {
 }
 
-WeaponInfo::WeaponInfo(WEAPON_TYPE type) : EnergyConsumer(EnergyType::Energy,
-                                           EnergyConsumerClassification::BallWeapon, 
-                                           EnergyConsumerType::Momentary,
-                                           0.0) {
+WeaponInfo::WeaponInfo(WEAPON_TYPE type) : EnergyConsumer(nullptr, false) {
     this->type = type;
 }
 
-WeaponInfo::WeaponInfo(const WeaponInfo &tmp) : EnergyConsumer(tmp.energy_type, 
-                                                tmp.classification, 
-                                                tmp.consumer_type,
-                                                0.0)  {
+WeaponInfo::WeaponInfo(const WeaponInfo &tmp) : EnergyConsumer(nullptr, false)  {
     *this = tmp;
 }
 

@@ -661,7 +661,6 @@ SET(LIBRESOURCE
 
 SET(LIBCOMPONENT
     src/components/component.cpp
-    src/components/energy_types.cpp
 
     src/components/armor.cpp
     src/components/hull.cpp
@@ -672,8 +671,6 @@ SET(LIBCOMPONENT
     src/components/drive.cpp
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
-    src/components/energy_manager.cpp
-    src/components/fuel.cpp
     src/components/jump_drive.cpp
     src/components/radar.cpp
     src/components/reactor.cpp

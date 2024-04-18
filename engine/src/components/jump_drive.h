@@ -26,20 +26,39 @@
 #define JUMP_DRIVE_H
 
 #include "component.h"
-#include "energy_types.h"
 #include "energy_container.h"
+#include "energy_consumer.h"
 
-class JumpDrive : //public Component, 
-    public EnergyConsumer {
+class JumpDrive : public Component, public EnergyConsumer {
     int destination;
     double delay;
 
 public:
-    JumpDrive();
-    JumpDrive(double consumption, double delay);
+    JumpDrive(EnergyContainer *source);
 
     bool Ready();
     void SetDestination(int destination);
+
+    // Component Methods
+    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+
+    virtual std::string Describe() const; // Describe component in base_computer 
+
+    virtual bool CanDowngrade() const;
+
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_name) const;
+
+    virtual bool Upgrade(const std::string upgrade_name);
+
+    virtual void Damage();
+    virtual void Repair();
+
+    virtual bool Damaged() const;
+    virtual bool Installed() const;
 };
 
 #endif // JUMP_DRIVE_H

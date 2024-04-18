@@ -24,20 +24,10 @@
 
 #include "jump_drive.h"
 
-JumpDrive::JumpDrive():
-    //Component("", 0.0, 0.0, true),
-    EnergyConsumer(EnergyType::None, 
-                   EnergyConsumerClassification::JumpDrive,
-                   EnergyConsumerType::Variable, 
-                   0.0),
-    delay(0.0){}
-
-JumpDrive::JumpDrive(double consumption, double delay) : 
-    //Component("", 0.0, 0.0, true),
-    EnergyConsumer(EnergyType::FTL,
-                   EnergyConsumerClassification::JumpDrive,
-                   EnergyConsumerType::Variable, consumption),
-                   delay(delay) {}
+JumpDrive::JumpDrive(EnergyContainer *source):
+    Component("", 0.0, 0.0, true),
+    EnergyConsumer(source, false),
+    delay(0.0) {}
 
 bool JumpDrive::Ready() { 
     return true;//installed && enabled; 
@@ -47,3 +37,48 @@ void JumpDrive::SetDestination(int destination) {
     this->destination = destination; 
 }
 
+// Component Methods
+void JumpDrive::Load(std::string upgrade_key, std::string unit_key) {
+}      
+
+void JumpDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
+}
+
+std::string JumpDrive::Describe() const {
+    return std::string();
+} 
+
+bool JumpDrive::CanDowngrade() const {
+    return !Damaged();
+}
+
+bool JumpDrive::Downgrade() {
+    if(!CanDowngrade()) {
+        return false;
+    }
+}
+
+bool JumpDrive::CanUpgrade(const std::string upgrade_name) const {
+    return !Damaged();
+}
+
+bool JumpDrive::Upgrade(const std::string upgrade_name) {
+    if(!CanUpgrade(upgrade_name)) {
+        return false;
+    }
+}
+
+void JumpDrive::Damage() {
+    return;
+}
+
+void JumpDrive::Repair() {
+}
+
+bool JumpDrive::Damaged() const {
+    return false;
+}
+
+bool JumpDrive::Installed() const {
+    return false;
+}

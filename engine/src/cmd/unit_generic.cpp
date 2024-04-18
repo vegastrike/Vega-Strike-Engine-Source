@@ -508,11 +508,6 @@ void Unit::Init(const char *filename,
         SetAniSpeed(0.05);
         StartAnimation();
     }
-
-    //Components
-    fuel.AddConsumer(reactor);
-    energy.AddConsumer(shield_);
-    energy.AddConsumer(cloak);
 }
 
 vector<Mesh *> Unit::StealMeshes() {
@@ -1049,7 +1044,8 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
         if ((!SPEC_interference && (jump.drive >= 0
                 && (ftl_energy.Level() >= jump.energy || (ai_jump_cheat && cp == NULL))
         )) || smalle->forcejump) {
-            jump_drive.Use();
+            // TODO: check we're not doing this multiple times
+            jump_drive.Consume();
             DeactivateJumpDrive();
             Unit *jumppoint = smalle;
 
@@ -3231,7 +3227,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     static bool use_template_maxrange =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "use_upgrade_template_maxrange", "true"));
     //Radar stuff
-    if (!csv_cell_null_check || force_change_on_nothing
+    /*if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction,
                     "Radar_Range|Radar_Color|ITTS|Can_Lock|Max_Cone|Lock_Cone|Tracking_Cone")) {
         if (!csv_cell_null_check || force_change_on_nothing
@@ -3307,7 +3303,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
             }
         }
         cancompletefully = ccf;
-    }
+    }*/
     //NO CLUE FOR BELOW
     if (downgrade) {
         if (jump.drive >= -1 && up->jump.drive >= -1) {
@@ -4256,13 +4252,9 @@ void Unit::ActTurn() {
     Repair();
 
     // Power
-    fuel.Act();
     reactor.Generate();
-    energy.Act();
 
     shield_.Regenerate(graphicOptions.InWarp, isPlayerShip());
-
-    ftl_energy.Act();
 }
 
 void Unit::UpdatePhysics2(const Transformation &trans,

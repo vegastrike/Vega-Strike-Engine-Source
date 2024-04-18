@@ -1,12 +1,11 @@
 #include <gtest/gtest.h>
 
 #include "energy_container.h"
-#include "energy_manager.h"
 #include "reactor.h"
-#include "fuel.h"
-
 
 double simulation_atom_var = 0.1;
+
+bool fairlyEqual(double a, double b);
 
 struct EnergySetup {
     double capacity;
@@ -21,14 +20,6 @@ struct EnergySetup {
                 energy_capacity(energy_capacity), ftl_capacity(ftl_capacity) {}
 };
 
-
-
-struct ConsumerSetup {
-    EnergyType energy_type;
-    EnergyConsumerClassification classification;
-    EnergyConsumerType consumer_type;
-    double consumption;
-};
 
 double reactor_capacity = 15;
 
@@ -58,104 +49,129 @@ double SPECDrive = 1;
 double JumpDrive = 1;
 
 struct EnergyManager {
-    Fuel fuel;
+    EnergyContainer fuel;
     EnergyContainer energy;
     EnergyContainer ftl_energy;
     Reactor reactor;
 
     EnergyManager(EnergySetup setup, 
                   double simulation_atom_var):
-                  fuel(), energy(), ftl_energy(),
-                  reactor(setup.capacity, &energy, &ftl_energy,
-                            simulation_atom_var) {
+                  fuel(EnergyType::Fuel), energy(EnergyType::Energy), 
+                  ftl_energy(EnergyType::FTL),
+                  reactor(&fuel, &energy, &ftl_energy) {
         fuel.SetCapacity(setup.fuel_capacity);
         energy.SetCapacity(setup.energy_capacity);
         ftl_energy.SetCapacity(setup.ftl_capacity);
+        reactor.SetCapacity(setup.capacity);
+    }
+
+    void Print(int counter) {
+        std::cout << counter << " R: " << reactor.Capacity() << 
+            " F: " << fuel.Level() << 
+            " E: " << energy.Level() <<
+            " S: " << ftl_energy.Level() << std::endl;
     }
 };
 
+struct FuelBurnResult {
+    double residue;
+    int iterations;
+    int seconds;
+};
 
-double fuelBurn(EnergySetup setup, 
-                std::vector<EnergyConsumer> energy_consumers, int seconds,
+FuelBurnResult fuelBurn(EnergyManager& manager, 
+                std::vector<EnergyConsumer>& consumers,
+                int seconds,
                 int print_every_n = 1000) {
     int run_time = seconds / simulation_atom_var;
-    EnergyManager manager = EnergyManager(setup, simulation_atom_var);
     
-    // Add fuel consumers
+    manager.Print(-1);
+    EXPECT_FALSE(manager.fuel.Depleted());
+    EXPECT_FALSE(manager.energy.Depleted());
+    EXPECT_FALSE(manager.ftl_energy.Depleted());
 
-
-    // Add energy consumers
-    for(EnergyConsumer consumer : energy_consumers) {
-        manager.energy.AddConsumer(consumer);
-    }
-
-    for(int i = 0;i<run_time;i++) {
+    int i = 0;
+    for(;i<run_time;i++) {
         if(i%print_every_n == 0) {
-            std::cout << i << " R: " << manager.reactor.Capacity() << 
-                              " F: " << manager.fuel.Level() << 
-                              " E: " << manager.energy.Level() <<
-                              " S: " << manager.ftl_energy.Level() << std::endl;
+            manager.Print(i);
         }
         
         if(manager.fuel.Depleted()) { 
-            std::cout << "Exhausted all fuel in " << i * simulation_atom_var / 60 << " minutes.\n";
+            std::cout << i << " Exhausted all fuel in " << i * simulation_atom_var / 60 << " minutes.\n";
             break;
         }
 
-        manager.fuel.Act();
         manager.reactor.Generate();
-        manager.energy.Act();
-        manager.ftl_energy.Act();
+        for(EnergyConsumer& consumer : consumers) {
+            consumer.Consume();
+        }
     }
 
-    return manager.fuel.Percent();
+    FuelBurnResult result {
+        .residue = manager.fuel.Percent(),
+        .iterations = i,
+        .seconds = i/60
+    };
+
+    return result;
 };
 
-// This tests a fighter ship with level 1 equipment
-TEST(NoFuelBurn, Robin) {
-    EnergySetup setup = EnergySetup(15.0, 3.51, 100.0, 200.0);
-    int seconds = 20 * 60; // 20 minutes gameplay
+// This tests a very trivial example
+TEST(FuelBurn, Trivial) {
+    EnergySetup setup = EnergySetup(1.0, 1.0, 100.0, 200.0);
+    EnergyManager manager = EnergyManager(setup, simulation_atom_var);
+    int seconds = 10000; 
 
-    double result = fuelBurn(setup, std::vector<EnergyConsumer>(),
-                             seconds);
+    EXPECT_EQ(manager.reactor.GetConsumption(), 0.0001);
 
-    std::cout << "NoFuelBurn percent left: " << result * 100 << std::endl;
+    std::vector<EnergyConsumer> consumers = {};
+
+    FuelBurnResult result = fuelBurn(manager, consumers, seconds, 1000);
+    std::cout << "Reactor consumption: " << manager.reactor.GetAtomConsumption() << std::endl;
+
+    std::cout << "NoFuelBurn percent left: " << result.residue * 100 << std::endl;
+
+    // 1 / (sim_atom_var (0.1) * conversion_ration (0.001))
+    EXPECT_GT(result.iterations, 99900);
+    EXPECT_LT(result.iterations, 100900);
 }
 
-// This tests a fighter ship with level 1 equipment and steady 50MJ energy consumption
+// This tests a fighter ship with level 1 equipment and steady 15MJ energy consumption
+// Ship flies for 22 minutes
 TEST(FuelBurn, RobinNaive_1) {
     EnergySetup setup = {15.0, 3.51, 100.0, 200.0};
-    std::vector<EnergyConsumer> consumers_setup = {
-        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Drive, 
-        EnergyConsumerType::Constant, 0.0001),
-        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Afterburner, 
-        EnergyConsumerType::Constant, 0.0001 * 3 * .05), // Drive consumption x 3 but 5% of flight time
-        EnergyConsumer(EnergyType::Energy, EnergyConsumerClassification::LifeSupport, 
-        EnergyConsumerType::Constant, 50.0 * simulation_atom_var) // General consumer at 50 per second
+    EnergyManager manager = EnergyManager(setup, simulation_atom_var);
+    std::vector<EnergyConsumer> consumers = {
+        EnergyConsumer(&manager.fuel, false, 0.001),           // Drive
+        EnergyConsumer(&manager.fuel, false, 0.001 * 3 * .05), // Afterburner, Drive consumption x 3 but 5% of flight time
+        EnergyConsumer(&manager.energy, false, 15.0) // General consumer at 15 per second
     };
     
     int seconds = 60 * 60; // 60 minutes gameplay
     
-    double result = fuelBurn(setup, consumers_setup, seconds);
+    FuelBurnResult result = fuelBurn(manager, consumers, seconds, 1000);
+    EXPECT_GT(result.iterations, 12000); // More than 10 minutes
 
-    std::cout << "NaiveFuelBurn_1 percent left: " << result * 100 << std::endl;
+    std::cout << "RobinNaive_1 NoFuelBurn percent left: " << result.residue * 100 << std::endl;
+    //EXPECT_EQ(0,1); // use these to see detailed prints
 }
 
-// This tests a fighter ship with level 1 equipment and steady 150MJ energy consumption
+// This tests a fighter ship with level 1 equipment and steady 40MJ energy consumption
+// Ship flies for 10 minutes
 TEST(FuelBurn, RobinNaive_2) {
     EnergySetup setup = {44.0, 3.51, 300.0, 200.0};
-    std::vector<EnergyConsumer> consumers_setup = {
-        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Drive, 
-        EnergyConsumerType::Constant, 0.0001),
-        EnergyConsumer(EnergyType::Fuel, EnergyConsumerClassification::Afterburner, 
-        EnergyConsumerType::Constant, 0.0001 * 3 * .05), // Drive consumption x 3 but 5% of flight time
-        EnergyConsumer(EnergyType::Energy, EnergyConsumerClassification::LifeSupport, 
-        EnergyConsumerType::Constant, 150.0 * simulation_atom_var) // General consumer at 50 per second
+    EnergyManager manager = EnergyManager(setup, simulation_atom_var);
+    std::vector<EnergyConsumer> consumers = {
+        EnergyConsumer(&manager.fuel, false, 0.001),           // Drive
+        EnergyConsumer(&manager.fuel, false, 0.001 * 3 * .05), // Afterburner, Drive consumption x 3 but 5% of flight time
+        EnergyConsumer(&manager.energy, false, 40) // General consumer at 40 per second
     };
     
     int seconds = 60 * 60; // 60 minutes gameplay
     
-    double result = fuelBurn(setup, consumers_setup, seconds);
+    FuelBurnResult result = fuelBurn(manager, consumers, seconds, 1000);
+    EXPECT_GT(result.iterations, 6000); // More than 10 minutes
 
-    std::cout << "NaiveFuelBurn_2 percent left: " << result * 100 << std::endl;
+    std::cout << "NaiveFuelBurn_2 percent left: " << result.residue * 100 << std::endl;
+    //EXPECT_EQ(0,1); // use these to see detailed prints
 }

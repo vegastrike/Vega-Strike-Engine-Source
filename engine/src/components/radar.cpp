@@ -34,7 +34,9 @@
 
 #include <random>
 
-CRadar::CRadar():
+CRadar::CRadar(EnergyContainer *source, Computer* computer = nullptr):
+        Component("", 0.0, 0.0, false),
+        EnergyConsumer(source, false), // TODO: support partial
         max_range(0),
         max_cone(-1),
         lock_cone(0),
@@ -45,8 +47,9 @@ CRadar::CRadar():
         locked(false),
         can_lock(false),
         tracking_active(true),
+        damaged_(false),
         original(nullptr),
-        computer(nullptr)
+        computer(computer)
 {
 
     max_range = configuration()->computer_config.default_max_range;
@@ -54,19 +57,56 @@ CRadar::CRadar():
     lock_cone = configuration()->computer_config.default_lock_cone;
 }
 
-CRadar::CRadar(std::string unit_key, Computer* computer):
-        max_range(0),
-        max_cone(-1),
-        lock_cone(0),
-        tracking_cone(0),
-        min_target_size(0),
-        type(RadarType::SPHERE),
-        capabilities(RadarCapabilities::NONE),
-        locked(false),
-        can_lock(false),
-        tracking_active(true),
-        original(nullptr),
-        computer(nullptr) {
+
+
+// This code replaces and fixes the old code in Armed::LockTarget(bool)
+void CRadar::Lock() {
+    if(!computer) {
+        return;
+    }
+
+    const Unit *target = computer->target.GetConstUnit();
+
+    if(!target) {
+        //std::cerr << "Target is null\n";
+        return;
+    }
+
+    if(!can_lock) {
+        std::cerr << "Can't lock\n";
+        this->locked = false;
+        return;
+    }
+
+    /*if(!UnitUtil::isSignificant(target)) {
+        std::cerr << "Target insignificant\n";
+        this->locked = false;
+        return;
+    }*/
+
+    std::cout << "Target locked\n";
+    this->locked = true;
+
+}
+
+RadarType CRadar::GetType() const {
+    return type;
+}
+
+bool CRadar::UseFriendFoe() const {
+    return (capabilities & RadarCapabilities::FRIEND_FOE);
+}
+
+bool CRadar::UseObjectRecognition() const {
+    return (capabilities & RadarCapabilities::OBJECT_RECOGNITION);
+}
+
+bool CRadar::UseThreatAssessment() const {
+    return (capabilities & RadarCapabilities::THREAT_ASSESSMENT);
+}
+
+// Component Methods
+void CRadar::Load(std::string upgrade_key, std::string unit_key) {
     can_lock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
 
     // TODO: fix this
@@ -116,15 +156,46 @@ CRadar::CRadar(std::string unit_key, Computer* computer):
     lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * VS_PI / 180);
     original = nullptr;
     this->computer = computer;
-}
+}      
 
-void CRadar::WriteUnitString(std::map<std::string, std::string> &unit) {
+void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Can_Lock"] = std::to_string(can_lock);
     unit["Radar_Color"] = std::to_string(capabilities);
-    unit["Radar_Range"] = std::to_string(max_range);
-    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone) * 180. / VS_PI);
-    unit["Max_Cone"] = std::to_string(acos(max_cone) * 180. / VS_PI);
-    unit["Lock_Cone"] = std::to_string(acos(lock_cone) * 180. / VS_PI);
+    unit["Radar_Range"] = std::to_string(max_range.Value());
+    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone.Value()) * 180. / VS_PI);
+    unit["Max_Cone"] = std::to_string(acos(max_cone.Value()) * 180. / VS_PI);
+    unit["Lock_Cone"] = std::to_string(acos(lock_cone.Value()) * 180. / VS_PI);
+}
+
+std::string CRadar::Describe() const {
+    return std::string();
+} 
+
+bool CRadar::CanDowngrade() const {
+    return !Damaged();
+}
+
+bool CRadar::Downgrade() {
+    max_range.SetMaxValue(0);
+    max_cone.SetMaxValue(-1);
+    lock_cone.SetMaxValue(0);
+    tracking_cone.SetMaxValue(0);
+    min_target_size.SetMaxValue(0);
+    type = RadarType::SPHERE;
+    capabilities = RadarCapabilities::NONE;
+    locked = false;
+    can_lock =false;
+    tracking_active = true;
+    original = nullptr;
+    computer = nullptr;
+}
+
+bool CRadar::CanUpgrade(const std::string upgrade_name) const {
+    return !Damaged();
+}
+
+bool CRadar::Upgrade(const std::string upgrade_name) {
+
 }
 
 void CRadar::Damage()
@@ -165,56 +236,18 @@ void CRadar::Damage()
     if (radar.tracking_cone > maxdam) {
         radar.tracking_cone = maxdam;
     }*/
-
+    damaged_ = true;
 }
 
 void CRadar::Repair()
 {
-
+    damaged_ = false;
 }
 
-// This code replaces and fixes the old code in Armed::LockTarget(bool)
-void CRadar::Lock() {
-    if(!computer) {
-        return;
-    }
-
-    const Unit *target = computer->target.GetConstUnit();
-
-    if(!target) {
-        //std::cerr << "Target is null\n";
-        return;
-    }
-
-    if(!can_lock) {
-        std::cerr << "Can't lock\n";
-        this->locked = false;
-        return;
-    }
-
-    /*if(!UnitUtil::isSignificant(target)) {
-        std::cerr << "Target insignificant\n";
-        this->locked = false;
-        return;
-    }*/
-
-    std::cout << "Target locked\n";
-    this->locked = true;
-
+bool CRadar::Damaged() const {
+    return damaged_;
 }
 
-RadarType CRadar::GetType() const {
-    return type;
-}
+bool CRadar::Installed() const {
 
-bool CRadar::UseFriendFoe() const {
-    return (capabilities & RadarCapabilities::FRIEND_FOE);
-}
-
-bool CRadar::UseObjectRecognition() const {
-    return (capabilities & RadarCapabilities::OBJECT_RECOGNITION);
-}
-
-bool CRadar::UseThreatAssessment() const {
-    return (capabilities & RadarCapabilities::THREAT_ASSESSMENT);
 }

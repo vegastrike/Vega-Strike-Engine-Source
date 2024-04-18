@@ -59,25 +59,27 @@ TEST(Layer, Sanity_2) {
     EXPECT_EQ(health.health.MaxValue(), 10);
     EXPECT_EQ(health.health.Value(), 10);
 
+    // This is copied in the next line. Do not refer to this variable.
     DamageableLayer layer = DamageableLayer(0, FacetConfiguration::one, health, true);
+
     std::vector<DamageableLayer> layers = { layer };
-    EXPECT_EQ(layer.facets[0].health.MaxValue(), 10);
-    EXPECT_EQ(layer.facets[0].health.Value(), 10);
+    EXPECT_EQ(layers[0].facets[0].health.MaxValue(), 10);
+    EXPECT_EQ(layers[0].facets[0].health.Value(), 10);
     
     DamageableLayer* ptr = &layers[0];
     EXPECT_EQ(ptr->facets[0].health.MaxValue(), 10);
-    EXPECT_EQ(layer.facets[0].health.Value(), 10);
+    EXPECT_EQ(layers[0].facets[0].health.Value(), 10);
 
     std::vector<double> new_health = {50};
     ptr->UpdateFacets(new_health);
 
-    EXPECT_EQ(layer.facets[0].health.MaxValue(), 50);
-    EXPECT_EQ(layer.facets[0].health.Value(), 50);
+    EXPECT_EQ(layers[0].facets[0].health.MaxValue(), 50);
+    EXPECT_EQ(layers[0].facets[0].health.Value(), 50);
 
     EXPECT_EQ(ptr->facets[0].health.MaxValue(), 50);
     EXPECT_EQ(ptr->facets[0].health.Value(), 50);
 
-    EXPECT_EQ(ptr, &layer);
+    EXPECT_EQ(ptr, &layers[0]);
 }
 
 // How embarrassing

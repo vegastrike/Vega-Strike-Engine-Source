@@ -27,17 +27,36 @@
 
 #include "component.h"
 #include "energy_container.h"
+#include "energy_consumer.h"
 
 
-class Drive : //public Component, 
+class Drive : public Component, 
     public EnergyConsumer {
     double usage_factor;
 public:
-    Drive(EnergyType type, 
-          double usage_factor, 
-          double drive_level, 
-          double mass, 
-          double simulation_atom_var);
+    Drive(EnergyContainer *source, 
+          double usage_factor = 1.0);
+
+    // Component Methods
+    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+
+    virtual std::string Describe() const; // Describe component in base_computer 
+
+    virtual bool CanDowngrade() const;
+
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_name) const;
+
+    virtual bool Upgrade(const std::string upgrade_name);
+
+    virtual void Damage();
+    virtual void Repair();
+
+    virtual bool Damaged() const;
+    virtual bool Installed() const;
 };
 
 #endif // DRIVE_H

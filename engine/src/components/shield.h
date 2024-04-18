@@ -76,7 +76,7 @@ class Shield : public Component, public DamageableLayer, public EnergyConsumer {
    
     friend class Damageable;
 public:
-    Shield();
+    Shield(EnergyContainer *source);
 
     virtual void Load(std::string upgrade_key, std::string unit_key, 
                       Unit *unit, double difficulty);      // Load from dictionary

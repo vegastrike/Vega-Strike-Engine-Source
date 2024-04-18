@@ -250,15 +250,18 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
         bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
                 //&& ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
                 ((locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns);
-        if ((*i).type->type == WEAPON_TYPE::BEAM) {
-            if ((*i).type->GetConsumption() * simulation_atom_var > unit->energy.Level()) {
+
+        double power = (*i).type->Consume();
+
+        if ((*i).type->type == WEAPON_TYPE::BEAM) { 
+            if (power < 1.0) {
                 //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
                 (*i).UnFire();
                 continue;
             }
         } else
             //Only in non-networking mode
-        if (i->type->GetConsumption() > unit->energy.Level()) {
+        if (power < 1.0) {
             if (!want_to_fire) {
                 i->UnFire();
             }
@@ -275,7 +278,11 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
                 //info the server sends with ack for fire
                 //FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
                 //if( Network==NULL || SERVER)
-                if (i->type->type == WEAPON_TYPE::BEAM) {
+
+
+                // Disabled all the code below. Consume() should deal with it above.
+                // TODO: do something here. Test?
+                /*if (i->type->type == WEAPON_TYPE::BEAM) {
                     if (i->ref.gun) {
                         if ((!i->ref.gun->Dissolved()) || i->ref.gun->Ready()) {
                             // TODO: switch to standard energy usage
@@ -284,7 +291,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
                     }
                 } else if (i->type->isMissile()) {    // FIXME  other than beams, only missiles are processed here?
                     unit->energy.Deplete(i->type->GetConsumption());
-                }
+                }*/
                 //IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
                 //fire only 1 missile at a time
                 if (mis) {
@@ -455,7 +462,7 @@ float Armed::TrackingGuns(bool &missilelock) {
     missilelock = false;
     for (int i = 0; i < getNumMounts(); ++i) {
         if (mounts[i].status == Mount::ACTIVE && isAutoTrackingMount(mounts[i].size)) {
-            trackingcone = unit->radar.tracking_cone;
+            trackingcone = unit->radar.tracking_cone.Value();
         }
         if (mounts[i].status == Mount::ACTIVE && mounts[i].type->lock_time > 0 && mounts[i].time_to_lock <= 0) {
             missilelock = true;

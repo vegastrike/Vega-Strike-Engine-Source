@@ -23,20 +23,60 @@
  */
 
 #include "drive.h"
-#include "energy_types.h"
 
 // Note that usage_factor should be closely related to normal drive's usage factor.
 // In most cases it should be 1.0 and the difference should be modelled using the afterburner_level.
-Drive::Drive(EnergyType type, 
-             double usage_factor, 
-             double drive_level, 
-             double mass, 
-             double simulation_atom_var):
-             //Component("", 0.0, 0.0, false),
-             EnergyConsumer(type, 
-                            EnergyConsumerClassification::Afterburner, 
-                            EnergyConsumerType::Constant, 
-                            0.0),
+Drive::Drive(EnergyContainer *source, 
+             double usage_factor):
+             Component("", 0.0, 0.0, false),
+             EnergyConsumer(source, false),
              usage_factor(usage_factor) {
-    consumption = usage_factor * drive_level * mass * simulation_atom_var;
+    consumption = usage_factor * 1.0 * mass * simulation_atom_var;
+}
+
+
+// Component Methods
+void Drive::Load(std::string upgrade_key, std::string unit_key) {
+}      
+
+void Drive::SaveToCSV(std::map<std::string, std::string>& unit) const {
+}
+
+std::string Drive::Describe() const {
+    return std::string();
+} 
+
+bool Drive::CanDowngrade() const {
+    return !Damaged();
+}
+
+bool Drive::Downgrade() {
+    if(!CanDowngrade()) {
+        return false;
+    }
+}
+
+bool Drive::CanUpgrade(const std::string upgrade_name) const {
+    return !Damaged();
+}
+
+bool Drive::Upgrade(const std::string upgrade_name) {
+    if(!CanUpgrade(upgrade_name)) {
+        return false;
+    }
+}
+
+void Drive::Damage() {
+    return;
+}
+
+void Drive::Repair() {
+}
+
+bool Drive::Damaged() const {
+    return false;
+}
+
+bool Drive::Installed() const {
+    return false;
 }

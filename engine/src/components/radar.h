@@ -33,7 +33,10 @@
 #include <memory>
 #include <iostream>
 
+#include "component.h"
+#include "energy_consumer.h"
 #include "computer.h"
+#include "resource/resource.h"
 
 class Unit;
 
@@ -51,19 +54,19 @@ enum RadarCapabilities {
 };
 
 // Can't call it radar because of namespace collision
-class CRadar
+class CRadar : public Component, public EnergyConsumer
 {
     // TODO: move floats to doubles
     //the max range the radar can handle
-    float max_range;
+    Resource<double> max_range;
 
     //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
-    float max_cone;
-    float lock_cone;
-    float tracking_cone;
+    Resource<double> max_cone;
+    Resource<double> lock_cone;
+    Resource<double> tracking_cone;
 
     //The minimum radius of the target
-    float min_target_size;
+    Resource<double> min_target_size;
 
     // What kind of type and capability the radar supports
     RadarType type;
@@ -71,21 +74,20 @@ class CRadar
     bool locked;
     bool can_lock;
     bool tracking_active;
+    bool damaged_;
 
     std::unique_ptr<CRadar> original;
 
     Computer *computer;
 
+    
+
     friend class Armed;
     friend class Unit;
 public:
-    CRadar();
-    CRadar(std::string unit_key, Computer* computer);
+    CRadar(EnergyContainer *source, Computer* computer);
 
     void WriteUnitString(std::map<std::string, std::string> &unit);
-
-    void Damage();
-    void Repair();
 
     void Lock();
     void Unlock() {
@@ -103,15 +105,36 @@ public:
     bool UseObjectRecognition() const;
     bool UseThreatAssessment() const;
 
-    float GetMaxRange() const { return max_range; }
-    float GetMaxCone() const { return max_cone; }
-    float GetLockCone() const { return lock_cone; }
-    float GetTrackingCone() const { return tracking_cone; }
-    float GetMinTargetSize() const { return min_target_size; }
+    float GetMaxRange() const { return max_range.Value(); }
+    float GetMaxCone() const { return max_cone.Value(); }
+    float GetLockCone() const { return lock_cone.Value(); }
+    float GetTrackingCone() const { return tracking_cone.Value(); }
+    float GetMinTargetSize() const { return min_target_size.Value(); }
 
     bool Locked() const { return locked; }
     bool CanLock() const { return can_lock; }
     bool Tracking() const { return tracking_active; }
+
+    // Component Methods
+    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+
+    virtual std::string Describe() const; // Describe component in base_computer 
+
+    virtual bool CanDowngrade() const;
+
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_name) const;
+
+    virtual bool Upgrade(const std::string upgrade_name);
+
+    virtual void Damage();
+    virtual void Repair();
+
+    virtual bool Damaged() const;
+    virtual bool Installed() const;
 };
 
 #endif // RADAR_H

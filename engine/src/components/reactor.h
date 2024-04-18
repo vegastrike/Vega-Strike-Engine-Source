@@ -38,18 +38,17 @@ class EnergyManager;
 class Reactor: public Component, public EnergyConsumer
 {
     Resource<double> capacity;          // Capacity per second
-    const double simulation_atom_var;   // Atom definition. typically 0.1 second
     double atom_capacity;               // Capacity per atom
+    const double conversion_ratio;            // Used to calculate fuel consumption
 
     EnergyContainer *energy;
     EnergyContainer *ftl_energy;
 
 public:
-    Reactor();
-    Reactor(double capacity, // How much energy does the reactor generate
-                 EnergyContainer *energy,
-                 EnergyContainer *ftl_energy,
-                 double simulation_atom_var);
+    Reactor(EnergyContainer *source,
+            EnergyContainer *energy,
+            EnergyContainer *ftl_energy,
+            double conversion_ratio = 0.0001); // < 0.01 or very short flight
 
 
     virtual void Load(std::string upgrade_key, std::string unit_key);      
@@ -75,6 +74,7 @@ public:
     void Generate();
     double Capacity() const;
     double MaxCapacity() const;
+    void SetCapacity(double capacity);
 };
 
 #endif // REACTOR_H

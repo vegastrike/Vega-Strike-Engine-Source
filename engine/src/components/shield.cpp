@@ -63,13 +63,11 @@ std::string shield_facets_two[2] = {
 
 
 // Note that we need to define FacetConfiguration during load
-Shield::Shield(): 
+Shield::Shield(EnergyContainer *source): 
                Component("", 0.0, 0.0, false),
                DamageableLayer(2, FacetConfiguration::zero, 
                                Health(2, 0), false),
-               EnergyConsumer(EnergyType::Energy, 
-                              EnergyConsumerClassification::Shield,
-                              EnergyConsumerType::Constant, 0.0),
+               EnergyConsumer(source, true),
                regeneration(0,0,0),
                power(1.0,0.0,1.0) {}
 
@@ -125,8 +123,7 @@ void Shield::Load(std::string upgrade_key, std::string unit_key,
 
     // Power draw for maintenance and regeneration
     // TODO: implement fully
-    double c = TotalMaxLayerValue()/10 + regeneration;
-    consumption.SetMaxValue(c);
+    consumption = TotalMaxLayerValue()/10 + regeneration;
 }
 
 
@@ -365,16 +362,12 @@ void Shield::Regenerate(bool ftl, bool player_ship) {
         return;
     }
 
-    double actual_recharge = regeneration.Value() * powered * simulation_atom_var;
+    double power = Consume();
+    double actual_recharge = regeneration.Value() * power * simulation_atom_var;
     // TODO: adjust for nebula                             
 
     // Discharge shields due to energy or SPEC or cloak
     if (ftl && !shield_in_ftl) {
-        if(player_ship) {
-           static int i = 0;
-           printOnceInAHundred(i, "FTL", std::to_string(actual_recharge)); 
-        }
-
         // "Damage" power
         SetPowerCap(0.0);
     } else {

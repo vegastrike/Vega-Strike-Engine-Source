@@ -76,9 +76,9 @@ public:
 
     virtual bool Downgrade() = 0;
 
-    virtual bool CanUpgrade(const std::string upgrade_name) const = 0;
+    virtual bool CanUpgrade(const std::string upgrade_key) const = 0;
 
-    virtual bool Upgrade(const std::string upgrade_name) = 0;
+    virtual bool Upgrade(const std::string upgrade_key) = 0;
 
     virtual void Damage() = 0;
     virtual void Repair() = 0;

@@ -113,8 +113,6 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
     
     UpgradeOperationResult result;
 
-
-
     switch(upgrade_type) {
         case UpgradeType::Armor:
             result.upgradeable = true;
@@ -124,6 +122,51 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             result.upgradeable = true;
             result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
+
+        case UpgradeType::Capacitor:
+            result.upgradeable = true;
+            result.success = unit->energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::FTL_Capacitor:
+            result.upgradeable = true;
+            result.success = unit->ftl_energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Reactor:
+            result.upgradeable = true;
+            result.success = unit->reactor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
+        case UpgradeType::Afterburner:
+            result.upgradeable = true;
+            result.success = unit->afterburner.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Drive:
+            result.upgradeable = true;
+            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Jump_Drive:
+            result.upgradeable = true;
+            result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
+        case UpgradeType::Cloak:
+            result.upgradeable = true;
+            result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        /*case UpgradeType::ECM:
+            result.upgradeable = true;
+            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;*/
+        case UpgradeType::Radar:
+            result.upgradeable = true;
+            result.success = unit->radar.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
+        /*case UpgradeType::Repair_Droid:
+            result.upgradeable = true;
+            result.success = unit->repair_droid.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
         default:
             //std::cout << "Unhandled type for " << upgrade_name << std::endl;
             break;

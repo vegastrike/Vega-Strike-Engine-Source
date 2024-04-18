@@ -24,3 +24,41 @@
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
+#include "energy_consumer.h"
+
+double EnergyConsumer::simulation_atom_var = 0.1;
+
+EnergyConsumer::EnergyConsumer(EnergyContainer *source, 
+                               bool partial, 
+                               double consumption):
+                               source(source), 
+                               partial(partial),
+                               consumption(consumption),
+                               atom_consumption(consumption * simulation_atom_var) {}
+
+
+double EnergyConsumer::Consume() {
+    if(!source) {
+        return 0.0;
+    }
+
+    return source->Deplete(partial, atom_consumption);
+}
+
+double EnergyConsumer::GetConsumption() const {
+    return consumption;
+}
+
+double EnergyConsumer::GetAtomConsumption() const {
+    return atom_consumption;
+}
+
+void EnergyConsumer::SetConsumption(double consumption) {
+    this->consumption = consumption;
+    atom_consumption = consumption * simulation_atom_var;
+}
+
+void EnergyConsumer::ZeroSource() {
+    source->Zero();
+}

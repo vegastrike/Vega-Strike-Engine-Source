@@ -23,16 +23,26 @@
  */
 
 #include "cloak.h"
-#include "energy_types.h"
 #include "energy_consumer.h"
 #include "unit_csv_factory.h"
 #include "vegastrike.h"
 #include "configuration/configuration.h"
 
-Cloak::Cloak() : Component(std::string(), 0.0, 0.0, false),
-                 EnergyConsumer(EnergyType::Energy,
-                                EnergyConsumerClassification::Cloak, 
-                                EnergyConsumerType::Variable, 0.0) {
+Cloak::Cloak(): Component(std::string(), 0.0, 0.0, false),
+                EnergyConsumer(nullptr, false) {
+    status = CloakingStatus::disabled;
+
+    energy = 0;
+    rate = 100;
+    glass = false;
+    current = 0;
+    minimum = 0;
+}
+
+
+Cloak::Cloak(EnergyContainer *source) : 
+             Component(std::string(), 0.0, 0.0, false),
+             EnergyConsumer(source, false) {
     status = CloakingStatus::disabled;
 
     energy = 0;
@@ -163,8 +173,10 @@ void Cloak::Update()
         return;
     }
 
+    double power = Consume();
+
     // Insufficient energy to cloak ship
-    if(powered < 1.0) {
+    if(power < 1.0) {
         std::cerr << "No power to cloak\n";
         status = CloakingStatus::decloaking;
     } 
@@ -192,20 +204,17 @@ void Cloak::Toggle() {
     // Unit is not capable of cloaking or damaged
     if(status == CloakingStatus::disabled || 
        status == CloakingStatus::damaged) {
-        powered = 0.0;
         return;
     }
 
     // If we're ready start cloaking
     if(status == CloakingStatus::ready) {
         status = CloakingStatus::cloaking;
-        powered = energy;
         return;
     }
 
     // In any other case, start decloaking
     status = CloakingStatus::decloaking;
-    powered = 0.0;
 }
 
 void Cloak::Activate() {

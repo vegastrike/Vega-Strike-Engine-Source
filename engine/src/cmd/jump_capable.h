@@ -25,7 +25,6 @@
 #define VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 
 #include "star_system.h"
-#include "components/jump_drive.h"
 
 #include <string>
 
@@ -34,7 +33,6 @@
 class JumpCapable {
 public:
     StarSystem *activeStarSystem;
-    JumpDrive jump_drive;
     
 public:
     struct UnitJump {

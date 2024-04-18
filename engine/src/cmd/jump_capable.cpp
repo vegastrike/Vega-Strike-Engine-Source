@@ -98,8 +98,7 @@ std::string GenerateAutoError(Unit *me, Unit *targ) {
 
 ///////////////////////////////////////////////
 
-JumpCapable::JumpCapable() : activeStarSystem(nullptr),
-                             jump_drive() {};
+JumpCapable::JumpCapable() : activeStarSystem(nullptr) {};
 
 void JumpCapable::ActivateJumpDrive(int destination) {
     Unit *unit = static_cast<Unit *>(this);
@@ -141,7 +140,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     // TODO: move to energymanager.canpower and
     // energycontainer.canpower
-    if (unit->ftl_energy.Level() < jump_drive.GetConsumption()) {
+    double power = unit->jump_drive.Consume();
+    if (power < 1.0) {
         if (!ignore_energy_requirements) {
             return false;
         }
@@ -275,7 +275,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             return false;
         }
         
-        jump_drive.Use();
+        // TODO: make sure we don't consume energy before here.
+        // See line 143 above
 
         if (unsafe == false && totpercent == 0) {
             end = endne;

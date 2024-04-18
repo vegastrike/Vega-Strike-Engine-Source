@@ -31,18 +31,56 @@
 #include <string>
 #include <map>
 
+#include "component.h"
 #include "energy_container.h"
-#include "energy_types.h"
+#include "energy_consumer.h"
 
+// TODO: Take ship size, mass, cost, something into account.
+// TODO: figure out the whole type thing.
 
-class Afterburner : public EnergyConsumer
+/* @discussion Afterburners are extra engines or a feature of existing 
+    engines that accelrate faster and achieve a top higher speed.
+    Overdrive upgrade is an upgrade to improve the performance of 
+    the afterburners.
+    By default, ships do not have afterburners. If they do, it must be
+    integrated and cannot be upgraded.
+*/
+class Afterburner : public Component, public EnergyConsumer
 {
-    double usage_factor;
+    int type = 0;
+    double usage_cost = 1.0;        // Multiplier
+    double acceleration = 1.0;      // Multiplier
+    double speed_governor = 1.0;    // Multiplier
+    double usage_factor = 1.0;
+
+    double atomic_drive_usage = 1.0;
+    /*  Discussion of fuel usage
+        Afterburner fuel usage is based on normal drive usage.
+        Therefore, we need this data here as well.
+    */
 public:
-    Afterburner(EnergyType type, double usage_factor);
-    Afterburner(EnergyType type, double usage_factor, double afterburner_level, 
-                         double mass, double simulation_atom_var);
-    //Afterburner(std::string unit_key);
+    Afterburner(EnergyContainer *source, double usage_factor = 1.0);
+
+    // Component
+    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+
+    virtual std::string Describe() const; // Describe component in base_computer 
+
+    virtual bool CanDowngrade() const;
+
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_name) const;
+
+    virtual bool Upgrade(const std::string upgrade_name);
+
+    virtual void Damage();
+    virtual void Repair();
+
+    virtual bool Damaged() const;
+    virtual bool Installed() const;
 
     //void WriteUnitString(std::map<std::string, std::string> &unit);
     double UsageFactor() { return usage_factor; }

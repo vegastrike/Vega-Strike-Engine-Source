@@ -25,6 +25,8 @@ Armor createArmor(double health) {
         facets.push_back(health);
     }
     armor.UpdateFacets(facets);
+
+    return armor;
 }
     
 void loadArmor(Armor &armor, double health, double max_health) {

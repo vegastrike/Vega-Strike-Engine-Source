@@ -26,24 +26,19 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "energy_container.h"
+#include "unit_csv_factory.h"
 
 #include <iostream>
 
-EnergyContainer::EnergyContainer(): type(EnergyType::Fuel), 
-                                    level(Resource<double>(0.0,0.0,0.0)),
-                                    consumers(std::vector<EnergyConsumer>()) {}
+const std::string FUEL_CAPACITY = "Fuel_Capacity";
+const std::string CAPACITOR = "Warp_Capacitor";
+const std::string FTL_CAPACITOR = "Primary_Capacitor";
 
-EnergyContainer::EnergyContainer(EnergyType type, double capacity): type(type), 
-                                                   level(Resource<double>(capacity,0.0,capacity)),
-                                                   consumers(std::vector<EnergyConsumer>()) {}
+EnergyContainer::EnergyContainer(EnergyType type): 
+                                 Component("", 0.0, 0.0, false),
+                                 type(type),
+                                 level(Resource<double>(0.0,0.0,0.0)) {}
 
-void EnergyContainer::AddConsumer(EnergyType energy_type,
-                                  EnergyConsumerClassification classification, 
-                                  EnergyConsumerType consumer_type,
-                                  double quantity) {
-    EnergyConsumer consumer(energy_type, classification, consumer_type, quantity); 
-    consumers.push_back(consumer);
-}
 
 // Return value - any surplus charge
 double EnergyContainer::Charge(const double quantity) {
@@ -53,14 +48,20 @@ double EnergyContainer::Charge(const double quantity) {
     return quantity - level.Value() + old_level;
 }
 
-double EnergyContainer::Deplete(const double quantity) {
+double EnergyContainer::Deplete(bool partial, const double quantity) {
+    // Check we have enough energy to fully charge the consumer
+    if(!partial && quantity > level.Value()) {
+        return 0.0;
+    }
+
     double old_level = level.Value();
     level -= quantity;
-    return quantity + old_level - level.Value();
+    double actual_usage = old_level - level.Value();
+    return actual_usage / quantity;
 }
 
 bool EnergyContainer::Depleted() const {
-    return (level.Value() < 0.01);
+    return (level.Value() < 0.0001);
 }
 
 void EnergyContainer::SetCapacity(const double capacity, bool refill) {
@@ -83,7 +84,7 @@ double EnergyContainer::Percent() const {
 
 void EnergyContainer::Zero() { level = 0; }
 
-void EnergyContainer::Act() {
+/*void EnergyContainer::Act() {
     for(EnergyConsumer& consumer : consumers) {
         if(consumer.consumer_type == EnergyConsumerType::Constant) {
             consumer.in_use = true;
@@ -100,9 +101,9 @@ void EnergyContainer::Act() {
         level -= consumer.consumption;
         consumer.powered = 1.0;
     }
-}
+}*/
 
-void EnergyContainer::Use(EnergyConsumerClassification classification) {
+/*void EnergyContainer::Use(EnergyConsumerClassification classification) {
     for(EnergyConsumer& consumer : consumers) {
         consumer.in_use = true;
     }
@@ -116,9 +117,9 @@ bool EnergyContainer::InUse(EnergyConsumerClassification classification) {
     }
 
     return false;
-}
+}*/
 
-double EnergyContainer::Powered(EnergyConsumerClassification classification) {
+/*double EnergyContainer::Powered(EnergyConsumerClassification classification) {
     for(EnergyConsumer& consumer : consumers) {
         if(consumer.classification == classification) {
             return consumer.powered;
@@ -126,8 +127,117 @@ double EnergyContainer::Powered(EnergyConsumerClassification classification) {
     }
         
     return false;
-}
+}*/
 
 void EnergyContainer::Refill() {
     level.SetToMax();
+}
+
+
+// Component Functions
+void EnergyContainer::Load(std::string upgrade_key, std::string unit_key) {
+    // Component
+    upgrade_key = "";
+
+    // TODO: nice to have - ship mass goes down as fuel depleted
+    mass = 0; 
+    volume = 0;
+
+    double capacity = 0.0;
+ 
+    switch(type) {
+        case EnergyType::Fuel:
+        upgrade_name = "Fuel";
+        capacity = UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, 1.0);
+        break;
+
+        case EnergyType::Energy:
+        upgrade_name = "Capacitor";
+        capacity = UnitCSVFactory::GetVariable(unit_key, CAPACITOR, 1.0);
+        break;
+        
+        case EnergyType::FTL:
+        upgrade_name = "FTL_Capacitor";
+        capacity = UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, 1.0);
+        break;
+
+        case EnergyType::None:
+        break;
+    }
+    
+    SetCapacity(capacity);
+}
+
+void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
+    unit[FUEL_CAPACITY] = std::to_string(MaxLevel());
+}
+
+std::string EnergyContainer::Describe() const {
+    return std::string();
+}
+
+bool EnergyContainer::CanDowngrade() const {
+    return !Damaged();
+}
+
+bool EnergyContainer::Downgrade() {
+    if(!CanDowngrade()) {
+        return false;
+    }
+
+    level.SetMaxValue(0.0);
+    return true;
+}
+
+bool EnergyContainer::CanUpgrade(const std::string upgrade_key) const {
+    return !Damaged();
+}
+
+bool EnergyContainer::Upgrade(const std::string upgrade_key) {
+    if(!CanUpgrade(upgrade_key)) {
+        return false;
+    }
+
+    this->upgrade_key = upgrade_key;
+    upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
+
+    double capacity = 0.0;
+ 
+    switch(type) {
+        case EnergyType::Fuel:
+        capacity = UnitCSVFactory::GetVariable(upgrade_key, FUEL_CAPACITY, 1.0);
+        break;
+
+        case EnergyType::Energy:
+        capacity = UnitCSVFactory::GetVariable(upgrade_key, CAPACITOR, 1.0);
+        break;
+        
+        case EnergyType::FTL:
+        capacity = UnitCSVFactory::GetVariable(upgrade_key, FTL_CAPACITOR, 1.0);
+        break;
+
+        case EnergyType::None:
+        break;
+    }
+    
+    SetCapacity(capacity);
+    return true;
+}
+
+
+void EnergyContainer::Damage() {
+    level.RandomDamage();    
+}
+
+void EnergyContainer::Repair() {
+    level.RepairFully();
+}
+
+bool EnergyContainer::Damaged() const {
+    return level.Damaged();
+}
+
+
+bool EnergyContainer::Installed() const {
+    return level > 0.0;
 }

@@ -28,32 +28,23 @@
 #ifndef ENERGYCONSUMER_H
 #define ENERGYCONSUMER_H
 
-#include "energy_types.h"
-#include "energy_consumer.h"
-#include "resource.h"
+#include "energy_container.h"
 
 class EnergyConsumer {
+    EnergyContainer *source;
+    bool partial; // Can power consumer with less energy than requested
 protected:
-    EnergyType energy_type;
-    EnergyConsumerClassification classification;
-    EnergyConsumerType consumer_type;
-    bool in_use;
-    double powered; // 0.0-1.0 percentage powered 
-    Resource<double> consumption;  // This is when powered and for simulation_atom_var
-    
-    friend class EnergyContainer;
-    friend class EnergyManager;
-public:
-    EnergyConsumer(EnergyType energy_type, EnergyConsumerClassification classification,
-                    EnergyConsumerType consumer_type, double consumption):
-                    energy_type(energy_type), classification(classification), consumer_type(consumer_type), in_use(false), 
-                    powered(0.0), consumption(Resource<double>(consumption, 0.0, consumption)) {}
+    double consumption;         // Directly converted to atomic. Mostly for book keeping.
+    double atom_consumption;    // consumption per 0.1 seconds.
 
-    double Powered() { return powered; }
-    void Use() { in_use = true;}
-    EnergyType GetEnergyType() { return energy_type; }
-    double GetConsumption() const { return consumption.Value(); }
-    void SetConsumption(const double consumption) { this->consumption = consumption; }
+    static double simulation_atom_var;
+public:
+    EnergyConsumer(EnergyContainer *source, bool partial, double consumption = 0.0);
+    double Consume();
+    double GetConsumption() const;
+    double GetAtomConsumption() const;
+    void SetConsumption(double consumption);
+    void ZeroSource();
 };
 
 #endif // ENERGYCONSUMER_H

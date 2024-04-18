@@ -74,7 +74,7 @@ public:
             status;
     bool bank;
 //bank implies whether the weapon is linked with the next mount (i.e. only one firing at a time)
-    const WeaponInfo *type;
+    WeaponInfo *type;
     float functionality;
     float maxfunctionality;
     int sound;

@@ -29,6 +29,7 @@
 #include <map>
 
 #include "component.h"
+#include "energy_consumer.h"
 #include "energy_container.h"
 #include "damageable_layer.h"
 
@@ -65,6 +66,7 @@ class Cloak : public Component, public EnergyConsumer
 
 public:
     Cloak();
+    Cloak(EnergyContainer *source);
 
     // Virtual Functions
     virtual void Load(std::string upgrade_key, std::string unit_key);

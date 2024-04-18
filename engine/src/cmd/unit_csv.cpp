@@ -799,11 +799,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // TODO: 1. check AB cost values in json
     //       2. tweak afterburner cost for playability
     //       3. check WC
-    int afterburner_type_number = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Type", 0);
-    EnergyType afterburner_type = SaveToType(afterburner_type_number);
-    double afterburner_usage_factor = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 3.0);
-    afterburner = Afterburner(afterburner_type, afterburner_usage_factor, 1.0,
-                              Mass, simulation_atom_var);
+    afterburner.Load("", unit_key);
 
     limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) * VS_PI / 180.0;
     limits.pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) * VS_PI / 180.0;
@@ -844,11 +840,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 0.0f) * game_speed;
     computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
 
-    radar = CRadar(unit_key, &computer);
-
-    cloak = Cloak();
+    radar.Load("", unit_key);
     cloak.Load("", unit_key);
-
+    
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
 
@@ -1208,7 +1202,7 @@ string Unit::WriteUnitString() {
     unit["Armor_Back_Bottom_Right"] = tos(GetArmorLayer().facets[7].health);
 
     shield->SaveToCSV(unit);
-    
+    radar.SaveToCSV(unit);
 
 
     
@@ -1224,8 +1218,7 @@ string Unit::WriteUnitString() {
     unit["Warp_Usage_Cost"] = tos(jump.insysenergy);
     
     // Afterburner
-    unit["Afterburner_Type"] = TypeToSave(afterburner.GetEnergyType());
-    unit["Afterburner_Usage_Cost"] = tos(afterburner.UsageFactor());
+    afterburner.SaveToCSV(unit);
     
     unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (VS_PI));
     unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (VS_PI));

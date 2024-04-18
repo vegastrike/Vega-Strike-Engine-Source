@@ -50,6 +50,10 @@ enum class UpgradeType {
 
     Capacitor, 
     FTL_Capacitor,
+    Reactor,
+
+    Afterburner,
+    Drive,
     Jump_Drive,
 
     Cloak,

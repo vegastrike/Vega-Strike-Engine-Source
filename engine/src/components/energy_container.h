@@ -32,38 +32,36 @@
 #include <iostream>
 
 #include "resource/resource.h"
-#include "energy_types.h"
-#include "energy_consumer.h"
+#include "component.h"
+
+/* Discussion of FTL - yes, it isn't really faster. However, 
+* it would be easier for a new developer or someone from WC
+* to figure what it means.
+*/
+enum class EnergyType {
+    Fuel,   // 1
+    Energy, // 0 Capacitor
+    FTL,   // 2 FTL
+    None    // 3 Free Energy
+};
 
 
 /**
  * @brief The EnergyContainer class models the fuel cell, capacitor and SPEC capacitor
  */
-class EnergyContainer
+class EnergyContainer: public Component
 {
-protected:
     EnergyType type;
     Resource<double> level;
-    std::vector<EnergyConsumer> consumers;
 
-    friend class EnergyManager;
 public:
-    EnergyContainer();
-    EnergyContainer(EnergyType type, double capacity);
-
-    void AddConsumer(EnergyType energy_type, 
-                     EnergyConsumerClassification classification, 
-                     EnergyConsumerType consumer_type,
-                     double quantity);
-
-    void AddConsumer(EnergyConsumer consumer) {
-        consumers.push_back(consumer);
-    }
+    EnergyContainer(EnergyType type);
 
     // Return value - any surplus charge
     double Charge(const double quantity);
 
-    double Deplete(const double quantity);
+    // Partial - can power consumer with less energy than requested
+    double Deplete(bool partial, const double quantity);
     bool Depleted() const;
 
     void SetCapacity(const double capacity, bool refill = true);
@@ -74,12 +72,31 @@ public:
 
     void Zero();
 
-    void Act();
-
-    void Use(EnergyConsumerClassification classification);
+    /*void Use(EnergyConsumerClassification classification);
 
     bool InUse(EnergyConsumerClassification classification);
-    double Powered(EnergyConsumerClassification classification);
+    double Powered(EnergyConsumerClassification classification);*/
+
+    // Component
+    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+
+    virtual std::string Describe() const; // Describe component in base_computer 
+
+    virtual bool CanDowngrade() const;
+
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_name) const;
+
+    virtual bool Upgrade(const std::string upgrade_name);
+
+    virtual void Damage();
+    virtual void Repair();
+
+    virtual bool Damaged() const;
+    virtual bool Installed() const;
 };
 
 #endif // ENERGYCONTAINER_H

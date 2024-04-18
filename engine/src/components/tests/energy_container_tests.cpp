@@ -10,20 +10,20 @@ void printContainer(EnergyContainer& container) {
 }
 
 TEST(EnergyContainer, Sanity) {
-    EnergyContainer container = EnergyContainer();
+    EnergyContainer container = EnergyContainer(EnergyType::Energy);
     EXPECT_EQ(container.Level(), 0.0);
     container.SetCapacity(10.0, true);
 
     printContainer(container);
 
-    EnergyConsumer consumer = EnergyConsumer(EnergyType::Fuel, 
-                                             EnergyConsumerClassification::Drive,
-                                             EnergyConsumerType::Constant, 1.0);
-    container.AddConsumer(consumer);
+    EnergyConsumer consumer = EnergyConsumer(&container, 
+                                             false,
+                                             1.0);
+    
 
     int i=0;
-    while(container.Level() > 0 && i < 100) {
-        container.Act();
+    while(!container.Depleted() && i < 100) {
+        consumer.Consume();
         printContainer(container);
         i++;
     }

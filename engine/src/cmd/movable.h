@@ -41,10 +41,6 @@ class UnitCollection;
 struct Quaternion;
 
 class Movable {
-
-protected:
-    Drive drive;
-    Afterburner afterburner;
 public:
     //mass of this unit (may change with cargo)
     // TODO: subclass with return Mass+fuel;

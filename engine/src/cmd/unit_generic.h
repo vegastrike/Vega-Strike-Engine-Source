@@ -80,11 +80,16 @@ void UncheckUnit( class Unit*un );
 #include "upgradeable_unit.h"
 
 // Components
-#include "components/energy_manager.h"
-#include "components/cloak.h"
-#include "components/fuel.h"
-#include "components/radar.h"
+#include "components/energy_container.h"
 #include "components/reactor.h"
+
+#include "components/afterburner.h"
+#include "components/drive.h"
+#include "components/jump_drive.h"
+
+#include "components/cloak.h"
+#include "components/radar.h"
+
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
@@ -152,16 +157,24 @@ protected:
     StringPool::Reference csvRow;
 
 public:
+    Computer computer;
     // Components
-    Fuel fuel = Fuel();
-    EnergyContainer energy = EnergyContainer(EnergyType::Energy, 0.0);
-    EnergyContainer ftl_energy = EnergyContainer(EnergyType::FTL, 0.0);
+    EnergyContainer fuel = EnergyContainer(EnergyType::Fuel);
+    EnergyContainer energy = EnergyContainer(EnergyType::Energy);
+    EnergyContainer ftl_energy = EnergyContainer(EnergyType::FTL);
 
     // TODO: move this to a single constructor?!
-    Reactor reactor = Reactor(0.0,
-                    &energy, &ftl_energy,
-                    sim_atom_multiplier);
-    Cloak cloak;
+    Reactor reactor = Reactor(&fuel,
+                              &energy, &ftl_energy);
+    
+    Afterburner afterburner = Afterburner(&fuel);
+    Drive drive = Drive(&fuel);
+    JumpDrive jump_drive = JumpDrive(&ftl_energy);
+    
+    Cloak cloak = Cloak(&energy);
+
+    CRadar radar = CRadar(&energy, &computer);
+
 
     /// Radar and related systems
     // TODO: take a deeper look at this much later...
@@ -496,8 +509,7 @@ public:
             StarSystem *&previouslyActiveStarSystem,
             bool DoSightAndSound) override;
 
-    Computer computer;
-    CRadar radar;
+    
     void SwitchCombatFlightMode();
     bool CombatMode();
 

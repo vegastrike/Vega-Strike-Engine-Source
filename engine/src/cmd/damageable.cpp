@@ -47,7 +47,7 @@ Damageable::Damageable() : DamageableObject(),
                            killed(false),
                            hull_(),
                            armor_(),
-                           shield_() {    
+                           shield_(nullptr) {  // TODO: initialize elsewhere   
     hull = &hull_;
     armor = &armor_;
     shield = &shield_;

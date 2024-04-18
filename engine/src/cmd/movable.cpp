@@ -55,10 +55,7 @@ Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
         corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
         corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
         radial_size(0),
-        Momentofinertia(0.01),
-        // TODO: make drive and afterburner parameters configurable somehow
-        drive(EnergyType::Fuel, 1.0, 1.0, 1.0, 0.1),
-        afterburner(EnergyType::Fuel, 3.0) { 
+        Momentofinertia(0.01) { 
     cur_sim_queue_slot = rand() % SIM_QUEUE_SIZE;
     const Vector default_angular_velocity(configuration()->general_config.pitch,
             configuration()->general_config.yaw,
@@ -535,10 +532,13 @@ Vector Movable::MaxTorque(const Vector &torque) {
 }
 
 Vector Movable::ClampTorque(const Vector &amt1) {
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+
     Vector Res = amt1;
 
+    double power = unit->drive.Consume();
     // no_fuel_thrust = 0.4, so even with no fuel, we should keep flying
-    float fuelclamp = std::max(drive.Powered(), configuration()->fuel.no_fuel_thrust);
+    float fuelclamp = std::max(power, configuration()->fuel.no_fuel_thrust);
     if (fabs(amt1.i) > fuelclamp * limits.pitch) {
         Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
     }
@@ -555,11 +555,15 @@ Vector Movable::ClampTorque(const Vector &amt1) {
 
 
 Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    Unit *unit = dynamic_cast<Unit*>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+
+    // We're consuming energy twice. Here and in 537
+    double drive_power = unit->drive.Consume();
+    double ab_power = unit->afterburner.Consume();
 
     // no_fuel_thrust = 0.4, so even with no fuel, we should keep flying
-    float fuelclamp = std::max(drive.Powered(), configuration()->fuel.no_fuel_thrust);
-    float abfuelclamp = std::max(afterburner.Powered(), configuration()->fuel.no_fuel_afterburn);
+    float fuelclamp = std::max(drive_power, configuration()->fuel.no_fuel_thrust);
+    float abfuelclamp = std::max(ab_power, configuration()->fuel.no_fuel_afterburn);
     
     float limit = afterburn ? (abfuelclamp * (unit->computer.max_ab_speed() - unit->computer.max_speed()) + (fuelclamp * unit->computer.max_speed())) : 
                 fuelclamp * unit->computer.max_speed();
@@ -612,17 +616,16 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     Unit *unit = static_cast<Unit *>(this);
 
     const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
-    
-    // Delayed reaction
-    if(afterburn) {
-        afterburner.Use();
-    }
 
     Vector Res = amt1;
 
+    // We're consuming energy thrice. Here and in 537 and 559
+    double drive_power = unit->drive.Consume();
+    double ab_power = unit->afterburner.Consume();
+
     // no_fuel_thrust = 0.4, so even with no fuel, we should keep flying
-    float fuelclamp = std::max(drive.Powered(), configuration()->fuel.no_fuel_thrust);
-    float abfuelclamp = std::max(afterburner.Powered(), configuration()->fuel.no_fuel_afterburn);
+    float fuelclamp = std::max(drive_power, configuration()->fuel.no_fuel_thrust);
+    float abfuelclamp = std::max(ab_power, configuration()->fuel.no_fuel_afterburn);
     
     if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
         Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
