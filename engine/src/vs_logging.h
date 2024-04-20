@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2021-2023 Daniel Horn, Stephen G. Tuggy, Benjamen R. Meyer, and
+ * vs_logging.h
+ * 
+ * Copyright (C) 2021-2024 Daniel Horn, Stephen G. Tuggy, Benjamen R. Meyer, and
  * other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,12 +15,14 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #ifndef VEGA_STRIKE_ENGINE_VS_LOGGING_H
 #define VEGA_STRIKE_ENGINE_VS_LOGGING_H
 
@@ -26,10 +30,12 @@
 
 #include "boost/move/utility_core.hpp"
 #include "boost/smart_ptr/shared_ptr.hpp"
+#include "boost/smart_ptr/make_shared_object.hpp"
 #include "boost/format.hpp"
 //#include "boost/log/sources/logger.hpp"
 #include "boost/log/sources/severity_logger.hpp"
 #include "boost/log/sources/record_ostream.hpp"
+#include "boost/log/sinks/async_frontend.hpp"
 #include "boost/log/sinks/sync_frontend.hpp"
 #include "boost/log/sinks/text_file_backend.hpp"
 #include "boost/log/sinks/text_ostream_backend.hpp"
@@ -50,39 +56,54 @@ enum vega_log_level {
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", vega_log_level)
 
-typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend> ConsoleLogSink;
-typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend> FileLogSink;
+typedef boost::log::sinks::text_ostream_backend ConsoleLogBackEnd;
+typedef boost::log::sinks::text_file_backend FileLogBackEnd;
+typedef boost::log::sinks::asynchronous_sink<ConsoleLogBackEnd> ConsoleLogSink;
+typedef boost::log::sinks::asynchronous_sink<FileLogBackEnd>    FileLogSink;
 
-#define VS_LOG(log_level, log_message)                                                                              \
-    do {                                                                                                            \
-        VegaStrikeLogging::vega_logger()->Log(VegaStrikeLogging::vega_log_level::log_level, (log_message));         \
+#define VS_LOG(log_level, log_message)                                                                                            \
+    do {                                                                                                                          \
+        VegaStrikeLogging::VegaStrikeLogger::instance().Log(VegaStrikeLogging::vega_log_level::log_level, (log_message));         \
     } while (false)
-#define VS_LOG_AND_FLUSH(log_level, log_message)                                                                    \
-    do {                                                                                                            \
-        VegaStrikeLogging::vega_logger()->LogAndFlush(VegaStrikeLogging::vega_log_level::log_level, (log_message)); \
+#define VS_LOG_AND_FLUSH(log_level, log_message)                                                                                  \
+    do {                                                                                                                          \
+        VegaStrikeLogging::VegaStrikeLogger::instance().LogAndFlush(VegaStrikeLogging::vega_log_level::log_level, (log_message)); \
     } while (false)
+//#define VS_LOG_FLUSH_EXIT(log_level, log_message)
 
-class VegaStrikeLogger {
+struct VegaStrikeLogger {
 private:
     boost::log::core_ptr logging_core_;
-    boost::shared_ptr<boost::log::sources::severity_logger_mt<vega_log_level>> slg_;
+    boost::log::sources::severity_logger_mt<vega_log_level> slg_;
     boost::shared_ptr<ConsoleLogSink> console_log_sink_;
     boost::shared_ptr<FileLogSink> file_log_sink_;
 
-public:
+private:
     VegaStrikeLogger();
     ~VegaStrikeLogger();
+
+public:
+    static VegaStrikeLogger& instance() {
+        static VegaStrikeLogger logger_instance;
+        return logger_instance;
+    }
+        
     void InitLoggingPart2(const uint8_t debug_level, const boost::filesystem::path &vega_strike_home_dir);
     void FlushLogs();
+    void FlushLogsProgramExiting();
     void Log(const vega_log_level level, const std::string& message);
     void Log(const vega_log_level level, const char * message);
     void Log(const vega_log_level level, const boost::basic_format<char>& message);
     void LogAndFlush(const vega_log_level level, const std::string& message);
+    void LogFlushExit(const vega_log_level level, const std::string& message, const int exit_code);
     void LogAndFlush(const vega_log_level level, const char * message);
+    void LogFlushExit(const vega_log_level level, const char* message, const int exit_code);
     void LogAndFlush(const vega_log_level level, const boost::basic_format<char>& message);
-};
+    void LogFlushExit(const vega_log_level level, const boost::basic_format<char>& message, const int exit_code);
 
-extern boost::shared_ptr<VegaStrikeLogger> vega_logger();
+    VegaStrikeLogger(const VegaStrikeLogger &) = delete;
+    VegaStrikeLogger& operator = (const VegaStrikeLogger&) = delete;
+};
 
 } // namespace VegaStrikeLogging
 

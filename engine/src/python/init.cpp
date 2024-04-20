@@ -1,7 +1,7 @@
 /*
  * init.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -121,7 +121,6 @@ void Python::reseterrors() {
         VS_LOG_AND_FLUSH(error, "void Python::reseterrors(): Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VegaStrikeLogging::vega_logger()->FlushLogs();
     }
 }
 
@@ -242,7 +241,7 @@ void Python::test() {
 //vs_config->setVariable("data","test","NULL");
 //VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
 //VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
 }
 
 #endif

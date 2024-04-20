@@ -1,5 +1,7 @@
-/*
- * Copyright (C) 2001-2023 Daniel Horn, Alan Shieh, klaussfreire,
+/* 
+ * sprite.h
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, Alan Shieh, klaussfreire,
  * surfdargent, dan_w, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
@@ -14,12 +16,14 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #ifndef VEGA_STRIKE_ENGINE_GFX_SPRITE_H
 #define VEGA_STRIKE_ENGINE_GFX_SPRITE_H
 
@@ -47,7 +51,7 @@ class VSSprite {
     bool isAnimation;
 
 //For private use only
-    VSSprite() : surface(0) {
+    VSSprite() : surface(nullptr), isAnimation(false), rotation(0.0F), maxs(0.0F), maxt(0.0F), heighto2(0.0F), widtho2(0.0F), xcenter(0.0F), ycenter(0.0F) {
     }
 
 public:

@@ -1,7 +1,7 @@
 /*
  * particle.cpp
  *
- * Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (c) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -10,16 +10,16 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -311,7 +311,7 @@ void ParticleTrail::DrawAndUpdate() {
         }
 
         particleVert.clear();
-        particleVert.reserve(particles.size() * (3 + 4));
+        particleVert.reserve(particles.size() * (static_cast<size_t>(3) + 4));
         std::back_insert_iterator<std::vector<float> > v(particleVert);
         for (size_t i = 0; i < nparticles; ++i) {
             const QVector &loc = particles[i].location;
@@ -395,7 +395,7 @@ void ParticleTrail::DrawAndUpdate() {
         }
 
         particleVert.clear();
-        particleVert.reserve(nparticles * vertsPerParticle * (3 + 4 + 2));
+        particleVert.reserve(nparticles * vertsPerParticle * (static_cast<size_t>(3 + 4) + 2));
         std::back_insert_iterator<std::vector<float> > v(particleVert);
         for (size_t i = 0; i < nparticles; ++i) {
             SetQuadVertex(particles[i].location, particles[i].color, particles[i].size, pgrow, ptrans, v, kCameraPosition);

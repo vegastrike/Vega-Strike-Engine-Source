@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gamemenu.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -459,7 +461,7 @@ bool GameMenu::processMainMenuButton(const EventCommandId &command, Control *con
 }
 
 bool GameMenu::processExitGameButton(const EventCommandId &command, Control *control) {
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     winsys_exit(0);
     return true;
 }

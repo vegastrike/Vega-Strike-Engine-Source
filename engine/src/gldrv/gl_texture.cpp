@@ -1,7 +1,7 @@
 /*
  * gl_texture.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -463,8 +463,8 @@ static void DownSampleTexture(unsigned char **newbuf,
             amask >>= 1, tshift++, hshift++;
         }
         int tmask = (1 << tshift) - 1;
-        *newbuf = (unsigned char *) malloc(newheight * newwidth * pixsize * sizeof(unsigned char));
-        unsigned int temp[32 * 4];
+        *newbuf = (unsigned char*)malloc(static_cast<size_t>(newheight) * newwidth * pixsize * sizeof(unsigned char));
+        unsigned int temp[32 * 4]{};
         unsigned char *orow = (*newbuf);
         const unsigned char *irow = oldbuf;
         for (i = 0; i < newheight; i++, orow += ostride, irow += rowstride) {
@@ -510,7 +510,7 @@ static void DownSampleTexture(unsigned char **newbuf,
         //Specific purpose downsampler: 2x2 averaging
         //a) Very little overhead
         //b) Very common case (mipmap generation)
-        *newbuf = (unsigned char *) malloc(newheight * newwidth * pixsize * sizeof(unsigned char));
+        *newbuf = (unsigned char*)malloc(static_cast<size_t>(newheight) * newwidth * pixsize * sizeof(unsigned char));
         unsigned char *orow = (*newbuf);
         int ostride = newwidth * pixsize;
         int istride = width * pixsize;
@@ -1093,11 +1093,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
 }
 
 void /*GFXDRVAPI*/ GFXDeleteTexture(int handle) {
+    if (handle < 0) {
+        VS_LOG(error, (boost::format("GFXDeleteTexture(int handle) called with invalid, negative handle value %1%") % handle));
+        return;
+    } else if (handle >= textures.size()) {
+        VS_LOG(error, (boost::format("GFXDeleteTexture(int handle) called with invalid handle value %1%, which is greater than textures.size(): %2%") % handle % textures.size()));
+        return;
+    }
     if (textures[handle].alive) {
-        glDeleteTextures(1, &textures[handle].name);
-        for (size_t i = 0; i < sizeof(activetexture) / sizeof(int); ++i) {
-            if (activetexture[i] == handle) {
-                activetexture[i] = -1;
+        glDeleteTextures(1, &textures[handle].name);                        // Is this correct? - SGT 2024-04-18
+        for (int & each_texture : activetexture) {
+            if (each_texture == handle) {
+                each_texture = -1;
             }
         }
     }
@@ -1110,7 +1117,7 @@ void /*GFXDRVAPI*/ GFXDeleteTexture(int handle) {
 
 void GFXInitTextureManager() {
     for (size_t handle = 0; handle < textures.size(); ++handle) {
-        textures[handle].palette = NULL;
+        textures[handle].palette = nullptr;
         textures[handle].width = textures[handle].height = textures[handle].iwidth = textures[handle].iheight = 0;
         textures[handle].texturestage = 0;
         textures[handle].name = 0;
@@ -1123,6 +1130,7 @@ void GFXInitTextureManager() {
 }
 
 void GFXDestroyAllTextures() {
+    // TODO: There's got to be a more efficient way to do this -- SGT 2024-04-18
     for (size_t handle = 0; handle < textures.size(); handle++) {
         GFXDeleteTexture(handle);
     }
