@@ -273,7 +273,7 @@
       }
     },
     {
-      "name": "windows-default",
+      "name": "windows-base",
       "hidden": true,
       "inherits": "default",
       "displayName": "Windows Default",
@@ -303,7 +303,7 @@
     {
       "name": "VS2019Win64",
       "hidden": true,
-      "inherits": "windows-default",
+      "inherits": "windows-base",
       "displayName": "Visual Studio 2019 on Windows x64",
       "generator": "Visual Studio 16 2019",
       "architecture": "X64",
@@ -316,7 +316,7 @@
     {
       "name": "VS2022Win64",
       "hidden": true,
-      "inherits": "windows-default",
+      "inherits": "windows-base",
       "displayName": "Visual Studio 2022 on Windows x64",
       "generator": "Visual Studio 17 2022",
       "architecture": "X64",
@@ -329,7 +329,7 @@
     {
       "name": "ninja-windows",
       "hidden": true,
-      "inherits": "windows-default",
+      "inherits": "windows-base",
       "displayName": "Ninja on Windows",
       "generator": "Ninja Multi-Config",
       "condition": {
