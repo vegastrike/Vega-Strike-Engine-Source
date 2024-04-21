@@ -4,7 +4,7 @@
 *                           begin                : January 10, 2002
 *                           copyright            : (C) 2002 by David Ranger
 *                           email                : ussreliant@users.sourceforge.net
-*                           copyright            : (C) 2020 by Stephen G. Tuggy
+*                           copyright            : (C) 2020-2023 Stephen G. Tuggy
 *                           email                : sgt@stephengtuggy.com
 ***************************************************************************/
 
@@ -33,7 +33,7 @@
 //There are places where a float is converted to an int. This define takes extra steps to convert without a warning (float -> char -> int)
 #define NO_WARNINGS
 
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <OpenGL/gl.h>
     #include <GLUT/glut.h>
 #else

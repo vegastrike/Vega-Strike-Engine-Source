@@ -5,7 +5,7 @@
  *                           copyright            : (C) 2001 by David Ranger
  *                           email                : ussreliant@users.sourceforge.net
  *                           copyright            : (C) 2020 pyramid3d
- *                           copyright            : (C) 2020 Stephen G. Tuggy
+ *                           copyright            : (C) 2020-2023 Stephen G. Tuggy
  **************************************************************************/
 
 /***************************************************************************
@@ -21,7 +21,7 @@
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
 #include <sys/param.h> // For MAXPATHLEN
 #endif
 #ifdef __MINGW32__
@@ -448,7 +448,7 @@ int isdir(const char *file) {
 glob_t *FindPath(char *path, int type) {
 	glob_t *FILES = new glob_t;
 	string mypath(path);
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
 	char thispath[MAXPATHLEN];
 #else
 	char thispath[800000];
@@ -460,7 +460,7 @@ glob_t *FindPath(char *path, int type) {
 	dirent *entry;
 	unsigned int cur;
 	char *newpath = 0;
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
 	getcwd(thispath, MAXPATHLEN);
 #else
 	getcwd(thispath, 790000);
