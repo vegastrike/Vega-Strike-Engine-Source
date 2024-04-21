@@ -89,7 +89,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                     boost::log::keywords::min_free_space = 2UL * 1024UL * 1024UL
                             * 1024UL                                      /*< stop boost::log when there's only 2 GiB free space left >*/
             );
-    file_log_sink_ = boost::make_shared<FileLogSink>(file_log_back_end_, boost::null_deleter());
+    file_log_sink_ = boost::make_shared<FileLogSink>(file_log_back_end_);
     logging_core_->add_sink(file_log_sink_);
 
     console_log_sink_->set_filter(severity >= fatal);
@@ -143,7 +143,7 @@ VegaStrikeLogger::VegaStrikeLogger() : slg_(), file_log_sink_(nullptr) {
                     boost::log::keywords::auto_flush =
                             false /*true*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
             );
-    console_log_sink_ = boost::make_shared<ConsoleLogSink>(console_log_back_end_, boost::null_deleter());
+    console_log_sink_ = boost::make_shared<ConsoleLogSink>(console_log_back_end_);
     logging_core_->add_sink(console_log_sink_);
 }
 
