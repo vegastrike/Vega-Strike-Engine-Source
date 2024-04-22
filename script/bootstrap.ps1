@@ -1,6 +1,6 @@
 # bootstrap.ps1
 
-# Copyright (C) 2021-2023 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2021-2024 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -13,11 +13,11 @@
 
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 
 # You can customize this directory location if desired, but it should be
@@ -26,18 +26,18 @@ param(
     [String]$VCPKG_PARENT_DIR = "C:\Projects"
 )
 
-Set-Variable -Name CMAKE_VERSION -Value "3.26.1"
+Set-Variable -Name CMAKE_VERSION -Value "3.29.2"
 
-New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
-Push-Location "$VCKPG_PARENT_DIR"
+New-Item "$VCPKG_PARENT_DIR" -ItemType Directory -Force
+Push-Location "$VCPKG_PARENT_DIR"
 git clone https://github.com/vegastrike/vcpkg-local.git ./v
 .\v\bootstrap-vcpkg.bat -disableMetrics
 
-[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCKPG_PARENT_DIR\v", 'User')
-$env:VCPKG_ROOT = "$VCKPG_PARENT_DIR\v"
+[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCPKG_PARENT_DIR\v", 'User')
+$env:VCPKG_ROOT = "$VCPKG_PARENT_DIR\v"
 
 $path = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$newPath = $path + ";$VCKPG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
+$newPath = $path + ";$VCPKG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 $env:PATH = $newPath
 
@@ -47,7 +47,7 @@ $env:VCPKG_DEFAULT_TRIPLET = $triplet
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', $triplet, 'User')
 $env:VCPKG_DEFAULT_HOST_TRIPLET = $triplet
 
-$pythonHome = "$VCKPG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
+$pythonHome = "$VCPKG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
 [Environment]::SetEnvironmentVariable('PYTHONHOME', $pythonHome, 'User')
 $env:PYTHONHOME = $pythonHome
 
