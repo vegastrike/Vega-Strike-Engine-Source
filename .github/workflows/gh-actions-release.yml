@@ -119,7 +119,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f #v4.1.3
         with:
           fetch-depth: 2
           submodules: false
@@ -142,7 +142,7 @@ jobs:
           IS_RELEASE: 1
         run: script/cibuild $FLAGS
       - name: Upload the artifacts
-        uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}

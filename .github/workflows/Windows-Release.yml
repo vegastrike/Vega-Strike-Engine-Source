@@ -1,4 +1,4 @@
-name: Windows-CI
+name: Windows-Release
 
 # Controls when the action will run.
 on:
@@ -37,11 +37,10 @@ jobs:
       VCPKG_ROOT: '${{ github.workspace }}/v'
       # Tells vcpkg where binary packages are stored.
       VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/vbincache'
-      ## Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
-      #VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
+      VCPKG_BINARY_SOURCES: 'x-gha,readwrite'
       VCPKG_DEFAULT_TRIPLET: x64-windows
       VCPKG_DEFAULT_HOST_TRIPLET: x64-windows
-      PYTHONHOME: '${{ github.workspace }}/v/packages/python3_x64-windows/tools/python3'
       TAG_NAME: '${{ github.ref_name }}'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -49,7 +48,7 @@ jobs:
       # Set env vars needed for vcpkg to leverage the GitHub Action cache as a storage
       # for Binary Caching.
       # Also process the `github.sha` value to produce the SHORT_SHA we'll need later
-      - uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 #v6.4.1
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const git_sha = context.sha.substring(0, 7)
@@ -64,40 +63,45 @@ jobs:
 
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f #v4.1.3
+
+      - name: Setup Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d #v5.1.0
+        with:
+          python-version: 3.11
 
       - name: "Create directory '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}'"
         run: mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
         shell: bash
 
       - name: install-cmake
-        uses: lukka/get-cmake@359fbae4b163fa01633e6de228fa7f2a31ab1fc7 #v3.26.1
+        uses: lukka/get-cmake@4931ab1fc1604964c055eb330edb3f6b26ba0cfa #v3.29.2
         with:
-          cmakeVersion: 3.26.1
+          cmakeVersion: 3.29.2
           ninjaVersion: 1.11.1
 
-      #      # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
-      #      # when it is being run afterward by CMake.
-      #      - name: restore-vcpkg
-      #        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 #v3.3.1
-      #        with:
-      #          # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
-      #          # built package archives (aka binary cache) which are located by VCPKG_DEFAULT_BINARY_CACHE env var.
-      #          # The other paths starting with '!' are exclusions: they contain temporary files generated during the build of the installed packages.
-      #          path: |
-      #            ${{ env.VCPKG_ROOT }}
-      #            !${{ env.VCPKG_ROOT }}/buildtrees
-      #            !${{ env.VCPKG_ROOT }}/packages
-      #            !${{ env.VCPKG_ROOT }}/downloads
-      #            !${{ env.VCPKG_ROOT }}/installed
-      #          # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
-      #          key: |
-      #            ${{ hashFiles( '.git/modules/vcpkg/HEAD' )}}
+      # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
+      # when it is being run afterward by CMake.
+      - name: restore-vcpkg
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #v4.0.2
+        with:
+          # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
+          # built package archives (aka binary cache) which are located by VCPKG_DEFAULT_BINARY_CACHE env var.
+          # The other paths starting with '!' are exclusions: they contain temporary files generated during the build of the installed packages.
+          path: |
+            ${{ env.VCPKG_ROOT }}
+            !${{ env.VCPKG_ROOT }}/buildtrees
+            !${{ env.VCPKG_ROOT }}/packages
+            !${{ env.VCPKG_ROOT }}/downloads
+            !${{ env.VCPKG_ROOT }}/installed
+          # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
+          key: |
+            ${{ os.release }}-${{ hashFiles( './engine/vcpkg.json' )}}
 
       - name: install-vcpkg
-        #if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/vegastrike/vcpkg-local.git ${{ env.VCPKG_ROOT }}
+          git clone https://github.com/Microsoft/vcpkg.git ${{ env.VCPKG_ROOT }}
           ${{ env.VCPKG_ROOT }}\bootstrap-vcpkg.bat -disableMetrics
 
       - name: run-build-script
@@ -111,10 +115,14 @@ jobs:
           GTEST_COLOR: 1
         run: .\script\test.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
 
-      - name: Upload artifacts
-        uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
+      - name: Upload test results
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        if: failure()
         with:
-          path: "${{ github.workspace }}/**/*.zip"
+          name: test_results_xml
+          path: ${{github.workspace}}/build/test-results/**/*.xml
+
+      #- name: Upload artifacts
+      #  uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+      #  with:
+      #    path: "${{ github.workspace }}/build/**/*.zip"
