@@ -1,25 +1,10 @@
 /*
- * Tux Racer
- * Copyright (C) 1999-2001 Jasmin F. Patry
+ * winsys.cpp
+ * 
+ * Incorporated into Vega Strike from Tux Racer
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- * Incorporated into Vega Strike
- *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Copyright (C) 1999-2024 Jasmin F. Patry, Daniel Horn, pyramid3d,
+ * Benjamen R. Meyer, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -753,7 +738,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     gl_options.color_depth = game_options()->colordepth;
     glutInit( argc, argv );
     if (game_options()->glut_stencil) {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
         if ( !(glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE|GLUT_STENCIL ), 1) )
             glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE );
 #else

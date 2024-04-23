@@ -123,7 +123,7 @@ bool isPowerOfTwo(int num, int &which) {
     return true;
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
 
 static GLint round2( GLint n )
 {
@@ -403,7 +403,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width,
 
 void /*GFXDRVAPI*/ GFXPrioritizeTexture(unsigned int handle, float priority) {
     glPrioritizeTextures(1,
-#if defined (__APPLE__)
+#if defined (__APPLE__) && defined(__MACH__)
             (GLuint*)
 #endif
             &handle, &priority);

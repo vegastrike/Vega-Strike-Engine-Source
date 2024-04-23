@@ -151,7 +151,7 @@ struct RendererData {
             #ifdef _WIN32
             deviceSpecifier = "DirectSound3D";
             #else
-                #ifdef __APPLE__
+                #if defined(__APPLE__) && defined(__MACH__)
             deviceSpecifier = "sdl";
                 #endif
             #endif

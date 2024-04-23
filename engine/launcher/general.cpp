@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
+ * general.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, David Ranger, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +26,7 @@
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
 #include <sys/param.h> // For MAXPATHLEN
 #endif
 #ifdef __MINGW32__
@@ -492,7 +494,7 @@ int isdir(const char *file) {
 glob_t *FindPath(char *path, int type) {
     glob_t *FILES = new glob_t;
     string mypath(path);
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     char thispath[MAXPATHLEN];
 #else
     char thispath[800000];
@@ -504,7 +506,7 @@ glob_t *FindPath(char *path, int type) {
     dirent *entry;
     unsigned int cur;
     char *newpath = 0;
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     getcwd(thispath, MAXPATHLEN);
 #else
     getcwd(thispath, 790000);

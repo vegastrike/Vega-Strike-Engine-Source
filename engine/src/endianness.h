@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * endianness.h
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -42,7 +44,7 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
     #endif //defined (IRIX)
 #endif //defined (__HAIKU__)
 
-#if defined (__APPLE__)
+#if defined (__APPLE__) && defined(__MACH__)
     #if defined (__BIG_ENDIAN__)
         #if defined (__x86_64__)
             #include <libkern/OSByteOrder.h>
@@ -60,7 +62,7 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
         #define le16_to_cpu( x ) (x)
         #define le64_to_cpu( x ) (x)
     #endif //defined (__BIG_ENDIAN__)
-#else //defined (__APPLE__)
+#else //defined (__APPLE__) && defined(__MACH__)
     #if defined (IRIX) || (defined (__SVR4) && defined (__sun ))
         #include <sys/types.h>
         # if BYTE_ORDER == BIG_ENDIAN       /* depends on MIPSEB or MIPSEL and SGIAPI */
