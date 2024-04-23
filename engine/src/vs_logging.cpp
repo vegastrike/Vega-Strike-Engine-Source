@@ -123,12 +123,12 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
         file_log_sink_->flush();
     }
 
-    console_log_sink_.reset();
-    file_log_sink_.reset();
-
     std::cout << std::flush;
     std::cerr << std::flush;
     std::clog << std::flush;
+
+    console_log_sink_.reset();
+    file_log_sink_.reset();
 }
 
 VegaStrikeLogger::VegaStrikeLogger() : slg_(), file_log_sink_(nullptr) {
