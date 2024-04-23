@@ -32,7 +32,10 @@
 #include "boost/smart_ptr/shared_ptr.hpp"
 #include "boost/smart_ptr/make_shared_object.hpp"
 #include "boost/format.hpp"
+#include "boost/log/sources/global_logger_storage.hpp"
 //#include "boost/log/sources/logger.hpp"
+#include "boost/log/core.hpp"
+#include "boost/log/expressions.hpp"
 #include "boost/log/sources/severity_logger.hpp"
 #include "boost/log/sources/record_ostream.hpp"
 #include "boost/log/sinks/async_frontend.hpp"
@@ -53,6 +56,8 @@ enum vega_log_level {
     error,
     fatal
 };
+
+BOOST_LOG_GLOBAL_LOGGER(my_logger, boost::log::sources::severity_logger_mt<VegaStrikeLogging::vega_log_level>)
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", vega_log_level)
 
@@ -77,7 +82,9 @@ typedef boost::log::sinks::asynchronous_sink<FileLogBackEnd>    FileLogSink;
 struct VegaStrikeLogger {
 private:
     boost::log::core_ptr logging_core_;
-    boost::log::sources::severity_logger_mt<vega_log_level> slg_;
+    boost::log::sources::severity_logger_mt<vega_log_level>& slg_;
+    boost::shared_ptr<ConsoleLogBackEnd> console_log_back_end_;
+    boost::shared_ptr<FileLogBackEnd> file_log_back_end_;
     boost::shared_ptr<ConsoleLogSink> console_log_sink_;
     boost::shared_ptr<FileLogSink> file_log_sink_;
 
