@@ -111,13 +111,13 @@ void VegaStrikeLogger::FlushLogs() {
 
 void VegaStrikeLogger::FlushLogsProgramExiting() {
     if (console_log_sink_) {
-        logging_core_->remove_sink(console_log_sink_);
+        // logging_core_->remove_sink(console_log_sink_);
         console_log_sink_->stop();
         console_log_sink_->feed_records();
         console_log_sink_->flush();
     }
     if (file_log_sink_) {
-        logging_core_->remove_sink(file_log_sink_);
+        // logging_core_->remove_sink(file_log_sink_);
         file_log_sink_->stop();
         file_log_sink_->feed_records();
         file_log_sink_->flush();
@@ -129,11 +129,13 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     fflush(stdout);
     fflush(stderr);
 
+    logging_core_->remove_all_sinks();
     console_log_sink_.reset();
     file_log_sink_.reset();
 }
 
 VegaStrikeLogger::VegaStrikeLogger() : slg_(), file_log_sink_(nullptr) {
+    boost::filesystem::path::imbue(std::locale("C"));
     logging_core_ = boost::log::core::get();
     boost::log::add_common_attributes();
 
