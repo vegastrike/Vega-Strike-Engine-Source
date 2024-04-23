@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Nachum Barcohen, Roy Falk,
+ * vsfilesystem.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Nachum Barcohen, Roy Falk,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -472,13 +474,11 @@ void InitHomeDirectory()
         if (conversionResult == 0) {
             userdir = mbcsPath;
         } else {
-            VS_LOG_AND_FLUSH(fatal, "!!! Fatal Error converting user's home directory to MBCS");
-            VSExit(1);
+            VS_LOG_FLUSH_EXIT(fatal, "!!! Fatal Error converting user's home directory to MBCS", 1);
         }
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! Fatal Error getting user's home directory");
         CoTaskMemFree(pszPath);
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! Fatal Error getting user's home directory", 1);
     }
 
     boost::filesystem::path home_path{userdir};
@@ -498,8 +498,7 @@ void InitHomeDirectory() {
     pwent = getpwuid(getuid());
     chome_path = pwent->pw_dir;
     if (!DirectoryExists(chome_path)) {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : home directory not found");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : home directory not found", 1);
     }
     string user_home_path(chome_path);
     homedir = user_home_path + "/" + HOMESUBDIR;
@@ -576,8 +575,7 @@ void InitDataDirectory() {
             }
 
             if (chdir(datadir.c_str()) < 0) {
-                VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
-                VSExit(1);
+                VS_LOG_FLUSH_EXIT(fatal, "Error changing to datadir", 1);
             }
             if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
                 datadir = string(tmppath);
@@ -684,8 +682,7 @@ void LoadConfig(string subdir) {
                 VS_LOG_AND_FLUSH(fatal,
                         (boost::format("CONFIGFILE - No config found in data dir : %1%")
                                 % (datadir + "/" + config_file)));
-                VS_LOG_AND_FLUSH(fatal, "CONFIG FILE NOT FOUND !!!");
-                VSExit(1);
+                VS_LOG_FLUSH_EXIT(fatal, "CONFIG FILE NOT FOUND !!!", 1);
             }
         }
     } else if (!subdir.empty()) {
@@ -715,8 +712,7 @@ void LoadConfig(string subdir) {
         if (true == legacy_data_dir_mode) {
             VS_LOG(info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
         } else {
-            VS_LOG_AND_FLUSH(fatal, "DATADIR - No datadir specified in config file");
-            VSExit(1);
+            VS_LOG_FLUSH_EXIT(fatal, "DATADIR - No datadir specified in config file", 1);
         }
     }
 
@@ -727,11 +723,10 @@ void LoadConfig(string subdir) {
     try {
         Galaxy galaxy = Galaxy(universe_file);
     } catch (std::exception &e) {
-        VS_LOG_AND_FLUSH(fatal,
+        VS_LOG_FLUSH_EXIT(fatal,
                 (boost::format(
                         "Error while loading configuration. Did you specify the asset directory? Error: %1%")
-                        % e.what()));
-        VSExit(1);
+                        % e.what()), 1);
     }
 }
 
@@ -1044,7 +1039,8 @@ void CreateDirectoryAbs(const char *filename) {
 #endif
         );
         if (err < 0 && errno != EEXIST) {
-            VS_LOG_AND_FLUSH(fatal, (boost::format("Errno=%1% - FAILED TO CREATE : %2%") % errno % filename));
+            VS_LOG(fatal, (boost::format("Errno=%1% - FAILED TO CREATE : %2%") % errno % filename));
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             GetError("CreateDirectory");
             VSExit(1);
         }
@@ -1491,8 +1487,7 @@ void VSFile::checkExtracted() {
                 //File is not opened so we open it and add it in the pk3 file map
                 CPK3 *pk3newfile = new CPK3;
                 if (!pk3newfile->Open(full_vol_path.c_str())) {
-                    VS_LOG_AND_FLUSH(fatal, (boost::format("!!! ERROR : opening volume : %1%") % full_vol_path));
-                    VSExit(1);
+                    VS_LOG_FLUSH_EXIT(fatal, (boost::format("!!! ERROR : opening volume : %1%") % full_vol_path), 1);
                 }
                 std::pair<std::string, CPK3 *> pk3_pair(full_vol_path, pk3newfile);
                 pk3_opened_files.insert(pk3_pair);
@@ -1580,11 +1575,10 @@ VSError VSFile::OpenReadOnly(const char *file, VSFileType type) {
                     err = FileNotFound;
                 } else {
                     if ((this->fp = fopen(filestr.c_str(), "rb")) == nullptr) {
-                        VS_LOG_AND_FLUSH(fatal,
+                        VS_LOG_FLUSH_EXIT(fatal,
                                 (boost::format(
                                         "!!! SERIOUS ERROR : failed to open Unknown file %1% - this should not happen")
-                                        % filestr));
-                        VSExit(1);
+                                        % filestr), 1);
                     }
                     this->valid = true;
                     if (VSFS_DEBUG() > 1) {
@@ -1842,8 +1836,7 @@ size_t VSFile::Write(const void *ptr, size_t length) {
         size_t nbwritten = fwrite(ptr, 1, length, this->fp);
         return nbwritten;
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
     return Ok;
 }
@@ -1857,8 +1850,7 @@ VSError VSFile::WriteLine(const void *ptr) {
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
         fputs((const char *) ptr, this->fp);
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
     return Ok;
 }
@@ -1875,8 +1867,7 @@ int VSFile::Fprintf(const char *format, ...) {
         va_end(ap);
         return retVal;
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
     return 0;
 }
@@ -1984,8 +1975,7 @@ void VSFile::Clear() {
             VSExit(1);
         }
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
 }
 

@@ -1,9 +1,8 @@
 /*
  * csv.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -247,7 +246,8 @@ CSVTable::Merge(const CSVTable &other) {
             local = columns.insert(std::pair<string, int>(it->first, key.size() - 1)).first;
         }
         if (it->second >= int(colmap.size())) {
-            VS_LOG_AND_FLUSH(fatal, (boost::format("WTF column %1%?") % it->second));
+            VS_LOG(fatal, (boost::format("WTF column %1%?") % it->second));
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             abort();
         }
         VS_LOG(debug, (boost::format("  %1% (%2%) -> %3%") % it->first % it->second % local->second));
@@ -389,8 +389,7 @@ CSVTable *loadCSVTableList(const string &csvfiles, VSFileSystem::VSFileType file
                 }
                 thisFile.Close();
             } else if (critical) {
-                VS_LOG_AND_FLUSH(fatal, (boost::format("Could not load CSV database at '%1%'") % tmp));
-                VSExit(2);
+                VS_LOG_FLUSH_EXIT(fatal, (boost::format("Could not load CSV database at '%1%'") % tmp), 2);
             }
         }
         if (where2 == string::npos) {

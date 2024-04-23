@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * mesh_bxm.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -319,12 +321,14 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
 #else
     uint32bit Inputlength = Inputfile.Size();
     if (Inputlength < sizeof(uint32bit) * 13 || Inputlength > (1 << 30)) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Corrupt file %1%, aborting") % Inputfile.GetFilename()));
+        VS_LOG(fatal, (boost::format("Corrupt file %1%, aborting") % Inputfile.GetFilename()));
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         abort();
     }
     inmemfile = (chunk32 *) malloc(Inputlength);
     if (!inmemfile) {
-        VS_LOG_AND_FLUSH(fatal, "Buffer allocation failed, Aborting");
+        VS_LOG(fatal, "Buffer allocation failed, Aborting");
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         exit(-2);
     }
     Inputfile.Read(inmemfile, Inputlength);

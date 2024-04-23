@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
+ * easydom.h
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -280,8 +282,7 @@ public:
         doTextBuffer();
         domNodeType *stacktop = nodestack.top();
         if (stacktop->Name() != name) {
-            VS_LOG_AND_FLUSH(fatal, (boost::format("error: expected %1% , got %2%") % stacktop->Name() % name));
-            VSExit(1);
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("error: expected %1% , got %2%") % stacktop->Name() % name), 1);
         } else {
             nodestack.pop();
         }

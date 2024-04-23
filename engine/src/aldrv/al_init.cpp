@@ -53,54 +53,6 @@
 #endif
 
 static void fixup_function_pointers(void) {
-    /* UNCOMMENT AS NEEDED
-     *     talcGetAudioChannel = (ALfloat (*)(ALuint channel))
-     *                             GP("alcGetAudioChannel_LOKI");
-     *     talcSetAudioChannel = (void (*)(ALuint channel, ALfloat volume))
-     *                             GP("alcSetAudioChannel_LOKI");
-     *
-     *     talMute   = (void (*)(ALvoid)) GP("alMute_LOKI");
-     *     talUnMute = (void (*)(ALvoid)) GP("alUnMute_LOKI");
-     *
-     *     talReverbScale = (void (*)(ALuint sid, ALfloat param))
-     *             GP("alReverbScale_LOKI");
-     *     talReverbDelay = (void (*)(ALuint sid, ALfloat param))
-     *             GP("alReverbDelay_LOKI");
-     *
-     *     talBombOnError = (void (*)(void))
-     *             GP("alBombOnError_LOKI");
-     *
-     *     if(talBombOnError == NULL) {
-     *             VS_LOG_AND_FLUSH(fatal, "Could not GetProcAddress alBombOnError_LOKI");
-     *             VSExit(1);
-     *     }
-     *
-     *     talBufferi = (void (*)(ALuint, ALenum, ALint ))
-     *             GP("alBufferi_LOKI");
-     *
-     *     if(talBufferi == NULL) {
-     *             VS_LOG_AND_FLUSH(fatal, "Could not GetProcAddress alBufferi_LOKI");
-     *             VSExit(1);
-     *     }
-     *
-     *     alCaptureInit    = (ALboolean (*)( ALenum, ALuint, ALsizei )) GP("alCaptureInit_EXT");
-     *     alCaptureDestroy = (ALboolean (*)( ALvoid )) GP("alCaptureDestroy_EXT");
-     *     alCaptureStart   = (ALboolean (*)( ALvoid )) GP("alCaptureStart_EXT");
-     *     alCaptureStop    = (ALboolean (*)( ALvoid )) GP("alCaptureStop_EXT");
-     *     alCaptureGetData = (ALsizei (*)( ALvoid*, ALsizei, ALenum, ALuint )) GP("alCaptureGetData_EXT");
-     *
-     *     talBufferAppendData = (ALuint (*)(ALuint, ALenum, ALvoid *, ALint, ALint)) GP("alBufferAppendData_LOKI");
-     *     talBufferAppendWriteData = (ALuint (*)(ALuint, ALenum, ALvoid *, ALint, ALint, ALenum)) GP("alBufferAppendWriteData_LOKI");
-     *
-     *     talGenStreamingBuffers = (void (*)(ALsizei n, ALuint *bids )) GP("alGenStreamingBuffers_LOKI");
-     *     if( talGenStreamingBuffers == NULL ) {
-     *             VS_LOG_AND_FLUSH(fatal, "Could not GP alGenStreamingBuffers_LOKI");
-     *             VSExit(1);
-     *     }
-     *
-     *
-     *
-     */
 }
 
 #endif

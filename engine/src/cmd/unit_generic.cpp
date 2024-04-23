@@ -1,7 +1,7 @@
 /*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -341,7 +341,7 @@ Unit::~Unit() {
         VS_LOG(error, (boost::format("Assumed exit on unit %1%(if not quitting, report error)") % name));
     }
     if (ucref) {
-        VS_LOG_AND_FLUSH(fatal, "DISASTER AREA!!!!");
+        VS_LOG_FLUSH_EXIT(fatal, "DISASTER AREA!!!!", -10);
     }
     VS_LOG(trace, (boost::format("Deallocating unit %1$s addr=%2$x refs=%3$d")
             % name.get().c_str() % this % ucref));

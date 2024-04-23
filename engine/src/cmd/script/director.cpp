@@ -91,7 +91,8 @@ void Mission::DirectorLoop() {
     }
     catch (...) {
         if (PyErr_Occurred()) {
-            VS_LOG_AND_FLUSH(fatal, "void Mission::DirectorLoop(): Python error occurred");
+            VS_LOG(fatal, "void Mission::DirectorLoop(): Python error occurred");
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             PyErr_Print();
             PyErr_Clear();
         }

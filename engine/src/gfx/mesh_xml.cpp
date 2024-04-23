@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, chuck_starchaser, pyramid3d,
+ * mesh_xml.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, chuck_starchaser, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -1186,12 +1188,10 @@ void LaunchConverter(const char *input, const char *output, const char *args = "
         soundserver_path = VSFileSystem::datadir + "/mesher";
         firstarg = string("\"") + soundserver_path + string("\"");
         pid = execlp(soundserver_path.c_str(), soundserver_path.c_str(), input, output, args, NULL);
-        VS_LOG_AND_FLUSH(fatal, "Unable to spawn converter");
-        VSExit(-1);
+        VS_LOG_FLUSH_EXIT(fatal, "Unable to spawn converter", -1);
     } else {
         if (pid == -1) {
-            VS_LOG_AND_FLUSH(fatal, "Unable to spawn converter");
-            VSExit(-1);
+            VS_LOG_FLUSH_EXIT(fatal, "Unable to spawn converter", -1);
         }
         int mystat = 0;
         waitpid(pid, &mystat, 0);
@@ -1427,8 +1427,7 @@ void Mesh::LoadXML(VSFileSystem::VSFile &f,
     XML_ParserFree(parser);
     //Now, copy everything into the mesh data structures
     if (xml->load_stage != 5) {
-        VS_LOG_AND_FLUSH(fatal, "Warning: mesh load possibly failed");
-        VSExit(-1);
+        VS_LOG_FLUSH_EXIT(fatal, "Warning: mesh load possibly failed", -1);
     }
     PostProcessLoading(xml, textureOverride);
     numlods = xml->lod.size() + 1;

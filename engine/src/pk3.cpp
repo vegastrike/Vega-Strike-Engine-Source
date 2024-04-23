@@ -1,4 +1,6 @@
 /*
+ *  pk3.cpp
+ *
  *  Copyright 2002-2003 LibPK3, Inc. All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -48,8 +50,8 @@
  */
 
 /*
- * Further Modified by Stephen G. Tuggy 2021-09-06
- * - Use VS_LOG or VS_LOG_AND_FLUSH instead of BOOST_LOG_TRIVIAL
+ * Further Modified by Stephen G. Tuggy 2021-09-06 and 2024-04-23
+ * - Use VS_LOG, VS_LOG_AND_FLUSH, etc. instead of BOOST_LOG_TRIVIAL
  */
 
 #include "pk3.h"
@@ -207,8 +209,7 @@ bool CPK3::CheckPK3(FILE *f) {
     dh.correctByteOrder();
     //Check
     if (dh.sig != TZipDirHeader::SIGNATURE) {
-        VS_LOG_AND_FLUSH(fatal, "PK3 -- BAD DIR HEADER SIGNATURE, NOT A PK3 FILE !");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "PK3 -- BAD DIR HEADER SIGNATURE, NOT A PK3 FILE !", 1);
         return false;
     }
     //Go to the beginning of the directory.
@@ -217,8 +218,7 @@ bool CPK3::CheckPK3(FILE *f) {
     //Allocate the data buffer, and read the whole thing.
     m_pDirData = new char[dh.dirSize + dh.nDirEntries * sizeof(*m_papDir)];
     if (!m_pDirData) {
-        VS_LOG_AND_FLUSH(fatal, "PK3 -- ERROR ALLOCATING DATA BUFFER !");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "PK3 -- ERROR ALLOCATING DATA BUFFER !", 1);
         return false;
     }
     memset(m_pDirData, 0, dh.dirSize + dh.nDirEntries * sizeof(*m_papDir));
@@ -237,8 +237,7 @@ bool CPK3::CheckPK3(FILE *f) {
         m_papDir[i] = &fh;
         //Check the directory entry integrity.
         if (fh.sig != TZipDirFileHeader::SIGNATURE) {
-            VS_LOG_AND_FLUSH(fatal, "PK3 -- ERROR BAD DIRECTORY SIGNATURE !");
-            VSExit(1);
+            VS_LOG_FLUSH_EXIT(fatal, "PK3 -- ERROR BAD DIRECTORY SIGNATURE !", 1);
             ret = false;
         } else {
             pfh += sizeof(fh);

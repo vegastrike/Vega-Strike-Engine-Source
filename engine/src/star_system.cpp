@@ -681,7 +681,8 @@ void StarSystem::ExecuteUnitAI() {
     }
     catch (const boost::python::error_already_set &) {
         if (PyErr_Occurred()) {
-            VS_LOG_AND_FLUSH(fatal, "void StarSystem::ExecuteUnitAI(): Python error occurred");
+            VS_LOG(fatal, "void StarSystem::ExecuteUnitAI(): Python error occurred");
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             PyErr_Print();
             PyErr_Clear();
         }

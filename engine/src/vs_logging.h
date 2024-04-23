@@ -61,15 +61,18 @@ typedef boost::log::sinks::text_file_backend FileLogBackEnd;
 typedef boost::log::sinks::asynchronous_sink<ConsoleLogBackEnd> ConsoleLogSink;
 typedef boost::log::sinks::asynchronous_sink<FileLogBackEnd>    FileLogSink;
 
-#define VS_LOG(log_level, log_message)                                                                                            \
-    do {                                                                                                                          \
-        VegaStrikeLogging::VegaStrikeLogger::instance().Log(VegaStrikeLogging::vega_log_level::log_level, (log_message));         \
+#define VS_LOG(log_level, log_message)                                                                                                          \
+    do {                                                                                                                                        \
+        VegaStrikeLogging::VegaStrikeLogger::instance().Log(VegaStrikeLogging::vega_log_level::log_level, (log_message));                       \
     } while (false)
-#define VS_LOG_AND_FLUSH(log_level, log_message)                                                                                  \
-    do {                                                                                                                          \
-        VegaStrikeLogging::VegaStrikeLogger::instance().LogAndFlush(VegaStrikeLogging::vega_log_level::log_level, (log_message)); \
+#define VS_LOG_AND_FLUSH(log_level, log_message)                                                                                                \
+    do {                                                                                                                                        \
+        VegaStrikeLogging::VegaStrikeLogger::instance().LogAndFlush(VegaStrikeLogging::vega_log_level::log_level, (log_message));               \
     } while (false)
-//#define VS_LOG_FLUSH_EXIT(log_level, log_message)
+#define VS_LOG_FLUSH_EXIT(log_level, log_message, exit_code)                                                                                    \
+    do {                                                                                                                                        \
+        VegaStrikeLogging::VegaStrikeLogger::instance().LogFlushExit(VegaStrikeLogging::vega_log_level::log_level, (log_message), (exit_code)); \
+    } while (false)
 
 struct VegaStrikeLogger {
 private:

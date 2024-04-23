@@ -1,10 +1,8 @@
 /*
  * mission.h
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2001-2024 Daniel Horn, Alexander Rawass <alexannika@users.sourceforge.net>,
+ * pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -303,7 +301,8 @@ public:
     }
 
     varInst() {
-        VS_LOG_AND_FLUSH(fatal, "varInst() obsolete");
+        VS_LOG(fatal, "varInst() obsolete");
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         assert(0);
     }
 

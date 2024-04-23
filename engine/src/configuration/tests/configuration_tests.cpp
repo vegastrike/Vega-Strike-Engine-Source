@@ -1,7 +1,7 @@
 /*
  * configuration_tests.cpp
  *
- * Copyright (C) 2021-2022 Daniel Horn, Roy Falk, David Wales,
+ * Copyright (C) 2021-2024 Daniel Horn, Roy Falk, David Wales,
  * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -10,12 +10,12 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -82,11 +82,5 @@ TEST(LoadConfig, Sanity) {
     EXPECT_FLOAT_EQ(test_float2, 4.2F) << "Expected 4.2 but got " << test_float2;
     EXPECT_EQ(test_string2, "hello");
     EXPECT_EQ(escaped_string2, "#FF0000Hello\r\nthere!#000000");
-
-//    VS_LOG_AND_FLUSH(fatal, "Starting GetFloat performance test");
-//    for (int i = 0; i < 1000000; ++i) {
-//        vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 11.1F);
-//    }
-//    VS_LOG_AND_FLUSH(fatal, "Finished GetFloat performance test");
 
 }

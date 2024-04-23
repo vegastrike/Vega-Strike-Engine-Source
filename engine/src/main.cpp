@@ -363,8 +363,7 @@ int main(int argc, char *argv[]) {
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()), 1);
     }
 #endif
 #endif
@@ -587,9 +586,8 @@ void bootstrap_main_loop() {
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
                 if (pname.empty()) {
-                    VS_LOG_AND_FLUSH(fatal, (boost::format("Missing or incomplete section for player %1%") % p));
                     cleanexit = true;
-                    VSExit(1);
+                    VS_LOG_FLUSH_EXIT(fatal, (boost::format("Missing or incomplete section for player %1%") % p), 1);
                 }
             }
             playername.push_back(pname);

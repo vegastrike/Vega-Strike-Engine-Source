@@ -93,15 +93,13 @@ std::string GetHelperPlayerSaveGame(int num) {
                 f.Write("\n", 1);
                 f.Close();
             } else {
-                VS_LOG_AND_FLUSH(fatal,
+                VS_LOG_FLUSH_EXIT(fatal,
                                  (boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%")
-                                  % f.GetFullPath()));
-                VSExit(1);
+                                  % f.GetFullPath()), 1);
             }
             err = f.OpenReadOnly("save.4.x.txt", UnknownFile);
             if (err > Ok) {
-                VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Opening the default save we just created");
-                VSExit(1);
+                VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Opening the default save we just created", 1);
             }
         }
         if (err <= Ok) {
@@ -292,7 +290,7 @@ bool isUtf8SaveGame(std::string filename) {
     if (check.validUtf8(savegame)) {
         return true;
     } else {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("ERROR: save file %1% is not UTF-8") % path));
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("ERROR: save file %1% is not UTF-8") % path), -8);
         return false;
     }
 }
@@ -338,7 +336,8 @@ void SaveGame::SetPlayerLocation(const QVector &v) {
     if ((FINITE(v.i) && FINITE(v.j) && FINITE(v.k))) {
         PlayerLocation = v;
     } else {
-        VS_LOG_AND_FLUSH(fatal, "NaN ERROR saving unit");
+        VS_LOG(fatal, "NaN ERROR saving unit");
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         assert(FINITE(v.i) && FINITE(v.j) && FINITE(v.k));
         PlayerLocation.Set(1, 1, 1);
     }

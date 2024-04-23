@@ -1,7 +1,7 @@
 /*
  * game_config.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, David Wales,
+ * Copyright (C) 2020-2024 Daniel Horn, Roy Falk, Stephen G. Tuggy, David Wales,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -75,8 +75,7 @@ void vega_config::GameConfig::LoadGameConfig(const std::string &filename) {
     if (boost::filesystem::exists(filename)) {
         VS_LOG(debug, (boost::format("%1%: Found game config at '%2%'") % __func__ % filename));
     } else {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("%1%: Could not find game config at '%2%'") % __func__ % filename));
-//        VSExit
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%: Could not find game config at '%2%'") % __func__ % filename), 404);
     }
     pt::read_xml(filename, temp_ptree, boost::property_tree::xml_parser::no_comments);
 //    pt::write_xml(filename + ".out.xml", temp_ptree);
