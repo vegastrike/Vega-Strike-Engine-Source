@@ -126,6 +126,8 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     std::cout << std::flush;
     std::cerr << std::flush;
     std::clog << std::flush;
+    fflush(stdout);
+    fflush(stderr);
 
     console_log_sink_.reset();
     file_log_sink_.reset();
