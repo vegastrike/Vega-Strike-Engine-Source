@@ -1,4 +1,4 @@
-name: Windows-CI
+name: Windows-Release
 
 # Controls when the action will run.
 on:
@@ -111,10 +111,11 @@ jobs:
           GTEST_COLOR: 1
         run: .\script\test.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
 
-      - name: Upload artifacts 
-        uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
-        with:
-          path: "${{ github.workspace }}/**/*.zip"
+      # TODO: Find/write a tool to upload release for Windows
+      # - name: Upload artifacts
+      #  uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #    ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
+      #  with:
+      #    path: "${{ github.workspace }}/**/*.zip"
