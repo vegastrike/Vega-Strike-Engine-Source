@@ -126,3 +126,12 @@ jobs:
       #  uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
       #  with:
       #    path: "${{ github.workspace }}/build/**/*.zip"
+
+      # TODO: Find/write a tool to upload release for Windows
+      # - name: Upload artifacts
+      #  uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #    ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
+      #  with:
+      #    path: "${{ github.workspace }}/**/*.zip"
