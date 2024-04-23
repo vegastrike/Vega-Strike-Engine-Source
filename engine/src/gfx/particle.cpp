@@ -225,8 +225,12 @@ ParticleTrail::Config::Config(const std::string &prefix) {
 
 ParticleTrail::Config::~Config() {
     if (texture != nullptr) {
-        delete texture;
-        texture = nullptr;
+        texture->refcount--;
+        if (texture->refcount <= 0)
+        {
+            delete texture;
+            texture = nullptr;
+        }
     }
 }
 
