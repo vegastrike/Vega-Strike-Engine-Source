@@ -85,7 +85,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                     boost::log::keywords::format =
                             "[%TimeStamp%]: %Message%",                                     /*< log record format >*/
                     boost::log::keywords::auto_flush =
-                            false, /*true,*/                                                /*< whether to auto flush to the file after every line >*/
+                            true, /*false,*/                                                /*< whether to auto flush to the file after every line >*/
                     boost::log::keywords::min_free_space = 2UL * 1024UL * 1024UL
                             * 1024UL                                      /*< stop boost::log when there's only 2 GiB free space left >*/
             );
@@ -141,7 +141,7 @@ VegaStrikeLogger::VegaStrikeLogger() : slg_(), file_log_sink_(nullptr) {
                     boost::log::keywords::format =
                             "%Message%",                                                    /*< log record format specific to the console >*/
                     boost::log::keywords::auto_flush =
-                            false /*true*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+                            true /*false*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
             );
     console_log_sink_ = boost::make_shared<ConsoleLogSink>(console_log_back_end_);
     logging_core_->add_sink(console_log_sink_);
