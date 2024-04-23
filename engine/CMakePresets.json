@@ -279,12 +279,17 @@
       "displayName": "Windows Default",
       "description": "Default build for Windows",
       "environment": {
-        "VCPKG_DEFAULT_TRIPLET": "x64-windows",
-        "VCPKG_DEFAULT_HOST_TRIPLET": "x64-windows",
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "VCPKG_HOST_TRIPLET": "x64-windows"
+        "VCPKG_TARGET_TRIPLET": "x64-windows-win10",
+        "VCPKG_HOST_TRIPLET": "x64-windows-win10"
       },
-      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        },
+        "VCPKG_TARGET_TRIPLET": "x64-windows-win10",
+        "VCPKG_HOST_TRIPLET": "x64-windows-win10"
+      },
       "debug": {
         "output": true,
         "find": true
@@ -326,7 +331,7 @@
       "hidden": true,
       "inherits": "windows-default",
       "displayName": "Ninja on Windows",
-      "generator": "Ninja",
+      "generator": "Ninja Multi-Config",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
