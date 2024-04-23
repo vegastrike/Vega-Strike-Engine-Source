@@ -77,13 +77,13 @@ jobs:
           # The other paths starting with '!' are exclusions: they contain temporary files generated during the build of the installed packages.
           path: |
             ${{ env.VCPKG_ROOT }}
-            #!${{ env.VCPKG_ROOT }}/buildtrees
-            #!${{ env.VCPKG_ROOT }}/packages
-            #!${{ env.VCPKG_ROOT }}/downloads
-            #!${{ env.VCPKG_ROOT }}/installed
+            !${{ env.VCPKG_ROOT }}/buildtrees
+            !${{ env.VCPKG_ROOT }}/packages
+            !${{ env.VCPKG_ROOT }}/downloads
+            !${{ env.VCPKG_ROOT }}/installed
           # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
           key: |
-            ${{ hashFiles( '.git/modules/vcpkg/HEAD' )}}
+            ${{ os.release }}-${{ hashFiles( './engine/vcpkg.json' )}}
 
       - name: install-vcpkg
         if: steps.cache.outputs.cache-hit != 'true'
