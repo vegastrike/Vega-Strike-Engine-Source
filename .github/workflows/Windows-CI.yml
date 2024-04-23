@@ -37,7 +37,6 @@ jobs:
       VCPKG_BINARY_SOURCES: 'x-gha,readwrite'
       VCPKG_DEFAULT_TRIPLET: x64-windows
       VCPKG_DEFAULT_HOST_TRIPLET: x64-windows
-      PYTHONHOME: '${{ github.workspace }}/v/packages/python3_x64-windows/tools/python3'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
