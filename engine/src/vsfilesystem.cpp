@@ -528,7 +528,7 @@ void InitDataDirectory() {
         //      %{appdata%}
         // data_paths.push_back();
 #else
-        data_paths.push_back("/usr/share/vegastrike");
+        data_paths.emplace_back("/usr/share/vegastrike");
 #endif
     }
 
@@ -563,10 +563,10 @@ void InitDataDirectory() {
     for (auto & data_path : data_paths) {
         //Test if the dir exist and contains config_file
         if (FileExists(data_path, config_file) >= 0) {
-            VS_LOG(info, (boost::format("Found data in %1%") % data_path));
+            VS_LOG(important_info, (boost::format("Found data in %1%") % data_path));
             if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
                 if (data_path.substr(0, 1) == ".") {
-                    datadir = string(tmppath) + "/" + data_path;
+                    datadir = std::string(tmppath) + "/" + data_path;
                 } else {
                     datadir = data_path;
                 }
@@ -578,12 +578,12 @@ void InitDataDirectory() {
                 VS_LOG_FLUSH_EXIT(fatal, "Error changing to datadir", 1);
             }
             if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
-                datadir = string(tmppath);
+                datadir = std::string(tmppath);
             } else {
                 VS_LOG(error, "Cannot get current path: path too long");
             }
 
-            VS_LOG(info, (boost::format("Using %1% as data directory") % datadir));
+            VS_LOG(important_info, (boost::format("Using %1% as data directory") % datadir));
             break;
         }
     }
@@ -622,7 +622,7 @@ void InitDataDirectory() {
 void LoadConfig(string subdir) {
     bool config_file_found = false;
     bool mod_found = false;
-    bool data_dir_found = false;
+    bool data_dir_found = (!datadir.empty());
     bool foundweapons = false;
     //First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
     weapon_list = "weapon_list.xml";
