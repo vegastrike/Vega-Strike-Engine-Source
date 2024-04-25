@@ -81,11 +81,6 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
-          - FROM:     'debian:buster'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
           - FROM:     'opensuse/leap:15.5'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
@@ -101,27 +96,27 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'fedora:38'
+          - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:38'
+          - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:37'
+          - FROM:     'fedora:39'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'rockylinux:9.1'
+          - FROM:     'rockylinux:9.3'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'rockylinux:8.7'
+          - FROM:     'rockylinux:8.9'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
@@ -176,13 +171,8 @@ jobs:
           IS_RELEASE: 0
         run: script/cibuild $FLAGS
 
-      # This is run from inside the Docker container, by script/docker-entrypoint.sh
-      # - name: Test
-      #   working-directory: ${{github.workspace}}/build
-      #   env:
-      #     GTEST_OUTPUT: xml
-      #     GTEST_COLOR: 1
-      #   run: ctest -V
+      # The tests are run from inside the Docker container, by script/docker-entrypoint.sh.
+      # No need to run them explicitly from here.
 
       - name: Upload test results
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
