@@ -620,7 +620,9 @@ void InitDataDirectory() {
 //Config file has been loaded from data dir but now we look at the specified moddir in order
 //to see if we should use a mod config file
 void LoadConfig(string subdir) {
-    bool found = false;
+    bool config_file_found = false;
+    bool mod_found = false;
+    bool data_dir_found = false;
     bool foundweapons = false;
     //First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
     weapon_list = "weapon_list.xml";
@@ -628,72 +630,74 @@ void LoadConfig(string subdir) {
         modname = subdir;
         if (DirectoryExists(homedir + "/mods/" + subdir)) {
             if (FileExists(homedir + "/mods/" + subdir, config_file) >= 0) {
-                VS_LOG(info,
+                VS_LOG(important_info,
                         (boost::format("CONFIGFILE - Found a config file in home mod directory, using : %1%")
                                 % (homedir + "/mods/" + subdir + "/" + config_file)));
+                config_file = homedir + "/mods/" + subdir + "/" + config_file;
+                mod_found = true;
+                config_file_found = true;
                 if (FileExists(homedir + "/mods/" + subdir, "weapon_list.xml") >= 0) {
                     weapon_list = homedir + "/mods/" + subdir + "/weapon_list.xml";
                     foundweapons = true;
                 }
-                config_file = homedir + "/mods/" + subdir + "/" + config_file;
-                found = true;
             }
         }
-        if (!found) {
+        if (!mod_found) {
             VS_LOG(warning, (boost::format("WARNING : couldn't find a mod named '%1%' in homedir/mods") % subdir));
         }
         if (DirectoryExists(moddir + "/" + subdir)) {
             if (FileExists(moddir + "/" + subdir, config_file) >= 0) {
-                if (!found) {
-                    VS_LOG(info,
+                if (!config_file_found) {
+                    VS_LOG(important_info,
                             (boost::format("CONFIGFILE - Found a config file in mods directory, using : %1%")
                                     % (moddir + "/" + subdir + "/" + config_file)));
+                    config_file = moddir + "/" + subdir + "/" + config_file;
+                    config_file_found = true;
                 }
                 if ((!foundweapons) && FileExists(moddir + "/" + subdir, "weapon_list.xml") >= 0) {
                     weapon_list = moddir + "/" + subdir + "/weapon_list.xml";
                     foundweapons = true;
                 }
-                if (!found) {
-                    config_file = moddir + "/" + subdir + "/" + config_file;
-                }
-                found = true;
             }
         } else {
             VS_LOG(error, (boost::format("ERROR : couldn't find a mod named '%1%' in datadir/mods") % subdir));
         }
         //}
     }
-    if (!found) {
-        //Next check if we have a config file in homedir if we haven't found one for mod
+    if (!config_file_found) {
+        //Next check if we have a config file in homedir if we haven't config_file_found one for mod
         if (FileExists(homedir, config_file) >= 0) {
-            VS_LOG(info,
+            VS_LOG(important_info,
                     (boost::format("CONFIGFILE - Found a config file in home directory, using : %1%")
                             % (homedir + "/" + config_file)));
             config_file = homedir + "/" + config_file;
+            config_file_found = true;
         } else {
-            VS_LOG(info, (boost::format("CONFIGFILE - No config found in home : %1%") % (homedir + "/" + config_file)));
+            VS_LOG(important_info, (boost::format("CONFIGFILE - No config config_file_found in home : %1%") % (homedir + "/" + config_file)));
             if (FileExists(datadir, config_file) >= 0) {
-                VS_LOG(info,
-                        (boost::format("CONFIGFILE - No home config file found, using datadir config file : %1%")
+                VS_LOG(important_info,
+                        (boost::format("CONFIGFILE - No home config file config_file_found, using datadir config file : %1%")
                                 % (datadir + "/" + config_file)));
                 //We didn't find a config file in home_path so we load the data_path one
                 config_file = datadir + "/" + config_file;
+                config_file_found = true;
             } else {
                 VS_LOG_AND_FLUSH(fatal,
-                        (boost::format("CONFIGFILE - No config found in data dir : %1%")
+                        (boost::format("CONFIGFILE - No config config_file_found in data dir : %1%")
                                 % (datadir + "/" + config_file)));
                 VS_LOG_FLUSH_EXIT(fatal, "CONFIG FILE NOT FOUND !!!", 1);
             }
         }
     } else if (!subdir.empty()) {
-        VS_LOG(info, (boost::format("Using Mod Directory %1%") % moddir));
+        VS_LOG(important_info, (boost::format("Using Mod Directory %1%") % moddir));
         CreateDirectoryHome("mods");
         CreateDirectoryHome("mods/" + subdir);
         homedir = homedir + "/mods/" + subdir;
+        mod_found = true;
     }
     //Delete the default config in order to reallocate it with the right one (if it is a mod)
     if (vs_config) {
-        VS_LOG(info, "reallocating vs_config ");
+        VS_LOG(important_info, "reallocating vs_config ");
         delete vs_config;
     }
 
@@ -705,13 +709,15 @@ void LoadConfig(string subdir) {
     //Now check if there is a data directory specified in it
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
     if (!game_options()->datadir.empty()) {
-        //We found a path to data in config file
-        VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
+        //We config_file_found a path to data in config file
+        VS_LOG(important_info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
         datadir = game_options()->datadir;
+        data_dir_found = true;
     } else {
         if (true == legacy_data_dir_mode) {
-            VS_LOG(info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
-        } else {
+            VS_LOG(important_info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
+            data_dir_found = true;
+        } else if (!data_dir_found) {
             VS_LOG_FLUSH_EXIT(fatal, "DATADIR - No datadir specified in config file", 1);
         }
     }
@@ -836,7 +842,7 @@ void InitMods() {
 //    free(dirlist);
 }
 
-void InitPaths(string conf, string subdir) {
+void InitPaths(std::string conf, std::string subdir) {
     config_file = std::move(conf);
 
     current_path.emplace_back("");
@@ -1035,7 +1041,7 @@ void CreateDirectoryAbs(const char *filename) {
     if (!DirectoryExists(filename)) {
         err = mkdir(filename
 #if !defined (_WIN32) || defined (__CYGWIN__)
-                , 0xFFFFFFFF
+                , 0xFFFF
 #endif
         );
         if (err < 0 && errno != EEXIST) {

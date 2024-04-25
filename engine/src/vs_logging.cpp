@@ -94,7 +94,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
     file_log_sink_ = boost::make_shared<FileLogSink>(file_log_back_end_);
     logging_core_->add_sink(file_log_sink_);
 
-    console_log_sink_->set_filter(severity >= fatal);
+    console_log_sink_->set_filter(severity >= important_info);
 }
 
 void VegaStrikeLogger::FlushLogs() {

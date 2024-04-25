@@ -253,11 +253,11 @@ int main(int argc, char *argv[]) {
     // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
     // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
     legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
-    std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
+    VS_LOG(important_info, (boost::format("Legacy Mode: %1%") % legacy_data_dir_mode));
 
     if (legacy_data_dir_mode) {
         VSFileSystem::datadir = boost::filesystem::current_path().string();
-        std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
+        VS_LOG(important_info, (boost::format("Saving current directory (%1%) as DATA_DIR") % VSFileSystem::datadir));
     }
 
     if (!program_directory_path.empty())                  // Changing to an empty path does bad things
@@ -273,9 +273,9 @@ int main(int argc, char *argv[]) {
         char pwd[8192] = "";
         if (nullptr != getcwd(pwd, 8191)) {
             pwd[8191] = '\0';
-            VS_LOG(info, (boost::format(" In path %1%") % pwd));
+            VS_LOG(important_info, (boost::format(" In path %1%") % pwd));
         } else {
-            VS_LOG(info, " In path <<path too long>>");
+            VS_LOG(error, " In path <<path too long>>");
         }
     }
 #ifdef _WIN32
@@ -300,23 +300,21 @@ int main(int argc, char *argv[]) {
     //this sets up the vegastrike config variable
     setup_game_data();
     //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
-    {
-        std::string subdir = ParseCommandLine(argc, argv);
-        VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
-        if (CONFIGFILE == 0) {
-            CONFIGFILE = new char[42];
-            sprintf(CONFIGFILE, "vegastrike.config");
-        }
-        //Specify the config file and the possible mod subdir to play
-        VSFileSystem::InitPaths(CONFIGFILE, subdir);
-        // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
+    std::string subdir = ParseCommandLine(argc, argv);
+    VS_LOG(important_info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
+    if (CONFIGFILE == 0) {
+        CONFIGFILE = new char[42];
+        sprintf(CONFIGFILE, "vegastrike.config");
     }
+    //Specify the config file and the possible mod subdir to play
+    VSFileSystem::InitPaths(CONFIGFILE, subdir);
+    // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
 
     // now that the user config file has been loaded from disk, update the global configuration struct values
     configuration()->OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
-    if (g_game.vsdebug == '0') {
+    if (g_game.vsdebug == '0' || g_game.vsdebug == '\0') {
         g_game.vsdebug = configuration()->logging.vsdebug;
     }
 
@@ -339,7 +337,7 @@ int main(int argc, char *argv[]) {
     if (mission_name[0] == '\0') {
         strncpy(mission_name, game_options()->default_mission.c_str(), 1023);
         mission_name[1023] = '\0';
-        VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
+        VS_LOG(important_info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
     int exitcode;
@@ -867,8 +865,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
     }
     if (false == legacy_data_dir_mode) {
         if (true == VSFileSystem::datadir.empty()) {
-            std::cout << "Data directory not specified." << std::endl;
-            exit(1);
+            VS_LOG_FLUSH_EXIT(fatal, "Data directory not specified.", 1);
         }
     }
 
