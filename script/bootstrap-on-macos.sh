@@ -38,7 +38,7 @@ brew update
 
 for j in "${packages_to_install[@]}"
 do
-    brew install "$j"
+    brew list "$j" &>/dev/null || brew install "$j"
     PACKAGE_INSTALLED_PREFIX=$(brew --prefix "$j")
     PACKAGE_INSTALLED_BIN="$PACKAGE_INSTALLED_PREFIX/bin"
     export PATH="$PACKAGE_INSTALLED_BIN:$PATH"
@@ -47,5 +47,5 @@ done
 
 ln -s /usr/local/include/GL /usr/local/include/OpenGL
 ln -s /usr/local/include/GL /usr/local/include/GLUT
-OPENALDIR=$(brew --prefix openal-soft)
+OPENALDIR="$(brew --prefix openal-soft)"
 export OPENALDIR

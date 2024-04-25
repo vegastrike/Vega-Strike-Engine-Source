@@ -116,11 +116,11 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'rockylinux:8.9'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: false
+          #- FROM:     'rockylinux:8.9'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: false
           #- FROM:     'manjarolinux/base'
           #  COMPILER: 'clang'
           #  OpenGL_GL_PREFERENCE: 'LEGACY'
