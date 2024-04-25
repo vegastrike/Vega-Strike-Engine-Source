@@ -76,7 +76,7 @@ typedef boost::log::sinks::synchronous_sink<FileLogBackEnd>    FileLogSink;
     } while (false)
 #define VS_LOG_FLUSH_EXIT(log_level, log_message, exit_code)                                                                                    \
     do {                                                                                                                                        \
-        VegaStrikeLogging::VegaStrikeLogger::instance().LogFlushExit(VegaStrikeLogging::vega_log_level::log_level, (log_message), (exit_code)); \
+        VegaStrikeLogging::VegaStrikeLogger::instance().LogFlushExit(VegaStrikeLogging::vega_log_level::log_level, (log_message), exit_code);   \
     } while (false)
 
 class VegaStrikeLogger {

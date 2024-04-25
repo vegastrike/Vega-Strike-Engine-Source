@@ -24,6 +24,7 @@
 
 
 #include "vs_logging.h"
+#include "vs_exit.h"
 
 #include <string>
 #include <cstdint>
@@ -86,7 +87,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                     boost::log::keywords::format =
                             "[%TimeStamp%]: %Message%",                                     /*< log record format >*/
                     boost::log::keywords::auto_flush =
-                            false, /*true,*/                                                /*< whether to auto flush to the file after every line >*/
+                            true, /*false,*/                                                /*< whether to auto flush to the file after every line >*/
                     boost::log::keywords::min_free_space = 5UL * 1024UL * 1024UL
                             * 1024UL                                      /*< stop boost::log when there's only 5 GiB free space left >*/
             );
@@ -98,14 +99,14 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
 
 void VegaStrikeLogger::FlushLogs() {
     logging_core_->flush();
-    if (console_log_sink_) {
-//        console_log_sink_->feed_records();
-        console_log_sink_->flush();
-    }
-    if (file_log_sink_) {
-//        file_log_sink_->feed_records();
-        file_log_sink_->flush();
-    }
+//    if (console_log_sink_) {
+////        console_log_sink_->feed_records();
+//        console_log_sink_->flush();
+//    }
+//    if (file_log_sink_) {
+////        file_log_sink_->feed_records();
+//        file_log_sink_->flush();
+//    }
 
     std::cout << std::flush;
     std::cerr << std::flush;
@@ -116,22 +117,22 @@ void VegaStrikeLogger::FlushLogs() {
 
 void VegaStrikeLogger::FlushLogsProgramExiting() {
     logging_core_->flush();
-    if (console_log_sink_) {
-        logging_core_->remove_sink(console_log_sink_);
-//        console_log_sink_->stop();
-        console_log_sink_->flush();
-    }
-    if (console_log_back_end_) {
-        console_log_back_end_->flush();
-    }
-    if (file_log_sink_) {
-        logging_core_->remove_sink(file_log_sink_);
-//        file_log_sink_->stop();
-        file_log_sink_->flush();
-    }
-    if (file_log_back_end_) {
-        file_log_back_end_->flush();
-    }
+//    if (console_log_sink_) {
+//        logging_core_->remove_sink(console_log_sink_);
+////        console_log_sink_->stop();
+//        console_log_sink_->flush();
+//    }
+//    if (console_log_back_end_) {
+//        console_log_back_end_->flush();
+//    }
+//    if (file_log_sink_) {
+//        logging_core_->remove_sink(file_log_sink_);
+////        file_log_sink_->stop();
+//        file_log_sink_->flush();
+//    }
+//    if (file_log_back_end_) {
+//        file_log_back_end_->flush();
+//    }
 
     std::cout << std::flush;
     std::cerr << std::flush;
@@ -139,11 +140,10 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     fflush(stdout);
     fflush(stderr);
 
-    logging_core_->remove_all_sinks();
-    console_log_sink_.reset();
-    file_log_sink_.reset();
-    console_log_back_end_.reset();
-    file_log_back_end_.reset();
+//    console_log_sink_.reset();
+//    file_log_sink_.reset();
+//    console_log_back_end_.reset();
+//    file_log_back_end_.reset();
 }
 
 BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
@@ -153,7 +153,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
 }
 
 VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end_(nullptr), file_log_sink_(nullptr) {
-    boost::filesystem::path::imbue(std::locale("C"));
+    boost::filesystem::path::imbue(std::locale(""));
     logging_core_ = boost::log::core::get();
     // slg_ = my_logger::get();
 
@@ -163,7 +163,7 @@ VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end
                     boost::log::keywords::format =
                             "%Message%",                                                    /*< log record format specific to the console >*/
                     boost::log::keywords::auto_flush =
-                            false /*true*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+                            true /*false*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
             );
     console_log_sink_ = boost::make_shared<ConsoleLogSink>(console_log_back_end_);
     logging_core_->add_sink(console_log_sink_);
@@ -171,6 +171,7 @@ VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end
 
 VegaStrikeLogger::~VegaStrikeLogger() {
     FlushLogsProgramExiting();
+    logging_core_->remove_all_sinks();
 }
 
 void VegaStrikeLogger::Log(const vega_log_level level, const std::string &message) {
@@ -192,7 +193,7 @@ void VegaStrikeLogger::LogAndFlush(const vega_log_level level, const std::string
 void VegaStrikeLogger::LogFlushExit(const vega_log_level level, const std::string& message, const int exit_code = -50) {
     Log(level, message);
     FlushLogsProgramExiting();
-    exit(exit_code);
+    VSExit(exit_code);
 }
 
 void VegaStrikeLogger::Log(const vega_log_level level, const char *message) {
@@ -214,7 +215,7 @@ void VegaStrikeLogger::LogAndFlush(const vega_log_level level, const char *messa
 void VegaStrikeLogger::LogFlushExit(const vega_log_level level, const char* message, const int exit_code = -50) {
     Log(level, message);
     FlushLogsProgramExiting();
-    exit(exit_code);
+    VSExit(exit_code);
 }
 
 void VegaStrikeLogger::Log(const vega_log_level level, const boost::basic_format<char> &message) {
@@ -236,7 +237,7 @@ void VegaStrikeLogger::LogAndFlush(const vega_log_level level, const boost::basi
 void VegaStrikeLogger::LogFlushExit(const vega_log_level level, const boost::basic_format<char>& message, const int exit_code = -50) {
     Log(level, message);
     FlushLogsProgramExiting();
-    exit(exit_code);
+    VSExit(exit_code);
 }
 
 } // namespace VegaStrikeLogging
