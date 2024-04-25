@@ -49,3 +49,7 @@ ln -s /usr/local/include/GL /usr/local/include/OpenGL
 ln -s /usr/local/include/GL /usr/local/include/GLUT
 OPENALDIR="$(brew --prefix openal-soft)"
 export OPENALDIR
+
+echo "PATH=$PATH"
+echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+echo "OPENALDIR=$OPENALDIR"
