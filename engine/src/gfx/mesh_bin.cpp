@@ -1,7 +1,7 @@
 /*
  * mesh_bin.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -78,8 +78,7 @@ void Mesh::LoadBinary(const char *filename, int faction) {
     VSFile fp;
     VSError err = fp.OpenReadOnly(filename, MeshFile);
     if (err > Ok) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Failed to load file %1$s") % filename));
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Failed to load file %1$s") % filename), 1);
     }
     TexNameLength = readi(fp);
     if (TexNameLength) {

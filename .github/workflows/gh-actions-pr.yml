@@ -81,11 +81,6 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
-          - FROM:     'debian:buster'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
           - FROM:     'opensuse/leap:15.5'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
@@ -101,31 +96,31 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'fedora:38'
+          - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:38'
+          - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:37'
+          - FROM:     'fedora:39'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'rockylinux:9.1'
+          - FROM:     'rockylinux:9.3'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'rockylinux:8.7'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: false
+          #- FROM:     'rockylinux:8.9'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: false
           #- FROM:     'manjarolinux/base'
           #  COMPILER: 'clang'
           #  OpenGL_GL_PREFERENCE: 'LEGACY'
@@ -149,7 +144,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f #v4.1.3
         with:
           fetch-depth: 2
           submodules: false
@@ -176,16 +171,11 @@ jobs:
           IS_RELEASE: 0
         run: script/cibuild $FLAGS
 
-      # This is run from inside the Docker container, by script/docker-entrypoint.sh
-      # - name: Test
-      #   working-directory: ${{github.workspace}}/build
-      #   env:
-      #     GTEST_OUTPUT: xml
-      #     GTEST_COLOR: 1
-      #   run: ctest -V
+      # The tests are run from inside the Docker container, by script/docker-entrypoint.sh.
+      # No need to run them explicitly from here.
 
       - name: Upload test results
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 #v3.1.3
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
         if: failure()
         with:
           name: test_results_xml

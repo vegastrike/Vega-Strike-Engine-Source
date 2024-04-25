@@ -1,7 +1,7 @@
 /*
  * gl_init.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -40,23 +40,13 @@
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
-//#if !(defined(__APPLE__) || defined(MACOSX))
-//#define GL_GLEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_PROTOTYPES 1
-//#define GLX_GLXEXT_LEGACY 1
-
-//#   include <GL/glxext.h>
-//#   include <GL/glx.h>
-//#   include <GL/glxext.h>
-//#endif
-
 #include <stdlib.h>
 
 #else
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
-// #if defined (__APPLE__) || defined (MACOSX)
+// #if defined(__APPLE__) && defined(__MACH__)
 // #include <GL/glew.h>
 // #else
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS_ARB 0x884F
@@ -64,7 +54,7 @@
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <OpenGL/gl.h>
     #include <OpenGL/glext.h>
     #include <dlfcn.h>
@@ -260,7 +250,7 @@ void init_opengl_extensions() {
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if (vsExtensionSupported("GL_EXT_compiled_vertex_array")
             && game_options()->LockVertexArrays) {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 #if defined (glLockArraysEXT) && defined (glUnlockArraysEXT)
         glLockArraysEXT_p   = &glLockArraysEXT;
@@ -281,7 +271,7 @@ void init_opengl_extensions() {
 #endif
         VS_LOG(trace, "OpenGL::GL_EXT_compiled_vertex_array supported");
     } else {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
         glLockArraysEXT_p = nullptr;
         glUnlockArraysEXT_p = nullptr;
 #endif

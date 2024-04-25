@@ -1,7 +1,7 @@
 /*
  * mission.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Copyright (C) 2001-2024 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -88,8 +88,7 @@ void Mission::ConstructMission(const char *configfile, const std::string &script
     top = domf.LoadXML(configfile);
     static bool dontpanic = false;
     if (top == NULL && !dontpanic) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Panic exit - mission file %1% not found") % configfile));
-        VSExit(0);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Panic exit - mission file %1% not found") % configfile), 0);
     } else {
         dontpanic = true;
     }

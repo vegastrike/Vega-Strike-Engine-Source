@@ -1,10 +1,8 @@
-/**
+/*
  * aux_texture.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, Roy Falk,
- * and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, 
+ * Roy Falk, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -558,7 +556,13 @@ Texture::~Texture() {
     } else {
         original->refcount--;
         if (original->refcount == 0) {
-            delete original;
+            if (original == this) {
+                VS_LOG(debug, "In Texture::~Texture() in aux_texture.cpp: original->refcount == 0, but original == this, so not deleting again. (We are already in the destructor.)");
+            } else {
+                VS_LOG(trace, "In Texture::~Texture() in aux_texture.cpp: original->refcount == 0, and original != this, so deleting original");
+                delete original;
+                original = nullptr;
+            }
         }
     }
 }

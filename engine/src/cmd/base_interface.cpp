@@ -1,7 +1,7 @@
 /*
  * base_interface.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -1398,7 +1398,8 @@ void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int
                 }
             }
         } else {
-            VS_LOG_AND_FLUSH(fatal, "\nThere are no things to say...\n");
+            VS_LOG(fatal, "\nThere are no things to say...\n");
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             assert(0);
         }
     }

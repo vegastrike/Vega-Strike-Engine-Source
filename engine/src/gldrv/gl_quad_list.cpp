@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
+ * gl_quad_list.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -82,7 +84,7 @@ int GFXQuadList::AddQuad(const GFXVertex *vertices, const GFXColorVertex *color)
             }
             int *tmp = (int *) realloc(quadassignments, numVertices * sizeof(int) / 4);
             if (tmp == nullptr) {
-                VS_LOG_AND_FLUSH(fatal, "Error reallocating quadassignments!");
+                VS_LOG_FLUSH_EXIT(fatal, "Error reallocating quadassignments!", -1);
                 return -1;
             } else {
                 quadassignments = tmp;

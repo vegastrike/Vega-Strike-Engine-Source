@@ -1,7 +1,7 @@
 /*
  * star_system.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -681,10 +681,10 @@ void StarSystem::ExecuteUnitAI() {
     }
     catch (const boost::python::error_already_set &) {
         if (PyErr_Occurred()) {
-            VS_LOG_AND_FLUSH(fatal, "void StarSystem::ExecuteUnitAI(): Python error occurred");
+            VS_LOG(fatal, "void StarSystem::ExecuteUnitAI(): Python error occurred");
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             PyErr_Print();
             PyErr_Clear();
-            VegaStrikeLogging::vega_logger()->FlushLogs();
         }
         throw;
     }
@@ -928,7 +928,6 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                         "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred");
                 PyErr_Print();
                 PyErr_Clear();
-                VegaStrikeLogging::vega_logger()->FlushLogs();
             }
             throw;
         }

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, Alan Shieh, pyramid3d,
+ * gl_globals.h
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -100,7 +102,7 @@ struct GFXStats
 #include <windows.h>
 #include <GL/gl.h>
 #endif
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
 #include <GLUT/glut.h>
 //#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
 #if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)

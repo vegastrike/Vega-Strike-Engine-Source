@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * sprite.h
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -28,7 +30,7 @@
 #include "gfx/hud.h"
 #include "vs_globals.h"
 
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <GLUT/glut.h>
     #include <OpenGL/glext.h>
 #else

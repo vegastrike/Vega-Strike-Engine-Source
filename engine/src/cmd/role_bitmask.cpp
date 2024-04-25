@@ -1,9 +1,8 @@
 /*
  * role_bitmask.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -59,8 +58,7 @@ std::vector<std::vector<char>> &getAllRolePriorities() {
 
 std::vector<char> &getPriority(unsigned char rolerow) {
     if (rolerow > getAllRolePriorities().size()) {
-        VS_LOG_AND_FLUSH(fatal, "FATAL ERROR ROLE OUT OF RANGE");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "FATAL ERROR ROLE OUT OF RANGE", 1);
     }
     return getAllRolePriorities()[rolerow];
 }
@@ -101,22 +99,20 @@ std::vector<std::vector<std::string> > buildscripts() {
 
         std::vector<std::string> vec = readCSV(temp);
         if (siz && getAllRolePriorities()[0].size() != vec.size()) {
-            VS_LOG_AND_FLUSH(fatal,
+            VS_LOG_FLUSH_EXIT(fatal,
                     (boost::format(
                             "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                            % ((unsigned int) vec.size())));
-            VSExit(-5);
+                            % ((unsigned int) vec.size())), -5);
         }
         if (vec.size()) {
             vec.erase(vec.begin());
         }
         for (unsigned int j = 0; j < vec.size(); j++) {
             if (getRole(vec[j]) != j) {
-                VS_LOG_AND_FLUSH(fatal,
+                VS_LOG_FLUSH_EXIT(fatal,
                         (boost::format(
                                 "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                                % j));
-                VSExit(-5);
+                                % j), -5);
             }
         }
         unsigned int i = 0;

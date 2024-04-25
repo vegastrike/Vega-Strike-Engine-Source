@@ -1,7 +1,7 @@
 /*
  * vega_string_utils.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, Stephen G. Tuggy, Benjamen R. Meyer,
+ * Copyright (C) 2001-2024 Daniel Horn, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -38,8 +38,7 @@ inline char *vega_str_dup(const char *string) {
     alloc = (char *)malloc(buf_size);
     if (alloc == nullptr)
     {
-        VS_LOG_AND_FLUSH(fatal, "Out of memory");
-        VSExit(-1);
+        VS_LOG_FLUSH_EXIT(fatal, "Out of memory", -1);
     }
     strncpy(alloc, string, buf_size);
     alloc[buf_size - 1] = '\0';

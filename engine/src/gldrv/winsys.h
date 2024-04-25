@@ -1,26 +1,10 @@
 /*
- * Tux Racer
- * Copyright (C) 1999-2001 Jasmin F. Patry
- * Copyright (C) 2023 Benjamen R. Meyer
+ * winsys.h
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * Incorporated into Vega Strike from Tux Racer
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- * Incorporated into Vega Strike
- *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Copyright (C) 1999-2024 Jasmin F. Patry, Daniel Horn, pyramid3d,
+ * Benjamen R. Meyer, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -51,7 +35,7 @@
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 #   include "SDL2/SDL.h"
 #elif defined( HAVE_GLUT )
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <GLUT/glut.h>
 #else
     #include <GL/glut.h>
@@ -100,13 +84,13 @@ typedef enum {
     WSK_TAB = '\t',
     WSK_ESCAPE = 27,
     WSK_BACKSPACE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
     127,
 #else
     8,
 #endif
     WSK_DELETE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
     8,
 #else
     127,
@@ -227,13 +211,13 @@ typedef enum {
     WSK_TAB = '\t',
     WSK_ESCAPE = 27,
     WSK_BACKSPACE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
     127,
 #else
     8,
 #endif
     WSK_DELETE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
     8,
 #else
     127,

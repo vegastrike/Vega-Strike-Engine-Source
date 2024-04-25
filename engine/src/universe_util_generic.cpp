@@ -1,7 +1,7 @@
 /*
  * universe_util_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -940,18 +940,13 @@ namespace UniverseUtil {
                << lf;
         }
         catch (boost::filesystem::filesystem_error &fse) {
-            VS_LOG_AND_FLUSH(fatal, "boost::filesystem::filesystem_error encountered:");
-            VS_LOG_AND_FLUSH(fatal, fse.what());
-            VSExit(-6);
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("boost::filesystem::filesystem_error encountered: %1%") % fse.what()), -6);
         }
         catch (std::exception &e) {
-            VS_LOG_AND_FLUSH(fatal, "std::exception encountered:");
-            VS_LOG_AND_FLUSH(fatal, e.what());
-            VSExit(-6);
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("std::exception encountered: %1%") % e.what()), -6);
         }
         catch (...) {
-            VS_LOG_AND_FLUSH(fatal, "unknown exception type encountered!");
-            VSExit(-6);
+            VS_LOG_FLUSH_EXIT(fatal, "unknown exception type encountered!", -6);
         }
         ss << "Credits: "
            << static_cast<int64_t>(creds)

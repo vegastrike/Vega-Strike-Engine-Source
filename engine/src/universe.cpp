@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * universe.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -40,7 +42,7 @@
 #include "in_kb.h"
 #include "in_kb_data.h"
 #include "in_main.h"
-#if defined (__APPLE__)
+#if defined (__APPLE__) && defined(__MACH__)
 #import <sys/param.h>
 #endif
 #include "savegame.h"
@@ -324,13 +326,13 @@ void CleanupUnitTables() {
 // Constructors and Init
 Universe::Universe(int argc, char **argv, const char *galaxy_str) {
     //Select drivers
-#if defined (__APPLE__)
+#if defined (__APPLE__) && defined(__MACH__)
     //get the current working directory so when glut trashes it we can restore.
     char pwd[MAXPATHLEN];
     getcwd( pwd, MAXPATHLEN );
 #endif
     GFXInit(argc, argv);
-#if defined (__APPLE__)
+#if defined (__APPLE__) && defined(__MACH__)
     //Restore it
     chdir( pwd );
 #endif

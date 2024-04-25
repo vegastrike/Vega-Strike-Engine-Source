@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Nachum Barcohen, Roy Falk,
+ * vsfilesystem.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Nachum Barcohen, Roy Falk,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -472,13 +474,11 @@ void InitHomeDirectory()
         if (conversionResult == 0) {
             userdir = mbcsPath;
         } else {
-            VS_LOG_AND_FLUSH(fatal, "!!! Fatal Error converting user's home directory to MBCS");
-            VSExit(1);
+            VS_LOG_FLUSH_EXIT(fatal, "!!! Fatal Error converting user's home directory to MBCS", 1);
         }
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! Fatal Error getting user's home directory");
         CoTaskMemFree(pszPath);
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! Fatal Error getting user's home directory", 1);
     }
 
     boost::filesystem::path home_path{userdir};
@@ -498,8 +498,7 @@ void InitHomeDirectory() {
     pwent = getpwuid(getuid());
     chome_path = pwent->pw_dir;
     if (!DirectoryExists(chome_path)) {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : home directory not found");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : home directory not found", 1);
     }
     string user_home_path(chome_path);
     homedir = user_home_path + "/" + HOMESUBDIR;
@@ -529,7 +528,7 @@ void InitDataDirectory() {
         //      %{appdata%}
         // data_paths.push_back();
 #else
-        data_paths.push_back("/usr/share/vegastrike");
+        data_paths.emplace_back("/usr/share/vegastrike");
 #endif
     }
 
@@ -564,10 +563,10 @@ void InitDataDirectory() {
     for (auto & data_path : data_paths) {
         //Test if the dir exist and contains config_file
         if (FileExists(data_path, config_file) >= 0) {
-            VS_LOG(info, (boost::format("Found data in %1%") % data_path));
+            VS_LOG(important_info, (boost::format("Found data in %1%") % data_path));
             if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
                 if (data_path.substr(0, 1) == ".") {
-                    datadir = string(tmppath) + "/" + data_path;
+                    datadir = std::string(tmppath) + "/" + data_path;
                 } else {
                     datadir = data_path;
                 }
@@ -576,16 +575,15 @@ void InitDataDirectory() {
             }
 
             if (chdir(datadir.c_str()) < 0) {
-                VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
-                VSExit(1);
+                VS_LOG_FLUSH_EXIT(fatal, "Error changing to datadir", 1);
             }
             if (nullptr != getcwd(tmppath, VS_PATH_BUF_SIZE - 1)) {
-                datadir = string(tmppath);
+                datadir = std::string(tmppath);
             } else {
                 VS_LOG(error, "Cannot get current path: path too long");
             }
 
-            VS_LOG(info, (boost::format("Using %1% as data directory") % datadir));
+            VS_LOG(important_info, (boost::format("Using %1% as data directory") % datadir));
             break;
         }
     }
@@ -622,7 +620,9 @@ void InitDataDirectory() {
 //Config file has been loaded from data dir but now we look at the specified moddir in order
 //to see if we should use a mod config file
 void LoadConfig(string subdir) {
-    bool found = false;
+    bool config_file_found = false;
+    bool mod_found = false;
+    bool data_dir_found = (!datadir.empty());
     bool foundweapons = false;
     //First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
     weapon_list = "weapon_list.xml";
@@ -630,73 +630,74 @@ void LoadConfig(string subdir) {
         modname = subdir;
         if (DirectoryExists(homedir + "/mods/" + subdir)) {
             if (FileExists(homedir + "/mods/" + subdir, config_file) >= 0) {
-                VS_LOG(info,
+                VS_LOG(important_info,
                         (boost::format("CONFIGFILE - Found a config file in home mod directory, using : %1%")
                                 % (homedir + "/mods/" + subdir + "/" + config_file)));
+                config_file = homedir + "/mods/" + subdir + "/" + config_file;
+                mod_found = true;
+                config_file_found = true;
                 if (FileExists(homedir + "/mods/" + subdir, "weapon_list.xml") >= 0) {
                     weapon_list = homedir + "/mods/" + subdir + "/weapon_list.xml";
                     foundweapons = true;
                 }
-                config_file = homedir + "/mods/" + subdir + "/" + config_file;
-                found = true;
             }
         }
-        if (!found) {
+        if (!mod_found) {
             VS_LOG(warning, (boost::format("WARNING : couldn't find a mod named '%1%' in homedir/mods") % subdir));
         }
         if (DirectoryExists(moddir + "/" + subdir)) {
             if (FileExists(moddir + "/" + subdir, config_file) >= 0) {
-                if (!found) {
-                    VS_LOG(info,
+                if (!config_file_found) {
+                    VS_LOG(important_info,
                             (boost::format("CONFIGFILE - Found a config file in mods directory, using : %1%")
                                     % (moddir + "/" + subdir + "/" + config_file)));
+                    config_file = moddir + "/" + subdir + "/" + config_file;
+                    config_file_found = true;
                 }
                 if ((!foundweapons) && FileExists(moddir + "/" + subdir, "weapon_list.xml") >= 0) {
                     weapon_list = moddir + "/" + subdir + "/weapon_list.xml";
                     foundweapons = true;
                 }
-                if (!found) {
-                    config_file = moddir + "/" + subdir + "/" + config_file;
-                }
-                found = true;
             }
         } else {
             VS_LOG(error, (boost::format("ERROR : couldn't find a mod named '%1%' in datadir/mods") % subdir));
         }
         //}
     }
-    if (!found) {
-        //Next check if we have a config file in homedir if we haven't found one for mod
+    if (!config_file_found) {
+        //Next check if we have a config file in homedir if we haven't config_file_found one for mod
         if (FileExists(homedir, config_file) >= 0) {
-            VS_LOG(info,
+            VS_LOG(important_info,
                     (boost::format("CONFIGFILE - Found a config file in home directory, using : %1%")
                             % (homedir + "/" + config_file)));
             config_file = homedir + "/" + config_file;
+            config_file_found = true;
         } else {
-            VS_LOG(info, (boost::format("CONFIGFILE - No config found in home : %1%") % (homedir + "/" + config_file)));
+            VS_LOG(important_info, (boost::format("CONFIGFILE - No config config_file_found in home : %1%") % (homedir + "/" + config_file)));
             if (FileExists(datadir, config_file) >= 0) {
-                VS_LOG(info,
-                        (boost::format("CONFIGFILE - No home config file found, using datadir config file : %1%")
+                VS_LOG(important_info,
+                        (boost::format("CONFIGFILE - No home config file config_file_found, using datadir config file : %1%")
                                 % (datadir + "/" + config_file)));
                 //We didn't find a config file in home_path so we load the data_path one
                 config_file = datadir + "/" + config_file;
+                config_file_found = true;
             } else {
                 VS_LOG_AND_FLUSH(fatal,
-                        (boost::format("CONFIGFILE - No config found in data dir : %1%")
+                        (boost::format("CONFIGFILE - No config config_file_found in data dir : %1%")
                                 % (datadir + "/" + config_file)));
-                VS_LOG_AND_FLUSH(fatal, "CONFIG FILE NOT FOUND !!!");
-                VSExit(1);
+                VS_LOG_FLUSH_EXIT(fatal, "CONFIG FILE NOT FOUND !!!", 1);
             }
         }
     } else if (!subdir.empty()) {
-        VS_LOG(info, (boost::format("Using Mod Directory %1%") % moddir));
+        VS_LOG(important_info, (boost::format("Using Mod Directory %1%") % moddir));
         CreateDirectoryHome("mods");
         CreateDirectoryHome("mods/" + subdir);
         homedir = homedir + "/mods/" + subdir;
+        mod_found = true;
     }
     //Delete the default config in order to reallocate it with the right one (if it is a mod)
     if (vs_config) {
-        VS_LOG(info, "reallocating vs_config ");
+        VS_LOG(important_info, "reallocating vs_config ");
         delete vs_config;
     }
 
@@ -708,15 +709,16 @@ void LoadConfig(string subdir) {
     //Now check if there is a data directory specified in it
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
     if (!game_options()->datadir.empty()) {
-        //We found a path to data in config file
-        VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
+        //We config_file_found a path to data in config file
+        VS_LOG(important_info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
         datadir = game_options()->datadir;
+        data_dir_found = true;
     } else {
         if (true == legacy_data_dir_mode) {
-            VS_LOG(info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
-        } else {
-            VS_LOG_AND_FLUSH(fatal, "DATADIR - No datadir specified in config file");
-            VSExit(1);
+            VS_LOG(important_info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
+            data_dir_found = true;
+        } else if (!data_dir_found) {
+            VS_LOG_FLUSH_EXIT(fatal, "DATADIR - No datadir specified in config file", 1);
         }
     }
 
@@ -727,11 +729,10 @@ void LoadConfig(string subdir) {
     try {
         Galaxy galaxy = Galaxy(universe_file);
     } catch (std::exception &e) {
-        VS_LOG_AND_FLUSH(fatal,
+        VS_LOG_FLUSH_EXIT(fatal,
                 (boost::format(
                         "Error while loading configuration. Did you specify the asset directory? Error: %1%")
-                        % e.what()));
-        VSExit(1);
+                        % e.what()), 1);
     }
 }
 
@@ -841,7 +842,7 @@ void InitMods() {
 //    free(dirlist);
 }
 
-void InitPaths(string conf, string subdir) {
+void InitPaths(std::string conf, std::string subdir) {
     config_file = std::move(conf);
 
     current_path.emplace_back("");
@@ -1040,11 +1041,12 @@ void CreateDirectoryAbs(const char *filename) {
     if (!DirectoryExists(filename)) {
         err = mkdir(filename
 #if !defined (_WIN32) || defined (__CYGWIN__)
-                , 0xFFFFFFFF
+                , 0xFFFF
 #endif
         );
         if (err < 0 && errno != EEXIST) {
-            VS_LOG_AND_FLUSH(fatal, (boost::format("Errno=%1% - FAILED TO CREATE : %2%") % errno % filename));
+            VS_LOG(fatal, (boost::format("Errno=%1% - FAILED TO CREATE : %2%") % errno % filename));
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             GetError("CreateDirectory");
             VSExit(1);
         }
@@ -1491,8 +1493,7 @@ void VSFile::checkExtracted() {
                 //File is not opened so we open it and add it in the pk3 file map
                 CPK3 *pk3newfile = new CPK3;
                 if (!pk3newfile->Open(full_vol_path.c_str())) {
-                    VS_LOG_AND_FLUSH(fatal, (boost::format("!!! ERROR : opening volume : %1%") % full_vol_path));
-                    VSExit(1);
+                    VS_LOG_FLUSH_EXIT(fatal, (boost::format("!!! ERROR : opening volume : %1%") % full_vol_path), 1);
                 }
                 std::pair<std::string, CPK3 *> pk3_pair(full_vol_path, pk3newfile);
                 pk3_opened_files.insert(pk3_pair);
@@ -1580,11 +1581,10 @@ VSError VSFile::OpenReadOnly(const char *file, VSFileType type) {
                     err = FileNotFound;
                 } else {
                     if ((this->fp = fopen(filestr.c_str(), "rb")) == nullptr) {
-                        VS_LOG_AND_FLUSH(fatal,
+                        VS_LOG_FLUSH_EXIT(fatal,
                                 (boost::format(
                                         "!!! SERIOUS ERROR : failed to open Unknown file %1% - this should not happen")
-                                        % filestr));
-                        VSExit(1);
+                                        % filestr), 1);
                     }
                     this->valid = true;
                     if (VSFS_DEBUG() > 1) {
@@ -1842,8 +1842,7 @@ size_t VSFile::Write(const void *ptr, size_t length) {
         size_t nbwritten = fwrite(ptr, 1, length, this->fp);
         return nbwritten;
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
     return Ok;
 }
@@ -1857,8 +1856,7 @@ VSError VSFile::WriteLine(const void *ptr) {
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
         fputs((const char *) ptr, this->fp);
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
     return Ok;
 }
@@ -1875,8 +1873,7 @@ int VSFile::Fprintf(const char *format, ...) {
         va_end(ap);
         return retVal;
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
     return 0;
 }
@@ -1984,8 +1981,7 @@ void VSFile::Clear() {
             VSExit(1);
         }
     } else {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "!!! ERROR : Writing is not supported within resource/volume files", 1);
     }
 }
 

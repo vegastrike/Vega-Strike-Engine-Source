@@ -1,9 +1,8 @@
 /*
  * event_xml.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -209,7 +208,7 @@ void LoadAI(const char *filename, ElemAttrMap &result, const string &faction) {
             VS_LOG(warning, (boost::format("ai file again %1% again not found") % full_filename));
             err = f.OpenReadOnly("default.agg.xml", AiFile);
             if (err > Ok) {
-                VS_LOG(error, "ai file again default.agg.xml again not found");
+                VS_LOG_AND_FLUSH(error, "ai file again default.agg.xml again not found");
                 return;                 //Who knows what will happen now? Crash?    // TODO: VSExit()?
             }
         }

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d, Stephen G. Tuggy,
+ * configxml.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Alexander Rawass, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -39,8 +41,7 @@ VegaConfig::VegaConfig(const char *configfile) {
     configNodeFactory domf;
     configNode *top = (configNode *) domf.LoadXML(configfile);
     if (top == nullptr) {
-        VS_LOG_AND_FLUSH(fatal, "Panic exit - no configuration");
-        VSExit(0);
+        VS_LOG_FLUSH_EXIT(fatal, "Panic exit - no configuration", 0);
     }
     variables = nullptr;
     colors = nullptr;

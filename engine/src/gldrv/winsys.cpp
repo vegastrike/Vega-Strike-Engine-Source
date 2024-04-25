@@ -1,25 +1,10 @@
 /*
- * Tux Racer
- * Copyright (C) 1999-2001 Jasmin F. Patry
+ * winsys.cpp
+ * 
+ * Incorporated into Vega Strike from Tux Racer
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- * Incorporated into Vega Strike
- *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Copyright (C) 1999-2024 Jasmin F. Patry, Daniel Horn, pyramid3d,
+ * Benjamen R. Meyer, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -258,54 +243,27 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     if(!window) {
         std::cerr << "No window\n" << std::flush;
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
     }
 
     SDL_GL_CreateContext(window);
 
     screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
     if (!screen) {
-
-        VS_LOG(info, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()));
-        VSExit(1);
-
-        /*for (int counter = 0; window == nullptr && counter < 2; ++counter) {
-            for (int bpd = 4; bpd > 1; --bpd) {
-                SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, bpd * 8);
-                if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags | SDL_ANYFORMAT))
-                        == NULL) {
-                    VS_LOG_AND_FLUSH(error,
-                            (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
-                                    % bpp
-                                    % (bpd * 8)
-                                    % SDL_GetError()));
-                } else {
-                    break;
-                }
-            }
-            if (screen == NULL) {
-                SDL_GL_SetAttribute(SDL_GL_RED_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, otherattributes);
-                gl_options.color_depth = bpp = otherbpp;
-            }
-        }
-        if (screen == NULL) {
-            VS_LOG_AND_FLUSH(fatal, "FAILED to initialize video");
-            VSExit(1);
-        }*/
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()), 1);
     }
 
     std::string version = (const char *) glGetString(GL_RENDERER);
     if (version == "GDI Generic") {
         if (game_options()->gl_accelerated_visual) {
             VS_LOG(error, "GDI Generic software driver reported, trying to reset.");
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             SDL_Quit();
             game_options()->gl_accelerated_visual = false;
             return false;
         } else {
             VS_LOG(error, "GDI Generic software driver reported, reset failed.\n");
-            VS_LOG(error, "Please make sure a graphics card driver is installed and functioning properly.\n");
+            VS_LOG_AND_FLUSH(error, "Please make sure a graphics card driver is installed and functioning properly.\n");
         }
     }
 
@@ -342,7 +300,8 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
      * Initialize SDL
      */
     if (SDL_Init(sdl_flags) < 0) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
+        VS_LOG(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         exit(1);              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
 
@@ -534,14 +493,14 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  Exits the program
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2000-10-20
+ *  \date    Modified: 2024-04-25
  */
 void winsys_exit(int code) {
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();
     }
-    // exit( code );
+    exit( code );
 }
 
 #else
@@ -753,7 +712,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     gl_options.color_depth = game_options()->colordepth;
     glutInit( argc, argv );
     if (game_options()->glut_stencil) {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(__MACH__)
         if ( !(glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE|GLUT_STENCIL ), 1) )
             glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE );
 #else
@@ -785,7 +744,8 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 
         glutWindow = glutCreateWindow( window_title );
         if (glutWindow == 0) {
-            VS_LOG_AND_FLUSH(fatal, "Couldn't create a window.");
+            VS_LOG(fatal, "Couldn't create a window.");
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             exit( 1 );                  // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
         }
     }

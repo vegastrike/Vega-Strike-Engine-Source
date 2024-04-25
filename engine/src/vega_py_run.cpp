@@ -1,7 +1,7 @@
 /*
  * vega_py_run.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -49,7 +49,6 @@ void VegaPyRunString(char *py_snippet) {
         VS_LOG_AND_FLUSH(error, "VegaPyRunString: Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VegaStrikeLogging::vega_logger()->FlushLogs();
     }
 //#endif
 }

@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2001-2023 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2024 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -77,45 +77,6 @@ ENDIF ()
 # allowing us to differentiate our Assets API across multiple versions.
 # If a release is missing this value, then version `1` can be assumed.
 SET(VEGASTRIKE_ASSETS_API_VERSION "2")
-
-#IF (COMMAND cmake_policy)
-#    CMAKE_POLICY (SET CMP0003 NEW)
-#ENDIF (COMMAND cmake_policy)
-#
-## VERSION Policy
-#IF (POLICY CMP0048)
-#    CMAKE_POLICY (SET CMP0048 NEW)
-#ENDIF (POLICY CMP0048)
-#
-## Used to be that without this, CMake couldn't find pow() -- at least not on my Windows machine.
-#IF (POLICY CMP0066)
-#    CMAKE_POLICY (SET CMP0066 NEW)
-#ENDIF ()
-#
-## FindOpenGL prefers GLVND by default when available. But there is an option to override that.
-#IF (POLICY CMP0072)
-#    CMAKE_POLICY (SET CMP0072 NEW)
-#ENDIF (POLICY CMP0072)
-#
-## find_package() uses <PackageName>_ROOT variables
-#IF (POLICY CMP0074)
-#    CMAKE_POLICY (SET CMP0074 NEW)
-#ENDIF (POLICY CMP0074)
-#
-## Include file check macros honor CMAKE_REQUIRED_LIBRARIES
-#IF (POLICY CMP0075)
-#    CMAKE_POLICY (SET CMP0075 NEW)
-#ENDIF ()
-#
-## Concerning link time flags for turning on or off Position Independent Executables (PIE)
-#IF (POLICY CMP0083)
-#    CMAKE_POLICY (SET CMP0083 NEW)
-#ENDIF ()
-#
-## MSVC runtime library flags are selected by an abstraction. Supported by CMake 3.15 and up
-#IF (POLICY CMP0091)
-#    CMAKE_POLICY (SET CMP0091 NEW)
-#ENDIF ()
 
 PROJECT(Vega_Strike
     VERSION
@@ -619,9 +580,9 @@ ELSE (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB network)
 ENDIF (NOT BEOS)
 
-IF (NOT WIN32)
+IF (UTIL_LIB)
     SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
-ENDIF (NOT WIN32)
+ENDIF ()
 
 # Still need to add CEGUI and OGRE find packages
 
@@ -1621,7 +1582,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 MESSAGE (SEND_WARNING "!! Unsupported version of openSUSE")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "")
             ENDIF (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
-        ELSEIF (LINUX_ID STREQUAL fedora AND LINUX_VERSION_ID VERSION_GREATER_EQUAL 30 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 37)
+        ELSEIF (LINUX_ID STREQUAL fedora AND LINUX_VERSION_ID VERSION_GREATER_EQUAL 30 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 40)
             IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 34)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
             ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
@@ -1632,15 +1593,43 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python37, boost-python3")
             ENDIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 34)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
-        ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")
-            SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
-        ELSEIF (LINUX_ID STREQUAL rhel OR LINUX_ID STREQUAL redhat)
-            SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
-        ELSEIF (LINUX_ID STREQUAL rocky)
-            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.1)
+        ELSEIF (LINUX_ID STREQUAL centos)
+            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.7)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.8 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.9)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python3.11, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 9.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSE ()
+                MESSAGE(SEND_WARNING "!! We do not currently support this version of CentOS.")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "")
+            ENDIF ()
+        ELSEIF (LINUX_ID STREQUAL rhel OR LINUX_ID STREQUAL redhat)
+            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.7)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.8 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.9)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python3.11, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 9.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSE ()
+                MESSAGE(SEND_WARNING "!! This version of Red Hat is not currently supported.")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "")
+            ENDIF ()
+        ELSEIF (LINUX_ID STREQUAL rocky)
+            IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.7)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.8 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 8.9)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python3.11, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            ELSEIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 9.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python3, boost-python3")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
             ELSE ()
                 MESSAGE(SEND_WARNING "!! This version of Rocky Linux is not currently supported.")

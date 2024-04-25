@@ -1,8 +1,8 @@
 /*
  * main.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -142,7 +142,7 @@ int readCommandLineOptions(int argc, char **argv);
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
 void VSExit(int code) {
     Music::CleanupMuzak();
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     winsys_exit(code);
 }
 
@@ -151,7 +151,7 @@ void cleanup(void) {
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
     VS_LOG(info, "Thank you for playing!");
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     if (_Universe != NULL) {
         _Universe->WriteSaveGame(true);
     }
@@ -253,11 +253,11 @@ int main(int argc, char *argv[]) {
     // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
     // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
     legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
-    std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
+    VS_LOG(important_info, (boost::format("Legacy Mode: %1%") % legacy_data_dir_mode));
 
     if (legacy_data_dir_mode) {
         VSFileSystem::datadir = boost::filesystem::current_path().string();
-        std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
+        VS_LOG(important_info, (boost::format("Saving current directory (%1%) as DATA_DIR") % VSFileSystem::datadir));
     }
 
     if (!program_directory_path.empty())                  // Changing to an empty path does bad things
@@ -273,9 +273,9 @@ int main(int argc, char *argv[]) {
         char pwd[8192] = "";
         if (nullptr != getcwd(pwd, 8191)) {
             pwd[8191] = '\0';
-            VS_LOG(info, (boost::format(" In path %1%") % pwd));
+            VS_LOG(important_info, (boost::format(" In path %1%") % pwd));
         } else {
-            VS_LOG(info, " In path <<path too long>>");
+            VS_LOG(error, " In path <<path too long>>");
         }
     }
 #ifdef _WIN32
@@ -300,23 +300,21 @@ int main(int argc, char *argv[]) {
     //this sets up the vegastrike config variable
     setup_game_data();
     //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
-    {
-        std::string subdir = ParseCommandLine(argc, argv);
-        VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
-        if (CONFIGFILE == 0) {
-            CONFIGFILE = new char[42];
-            sprintf(CONFIGFILE, "vegastrike.config");
-        }
-        //Specify the config file and the possible mod subdir to play
-        VSFileSystem::InitPaths(CONFIGFILE, subdir);
-        // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
+    std::string subdir = ParseCommandLine(argc, argv);
+    VS_LOG(important_info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
+    if (CONFIGFILE == 0) {
+        CONFIGFILE = new char[42];
+        sprintf(CONFIGFILE, "vegastrike.config");
     }
+    //Specify the config file and the possible mod subdir to play
+    VSFileSystem::InitPaths(CONFIGFILE, subdir);
+    // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
 
     // now that the user config file has been loaded from disk, update the global configuration struct values
     configuration()->OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
-    if (g_game.vsdebug == '0') {
+    if (g_game.vsdebug == '0' || g_game.vsdebug == '\0') {
         g_game.vsdebug = configuration()->logging.vsdebug;
     }
 
@@ -330,7 +328,7 @@ int main(int argc, char *argv[]) {
         home_subdir_path = home_path;
     }
 
-    VegaStrikeLogging::vega_logger()->InitLoggingPart2(g_game.vsdebug, home_subdir_path);
+    VegaStrikeLogging::VegaStrikeLogger::instance().InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
     if (game_options()->force_client_connect) {
@@ -339,7 +337,7 @@ int main(int argc, char *argv[]) {
     if (mission_name[0] == '\0') {
         strncpy(mission_name, game_options()->default_mission.c_str(), 1023);
         mission_name[1023] = '\0';
-        VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
+        VS_LOG(important_info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
     int exitcode;
@@ -363,8 +361,7 @@ int main(int argc, char *argv[]) {
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()), 1);
     }
 #endif
 #endif
@@ -400,8 +397,6 @@ int main(int argc, char *argv[]) {
 
     delete _Universe;
     CleanupUnitTables();
-    // Just to be sure -- stephengtuggy 2020-07-27
-    VegaStrikeLogging::vega_logger()->FlushLogs();
     return 0;
 }
 
@@ -589,9 +584,8 @@ void bootstrap_main_loop() {
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
                 if (pname.empty()) {
-                    VS_LOG_AND_FLUSH(fatal, (boost::format("Missing or incomplete section for player %1%") % p));
                     cleanexit = true;
-                    VSExit(1);
+                    VS_LOG_FLUSH_EXIT(fatal, (boost::format("Missing or incomplete section for player %1%") % p), 1);
                 }
             }
             playername.push_back(pname);
@@ -871,8 +865,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
     }
     if (false == legacy_data_dir_mode) {
         if (true == VSFileSystem::datadir.empty()) {
-            std::cout << "Data directory not specified." << std::endl;
-            exit(1);
+            VS_LOG_FLUSH_EXIT(fatal, "Data directory not specified.", 1);
         }
     }
 
