@@ -460,7 +460,6 @@ retryEraseItem:
                         resetIter = true;
                         cachedHashItem = hashItem + 1;
                     }
-                    //delete hashItem;
                     hashers->erase(hashItem);
                     if (hashers->empty()) {
                         bfxmHashTable.Delete(hash_name);
