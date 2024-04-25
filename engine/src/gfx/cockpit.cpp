@@ -682,11 +682,11 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::NOTAPPLICABLE;
             }
         case UnitImages<void>::CLOAK_MODAL:
-            if (-1 == target->cloaking) {
+            if (!target->cloak.Capable() || target->cloak.Damaged()) {
                 return (float) UnitImages<void>::NOTAPPLICABLE;
-            } else if (((int) (-2147483647) - 1) == target->cloaking) {
+            } else if (target->cloak.Ready()) {
                 return (float) UnitImages<void>::READY;
-            } else if (target->cloaking == target->cloakmin) {
+            } else if (target->cloak.Cloaked()) {
                 return (float) UnitImages<void>::ACTIVE;
             } else {
                 return (float) UnitImages<void>::SWITCHING;
