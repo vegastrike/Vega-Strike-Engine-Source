@@ -29,14 +29,11 @@
 #include <string>
 #include <cstdint>
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/sinks/async_frontend.hpp>
-#include <boost/log/sinks/sync_frontend.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/sinks/text_ostream_backend.hpp>
 #include <boost/log/utility/setup/console.hpp>
@@ -45,13 +42,6 @@
 #include <boost/filesystem.hpp>
 
 namespace VegaStrikeLogging {
-
-// void exitProgram(int code)
-// {
-//     Music::CleanupMuzak();
-//     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
-//     winsys_exit(code);
-// }
 
 void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
         const boost::filesystem::path &vega_strike_home_dir) {
@@ -76,7 +66,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
             break;
     }
 
-    file_log_back_end_ = boost::make_shared<FileLogBackEnd>
+    file_log_sink_ = boost::log::add_file_log
             (
                     boost::log::keywords::file_name =
                             logging_dir_name + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f.log", /*< file name pattern >*/
@@ -91,23 +81,12 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                     boost::log::keywords::min_free_space = 5UL * 1024UL * 1024UL
                             * 1024UL                                      /*< stop boost::log when there's only 5 GiB free space left >*/
             );
-    file_log_sink_ = boost::make_shared<FileLogSink>(file_log_back_end_);
-    logging_core_->add_sink(file_log_sink_);
 
     console_log_sink_->set_filter(severity >= important_info);
 }
 
 void VegaStrikeLogger::FlushLogs() {
     logging_core_->flush();
-//    if (console_log_sink_) {
-////        console_log_sink_->feed_records();
-//        console_log_sink_->flush();
-//    }
-//    if (file_log_sink_) {
-////        file_log_sink_->feed_records();
-//        file_log_sink_->flush();
-//    }
-
     std::cout << std::flush;
     std::cerr << std::flush;
     std::clog << std::flush;
@@ -117,33 +96,11 @@ void VegaStrikeLogger::FlushLogs() {
 
 void VegaStrikeLogger::FlushLogsProgramExiting() {
     logging_core_->flush();
-//    if (console_log_sink_) {
-//        logging_core_->remove_sink(console_log_sink_);
-////        console_log_sink_->stop();
-//        console_log_sink_->flush();
-//    }
-//    if (console_log_back_end_) {
-//        console_log_back_end_->flush();
-//    }
-//    if (file_log_sink_) {
-//        logging_core_->remove_sink(file_log_sink_);
-////        file_log_sink_->stop();
-//        file_log_sink_->flush();
-//    }
-//    if (file_log_back_end_) {
-//        file_log_back_end_->flush();
-//    }
-
     std::cout << std::flush;
     std::cerr << std::flush;
     std::clog << std::flush;
     fflush(stdout);
     fflush(stderr);
-
-//    console_log_sink_.reset();
-//    file_log_sink_.reset();
-//    console_log_back_end_.reset();
-//    file_log_back_end_.reset();
 }
 
 BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
@@ -155,18 +112,14 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
 VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end_(nullptr), file_log_sink_(nullptr) {
     boost::filesystem::path::imbue(std::locale(""));
     logging_core_ = boost::log::core::get();
-    // slg_ = my_logger::get();
-
-    console_log_back_end_ = boost::make_shared<ConsoleLogBackEnd>
+    console_log_sink_ = boost::log::add_console_log
             (
-                    boost::shared_ptr<std::ostream>(&std::cerr, boost::null_deleter()),
+                    std::cerr,
                     boost::log::keywords::format =
                             "%Message%",                                                    /*< log record format specific to the console >*/
                     boost::log::keywords::auto_flush =
                             true /*false*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
             );
-    console_log_sink_ = boost::make_shared<ConsoleLogSink>(console_log_back_end_);
-    logging_core_->add_sink(console_log_sink_);
 }
 
 VegaStrikeLogger::~VegaStrikeLogger() {
