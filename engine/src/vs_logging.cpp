@@ -35,6 +35,7 @@
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/sinks/async_frontend.hpp>
+#include <boost/log/sinks/sync_frontend.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/sinks/text_ostream_backend.hpp>
 #include <boost/log/utility/setup/console.hpp>

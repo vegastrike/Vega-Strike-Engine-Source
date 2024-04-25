@@ -28,21 +28,21 @@
 
 #include <cstdint>
 
-#include "boost/move/utility_core.hpp"
-#include "boost/smart_ptr/shared_ptr.hpp"
-#include "boost/smart_ptr/make_shared_object.hpp"
-#include "boost/format.hpp"
-#include "boost/log/sources/global_logger_storage.hpp"
-//#include "boost/log/sources/logger.hpp"
-#include "boost/log/core.hpp"
-#include "boost/log/expressions.hpp"
-#include "boost/log/sources/severity_logger.hpp"
-#include "boost/log/sources/record_ostream.hpp"
-#include "boost/log/sinks/async_frontend.hpp"
-#include "boost/log/sinks/sync_frontend.hpp"
-#include "boost/log/sinks/text_file_backend.hpp"
-#include "boost/log/sinks/text_ostream_backend.hpp"
-#include "boost/filesystem.hpp"
+#include <boost/move/utility_core.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/smart_ptr/make_shared_object.hpp>
+#include <boost/format.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+//#include <boost/log/sources/logger.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/sinks/async_frontend.hpp>
+#include <boost/log/sinks/sync_frontend.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/sinks/text_ostream_backend.hpp>
+#include <boost/filesystem.hpp>
 
 namespace VegaStrikeLogging {
 
@@ -63,8 +63,8 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", vega_log_level)
 
 typedef boost::log::sinks::text_ostream_backend ConsoleLogBackEnd;
 typedef boost::log::sinks::text_file_backend FileLogBackEnd;
-typedef boost::log::sinks::asynchronous_sink<ConsoleLogBackEnd> ConsoleLogSink;
-typedef boost::log::sinks::asynchronous_sink<FileLogBackEnd>    FileLogSink;
+typedef boost::log::sinks::synchronous_sink<ConsoleLogBackEnd> ConsoleLogSink;
+typedef boost::log::sinks::synchronous_sink<FileLogBackEnd>    FileLogSink;
 
 #define VS_LOG(log_level, log_message)                                                                                                          \
     do {                                                                                                                                        \
@@ -79,7 +79,7 @@ typedef boost::log::sinks::asynchronous_sink<FileLogBackEnd>    FileLogSink;
         VegaStrikeLogging::VegaStrikeLogger::instance().LogFlushExit(VegaStrikeLogging::vega_log_level::log_level, (log_message), (exit_code)); \
     } while (false)
 
-struct VegaStrikeLogger {
+class VegaStrikeLogger {
 private:
     boost::log::core_ptr logging_core_;
     boost::log::sources::severity_logger_mt<vega_log_level>& slg_;
