@@ -580,9 +580,9 @@ ELSE (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB network)
 ENDIF (NOT BEOS)
 
-IF (NOT WIN32)
+IF (UTIL_LIB)
     SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
-ENDIF (NOT WIN32)
+ENDIF ()
 
 # Still need to add CEGUI and OGRE find packages
 
