@@ -493,14 +493,14 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  Exits the program
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2000-10-20
+ *  \date    Modified: 2024-04-25
  */
 void winsys_exit(int code) {
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();
     }
-    // exit( code );
+    exit( code );
 }
 
 #else
