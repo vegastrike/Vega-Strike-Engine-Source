@@ -99,11 +99,11 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
 void VegaStrikeLogger::FlushLogs() {
     logging_core_->flush();
     if (console_log_sink_) {
-        console_log_sink_->feed_records();
+//        console_log_sink_->feed_records();
         console_log_sink_->flush();
     }
     if (file_log_sink_) {
-        file_log_sink_->feed_records();
+//        file_log_sink_->feed_records();
         file_log_sink_->flush();
     }
 
@@ -118,7 +118,7 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     logging_core_->flush();
     if (console_log_sink_) {
         logging_core_->remove_sink(console_log_sink_);
-        console_log_sink_->stop();
+//        console_log_sink_->stop();
         console_log_sink_->flush();
     }
     if (console_log_back_end_) {
@@ -126,7 +126,7 @@ void VegaStrikeLogger::FlushLogsProgramExiting() {
     }
     if (file_log_sink_) {
         logging_core_->remove_sink(file_log_sink_);
-        file_log_sink_->stop();
+//        file_log_sink_->stop();
         file_log_sink_->flush();
     }
     if (file_log_back_end_) {
@@ -152,7 +152,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
     return lg;
 }
 
-VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_sink_(nullptr), file_log_back_end_(nullptr) {
+VegaStrikeLogger::VegaStrikeLogger() : slg_(my_logger::get()), file_log_back_end_(nullptr), file_log_sink_(nullptr) {
     boost::filesystem::path::imbue(std::locale("C"));
     logging_core_ = boost::log::core::get();
     // slg_ = my_logger::get();
