@@ -71,7 +71,7 @@ extern float AUDIO_ATOM;
 #ifndef NO_GFX
     #if defined(__APPLE__) && defined(__MACH__)
         #include <epoxy/gl.h>
-        #include <epoxy/glx.h>
+//        #include <epoxy/glx.h>
         #include <GLUT/glut.h>
     #else //defined (__APPLE__) || defined (MACOSX)
         #define __glext_h_

@@ -43,7 +43,7 @@ using std::vector;
 using std::string;
 using std::map;
 
-class VSDrawable {
+class Drawable {
 public:
     //number of meshes (each with separate texture) this unit has
     std::vector<Mesh *> meshdata;
@@ -74,8 +74,8 @@ public:
 
     static std::map<string, Unit *> Units;
 
-    VSDrawable();
-    ~VSDrawable();
+    Drawable();
+    ~Drawable();
 
     bool DrawableInit(const char *filename,
             int faction,
@@ -90,9 +90,9 @@ public:
 
 protected:
     // forbidden
-    VSDrawable(const VSDrawable &) = delete;
+    Drawable(const Drawable &) = delete;
     // forbidden
-    VSDrawable &operator=(const VSDrawable &) = delete;
+    Drawable &operator=(const Drawable &) = delete;
 
 public:
     string getAnimationName(unsigned int animationNumber) const;

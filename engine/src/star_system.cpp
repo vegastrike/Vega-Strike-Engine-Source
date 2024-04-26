@@ -453,7 +453,7 @@ void StarSystem::Draw(bool DrawCockpit) {
         _Universe->AccessCockpit()->Draw();
     }
 
-    VSDrawable::UpdateFrames();
+    Drawable::UpdateFrames();
 
     // And now we're done with the occluder set
     Occlusion::end();

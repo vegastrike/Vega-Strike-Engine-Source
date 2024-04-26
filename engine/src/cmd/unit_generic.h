@@ -137,7 +137,7 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public VSDrawable, public Damageable, public Energetic,
+class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
              public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
 
 protected:

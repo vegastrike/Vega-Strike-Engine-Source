@@ -104,7 +104,7 @@ struct GFXStats
 #endif
 #if defined(__APPLE__) && defined(__MACH__)
 #include <epoxy/gl.h>
-#include <epoxy/glx.h>
+//#include <epoxy/glx.h>
 //#include <GLUT/glut.h>
 //#include <SDL_opengl.h>
 //#include <SDL_opengl_glext.h>

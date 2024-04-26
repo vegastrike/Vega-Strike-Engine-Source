@@ -278,7 +278,7 @@ char *GetUnitDir(const char *filename) {
  **********************************************************************************
  */
 // Called by Planet
-Unit::Unit(int dummy) : VSDrawable(), Damageable(), Movable() {
+Unit::Unit(int dummy) : Drawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
     pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
@@ -287,7 +287,7 @@ Unit::Unit(int dummy) : VSDrawable(), Damageable(), Movable() {
 }
 
 
-Unit::Unit() : VSDrawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
+Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pImage->cockpit_damage = NULL;
@@ -298,7 +298,7 @@ Unit::Unit() : VSDrawable(), Damageable(), Movable() //: cumulative_transformati
 
 // Called by Missile
 Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
-        : VSDrawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
+        : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(fact);
@@ -324,7 +324,7 @@ Unit::Unit(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber)
-        : VSDrawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
+        : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(faction);
@@ -4250,11 +4250,11 @@ void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &ove
     }
 }
 
-std::map<string, Unit *> VSDrawable::Units;
+std::map<string, Unit *> Drawable::Units;
 
 
 
-unsigned int VSDrawable::unitCount = 0;
+unsigned int Drawable::unitCount = 0;
 
 void Unit::ActTurn() {
     // Dock
