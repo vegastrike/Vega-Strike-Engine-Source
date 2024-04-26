@@ -103,27 +103,10 @@ struct GFXStats
 #include <GL/gl.h>
 #endif
 #if defined(__APPLE__) && defined(__MACH__)
-//#include <OpenGL/gl.h>
-//#include <OpenGL/glu.h>
-//#include <epoxy/gl.h>
-//#include <epoxy/glx.h>
-//#include <GLUT/glut.h>
-//#include <SDL_opengl_glext.h>
-//#include <SDL_opengl.h>
-//#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
-#if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)
+// Try hard-coding this now -- stephengtuggy 2024-04-26
 #define OSX_AT_LEAST_10_4
-#else
-#define OSX_LOWER_THAN_10_4
-#endif
-//#define GL_GLEXT_PROTOTYPES 1
-//#define __glext_h_
+#include <GL/glext.h>
 #include <GLUT/glut.h>
-//#include "gl_undefined_extensions.h"
-//#undef __glext_h_
-//#endif
-    #include <OpenGL/glext.h>
-//#include <SDL_opengl_glext.h>
 
 #else
 #define __glext_h_

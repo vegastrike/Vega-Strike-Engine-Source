@@ -120,6 +120,8 @@ SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
 
+INCLUDE_DIRECTORIES(BEFORE SYSTEM ${Vega_Strike_SOURCE_DIR}/src/OpenGL_downloaded)
+
 IF (UNIX)
     INCLUDE_DIRECTORIES(
         ${Vega_Strike_SOURCE_DIR}/src
