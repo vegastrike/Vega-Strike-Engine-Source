@@ -361,6 +361,7 @@ Unit::~Unit() {
 #endif
     pImage = nullptr;
     delete pilot;
+    pilot = nullptr;
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 5));
 #endif
@@ -384,10 +385,10 @@ Unit::~Unit() {
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 0));
 #endif
-    for (size_t meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
-        if (meshdata[meshcount] != nullptr) {
-            delete meshdata[meshcount];
-            meshdata[meshcount] = nullptr;
+    for (auto & mesh : meshdata) {
+        if (mesh != nullptr) {
+            delete mesh;
+            mesh = nullptr;
         }
     }
     meshdata.clear();
