@@ -278,7 +278,7 @@ char *GetUnitDir(const char *filename) {
  **********************************************************************************
  */
 // Called by Planet
-Unit::Unit(int dummy) : Drawable(), Damageable(), Movable() {
+Unit::Unit(int dummy) : VSDrawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
     pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
@@ -287,7 +287,7 @@ Unit::Unit(int dummy) : Drawable(), Damageable(), Movable() {
 }
 
 
-Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
+Unit::Unit() : VSDrawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pImage->cockpit_damage = NULL;
@@ -298,7 +298,7 @@ Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation
 
 // Called by Missile
 Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
-        : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
+        : VSDrawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(fact);
@@ -324,7 +324,7 @@ Unit::Unit(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber)
-        : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
+        : VSDrawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(faction);
@@ -4250,11 +4250,11 @@ void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &ove
     }
 }
 
-std::map<string, Unit *> Drawable::Units;
+std::map<string, Unit *> VSDrawable::Units;
 
 
 
-unsigned int Drawable::unitCount = 0;
+unsigned int VSDrawable::unitCount = 0;
 
 void Unit::ActTurn() {
     // Dock

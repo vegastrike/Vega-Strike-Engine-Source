@@ -36,12 +36,6 @@
 #include "universe.h"
 #include "vs_logging.h"
 
-#if defined(__APPLE__) && defined(__MACH__)
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-
 #define SINX 1
 #define SINY 2
 #define SINZ 4

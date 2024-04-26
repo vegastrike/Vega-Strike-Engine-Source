@@ -1,7 +1,7 @@
 /*
  * drawable.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
+ * Copyright (C) 2020-2024 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
  * Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -46,7 +46,7 @@
 #include "vega_cast_utils.h"
 
 // Required definition of static variable
-std::string Drawable::root;
+std::string VSDrawable::root;
 
 // Dupe to same function in unit.cpp
 // TODO: remove duplication
@@ -58,7 +58,7 @@ inline static float perspectiveFactor(float d) {
     }
 }
 
-Drawable::Drawable() :
+VSDrawable::VSDrawable() :
         halos(new HaloSystem()),
         animatedMesh(true),
         activeAnimation(0),
@@ -71,7 +71,7 @@ Drawable::Drawable() :
         curtime(0.0) {
 }
 
-Drawable::~Drawable() {
+VSDrawable::~VSDrawable() {
     for (Mesh *mesh : meshdata) {
         if (mesh != nullptr) {
             delete mesh;
@@ -82,8 +82,8 @@ Drawable::~Drawable() {
     clear();
 }
 
-bool Drawable::DrawableInit(const char *filename, int faction,
-        Flightgroup *flightgrp, const char *animationExt) {
+bool VSDrawable::DrawableInit(const char *filename, int faction,
+                              Flightgroup *flightgrp, const char *animationExt) {
     string fnam(filename);
     string::size_type pos = fnam.find('.');
     string anifilename = fnam.substr(0, pos);
@@ -144,7 +144,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
         addAnimation(meshes, animationName.c_str());
 
         int numFrames = meshes->size();
-        ++Drawable::unitCount;
+        ++VSDrawable::unitCount;
         sprintf(count, "%u", unitCount);
         uniqueUnitName = drawableGetName() + string(count);
         Units[uniqueUnitName] = vega_dynamic_cast_ptr<Unit>(this);
@@ -167,7 +167,7 @@ extern double calc_blend_factor(double frac,
         unsigned int when_it_will_be_simulated,
         unsigned int cur_simulation_frame);
 
-void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
+void VSDrawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     //Quick shortcut for camera setup phase
@@ -348,7 +348,7 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
     Sparkle(On_Screen, ctm);
 }
 
-void Drawable::AnimationStep() {
+void VSDrawable::AnimationStep() {
 #ifdef DEBUG_MESH_ANI
     VS_LOG(debug, (boost::format("Starting animation step of Unit: %1%") % uniqueUnitName));
 #endif
@@ -378,7 +378,7 @@ void Drawable::AnimationStep() {
 #endif
 }
 
-void Drawable::DrawNow(const Matrix &mato, float lod) {
+void VSDrawable::DrawNow(const Matrix &mato, float lod) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     static const void *rootunit = NULL;
@@ -503,7 +503,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     }
 }
 
-void Drawable::UpdateFrames() {
+void VSDrawable::UpdateFrames() {
     std::map<string, Unit *>::iterator pos;
     for (pos = Units.begin(); pos != Units.end(); ++pos) {
         pos->second->curtime += GetElapsedTime();
@@ -514,14 +514,14 @@ void Drawable::UpdateFrames() {
     }
 }
 
-void Drawable::addAnimation(std::vector<Mesh *> *meshes, const char *name) {
+void VSDrawable::addAnimation(std::vector<Mesh *> *meshes, const char *name) {
     if ((meshes->size() > 0) && animatedMesh) {
         vecAnimations.push_back(meshes);
         vecAnimationNames.push_back(string(name));
     }
 }
 
-void Drawable::StartAnimation(unsigned int how_many_times, int numAnimation) {
+void VSDrawable::StartAnimation(unsigned int how_many_times, int numAnimation) {
     if (animationRuns()) {
         StopAnimation();
     }
@@ -529,15 +529,15 @@ void Drawable::StartAnimation(unsigned int how_many_times, int numAnimation) {
     done = false;
 }
 
-void Drawable::StopAnimation() {
+void VSDrawable::StopAnimation() {
     done = true;
 }
 
-string Drawable::getAnimationName(unsigned int animationNumber) const {
+string VSDrawable::getAnimationName(unsigned int animationNumber) const {
     return vecAnimationNames.at(animationNumber);
 }
 
-unsigned int Drawable::getAnimationNumber(const char *name) const {
+unsigned int VSDrawable::getAnimationNumber(const char *name) const {
     string strname(name);
     for (unsigned int i = 0; i < vecAnimationNames.size(); i++) {
         if (strname == vecAnimationNames[i]) {
@@ -548,48 +548,48 @@ unsigned int Drawable::getAnimationNumber(const char *name) const {
     return 0; //NOT FOUND!
 }
 
-void Drawable::ChangeAnimation(const char *name) {
+void VSDrawable::ChangeAnimation(const char *name) {
     unsigned int AnimNumber = getAnimationNumber(name);
     if ((AnimNumber < numAnimations()) && isAnimatedMesh()) {
         activeAnimation = AnimNumber;
     }
 }
 
-void Drawable::ChangeAnimation(unsigned int AnimNumber) {
+void VSDrawable::ChangeAnimation(unsigned int AnimNumber) {
     if ((AnimNumber < numAnimations()) && isAnimatedMesh()) {
         activeAnimation = AnimNumber;
     }
 }
 
-bool Drawable::isAnimatedMesh() const {
+bool VSDrawable::isAnimatedMesh() const {
     return animatedMesh;
 }
 
-double Drawable::framesPerSecond() const {
+double VSDrawable::framesPerSecond() const {
     return 1 / timeperframe;
 }
 
-double Drawable::timePerFrame() const {
+double VSDrawable::timePerFrame() const {
     return timeperframe;
 }
 
-unsigned int Drawable::numAnimations() {
+unsigned int VSDrawable::numAnimations() {
     return vecAnimations.size();
 }
 
-void Drawable::ToggleAnimatedMesh(bool on) {
+void VSDrawable::ToggleAnimatedMesh(bool on) {
     animatedMesh = on;
 }
 
-bool Drawable::isContinuousLoop() const {
+bool VSDrawable::isContinuousLoop() const {
     return infiniteLoop;
 }
 
-void Drawable::SetAniSpeed(float speed) {
+void VSDrawable::SetAniSpeed(float speed) {
     timeperframe = speed;
 }
 
-void Drawable::clear() {
+void VSDrawable::clear() {
     StopAnimation();
 
     for (unsigned int i = 0; i < vecAnimations.size(); i++) {
@@ -605,7 +605,7 @@ void Drawable::clear() {
     Units.erase(uniqueUnitName);
 }
 
-bool Drawable::animationRuns() const {
+bool VSDrawable::animationRuns() const {
     return !done;
 }
 
@@ -628,9 +628,9 @@ Matrix *GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix
 }
 
 /**
- * @brief Drawable::Sparkle caused damaged units to emit sparks
+ * @brief VSDrawable::Sparkle caused damaged units to emit sparks
  */
-void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
+void VSDrawable::Sparkle(bool on_screen, Matrix *ctm) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     const Vector velocity = unit->GetVelocity();
 
@@ -696,7 +696,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     }
 }
 
-void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak cloak) {
+void VSDrawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak cloak) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // Units not shown don't emit a halo
@@ -740,7 +740,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
 
 }
 
-void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float average_scale, unsigned char char_damage) {
+void VSDrawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float average_scale, unsigned char char_damage) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Transformation *ct = &unit->cumulative_transformation;
 
@@ -825,7 +825,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
     }
 }
 
-void Drawable::Split(int level) {
+void VSDrawable::Split(int level) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (game_options()->split_dead_subunits) {
@@ -952,7 +952,7 @@ void Drawable::Split(int level) {
     unit->Mass *= game_options()->debris_mass;
 }
 
-void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
+void VSDrawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // Not sure about shield percentage - more variance for more damage?
@@ -972,7 +972,7 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
             std::min(1.0f, std::max(0.0f, amt)), color);
 }
 
-Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
+Matrix VSDrawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared()
@@ -1010,7 +1010,7 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     }
 }
 
-void Drawable::UpdateHudMatrix(int whichcam) {
+void VSDrawable::UpdateHudMatrix(int whichcam) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     Matrix m;
@@ -1028,7 +1028,7 @@ void Drawable::UpdateHudMatrix(int whichcam) {
             unit->GetAcceleration());
 }
 
-VSSprite *Drawable::getHudImage() const {
+VSSprite *VSDrawable::getHudImage() const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     return unit->pImage->pHudImage;
 }
