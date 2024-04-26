@@ -318,6 +318,7 @@ void winsys_set_motion_func(winsys_motion_func_t func);
 void winsys_set_passive_motion_func(winsys_motion_func_t func);
 
 void winsys_swap_buffers();
+void winsys_enable_key_repeat(bool enabled);
 void winsys_warp_pointer(int x, int y);
 void winsys_show_cursor(bool visible);
 

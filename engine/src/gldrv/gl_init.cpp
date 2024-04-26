@@ -149,7 +149,7 @@ typedef void ( *(*get_gl_proc_fptr_t)(const GLubyte *))();
     #if defined(__HAIKU__)
         typedef char * GET_GL_PTR_TYP;
         #define GET_GL_PROC glutGetProcAddress
-    #elif defined (__MACOSX__)
+    #elif defined (__APPLE__) && defined (__MACH__)
         typedef const char * GET_GL_PTR_TYP;
         void * vega_dlsym(GET_GL_PTR_TYP function_name) {
             return dlsym(RTLD_SELF, function_name);
@@ -585,7 +585,8 @@ void GFXInit(int argc, char **argv) {
     char vsname[12] = "Vega Strike";
     char vsicon[9] = "vega.ico";
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
-
+    /* Ignore key-repeat messages */
+    winsys_enable_key_repeat(false);
 
     glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
     static GFXColor clearcol = vs_config->getColor("space_background");;

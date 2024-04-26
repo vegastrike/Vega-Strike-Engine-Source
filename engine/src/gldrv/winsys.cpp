@@ -25,6 +25,7 @@
 
 #include <assert.h>
 #include <sstream>
+#include <SDL/SDL_keyboard.h>
 
 #include "gl_globals.h"
 #include "winsys.h"
@@ -349,6 +350,23 @@ void winsys_cleanup() {
 
 void winsys_shutdown() {
     keepRunning = false;
+}
+
+/*---------------------------------------------------------------------------*/
+/*!
+ *  Enables/disables key repeat messages from being generated
+ *  \return
+ *  \author  jfpatry
+ *  \date    Created:  2000-10-19
+ *  \date    Modified: 2000-10-19
+ */
+void winsys_enable_key_repeat(bool enabled) {
+    if (enabled) {
+        SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
+                            SDL_DEFAULT_REPEAT_INTERVAL);
+    } else {
+        SDL_EnableKeyRepeat(0, 0);
+    }
 }
 
 /*---------------------------------------------------------------------------*/

@@ -63,15 +63,16 @@ typedef void (*PFNGLUNLOCKARRAYSEXTPROC)( void );
 #elif !defined (_WIN32)
 #if defined(__APPLE__) && defined(__MACH__)
     #include <GLUT/glut.h>
+    #include <OpenGL/gl.h>
     #include <OpenGL/glext.h>
 #else
     #include <GL/glut.h>
     #include <GL/glext.h>
 #endif
 
-#if !defined (GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
-#   error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
-#endif
+//#if !defined (GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
+//#   error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
+//#endif
 #endif
 #if defined (PFNGLLOCKARRAYSEXTPROC) && defined (PFNGLUNLOCKARRAYSEXTPROC)
 extern PFNGLLOCKARRAYSEXTPROC   glLockArraysEXT_p;
