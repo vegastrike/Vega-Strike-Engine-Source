@@ -122,8 +122,8 @@ struct GFXStats
 #include "gl_undefined_extensions.h"
 #undef __glext_h_
 //#endif
-//    #include <OpenGL/glext.h>
-#include <SDL_opengl_glext.h>
+    #include <OpenGL/glext.h>
+//#include <SDL_opengl_glext.h>
 
 #else
 #define __glext_h_
