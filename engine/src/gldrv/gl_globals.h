@@ -92,7 +92,7 @@ struct GFXStats
 #endif
 
 #ifndef _WIN32
-//#define GL_GLEXT_PROTOTYPES
+#define GL_GLEXT_PROTOTYPES 1
 
 #endif
 #if defined (_WIN32) || defined (__CYGWIN__)
@@ -116,11 +116,11 @@ struct GFXStats
 #else
 #define OSX_LOWER_THAN_10_4
 #endif
-#define GL_GLEXT_PROTOTYPES 1
-#define __glext_h_
+//#define GL_GLEXT_PROTOTYPES 1
+//#define __glext_h_
 #include <GLUT/glut.h>
-#include "gl_undefined_extensions.h"
-#undef __glext_h_
+//#include "gl_undefined_extensions.h"
+//#undef __glext_h_
 //#endif
     #include <OpenGL/glext.h>
 //#include <SDL_opengl_glext.h>
