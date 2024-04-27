@@ -213,7 +213,7 @@
         "VERBOSE": "ON"
       },
       "cacheVariables": {
-        "CMAKE_FIND_FRAMEWORK": "FIRST"
+        "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
     {

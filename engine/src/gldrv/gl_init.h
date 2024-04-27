@@ -54,6 +54,10 @@ extern "C"
 /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
  * count on that...  */
 
+#if !defined(_WIN32)
+#define GL_GLEXT_PROTOTYPES 1
+#endif
+
 #if defined (IRIX)
 #include <GL/gl.h>
 #include <GL/glut.h>
@@ -62,12 +66,13 @@ typedef void (*PFNGLUNLOCKARRAYSEXTPROC)( void );
 
 #elif !defined (_WIN32)
 #if defined(__APPLE__) && defined(__MACH__)
-    #include <GLUT/glut.h>
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glext.h>
+#   define GL_GLEXT_FUNCTION_POINTERS 1
+#   include <OpenGL/gl.h>
+#   include <GL/glext.h>
+#   include <GLUT/glut.h>
 #else
-    #include <GL/glut.h>
-    #include <GL/glext.h>
+#   include <GL/glut.h>
+#   include <GL/glext.h>
 #endif
 
 //#if !defined (GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6

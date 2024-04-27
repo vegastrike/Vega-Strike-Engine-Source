@@ -52,6 +52,10 @@ extern float AUDIO_ATOM;
 #include <stdarg.h>
 #include "debug_vs.h"
 
+#if !defined(_WIN32)
+#   define GL_GLEXT_PROTOTYPES 1
+#endif
+
 #if defined (WIN32) || defined (__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already
  */
@@ -68,18 +72,19 @@ extern float AUDIO_ATOM;
 //#include "command.h"
 #endif //defined (WIN32) || defined (__CYGWIN__)
 
-#ifndef NO_GFX
-    #if defined(__APPLE__) && defined(__MACH__)
-        #include <OpenGL/gl.h>
-//        #include <epoxy/glx.h>
-        #include <GLUT/glut.h>
-    #else //defined (__APPLE__) || defined (MACOSX)
-        #define __glext_h_
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-        #include <GL/glut.h>
-        #undef __glext_h_
-    #endif //defined (__APPLE__) || defined (MACOSX)
+#if !defined (NO_GFX)
+#   if defined(__APPLE__) && defined(__MACH__)
+#       define GL_GLEXT_FUNCTION_POINTERS 1
+#       include <OpenGL/gl.h>
+#       include <GL/glext.h>
+#       include <GLUT/glut.h>
+#   else //defined(__APPLE__) && defined(__MACH__)
+#       define __glext_h_
+#       include <GL/gl.h>
+#       include <GL/glu.h>
+#       include <GL/glut.h>
+#       undef __glext_h_
+#   endif //defined(__APPLE__) && defined(__MACH__)
 #endif //NO_GFX
 
 #define PROG_NAME "vegastrike"

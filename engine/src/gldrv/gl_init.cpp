@@ -41,6 +41,7 @@
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
 #include <stdlib.h>
+#define GL_GLEXT_PROTOTYPES 1
 
 #else
 #ifndef NOMINMAX
@@ -53,14 +54,14 @@
 // #endif
 #include <windows.h>
 #endif
-#define GL_GLEXT_PROTOTYPES 1
 #if defined(__APPLE__) && defined(__MACH__)
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glext.h>
-    #include <dlfcn.h>
+#   define GL_GLEXT_FUNCTION_POINTERS 1
+#   include <OpenGL/gl.h>
+#   include <GL/glext.h>
+#   include <dlfcn.h>
 #else
-    #include <GL/gl.h>
-    #include <GL/glext.h>
+#   include <GL/gl.h>
+#   include <GL/glext.h>
 #endif
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC

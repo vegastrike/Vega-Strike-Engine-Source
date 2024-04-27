@@ -43,6 +43,7 @@
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
     #include <stdlib.h>
+    #define GL_GLEXT_PROTOTYPES 1
 #else //!defined (_WIN32) && !defined (__CYGWIN__)
     #ifndef NOMINMAX
         //tells VCC not to generate min/max macros
@@ -51,13 +52,9 @@
     #include <windows.h>
 #endif //!defined (_WIN32) && !defined (__CYGWIN__)
 
-#define GL_GLEXT_PROTOTYPES 1
-
 #if defined(__APPLE__) && defined(__MACH__)
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glext.h>
-#else //defined (__APPLE__) || defined (MACOSX)
-    #include <GL/gl.h>
-    #include <GL/glext.h>
-#endif //defined (__APPLE__) || defined (MACOSX)
-
+#   include <OpenGL/gl.h>
+#else
+#   include <GL/gl.h>
+#endif
+#include <GL/glext.h>
