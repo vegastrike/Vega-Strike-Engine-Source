@@ -1090,7 +1090,6 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBROOTGENERIC_SOURCES}
     ${LIBSCRIPT_SOURCES}
     ${LIBGFXGENERIC_SOURCES}
-        src/vega_collection_utils.cpp
 )
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
@@ -1704,7 +1703,6 @@ IF (USE_GTEST)
         ${LIBRESOURCE}
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
-            src/vega_collection_utils.cpp
     )
     target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     set_property(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)

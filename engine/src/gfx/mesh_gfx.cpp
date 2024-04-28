@@ -440,7 +440,7 @@ Mesh::~Mesh() {
         }
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
         bool hashers_was_deleted = false;
-        remove_all_references_to(this, hashers, hashers_was_deleted);
+        remove_all_references_to(this, hashers, true, hashers_was_deleted);
         if (hashers_was_deleted) {
             VS_LOG_AND_FLUSH(debug, "hashers was deleted");
         }

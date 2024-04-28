@@ -25,7 +25,6 @@
 
 #include <assert.h>
 #include <sstream>
-#include <SDL/SDL_keyboard.h>
 
 #include "gl_globals.h"
 #include "winsys.h"
@@ -354,23 +353,6 @@ void winsys_shutdown() {
 
 /*---------------------------------------------------------------------------*/
 /*!
- *  Enables/disables key repeat messages from being generated
- *  \return
- *  \author  jfpatry
- *  \date    Created:  2000-10-19
- *  \date    Modified: 2000-10-19
- */
-void winsys_enable_key_repeat(bool enabled) {
-    if (enabled) {
-        SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
-                            SDL_DEFAULT_REPEAT_INTERVAL);
-    } else {
-        SDL_EnableKeyRepeat(0, 0);
-    }
-}
-
-/*---------------------------------------------------------------------------*/
-/*!
  *  Shows/hides mouse cursor
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
@@ -418,17 +400,19 @@ void winsys_process_events() {
             switch (event.type) {
                 case SDL_KEYUP:
                     state = true;
-                    //does same thing as KEYDOWN, but with different state.
-                case SDL_KEYDOWN:
-
                     if (keyboard_func) {
                         SDL_GetMouseState(&x, &y);
-//                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
-//                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
-//                                       % event.key.keysym.mod
-//                                       % event.key.keysym.sym
-//                                       % event.key.keysym.scancode
-//                                      ));
+
+                        //Send the event
+                        (*keyboard_func)(event.key.keysym.sym, event.key.keysym.mod,
+                                         state,
+                                         x, y);
+                    }
+                    break;
+                case SDL_KEYDOWN:
+
+                    if (keyboard_func && (event.key.repeat == 0)) {
+                        SDL_GetMouseState(&x, &y);
 
                         //Send the event
                         (*keyboard_func)(event.key.keysym.sym, event.key.keysym.mod,
@@ -785,19 +769,6 @@ void winsys_shutdown()
             glutLeaveGameMode();
         }
     }
-}
-
-/*---------------------------------------------------------------------------*/
-/*!
- *  Enables/disables key repeat messages from being generated
- *  \return
- *  \author  jfpatry
- *  \date    Created:  2000-10-19
- *  \date    Modified: 2000-10-19
- */
-void winsys_enable_key_repeat( bool enabled )
-{
-    glutIgnoreKeyRepeat( !enabled );
 }
 
 /*---------------------------------------------------------------------------*/
