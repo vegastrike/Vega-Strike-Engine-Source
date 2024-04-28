@@ -54,10 +54,6 @@ extern "C"
 /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
  * count on that...  */
 
-#if !defined(_WIN32)
-#define GL_GLEXT_PROTOTYPES 1
-#endif
-
 #if defined (IRIX)
 #include <GL/gl.h>
 #include <GL/glut.h>
@@ -66,18 +62,16 @@ typedef void (*PFNGLUNLOCKARRAYSEXTPROC)( void );
 
 #elif !defined (_WIN32)
 #if defined(__APPLE__) && defined(__MACH__)
-#   define GL_GLEXT_FUNCTION_POINTERS 1
-#   include <OpenGL/gl.h>
-#   include <GL/glext.h>
 #   include <GLUT/glut.h>
+#   include <OpenGL/glext.h>
 #else
 #   include <GL/glut.h>
 #   include <GL/glext.h>
 #endif
 
-//#if !defined (GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
-//#   error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
-//#endif
+#if !defined (GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
+#   error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
+#endif
 #endif
 #if defined (PFNGLLOCKARRAYSEXTPROC) && defined (PFNGLUNLOCKARRAYSEXTPROC)
 extern PFNGLLOCKARRAYSEXTPROC   glLockArraysEXT_p;

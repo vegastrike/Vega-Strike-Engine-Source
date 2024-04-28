@@ -556,10 +556,7 @@ Texture::~Texture() {
     } else {
         original->refcount--;
         if (original->refcount == 0) {
-            if (original == this) {
-                // VS_LOG(debug, "In Texture::~Texture() in aux_texture.cpp: original->refcount == 0, but original == this, so not deleting again. (We are already in the destructor.)");
-            } else {
-                // VS_LOG(trace, "In Texture::~Texture() in aux_texture.cpp: original->refcount == 0, and original != this, so deleting original");
+            if (original != this) {
                 delete original;
                 original = nullptr;
             }

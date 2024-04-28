@@ -52,10 +52,6 @@ extern float AUDIO_ATOM;
 #include <stdarg.h>
 #include "debug_vs.h"
 
-#if !defined(_WIN32)
-#   define GL_GLEXT_PROTOTYPES 1
-#endif
-
 #if defined (WIN32) || defined (__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already
  */
@@ -72,11 +68,10 @@ extern float AUDIO_ATOM;
 //#include "command.h"
 #endif //defined (WIN32) || defined (__CYGWIN__)
 
-#if !defined (NO_GFX)
+#ifndef NO_GFX
 #   if defined(__APPLE__) && defined(__MACH__)
-#       define GL_GLEXT_FUNCTION_POINTERS 1
 #       include <OpenGL/gl.h>
-#       include <GL/glext.h>
+#       include <OpenGL/glu.h>
 #       include <GLUT/glut.h>
 #   else //defined(__APPLE__) && defined(__MACH__)
 #       define __glext_h_

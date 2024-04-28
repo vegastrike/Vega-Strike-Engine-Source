@@ -44,15 +44,13 @@
 #include <direct.h>
 #else
 #include <unistd.h>
-#   define GL_GLEXT_PROTOTYPES 1
 #endif
 #include <sys/stat.h> //for mkdir
 #include <sys/types.h>
 
 #if defined(__APPLE__) && defined(__MACH__)
-#   include <OpenGL/gl.h>
-#   include <GL/glext.h>
 #   include <GLUT/glut.h>
+#   include <OpenGL/glext.h>
 #else
 #   include <GL/glut.h>
 #   include <GL/glext.h>

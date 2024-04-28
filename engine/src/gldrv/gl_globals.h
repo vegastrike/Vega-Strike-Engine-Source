@@ -91,8 +91,8 @@ struct GFXStats
 #define GL_EXT_color_subtable 1
 #endif
 
-#if !defined (_WIN32)
-#   define GL_GLEXT_PROTOTYPES 1
+#ifndef _WIN32
+//#define GL_GLEXT_PROTOTYPES
 #endif
 
 #if defined (_WIN32) || defined (__CYGWIN__)
@@ -102,22 +102,27 @@ struct GFXStats
 #include <windows.h>
 #include <GL/gl.h>
 #endif
-#if defined(__APPLE__) && defined(__MACH__)
-// Try hard-coding this now -- stephengtuggy 2024-04-26
-#define OSX_AT_LEAST_10_4
-#define GL_GLEXT_FUNCTION_POINTERS 1
-#include <OpenGL/gl.h>
-#include <GL/glext.h>
-#include <GLUT/glut.h>
 
+#if defined(__APPLE__) && defined(__MACH__)
+#include <GLUT/glut.h>
+//#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
+#if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)
+#define OSX_AT_LEAST_10_4
+#else
+#define OSX_LOWER_THAN_10_4
+#endif
+#define GL_GLEXT_PROTOTYPES
+//#endif
+#include <OpenGL/glext.h>
 #else
 #define __glext_h_
-    #include <GL/glut.h>
+#include <GL/glut.h>
 #include "gl_undefined_extensions.h"
 #undef __glext_h_
 
-    #include <GL/glext.h>
+#include <GL/glext.h>
 #endif
+
 #ifdef _WIN32
 #   define GL_TEXTURE0_ARB 0x84C0
 #   define GL_TEXTURE1_ARB 0x84C1

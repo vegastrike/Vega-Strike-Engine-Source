@@ -91,7 +91,7 @@ CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/vers
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
-SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 SET(CMAKE_CXX_EXTENSIONS ON)
 SET(CMAKE_C_STANDARD 11)
@@ -119,8 +119,6 @@ UNSET(Boost_DIR)
 SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
-
-INCLUDE_DIRECTORIES(BEFORE SYSTEM ${Vega_Strike_SOURCE_DIR}/src/OpenGL_downloaded)
 
 IF (UNIX)
     INCLUDE_DIRECTORIES(
@@ -1092,6 +1090,7 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBROOTGENERIC_SOURCES}
     ${LIBSCRIPT_SOURCES}
     ${LIBGFXGENERIC_SOURCES}
+        src/vega_collection_utils.cpp
 )
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
@@ -1705,6 +1704,7 @@ IF (USE_GTEST)
         ${LIBRESOURCE}
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
+            src/vega_collection_utils.cpp
     )
     target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     set_property(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)

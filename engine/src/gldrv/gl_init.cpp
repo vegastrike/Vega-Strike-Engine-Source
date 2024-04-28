@@ -41,7 +41,6 @@
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
 #include <stdlib.h>
-#define GL_GLEXT_PROTOTYPES 1
 
 #else
 #ifndef NOMINMAX
@@ -54,10 +53,10 @@
 // #endif
 #include <windows.h>
 #endif
+#define GL_GLEXT_PROTOTYPES 1
 #if defined(__APPLE__) && defined(__MACH__)
-#   define GL_GLEXT_FUNCTION_POINTERS 1
 #   include <OpenGL/gl.h>
-#   include <GL/glext.h>
+#   include <OpenGL/glext.h>
 #   include <dlfcn.h>
 #else
 #   include <GL/gl.h>
@@ -586,6 +585,7 @@ void GFXInit(int argc, char **argv) {
     char vsname[12] = "Vega Strike";
     char vsicon[9] = "vega.ico";
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
+
     /* Ignore key-repeat messages */
     winsys_enable_key_repeat(false);
 

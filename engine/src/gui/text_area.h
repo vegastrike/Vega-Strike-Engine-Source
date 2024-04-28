@@ -37,13 +37,8 @@
 //There are places where a float is converted to an int. This define takes extra steps to convert without a warning (float -> char -> int)
 #define NO_WARNINGS
 
-#if !defined(_WIN32)
-#   define GL_GLEXT_PROTOTYPES 1
-#endif
-
 #if defined(__APPLE__) && defined(__MACH__)
     #include <OpenGL/gl.h>
-    #include <GL/glext.h>
     #include <GLUT/glut.h>
 #else
 #ifdef _WIN32

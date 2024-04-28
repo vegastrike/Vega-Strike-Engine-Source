@@ -59,6 +59,7 @@
 extern vector<Logo *> undrawn_logos;
 
 #include <exception>
+#include <vega_collection_utils.h>
 
 #ifdef _MSC_VER
 //Undefine those nasty min/max macros
@@ -438,45 +439,10 @@ Mesh::~Mesh() {
             meshHashTable.Delete(hash_name);
         }
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
-        vector<Mesh *>::iterator finder;
-        if (hashers) {
-            // the foollowing loop has several tricks to it:
-            // 1. `std::vector::erase()` can take an interator and remove it from the vector; but invalidates
-            //      the iterator in the process
-            // 2. To overcome the invalid iterator issue, the next previous iterator is cached
-            // 3. In the case that the previous iterator would be invalid (e.g it's at the start) then it needs
-            //      to restart the loop without the loop conditions, therefore a simple GOTO is used instead to
-            //      avoid the incrementing the iterator so that values are not skipped
-            // A reverse iterator could kind of help this; however, `std::vector::erase` unfortunately
-            // does not work on reverse iterators.
-            for (auto hashItem = hashers->begin(); hashItem != hashers->end(); ++hashItem) {
-retryEraseItem:
-                if (*hashItem == this) {
-                    bool resetIter = false;
-                    auto cachedHashItem = hashers->begin();
-                    if (hashItem != hashers->begin()) {
-                        cachedHashItem = hashItem - 1;
-                    } else {
-                        resetIter = true;
-                        cachedHashItem = hashItem + 1;
-                    }
-                    hashers->erase(hashItem);
-                    if (hashers->empty()) {
-                        bfxmHashTable.Delete(hash_name);
-                        delete hashers;
-                        hashers = nullptr;
-                        break;
-                    }
-
-                    if (resetIter) {
-                        hashItem = hashers->begin();
-                        // a necessary use of Goto as we do not want to use ++hashItem
-                        goto retryEraseItem;
-                    } else {
-                        hashItem = cachedHashItem;
-                    }
-                }
-            }
+        bool hashers_was_deleted = false;
+        remove_all_references_to(this, hashers, hashers_was_deleted);
+        if (hashers_was_deleted) {
+            VS_LOG_AND_FLUSH(debug, "hashers was deleted");
         }
         if (draw_queue != nullptr) {
             delete[] draw_queue;

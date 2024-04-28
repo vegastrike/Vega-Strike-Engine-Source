@@ -30,14 +30,9 @@
 #include "gfx/hud.h"
 #include "vs_globals.h"
 
-#if !defined(_WIN32)
-#   define GL_GLEXT_PROTOTYPES 1
-#endif
-
 #if defined(__APPLE__) && defined(__MACH__)
-#   include <OpenGL/gl.h>
-#   include <GL/glext.h>
 #   include <GLUT/glut.h>
+#   include <OpenGL/glext.h>
 #else
 #   include <GL/glut.h>
 #   include <GL/glext.h>

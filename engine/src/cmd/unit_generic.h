@@ -6,7 +6,7 @@
 /*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk, Benjamen R. Meyer,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Roy Falk, Benjamen R. Meyer,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -138,7 +138,7 @@ struct PlanetaryOrbitData;
 
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
-             public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
+        public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
 
 protected:
 //How many lists are referencing us
