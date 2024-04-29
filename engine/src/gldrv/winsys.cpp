@@ -165,8 +165,8 @@ void winsys_set_passive_motion_func(winsys_motion_func_t func) {
  *  \date    Modified: 2000-10-19
  */
 void winsys_swap_buffers() {
-//    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
-    SDL_GL_SwapWindow(window);
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_GL_SwapWindow(current_window);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -177,8 +177,8 @@ void winsys_swap_buffers() {
  *  \date    Modified: 2000-10-19
  */
 void winsys_warp_pointer(int x, int y) {
-//    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
-    SDL_WarpMouseInWindow(window, x, y);
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_WarpMouseInWindow(current_window, x, y);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -246,13 +246,47 @@ static bool setup_sdl_video_mode() {
 
     SDL_GL_GetDrawableSize(window, &width, &height);
 
-    auto context = SDL_GL_CreateContext(window);
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+    if (!context) {
+        std::cerr << "No GL context\n" << std::flush;
+        VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
+    }
+
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
 
     SDL_GL_MakeCurrent(window, context);
 
     screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
     if (!screen) {
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()), 1);
+
+//        for (int counter = 0; window == nullptr && counter < 2; ++counter) {
+//            for (int bpd = 4; bpd > 1; --bpd) {
+//                SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, bpd * 8);
+//                if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags))
+//                        == NULL) {
+//                    VS_LOG_AND_FLUSH(error,
+//                            (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
+//                                    % bpp
+//                                    % (bpd * 8)
+//                                    % SDL_GetError()));
+//                } else {
+//                    break;
+//                }
+//            }
+//            if (screen == NULL) {
+//                SDL_GL_SetAttribute(SDL_GL_RED_SIZE, otherattributes);
+//                SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, otherattributes);
+//                SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, otherattributes);
+//                gl_options.color_depth = bpp = otherbpp;
+//            }
+//        }
+//        if (screen == NULL) {
+//            VS_LOG_AND_FLUSH(fatal, "FAILED to initialize video");
+//            VSExit(1);
+//        }
     }
 
     std::string version = (const char *) glGetString(GL_RENDERER);
@@ -292,8 +326,7 @@ static bool setup_sdl_video_mode() {
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
 
-    //SDL_INIT_AUDIO|
-    Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
+    Uint32 sdl_flags = SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_EVENTS | SDL_INIT_TIMER;
     g_game.x_resolution = game_options()->x_resolution;
     g_game.y_resolution = game_options()->y_resolution;
     gl_options.fullscreen = game_options()->fullscreen;
@@ -471,9 +504,10 @@ void winsys_process_events() {
             (*display_func)();
         } else if (idle_func) {
             (*idle_func)();
-            /* Delay for 1 ms.  This allows the other threads to do some
+            /* Delay for a bit.  This allows the other threads to do some
              *  work (otherwise the audio thread gets starved). */
         }
+//        SDL_GL_SwapWindow(window);
         SDL_Delay(1);
     }
     winsys_cleanup();
