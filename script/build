@@ -91,6 +91,6 @@ for i in "${directories_to_copy_if_they_exist[@]}"
 do
     if [ -d "$i" ]
     then
-        cp -v "$i" "${BIN_DIR}"/
+        cp -rv "$i" "${BIN_DIR}"/
     fi
 done
