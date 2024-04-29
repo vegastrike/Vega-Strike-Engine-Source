@@ -41,8 +41,8 @@ IF (DEFINED ENV{SHORT_SHA} AND NOT "$ENV{SHORT_SHA}" STREQUAL "")
     SET(VEGASTRIKE_VERSION_TWEAK "$ENV{SHORT_SHA}")
 ELSE ()
     SET (GIT_ROOT_DIR "${CMAKE_SOURCE_DIR}/..")
-    MESSAGE("-- CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
-    MESSAGE("-- GIT_ROOT_DIR = ${GIT_ROOT_DIR}")
+    MESSAGE(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
+    MESSAGE(STATUS "GIT_ROOT_DIR = ${GIT_ROOT_DIR}")
     EXECUTE_PROCESS(
             COMMAND git rev-parse --short HEAD
             WORKING_DIRECTORY ${GIT_ROOT_DIR}
@@ -98,7 +98,6 @@ SET(CMAKE_C_STANDARD 11)
 SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 
-UNSET(PYTHONLIBS_FOUND)
 UNSET(Boost_FOUND)
 UNSET(Boost_python3_FOUND)
 UNSET(OPENGL_FOUND)
@@ -273,7 +272,7 @@ ENDIF (DATADIR)
 # - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 #
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
-MESSAGE("-- Always using preferred PIE logic now")
+MESSAGE(STATUS "Always using preferred PIE logic now")
 
 include(CheckPIESupported)
 check_pie_supported()
@@ -359,7 +358,7 @@ IF (USE_SYSTEM_BOOST)
         ELSE (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
             SET(Boost_1_67_Or_Later_Result FALSE)
         ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-        MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
+        MESSAGE(STATUS "Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
         IF (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
         ELSE (Boost_1_67_Or_Later_Result)
@@ -391,32 +390,9 @@ IF (USE_SYSTEM_BOOST)
         SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
         INCLUDE_DIRECTORIES(${TST_INCLUDES})
     ELSE (Boost_FOUND)
-        SET(USE_SYSTEM_BOOST OFF)
+        MESSAGE(FATAL_ERROR "Cannot find system Boost. Unable to continue.")
     ENDIF (Boost_FOUND)
 ENDIF (USE_SYSTEM_BOOST)
-
-IF (NOT USE_SYSTEM_BOOST)
-    MESSAGE("++ Using Internal Boost")
-    # This is just to cleanup advanced variable viewing, since they're not used anyway
-    UNSET(Boost_INCLUDE_DIRS)
-    UNSET(Boost_LIBRARIES)
-    UNSET(Boost_INCLUDE_DIR)
-    UNSET(Boost_LIBRARY_DIRS)
-    SET(Boost_DIR ../ext/)
-    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
-    MESSAGE("++ Using Internal Boost::python3")
-    SET(TST_LIBS ${TST_LIBS} boost_python3)
-    INCLUDE_DIRECTORIES(${TST_INCLUDES})
-    ADD_SUBDIRECTORY(${Boost_DIR} build)
-    MESSAGE("++ boost dir: ${Boost_DIR}")
-    #IF (NOT DISABLE_CLIENT)
-    #  ADD_DEPENDENCIES(vegastrike-engine boost_python)
-    #ENDIF (NOT DISABLE_CLIENT)
-    #IF (NOT DISABLE_SERVER)
-    #  ADD_DEPENDENCIES(vegaserver boost_python)
-    #ENDIF (NOT DISABLE_SERVER)
-ENDIF (NOT USE_SYSTEM_BOOST)
 
 IF (NOT DISABLE_CLIENT) ##########
 
@@ -545,13 +521,13 @@ IF (NOT DISABLE_FFMPEG)
         IF (swscale1_FOUND)
             MESSAGE("++ FFmpeg's libswscale found.")
         ELSE (swscale1_FOUND)
-            MESSAGE("-- FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
+            MESSAGE(STATUS "FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
         ENDIF (swscale1_FOUND)
     ELSE (FFMPEG_FOUND)
-        MESSAGE("-- FFMPEG Not Found")
+        MESSAGE(STATUS "FFMPEG Not Found")
     ENDIF (FFMPEG_FOUND)
 ELSE (NOT DISABLE_FFMPEG)
-    MESSAGE("-- FFMPEG disabled")
+    MESSAGE(STATUS "FFMPEG disabled")
 ENDIF (NOT DISABLE_FFMPEG)
 
 #Find Ogre
@@ -566,10 +542,10 @@ IF (NOT DISABLE_OGRE)
         SET(HAVE_OGRE 1)
         MESSAGE("++ Found Ogre: ${OGRE_VERSION}")
     ELSE (OGRE_FOUND)
-        MESSAGE("-- Ogre Not Found: compiling without")
+        MESSAGE(STATUS "Ogre Not Found: compiling without")
     ENDIF (OGRE_FOUND)
 ELSE (NOT DISABLE_OGRE)
-    MESSAGE("-- Ogre disabled")
+    MESSAGE(STATUS "Ogre disabled")
 ENDIF (NOT DISABLE_OGRE)
 
 IF (NOT BEOS)
@@ -1210,7 +1186,7 @@ ADD_SUBDIRECTORY(objconv)
 
 ## show debug output
 #GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-#MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
+#MESSAGE(STATUS "Default build type is RelWithDebInfo, no cpu opts enabled. ")
 #MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
 #MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 #MESSAGE("Linking with : ${TST_LIBS}")
@@ -1306,7 +1282,7 @@ SET(CPACK_SOURCE_GENERATOR "TBZ2" "TXZ")
 
 # See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
 IF (WIN32 AND NOT UNIX)
-    MESSAGE("-- Configuring Packaging for Windows")
+    MESSAGE(STATUS "Configuring Packaging for Windows (not fully implemented)")
     # NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
     # NSI bug requires at least 1 set of 4 forwards slashes??
     SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
@@ -1320,9 +1296,8 @@ IF (WIN32 AND NOT UNIX)
     # NSIS, Wix, and compressed archives (7z, Zip)
     SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
     SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe" "vega-meshtool.exe" "vegasettings.exe")
-ELSEIF (XCODE)
-    MESSAGE("-- Configuring Packaging for Mac OS X")
-    # Mac OS X
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    MESSAGE(STATUS "Configuring Packaging for macOS (not fully implemented)")
     # There's a few options for MacOSX; not sure what we want to use
     # DragNDrop -> DMG
     #  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
@@ -1330,7 +1305,7 @@ ELSEIF (XCODE)
     # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
     SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    MESSAGE("-- Configuring Packaging for Linux")
+    MESSAGE(STATUS "Configuring Packaging for Linux")
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
     # Linux
 
@@ -1342,7 +1317,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
     # "DEB"
     IF(VS_CAN_BUILD_DEB)
-        MESSAGE("-- Configuring Debian Packaging")
+        MESSAGE(STATUS "Configuring Debian Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
         SET(CPACK_DEBIAN_PACKAGE_NAME "Vega-Strike")
         SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
@@ -1549,7 +1524,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
     #  "RPM"
     IF (VS_CAN_BUILD_RPM)
-        MESSAGE("-- Configuring RPM Packaging")
+        MESSAGE(STATUS "Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
         SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
@@ -1643,7 +1618,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_GENERATOR "RPM")
     ENDIF (VS_CAN_BUILD_RPM)
 ELSE ()
-    MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
+    MESSAGE(STATUS "Configuring Packaging for Unknown Platform - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
 ENDIF (WIN32 AND NOT UNIX)
@@ -1651,7 +1626,7 @@ ENDIF (WIN32 AND NOT UNIX)
 INCLUDE(CPack)
 
 IF (INSTALL_GTEST OR USE_GTEST)
-    MESSAGE("-- Configuring Unit Tests")
+    MESSAGE(STATUS "Configuring Unit Tests")
 ENDIF (INSTALL_GTEST OR USE_GTEST)
 
 IF (INSTALL_GTEST)
