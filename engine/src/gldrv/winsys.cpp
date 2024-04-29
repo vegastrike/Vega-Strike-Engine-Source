@@ -4,7 +4,8 @@
  * Incorporated into Vega Strike from Tux Racer
  *
  * Copyright (C) 1999-2024 Jasmin F. Patry, Daniel Horn, pyramid3d,
- * Benjamen R. Meyer, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Benjamen R. Meyer, Stephen G. Tuggy, Roy Falk,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -53,17 +54,17 @@
  *******************************---------------------------------------------------------------------------
  */
 
-//static SDL_Window *window = NULL;
-static SDL_Surface *screen = NULL;
+static SDL_Window *window = nullptr;
+static SDL_Surface *screen = nullptr;
 
-static winsys_display_func_t display_func = NULL;
-static winsys_idle_func_t idle_func = NULL;
-static winsys_reshape_func_t reshape_func = NULL;
-static winsys_keyboard_func_t keyboard_func = NULL;
-static winsys_mouse_func_t mouse_func = NULL;
-static winsys_motion_func_t motion_func = NULL;
-static winsys_motion_func_t passive_motion_func = NULL;
-static winsys_atexit_func_t atexit_func = NULL;
+static winsys_display_func_t display_func = nullptr;
+static winsys_idle_func_t idle_func = nullptr;
+static winsys_reshape_func_t reshape_func = nullptr;
+static winsys_keyboard_func_t keyboard_func = nullptr;
+static winsys_mouse_func_t mouse_func = nullptr;
+static winsys_motion_func_t motion_func = nullptr;
+static winsys_motion_func_t passive_motion_func = nullptr;
+static winsys_atexit_func_t atexit_func = nullptr;
 
 static bool redisplay = false;
 static bool keepRunning = true;
@@ -164,8 +165,8 @@ void winsys_set_passive_motion_func(winsys_motion_func_t func) {
  *  \date    Modified: 2000-10-19
  */
 void winsys_swap_buffers() {
-    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
-    SDL_GL_SwapWindow(current_window);
+//    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_GL_SwapWindow(window);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -176,8 +177,8 @@ void winsys_swap_buffers() {
  *  \date    Modified: 2000-10-19
  */
 void winsys_warp_pointer(int x, int y) {
-    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
-    SDL_WarpMouseInWindow(current_window, x, y);
+//    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_WarpMouseInWindow(window, x, y);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -187,8 +188,8 @@ void winsys_warp_pointer(int x, int y) {
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2021-09-07 - stephengtuggy
  */
-static bool setup_sdl_video_mode(int *argc, char **argv) {
-    Uint32 video_flags = SDL_WINDOW_OPENGL;
+static bool setup_sdl_video_mode() {
+    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
     if (gl_options.fullscreen) {
@@ -202,7 +203,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
-    if (game_options()->rgb_pixel_format.compare("undefined") == 0) {
+    if (game_options()->rgb_pixel_format == "undefined") {
         game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
@@ -230,23 +231,24 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
-//#if SDL_VERSION_ATLEAST(1, 2, 10)
     if (game_options()->gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-//#endif
     width = g_game.x_resolution;
     height = g_game.y_resolution;
 
-
-    SDL_Window *window = SDL_CreateWindow("Vegastrike", 0, 0, width, height, video_flags);
+    window = SDL_CreateWindow("Vega Strike", 0, 0, width, height, video_flags);
 
     if(!window) {
         std::cerr << "No window\n" << std::flush;
         VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
     }
 
-    SDL_GL_CreateContext(window);
+    SDL_GL_GetDrawableSize(window, &width, &height);
+
+    auto context = SDL_GL_CreateContext(window);
+
+    SDL_GL_MakeCurrent(window, context);
 
     screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
     if (!screen) {
@@ -306,15 +308,13 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     }
 
     //signal( SIGSEGV, SIG_DFL );
-    SDL_Surface *icon = NULL;
-#if 1
+    SDL_Surface *icon = nullptr;
     if (icon_title) {
         icon = SDL_LoadBMP(icon_title);
     }
     if (icon) {
         SDL_SetColorKey(icon, SDL_TRUE, ((Uint32 *) (icon->pixels))[0]);
     }
-#endif
     /*
      * Init video
      */
@@ -325,7 +325,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 #endif
 
-    if (!setup_sdl_video_mode(argc, argv)) {
+    if (!setup_sdl_video_mode()) {
         winsys_init(argc, argv, window_title, icon_title);
     } else {
         glutInit(argc, argv);
@@ -456,6 +456,11 @@ void winsys_process_events() {
                                 event.window.data2);
                     }
 #endif
+                    break;
+
+                case SDL_QUIT:
+                    cleanexit = true;
+                    keepRunning = false;
                     break;
             }
             SDL_LockAudio();

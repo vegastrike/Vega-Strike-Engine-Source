@@ -586,10 +586,6 @@ void GFXInit(int argc, char **argv) {
     char vsicon[9] = "vega.ico";
     winsys_init(&argc, argv, &vsname[0], &vsicon[0]);
 
-    /* Note: We have a different way to ignore key-repeat messages in SDL2. Now we just ignore any SDL_KEYDOWN event
-     * with the "repeat" field set to true, I guess, or something like that. -- stephengtuggy 2024-04-28 */
-//    winsys_enable_key_repeat(false);
-
     glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
     static GFXColor clearcol = vs_config->getColor("space_background");;
     gl_options.wireframe = game_options()->use_wireframe;
