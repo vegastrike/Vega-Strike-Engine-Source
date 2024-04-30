@@ -562,10 +562,10 @@ void winsys_process_events() {
         } while (realTime() < timeLastChecked + REFRESH_RATE);
         timeLastChecked = realTime();
 
-        // Blue
-        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        winsys_swap_buffers();
+//        // Blue
+//        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+//        glClear(GL_COLOR_BUFFER_BIT);
+//        winsys_swap_buffers();
     }
     winsys_cleanup();
 }
