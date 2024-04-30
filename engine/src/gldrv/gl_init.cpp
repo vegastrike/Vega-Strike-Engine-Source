@@ -168,8 +168,9 @@ CG_Cloak *cloak_cg = new CG_Cloak();
 /* CENTRY */
 int vsExtensionSupported(const char *extension) {
     static const GLubyte *extensions = nullptr;
-    const GLubyte *start;
-    GLubyte *where, *terminator;
+    const GLubyte *start = nullptr;
+    GLubyte *where = nullptr;
+    GLubyte *terminator = nullptr;
 
     /* Extension names should not have spaces. */
     where = (GLubyte *) strchr(extension, ' ');
@@ -178,6 +179,10 @@ int vsExtensionSupported(const char *extension) {
     }
     if (!extensions) {
         extensions = glGetString(GL_EXTENSIONS);
+        if (!extensions) {
+            VS_LOG_AND_FLUSH(serious_warning, "glGetString(GL_EXTENSIONS) returned NULL!");
+            return false;
+        }
     }
     /* It takes a bit of care to be fool-proof about parsing the
      *  OpenGL extensions string.  Don't be fooled by sub-strings,
@@ -245,7 +250,11 @@ bool vsVendorMatch(const char *vendor) {
 void init_opengl_extensions() {
     const unsigned char *extensions = glGetString(GL_EXTENSIONS);
 
-    VS_LOG(trace, (boost::format("OpenGL Extensions supported: %1%") % extensions));
+    if (extensions) {
+        VS_LOG(trace, (boost::format("OpenGL Extensions supported: %1%") % extensions));
+    } else {
+        VS_LOG(serious_warning, "OpenGL Extensions supported: none!");
+    }
 
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if (vsExtensionSupported("GL_EXT_compiled_vertex_array")
