@@ -251,7 +251,6 @@ static bool setup_sdl_video_mode() {
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (!context) {
-        std::cerr << "No GL context\n" << std::flush;
         VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
     }
 
@@ -346,6 +345,8 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
         exit(1);              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
