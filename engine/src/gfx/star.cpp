@@ -37,9 +37,15 @@
 #include "vs_logging.h"
 
 #if defined(__APPLE__) && defined(__MACH__)
-#include <OpenGL/gl.h>
+#   include <OpenGL/gl.h>
+#elif defined (_WIN32) || defined (__CYGWIN__)
+#   ifndef NOMINMAX
+#       define NOMINMAX
+#   endif //tells VCC not to generate min/max macros
+#   include <windows.h>
+#   include <GL/gl.h>
 #else
-#include <GL/gl.h>
+#   include <GL/gl.h>
 #endif
 
 #define SINX 1
