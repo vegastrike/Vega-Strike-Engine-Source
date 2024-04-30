@@ -378,7 +378,6 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
 
     if (!setup_sdl_video_mode()) {
         VS_LOG_FLUSH_EXIT(fatal, "setup_sdl_video_mode() failed!", 1);
-//        winsys_init(argc, argv, window_title, icon_title);
     } else {
 //        glutInit(argc, argv);
     }
@@ -522,14 +521,14 @@ void winsys_process_events() {
             SDL_LockAudio();
             SDL_UnlockAudio();
         }
-//        if (redisplay && display_func) {
-//            redisplay = false;
-//            (*display_func)();
-//        } else if (idle_func) {
-//            (*idle_func)();
-//            /* Delay for a bit.  This allows the other threads to do some
-//             *  work (otherwise the audio thread gets starved). */
-//        }
+        if (redisplay && display_func) {
+            redisplay = false;
+            (*display_func)();
+        } else if (idle_func) {
+            (*idle_func)();
+            /* Delay for a bit.  This allows the other threads to do some
+             *  work (otherwise the audio thread gets starved). */
+        }
 
         do {
 //            micro_sleep(1000);
@@ -537,10 +536,10 @@ void winsys_process_events() {
         } while (realTime() < timeLastChecked + REFRESH_RATE);
         timeLastChecked = realTime();
 
-        // Blue
-        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        winsys_swap_buffers();
+//        // Blue
+//        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+//        glClear(GL_COLOR_BUFFER_BIT);
+//        winsys_swap_buffers();
     }
     winsys_cleanup();
 }
