@@ -25,6 +25,7 @@
 
 #include "vs_logging.h"
 #include "vs_exit.h"
+#include "vs_globals.h"
 
 #include <string>
 #include <cstdint>
@@ -86,7 +87,9 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
 }
 
 void VegaStrikeLogger::FlushLogs() {
-    logging_core_->flush();
+    if (!STATIC_VARS_DESTROYED) {
+        logging_core_->flush();
+    }
     std::cout << std::flush;
     std::cerr << std::flush;
     std::clog << std::flush;
@@ -95,12 +98,15 @@ void VegaStrikeLogger::FlushLogs() {
 }
 
 void VegaStrikeLogger::FlushLogsProgramExiting() {
-    logging_core_->flush();
+    if (!STATIC_VARS_DESTROYED) {
+        logging_core_->flush();
+    }
     std::cout << std::flush;
     std::cerr << std::flush;
     std::clog << std::flush;
     fflush(stdout);
     fflush(stderr);
+    STATIC_VARS_DESTROYED = true;
 }
 
 BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, severity_logger_mt<vega_log_level>) {
@@ -128,6 +134,9 @@ VegaStrikeLogger::~VegaStrikeLogger() {
 }
 
 void VegaStrikeLogger::Log(const vega_log_level level, const std::string &message) {
+    if (STATIC_VARS_DESTROYED) {
+        return;
+    }
     boost::log::record rec = slg_.open_record(boost::log::keywords::severity = level);
     if (rec)
     {
@@ -150,6 +159,9 @@ void VegaStrikeLogger::LogFlushExit(const vega_log_level level, const std::strin
 }
 
 void VegaStrikeLogger::Log(const vega_log_level level, const char *message) {
+    if (STATIC_VARS_DESTROYED) {
+        return;
+    }
     boost::log::record rec = slg_.open_record(boost::log::keywords::severity = level);
     if (rec)
     {
@@ -172,6 +184,9 @@ void VegaStrikeLogger::LogFlushExit(const vega_log_level level, const char* mess
 }
 
 void VegaStrikeLogger::Log(const vega_log_level level, const boost::basic_format<char> &message) {
+    if (STATIC_VARS_DESTROYED) {
+        return;
+    }
     boost::log::record rec = slg_.open_record(boost::log::keywords::severity = level);
     if (rec)
     {

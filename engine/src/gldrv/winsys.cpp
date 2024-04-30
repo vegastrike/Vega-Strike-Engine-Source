@@ -252,6 +252,9 @@ static bool setup_sdl_video_mode() {
         VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
     }
 
+    // This makes our buffer swap synchronized with the monitor's vertical refresh
+    SDL_GL_SetSwapInterval(1);
+
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
@@ -326,7 +329,7 @@ static bool setup_sdl_video_mode() {
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
 
-    Uint32 sdl_flags = SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_EVENTS | SDL_INIT_TIMER;
+    Uint32 sdl_flags = SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
     g_game.x_resolution = game_options()->x_resolution;
     g_game.y_resolution = game_options()->y_resolution;
     gl_options.fullscreen = game_options()->fullscreen;
@@ -340,18 +343,18 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
         exit(1);              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
     //signal( SIGSEGV, SIG_DFL );
     SDL_Surface *icon = nullptr;
     if (icon_title) {
         icon = SDL_LoadBMP(icon_title);
     }
     if (icon) {
+//        SDL_BlitSurface(i)
         SDL_SetColorKey(icon, SDL_TRUE, ((Uint32 *) (icon->pixels))[0]);
     }
-    /*
-     * Init video
-     */
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 #if defined (USE_STENCIL_BUFFER)
     /* Not sure if this is sufficient to activate stencil buffer  */
@@ -507,8 +510,8 @@ void winsys_process_events() {
             /* Delay for a bit.  This allows the other threads to do some
              *  work (otherwise the audio thread gets starved). */
         }
-//        SDL_GL_SwapWindow(window);
-        SDL_Delay(1);
+        winsys_swap_buffers();
+        SDL_Delay(2);
     }
     winsys_cleanup();
 }

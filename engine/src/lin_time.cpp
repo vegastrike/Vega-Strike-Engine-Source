@@ -147,6 +147,12 @@ void micro_sleep( unsigned int n )
     (void) usleep( (useconds_t) n );
 }
 
+#elif defined (__APPLE__) && defined (__MACH__)
+
+void micro_sleep(unsigned int n) {
+    usleep(static_cast<useconds_t>(n));
+}
+
 #else
 
 void micro_sleep(unsigned int n) {
