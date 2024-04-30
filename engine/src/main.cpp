@@ -387,6 +387,7 @@ int main(int argc, char *argv[]) {
     }
     _Universe = new Universe(argc, argv, game_options()->galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
+    InitTime();
     _Universe->Loop(bootstrap_first_loop);
 
     //Unregister commands - and cleanup memory
@@ -536,6 +537,7 @@ void bootstrap_first_loop() {
         bs_tp = new TextPlane();
     }
     bootstrap_draw("Vegastrike Loading...", SplashScreen);
+    //InitTime();
     if (i++ > 4) {
         if (_Universe) {
             if (game_options()->main_menu) {
@@ -557,7 +559,7 @@ void SetStartupView(Cockpit *cp) {
 
 void bootstrap_main_loop() {
     static bool LoadMission = true;
-    InitTime();
+    //InitTime();
     if (LoadMission) {
         LoadMission = false;
         active_missions.push_back(mission = new Mission(mission_name));

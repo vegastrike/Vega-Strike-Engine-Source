@@ -208,7 +208,9 @@ static bool setup_sdl_video_mode() {
     int width, height;
     if (gl_options.fullscreen) {
         video_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    } else {
+    }
+    else 
+    {
 #ifndef _WIN32
         video_flags |= SDL_WINDOW_RESIZABLE;
 #endif
@@ -221,7 +223,7 @@ static bool setup_sdl_video_mode() {
         game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
-            && isdigit(game_options()->rgb_pixel_format[1]) && isdigit(game_options()->rgb_pixel_format[2])) {
+        && isdigit(game_options()->rgb_pixel_format[1]) && isdigit(game_options()->rgb_pixel_format[2])) {
         rs = game_options()->rgb_pixel_format[0] - '0';
         gs = game_options()->rgb_pixel_format[1] - '0';
         bs = game_options()->rgb_pixel_format[2] - '0';
@@ -236,7 +238,9 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, bs);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    } else {
+    }
+    else
+    {
         otherattributes = 5;
         otherbpp = 16;
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, rs);
@@ -261,7 +265,9 @@ static bool setup_sdl_video_mode() {
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
         VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
-    } else {
+    }
+    else
+    {
         VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) failed. Error: %1%") % SDL_GetError()));
         SDL_ClearError();
     }
@@ -281,36 +287,41 @@ static bool setup_sdl_video_mode() {
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
 
-    SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == nullptr) {
         VS_LOG_AND_FLUSH(error, (boost::format(
-                "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
-                                 SDL_GetError()));
+            "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
+            SDL_GetError()));
         SDL_ClearError();
 
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
         if (renderer == nullptr) {
             VS_LOG_AND_FLUSH(error, (boost::format(
-                    "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
-                                     SDL_GetError()));
+                "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
+                SDL_GetError()));
             SDL_ClearError();
 
             renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
             if (renderer == nullptr) {
                 VS_LOG_FLUSH_EXIT(fatal, (boost::format(
-                        "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
-                                          SDL_GetError()),
-                                  1);
+                    "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
+                    SDL_GetError()),
+                    1);
             }
         }
     }
 
     if (SDL_RenderSetLogicalSize(renderer, width, height) < 0) {
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_RenderSetLogicalSize(...) failed! Error: %1%") % SDL_GetError()),
-                          8);
+            8);
     }
 
-    std::string version = (const char *) glGetString(GL_RENDERER);
+#if defined (GL_RENDERER)
+    std::string version{};
+    const GLubyte * renderer_string = glGetString(GL_RENDERER);
+    if (renderer_string) {
+        version = (const char*)renderer_string;
+    }
     if (version == "GDI Generic" || version == "software") {
         if (game_options()->gl_accelerated_visual) {
             VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
@@ -323,6 +334,7 @@ static bool setup_sdl_video_mode() {
             VS_LOG_AND_FLUSH(error, "Please make sure a graphics card driver is installed and functioning properly.");
         }
     }
+#endif
 
     // This makes our buffer swap synchronized with the monitor's vertical refresh
     if (SDL_GL_SetSwapInterval(1) < 0) {
@@ -454,6 +466,9 @@ void winsys_process_events() {
         memset(keysym_to_unicode, 0, sizeof(keysym_to_unicode));
     }
     double timeLastChecked = realTime();
+    if (timeLastChecked == INFINITY) {
+        timeLastChecked = 0;
+    }
     while (keepRunning) {
         SDL_LockAudio();
         SDL_UnlockAudio();
@@ -547,10 +562,10 @@ void winsys_process_events() {
         } while (realTime() < timeLastChecked + REFRESH_RATE);
         timeLastChecked = realTime();
 
-//        // Blue
-//        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-//        glClear(GL_COLOR_BUFFER_BIT);
-//        winsys_swap_buffers();
+        // Blue
+        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        winsys_swap_buffers();
     }
     winsys_cleanup();
 }

@@ -34,9 +34,9 @@ VSRandom vsrandom(time(NULL));
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-static LONGLONG ttime;
-static LONGLONG newtime = 0;
-static LONGLONG freq;
+static alignas(16) LARGE_INTEGER ttime{};
+static alignas(16) LARGE_INTEGER newtime{};
+static alignas(16) LARGE_INTEGER freq{};
 static double   dblnewtime;
 #else
 #if defined (HAVE_SDL)
@@ -169,8 +169,8 @@ void micro_sleep(unsigned int n) {
 
 void InitTime() {
 #ifdef WIN32
-    QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
-    QueryPerformanceCounter( (LARGE_INTEGER*) &ttime );
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&ttime);
 
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
@@ -201,9 +201,13 @@ double GetElapsedTime() {
 
 double queryTime() {
 #ifdef WIN32
-    LONGLONG tmpnewtime;
-    QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
-    return ( (double) tmpnewtime )/(double) freq-firsttime;
+    alignas(16) LARGE_INTEGER ticks;
+    QueryPerformanceCounter(&ticks);
+    double tmpnewtime = 0;
+    if (freq.QuadPart > 0) {
+        tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
+    }
+    return tmpnewtime - firsttime;
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -225,9 +229,15 @@ double queryTime() {
 
 double realTime() {
 #ifdef WIN32
-    LONGLONG tmpnewtime;
-    QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
-    return ( (double) tmpnewtime )/(double) freq;
+    alignas(16) LARGE_INTEGER ticks;
+    QueryPerformanceCounter(&ticks);
+    double tmpnewtime = 0;
+    if (freq.QuadPart > 0) {
+        tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
+    }
+    if (tmpnewtime == INFINITY) {
+        tmpnewtime = 0;
+    }
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -250,15 +260,25 @@ double realTime() {
 void UpdateTime() {
     static bool first = true;
 #ifdef WIN32
-    QueryPerformanceCounter( (LARGE_INTEGER*) &newtime );
-    elapsedtime = ( (double) (newtime-ttime) )/freq;
+    alignas(16) LARGE_INTEGER ticks;
+    QueryPerformanceCounter(&ticks);
+    double tmpnewtime = 0;
+    if (freq.QuadPart > 0) {
+        tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
+    }
+    if (tmpnewtime == INFINITY) {
+        tmpnewtime = 0;
+    }
+    double tmpttime = 0;
+    if (freq.QuadPart > 0) {
+        tmpttime = static_cast<double>(ttime.QuadPart / freq.QuadPart);
+    }
+    elapsedtime = (tmpnewtime - tmpttime);
     ttime = newtime;
-    if (freq == 0)
-        dblnewtime = 0.;
-    else
-        dblnewtime = ( (double) newtime )/( (double) freq );
     if (first)
+    {
         firsttime = dblnewtime;
+    }
 #elif defined(_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
