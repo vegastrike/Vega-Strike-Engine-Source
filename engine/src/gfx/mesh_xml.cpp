@@ -1323,11 +1323,10 @@ vector<Mesh *> Mesh::LoadMeshes(const char *filename,
         hash_name = VSFileSystem::GetSharedMeshHashName(filename, scale, faction);
         oldmesh = bfxmHashTable.Get(hash_name);
     }
-    if (0 != oldmesh) {
+    if (oldmesh && !oldmesh->empty() && oldmesh->size() < UINT32_MAX) {
         vector<Mesh *> ret;
-        for (unsigned int i = 0; i < oldmesh->size(); ++i) {
+        for (auto m : *oldmesh) {
             ret.push_back(new Mesh());
-            Mesh *m = (*oldmesh)[i];
             ret.back()->LoadExistant(m->orig ? m->orig : m);
         }
         return ret;

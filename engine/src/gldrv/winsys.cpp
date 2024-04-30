@@ -192,7 +192,7 @@ void winsys_warp_pointer(int x, int y) {
  *  \date    Modified: 2021-09-07 - stephengtuggy
  */
 static bool setup_sdl_video_mode() {
-    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN; // | SDL_WINDOW_ALLOW_HIGHDPI;
     int bpp = 0; // Bits per pixel?
     int width, height;
     if (gl_options.fullscreen) {
@@ -334,7 +334,7 @@ static bool setup_sdl_video_mode() {
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
 
-    Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_TIMER | SDL_INIT_EVENTS;
+    Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS;
     g_game.x_resolution = game_options()->x_resolution;
     g_game.y_resolution = game_options()->y_resolution;
 //    gl_options.fullscreen = game_options()->fullscreen;
