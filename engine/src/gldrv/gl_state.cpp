@@ -191,8 +191,8 @@ void GFXToggleTexture(bool enable, int whichstage, enum TEXTURE_TARGET target) {
 void /*GFXDRVAPI*/ GFXDisable(const STATE state) {
     switch (state) {
         case LIGHTING:
-//            glDisable(GL_LIGHTING);
-//            GFXLIGHTING = GFXFALSE;
+            glDisable(GL_LIGHTING);
+            GFXLIGHTING = GFXFALSE;
             break;
         case DEPTHTEST:
             glDisable(GL_DEPTH_TEST);
