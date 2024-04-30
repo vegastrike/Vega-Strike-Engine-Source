@@ -26,12 +26,12 @@
 
 #include <fstream>
 #include <sstream>
-#include <random>
 #include <algorithm>
 #include <iostream>
 
 //#include "xml_support.h"  // TODO: replace this later
 #include "json.h"
+#include "random_utils.h"
 
 
 // TODO: get rid of this helper function and others like it.
@@ -121,11 +121,7 @@ Cargo Manifest::GetRandomCargo(int quantity) {
         return Cargo();
     }
 
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> int_dist(0,_items.size()-1);
-
-    int index = int_dist(rng); // TODO: test this gets all items
+    int index = randomInt(_items.size()-1); 
     Cargo c = _items[index];
     c.SetQuantity(quantity);
     return c;

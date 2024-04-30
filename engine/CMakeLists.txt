@@ -710,6 +710,7 @@ SET(LIBRESOURCE
     src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
+    src/resource/random_utils.cpp
     src/cmd/json.cpp
     )
 
@@ -1705,6 +1706,7 @@ IF (USE_GTEST)
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp
+        src/resource/tests/random_tests.cpp
         src/exit_unit_tests.cpp
     )
 

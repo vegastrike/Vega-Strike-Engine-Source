@@ -31,6 +31,7 @@
 
 template<typename T>
 class Resource {
+protected:
     T value_;
     T min_value_;
     T max_value_;
@@ -39,6 +40,8 @@ class Resource {
 public:
     Resource(const T &value = 0, const T &min_value = 0, const T &max_value = -1);
 
+    const T operator=(Resource<T> value) const;
+    Resource<T> operator=(const T &value);
     Resource<T> operator+=(const T &value);
     Resource<T> operator-=(const T &value);
 
@@ -81,21 +84,36 @@ public:
 
     operator T() { return value_; }
 
-    void Downgrade(const T &value);
-    void DowngradeByPercent(const T &value);
+    
 
-    T Percent() const;
-    void ResetMaxValue();
+    double Percent() const;
+    void ResetMaxValue();       // adjusted_max_value_ = max_value_;
     void Set(const T &value);
-    void SetMaxValue(const T &value);
-    void Upgrade(const T &value);
-    void UpgradeByPercent(const T &value);
-    void Zero();
+    void SetToMax();            // value_ = adjusted_max_value_ = max_value_
+    void SetMaxValue(const T &value);       // value_ = adjusted_max_value_ = max_value_ = value;
+    void SetAdjustedMaxValue(const T &value); // New adjusted max value
+    
+    void Zero();    // value_ = adjusted_max_value_ = min_value_;
 
     T Value() const;
     T MaxValue() const;
     T MinValue() const;
     T AdjustedValue() const;
+
+    // Damage & Repair
+    void Destroy(); // value_ = adjusted_max_value_ = min_value_;
+    bool Destroyed();
+    void RandomDamage();
+    void DamageByValue(const T &value);
+    void DamageByPercent(const T &value);
+    bool Damaged() const;
+    void RepairFully();
+    void RepairByValue(const T &value);
+    void RepairByPercent(const T &value);
+
+    T* ValuePtr() { return &value_; }
+    T* AdjustedMaxValuePtr() { return &adjusted_max_value_; }
+    T* MaxValuePtr() { return &max_value_; }
 };
 
 template<typename T>
