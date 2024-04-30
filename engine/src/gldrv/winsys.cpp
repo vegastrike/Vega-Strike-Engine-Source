@@ -24,7 +24,11 @@
  */
 
 #include <SDL2/SDL.h>
-#include <OpenGL/gl.h>
+#if defined (__APPLE__) && defined (__MACH__)
+#   include <OpenGL/gl.h>
+#else
+#   include <GL/gl.h>
+#endif
 
 #include <assert.h>
 #include <sstream>
@@ -56,7 +60,7 @@
  */
 
 static SDL_Window *window = nullptr;
-static SDL_Surface *screen = nullptr;
+//static SDL_Surface *screen = nullptr;
 
 static winsys_display_func_t display_func = nullptr;
 static winsys_idle_func_t idle_func = nullptr;
@@ -379,7 +383,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     if (!setup_sdl_video_mode()) {
         VS_LOG_FLUSH_EXIT(fatal, "setup_sdl_video_mode() failed!", 1);
     } else {
-//        glutInit(argc, argv);
+        glutInit(argc, argv);
     }
 }
 
