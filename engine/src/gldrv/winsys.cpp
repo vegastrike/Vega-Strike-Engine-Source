@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <sstream>
+#include <lin_time.h>
 
 #include "gl_globals.h"
 #include "winsys.h"
@@ -68,6 +69,8 @@ static winsys_atexit_func_t atexit_func = nullptr;
 
 static bool redisplay = false;
 static bool keepRunning = true;
+
+const double REFRESH_RATE = 1.0 / 120.0;
 
 /*---------------------------------------------------------------------------*/
 /*!
@@ -427,6 +430,7 @@ void winsys_process_events() {
         keysym_to_unicode_init = true;
         memset(keysym_to_unicode, 0, sizeof(keysym_to_unicode));
     }
+    double timeLastChecked = realTime();
     while (keepRunning) {
         SDL_LockAudio();
         SDL_UnlockAudio();
@@ -510,8 +514,9 @@ void winsys_process_events() {
             /* Delay for a bit.  This allows the other threads to do some
              *  work (otherwise the audio thread gets starved). */
         }
-        winsys_swap_buffers();
-        SDL_Delay(2);
+        while (realTime() < timeLastChecked + REFRESH_RATE) {
+            SDL_Delay(1);
+        }
     }
     winsys_cleanup();
 }

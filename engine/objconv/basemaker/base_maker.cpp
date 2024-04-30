@@ -326,7 +326,9 @@ void VSSprite::GetRotation( float &rot )
 }
 
 */
+
 void VSExit(int code) {
+    STATIC_VARS_DESTROYED = true;
     exit(code);
 }
 

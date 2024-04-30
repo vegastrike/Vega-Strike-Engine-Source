@@ -49,6 +49,7 @@ float AUDIO_ATOM = 0.0f;
 
 void VSExit(int code) {
     VSServer->closeAllSockets();
+    STATIC_VARS_DESTROYED = true;
     exit(1);
 }
 

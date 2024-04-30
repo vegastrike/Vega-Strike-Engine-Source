@@ -143,15 +143,16 @@ int readCommandLineOptions(int argc, char **argv);
 void VSExit(int code) {
     Music::CleanupMuzak();
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
     winsys_exit(code);
 }
 
 void cleanup(void) {
-    STATIC_VARS_DESTROYED = true;
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
     VS_LOG(info, "Thank you for playing!");
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
     if (_Universe != NULL) {
         _Universe->WriteSaveGame(true);
     }
