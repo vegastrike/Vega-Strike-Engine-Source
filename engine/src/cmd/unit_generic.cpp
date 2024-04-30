@@ -1340,7 +1340,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
             if (dam < mindam) {
                 dam = mindam;
             }
-            energy.DowngradeByPercent(dam);
+            energy.DamageByPercent(dam);
         } else if (repair_droid > 0) {
             repair_droid--;
         }

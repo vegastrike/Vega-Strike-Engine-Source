@@ -26,25 +26,9 @@
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 #include <iostream>
-#include <random>
 
 #include "manifest.h"
 
-
-TEST(Manifest, Random) {
-    int size = 5;
-
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> int_dist(0,size-1); 
-
-    for(int i=0;i<1000;i++) {
-        int index = int_dist(rng);
-
-        EXPECT_GE(index,0);
-        EXPECT_LT(index,size);
-    }
-}
 
 
 TEST(Manifest, MPL) {
