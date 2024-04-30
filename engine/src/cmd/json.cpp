@@ -390,10 +390,12 @@ std::vector<std::string> json::parsing::parse_array(const char *input)
     // Initalize the result
     std::vector<std::string> result;
 
-    if (input != nullptr) {
-        VS_LOG_AND_FLUSH(debug, boost::format("JSON Data: %s") % input);
-    } else {
+    if (input == nullptr) {
         VS_LOG_AND_FLUSH(debug, "Invalid JSON Input - NULL Pointer");
+    } else if (input[0] == '\0') {
+        VS_LOG_AND_FLUSH(debug, "Invalid JSON Input - Empty String");
+    } else {
+        VS_LOG_AND_FLUSH(debug, boost::format("JSON Data: %s") % input);
     }
 
     const char *index = json::parsing::tlws(input);
