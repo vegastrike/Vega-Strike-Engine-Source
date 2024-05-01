@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * options.h
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -24,19 +26,27 @@
 
 #include <string>
 #include <memory>
+#include "vs_logging.h"
 
 #ifndef uint
 typedef unsigned int uint;
 #endif
 
 class vs_options {
-public:
+private:
     vs_options() {
     }
 
-    ~vs_options() {
+    inline ~vs_options() {
+        VS_LOG_AND_FLUSH(debug, "Destroying vs_options instance");
     }
 
+public:
+    static vs_options& instance() {
+        static vs_options vs_options_instance;
+        return vs_options_instance;
+    }
+    
     void init();
 
 /* General Options */
@@ -339,7 +349,5 @@ public:
     std::string getPlayer(int);
     std::string getPassword(int);
 };
-
-extern std::shared_ptr<vs_options> game_options();
 
 #endif //VEGA_STRIKE_ENGINE_OPTIONS_H

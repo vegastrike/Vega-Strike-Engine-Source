@@ -1,10 +1,8 @@
-/**
+/*
  * audible.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, 
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -96,21 +94,21 @@ void Audible::playSound(SoundType type) {
 
 void Audible::playShieldDamageSound(const Vector &pnt) {
     const int shieldSound = sounds[SoundType::shield];
-    static int playerShieldSound = AUDCreateSoundWAV(game_options()->player_shield_hit);
+    static int playerShieldSound = AUDCreateSoundWAV(vs_options::instance().player_shield_hit);
     int currentPlayerSound = playerShieldSound != -1 ? playerShieldSound : shieldSound;
     playSound(pnt, shieldSound, currentPlayerSound);
 }
 
 void Audible::playArmorDamageSound(const Vector &pnt) {
     const int armorSound = sounds[SoundType::armor];
-    static int playerArmorSound = AUDCreateSoundWAV(game_options()->player_armor_hit);
+    static int playerArmorSound = AUDCreateSoundWAV(vs_options::instance().player_armor_hit);
     int currentPlayerSound = playerArmorSound != -1 ? playerArmorSound : armorSound;
     playSound(pnt, armorSound, currentPlayerSound);
 }
 
 void Audible::playHullDamageSound(const Vector &pnt) {
     const int hullSound = sounds[SoundType::hull];
-    static int playerHullSound = AUDCreateSoundWAV(game_options()->player_hull_hit);
+    static int playerHullSound = AUDCreateSoundWAV(vs_options::instance().player_hull_hit);
     int currentPlayerSound = playerHullSound != -1 ? playerHullSound : hullSound;
     playSound(pnt, hullSound, currentPlayerSound);
 }
@@ -142,7 +140,7 @@ void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
     }
 
     if (!_Universe->isPlayerStarship(unit)) {
-        if (game_options()->ai_sound) {
+        if (vs_options::instance().ai_sound) {
             playDopplerSound(pnt, sound);
         }
     } else {

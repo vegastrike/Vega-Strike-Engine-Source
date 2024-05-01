@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * in_mouse.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -89,11 +91,11 @@ void AddDelta(int dx, int dy) {
 int warpallowage = 2;
 
 void DealWithWarp(int x, int y) {
-    if (game_options()->warp_mouse) {
+    if (vs_options::instance().warp_mouse) {
         if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
-            if (x < game_options()->warp_mouse_zone || y < game_options()->warp_mouse_zone
-                    || x > g_game.x_resolution - game_options()->warp_mouse_zone || y
-                    > g_game.y_resolution - game_options()->warp_mouse_zone) {
+            if (x < vs_options::instance().warp_mouse_zone || y < vs_options::instance().warp_mouse_zone
+                    || x > g_game.x_resolution - vs_options::instance().warp_mouse_zone || y
+                    > g_game.y_resolution - vs_options::instance().warp_mouse_zone) {
 
                 int delx = -x + g_game.x_resolution / 2;
                 int dely = -y + g_game.y_resolution / 2;

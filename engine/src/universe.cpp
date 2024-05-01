@@ -137,22 +137,22 @@ inline void loadsounds(const string &str, const int max, soundArray &snds, bool 
 
 static void UpdateTimeCompressionSounds() {
     static int lasttimecompress = 0;
-    if ((timecount != lasttimecompress) && (game_options()->compress_max > 0)) {
+    if ((timecount != lasttimecompress) && (vs_options::instance().compress_max > 0)) {
         static bool inittimecompresssounds = false;
         static soundArray loop_snds;
         static soundArray burst_snds;
         static soundArray end_snds;
         if (inittimecompresssounds == false) {
-            loadsounds(game_options()->compress_loop, game_options()->compress_max, loop_snds, true);
-            loadsounds(game_options()->compress_stop, game_options()->compress_max, end_snds);
-            loadsounds(game_options()->compress_change, game_options()->compress_max, burst_snds);
+            loadsounds(vs_options::instance().compress_loop, vs_options::instance().compress_max, loop_snds, true);
+            loadsounds(vs_options::instance().compress_stop, vs_options::instance().compress_max, end_snds);
+            loadsounds(vs_options::instance().compress_change, vs_options::instance().compress_max, burst_snds);
             inittimecompresssounds = true;
         }
-        int soundfile = (timecount - 1) / game_options()->compress_interval;
-        int lastsoundfile = (lasttimecompress - 1) / game_options()->compress_interval;
+        int soundfile = (timecount - 1) / vs_options::instance().compress_interval;
+        int lastsoundfile = (lasttimecompress - 1) / vs_options::instance().compress_interval;
         if (timecount > 0 && lasttimecompress >= 0) {
-            if ((soundfile + 1) >= game_options()->compress_max) {
-                burst_snds.ptr[game_options()->compress_max - 1].playsound();
+            if ((soundfile + 1) >= vs_options::instance().compress_max) {
+                burst_snds.ptr[vs_options::instance().compress_max - 1].playsound();
             } else {
                 if (lasttimecompress > 0 && loop_snds.ptr[lastsoundfile].sound >= 0
                         && AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound)) {
@@ -162,13 +162,13 @@ static void UpdateTimeCompressionSounds() {
                 burst_snds.ptr[soundfile].playsound();
             }
         } else if (lasttimecompress > 0 && timecount == 0) {
-            for (int i = 0; i < game_options()->compress_max; ++i) {
+            for (int i = 0; i < vs_options::instance().compress_max; ++i) {
                 if (loop_snds.ptr[i].sound >= 0 && AUDIsPlaying(loop_snds.ptr[i].sound)) {
                     AUDStopPlaying(loop_snds.ptr[i].sound);
                 }
             }
-            if (lastsoundfile >= game_options()->compress_max) {
-                end_snds.ptr[game_options()->compress_max - 1].playsound();
+            if (lastsoundfile >= vs_options::instance().compress_max) {
+                end_snds.ptr[vs_options::instance().compress_max - 1].playsound();
             } else {
                 end_snds.ptr[lastsoundfile].playsound();
             }
@@ -178,7 +178,7 @@ static void UpdateTimeCompressionSounds() {
 }
 
 Unit *DockToSavedBases(int playernum, QVector &safevec) {
-    string str = game_options()->startDockedTo;
+    string str = vs_options::instance().startDockedTo;
     Unit *plr = _Universe->AccessCockpit(playernum)->GetParent();
     if (!plr || !plr->getStarSystem()) {
         safevec = QVector(0, 0, 0);
@@ -275,7 +275,7 @@ static void AppendUnitTables(const string &csvfiles) {
 
 void InitUnitTables() {
     // Old Init
-    AppendUnitTables(game_options()->modUnitCSV);
+    AppendUnitTables(vs_options::instance().modUnitCSV);
 
     // New Init
     // Try to open units.json
@@ -443,8 +443,8 @@ void Universe::StartDraw() {
     UpdateTime();
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(((int) (rand01() * _cockpits.size())) % _cockpits.size());
-    for (i = 0; i < star_system.size() && i < game_options()->NumRunningSystems; ++i) {
-        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i, true);
+    for (i = 0; i < star_system.size() && i < vs_options::instance().NumRunningSystems; ++i) {
+        star_system[i]->Update((i == 0) ? 1 : vs_options::instance().InactiveSystemTime / i, true);
     }
     StarSystem::ProcessPendingJumps();
     for (i = 0; i < _cockpits.size(); ++i) {
@@ -506,7 +506,7 @@ void Universe::StartGFX() {
 void Universe::Update() {
     for (unsigned int i = 0; i < star_system.size(); ++i) {
         //Calls the update function for server
-        star_system[i]->Update((i == 0) ? 1 : game_options()->InactiveSystemTime / i);
+        star_system[i]->Update((i == 0) ? 1 : vs_options::instance().InactiveSystemTime / i);
     }
 }
 
@@ -701,7 +701,7 @@ void Universe::Generate2(StarSystem *ss) {
     static bool firsttime = true;
     LoadStarSystem(ss);
     pushActiveStarSystem(ss);
-    for (unsigned int tume = 0; tume <= game_options()->num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
+    for (unsigned int tume = 0; tume <= vs_options::instance().num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
             ++tume) {
         ss->UpdateUnitsPhysics(true);
     }

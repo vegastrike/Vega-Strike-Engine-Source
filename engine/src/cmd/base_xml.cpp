@@ -1,7 +1,7 @@
 /*
  * base_xml.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -56,6 +56,12 @@ static FILE *getFullFile(std::string filename, std::string time_of_day_hint, std
     if (!fp) {
         fp = withAndWithout(filename, time_of_day_hint);
     }
+    if (!fp) {
+        fp = withAndWithout(filename + "_" + faction, "");
+    }
+    if (!fp) {
+        fp = withAndWithout(filename, "");
+    }
     return fp;
 }
 
@@ -79,8 +85,7 @@ void BaseInterface::Load(const char *filename, const char *time_of_day_hint, con
     //now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
     string compilefile = string(filename) + time_of_day_hint + string(faction) + BASE_EXTENSION;
     Python::reseterrors();
-    PyRun_SimpleFile(inFile, compilefile.c_str());
+    VegaPyRunFile(inFile, compilefile);
     Python::reseterrors();
     VSFileSystem::vs_close(inFile);
 }
-

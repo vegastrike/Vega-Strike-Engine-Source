@@ -112,21 +112,21 @@ static ALCcontext *context_id = NULL;
 bool AUDInit() {
 #ifdef HAVE_AL
     // g_game.sound_enabled =
-    usedoppler = game_options()->Doppler;
-    usepositional = game_options()->Positional;
+    usedoppler = vs_options::instance().Doppler;
+    usepositional = vs_options::instance().Positional;
     double linuxadjust = 1;
 #ifndef _WIN32
 #ifndef __APPLE__
     linuxadjust = 1. / 3.;
 #endif
 #endif
-    scalepos = 1.0f / (game_options()->Volume * linuxadjust);
-    scalevel = game_options()->DopplerScale;
-    g_game.audio_frequency_mode = game_options()->frequency;
-    maxallowedsingle = game_options()->MaxSingleSounds;
+    scalepos = 1.0f / (vs_options::instance().Volume * linuxadjust);
+    scalevel = vs_options::instance().DopplerScale;
+    g_game.audio_frequency_mode = vs_options::instance().frequency;
+    maxallowedsingle = vs_options::instance().MaxSingleSounds;
     g_game.max_sound_sources =
-            maxallowedtotal = game_options()->MaxTotalSounds;
-    if (!game_options()->Sound && !game_options()->Music) {
+            maxallowedtotal = vs_options::instance().MaxTotalSounds;
+    if (!vs_options::instance().Sound && !vs_options::instance().Music) {
         return false;
     }
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
@@ -166,7 +166,7 @@ bool AUDInit() {
 
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
-    g_game.sound_enabled = game_options()->Sound;
+    g_game.sound_enabled = vs_options::instance().Sound;
 
     return true;
 #endif

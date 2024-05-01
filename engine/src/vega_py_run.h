@@ -1,7 +1,7 @@
 /*
  * vega_py_run.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,8 +25,10 @@
 #define VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H
 
 #include <string>
+#include <cstdio>
 
 void VegaPyRunString(char * py_snippet);
 void VegaPyRunString(const std::string& py_snippet);
+void VegaPyRunFile(FILE* fp, std::string file_path_or_description);
 
 #endif //VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H

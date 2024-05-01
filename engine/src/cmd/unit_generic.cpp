@@ -1705,13 +1705,13 @@ bool Unit::Explode(bool drawit, float timeit) {
             FactionUtil::GetRandExplosionAnimation(this->faction, bleh);
         }
         if (bleh.empty()) {
-            static Animation cache(game_options()->explosion_animation.c_str(), false, .1, BILINEAR, false);
+            static Animation cache(vs_options::instance().explosion_animation.c_str(), false, .1, BILINEAR, false);
             bleh = getRandomCachedAniString();
             if (bleh.size() == 0) {
-                bleh = game_options()->explosion_animation;
+                bleh = vs_options::instance().explosion_animation;
             }
         }
-        this->pImage->pExplosion = new Animation(bleh.c_str(), game_options()->explosion_face_player, .1, BILINEAR, true);
+        this->pImage->pExplosion = new Animation(bleh.c_str(), vs_options::instance().explosion_face_player, .1, BILINEAR, true);
         this->pImage->pExplosion->SetDimensions(this->ExplosionRadius(), this->ExplosionRadius());
         Vector p, q, r;
         this->GetOrientation(p, q, r);
@@ -1721,10 +1721,10 @@ bool Unit::Explode(bool drawit, float timeit) {
                     this->MaxShieldVal(),
                     0,
                     this->ExplosionRadius()
-                            * game_options()->explosion_damage_center,
+                            * vs_options::instance().explosion_damage_center,
                     this->ExplosionRadius()
-                            * game_options()->explosion_damage_center
-                            * game_options()->explosion_damage_edge,
+                            * vs_options::instance().explosion_damage_center
+                            * vs_options::instance().explosion_damage_edge,
                     NULL));
         }
         QVector exploc = this->cumulative_transformation.position;
@@ -1732,8 +1732,8 @@ bool Unit::Explode(bool drawit, float timeit) {
         Unit *un = NULL;
         if (!sub) {
             if ((un = _Universe->AccessCockpit(0)->GetParent())) {
-                exploc = un->Position() * game_options()->explosion_closeness
-                        + exploc * (1 - game_options()->explosion_closeness);
+                exploc = un->Position() * vs_options::instance().explosion_closeness
+                        + exploc * (1 - vs_options::instance().explosion_closeness);
             }
         }
         //AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
@@ -1742,8 +1742,8 @@ bool Unit::Explode(bool drawit, float timeit) {
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
             if (this->isUnit() == Vega_UnitType::unit) {
-                if (rand() < RAND_MAX * game_options()->percent_shockwave && (!this->isSubUnit())) {
-                    static string shockani(game_options()->shockwave_animation);
+                if (rand() < RAND_MAX * vs_options::instance().percent_shockwave && (!this->isSubUnit())) {
+                    static string shockani(vs_options::instance().shockwave_animation);
                     static Animation *__shock__ani = new Animation(shockani.c_str(), true, .1, MIPMAP, false);
 
                     __shock__ani->SetFaceCam(false);
@@ -1751,7 +1751,7 @@ bool Unit::Explode(bool drawit, float timeit) {
                             this->ExplosionRadius(),
                             true,
                             shockani,
-                            game_options()->shockwave_growth);
+                            vs_options::instance().shockwave_growth);
                     Animation *ani = GetVolatileAni(which);
                     if (ani) {
                         ani->SetFaceCam(false);
@@ -1775,15 +1775,15 @@ bool Unit::Explode(bool drawit, float timeit) {
                     if (!BaseInterface::CurrentBase) {
                         static float lasttime = 0;
                         float newtime = getNewTime();
-                        if (newtime - lasttime > game_options()->time_between_music
+                        if (newtime - lasttime > vs_options::instance().time_between_music
                                 || (_Universe->isPlayerStarship(this) && this->isUnit() != Vega_UnitType::missile
                                         && this->faction
                                                 != upgradesfaction)) {
                             //No victory for missiles or spawned explosions
-                            if (rel > game_options()->victory_relationship) {
+                            if (rel > vs_options::instance().victory_relationship) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong(Music::LOSSLIST);
-                            } else if (rel < game_options()->loss_relationship) {
+                            } else if (rel < vs_options::instance().loss_relationship) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong(Music::VICTORYLIST);
                             }
@@ -1794,7 +1794,7 @@ bool Unit::Explode(bool drawit, float timeit) {
         }
     }
     bool timealldone =
-            (this->pImage->timeexplode > game_options()->debris_time || this->isUnit() == Vega_UnitType::missile
+            (this->pImage->timeexplode > vs_options::instance().debris_time || this->isUnit() == Vega_UnitType::missile
                     || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty());
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -1820,8 +1820,8 @@ bool Unit::Explode(bool drawit, float timeit) {
             }
         }
     }
-    if ((game_options()->eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
-        unsigned int dropcount = floorf(this->numCargo() / game_options()->eject_cargo_on_blowup) + 1;
+    if ((vs_options::instance().eject_cargo_on_blowup > 0) && (this->numCargo() > 0)) {
+        unsigned int dropcount = floorf(this->numCargo() / vs_options::instance().eject_cargo_on_blowup) + 1;
         if (dropcount > this->numCargo()) {
             dropcount = this->numCargo();
         }

@@ -1,9 +1,8 @@
 /*
  * technique.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -355,11 +354,11 @@ bool Pass::isCompiled(int programVersion) const {
 Technique::Technique(const string &name) :
         name(name), compiled(false), programVersion(0) {
     string root_technique_filename =
-            game_options()->techniquesBasePath + "/"
+            vs_options::instance().techniquesBasePath + "/"
                     + name + ".technique";
     string sub_technique_filename =
-            game_options()->techniquesBasePath + "/"
-                    + game_options()->techniquesSubPath + "/"
+            vs_options::instance().techniquesBasePath + "/"
+                    + vs_options::instance().techniquesSubPath + "/"
                     + name + ".technique";
 
     string filename;

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * faction_util_generic.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -119,18 +121,18 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
         if (strcmp(factions[Myfaction]->factionname, "upgrades") != 0) {
             if (strcmp(factions[TheirFaction]->factionname, "neutral") != 0) {
                 if (strcmp(factions[TheirFaction]->factionname, "upgrades") != 0) {
-                    if (isPlayerFaction(TheirFaction) || game_options()->AllowNonplayerFactionChange) {
-                        if (game_options()->AllowCivilWar || Myfaction != TheirFaction) {
+                    if (isPlayerFaction(TheirFaction) || vs_options::instance().AllowNonplayerFactionChange) {
+                        if (vs_options::instance().AllowCivilWar || Myfaction != TheirFaction) {
                             factions[Myfaction]->faction[TheirFaction].relationship += factor * rank;
                             if (factions[Myfaction]->faction[TheirFaction].relationship > 1
-                                    && game_options()->CappedFactionRating) {
+                                    && vs_options::instance().CappedFactionRating) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = 1;
                             }
                             if (factions[Myfaction]->faction[TheirFaction].relationship
                                     < configuration()->ai.min_relationship) {
                                 factions[Myfaction]->faction[TheirFaction].relationship = static_cast<float>(configuration()->ai.min_relationship);
                             }
-                            if (!game_options()->AllowNonplayerFactionChange) {
+                            if (!vs_options::instance().AllowNonplayerFactionChange) {
                                 factions[TheirFaction]->faction[Myfaction].relationship =
                                         factions[Myfaction]->faction[TheirFaction].relationship;
                             }                                                                                     //reflect if player

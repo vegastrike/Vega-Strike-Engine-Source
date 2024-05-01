@@ -2,7 +2,7 @@
  * unit_csv_factory.cpp
  *
  * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2022-2024 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -156,6 +156,8 @@ inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const 
     std::string result = _GetVariable(unit_key, attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
         return default_value;
+    } else if (result.empty()) {
+        return default_value;
     }
     boost::algorithm::to_lower(result);
     return (result == "true" || result == "1");
@@ -166,6 +168,8 @@ inline float UnitCSVFactory::GetVariable(std::string unit_key, std::string const
     std::string result = _GetVariable(unit_key, attribute_key);
 
     if (result == DEFAULT_ERROR_VALUE) {
+        return default_value;
+    } else if (result.empty()) {
         return default_value;
     }
 
@@ -195,6 +199,8 @@ template<>
 inline int UnitCSVFactory::GetVariable(std::string unit_key, std::string const &attribute_key, int default_value) {
     std::string result = _GetVariable(unit_key, attribute_key);
     if (result == DEFAULT_ERROR_VALUE) {
+        return default_value;
+    } else if (result.empty()) {
         return default_value;
     }
     try {

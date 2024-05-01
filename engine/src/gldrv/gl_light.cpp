@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
+ * gl_light.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -379,8 +381,8 @@ static void SetupGLLightGlobals() {
         }
     }
 
-    GFXSetCutoff(game_options()->lightcutoff);
-    GFXSetOptimalIntensity(game_options()->lightoptimalintensity, game_options()->lightsaturation);
-    GFXSetOptimalNumLights(game_options()->numlights);
-    GFXSetSeparateSpecularColor(game_options()->separatespecularcolor ? GFXTRUE : GFXFALSE);
+    GFXSetCutoff(vs_options::instance().lightcutoff);
+    GFXSetOptimalIntensity(vs_options::instance().lightoptimalintensity, vs_options::instance().lightsaturation);
+    GFXSetOptimalNumLights(vs_options::instance().numlights);
+    GFXSetSeparateSpecularColor(vs_options::instance().separatespecularcolor ? GFXTRUE : GFXFALSE);
 }

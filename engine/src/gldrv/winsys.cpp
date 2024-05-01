@@ -219,14 +219,14 @@ static bool setup_sdl_video_mode() {
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
-    if (game_options()->rgb_pixel_format == "undefined") {
-        game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+    if (vs_options::instance().rgb_pixel_format == "undefined") {
+        vs_options::instance().rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
-    if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
-        && isdigit(game_options()->rgb_pixel_format[1]) && isdigit(game_options()->rgb_pixel_format[2])) {
-        rs = game_options()->rgb_pixel_format[0] - '0';
-        gs = game_options()->rgb_pixel_format[1] - '0';
-        bs = game_options()->rgb_pixel_format[2] - '0';
+    if ((vs_options::instance().rgb_pixel_format.length() == 3) && isdigit(vs_options::instance().rgb_pixel_format[0])
+        && isdigit(vs_options::instance().rgb_pixel_format[1]) && isdigit(vs_options::instance().rgb_pixel_format[2])) {
+        rs = vs_options::instance().rgb_pixel_format[0] - '0';
+        gs = vs_options::instance().rgb_pixel_format[1] - '0';
+        bs = vs_options::instance().rgb_pixel_format[2] - '0';
     }
     int otherbpp;
     int otherattributes;
@@ -236,7 +236,7 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, rs);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, gs);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, bs);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, vs_options::instance().z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
     else
@@ -246,10 +246,10 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, rs);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, gs);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, bs);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, vs_options::instance().z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
-    if (game_options()->gl_accelerated_visual) {
+    if (vs_options::instance().gl_accelerated_visual) {
         if (SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1) < 0) {
             VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, ...) failed! Error: %1%") % SDL_GetError()), 1);
         }
@@ -323,11 +323,11 @@ static bool setup_sdl_video_mode() {
         version = (const char*)renderer_string;
     }
     if (version == "GDI Generic" || version == "software") {
-        if (game_options()->gl_accelerated_visual) {
+        if (vs_options::instance().gl_accelerated_visual) {
             VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
             SDL_ClearError();
             SDL_Quit();
-            game_options()->gl_accelerated_visual = false;
+            vs_options::instance().gl_accelerated_visual = false;
             return false;
         } else {
             VS_LOG(error, "GDI Generic software driver reported, reset failed.");
@@ -357,11 +357,11 @@ static bool setup_sdl_video_mode() {
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
 
-    Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS;
-    g_game.x_resolution = game_options()->x_resolution;
-    g_game.y_resolution = game_options()->y_resolution;
-//    gl_options.fullscreen = game_options()->fullscreen;
-//    gl_options.color_depth = game_options()->colordepth;
+    Uint32 sdl_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+    g_game.x_resolution = vs_options::instance().x_resolution;
+    g_game.y_resolution = vs_options::instance().y_resolution;
+//    gl_options.fullscreen = vs_options::instance().fullscreen;
+//    gl_options.color_depth = vs_options::instance().colordepth;
     /*
      * Initialize SDL
      */
@@ -465,10 +465,10 @@ void winsys_process_events() {
         keysym_to_unicode_init = true;
         memset(keysym_to_unicode, 0, sizeof(keysym_to_unicode));
     }
-    double timeLastChecked = realTime();
-    if (timeLastChecked == INFINITY) {
-        timeLastChecked = 0;
-    }
+    //double timeLastChecked = realTime();
+    //if (timeLastChecked == INFINITY) {
+    //    timeLastChecked = 0;
+    //}
     while (keepRunning) {
         SDL_LockAudio();
         SDL_UnlockAudio();
@@ -556,11 +556,11 @@ void winsys_process_events() {
              *  work (otherwise the audio thread gets starved). */
         }
 
-        do {
-//            micro_sleep(1000);
-            SDL_Delay(1);
-        } while (realTime() < timeLastChecked + REFRESH_RATE);
-        timeLastChecked = realTime();
+        //do {
+            micro_sleep(10000);
+            //SDL_Delay(1);
+        //} while (realTime() < timeLastChecked + REFRESH_RATE);
+        //timeLastChecked = realTime();
 
 //        // Blue
 //        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
@@ -804,12 +804,12 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 {
     int width, height;
     int glutWindow;
-    g_game.x_resolution    = game_options()->x_resolution;
-    g_game.y_resolution    = game_options()->y_resolution;
-    gl_options.fullscreen  = game_options()->fullscreen;
-    gl_options.color_depth = game_options()->colordepth;
+    g_game.x_resolution    = vs_options::instance().x_resolution;
+    g_game.y_resolution    = vs_options::instance().y_resolution;
+    gl_options.fullscreen  = vs_options::instance().fullscreen;
+    gl_options.color_depth = vs_options::instance().colordepth;
     glutInit( argc, argv );
-    if (game_options()->glut_stencil) {
+    if (vs_options::instance().glut_stencil) {
 #if defined(__APPLE__) && defined(__MACH__)
         if ( !(glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE|GLUT_STENCIL ), 1) )
             glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE );

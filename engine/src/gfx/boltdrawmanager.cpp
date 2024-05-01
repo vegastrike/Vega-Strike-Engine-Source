@@ -1,10 +1,8 @@
-/**
+/*
  * boltdrawmanager.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -41,7 +39,7 @@ BoltDrawManager::BoltDrawManager() {
     if (!boltmesh) {
         GFXVertex vtx[12];
 #define V(ii, xx, yy, zz, ss, \
-           tt) vtx[(ii)].x = (xx); vtx[(ii)].y = (yy); vtx[(ii)].z = (zz) + game_options()->bolt_offset + .875; vtx[(ii)].i = 0; vtx[(ii)].j = 0; vtx[(ii)].k = 1; \
+           tt) vtx[(ii)].x = (xx); vtx[(ii)].y = (yy); vtx[(ii)].z = (zz) + vs_options::instance().bolt_offset + .875; vtx[(ii)].i = 0; vtx[(ii)].j = 0; vtx[(ii)].k = 1; \
     vtx[(ii)].s = (ss); vtx[(ii)].t = (tt);
         V(0, 0, 0, -.875, 0, .5);
         V(1, 0, -1, 0, .875, 1);
@@ -88,7 +86,7 @@ BoltDrawManager &BoltDrawManager::GetInstance() {
 void BoltDrawManager::Draw() {
     GFXDisable(LIGHTING);
     GFXDisable(CULLFACE);
-    GFXBlendMode(ONE, game_options()->BlendGuns ? ONE : ZERO);
+    GFXBlendMode(ONE, vs_options::instance().BlendGuns ? ONE : ZERO);
     GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
     GFXAlphaTest(GREATER, .1);
 
@@ -96,7 +94,7 @@ void BoltDrawManager::Draw() {
             * sin(g_game.fov * M_PI / 180.0
                     / (g_game.y_resolution
                             > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution))
-            * game_options()->bolt_pixel_size;
+            * vs_options::instance().bolt_pixel_size;
     pixel_angle *= pixel_angle;
     camera_position = _Universe->AccessCamera()->GetPosition();
     elapsed_time = GetElapsedTime();

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * force_feedback.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -199,12 +201,12 @@ void ForceFeedback::stopEffect( unsigned int eff_nr )
 
 void ForceFeedback::init()
 {
-    if (!game_options()->force_feedback) {
+    if (!vs_options::instance().force_feedback) {
         VS_LOG(info, "force feedback disabled in config file");
         return;
     }
     char devname[200];
-    sprintf( devname, "/dev/input/event%d", game_options()->ff_device );
+    sprintf( devname, "/dev/input/event%d", vs_options::instance().ff_device );
 
     ff_fd = open( devname, O_RDWR );
     if (ff_fd == -1) {

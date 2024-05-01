@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gfxlib_struct.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -114,10 +116,10 @@ static void EnableArrays(const GFXVertex *data) {
 
 void GFXVertexList::RefreshDisplayList() {
 #ifndef NO_VBO_SUPPORT
-    if (game_options()->vbo && !vbo_data) {
+    if (vs_options::instance().vbo && !vbo_data) {
         if (glGenBuffersARB_p == nullptr || glBindBufferARB_p == nullptr || glBufferDataARB_p == nullptr || glMapBufferARB_p == nullptr
                 || glUnmapBufferARB_p == nullptr) {
-            game_options()->vbo = false;
+            vs_options::instance().vbo = false;
         } else {
             (*glGenBuffersARB_p)(1, (GLuint *) &vbo_data);
             if (changed & HAS_INDEX) {

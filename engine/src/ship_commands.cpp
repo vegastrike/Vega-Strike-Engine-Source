@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * ship_commands.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -144,10 +146,10 @@ void ShipCommands::setkps(const char *in) {
     float kps = XMLSupport::parse_float(std::string(in));
     Unit *player = UniverseUtil::getPlayer();
     if (player) {
-        if (game_options()->game_speed_lying) {
-            kps *= game_options()->game_speed;
+        if (vs_options::instance().game_speed_lying) {
+            kps *= vs_options::instance().game_speed;
         } else {
-            kps /= game_options()->display_in_meters ? 1.0f : 3.6f;
+            kps /= vs_options::instance().display_in_meters ? 1.0f : 3.6f;
         }
         player->GetComputerData().set_speed = fmin(player->GetComputerData().max_speed(), kps);
     }

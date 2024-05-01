@@ -1,4 +1,6 @@
 /*
+ * galaxy_gen.cpp
+ * 
  * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Evert Vorster,
  * Roy Falk, Stephen G. Tuggy, and other Vega Strike contributors.
  *
@@ -254,7 +256,7 @@ float difffunc(float inputdiffuse) {
 void WriteLight(unsigned int i) {
     float ambient = (lights[i].r + lights[i].g + lights[i].b);
 
-    ambient *= game_options()->AmbientLightFactor;
+    ambient *= vs_options::instance().AmbientLightFactor;
     Tab();
     f.Fprintf("<Light>\n");
     xmllevel++;
@@ -379,7 +381,7 @@ void readColorGrads(vector<string> &entity, const char *file) {
     while (!f.Eof()) {
         f.ReadLine(input_buffer, BUFFER_SIZE - 1);
         if (sscanf(input_buffer, "%f %f %f %f %f %s", &g.minrad, &g.r, &g.g, &g.b, &g.variance, output_buffer) == 6) {
-            g.minrad *= game_options()->StarRadiusScale;
+            g.minrad *= vs_options::instance().StarRadiusScale;
             colorGradiant.push_back(g);
             entity.emplace_back(output_buffer);
         }
@@ -427,7 +429,7 @@ Color StarColor(float radius, unsigned int &entityindex) {
 
 GFXColor getStarColorFromRadius(float radius) {
     unsigned int myint = 0;
-    Color tmp = StarColor(radius * game_options()->StarRadiusScale, myint);
+    Color tmp = StarColor(radius * vs_options::instance().StarRadiusScale, myint);
     return GFXColor(tmp.r, tmp.g, tmp.b, 1);
 }
 
@@ -848,7 +850,7 @@ void MakePlanet(float radius,
     if (atmosphere == "false") {
         atmosphere = "";
     } else if (atmosphere == "true") {
-        atmosphere = game_options()->DefaultAtmosphereTexture;
+        atmosphere = vs_options::instance().DefaultAtmosphereTexture;
     }
     string cname;
     string planetlites = _Universe->getGalaxy()->getPlanetVariable(texturename, "lights", "");
@@ -896,7 +898,7 @@ void MakePlanet(float radius,
         Tab();
         f.Fprintf("<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n", cname.c_str(), wrapx, wrapy);
     }
-    if ((entitytype == PLANET && temprandom < game_options()->AtmosphereProbability) && (!atmosphere.empty())) {
+    if ((entitytype == PLANET && temprandom < vs_options::instance().AtmosphereProbability) && (!atmosphere.empty())) {
         string NAME = thisname + " Atmosphere";
         {
             bool doalphaatmosphere = (temprandom < .08 || temprandom > .3);
@@ -964,14 +966,14 @@ void MakePlanet(float radius,
 
     if (entitytype == PLANET) {
         float ringrand = grand();
-        if (ringrand < game_options()->RingProbability) {
+        if (ringrand < vs_options::instance().RingProbability) {
             string ringname = getRandName(rings);
-            double inner_rad = (game_options()->InnerRingRadius * (1.0 + grand() * 0.5)) * radius;
-            double outer_rad = inner_rad + (static_cast<double>(game_options()->OuterRingRadius) * grand()) * radius;
+            double inner_rad = (vs_options::instance().InnerRingRadius * (1.0 + grand() * 0.5)) * radius;
+            double outer_rad = inner_rad + (static_cast<double>(vs_options::instance().OuterRingRadius) * grand()) * radius;
             int wrapx = 1;
             int wrapy = 1;
             if (ringname.empty()) {
-                ringname = game_options()->DefaultRingTexture;
+                ringname = vs_options::instance().DefaultRingTexture;
             }
             ringname = GetWrapXY(ringname, wrapx, wrapy);
             Vector r, s;
@@ -988,7 +990,7 @@ void MakePlanet(float radius,
                 s.j /= smag;
                 s.k /= smag;
             }
-            if (ringrand < (1 - game_options()->DoubleRingProbability)) {
+            if (ringrand < (1 - vs_options::instance().DoubleRingProbability)) {
                 Tab();
                 f.Fprintf(
                         "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
@@ -1004,12 +1006,12 @@ void MakePlanet(float radius,
                         wrapx,
                         wrapy);
             }
-            if (ringrand < game_options()->DoubleRingProbability
-                    || ringrand >= (game_options()->RingProbability - game_options()->DoubleRingProbability)) {
+            if (ringrand < vs_options::instance().DoubleRingProbability
+                    || ringrand >= (vs_options::instance().RingProbability - vs_options::instance().DoubleRingProbability)) {
                 double movable = grand();
                 inner_rad = outer_rad
-                        * (1 + .1 * (game_options()->SecondRingDifference + game_options()->SecondRingDifference * movable));
-                outer_rad = inner_rad * (game_options()->OuterRingRadius * movable);
+                        * (1 + .1 * (vs_options::instance().SecondRingDifference + vs_options::instance().SecondRingDifference * movable));
+                outer_rad = inner_rad * (vs_options::instance().OuterRingRadius * movable);
                 Tab();
                 f.Fprintf(
                         "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
@@ -1032,7 +1034,7 @@ void MakePlanet(float radius,
     }
     moonlevel++;
     MakeMoons(
-            entitytype != MOON ? game_options()->MoonRelativeToPlanet * radius : game_options()->MoonRelativeToMoon * radius,
+            entitytype != MOON ? vs_options::instance().MoonRelativeToPlanet * radius : vs_options::instance().MoonRelativeToMoon * radius,
             entitytype);
     MakeJumps(100 + grand() * 300, entitytype, numberofjumps);
     moonlevel--;
@@ -1127,7 +1129,7 @@ void beginStar() {
         MakeSmallUnit();
     }
     MakeJumps(100 + grand() * 300, STAR, stars[staroffset].numjumps);
-    MakeMoons(game_options()->RockyRelativeToPrimary * radius, STAR);
+    MakeMoons(vs_options::instance().RockyRelativeToPrimary * radius, STAR);
     //Fixme: no jumps should be made around the star.
     if (!jumps.empty()) {
         VS_LOG(error, (boost::format("ERROR: jumps not empty() Size==%1$u!!!!!") % jumps.size()));
@@ -1400,7 +1402,7 @@ static int pushDownTowardsMean(int mean, int val) {
 }
 
 static int pushTowardsMean(int mean, int val) {
-    if (!game_options()->PushValuesToMean) {
+    if (!vs_options::instance().PushValuesToMean) {
         return val;
     }
     if (val < mean) {
@@ -1411,20 +1413,20 @@ static int pushTowardsMean(int mean, int val) {
 
 void generateStarSystem(SystemInfo &si) {
     ResetGlobalVariables();
-    si.sunradius *= game_options()->StarRadiusScale;
+    si.sunradius *= vs_options::instance().StarRadiusScale;
     systemname = si.name;
 
-    compactness = si.compactness * game_options()->CompactnessScale;
-    jumpcompactness = si.compactness * game_options()->JumpCompactnessScale;
+    compactness = si.compactness * vs_options::instance().CompactnessScale;
+    jumpcompactness = si.compactness * vs_options::instance().JumpCompactnessScale;
     if (si.seed) {
         seedrand(si.seed);
     } else {
         seedrand(stringhash(si.sector + '/' + si.name));
     }
     VS_LOG(info, (boost::format("star %1%, natural %2%, bases %3%") % si.numstars % si.numun1 % si.numun2));
-    int nat = pushTowardsMean(game_options()->MeanNaturalPhenomena, si.numun1);
+    int nat = pushTowardsMean(vs_options::instance().MeanNaturalPhenomena, si.numun1);
     numnaturalphenomena = nat > si.numun1 ? si.numun1 : nat;
-    numstarbases = pushTowardsMean(game_options()->MeanStarBases, si.numun2);
+    numstarbases = pushTowardsMean(vs_options::instance().MeanStarBases, si.numun2);
     numstarentities = si.numstars;
     VS_LOG(info,
             (boost::format("star %1%, natural %2%, bases %3%") % numstarentities % numnaturalphenomena % numstarbases));
