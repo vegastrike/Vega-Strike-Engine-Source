@@ -465,10 +465,6 @@ void winsys_process_events() {
         keysym_to_unicode_init = true;
         memset(keysym_to_unicode, 0, sizeof(keysym_to_unicode));
     }
-    //double timeLastChecked = realTime();
-    //if (timeLastChecked == INFINITY) {
-    //    timeLastChecked = 0;
-    //}
     while (keepRunning) {
         SDL_LockAudio();
         SDL_UnlockAudio();
@@ -529,10 +525,8 @@ void winsys_process_events() {
                     int width, height;
                     SDL_GL_GetDrawableSize(window, &width, &height);
                     g_game.x_resolution = width;
-//                    game_config()
                     g_game.y_resolution = height;
                     g_game.aspect = static_cast<float>(width) / static_cast<float>(height);
-                    //setup_sdl_video_mode(argc, argv);
                     if (reshape_func) {
                         (*reshape_func)(width, height);
                     }
@@ -552,20 +546,11 @@ void winsys_process_events() {
             (*display_func)();
         } else if (idle_func) {
             (*idle_func)();
-            /* Delay for a bit.  This allows the other threads to do some
-             *  work (otherwise the audio thread gets starved). */
         }
 
-        //do {
-            micro_sleep(10000);
-            //SDL_Delay(1);
-        //} while (realTime() < timeLastChecked + REFRESH_RATE);
-        //timeLastChecked = realTime();
-
-//        // Blue
-//        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-//        glClear(GL_COLOR_BUFFER_BIT);
-//        winsys_swap_buffers();
+        /* Delay for a bit.  This allows the other threads to do some
+         *  work (otherwise the audio thread gets starved). */
+        SDL_Delay(1);
     }
     winsys_cleanup();
 }
