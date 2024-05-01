@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * lin_time.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -29,7 +31,7 @@
 static double firsttime;
 VSRandom vsrandom(time(NULL));
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
@@ -168,8 +170,12 @@ void micro_sleep(unsigned int n) {
 #endif
 
 void InitTime() {
-#ifdef WIN32
+    VS_LOG(trace, "InitTime() called");
+#ifdef _WIN32
     QueryPerformanceFrequency(&freq);
+    if (freq.QuadPart == 0) {
+        VS_LOG(serious_warning, "InitTime(): freq is zero!");
+    }
     QueryPerformanceCounter(&ttime);
 
 #elif defined (_POSIX_MONOTONIC_CLOCK)
@@ -200,12 +206,14 @@ double GetElapsedTime() {
 }
 
 double queryTime() {
-#ifdef WIN32
+#ifdef _WIN32
     alignas(16) LARGE_INTEGER ticks;
     QueryPerformanceCounter(&ticks);
     double tmpnewtime = 0;
     if (freq.QuadPart > 0) {
         tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
+    } else {
+        tmpnewtime = static_cast<double>(ticks.QuadPart);
     }
     return tmpnewtime - firsttime;
 #elif defined (_POSIX_MONOTONIC_CLOCK)
@@ -228,12 +236,14 @@ double queryTime() {
 }
 
 double realTime() {
-#ifdef WIN32
+#ifdef _WIN32
     alignas(16) LARGE_INTEGER ticks;
     QueryPerformanceCounter(&ticks);
     double tmpnewtime = 0;
     if (freq.QuadPart > 0) {
         tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
+    } else {
+        tmpnewtime = static_cast<double>(ticks.QuadPart);
     }
     if (tmpnewtime == INFINITY) {
         tmpnewtime = 0;
@@ -259,12 +269,14 @@ double realTime() {
 
 void UpdateTime() {
     static bool first = true;
-#ifdef WIN32
+#ifdef _WIN32
     alignas(16) LARGE_INTEGER ticks;
     QueryPerformanceCounter(&ticks);
     double tmpnewtime = 0;
     if (freq.QuadPart > 0) {
         tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
+    } else {
+        tmpnewtime = static_cast<double>(ticks.QuadPart);
     }
     if (tmpnewtime == INFINITY) {
         tmpnewtime = 0;
@@ -272,6 +284,8 @@ void UpdateTime() {
     double tmpttime = 0;
     if (freq.QuadPart > 0) {
         tmpttime = static_cast<double>(ttime.QuadPart / freq.QuadPart);
+    } else {
+        tmpttime = static_cast<double>(ttime.QuadPart);
     }
     elapsedtime = (tmpnewtime - tmpttime);
     ttime = newtime;
@@ -307,7 +321,7 @@ void UpdateTime() {
 # error "We have no way to determine the time on this system."
 #endif
     elapsedtime *= timecompression;
-    // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime));
+    //VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime));
     first = false;
 }
 

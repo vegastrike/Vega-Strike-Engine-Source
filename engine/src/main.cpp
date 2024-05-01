@@ -366,6 +366,8 @@ int main(int argc, char *argv[]) {
     }
 #endif
 #endif
+    
+    InitTime();
 
     AUDInit();
     AUDListenerGain(vs_options::instance().sound_gain);
@@ -555,7 +557,7 @@ void SetStartupView(Cockpit *cp) {
 
 void bootstrap_main_loop() {
     static bool LoadMission = true;
-    InitTime();
+    //InitTime();
     if (LoadMission) {
         LoadMission = false;
         active_missions.push_back(mission = new Mission(mission_name));
