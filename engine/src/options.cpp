@@ -30,13 +30,7 @@ extern VegaConfig *vs_config;
 void vs_options::init() {
     /* General Options */
     default_mission = vs_config->getVariable("general", "default_mission", "test/test1.mission");
-    std::string main_menu_default{};
-    if (default_mission == "main_menu.mission") {
-        main_menu_default = "true";
-    } else {
-        main_menu_default = "false";
-    }
-    main_menu = XMLSupport::parse_bool(vs_config->getVariable("general", "main_menu", main_menu_default));
+    main_menu = XMLSupport::parse_bool(vs_config->getVariable("general", "main_menu", "false"));
     galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
     load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));

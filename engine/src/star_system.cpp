@@ -1101,7 +1101,6 @@ void StarSystem::Update(float priority) {
 
 //client
 void StarSystem::Update(float priority, bool executeDirector) {
-    static bool very_first_frame{ true };
     bool firstframe = true;
     ///this makes it so systems without players may be simulated less accurately
     for (unsigned int k = 0; k < _Universe->numPlayers(); ++k) {
@@ -1114,19 +1113,15 @@ void StarSystem::Update(float priority, bool executeDirector) {
     simulation_atom_var /= (priority / getTimeCompression());
     //VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Msg B: simulation_atom_var as multiplied = %1%") % simulation_atom_var));
     ///just be sure to restore this at the end
-    if (very_first_frame) {
-        time = GetElapsedTime() - SIMULATION_ATOM;
-        very_first_frame = false;
-    }
-    double time_to_chew_up = GetElapsedTime() - time;
+    time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
     double bolttime = 0;
-    if (time_to_chew_up > simulation_atom_var) {
-        if (time_to_chew_up > simulation_atom_var * 2) {
+    if (time > simulation_atom_var) {
+        if (time > simulation_atom_var * 2) {
             VS_LOG(trace,
                     (boost::format(
-                            "%1% %2%: time_to_chew_up to chew up, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
-                            % __FILE__ % __LINE__ % time_to_chew_up % simulation_atom_var));
+                            "%1% %2%: time to chew up, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
+                            % __FILE__ % __LINE__ % time % simulation_atom_var));
         }
 
         double missionSimulationTimeSubtotal = 0.0;
@@ -1139,7 +1134,7 @@ void StarSystem::Update(float priority, bool executeDirector) {
 
         //Chew up all sim_atoms that have elapsed since last update
         // ** stephengtuggy 2020-07-23: We definitely need this block of code! **
-        while (time_to_chew_up > simulation_atom_var) {
+        while (time > simulation_atom_var) {
             //VS_LOG(trace, "void StarSystem::Update( float priority, bool executeDirector ): Chewing up a sim atom");
             if (current_stage == MISSION_SIMULATION) {
                 double missionSimulationStageStartTime = realTime();
@@ -1189,9 +1184,9 @@ void StarSystem::Update(float priority, bool executeDirector) {
                 current_stage = MISSION_SIMULATION;
                 firstframe = false;
             }
-            time_to_chew_up -= simulation_atom_var;
+            time -= simulation_atom_var;
         }
-        time = GetElapsedTime();
+        //time = GetElapsedTime();
 
         VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by MISSION_SIMULATION: %3%") % __FILE__ % __LINE__ % missionSimulationTimeSubtotal));
         VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by PROCESS_UNIT: %3%") % __FILE__ % __LINE__ % processUnitTimeSubtotal));
