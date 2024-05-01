@@ -36,10 +36,11 @@ VSRandom vsrandom(time(NULL));
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-static alignas(16) LARGE_INTEGER ttime{};
-static alignas(16) LARGE_INTEGER newtime{};
-static alignas(16) LARGE_INTEGER freq{};
-static double   dblnewtime;
+#if defined (HAVE_SDL)
+#   include <SDL2/SDL.h>
+#endif /* defined( HAVE_SDL ) */
+static double newtime;
+static double lasttime;
 #else
 #if defined (HAVE_SDL)
 #   include <SDL2/SDL.h>
@@ -55,11 +56,7 @@ static double elapsedtime = .1;
 static double timecompression = 1;
 
 double getNewTime() {
-#ifdef _WIN32
-    return dblnewtime-firsttime;
-#else
     return newtime - firsttime;
-#endif
 }
 
 class NetClient;
@@ -140,7 +137,7 @@ void micro_sleep( unsigned int n )
 
 void micro_sleep( unsigned int n )
 {
-    (void) usleep( (useconds_t) n );
+    usleep(static_cast<useconds_t>(n));
 }
 
 #elif defined (__APPLE__) && defined (__MACH__)
@@ -165,14 +162,7 @@ void micro_sleep(unsigned int n) {
 
 void InitTime() {
     VS_LOG(trace, "InitTime() called");
-#ifdef _WIN32
-    QueryPerformanceFrequency(&freq);
-    if (freq.QuadPart == 0) {
-        VS_LOG(serious_warning, "InitTime(): freq is zero!");
-    }
-    QueryPerformanceCounter(&ttime);
-
-#elif defined (_POSIX_MONOTONIC_CLOCK)
+#if defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     newtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
@@ -200,17 +190,7 @@ double GetElapsedTime() {
 }
 
 double queryTime() {
-#ifdef _WIN32
-    alignas(16) LARGE_INTEGER ticks;
-    QueryPerformanceCounter(&ticks);
-    double tmpnewtime = 0;
-    if (freq.QuadPart > 0) {
-        tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
-    } else {
-        tmpnewtime = static_cast<double>(ticks.QuadPart);
-    }
-    return tmpnewtime - firsttime;
-#elif defined (_POSIX_MONOTONIC_CLOCK)
+#if defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     double tmpnewtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
@@ -230,19 +210,7 @@ double queryTime() {
 }
 
 double realTime() {
-#ifdef _WIN32
-    alignas(16) LARGE_INTEGER ticks;
-    QueryPerformanceCounter(&ticks);
-    double tmpnewtime = 0;
-    if (freq.QuadPart > 0) {
-        tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
-    } else {
-        tmpnewtime = static_cast<double>(ticks.QuadPart);
-    }
-    if (tmpnewtime == INFINITY) {
-        tmpnewtime = 0;
-    }
-#elif defined (_POSIX_MONOTONIC_CLOCK)
+#if defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     double tmpnewtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
@@ -263,31 +231,7 @@ double realTime() {
 
 void UpdateTime() {
     static bool first = true;
-#ifdef _WIN32
-    alignas(16) LARGE_INTEGER ticks;
-    QueryPerformanceCounter(&ticks);
-    double tmpnewtime = 0;
-    if (freq.QuadPart > 0) {
-        tmpnewtime = static_cast<double>(ticks.QuadPart / freq.QuadPart);
-    } else {
-        tmpnewtime = static_cast<double>(ticks.QuadPart);
-    }
-    if (tmpnewtime == INFINITY) {
-        tmpnewtime = 0;
-    }
-    double tmpttime = 0;
-    if (freq.QuadPart > 0) {
-        tmpttime = static_cast<double>(ttime.QuadPart / freq.QuadPart);
-    } else {
-        tmpttime = static_cast<double>(ttime.QuadPart);
-    }
-    elapsedtime = (tmpnewtime - tmpttime);
-    ttime = newtime;
-    if (first)
-    {
-        firsttime = dblnewtime;
-    }
-#elif defined(_POSIX_MONOTONIC_CLOCK)
+#if defined(_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     lasttime = newtime;
