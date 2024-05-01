@@ -368,6 +368,7 @@ int main(int argc, char *argv[]) {
 #endif
     
     InitTime();
+    UpdateTime();
 
     AUDInit();
     AUDListenerGain(vs_options::instance().sound_gain);

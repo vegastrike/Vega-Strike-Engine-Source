@@ -39,7 +39,8 @@ VSRandom vsrandom(time(NULL));
 static LARGE_INTEGER ttime{};
 static LARGE_INTEGER newtime{};
 static LARGE_INTEGER freq{};
-static double   dblnewtime;
+static double dblnewtime;
+static double lasttime;
 #else
 #if defined (HAVE_SDL)
 #   include <SDL2/SDL.h>
@@ -171,6 +172,12 @@ void InitTime() {
         VS_LOG(serious_warning, "InitTime(): freq is zero!");
     }
     QueryPerformanceCounter(&ttime);
+    if (freq.QuadPart == 0) {
+        dblnewtime = static_cast<double>(ttime.QuadPart);
+    } else {
+        dblnewtime = static_cast<double>(ttime.QuadPart) / static_cast<double>(freq.QuadPart);
+    }
+    lasttime = dblnewtime - .0001;
 
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
@@ -266,28 +273,20 @@ void UpdateTime() {
 #ifdef _WIN32
     LARGE_INTEGER ticks;
     QueryPerformanceCounter(&ticks);
-    double tmpnewtime = 0;
+    lasttime = dblnewtime;
     if (freq.QuadPart > 0) {
-        tmpnewtime = static_cast<double>(ticks.QuadPart) / static_cast<double>(freq.QuadPart);
+        dblnewtime = static_cast<double>(ticks.QuadPart) / static_cast<double>(freq.QuadPart);
     } else {
-        tmpnewtime = static_cast<double>(ticks.QuadPart);
+        dblnewtime = static_cast<double>(ticks.QuadPart);
     }
-    if (tmpnewtime == INFINITY) {
-        tmpnewtime = 0;
-    }
-    double tmpttime = 0;
+    double dblttime = 0;
     if (freq.QuadPart > 0) {
-        tmpttime = static_cast<double>(ttime.QuadPart) / static_cast<double>(freq.QuadPart);
+        dblttime = static_cast<double>(ttime.QuadPart) / static_cast<double>(freq.QuadPart);
     } else {
-        tmpttime = static_cast<double>(ttime.QuadPart);
+        dblttime = static_cast<double>(ttime.QuadPart);
     }
-    elapsedtime = (tmpnewtime - tmpttime);
+    elapsedtime = (dblnewtime - lasttime);
     ttime = newtime;
-    if (freq.QuadPart == 0) {
-        dblnewtime = 0.0;
-    } else {
-        dblnewtime = static_cast<double>(newtime.QuadPart) / static_cast<double>(freq.QuadPart);
-    }
     if (first)
     {
         firsttime = dblnewtime;
