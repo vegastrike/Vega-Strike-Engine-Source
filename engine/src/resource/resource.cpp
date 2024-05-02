@@ -212,10 +212,10 @@ void Resource<T>::RepairByPercent(const T &value) {
  * Overloaded operators
  */
 
-template<typename T>
+/*template<typename T>
 const T Resource<T>::operator=(Resource<T> value) const {
     return value.value_;
-}
+}*/
 
 
 template<typename T>
