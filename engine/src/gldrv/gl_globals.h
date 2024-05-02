@@ -103,7 +103,7 @@ struct GFXStats
 #include <windows.h>
 #include <GL/gl.h>
 #endif
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <GLUT/glut.h>
 //#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
 #if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)
@@ -255,7 +255,7 @@ extern int gl_batches_this_frame;
         #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
         #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT GL_TEXTURE_CUBE_MAP_POSITIVE_Z
         #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    #else 
+    #else
         #ifdef GL_TEXTURE_CUBE_MAP_ARB
             #define GL_TEXTURE_CUBE_MAP_EXT GL_TEXTURE_CUBE_MAP_ARB
             #define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB

@@ -30,13 +30,7 @@
 #else
 #define GFXDRVAPI
 #endif
-/*#if 0
- * #if defined(__APPLE__) || defined(MACOSX)
- * #include <GLUT/glut.h>
- * #else
- * #include <GL/glut.h>
- * #endif
- #endif*/
+
 #include <cstddef>
 #include <vector>
 class Matrix;

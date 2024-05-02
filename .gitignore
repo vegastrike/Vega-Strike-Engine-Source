@@ -12,8 +12,11 @@ packages/
 *.kdev4
 .vs/
 .vscode/
+.idea/
 engine/.idea/
+engine/.run/
 .editorconfig
+**/CMakeUserPresets.json
 
 engine/src/version.h
 engine/setup/src/include/version.h

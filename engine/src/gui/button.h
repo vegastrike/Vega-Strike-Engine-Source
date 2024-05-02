@@ -4,6 +4,8 @@
 *                           begin                : January 10, 2002
 *                           copyright            : (C) 2002 by David Ranger
 *                           email                : ussreliant@users.sourceforge.net
+*                           copyright            : (C) 2023 Stephen G. Tuggy
+*                           email                : sgt@stephengtuggy.com
 ***************************************************************************/
 
 /***************************************************************************
@@ -24,7 +26,7 @@
  * The only external functions it requires that aren't provided by system libs are in glut_support.h
  */
 
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined(__MACH__)
     #include <OpenGL/gl.h>
     #include <GLUT/glut.h>
 #else
