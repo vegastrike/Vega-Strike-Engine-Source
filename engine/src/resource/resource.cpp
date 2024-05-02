@@ -150,7 +150,7 @@ void Resource<T>::RandomDamage() {
 
     if(severity > .95) {
         // Destroy system
-        adjusted_max_value_ = min_value_;
+        Destroy();
     } else {
         // Damage system
         DamageByPercent(severity);
