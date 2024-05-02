@@ -1172,6 +1172,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/building.cpp
     src/cmd/click_list.cpp
     src/cmd/cont_terrain.cpp
+    src/cmd/controls_factory.cpp
     src/cmd/missile.cpp
     src/cmd/music.cpp
     src/cmd/nebula.cpp
