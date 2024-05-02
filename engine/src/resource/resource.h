@@ -40,7 +40,7 @@ protected:
 public:
     Resource(const T &value = 0, const T &min_value = 0, const T &max_value = -1);
 
-    const T operator=(Resource<T> value) const;
+    //const T operator=(Resource<T> value) const;
     Resource<T> operator=(const T &value);
     Resource<T> operator+=(const T &value);
     Resource<T> operator-=(const T &value);
