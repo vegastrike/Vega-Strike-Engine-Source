@@ -23,12 +23,13 @@
 
 #include "damageable_layer.h"
 
-#include <random>
 #include <cassert>
 
 // TODO: this is a use of the code in a different library.
 // I'm unhappy with this, so it needs to change.
 #include "mount_size.h"
+
+#include "random_utils.h"
 
 DamageableLayer::DamageableLayer(int layer_index,
         FacetConfiguration configuration,
@@ -229,15 +230,8 @@ void DamageableLayer::ReduceLayerCapability(const float &percent,
         return;
     }
 
-    static std::random_device randome_device;
-    static std::mt19937 gen(randome_device());
-
-    // TODO: this feels a bit sloppy, as we're dealing in integers here.
-    static std::uniform_int_distribution<> impact_distribution(1, 100);
-    static std::uniform_int_distribution<> facet_distribution(0, facets.size() - 1);
-
-    bool affect_regeneration = impact_distribution(gen) <= chance_to_reduce_regeneration;
-    int facet_index = facet_distribution(gen);
+    bool affect_regeneration = randomDouble() <= chance_to_reduce_regeneration;
+    int facet_index = randomInt(number_of_facets);
 
     if (affect_regeneration) {
         // Reduce regeneration

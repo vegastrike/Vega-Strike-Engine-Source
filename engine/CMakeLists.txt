@@ -710,6 +710,7 @@ SET(LIBRESOURCE
     src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
+    src/resource/random_utils.cpp
     src/cmd/json.cpp
     )
 
@@ -1172,6 +1173,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/building.cpp
     src/cmd/click_list.cpp
     src/cmd/cont_terrain.cpp
+    src/cmd/controls_factory.cpp
     src/cmd/missile.cpp
     src/cmd/music.cpp
     src/cmd/nebula.cpp
@@ -1705,6 +1707,7 @@ IF (USE_GTEST)
         src/resource/tests/buy_sell.cpp
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp
+        src/resource/tests/random_tests.cpp
         src/exit_unit_tests.cpp
     )
 
