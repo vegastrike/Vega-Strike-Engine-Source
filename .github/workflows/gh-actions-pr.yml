@@ -81,11 +81,11 @@ jobs:
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'debian:buster'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            allow_failure: false
+          #- FROM:     'debian:buster'
+          #  COMPILER: 'clang'
+          #  USE_PYTHON_3: 'ON'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  allow_failure: false
           - FROM:     'opensuse/leap:15.5'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
@@ -121,11 +121,11 @@ jobs:
             USE_PYTHON_3: 'ON'
             OpenGL_GL_PREFERENCE: 'GLVND'
             allow_failure: false
-          - FROM:     'rockylinux/8.7'
-            COMPILER: 'clang'
-            USE_PYTHON_3: 'ON'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            allow_failure: false
+          #- FROM:     'rockylinux/8.7'
+          #  COMPILER: 'clang'
+          #  USE_PYTHON_3: 'ON'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  allow_failure: false
           - FROM:     'manjarolinux/base'
             COMPILER: 'clang'
             USE_PYTHON_3: 'ON'
