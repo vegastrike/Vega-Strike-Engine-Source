@@ -144,6 +144,7 @@ void VSExit(int code) {
     Music::CleanupMuzak();
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     STATIC_VARS_DESTROYED = true;
+    AUDDestroy();
     winsys_exit(code);
 }
 
