@@ -38,8 +38,8 @@
 #define NO_WARNINGS
 
 #if defined(__APPLE__) && defined(__MACH__)
-    #include <OpenGL/gl.h>
-    #include <GLUT/glut.h>
+    #include <gl.h>
+    #include <glut.h>
 #else
 #ifdef _WIN32
     #ifndef NOMINMAX
@@ -47,8 +47,8 @@
     #endif //tells VCC not to generate min/max macros
     #include <windows.h>
 #endif
-    #include <GL/gl.h>
-    #include <GL/glut.h>
+    #include <gl.h>
+    #include <glut.h>
 #endif
 
 #include "glut_support.h"

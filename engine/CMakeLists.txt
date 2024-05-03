@@ -127,7 +127,7 @@ IF (UNIX)
         ${Vega_Strike_SOURCE_DIR}/src/resource
         ${Vega_Strike_BINARY_DIR}
         ${Vega_Strike_BINARY_DIR}/src
-        /usr/include/harfbuzz/
+        ${CMAKE_PREFIX_PATH}/harfbuzz/
     )
 ELSE ()
     INCLUDE_DIRECTORIES(
@@ -401,9 +401,18 @@ IF (NOT DISABLE_CLIENT) ##########
     SET(CMAKE_FIND_FRAMEWORK "FIRST")
     FIND_PACKAGE(OpenGL REQUIRED)
     IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${OPENGL_INCLUDE_DIR})
-        # SET(TST_LIBS ${TST_LIBS} "${OpenGL::GL}" "${OpenGL::GLU}")
         MESSAGE("++ OpenGL found")
+        SET(CMAKE_FIND_FRAMEWORK "LAST")
+        FIND_FILE(VEGA_GLEXT_H_PATH glext.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GLEXT_H_DIRECTORY ${VEGA_GLEXT_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glext.h: ${VEGA_GLEXT_H_PATH}")
+        FIND_FILE(VEGA_GL_H_PATH gl.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GL_H_DIRECTORY ${VEGA_GL_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to gl.h: ${VEGA_GL_H_PATH}")
+        FIND_FILE(VEGA_GLU_H_PATH glu.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GLU_H_DIRECTORY ${VEGA_GLU_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glu.h: ${VEGA_GLU_H_PATH}")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLEXT_H_DIRECTORY} ${VEGA_GL_H_DIRECTORY} ${VEGA_GLU_H_DIRECTORY})
     ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
         MESSAGE("!! Why you no have GL?")
     ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
@@ -426,11 +435,16 @@ IF (NOT DISABLE_CLIENT) ##########
     SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
 
     #Find GLUT
+    SET(CMAKE_FIND_FRAMEWORK "FIRST")
     FIND_PACKAGE(GLUT REQUIRED)
     IF (GLUT_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
-        SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
         MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
+        SET(CMAKE_FIND_FRAMEWORK "LAST")
+        FIND_FILE(VEGA_GLUT_H_PATH glut.h PATH_SUFFIXES GL/ GLUT/)
+        get_filename_component(VEGA_GLUT_H_DIRECTORY ${VEGA_GLUT_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glut.h: ${VEGA_GLUT_H_PATH}")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLUT_H_PATH} ${GLUT_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
     ELSE (GLUT_FOUND)
         MESSAGE("!! I can't build this, missing GLUT")
     ENDIF (GLUT_FOUND)
@@ -1058,6 +1072,10 @@ SET(LIBAUDIO_SOURCES
 
 
 ADD_LIBRARY(vegastrike-engine_com
+    ${VEGA_GL_H_PATH}
+    ${VEGA_GLU_H_PATH}
+    ${VEGA_GLEXT_H_PATH}
+    ${VEGA_GLUT_H_PATH}
     ${LIBVS_LOGGING}
     ${LIBCONFIG}
     ${LIBDAMAGE}
@@ -1085,6 +1103,10 @@ IF (WIN32)
 ENDIF()
 
 SET(VEGASTRIKE_SOURCES
+    ${VEGA_GL_H_PATH}
+    ${VEGA_GLU_H_PATH}
+    ${VEGA_GLEXT_H_PATH}
+    ${VEGA_GLUT_H_PATH}
     ${LIBGUI_SOURCES}
     ${LIBNETCLIENT_SOURCES}
     ${LIBROOTCLIENT_SOURCES}
@@ -1184,7 +1206,7 @@ ENDIF (NOT DISABLE_CLIENT)
 # Vssetup Sub build file
 ADD_SUBDIRECTORY(setup)
 
-# Add other utilies here
+# Add other utilities here
 ADD_SUBDIRECTORY(objconv)
 
 ## show debug output

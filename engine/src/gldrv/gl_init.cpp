@@ -55,12 +55,12 @@
 #endif
 #define GL_GLEXT_PROTOTYPES 1
 #if defined(__APPLE__) && defined(__MACH__)
-#   include <OpenGL/gl.h>
-#   include <OpenGL/glext.h>
+#   include <gl.h>
+#   include <glext.h>
 #   include <dlfcn.h>
 #else
-#   include <GL/gl.h>
-#   include <GL/glext.h>
+#   include <gl.h>
+#   include <glext.h>
 #endif
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
@@ -75,7 +75,7 @@
     # define GLX_GLXEXT_PROTOTYPES 1
     # define GLX_GLXEXT_LEGACY 1
     # include <GL/glx.h>
-    # include <GL/glext.h>
+    # include <glext.h>
 #endif
 #endif
 

@@ -100,11 +100,11 @@ struct GFXStats
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-#include <GL/gl.h>
+#include <gl.h>
 #endif
 
 #if defined(__APPLE__) && defined(__MACH__)
-#include <GLUT/glut.h>
+#include <glut.h>
 //#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
 #if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)
 #define OSX_AT_LEAST_10_4
@@ -113,14 +113,14 @@ struct GFXStats
 #endif
 #define GL_GLEXT_PROTOTYPES
 //#endif
-#include <OpenGL/glext.h>
+#include <glext.h>
 #else
 #define __glext_h_
-#include <GL/glut.h>
+#include <glut.h>
 #include "gl_undefined_extensions.h"
 #undef __glext_h_
 
-#include <GL/glext.h>
+#include <glext.h>
 #endif
 
 #ifdef _WIN32

@@ -36,9 +36,9 @@
 #   include "SDL2/SDL.h"
 #elif defined( HAVE_GLUT )
 #if defined(__APPLE__) && defined(__MACH__)
-    #include <GLUT/glut.h>
+    #include <glut.h>
 #else
-    #include <GL/glut.h>
+    #include <glut.h>
 #endif
 #else
 #   error "Neither SDL nor GLUT are present."

@@ -70,14 +70,14 @@ extern float AUDIO_ATOM;
 
 #ifndef NO_GFX
 #   if defined(__APPLE__) && defined(__MACH__)
-#       include <OpenGL/gl.h>
-#       include <OpenGL/glu.h>
-#       include <GLUT/glut.h>
+#       include <gl.h>
+#       include <glu.h>
+#       include <glut.h>
 #   else //defined(__APPLE__) && defined(__MACH__)
 #       define __glext_h_
-#       include <GL/gl.h>
-#       include <GL/glu.h>
-#       include <GL/glut.h>
+#       include <gl.h>
+#       include <glu.h>
+#       include <glut.h>
 #       undef __glext_h_
 #   endif //defined(__APPLE__) && defined(__MACH__)
 #endif //NO_GFX

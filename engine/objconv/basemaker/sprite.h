@@ -31,11 +31,11 @@
 #include "vs_globals.h"
 
 #if defined(__APPLE__) && defined(__MACH__)
-#   include <GLUT/glut.h>
-#   include <OpenGL/glext.h>
+#   include <glut.h>
+#   include <glext.h>
 #else
-#   include <GL/glut.h>
-#   include <GL/glext.h>
+#   include <glut.h>
+#   include <glext.h>
 #endif
 
 #include <iostream>

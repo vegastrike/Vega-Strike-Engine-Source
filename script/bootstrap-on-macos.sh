@@ -5,6 +5,14 @@
 # Copyright (C) 2023-2024 Stephen G. Tuggy and other
 # Vega Strike contributors
 #
+# This script may not need root privileges. You should be able to run
+# it as follows:
+#
+# ./script/bootstrap-on-macos.sh
+#
+# Note that this is the Homebrew version of the bootstrap script. The
+# MacPorts version is called bootstrap-on-macOS-using-MacPorts.sh
+#
 # This file is part of Vega Strike.
 #
 # Vega Strike is free software: you can redistribute it and/or modify
@@ -45,8 +53,6 @@ do
     export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
 done
 
-ln -s /usr/local/include/GL /usr/local/include/OpenGL
-ln -s /usr/local/include/GL /usr/local/include/GLUT
 OPENALDIR="$(brew --prefix openal-soft)"
 export OPENALDIR
 

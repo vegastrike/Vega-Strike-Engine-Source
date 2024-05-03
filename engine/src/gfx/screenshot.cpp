@@ -30,9 +30,9 @@
 #include "xml_support.h"
 #include "vsimage.h"
 #ifndef __APPLE__
-#include <GL/glut.h>
+#include <glut.h>
 #else
-#include <GLUT/glut.h>
+#include <glut.h>
 #endif
 
 using namespace VSFileSystem;

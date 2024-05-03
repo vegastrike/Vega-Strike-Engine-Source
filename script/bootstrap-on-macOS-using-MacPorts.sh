@@ -30,7 +30,4 @@ port install python312 boost181@1.81.0_10+cmake_scripts+no_single+no_static+pyth
 
 export CMAKE_PREFIX_PATH="/opt/local/"
 
-ln -s /opt/local/include/GL /opt/local/include/OpenGL
-ln -s /opt/local/include/GL /opt/local/include/GLUT
-
 echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
