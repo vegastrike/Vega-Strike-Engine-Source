@@ -180,6 +180,7 @@ FUNCTION(_GTK3_FIND_INCLUDE_DIR _var _hdr)
         /sw
         /opt/local
         /opt/local/include
+        /opt/local/lib/glib-2.0/include
         $ENV{GTKMM_BASEPATH}
         [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
         [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]

@@ -1,8 +1,8 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
-# Benjamen R. Meyer, and other Vega Strike contributors
+# Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Benjamen R. Meyer, Roy Falk, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -21,6 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
+
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 FIND_PACKAGE(EXPAT REQUIRED)
 IF (EXPAT_FOUND)

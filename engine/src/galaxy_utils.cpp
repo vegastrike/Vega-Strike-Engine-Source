@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * galaxy_utils.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -75,7 +77,7 @@ string RemoveDotSystem(const char *input) {
 
 string getUniversePath() {
     char del[] = {'/', '\0'};
-    return game_options()->universe_path + string(del);
+    return vs_options::instance().universe_path + string(del);
 }
 
 string getVarEitherSectionOrSub(Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
@@ -235,7 +237,7 @@ void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom)
     si.nebulaelist = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "nebulalist", Ave.nebulaelist);
     si.backgrounds = getVarEitherSectionOrSub(galaxy, si.sector, si.name, "backgroundlist", Ave.backgrounds);
     si.force = parse_bool(getVarEitherSectionOrSub(galaxy, si.sector, si.name, "force", Ave.force ? "true" : "false"));
-    if (game_options()->PushValuesToMean) {
+    if (vs_options::instance().PushValuesToMean) {
         si.force = true;
     }
     string dest = galaxy->getVariable(si.sector, si.name, "jumps", "");

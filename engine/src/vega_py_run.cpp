@@ -52,3 +52,14 @@ void VegaPyRunString(char *py_snippet) {
     }
 //#endif
 }
+
+void VegaPyRunFile(FILE* fp, std::string file_path_or_description) {
+    VS_LOG(important_info, (boost::format("running file '%1%'") % file_path_or_description));
+    PyRun_SimpleFile(fp, file_path_or_description.c_str());
+    //Python::reseterrors();
+    if (PyErr_Occurred()) {
+        VS_LOG_AND_FLUSH(error, "VegaPyRunFile: Python error occurred");
+        PyErr_Print();
+        PyErr_Clear();
+    }
+}

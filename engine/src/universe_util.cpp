@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * universe_util.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -66,7 +68,7 @@ void ClientServerSetLightContext(int lightcontext) {
 
 namespace UniverseUtil {
 void playVictoryTune() {
-    muzak->GotoSong(game_options()->missionvictorysong);
+    muzak->GotoSong(vs_options::instance().missionvictorysong);
 }
 
 int musicAddList(string str) {
@@ -150,7 +152,7 @@ unsigned int getCurrentPlayer() {
 }
 
 unsigned int maxMissions() {
-    return game_options()->max_missions;
+    return vs_options::instance().max_missions;
 }
 
 void addParticle(QVector loc, Vector velocity, Vector color, float size) {
@@ -189,7 +191,7 @@ void showSplashScreen(const string &filename) {
         }
         curSplash = new Animation(filename.c_str(), 0);
     } else if (!curSplash && !GetSplashScreen()) {
-        static std::vector<std::string> s = ParseDestinations(game_options()->splash_screen);
+        static std::vector<std::string> s = ParseDestinations(vs_options::instance().splash_screen);
         int snum = time(NULL) % s.size();
         curSplash = new Animation(s[snum].c_str(), 0);
     }

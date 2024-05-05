@@ -3,7 +3,7 @@
 /*
  * cockpit.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -2069,7 +2069,7 @@ void GameCockpit::Draw() {
             GFXEnable(TEXTURE0);
             //GFXDisable (DEPTHTEST);
             //GFXDisable(TEXTURE1);
-            static float deadband = game_options()->mouse_deadband;
+            static float deadband = vs_options::instance().mouse_deadband;
             static int revspr =
                     XMLSupport::parse_bool(vs_config->getVariable("joystick", "reverse_mouse_spr", "true")) ? 1 : -1;
             static string blah = vs_config->getVariable("joystick", "mouse_crosshair", "crosshairs.spr");

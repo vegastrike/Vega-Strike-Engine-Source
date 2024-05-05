@@ -76,4 +76,21 @@ cd "${ROOT_DIR}"
 
 mkdir -pv "${BIN_DIR}"
 
-cp -v "${BUILD_DIR}"/{vegastrike-engine,setup/vegasettings,objconv/vega-meshtool} "${BIN_DIR}"
+declare -a files_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine" "${BUILD_DIR}/setup/vegasettings" "${BUILD_DIR}/objconv/vega-meshtool")
+declare -a directories_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine.app")
+
+for i in "${files_to_copy_if_they_exist[@]}"
+do
+    if [ -f "$i" ]
+    then
+        cp -v "$i" "${BIN_DIR}"/
+    fi
+done
+
+for i in "${directories_to_copy_if_they_exist[@]}"
+do
+    if [ -d "$i" ]
+    then
+        cp -rv "$i" "${BIN_DIR}"/
+    fi
+done

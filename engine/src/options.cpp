@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * options.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -28,6 +30,7 @@ extern VegaConfig *vs_config;
 void vs_options::init() {
     /* General Options */
     default_mission = vs_config->getVariable("general", "default_mission", "test/test1.mission");
+    main_menu = XMLSupport::parse_bool(vs_config->getVariable("general", "main_menu", "false"));
     galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
     load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
@@ -388,9 +391,4 @@ string vs_options::getPassword(int playernum) {
     return (vs_config->getVariable("player" + ((playernum > 0) ? XMLSupport::tostring(playernum + 1) : string("")),
             "password",
             ""));
-}
-
-std::shared_ptr<vs_options> game_options() {
-    static const std::shared_ptr<vs_options> GAME_OPTIONS = std::make_shared<vs_options>();
-    return GAME_OPTIONS;
 }

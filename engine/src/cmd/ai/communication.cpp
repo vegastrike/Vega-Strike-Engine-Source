@@ -1,9 +1,8 @@
 /*
  * communication.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, 
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -209,7 +208,7 @@ void FSM::Node::AddSound(std::string soundfile, unsigned char sex, float gain) {
             gains[index] = gain;
 
             // Preload sound if configured to do so
-            if (game_options()->comm_preload) {
+            if (vs_options::instance().comm_preload) {
                 GetSound(sex, multiple, gain);
             }
 

@@ -213,6 +213,7 @@
         "VERBOSE": "ON"
       },
       "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "/usr/local",
         "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
@@ -266,6 +267,80 @@
         "release"
       ],
       "displayName": "macOS, Pie Disabled, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-default",
+      "hidden": true,
+      "inherits": "default",
+      "displayName": "macOS (MacPorts) Default",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      },
+      "environment": {
+        "VERBOSE": "ON"
+      },
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "/opt/local",
+        "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-debug",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-enabled",
+        "debug"
+      ],
+      "displayName": "macOS (MacPorts), PIE Enabled, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-release",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-enabled",
+        "release"
+      ],
+      "displayName": "macOS (MacPorts), PIE Enabled, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-debug",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-disabled",
+        "debug"
+      ],
+      "displayName": "macOS (MacPorts), PIE Disabled, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-release",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-disabled",
+        "release"
+      ],
+      "displayName": "macOS (MacPorts), Pie Disabled, Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -633,6 +708,50 @@
       "name": "build-macos-pie-disabled-release",
       "configurePreset": "macos-pie-disabled-release",
       "displayName": "macOS, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-enabled-debug",
+      "displayName": "macOS (MacPorts), PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-release",
+      "configurePreset": "macOS-MacPorts-pie-enabled-release",
+      "displayName": "macOS (MacPorts), PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-disabled-debug",
+      "displayName": "macOS (MacPorts), PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-release",
+      "configurePreset": "macOS-MacPorts-pie-disabled-release",
+      "displayName": "macOS (MacPorts), PIE Disabled, Release",
       "configuration": "Release",
       "condition": {
         "type": "equals",

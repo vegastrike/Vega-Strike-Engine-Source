@@ -48,13 +48,9 @@
 #include <sys/stat.h> //for mkdir
 #include <sys/types.h>
 
-#if defined(__APPLE__) && defined(__MACH__)
-    #include <GLUT/glut.h>
-    #include <OpenGL/glext.h>
-#else
-    #include <GL/glut.h>
-    #include <GL/glext.h>
-#endif
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#include <glut.h>
+#include <glext.h>
 
 /*
  * Globals
@@ -326,7 +322,9 @@ void VSSprite::GetRotation( float &rot )
 }
 
 */
+
 void VSExit(int code) {
+    STATIC_VARS_DESTROYED = true;
     exit(code);
 }
 

@@ -31,7 +31,10 @@ using std::string;
 #include "networking/acctserver.h"
 #include "lin_time.h"
 
+bool STATIC_VARS_DESTROYED = false;
+
 void VSExit(int code) {
+    STATIC_VARS_DESTROYED = true;
     exit(code);
 }
 

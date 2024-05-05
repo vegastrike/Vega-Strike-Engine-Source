@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -35,11 +35,8 @@
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 #   include "SDL2/SDL.h"
 #elif defined( HAVE_GLUT )
-#if defined(__APPLE__) && defined(__MACH__)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#   include <glut.h>
 #else
 #   error "Neither SDL nor GLUT are present."
 #endif

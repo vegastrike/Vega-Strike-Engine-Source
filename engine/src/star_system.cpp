@@ -219,7 +219,7 @@ ClickList *StarSystem::getClickList() {
 }
 
 void ConditionalCursorDraw(bool tf) {
-    if (game_options()->hardware_cursor) {
+    if (vs_options::instance().hardware_cursor) {
         winsys_show_cursor(tf);
     }
 }
@@ -385,7 +385,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     QVector drawstartpos = _Universe->AccessCamera()->GetPosition();
 
     Collidable key_iterator(0, 1, drawstartpos);
-    UnitWithinRangeOfPosition<UnitDrawer> drawer(game_options()->precull_dist, 0, key_iterator);
+    UnitWithinRangeOfPosition<UnitDrawer> drawer(vs_options::instance().precull_dist, 0, key_iterator);
     //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despited extreme distance
     Unit *unit;
     if ((drawer.action.parent = _Universe->AccessCockpit()->GetParent()) != nullptr) {
@@ -393,7 +393,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     }
     for (un_iter iter = this->gravitational_units.createIterator(); (unit = *iter); ++iter) {
         float distance = (drawstartpos - unit->Position()).Magnitude() - unit->rSize();
-        if (distance < game_options()->precull_dist) {
+        if (distance < vs_options::instance().precull_dist) {
             drawer.action.grav_acquire(unit);
         } else {
             drawer.action.draw(unit);
@@ -416,11 +416,11 @@ void StarSystem::Draw(bool DrawCockpit) {
     GFXColor tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     double processmesh = queryTime();
-    if (!game_options()->draw_near_stars_in_front_of_planets) {
+    if (!vs_options::instance().draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     Mesh::ProcessZFarMeshes();
-    if (game_options()->draw_near_stars_in_front_of_planets) {
+    if (vs_options::instance().draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
     GFXEnable(DEPTHTEST);
@@ -494,33 +494,33 @@ void StarSystem::createBackground(Star_XML *xml) {
 #ifdef NV_CUBE_MAP
     VS_LOG(info, "using NV_CUBE_MAP");
     light_map[0] = new Texture((xml->backgroundname + "_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-            GFXFALSE, game_options()->max_cubemap_size);
+            GFXFALSE, vs_options::instance().max_cubemap_size);
     if (light_map[0]->LoadSuccess() && light_map[0]->isCube()) {
         light_map[1] = light_map[2] = light_map[3] = light_map[4] = light_map[5] = 0;
     } else {
         delete light_map[0];
         light_map[0] =
                 new Texture((xml->backgroundname + "_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                        GFXFALSE, game_options()->max_cubemap_size);
+                        GFXFALSE, vs_options::instance().max_cubemap_size);
         light_map[1] =
                 new Texture((xml->backgroundname + "_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
-                        GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, vs_options::instance().max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[2] =
                 new Texture((xml->backgroundname + "_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
-                        GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, vs_options::instance().max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[3] =
                 new Texture((xml->backgroundname + "_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
-                        GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, vs_options::instance().max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[4] =
                 new Texture((xml->backgroundname + "_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
-                        GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, vs_options::instance().max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
         light_map[5] =
                 new Texture((xml->backgroundname + "_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
-                        GFXFALSE, game_options()->max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                        GFXFALSE, vs_options::instance().max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                         light_map[0]);
     }
 #else
@@ -543,7 +543,7 @@ void StarSystem::createBackground(Star_XML *xml) {
             xml->backgroundColor,
             xml->backgroundDegamma);
     stars = new Stars(xml->numnearstars, xml->starsp);
-    stars->SetBlend(game_options()->starblend, game_options()->starblend);
+    stars->SetBlend(vs_options::instance().starblend, vs_options::instance().starblend);
 }
 
 
@@ -564,7 +564,7 @@ void TentativeJumpTo(StarSystem *ss, Unit *un, Unit *jumppoint, const std::strin
 
 float ScaleJumpRadius(float radius) {
     //need this because sys scale doesn't affect j-point size
-    radius *= game_options()->jump_radius_scale * game_options()->game_speed;
+    radius *= vs_options::instance().jump_radius_scale * vs_options::instance().game_speed;
     return radius;
 }
 
@@ -1115,29 +1115,29 @@ void StarSystem::Update(float priority, bool executeDirector) {
     ///just be sure to restore this at the end
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem(this);
-//    double bolttime = 0;
+    double bolttime = 0;
     if (time > simulation_atom_var) {
         if (time > simulation_atom_var * 2) {
             VS_LOG(trace,
                     (boost::format(
-                            "%1% %2%: time, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
+                            "%1% %2%: time to chew up, %3$.6f, is more than twice simulation_atom_var, %4$.6f")
                             % __FILE__ % __LINE__ % time % simulation_atom_var));
         }
 
-//        double missionSimulationTimeSubtotal = 0.0;
-//        double processUnitTimeSubtotal = 0.0;
-//
-//        double updateUnitsPhysicsTimeSubtotal = 0.0;
-//        double updateMissilesTimeSubtotal = 0.0;
-//        double collideTableUpdateTimeSubtotal = 0.0;
-//        double updateCameraSoundsTimeSubtotal = 0.0;
+        double missionSimulationTimeSubtotal = 0.0;
+        double processUnitTimeSubtotal = 0.0;
+
+        double updateUnitsPhysicsTimeSubtotal = 0.0;
+        double updateMissilesTimeSubtotal = 0.0;
+        double collideTableUpdateTimeSubtotal = 0.0;
+        double updateCameraSoundsTimeSubtotal = 0.0;
 
         //Chew up all sim_atoms that have elapsed since last update
         // ** stephengtuggy 2020-07-23: We definitely need this block of code! **
         while (time > simulation_atom_var) {
             //VS_LOG(trace, "void StarSystem::Update( float priority, bool executeDirector ): Chewing up a sim atom");
             if (current_stage == MISSION_SIMULATION) {
-//                double missionSimulationStageStartTime = realTime();
+                double missionSimulationStageStartTime = realTime();
                 TerrainCollide();
                 UpdateAnimatedTexture();
                 Unit::ProcessDeleteQueue();
@@ -1157,45 +1157,46 @@ void StarSystem::Update(float priority, bool executeDirector) {
                     //waste of frakkin time
                     active_missions[i]->BriefingUpdate();
                 }
-//                double missionSimulationStageEndTime = realTime();
-//                missionSimulationTimeSubtotal += (missionSimulationStageEndTime - missionSimulationStageStartTime);
-//                VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by MISSION_SIMULATION stage: %1%") % (missionSimulationStageEndTime - missionSimulationStageStartTime)));
+                double missionSimulationStageEndTime = realTime();
+                missionSimulationTimeSubtotal += (missionSimulationStageEndTime - missionSimulationStageStartTime);
+                //VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by MISSION_SIMULATION stage: %1%") % (missionSimulationStageEndTime - missionSimulationStageStartTime)));
                 current_stage = PROCESS_UNIT;
             } else if (current_stage == PROCESS_UNIT) {
-//                double processUnitStageStartTime = realTime();
+                double processUnitStageStartTime = realTime();
                 UpdateUnitsPhysics(firstframe);
-//                double updateUnitsPhysicsDoneTime = realTime();
-//                updateUnitsPhysicsTimeSubtotal += (updateUnitsPhysicsDoneTime - processUnitStageStartTime);
+                double updateUnitsPhysicsDoneTime = realTime();
+                updateUnitsPhysicsTimeSubtotal += (updateUnitsPhysicsDoneTime - processUnitStageStartTime);
                 UpdateMissiles(); //do explosions
-//                double updateMissilesDoneTime = realTime();
-//                updateMissilesTimeSubtotal += (updateMissilesDoneTime - updateUnitsPhysicsDoneTime);
+                double updateMissilesDoneTime = realTime();
+                updateMissilesTimeSubtotal += (updateMissilesDoneTime - updateUnitsPhysicsDoneTime);
                 collide_table->Update();
-//                double collideTableUpdateDoneTime = realTime();
-//                collideTableUpdateTimeSubtotal += (collideTableUpdateDoneTime - updateMissilesDoneTime);
+                double collideTableUpdateDoneTime = realTime();
+                collideTableUpdateTimeSubtotal += (collideTableUpdateDoneTime - updateMissilesDoneTime);
                 if (this == _Universe->getActiveStarSystem(0)) {
                     UpdateCameraSnds();
                 }
-//                bolttime = queryTime();
-//                bolttime = queryTime() - bolttime;
-//                double processUnitStageEndTime = realTime();
-//                processUnitTimeSubtotal += (processUnitStageEndTime - processUnitStageStartTime);
-//                updateCameraSoundsTimeSubtotal += (processUnitStageEndTime - collideTableUpdateDoneTime);
-//                VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by PROCESS_UNIT stage: %1%") % (processUnitStageEndTime - processUnitStageStartTime)));
+                bolttime = queryTime();
+                bolttime = queryTime() - bolttime;
+                double processUnitStageEndTime = realTime();
+                processUnitTimeSubtotal += (processUnitStageEndTime - processUnitStageStartTime);
+                updateCameraSoundsTimeSubtotal += (processUnitStageEndTime - collideTableUpdateDoneTime);
+                //VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Time taken by PROCESS_UNIT stage: %1%") % (processUnitStageEndTime - processUnitStageStartTime)));
                 current_stage = MISSION_SIMULATION;
                 firstframe = false;
             }
             time -= simulation_atom_var;
         }
+        //time = GetElapsedTime();
 
-//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by MISSION_SIMULATION: %3%") % __FILE__ % __LINE__ % missionSimulationTimeSubtotal));
-//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by PROCESS_UNIT: %3%") % __FILE__ % __LINE__ % processUnitTimeSubtotal));
-//
-//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating units' physics: %3%") % __FILE__ % __LINE__ % updateUnitsPhysicsTimeSubtotal));
-//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating missiles: %3%") % __FILE__ % __LINE__ % updateMissilesTimeSubtotal));
-//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating collide tables: %3%") % __FILE__ % __LINE__ % collideTableUpdateTimeSubtotal));
-//        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating camera sounds: %3%") % __FILE__ % __LINE__ % updateCameraSoundsTimeSubtotal));
+        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by MISSION_SIMULATION: %3%") % __FILE__ % __LINE__ % missionSimulationTimeSubtotal));
+        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by PROCESS_UNIT: %3%") % __FILE__ % __LINE__ % processUnitTimeSubtotal));
 
-//        double cycleThroughPlayersStartTime = realTime();
+        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating units' physics: %3%") % __FILE__ % __LINE__ % updateUnitsPhysicsTimeSubtotal));
+        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating missiles: %3%") % __FILE__ % __LINE__ % updateMissilesTimeSubtotal));
+        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating collide tables: %3%") % __FILE__ % __LINE__ % collideTableUpdateTimeSubtotal));
+        VS_LOG(trace, (boost::format("%1% %2%: Subtotal of time taken by updating camera sounds: %3%") % __FILE__ % __LINE__ % updateCameraSoundsTimeSubtotal));
+
+        double cycleThroughPlayersStartTime = realTime();
         unsigned int i = _Universe->CurrentCockpit();
         for (unsigned int j = 0; j < _Universe->numPlayers(); ++j) {
             if (_Universe->AccessCockpit(j)->activeStarSystem == this) {
@@ -1211,8 +1212,8 @@ void StarSystem::Update(float priority, bool executeDirector) {
             }
         }
         _Universe->SetActiveCockpit(i);
-//        double cycleThroughPlayersEndTime = realTime();
-//        VS_LOG(trace, (boost::format("%1% %2%: Time taken by cycling through active players / cockpits: %3%") % __FILE__ % __LINE__ % (cycleThroughPlayersEndTime - cycleThroughPlayersStartTime)));
+        double cycleThroughPlayersEndTime = realTime();
+        VS_LOG(trace, (boost::format("%1% %2%: Time taken by cycling through active players / cockpits: %3%") % __FILE__ % __LINE__ % (cycleThroughPlayersEndTime - cycleThroughPlayersStartTime)));
     }
     if (sigIter.isDone()) {
         sigIter = draw_list.createIterator();
@@ -1281,7 +1282,7 @@ void StarSystem::ProcessPendingJumps() {
                     } else if (!player) {
                         un->SetVelocity(Vector(0, 0, 0));
                     }
-                    if (game_options()->jump_disables_shields) {
+                    if (vs_options::instance().jump_disables_shields) {
                         // Disable and then enable so they'll start recharging
                         un->shield->Disable();
                         un->shield->Enable();

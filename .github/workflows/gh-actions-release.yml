@@ -86,6 +86,11 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             ARTIFACT_EXT: 'rpm'
+          - FROM:     'fedora:38'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'rockylinux:9.3'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -113,6 +118,7 @@ jobs:
         run: |
           echo "${TAG_NAME}"
           echo "${SHORT_SHA}"
+
       - name: Run CI
         env:
           FROM:       ${{ matrix.FROM }}
@@ -121,6 +127,7 @@ jobs:
           MY_OS_NAME: linux
           IS_RELEASE: 1
         run: script/cibuild $FLAGS
+
       - name: Upload the artifacts
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
         env:

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * star_system_jump.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -41,7 +43,7 @@
 #include "options.h"
 
 void CacheJumpStar(bool destroy) {
-    static Animation *cachedani = new Animation(game_options()->jumpgate.c_str(), true, .1, MIPMAP, false);
+    static Animation *cachedani = new Animation(vs_options::instance().jumpgate.c_str(), true, .1, MIPMAP, false);
     if (destroy) {
         delete cachedani;
         cachedani = nullptr;
@@ -94,12 +96,12 @@ unsigned int AddAnimation(const QVector &pos,
 }
 
 static unsigned int AddJumpAnimation(const QVector &pos, const float size, bool mvolatile = false) {
-    return AddAnimation(pos, size, mvolatile, game_options()->jumpgate, .95);
+    return AddAnimation(pos, size, mvolatile, vs_options::instance().jumpgate, .95);
 }
 
 void StarSystem::VolitalizeJumpAnimation(const int ani) {
     if (ani != -1) {
-        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, game_options()->jumpanimationshrink));
+        VolatileJumpAnimations.push_back(ResizeAni(JumpAnimations[ani].a, vs_options::instance().jumpanimationshrink));
         JumpAnimations[ani].a = NULL;
         AnimationNulls.push_back(ani);
     }
@@ -118,7 +120,7 @@ void StarSystem::DrawJumpStars() {
                         ->SetPosition(
                                 un->Position() + r.Cast() * un->rSize() * (pendingjump[kk]->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
-                float dd = un->rSize() * game_options()->jumpgatesize
+                float dd = un->rSize() * vs_options::instance().jumpgatesize
                         * (un->GetJumpStatus().delay - pendingjump[kk]->delay) / (float) un->GetJumpStatus().delay;
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
@@ -150,7 +152,7 @@ void StarSystem::DrawJumpStars() {
 void StarSystem::DoJumpingComeSightAndSound(Unit *un) {
     Vector p, q, r;
     un->GetOrientation(p, q, r);
-    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * game_options()->jumpgatesize, true);
+    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * vs_options::instance().jumpgatesize, true);
     VolatileJumpAnimations[myani].a->SetOrientation(p, q, r);
 }
 
@@ -160,7 +162,7 @@ int StarSystem::DoJumpingLeaveSightAndSound(Unit *un) {
     un->GetOrientation(p, q, r);
     ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->GetJumpStatus().delay + .25),
             10 * un->rSize());
-    static int jumpleave = AUDCreateSound(game_options()->jumpleave, false);
+    static int jumpleave = AUDCreateSound(vs_options::instance().jumpleave, false);
     AUDPlay(jumpleave, un->LocalPosition(), un->GetVelocity(), 1);
     return ani;
 }

@@ -177,7 +177,7 @@ static void SwitchVDUTo(VDU::VDU_MODE v) {
 }
 
 void ExamineWhenTargetKey() {
-    //if (game_options()->switchToTargetModeOnKey) {
+    //if (vs_options::instance().switchToTargetModeOnKey) {
     if (configuration()->graphics_config.hud.switch_to_target_mode_on_key) {
         int view = 0;
         int examine = 0;
@@ -253,7 +253,7 @@ void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x,
 
 void TextMessageKey(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
-        if (game_options()->chat_only_in_network) {
+        if (vs_options::instance().chat_only_in_network) {
             return;
         }
         winsys_set_keyboard_func(TextMessageCallback);
@@ -300,7 +300,7 @@ static void _PitchDown(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q,
                     R,
-                    game_options()->camera_pan_speed);
+                    vs_options::instance().camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -317,7 +317,7 @@ static void _PitchUp(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q,
                     R,
-                    game_options()->camera_pan_speed);
+                    vs_options::instance().camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -334,7 +334,7 @@ static void _YawLeft(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1)
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P,
                     R,
-                    game_options()->camera_pan_speed);
+                    vs_options::instance().camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -351,7 +351,7 @@ static void _YawRight(KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM - 1
             R = _Universe->AccessCockpit()->AccessCamera(i)->R;
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P,
                     R,
-                    game_options()->camera_pan_speed);
+                    vs_options::instance().camera_pan_speed);
         }
         if (_Slew && newState == RELEASE) {
             _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));
@@ -391,7 +391,7 @@ void LookDown(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(vs_options::instance().camera_pan_speed * 1000.0);
         } else {
             PitchDown(kbdata, newState);
         }
@@ -409,7 +409,7 @@ void LookUp(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-vs_options::instance().camera_pan_speed * 1000.0);
         } else {
             PitchUp(kbdata, newState);
         }
@@ -427,7 +427,7 @@ void LookLeft(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(vs_options::instance().camera_pan_speed * 1000.0);
         } else {
             YawLeft(kbdata, newState);
         }
@@ -445,7 +445,7 @@ void LookRight(const KBData &kbdata, KBSTATE newState) {
         if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
             InitPanInside();
         } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
-            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-game_options()->camera_pan_speed * 1000.0);
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-vs_options::instance().camera_pan_speed * 1000.0);
         } else {
             YawRight(kbdata, newState);
         }
@@ -467,12 +467,12 @@ void Quit(const KBData &, KBSTATE newState) {
 void Inside(const KBData &, KBSTATE newState) {
     {
         if (_Universe->activeStarSystem() && _Universe->activeStarSystem()->getBackground()) {
-            _Universe->activeStarSystem()->getBackground()->EnableBG(game_options()->background);
+            _Universe->activeStarSystem()->getBackground()->EnableBG(vs_options::instance().background);
         }
     }
-    static int tmp = (game_options()->cockpit ? 1 : 0);
+    static int tmp = (vs_options::instance().cockpit ? 1 : 0);
     if (newState == PRESS && (_Universe->AccessCockpit()->GetView() == CP_FRONT)
-            && game_options()->disabled_cockpit_allowed) {
+            && vs_options::instance().disabled_cockpit_allowed) {
         YawLeft(KBData(), RELEASE);
         YawRight(KBData(), RELEASE);
         PitchUp(KBData(), RELEASE);
@@ -594,7 +594,7 @@ void CommModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->comm);
+            sc.loadsound(vs_options::instance().comm);
         }
         sc.playsound();
         SwitchVDUTo(VDU::COMM);
@@ -605,7 +605,7 @@ void ScanningModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->scanning);
+            sc.loadsound(vs_options::instance().scanning);
         }
         sc.playsound();
         SwitchVDUTo(VDU::SCANNING);
@@ -616,7 +616,7 @@ void ObjectiveModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->objective);
+            sc.loadsound(vs_options::instance().objective);
         }
         sc.playsound();
 
@@ -628,7 +628,7 @@ void TargetModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->examine);
+            sc.loadsound(vs_options::instance().examine);
         }
         sc.playsound();
 
@@ -640,7 +640,7 @@ void ViewModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->view);
+            sc.loadsound(vs_options::instance().view);
         }
         sc.playsound();
         SwitchVDUTo(VDU::VIEW);
@@ -651,7 +651,7 @@ void DamageModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->repair);
+            sc.loadsound(vs_options::instance().repair);
         }
         sc.playsound();
 
@@ -663,7 +663,7 @@ void ManifestModeVDU(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         static soundContainer sc;
         if (sc.sound < 0) {
-            sc.loadsound(game_options()->manifest);
+            sc.loadsound(vs_options::instance().manifest);
         }
         sc.playsound();
 
@@ -789,12 +789,12 @@ void createObjects(std::vector<std::string> &fighter0name,
     vector<std::string> fighter0mods;
     vector<int> fighter0indices;
 
-    static Vector TerrainScale(game_options()->xscale, game_options()->yscale, game_options()->zscale);
+    static Vector TerrainScale(vs_options::instance().xscale, vs_options::instance().yscale, vs_options::instance().zscale);
 
     myterrain = nullptr;
     std::string stdstr = mission->getVariable("terrain", "");
     if (stdstr.length() > 0) {
-        Terrain *terr = new Terrain(stdstr.c_str(), TerrainScale, game_options()->mass, game_options()->radius);
+        Terrain *terr = new Terrain(stdstr.c_str(), TerrainScale, vs_options::instance().mass, vs_options::instance().radius);
         Matrix tmp;
         ScaleMatrix(tmp, TerrainScale);
         QVector pos;
@@ -804,7 +804,7 @@ void createObjects(std::vector<std::string> &fighter0name,
     }
     stdstr = mission->getVariable("continuousterrain", "");
     if (stdstr.length() > 0) {
-        myterrain = new ContinuousTerrain(stdstr.c_str(), TerrainScale, game_options()->mass);
+        myterrain = new ContinuousTerrain(stdstr.c_str(), TerrainScale, vs_options::instance().mass);
         Matrix tmp;
         Identity(tmp);
         QVector pos;
@@ -902,7 +902,7 @@ void createObjects(std::vector<std::string> &fighter0name,
                             }
                             dat->clear();
                         }
-                        fighter0mods.push_back(modifications = game_options()->getCallsign(squadnum));
+                        fighter0mods.push_back(modifications = vs_options::instance().getCallsign(squadnum));
                         VS_LOG(info,
                                 (boost::format("FOUND MODIFICATION = %1% FOR PLAYER #%2%") % modifications.c_str()
                                         % squadnum));
@@ -1022,7 +1022,7 @@ void destroyObjects() {
 }
 
 int getmicrosleep() {
-    return game_options()->threadtime;
+    return vs_options::instance().threadtime;
 }
 
 void restore_main_loop() {

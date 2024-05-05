@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
+ * gl_matrix_hack.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -43,7 +45,8 @@
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 
-//#include <GL/glu.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+//#include <glu.h>
 
 inline void Zero(float matrix[]) {
     matrix[0] = 0;

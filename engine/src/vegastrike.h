@@ -68,18 +68,19 @@ extern float AUDIO_ATOM;
 //#include "command.h"
 #endif //defined (WIN32) || defined (__CYGWIN__)
 
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #ifndef NO_GFX
-    #if defined(__APPLE__) && defined(__MACH__)
-        #include <OpenGL/gl.h>
-        #include <OpenGL/glu.h>
-        #include <GLUT/glut.h>
-    #else //defined (__APPLE__) || defined (MACOSX)
-        #define __glext_h_
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-        #include <GL/glut.h>
-        #undef __glext_h_
-    #endif //defined (__APPLE__) || defined (MACOSX)
+#   if defined(__APPLE__) && defined(__MACH__)
+#       include <gl.h>
+#       include <glu.h>
+#       include <glut.h>
+#   else //defined(__APPLE__) && defined(__MACH__)
+#       define __glext_h_
+#       include <gl.h>
+#       include <glu.h>
+#       include <glut.h>
+#       undef __glext_h_
+#   endif //defined(__APPLE__) && defined(__MACH__)
 #endif //NO_GFX
 
 #define PROG_NAME "vegastrike"

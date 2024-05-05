@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * weapon_info.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -56,8 +58,8 @@ float WeaponInfo::Refire() const {
             != 't' || name[len - 2] != 'e' || name[len - 1] != 'r') {
         return refire_rate;
     }
-    return this->refire_rate * (game_options()->refire_difficulty_scaling
-            / (1.0f + (game_options()->refire_difficulty_scaling - 1.0f) * g_game.difficulty));
+    return this->refire_rate * (vs_options::instance().refire_difficulty_scaling
+            / (1.0f + (vs_options::instance().refire_difficulty_scaling - 1.0f) * g_game.difficulty));
 }
 
 bool WeaponInfo::isMissile() const {

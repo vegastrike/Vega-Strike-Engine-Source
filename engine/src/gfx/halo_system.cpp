@@ -1,10 +1,8 @@
-/**
+/*
  * halo_system.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -83,7 +81,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
         bool done = false;
         Vector back = vel;
         back.Normalize();
-        back *= -game_options()->sparkleabsolutespeed;
+        back *= -vs_options::instance().sparkleabsolutespeed;
 
         collideTrees *colTrees = mush->colTrees;
         if (colTrees) {
@@ -99,7 +97,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                             vel,
                             back,
                             0,
-                            mush->rSize() * game_options()->sparkleenginesizerelativetoship,
+                            mush->rSize() * vs_options::instance().sparkleenginesizerelativetoship,
                             faction);
                     done = true;
                 }
@@ -119,7 +117,7 @@ void LaunchOneParticle(const Matrix &mat, const Vector &vel, unsigned int seed, 
                         vel,
                         back,
                         0,
-                        mush->rSize() * game_options()->sparkleenginesizerelativetoship,
+                        mush->rSize() * vs_options::instance().sparkleenginesizerelativetoship,
                         faction);
                 done = true;
             }
@@ -140,11 +138,11 @@ unsigned int HaloSystem::AddHalo(const char *filename,
     int neutralfac = FactionUtil::GetNeutralFaction();
     halo.push_back(Halo());
     halo.back().trans = trans;
-    halo.back().size = Vector(size.i * game_options()->engine_radii_scale,
-            size.j * game_options()->engine_radii_scale,
-            size.k * game_options()->engine_length_scale);
+    halo.back().size = Vector(size.i * vs_options::instance().engine_radii_scale,
+            size.j * vs_options::instance().engine_radii_scale,
+            size.k * vs_options::instance().engine_length_scale);
     halo.back().mesh = Mesh::LoadMesh((string(filename)).c_str(), Vector(1, 1, 1), neutralfac, NULL);
-    halo.back().activation = activation_accel * game_options()->game_speed;
+    halo.back().activation = activation_accel * vs_options::instance().game_speed;
     halo.back().oscale = 0;
     halo.back().sparkle_accum = 0;
     halo.back().sparkle_rate = 0.5 + rand() * 0.5 / float(RAND_MAX);
@@ -188,12 +186,12 @@ void HaloSystem::Draw(const Matrix &trans,
         maxvelocity = 1;
     }
 
-    double sparkledelta = GetElapsedTime() * game_options()->halosparklerate;
+    double sparkledelta = GetElapsedTime() * vs_options::instance().halosparklerate;
 
     for (std::vector<Halo>::iterator i = halo.begin(); i != halo.end(); ++i) {
         Vector thrustvector = TransformNormal(trans, i->trans.getR()).Normalize();
         float value, maxvalue, minvalue;
-        if (game_options()->halos_by_velocity) {
+        if (vs_options::instance().halos_by_velocity) {
             value = velocity.Dot(thrustvector);
             maxvalue = sqrt(maxvelocity);
             minvalue = i->activation;
@@ -211,7 +209,7 @@ void HaloSystem::Draw(const Matrix &trans,
             ScaleMatrix(m, Vector(scale.i * i->size.i, scale.j * i->size.j, scale.k * i->size.k * value / maxvalue));
 
             float maxfade =
-                    minvalue * (1.0 - game_options()->percent_halo_fade_in) + maxvalue * game_options()->percent_halo_fade_in;
+                    minvalue * (1.0 - vs_options::instance().percent_halo_fade_in) + maxvalue * vs_options::instance().percent_halo_fade_in;
             int alpha = halo_alpha;
             if (value < maxfade) {
                 if (alpha < 0) {
@@ -221,19 +219,19 @@ void HaloSystem::Draw(const Matrix &trans,
                 alpha |= 1;
             }
 
-            GFXColor blend = GFXColor(game_options()->engine_color_red,
-                    game_options()->engine_color_green,
-                    game_options()->engine_color_blue,
+            GFXColor blend = GFXColor(vs_options::instance().engine_color_red,
+                    vs_options::instance().engine_color_green,
+                    vs_options::instance().engine_color_blue,
                     1);
-            if (value > maxvalue * game_options()->percent_afterburner_color_change) {
-                float test = value - maxvalue * game_options()->percent_afterburner_color_change;
-                test /= maxvalue * game_options()->percent_afterburner_color_change;
+            if (value > maxvalue * vs_options::instance().percent_afterburner_color_change) {
+                float test = value - maxvalue * vs_options::instance().percent_afterburner_color_change;
+                test /= maxvalue * vs_options::instance().percent_afterburner_color_change;
                 if (!(test < 1.0)) {
                     test = 1.0;
                 }
-                float r = game_options()->afterburner_color_red * test + game_options()->engine_color_red * (1.0 - test);
-                float g = game_options()->afterburner_color_green * test + game_options()->engine_color_green * (1.0 - test);
-                float b = game_options()->afterburner_color_blue * test + game_options()->engine_color_blue * (1.0 - test);
+                float r = vs_options::instance().afterburner_color_red * test + vs_options::instance().engine_color_red * (1.0 - test);
+                float g = vs_options::instance().afterburner_color_green * test + vs_options::instance().engine_color_green * (1.0 - test);
+                float b = vs_options::instance().afterburner_color_blue * test + vs_options::instance().engine_color_blue * (1.0 - test);
                 blend = GFXColor(r, g, b, 1.0);
             }
 
@@ -257,14 +255,14 @@ void HaloSystem::Draw(const Matrix &trans,
                     i->sparkle_accum -= 1;
 
                     float rsize = i->mesh->rSize() * scale.i * i->size.i;
-                    Vector pvelocity = thrustvector * -rsize * game_options()->halosparklespeed * vpercent;
+                    Vector pvelocity = thrustvector * -rsize * vs_options::instance().halosparklespeed * vpercent;
 
                     DoParticles(m.p,
                             hullpercent,
                             velocity,
                             pvelocity,
                             rsize,
-                            rsize * game_options()->halosparklescale,
+                            rsize * vs_options::instance().halosparklescale,
                             faction);
                 }
             } else {

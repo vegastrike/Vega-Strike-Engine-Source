@@ -105,7 +105,7 @@ void Bolt::DrawAllBolts() {
     GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
 
     BLENDFUNC bsrc, bdst;
-    if (game_options()->BlendGuns == true) {
+    if (vs_options::instance().BlendGuns == true) {
         GFXBlendMode(bsrc = ONE, bdst = ONE);
     } else {
         GFXBlendMode(bsrc = ONE, bdst = ZERO);
@@ -179,11 +179,11 @@ void Bolt::DrawBolt(GFXVertexList *qmesh) {
 
     BlendTrans(drawmat, cur_position, prev_position);
     Matrix drawmat(this->drawmat);
-    if (game_options()->StretchBolts > 0) {
+    if (vs_options::instance().StretchBolts > 0) {
         ScaleMatrix(drawmat,
                 Vector(1,
                         1,
-                        type->speed * BoltDrawManager::elapsed_time * game_options()->StretchBolts / type->length));
+                        type->speed * BoltDrawManager::elapsed_time * vs_options::instance().StretchBolts / type->length));
     }
     GFXLoadMatrixModel(drawmat);
     GFXColor4f(wt->r, wt->g, wt->b, wt->a);

@@ -1204,10 +1204,11 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
             saveStringList(cpt, mission_key, vec);
         }
     }
-    if (!rooms.size()) {
-        VS_LOG(error, (boost::format("ERROR: there are no rooms in basefile \"%1%%2%%3%\" ...\n")
+    if (rooms.empty()) {
+        VS_LOG(error, (boost::format("ERROR: there are no rooms in basefile \"%1%%2%%3%%4%\" ...\n")
                 % basefile
                 % compute_time_of_day(base, un)
+                % fac
                 % BASE_EXTENSION));
         rooms.push_back(new Room());
         rooms.back()->deftext = "ERROR: No rooms specified...";

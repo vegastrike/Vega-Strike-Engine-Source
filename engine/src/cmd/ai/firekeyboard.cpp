@@ -1181,7 +1181,7 @@ bool ChooseTargets(Unit *me, bool (*typeofunit)(Unit *, Unit *), bool reverse) {
     for (un_iter iter = drawlist.createIterator(); (target = *iter) != NULL; ++iter) {
         vec.push_back(target);
     }
-    if (vec.size() == 0) {
+    if (vec.empty()) {
         return false;
     }
     if (reverse) {

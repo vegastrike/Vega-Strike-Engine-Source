@@ -143,15 +143,17 @@ int readCommandLineOptions(int argc, char **argv);
 void VSExit(int code) {
     Music::CleanupMuzak();
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
+    AUDDestroy();
     winsys_exit(code);
 }
 
 void cleanup(void) {
-    STATIC_VARS_DESTROYED = true;
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
     VS_LOG(info, "Thank you for playing!");
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
     if (_Universe != NULL) {
         _Universe->WriteSaveGame(true);
     }
@@ -285,7 +287,7 @@ int main(int argc, char *argv[]) {
 
     GetVersionEx( &osvi );
     isVista = (osvi.dwMajorVersion == 6);
-    VS_LOG(info, (boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion));
+    VS_LOG(important_info, (boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion));
 #endif
     /* Print copyright notice */
     printf("Vega Strike "  " \n"
@@ -331,11 +333,11 @@ int main(int argc, char *argv[]) {
     VegaStrikeLogging::VegaStrikeLogger::instance().InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
-    if (game_options()->force_client_connect) {
+    if (vs_options::instance().force_client_connect) {
         ignore_network = false;
     }
     if (mission_name[0] == '\0') {
-        strncpy(mission_name, game_options()->default_mission.c_str(), 1023);
+        strncpy(mission_name, vs_options::instance().default_mission.c_str(), 1023);
         mission_name[1023] = '\0';
         VS_LOG(important_info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
@@ -365,13 +367,12 @@ int main(int argc, char *argv[]) {
     }
 #endif
 #endif
-#if 0
+    
     InitTime();
     UpdateTime();
-#endif
 
     AUDInit();
-    AUDListenerGain(game_options()->sound_gain);
+    AUDListenerGain(vs_options::instance().sound_gain);
     Music::InitMuzak();
 
     initSceneManager();
@@ -380,12 +381,13 @@ int main(int argc, char *argv[]) {
 
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
-    if (game_options()->command_interpretor) {
+    if (vs_options::instance().command_interpretor) {
         CommandInterpretor = new commandI;
         InitShipCommands();
     }
-    _Universe = new Universe(argc, argv, game_options()->galaxy.c_str());
+    _Universe = new Universe(argc, argv, vs_options::instance().galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
+    //InitTime();
     _Universe->Loop(bootstrap_first_loop);
 
     //Unregister commands - and cleanup memory
@@ -469,9 +471,9 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
             ani->DrawNow(tmp);
         }
     }
-    bs_tp->Draw(game_options()->default_boot_message.length() > 0 ?
-            game_options()->default_boot_message : message.length() > 0 ?
-                    message : game_options()->initial_boot_message);
+    bs_tp->Draw(vs_options::instance().default_boot_message.length() > 0 ?
+            vs_options::instance().default_boot_message : message.length() > 0 ?
+                    message : vs_options::instance().initial_boot_message);
 
     GFXHudMode(GFXFALSE);
     GFXEndScene();
@@ -525,8 +527,8 @@ vector<string> parse_space_string(std::string s) {
 void bootstrap_first_loop() {
     static int i = 0;
     if (i == 0) {
-        vector<string> s = parse_space_string(game_options()->splash_screen);
-        vector<string> sa = parse_space_string(game_options()->splash_audio);
+        vector<string> s = parse_space_string(vs_options::instance().splash_screen);
+        vector<string> sa = parse_space_string(vs_options::instance().splash_audio);
         int snum = time(nullptr) % s.size();
         SplashScreen = new Animation(s[snum].c_str(), false);
         if (!sa.empty() && sa[0].length()) {
@@ -535,9 +537,10 @@ void bootstrap_first_loop() {
         bs_tp = new TextPlane();
     }
     bootstrap_draw("Vegastrike Loading...", SplashScreen);
+    //InitTime();
     if (i++ > 4) {
         if (_Universe) {
-            if (game_options()->main_menu) {
+            if (vs_options::instance().main_menu) {
                 UniverseUtil::startMenuInterface(true);
             } else {
                 _Universe->Loop(bootstrap_main_loop);
@@ -547,16 +550,16 @@ void bootstrap_first_loop() {
 }
 
 void SetStartupView(Cockpit *cp) {
-    cp->SetView(game_options()->startup_cockpit_view
-            == "view_target" ? CP_TARGET : (game_options()->startup_cockpit_view
-            == "back" ? CP_BACK : (game_options()->startup_cockpit_view
+    cp->SetView(vs_options::instance().startup_cockpit_view
+            == "view_target" ? CP_TARGET : (vs_options::instance().startup_cockpit_view
+            == "back" ? CP_BACK : (vs_options::instance().startup_cockpit_view
             == "chase" ? CP_CHASE
             : CP_FRONT)));
 }
 
 void bootstrap_main_loop() {
     static bool LoadMission = true;
-    InitTime();
+    //InitTime();
     if (LoadMission) {
         LoadMission = false;
         active_missions.push_back(mission = new Mission(mission_name));
@@ -578,8 +581,8 @@ void bootstrap_main_loop() {
         vector<std::string> playerpasswd;
         string pname, ppasswd;
         for (int p = 0; p < numplayers; p++) {
-            pname = game_options()->getPlayer(p);
-            ppasswd = game_options()->getPassword(p);
+            pname = vs_options::instance().getPlayer(p);
+            ppasswd = vs_options::instance().getPassword(p);
 
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
@@ -624,7 +627,7 @@ void bootstrap_main_loop() {
         vector<SavedUnits> saved;
         vector<string> packedInfo;
 
-        if (game_options()->load_last_savegame) {
+        if (vs_options::instance().load_last_savegame) {
             _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
                     mysystem,
                     mysystem,
@@ -667,16 +670,16 @@ void bootstrap_main_loop() {
         FactionUtil::LoadContrabandLists();
         {
             // TODO: Figure out how to refactor this section to use a loop or similar, eliminating code duplication
-            if (!game_options()->intro1.empty()) {
-                UniverseUtil::IOmessage(0, "game", "all", game_options()->intro1);
-                if (!game_options()->intro2.empty()) {
-                    UniverseUtil::IOmessage(4, "game", "all", game_options()->intro2);
-                    if (!game_options()->intro3.empty()) {
-                        UniverseUtil::IOmessage(8, "game", "all", game_options()->intro3);
-                        if (!game_options()->intro4.empty()) {
-                            UniverseUtil::IOmessage(12, "game", "all", game_options()->intro4);
-                            if (!game_options()->intro5.empty()) {
-                                UniverseUtil::IOmessage(16, "game", "all", game_options()->intro5);
+            if (!vs_options::instance().intro1.empty()) {
+                UniverseUtil::IOmessage(0, "game", "all", vs_options::instance().intro1);
+                if (!vs_options::instance().intro2.empty()) {
+                    UniverseUtil::IOmessage(4, "game", "all", vs_options::instance().intro2);
+                    if (!vs_options::instance().intro3.empty()) {
+                        UniverseUtil::IOmessage(8, "game", "all", vs_options::instance().intro3);
+                        if (!vs_options::instance().intro4.empty()) {
+                            UniverseUtil::IOmessage(12, "game", "all", vs_options::instance().intro4);
+                            if (!vs_options::instance().intro5.empty()) {
+                                UniverseUtil::IOmessage(16, "game", "all", vs_options::instance().intro5);
                             }
                         }
                     }
@@ -686,14 +689,14 @@ void bootstrap_main_loop() {
 
         if (mission->getVariable("savegame",
                 "").length() != 0
-                && game_options()->dockOnLoad) {
+                && vs_options::instance().dockOnLoad) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
                 DockToSavedBases(i, vec);
             }
         }
 
-        if (game_options()->load_last_savegame) {
+        if (vs_options::instance().load_last_savegame) {
             //Don't write if we didn't load...
             for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
                 WriteSaveGame(_Universe->AccessCockpit(i), false);
@@ -705,7 +708,7 @@ void bootstrap_main_loop() {
         }
         _Universe->Loop(main_loop);
         ///return to idle func which now should call main_loop mohahahah
-        if (game_options()->auto_hide) {
+        if (vs_options::instance().auto_hide) {
             UniverseUtil::hideSplashScreen();
         }
     }

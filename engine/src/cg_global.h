@@ -37,10 +37,11 @@
 
 #if defined (UNIX)
 
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #define GLX_GLXEXT_PROTOTYPES 1
-#include <GL/glx.h>
+#include <glx.h>
 #include "gldrv/glx_undefined_extensions.h"
-#include <GL/glxext.h>
+#include <glxext.h>
 
 #endif //defined (UNIX)
 

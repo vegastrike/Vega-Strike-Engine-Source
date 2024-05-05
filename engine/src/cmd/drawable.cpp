@@ -1,7 +1,7 @@
 /*
  * drawable.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
+ * Copyright (C) 2020-2024 Daniel Horn, Roy Falk, Stephen G. Tuggy and other
  * Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -83,7 +83,7 @@ Drawable::~Drawable() {
 }
 
 bool Drawable::DrawableInit(const char *filename, int faction,
-        Flightgroup *flightgrp, const char *animationExt) {
+                            Flightgroup *flightgrp, const char *animationExt) {
     string fnam(filename);
     string::size_type pos = fnam.find('.');
     string anifilename = fnam.substr(0, pos);
@@ -445,7 +445,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     Matrix wmat = WarpMatrix(mat);
     for (i = 0; (int) i < nummounts; i++) {
         Mount *mahnt = &unit->mounts[i];
-        if (game_options()->draw_weapons) {
+        if (vs_options::instance().draw_weapons) {
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
@@ -666,7 +666,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
         return;
     }
 
-    double sparkle_accum = GetElapsedTime() * game_options()->sparklerate;
+    double sparkle_accum = GetElapsedTime() * vs_options::instance().sparklerate;
     int spawn = (int) (sparkle_accum);
     sparkle_accum -= spawn;
 
@@ -772,7 +772,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
         }
 
         // Don't draw mounts if game is set not to...
-        if (!game_options()->draw_weapons) {
+        if (!vs_options::instance().draw_weapons) {
             continue;
         }
 
@@ -828,7 +828,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
 void Drawable::Split(int level) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    if (game_options()->split_dead_subunits) {
+    if (vs_options::instance().split_dead_subunits) {
         for (un_iter su = unit->getSubUnits(); *su; ++su) {
             (*su)->Split(level);
         }
@@ -929,7 +929,7 @@ void Drawable::Split(int level) {
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
         *splitsub->current_hull = 1000.0f;
         splitsub->name = "debris";
-        splitsub->setMass(game_options()->debris_mass * splitsub->getMass() / level);
+        splitsub->setMass(vs_options::instance().debris_mass * splitsub->getMass() / level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc = splitsub->meshdata[0]->Position();
@@ -938,18 +938,18 @@ void Drawable::Split(int level) {
                 locm = 1;
             }
             splitsub->ApplyForce(
-                    splitsub->meshdata[0]->rSize() * game_options()->explosionforce * 10 * splitsub->getMass() * loc
+                    splitsub->meshdata[0]->rSize() * vs_options::instance().explosionforce * 10 * splitsub->getMass() * loc
                             / locm);
             loc.Set(rand(), rand(), rand() + .1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * game_options()->explosiontorque
+            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * vs_options::instance().explosiontorque
                     * (1 + rand() % (int) (1 + unit->rSize())));
         }
     }
     old.clear();
     this->meshdata.clear();
     this->meshdata.push_back(NULL);     //the shield
-    unit->Mass *= game_options()->debris_mass;
+    unit->Mass *= vs_options::instance().debris_mass;
 }
 
 void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color) {
@@ -976,35 +976,35 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared()
-            < (static_cast<double>(game_options()->warp_stretch_cutoff) * game_options()->warp_stretch_cutoff * game_options()->game_speed
-                    * game_options()->game_speed)
-            || (game_options()->only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
+            < (static_cast<double>(vs_options::instance().warp_stretch_cutoff) * vs_options::instance().warp_stretch_cutoff * vs_options::instance().game_speed
+                    * vs_options::instance().game_speed)
+            || (vs_options::instance().only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
         return ctm;
     } else {
         Matrix k(ctm);
 
         float speed = unit->GetWarpVelocity().Magnitude();
-        float stretchregion0length = static_cast<float>(game_options()->warp_stretch_region0_max
-                * (speed - (game_options()->warp_stretch_cutoff * game_options()->game_speed))
-                / ((game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
-                        - (game_options()->warp_stretch_cutoff * game_options()->game_speed)));
+        float stretchregion0length = static_cast<float>(vs_options::instance().warp_stretch_region0_max
+                * (speed - (vs_options::instance().warp_stretch_cutoff * vs_options::instance().game_speed))
+                / ((vs_options::instance().warp_stretch_max_region0_speed * vs_options::instance().game_speed)
+                        - (vs_options::instance().warp_stretch_cutoff * vs_options::instance().game_speed)));
         float stretchlength =
-                static_cast<float>((game_options()->warp_stretch_max
-                        - game_options()->warp_stretch_region0_max)
-                        * (speed - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed))
-                        / ((game_options()->warp_stretch_max_speed * game_options()->game_speed)
-                                - (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed) + .06125f)
-                        + game_options()->warp_stretch_region0_max);
-        if (stretchlength > game_options()->warp_stretch_max) {
-            stretchlength = game_options()->warp_stretch_max;
+                static_cast<float>((vs_options::instance().warp_stretch_max
+                        - vs_options::instance().warp_stretch_region0_max)
+                        * (speed - (vs_options::instance().warp_stretch_max_region0_speed * vs_options::instance().game_speed))
+                        / ((vs_options::instance().warp_stretch_max_speed * vs_options::instance().game_speed)
+                                - (vs_options::instance().warp_stretch_max_region0_speed * vs_options::instance().game_speed) + .06125f)
+                        + vs_options::instance().warp_stretch_region0_max);
+        if (stretchlength > vs_options::instance().warp_stretch_max) {
+            stretchlength = vs_options::instance().warp_stretch_max;
         }
-        if (stretchregion0length > game_options()->warp_stretch_region0_max) {
-            stretchregion0length = game_options()->warp_stretch_region0_max;
+        if (stretchregion0length > vs_options::instance().warp_stretch_region0_max) {
+            stretchregion0length = vs_options::instance().warp_stretch_region0_max;
         }
         ScaleMatrix(k,
                 Vector(1,
                         1,
-                        1 + (speed > (game_options()->warp_stretch_max_region0_speed * game_options()->game_speed)
+                        1 + (speed > (vs_options::instance().warp_stretch_max_region0_speed * vs_options::instance().game_speed)
                                 ? stretchlength : stretchregion0length)));
         return k;
     }

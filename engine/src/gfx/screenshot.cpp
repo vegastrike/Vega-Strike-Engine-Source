@@ -29,11 +29,8 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "vsimage.h"
-#ifndef __APPLE__
-#include <GL/glut.h>
-#else
-#include <GLUT/glut.h>
-#endif
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#include <glut.h>
 
 using namespace VSFileSystem;
 

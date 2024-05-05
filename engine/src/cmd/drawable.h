@@ -1,9 +1,8 @@
-/**
+/*
  * drawable.h
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
- * contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2020-2024 Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License

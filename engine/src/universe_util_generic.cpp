@@ -630,7 +630,7 @@ namespace UniverseUtil {
     }
 
     void IOmessage(int delay, string from, string to, string message) {
-        if (to == "news" && (!game_options()->news_from_cargolist)) {
+        if (to == "news" && (!vs_options::instance().news_from_cargolist)) {
             for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
                 pushSaveString(i, "news", string("#") + message);
             }
@@ -674,7 +674,7 @@ namespace UniverseUtil {
 
     QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector pos, float radial_size) {
         if (radial_size < 0) {
-            radial_size = game_options()->respawn_unit_size;
+            radial_size = vs_options::instance().respawn_unit_size;
         }
         for (unsigned int k = 0; k < 10; ++k) {
             Unit *un;
@@ -804,7 +804,7 @@ namespace UniverseUtil {
     }
 
     float getPlanetRadiusPercent() {
-        return game_options()->auto_pilot_planet_radius_percent;
+        return vs_options::instance().auto_pilot_planet_radius_percent;
     }
 
     std::string getVariable(std::string section, std::string name, std::string def) {
@@ -891,12 +891,12 @@ namespace UniverseUtil {
         static bool campaign_score_vars_init = false;
         if (!campaign_score_vars_init) {
 
-            string::size_type where = 0, when = game_options()->campaigns.find(' ');
+            string::size_type where = 0, when = vs_options::instance().campaigns.find(' ');
             while (where != string::npos) {
-                campaign_score_vars.insert(game_options()->campaigns
+                campaign_score_vars.insert(vs_options::instance().campaigns
                                                    .substr(where, ((when == string::npos) ? when : when - where)));
                 where = (when == string::npos) ? when : when + 1;
-                when = game_options()->campaigns.find(' ', where);
+                when = vs_options::instance().campaigns.find(' ', where);
             }
             campaign_score_vars_init = true;
         }

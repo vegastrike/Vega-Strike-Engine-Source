@@ -1,8 +1,8 @@
 /*
- * gl_include.h
+ * owner.h
  *
  * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Benjamen R. Meyer, and other Vega Strike contributors.
+ * Benjamen R. Meyer, Roy Falk, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,10 +22,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
-#define VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
+#ifndef VEGA_STRIKE_OWNER_H
+#define VEGA_STRIKE_OWNER_H
 
-// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#include <glut.h>
+#include <memory>
+#include <type_traits>
 
-#endif //VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
+using std::shared_ptr;
+using std::unique_ptr;
+
+template <class T, class = std::enable_if_t<std::is_pointer<T>::value>>
+using owner = T;
+
+#endif //VEGA_STRIKE_OWNER_H

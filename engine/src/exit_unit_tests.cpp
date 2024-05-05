@@ -28,7 +28,10 @@
 #include "vs_exit.h"
 #include "vs_logging.h"
 
+bool STATIC_VARS_DESTROYED = false;
+
 void VSExit(int code) {
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
     exit(code);
 }

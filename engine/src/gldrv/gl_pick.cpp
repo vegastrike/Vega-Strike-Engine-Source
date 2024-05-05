@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gl_pick.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -23,7 +25,8 @@
 /* GL selection buffer code
  */
 
-//#include <GL/gl.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+//#include <gl.h>
 #include "gl_globals.h"
 #include "gfxlib.h"
 #include "gl_matrix.h"

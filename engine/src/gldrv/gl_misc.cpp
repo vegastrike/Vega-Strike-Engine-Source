@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, pyramid3d,
+ * gl_misc.cpp
+ * 
+ * Copyright (C) 2001-2024 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -52,7 +54,7 @@ void GFXCircle(float x, float y, float wid, float hei) {
                     - Vector(static_cast<double>(wid) * g_game.x_resolution * cos(2.0 * M_PI / 360.0),
                             static_cast<double>(hei) * g_game.y_resolution * sin(2.0 * M_PI / 360.0),
                             0)).Magnitude();
-    int accuracy = (int) (360.0f * game_options()->circle_accuracy * (1.0f < segmag ? 1.0 : segmag));
+    int accuracy = (int) (360.0f * vs_options::instance().circle_accuracy * (1.0f < segmag ? 1.0 : segmag));
     if (accuracy < 4) {
         accuracy = 4;
     }

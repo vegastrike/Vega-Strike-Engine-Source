@@ -1,10 +1,8 @@
-/**
+/*
  * weapon_factory.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -116,8 +114,8 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
     json::jobject weapon = json::jobject::parse(weapon_text);
     WeaponInfo wi;
     /*static float gun_speed =
-            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
-    static int gamma = (int) (20 * game_options()->weapon_gamma);*/
+            vs_options::instance().gun_speed * (vs_options::instance().gun_speed_adjusted_game_speed ? vs_options::instance().game_speed : 1);
+    static int gamma = (int) (20 * vs_options::instance().weapon_gamma);*/
 
 
     // Weapon Type
@@ -163,7 +161,7 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
     //wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
 
     // TODO: is this really necessary???
-    /*if(game_options()->gun_speed_adjusted_game_speed) {
+    /*if(vs_options::instance().gun_speed_adjusted_game_speed) {
         if (wi.speed < 1000) {
             wi.speed *= 1.0+gun_speed/1.25;
         } else if (wi.speed < 2000) {
@@ -209,8 +207,8 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
 
 void WeaponFactory::parse(ptree tree) {
 //    static float gun_speed =
-//            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
-//    static int gamma = (int) (20 * game_options()->weapon_gamma);
+//            vs_options::instance().gun_speed * (vs_options::instance().gun_speed_adjusted_game_speed ? vs_options::instance().game_speed : 1);
+//    static int gamma = (int) (20 * vs_options::instance().weapon_gamma);
 
     for (const auto &iterator : tree) {
         WeaponInfo wi;
@@ -256,7 +254,7 @@ void WeaponFactory::parse(ptree tree) {
         //wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
 
         // TODO: is this really necessary???
-        /*if(game_options()->gun_speed_adjusted_game_speed) {
+        /*if(vs_options::instance().gun_speed_adjusted_game_speed) {
             if (wi.speed < 1000) {
                 wi.speed *= 1.0+gun_speed/1.25;
             } else if (wi.speed < 2000) {
