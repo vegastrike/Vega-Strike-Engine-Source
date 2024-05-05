@@ -25,6 +25,7 @@
 
 #include <SDL2/SDL.h>
 
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined(__APPLE__) && defined(__MACH__)
 #   include <gl.h>
 #elif defined (_WIN32) || defined (__CYGWIN__)

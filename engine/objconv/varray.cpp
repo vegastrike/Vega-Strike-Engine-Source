@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * varray.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,10 +23,12 @@
  */
 
 #include <stdlib.h>
-#include <GL/glut.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#include <glut.h>
 #include <vector>
 #undef GL_ARB_vertex_buffer_object
-#include <GL/glext.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#include <glext.h>
 #include <stdio.h>
 PFNGLBINDBUFFERARBPROC glBindBufferARB_p = 0;
 PFNGLGENBUFFERSARBPROC glGenBuffersARB_p = 0;

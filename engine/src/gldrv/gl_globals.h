@@ -95,6 +95,7 @@ struct GFXStats
 //#define GL_GLEXT_PROTOTYPES
 #endif
 
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined (_WIN32) || defined (__CYGWIN__)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -103,6 +104,7 @@ struct GFXStats
 #include <gl.h>
 #endif
 
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined(__APPLE__) && defined(__MACH__)
 #include <glut.h>
 //#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)

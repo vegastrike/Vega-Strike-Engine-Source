@@ -35,11 +35,8 @@
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 #   include "SDL2/SDL.h"
 #elif defined( HAVE_GLUT )
-#if defined(__APPLE__) && defined(__MACH__)
-    #include <glut.h>
-#else
-    #include <glut.h>
-#endif
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#   include <glut.h>
 #else
 #   error "Neither SDL nor GLUT are present."
 #endif

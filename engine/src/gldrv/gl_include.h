@@ -25,10 +25,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
 
-#if defined(__APPLE__) && defined(__MACH__)
-#   include <glut.h>
-#else
-#   include <glut.h>
-#endif
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#include <glut.h>
 
 #endif //VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H

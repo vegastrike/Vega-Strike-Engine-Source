@@ -55,19 +55,16 @@ extern "C"
  * count on that...  */
 
 #if defined (IRIX)
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <gl.h>
 #include <glut.h>
 typedef void (*PFNGLLOCKARRAYSEXTPROC)( GLint first, GLsizei count );
 typedef void (*PFNGLUNLOCKARRAYSEXTPROC)( void );
 
 #elif !defined (_WIN32)
-#if defined(__APPLE__) && defined(__MACH__)
-#   include <glut.h>
-#   include <glext.h>
-#else
-#   include <glut.h>
-#   include <glext.h>
-#endif
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#include <glut.h>
+#include <glext.h>
 
 #if !defined (GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
 #   error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"

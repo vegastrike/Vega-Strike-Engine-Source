@@ -54,6 +54,7 @@
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined(__APPLE__) && defined(__MACH__)
 #   include <gl.h>
 #   include <glext.h>

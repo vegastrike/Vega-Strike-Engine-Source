@@ -37,6 +37,7 @@
 //There are places where a float is converted to an int. This define takes extra steps to convert without a warning (float -> char -> int)
 #define NO_WARNINGS
 
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined(__APPLE__) && defined(__MACH__)
     #include <gl.h>
     #include <glut.h>
