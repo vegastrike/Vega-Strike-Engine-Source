@@ -287,7 +287,8 @@ void InitUnitTables() {
         VSFileSystem::VSFile csvFile;
         VSFileSystem::VSError err = csvFile.OpenReadOnly("units.csv", VSFileSystem::UnitFile);
         if (err <= VSFileSystem::Ok) {
-            UnitCSVFactory::ParseCSV(csvFile, true);
+            std::string data = csvFile.ReadFull();
+            UnitCSVFactory::ParseCSV(data, csvFile.GetRoot(), true);
         } else {
             std::cerr << "Unable to open units file. Aborting.\n";
             abort();

@@ -59,6 +59,8 @@ const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
                             "Explosion",	"Num_Animation_Stages",	"Upgrade_Storage_Volume",	"Heat_Sink_Rating",
                             "Shield_Efficiency",	"Num_Chunks",	"Chunk_0",	"Collide_Subunits",	"Spec_Interdiction",
                             "Tractorability",
+                            // For component upgrade
+                            "Upgrade_Type", "Facets",
                             // These values are not in units.csv! There are probably more but I stopped mapping.
                             // TODO: map all missing values using the commented out code below!
                             "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space"};
@@ -102,7 +104,7 @@ class UnitCSVFactory {
     friend class UnitJSONFactory;
     friend class UnitOptimizeFactory;
 public:
-    static void ParseCSV(VSFileSystem::VSFile &file, bool saved_game);
+    static void ParseCSV(std::string data, std::string root, bool saved_game);
 
     template<class T>
     static inline T GetVariable(std::string unit_key, std::string const &attribute_key, T default_value) = delete;
@@ -124,6 +126,9 @@ public:
     static std::map<std::string, std::string> GetUnit(std::string key) {
         return UnitCSVFactory::units[key];
     }
+
+    static void LoadUnit(std::string key, 
+                         std::map<std::string,std::string> unit_map);
 };
 
 // Template Specialization
