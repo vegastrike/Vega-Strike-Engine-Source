@@ -77,6 +77,9 @@ struct FuelBurnResult {
     double residue;
     int iterations;
     int seconds;
+
+    FuelBurnResult(double residue, int iterations, int seconds):
+        residue(residue), iterations(iterations), seconds(seconds) {}
 };
 
 FuelBurnResult fuelBurn(EnergyManager& manager, 
@@ -107,11 +110,7 @@ FuelBurnResult fuelBurn(EnergyManager& manager,
         }
     }
 
-    FuelBurnResult result {
-        .residue = manager.fuel.Percent(),
-        .iterations = i,
-        .seconds = i/60
-    };
+    FuelBurnResult result(manager.fuel.Percent(), i, i/60);
 
     return result;
 };
