@@ -51,6 +51,7 @@ enum class EnergyType {
  */
 class EnergyContainer: public Component
 {
+private:
     EnergyType type;
     Resource<double> level;
 

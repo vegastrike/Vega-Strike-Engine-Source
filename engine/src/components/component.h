@@ -75,7 +75,7 @@ public:
 
     virtual bool CanDowngrade() const = 0;
 
-    virtual bool Downgrade() = 0;
+    virtual bool Downgrade();
 
     virtual bool CanUpgrade(const std::string upgrade_key) const = 0;
 

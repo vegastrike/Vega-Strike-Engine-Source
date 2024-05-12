@@ -31,13 +31,15 @@
 #include "energy_container.h"
 
 class EnergyConsumer {
-    EnergyContainer *source;
-    bool partial; // Can power consumer with less energy than requested
 protected:
     double consumption;         // Directly converted to atomic. Mostly for book keeping.
     double atom_consumption;    // consumption per 0.1 seconds.
 
     static double simulation_atom_var;
+
+private:
+    EnergyContainer *source;
+    bool partial; // Can power consumer with less energy than requested
 public:
     EnergyConsumer(EnergyContainer *source, bool partial, double consumption = 0.0);
     double Consume();

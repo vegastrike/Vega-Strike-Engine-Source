@@ -37,6 +37,7 @@ class EnergyManager;
 
 class Reactor: public Component, public EnergyConsumer
 {
+private:
     Resource<double> capacity;          // Capacity per second
     double atom_capacity;               // Capacity per atom
     const double conversion_ratio;            // Used to calculate fuel consumption

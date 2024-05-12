@@ -69,6 +69,8 @@ bool Component::Downgrade() {
     
     mass = 0.0;
     volume = 0.0;
+
+    return true;
 }
 
 void Component::SetIntegral(bool integral) {
