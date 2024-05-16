@@ -165,6 +165,7 @@ IF (UNIX)
         ${Vega_Strike_SOURCE_DIR}/src/cmd
         ${Vega_Strike_SOURCE_DIR}/src/damage
         ${Vega_Strike_SOURCE_DIR}/src/resource
+        ${Vega_Strike_SOURCE_DIR}/src/components
         ${Vega_Strike_BINARY_DIR}
         ${Vega_Strike_BINARY_DIR}/src
         /usr/include/harfbuzz/
@@ -175,6 +176,7 @@ ELSE ()
         ${Vega_Strike_SOURCE_DIR}/src/cmd
         ${Vega_Strike_SOURCE_DIR}/src/damage
         ${Vega_Strike_SOURCE_DIR}/src/resource
+        ${Vega_Strike_SOURCE_DIR}/src/components
         ${Vega_Strike_BINARY_DIR}
         ${Vega_Strike_BINARY_DIR}/src
     )
@@ -714,6 +716,14 @@ SET(LIBRESOURCE
     src/cmd/json.cpp
     )
 
+SET(LIBCOMPONENT
+    src/components/component.cpp
+    
+    src/components/energy_consumer.cpp
+    src/components/energy_container.cpp
+    src/components/reactor.cpp
+    )
+
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
     src/gui/control.cpp
@@ -1123,6 +1133,7 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBCONFIG}
     ${LIBDAMAGE}
     ${LIBRESOURCE}
+    ${LIBCOMPONENT}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
@@ -1709,12 +1720,15 @@ IF (USE_GTEST)
         src/resource/tests/manifest_tests.cpp
         src/resource/tests/random_tests.cpp
         src/exit_unit_tests.cpp
+        src/components/tests/energy_container_tests.cpp
+        src/components/tests/balancing_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBCONFIG}
         ${LIBDAMAGE}
         ${LIBRESOURCE}
+        ${LIBCOMPONENT}
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
     )

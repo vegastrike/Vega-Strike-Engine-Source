@@ -454,7 +454,8 @@ void Unit::Init(const char *filename,
             VSFile unitTab;
             VSError taberr = unitTab.OpenReadOnly(filepath + ".csv", UnitSaveFile);
             if (taberr <= Ok) {
-                UnitCSVFactory::ParseCSV(unitTab, true);
+                std::string data = unitTab.ReadFull();
+                UnitCSVFactory::ParseCSV(data, unitTab.GetRoot(), true);
                 unitTab.Close();
                 saved_game = true;
             }
