@@ -31,6 +31,7 @@
 class Energetic {
 public:
     Energetic();
+    virtual ~Energetic() = default;
 
     void decreaseWarpEnergy(bool insys, float time);
     void DecreaseWarpEnergyInWarp();
@@ -63,7 +64,6 @@ public:
 
     void setAfterburnerEnergy(float aft);
     void setEnergyRecharge(float enrech);
-    void setFuel(float f);
 
     float totalShieldEnergyCapacitance();
 
@@ -86,21 +86,10 @@ public:
     }
             jump{};
 
-    //current energy
-    Resource<float> energy;
 
-    //how much the energy recharges per second
-    float recharge;
-
-    //maximum energy
-    float maxwarpenergy; //short fix
-    //current energy
-    float warpenergy;    //short fix
     float constrained_charge_to_shields;
     bool sufficient_energy_to_recharge_shields;
 
-    //fuel of this unit
-    float fuel;
     float afterburnenergy;              //short fix
     int afterburntype;   //0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)

@@ -3656,6 +3656,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 }
 
 //Check, and verify user wants Sell Upgrade transaction.  Returns true if more input is required.
+// Only applies to mounts!
 bool BaseComputer::SellUpgradeOperation::checkTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     if (!playerUnit) {
@@ -3675,6 +3676,7 @@ bool BaseComputer::SellUpgradeOperation::checkTransaction(void) {
 }
 
 //Finish the transaction.
+// Only applies to mounts!
 void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     Unit *baseUnit = m_parent.m_base.GetUnit();
@@ -3750,7 +3752,12 @@ bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) 
             Unit *baseUnit = m_base.GetUnit();
             if (baseUnit && playerUnit) {
                 playerUnit->SellCargo(item->GetName(), quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+                
+                // Old system
                 UnitUtil::RecomputeUnitUpgrades(playerUnit);
+
+                // New system
+                UpgradeOperationResult result = playerUnit->UpgradeUnit(item->GetName(), false, true);
                 refresh();
             }
             return true;

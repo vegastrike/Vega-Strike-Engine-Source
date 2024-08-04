@@ -79,9 +79,10 @@ public:
 
     virtual bool CanUpgrade(const std::string upgrade_key) const = 0;
 
-    virtual bool Upgrade(const std::string upgrade_key) = 0;
+    virtual bool Upgrade(const std::string upgrade_key);
 
     virtual void Damage() = 0;
+    virtual void DamageByPercent(double percent) = 0;
     virtual void Repair() = 0;
 
     virtual bool Damaged() const = 0;

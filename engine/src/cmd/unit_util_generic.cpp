@@ -42,6 +42,9 @@
 #include "universe.h"
 #include "vs_logging.h"
 #include "weapon_info.h"
+#include "unit_csv_factory.h"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "cmd/script/pythonmission.h"
 #ifndef NO_GFX
@@ -894,6 +897,32 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     if (!un) {
         return 0;
     }
+
+    // New Code
+    // TODO: Make actually return percent damaged
+
+    // name is unit_key with stripped suffix. Need to add it again
+    // TODO: check for prefixes: add_ mult_
+    std::string unit_key = name;
+    if(!boost::algorithm::ends_with(unit_key, "__upgrades")) {
+        unit_key = name + "__upgrades";
+    }
+
+    const std::string upgrade_category = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Type", std::string());
+    if(upgrade_category == "Reactor") {
+        return un->reactor.Damaged() ? 0.5 : 1.0;
+    } 
+    
+    if(upgrade_category == "Capacitor") {
+        return un->reactor.Damaged() ? 0.5 : 1.0;
+    } 
+    
+    if(upgrade_category == "FTL_Capacitor") {
+        return un->reactor.Damaged() ? 0.5 : 1.0;
+    }
+
+
+    // Old Code
     if (category.find(DamagedCategory) == 0) {
         return 0.0f;
     }

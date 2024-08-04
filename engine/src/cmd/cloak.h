@@ -31,6 +31,9 @@
 #include "energetic.h"
 #include "damageable_layer.h"
 
+// TODO: remove dependency on unit
+class Unit;
+
 enum class CloakingStatus {
     disabled,
     damaged,
@@ -67,7 +70,7 @@ public:
     Cloak(std::string unit_key);
     void Save(std::map<std::string, std::string>& unit);
 
-    void Update(Energetic *energetic);
+    void Update(Unit *unit);
     void Toggle(); // Toggle cloak on/off
 
     bool Capable() const {

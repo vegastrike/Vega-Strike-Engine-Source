@@ -62,11 +62,12 @@ public:
 
     virtual bool Downgrade();
 
-    virtual bool CanUpgrade(const std::string upgrade_name) const;
+    virtual bool CanUpgrade(const std::string upgrade_key) const;
 
-    virtual bool Upgrade(const std::string upgrade_name);
+    virtual bool Upgrade(const std::string upgrade_key);
 
     virtual void Damage();
+    virtual void DamageByPercent(double percent);
     virtual void Repair();
 
     virtual bool Damaged() const;

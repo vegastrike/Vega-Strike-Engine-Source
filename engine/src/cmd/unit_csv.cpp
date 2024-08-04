@@ -731,7 +731,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
     Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f);
     Momentofinertia = UnitCSVFactory::GetVariable(unit_key, "Moment_Of_Inertia", 1.0f);
-    fuel = UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0f);
+    
 
     // Hull
     float temp_hull = UnitCSVFactory::GetVariable(unit_key, "Hull", 0.0f);
@@ -809,16 +809,29 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     // End shield section
 
+    // Energy 
+    // TODO: The following code has a bug.
+    // It will set the max of the component as the current value loaded from the 
+    // CSV. If the component is damaged, this will be lower than the original value.
+    fuel.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0), true);
+    energy.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0), true);
+    ftl_energy.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0), true);
+    reactor.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0));
 
-    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
-    maxwarpenergy = warpenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f);
+    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp; 
+    
+    //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!  
+    if (WCfuelhack) {
+        ftl_energy.SetCapacity(ftl_energy.MaxLevel() + jump.energy * 0.1f);
+        fuel.SetCapacity(ftl_energy.MaxLevel());
+    } 
+
+    // End Energy
 
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
     graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    double capacitor = UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f);
-    energy = Resource<float>(capacitor, 0.0f, capacitor);
-    recharge = UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f);
+    
     jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false) ? -1 : -2;
     jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
@@ -828,10 +841,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
                     ? true : false) ? 1 : 0;
     jump.energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     jump.insysenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    if (WCfuelhack) {
-        fuel = warpenergy = warpenergy + jump.energy
-                * 0.1f;
-    }       //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
+    
     afterburnenergy = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
     afterburntype = UnitCSVFactory::GetVariable(unit_key,
             "Afterburner_Type",
@@ -1262,7 +1272,7 @@ string Unit::WriteUnitString() {
     }
     unit["Mass"] = tos(Mass);
     unit["Moment_Of_Inertia"] = tos(Momentofinertia);
-    unit["Fuel_Capacity"] = tos(fuel);
+    unit["Fuel_Capacity"] = tos(fuel.Level());
     unit["Hull"] = tos(GetHullLayer().facets[0].health);
     unit["Spec_Interdiction"] = tos(specInterdiction);
 
@@ -1327,11 +1337,11 @@ string Unit::WriteUnitString() {
     unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
     unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
     unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
-    unit["Warp_Capacitor"] = tos(maxwarpenergy);
+    unit["Warp_Capacitor"] = tos(ftl_energy.Level());
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
-    unit["Primary_Capacitor"] = tos(energy.MaxValue());
-    unit["Reactor_Recharge"] = tos(recharge);
+    unit["Primary_Capacitor"] = tos(energy.Level());
+    unit["Reactor_Recharge"] = tos(reactor.Capacity());
     unit["Jump_Drive_Present"] = tos(jump.drive >= -1);
     unit["Jump_Drive_Delay"] = tos(jump.delay);
     unit["Wormhole"] = tos(forcejump != 0);

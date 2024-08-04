@@ -40,6 +40,7 @@ public:
     std::vector<Cargo> cargo;
 
     Carrier();
+    virtual ~Carrier() = default;
     void SortCargo();
     static std::string cargoSerializer(const struct XMLType &input, void *mythis);
 

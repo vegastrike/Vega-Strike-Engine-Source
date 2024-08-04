@@ -28,6 +28,10 @@
 #include "component.h"
 #include "unit_csv_factory.h"
 
+const std::string NAME = "Name";
+const std::string MASS = "Mass";
+const std::string VOLUME = "Volume";
+
 Component::Component(double mass, double volume, bool integral):
                      unit_key(""),
                      upgrade_name(""),
@@ -69,6 +73,17 @@ bool Component::Downgrade() {
     
     mass = 0.0;
     volume = 0.0;
+
+    return true;
+}
+
+bool Component::Upgrade(const std::string upgrade_key) {
+    this->upgrade_key = upgrade_key;
+    upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, NAME, std::string());
+    
+    mass = UnitCSVFactory::GetVariable(upgrade_key, MASS, 0.0);
+    // TODO: volume currently not in units.json. need to merge with items list
+    volume = UnitCSVFactory::GetVariable(upgrade_key, VOLUME, 0.0);
 
     return true;
 }
