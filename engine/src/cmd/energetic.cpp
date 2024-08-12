@@ -53,7 +53,7 @@ Energetic::Energetic() :
     jump.damage = 0;
 }
 
-void Energetic::decreaseWarpEnergy(bool insys, float time) {
+void Energetic::decreaseWarpEnergy(bool insys, double time) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (configuration()->fuel.fuel_equals_warp) {
@@ -151,7 +151,7 @@ float Energetic::ExpendMomentaryFuelUsage(float magnitude) {
  * @param quantity - requested quantity to use
  * @return - actual quantity used
  */
-float Energetic::ExpendFuel(float quantity) {
+float Energetic::ExpendFuel(double quantity) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     return quantity * unit->fuel.Deplete(true, configuration()->fuel.normal_fuel_usage * quantity);
 }
@@ -161,7 +161,7 @@ float Energetic::getWarpEnergy() const {
     return unit->ftl_energy.Level();
 }
 
-void Energetic::increaseWarpEnergy(bool insys, float time) {
+void Energetic::increaseWarpEnergy(bool insys, double time) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     if (configuration()->fuel.fuel_equals_warp) {
         unit->ftl_energy.SetLevel(unit->fuel.Level());

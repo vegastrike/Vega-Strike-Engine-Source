@@ -33,7 +33,7 @@ public:
     Energetic();
     virtual ~Energetic() = default;
 
-    void decreaseWarpEnergy(bool insys, float time);
+    void decreaseWarpEnergy(bool insys, double time);
     void DecreaseWarpEnergyInWarp();
 
     float energyData() const;
@@ -44,14 +44,14 @@ public:
     static float getFuelUsage(bool afterburner);
     void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
     float ExpendMomentaryFuelUsage(float magnitude);
-    float ExpendFuel(float quantity);
+    float ExpendFuel(double quantity);
     void ExpendEnergy(const bool player_ship);
     void ExpendEnergy(float usage);
     void ExpendEnergyToRechargeShields();
     void ExpendFuel();
     float getWarpEnergy() const;
 
-    void increaseWarpEnergy(bool insys, float time);
+    void increaseWarpEnergy(bool insys, double time);
 
     float maxEnergyData() const;
 

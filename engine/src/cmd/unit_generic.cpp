@@ -4569,7 +4569,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     trackingcone,
                     hint)) {
                 const WeaponInfo *typ = mounts[i].type;
-                energy.Charge(typ->energy_rate * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1));
+                energy.Charge(static_cast<double>(typ->energy_rate) * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1));
             }
         } else if (mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2 * mounts[i].type->Refire()) {
             mounts[i].processed = Mount::UNFIRED;

@@ -561,7 +561,7 @@ Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
     Unit *unit = static_cast<Unit *>(this);
 
     float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (energetic->fuelData() <= 0 || (unit->energy.Level() < unit->afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
+    float abfuelclamp = (energetic->fuelData() <= 0 || (unit->energy.Level() < unit->afterburnenergy * static_cast<double>(simulation_atom_var))) ? configuration()->fuel.no_fuel_afterburn : 1;
     float limit =
             afterburn ? (abfuelclamp
                     * (unit->computer.max_ab_speed()
@@ -772,7 +772,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     Unit *unit = static_cast<Unit *>(this);
 
     if (unit->afterburntype == 0) {
-        afterburn = afterburn && unit->energy.Level() > unit->afterburnenergy * simulation_atom_var;
+        afterburn = afterburn && unit->energy.Level() > unit->afterburnenergy * static_cast<double>(simulation_atom_var);
     } //SIMULATION_ATOM; ?
     if (unit->afterburntype == 1) {
         afterburn = afterburn && unit->fuel.Level() > 0;
