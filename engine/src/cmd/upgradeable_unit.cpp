@@ -39,6 +39,7 @@
 #include "weapon_info.h"
 #include "vega_cast_utils.h"
 #include "vs_logging.h"
+#include "unit_csv_factory.h"
 
 std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     if(upgrades.size() == 0) {
@@ -85,6 +86,115 @@ UpgradeableUnit::UpgradeableUnit()
 }
 
 extern int GetModeFromName(const char *input_buffer);
+
+UpgradeType GetUpgradeType(const std::string upgrade_key) {
+    std::string upgrade_type_string = UnitCSVFactory::GetVariable(upgrade_key, "Upgrade_Type", std::string());
+    std::string upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
+
+    if(upgrade_type_string.empty()) return UpgradeType::None;
+    
+    if(upgrade_type_string == "Armor") {
+        return UpgradeType::Armor;
+    }
+    //if(upgrade_type_string == "Hull") return UpgradeType::Hull;
+    if(upgrade_type_string == "Shield") {
+        return UpgradeType::Shield;
+    }
+
+    if(upgrade_type_string == "Reactor") {
+        return UpgradeType::Reactor;
+    }
+
+    if(upgrade_type_string == "FTL_Capacitor") {
+        return UpgradeType::FTL_Capacitor;
+    }
+
+    if(upgrade_type_string == "Capacitor") {
+        return UpgradeType::Capacitor;
+    }
+
+    if(upgrade_type_string == "Jump_Drive") {
+        return UpgradeType::Jump_Drive;
+    }
+
+    if(upgrade_type_string == "Afterburner") {
+        return UpgradeType::Afterburner;
+    }
+
+    return UpgradeType::None;
+}
+
+UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_name,
+                     bool upgrade, bool apply) {
+    Unit* unit = vega_dynamic_cast_ptr<Unit>(this);
+    const std::string upgrade_key = upgrade_name + UPGRADES_SUFFIX;
+    const UpgradeType upgrade_type = GetUpgradeType(upgrade_key);
+    
+    UpgradeOperationResult result;
+
+    switch(upgrade_type) {
+        /*case UpgradeType::Armor:
+            result.upgradeable = true;
+            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Shield:
+            result.upgradeable = true;
+            result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
+        case UpgradeType::Capacitor:
+            result.upgradeable = true;
+            result.success = unit->energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::FTL_Capacitor:
+            result.upgradeable = true;
+            result.success = unit->ftl_energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Reactor:
+            result.upgradeable = true;
+            result.success = unit->reactor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
+        /*case UpgradeType::Afterburner:
+            result.upgradeable = true;
+            result.success = unit->afterburner.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            std::cout << "Afterburner upgraded successfully\n";
+            break;
+        case UpgradeType::Drive:
+            result.upgradeable = true;
+            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Jump_Drive:
+            result.upgradeable = true;
+            result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
+        case UpgradeType::Cloak:
+            result.upgradeable = true;
+            result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        /*case UpgradeType::ECM:
+            result.upgradeable = true;
+            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Radar:
+            result.upgradeable = true;
+            result.success = unit->radar.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
+        /*case UpgradeType::Repair_Droid:
+            result.upgradeable = true;
+            result.success = unit->repair_droid.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
+        default:
+            //std::cout << "Unhandled type for " << upgrade_name << std::endl;
+            break;
+    }
+
+    return result;
+}
+
 
 // TODO: remove unit parameter
 void UpgradeableUnit::UpgradeUnit(const std::string &upgrades) {

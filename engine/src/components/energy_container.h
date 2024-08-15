@@ -67,6 +67,7 @@ public:
 
     void SetCapacity(const double capacity, bool refill = true);
     double Level() const;
+    void SetLevel(double new_level);
     double MaxLevel() const;
     double Percent() const;
     void Refill();
@@ -89,6 +90,8 @@ public:
     virtual bool Upgrade(const std::string upgrade_name);
 
     virtual void Damage();
+    virtual void DamageByPercent(double percent);
+
     virtual void Repair();
 
     virtual bool Damaged() const;

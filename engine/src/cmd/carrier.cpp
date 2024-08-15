@@ -34,6 +34,7 @@
 #include "missile.h"
 #include "vs_random.h"
 #include "vs_logging.h"
+#include "vega_cast_utils.h"
 
 #include "json.h"
 
@@ -494,12 +495,12 @@ bool cargoIsUpgrade(const Cargo &c) {
 }
 
 float Carrier::getHiddenCargoVolume() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->HiddenCargoVolume;
 }
 
 bool Carrier::CanAddCargo(const Cargo &carg) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     //Always can, in this case (this accounts for some odd precision issues)
     if ((carg.quantity == 0) || (carg.GetVolume() == 0)) {
@@ -523,17 +524,17 @@ bool Carrier::CanAddCargo(const Cargo &carg) const {
 
 //The cargo volume of this ship when empty.  Max cargo volume.
 float Carrier::getEmptyCargoVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->CargoVolume;
 }
 
 float Carrier::getEmptyUpgradeVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->UpgradeVolume;
 }
 
 float Carrier::getCargoVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
         if (!cargoIsUpgrade(unit->cargo[i])) {
@@ -567,7 +568,7 @@ float Carrier::PriceCargo(const std::string &s) {
 }
 
 float Carrier::getUpgradeVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
         if (cargoIsUpgrade(unit->cargo[i])) {
@@ -583,7 +584,7 @@ Cargo &Carrier::GetCargo(unsigned int i) {
 }
 
 const Cargo &Carrier::GetCargo(unsigned int i) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->cargo[i];
 }
 
@@ -609,7 +610,7 @@ void Carrier::GetSortedCargoCat(const std::string &cat, size_t &begin, size_t &e
 // The game also crashed due to endless loop.
 // I returned the code and now it works and I don't know why.
 Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     if (unit->GetCargo(s, i)) {
         return &GetCargo(i);
     }
@@ -617,7 +618,7 @@ Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) {
 }
 
 const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     static Hashtable<string, unsigned int, 2047> index_cache_table;
     Unit *mpl = getMasterPartList();
@@ -670,12 +671,12 @@ const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
 }
 
 unsigned int Carrier::numCargo() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->cargo.size();
 }
 
 std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vector &oldspd) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     ///FIXME somehow mangle string
     string mangled = unit->cargo[i].name;
@@ -700,7 +701,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
 }
 
 bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg, Unit *buyer) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (i < 0 || i >= unit->cargo.size() || !buyer->CanAddCargo(unit->cargo[i])
             || unit->getMass() < unit->cargo[i].GetMass()) {
@@ -721,7 +722,7 @@ bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg,
 }
 
 bool Carrier::SellCargo(const std::string &s, int quantity, float &creds, Cargo &carg, Unit *buyer) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     Cargo tmp;
     tmp.name = s;

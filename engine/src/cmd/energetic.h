@@ -31,8 +31,9 @@
 class Energetic {
 public:
     Energetic();
+    virtual ~Energetic() = default;
 
-    void decreaseWarpEnergy(bool insys, float time);
+    void decreaseWarpEnergy(bool insys, double time);
     void DecreaseWarpEnergyInWarp();
 
     float energyData() const;
@@ -43,14 +44,14 @@ public:
     static float getFuelUsage(bool afterburner);
     void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
     float ExpendMomentaryFuelUsage(float magnitude);
-    float ExpendFuel(float quantity);
+    float ExpendFuel(double quantity);
     void ExpendEnergy(const bool player_ship);
     void ExpendEnergy(float usage);
     void ExpendEnergyToRechargeShields();
     void ExpendFuel();
     float getWarpEnergy() const;
 
-    void increaseWarpEnergy(bool insys, float time);
+    void increaseWarpEnergy(bool insys, double time);
 
     float maxEnergyData() const;
 
@@ -63,7 +64,6 @@ public:
 
     void setAfterburnerEnergy(float aft);
     void setEnergyRecharge(float enrech);
-    void setFuel(float f);
 
     float totalShieldEnergyCapacitance();
 
@@ -86,21 +86,10 @@ public:
     }
             jump{};
 
-    //current energy
-    Resource<float> energy;
 
-    //how much the energy recharges per second
-    float recharge;
-
-    //maximum energy
-    float maxwarpenergy; //short fix
-    //current energy
-    float warpenergy;    //short fix
     float constrained_charge_to_shields;
     bool sufficient_energy_to_recharge_shields;
 
-    //fuel of this unit
-    float fuel;
     float afterburnenergy;              //short fix
     int afterburntype;   //0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)

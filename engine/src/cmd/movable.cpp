@@ -561,7 +561,7 @@ Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
     Unit *unit = static_cast<Unit *>(this);
 
     float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (energetic->fuelData() <= 0 || (energetic->energy < unit->afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
+    float abfuelclamp = (energetic->fuelData() <= 0 || (unit->energy.Level() < unit->afterburnenergy * static_cast<double>(simulation_atom_var))) ? configuration()->fuel.no_fuel_afterburn : 1;
     float limit =
             afterburn ? (abfuelclamp
                     * (unit->computer.max_ab_speed()
@@ -613,28 +613,29 @@ Vector Movable::MaxThrust(const Vector &amt1) {
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 // TODO: refactor soon. Especially access to the fuel variable
 Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
     const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
     if (WCfuelhack) {
-        if (unit->fuel > unit->warpenergy) {
-            unit->fuel = unit->warpenergy;
+        // TODO: just don't use fuel in WC
+        if (unit->fuel.Level() > unit->ftl_energy.Level()) {
+            unit->fuel.SetLevel(unit->ftl_energy.Level());
         }
-        if (unit->fuel < unit->warpenergy) {
-            unit->warpenergy = unit->fuel;
+        if (unit->fuel.Level() < unit->ftl_energy.Level()) {
+            unit->ftl_energy.SetLevel(unit->fuel.Level());
         }
     }
     float instantenergy = unit->afterburnenergy * simulation_atom_var;
-    if ((unit->afterburntype == 0) && unit->energy < instantenergy) {
+    if ((unit->afterburntype == 0) && unit->energy.Level() < instantenergy) {
         afterburn = false;
     }
-    if ((unit->afterburntype == 1) && unit->fuel < 0) {
-        unit->fuel = 0;
+    if ((unit->afterburntype == 1) && unit->fuel.Level() < 0) {
+        unit->fuel.Zero();
         afterburn = false;
     }
-    if ((unit->afterburntype == 2) && unit->warpenergy < 0) {
-        unit->warpenergy = 0;
+    if ((unit->afterburntype == 2) && unit->ftl_energy.Level() < 0) {
+        unit->ftl_energy.SetCapacity(0);
         afterburn = false;
     }
     if (3 == unit->afterburntype) {      //no afterburner -- we should really make these types an enum :-/
@@ -642,8 +643,8 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     }
     Vector Res = amt1;
 
-    float fuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
     if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
         Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
     }
@@ -666,45 +667,45 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     if (unit->afterburntype == 2) {
         //Energy-consuming afterburner
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->warpenergy -= unit->afterburnenergy * Energetic::getFuelUsage(afterburn) * simulation_atom_var * Res.Magnitude()
-                * FMEC_exit_vel_inverse
-                / Lithium6constant;
+        unit->ftl_energy.Deplete(true, unit->afterburnenergy * Energetic::getFuelUsage(afterburn) * simulation_atom_var * Res.Magnitude()
+                * FMEC_exit_vel_inverse / Lithium6constant);
     }
     if (3 == unit->afterburntype || unit->afterburntype == 1) {
         //fuel-burning overdrive - uses afterburner efficiency. In NO_AFTERBURNER case, "afterburn" will always be false, so can reuse code.
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->fuel -=
+        unit->fuel.Deplete(true,
                 ((afterburn
                         && finegrainedFuelEfficiency) ? unit->afterburnenergy : Energetic::getFuelUsage(afterburn))
                         * simulation_atom_var * Res.Magnitude()
-                        * FMEC_exit_vel_inverse / Lithium6constant;
+                        * FMEC_exit_vel_inverse / Lithium6constant);
 #ifndef __APPLE__
-        if (ISNAN(unit->fuel)) {
+        if (ISNAN(unit->fuel.Level())) {
             VS_LOG(error, "Fuel is NAN A");
-            unit->fuel = 0;
+            unit->fuel.Zero();
         }
 #endif
     }
     if (unit->afterburntype == 0) {
         //fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->fuel -= unit->getFuelUsage(false) * simulation_atom_var * Res.Magnitude() * FMEC_exit_vel_inverse / Lithium6constant;
+        unit->fuel.Deplete(true, unit->getFuelUsage(false) * simulation_atom_var * Res.Magnitude() * FMEC_exit_vel_inverse / Lithium6constant);
 #ifndef __APPLE__
-        if (ISNAN(unit->fuel)) {
+        if (ISNAN(unit->fuel.Level())) {
             VS_LOG(error, "Fuel is NAN B");
-            unit->fuel = 0;
+            unit->fuel.Zero();
         }
 #endif
     }
     if ((afterburn) && (unit->afterburntype == 0)) {
-        unit->energy -= instantenergy;
+        unit->energy.Deplete(true, instantenergy);
     }
     if (WCfuelhack) {
-        if (unit->fuel > unit->warpenergy) {
-            unit->fuel = unit->warpenergy;
+        // TODO: just don't use fuel in WC
+        if (unit->fuel.Level() > unit->ftl_energy.Level()) {
+            unit->fuel.SetLevel(unit->ftl_energy.Level());
         }
-        if (unit->fuel < unit->warpenergy) {
-            unit->warpenergy = unit->fuel;
+        if (unit->fuel.Level() < unit->ftl_energy.Level()) {
+            unit->ftl_energy.SetLevel(unit->fuel.Level());
         }
     }
     return Res;
@@ -771,13 +772,13 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     Unit *unit = static_cast<Unit *>(this);
 
     if (unit->afterburntype == 0) {
-        afterburn = afterburn && unit->energy > unit->afterburnenergy * simulation_atom_var;
+        afterburn = afterburn && unit->energy.Level() > unit->afterburnenergy * static_cast<double>(simulation_atom_var);
     } //SIMULATION_ATOM; ?
     if (unit->afterburntype == 1) {
-        afterburn = afterburn && unit->fuel > 0;
+        afterburn = afterburn && unit->fuel.Level() > 0;
     }
     if (unit->afterburntype == 2) {
-        afterburn = afterburn && unit->warpenergy > 0;
+        afterburn = afterburn && unit->ftl_energy.Level() > 0;
     }
 
 
