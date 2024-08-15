@@ -37,6 +37,7 @@
 #include "unit_util.h"
 #include "vs_logging.h"
 #include "resource/resource.h"
+#include "vega_cast_utils.h"
 
 #include <vector>
 
@@ -250,14 +251,14 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
                 //&& ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
                 ((locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns);
         if ((*i).type->type == WEAPON_TYPE::BEAM) {
-            if ((*i).type->energy_rate * simulation_atom_var > unit->energy) {
+            if ((*i).type->energy_rate * static_cast<double>(simulation_atom_var) > unit->energy.Level()) {
                 //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
                 (*i).UnFire();
                 continue;
             }
         } else
             //Only in non-networking mode
-        if (i->type->energy_rate > unit->energy) {
+        if (i->type->energy_rate > unit->energy.Level()) {
             if (!want_to_fire) {
                 i->UnFire();
             }
@@ -277,11 +278,11 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
                 if (i->type->type == WEAPON_TYPE::BEAM) {
                     if (i->ref.gun) {
                         if ((!i->ref.gun->Dissolved()) || i->ref.gun->Ready()) {
-                            unit->energy -= i->type->energy_rate * simulation_atom_var;
+                            unit->energy.Deplete(true, i->type->energy_rate * static_cast<double>(simulation_atom_var));
                         }
                     }
                 } else if (i->type->isMissile()) {    // FIXME  other than beams, only missiles are processed here?
-                    unit->energy -= i->type->energy_rate;
+                    unit->energy.Deplete(true, i->type->energy_rate);
                 }
                 //IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
                 //fire only 1 missile at a time
@@ -333,7 +334,7 @@ void Armed::LockTarget(bool myboo) {
 }
 
 QVector Armed::PositionITTS(const QVector &absposit, Vector velocity, float speed, bool steady_itts) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     if (speed == FLT_MAX) {
         return unit->Position();
     }
@@ -412,7 +413,7 @@ void Armed::setAverageGunSpeed() {
 }
 
 bool Armed::TargetLocked(const Unit *checktarget) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     if (!unit->computer.radar.locked) {
         return false;
     }
@@ -449,7 +450,7 @@ void Armed::ToggleWeapon(bool missile, bool forward) {
 }
 
 float Armed::TrackingGuns(bool &missilelock) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     float trackingcone = 0;
     missilelock = false;
     for (int i = 0; i < getNumMounts(); ++i) {

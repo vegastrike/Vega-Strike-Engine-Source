@@ -42,6 +42,7 @@
 #include "gfx/mesh.h"
 #include "ai/turretai.h"
 #include "collide2/CSopcodecollider.h"
+#include "vega_cast_utils.h"
 
 #include <string>
 
@@ -220,13 +221,13 @@ string Intelligent::getFullAIDescription() {
 }
 
 float Intelligent::getRelation(const Unit *targ) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     return unit->pilot->GetEffectiveRelationship(unit, targ);
 }
 
 double Intelligent::getMinDis(const QVector &pnt) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     float minsofar = 1e+10;
     float tmpvar;

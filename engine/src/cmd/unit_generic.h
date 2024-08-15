@@ -83,6 +83,10 @@ void UncheckUnit( class Unit*un );
 
 #include "cargo_color.h"
 
+// Components
+#include "components/energy_container.h"
+#include "components/reactor.h"
+
 extern char *GetUnitDir(const char *filename);
 
 Unit *getMasterPartList();
@@ -146,6 +150,14 @@ protected:
     StringPool::Reference csvRow;
 
 public:
+    // Components
+    EnergyContainer fuel = EnergyContainer(EnergyType::Fuel);
+    EnergyContainer energy = EnergyContainer(EnergyType::Energy);
+    EnergyContainer ftl_energy = EnergyContainer(EnergyType::FTL);
+
+    // TODO: move this to a single constructor?!
+    Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
+
     Cloak cloak;
 
     /// Radar and related systems

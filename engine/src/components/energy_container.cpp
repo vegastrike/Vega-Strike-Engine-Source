@@ -73,6 +73,9 @@ void EnergyContainer::SetCapacity(const double capacity, bool refill) {
 }
 
 double EnergyContainer::Level() const { return level.Value(); }
+void EnergyContainer::SetLevel(double new_level) {
+    level = new_level;
+} 
 double EnergyContainer::MaxLevel() const { return level.MaxValue(); }
 double EnergyContainer::Percent() const { 
     if(level.MaxValue() == 0.0) {
@@ -183,6 +186,10 @@ bool EnergyContainer::Upgrade(const std::string upgrade_key) {
 
 void EnergyContainer::Damage() {
     level.RandomDamage();    
+}
+
+void EnergyContainer::DamageByPercent(double percent) {
+    level.DamageByPercent(percent);    
 }
 
 void EnergyContainer::Repair() {

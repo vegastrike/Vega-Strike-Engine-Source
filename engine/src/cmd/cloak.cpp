@@ -26,6 +26,7 @@
 #include "unit_csv_factory.h"
 #include "vegastrike.h"
 #include "configuration/configuration.h"
+#include "unit_generic.h"
 
 Cloak::Cloak()
 {
@@ -63,7 +64,7 @@ void Cloak::Save(std::map<std::string, std::string>& unit)
     unit["Cloak_Glass"] = std::to_string(glass);
 }
 
-void Cloak::Update(Energetic *energetic)
+void Cloak::Update(Unit *unit)
 {
     // Unit is not capable of cloaking or damaged or just not cloaking
     if(status == CloakingStatus::disabled ||
@@ -74,7 +75,7 @@ void Cloak::Update(Energetic *energetic)
 
     // Use warp power for cloaking (SPEC capacitor)
     const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
-    double available_energy = warp_energy_for_cloak ? energetic->warpenergy : energetic->energy.Value();
+    double available_energy = warp_energy_for_cloak ? unit->ftl_energy.Level() : unit->energy.Level();
 
 
     // Insufficient energy to cloak ship
@@ -83,9 +84,9 @@ void Cloak::Update(Energetic *energetic)
     } else {
         // Subtract the energy used
         if (warp_energy_for_cloak) {
-            energetic->warpenergy -= (simulation_atom_var * energy);
+            unit->ftl_energy.Deplete(true, simulation_atom_var * energy);
         } else {
-            energetic->energy -= (simulation_atom_var * energy);
+            unit->energy.Deplete(true, simulation_atom_var * energy);
         }
     }
 

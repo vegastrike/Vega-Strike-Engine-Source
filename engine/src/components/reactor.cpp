@@ -73,6 +73,7 @@ bool Reactor::Downgrade() {
         return false;
     }
     
+    Component::Downgrade();
     capacity.SetMaxValue(0.0);
     atom_capacity = 0.0;
     SetConsumption(0.0);
@@ -80,19 +81,18 @@ bool Reactor::Downgrade() {
     return true;
 }
 
-bool Reactor::CanUpgrade(const std::string upgrade_name) const {
+bool Reactor::CanUpgrade(const std::string upgrade_key) const {
     return !Damaged();
 }
 
-bool Reactor::Upgrade(const std::string upgrade_name) {
+bool Reactor::Upgrade(const std::string upgrade_key) {
     if(!CanUpgrade(upgrade_key)) {
         return false;
     }
 
-    this->upgrade_key = upgrade_key;
-    this->upgrade_name = upgrade_name;
+    Component::Upgrade(upgrade_key);
 
-    capacity = UnitCSVFactory::GetVariable(upgrade_name, REACTOR_RECHARGE, 0.0f);
+    capacity.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, 0.0));
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
 
@@ -102,6 +102,11 @@ bool Reactor::Upgrade(const std::string upgrade_name) {
 void Reactor::Damage() {
     capacity.RandomDamage();
     atom_capacity = capacity.Value() * simulation_atom_var;
+}
+
+void Reactor::DamageByPercent(double percent) {
+    capacity.DamageByPercent(percent); 
+    atom_capacity = capacity.Value() * simulation_atom_var;   
 }
 
 void Reactor::Repair() {

@@ -1019,7 +1019,7 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
         //we have a drive
         if ((!SPEC_interference && (smalle->GetJumpStatus().drive >= 0
                 &&          //we have power
-                        (smalle->warpenergy >= smalle->GetJumpStatus().energy
+                        (smalle->ftl_energy.Level() >= smalle->GetJumpStatus().energy
                                 //or we're being cheap
                                 || (ai_jump_cheat && cp == nullptr)
                         )))
@@ -1046,9 +1046,9 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
             return false;
         }
         if ((!SPEC_interference && (GetJumpStatus().drive >= 0
-                && (warpenergy >= GetJumpStatus().energy || (ai_jump_cheat && cp == NULL))
+                && (ftl_energy.Level() >= GetJumpStatus().energy || (ai_jump_cheat && cp == NULL))
         )) || smalle->forcejump) {
-            warpenergy -= GetJumpStatus().energy;
+            ftl_energy.Deplete(false, GetJumpStatus().energy);
             DeactivateJumpDrive();
             Unit *jumppoint = smalle;
 
@@ -1131,6 +1131,7 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 
 //NUMGAUGES has been moved to pImages.h in UnitImages<void>
 void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
+    // TODO: take actual damage into account when damaging components.
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
     randnum = rand01();
     const float inv_min_dam = 1.0F - configuration()->physics_config.min_damage;
@@ -1274,11 +1275,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         static float cargo_damage_prob = upgradevolume_damage_prob
                 - XMLSupport::parse_float(vs_config->getVariable("physics", "cargo_damage_prob", "1"));
         if (randnum >= fuel_damage_prob) {
-            fuel *= dam;
+            fuel.Damage();
         } else if (randnum >= warpenergy_damage_prob) {
-            warpenergy *= dam;
+            ftl_energy.Damage();
         } else if (randnum >= ab_damage_prob) {
-            this->afterburnenergy += ((1 - dam) * recharge);
+            this->afterburnenergy += ((1 - dam) * reactor.Capacity());
         } else if (randnum >= cargovolume_damage_prob) {
             CargoVolume *= dam;
         } else if (randnum >= upgradevolume_damage_prob) {
@@ -1329,12 +1330,14 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         } else if (randnum >= .7) {
             // TODO: lib_damage shield.recharge *= dam;
         } else if (randnum >= .5) {
-            static float mindam =
+            /*static float mindam =
                     XMLSupport::parse_float(vs_config->getVariable("physics", "min_recharge_shot_damage", "0.5"));
             if (dam < mindam) {
                 dam = mindam;
             }
-            this->recharge *= dam;
+            this->recharge *= dam;*/
+            // TODO: do the above
+            reactor.Damage();
         } else if (randnum >= .2) {
             static float mindam =
                     XMLSupport::parse_float(vs_config->getVariable("physics", "min_maxenergy_shot_damage", "0.2"));
@@ -2856,6 +2859,15 @@ bool Unit::UpAndDownGrade(const Unit *up,
         const Unit *downgradelimit,
         bool force_change_on_nothing,
         bool gen_downgrade_list) {
+    // New Code
+    UpgradeOperationResult result = UpgradeUnit(up->name, !downgrade, touchme);
+    if(result.upgradeable) {
+        percentage = result.percent;
+        return result.success;
+    }
+
+
+    // Old Code
     percentage = 0;
 
     static bool
@@ -2996,9 +3008,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction,
                     "Warp_Capacitor|Warp_Usage_Cost")) {
-        if (!csv_cell_null_check || force_change_on_nothing
+        /*if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Capacitor"))
-            STDUPGRADE(maxwarpenergy, up->maxwarpenergy, templ->maxwarpenergy, 0);
+            STDUPGRADE(maxwarpenergy, up->maxwarpenergy, templ->maxwarpenergy, 0);*/
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Usage_Cost"))
             STDUPGRADE(jump.insysenergy, up->jump.insysenergy, templ->jump.insysenergy, 0);
@@ -3061,9 +3073,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
         hull->facets[0].max_health = hull->facets[0].health;
     }
 
-    if (!csv_cell_null_check || force_change_on_nothing
+    /*if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
-        STDUPGRADE(recharge, up->recharge, templ->recharge, 0);
+        STDUPGRADE(recharge, up->recharge, templ->recharge, 0);*/
     static bool unittable = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
     //Uncommon fields (capacities... rates... etc...)
     if (!csv_cell_null_check || force_change_on_nothing
@@ -3091,12 +3103,12 @@ bool Unit::UpAndDownGrade(const Unit *up,
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "ECM_Rating"))
             STDUPGRADE(ecm, up->ecm, templ->ecm, 0); //ecm is unsigned --chuck_starchaser
-        if (!csv_cell_null_check || force_change_on_nothing
+        /*if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Primary_Capacitor")) {
             temporary_upgrade_float_variable = static_cast<float>(energy.MaxValue());
             STDUPGRADE(temporary_upgrade_float_variable, up->energy.MaxValue(), templ->energy.MaxValue(), 0);
             energy.SetMaxValue(temporary_upgrade_float_variable);
-        }
+        }*/
     }
     //Maneuvering stuff
     if (!csv_cell_null_check || force_change_on_nothing
@@ -3127,9 +3139,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Afterburner_Accel"))
             STDUPGRADE(limits.afterburn, tlimits_afterburn, templ->limits.afterburn, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
+        /*if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Fuel_Capacity"))
-            STDUPGRADE(fuel, up->fuel, templ->fuel, 0);
+            STDUPGRADE(fuel, up->fuel, templ->fuel, 0);*/
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Default_Speed_Governor"))
             STDUPGRADE(computer.max_combat_speed, tmax_speed, templ->computer.max_combat_speed, 0);
@@ -3607,12 +3619,6 @@ int Unit::RepairUpgrade() {
                         if (shield.recharge > maxrecharge->shield.recharge)
                             shield.recharge = maxrecharge->shield.recharge;
                 }*/
-                if (up->energy.MaxValue() == energy.MaxValue() && up->recharge > recharge) {
-                    recharge = up->recharge;
-                    if (recharge > maxrecharge->recharge) {
-                        recharge = maxrecharge->recharge;
-                    }
-                }
             }
         }
     }
@@ -4336,10 +4342,6 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         Unit *superunit) {
     ActTurn();
 
-    if (fuel < 0) {
-        fuel = 0;
-    }
-
     static CloakingStatus previous_status = cloak.status;
     cloak.Update(this);
 
@@ -4567,7 +4569,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     trackingcone,
                     hint)) {
                 const WeaponInfo *typ = mounts[i].type;
-                energy += typ->energy_rate * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1);
+                energy.Charge(static_cast<double>(typ->energy_rate) * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1));
             }
         } else if (mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2 * mounts[i].type->Refire()) {
             mounts[i].processed = Mount::UNFIRED;
