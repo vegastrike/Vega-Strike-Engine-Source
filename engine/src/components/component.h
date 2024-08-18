@@ -59,8 +59,8 @@ protected:
 
     bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
-    Component(double mass, 
-              double volume, bool integral);
+    Component(double mass = 0, 
+              double volume = 0, bool integral = false);
 
     // Load from units dictionary
     virtual void Load(std::string upgrade_key, std::string unit_key);      

@@ -3384,19 +3384,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
                 }
             }
         }
-        if ((!cloak.Capable() && up->cloak.Capable()) || force_change_on_nothing) {
-            if (touchme) {
-                cloak.Enable();
-
-                cloak.minimum = up->cloak.minimum;
-                cloak.rate = up->cloak.rate;
-                cloak.glass = up->cloak.glass;
-                cloak.energy = up->cloak.energy;
-            }
-            ++numave;
-        } else if (cloak.Capable() && up->cloak.Capable()) {
-            cancompletefully = false;
-        }
+        
         //NOTE: Afterburner type 2 (jmp)
         //NOTE: Afterburner type 1 (gas)
         //NOTE: Afterburner type 0 (pwr)
@@ -4861,4 +4849,19 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
         VS_LOG(warning, "Already jumped\n");
     }
     return ret;
+}
+
+// TODO: move this to energy or just simplify
+// Why single out shields from other constant drains?
+float Unit::energyData() const {
+    float capacitance = totalShieldEnergyCapacitance();
+
+    if (configuration()->physics_config.max_shield_lowers_capacitance) {
+        if (energy.MaxLevel() <= capacitance) {
+            return 0;
+        }
+        return (energy.Level()) / (energy.MaxLevel() - capacitance);
+    } else {
+        return energy.Percent();
+    }
 }

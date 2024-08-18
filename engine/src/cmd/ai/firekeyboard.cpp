@@ -2178,7 +2178,7 @@ void FireKeyboard::Execute() {
         }              //use specialized ejectdock in the future
     }
     static bool actually_arrest = XMLSupport::parse_bool(vs_config->getVariable("AI", "arrest_energy_zero", "false"));
-    if (actually_arrest && parent->energyRechargeData() == 0) {
+    if (actually_arrest && parent->reactor.Capacity() == 0) {
         Arrested(parent);
     }
 }

@@ -36,10 +36,6 @@ public:
     void decreaseWarpEnergy(bool insys, double time);
     void DecreaseWarpEnergyInWarp();
 
-    float energyData() const;
-    float energyRechargeData() const;
-
-    float fuelData() const;
 
     static float getFuelUsage(bool afterburner);
     void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
@@ -65,7 +61,7 @@ public:
     void setAfterburnerEnergy(float aft);
     void setEnergyRecharge(float enrech);
 
-    float totalShieldEnergyCapacitance();
+    float totalShieldEnergyCapacitance() const;
 
     static float VSDPercent();
 
