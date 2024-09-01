@@ -932,7 +932,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     computer.radar.trackingcone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI / 180);
     computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI / 180);
 
-    cloak = Cloak(unit_key);
+    const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
+    cloak = Cloak(unit_key, (warp_energy_for_cloak ? &ftl_energy : &energy));
 
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
@@ -1375,7 +1376,7 @@ string Unit::WriteUnitString() {
     unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
     unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
 
-    cloak.Save(unit);
+    cloak.SaveToCSV(unit);
     unit["Repair_Droid"] = tos(repair_droid);
     unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
     unit["Hud_Functionality"] = WriteHudDamage(this);

@@ -179,7 +179,7 @@ void Movable::UpdatePhysics(const Transformation &trans,
 }
 
 void Movable::AddVelocity(float difficulty) {
-    Unit *unit = static_cast<Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
     bool playa = isPlayerShip();
@@ -474,8 +474,8 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 void Movable::FireEngines(const Vector &Direction /*unit vector... might default to "r"*/,
         float FuelSpeed,
         float FMass) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
-    FMass = energetic->ExpendFuel(FMass);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    FMass = unit->ExpendFuel(FMass);
     NetForce += Direction * ((double)FuelSpeed * (double)FMass / GetElapsedTime());
 }
 
@@ -533,12 +533,12 @@ Vector Movable::MaxTorque(const Vector &torque) {
 }
 
 Vector Movable::ClampTorque(const Vector &amt1) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Vector Res = amt1;
 
-    energetic->WCWarpIsFuelHack(true);
+    unit->WCWarpIsFuelHack(true);
 
-    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
     if (fabs(amt1.i) > fuelclamp * limits.pitch) {
         Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
     }
@@ -550,18 +550,18 @@ Vector Movable::ClampTorque(const Vector &amt1) {
     }
     //1/5,000,000 m/s
 
-    energetic->ExpendMomentaryFuelUsage(Res.Magnitude());
-    energetic->WCWarpIsFuelHack(false);
+    unit->ExpendMomentaryFuelUsage(Res.Magnitude());
+    unit->WCWarpIsFuelHack(false);
     return Res;
 }
 
 
 Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
-    Unit *unit = static_cast<Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
-    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (energetic->fuelData() <= 0 || (unit->energy.Level() < unit->afterburnenergy * static_cast<double>(simulation_atom_var))) ? configuration()->fuel.no_fuel_afterburn : 1;
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (unit->fuel.Level() <= 0 || (unit->energy.Level() < unit->afterburnenergy * static_cast<double>(simulation_atom_var))) ? configuration()->fuel.no_fuel_afterburn : 1;
+
     float limit =
             afterburn ? (abfuelclamp
                     * (unit->computer.max_ab_speed()
@@ -576,7 +576,7 @@ Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
 
 
 Vector Movable::ClampAngVel(const Vector &velocity) {
-    Unit *unit = static_cast<Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     Vector res(velocity);
     if (res.i >= 0) {
@@ -769,7 +769,7 @@ void Movable::RollTorque(float amt) {
 }
 
 void Movable::Thrust(const Vector &amt1, bool afterburn) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (unit->afterburntype == 0) {
         afterburn = afterburn && unit->energy.Level() > unit->afterburnenergy * static_cast<double>(simulation_atom_var);

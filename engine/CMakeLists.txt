@@ -722,6 +722,8 @@ SET(LIBCOMPONENT
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
     src/components/reactor.cpp
+
+    src/components/cloak.cpp
     )
 
 SET(LIBGUI_SOURCES
@@ -900,7 +902,6 @@ SET(LIBCMD_SOURCES
 
     src/cmd/intelligent.cpp
     src/cmd/energetic.cpp
-    src/cmd/cloak.cpp
 
     src/cmd/planetary_orbit.cpp
 

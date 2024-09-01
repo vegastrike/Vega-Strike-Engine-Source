@@ -87,29 +87,7 @@ void Energetic::DecreaseWarpEnergyInWarp() {
     }
 }
 
-float Energetic::energyData() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    float capacitance = const_cast<Energetic *>(this)->totalShieldEnergyCapacitance();
 
-    if (configuration()->physics_config.max_shield_lowers_capacitance) {
-        if (unit->energy.MaxLevel() <= capacitance) {
-            return 0;
-        }
-        return (unit->energy.Level()) / (unit->energy.MaxLevel() - capacitance);
-    } else {
-        return unit->energy.Percent();
-    }
-}
-
-float Energetic::energyRechargeData() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->reactor.Capacity();
-}
-
-float Energetic::fuelData() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->fuel.Level();
-}
 
 float Energetic::getFuelUsage(bool afterburner) {
     if (afterburner) {
@@ -236,7 +214,7 @@ float Energetic::warpEnergyData() const {
 }
 
 // Basically max or current shield x 0.2
-float Energetic::totalShieldEnergyCapacitance() {
+float Energetic::totalShieldEnergyCapacitance() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     DamageableLayer *shield = unit->shield;
 

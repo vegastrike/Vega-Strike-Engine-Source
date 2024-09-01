@@ -921,6 +921,10 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         return un->reactor.Damaged() ? 0.5 : 1.0;
     }
 
+    if(upgrade_category == "Cloak") {
+        return un->cloak.Damaged() ? 0.5 : 1.0;
+    }
+
 
     // Old Code
     if (category.find(DamagedCategory) == 0) {
