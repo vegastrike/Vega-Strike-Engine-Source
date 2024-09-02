@@ -30,6 +30,8 @@
 
 #include "energetic.h"
 #include "damageable_layer.h"
+#include "energy_container.h"
+#include "energy_consumer.h"
 
 // TODO: remove dependency on unit
 class Unit;
@@ -43,14 +45,11 @@ enum class CloakingStatus {
     decloaking
 };
 
-class Cloak
+class Cloak : public Component, public EnergyConsumer
 {
     friend class Unit;
 
     CloakingStatus status;
-
-    // How much energy cloaking takes per frame
-    double energy;
 
     // How fast does this starship cloak/decloak
     double rate;
@@ -67,8 +66,25 @@ class Cloak
 
 public:
     Cloak();
-    Cloak(std::string unit_key);
-    void Save(std::map<std::string, std::string>& unit);
+    Cloak(std::string unit_key, EnergyContainer* capacitor);
+
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+    virtual std::string Describe() const;
+
+    virtual bool CanDowngrade() const;
+
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_key) const;
+
+    virtual bool Upgrade(const std::string upgrade_key);
+
+    virtual void Damage();
+    virtual void DamageByPercent(double percent);
+    virtual void Repair();
+
+    virtual bool Damaged() const;
+    virtual bool Installed() const;
 
     void Update(Unit *unit);
     void Toggle(); // Toggle cloak on/off
@@ -92,10 +108,6 @@ public:
                 status == CloakingStatus::decloaking);
     }
 
-    bool Damaged() {
-        return (status == CloakingStatus::damaged);
-    }
-
     bool Ready() {
         return (status == CloakingStatus::ready);
     }
@@ -104,9 +116,7 @@ public:
         return glass;
     }
 
-    double Energy() {
-        return energy;
-    }
+    
 
     // Is the ship visible
     bool Visible() {
@@ -122,20 +132,6 @@ public:
         return 1-current;
     }
 
-    // TODO: more granular damage
-    // TODO: damageable component
-    void Damage() {
-        status = CloakingStatus::damaged;
-        current = 0;
-    }
-
-    void Repair() {
-        if(status == CloakingStatus::damaged) {
-            status = CloakingStatus::ready;
-            current = 0;
-        }
-    }
-
     void Disable() {
         status = CloakingStatus::disabled;
         current = 0;
@@ -148,6 +144,10 @@ public:
 
     void Activate();
     void Deactivate();
+
+private:
+    void _Downgrade();
+    void _Upgrade(const std::string upgrade_key);
 };
 
 #endif // CLOAK_H

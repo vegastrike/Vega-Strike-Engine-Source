@@ -113,6 +113,10 @@ UpgradeType GetUpgradeType(const std::string upgrade_key) {
         return UpgradeType::Capacitor;
     }
 
+    if(upgrade_type_string == "Cloak") {
+        return UpgradeType::Cloak;
+    }
+
     if(upgrade_type_string == "Jump_Drive") {
         return UpgradeType::Jump_Drive;
     }
@@ -154,7 +158,10 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             result.upgradeable = true;
             result.success = unit->reactor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
-
+        case UpgradeType::Cloak:
+            result.upgradeable = true;
+            result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
         /*case UpgradeType::Afterburner:
             result.upgradeable = true;
             result.success = unit->afterburner.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
@@ -169,10 +176,7 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
 
-        case UpgradeType::Cloak:
-            result.upgradeable = true;
-            result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
-            break;
+        
         /*case UpgradeType::ECM:
             result.upgradeable = true;
             result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    

@@ -76,7 +76,7 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
-#include "cloak.h"
+
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
@@ -84,6 +84,7 @@ void UncheckUnit( class Unit*un );
 #include "cargo_color.h"
 
 // Components
+#include "components/cloak.h"
 #include "components/energy_container.h"
 #include "components/reactor.h"
 
@@ -997,6 +998,10 @@ public:
     // object_a->field_a = object_b->field_b;
     float temporary_upgrade_float_variable;
 
+
+    // Python Interfaces
+    float fuelData() const { return fuel.Level(); }
+    float energyData() const;
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);

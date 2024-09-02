@@ -5184,7 +5184,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         if (shields_require_power) {
             maxshield = 0;
         }
-        PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
+        PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
         PRETTY_ADDU(statcolor + "Weapon capacitor bank storage: #-c",
                 ((playerUnit->maxEnergyData() - maxshield) * RSconverter), 0, "MJ");
         //note: I found no function to get max warp energy, but since we're docked they are the same
@@ -5223,9 +5223,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     } else {
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Installs reactor with recharge rate: #-c",
-                            playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
+                            playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
                     PRETTY_ADDU(statcolor + "Installs main capacitor bank with storage capacity: #-c",
                             (playerUnit->maxEnergyData() * RSconverter), 0, "MJ");
@@ -5238,9 +5238,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 }
                 break;
             case 1:                 //Additive
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Increases recharge rate by #-c",
-                            playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
+                            playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
                     PRETTY_ADDU(statcolor + "Adds #-c",
                             (playerUnit->maxEnergyData() * RSconverter),
@@ -5253,9 +5253,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                             "MJ of storage to warp capacitor bank");
                 break;
             case 2:                 //multiplicative
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
                     PRETTY_ADDU(statcolor + "Increases reactor recharge rate by #-c",
-                            100.0 * (playerUnit->energyRechargeData() - 1), 0, "%");
+                            100.0 * (playerUnit->reactor.Capacity() - 1), 0, "%");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
                     PRETTY_ADDU(statcolor + "Increases main capacitor bank storage by #-c",
                             100.0 * (playerUnit->maxEnergyData() - 1), 0, "%");
@@ -5432,14 +5432,14 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     if (playerUnit->cloak.Capable()) {
         if (!mode) {
             PRETTY_ADDU(statcolor + "Cloaking device available, energy usage: #-c",
-                    playerUnit->cloak.Energy() * RSconverter * Wconv,
+                    playerUnit->cloak.GetConsumption() * RSconverter * Wconv,
                     0,
                     "MJ/s");
         } else {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "Installs a cloaking device.#n#  Activated energy usage: #-c",
-                            playerUnit->cloak.Energy() * RSconverter * Wconv,
+                            playerUnit->cloak.GetConsumption() * RSconverter * Wconv,
                             0,
                             "MJ/s");
                     break;
@@ -5616,7 +5616,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         float overhead = (shields_require_power) ?
                 (regeneration / shieldenergycap * shield_maintenance_cost
                         * num_shields * VSDM) : 0;
-        float nrt = avail / (playerUnit->energyRechargeData() * RSconverter); // TODO -overhead);
+        float nrt = avail / (playerUnit->reactor.Capacity() * RSconverter); // TODO -overhead);
         PRETTY_ADDU(statcolor + "Reactor nominal replenish time: #-c", nrt, 2, "seconds");
         //shield related stuff
         //code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
@@ -5634,7 +5634,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
 
         if (num_shields) {
-            if (regeneration * num_shields * VSDM / shieldenergycap > playerUnit->energyRechargeData()
+            if (regeneration * num_shields * VSDM / shieldenergycap > playerUnit->reactor.Capacity()
                     * RSconverter) {
                 text += "#n##c1:1:.1#" + prefix
                         + "WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
@@ -5643,7 +5643,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             if (shields_require_power) {
                 text += "#n#" + prefix + statcolor + "Reactor recharge slowdown caused by shield maintenance: #-c";
                 float maint_draw_percent = regeneration * VSDM * 100.0 / shieldenergycap * shield_maintenance_cost
-                        * num_shields / (playerUnit->energyRechargeData() * RSconverter);
+                        * num_shields / (playerUnit->reactor.Capacity() * RSconverter);
                 text += (boost::format("%1$.2f") % maint_draw_percent).str();
                 text += " %.";
                 if (maint_draw_percent > 60) {
@@ -5662,14 +5662,14 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         float maint_draw =
                 (shields_require_power && num_shields) ? (regeneration * VSDM / shieldenergycap
                         * shield_maintenance_cost * num_shields) : 0;
-        if (totalWeaponEnergyUsage < (playerUnit->energyRechargeData() * RSconverter - maint_draw)) {
+        if (totalWeaponEnergyUsage < (playerUnit->reactor.Capacity() * RSconverter - maint_draw)) {
             //waouh, impressive...
             text += "#n##c0:1:.2#" + prefix + "Your reactor produces more energy than your weapons can use!#-c";
         } else {
             PRETTY_ADDU(statcolor + "Reactor energy depletion time if weapons in continuous use: #-c",
                     (playerUnit->maxEnergyData()
                             * RSconverter) / (totalWeaponEnergyUsage
-                            - ((playerUnit->energyRechargeData() * RSconverter - maint_draw))),
+                            - ((playerUnit->reactor.Capacity() * RSconverter - maint_draw))),
                     2,
                     "seconds");
         }
