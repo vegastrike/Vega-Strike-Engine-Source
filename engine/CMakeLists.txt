@@ -1722,6 +1722,7 @@ IF (USE_GTEST)
         src/exit_unit_tests.cpp
         src/components/tests/energy_container_tests.cpp
         src/components/tests/balancing_tests.cpp
+        src/components/tests/python_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
@@ -1743,6 +1744,8 @@ IF (USE_GTEST)
 
     TARGET_LINK_LIBRARIES(
         ${TEST_NAME}
+        ${Boost_LIBRARIES}
+        ${Python3_LIBRARIES}
         gtest_main
         vegastrike-testing
         Boost::log
@@ -1764,6 +1767,11 @@ IF (USE_GTEST)
     FILE(
         COPY "src/cmd/tests/units.json"
         DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    )
+
+    FILE(
+        COPY "src/components/tests/python_tests.py"
+        DESTINATION ${CMAKE_BINARY_DIR}
     )
 
     INCLUDE(GoogleTest)
