@@ -36,6 +36,9 @@ namespace vega_config {
 struct GeneralConfig {
     GeneralConfig() = default;
 
+    int screen{0};  // TODO: move to a dedicated section along with other such paramters.
+                    // e.g. screen width and height, resolution, color, etc.
+
     float pitch{0.0F};
     float yaw{0.0F};
     float roll{0.0F};

@@ -42,6 +42,8 @@ Configuration::Configuration() {
 * behavior/range bounding is complicated/necessary-for-stability abd additional validation code is required for checking/adjusting user inputs
 */
 void Configuration::OverrideDefaultsWithUserConfiguration() {
+    general_config.screen = GetGameConfig().GetInt16("general.screen", general_config.screen);
+
     general_config.pitch = GetGameConfig().GetFloat("general.pitch", general_config.pitch);
     general_config.yaw = GetGameConfig().GetFloat("general.yaw", general_config.yaw);
     general_config.roll = GetGameConfig().GetFloat("general.roll", general_config.roll);
