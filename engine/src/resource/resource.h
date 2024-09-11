@@ -102,7 +102,7 @@ public:
 
     // Damage & Repair
     void Destroy(); // value_ = adjusted_max_value_ = min_value_;
-    bool Destroyed();
+    bool Destroyed() const;
     void RandomDamage();
     void DamageByValue(const T &value);
     void DamageByPercent(const T &value);

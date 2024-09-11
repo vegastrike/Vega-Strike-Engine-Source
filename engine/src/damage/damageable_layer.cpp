@@ -276,30 +276,6 @@ float DamageableLayer::AverageMaxLayerValue() {
 
 float CalculatePercentage(float numerator, float denominator) {
     return numerator / denominator;
-
-    // All these checks potentially slow down the game
-    // and cause the graphics to flicker
-    /*if(denominator < numerator) {
-        return 0.0; // This should really be an error
-    }
-
-    if(denominator <= 0.0f || numerator <0.0f) {
-        return 0.0;
-    }
-
-    float percent = numerator / denominator;
-
-    if(percent > 1.0f) {
-        return 1.0;
-    }
-
-    if(percent <0.01) {
-        return 0.0f;
-    }
-
-    // Possibly nicer alternative
-    //return roundf(percent * 100) / 100.0;
-    return percent;*/
 }
 
 float DamageableLayer::GetMaxHealth() {
@@ -373,6 +349,12 @@ float DamageableLayer::GetPercent(FacetName facet_name) {
 
     percent = CalculatePercentage(aggregate_health, aggregate_max_health);
     return percent;
+}
+
+void DamageableLayer::FullyCharge() {
+    for (Health &facet : facets) {
+        facet.SetHealth(facet.adjusted_health);
+    }
 }
 
 void DamageableLayer::Regenerate(float recharge_rate) {

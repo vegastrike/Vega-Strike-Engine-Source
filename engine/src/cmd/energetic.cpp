@@ -42,30 +42,10 @@
 Energetic::Energetic() : 
         constrained_charge_to_shields(0.0f),
         sufficient_energy_to_recharge_shields(true),
-        //fuel(0),
         afterburnenergy(0),
         afterburntype(0) {
-    jump.warpDriveRating = 0;
-    jump.energy = 100;
-    jump.insysenergy = configuration()->warp_config.insystem_jump_cost * jump.energy;
-    jump.drive = -2;
-    jump.delay = 5;
-    jump.damage = 0;
 }
 
-void Energetic::decreaseWarpEnergy(bool insys, double time) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    if (configuration()->fuel.fuel_equals_warp) {
-        unit->ftl_energy.SetLevel(unit->fuel.Level());
-    }
-    
-    unit->ftl_energy.Deplete(true, (insys ? jump.insysenergy / configuration()->warp_config.bleed_factor : jump.energy) * time);
-    
-    if (configuration()->fuel.fuel_equals_warp) {
-        unit->fuel.SetLevel(unit->ftl_energy.Level());
-    }
-}
 
 void Energetic::DecreaseWarpEnergyInWarp() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
@@ -76,11 +56,8 @@ void Energetic::DecreaseWarpEnergyInWarp() {
         return;
     }
 
-    //FIXME FIXME FIXME
-    // Roy Falk - fix what?
-    float bleed = jump.insysenergy / configuration()->warp_config.bleed_factor * simulation_atom_var;
-    if (unit->ftl_energy.Level() > bleed) {
-        unit->ftl_energy.Deplete(true, bleed);
+    if(unit->ftl_drive.CanConsume()) {
+        unit->ftl_drive.Consume();
     } else {
         unit->graphicOptions.InWarp = 0;
         unit->graphicOptions.WarpRamping = 1;
@@ -139,18 +116,6 @@ float Energetic::getWarpEnergy() const {
     return unit->ftl_energy.Level();
 }
 
-void Energetic::increaseWarpEnergy(bool insys, double time) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    if (configuration()->fuel.fuel_equals_warp) {
-        unit->ftl_energy.SetLevel(unit->fuel.Level());
-    }
-
-    unit->ftl_energy.Charge((insys ? jump.insysenergy : jump.energy) * time);
-    
-    if (configuration()->fuel.fuel_equals_warp) {
-        unit->fuel.SetLevel(unit->ftl_energy.Level());
-    }
-}
 
 float Energetic::maxEnergyData() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
@@ -162,28 +127,6 @@ void Energetic::rechargeEnergy() {
     if ((!configuration()->fuel.reactor_uses_fuel) || (!unit->fuel.Depleted())) {
         unit->energy.Charge(unit->reactor.Capacity() * simulation_atom_var);
     }
-}
-
-bool Energetic::refillWarpEnergy() {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    if (configuration()->fuel.fuel_equals_warp) {
-        unit->ftl_energy.SetLevel(unit->fuel.Level());
-    }
-
-    // TODO: move this elsewhere. It should be evaluated every time.
-    if (unit->ftl_energy.MaxLevel() < this->jump.energy) {
-        unit->ftl_energy.SetCapacity(this->jump.energy, false);
-    } 
-
-    if(unit->ftl_energy.Level() < unit->ftl_energy.MaxLevel()) {
-        unit->ftl_energy.Refill();
-        if (configuration()->fuel.fuel_equals_warp) {
-            unit->fuel.SetLevel(unit->ftl_energy.Level());
-        }
-        return true;
-    }
-    
-    return false;
 }
 
 void Energetic::setAfterburnerEnergy(float aft) {
@@ -199,18 +142,6 @@ void Energetic::setEnergyRecharge(float enrech) {
 float Energetic::warpCapData() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->ftl_energy.MaxLevel();
-}
-
-float Energetic::warpEnergyData() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    if (unit->ftl_energy.MaxLevel() > 0) {
-        return unit->ftl_energy.Percent();
-    }
-
-    if (jump.energy > 0) {
-        return ((float) unit->ftl_energy.Level()) / ((float) jump.energy);
-    }
-    return 0.0f;
 }
 
 // Basically max or current shield x 0.2

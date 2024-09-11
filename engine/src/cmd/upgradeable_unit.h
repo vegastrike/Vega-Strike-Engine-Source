@@ -2,7 +2,7 @@
 /*
  * upgradeable_unit.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
+ * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -55,6 +55,7 @@ enum class UpgradeType {
     Afterburner,
     Drive,
     Jump_Drive,
+    FTL_Drive,
 
     Cloak,
     ECM,

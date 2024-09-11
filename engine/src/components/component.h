@@ -31,6 +31,8 @@
 #include <string>
 #include <map>
 
+#include "resource/resource.h"
+
 /**
  * LibComponent is currently tightly coupled to LibDamage and
  * other various libraries in VegaStrike engine.
@@ -57,10 +59,15 @@ protected:
     double mass = 0;
     double volume = 0;
 
+    Resource<double> operational; // Percent operational
+
+    bool installed = false;
     bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
     Component(double mass = 0, 
-              double volume = 0, bool integral = false);
+              double volume = 0, 
+              bool installed = false, 
+              bool integral = false);
 
     // Load from units dictionary
     virtual void Load(std::string upgrade_key, std::string unit_key);      
@@ -81,12 +88,15 @@ public:
 
     virtual bool Upgrade(const std::string upgrade_key);
 
-    virtual void Damage() = 0;
-    virtual void DamageByPercent(double percent) = 0;
-    virtual void Repair() = 0;
+    virtual void Damage();
+    virtual void DamageByPercent(double percent);
+    virtual void Repair();
 
-    virtual bool Damaged() const = 0;
-    virtual bool Installed() const = 0;
+    virtual bool Damaged() const;
+    bool Destroyed() const;
+    double Percent() const;
+    bool Installed() const;
+    bool Operational() const;
 
     void SetIntegral(bool integral);
 };
