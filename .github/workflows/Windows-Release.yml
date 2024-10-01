@@ -122,16 +122,9 @@ jobs:
           name: test_results_xml
           path: ${{github.workspace}}/build/test-results/**/*.xml
 
-      #- name: Upload artifacts
-      #  uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
-      #  with:
-      #    path: "${{ github.workspace }}/build/**/*.zip"
-
-      # TODO: Find/write a tool to upload release for Windows
-      # - name: Upload artifacts
-      #  uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #    ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
-      #  with:
-      #    path: "${{ github.workspace }}/**/*.zip"
+      - name: Upload the artifacts
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "packages/*.${{ matrix.ARTIFACT_EXT }}"
