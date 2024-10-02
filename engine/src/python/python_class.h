@@ -77,7 +77,7 @@
 These following #defines will create a module for python
 call them with:
 
-PYTHON_BEGIN_MODULE(VS)
+BOOST_PYTHON_MODULE(VS) {
        PYTHON_BEGIN_INHERIT_CLASS(VS,FireAt,"PythonFire") //begins an inherited class with a virtual Execute function...
        //You can call any other virtual functions by defining:
        //      void callFunction(std::string name){}
@@ -97,7 +97,7 @@ PYTHON_BEGIN_MODULE(VS)
        Class.def(&MyOtherClass::MyOtherFunc,"FunctionName");
        PYTHON_END_CLASS(VS,MyOtherClass)
        VS.def(&MyGlobalFunction,"GlobalFunc") //the global functions are easiest; you can call these in python with VS.globalfunc
-PYTHON_END_MODULE(VS)
+}
 ...
 int main (int argc,char *argv[]) {
        ...
@@ -147,7 +147,6 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 
 //These two functions purposely have opening/closing braces that don't match up
 
-#define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE(name) {
 #define PYTHON_DEFINE_GLOBAL(modul, fun, funname) boost::python::def (funname,fun)
 #define VS_BOOST_MAKE_TUPLE(a, b, c) boost::python::make_tuple(a,b,c)
 #define VS_BOOST_MAKE_TUPLE_2(a, b) boost::python::make_tuple(a,b)
@@ -159,7 +158,6 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define PYTHON_MODULE_INIT_FUNCTION(name) PyInit_##name
 #endif // (PY_VERSION_HEX < 0x03000000)
 
-#define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) PYTHON_MODULE_INIT_FUNCTION(name)()
 
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name, NewClass, SuperClass, myclass) { \

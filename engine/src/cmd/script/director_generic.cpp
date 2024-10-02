@@ -329,7 +329,7 @@ static bool isUtf8SaveGamePy(string savegame) {
     return isUtf8SaveGame(savegame);
 }
 
-PYTHON_BEGIN_MODULE(Director)
+BOOST_PYTHON_MODULE(Director) {
     PYTHON_BEGIN_INHERIT_CLASS(Director, pythonMission, PythonMissionBaseClass, "Mission")
         PYTHON_DEFINE_METHOD_DEFAULT(Class, &PythonMissionBaseClass::Pickle, "Pickle", pythonMission::default_Pickle);
         PYTHON_DEFINE_METHOD_DEFAULT(Class,
@@ -341,22 +341,22 @@ PYTHON_BEGIN_MODULE(Director)
                 "Execute",
                 pythonMission::default_Execute);
     PYTHON_END_CLASS(Director, pythonMission)
-    PYTHON_DEFINE_GLOBAL(Director, &putSaveDataPy, "putSaveData");
-    PYTHON_DEFINE_GLOBAL(Director, &pushSaveDataPy, "pushSaveData");
-    PYTHON_DEFINE_GLOBAL(Director, &eraseSaveDataPy, "eraseSaveData");
-    PYTHON_DEFINE_GLOBAL(Director, &clearSaveDataPy, "clearSaveData");
-    PYTHON_DEFINE_GLOBAL(Director, &getSaveDataPy, "getSaveData");
-    PYTHON_DEFINE_GLOBAL(Director, &getSaveDataLengthPy, "getSaveDataLength");
-    PYTHON_DEFINE_GLOBAL(Director, &putSaveStringPy, "putSaveString");
-    PYTHON_DEFINE_GLOBAL(Director, &pushSaveStringPy, "pushSaveString");
-    PYTHON_DEFINE_GLOBAL(Director, &getSaveStringPy, "getSaveString");
-    PYTHON_DEFINE_GLOBAL(Director, &getSaveStringLengthPy, "getSaveStringLength");
-    PYTHON_DEFINE_GLOBAL(Director, &eraseSaveStringPy, "eraseSaveString");
-    PYTHON_DEFINE_GLOBAL(Director, &clearSaveStringPy, "clearSaveString");
-    PYTHON_DEFINE_GLOBAL(Director, &loadStringListPy, "loadStringList");
-    PYTHON_DEFINE_GLOBAL(Director, &saveStringListPy, "saveStringList");
-    PYTHON_DEFINE_GLOBAL(Director, &isUtf8SaveGamePy, "isUtf8SaveGame");
-PYTHON_END_MODULE(Director)
+    boost::python::def("putSaveData", &putSaveDataPy);
+    boost::python::def("pushSaveData", &pushSaveDataPy);
+    boost::python::def("eraseSaveData", &eraseSaveDataPy);
+    boost::python::def("clearSaveData", &clearSaveDataPy);
+    boost::python::def("getSaveData", &getSaveDataPy);
+    boost::python::def("getSaveDataLength", &getSaveDataLengthPy);
+    boost::python::def("putSaveString", &putSaveStringPy);
+    boost::python::def("pushSaveString", &pushSaveStringPy);
+    boost::python::def("getSaveString", &getSaveStringPy);
+    boost::python::def("getSaveStringLength", &getSaveStringLengthPy);
+    boost::python::def("eraseSaveString", &eraseSaveStringPy);
+    boost::python::def("clearSaveString", &clearSaveStringPy);
+    boost::python::def("loadStringList", &loadStringListPy);
+    boost::python::def("saveStringList", &saveStringListPy);
+    boost::python::def("isUtf8SaveGame", &isUtf8SaveGamePy);
+}
 
 void InitDirector() {
     PyImport_AppendInittab("Director", PYTHON_MODULE_INIT_FUNCTION(Director));

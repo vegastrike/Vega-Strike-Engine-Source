@@ -23,6 +23,7 @@
 #define VEGA_STRIKE_ENGINE_VS_GLOBALS_H
 
 #include <vector>
+#include <stddef.h>
 
 #include "command.h"
 #include "vs_exit.h"
