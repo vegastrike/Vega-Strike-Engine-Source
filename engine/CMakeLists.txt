@@ -712,6 +712,7 @@ SET(LIBRESOURCE
     src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
+    src/resource/python_utils.cpp
     src/resource/random_utils.cpp
     src/cmd/json.cpp
     )
@@ -1719,10 +1720,10 @@ IF (USE_GTEST)
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp
         src/resource/tests/random_tests.cpp
+        src/resource/tests/python_tests.cpp
         src/exit_unit_tests.cpp
         src/components/tests/energy_container_tests.cpp
         src/components/tests/balancing_tests.cpp
-        src/components/tests/python_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing

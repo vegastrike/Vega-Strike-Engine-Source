@@ -30,6 +30,8 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 
+#include "python_utils.h"
+
 using namespace boost::python;
 
 // This code shows how to call a python file from c++
@@ -75,7 +77,11 @@ TEST(Python, Call_Function) {
     std::cout << "python_tests.py exists in current folder " << exists << std::endl;
 
     // Set path is called before 
-    wchar_t* path = L"/usr/lib/python38.zip:/usr/lib/python3.8:/usr/lib/python3.8/lib-dynload:.";
+    
+    //const wchar_t* path = L"/usr/lib/python38.zip:/usr/lib/python3.8:/usr/lib/python3.8/lib-dynload:.";
+    const std::string path_string = GetPythonPath();
+    const std::wstring path_wstring = std::wstring(path_string.begin(), path_string.end());
+    const wchar_t* path = path_wstring.c_str();
     Py_SetPath(path);
     
     Py_Initialize();
@@ -131,4 +137,7 @@ TEST(Python, Call_Function) {
     Py_Finalize();
 
     EXPECT_EQ(result, hello_world);
+
+    // Uncomment to see prints
+    //EXPECT_FALSE(true); 
 }
