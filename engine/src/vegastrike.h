@@ -63,7 +63,6 @@ extern float AUDIO_ATOM;
     #include <sys/time.h>
     #include <sys/stat.h>
     #include <unistd.h>
-//#include "command.h"
 #endif //defined (WIN32) || defined (__CYGWIN__)
 
 #ifndef NO_GFX

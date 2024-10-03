@@ -68,7 +68,7 @@ void setOwner(int obj, UnitWrapper un) {
 }
 PYTHON_INIT_INHERIT_GLOBALS(VS, FireAt);
 PYTHON_INIT_INHERIT_GLOBALS(VS, VegaStrike::EngineVersionData);
-PYTHON_BEGIN_MODULE(VS)
+BOOST_PYTHON_MODULE(VS) {
 
 //#undef EXPORT_UTIL
 //#undef voidEXPORT_UTIL
@@ -191,7 +191,7 @@ PYTHON_BEGIN_MODULE(VS)
         PYTHON_DEFINE_METHOD(Class, &VegaStrike::EngineVersionData::GetAssetAPIVersion, "GetAssetAPIVersion");
     PYTHON_END_CLASS(VS, VegaStrike::EngineVersionData)
 
-PYTHON_END_MODULE(VS)
+}
 
 void InitVS() {
     PyImport_AppendInittab("VS", PYTHON_MODULE_INIT_FUNCTION(VS));

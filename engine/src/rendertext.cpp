@@ -23,7 +23,7 @@
 
 //rendertext.cpp: based on Don's gl_text.cpp
 //Based on Aardarples rendertext
-#include "command.h"
+#include "rendertext.h"
 
 #include "vegastrike.h"
 #include "cg_global.h"
@@ -35,12 +35,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
-using std::vector;
-using std::string;
-using std::ostringstream;
-using std::cout;
-using std::endl;
 
 //****************
 //Console Rendering System by Rogue
@@ -101,8 +97,8 @@ void RText::draw_text(std::string &str, float left, float top, int gl_num) {
 void RText::renderconsole() //render buffer
 {
     int nd = 0;
-    vector<string> refs;
-    for (vector<cline>::iterator iter = conlines.begin(); iter < conlines.end(); iter++) {
+    std::vector<std::string> refs;
+    for (std::vector<cline>::iterator iter = conlines.begin(); iter < conlines.end(); iter++) {
         if (nd < ndraw) {
             refs.push_back((*(iter)).cref);
         } else {
@@ -112,10 +108,10 @@ void RText::renderconsole() //render buffer
     }
     float x = -1;
     float y = -0.5;
-    string workIt;
+    std::string workIt;
     workIt.append("\n");
     bool breakout = true;
-    vector<string>::iterator iter = refs.end();
+    std::vector<std::string>::iterator iter = refs.end();
     if (iter == refs.begin()) {
         breakout = false;
     }
@@ -128,8 +124,8 @@ void RText::renderconsole() //render buffer
         workIt.append("\n");
     }
     y = 1;
-    ostringstream drawCommand;
-    string shorter;
+    std::ostringstream drawCommand;
+    std::string shorter;
     shorter.append(getcurcommand());
     while (shorter.size() > 80) {
         shorter.erase(shorter.begin());
@@ -137,19 +133,19 @@ void RText::renderconsole() //render buffer
     //erase the front of the current command while it's larger than 80
     //charactors, as to not draw off the screen
     drawCommand << workIt << "#FF1100> " << "#FF1100" << shorter << "#00000";
-    string Acdraw;     //passing .str() straight to draw_text produces an
+    std::string Acdraw;     //passing .str() straight to draw_text produces an
     //error with gcc 4, because it's constant I believe
     Acdraw.append(drawCommand.str());
     draw_text(Acdraw, x, y, 2);
 }
 
 //append a line to the console, optional "highlight" method , untested {{{
-void RText::conline(string &sf, bool highlight)        //add a line to the console buffer
+void RText::conline(std::string &sf, bool highlight)        //add a line to the console buffer
 {
     {
         size_t search = 0;
         size_t lastsearch = 0;
-        for (; (search = sf.find("/r")) != string::npos;) {
+        for (; (search = sf.find("/r")) != std::string::npos;) {
             sf.replace(lastsearch, search - lastsearch, "");
             lastsearch = search;
         }
@@ -169,21 +165,21 @@ void RText::conline(string &sf, bool highlight)        //add a line to the conso
 
 //print a line to the console, broken at \n's {{{
 void RText::conoutf(char *in) {
-    string foobar(in);
+    std::string foobar(in);
     conoutf(foobar);
 }
 
-void RText::conoutf(string &s, int a, int b, int c) {
+void RText::conoutf(std::string &s, int a, int b, int c) {
 #ifdef HAVE_SDL
     //NOTE: first call must be single-threaded!
     SDL_mutex *mymutex = _rtextSDLMutex();
     SDL_LockMutex(mymutex);
 #endif
     // stephengtuggy 2020-11-22: Leaving for now -- this should perhaps continue to call cout, I'm not sure
-    cout << s << endl;
-    string::size_type fries = s.size();
-    string customer;
-    for (string::size_type burger = 0; burger < fries; burger++) {
+    std::cout << s << std::endl;
+    std::string::size_type fries = s.size();
+    std::string customer;
+    for (std::string::size_type burger = 0; burger < fries; burger++) {
         if (s[burger] == '\n' || burger == fries - 1) {
             if (burger == fries - 1) {
                 if (s[fries - 1] != '\n' && s[fries - 1] != '\r') {
@@ -194,17 +190,17 @@ void RText::conoutf(string &s, int a, int b, int c) {
             customer.erase();
         } else if (customer.size() >= static_cast<size_t>(WORDWRAP)) {
             customer += s[burger];
-            string fliptheburger;
+            std::string fliptheburger;
             while (customer[customer.size() - 1] != ' ') {
                 fliptheburger += customer[customer.size() - 1];
-                string::iterator oldfloormeat = customer.end();
+                std::string::iterator oldfloormeat = customer.end();
                 oldfloormeat--;
                 customer.erase(oldfloormeat);
             }
             conline(customer, 1);
             customer.erase();
             {
-                string spatchula;
+                std::string spatchula;
                 for (int salt = fliptheburger.size() - 1; salt >= 0; salt--) {
                     spatchula += fliptheburger[salt];
                 }
@@ -222,21 +218,21 @@ void RText::conoutf(string &s, int a, int b, int c) {
 }
 
 //same as above, but I think it works better {{{
-void RText::conoutn(string &s, int a, int b, int c) {
+void RText::conoutn(std::string &s, int a, int b, int c) {
     size_t x = s.find("\n");
     size_t xlast = 0;
-    if (x >= string::npos) {
+    if (x >= std::string::npos) {
         conoutf(s);
     }
-    string::iterator iter = s.end();
+    std::string::iterator iter = s.end();
     if (iter != s.begin()) {
         iter--;
         if (strcmp(&(*(iter)), "\n") != 0) {
             s.append("\n");
         };
     }
-    while (x < string::npos) {
-        string part;
+    while (x < std::string::npos) {
+        std::string part;
         part.append(s.substr(xlast, x - xlast));
         xlast = x + 1;
         x = s.find("\n", x + 1);
@@ -256,7 +252,7 @@ void RText::ConsoleKeyboardI(int code, bool isdown) {
         switch (code) {
 //pop teh back of commandbuf
             case WSK_BACKSPACE: {
-                string::iterator iter = commandbuf.begin();
+                std::string::iterator iter = commandbuf.begin();
                 if (iter < commandbuf.end()) {
                     iter = commandbuf.end();
                     iter--;
@@ -271,7 +267,7 @@ void RText::ConsoleKeyboardI(int code, bool isdown) {
 
             case WSK_RETURN:
                 if (commandbuf[0]) {
-                    vector<string>::iterator iter = vhistory.end();
+                    std::vector<std::string>::iterator iter = vhistory.end();
                     bool noSize = false;
                     if (iter <= vhistory.begin() && iter >= vhistory.end()) {
                         noSize = true;
@@ -309,7 +305,7 @@ void RText::ConsoleKeyboardI(int code, bool isdown) {
 
 //}}}
 //get the current command buffer, to execute at enter {{{
-string RText::getcurcommand() {
+std::string RText::getcurcommand() {
     return commandbuf;
 }
 //footer, leave at bottom

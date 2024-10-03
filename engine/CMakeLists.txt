@@ -712,6 +712,7 @@ SET(LIBRESOURCE
     src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
+    src/resource/python_utils.cpp
     src/resource/random_utils.cpp
     src/cmd/json.cpp
     )
@@ -1720,6 +1721,7 @@ IF (USE_GTEST)
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp
         src/resource/tests/random_tests.cpp
+        src/resource/tests/python_tests.cpp
         src/exit_unit_tests.cpp
         src/components/tests/energy_container_tests.cpp
         src/components/tests/balancing_tests.cpp
@@ -1744,6 +1746,8 @@ IF (USE_GTEST)
 
     TARGET_LINK_LIBRARIES(
         ${TEST_NAME}
+        ${Boost_LIBRARIES}
+        ${Python3_LIBRARIES}
         gtest_main
         vegastrike-testing
         Boost::log
@@ -1765,6 +1769,11 @@ IF (USE_GTEST)
     FILE(
         COPY "src/cmd/tests/units.json"
         DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    )
+
+    FILE(
+        COPY "src/components/tests/python_tests.py"
+        DESTINATION ${CMAKE_BINARY_DIR}
     )
 
     INCLUDE(GoogleTest)
