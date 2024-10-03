@@ -1262,19 +1262,23 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         return;
     }
     if (degrees >= 35 && degrees < 60) {
+        // This code potentially damages a whole bunch of components.
+        // We generate a random int (0-19). 0-8 damages something.
+        // 9-19 doesn't.
+        // This is really a stopgap code until we refactor this better.
         std::random_device dev;
         std::mt19937 rng(dev());
         std::uniform_int_distribution<std::mt19937::result_type> dist20(0,19); // distribution in range [1, 6]
 
         switch(dist20(rng)) {
             case 0: fuel.Damage(); break;   // Fuel
-            case 1: energy.Damage();        // Energy
-            case 2: ftl_energy.Damage();
-            case 3: ftl_drive.Damage();
-            case 4: jump_drive.Damage();
-            case 5: this->afterburnenergy += ((1 - dam) * reactor.Capacity());
-            case 6: CargoVolume *= dam;
-            case 7: UpgradeVolume *= dam;
+            case 1: energy.Damage();  break;       // Energy
+            case 2: ftl_energy.Damage(); break;
+            case 3: ftl_drive.Damage(); break;
+            case 4: jump_drive.Damage(); break;
+            case 5: this->afterburnenergy += ((1 - dam) * reactor.Capacity()); break;
+            case 6: CargoVolume *= dam; break;
+            case 7: UpgradeVolume *= dam; break;
             case 8: 
             //Do something NASTY to the cargo
             if (cargo.size() > 0) {
