@@ -258,7 +258,7 @@ If you encounter any issues while playing, please create an issue with the Vega 
 
    ```bash
    mkdir build & cd build
-   ccmake ../engine
+   ccmake ..
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
    cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
@@ -269,7 +269,7 @@ If you encounter any issues while playing, please create an issue with the Vega 
 
    ```bash
    mkdir build & cd build
-   cmake ../engine
+   cmake ..
    cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike-engine ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
@@ -285,7 +285,7 @@ If you encounter any issues while playing, please create an issue with the Vega 
    To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
 
    ```bash
-   cmake ../engine -DENABLE_PIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   cmake .. -DENABLE_PIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
    ```
 
    __NOTE__:

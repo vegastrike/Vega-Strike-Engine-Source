@@ -20,7 +20,6 @@ ROOT_DIR=$(pwd)
 BUILD_DIR=$ROOT_DIR/build
 BIN_DIR=$ROOT_DIR/bin
 DATA_DIR=$ROOT_DIR/data
-SRC_DIR=$ROOT_DIR/engine
 
 # delete build directory
 echo "deleting build directory ($BUILD_DIR)"
