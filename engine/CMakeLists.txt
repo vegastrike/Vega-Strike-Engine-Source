@@ -1166,9 +1166,9 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
 ELSE (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
 ENDIF (WIN32)
 
 
