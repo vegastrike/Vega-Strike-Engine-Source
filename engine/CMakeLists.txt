@@ -58,7 +58,6 @@ IF (UNIX)
     )
 ENDIF (UNIX)
 MESSAGE("VS INCLUDE DIRS: ${VS_INCLUDE_DIRS}")
-#INCLUDE_DIRECTORIES(${VS_INCLUDE_DIRS})
 
 # The source files used to be listed here...
 
@@ -1616,5 +1615,3 @@ IF (USE_GTEST)
     INCLUDE(GoogleTest)
     gtest_discover_tests(${TEST_NAME})
 ENDIF (USE_GTEST)
-
-#MESSAGE("INCLUDE DIRECTORIES: ${INCLUDE_DIRECTORIES}")
