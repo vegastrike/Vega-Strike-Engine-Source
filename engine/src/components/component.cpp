@@ -32,10 +32,12 @@ const std::string NAME = "Name";
 const std::string MASS = "Mass";
 const std::string VOLUME = "Volume";
 
-Component::Component(double mass, double volume, bool integral):
+Component::Component(double mass, double volume, bool installed, bool integral):
                      unit_key(""),
                      upgrade_name(""),
                      mass(mass), volume(volume),
+                     operational(Resource<double>(100.0,0.0,100.0)),
+                     installed(installed),
                      integral(integral) {}
 
 
@@ -73,7 +75,7 @@ bool Component::Downgrade() {
     
     mass = 0.0;
     volume = 0.0;
-
+    installed = false;
     return true;
 }
 
@@ -84,8 +86,40 @@ bool Component::Upgrade(const std::string upgrade_key) {
     mass = UnitCSVFactory::GetVariable(upgrade_key, MASS, 0.0);
     // TODO: volume currently not in units.json. need to merge with items list
     volume = UnitCSVFactory::GetVariable(upgrade_key, VOLUME, 0.0);
-
+    installed = true;
     return true;
+}
+
+void Component::Damage() {
+    operational.RandomDamage();
+}
+
+void Component::DamageByPercent(double percent) {
+    operational.DamageByPercent(percent);
+}
+
+void Component::Repair() {
+    operational.RepairFully();
+}
+
+bool Component::Damaged() const {
+    return operational.Damaged();
+}
+
+bool Component::Destroyed() const {
+    return operational.Destroyed();
+}
+
+bool Component::Installed() const {
+    return installed;
+}
+
+bool Component::Operational() const {
+    return Installed() && !Destroyed();
+}
+
+double Component::Percent() const {
+    return operational.Percent();
 }
 
 void Component::SetIntegral(bool integral) {

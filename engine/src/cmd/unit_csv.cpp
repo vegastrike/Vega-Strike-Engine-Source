@@ -820,10 +820,13 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     const bool WCfuelhack = configuration()->fuel.fuel_equals_warp; 
     
-    //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!  
     if (WCfuelhack) {
-        ftl_energy.SetCapacity(ftl_energy.MaxLevel() + jump.energy * 0.1f);
+        ftl_energy.SetCapacity(0);
         fuel.SetCapacity(ftl_energy.MaxLevel());
+        ftl_drive = FtlDrive(&fuel);
+        jump_drive = JumpDrive(&fuel);
+        // Add any other component that relies on FTL.
+        // Especially note the cloaking device support for FTL as an energy source.
     } 
 
     // End Energy
@@ -831,17 +834,19 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
     graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
+    // Bleed factor hints at losing energy. However, here, at 2.0 it's a factor
+    // for reducing warp cost
+    double ftl_factor = configuration()->warp_config.bleed_factor;
+    ftl_drive.Load("", unit_key, ftl_factor);
+    jump_drive.Load("", unit_key);
     
-    jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false) ? -1 : -2;
-    jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
+    
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
     graphicOptions.RecurseIntoSubUnitsOnCollision = UnitCSVFactory::GetVariable(unit_key,
             "Collide_Subunits",
             graphicOptions.RecurseIntoSubUnitsOnCollision
                     ? true : false) ? 1 : 0;
-    jump.energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
-    jump.insysenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    
+        
     afterburnenergy = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
     afterburntype = UnitCSVFactory::GetVariable(unit_key,
             "Afterburner_Type",
@@ -1343,11 +1348,10 @@ string Unit::WriteUnitString() {
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
     unit["Primary_Capacitor"] = tos(energy.Level());
     unit["Reactor_Recharge"] = tos(reactor.Capacity());
-    unit["Jump_Drive_Present"] = tos(jump.drive >= -1);
-    unit["Jump_Drive_Delay"] = tos(jump.delay);
+    jump_drive.SaveToCSV(unit);
+    ftl_drive.SaveToCSV(unit);
+
     unit["Wormhole"] = tos(forcejump != 0);
-    unit["Outsystem_Jump_Cost"] = tos(jump.energy);
-    unit["Warp_Usage_Cost"] = tos(jump.insysenergy);
     unit["Afterburner_Usage_Cost"] = tos(afterburnenergy);
     unit["Afterburner_Type"] = tos(afterburntype);
     unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (VS_PI));

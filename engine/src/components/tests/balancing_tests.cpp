@@ -174,3 +174,37 @@ TEST(FuelBurn, RobinNaive_2) {
     std::cout << "NaiveFuelBurn_2 percent left: " << result.residue * 100 << std::endl;
     //EXPECT_EQ(0,1); // use these to see detailed prints
 }
+
+// Use this test to figure out why FTL drive is running out of energy
+/*TEST(FTLDrive, Sanity) {
+    EnergySetup setup = {99.0, 25, 1.0, 1.0};
+    EnergyManager manager = EnergyManager(setup, simulation_atom_var);
+    std::vector<EnergyConsumer> consumers = {
+        EnergyConsumer(&manager.ftl_energy, false, 120) // General consumer at 40 per second
+    };
+        
+    manager.Print(-1);
+    EXPECT_FALSE(manager.fuel.Depleted());
+    EXPECT_FALSE(manager.energy.Depleted());
+    EXPECT_FALSE(manager.ftl_energy.Depleted());
+
+    int i = 0;
+    for(;i<10;i++) {
+        manager.Print(i);
+
+        manager.reactor.Generate();
+        for(EnergyConsumer& consumer : consumers) {
+            if(consumer.CanConsume()) {
+                consumer.Consume();
+            } else {
+                std::cout << "Not enough FTL energy.\n";
+                EXPECT_EQ(0,1);
+            }
+            
+        }
+    }
+
+    FuelBurnResult result(manager.fuel.Percent(), i, i/60);
+    
+    EXPECT_EQ(0,1); // use these to see detailed prints
+}*/

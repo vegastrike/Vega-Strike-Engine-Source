@@ -1293,7 +1293,7 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     int whichlist = 1;  //friendly
     std::string fgname = UnitUtil::getFlightgroupName(parent);
 
-    bool insys = (parent->GetJumpStatus().drive == -2) || fgname.find(insysString) != std::string::npos;
+    bool insys = (!parent->jump_drive.Installed()) || fgname.find(insysString) != std::string::npos;
     std::string::size_type whereconvoy = fgname.find(arrowString);
     bool convoy = (whereconvoy != std::string::npos);
     size_t total_size = stats->navs[0].size() + stats->navs[whichlist].size();     //friendly and neutral
@@ -1641,9 +1641,9 @@ void AggressiveAI::Execute() {
     bool isjumpable = target ? (!target->GetDestinations().empty()) : false;
     if (!ProcessCurrentFgDirective(fg)) {
         if (isjumpable) {
-            if (parent->GetJumpStatus().drive < 0) {
+            if (!parent->jump_drive.IsDestinationSet()) {
                 parent->ActivateJumpDrive(0);
-                if (parent->GetJumpStatus().drive == -2) {
+                if (!parent->jump_drive.Installed()) {
                     static bool AIjumpCheat =
                             XMLSupport::parse_bool(vs_config->getVariable("AI",
                                     "always_have_jumpdrive_cheat",
@@ -1654,15 +1654,15 @@ void AggressiveAI::Execute() {
                             VS_LOG(warning, "FIXME: warning ship not equipped to jump");
                             i = 1;
                         }
-                        parent->jump.drive = -1;
+                        parent->jump_drive.UnsetDestination();
                     } else {
                         parent->Target(NULL);
                     }
-                } else if (parent->GetJumpStatus().drive < 0) {
+                } else if (!parent->jump_drive.IsDestinationSet()) {
                     static bool
                             AIjumpCheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "jump_cheat", "true"));
                     if (AIjumpCheat) {
-                        parent->jump.drive = 0;
+                        parent->jump_drive.SetDestination(0);
                     }
                 }
             }
@@ -1734,7 +1734,7 @@ void AggressiveAI::Execute() {
 
     isjumpable = target ? (!target->GetDestinations().empty()) : false;
     if (!isjumpable) {
-        if (parent->GetJumpStatus().drive >= 0) {
+        if (parent->jump_drive.IsDestinationSet()) {
             parent->ActivateJumpDrive(-1);
         }
     }

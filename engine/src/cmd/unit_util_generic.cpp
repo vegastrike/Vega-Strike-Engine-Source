@@ -921,6 +921,16 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         return un->reactor.Damaged() ? 0.5 : 1.0;
     }
 
+    if(upgrade_category == "Jump_Drive") {
+        return un->jump_drive.Operational();
+    }
+
+    if(upgrade_category == "FTL Drive") {
+        return un->ftl_drive.Operational();
+    }
+
+    // TODO: make cloak.current a resource
+    // Then implement damage properly
     if(upgrade_category == "Cloak") {
         return un->cloak.Damaged() ? 0.5 : 1.0;
     }
