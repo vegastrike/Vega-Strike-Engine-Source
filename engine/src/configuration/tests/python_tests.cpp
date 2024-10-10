@@ -139,11 +139,13 @@ TEST(Python, Config) {
     std::cout << "test_path: " << test_path << std::endl;
     std::cout << "lib_path: " << lib_path << std::endl;
 
+    std::cout << "Try to run GetClassFromPython." << std::endl;
     PyObject* object = GetClassFromPython(
         lib_path.string(),
         test_path.string(),
         "config", "get_config");
-
+    std::cout << "Ran GetClassFromPython successfully. Got " << object << std::endl;
+    
     Graphics2Config& cfg2 = extract<Graphics2Config&>(object);
     EXPECT_EQ(cfg2.screen, 0);
     EXPECT_EQ(cfg2.resolution_x, 2560);
