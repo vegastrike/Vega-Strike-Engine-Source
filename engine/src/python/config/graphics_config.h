@@ -1,5 +1,5 @@
 /*
- * python_utils.h
+ * graphics_config.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,11 +25,23 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
-#define VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H
+#define VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H
 
-#include <string>
+// TODO: remove the other GraphicsConfig and rename this
+struct Graphics2Config {
+    int screen{0};
+    int resolution_x{1920};
+    int resolution_y{1080};
 
-const std::string GetPythonPath();
+    Graphics2Config() = default;
+};
 
-#endif //VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
+Graphics2Config GetGraphics2Config(
+    const std::string build_path,
+    const std::string path_string,
+    const std::string file_name,
+    const std::string function_name
+);
+
+#endif // VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H

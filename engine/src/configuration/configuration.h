@@ -30,6 +30,8 @@
 #include <memory>
 #include <string>
 
+#include "python/config/graphics_config.h"
+
 namespace vega_config {
 // Config Structs Declaration
 
@@ -449,6 +451,7 @@ public:
     Configuration();
     void OverrideDefaultsWithUserConfiguration();
     vega_config::GeneralConfig general_config;
+    Graphics2Config graphics2_config;
     vega_config::DataConfig data_config;
     vega_config::AIConfig ai;
     vega_config::AudioConfig audio_config;

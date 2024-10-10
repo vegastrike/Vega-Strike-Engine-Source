@@ -166,6 +166,7 @@ IF (UNIX)
         ${Vega_Strike_SOURCE_DIR}/src/damage
         ${Vega_Strike_SOURCE_DIR}/src/resource
         ${Vega_Strike_SOURCE_DIR}/src/components
+        ${Vega_Strike_SOURCE_DIR}/src/python/config
         ${Vega_Strike_BINARY_DIR}
         ${Vega_Strike_BINARY_DIR}/src
         /usr/include/harfbuzz/
@@ -177,6 +178,7 @@ ELSE ()
         ${Vega_Strike_SOURCE_DIR}/src/damage
         ${Vega_Strike_SOURCE_DIR}/src/resource
         ${Vega_Strike_SOURCE_DIR}/src/components
+        ${Vega_Strike_SOURCE_DIR}/src/python/config
         ${Vega_Strike_BINARY_DIR}
         ${Vega_Strike_BINARY_DIR}/src
     )
@@ -374,6 +376,7 @@ IF (Python3_FOUND)
     SET(TST_INCLUDES ${Python3_INCLUDE_DIRS})
     SET(TST_LIBS ${Python3_LIBRARIES})
     SET(HAVE_PYTHON 1)
+    add_compile_definitions(Python_SITELIB=${Python3_SITELIB})
 ELSE (Python3_FOUND)
     MESSAGE(FATAL_ERROR "Can't find python")
 ENDIF (Python3_FOUND)
@@ -712,10 +715,14 @@ SET(LIBRESOURCE
     src/resource/product.cpp
     src/resource/cargo.cpp
     src/resource/manifest.cpp
-    src/resource/python_utils.cpp
     src/resource/random_utils.cpp
     src/cmd/json.cpp
     )
+
+SET(LIBPYTHON
+    src/python/config/python_utils.cpp
+    src/python/config/graphics_config.cpp
+)
 
 SET(LIBCOMPONENT
     src/components/component.cpp
@@ -1130,7 +1137,21 @@ SET(LIBAUDIO_SOURCES
 )
 
 
+ADD_LIBRARY(vegastrike_python SHARED
+    ${LIBPYTHON}
+)
+
+TARGET_LINK_LIBRARIES(
+    vegastrike_python
+    ${Boost_LIBRARIES}
+    ${Python3_LIBRARIES}
+)
+
+# Name must be witout the lib prefix
+SET_TARGET_PROPERTIES(vegastrike_python PROPERTIES PREFIX "")
+
 ADD_LIBRARY(vegastrike-engine_com
+    ${LIBPYTHON}
     ${LIBVS_LOGGING}
     ${LIBCONFIG}
     ${LIBDAMAGE}
@@ -1721,13 +1742,14 @@ IF (USE_GTEST)
         src/resource/tests/resource_test.cpp
         src/resource/tests/manifest_tests.cpp
         src/resource/tests/random_tests.cpp
-        src/resource/tests/python_tests.cpp
+        src/configuration/tests/python_tests.cpp
         src/exit_unit_tests.cpp
         src/components/tests/energy_container_tests.cpp
         src/components/tests/balancing_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
+        ${LIBPYTHON}
         ${LIBCONFIG}
         ${LIBDAMAGE}
         ${LIBRESOURCE}
@@ -1762,18 +1784,23 @@ IF (USE_GTEST)
     ENDIF()
 
     FILE(
-        COPY "src/configuration/tests/vegastrike.config"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
-    )
-
-    FILE(
         COPY "src/cmd/tests/units.json"
         DESTINATION ${CMAKE_BINARY_DIR}/test_assets
     )
 
     FILE(
-        COPY "src/components/tests/python_tests.py"
-        DESTINATION ${CMAKE_BINARY_DIR}
+        COPY "src/configuration/tests/python_tests.py"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    )
+
+    FILE(
+        COPY "src/configuration/tests/config.py"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    )
+
+    FILE(
+        COPY "src/configuration/tests/config.yaml"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
     )
 
     INCLUDE(GoogleTest)

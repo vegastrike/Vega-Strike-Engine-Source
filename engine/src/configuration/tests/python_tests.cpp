@@ -30,12 +30,11 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 
-#include "python_utils.h"
+#include "python/config/python_utils.h"
+#include "python/config/graphics_config.h"
 
 using namespace boost::python;
 
-// This code shows how to call a python file from c++
-// It is not portable
 
 struct World
 {
@@ -86,15 +85,6 @@ TEST(Python, Call_Function) {
     
     Py_Initialize();
     
-    // Use the following code to figure out your original path, as the above Py_SetPath overrides it.
-    // Note that Py_GetPath must be called after Py_Initialize and Py_SetPath before.
-    /*wchar_t* w_path_ptr = Py_GetPath();
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
-    std::cout << "Path: " << path << std::endl;*/
-
-    //PyObject* moduleString = PyUnicode_FromString((char*)"python_tests");
-    //PyObject* module = PyImport_Import(moduleString);
     PyObject* module = PyImport_ImportModule("python_tests");
     std::cout << "PyImport_ImportModule did not crash\n" << std::flush;
     if(!module) {
@@ -139,5 +129,26 @@ TEST(Python, Call_Function) {
     EXPECT_EQ(result, hello_world);
 
     // Uncomment to see prints
+    //EXPECT_FALSE(true); 
+}
+
+// Test ability to get config file from python
+TEST(Python, Config) {
+    boost::filesystem::path test_path(boost::filesystem::current_path());
+    boost::filesystem::path lib_path = test_path.parent_path();
+    std::cout << "test_path: " << test_path << std::endl;
+    std::cout << "lib_path: " << lib_path << std::endl;
+
+    PyObject* object = GetClassFromPython(
+        lib_path.string(),
+        test_path.string(),
+        "config", "get_config");
+
+    Graphics2Config& cfg2 = extract<Graphics2Config&>(object);
+    EXPECT_EQ(cfg2.screen, 0);
+    EXPECT_EQ(cfg2.resolution_x, 2560);
+    EXPECT_EQ(cfg2.resolution_y, 1600);
+    
+    // Uncomment to see prints*/
     //EXPECT_FALSE(true); 
 }

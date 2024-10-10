@@ -30,10 +30,16 @@
 #endif
 #include <math.h>
 
+#include "vsfilesystem.h"
+
 using vega_config::GetGameConfig;
 
 Configuration::Configuration() {
     //logging.verbose_debug = GetGameConfig().GetBool("data.verbose_debug", false);
+    graphics2_config = GetGraphics2Config(
+        VSFileSystem::programdir, 
+        VSFileSystem::datadir, 
+        "config", "get_config");
 }
 
 /* Override the default value(provided by constructor) with the value from the user specified configuration file, if any.
