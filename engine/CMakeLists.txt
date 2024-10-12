@@ -554,6 +554,8 @@ SET(LIBCOMPONENT
     src/components/reactor.cpp
 
     src/components/cloak.cpp
+    src/components/ftl_drive.cpp
+    src/components/jump_drive.cpp
     )
 
 SET(LIBGUI_SOURCES

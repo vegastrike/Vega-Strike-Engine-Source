@@ -140,21 +140,14 @@ void Resource<T>::Destroy() {
 }
     
 template<typename T>
-bool Resource<T>::Destroyed() {
+bool Resource<T>::Destroyed() const {
     return adjusted_max_value_ == min_value_;
 }
 
 template<typename T>
 void Resource<T>::RandomDamage() {
     const double severity = randomDouble();
-
-    if(severity > .95) {
-        // Destroy system
-        Destroy();
-    } else {
-        // Damage system
-        DamageByPercent(severity);
-    }   
+    DamageByPercent(severity);
 }
 
 template<typename T>
@@ -173,8 +166,11 @@ void Resource<T>::DamageByPercent(const T &value) {
         return;
     }
 
-    adjusted_max_value_ = std::max(min_value_, adjusted_max_value_ - (max_value_ * value));
-    value_ = std::min(value_, adjusted_max_value_);
+    if(value > .95) {
+        Destroy();
+    } else {
+        DamageByValue(max_value_ * value);
+    }
 }
 
 template<typename T>

@@ -25,7 +25,6 @@
 #define VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 
 #include "star_system.h"
-#include "energetic.h"
 
 #include <string>
 
@@ -48,7 +47,6 @@ public:
     float CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const;
     void DeactivateJumpDrive();
     const std::vector<std::string> &GetDestinations() const;
-    const Energetic::UnitJump &GetJumpStatus() const;
     StarSystem *getStarSystem();
     const StarSystem *getStarSystem() const;
     Vector GetWarpRefVelocity() const;

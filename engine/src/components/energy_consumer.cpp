@@ -38,6 +38,15 @@ EnergyConsumer::EnergyConsumer(EnergyContainer *source,
                                atom_consumption(consumption * simulation_atom_var) {}
 
 
+bool EnergyConsumer::CanConsume() {
+    // TODO: need to check if operational somewhere else
+    if(!source) {
+        return false;
+    }
+
+    return source->Level() > atom_consumption;
+}
+
 double EnergyConsumer::Consume() {
     if(!source) {
         return 0.0;
