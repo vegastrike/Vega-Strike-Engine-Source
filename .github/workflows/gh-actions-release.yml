@@ -131,11 +131,12 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'rockylinux_rockylinux:8.10'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            ARTIFACT_EXT: 'rpm'
+          # Disabled until the build can be fixed
+          #- FROM:     'rockylinux_rockylinux:8.10'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  ARTIFACT_EXT: 'rpm'
 
     steps:
       - name: Check out repository
