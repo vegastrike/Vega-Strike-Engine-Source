@@ -1784,22 +1784,17 @@ IF (USE_GTEST)
     ENDIF()
 
     FILE(
+        COPY "src/configuration/tests/vegastrike.config"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    )
+
+    FILE(
         COPY "src/cmd/tests/units.json"
         DESTINATION ${CMAKE_BINARY_DIR}/test_assets
     )
 
     FILE(
         COPY "src/configuration/tests/python_tests.py"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
-    )
-
-    FILE(
-        COPY "src/configuration/tests/config.py"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
-    )
-
-    FILE(
-        COPY "src/configuration/tests/config.yaml"
         DESTINATION ${CMAKE_BINARY_DIR}/test_assets
     )
 

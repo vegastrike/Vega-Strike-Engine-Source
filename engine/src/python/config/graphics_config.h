@@ -35,13 +35,9 @@ struct Graphics2Config {
     int resolution_y{1080};
 
     Graphics2Config() = default;
+    Graphics2Config(const std::string config);
 };
 
-Graphics2Config GetGraphics2Config(
-    const std::string build_path,
-    const std::string path_string,
-    const std::string file_name,
-    const std::string function_name
-);
+
 
 #endif // VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H
