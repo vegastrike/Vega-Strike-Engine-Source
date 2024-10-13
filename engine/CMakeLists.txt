@@ -106,12 +106,6 @@ ELSE ()
 ENDIF ()
 MESSAGE("** OpenGL_GL_PREFERENCE: ${OpenGL_GL_PREFERENCE}")
 
-# Should we install gtest?
-OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
-
-# Should we run gtest?
-OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
-
 SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
@@ -1540,10 +1534,6 @@ IF (INSTALL_GTEST)
 ENDIF (INSTALL_GTEST)
 
 IF (USE_GTEST)
-    ENABLE_TESTING()
-
-    SET(TEST_NAME ${PROJECT_NAME}_tests)
-
     ADD_EXECUTABLE(
         ${TEST_NAME}
         src/cmd/tests/csv_tests.cpp
@@ -1562,7 +1552,7 @@ IF (USE_GTEST)
         src/components/tests/balancing_tests.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PUBLIC ${VS_INCLUDE_DIRS})
-    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Strike_BINARY_DIR}/)
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBCONFIG}

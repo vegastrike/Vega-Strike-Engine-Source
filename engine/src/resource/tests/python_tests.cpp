@@ -66,10 +66,10 @@ TEST(Python, Call_Function) {
     boost::filesystem::path full_path(boost::filesystem::current_path());
     std::cout << full_path << std::endl;
 
-    bool exists = boost::filesystem::exists("test_assets/python_tests.py");
+    bool exists = boost::filesystem::exists("../test_assets/python_tests.py");
     std::cout << "python_tests.py exists " << exists << std::endl;
 
-    boost::filesystem::current_path(full_path.concat("/test_assets"));
+    boost::filesystem::current_path(full_path.concat("/../test_assets"));
     full_path = boost::filesystem::current_path();
     std::cout << full_path << std::endl;
 

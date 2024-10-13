@@ -137,6 +137,18 @@ SET(CMAKE_C_STANDARD 11)
 SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 
+# Should we install gtest?
+OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
+
+# Should we run gtest?
+OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
+
+IF (USE_GTEST)
+    ENABLE_TESTING()
+
+    SET(TEST_NAME ${PROJECT_NAME}_tests)
+ENDIF (USE_GTEST)
+
 SET(VS_SUBDIRECTORIES "engine")
 FOREACH(VS_SUBDIR IN LISTS VS_SUBDIRECTORIES)
     ADD_SUBDIRECTORY(${VS_SUBDIR})
