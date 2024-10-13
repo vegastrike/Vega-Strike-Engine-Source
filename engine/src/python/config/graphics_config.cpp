@@ -38,7 +38,7 @@ Graphics2Config::Graphics2Config(const std::string config) {
     }
 
     const std::string graphics_json = json_root.get("graphics");
-    json::jobject json_graphics = json::jobject::parse(config);
+    json::jobject json_graphics = json::jobject::parse(graphics_json);
 
     screen = GetValue("screen", 0, json_graphics);
     resolution_x = GetValue("resolution_x", 2560, json_graphics);
