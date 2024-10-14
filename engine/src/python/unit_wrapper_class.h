@@ -272,7 +272,16 @@ public:
         {
         CHECKME -1;
         }
-        return unit->GetJumpStatus().drive;
+
+        // Here is the last vestige of the old code
+        // -2 is no jump drive
+        // -1 is jump drive but no destination
+        // 0 and above is set destination
+        if(!unit->jump_drive.Installed()) {
+            return -2;
+        } 
+
+        return unit->jump_drive.Destination();
     }
 
     void ApplyDamage(Vector pnt,

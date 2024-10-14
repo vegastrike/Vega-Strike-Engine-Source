@@ -33,7 +33,6 @@ public:
     Energetic();
     virtual ~Energetic() = default;
 
-    void decreaseWarpEnergy(bool insys, double time);
     void DecreaseWarpEnergyInWarp();
 
 
@@ -47,7 +46,6 @@ public:
     void ExpendFuel();
     float getWarpEnergy() const;
 
-    void increaseWarpEnergy(bool insys, double time);
 
     float maxEnergyData() const;
 
@@ -56,7 +54,6 @@ public:
 
     void rechargeEnergy();
     void RechargeWarpCapacitors(const bool player_ship);
-    bool refillWarpEnergy();
 
     void setAfterburnerEnergy(float aft);
     void setEnergyRecharge(float enrech);
@@ -66,21 +63,8 @@ public:
     static float VSDPercent();
 
     float warpCapData() const;
-    float warpEnergyData() const;
 
     float WarpEnergyMultiplier(const bool player_ship);
-
-    // TODO: move to StarFaring class when available
-    struct UnitJump {
-        float warpDriveRating;
-        float energy;       //short fix
-        float insysenergy;  //short fix
-        signed char drive; // disabled
-        unsigned char delay;
-        unsigned char damage;
-        //negative means fuel
-    }
-            jump{};
 
 
     float constrained_charge_to_shields;

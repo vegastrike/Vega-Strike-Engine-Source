@@ -432,7 +432,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
 
         case UnitImages<void>::WARPENERGY: {
             const bool warpifnojump = configuration()->graphics_config.hud.display_warp_energy_if_no_jump_drive;
-            return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->warpEnergyData() : 0;
+            return (warpifnojump || target->jump_drive.Installed()) ? target->ftl_energy.Percent() : 0;
         }
         case UnitImages<void>::HULL:
             if (maxhull < target->GetHull()) {
@@ -728,9 +728,9 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::NOMINAL;
             }
         case UnitImages<void>::CANJUMP_MODAL:
-            if (-2 == target->GetJumpStatus().drive) {
+            if (!target->jump_drive.Installed() || !target->jump_drive.Operational()) {
                 return (float) UnitImages<void>::NODRIVE;
-            } else if (target->getWarpEnergy() < target->GetJumpStatus().energy) {
+            } else if (!target->jump_drive.CanConsume()) {
                 return (float) UnitImages<void>::NOTENOUGHENERGY;
             } else if (target->graphicOptions.InWarp) {          //FIXME
                 return (float) UnitImages<void>::OFF;

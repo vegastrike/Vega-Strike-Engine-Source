@@ -42,6 +42,7 @@ private:
     bool partial; // Can power consumer with less energy than requested
 public:
     EnergyConsumer(EnergyContainer *source, bool partial, double consumption = 0.0);
+    bool CanConsume();
     double Consume();
     double GetConsumption() const;
     double GetAtomConsumption() const;

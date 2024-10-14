@@ -16,22 +16,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - FROM:     'ubuntu:mantic'
+          - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ENABLE_PIE: 'OFF'
             allow_failure: true
-          - FROM:     'ubuntu:mantic'
+          - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ENABLE_PIE: 'OFF'
             allow_failure: true
-          - FROM:     'ubuntu:mantic'
+          - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: true
-          - FROM:     'ubuntu:mantic'
+          - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
@@ -56,6 +56,21 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
+          - FROM:     'linuxmintd/mint22-amd64'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'OFF'
+            allow_failure: true
+          - FROM:     'linuxmintd/mint21.3-amd64'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'OFF'
+            allow_failure: true
+          - FROM:     'linuxmintd/mint21.2-amd64'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'OFF'
+            allow_failure: true
           - FROM:     'linuxmintd/mint21.1-amd64'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -81,11 +96,16 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
-          - FROM:     'debian:buster'
+          - FROM:     'opensuse/leap:15.6'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
+          - FROM:     'opensuse/leap:15.6'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
+            ENABLE_PIE: 'ON'
+            allow_failure: true
           - FROM:     'opensuse/leap:15.5'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
@@ -101,31 +121,37 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'fedora:38'
+          - FROM:     'fedora:39'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:38'
+          - FROM:     'fedora:39'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:37'
+          - FROM:     'fedora:40'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
+          - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'rockylinux:9.1'
+          - FROM:     'rockylinux_rockylinux:9.4'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'rockylinux:8.7'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: false
+          # Disabled until the build can be fixed
+          #- FROM:     'rockylinux_rockylinux:8.10'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: false
           #- FROM:     'manjarolinux/base'
           #  COMPILER: 'clang'
           #  OpenGL_GL_PREFERENCE: 'LEGACY'

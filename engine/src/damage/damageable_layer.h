@@ -88,6 +88,7 @@ struct DamageableLayer {
     float GetMaxHealth();
     float GetPercent(FacetName facet_name);
 
+    void FullyCharge();
     void Regenerate(float recharge_rate);
     void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
     float GetRegeneration();
