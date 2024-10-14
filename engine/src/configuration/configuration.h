@@ -30,7 +30,7 @@
 #include <memory>
 #include <string>
 
-#include "python/config/graphics_config.h"
+#include "graphics_config.h"
 
 namespace vega_config {
 // Config Structs Declaration

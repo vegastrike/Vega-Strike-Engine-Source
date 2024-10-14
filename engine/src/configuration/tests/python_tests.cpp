@@ -31,7 +31,6 @@
 #include <iostream>
 
 #include "python/config/python_utils.h"
-#include "python/config/graphics_config.h"
 
 using namespace boost::python;
 

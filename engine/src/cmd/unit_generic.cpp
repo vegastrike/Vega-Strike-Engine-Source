@@ -1025,7 +1025,6 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
                         )))
                 || forcejump) {
             //or the jump is being forced?
-            //NOW done in star_system_generic.cpp before TransferUnitToSystem smalle->warpenergy-=smalle->GetJumpStatus().energy;
             int dest = smalle->GetJumpStatus().drive;
             if (dest < 0) {
                 dest = 0;

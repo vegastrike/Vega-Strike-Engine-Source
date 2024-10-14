@@ -698,9 +698,9 @@ SET(LIBVS_LOGGING
 )
 
 SET(LIBCONFIG
-    src/abstract_config.cpp
     src/configuration/configuration.cpp
     src/configuration/game_config.cpp
+    src/configuration/graphics_config.cpp
 )
 
 SET(LIBDAMAGE
@@ -721,7 +721,6 @@ SET(LIBRESOURCE
 
 SET(LIBPYTHON
     src/python/config/python_utils.cpp
-    src/python/config/graphics_config.cpp
 )
 
 SET(LIBCOMPONENT
@@ -1041,7 +1040,6 @@ SET(LIBROOTGENERIC_SOURCES
     src/atmospheric_fog_mesh.cpp
     src/configxml.cpp
     src/easydom.cpp
-    src/endianness.cpp
     src/macosx_math.cpp
     src/faction_generic.cpp
     src/faction_util_generic.cpp
@@ -1049,14 +1047,12 @@ SET(LIBROOTGENERIC_SOURCES
     src/galaxy_gen.cpp
     src/galaxy_xml.cpp
     src/galaxy_utils.cpp
-    src/hashtable.cpp
     src/lin_time.cpp
     src/load_mission.cpp
     src/pk3.cpp
     src/posh.cpp
     src/savegame.cpp
     src/system_factory.cpp
-    src/star_system_generic.cpp
     src/star_system_xml.cpp
     src/stardate.cpp
     src/universe_globals.cpp

@@ -22,7 +22,6 @@
 
 #include "vs_globals.h"
 #include "configxml.h"
-#include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 
 VegaConfig *createVegaConfig(const char *file) {
