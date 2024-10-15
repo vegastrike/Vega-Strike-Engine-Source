@@ -86,6 +86,8 @@ void UncheckUnit( class Unit*un );
 #include "components/cloak.h"
 #include "components/energy_container.h"
 #include "components/reactor.h"
+#include "components/ftl_drive.h"
+#include "components/jump_drive.h"
 
 extern char *GetUnitDir(const char *filename);
 
@@ -159,6 +161,8 @@ public:
     Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
 
     Cloak cloak;
+    FtlDrive ftl_drive = FtlDrive(&ftl_energy);
+    JumpDrive jump_drive = JumpDrive(&ftl_energy);
 
     /// Radar and related systems
     // TODO: take a deeper look at this much later...
@@ -1058,13 +1062,9 @@ extern std::set<std::string> GetListOfDowngrades();
 extern void ClearDowngradeMap();
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
-/*
- **************************************************************************************
- **** MESH ANIMATION STUFF                                                       ***
- **************************************************************************************
- */
 
 
+void rechargeShip(Unit *unit, unsigned int cockpit);
 
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
 

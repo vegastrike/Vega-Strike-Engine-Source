@@ -84,6 +84,7 @@
 #include <list>
 #include <cstdint>
 #include <boost/format.hpp>
+#include <random>
 
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -651,7 +652,7 @@ float Unit::cosAngleTo(Unit *targ, float &dist, float speed, float range, bool t
     float rv = ittsangle - radangle - (turnmargin ? turnangle : 0);
 
     float rsize = targ->rSize() + rSize();
-    if ((!targ->GetDestinations().empty() && jump.drive >= 0) || (targ->faction == faction)) {
+    if ((!targ->GetDestinations().empty() && jump_drive.IsDestinationSet()) || (targ->faction == faction)) {
         rsize = 0;
     }                                       //HACK so missions work well
     if (range != 0) {
@@ -993,13 +994,19 @@ float globQueryShell(QVector pos, QVector dir, float rad);
 extern void ActivateAnimation(Unit *jp);
 
 void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
-    if (cp) {
-        if (un->getWarpEnergy() >= un->GetJumpStatus().energy) {
-            if (un->GetJumpStatus().drive > -2) {
-                cp->jumpok = 1;
-            }
-        }
+    if(!cp) {
+        return;
     }
+
+    if(!un->jump_drive.Operational()) {
+       return;
+    }
+
+    if (!un->jump_drive.CanConsume()) {
+        return;    
+    }
+
+    cp->jumpok = 1;
 }
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
@@ -1017,19 +1024,20 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
             return false;
         }
         //we have a drive
-        if ((!SPEC_interference && (smalle->GetJumpStatus().drive >= 0
-                &&          //we have power
-                        (smalle->ftl_energy.Level() >= smalle->GetJumpStatus().energy
-                                //or we're being cheap
-                                || (ai_jump_cheat && cp == nullptr)
-                        )))
-                || forcejump) {
-            //or the jump is being forced?
-            int dest = smalle->GetJumpStatus().drive;
-            if (dest < 0) {
-                dest = 0;
+        if ((!SPEC_interference && 
+                (smalle->jump_drive.IsDestinationSet() &&          //we have power
+                    (smalle->jump_drive.CanConsume() ||
+                    //or we're being cheap
+                    (ai_jump_cheat && cp == nullptr))
+                )
+            ) || forcejump) {
+            
+            if(!smalle->jump_drive.IsDestinationSet()) {
+                smalle->jump_drive.SetDestination(0);
             }
-            smalle->DeactivateJumpDrive();
+            int dest = smalle->jump_drive.Destination();
+           
+            smalle->jump_drive.UnsetDestination();
             Unit *jumppoint = this;
             _Universe->activeStarSystem()
                     ->JumpTo(smalle, jumppoint, GetDestinations()[dest % GetDestinations().size()]);
@@ -1044,15 +1052,15 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
         } else {
             return false;
         }
-        if ((!SPEC_interference && (GetJumpStatus().drive >= 0
-                && (ftl_energy.Level() >= GetJumpStatus().energy || (ai_jump_cheat && cp == NULL))
+        if ((!SPEC_interference && (jump_drive.IsDestinationSet()
+                && (jump_drive.CanConsume() || (ai_jump_cheat && cp == NULL))
         )) || smalle->forcejump) {
-            ftl_energy.Deplete(false, GetJumpStatus().energy);
-            DeactivateJumpDrive();
+            jump_drive.Consume();
+            jump_drive.UnsetDestination();
             Unit *jumppoint = smalle;
 
             _Universe->activeStarSystem()->JumpTo(this, jumppoint,
-                    smalle->GetDestinations()[GetJumpStatus().drive
+                    smalle->GetDestinations()[jump_drive.Destination()
                             % smalle->GetDestinations().size()]);
 
             return true;
@@ -1254,36 +1262,24 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         return;
     }
     if (degrees >= 35 && degrees < 60) {
-        //DAMAGE FUEL
-        static float fuel_damage_prob = 1.f
-                - XMLSupport::parse_float(vs_config->getVariable("physics", "fuel_damage_prob", ".25"));
-        static float warpenergy_damage_prob = fuel_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "warpenergy_damage_prob",
-                        "0.05"));
-        static float ab_damage_prob = warpenergy_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics", "ab_damage_prob", ".2"));
-        static float cargovolume_damage_prob = ab_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "cargovolume_damage_prob",
-                        ".15"));
-        static float upgradevolume_damage_prob = cargovolume_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "upgradevolume_damage_prob",
-                        ".1"));
-        static float cargo_damage_prob = upgradevolume_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics", "cargo_damage_prob", "1"));
-        if (randnum >= fuel_damage_prob) {
-            fuel.Damage();
-        } else if (randnum >= warpenergy_damage_prob) {
-            ftl_energy.Damage();
-        } else if (randnum >= ab_damage_prob) {
-            this->afterburnenergy += ((1 - dam) * reactor.Capacity());
-        } else if (randnum >= cargovolume_damage_prob) {
-            CargoVolume *= dam;
-        } else if (randnum >= upgradevolume_damage_prob) {
-            UpgradeVolume *= dam;
-        } else if (randnum >= cargo_damage_prob) {
+        // This code potentially damages a whole bunch of components.
+        // We generate a random int (0-19). 0-8 damages something.
+        // 9-19 doesn't.
+        // This is really a stopgap code until we refactor this better.
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist20(0,19); // distribution in range [1, 6]
+
+        switch(dist20(rng)) {
+            case 0: fuel.Damage(); break;   // Fuel
+            case 1: energy.Damage();  break;       // Energy
+            case 2: ftl_energy.Damage(); break;
+            case 3: ftl_drive.Damage(); break;
+            case 4: jump_drive.Damage(); break;
+            case 5: this->afterburnenergy += ((1 - dam) * reactor.Capacity()); break;
+            case 6: CargoVolume *= dam; break;
+            case 7: UpgradeVolume *= dam; break;
+            case 8: 
             //Do something NASTY to the cargo
             if (cargo.size() > 0) {
                 unsigned int i = 0;
@@ -1295,7 +1291,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
                         || cargo[cargorand].GetMissionFlag()) && (++i) < cargo.size());
                 cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
             }
+            break;
+            //default:
+                // No damage
         }
+
         damages |= Damages::CARGOFUEL_DAMAGED;
         return;
     }
@@ -1600,9 +1600,9 @@ void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination) {
         float ttime =
                 (SystemLocation(sourcess->getFileName()) - SystemLocation(destination)).Magnitude()
                         * seconds_per_parsec;
-        un->jump.delay += float_to_int(ttime);
+        un->jump_drive.SetDelay(float_to_int(ttime));
         sourcess->JumpTo(un, NULL, destination, true, true);
-        un->jump.delay -= float_to_int(ttime);
+        un->jump_drive.SetDelay(-float_to_int(ttime));
     }
 }
 
@@ -1632,7 +1632,9 @@ void Unit::Target(Unit *targ) {
                 LockTarget(false);
             }
         } else {
-            if (jump.drive != -1) {
+            // TODO: this is unclear code. I translated it fully but 
+            // it doesn't really make sense. Maybe targets don't have destinations?!
+            if (!jump_drive.Installed() || jump_drive.IsDestinationSet()) {
                 bool found = false;
                 Unit *u;
                 for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (u = *i) != NULL; ++i) {
@@ -2027,7 +2029,27 @@ void Unit::PerformDockingOperations() {
 
 std::set<Unit *> arrested_list_do_not_dereference;
 
+// A simple utility to recharge energy, ftl_energy and shields
+// Also to charge for docking and refueling
+void rechargeShip(Unit *unit, unsigned int cockpit) {
+    unit->energy.Refill();
+    unit->ftl_energy.Refill();
+    unit->shield->FullyCharge();
 
+    if (cockpit < 0 || cockpit >= _Universe->numPlayers()) {
+        return;
+    }
+
+    // Refueling fee
+    static float refueling_fee = XMLSupport::parse_float(vs_config->getVariable("general", "fuel_docking_fee", "0"));
+    _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
+
+    static float docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "docking_fee", "0"));
+    _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
+}
+
+
+// UTDW - unit to dock with
 int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     if (utdw->pImage->dockingports.size() <= whichdockport) {
         return 0;
@@ -2051,37 +2073,10 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     }
     
     unsigned int cockpit = UnitUtil::isPlayerStarship(this);
+  
+    // Refuel and recharge and charge docking/refueling fees
+    rechargeShip(this, cockpit);
 
-    static float MinimumCapacityToRefuelOnLand =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "MinimumWarpCapToRefuelDockeesAutomatically",
-                    "0"));
-    float capdata = utdw->warpCapData();
-    if ((capdata >= MinimumCapacityToRefuelOnLand) && (this->refillWarpEnergy())) {
-        if (cockpit >= 0 && cockpit < _Universe->numPlayers()) {
-            static float
-                    docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "fuel_docking_fee", "0"));
-            _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
-        }
-    }
-    if ((capdata < MinimumCapacityToRefuelOnLand) && (this->faction == utdw->faction)) {
-        if (utdw->warpEnergyData() > this->warpEnergyData() && utdw->warpEnergyData() > this->jump.energy) {
-            this->increaseWarpEnergy(false, this->jump.energy);
-            utdw->decreaseWarpEnergy(false, this->jump.energy);
-        }
-        if (utdw->warpEnergyData() < this->warpEnergyData() && this->warpEnergyData() > utdw->jump.energy) {
-            utdw->increaseWarpEnergy(false, utdw->jump.energy);
-            this->decreaseWarpEnergy(false, utdw->jump.energy);
-        }
-    }
-    if (cockpit >= 0 && cockpit < _Universe->numPlayers()) {
-        static float docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "docking_fee", "0"));
-        if (_Universe->AccessCockpit(cockpit)->credits >= docking_fee) {
-            _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
-        } else if (_Universe->AccessCockpit(cockpit)->credits >= 0) {
-            _Universe->AccessCockpit(cockpit)->credits = 0;
-        }
-    }
     std::set<Unit *>::iterator arrested = arrested_list_do_not_dereference.find(this);
     if (arrested != arrested_list_do_not_dereference.end()) {
         arrested_list_do_not_dereference.erase(arrested);
@@ -3003,26 +2998,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     1);
         }
     }
-    //Check jump and jump/SPEC stuff
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction,
-                    "Warp_Capacitor|Warp_Usage_Cost")) {
-        /*if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Capacitor"))
-            STDUPGRADE(maxwarpenergy, up->maxwarpenergy, templ->maxwarpenergy, 0);*/
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Usage_Cost"))
-            STDUPGRADE(jump.insysenergy, up->jump.insysenergy, templ->jump.insysenergy, 0);
-
-// for when we'll need more than one jump drive upgrade (Elite Strike?)
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Outsystem_Jump_Cost"))
-            STDUPGRADE(jump.energy, up->jump.energy, templ->jump.energy, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Jump_Drive_Delay"))
-            STDUPGRADE(jump.delay, up->jump.delay, templ->jump.delay, 0);
-
-    }
+    
 
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Armor_Front_Top_Right")) {
@@ -3331,32 +3307,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
     }
     //NO CLUE FOR BELOW
     if (downgrade) {
-        if (jump.drive >= -1 && up->jump.drive >= -1) {
-            if (touchme) {
-                jump.drive = -2;
-            }
-            ++numave;
-            percentage += .5 * ((float) (100 - jump.damage)) / (101 - up->jump.damage);
-            if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name,
-                        up->jump.drive,
-                        ((char *) &this->jump.drive) - ((char *) this),
-                        tempdownmap);
-            }
-        }
-        if (cloak.Capable() && up->cloak.Capable()) {
-            if (touchme) {
-                cloak.Disable();
-            }
-            ++numave;
-            ++percentage;
-            if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name,
-                                  up->cloak.current,
-                                  ((char *) &this->cloak.current) - ((char *) this),
-                                  tempdownmap);
-            }
-        }
         //NOTE: Afterburner type 2 (jmp)
         //NOTE: Afterburner type 1 (gas)
         //NOTE: Afterburner type 0 (pwr)
@@ -3396,15 +3346,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
             }
         } else if (afterburnenergy <= up->afterburnenergy && afterburnenergy >= 0 && up->afterburnenergy > 0
                 && up->afterburnenergy < 32767) {
-            cancompletefully = false;
-        }
-        if ((jump.drive == -2 && up->jump.drive >= -1) || force_change_on_nothing) {
-            if (touchme) {
-                jump.drive = up->jump.drive;
-                jump.damage = 0;
-            }
-            ++numave;
-        } else if (jump.drive >= -1 && up->jump.drive >= -1) {
             cancompletefully = false;
         }
     }

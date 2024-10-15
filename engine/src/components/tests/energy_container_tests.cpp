@@ -23,8 +23,12 @@ TEST(EnergyContainer, Sanity) {
 
     int i=0;
     while(!container.Depleted() && i < 100) {
+        std::cout << " Can consume: " << consumer.CanConsume() << std::endl;
         consumer.Consume();
         printContainer(container);
         i++;
     }
+
+    // Uncomment to see prints
+    //EXPECT_TRUE(consumer.CanConsume());
 }

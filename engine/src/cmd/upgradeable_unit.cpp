@@ -1,7 +1,7 @@
 /*
  * upgradeable_unit.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -113,6 +113,14 @@ UpgradeType GetUpgradeType(const std::string upgrade_key) {
         return UpgradeType::Capacitor;
     }
 
+    if(upgrade_type_string == "FTL_Drive") {
+        return UpgradeType::FTL_Drive;
+    }
+
+    if(upgrade_type_string == "Jump_Drive") {
+        return UpgradeType::Jump_Drive;
+    }
+
     if(upgrade_type_string == "Cloak") {
         return UpgradeType::Cloak;
     }
@@ -158,6 +166,17 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             result.upgradeable = true;
             result.success = unit->reactor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
+
+        case UpgradeType::FTL_Drive:
+            result.upgradeable = true;
+            result.success = unit->ftl_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+        
+        case UpgradeType::Jump_Drive:
+            result.upgradeable = true;
+            result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
         case UpgradeType::Cloak:
             result.upgradeable = true;
             result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
@@ -170,10 +189,6 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
         case UpgradeType::Drive:
             result.upgradeable = true;
             result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
-            break;
-        case UpgradeType::Jump_Drive:
-            result.upgradeable = true;
-            result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
 
         

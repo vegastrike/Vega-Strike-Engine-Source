@@ -4634,7 +4634,6 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     static Unit *blankUnit = new Unit("upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex("upgrades"));
     static float
             warpenratio = XMLSupport::parse_float(vs_config->getVariable("physics", "warp_energy_multiplier", "0.12"));
-    static float warpbleed = XMLSupport::parse_float(vs_config->getVariable("physics", "warpbleed", "20"));
     static float shield_maintenance_cost =
             XMLSupport::parse_float(vs_config->getVariable("physics", "shield_maintenance_charge", ".25"));
     static bool shields_require_power =
@@ -5177,8 +5176,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 break;
         }
     }
-    const Unit::UnitJump &uj = playerUnit->GetJumpStatus();
-    const Unit::UnitJump &buj = blankUnit->GetJumpStatus();
+    const JumpDrive &uj = playerUnit->jump_drive;
+    const FtlDrive &ftl = playerUnit->ftl_drive;
+    const JumpDrive &buj = blankUnit->jump_drive;
     if (!mode) {
         float maxshield = playerUnit->totalShieldEnergyCapacitance();
         if (shields_require_power) {
@@ -5197,23 +5197,23 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             text += "#n##n##c0:1:.5#" + prefix + "[SPEC SUBSYSTEM]#n##-c";
 
             PRETTY_ADDU(statcolor + "Active SPEC Energy Requirements: #-c",
-                    uj.insysenergy * RSconverter * Wconv / warpbleed,
+                    ftl.GetConsumption() * RSconverter * Wconv,
                     0,
                     "MJ/s");
 
             text += "#n##n##c0:1:.5#" + prefix + "[JUMP SUBSYSTEM]#n##-c";
-            if (uj.drive == -2) {
+            if (!uj.Installed()) {
                 text += "#n##c1:.3:.3#No outsystem jump drive present#-c";                 //fixed??
             } else {
                 PRETTY_ADDU(statcolor + "Energy cost for jumpnode travel: #-c",
-                        uj.energy * RSconverter * Wconv,
+                        uj.GetConsumption() * RSconverter * Wconv,
                         0,
                         "MJ");
-                if (uj.delay)
-                    PRETTY_ADDU(statcolor + "Delay: #-c", uj.delay, 0, "seconds");
-                if (uj.damage > 0)
-                    PRETTY_ADDU(statcolor + "Damage to outsystem jump drive: #-c", uj.damage * VSDM, 0, "MJ");
-                if (playerUnit->warpCapData() < uj.energy) {
+                if (uj.Delay() > 0)
+                    PRETTY_ADDU(statcolor + "Delay: #-c", uj.Delay(), 0, "seconds");
+                if (uj.Damaged())
+                    PRETTY_ADDU(statcolor + "Damage to outsystem jump drive: #-c", 1-uj.Percent(), 0, "%");
+                if (playerUnit->ftl_energy.MaxLevel() < uj.GetAtomConsumption()) {
                     text += "#n##c1:.3:.3#" + prefix
                             +
                                     "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
@@ -5232,7 +5232,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
                     PRETTY_ADDU(statcolor + "Installs warp capacitor bank with storage capacity: #-c",
                             playerUnit->getWarpEnergy() * RSconverter * Wconv, 0, "MJ");
-                if (buj.drive != uj.drive) {
+                if (buj.Installed() && !uj.Installed()) {
                     text += statcolor +
                             "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
                 }
@@ -5627,7 +5627,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     +
                             "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
         }
-        if (uj.drive != -2 && playerUnit->warpCapData() < uj.energy) {
+        if (uj.Installed() && playerUnit->jump_drive.GetAtomConsumption() > playerUnit->ftl_energy.MaxLevel()) {
             text += "#n##c1:.3:.3#" + prefix
                     +
                             "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";

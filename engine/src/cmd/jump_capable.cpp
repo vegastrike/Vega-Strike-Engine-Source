@@ -104,8 +104,8 @@ JumpCapable::JumpCapable() : activeStarSystem(nullptr) {
 
 void JumpCapable::ActivateJumpDrive(int destination) {
     Unit *unit = static_cast<Unit *>(this);
-    if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && unit->jump.drive != -2) {
-        unit->jump.drive = destination;
+    if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && unit->jump_drive.Installed()) {
+        unit->jump_drive.SetDestination(destination);
     }
 }
 
@@ -139,7 +139,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             return AutoPilotToErrorMessage(targ, ignore_energy_requirements, failuremessage, recursive_level);
         }
     }
-    if (unit->ftl_energy.Level() < unit->jump.insysenergy) {
+    if (!unit->ftl_drive.CanConsume()) {
         if (!ignore_energy_requirements) {
             return false;
         }
@@ -271,7 +271,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             failuremessage = configuration()->graphics_config.hud.already_near_message;
             return false;
         }
-        unit->ftl_energy.Deplete(true, static_cast<double>(totpercent) * unit->jump.insysenergy);
+        unit->ftl_energy.Deplete(true, static_cast<double>(totpercent) * unit->ftl_drive.GetAtomConsumption());
+        // TODO: figure out to do unit->ftl_drive.Consume() instead
         if (unsafe == false && totpercent == 0) {
             end = endne;
         }
@@ -490,19 +491,12 @@ float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &F
 
 void JumpCapable::DeactivateJumpDrive() {
     Unit *unit = static_cast<Unit *>(this);
-    if (unit->jump.drive >= 0) {
-        unit->jump.drive = -1;
-    }
+    unit->jump_drive.UnsetDestination();
 }
 
 const std::vector<std::string> &JumpCapable::GetDestinations() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->pImage->destination;
-}
-
-const Energetic::UnitJump &JumpCapable::GetJumpStatus() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->jump;
 }
 
 StarSystem *JumpCapable::getStarSystem() {
