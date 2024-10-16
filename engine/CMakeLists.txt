@@ -1139,6 +1139,10 @@ ADD_LIBRARY(vegastrike_python SHARED
     ${LIBPYTHON}
 )
 
+TARGET_COMPILE_OPTIONS(
+    vegastrike_python PRIVATE -fPIC
+)
+
 TARGET_LINK_LIBRARIES(
     vegastrike_python
     ${Boost_LIBRARIES}
