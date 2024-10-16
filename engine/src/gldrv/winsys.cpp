@@ -50,6 +50,7 @@
 #include "vs_logging.h"
 #include "options.h"
 #include "vs_exit.h"
+#include "configuration/configuration.h"
 
 #include "SDL2/SDL_video.h"
 
@@ -253,8 +254,17 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     width = g_game.x_resolution;
     height = g_game.y_resolution;
 
-
-    SDL_Window *window = SDL_CreateWindow("Vegastrike", 0, 0, width, height, video_flags);
+    const int screen_number = configuration()->general_config.screen;
+    SDL_Window *window = nullptr;
+    if(screen_number == 0) {
+        window = SDL_CreateWindow("Vegastrike", 0, 0, width, height, video_flags);
+    } else {
+        window = SDL_CreateWindow("Vegastrike", 
+                                SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
+                                SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number), 
+                                0, 0, video_flags);
+    }
+    
 
     if(!window) {
         std::cerr << "No window\n" << std::flush;

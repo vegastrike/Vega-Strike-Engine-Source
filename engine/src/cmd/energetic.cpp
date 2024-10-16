@@ -161,6 +161,8 @@ float Energetic::totalShieldEnergyCapacitance() const {
 // or better yet, write plugable consumption models.
 //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
 void Energetic::ExpendEnergy(const bool player_ship) {
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+
     // TODO: if we run out of fuel or energy, we die from lack of air
 
     MaintainShields();
@@ -168,9 +170,7 @@ void Energetic::ExpendEnergy(const bool player_ship) {
     MaintainECM();
     DecreaseWarpEnergyInWarp();
 
-    RechargeWarpCapacitors(player_ship);
-
-    ExpendFuel();
+    unit->reactor.Generate();
 }
 
 void Energetic::ExpendEnergy(float usage) {

@@ -46,13 +46,13 @@
 #include "cmd/unit_generic.h"
 #include "mission.h"
 
-PYTHON_BEGIN_MODULE(Base)
+BOOST_PYTHON_MODULE(Base) {
 //Nothing here, but keeps those files that do a "import Base" happy.
-PYTHON_END_MODULE(Base)
+}
 
-PYTHON_BEGIN_MODULE(Briefing)
+BOOST_PYTHON_MODULE(Briefing) {
 //Nothing here, but keeps those files that do a "import Briefing" happy.
-PYTHON_END_MODULE(Briefing)
+}
 
 void InitBase() {
     PyImport_AppendInittab("Base", PYTHON_MODULE_INIT_FUNCTION(Base));
