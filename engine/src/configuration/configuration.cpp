@@ -30,10 +30,17 @@
 #endif
 #include <math.h>
 
+#include <stdio.h> 
+
 using vega_config::GetGameConfig;
 
 Configuration::Configuration() {
     //logging.verbose_debug = GetGameConfig().GetBool("data.verbose_debug", false);
+    std::ifstream ifs("config.json", std::ifstream::in);
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+    const std::string json_text = buffer.str();
+    graphics2_config = Graphics2Config(json_text);
 }
 
 /* Override the default value(provided by constructor) with the value from the user specified configuration file, if any.

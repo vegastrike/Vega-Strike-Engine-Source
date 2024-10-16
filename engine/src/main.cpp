@@ -247,6 +247,8 @@ int main(int argc, char *argv[]) {
     const boost::filesystem::path program_name{program_path.filename()};  //canonical_program_path.filename();
     const boost::filesystem::path program_directory_path{program_path.parent_path()};
 
+    VSFileSystem::programdir = program_directory_path.string();
+
     // This will be set later
     boost::filesystem::path home_subdir_path{};
 

@@ -69,7 +69,6 @@ void UncheckUnit( class Unit*un );
 #include "collection.h"
 #include "script/flightgroup.h"
 #include "faction_generic.h"
-#include "star_system_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
 #include "collide_map.h"

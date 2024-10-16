@@ -32,7 +32,6 @@
 #include "configxml.h"
 #include "images.h"
 #include "collection.h"
-#include "star_system_generic.h"
 #include "role_bitmask.h"
 #include "ai/order.h"
 #include "faction_generic.h"
