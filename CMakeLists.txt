@@ -143,11 +143,34 @@ OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
 # Should we run gtest?
 OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 
-IF (USE_GTEST)
+IF (INSTALL_GTEST OR USE_GTEST)
+    MESSAGE("-- Configuring Unit Tests")
     ENABLE_TESTING()
 
-    SET(TEST_NAME ${PROJECT_NAME}_tests)
-ENDIF (USE_GTEST)
+    IF (INSTALL_GTEST)
+        INCLUDE(FetchContent)
+        FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG        release-1.11.0
+        )
+
+        FetchContent_GetProperties(googletest)
+        STRING(TOLOWER "googletest" lcName)
+        IF(NOT ${lcName}_POPULATED)
+            # Fetch the content using previously declared details
+            FetchContent_Populate(googletest)
+
+            # Set custom variables, policies, etc.
+
+            # For Windows: Prevent overriding the parent project's compiler/linker settings
+            SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+            # Bring the populated content into the build
+            ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
+        ENDIF(NOT ${lcName}_POPULATED)
+    ENDIF (INSTALL_GTEST)
+ENDIF (INSTALL_GTEST OR USE_GTEST)
 
 SET(VS_SUBDIRECTORIES "engine")
 FOREACH(VS_SUBDIR IN LISTS VS_SUBDIRECTORIES)

@@ -45,5 +45,5 @@ else
 fi
 
 pushd build
-GTEST_OUTPUT=xml:test-results ctest -V
+GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V
 popd

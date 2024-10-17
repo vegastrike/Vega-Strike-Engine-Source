@@ -1505,35 +1505,8 @@ ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
-IF (INSTALL_GTEST OR USE_GTEST)
-    MESSAGE("-- Configuring Unit Tests")
-ENDIF (INSTALL_GTEST OR USE_GTEST)
-
-IF (INSTALL_GTEST)
-    INCLUDE(FetchContent)
-    FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.11.0
-    )
-
-    FetchContent_GetProperties(googletest)
-    STRING(TOLOWER "googletest" lcName)
-    IF(NOT ${lcName}_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(googletest)
-
-        # Set custom variables, policies, etc.
-
-        # For Windows: Prevent overriding the parent project's compiler/linker settings
-        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-        # Bring the populated content into the build
-        ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-    ENDIF(NOT ${lcName}_POPULATED)
-ENDIF (INSTALL_GTEST)
-
 IF (USE_GTEST)
+    SET(TEST_NAME ${PROJECT_NAME}_tests)
     ADD_EXECUTABLE(
         ${TEST_NAME}
         src/cmd/tests/csv_tests.cpp
