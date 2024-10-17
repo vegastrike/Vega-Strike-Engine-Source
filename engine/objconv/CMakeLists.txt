@@ -94,7 +94,6 @@ SET(MESHER_SOURCES
     mesher/Modules/XMesh_to_BFXM.cpp
     mesher/Modules/XMesh_to_Ogre.cpp
     mesher/Modules/Wavefront_to_BFXM.cpp
-    ${Vega_Strike_SOURCE_DIR}/engine/src/hashtable.cpp
     ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
 )
 

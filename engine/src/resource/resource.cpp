@@ -24,6 +24,10 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
+
+#include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "random_utils.h"
 
@@ -38,9 +42,49 @@ Resource<T>::Resource(const T &value, const T &min_value, const T &max_value):
         adjusted_max_value_(max_value),
         no_max_(max_value==-1) {}
 
+template<>
+Resource<double>::Resource(const std::string input, const double modifier, const double minimum_functionality):
+        value_(0),
+        min_value_(0),
+        max_value_(1),
+        adjusted_max_value_(1),
+        no_max_(false) {
+    if(input.empty()) {
+        value_ = max_value_ = adjusted_max_value_ = 0.0;
+        return;
+    }
+
+    std::vector<std::string> result; 
+    boost::split(result, input, boost::is_any_of("/"));
+
+    switch(result.size()) {
+        case 1:
+            value_ = max_value_ = adjusted_max_value_ = std::stod(result[0]) * modifier;
+            break;
+        case 2:
+            value_ = adjusted_max_value_ = std::stod(result[0]) * modifier;
+            max_value_ = std::stod(result[1]) * modifier;
+            break;
+        case 3:
+            value_ = std::stod(result[0]) * modifier;
+            adjusted_max_value_ = std::stod(result[1]) * modifier;
+            max_value_ = std::stod(result[2]) * modifier;
+            break;
+        default:
+            value_ = max_value_ = adjusted_max_value_ = 0.0;
+    }
+
+    min_value_ = max_value_ * minimum_functionality;
+}
+
 /*
  * Methods
  */
+template<>
+const std::string Resource<double>::Serialize(const double modifier) const {
+    return (boost::format("%1$.2f/%2$.2f/%3$.2f") % (value_/modifier) %
+            (adjusted_max_value_/modifier) % (max_value_/modifier)).str();
+}
 
 
 template<typename T>
@@ -69,7 +113,7 @@ template<typename T>
 void Resource<T>::Set(const T &value) {
     value_ = value;
     if(!no_max_) {
-        value_ = std::min(max_value_, value_);
+        value_ = std::min(adjusted_max_value_, value_);
     }
     value_ = std::max(min_value_, value_);
 }
@@ -218,7 +262,7 @@ template<typename T>
 Resource<T> Resource<T>::operator=(const T &value) {
     value_ = value;
     if(!no_max_) {
-        value_ = std::min(max_value_, value_);
+        value_ = std::min(adjusted_max_value_, value_);
     }
     value_ = std::max(min_value_, value_);
 
@@ -258,6 +302,11 @@ template<typename T>
 Resource<T> Resource<T>::operator-=(T &value) {
     value_ = std::max(value_ - value, min_value_);
     return *this;
+}
+
+template<typename T>
+bool operator==(const Resource<T> &lhs, const Resource<T> &rhs) {
+    return lhs.Value() == rhs.Value();
 }
 
 template<typename T>
@@ -325,6 +374,7 @@ T operator/(const T &lhs, const Resource<T> &rhs) {
 template
 class Resource<float>;
 
+template bool operator==(const Resource<float> &lhs, const Resource<float> &rhs);
 template bool operator==(const Resource<float> &lhs, const float &rhs);
 template bool operator>(const Resource<float> &lhs, const float &rhs);
 template bool operator<(const Resource<float> &lhs, const float &rhs);
@@ -344,6 +394,7 @@ template float operator/(const float &lhs, const Resource<float> &rhs);
 template
 class Resource<double>;
 
+template bool operator==(const Resource<double> &lhs, const Resource<double> &rhs);
 template bool operator==(const Resource<double> &lhs, const double &rhs);
 template bool operator>(const Resource<double> &lhs, const double &rhs);
 template bool operator<(const Resource<double> &lhs, const double &rhs);
@@ -360,6 +411,7 @@ template double operator/(const double &lhs, const Resource<double> &rhs);
 template
 class Resource<int>;
 
+template bool operator==(const Resource<int> &lhs, const Resource<int> &rhs);
 template bool operator==(const Resource<int> &lhs, const int &rhs);
 template bool operator>(const Resource<int> &lhs, const int &rhs);
 template bool operator<(const Resource<int> &lhs, const int &rhs);
