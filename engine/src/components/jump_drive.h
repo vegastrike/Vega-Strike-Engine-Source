@@ -22,8 +22,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef JUMP_DRIVE_H
-#define JUMP_DRIVE_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_JUMP_DRIVE_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_JUMP_DRIVE_H
 
 #include "component.h"
 #include "energy_consumer.h"
@@ -49,11 +49,9 @@ public:
     bool Enabled() const;
 
     // Component Methods
-    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    virtual void Load(std::string upgrade_key, std::string unit_key = "");      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
-
-    virtual std::string Describe() const; // Describe component in base_computer 
 
     virtual bool CanDowngrade() const;
 
@@ -64,4 +62,4 @@ public:
     virtual bool Upgrade(const std::string upgrade_name);
 };
 
-#endif // JUMP_DRIVE_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_JUMP_DRIVE_H

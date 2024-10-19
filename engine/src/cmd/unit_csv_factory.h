@@ -30,8 +30,6 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-#include "vsfilesystem.h"
-
 const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
                             "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	"Rapid_Mesh",	"BSP_Mesh",

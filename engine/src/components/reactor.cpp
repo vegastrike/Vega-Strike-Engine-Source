@@ -28,6 +28,7 @@
 #include "reactor.h"
 
 #include "unit_csv_factory.h"
+#include "configuration/configuration.h"
 
 #include <iostream>
 
@@ -46,11 +47,15 @@ Reactor::Reactor(EnergyContainer *source,
                  conversion_ratio(conversion_ratio),
                  energy(energy),
                  ftl_energy(ftl_energy) {
+    type = ComponentType::Reactor;
 }
 
 
 void Reactor::Load(std::string upgrade_key, std::string unit_key) {
-    capacity = UnitCSVFactory::GetVariable(unit_key, REACTOR_RECHARGE, 0.0f);
+    Component::Load(upgrade_key, unit_key);
+    capacity = Resource<double>(UnitCSVFactory::GetVariable(unit_key, REACTOR_RECHARGE, std::string("0.0")),
+                                configuration()->fuel.reactor_factor);
+    
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
 }     
@@ -60,9 +65,6 @@ void Reactor::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit[REACTOR_RECHARGE] = std::to_string(capacity.MaxValue());
 }
 
-std::string Reactor::Describe() const {
-    return std::string();
-}
 
 bool Reactor::CanDowngrade() const {
     return !Damaged();
@@ -92,7 +94,8 @@ bool Reactor::Upgrade(const std::string upgrade_key) {
 
     Component::Upgrade(upgrade_key);
 
-    capacity.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, 0.0));
+    capacity = Resource<double>(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, std::string("0.0")), 
+                                configuration()->fuel.reactor_factor);
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
 
@@ -144,7 +147,7 @@ double Reactor::MaxCapacity() const {
 }
 
 void Reactor::SetCapacity(double capacity) {
-    this->capacity.SetMaxValue(capacity);
+    this->capacity.SetMaxValue(capacity * configuration()->fuel.reactor_factor);
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
 }

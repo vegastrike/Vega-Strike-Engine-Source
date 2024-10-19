@@ -25,14 +25,19 @@
 #include "ftl_drive.h"
 
 #include "unit_csv_factory.h"
+#include "configuration/configuration.h"
 
 FtlDrive::FtlDrive() : 
     Component(),
-    EnergyConsumer(nullptr, 0, false) {}
+    EnergyConsumer(nullptr, 0, false) {
+    type = ComponentType::FtlDrive;
+}
 
 FtlDrive::FtlDrive(EnergyContainer *source):
     Component(0.0, 0.0, true),
-    EnergyConsumer(source, false) {}
+    EnergyConsumer(source, false) {
+    type = ComponentType::FtlDrive;
+}
 
 
 bool FtlDrive::Enabled() const {
@@ -42,13 +47,14 @@ bool FtlDrive::Enabled() const {
 
 // Component Methods
 void FtlDrive::Load(std::string upgrade_key, 
-                    std::string unit_key, 
-                    double ftl_factor) {
+                    std::string unit_key) {
     Component::Load(upgrade_key, unit_key);
+
+    const double ftl_drive_factor = configuration()->fuel.ftl_drive_factor;
 
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    SetConsumption(energy / ftl_factor);
+    SetConsumption(energy * ftl_drive_factor);
 
     // FTL Drive
 }      
@@ -56,10 +62,6 @@ void FtlDrive::Load(std::string upgrade_key,
 void FtlDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Warp_Usage_Cost"] = std::to_string(consumption);
 }
-
-std::string FtlDrive::Describe() const {
-    return std::string();
-} 
 
 // FTL drive is integrated and so cannot be upgraded/downgraded
 bool FtlDrive::CanDowngrade() const {

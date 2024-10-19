@@ -41,32 +41,7 @@ struct UpgradeOperationResult {
     bool upgradeable = false;   // Temp variable. Until we map all types.
 };
 
-enum class UpgradeType {
-    None,
 
-    Armor,
-    //Hull,         // Can't upgrade the hull right now
-    Shield,
-
-    Capacitor, 
-    FTL_Capacitor,
-    Reactor,
-
-    Afterburner,
-    Drive,
-    Jump_Drive,
-    FTL_Drive,
-
-    Cloak,
-    ECM,
-    Radar,
-
-    Repair_Droid
-
-    // TODO: all the rest of the upgrades, shady or not...
-};
-
-UpgradeType GetUpgradeType(const std::string upgrade_key);
 
 // TODO: make this into a subclass of unit later
 

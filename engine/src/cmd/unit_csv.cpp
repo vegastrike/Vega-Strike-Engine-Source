@@ -346,7 +346,7 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
             Q.i = nextElementFloat(subunits, elemstart, elemend);
             Q.j = nextElementFloat(subunits, elemstart, elemend);
             Q.k = nextElementFloat(subunits, elemstart, elemend);
-            double restricted = cos(nextElementFloat(subunits, elemstart, elemend, 180) * VS_PI / 180.0);
+            double restricted = cos(nextElementFloat(subunits, elemstart, elemend, 180) * M_PI / 180.0);
 
             ret.push_back(SubUnitStruct(filename, pos, Q, R, restricted));
         } else {
@@ -608,9 +608,6 @@ void LoadCockpit(Unit *thus, const string &cockpit) {
     thus->pImage->CockpitCenter.k = nextElementFloat(cockpit, elemstart, elemend);
 }
 
-float getFuelConversion() {
-    return configuration()->fuel.fuel_conversion;
-}
 
 const std::string EMPTY_STRING("");
 
@@ -623,8 +620,8 @@ void YawPitchRollParser(std::string unit_key,
     float main_value = UnitCSVFactory::GetVariable(unit_key, main_string, 0.0f);
     float right_value = UnitCSVFactory::GetVariable(unit_key, right_string, 0.0f);
     float left_value = UnitCSVFactory::GetVariable(unit_key, left_string, 0.0f);
-    right_pointer = (right_value > 0 ? right_value : main_value) * VS_PI / 180.;
-    left_pointer = (left_value > 0 ? left_value : main_value) * VS_PI / 180.;
+    right_pointer = (right_value > 0 ? right_value : main_value) * M_PI / 180.;
+    left_pointer = (left_value > 0 ? left_value : main_value) * M_PI / 180.;
 }
 
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
@@ -813,21 +810,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // TODO: The following code has a bug.
     // It will set the max of the component as the current value loaded from the 
     // CSV. If the component is damaged, this will be lower than the original value.
-    fuel.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0), true);
-    energy.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0), true);
-    ftl_energy.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0), true);
-    reactor.SetCapacity(UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0));
-
-    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp; 
-    
-    if (WCfuelhack) {
-        ftl_energy.SetCapacity(0);
-        fuel.SetCapacity(ftl_energy.MaxLevel());
-        ftl_drive = FtlDrive(&fuel);
-        jump_drive = JumpDrive(&fuel);
-        // Add any other component that relies on FTL.
-        // Especially note the cloaking device support for FTL as an energy source.
-    } 
+    fuel.Load("", unit_key);
+    energy.Load("", unit_key);
+    ftl_energy.Load("", unit_key);
+    reactor.Load("", unit_key);
 
     // End Energy
 
@@ -837,7 +823,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // Bleed factor hints at losing energy. However, here, at 2.0 it's a factor
     // for reducing warp cost
     double ftl_factor = configuration()->warp_config.bleed_factor;
-    ftl_drive.Load("", unit_key, ftl_factor);
+    ftl_drive.Load("", unit_key);
     jump_drive.Load("", unit_key);
     
     
@@ -851,9 +837,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     afterburntype = UnitCSVFactory::GetVariable(unit_key,
             "Afterburner_Type",
             0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
-    limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) * VS_PI / 180.0;
-    limits.pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) * VS_PI / 180.0;
-    limits.roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) * VS_PI / 180.0;
+    limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) * M_PI / 180.0;
+    limits.pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) * M_PI / 180.0;
+    limits.roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) * M_PI / 180.0;
 
     YawPitchRollParser(unit_key,
             "Yaw_Governor",
@@ -933,9 +919,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     }
 
     computer.radar.maxrange = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", FLT_MAX);
-    computer.radar.maxcone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0f) * VS_PI / 180);
-    computer.radar.trackingcone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI / 180);
-    computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI / 180);
+    computer.radar.maxcone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0f) * M_PI / 180);
+    computer.radar.trackingcone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * M_PI / 180);
+    computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * M_PI / 180);
 
     const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
     cloak = Cloak(unit_key, (warp_energy_for_cloak ? &ftl_energy : &energy));
@@ -1251,7 +1237,7 @@ string Unit::WriteUnitString() {
                         subunits[k].Q.i,
                         subunits[k].Q.j,
                         subunits[k].Q.k,
-                        ((double) acos(subunits[k].restricted) * 180. / VS_PI));
+                        ((double) acos(subunits[k].restricted) * 180. / M_PI));
                 str += "{" + subunits[k].filename + tmp;
             }
             unit["Sub_Units"] = str;
@@ -1354,15 +1340,15 @@ string Unit::WriteUnitString() {
     unit["Wormhole"] = tos(forcejump != 0);
     unit["Afterburner_Usage_Cost"] = tos(afterburnenergy);
     unit["Afterburner_Type"] = tos(afterburntype);
-    unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (VS_PI));
-    unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (VS_PI));
-    unit["Maneuver_Roll"] = tos(limits.roll * 180 / (VS_PI));
-    unit["Yaw_Governor_Right"] = tos(computer.max_yaw_right * 180 / VS_PI);
-    unit["Yaw_Governor_Left"] = tos(computer.max_yaw_left * 180 / VS_PI);
-    unit["Pitch_Governor_Up"] = tos(computer.max_pitch_up * 180 / VS_PI);
-    unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / VS_PI);
-    unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / VS_PI);
-    unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / VS_PI);
+    unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (M_PI));
+    unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (M_PI));
+    unit["Maneuver_Roll"] = tos(limits.roll * 180 / (M_PI));
+    unit["Yaw_Governor_Right"] = tos(computer.max_yaw_right * 180 / M_PI);
+    unit["Yaw_Governor_Left"] = tos(computer.max_yaw_left * 180 / M_PI);
+    unit["Pitch_Governor_Up"] = tos(computer.max_pitch_up * 180 / M_PI);
+    unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / M_PI);
+    unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / M_PI);
+    unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / M_PI);
     const float game_accel = configuration()->physics_config.game_accel;
     const float game_speed = configuration()->physics_config.game_speed;
     unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
@@ -1376,9 +1362,9 @@ string Unit::WriteUnitString() {
     unit["Can_Lock"] = tos(computer.radar.canlock);
     unit["Radar_Color"] = tos(computer.radar.capability);
     unit["Radar_Range"] = tos(computer.radar.maxrange);
-    unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / VS_PI);
-    unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
-    unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / VS_PI);
+    unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / M_PI);
+    unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / M_PI);
+    unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / M_PI);
 
     cloak.SaveToCSV(unit);
     unit["Repair_Droid"] = tos(repair_droid);

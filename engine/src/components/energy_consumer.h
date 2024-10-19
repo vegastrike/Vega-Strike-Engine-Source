@@ -25,10 +25,16 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef ENERGYCONSUMER_H
-#define ENERGYCONSUMER_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONSUMER_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONSUMER_H
 
 #include "energy_container.h"
+
+enum class EnergyConsumerSource {
+    Infinite, Fuel, Energy, FTLEnergy, None
+};
+
+EnergyConsumerSource GetSource(const int source);
 
 class EnergyConsumer {
 protected:
@@ -40,9 +46,12 @@ protected:
 private:
     EnergyContainer *source;
     bool partial; // Can power consumer with less energy than requested
+
+protected:
+    bool infinite; // Connected to infinite power source. Ignore source field. Always work.
 public:
-    EnergyConsumer(EnergyContainer *source, bool partial, double consumption = 0.0);
-    bool CanConsume();
+    EnergyConsumer(EnergyContainer *source = nullptr, bool partial = false, double consumption = 0.0, bool infinite = false);
+    bool CanConsume() const;
     double Consume();
     double GetConsumption() const;
     double GetAtomConsumption() const;
@@ -52,4 +61,4 @@ public:
 
 };
 
-#endif // ENERGYCONSUMER_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONSUMER_H

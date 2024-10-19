@@ -54,7 +54,6 @@ using namespace XMLSupport;
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
 UNITLOADTYPE current_unit_load_mode = DEFAULT;
-extern float getFuelConversion();
 
 string KillQuadZeros(string inp) {
     std::string::size_type text = 0;
@@ -115,6 +114,8 @@ string MakeUnitXMLPretty(string str, Unit *un) {
     return writestr;
 }
 
+// TODO: delete this at some point. 
+// We no longer support add/mul modes of upgrades
 int GetModeFromName(const char *input_buffer) {
     if (strlen(input_buffer) > 3) {
         if (input_buffer[0] == 'a'

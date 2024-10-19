@@ -1272,14 +1272,14 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 
         switch(dist20(rng)) {
             case 0: fuel.Damage(); break;   // Fuel
-            case 1: energy.Damage();  break;       // Energy
+            case 1: energy.Damage(); break; // Energy
             case 2: ftl_energy.Damage(); break;
             case 3: ftl_drive.Damage(); break;
             case 4: jump_drive.Damage(); break;
             case 5: this->afterburnenergy += ((1 - dam) * reactor.Capacity()); break;
             case 6: CargoVolume *= dam; break;
             case 7: UpgradeVolume *= dam; break;
-            case 8: 
+            case 8:
             //Do something NASTY to the cargo
             if (cargo.size() > 0) {
                 unsigned int i = 0;
@@ -3078,12 +3078,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "ECM_Rating"))
             STDUPGRADE(ecm, up->ecm, templ->ecm, 0); //ecm is unsigned --chuck_starchaser
-        /*if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Primary_Capacitor")) {
-            temporary_upgrade_float_variable = static_cast<float>(energy.MaxValue());
-            STDUPGRADE(temporary_upgrade_float_variable, up->energy.MaxValue(), templ->energy.MaxValue(), 0);
-            energy.SetMaxValue(temporary_upgrade_float_variable);
-        }*/
     }
     //Maneuvering stuff
     if (!csv_cell_null_check || force_change_on_nothing
@@ -4271,7 +4265,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     ActTurn();
 
     static CloakingStatus previous_status = cloak.status;
-    cloak.Update(this);
+    cloak.Update();
 
     // Play once per cloaking
     if(cloak.Cloaking() && previous_status != CloakingStatus::cloaking) {

@@ -25,17 +25,22 @@
 #include "jump_drive.h"
 
 #include "unit_csv_factory.h"
+#include "configuration/configuration.h"
 
 JumpDrive::JumpDrive() : 
     Component(),
     EnergyConsumer(nullptr, 0, false),
     destination(-1),
-    delay(0.0) {}
+    delay(0.0) {
+    type = ComponentType::JumpDrive;
+}
 
 JumpDrive::JumpDrive(EnergyContainer *source):
     Component(0.0, 0.0, true),
     EnergyConsumer(source, false),
-    delay(0.0) {}
+    delay(0.0) {
+    type = ComponentType::JumpDrive;
+}
 
 
 int JumpDrive::Destination() const {
@@ -73,10 +78,12 @@ bool JumpDrive::Enabled() const {
 void JumpDrive::Load(std::string upgrade_key, std::string unit_key) {
     Component::Load(upgrade_key, unit_key);
 
+    const double jump_drive_factor = configuration()->fuel.jump_drive_factor;
+
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     // Jump drive is unique - consumption and atom_consumption are identical
-    atom_consumption = consumption = energy;
+    atom_consumption = consumption = energy * jump_drive_factor;
  
 
     // Jump Drive
@@ -93,10 +100,6 @@ void JumpDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Jump_Drive_Delay"] = std::to_string(delay);
     unit["Outsystem_Jump_Cost"] = std::to_string(consumption);
 }
-
-std::string JumpDrive::Describe() const {
-    return std::string();
-} 
 
 bool JumpDrive::CanDowngrade() const {
     return !Damaged();
