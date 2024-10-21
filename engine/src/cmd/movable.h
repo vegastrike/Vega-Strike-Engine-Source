@@ -25,7 +25,6 @@
 #define VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 
 #include "gfx/vec.h"
-#include "vs_limits.h"
 #include "gfx/quaternion.h"
 #include "star_system.h"
 
@@ -59,8 +58,6 @@ public:
     }
 
     // Fields
-
-    Limits limits;
     //The velocity this unit has in World Space
     Vector cumulative_velocity;
     //The force applied from outside accrued over the whole physics frame
@@ -295,6 +292,9 @@ public:
     void PitchTorque(float amt);
     //Applies a roll of amt
     void RollTorque(float amt);
+
+    double MaxSpeed() const;
+    double MaxAfterburnerSpeed() const;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_MOVABLE_H

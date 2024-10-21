@@ -28,6 +28,7 @@
 #include "component.h"
 #include "energy_consumer.h"
 #include "energy_container.h"
+#include "resource/resource.h"
 
 #include <string>
 
@@ -39,5 +40,17 @@ EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
 
 EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer* fuel,
                                             EnergyContainer* energy, EnergyContainer* ftl_energy);
+
+enum class YPR {
+    Yaw, Pitch, Roll
+};
+
+
+void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr,
+                        double &right_value, double &left_value);
+
+ void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr,
+                        Resource<double> &right_value, Resource<double> &left_value,
+                        const double minimum_functionality = 0.0);
                                                
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H

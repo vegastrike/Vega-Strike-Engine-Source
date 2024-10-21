@@ -330,8 +330,8 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                             type->radial_speed,
                             type->pulse_speed /*detonation_radius*/);
                     if (!match_speed_with_target) {
-                        temp->GetComputerData().max_combat_speed = type->speed + velocity.Magnitude();
-                        temp->GetComputerData().max_combat_ab_speed = type->speed + velocity.Magnitude();
+                        temp->drive.speed = type->speed + velocity.Magnitude();
+                        temp->afterburner.speed = type->speed + velocity.Magnitude();
                     }
                 } else {
                     Flightgroup *testfg = caller->getFlightgroup();

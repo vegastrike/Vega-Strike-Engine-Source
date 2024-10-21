@@ -321,7 +321,7 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
                 value = (pdmag - parent->rSize() - targ->rSize());
                 float myvel = PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / value;        ///pdmag;
                 if (myvel > 0) {
-                    value -= myvel * myvel / (2 * (parent->limits.retro / parent->getMass()));
+                    value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
                 }
             } else {
                 value = 10000;
@@ -1727,7 +1727,7 @@ void AggressiveAI::Execute() {
             mag = 1 / mag;
         }
         parent->SetVelocity(
-                parent->GetVelocity() * (mag * parent->GetComputerData().max_speed() / getTimeCompression()));
+                parent->GetVelocity() * (mag * parent->MaxSpeed() / getTimeCompression()));
         parent->NetLocalForce = parent->NetForce = Vector(0, 0, 0);
     }
     target = parent->Target();

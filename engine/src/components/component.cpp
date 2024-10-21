@@ -57,7 +57,6 @@ void Component::Load(std::string upgrade_key, std::string unit_key) {
         mass = UnitCSVFactory::GetVariable(upgrade_key, "Mass", 0.0);
 
         // Get volume and description from MasterPartList.
-        // We need try/catch for unit tests where MPL isn't loaded.
         const Cargo cargo = Manifest::MPL().GetCargoByName(upgrade_key);
         if(!cargo.GetName().empty()) {
             price = cargo.GetPrice();
@@ -68,6 +67,8 @@ void Component::Load(std::string upgrade_key, std::string unit_key) {
 
     // TODO: bool integral = false;
 }
+
+
 
 // TODO: convert to std::pair<bool, double>
 bool Component::CanWillUpDowngrade(const std::string upgrade_key,

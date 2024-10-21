@@ -87,11 +87,7 @@ void JumpDrive::Load(std::string upgrade_key, std::string unit_key) {
  
 
     // Jump Drive
-    bool installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
-    if(!installed) {
-        this->unit_key = "";
-    }
-
+    installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
     delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
 }      
 

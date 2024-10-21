@@ -107,25 +107,14 @@ public:
     float threatlevel;
     //The speed the flybywire system attempts to maintain
     float set_speed;
-    //Computers limitation of speed
-    float max_combat_speed;
-    float max_combat_ab_speed;
-    //Computer's restrictions of YPR to limit space combat maneuvers
-    float max_yaw_left;
-    float max_yaw_right;
-    float max_pitch_down;
-    float max_pitch_up;
-    float max_roll_left;
-    float max_roll_right;
+    
     //Whether or not an 'lead' indicator appears in front of target
     unsigned char slide_start;
     unsigned char slide_end;
     bool itts;
-    //tells whether the speed is clamped draconian-like or not
+    
+    // In hud - Maneuver (true) Travel (false)
     bool combat_mode;
-
-    float max_speed() const;
-    float max_ab_speed() const;
 
     Computer();
 };

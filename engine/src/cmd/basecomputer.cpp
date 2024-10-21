@@ -62,7 +62,7 @@ using VSFileSystem::SaveFile;
 #include "facet_configuration.h"
 #include "vs_logging.h"
 #include "controls_factory.h"
-
+#include "configuration/configuration.h"
 
 //for directory thing
 #if defined (_WIN32) && !defined (__CYGWIN__)
@@ -3940,7 +3940,9 @@ string buildUpgradeDescription(Cargo &item) {
     current_unit_load_mode = DEFAULT;
     string str = "";
     str += item.GetDescription();
+    
     showUnitStats(newPart, str, 0, 1, item);
+    
     newPart->Kill();
     // delete newPart;
     return str;
@@ -4631,8 +4633,6 @@ static const char *WeaponTypeStrings[] = {
 
 void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item) {
     static Unit *blankUnit = new Unit("upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex("upgrades"));
-    static float
-            warpenratio = XMLSupport::parse_float(vs_config->getVariable("physics", "warp_energy_multiplier", "0.12"));
     static float shield_maintenance_cost =
             XMLSupport::parse_float(vs_config->getVariable("physics", "shield_maintenance_charge", ".25"));
     static bool shields_require_power =
@@ -4642,7 +4642,6 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     static float shieldenergycap =
             XMLSupport::parse_float(vs_config->getVariable("physics", "shield_energy_capacitance", ".2"));
 
-    float Wconv = warpenratio == 0.0 ? 0.0 : (1.0 / warpenratio);      //converts from reactor to warp energy scales
     char conversionBuffer[128];
     string prefix = "";
     for (int i = 0; i < subunitlevel; i++) {
@@ -4652,7 +4651,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     static float kj_per_unit_damage =
             XMLSupport::parse_float(vs_config->getVariable("physics", "kilojoules_per_unit_damage", "5400"));
     float VSDM = kj_per_unit_damage / 1000.0;
-    float RSconverter = 100;    //100MJ per reactor or shield recharge energy unit
+    float RSconverter = configuration()->fuel.megajoules_factor;    //100MJ per reactor or shield recharge energy unit
     float totalWeaponEnergyUsage = 0;
     float totalWeaponDamage = 0;
     string MPLdesc = "";
@@ -4792,7 +4791,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     
     
     if (!mode) {
-        PRETTY_ADDU(statcolor + "Fuel capacity: #-c", playerUnit->fuelData(), 2, "metric tons of Lithium-6");
+        double f = playerUnit->fuelData();
+        double mod = configuration()->fuel.fuel_ton_modifier;
+        PRETTY_ADDU(statcolor + "Fuel capacity: #-c", f * mod, 2, "metric tons of Lithium-6");
     } 
 
     const Computer &uc = playerUnit->ViewComputerData();
@@ -4801,17 +4802,18 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         text += "#n##n#" + prefix + "#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
         text += "#n#" + prefix + statcolor + "Turning response: #-c";
     }
-    if (playerUnit->limits.yaw == playerUnit->limits.pitch && playerUnit->limits.yaw == playerUnit->limits.roll) {
-        prettyPrintFloat(conversionBuffer, playerUnit->limits.yaw
+    if (playerUnit->drive.yaw.MaxValue() == playerUnit->drive.pitch.MaxValue() && 
+        playerUnit->drive.yaw.MaxValue() == playerUnit->drive.roll.MaxValue()) {
+        prettyPrintFloat(conversionBuffer, playerUnit->drive.yaw
                 / ((playerUnit->GetMoment() != 0) ? playerUnit->GetMoment() : 1), 0, 4);
         if (!mode) {
             text += conversionBuffer;
             text += " radians/second^2#n#" + expstatcolor + "  (yaw, pitch, roll)#-c";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) {
+        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.yaw)) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "#n#Installs maneuvering jets with turning response #-c",
-                            playerUnit->limits.yaw,
+                            playerUnit->drive.yaw,
                             0,
                             " radians/second^2#n#" + statcolor + "  (yaw, pitch, roll)#-c");
                     break;
@@ -4819,7 +4821,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     break;
                 case 2:                     //multiplicative
                     PRETTY_ADDU(statcolor + "#n#Increases turning response by #-c",
-                            100.0 * ((playerUnit->limits.yaw * 180 / PI) - 1),
+                            100.0 * ((playerUnit->drive.yaw * 180 / PI) - 1),
                             0,
                             "%#n#" + statcolor + "  (yaw, pitch, roll)#-c");
                     break;
@@ -4831,34 +4833,34 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     } else {
         if (!mode) {
             float moment = (playerUnit->GetMoment() != 0) ? playerUnit->GetMoment() : 1;
-            PRETTY_ADDN(substatcolor + "  yaw #-c", playerUnit->limits.yaw / (moment), 4);
-            PRETTY_ADDN(substatcolor + "  pitch #-c", playerUnit->limits.pitch / (moment), 4);
-            PRETTY_ADDN(substatcolor + "  roll #-c", playerUnit->limits.roll / (moment), 4);
+            PRETTY_ADDN(substatcolor + "  yaw #-c", playerUnit->drive.yaw / (moment), 4);
+            PRETTY_ADDN(substatcolor + "  pitch #-c", playerUnit->drive.pitch / (moment), 4);
+            PRETTY_ADDN(substatcolor + "  roll #-c", playerUnit->drive.roll / (moment), 4);
             text += " radians/second^2";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)
-                || MODIFIES(replacement_mode, playerUnit, blankUnit, limits.pitch)
-                || MODIFIES(replacement_mode, playerUnit, blankUnit, limits.roll)) {
+        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.yaw)
+                || MODIFIES(replacement_mode, playerUnit, blankUnit, drive.pitch)
+                || MODIFIES(replacement_mode, playerUnit, blankUnit, drive.roll)) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     text += "#n#Replaces existing maneuvering system with one rated at: #-c#n#";
-                    PRETTY_ADDN(substatcolor + "Yaw #-c", playerUnit->limits.yaw, 2);
-                    PRETTY_ADDN(substatcolor + "  Pitch #-c", playerUnit->limits.pitch, 2);
-                    PRETTY_ADDN(substatcolor + "  Roll #-c", playerUnit->limits.roll, 2);
+                    PRETTY_ADDN(substatcolor + "Yaw #-c", playerUnit->drive.yaw, 2);
+                    PRETTY_ADDN(substatcolor + "  Pitch #-c", playerUnit->drive.pitch, 2);
+                    PRETTY_ADDN(substatcolor + "  Roll #-c", playerUnit->drive.roll, 2);
                     text += " metric-ton*radians/second^2";
                     break;
                 case 1:                     //Additive
                     text += "#n#Upgrades existing maneuvering system by the following amounts: #-c#n#";
-                    PRETTY_ADDN(substatcolor + "Yaw #-c", playerUnit->limits.yaw, 2);
-                    PRETTY_ADDN(substatcolor + "  Pitch #-c", playerUnit->limits.pitch, 2);
-                    PRETTY_ADDN(substatcolor + "  Roll #-c", playerUnit->limits.roll, 2);
+                    PRETTY_ADDN(substatcolor + "Yaw #-c", playerUnit->drive.yaw, 2);
+                    PRETTY_ADDN(substatcolor + "  Pitch #-c", playerUnit->drive.pitch, 2);
+                    PRETTY_ADDN(substatcolor + "  Roll #-c", playerUnit->drive.roll, 2);
                     text += " metric-ton*radians/second^2";
                     break;
                 case 2:                     //multiplicative
                     text +=
                             "#n#Increases performance of existing maneuvering system by the following percentages: #-c#n#";
-                    PRETTY_ADDN(substatcolor + "Yaw #-c", 100.0 * ((playerUnit->limits.yaw * 180 / PI) - 1), 0);
-                    PRETTY_ADDN(substatcolor + "  Pitch #-c", 100.0 * ((playerUnit->limits.pitch * 180 / PI) - 1), 0);
-                    PRETTY_ADDN(substatcolor + "  Roll #-c", 100.0 * ((playerUnit->limits.roll * 180 / PI) - 1), 0);
+                    PRETTY_ADDN(substatcolor + "Yaw #-c", 100.0 * ((playerUnit->drive.yaw * 180 / PI) - 1), 0);
+                    PRETTY_ADDN(substatcolor + "  Pitch #-c", 100.0 * ((playerUnit->drive.pitch * 180 / PI) - 1), 0);
+                    PRETTY_ADDN(substatcolor + "  Roll #-c", 100.0 * ((playerUnit->drive.roll * 180 / PI) - 1), 0);
                     break;
                 default:                     //Failure
                     text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -4869,118 +4871,118 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     if (!subunitlevel) {
         if (!mode && (playerUnit->getMass() != 0)) {
             PRETTY_ADDU(statcolor + "Fore acceleration: #-c",
-                    playerUnit->limits.forward / (9.8 * playerUnit->getMass()), 2, "gravities");
+                    playerUnit->drive.forward / (9.8 * playerUnit->getMass()), 2, "gravities");
             PRETTY_ADDU(statcolor + "Aft acceleration: #-c",
-                    playerUnit->limits.retro / (9.8 * playerUnit->getMass()), 2, "gravities");
-            if (playerUnit->limits.lateral == playerUnit->limits.vertical) {
+                    playerUnit->drive.retro / (9.8 * playerUnit->getMass()), 2, "gravities");
+            if (playerUnit->drive.lateral.MaxValue() == playerUnit->drive.vertical.MaxValue()) {
                 PRETTY_ADDU(statcolor + "Orthogonal acceleration: #-c",
-                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2, "gravities");
+                        playerUnit->drive.vertical / (9.8 * playerUnit->getMass()), 2, "gravities");
                 text += expstatcolor + "#n#  (vertical and lateral axes)#-c";
             } else {
                 PRETTY_ADDN(statcolor + " Lateral acceleration #-c",
-                        playerUnit->limits.lateral / (9.8 * playerUnit->getMass()),
+                        playerUnit->drive.lateral / (9.8 * playerUnit->getMass()),
                         2);
                 PRETTY_ADDN(statcolor + " Vertical acceleration #-c",
-                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2);
+                        playerUnit->drive.vertical / (9.8 * playerUnit->getMass()), 2);
                 text += " gravities";
             }
-            PRETTY_ADDU(statcolor + "Forward acceleration with overthrust: #-c", playerUnit->limits.afterburn
+            PRETTY_ADDU(statcolor + "Forward acceleration with overthrust: #-c", playerUnit->afterburner.thrust
                     / (9.8 * playerUnit->getMass()), 2, "gravities");
             text.append("#n##n##c0:1:.5#" + prefix + "[GOVERNOR SETTINGS]#n##-c");
         } else {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.forward)) {
                         PRETTY_ADDU(statcolor + "Provides forward thrust rated at: #-c",
-                                playerUnit->limits.forward / 1000.0,
+                                playerUnit->drive.forward / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.retro)) {
                         PRETTY_ADDU(statcolor + "Provides aftward thrust rated at: #-c",
-                                playerUnit->limits.retro / 1000.0,
+                                playerUnit->drive.retro / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.vertical)) {
                         PRETTY_ADDU(statcolor + "Provides vertical thrust rated at: #-c",
-                                playerUnit->limits.vertical / 1000.0,
+                                playerUnit->drive.vertical / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.lateral)) {
                         PRETTY_ADDU(statcolor + "Provides lateral thrust rated at: #-c",
-                                playerUnit->limits.lateral / 1000.0,
+                                playerUnit->drive.lateral / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, afterburner.thrust)) {
                         PRETTY_ADDU(statcolor + "Overdrive thrust rated at: #-c",
-                                playerUnit->limits.afterburn / 1000.0,
+                                playerUnit->afterburner.thrust / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
                     break;
                 case 1:                     //Additive
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.forward)) {
                         PRETTY_ADDU(statcolor + "Increases forward thrust rating by: #-c",
-                                playerUnit->limits.forward / 1000.0,
+                                playerUnit->drive.forward / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.retro)) {
                         PRETTY_ADDU(statcolor + "Increases aftward thrust rating by: #-c",
-                                playerUnit->limits.retro / 1000.0,
+                                playerUnit->drive.retro / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.vertical)) {
                         PRETTY_ADDU(statcolor + "Increases vertical thrust rating by: #-c",
-                                playerUnit->limits.vertical / 1000.0,
+                                playerUnit->drive.vertical / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.lateral)) {
                         PRETTY_ADDU(statcolor + "Increases lateral thrust rating by: #-c",
-                                playerUnit->limits.lateral / 1000.0,
+                                playerUnit->drive.lateral / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, afterburner.thrust)) {
                         PRETTY_ADDU(statcolor + "Increases overdrive thrust rating by: #-c",
-                                playerUnit->limits.afterburn / 1000.0,
+                                playerUnit->afterburner.thrust / 1000.0,
                                 2,
                                 "MegaNewtons");
                     }
                     break;
                 case 2:                     //multiplicative
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.forward)) {
                         PRETTY_ADDU(statcolor + "Increases forward thrust rating by: #-c",
-                                (playerUnit->limits.forward - 1) * 100,
+                                (playerUnit->drive.forward - 1) * 100,
                                 0,
                                 "%");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.retro)) {
                         PRETTY_ADDU(statcolor + "Increases aftward thrust rating by: #-c",
-                                (playerUnit->limits.retro - 1) * 100,
+                                (playerUnit->drive.retro - 1) * 100,
                                 0,
                                 "%");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.vertical)) {
                         PRETTY_ADDU(statcolor + "Increases vertical thrust rating by: #-c",
-                                (playerUnit->limits.vertical - 1) * 100,
+                                (playerUnit->drive.vertical - 1) * 100,
                                 0,
                                 "%");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.lateral)) {
                         PRETTY_ADDU(statcolor + "Increases lateral thrust rating by: #-c",
-                                (playerUnit->limits.lateral - 1) * 100,
+                                (playerUnit->drive.lateral - 1) * 100,
                                 0,
                                 "%");
                     }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn))
+                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, afterburner.thrust))
                         PRETTY_ADDU(statcolor + "Overdrive thrust rating by: #-c",
-                                (playerUnit->limits.afterburn - 1) * 100,
+                                (playerUnit->afterburner.thrust - 1) * 100,
                                 0,
                                 "%");
                     break;
@@ -4992,94 +4994,24 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         static float non_combat_mode_mult =
                 XMLSupport::parse_float(vs_config->getVariable("physics", "combat_speed_boost", "100"));
         if (!mode) {
-            PRETTY_ADDU(statcolor + "Max combat speed: #-c", uc.max_speed(), 0, "m/s");
-            PRETTY_ADDU(statcolor + "Max overdrive combat speed: #-c", uc.max_ab_speed(), 0, "m/s");
-            PRETTY_ADDU(statcolor + "Max non-combat speed: #-c", uc.max_speed() * non_combat_mode_mult, 0, "m/s");
-        } else {
-            switch (replacement_mode) {
-                case 0:                     //Replacement or new Module
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
-                        PRETTY_ADDU(statcolor + "Sets max combat speed governor to: #-c", uc.max_speed(), 0, "m/s");
-                        PRETTY_ADDU(statcolor + "Sets max non-combat speed governor to: #-c",
-                                uc.max_speed() * non_combat_mode_mult, 0, "m/s");
-                    }
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
-                        PRETTY_ADDU(statcolor + "Sets max overdrive combat speed governor to: #-c",
-                                uc.max_ab_speed(),
-                                0,
-                                "m/s");
-                    break;
-                case 1:                     //Additive
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
-                        PRETTY_ADDU(statcolor + "Increases max combat speed governor setting by: #-c",
-                                uc.max_speed(),
-                                0,
-                                "m/s");
-                        PRETTY_ADDU(statcolor + "Increases max non-combat speed governor setting by: #-c",
-                                uc.max_speed() * non_combat_mode_mult, 0, "m/s");
-                    }
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
-                        PRETTY_ADDU(statcolor + "Increases max overdrive combat speed governor setting by: #-c",
-                                uc.max_ab_speed(), 0, "m/s");
-                    break;
-                case 2:                     //multiplicative
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
-                        PRETTY_ADDU(statcolor + "Increases max combat speed governor settings by: #-c",
-                                100.0 * (uc.max_speed() - 1), 0, "%");
-                        PRETTY_ADDU(statcolor + "Increases max non-combat speed governor settings by: #-c",
-                                100.0 * (uc.max_speed() - 1), 0, "%");
-                    }
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
-                        PRETTY_ADDU(statcolor + "Increases max overdrive combat speed governor settings by: #-c",
-                                (uc.max_ab_speed() - 1) * 100, 0, "%");
-                    break;
-                default:                     //Failure
-                    text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                    break;
-            }
+            PRETTY_ADDU(statcolor + "Max combat speed: #-c", playerUnit->MaxSpeed(), 0, "m/s");
+            PRETTY_ADDU(statcolor + "Max overdrive combat speed: #-c", playerUnit->MaxAfterburnerSpeed(), 0, "m/s");
+            PRETTY_ADDU(statcolor + "Max non-combat speed: #-c", playerUnit->MaxSpeed() * non_combat_mode_mult, 0, "m/s");
         }
     }
     if (!mode) {
-        if (uc.max_yaw_right == uc.max_pitch_up && uc.max_yaw_right == uc.max_roll_right) {
-            PRETTY_ADD(statcolor + "Max turn rate: #-c", uc.max_yaw_right, 2);
+        if (playerUnit->drive.max_yaw_right.MaxValue() == playerUnit->drive.max_pitch_up.MaxValue() && 
+            playerUnit->drive.max_yaw_right.MaxValue() == playerUnit->drive.max_roll_right.MaxValue()) {
+            PRETTY_ADD(statcolor + "Max turn rate: #-c", playerUnit->drive.max_yaw_right, 2);
             text += " radians/second " + expstatcolor + "(yaw, pitch, roll)#-c";
         } else {
             text += ("#n#" + prefix + statcolor + "Max turn rates:#-c");
-            PRETTY_ADDU(substatcolor + " - yaw: #-c", uc.max_yaw_right, 2, "radians/second");
-            PRETTY_ADDU(substatcolor + " - pitch: #-c", uc.max_pitch_up, 2, "radians/second");
-            PRETTY_ADDU(substatcolor + " - roll: #-c", uc.max_roll_right, 2, "radians/second");
+            PRETTY_ADDU(substatcolor + " - yaw: #-c", playerUnit->drive.max_yaw_right, 2, "radians/second");
+            PRETTY_ADDU(substatcolor + " - pitch: #-c", playerUnit->drive.max_pitch_up, 2, "radians/second");
+            PRETTY_ADDU(substatcolor + " - roll: #-c", playerUnit->drive.max_roll_right, 2, "radians/second");
         }
         text += "#n##n##c0:1:.5#" + prefix + "[TARGETTING SUBSYSTEM]#n##-c";
-    } else if (MODIFIES(replacement_mode, &uc, &buc, max_yaw_right)
-            || MODIFIES(replacement_mode, &uc, &buc, max_pitch_up)
-            || MODIFIES(replacement_mode, &uc, &buc, max_roll_right)) {
-        switch (replacement_mode) {
-            case 0:                         //Replacement or new Module
-                text += ("#n#" + prefix + "Governor settings for maximum turn rates set to: ");
-                PRETTY_ADDN(substatcolor + "  yaw #-c", uc.max_yaw_right, 2);
-                PRETTY_ADDN(substatcolor + "  pitch #-c", uc.max_pitch_up, 2);
-                PRETTY_ADDN(substatcolor + "  roll #-c", uc.max_roll_right, 2);
-                text += " radians/second";
-                break;
-            case 1:                         //Additive
-                text += ("#n#" + prefix + "Governor settings for maximum turn rates increased by: ");
-                PRETTY_ADDN(substatcolor + "  yaw #-c", uc.max_yaw_right, 2);
-                PRETTY_ADDN(substatcolor + "  pitch #-c", uc.max_pitch_up, 2);
-                PRETTY_ADDN(substatcolor + "  roll #-c", uc.max_roll_right, 2);
-                text += " radians/second";
-                break;
-            case 2:                         //multiplicative
-                text += ("#n#" + substatcolor + "Increases governor settings for maximum turn rates by: #-c");
-                PRETTY_ADDN(substatcolor + "  yaw #-c", 100.0 * ((uc.max_yaw_right * 180 / PI) - 1), 0);
-                PRETTY_ADDN(substatcolor + "  pitch #-c", 100.0 * ((uc.max_pitch_up * 180 / PI) - 1), 0);
-                PRETTY_ADDN(substatcolor + "  roll #-c", 100.0 * ((uc.max_roll_right * 180 / PI) - 1), 0);
-                text += " %";
-                break;
-            default:                         //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
+    } 
     if (!mode) {
         PRETTY_ADDU(statcolor + "Tracking range: #-c", uc.radar.maxrange / 1000, 0, "km");
         if ((acos(uc.radar.maxcone) * 360 / PI) < 359) {
@@ -5167,19 +5099,19 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             maxshield = 0;
         }
         PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
-        PRETTY_ADDU(statcolor + "Weapon capacitor bank storage: #-c",
-                ((playerUnit->maxEnergyData() - maxshield) * RSconverter), 0, "MJ");
-        //note: I found no function to get max warp energy, but since we're docked they are the same
+        PRETTY_ADDU(statcolor + "Main capacitor bank storage: #-c",
+                playerUnit->energy.MaxLevel() * RSconverter, 0, "MJ");
+        
         if (!subunitlevel) {
-            PRETTY_ADDU(statcolor + "Warp capacitor bank storage: #-c",
-                    playerUnit->ftl_energy.MaxLevel() * RSconverter * Wconv,
+            PRETTY_ADDU(statcolor + "SPEC capacitor bank storage: #-c",
+                    playerUnit->ftl_energy.MaxLevel() * RSconverter,
                     0,
                     "MJ");
 
             text += "#n##n##c0:1:.5#" + prefix + "[SPEC SUBSYSTEM]#n##-c";
 
             PRETTY_ADDU(statcolor + "Active SPEC Energy Requirements: #-c",
-                    ftl.GetConsumption() * RSconverter * Wconv,
+                    ftl.GetConsumption() * RSconverter,
                     0,
                     "MJ/s");
 
@@ -5188,7 +5120,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 text += "#n##c1:.3:.3#No outsystem jump drive present#-c";                 //fixed??
             } else {
                 PRETTY_ADDU(statcolor + "Energy cost for jumpnode travel: #-c",
-                        uj.GetConsumption() * RSconverter * Wconv,
+                        uj.GetConsumption() * RSconverter,
                         0,
                         "MJ");
                 if (uj.Delay() > 0)
@@ -5198,7 +5130,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 if (playerUnit->ftl_energy.MaxLevel() < uj.GetAtomConsumption()) {
                     text += "#n##c1:.3:.3#" + prefix
                             +
-                                    "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
+                                    "WARNING: SPEC capacitor banks under capacity for jump: upgrade SPEC capacitance#-c";
                 }
             }
         }
@@ -5212,8 +5144,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     PRETTY_ADDU(statcolor + "Installs main capacitor bank with storage capacity: #-c",
                             (playerUnit->maxEnergyData() * RSconverter), 0, "MJ");
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, ftl_energy.MaxLevel()))
-                    PRETTY_ADDU(statcolor + "Installs warp capacitor bank with storage capacity: #-c",
-                            playerUnit->ftl_energy.MaxLevel() * RSconverter * Wconv, 0, "MJ");
+                    PRETTY_ADDU(statcolor + "Installs SPEC capacitor bank with storage capacity: #-c",
+                            playerUnit->ftl_energy.MaxLevel() * RSconverter, 0, "MJ");
                 if (buj.Installed() && !uj.Installed()) {
                     text += statcolor +
                             "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
@@ -5388,14 +5320,14 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     if (playerUnit->cloak.Capable()) {
         if (!mode) {
             PRETTY_ADDU(statcolor + "Cloaking device available, energy usage: #-c",
-                    playerUnit->cloak.GetConsumption() * RSconverter * Wconv,
+                    playerUnit->cloak.GetConsumption() * RSconverter,
                     0,
                     "MJ/s");
         } else {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "Installs a cloaking device.#n#  Activated energy usage: #-c",
-                            playerUnit->cloak.GetConsumption() * RSconverter * Wconv,
+                            playerUnit->cloak.GetConsumption() * RSconverter,
                             0,
                             "MJ/s");
                     break;
@@ -5563,7 +5495,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             maxshield = 0;
         }
         PRETTY_ADDU(statcolor + "Minimum time to reach full overthrust speed: #-c",
-                playerUnit->getMass() * uc.max_ab_speed() / playerUnit->limits.afterburn, 2, "seconds");
+                playerUnit->getMass() * playerUnit->MaxAfterburnerSpeed() / playerUnit->afterburner.thrust, 2, "seconds");
         //reactor
         float avail = (playerUnit->maxEnergyData() * RSconverter - maxshield * VSDM);
 
@@ -5586,7 +5518,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         if (uj.Installed() && playerUnit->jump_drive.GetAtomConsumption() > playerUnit->ftl_energy.MaxLevel()) {
             text += "#n##c1:.3:.3#" + prefix
                     +
-                            "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
+                            "WARNING: SPEC capacitor banks under capacity for jump: upgrade SPEC capacitance#-c";
         }
 
         if (num_shields) {

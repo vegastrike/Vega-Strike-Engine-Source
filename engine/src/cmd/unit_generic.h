@@ -83,9 +83,13 @@ void UncheckUnit( class Unit*un );
 #include "cargo_color.h"
 
 // Components
+#include "components/afterburner.h"
+#include "components/afterburner_upgrade.h"
 #include "components/cloak.h"
 #include "components/energy_container.h"
 #include "components/reactor.h"
+#include "components/drive.h"
+#include "components/drive_upgrade.h"
 #include "components/ftl_drive.h"
 #include "components/jump_drive.h"
 
@@ -107,7 +111,6 @@ class Box;
 class StarSystem;
 struct colTrees;
 class Pilot;
-class Limits;
 class MissileGeneric;
 class AsteroidGeneric;
 
@@ -160,7 +163,11 @@ public:
     // TODO: move this to a single constructor?!
     Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
 
+    Afterburner afterburner;
+    AfterburnerUpgrade afterburner_upgrade = AfterburnerUpgrade(&afterburner);
     Cloak cloak;
+    Drive drive;
+    DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
     FtlDrive ftl_drive = FtlDrive(&ftl_energy);
     JumpDrive jump_drive = JumpDrive(&ftl_energy);
 
@@ -289,6 +296,15 @@ public:
 
 //the turrets and spinning parts fun fun stuff
     UnitCollection SubUnits;
+
+// Turret limits
+    //the vector denoting the "front" of the turret cone!
+    // Again, an inconsistency between constructor and Init(). Chose Init
+    // value as it comes later
+    Vector structure_limits = Vector(0.0f, 0.0f, 1.0f);
+
+    //the minimum dot that the current heading can have with the structurelimit
+    double limit_min = -1;
 
 /**
  * Contains information about a particular Mount on a unit.

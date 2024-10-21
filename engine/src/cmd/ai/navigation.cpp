@@ -171,10 +171,10 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
 
     last_velocity = local_vel;
     Vector heading = parent->ToLocalCoordinates((targetlocation - parent->Position()).Cast());
-    Vector thrust(parent->limits.lateral, parent->limits.vertical,
-            afterburn ? parent->limits.afterburn : parent->limits.forward);
+    Vector thrust(parent->drive.lateral, parent->drive.vertical,
+            afterburn ? parent->afterburner.thrust : parent->drive.forward);
     float max_speed =
-            (afterburn ? parent->GetComputerData().max_ab_speed() : parent->GetComputerData().max_speed());
+            (afterburn ? parent->MaxAfterburnerSpeed() : parent->MaxSpeed());
     Vector normheading = heading;
     normheading.Normalize();
     Vector max_velocity = max_speed * normheading;
@@ -222,18 +222,18 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
         }
         //start with Forward/Reverse:
         float t =
-                CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->limits.retro / div, parent->getMass());
+                CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->drive.retro / div, parent->getMass());
         if (t < THRESHOLD) {
             thrust.k =
-                    (thrust.k > 0 ? -parent->limits.retro
-                            / div : (afterburn ? parent->limits.afterburn / div : parent->limits.forward / div));
+                    (thrust.k > 0 ? -parent->drive.retro
+                            / div : (afterburn ? parent->afterburner.thrust / div : parent->drive.forward / div));
         } else if (t < simulation_atom_var) {
             thrust.k *= t / simulation_atom_var;
             thrust.k +=
                     (simulation_atom_var
                             - t)
-                            * (thrust.k > 0 ? -parent->limits.retro
-                                    / div : (afterburn ? parent->limits.afterburn / div : parent->limits.forward / div))
+                            * (thrust.k > 0 ? -parent->drive.retro
+                                    / div : (afterburn ? parent->afterburner.thrust / div : parent->drive.forward / div))
                             / simulation_atom_var;
         }
         OptimizeSpeed(parent, last_velocity.k, thrust.k, max_velocity.k / vdiv);
@@ -349,7 +349,7 @@ void ChangeHeading::Execute() {
     bool cheater = false;
     static float min_for_no_oversteer =
             XMLSupport::parse_float(vs_config->getVariable("AI", "min_angular_accel_cheat", "50"));
-    if (AICheat && ((parent->limits.yaw + parent->limits.pitch) * 180 / (PI * parent->getMass()) > min_for_no_oversteer)
+    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->getMass()) > min_for_no_oversteer)
             && !parent->isSubUnit()) {
         if (xswitch || yswitch) {
             Vector P, Q, R;
@@ -388,7 +388,7 @@ void ChangeHeading::Execute() {
     if (done /*||(xswitch&&yswitch)*/) {
         return;
     }
-    Vector torque(parent->limits.pitch, parent->limits.yaw, 0);     //set torque to max accel in any direction
+    Vector torque(parent->drive.pitch, parent->drive.yaw, 0);     //set torque to max accel in any direction
     if (terminatingX > switchbacks && terminatingY > switchbacks) {
         if (Done(local_velocity)) {
             if (this->terminating) {
@@ -404,14 +404,14 @@ void ChangeHeading::Execute() {
         TurnToward(atan2(local_heading.j, local_heading.k),
                 local_velocity.i,
                 torque.i);         //find angle away from axis 0,0,1 in yz plane
-        OptimizeAngSpeed(turningspeed * parent->GetComputerData().max_pitch_down,
-                turningspeed * parent->GetComputerData().max_pitch_up,
+        OptimizeAngSpeed(turningspeed * parent->drive.max_pitch_down,
+                turningspeed * parent->drive.max_pitch_up,
                 local_velocity.i,
                 torque.i);
         TurnToward(atan2(local_heading.i, local_heading.k), -local_velocity.j, torque.j);
         torque.j = -torque.j;
-        OptimizeAngSpeed(turningspeed * parent->GetComputerData().max_yaw_left,
-                turningspeed * parent->GetComputerData().max_yaw_right,
+        OptimizeAngSpeed(turningspeed * parent->drive.max_yaw_left,
+                turningspeed * parent->drive.max_yaw_right,
                 local_velocity.j,
                 torque.j);
         torque.k = -parent->GetMoment() * local_velocity.k / simulation_atom_var;         //try to counteract roll;
@@ -506,9 +506,8 @@ void AutoLongHaul::MakeLinearVelocityOrder() {
             XMLSupport::parse_float(vs_config->getVariable("auto_physics", "auto_docking_speed_boost", "20"));
 
     float speed =
-            parent->GetComputerData().combat_mode ? parent->GetComputerData().max_combat_speed
-                    : parent->GetComputerData().
-                    max_combat_ab_speed /*won't do insanity flight mode + spec = ludicrous speed*/;
+            parent->GetComputerData().combat_mode ? parent->drive.speed
+                    : parent->afterburner.speed /*won't do insanity flight mode + spec = ludicrous speed*/;
     if (inside_landing_zone) {
         speed *= combat_mode_mult;
     }
@@ -568,7 +567,7 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
     if (parent->computer.combat_mode == false) {
         return true;
     }
-    float maxspeed = parent->GetComputerData().max_combat_ab_speed;
+    float maxspeed = parent->afterburner.speed;
     static float accel_auto_limit =
             XMLSupport::parse_float(vs_config->getVariable("physics", "max_accel_for_smooth_autopilot", "10"));
     static float speed_auto_limit =
@@ -587,7 +586,7 @@ bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
             XMLSupport::parse_float(vs_config->getVariable("physics", "auto_landing_port_unclamped_seconds", "120"));
     return UnitUtil::getSignificantDistance(parent,
             obstacle)
-            < -landing_port_limit * parent->GetComputerData().max_combat_ab_speed;
+            < -landing_port_limit * parent->afterburner.speed;
 }
 
 void AutoLongHaul::Execute() {
@@ -685,8 +684,8 @@ void AutoLongHaul::Execute() {
     }
     float mass = parent->getMass();
     float minaccel =
-            mymin(parent->limits.lateral,
-                    mymin(parent->limits.vertical, mymin(parent->limits.forward, parent->limits.retro)));
+            mymin(parent->drive.lateral,
+                    mymin(parent->drive.vertical, mymin(parent->drive.forward, parent->drive.retro)));
     if (mass) {
         minaccel /= mass;
     }
@@ -710,7 +709,7 @@ void AutoLongHaul::Execute() {
         deactivatewarp = true;
     }
     float maxspeed =
-            mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->GetComputerData().max_combat_ab_speed);
+            mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
     double dis = UnitUtil::getSignificantDistance(parent, target);
     float time_to_destination = dis / maxspeed;
 
@@ -749,10 +748,10 @@ void AutoLongHaul::Execute() {
     static bool
             do_auto_finish = XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_terminate", "true"));
     bool stopnow = false;
-    maxspeed = parent->GetComputerData().max_combat_ab_speed;
-    if (maxspeed && parent->limits.retro) {
+    maxspeed = parent->afterburner.speed;
+    if (maxspeed && parent->drive.retro) {
         float time_to_destination = dis / maxspeed;         //conservative
-        float time_to_stop = speed * mass / parent->limits.retro;
+        float time_to_stop = speed * mass / parent->drive.retro;
         if (time_to_destination <= time_to_stop) {
             stopnow = true;
         }

@@ -811,8 +811,8 @@ void AIScript::LoadXML() {
         }
         if (_Universe->isPlayerStarship(parent->Target())) {
             float value;
-            static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
-            static float game_accel = XMLSupport::parse_float(vs_config->getVariable("physics", "game_accel", "1"));
+            static const double game_speed = configuration()->physics_config.game_speed;
+            static const double game_accel = configuration()->physics_config.game_accel;
             {
                 Unit *targ = parent->Target();
                 if (targ) {
@@ -822,7 +822,7 @@ void AIScript::LoadXML() {
                     float myvel =
                             pdmag > 0 ? PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / pdmag : 0;
                     if (myvel > 0) {
-                        value -= myvel * myvel / (2 * (parent->limits.retro / parent->getMass()));
+                        value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
                     }
                 } else {
                     value = 10000;
