@@ -29,7 +29,6 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
 #include "vs_globals.h"
-#include "star_system_generic.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "cmd/unit_generic.h"

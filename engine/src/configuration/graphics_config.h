@@ -1,5 +1,5 @@
 /*
- * python_utils.cpp
+ * graphics_config.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,21 +25,19 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "python_utils.h"
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H
+#define VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H
 
-#include <boost/python.hpp>
-#include <iostream>
+// TODO: remove the other GraphicsConfig and rename this
+struct Graphics2Config {
+    int screen{0};
+    int resolution_x{1920};
+    int resolution_y{1080};
 
-using namespace boost::python;
+    Graphics2Config() = default;
+    Graphics2Config(const std::string config);
+};
 
-const std::string GetPythonPath() {
-    Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
-    Py_Finalize();
-    
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
-    std::cout << "Python path: " << path << std::endl;
 
-    return path;
-}
+
+#endif // VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H

@@ -123,6 +123,7 @@ extern std::string sharedanims;
 extern std::string sharedsprites;
 extern std::string savedunitpath;
 extern std::string moddir;
+extern std::string programdir;
 extern std::string datadir;
 extern std::string
         homedir;                                                                          //User home directory including .vegastrike subdir

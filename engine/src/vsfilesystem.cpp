@@ -249,6 +249,7 @@ std::string sharedsprites;
 std::string savedunitpath;
 std::string modname;
 std::string moddir;
+std::string programdir;
 std::string datadir;
 std::string homedir;
 
