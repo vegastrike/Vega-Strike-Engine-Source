@@ -62,6 +62,8 @@ using VSFileSystem::SaveFile;
 #include "facet_configuration.h"
 #include "vs_logging.h"
 #include "controls_factory.h"
+#include "python/base_computer/ship_view.h"
+
 
 //#define VS_PI 3.1415926535897931
 
@@ -4702,53 +4704,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         text += "#n##c0:1:.5#[STATS]#n##-c";
     }
     if (!mode) {
-        const std::string &name = playerUnit->name;
-        for (nameindex = 0; (nameindex < name.size()) && name[nameindex] != '.'; nameindex++) {
-        }
-        nametemp = playerUnit->getFullname();
-        if (nametemp.length()) {
-            nametemp[0] = toupper(nametemp[0]);
-        }
-        for (nameindex = nameindex + 1; nameindex < name.size(); nameindex++) {
-            model += name[nameindex];
-        }
-        if (model == "blank") {
-            model = "TEMPLATE--WARNING--BUG";
-        } else if (model == "") {
-            model = "Military Issue (equipped)";
-        } else if (model == "rg") {
-            model = "Regional Guard Issue (equipped)";
-        } else if (model == "milspec") {
-            model = "Military Spec.";
-        } else if (model == "rgspec") {
-            model = "Regional Guard Spec.";
-        } else if (model == "stock") {
-            model = "Stock";
-        } else if (model == "begin") {
-            model = "Stock(Refurbished)";
-        } else {
-            model = "Military Spec. Variant (" + model + ")";
-        }
-        Cargo *fullname = GetMasterPartList(playerUnit->name.get().c_str());
-        Cargo *milname = GetMasterPartList(nametemp.c_str());
-        Cargo *blankname = GetMasterPartList((nametemp + ".blank").c_str());
-        if (!subunitlevel && (fullname || milname || blankname)) {
-            text += "#c0:1:.5#" + prefix + "[NOTES]#n##n##-c";
-            if (fullname) {
-                text += fullname->GetDescription();
-            } else if (blankname) {
-                text += blankname->GetDescription();
-            } else if (milname) {
-                text += milname->GetDescription();
-            }
-            text += "#n#";
-        }
-        text += "#n##c0:1:.5#" + prefix + "[GENERAL INFORMATION]#n##-c";
-
-        text += "#n#" + prefix + statcolor + "Class: #-c" + nametemp + statcolor + "    Model: #-c" + model;
-        PRETTY_ADDU(statcolor + "Mass: #-c", playerUnit->getMass(), 0, "metric tons");
-        //Irrelevant to player as is proportional to mass in our physics system.
-        //PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m�");
+        std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
+        text += GetShipView(ship_map);
     }
     if (mode && replacement_mode == 2 && playerUnit->getMass() != blankUnit->getMass())
         PRETTY_ADDU(statcolor + "Effective Mass reduced by: #-c", 100.0 * (1.0 - playerUnit->getMass()), 0, "%");
@@ -4761,9 +4718,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         bvol[0] = blankUnit->getEmptyCargoVolume();
         bvol[1] = blankUnit->getEmptyUpgradeVolume();
         for (int index = 0; index < 2; ++index) {
-            if (!mode) {
-                PRETTY_ADDU(statcolor + dvol[index] + " volume: #-c", vol[index], 0, "cubic meters");
-            } else if (bvol[index] != vol[index]) {
+            if (mode && bvol[index] != vol[index]) {
                 switch (replacement_mode) {
                     case 0:                 //Replacement or new Module
                         PRETTY_ADDU(statcolor + "Changes " + dvol[index] + " Volume to: #-c",
@@ -4792,9 +4747,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
     //following lines somewhat borken in terms of semantics for quantity of fuel
     //and policy of upgrades to fuel
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Fuel capacity: #-c", playerUnit->fuelData(), 2, "metric tons of Lithium-6");
-    } else if (blankUnit->fuelData() != playerUnit->fuelData()) {
+    if (mode && blankUnit->fuelData() != playerUnit->fuelData()) {
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
                 break;
@@ -4811,21 +4764,13 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 break;
         }
     }
-    //const Unit::Computer uc  = playerUnit->ViewComputerData();
-    //const Unit::Computer buc = blankUnit->ViewComputerData();
     const Computer &uc = playerUnit->ViewComputerData();
     const Computer &buc = blankUnit->ViewComputerData();
-    if (!mode) {
-        text += "#n##n#" + prefix + "#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
-        text += "#n#" + prefix + statcolor + "Turning response: #-c";
-    }
+    
     if (playerUnit->limits.yaw == playerUnit->limits.pitch && playerUnit->limits.yaw == playerUnit->limits.roll) {
         prettyPrintFloat(conversionBuffer, playerUnit->limits.yaw
                 / ((playerUnit->GetMoment() != 0) ? playerUnit->GetMoment() : 1), 0, 4);
-        if (!mode) {
-            text += conversionBuffer;
-            text += " radians/second^2#n#" + expstatcolor + "  (yaw, pitch, roll)#-c";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) {
+        if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "#n#Installs maneuvering jets with turning response #-c",
@@ -4847,15 +4792,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             }
         }
     } else {
-        if (!mode) {
-            float moment = (playerUnit->GetMoment() != 0) ? playerUnit->GetMoment() : 1;
-            PRETTY_ADDN(substatcolor + "  yaw #-c", playerUnit->limits.yaw / (moment), 4);
-            PRETTY_ADDN(substatcolor + "  pitch #-c", playerUnit->limits.pitch / (moment), 4);
-            PRETTY_ADDN(substatcolor + "  roll #-c", playerUnit->limits.roll / (moment), 4);
-            text += " radians/second^2";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)
+        if (mode && (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)
                 || MODIFIES(replacement_mode, playerUnit, blankUnit, limits.pitch)
-                || MODIFIES(replacement_mode, playerUnit, blankUnit, limits.roll)) {
+                || MODIFIES(replacement_mode, playerUnit, blankUnit, limits.roll))) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     text += "#n#Replaces existing maneuvering system with one rated at: #-c#n#";
@@ -4885,27 +4824,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
     }
     if (!subunitlevel) {
-        if (!mode && (playerUnit->getMass() != 0)) {
-            PRETTY_ADDU(statcolor + "Fore acceleration: #-c",
-                    playerUnit->limits.forward / (9.8 * playerUnit->getMass()), 2, "gravities");
-            PRETTY_ADDU(statcolor + "Aft acceleration: #-c",
-                    playerUnit->limits.retro / (9.8 * playerUnit->getMass()), 2, "gravities");
-            if (playerUnit->limits.lateral == playerUnit->limits.vertical) {
-                PRETTY_ADDU(statcolor + "Orthogonal acceleration: #-c",
-                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2, "gravities");
-                text += expstatcolor + "#n#  (vertical and lateral axes)#-c";
-            } else {
-                PRETTY_ADDN(statcolor + " Lateral acceleration #-c",
-                        playerUnit->limits.lateral / (9.8 * playerUnit->getMass()),
-                        2);
-                PRETTY_ADDN(statcolor + " Vertical acceleration #-c",
-                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2);
-                text += " gravities";
-            }
-            PRETTY_ADDU(statcolor + "Forward acceleration with overthrust: #-c", playerUnit->limits.afterburn
-                    / (9.8 * playerUnit->getMass()), 2, "gravities");
-            text.append("#n##n##c0:1:.5#" + prefix + "[GOVERNOR SETTINGS]#n##-c");
-        } else {
+        if (mode) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
@@ -5009,11 +4928,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
         static float non_combat_mode_mult =
                 XMLSupport::parse_float(vs_config->getVariable("physics", "combat_speed_boost", "100"));
-        if (!mode) {
-            PRETTY_ADDU(statcolor + "Max combat speed: #-c", uc.max_speed(), 0, "m/s");
-            PRETTY_ADDU(statcolor + "Max overdrive combat speed: #-c", uc.max_ab_speed(), 0, "m/s");
-            PRETTY_ADDU(statcolor + "Max non-combat speed: #-c", uc.max_speed() * non_combat_mode_mult, 0, "m/s");
-        } else {
+        if (mode) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
@@ -5057,20 +4972,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             }
         }
     }
-    if (!mode) {
-        if (uc.max_yaw_right == uc.max_pitch_up && uc.max_yaw_right == uc.max_roll_right) {
-            PRETTY_ADD(statcolor + "Max turn rate: #-c", uc.max_yaw_right, 2);
-            text += " radians/second " + expstatcolor + "(yaw, pitch, roll)#-c";
-        } else {
-            text += ("#n#" + prefix + statcolor + "Max turn rates:#-c");
-            PRETTY_ADDU(substatcolor + " - yaw: #-c", uc.max_yaw_right, 2, "radians/second");
-            PRETTY_ADDU(substatcolor + " - pitch: #-c", uc.max_pitch_up, 2, "radians/second");
-            PRETTY_ADDU(substatcolor + " - roll: #-c", uc.max_roll_right, 2, "radians/second");
-        }
-        text += "#n##n##c0:1:.5#" + prefix + "[TARGETTING SUBSYSTEM]#n##-c";
-    } else if (MODIFIES(replacement_mode, &uc, &buc, max_yaw_right)
+    if (mode && (MODIFIES(replacement_mode, &uc, &buc, max_yaw_right)
             || MODIFIES(replacement_mode, &uc, &buc, max_pitch_up)
-            || MODIFIES(replacement_mode, &uc, &buc, max_roll_right)) {
+            || MODIFIES(replacement_mode, &uc, &buc, max_roll_right))) {
         switch (replacement_mode) {
             case 0:                         //Replacement or new Module
                 text += ("#n#" + prefix + "Governor settings for maximum turn rates set to: ");
@@ -5098,39 +5002,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 break;
         }
     }
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Tracking range: #-c", uc.radar.maxrange / 1000, 0, "km");
-        if ((acos(uc.radar.maxcone) * 360 / PI) < 359) {
-            PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(uc.radar.maxcone) * 2, 2, "radians");
-            text += expstatcolor + "#n#  (planar angle: 2 pi means full space)#-c";
-        } else {
-            text += "#n#" + prefix + statcolor + "Tracking cone: #-cOMNIDIRECTIONAL";
-        }
-        PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c", acos(uc.radar.trackingcone) * 2, 2, "radians");
-        PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(uc.radar.lockcone) * 2, 2, "radians");
-        if (!subunitlevel) {
-            //Always zero PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
-            text += "#n#" + prefix + statcolor + "ITTS (Intelligent Target Tracking System) support: #-c";
-            if (uc.itts) {
-                text += "yes";
-            } else {
-                text += "no";
-            }
-            text += "#n#" + prefix + statcolor + "AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-            std::string afhh;
-            if (uc.radar.UseFriendFoe()) {
-                afhh += "friendly/hostile ";
-            }
-            if (uc.radar.UseThreatAssessment()) {
-                afhh += "threat ";
-            }
-            if (afhh.empty()) {
-                afhh = "no";
-            }
-            text += afhh;
-        }
-        text.append("#n##n##c0:1:.5#" + prefix + "[ENERGY SUBSYSTEM]#n##-c");
-    } else {
+    if (mode) {
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
                 if (MODIFIES_ALTEMPTY(replacement_mode, &uc, &buc, radar.maxrange, FLT_MAX)
@@ -5179,48 +5051,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     const JumpDrive &uj = playerUnit->jump_drive;
     const FtlDrive &ftl = playerUnit->ftl_drive;
     const JumpDrive &buj = blankUnit->jump_drive;
-    if (!mode) {
-        float maxshield = playerUnit->totalShieldEnergyCapacitance();
-        if (shields_require_power) {
-            maxshield = 0;
-        }
-        PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
-        PRETTY_ADDU(statcolor + "Weapon capacitor bank storage: #-c",
-                ((playerUnit->maxEnergyData() - maxshield) * RSconverter), 0, "MJ");
-        //note: I found no function to get max warp energy, but since we're docked they are the same
-        if (!subunitlevel) {
-            PRETTY_ADDU(statcolor + "Warp capacitor bank storage: #-c",
-                    playerUnit->warpCapData() * RSconverter * Wconv,
-                    0,
-                    "MJ");
-
-            text += "#n##n##c0:1:.5#" + prefix + "[SPEC SUBSYSTEM]#n##-c";
-
-            PRETTY_ADDU(statcolor + "Active SPEC Energy Requirements: #-c",
-                    ftl.GetConsumption() * RSconverter * Wconv,
-                    0,
-                    "MJ/s");
-
-            text += "#n##n##c0:1:.5#" + prefix + "[JUMP SUBSYSTEM]#n##-c";
-            if (!uj.Installed()) {
-                text += "#n##c1:.3:.3#No outsystem jump drive present#-c";                 //fixed??
-            } else {
-                PRETTY_ADDU(statcolor + "Energy cost for jumpnode travel: #-c",
-                        uj.GetConsumption() * RSconverter * Wconv,
-                        0,
-                        "MJ");
-                if (uj.Delay() > 0)
-                    PRETTY_ADDU(statcolor + "Delay: #-c", uj.Delay(), 0, "seconds");
-                if (uj.Damaged())
-                    PRETTY_ADDU(statcolor + "Damage to outsystem jump drive: #-c", 1-uj.Percent(), 0, "%");
-                if (playerUnit->ftl_energy.MaxLevel() < uj.GetAtomConsumption()) {
-                    text += "#n##c1:.3:.3#" + prefix
-                            +
-                                    "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
-                }
-            }
-        }
-    } else {
+    if (mode) {
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
@@ -5268,10 +5099,6 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 break;
         }
     }
-    if (!mode) {
-        text += "#n##n##c0:1:.5#" + prefix + "[DURABILITY STATISTICS]#n##-c";
-        text += "#n#" + prefix + statcolor + "Armor damage resistance:#-c";
-    }
 
     if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit,
             armor->facets[as_integer(FacetName::left_top_front)].health)) {
@@ -5292,7 +5119,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
 
     // Add Armor stats
-    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, armor->facets[2].health)) {
+    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, armor->facets[2].health)) {
         std::string armor_color_strings[8] = {
                 " - Fore-starboard-high: #-c",
                 " - Aft-starboard-high: #-c",
@@ -5317,14 +5144,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         }
     }
 
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Sustainable Hull Damage: #-c",
-                playerUnit->GetHull() / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
-        if (1 != playerUnit->GetHullPercent()) {
-            PRETTY_ADD("  Current condition: ", playerUnit->GetHullPercent() * 100, 2);
-            text += "% of normal";
-        }
-    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, GetHull())) {
+    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, GetHull())) {
         switch (replacement_mode) {
             case 0:                         //Replacement or new Module
                 PRETTY_ADDU(statcolor + "New Sustained Hull Damage Rating: #-c",
@@ -5345,14 +5165,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
 
     // Shields
     const int num_shields = playerUnit->shield->number_of_facets;
-    if (!mode) {
-        if (num_shields) {
-            PRETTY_ADD(statcolor + "Number of shield emitter facings: #-c", num_shields, 0);
-            text += "#n#" + prefix + statcolor + "Shield protection rating:#-c";
-        } else {
-            text += "#n#" + prefix + statcolor + "No shielding. #-c";
-        }
-    } else if (replacement_mode != 0 || playerUnit->shield->GetMaxHealth() != blankUnit->shield->GetMaxHealth()) {
+    if (mode && (replacement_mode != 0 || playerUnit->shield->GetMaxHealth() != blankUnit->shield->GetMaxHealth())) {
         switch (replacement_mode) {
             case 0:                         //Replacement or new Module
                 text += "#n#" + prefix + statcolor + "Installs shield with following protection ratings:#-c";
@@ -5391,7 +5204,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
 
     if (shield_strings) {
-        if (!mode || MODIFIES(replacement_mode, playerUnit,
+        if (mode && MODIFIES(replacement_mode, playerUnit,
                 blankUnit,
                 shield->GetMaxHealth())) {
             for (int i = 0; i < num_shields; i++) {
@@ -5404,9 +5217,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
 
     const float regeneration = playerUnit->shield->GetRegeneration();
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s");
-    } else if (replacement_mode != 0 || playerUnit->shield->GetRegeneration() != blankUnit->shield->GetRegeneration()) {
+    if (mode && (replacement_mode != 0 || playerUnit->shield->GetRegeneration() != blankUnit->shield->GetRegeneration())) {
         switch (replacement_mode) {
             case 0:                         //Replacement or new Module
                 PRETTY_ADDU(statcolor + "Shield protection recharge speed set to: #-c", regeneration * VSDM, 0, "MJ/s");

@@ -52,6 +52,8 @@
 #include "python_compile.h"
 #include "python_class.h"
 #include "cmd/unit_generic.h"
+#include "python/config/python_utils.h"
+
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <direct.h>
 #include <vega_py_run.h>
@@ -169,6 +171,15 @@ void Python::init() {
     InitBriefing();
     InitBase();
     InitDirector();
+
+// Add relevant paths to python path
+    const std::string python_path_string = GetPythonPath() 
+                                           + ":" + VSFileSystem::programdir
+                                           + ":" + VSFileSystem::datadir + "/python/base_computer/";
+    const std::wstring python_path_wstring = std::wstring(python_path_string.begin(), 
+                                                          python_path_string.end());
+    const wchar_t* python_path = python_path_wstring.c_str();
+    Py_SetPath(python_path);
 
 // Now we can do python things about them and initialize them
     Py_Initialize();

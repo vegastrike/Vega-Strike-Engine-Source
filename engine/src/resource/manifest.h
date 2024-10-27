@@ -52,6 +52,8 @@ public:
     std::vector<Cargo> getItems() { return _items; }
     bool empty() { return _items.empty(); }
     int size() { return _items.size(); }
+
+    const std::string GetShipDescription(const std::string unit_key);
 };
 
 

@@ -47,6 +47,7 @@
 #include "resource/resource.h"
 #include "unit_csv_factory.h"
 #include "upgradeable_unit.h"
+#include "resource/manifest.h"
 
 extern int GetModeFromName(const char *input_buffer);
 extern void pushMesh(std::vector<Mesh *> &mesh,
@@ -643,6 +644,13 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     string tmpstr;
     csvRow = unit_identifier;
 
+    // Textual Descriptions
+    this->unit_key = unit_identifier;            
+    this->unit_name = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
+    this->unit_description = Manifest::MPL().GetShipDescription(unit_identifier);
+
+    // This shadows the unit variable. It also doesn't support more than one ship.
+    // TODO: figure this out.
     std::string unit_key = (saved_game ? "player_ship" : unit_identifier);
 
     fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
@@ -1095,42 +1103,32 @@ CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &
 }
 
 void Unit::WriteUnit(const char *modifications) {
-    const bool UNITTAB = configuration()->physics_config.unit_table;
-    if (UNITTAB) {
-        bool bad = false;
-        if (!modifications) {
+    bool bad = false;
+    if (!modifications) {
+        bad = true;
+    }
+    if (!bad) {
+        if (!strlen(modifications)) {
             bad = true;
         }
-        if (!bad) {
-            if (!strlen(modifications)) {
-                bad = true;
-            }
-        }
-        if (bad) {
-            VS_LOG(error,
-                    (boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str()
-                            % csvRow.get().c_str()));
-            return;
-        }
-        std::string savedir = modifications;
-        VSFileSystem::CreateDirectoryHome(VSFileSystem::savedunitpath + "/" + savedir);
-        VSFileSystem::VSFile f;
-        VSFileSystem::VSError err = f.OpenCreateWrite(savedir + "/" + name + ".csv", VSFileSystem::UnitFile);
-        if (err > VSFileSystem::Ok) {
-            VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
-            return;
-        }
-        std::string towrite = WriteUnitString();
-        f.Write(towrite.c_str(), towrite.length());
-        f.Close();
-    } else {
-        if (pImage->unitwriter) {
-            pImage->unitwriter->Write(modifications);
-        }
-        for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui) {
-            (*ui)->WriteUnit(modifications);
-        }
     }
+    if (bad) {
+        VS_LOG(error,
+                (boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str()
+                        % csvRow.get().c_str()));
+        return;
+    }
+    std::string savedir = modifications;
+    VSFileSystem::CreateDirectoryHome(VSFileSystem::savedunitpath + "/" + savedir);
+    VSFileSystem::VSFile f;
+    VSFileSystem::VSError err = f.OpenCreateWrite(savedir + "/" + name + ".csv", VSFileSystem::UnitFile);
+    if (err > VSFileSystem::Ok) {
+        VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
+        return;
+    }
+    std::string towrite = WriteUnitString();
+    f.Write(towrite.c_str(), towrite.length());
+    f.Close();
 }
 
 using XMLSupport::tostring;
@@ -1154,23 +1152,14 @@ static string tos(int val) {
     return XMLSupport::tostring(val);
 }
 
-string Unit::WriteUnitString() {
-    const bool UNITTAB = configuration()->physics_config.unit_table;
-    string ret = "";
-    if (!UNITTAB) {
-        // Is this code doing something? Is it legacy?
-        // TODO: figure this out
-        if (pImage->unitwriter) {
-            ret = pImage->unitwriter->WriteString();
-        }
-        for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui) {
-            ret = ret + ((*ui)->WriteUnitString());
-        }
-        return ret;
-    }
-
+std::map<std::string, std::string> Unit::UnitToMap() {
     std::map<std::string, std::string> unit = UnitCSVFactory::GetUnit(name);
     string val;
+
+    // Textual Descriptions
+    unit["Key"] = unit_key;            
+    unit["Name"] = unit_name;
+    unit["Textual_Description"] = unit_description; // Used in ship view
 
     //mutable things
     unit["Equipment_Space"] = XMLSupport::tostring(equipment_volume);
@@ -1374,7 +1363,7 @@ string Unit::WriteUnitString() {
     unit["Afterburner_Speed_Governor"] = tos(computer.max_combat_ab_speed / game_speed);
     unit["ITTS"] = tos(computer.itts);
     unit["Can_Lock"] = tos(computer.radar.canlock);
-    unit["Radar_Color"] = tos(computer.radar.capability);
+    unit["Radar_Color"] = std::to_string(computer.radar.capability);
     unit["Radar_Range"] = tos(computer.radar.maxrange);
     unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / VS_PI);
     unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / VS_PI);
@@ -1413,6 +1402,10 @@ string Unit::WriteUnitString() {
         unit["Tractorability"] = trac;
     }
 
+    return unit;
+}
+string Unit::WriteUnitString() {
+    std::map<std::string, std::string> unit = UnitToMap();
     return writeCSV(unit);
 }
 
