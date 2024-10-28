@@ -33,7 +33,7 @@ protected:
     // TODO: Can be a fraction for things such as fuel, water, etc. But not for now.
     Resource<int> quantity;
 
-    // TODO: move to int, x100 and add code to deal with cents.
+    // TODO: move to int and not deal with cents.
     double price;          // Price per one of quantity
 
     friend bool operator==(const Product &lhs, const std::string &rhs);
