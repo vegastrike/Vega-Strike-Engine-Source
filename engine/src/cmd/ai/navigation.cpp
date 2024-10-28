@@ -750,8 +750,8 @@ void AutoLongHaul::Execute() {
     bool stopnow = false;
     maxspeed = parent->afterburner.speed;
     if (maxspeed && parent->drive.retro) {
-        float time_to_destination = dis / maxspeed;         //conservative
-        float time_to_stop = speed * mass / parent->drive.retro;
+        double time_to_destination = dis / maxspeed;         //conservative
+        double time_to_stop = speed * mass / parent->drive.retro;
         if (time_to_destination <= time_to_stop) {
             stopnow = true;
         }

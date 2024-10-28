@@ -85,7 +85,7 @@ static const std::map<std::string,std::string> drive_upgrade_map = {
     { "Roll_Governor_Left", "1.5" }
 };
 
-static void DriveExpectEq(Drive& drive, const double value) {
+static void DriveExpectEq(const Drive& drive, const double value) {
     EXPECT_EQ(drive.yaw.MaxValue(), value * M_PI / 180.0);
     EXPECT_EQ(drive.pitch.MaxValue(), value * M_PI / 180.0);
     EXPECT_EQ(drive.roll.MaxValue(), value * M_PI / 180.0);
@@ -103,7 +103,7 @@ static void DriveExpectEq(Drive& drive, const double value) {
     EXPECT_EQ(drive.max_yaw_right.MaxValue(), value * M_PI / 180.0);
 }
 
-static void DriveUpgradeExpectEq(DriveUpgrade &upgrade, const double value) {
+static void DriveUpgradeExpectEq(const DriveUpgrade& upgrade, const double value) {
     EXPECT_EQ(upgrade.yaw, value);
     EXPECT_EQ(upgrade.pitch, value);
     EXPECT_EQ(upgrade.roll, value);
@@ -178,6 +178,7 @@ TEST(Drive, UpgradeDowngrade) {
 
 // Upgrade
     std::cout << "Upgrade\n-------\n";
+    upgrade.Load(upgrade_string + upgrades_suffix_string);
     
     // Drive
     upgrade.Upgrade(upgrade_string);

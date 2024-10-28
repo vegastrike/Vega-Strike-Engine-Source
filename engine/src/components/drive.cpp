@@ -22,14 +22,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <string>
+
 #include "drive.h"
 
 #include "component_utils.h"
 #include "unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-#include <math.h>
-#include <string>
 
 
 Drive::Drive(EnergyContainer *source):

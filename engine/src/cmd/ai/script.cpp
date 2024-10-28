@@ -810,7 +810,7 @@ void AIScript::LoadXML() {
                     % parent->GetComputerData().threatlevel));
         }
         if (_Universe->isPlayerStarship(parent->Target())) {
-            float value;
+            double value;
             static const double game_speed = configuration()->physics_config.game_speed;
             static const double game_accel = configuration()->physics_config.game_accel;
             {
@@ -833,7 +833,7 @@ void AIScript::LoadXML() {
                 UniverseUtil::IOmessage(0, parent->name, "all", string("using script ") + string(
                         filename) + " threat " + XMLSupport::tostring(
                         parent->GetComputerData().threatlevel) + " dis "
-                        + XMLSupport::tostring(value));
+                        + std::to_string(value));
             }
         }
         return;

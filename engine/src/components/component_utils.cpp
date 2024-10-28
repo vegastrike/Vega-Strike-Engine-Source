@@ -22,6 +22,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "component_utils.h"
 
 #include "component.h"
@@ -41,7 +44,7 @@
 #include "unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-#include <math.h>
+
 
 
 const ComponentType GetComponentTypeFromName(const std::string name) {

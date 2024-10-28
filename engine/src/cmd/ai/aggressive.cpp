@@ -307,7 +307,7 @@ bool AggressiveAI::ExecuteLogicItem(const AIEvents::AIEvresult &item) {
 }
 
 bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
-    float value = 0.0;
+    double value = 0.0;
 
     switch (abs(item.type)) {
         case DISTANCE:
