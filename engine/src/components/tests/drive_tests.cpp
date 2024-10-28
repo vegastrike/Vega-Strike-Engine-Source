@@ -24,13 +24,15 @@
 
 #include <gtest/gtest.h>
 #include <map>
-#include <math.h>
+#include <boost/math/constants/constants.hpp>
 #include <utility>
 
 #include "drive.h"
 #include "drive_upgrade.h"
 
 #include "unit_csv_factory.h"
+
+using boost::math::float_constants::pi;
 
 static const std::string upgrades_suffix_string = "__upgrades";
 static const std::string drive_string = "drive";
@@ -86,21 +88,21 @@ static const std::map<std::string,std::string> drive_upgrade_map = {
 };
 
 static void DriveExpectEq(const Drive& drive, const double value) {
-    EXPECT_EQ(drive.yaw.MaxValue(), value * M_PI / 180.0);
-    EXPECT_EQ(drive.pitch.MaxValue(), value * M_PI / 180.0);
-    EXPECT_EQ(drive.roll.MaxValue(), value * M_PI / 180.0);
+    EXPECT_FLOAT_EQ(drive.yaw.MaxValue(), value * pi / 180.0);
+    EXPECT_FLOAT_EQ(drive.pitch.MaxValue(), value * pi / 180.0);
+    EXPECT_FLOAT_EQ(drive.roll.MaxValue(), value * pi / 180.0);
     EXPECT_EQ(drive.forward.MaxValue(), value);
     EXPECT_EQ(drive.retro.MaxValue(), value);
     EXPECT_EQ(drive.lateral.MaxValue(), value);
     EXPECT_EQ(drive.vertical.MaxValue(), value);
     EXPECT_EQ(drive.speed.MaxValue(), value);
 
-    EXPECT_EQ(drive.max_pitch_down.MaxValue(), value * M_PI / 180.0);
-    EXPECT_EQ(drive.max_pitch_up.MaxValue(), value * M_PI / 180.0);
-    EXPECT_EQ(drive.max_roll_left.MaxValue(), value * M_PI / 180.0);
-    EXPECT_EQ(drive.max_roll_right.MaxValue(), value * M_PI / 180.0);
-    EXPECT_EQ(drive.max_yaw_left.MaxValue(), value * M_PI / 180.0);
-    EXPECT_EQ(drive.max_yaw_right.MaxValue(), value * M_PI / 180.0);
+    EXPECT_FLOAT_EQ(drive.max_pitch_down.MaxValue(), value * pi / 180.0);
+    EXPECT_FLOAT_EQ(drive.max_pitch_up.MaxValue(), value * pi / 180.0);
+    EXPECT_FLOAT_EQ(drive.max_roll_left.MaxValue(), value * pi / 180.0);
+    EXPECT_FLOAT_EQ(drive.max_roll_right.MaxValue(), value * pi / 180.0);
+    EXPECT_FLOAT_EQ(drive.max_yaw_left.MaxValue(), value * pi / 180.0);
+    EXPECT_FLOAT_EQ(drive.max_yaw_right.MaxValue(), value * pi / 180.0);
 }
 
 static void DriveUpgradeExpectEq(const DriveUpgrade& upgrade, const double value) {
