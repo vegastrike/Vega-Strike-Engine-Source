@@ -682,15 +682,15 @@ void AutoLongHaul::Execute() {
     if (parent->graphicOptions.InWarp == 0 && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
-    float mass = parent->getMass();
-    float minaccel =
+    double mass = parent->getMass();
+    double minaccel =
             mymin(parent->drive.lateral,
                     mymin(parent->drive.vertical, mymin(parent->drive.forward, parent->drive.retro)));
     if (mass) {
         minaccel /= mass;
     }
     QVector cfacing = parent->cumulative_transformation_matrix.getR();         //velocity.Cast();
-    float speed = cfacing.Magnitude();
+    double speed = cfacing.Magnitude();
     if (StraightToTarget && useJitteryAutopilot(parent, target, minaccel)) {
         if (speed > .01) {
             cfacing = cfacing * (1. / speed);
@@ -708,7 +708,7 @@ void AutoLongHaul::Execute() {
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
     }
-    float maxspeed =
+    double maxspeed =
             mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
     double dis = UnitUtil::getSignificantDistance(parent, target);
     float time_to_destination = dis / maxspeed;
