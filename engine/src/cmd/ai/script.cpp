@@ -817,9 +817,9 @@ void AIScript::LoadXML() {
                 Unit *targ = parent->Target();
                 if (targ) {
                     Vector PosDifference = (targ->Position() - parent->Position()).Cast();
-                    float pdmag = PosDifference.Magnitude();
+                    double pdmag = PosDifference.Magnitude();
                     value = (pdmag - parent->rSize() - targ->rSize());
-                    float myvel =
+                    double myvel =
                             pdmag > 0 ? PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / pdmag : 0;
                     if (myvel > 0) {
                         value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));

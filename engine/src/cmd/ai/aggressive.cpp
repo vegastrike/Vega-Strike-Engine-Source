@@ -317,9 +317,9 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             Unit *targ = parent->Target();
             if (targ) {
                 Vector PosDifference = targ->Position().Cast() - parent->Position().Cast();
-                float pdmag = PosDifference.Magnitude();
+                double pdmag = PosDifference.Magnitude();
                 value = (pdmag - parent->rSize() - targ->rSize());
-                float myvel = PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / value;        ///pdmag;
+                double myvel = PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / value;        ///pdmag;
                 if (myvel > 0) {
                     value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
                 }
