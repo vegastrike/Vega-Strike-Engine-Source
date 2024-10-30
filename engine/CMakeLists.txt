@@ -1756,6 +1756,7 @@ IF (USE_GTEST)
         src/components/tests/balancing_tests.cpp
         src/components/tests/drive_tests.cpp
         src/components/tests/afterburner_tests.cpp
+        src/components/tests/jump_drive_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
