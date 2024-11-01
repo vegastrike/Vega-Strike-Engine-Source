@@ -31,6 +31,6 @@
 #include <string>
 #include <map>
 
-const std::string GetShipView(const std::map<std::string, std::string>ship_stats);
+const std::string GetShipView(const std::map<std::string, std::string>&ship_stats);
 
 #endif // VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_SHIP_VIEW_H

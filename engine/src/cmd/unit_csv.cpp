@@ -1152,7 +1152,7 @@ static string tos(int val) {
     return XMLSupport::tostring(val);
 }
 
-std::map<std::string, std::string> Unit::UnitToMap() {
+const std::map<std::string, std::string> Unit::UnitToMap() {
     std::map<std::string, std::string> unit = UnitCSVFactory::GetUnit(name);
     string val;
 

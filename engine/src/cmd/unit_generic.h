@@ -550,7 +550,7 @@ public:
 //tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
     void WriteUnit(const char *modificationname = "");
 
-    std::map<std::string, std::string> UnitToMap();
+    const std::map<std::string, std::string> UnitToMap();
     std::string WriteUnitString();
 //Loads a unit from an xml file into a complete datastructure
     void LoadXML(const char *filename, const char *unitModifications = "", std::string *xmlbuffer = NULL);

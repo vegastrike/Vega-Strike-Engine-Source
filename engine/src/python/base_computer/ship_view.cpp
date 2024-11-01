@@ -34,7 +34,7 @@
 
 static const std::string module_name = "ship_view";
 
-const std::string GetShipView(const std::map<std::string, std::string>ship_stats) {
+const std::string GetShipView(const std::map<std::string, std::string>&ship_stats) {
     if(!boost::filesystem::exists("python/base_computer/ship_view.py")) {
         return "Error: ship description not found";
     }
