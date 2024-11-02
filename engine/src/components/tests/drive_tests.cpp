@@ -179,10 +179,10 @@ TEST(Drive, UpgradeDowngrade) {
     EXPECT_EQ(upgrade.fuel_consumption, 1.0);
 
 // Upgrade
-    // std::cout << "Upgrade\n-------\n";
+    std::cout << "Upgrade\n-------\n";
     
-    // // Drive
-    // upgrade.Upgrade(upgrade_string);
+    // Drive
+    upgrade.Upgrade(upgrade_string);
 
     // EXPECT_EQ(drive.GetUpgradeName(), "");
     // EXPECT_EQ(drive.GetMass(), 0.0);
