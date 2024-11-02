@@ -160,15 +160,15 @@ TEST(Drive, UpgradeDowngrade) {
     drive.Load("", drive_string + upgrades_suffix_string);
 
 // Original
-    // std::cout << "Original\n--------\n";
+    std::cout << "Original\n--------\n";
 
-    // // Drive
-    // EXPECT_EQ(drive.GetUpgradeName(), "");
-    // EXPECT_EQ(drive.GetMass(), 0.0);
+    // Drive
+    EXPECT_EQ(drive.GetUpgradeName(), "");
+    EXPECT_EQ(drive.GetMass(), 0.0);
 
-    // DriveExpectEq(drive, 10.0);
+    DriveExpectEq(drive, 10.0);
     
-    // EXPECT_EQ(drive.GetConsumption(), 1.0);
+    EXPECT_EQ(drive.GetConsumption(), 1.0);
 
     // // Upgrade
     // EXPECT_EQ(upgrade.GetUpgradeName(), "");
