@@ -170,13 +170,13 @@ TEST(Drive, UpgradeDowngrade) {
     
     EXPECT_EQ(drive.GetConsumption(), 1.0);
 
-    // // Upgrade
-    // EXPECT_EQ(upgrade.GetUpgradeName(), "");
-    // EXPECT_EQ(upgrade.GetMass(), 0.0);
+    // Upgrade
+    EXPECT_EQ(upgrade.GetUpgradeName(), "");
+    EXPECT_EQ(upgrade.GetMass(), 0.0);
 
-    // DriveUpgradeExpectEq(upgrade, 1.0);
+    DriveUpgradeExpectEq(upgrade, 1.0);
     
-    // EXPECT_EQ(upgrade.fuel_consumption, 1.0);
+    EXPECT_EQ(upgrade.fuel_consumption, 1.0);
 
 // Upgrade
     // std::cout << "Upgrade\n-------\n";
