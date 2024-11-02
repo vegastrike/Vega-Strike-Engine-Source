@@ -34,7 +34,7 @@
 #include "sensor.h"
 #include "universe.h"
 
-extern Unit *getTopLevelOwner(); // WTF... located in star_system_generic.cpp
+extern Unit *getTopLevelOwner(); // located in star_system.cpp
 
 namespace Radar {
 

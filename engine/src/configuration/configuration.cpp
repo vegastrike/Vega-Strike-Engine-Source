@@ -30,10 +30,17 @@
 #endif
 #include <math.h>
 
+#include <stdio.h> 
+
 using vega_config::GetGameConfig;
 
 Configuration::Configuration() {
     //logging.verbose_debug = GetGameConfig().GetBool("data.verbose_debug", false);
+    std::ifstream ifs("config.json", std::ifstream::in);
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+    const std::string json_text = buffer.str();
+    graphics2_config = Graphics2Config(json_text);
 }
 
 /* Override the default value(provided by constructor) with the value from the user specified configuration file, if any.
@@ -305,7 +312,6 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config.velocity_max = GetGameConfig().GetFloat("physics.velocity_max", physics_config.velocity_max);
     physics_config.max_player_rotation_rate = GetGameConfig().GetFloat("physics.maxplayerrot", physics_config.max_player_rotation_rate);
     physics_config.max_non_player_rotation_rate = GetGameConfig().GetFloat("physics.maxNPCrot", physics_config.max_non_player_rotation_rate);
-    physics_config.unit_table = GetGameConfig().GetBool("physics.UnitTable", physics_config.unit_table);
     physics_config.capship_size = GetGameConfig().GetFloat("physics.capship_size", physics_config.capship_size);
     physics_config.near_autotrack_cone = GetGameConfig().GetFloat("physics.near_autotrack_cone", physics_config.near_autotrack_cone);
     physics_config.close_enough_to_autotrack = GetGameConfig().GetFloat("physics.close_enough_to_autotrack", physics_config.close_enough_to_autotrack);

@@ -69,7 +69,6 @@ void UncheckUnit( class Unit*un );
 #include "collection.h"
 #include "script/flightgroup.h"
 #include "faction_generic.h"
-#include "star_system_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
 #include "collide_map.h"
@@ -146,6 +145,16 @@ struct PlanetaryOrbitData;
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
         public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
+    // We store relevant textual description here. 
+    // We stop relying on manifest and units data once we create the unit.
+    // The unit description is always taken from the manifest and not saved.
+    // Note the game confusingly refers to units:
+    // - class (Llama) - should be model
+    // - model (stock) - should be variant, but only if actually different without upgrades
+    // TODO: name is duplicated down below in some memory saving measure (StringPool::Reference)
+    std::string unit_key;           
+    std::string unit_name;
+    std::string unit_description;
 
 protected:
 //How many lists are referencing us
@@ -540,6 +549,8 @@ protected:
 public:
 //tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
     void WriteUnit(const char *modificationname = "");
+
+    const std::map<std::string, std::string> UnitToMap();
     std::string WriteUnitString();
 //Loads a unit from an xml file into a complete datastructure
     void LoadXML(const char *filename, const char *unitModifications = "", std::string *xmlbuffer = NULL);

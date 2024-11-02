@@ -1,5 +1,5 @@
 /*
- * python_utils.h
+ * ship_view.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,11 +25,12 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
-#define VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_SHIP_VIEW_H
+#define VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_SHIP_VIEW_H
 
 #include <string>
+#include <map>
 
-const std::string GetPythonPath();
+const std::string GetShipView(const std::map<std::string, std::string>&ship_stats);
 
-#endif //VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
+#endif // VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_SHIP_VIEW_H

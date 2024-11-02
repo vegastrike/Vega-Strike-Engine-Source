@@ -1,5 +1,5 @@
 /*
- * python_utils.cpp
+ * python_utils.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,21 +25,23 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "python_utils.h"
+#ifndef VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
+#define VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
 
-#include <boost/python.hpp>
-#include <iostream>
+#include <string>
 
-using namespace boost::python;
+// See https://stackoverflow.com/q/804894/5276890
+struct _object;
+typedef _object PyObject;
 
-const std::string GetPythonPath() {
-    Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
-    Py_Finalize();
-    
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
-    std::cout << "Python path: " << path << std::endl;
+const std::string GetPythonPath();
 
-    return path;
-}
+// A utility function to call a function and get a PyObject as a result
+PyObject* GetClassFromPython(
+    const std::string build_path,
+    const std::string path_string,
+    const std::string module_name,
+    const std::string function_name);
+
+
+#endif //VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H

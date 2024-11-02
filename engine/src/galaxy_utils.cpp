@@ -20,7 +20,6 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "star_system_generic.h"
 #include "cmd/script/mission.h"
 #include "universe.h"
 #include "galaxy_xml.h"
@@ -30,7 +29,6 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "lin_time.h"
-#include "star_system_generic.h"
 
 #include "options.h"
 
