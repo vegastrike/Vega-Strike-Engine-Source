@@ -36,7 +36,7 @@
 #include "universe.h"
 #include "mount_size.h"
 #include "damageable.h"
-
+#include "resource/random_utils.h"
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
@@ -255,10 +255,10 @@ void DealPossibleJumpDamage(Unit *un) {
     static double max_damage = XMLSupport::parse_float(vs_config->getVariable("physics", "max_jump_damage", "100"));
 
     // Also damage multiplier
-    double chance_to_damage = ((double) rand() / (RAND_MAX)) + 1;
+    double chance_to_damage = randomDouble() - 0.01;
 
     // If jump drive is fully operational, there's no chance for damage
-    if(un->jump_drive.Operational() >= chance_to_damage) {
+    if(un->jump_drive.Percent() >= chance_to_damage) {
         return;
     }
 
