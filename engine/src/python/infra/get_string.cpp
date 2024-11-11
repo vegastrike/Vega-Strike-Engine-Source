@@ -1,5 +1,5 @@
 /*
- * ship_view.cpp
+ * get_string.cpp
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,18 +25,21 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "ship_view.h"
+#include "get_string.h"
 #include "vsfilesystem.h"
 
 #include <Python.h> 
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 
-static const std::string module_name = "ship_view";
 
-const std::string GetShipView(const std::map<std::string, std::string>&ship_stats) {
-    if(!boost::filesystem::exists("python/base_computer/ship_view.py")) {
-        return "Error: ship description not found";
+
+const std::string GetString(const std::string function_name, 
+                            const std::string module_name,
+                            const std::string file_name,
+                            PyObject* args) {
+    if(!boost::filesystem::exists(file_name)) {
+        return "Error:" + file_name + "not found";
     }
     
     PyObject* module = PyImport_ImportModule(module_name.c_str());
@@ -46,24 +49,16 @@ const std::string GetShipView(const std::map<std::string, std::string>&ship_stat
         return "Error: PyImport_ImportModule is null";
     }
 
-    boost::python::dict dict;
-    for (auto const& pair : ship_stats) {
-        dict[pair.first] = pair.second;
-    }
-
-
-    PyObject* args = PyTuple_Pack(1, dict.ptr());
-    if(args == nullptr) {
-        PyErr_Print();
-        return "Error: PyTuple_Pack is null";
-    } 
-
-    PyObject* function = PyObject_GetAttrString(module,"get_ship_description");
+    PyObject* function = PyObject_GetAttrString(module, function_name.c_str());
     if(!function) {
         PyErr_Print();
         return "Error: PyObject_GetAttrString is null";
     } 
     
+    if(args == nullptr) {
+        PyErr_Print();
+        return "Error: PyTuple_Pack is null";
+    } 
     
     PyObject* pyResult = PyObject_CallObject(function, args);
 
@@ -76,3 +71,20 @@ const std::string GetShipView(const std::map<std::string, std::string>&ship_stat
 
     return result;
 }
+
+
+const std::string GetString(const std::string function_name, 
+                            const std::string module_name,
+                            const std::string file_name,
+                            const std::map<std::string, std::string>& cpp_map) {
+    boost::python::dict dict;
+    for (auto const& pair : cpp_map) {
+        dict[pair.first] = pair.second;
+    }
+
+    PyObject* args = PyTuple_Pack(1, dict.ptr());
+    
+    return GetString(function_name, module_name, file_name, args);
+}
+
+

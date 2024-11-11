@@ -772,7 +772,7 @@ SET(LIBPYTHON_SOURCES
     src/python/unit_wrapper.cpp
     src/python/universe_util_export.cpp
 
-    src/python/base_computer/ship_view.cpp
+    src/python/infra/get_string.cpp
 )
 
 SET(LIBSCRIPT_SOURCES

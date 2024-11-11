@@ -62,8 +62,9 @@ using VSFileSystem::SaveFile;
 #include "facet_configuration.h"
 #include "vs_logging.h"
 #include "controls_factory.h"
-#include "python/base_computer/ship_view.h"
+#include "python/infra/get_string.h"
 
+#include <boost/python.hpp>
 
 //#define VS_PI 3.1415926535897931
 
@@ -81,6 +82,12 @@ using VSFileSystem::SaveFile;
 #endif
 #include <sys/stat.h>
 #include "vega_cast_utils.h"
+
+// Can't declare in header because PyObject is problematic
+extern const std::string GetString(const std::string function_name, 
+                            const std::string module_name,
+                            const std::string file_name,
+                            PyObject* args);
 
 using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 
@@ -3933,20 +3940,11 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
 
 //UNDER CONSTRUCTION
 string buildUpgradeDescription(Cargo &item) {
-    //load the Unit
-    string blnk;     //modifications to an upgrade item???
-    Flightgroup *flightGroup = new Flightgroup();     //sigh
-    int fgsNumber = 0;
-    current_unit_load_mode = NO_MESH;
-    Unit *newPart = new Unit(item.GetName().c_str(), false,
-            FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber);
-    current_unit_load_mode = DEFAULT;
-    string str = "";
-    str += item.GetDescription();
-    showUnitStats(newPart, str, 0, 1, item);
-    newPart->Kill();
-    // delete newPart;
-    return str;
+    const std::string key = item.GetName() + "__upgrades";
+    PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(key.c_str()));
+    const std::string text = GetString("get_upgrade_info", "upgrade_view",
+        "python/base_computer/upgrade_view.py", args);
+    return text;
 }
 
 class PriceSort {
@@ -4476,86 +4474,39 @@ static std::string factionColorTextString(int faction) {
     return result;
 }
 
+
+// A utility to convert vector to list
+boost::python::list VectorToList(const std::vector<std::string> v) {
+    boost::python::list l;
+    for (const std::string& value : v) {
+        l.append(value);
+    }
+
+    return l;
+}
+
 //Show the player's basic information.
 bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *control) {
-    //Heading.
-    string text = "#b#Factions:#-b#n1.7#";
-
     //Number of kills for each faction.
-    vector<float> *killList = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
+    vector<float> *kill_list = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
 
-    //Make everything bold.
-    text += "#b#";
+    const std::vector<std::string> names_vector = FactionUtil::GetFactionNames();
+    const std::vector<std::string> relations_vector = FactionUtil::GetFactionRelations();
+    const std::vector<std::string> kills_vector = FactionUtil::GetFactionKills(kill_list);
 
-    //A line for each faction.
-    const size_t numFactions = FactionUtil::GetNumFactions();
-    size_t i = 0;
-    static string disallowedFactions = vs_config->getVariable("graphics", "unprintable_factions", "");
-    int totkills = 0;
-    size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
-    for (; i < numFactions; i++) {
-        Unit *currentplayer = UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
-        float relation = 0;
-        size_t upgrades = FactionUtil::GetUpgradeFaction();
-        size_t planets = FactionUtil::GetPlanetFaction();
-        static size_t privateer = FactionUtil::GetFactionIndex("privateer");
-        size_t neutral = FactionUtil::GetNeutralFaction();
-        if (i < killList->size() && i != upgrades && i != planets && i != neutral && i != privateer) {
-            totkills += (int) (*killList)[i];
-        }
-        string factionname = FactionUtil::GetFactionName(i);
-        fac_loc_after = 0;
-        fac_loc = disallowedFactions.find(factionname, fac_loc_after);
-        while (fac_loc != string::npos) {
-            if (fac_loc > 0) {
-                fac_loc_before = fac_loc - 1;
-            } else {
-                fac_loc_before = 0;
-            }
-            fac_loc_after = fac_loc + factionname.size();
-            if ((fac_loc == 0 || disallowedFactions[fac_loc_before] == ' '
-                    || disallowedFactions[fac_loc_before] == '\t')
-                    && (disallowedFactions[fac_loc_after] == ' ' || disallowedFactions[fac_loc_after] == '\t'
-                            || disallowedFactions[fac_loc_after] == '\0')) {
-                break;
-            }
-            fac_loc = disallowedFactions.find(factionname, fac_loc_after);
-        }
-        if (fac_loc != string::npos) {
-            continue;
-        }
-        if (currentplayer) {
-            relation = UnitUtil::getRelationFromFaction(currentplayer, i);
-        }
-        if (relation < -1) {
-            relation = -1;
-        }
-        if (relation > 1) {
-            relation = 1;
-        }
-        const int percent = (int) (relation * 100.0);
+    boost::python::list names_list = VectorToList(names_vector);
+    boost::python::list relations_list = VectorToList(relations_vector);
+    boost::python::list kills_list = VectorToList(kills_vector);
 
-        //Faction name.
-        text += factionColorTextString(i) + FactionUtil::GetFactionName(i) + ":#-c  ";
+    PyObject* args = PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr());
 
-        //Relation color.
-        float normRelation =
-                (relation + 1) / 2;                                    //Move relation value into 0-1 range.
-        normRelation = guiMax(0, guiMin(1, normRelation));          //Make *sure* it's in the right range.
-        text += colorsToCommandString(1 - normRelation, normRelation, guiMin(1 - normRelation, normRelation));
-
-        //End the line.
-        text += XMLSupport::tostring(percent) + "#-c";
-        if (i < killList->size()) {
-            text += ", kills: " + XMLSupport::tostring((int) (*killList)[i]);
-        }
-        text += "#n#";
-    }
-    //Total Kills if we have it.
-    text += "#n##b#Total Kills: " + XMLSupport::tostring(totkills) + "#-b#";
+    const std::string text = GetString("get_player_info", "player_info",
+        "python/base_computer/player_info.py", args);
+    
     //Put this in the description.
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
+
     desc->setText(text);
 
     return true;
@@ -4705,7 +4656,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
     if (!mode) {
         std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
-        text += GetShipView(ship_map);
+        text += GetString("get_ship_description", "ship_view",
+                          "python/base_computer/ship_view.py",
+                          ship_map);
     }
     if (mode && replacement_mode == 2 && playerUnit->getMass() != blankUnit->getMass())
         PRETTY_ADDU(statcolor + "Effective Mass reduced by: #-c", 100.0 * (1.0 - playerUnit->getMass()), 0, "%");
