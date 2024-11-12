@@ -387,7 +387,6 @@ struct PhysicsConfig {
     float velocity_max{10000.0F};
     float max_player_rotation_rate{24.0F};
     float max_non_player_rotation_rate{360.0F};
-    bool unit_table{false};
     float capship_size{500.0F};
     float near_autotrack_cone{0.9F};
     float close_enough_to_autotrack{4.0F};

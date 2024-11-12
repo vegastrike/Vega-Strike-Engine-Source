@@ -166,6 +166,7 @@ IF (UNIX)
         ${Vega_Strike_SOURCE_DIR}/src/damage
         ${Vega_Strike_SOURCE_DIR}/src/resource
         ${Vega_Strike_SOURCE_DIR}/src/components
+        ${Vega_Strike_SOURCE_DIR}/src/python/base_computer
         ${Vega_Strike_SOURCE_DIR}/src/python/config
         ${Vega_Strike_BINARY_DIR}
         ${Vega_Strike_BINARY_DIR}/src
@@ -178,6 +179,7 @@ ELSE ()
         ${Vega_Strike_SOURCE_DIR}/src/damage
         ${Vega_Strike_SOURCE_DIR}/src/resource
         ${Vega_Strike_SOURCE_DIR}/src/components
+        ${Vega_Strike_SOURCE_DIR}/src/python/base_computer
         ${Vega_Strike_SOURCE_DIR}/src/python/config
         ${Vega_Strike_BINARY_DIR}
         ${Vega_Strike_BINARY_DIR}/src
@@ -770,6 +772,8 @@ SET(LIBPYTHON_SOURCES
     src/python/unit_method_defs.cpp
     src/python/unit_wrapper.cpp
     src/python/universe_util_export.cpp
+
+    src/python/base_computer/ship_view.cpp
 )
 
 SET(LIBSCRIPT_SOURCES
@@ -1749,6 +1753,7 @@ IF (USE_GTEST)
         src/exit_unit_tests.cpp
         src/components/tests/energy_container_tests.cpp
         src/components/tests/balancing_tests.cpp
+        src/components/tests/jump_drive_tests.cpp
     )
 
     ADD_LIBRARY(vegastrike-testing
