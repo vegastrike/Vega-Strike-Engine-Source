@@ -189,11 +189,11 @@ struct Fuel {
     
     double fuel_factor{60.0};   // Multiply fuel by this to get fuel by minutes
     double energy_factor{1.0};
-    double ftl_energy_factor{0.1};
+    double ftl_energy_factor{1.0};
 
     double reactor_factor{1.0};
 
-    double ftl_drive_factor{1.0};
+    double ftl_drive_factor{0.1};
     double jump_drive_factor{1.0};
 
     // 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled

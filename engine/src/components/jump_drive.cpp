@@ -78,12 +78,10 @@ bool JumpDrive::Enabled() const {
 void JumpDrive::Load(std::string upgrade_key, std::string unit_key) {
     Component::Load(upgrade_key, unit_key);
 
-    const double jump_drive_factor = configuration()->fuel.jump_drive_factor;
-
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     // Jump drive is unique - consumption and atom_consumption are identical
-    atom_consumption = consumption = energy * jump_drive_factor;
+    atom_consumption = consumption = energy * configuration()->fuel.jump_drive_factor;
  
 
     // Jump Drive
@@ -98,7 +96,7 @@ void JumpDrive::Load(std::string upgrade_key, std::string unit_key) {
 void JumpDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Jump_Drive_Present"] = std::to_string(Installed());
     unit["Jump_Drive_Delay"] = std::to_string(delay);
-    unit["Outsystem_Jump_Cost"] = std::to_string(consumption);
+    unit["Outsystem_Jump_Cost"] = std::to_string(consumption / configuration()->fuel.jump_drive_factor);
 }
 
 bool JumpDrive::CanDowngrade() const {
