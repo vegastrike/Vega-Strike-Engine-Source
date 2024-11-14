@@ -162,6 +162,8 @@ bool DriveUpgrade::Upgrade(const std::string upgrade_name) {
     drive->max_roll_right.SetMaxValue(drive->max_roll_right.MaxValue() * max_roll_right);
 
     drive->SetConsumption(drive->GetConsumption() * fuel_consumption);
+
+    return true;
 }
 
 

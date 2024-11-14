@@ -200,22 +200,22 @@ TEST(Drive, UpgradeDowngrade) {
     EXPECT_EQ(upgrade.fuel_consumption, 1.5);
 
 // Downgrade
-    // std::cout << "Downgrade\n---------\n";
-    // // Drive
-    // upgrade.Downgrade();
+    std::cout << "Downgrade\n---------\n";
+    // Drive
+    upgrade.Downgrade();
 
-    // EXPECT_EQ(drive.GetUpgradeName(), "");
-    // EXPECT_EQ(drive.GetMass(), 0.0);
+    EXPECT_EQ(drive.GetUpgradeName(), "");
+    EXPECT_EQ(drive.GetMass(), 0.0);
 
-    // DriveExpectEq(drive, 10.0);
+    DriveExpectEq(drive, 10.0);
     
-    // EXPECT_EQ(drive.GetConsumption(), 1.0);
+    EXPECT_EQ(drive.GetConsumption(), 1.0);
 
-    // // Upgrade
-    // EXPECT_EQ(upgrade.GetUpgradeName(), "");
-    // EXPECT_EQ(upgrade.GetMass(), 0.0);
+    // Upgrade
+    EXPECT_EQ(upgrade.GetUpgradeName(), "");
+    EXPECT_EQ(upgrade.GetMass(), 0.0);
 
-    // DriveUpgradeExpectEq(upgrade, 1.0);
+    DriveUpgradeExpectEq(upgrade, 1.0);
     
-    // EXPECT_EQ(upgrade.fuel_consumption, 1.0);
+    EXPECT_EQ(upgrade.fuel_consumption, 1.0);
 }
