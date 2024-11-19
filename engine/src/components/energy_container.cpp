@@ -126,6 +126,7 @@ void EnergyContainer::Load(std::string upgrade_key, std::string unit_key) {
         break; 
 
         default: // This really can't happen
+        std::cerr << "Illegal container type in EnergyContainer::Load" << std::flush;
         abort();       
     }
 }
@@ -145,6 +146,7 @@ void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const 
         break; 
 
         default: // This really can't happen
+        std::cerr << "Illegal container type in EnergyContainer::SaveToCSV" << std::flush;
         abort();       
     }
 }
