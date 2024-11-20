@@ -32,6 +32,8 @@
 #include "unit_json_factory.h"
 #include "vs_exit.h"
 
+#include <boost/algorithm/string.hpp>
+
 using std::string;
 
 std::vector<string> readCSV(const string &s, string delim) {
@@ -116,10 +118,18 @@ string writeCSV(const std::map<std::string, std::string> &unit, string delim) {
     std::string first_line;
     std::string second_line;
     for (auto const& pair : unit) {
-        first_line += addQuote(pair.first, delim);
+        std::string pair_first = pair.first;
+        std::string pair_second = pair.second;
+
+        // Replaces standard comma with turned comma (U+2E32)
+        // Prevents CSV corruption on load.
+        boost::replace_all(pair_first, ",", "⸲");
+        boost::replace_all(pair_second, ",", "⸲");
+
+        first_line += addQuote(pair_first, delim);
         first_line += delim[0];
 
-        second_line += addQuote(pair.second, delim);
+        second_line += addQuote(pair_second, delim);
         second_line += delim[0];
     }
 

@@ -197,3 +197,13 @@ Manifest Manifest::GetMissionManifest() {
 
     return manifest;
 }
+
+const std::string Manifest::GetShipDescription(const std::string unit_key) {
+    for(const Cargo& cargo : _items) {
+        if(cargo.name == unit_key) {
+            return cargo.description;
+        }
+    }
+
+    return "";
+}

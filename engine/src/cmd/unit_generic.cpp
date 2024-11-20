@@ -424,11 +424,6 @@ void Unit::Init(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber) {
-    // Deprecated UNITTAB and configuration()->physics_config.unit_table options.
-    // Game will always load units from the JSON or CSV files.
-    // The other option was not implemented wholly. It simply opened the file
-    // but didn't do anything with it. See VSFile f variable.
-
     // TODO: something with the following line
     this->Unit::Init();
     graphicOptions.SubUnit = SubU ? 1 : 0;
