@@ -27,6 +27,10 @@
 
 #include "component.h"
 #include "unit_csv_factory.h"
+#include "resource/cargo.h"
+#include "resource/manifest.h"
+
+
 
 const std::string NAME = "Name";
 const std::string MASS = "Mass";
@@ -35,6 +39,8 @@ const std::string VOLUME = "Volume";
 Component::Component(double mass, double volume, bool installed, bool integral):
                      unit_key(""),
                      upgrade_name(""),
+                     description(""),
+                     price(0.0),
                      mass(mass), volume(volume),
                      operational(Resource<double>(100.0,0.0,100.0)),
                      installed(installed),
@@ -43,11 +49,23 @@ Component::Component(double mass, double volume, bool installed, bool integral):
 
 void Component::Load(std::string upgrade_key, std::string unit_key) {
     this->unit_key = unit_key;
-    upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
     this->upgrade_key = upgrade_key;
-    
-    mass = UnitCSVFactory::GetVariable(upgrade_key, "Mass", 0.0);
-    // TODO: volume = UnitCSVFactory::GetVariable(upgrade_key, "Volume", 0.0);
+
+    // Integrated components have no name, mass, price, volume or description
+    if(!integral) {
+        upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
+        mass = UnitCSVFactory::GetVariable(upgrade_key, "Mass", 0.0);
+
+        // Get volume and description from MasterPartList.
+        // We need try/catch for unit tests where MPL isn't loaded.
+        const Cargo cargo = Manifest::MPL().GetCargoByName(upgrade_key);
+        if(!cargo.GetName().empty()) {
+            price = cargo.GetPrice();
+            volume = cargo.GetVolume();
+            description = cargo.GetDescription();
+        }
+    }
+
     // TODO: bool integral = false;
 }
 
@@ -125,3 +143,18 @@ double Component::Percent() const {
 void Component::SetIntegral(bool integral) {
     this->integral = integral;
 }
+
+// Getters
+const std::string Component::GetUnitKey() const { return unit_key; }
+const std::string Component::GetUpgradeName() const { return upgrade_name; }
+const std::string Component::GetUpgradeKey() const { return upgrade_key; }
+const std::string Component::GetDescription() const { return description; }
+
+const double Component::GetPrice() const { return price; }
+const double Component::GetMass() const { return mass; }
+const double Component::GetVolume() const { return volume; }
+
+const double Component::GetOperational() const { return operational.Value(); }
+
+const bool Component::GetInstalled() const { return installed; }
+const bool Component::GetIntegral() const { return integral; }

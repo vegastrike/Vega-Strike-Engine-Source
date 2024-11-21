@@ -65,8 +65,6 @@ using VSFileSystem::SaveFile;
 #include "python/base_computer/ship_view.h"
 
 
-//#define VS_PI 3.1415926535897931
-
 
 //for directory thing
 #if defined (_WIN32) && !defined (__CYGWIN__)
@@ -2024,6 +2022,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
         }
     }
     //Description.
+    // TODO: this adds the description to the price. We should move everything to component.
     descString += item.GetDescription();
     descString += tailString;
 
@@ -5006,7 +5005,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
                 if (MODIFIES_ALTEMPTY(replacement_mode, &uc, &buc, radar.maxrange, FLT_MAX)
-                        || MODIFIES_ALTEMPTY(replacement_mode, &uc, &buc, radar.maxcone, VS_PI)) {
+                        || MODIFIES_ALTEMPTY(replacement_mode, &uc, &buc, radar.maxcone, M_PI)) {
                     PRETTY_ADDU(statcolor + "Tracking range: #-c", uc.radar.maxrange / 1000, 0, "km");
                     if ((acos(uc.radar.maxcone) * 360 / PI) < 359) {
                         PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(uc.radar.maxcone) * 2, 2, "radians");
@@ -5060,39 +5059,13 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
                     PRETTY_ADDU(statcolor + "Installs main capacitor bank with storage capacity: #-c",
                             (playerUnit->maxEnergyData() * RSconverter), 0, "MJ");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
+                if (MODIFIES(replacement_mode, playerUnit, blankUnit, ftl_energy.MaxLevel()))
                     PRETTY_ADDU(statcolor + "Installs warp capacitor bank with storage capacity: #-c",
-                            playerUnit->getWarpEnergy() * RSconverter * Wconv, 0, "MJ");
+                            playerUnit->ftl_energy.MaxLevel() * RSconverter * Wconv, 0, "MJ");
                 if (buj.Installed() && !uj.Installed()) {
                     text += statcolor +
                             "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
                 }
-                break;
-            case 1:                 //Additive
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
-                    PRETTY_ADDU(statcolor + "Increases recharge rate by #-c",
-                            playerUnit->reactor.Capacity() * RSconverter, 0, "MJ/s");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
-                    PRETTY_ADDU(statcolor + "Adds #-c",
-                            (playerUnit->maxEnergyData() * RSconverter),
-                            0,
-                            "MJ of storage to main capacitor banks");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
-                    PRETTY_ADDU(statcolor + "Adds #-c",
-                            playerUnit->getWarpEnergy() * RSconverter * Wconv,
-                            0,
-                            "MJ of storage to warp capacitor bank");
-                break;
-            case 2:                 //multiplicative
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, reactor.Capacity()))
-                    PRETTY_ADDU(statcolor + "Increases reactor recharge rate by #-c",
-                            100.0 * (playerUnit->reactor.Capacity() - 1), 0, "%");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
-                    PRETTY_ADDU(statcolor + "Increases main capacitor bank storage by #-c",
-                            100.0 * (playerUnit->maxEnergyData() - 1), 0, "%");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
-                    PRETTY_ADDU(statcolor + "Increases warp capacitor bank storage by #-c",
-                            (playerUnit->getWarpEnergy() - 1) * 100, 0, "%");
                 break;
             default:                 //Failure
                 text += "Oh dear, this wasn't an upgrade. Please debug code.";

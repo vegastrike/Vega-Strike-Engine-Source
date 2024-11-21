@@ -1,7 +1,32 @@
+/*
+ * balancing_tests.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include <gtest/gtest.h>
 
 #include "energy_container.h"
 #include "reactor.h"
+#include "configuration/game_config.h"
 
 double simulation_atom_var = 0.1;
 
@@ -56,8 +81,8 @@ struct EnergyManager {
 
     EnergyManager(EnergySetup setup, 
                   double simulation_atom_var):
-                  fuel(EnergyType::Fuel), energy(EnergyType::Energy), 
-                  ftl_energy(EnergyType::FTL),
+                  fuel(ComponentType::Fuel), energy(ComponentType::Capacitor), 
+                  ftl_energy(ComponentType::FtlCapacitor),
                   reactor(&fuel, &energy, &ftl_energy) {
         fuel.SetCapacity(setup.fuel_capacity);
         energy.SetCapacity(setup.energy_capacity);
