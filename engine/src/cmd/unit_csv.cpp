@@ -735,7 +735,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
     Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f);
-    Momentofinertia = UnitCSVFactory::GetVariable(unit_key, "Moment_Of_Inertia", 1.0f);
+    Momentofinertia = Mass;
     
 
     // Hull
@@ -746,14 +746,28 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     specInterdiction = UnitCSVFactory::GetVariable(unit_key, "Spec_Interdiction", 0.0f);
 
     // Init armor
-    std::string armor_keys[] = {"Armor_Front_Top_Left", "Armor_Front_Top_Right",
+    // We support 2 options:
+    // 1. armor = x. Could be 0, 40, etc. This populaes the 8 facets below
+    // 2. armor = "". Use the old method of reading all 8 facets. 
+    const std::string armor_single_value_string = UnitCSVFactory::GetVariable(unit_key, "armor", std::string());
+    float armor_values[8];
+
+    if(armor_single_value_string != "") {
+        int armor_single_value = std::stoi(armor_single_value_string, 0);
+        
+        for (int i = 0; i < 8; i++) {
+            armor_values[i] = armor_single_value;
+        }
+    } else {
+        std::string armor_keys[] = {"Armor_Front_Top_Left", "Armor_Front_Top_Right",
             "Armor_Front_Bottom_Left", "Armor_Front_Bottom_Right",
             "Armor_Back_Top_Left", "Armor_Back_Top_Right",
             "Armor_Back_Bottom_Left", "Armor_Back_Bottom_Right"};
-    float armor_values[8];
-    for (int i = 0; i < 8; i++) {
-        float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
-        armor_values[i] = tmp_armor_value;
+    
+        for (int i = 0; i < 8; i++) {
+            float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
+            armor_values[i] = tmp_armor_value;
+        }
     }
 
     armor->UpdateFacets(8, armor_values);
@@ -773,44 +787,58 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     //float efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
 
     // Get shield count
-
-    int shield_count = 0;
-    float shield_values[4];
     std::string shield_string_values[4];
+    std::vector<string> shield_sections;
+    
+    const std::string shield_strength_string = UnitCSVFactory::GetVariable(unit_key, "shield_strength", std::string());
+    const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
+    
+    if(shield_strength_string != "" && shield_facets_string != "") {
+        int shield_strength = std::stoi(shield_strength_string);
+        int shield_facets = std::stoi(shield_facets_string);
+        shield->number_of_facets = shield_facets;
+        shield->UpdateFacets(shield_strength);        
+    } else {
+        int shield_count = 0;
+        float shield_values[4];
+        
 
-    // TODO: this mapping should really go away
-    // I love macros, NOT.
-    shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string());
-    shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string());
-    shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string());
-    shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string());
+        // TODO: this mapping should really go away
+        // I love macros, NOT.
+        shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string());
+        shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string());
+        shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string());
+        shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string());
 
-    for (int i = 0; i < 4; i++) {
-        shield_values[i] = 0.0f;
+        for (int i = 0; i < 4; i++) {
+            shield_values[i] = 0.0f;
 
-        if (shield_string_values[i].empty()) {
-            continue;
+            if (shield_string_values[i].empty()) {
+                continue;
+            }
+
+            shield_values[i] = ::stof(shield_string_values[i]);
+            // Should add up to the shield type - quad or dual
+            shield_count++;
         }
 
-        shield_values[i] = ::stof(shield_string_values[i]);
-        // Should add up to the shield type - quad or dual
-        shield_count++;
+        /*
+        We are making the following assumptions:
+        1. The CSV is correct
+        2. Dual shields are 0 front and 1 rear
+        3. Quad shields are front (0), rear(1), right(2) and left(3)
+        4. There is no support for 8 facet shields in the game.
+            This has more to do with the cockpit code than anything else
+        5. We map the above index to our own
+        */
+
+        if (shield_count == 4 || shield_count == 2) {
+            shield->number_of_facets = shield_count;
+            shield->UpdateFacets(shield_count, shield_values);
+        }
     }
 
-    /*
-     We are making the following assumptions:
-     1. The CSV is correct
-     2. Dual shields are 0 front and 1 rear
-     3. Quad shields are front (0), rear(1), right(2) and left(3)
-     4. There is no support for 8 facet shields in the game.
-        This has more to do with the cockpit code than anything else
-     5. We map the above index to our own
-     */
-
-    if (shield_count == 4 || shield_count == 2) {
-        shield->number_of_facets = shield_count;
-        shield->UpdateFacets(shield_count, shield_values);
-    }
+    
 
     // End shield section
 
@@ -1252,7 +1280,6 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
         unit["Cargo"] = carg;
     }
     unit["Mass"] = tos(Mass);
-    unit["Moment_Of_Inertia"] = tos(Momentofinertia);
     unit["Fuel_Capacity"] = tos(fuel.Level());
     unit["Hull"] = tos(GetHullLayer().facets[0].health);
     unit["Spec_Interdiction"] = tos(specInterdiction);
