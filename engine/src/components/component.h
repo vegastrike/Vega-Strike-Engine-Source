@@ -25,8 +25,8 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H
 
 #include <string>
 #include <map>
@@ -43,10 +43,27 @@ class Unit;
 
 // TODO: add complete list
 enum class ComponentType {
+    None, 
+    Dummy, 
+
     Hull, 
     Armor, 
     Shield,
-    Drive
+    
+    Afterburner,
+    AfterburnerUpgrade,
+    Drive,
+    DriveUpgrade,
+    FtlDrive,
+    JumpDrive,
+
+    Reactor,
+    Capacitor,
+    FtlCapacitor,
+    Fuel,
+
+    Cloak
+    // TODO: all the rest of the upgrades, shady or not...
 };
 
 class Component
@@ -55,7 +72,9 @@ protected:
     std::string unit_key;       // Areus.blank
     std::string upgrade_name;   // Isometal Armor
     std::string upgrade_key;    // armor03__upgrades
+    std::string description;    // Long text and picture. Taken from master_parts_list
     
+    double price = 0;
     double mass = 0;
     double volume = 0;
 
@@ -64,17 +83,18 @@ protected:
     bool installed = false;
     bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
+    ComponentType type = ComponentType::None;
+
     Component(double mass = 0, 
               double volume = 0, 
               bool installed = false, 
               bool integral = false);
 
     // Load from units dictionary
-    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    // TODO: we should really switch the two parameters around.
+    virtual void Load(std::string upgrade_key, std::string unit_key = "");      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const = 0;
-
-    virtual std::string Describe() const = 0; // Describe component in base_computer 
 
     // Handle the four cases of CanUpgrade/Upgrade/CanDowngrade/Downgrade
     bool CanWillUpDowngrade(const std::string upgrade_key,
@@ -99,5 +119,20 @@ public:
     bool Operational() const;
 
     void SetIntegral(bool integral);
+
+    // Getters
+    const std::string GetUnitKey() const;
+    const std::string GetUpgradeName() const;
+    const std::string GetUpgradeKey() const;
+    const std::string GetDescription() const;
+    
+    const double GetPrice() const;
+    const double GetMass() const;
+    const double GetVolume() const;
+
+    const double GetOperational() const;
+
+    const bool GetInstalled() const;
+    const bool GetIntegral() const;
 };
-#endif // COMPONENT_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H

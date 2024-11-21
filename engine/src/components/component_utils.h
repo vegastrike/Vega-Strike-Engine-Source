@@ -1,5 +1,5 @@
 /*
- * ftl_drive.h
+ * src/components/component_printer.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,37 +22,22 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
-#define VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H
 
 #include "component.h"
 #include "energy_consumer.h"
+#include "energy_container.h"
 
-class EnergyContainer;
+#include <string>
 
-class FtlDrive : public Component, public EnergyConsumer {
-    // TODO: implement damage so something will actually happen
-    // Right now, damage is recorded in component superclass but game doesn't
-    // take it into account.
-public:
-    FtlDrive();
-    FtlDrive(EnergyContainer *source);
+/** A collection of utility functions for lib component. */
+const ComponentType GetComponentTypeFromName(const std::string name);
 
-    bool Enabled() const;
+EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
+                           EnergyContainer* energy, EnergyContainer* ftl_energy);
 
-    // Component Methods
-    virtual void Load(std::string upgrade_key, 
-                      std::string unit_key = "");      
-    
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
-
-    virtual bool CanDowngrade() const;
-
-    virtual bool Downgrade();
-
-    virtual bool CanUpgrade(const std::string upgrade_name) const;
-
-    virtual bool Upgrade(const std::string upgrade_name);
-};
-
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer* fuel,
+                                            EnergyContainer* energy, EnergyContainer* ftl_energy);
+                                               
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H

@@ -33,6 +33,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include "components/component.h"
+#include "components/component_utils.h"
 #include "unit_const_cache.h"
 #include "faction_generic.h"
 #include "unit_generic.h"
@@ -67,6 +69,34 @@ std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     return upgrades_vector;
 }
 
+// A simple struct for holding all the data
+// TODO: figure out what the numbers mean
+// TODO: move this to Cargo or a subclass of cargo
+// TODO: separate cargo from upgrades 
+struct CargoUpgrade {
+    std::string name;
+    std::string category;
+
+    CargoUpgrade(const std::string upgrade_string) {
+        if(upgrade_string.empty()) {
+            return;
+        }
+
+        const std::string delimiter = ";";
+
+        std::vector<std::string> upgrade_vector;
+        boost::split(upgrade_vector, upgrade_string, boost::is_any_of(delimiter));
+
+        // TODO: figure out format and change 3 to the real size and implement the rest
+        if(upgrade_vector.size() < 3) {
+            return;
+        }
+
+        name = upgrade_vector.at(0);
+        category = upgrade_vector.at(1);
+    }
+};
+
 // TODO: why do we have to use such kludges?!
 unsigned int convert_to_int(std::string s) {
     if(s.size() == 0) {
@@ -87,97 +117,50 @@ UpgradeableUnit::UpgradeableUnit()
 
 extern int GetModeFromName(const char *input_buffer);
 
-UpgradeType GetUpgradeType(const std::string upgrade_key) {
-    std::string upgrade_type_string = UnitCSVFactory::GetVariable(upgrade_key, "Upgrade_Type", std::string());
-    std::string upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
 
-    if(upgrade_type_string.empty()) return UpgradeType::None;
-    
-    if(upgrade_type_string == "Armor") {
-        return UpgradeType::Armor;
-    }
-    //if(upgrade_type_string == "Hull") return UpgradeType::Hull;
-    if(upgrade_type_string == "Shield") {
-        return UpgradeType::Shield;
-    }
-
-    if(upgrade_type_string == "Reactor") {
-        return UpgradeType::Reactor;
-    }
-
-    if(upgrade_type_string == "FTL_Capacitor") {
-        return UpgradeType::FTL_Capacitor;
-    }
-
-    if(upgrade_type_string == "Capacitor") {
-        return UpgradeType::Capacitor;
-    }
-
-    if(upgrade_type_string == "FTL_Drive") {
-        return UpgradeType::FTL_Drive;
-    }
-
-    if(upgrade_type_string == "Jump_Drive") {
-        return UpgradeType::Jump_Drive;
-    }
-
-    if(upgrade_type_string == "Cloak") {
-        return UpgradeType::Cloak;
-    }
-
-    if(upgrade_type_string == "Jump_Drive") {
-        return UpgradeType::Jump_Drive;
-    }
-
-    if(upgrade_type_string == "Afterburner") {
-        return UpgradeType::Afterburner;
-    }
-
-    return UpgradeType::None;
-}
 
 UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_name,
                      bool upgrade, bool apply) {
     Unit* unit = vega_dynamic_cast_ptr<Unit>(this);
     const std::string upgrade_key = upgrade_name + UPGRADES_SUFFIX;
-    const UpgradeType upgrade_type = GetUpgradeType(upgrade_key);
+    const ComponentType component_type = GetComponentTypeFromName(upgrade_name);
     
     UpgradeOperationResult result;
 
-    switch(upgrade_type) {
-        /*case UpgradeType::Armor:
+    switch(component_type) {
+        /*case ComponentType::Armor:
             result.upgradeable = true;
             result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
-        case UpgradeType::Shield:
+        case ComponentType::Shield:
             result.upgradeable = true;
             result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;*/
 
-        case UpgradeType::Capacitor:
+        case ComponentType::Capacitor:
             result.upgradeable = true;
             result.success = unit->energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
-        case UpgradeType::FTL_Capacitor:
+        case ComponentType::FtlCapacitor:
             result.upgradeable = true;
             result.success = unit->ftl_energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
-        case UpgradeType::Reactor:
+        case ComponentType::Reactor:
             result.upgradeable = true;
             result.success = unit->reactor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
 
-        case UpgradeType::FTL_Drive:
+        case ComponentType::FtlDrive:
             result.upgradeable = true;
             result.success = unit->ftl_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         
-        case UpgradeType::Jump_Drive:
+        case ComponentType::JumpDrive:
             result.upgradeable = true;
             result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
 
-        case UpgradeType::Cloak:
+        case ComponentType::Cloak:
             result.upgradeable = true;
             result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
@@ -189,7 +172,7 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
         case UpgradeType::Drive:
             result.upgradeable = true;
             result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
-            break;
+            break;*/
 
         
         /*case UpgradeType::ECM:
