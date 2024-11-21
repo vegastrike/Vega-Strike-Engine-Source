@@ -163,9 +163,9 @@ protected:
 
 public:
     // Components
-    EnergyContainer fuel = EnergyContainer(EnergyType::Fuel);
-    EnergyContainer energy = EnergyContainer(EnergyType::Energy);
-    EnergyContainer ftl_energy = EnergyContainer(EnergyType::FTL);
+    EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
+    EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
+    EnergyContainer ftl_energy = EnergyContainer(ComponentType::FtlCapacitor);
 
     // TODO: move this to a single constructor?!
     Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
