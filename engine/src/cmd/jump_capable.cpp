@@ -271,8 +271,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             failuremessage = configuration()->graphics_config.hud.already_near_message;
             return false;
         }
-        unit->ftl_energy.Deplete(true, static_cast<double>(totpercent) * unit->ftl_drive.GetAtomConsumption());
-        // TODO: figure out to do unit->ftl_drive.Consume() instead
+        
         if (unsafe == false && totpercent == 0) {
             end = endne;
         }

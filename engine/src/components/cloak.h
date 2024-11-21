@@ -22,19 +22,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CLOAK_H
-#define CLOAK_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H
 
 #include <string>
 #include <map>
 
-#include "energetic.h"
-#include "damageable_layer.h"
-#include "energy_container.h"
 #include "energy_consumer.h"
 
 // TODO: remove dependency on unit
-class Unit;
+class EnergyContainer;
 
 enum class CloakingStatus {
     disabled,
@@ -69,7 +66,6 @@ public:
     Cloak(std::string unit_key, EnergyContainer* capacitor);
 
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
-    virtual std::string Describe() const;
 
     virtual bool CanDowngrade() const;
 
@@ -86,7 +82,7 @@ public:
     virtual bool Damaged() const;
     virtual bool Installed() const;
 
-    void Update(Unit *unit);
+    void Update();
     void Toggle(); // Toggle cloak on/off
 
     bool Capable() const {
@@ -150,4 +146,4 @@ private:
     void _Upgrade(const std::string upgrade_key);
 };
 
-#endif // CLOAK_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H

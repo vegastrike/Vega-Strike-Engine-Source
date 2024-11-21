@@ -727,6 +727,7 @@ SET(LIBPYTHON
 
 SET(LIBCOMPONENT
     src/components/component.cpp
+    src/components/component_utils
     
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
@@ -1757,6 +1758,7 @@ IF (USE_GTEST)
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBPYTHON}
+        ${LIBVS_LOGGING}
         ${LIBCONFIG}
         ${LIBDAMAGE}
         ${LIBRESOURCE}

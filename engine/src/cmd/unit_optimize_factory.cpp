@@ -28,7 +28,7 @@
 #include "json.h"
 
 void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit_attributes,
-                   const std::string& json_text, bool is_root) {
+                   const std::string& json_text) {
     json::jobject json = json::jobject::parse(json_text);
 
     // Parse the data section
@@ -37,35 +37,28 @@ void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit
 
     for (const std::string &key : keys) {
         // For some reason, parser adds quotes
+        
         if(data_json.has_key(key)) {
             const std::string attribute = data_json.get(key);
             const std::string stripped_attribute = attribute.substr(1, attribute.size() - 2);
             unit_attributes[key] = stripped_attribute;
-        } else {
-            // If we do this for non-root, we'll overwrite existing attributes
-            if(is_root) {
-                unit_attributes[key] = "";
-            }
-        }
+        } 
     }
+
+    if(unit_attributes.count("Key")) {
+        std::string unit_key = unit_attributes["Key"];
+        UnitCSVFactory::units[unit_key] = unit_attributes;
+    }
+    
 
     // Parse the units array
     if(json.has_key("units")) {
         std::vector<std::string> units = json::parsing::parse_array(json.get("units").c_str());
         // Iterate over root
         for (const std::string &unit_text : units) {
-            RecursiveParse(unit_attributes, unit_text, false);
+            RecursiveParse(unit_attributes, unit_text);
         }
-    } else {
-        // Add moment of intertia
-        if(unit_attributes.count("Mass")) {
-            unit_attributes["Moment_Of_Inertia"] = unit_attributes["Mass"];
-        }
-
-        std::string unit_key = unit_attributes["Key"];
-
-        UnitCSVFactory::units[unit_key] = unit_attributes;
-    }
+    } 
 }
 
 
@@ -79,5 +72,5 @@ void UnitOptimizeFactory::ParseJSON(VSFileSystem::VSFile &file) {
     // Add root
     unit_attributes["root"] = file.GetRoot();
 
-    RecursiveParse(unit_attributes, json_text, true);
+    RecursiveParse(unit_attributes, json_text);
 }
