@@ -188,18 +188,13 @@ struct Fuel {
     float ecm_energy_cost{0.05F};
     
     double megajoules_factor{100};
-
-    // Reduce the number of tons in a ship to something realistic
-    // The more we multiply fuel_factor, the more we match here
-    double fuel_ton_modifier{0.0001}; 
-
-    double fuel_factor{1000.0};   // Multiply fuel by this to get fuel by minutes
+    double fuel_factor{60.0};   // Multiply fuel by this to get fuel by minutes
     double energy_factor{1.0};
     double ftl_energy_factor{1.0};
 
     double reactor_factor{1.0};
 
-    double ftl_drive_factor{1.0};
+    double ftl_drive_factor{0.1};
     double jump_drive_factor{1.0};
 
     // 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled

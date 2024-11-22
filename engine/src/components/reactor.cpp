@@ -62,7 +62,7 @@ void Reactor::Load(std::string upgrade_key, std::string unit_key) {
     
 void Reactor::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // TODO: This won't record damage to recharge
-    unit[REACTOR_RECHARGE] = std::to_string(capacity.MaxValue());
+    unit[REACTOR_RECHARGE] = std::to_string(capacity.MaxValue() / configuration()->fuel.reactor_factor);
 }
 
 

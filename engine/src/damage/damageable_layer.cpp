@@ -377,6 +377,12 @@ float DamageableLayer::GetRegeneration() {
     return facets[0].regeneration;
 }
 
+void DamageableLayer::UpdateFacets(const float new_facet_strength) {
+    for (unsigned int i = 0; i < number_of_facets; i++) {
+        facets[i].Update(new_facet_strength);
+    }
+}
+
 void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_facets[4]) {
     assert(new_size == number_of_facets);
 

@@ -126,12 +126,29 @@ void EnergyContainer::Load(std::string upgrade_key, std::string unit_key) {
         break; 
 
         default: // This really can't happen
+        std::cerr << "Illegal container type in EnergyContainer::Load" << std::flush;
         abort();       
     }
 }
 
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit[FUEL_CAPACITY] = std::to_string(MaxLevel());
+    switch(type) {
+        case ComponentType::Fuel:
+        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.fuel_factor);
+        break;
+
+        case ComponentType::Capacitor:
+        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.energy_factor);
+        break;
+        
+        case ComponentType::FtlCapacitor:
+        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.ftl_energy_factor);
+        break; 
+
+        default: // This really can't happen
+        std::cerr << "Illegal container type in EnergyContainer::SaveToCSV" << std::flush;
+        abort();       
+    }
 }
 
 
