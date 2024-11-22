@@ -125,6 +125,8 @@ bool DriveUpgrade::Downgrade() {
 
     yaw = pitch = roll = lateral = vertical = forward = retro = speed = fuel_consumption = 1.0;
     max_yaw_left = max_yaw_right = max_pitch_up = max_pitch_down = max_roll_left = max_roll_right = 1.0; 
+
+    return true;
 }
 
 bool DriveUpgrade::CanUpgrade(const std::string upgrade_name) const {
