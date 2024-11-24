@@ -901,11 +901,17 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
     limits.forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
     limits.retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
-    limits.lateral = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0f) +
+
+    float accel = UnitCSVFactory::GetVariable(unit_key, "accel", -1.0f);
+    if(accel != -1.0f) {
+        limits.lateral = limits.vertical = accel * game_accel * game_speed;
+    } else {
+        limits.lateral = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0f) +
             UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0f)) * game_accel * game_speed;
 
-    limits.vertical = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0f) +
+        limits.vertical = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0f) +
             UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0f)) * game_accel * game_speed;
+    }
 
     computer.max_combat_speed = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 0.0f) * game_speed;
     computer.max_combat_ab_speed =
