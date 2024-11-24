@@ -810,19 +810,19 @@ void AIScript::LoadXML() {
                     % parent->GetComputerData().threatlevel));
         }
         if (_Universe->isPlayerStarship(parent->Target())) {
-            float value;
-            static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
-            static float game_accel = XMLSupport::parse_float(vs_config->getVariable("physics", "game_accel", "1"));
+            double value;
+            static const double game_speed = configuration()->physics_config.game_speed;
+            static const double game_accel = configuration()->physics_config.game_accel;
             {
                 Unit *targ = parent->Target();
                 if (targ) {
                     Vector PosDifference = (targ->Position() - parent->Position()).Cast();
-                    float pdmag = PosDifference.Magnitude();
+                    double pdmag = PosDifference.Magnitude();
                     value = (pdmag - parent->rSize() - targ->rSize());
-                    float myvel =
+                    double myvel =
                             pdmag > 0 ? PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / pdmag : 0;
                     if (myvel > 0) {
-                        value -= myvel * myvel / (2 * (parent->limits.retro / parent->getMass()));
+                        value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
                     }
                 } else {
                     value = 10000;
@@ -833,7 +833,7 @@ void AIScript::LoadXML() {
                 UniverseUtil::IOmessage(0, parent->name, "all", string("using script ") + string(
                         filename) + " threat " + XMLSupport::tostring(
                         parent->GetComputerData().threatlevel) + " dis "
-                        + XMLSupport::tostring(value));
+                        + std::to_string(value));
             }
         }
         return;

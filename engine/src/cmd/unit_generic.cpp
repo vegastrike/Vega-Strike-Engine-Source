@@ -531,9 +531,9 @@ static float tmpmax(float a, float b) {
 bool CheckAccessory(Unit *tur) {
     bool accessory = tur->name.get().find("accessory") != string::npos;
     if (accessory) {
-        tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector(tur->GetComputerData().max_pitch_up,
-                tur->GetComputerData().max_yaw_right,
-                tur->GetComputerData().max_roll_right)));
+        tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector(tur->drive.max_pitch_up,
+                tur->drive.max_yaw_right,
+                tur->drive.max_roll_right)));
     }
     return accessory;
 }
@@ -635,11 +635,11 @@ float Unit::cosAngleTo(Unit *targ, float &dist, float speed, float range, bool t
 
     //Trial code
     float turnlimit =
-            tmpmax(tmpmax(computer.max_yaw_left, computer.max_yaw_right),
-                    tmpmax(computer.max_pitch_up, computer.max_pitch_down));
+            tmpmax(tmpmax(drive.max_yaw_left.Value(), drive.max_yaw_right.Value()),
+                    tmpmax(drive.max_pitch_up.Value(), drive.max_pitch_down.Value()));
     float turnangle = simulation_atom_var
             * tmpmax(turnlimit,
-                    tmpmax(simulation_atom_var * .5 * (limits.yaw + limits.pitch),
+                    tmpmax(simulation_atom_var * .5 * (drive.yaw.Value() + drive.pitch.Value()),
                             sqrtf(AngularVelocity.i * AngularVelocity.i + AngularVelocity.j * AngularVelocity.j)));
     float ittsangle = safeacos(Normal.Cast().Dot(totarget.Scale(1. / totarget.Magnitude())));
     QVector edgeLocation = (targ->cumulative_transformation_matrix.getP() * targ->rSize() + totarget);
@@ -1177,7 +1177,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
             //THIS IS NOT YET SUPPORTED IN NETWORKING
             computer.target = nullptr;             //set the target to NULL
         } else if (randnum >= .4) {
-            limits.retro *= dam;
+            drive.retro.RandomDamage();
         } else if (randnum >= .3275) {
             const float maxdam = configuration()->physics_config.max_radar_cone_damage;
             computer.radar.maxcone += (1 - dam);
@@ -1209,29 +1209,13 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         return;
     }
     if (rand01() < configuration()->physics_config.thruster_hit_chance) {
-        //DAMAGE ROLL/YAW/PITCH/THRUST
-        float orandnum = rand01() * .82 + .18;
-        if (randnum >= .9) {
-            computer.max_pitch_up *= orandnum;
-        } else if (randnum >= .8) {
-            computer.max_yaw_right *= orandnum;
-        } else if (randnum >= .6) {
-            computer.max_yaw_left *= orandnum;
-        } else if (randnum >= .4) {
-            computer.max_pitch_down *= orandnum;
-        } else if (randnum >= .2) {
-            computer.max_roll_right *= orandnum;
-        } else if (randnum >= .18) {
-            computer.max_roll_left *= orandnum;
-        } else if (randnum >= .17) {
-            limits.roll *= dam;
-        } else if (randnum >= .10) {
-            limits.yaw *= dam;
-        } else if (randnum >= .03) {
-            limits.pitch *= dam;
-        } else {
-            limits.lateral *= dam;
-        }
+        // This is fairly severe. One or two hits can disable the engine.
+        // Note that retro can be damaged by both this and above.
+        // Drive can also be damaged by code below - really computer.
+        // TODO: figure out a better damage system that doesn't rely on where 
+        // the shots are coming from.
+        drive.Damage();
+        afterburner.Damage();
         damages |= Damages::LIMITS_DAMAGED;
         return;
     }
@@ -1271,7 +1255,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
             case 2: ftl_energy.Damage(); break;
             case 3: ftl_drive.Damage(); break;
             case 4: jump_drive.Damage(); break;
-            case 5: this->afterburnenergy += ((1 - dam) * reactor.Capacity()); break;
+            case 5: afterburner.Damage(); break;
             case 6: CargoVolume *= dam; break;
             case 7: UpgradeVolume *= dam; break;
             case 8:
@@ -1347,17 +1331,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
     }
     if (degrees >= 150 && degrees <= 180) {
         //DAMAGE ENGINES
-        if (randnum >= .8) {
-            computer.max_combat_ab_speed *= dam;
-        } else if (randnum >= .6) {
-            computer.max_combat_speed *= dam;
-        } else if (randnum >= .4) {
-            limits.afterburn *= dam;
-        } else if (randnum >= .2) {
-            limits.vertical *= dam;
-        } else {
-            limits.forward *= dam;
-        }
+        drive.Damage();
         damages |= Damages::LIMITS_DAMAGED;
         return;
     }
@@ -2027,6 +2001,7 @@ std::set<Unit *> arrested_list_do_not_dereference;
 // A simple utility to recharge energy, ftl_energy and shields
 // Also to charge for docking and refueling
 void rechargeShip(Unit *unit, unsigned int cockpit) {
+    unit->fuel.Refill();
     unit->energy.Refill();
     unit->ftl_energy.Refill();
     unit->shield->FullyCharge();
@@ -2503,10 +2478,10 @@ bool Unit::UpgradeSubUnitsWithFactory(const Unit *up, int subunitoffset, bool to
                     un->SetFaction(faction);
                     un->curr_physical_state = addToMeCur;
                     un->prev_physical_state = addToMePrev;
-                    un->limits.yaw = 0;
-                    un->limits.pitch = 0;
-                    un->limits.roll = 0;
-                    un->limits.lateral = un->limits.retro = un->limits.forward = un->limits.afterburn = 0.0;
+                    un->drive.yaw = 0;
+                    un->drive.pitch = 0;
+                    un->drive.roll = 0;
+                    un->drive.lateral = un->drive.retro = un->drive.forward = un->afterburner.thrust = 0.0;
 
                     un->name = turSize + "_blank";
                     if (un->pImage->unitwriter != NULL) {
@@ -2882,22 +2857,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
             AddToDowngradeMap(up->name, 1, curdowngrademapoffset++, tempdownmap);
         }
     }
-    float tmax_speed = up->computer.max_combat_speed;
-    float tmax_ab_speed = up->computer.max_combat_ab_speed;
-    float tmax_yaw_right = up->computer.max_yaw_right;
-    float tmax_yaw_left = up->computer.max_yaw_left;
-    float tmax_pitch_up = up->computer.max_pitch_up;
-    float tmax_pitch_down = up->computer.max_pitch_down;
-    float tmax_roll_right = up->computer.max_roll_right;
-    float tmax_roll_left = up->computer.max_roll_left;
-    float tlimits_yaw = up->limits.yaw;
-    float tlimits_roll = up->limits.roll;
-    float tlimits_pitch = up->limits.pitch;
-    float tlimits_lateral = up->limits.lateral;
-    float tlimits_vertical = up->limits.vertical;
-    float tlimits_forward = up->limits.forward;
-    float tlimits_retro = up->limits.retro;
-    float tlimits_afterburn = up->limits.afterburn;
+    
     if (downgrade) {
         Adder = &SubtractUp;
         Percenter = &computeDowngradePercent;
@@ -2909,22 +2869,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         } else if (additive == 2) {
             Adder = &MultUp;
             Percenter = &computeMultPercent;
-            tmax_speed = speedStarHandler(tmax_speed);
-            tmax_ab_speed = speedStarHandler(tmax_ab_speed);
-            tmax_yaw_right = speedStarHandler(tmax_yaw_right);
-            tmax_yaw_left = speedStarHandler(tmax_yaw_left);
-            tmax_pitch_up = speedStarHandler(tmax_pitch_up);
-            tmax_pitch_down = speedStarHandler(tmax_pitch_down);
-            tmax_roll_right = speedStarHandler(tmax_roll_right);
-            tmax_roll_left = speedStarHandler(tmax_roll_left);
-            tlimits_yaw = speedStarHandler(tlimits_yaw);
-            tlimits_pitch = speedStarHandler(tlimits_pitch);
-            tlimits_roll = speedStarHandler(tlimits_roll);
-            tlimits_forward = accelStarHandler(tlimits_forward);
-            tlimits_retro = accelStarHandler(tlimits_retro);
-            tlimits_lateral = accelStarHandler(tlimits_lateral);
-            tlimits_vertical = accelStarHandler(tlimits_vertical);
-            tlimits_afterburn = accelStarHandler(tlimits_afterburn);
         } else {
             Adder = &GetsB;
             Percenter = &computePercent;
@@ -3074,60 +3018,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
                 || cell_has_recursive_data(upgrade_name, up->faction, "ECM_Rating"))
             STDUPGRADE(ecm, up->ecm, templ->ecm, 0); //ecm is unsigned --chuck_starchaser
     }
-    //Maneuvering stuff
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name,
-                    up->faction,
-                    "Maneuver_Yaw|Maneuver_Pitch|Maneuver_Roll|Left_Accel|Top_Accel|Retro_Accel|Forward_Accel|Afterburner_Accel|Default_Speed_Governor|Afterburner_Speed_Governor|Yaw_Governor|Pitch_Governor|Roll_Speed_Governor")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Maneuver_Yaw"))
-            STDUPGRADE(limits.yaw, tlimits_yaw, templ->limits.yaw, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Maneuver_Pitch"))
-            STDUPGRADE(limits.pitch, tlimits_pitch, templ->limits.pitch, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Maneuver_Roll"))
-            STDUPGRADE(limits.roll, tlimits_roll, templ->limits.roll, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Left_Accel"))
-            STDUPGRADE(limits.lateral, tlimits_lateral, templ->limits.lateral, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Top_Accel"))
-            STDUPGRADE(limits.vertical, tlimits_vertical, templ->limits.vertical, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Retro_Accel"))
-            STDUPGRADE(limits.retro, tlimits_retro, templ->limits.retro, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Forward_Accel"))
-            STDUPGRADE(limits.forward, tlimits_forward, templ->limits.forward, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Afterburner_Accel"))
-            STDUPGRADE(limits.afterburn, tlimits_afterburn, templ->limits.afterburn, 0);
-        /*if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Fuel_Capacity"))
-            STDUPGRADE(fuel, up->fuel, templ->fuel, 0);*/
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Default_Speed_Governor"))
-            STDUPGRADE(computer.max_combat_speed, tmax_speed, templ->computer.max_combat_speed, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Afterburner_Speed_Governor"))
-            STDUPGRADE(computer.max_combat_ab_speed, tmax_ab_speed, templ->computer.max_combat_ab_speed, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Yaw_Governor")) {
-            STDUPGRADE(computer.max_yaw_right, tmax_yaw_right, templ->computer.max_yaw_right, 0);
-            STDUPGRADE(computer.max_yaw_left, tmax_yaw_left, templ->computer.max_yaw_left, 0);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Pitch_Governor")) {
-            STDUPGRADE(computer.max_pitch_down, tmax_pitch_down, templ->computer.max_pitch_down, 0);
-            STDUPGRADE(computer.max_pitch_up, tmax_pitch_up, templ->computer.max_pitch_up, 0);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Roll_Speed_Governor")) {
-            STDUPGRADE(computer.max_roll_left, tmax_roll_left, templ->computer.max_roll_left, 0);
-            STDUPGRADE(computer.max_roll_right, tmax_roll_right, templ->computer.max_roll_right, 0);
-        }
-    }
+    
     //FIXME - do cell lookup later here
     static bool UpgradeCockpitDamage =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "upgrade_cockpit_damage", "false"));
@@ -3296,23 +3187,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     }
     //NO CLUE FOR BELOW
     if (downgrade) {
-        //NOTE: Afterburner type 2 (jmp)
-        //NOTE: Afterburner type 1 (gas)
-        //NOTE: Afterburner type 0 (pwr)
-        if (afterburnenergy < 32767 && afterburnenergy <= up->afterburnenergy && up->afterburnenergy != 32767
-                && up->afterburnenergy != 0) {
-            if (touchme) {
-                afterburnenergy = 32767, afterburntype = 0;
-            }
-            ++numave;
-            ++percentage;
-            if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name,
-                        up->afterburntype,
-                        ((char *) &this->afterburnenergy) - ((char *) this),
-                        tempdownmap);
-            }
-        }
+       
     } else {
         //we are upgrading!
         if (touchme) {
@@ -3321,21 +3196,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     AddCargo(up->cargo[i], false);
                 }
             }
-        }
-        
-        //NOTE: Afterburner type 2 (jmp)
-        //NOTE: Afterburner type 1 (gas)
-        //NOTE: Afterburner type 0 (pwr)
-        if (((afterburnenergy > up->afterburnenergy
-                || (afterburntype != up->afterburntype && up->afterburnenergy != 32767))
-                && up->afterburnenergy > 0) || force_change_on_nothing) {
-            ++numave;
-            if (touchme) {
-                afterburnenergy = up->afterburnenergy, afterburntype = up->afterburntype;
-            }
-        } else if (afterburnenergy <= up->afterburnenergy && afterburnenergy >= 0 && up->afterburnenergy > 0
-                && up->afterburnenergy < 32767) {
-            cancompletefully = false;
         }
     }
     if (needs_redemption) {

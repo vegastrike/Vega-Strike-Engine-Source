@@ -436,7 +436,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
             (un)->DrawNow(submat, lod);
         }
     }
-    float cmas = unit->computer.max_ab_speed() * unit->computer.max_ab_speed();
+    float cmas = unit->MaxAfterburnerSpeed() * unit->MaxAfterburnerSpeed();
     if (cmas == 0) {
         cmas = 1;
     }
@@ -724,7 +724,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
     float maxaccel = unit->GetMaxAccelerationInDirectionOf(wmat.getR(), true);
     Vector velocity = unit->GetVelocity();
 
-    float cmas = unit->computer.max_ab_speed() * unit->computer.max_ab_speed();
+    float cmas = unit->MaxAfterburnerSpeed() * unit->MaxAfterburnerSpeed();
     if (cmas == 0) {
         cmas = 1;
     }

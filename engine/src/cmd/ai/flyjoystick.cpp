@@ -233,7 +233,7 @@ void FlyByJoystick::Execute() {
                                 float(expamountc * (exp(expfactorc * axis_value) - 1) / norm
                                         + pamountc * pow(axis_value, pfactorc));
                     }
-                    cpu->set_speed = axis_value * cpu->max_speed();
+                    cpu->set_speed = axis_value * parent->MaxSpeed();
                     desired_velocity = Vector(0, 0, cpu->set_speed);
                 }
             }

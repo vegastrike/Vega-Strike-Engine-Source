@@ -328,8 +328,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config.max_ecm = GetGameConfig().GetSizeT("physics.max_ecm", physics_config.max_ecm);
     physics_config.max_lost_target_live_time = GetGameConfig().GetFloat("physics.max_lost_target_live_time", physics_config.max_lost_target_live_time);
     physics_config.percent_missile_match_target_velocity = GetGameConfig().GetFloat("physics.percent_missile_match_target_velocity", physics_config.percent_missile_match_target_velocity);
-    physics_config.game_speed = GetGameConfig().GetFloat("physics.game_speed", physics_config.game_speed);
-    physics_config.game_accel = GetGameConfig().GetFloat("physics.game_accel", physics_config.game_accel);
+    physics_config.game_speed = GetGameConfig().GetDouble("physics.game_speed", physics_config.game_speed);
+    physics_config.game_accel = GetGameConfig().GetDouble("physics.game_accel", physics_config.game_accel);
+    physics_config.combat_mode_multiplier = GetGameConfig().GetDouble("physics.combat_mode_multiplier", physics_config.combat_mode_multiplier);
     physics_config.velocity_max = GetGameConfig().GetFloat("physics.velocity_max", physics_config.velocity_max);
     physics_config.max_player_rotation_rate = GetGameConfig().GetFloat("physics.maxplayerrot", physics_config.max_player_rotation_rate);
     physics_config.max_non_player_rotation_rate = GetGameConfig().GetFloat("physics.maxNPCrot", physics_config.max_non_player_rotation_rate);
