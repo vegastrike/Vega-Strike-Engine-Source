@@ -5214,12 +5214,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
     //cloaking device? If we don't have one, no need to mention it ever exists, right?
     if (playerUnit->cloak.Capable()) {
-        if (!mode) {
-            PRETTY_ADDU(statcolor + "Cloaking device available, energy usage: #-c",
-                    playerUnit->cloak.GetConsumption() * RSconverter * Wconv,
-                    0,
-                    "MJ/s");
-        } else {
+        if (mode) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "Installs a cloaking device.#n#  Activated energy usage: #-c",
@@ -5239,38 +5234,25 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             }
         }
     }
-    bool anyweapons = false;
-    if (!mode) {
-        text += "#n##n##c0:1:.5#" + prefix + "[ARMAMENT]#n##-c";
-        text += prefix + "MOUNTPOINT RATINGS:";
-    }
+    
+    
     //let's go through all mountpoints
-    {
+    if(mode) {
+        bool anyweapons = false;
+
         for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-            if (!mode) {
-                PRETTY_ADD(" #c0:1:.3#[#-c", i + 1, 0);
-                text += "#c0:1:.3#]#-c #c0:1:1#" + getMountSizeString(playerUnit->mounts[i].size) + "#-c";
-            }
             const WeaponInfo *wi = playerUnit->mounts[i].type;
             if (wi && wi->name != "") {
                 anyweapons = true;
             }
         }
-    }
-    if (!mode) {
-        text += "#n#" + prefix + "MOUNTED:";
-    }          //need brace for namespace issues on VC++
-    {
+
         if (anyweapons) {
             for (int i = 0; i < playerUnit->getNumMounts(); i++) {
                 const WeaponInfo *wi = playerUnit->mounts[i].type;
                 if ((!wi) || (wi->name == "")) {
                     continue;
                 } else {
-                    if (!mode) {
-                        PRETTY_ADD("  #c0:1:.3#[#-c", i + 1, 0);
-                        text += "#c0:1:.3#]#-c ";
-                    }
                     text += wi->name + ": #c0:1:1#" + getMountSizeString(as_integer(wi->size)) + "#-c#c.9:.9:.5#"
                             + WeaponTypeStrings[as_integer(wi->type)] + " #-c";
                     if (wi->damage < 0) {
@@ -5376,15 +5358,10 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     text += "#n#";
                 }
             }
-        } else                  //end mountpoint list
-        if (!mode) {
-            text += "#n##c1:.3:.3#" + prefix + "  NO MOUNTED WEAPONS#n##-c";
-        }
+        } //end mountpoint list
     }
-    if (mode) {
-        return;
-    }
-    if (subunitlevel == 0 && mode == 0) {
+            
+    /*if (subunitlevel == 0 && mode == 0) {
         text += "#n##n##c0:1:.5#" + prefix + "[KEY FIGURES]#n##-c";
         float maxshield = playerUnit->totalShieldEnergyCapacitance();
         if (shields_require_power) {
@@ -5458,20 +5435,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     "seconds");
         }
         PRETTY_ADDU(statcolor + "Combined (non-missile) weapon damage: #-c", totalWeaponDamage * VSDM, 0, "MJ/s");
-    }
-    if (!mode) {
-        //handle SubUnits
-        Unit *sub;
-        int i = 1;
-        for (un_iter ki = playerUnit->getSubUnits(); (sub = *ki) != NULL; ++ki, ++i) {
-            if (i == 1) {
-                text += "#n##n##c0:1:.5#" + prefix + "[SUB UNITS]#-c";
-            }
-            PRETTY_ADD("#n#" + prefix + "#c0:1:.2#[#-csub unit ", i, 0);
-            text += "#c0:1:.2#]#-c#n#";
-            showUnitStats(sub, text, subunitlevel + 1, 0, item);
-        }
-    }
+    }*/
+    
     //last line sometimes gets lost in the interface
     text += "#n#";
 }
@@ -5498,46 +5463,7 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
             text += texture.substr(picend + 1);
         }
     }     //picture removed
-    text.append("#n##n##c0:1:.5#[RAW DIAGNOSTIC OUTPUT]#n##-c");
-    bool inQuote = false;
-    bool newLine = false;
-    static bool showdiags = XMLSupport::parse_bool(vs_config->getVariable("debug", "showdiagnostics", "false"));
-    if (showdiags) {
-        for (string::const_iterator i = rawText.begin(); i != rawText.end(); i++) {
-            switch (*i) {
-                case '\n':
-                    text.append("#n#");
-                    if (!newLine) {
-                        text.append("#c0:1:.5#");
-                        newLine = true;
-                    }
-                    break;
-                case '"':
-                    if (!inQuote) {
-                        text.append("#c1:.3:.3#");
-                        inQuote = true;
-                    } else {
-                        text.append("#-c");
-                        inQuote = false;
-                    }
-                    //Delete these, so do nothing.
-                    break;
-                case ' ':
-                    if (newLine) {
-                        newLine = false;
-                        text.append("#-c");
-                    }
-                    text += (*i);
-                    break;
-                default:
-                    text += (*i);
-                    break;
-            }
-        }
-    } else {
-        text.append("#n# #c1:.1:.1#SUPPRESSED #n##-c");
-        //Put this in the description.
-    }
+    
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText(text);
