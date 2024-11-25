@@ -69,6 +69,8 @@ void Component::Load(std::string upgrade_key, std::string unit_key) {
     // TODO: bool integral = false;
 }
 
+
+
 // TODO: convert to std::pair<bool, double>
 bool Component::CanWillUpDowngrade(const std::string upgrade_key,
                                    bool upgrade, bool apply) {

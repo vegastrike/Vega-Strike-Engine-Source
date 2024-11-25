@@ -150,6 +150,16 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             result.success = unit->reactor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
 
+        case ComponentType::Afterburner: break; // Integrated
+        case ComponentType::AfterburnerUpgrade:
+            result.upgradeable = true;
+            result.success = unit->afterburner_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case ComponentType::Drive: break; // Integrated
+        case ComponentType::DriveUpgrade:
+            result.upgradeable = true;
+            result.success = unit->drive_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
         case ComponentType::FtlDrive:
             result.upgradeable = true;
             result.success = unit->ftl_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
@@ -164,15 +174,6 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             result.upgradeable = true;
             result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
-        /*case UpgradeType::Afterburner:
-            result.upgradeable = true;
-            result.success = unit->afterburner.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
-            std::cout << "Afterburner upgraded successfully\n";
-            break;
-        case UpgradeType::Drive:
-            result.upgradeable = true;
-            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
-            break;*/
 
         
         /*case UpgradeType::ECM:
@@ -225,6 +226,16 @@ void UpgradeableUnit::UpgradeUnit(const std::string &upgrades) {
         // TODO: change this when we make this a sub-class of unit
         Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
         unit->Upgrade(upgradee, mount_offset, subunit_offset, mode, true, percent, nullptr);
+
+        // Code to handle DriveUpgrade and AfterburnerUpgrade
+        // Should eventually replace all the code above
+        CargoUpgrade cargo_upgrade(upgrade);
+        ComponentType component_type = GetComponentTypeFromName(cargo_upgrade.name);
+        if(component_type == ComponentType::AfterburnerUpgrade) {
+            unit->afterburner_upgrade.Load(cargo_upgrade.name + "__upgrades");
+        } else if(component_type == ComponentType::DriveUpgrade) {
+            unit->drive_upgrade.Load(cargo_upgrade.name + "__upgrades");
+        }
     }
 }
 

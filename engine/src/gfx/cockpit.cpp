@@ -559,13 +559,13 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                     value = target->GetComputerData().set_speed;
                     break;
                 case UnitImages<void>::MAXKPS:
-                    value = target->GetComputerData().max_speed();
+                    value = target->MaxSpeed();
                     break;
                 case UnitImages<void>::MAXCOMBATKPS:
-                    value = target->GetComputerData().max_combat_speed;
+                    value = target->drive.speed.Value();
                     break;
                 case UnitImages<void>::MAXCOMBATABKPS:
-                    value = target->GetComputerData().max_combat_ab_speed;
+                    value = target->afterburner.speed.Value();
                     break;
                 default:
                     value = 0;
