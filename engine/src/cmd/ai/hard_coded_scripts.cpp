@@ -235,7 +235,7 @@ void BarrelRoll(Order *aisc, Unit *un) {
     bool afterburn = useAfterburner();
     broll->MatchSpeed(Vector(0,
             0,
-            afterburn ? un->GetComputerData().max_ab_speed() : un->GetComputerData().max_speed()));
+            afterburn ? un->MaxAfterburnerSpeed() : un->MaxSpeed()));
     broll->Afterburn(afterburn);
 }
 
@@ -246,7 +246,7 @@ static void EvadeWavy(Order *aisc, Unit *un, bool updown, bool ab) {
     bool afterburn = ab && useAfterburner();
     broll->MatchSpeed(Vector(0,
             0,
-            afterburn ? un->GetComputerData().max_ab_speed() : un->GetComputerData().max_speed()));
+            afterburn ? un->MaxAfterburnerSpeed() : un->MaxSpeed()));
     broll->Afterburn(afterburn);
 }
 
@@ -330,11 +330,10 @@ public:
             Vector r = targ->cumulative_transformation_matrix.getR();
             bool afterburn = useAfterburner() && this->afterburn;
             bool ab_needed =
-                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->GetComputerData().max_speed();
+                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->MaxSpeed();
             m.SetDesiredVelocity(Vector(0, 0, afterburn
-                    && ab_needed ? parent->GetComputerData().max_ab_speed()
-                    : parent->GetComputerData().
-                            max_speed()), true);
+                    && ab_needed ? parent->MaxAfterburnerSpeed()
+                    : parent->MaxSpeed()), true);
             float spseed, grange = 0, mrange = 0;
             parent->getAverageGunSpeed(spseed, grange, mrange);
             if (r.Dot(relloc) < 0) {
@@ -429,7 +428,7 @@ public:
             Vector r = targ->cumulative_transformation_matrix.getR();
             bool afterburn = useAfterburner() && this->afterburn;
             bool ab_needed =
-                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->GetComputerData().max_speed();
+                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->MaxSpeed();
             if (r.Dot(relloc) < 0) {
                 FaceTargetITTS::Execute();
                 m.SetAfterburn(afterburn && ab_needed);
@@ -530,11 +529,10 @@ public:
             Vector r = targ->cumulative_transformation_matrix.getR();
             bool afterburn = useAfterburner() && this->afterburn;
             bool ab_needed =
-                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->GetComputerData().max_speed();
+                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->MaxSpeed();
             m.SetDesiredVelocity(Vector(0, 0, afterburn
-                    && ab_needed ? parent->GetComputerData().max_ab_speed()
-                    : parent->GetComputerData().
-                            max_speed()), true);
+                    && ab_needed ? parent->MaxAfterburnerSpeed()
+                    : parent->MaxSpeed()), true);
             float speed, grange = 0, mrange = 0;
             parent->getAverageGunSpeed(speed, grange, mrange);
             if (r.Dot(relloc) < 0) {
@@ -585,7 +583,7 @@ void RollLeft(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(un->GetComputerData().max_roll_right, false), 1.0f));
+                new Orders::ExecuteFor(new Orders::MatchRoll(un->drive.max_roll_right, false), 1.0f));
     }
 }
 
@@ -593,7 +591,7 @@ void RollRight(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left, false), 1.0f));
+                new Orders::ExecuteFor(new Orders::MatchRoll(-un->drive.max_roll_left, false), 1.0f));
     }
 }
 
@@ -602,7 +600,7 @@ void RollLeftHard(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(un->GetComputerData().max_roll_right, false), durvar));
+                new Orders::ExecuteFor(new Orders::MatchRoll(un->drive.max_roll_right, false), durvar));
     }
 }
 
@@ -611,7 +609,7 @@ void RollRightHard(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left, false), durvar));
+                new Orders::ExecuteFor(new Orders::MatchRoll(-un->drive.max_roll_left, false), durvar));
     }
 }
 

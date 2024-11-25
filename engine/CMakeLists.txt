@@ -727,13 +727,18 @@ SET(LIBPYTHON
 
 SET(LIBCOMPONENT
     src/components/component.cpp
+    src/components/dummy_component.cpp
     src/components/component_utils
     
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
     src/components/reactor.cpp
 
+    src/components/afterburner.cpp
+    src/components/afterburner_upgrade.cpp
     src/components/cloak.cpp
+    src/components/drive.cpp
+    src/components/drive_upgrade.cpp
     src/components/ftl_drive.cpp
     src/components/jump_drive.cpp
     )
@@ -1753,6 +1758,8 @@ IF (USE_GTEST)
         src/exit_unit_tests.cpp
         src/components/tests/energy_container_tests.cpp
         src/components/tests/balancing_tests.cpp
+        src/components/tests/drive_tests.cpp
+        src/components/tests/afterburner_tests.cpp
         src/components/tests/jump_drive_tests.cpp
     )
 

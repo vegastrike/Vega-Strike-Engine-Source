@@ -303,7 +303,7 @@ void NavigationSystem::DrawSystem() {
              *  {*/
             if (UnitUtil::isSignificant(*blah)) {
                 //capship or station
-                if ((*blah)->GetComputerData().max_speed() == 0) {
+                if ((*blah)->MaxSpeed() == 0) {
                     //is this item STATIONARY?
                     insert_type = navstation;
                     insert_size = navstationsize;

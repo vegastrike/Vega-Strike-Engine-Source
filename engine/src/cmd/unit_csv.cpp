@@ -48,6 +48,7 @@
 #include "unit_csv_factory.h"
 #include "upgradeable_unit.h"
 #include "resource/manifest.h"
+#include "components/component_utils.h"
 
 extern int GetModeFromName(const char *input_buffer);
 extern void pushMesh(std::vector<Mesh *> &mesh,
@@ -376,13 +377,7 @@ static void AddSubUnits(Unit *thus,
                         faction,
                         modification,
                         NULL));         //I set here the fg arg to NULL
-        if (xml.units.back()->name == "LOAD_FAILED") {
-            xml.units.back()->limits.yaw = 0;
-            xml.units.back()->limits.pitch = 0;
-            xml.units.back()->limits.roll = 0;
-            xml.units.back()->limits.lateral = xml.units.back()->limits.retro = xml.units.back()->limits.forward =
-                    xml.units.back()->limits.afterburn = 0.0;
-        }
+        
         if (!thus->isSubUnit()) {         //Useless to set recursive owner in subunits - as parent will do the same
             xml.units.back()->SetRecursiveOwner(thus);
         }
@@ -390,8 +385,11 @@ static void AddSubUnits(Unit *thus,
         R.Normalize();
         xml.units.back()->prev_physical_state = xml.units.back()->curr_physical_state;
         xml.units.back()->SetPosition(pos * xml.unitscale);
-        xml.units.back()->limits.structurelimits = R.Cast();
-        xml.units.back()->limits.limitmin = restricted;
+
+        // Subunit movement restrictions
+        xml.units.back()->structure_limits = R.Cast();
+        xml.units.back()->limit_min = restricted;
+
         xml.units.back()->name = filename;
         if (xml.units.back()->pImage->unitwriter != NULL) {
             xml.units.back()->pImage->unitwriter->setName(filename);
@@ -401,7 +399,7 @@ static void AddSubUnits(Unit *thus,
     for (int a = xml.units.size() - 1; a >= 0; a--) {
         bool randomspawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
         if (randomspawn) {
-            int chancetospawn = float_to_int(xml.units[a]->warpCapData());
+            int chancetospawn = float_to_int(xml.units[a]->ftl_energy.MaxLevel());
             if (chancetospawn > rand() % 100) {
                 thus->SubUnits.prepend(xml.units[a]);
             } else {
@@ -612,18 +610,7 @@ void LoadCockpit(Unit *thus, const string &cockpit) {
 
 const std::string EMPTY_STRING("");
 
-void YawPitchRollParser(std::string unit_key,
-        std::string main_string,
-        std::string left_string,
-        std::string right_string,
-        float &left_pointer,
-        float &right_pointer) {
-    float main_value = UnitCSVFactory::GetVariable(unit_key, main_string, 0.0f);
-    float right_value = UnitCSVFactory::GetVariable(unit_key, right_string, 0.0f);
-    float left_value = UnitCSVFactory::GetVariable(unit_key, left_string, 0.0f);
-    right_pointer = (right_value > 0 ? right_value : main_value) * M_PI / 180.;
-    left_pointer = (left_value > 0 ? left_value : main_value) * M_PI / 180.;
-}
+
 
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
@@ -856,9 +843,14 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
     graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    // Bleed factor hints at losing energy. However, here, at 2.0 it's a factor
-    // for reducing warp cost
-    double ftl_factor = configuration()->warp_config.bleed_factor;
+    // Begin Drive Section
+    // Afterburner
+    afterburner = Afterburner(GetSource(ComponentType::Afterburner, &fuel, &energy, &ftl_energy));
+    afterburner.Load("", unit_key);
+
+    drive = Drive(GetSource(ComponentType::Drive, &fuel, &energy, &ftl_energy));
+    drive.Load("", unit_key);
+
     ftl_drive.Load("", unit_key);
     jump_drive.Load("", unit_key);
     
@@ -868,48 +860,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             "Collide_Subunits",
             graphicOptions.RecurseIntoSubUnitsOnCollision
                     ? true : false) ? 1 : 0;
-        
-    afterburnenergy = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
-    afterburntype = UnitCSVFactory::GetVariable(unit_key,
-            "Afterburner_Type",
-            0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
-    limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) * M_PI / 180.0;
-    limits.pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) * M_PI / 180.0;
-    limits.roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) * M_PI / 180.0;
+            
+    // End Drive Section
 
-    YawPitchRollParser(unit_key,
-            "Yaw_Governor",
-            "Yaw_Governor",
-            "Yaw_Governor",
-            computer.max_yaw_right,
-            computer.max_yaw_left);
-    YawPitchRollParser(unit_key,
-            "Pitch_Governor",
-            "Pitch_Governor_Up",
-            "Pitch_Governor_Down",
-            computer.max_pitch_up,
-            computer.max_pitch_down);
-    YawPitchRollParser(unit_key,
-            "Roll_Governor",
-            "Roll_Governor_Right",
-            "Roll_Governor_Left",
-            computer.max_roll_right,
-            computer.max_roll_left);
-
-    const float game_accel = configuration()->physics_config.game_accel;
-    const float game_speed = configuration()->physics_config.game_speed;
-    limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
-    limits.forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
-    limits.retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
-    limits.lateral = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0f) +
-            UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0f)) * game_accel * game_speed;
-
-    limits.vertical = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0f) +
-            UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0f)) * game_accel * game_speed;
-
-    computer.max_combat_speed = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 0.0f) * game_speed;
-    computer.max_combat_ab_speed =
-            UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 0.0f) * game_speed;
     computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
     computer.radar.canlock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
 
@@ -1350,30 +1303,16 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
     unit["Primary_Capacitor"] = tos(energy.Level());
     unit["Reactor_Recharge"] = tos(reactor.Capacity());
+
+    afterburner.SaveToCSV(unit);
+    drive.SaveToCSV(unit);
     jump_drive.SaveToCSV(unit);
     ftl_drive.SaveToCSV(unit);
 
+
     unit["Wormhole"] = tos(forcejump != 0);
-    unit["Afterburner_Usage_Cost"] = tos(afterburnenergy);
-    unit["Afterburner_Type"] = tos(afterburntype);
-    unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (M_PI));
-    unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (M_PI));
-    unit["Maneuver_Roll"] = tos(limits.roll * 180 / (M_PI));
-    unit["Yaw_Governor_Right"] = tos(computer.max_yaw_right * 180 / M_PI);
-    unit["Yaw_Governor_Left"] = tos(computer.max_yaw_left * 180 / M_PI);
-    unit["Pitch_Governor_Up"] = tos(computer.max_pitch_up * 180 / M_PI);
-    unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / M_PI);
-    unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / M_PI);
-    unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / M_PI);
-    const float game_accel = configuration()->physics_config.game_accel;
-    const float game_speed = configuration()->physics_config.game_speed;
-    unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
-    unit["Forward_Accel"] = tos(limits.forward / (game_accel * game_speed));
-    unit["Retro_Accel"] = tos(limits.retro / (game_accel * game_speed));
-    unit["Left_Accel"] = unit["Right_Accel"] = tos(limits.lateral / (game_accel * game_speed));
-    unit["Bottom_Accel"] = unit["Top_Accel"] = tos(limits.vertical / (game_accel * game_speed));
-    unit["Default_Speed_Governor"] = tos(computer.max_combat_speed / game_speed);
-    unit["Afterburner_Speed_Governor"] = tos(computer.max_combat_ab_speed / game_speed);
+    
+    
     unit["ITTS"] = tos(computer.itts);
     unit["Can_Lock"] = tos(computer.radar.canlock);
     unit["Radar_Color"] = std::to_string(computer.radar.capability);

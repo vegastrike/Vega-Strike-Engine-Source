@@ -25,7 +25,6 @@
 #include "cloak.h"
 #include "unit_csv_factory.h"
 #include "configuration/configuration.h"
-#include "unit_generic.h"
 
 Cloak::Cloak() : 
     Component(),

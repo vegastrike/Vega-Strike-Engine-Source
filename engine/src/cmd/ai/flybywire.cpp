@@ -192,16 +192,16 @@ FlyByWire::FlyByWire() : MatchVelocity(Vector(0, 0, 0), Vector(0, 0, 0), true, f
 }
 
 void FlyByWire::Stop(float per) {
-    SetDesiredVelocity(Vector(0, 0, per * parent->GetComputerData().max_speed()), true);
+    SetDesiredVelocity(Vector(0, 0, per * parent->MaxSpeed()), true);
 
-    parent->GetComputerData().set_speed = per * parent->GetComputerData().max_speed();
+    parent->GetComputerData().set_speed = per * parent->MaxSpeed();
 }
 
 void FlyByWire::Right(float per) {
     desired_ang_velocity +=
             (-per
                     * (per
-                            > 0 ? parent->GetComputerData().max_yaw_left : parent->GetComputerData().max_yaw_right)
+                            > 0 ? parent->drive.max_yaw_left : parent->drive.max_yaw_right)
                     / getTimeCompression()) * Vector(
                     0,
                     1,
@@ -212,7 +212,7 @@ void FlyByWire::Up(float per) {
     desired_ang_velocity +=
             (-per
                     * (per
-                            > 0 ? parent->GetComputerData().max_pitch_down : parent->GetComputerData().max_pitch_up)
+                            > 0 ? parent->drive.max_pitch_down : parent->drive.max_pitch_up)
                     / getTimeCompression()) * Vector(
                     1,
                     0,
@@ -223,7 +223,7 @@ void FlyByWire::RollRight(float per) {
     desired_ang_velocity +=
             (-per
                     * (per
-                            > 0 ? parent->GetComputerData().max_roll_left : parent->GetComputerData().max_roll_right)
+                            > 0 ? parent->drive.max_roll_left : parent->drive.max_roll_right)
                     / getTimeCompression()) * Vector(
                     0,
                     0,
@@ -235,9 +235,9 @@ void FlyByWire::Afterburn(float per) {
 
     afterburn = (per > .1);
     if (!sheltonslide && !inertial_flight_model) {
-        desired_velocity = Vector(0, 0, cpu->set_speed + per * (cpu->max_ab_speed() - cpu->set_speed));
+        desired_velocity = Vector(0, 0, cpu->set_speed + per * (parent->MaxAfterburnerSpeed() - cpu->set_speed));
     } else if (inertial_flight_model) {
-        DirectThrust += Vector(0, 0, parent->limits.afterburn * per);
+        DirectThrust += Vector(0, 0, parent->afterburner.thrust * per);
     }
     if (parent == _Universe->AccessCockpit()->GetParent()) {
         //printf("afterburn is %d\n",afterburn); // DELETEME WTF all this force feedback code and its unused.
@@ -254,22 +254,22 @@ void FlyByWire::MatchSpeed(const Vector &vec) {
     Computer *cpu = &parent->GetComputerData();
 
     cpu->set_speed = (vec).Magnitude();
-    if (cpu->set_speed > cpu->max_speed()) {
-        cpu->set_speed = cpu->max_speed();
+    if (cpu->set_speed > parent->MaxSpeed()) {
+        cpu->set_speed = parent->MaxSpeed();
     }
 }
 
 void FlyByWire::Accel(float per) {
     Computer *cpu = &parent->GetComputerData();
 
-    cpu->set_speed += per * cpu->max_speed() * simulation_atom_var; //SIMULATION_ATOM?
-    if (cpu->set_speed > cpu->max_speed()) {
-        cpu->set_speed = cpu->max_speed();
+    cpu->set_speed += per * parent->MaxSpeed() * simulation_atom_var; //SIMULATION_ATOM?
+    if (cpu->set_speed > parent->MaxSpeed()) {
+        cpu->set_speed = parent->MaxSpeed();
     }
     static float reverse_speed_limit =
             XMLSupport::parse_float(vs_config->getVariable("physics", "reverse_speed_limit", "1.0"));
-    if (cpu->set_speed < -cpu->max_speed() * reverse_speed_limit) {
-        cpu->set_speed = -cpu->max_speed() * reverse_speed_limit;
+    if (cpu->set_speed < -parent->MaxSpeed() * reverse_speed_limit) {
+        cpu->set_speed = -parent->MaxSpeed() * reverse_speed_limit;
     }
     afterburn = false;
 
@@ -279,30 +279,30 @@ void FlyByWire::Accel(float per) {
 #define FBWABS(m) (m >= 0 ? m : -m)
 
 void FlyByWire::ThrustRight(float percent) {
-    DesiredShiftVelocity.i = parent->GetComputerData().max_speed() * percent;
+    DesiredShiftVelocity.i = parent->MaxSpeed() * percent;
 }
 
 void FlyByWire::ThrustUp(float percent) {
-    DesiredShiftVelocity.j = parent->GetComputerData().max_speed() * percent;
+    DesiredShiftVelocity.j = parent->MaxSpeed() * percent;
 }
 
 void FlyByWire::ThrustFront(float percent) {
-    DesiredShiftVelocity.k = parent->GetComputerData().max_speed() * percent;
+    DesiredShiftVelocity.k = parent->MaxSpeed() * percent;
 }
 
 void FlyByWire::DirectThrustRight(float percent) {
-    DirectThrust.i = parent->limits.lateral * percent;
+    DirectThrust.i = parent->drive.lateral * percent;
 }
 
 void FlyByWire::DirectThrustUp(float percent) {
-    DirectThrust.j = parent->limits.vertical * percent;
+    DirectThrust.j = parent->drive.vertical * percent;
 }
 
 void FlyByWire::DirectThrustFront(float percent) {
     if (percent > 0) {
-        DirectThrust.k = parent->limits.forward * percent;
+        DirectThrust.k = parent->drive.forward * percent;
     } else {
-        DirectThrust.k = parent->limits.retro * percent;
+        DirectThrust.k = parent->drive.retro * percent;
     }
 }
 
@@ -312,8 +312,8 @@ void FlyByWire::Execute() {
     if (!inertial_flight_model) {
         //Must translate the thrust values to velocities, which is somewhat cumbersome.
         Vector Limit(
-                parent->limits.lateral, parent->limits.vertical,
-                ((DirectThrust.k > 0) ? parent->limits.forward : parent->limits.retro)
+                parent->drive.lateral, parent->drive.vertical,
+                ((DirectThrust.k > 0) ? parent->drive.forward : parent->drive.retro)
         );
         if (Limit.i <= 1) {
             Limit.i = 1;
@@ -330,7 +330,7 @@ void FlyByWire::Execute() {
                 DirectThrust.k / Limit.k
         );
         //Now, scale so that maximum shift velocity is max_speed
-        DesiredDrift *= parent->GetComputerData().max_speed();
+        DesiredDrift *= parent->MaxSpeed();
         //And apply
         DesiredShiftVelocity += DesiredDrift;
     }

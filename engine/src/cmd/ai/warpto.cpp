@@ -44,7 +44,7 @@ bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
     float toodamnclose = following ? tooclosefollowing : tooclose;
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
-    float timetolive = dist / (diff * parent->GetComputerData().max_combat_speed);
+    float timetolive = dist / (diff * parent->drive.speed);
     if (timetolive > (5 * max_allowable_travel_time())) {
         return true;
     } else if (timetolive > (max_allowable_travel_time())) {
@@ -69,7 +69,7 @@ bool DistanceWarrantsTravelTo(Unit *parent, float dist, bool following) {
     //first let us decide whether the target is far enough to warrant using warp
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
-    float timetolive = dist / (diff * parent->GetComputerData().max_combat_speed);
+    float timetolive = dist / (diff * parent->drive.speed);
     if (timetolive > max_allowable_travel_time()) {
         return true;
     }
