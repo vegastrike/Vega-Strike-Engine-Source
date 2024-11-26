@@ -865,7 +865,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
             }
         } else {
             //no "-" before it - it's the mission name
-            mission_name = std::string(lpCmdLine[i] + 2);
+            mission_name = std::string(lpCmdLine[i]);
         }
     }
     if (false == legacy_data_dir_mode) {
