@@ -25,12 +25,70 @@
 
 #include "configuration.h"
 #include "game_config.h"
+#include "json.h"
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
 
 #include <stdio.h> 
+
+
+std::string GetString(std::string json_string, const std::string key, bool trim = true) {
+    json::jobject json = json::jobject::parse(json_string);
+    std::vector<std::string> key_sections;
+    boost::split(key_sections, key, boost::is_any_of("|"));
+    int key_sections_size = key_sections.size();
+
+    for(std::string& key_section : key_sections) {
+        key_sections_size--;
+
+        if(!json.has_key(key_section)) {
+            return "";
+        }
+
+        if(key_sections_size > 0) {
+            json_string = json.get(key_section);
+            json = json::jobject::parse(json_string);
+        } else {
+            json_string = json.get(key_section);
+
+            if(!trim) {
+                return json_string;
+            }
+
+            int len = json_string.length();
+            json_string = json_string.substr(1,len-2);
+            return json_string;
+        }
+    }
+    
+    return "";
+}
+
+bool GetBool(std::string json_string, const std::string key, bool default_value) {
+        std::string result = GetString(json_string, key, false);
+        if(result == "") {
+                return default_value;
+        } else {
+                return result == "true";
+        }
+}
+
+double GetDouble(std::string json_string, const std::string key, double default_value) {
+        std::string result = GetString(json_string, key, false);
+        if(result == "") {
+                return default_value;
+        } else {
+                try {
+                        return std::stod(result);
+                } catch(...) {
+                        std::cout << "Not a double: " << result << std::endl;
+                        abort();
+                }
+                
+        }
+}
 
 using vega_config::GetGameConfig;
 
@@ -43,6 +101,8 @@ Configuration::Configuration() {
         buffer << ifs.rdbuf();
         const std::string json_text = buffer.str();
         graphics2_config = Graphics2Config(json_text);
+        game_start = vega_config::GameStart(json_text);
+        fuel = vega_config::Fuel(json_text);
     }
 }
 
@@ -125,9 +185,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     // fuel substruct
     fuel.afterburner_fuel_usage =
             GetGameConfig().GetFloat("physics.AfterburnerFuelUsage", fuel.afterburner_fuel_usage);
-    fuel.fmec_exit_velocity_inverse = GetGameConfig().GetFloat("physics.FMEC_exit_vel_inverse", fuel.fmec_exit_velocity_inverse);
-//    fuel.fmec_exit_velocity_inverse =
-//            1.0F / GetGameConfig().GetFloat("physics.FMEC_exit_vel", 1.0F / 0.0000002F);
+    
     fuel.fuel_efficiency =
             GetGameConfig().GetDouble("physics.LithiumRelativeEfficiency_Lithium", fuel.fuel_efficiency);
     fuel.fuel_equals_warp = GetGameConfig().GetBool("physics.fuel_equals_warp", fuel.fuel_equals_warp);
@@ -432,6 +490,18 @@ vega_config::Fuel::Fuel() :
         reactor_uses_fuel(false) {
 }
 
+vega_config::Fuel::Fuel(const std::string config) {
+    fuel_equals_warp = GetBool(config, "components|fuel|fuel_equals_warp", false);
+    fuel_factor = GetDouble(config, "components|fuel|factor", 1.0);
+    energy_factor = GetDouble(config, "components|energy|factor", 1.0);
+    ftl_energy_factor = GetDouble(config, "components|ftl_energy|factor", 1.0);
+    
+    reactor_factor = GetDouble(config, "components|reactor|factor", 1.0);
+
+    ftl_drive_factor = GetDouble(config, "components|ftl_drive|factor", 1.0);
+    jump_drive_factor = GetDouble(config, "components|jump_drive|factor", 1.0);
+}
+
 vega_config::PhysicsConfig::PhysicsConfig() :
         collision_scale_factor(1.0f),
         inelastic_scale(0.8f),
@@ -446,6 +516,16 @@ vega_config::PhysicsConfig::PhysicsConfig() :
 vega_config::WeaponsConfig::WeaponsConfig() :
         can_fire_in_cloak(false),
         can_fire_in_spec(false) {
+}
+
+vega_config::GameStart::GameStart() :
+        default_mission(""),
+        introduction("") {
+}
+
+vega_config::GameStart::GameStart(const std::string config) {
+    default_mission = GetString(config, "game_start|default_mission");
+    introduction = GetString(config, "game_start|introduction");
 }
 
 std::shared_ptr<Configuration> configuration() {

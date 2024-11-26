@@ -158,16 +158,7 @@ struct EjectConfig {
 
 struct Fuel {
     float afterburner_fuel_usage;
-    /* There are a pair of "FMEC" variables - they both involve "Fuel Mass to Energy Conversion" -
-     * this one happens to specify the inverse (it's only ever used as 1/Value, so just encode 1/Value, not Value)
-     * of the assumed exit velocity of the mass ejected as thrust, calculated based on energy-possible
-     * (if not necessarily plausible) outcomes from a Li-6 + Deuterium fusion reaction.
-     * The other variable (not present here) FMEC_factor, is used in reactor --> energy production.
-     * As the comment in the code next to the variable init says, it specifies how many metric tons (1 VS mass unit)
-     * of fuel are used to produce 100MJ (one units.csv energy recharge unit) of recharge.
-     * At some point, it wouldn't kill us to renormalize the engine and dataset to both just use SI units, but that's not a priority.
-     */
-    float fmec_exit_velocity_inverse{0.0000002F};
+    
 
     /* This used to be Lithium6constant.
      * There's some relevant context that's been removed from the original name of this variable "Lithium6constant" --
@@ -207,6 +198,7 @@ struct Fuel {
     double minimum_drive{0.15};
 
     Fuel();
+    Fuel(const std::string config);
 };
 
 struct HudConfig {
@@ -461,6 +453,14 @@ struct WeaponsConfig {
     WeaponsConfig();
 };
 
+struct GameStart {
+    std::string default_mission;
+    std::string introduction;
+
+    GameStart();
+    GameStart(const std::string config);
+};
+
 }
 
 // not using namespace vega_config, because ComputerConfig would be ambiguous
@@ -485,6 +485,7 @@ public:
     vega_config::UnitConfig unit_config;
     vega_config::WarpConfig warp_config;
     vega_config::WeaponsConfig weapons;
+    vega_config::GameStart game_start;
 };
 
 extern std::shared_ptr<Configuration> configuration();

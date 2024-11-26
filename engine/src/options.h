@@ -40,15 +40,9 @@ public:
     void init();
 
 /* General Options */
-    std::string default_mission;
     std::string galaxy;
     bool command_interpretor{};
     bool load_last_savegame{};
-    std::string intro1;
-    std::string intro2;
-    std::string intro3;
-    std::string intro4;
-    std::string intro5;
     bool debug_fs{};
     float simulation_atom{};
     float audio_atom{};
