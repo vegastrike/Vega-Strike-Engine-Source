@@ -25,8 +25,8 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef ENERGYCONTAINER_H
-#define ENERGYCONTAINER_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H
 
 #include <vector>
 #include <iostream>
@@ -38,12 +38,6 @@
 * it would be easier for a new developer or someone from WC
 * to figure what it means.
 */
-enum class EnergyType {
-    Fuel,   // 1
-    Energy, // 0 Capacitor
-    FTL,   // 2 FTL
-    None    // 3 Free Energy
-};
 
 
 /**
@@ -52,11 +46,10 @@ enum class EnergyType {
 class EnergyContainer: public Component
 {
 private:
-    EnergyType type;
     Resource<double> level;
 
 public:
-    EnergyContainer(EnergyType type);
+    EnergyContainer(ComponentType type);
 
     // Return value - any surplus charge
     double Charge(const double quantity);
@@ -75,11 +68,9 @@ public:
     void Zero();
 
     // Component
-    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    virtual void Load(std::string upgrade_key, std::string unit_key = "");      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
-
-    virtual std::string Describe() const; // Describe component in base_computer 
 
     virtual bool CanDowngrade() const;
 
@@ -98,4 +89,4 @@ public:
     virtual bool Installed() const;
 };
 
-#endif // ENERGYCONTAINER_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H

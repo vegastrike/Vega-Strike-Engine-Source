@@ -92,6 +92,7 @@ struct DamageableLayer {
     void Regenerate(float recharge_rate);
     void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
     float GetRegeneration();
+    void UpdateFacets(const float new_facet_strength);
     void UpdateFacets(const unsigned int size, const float new_facets[4]);
     void UpdateRegeneration(const float &new_regeneration_value);
 };

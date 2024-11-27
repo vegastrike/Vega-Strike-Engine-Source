@@ -25,8 +25,8 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef REACTOR_H
-#define REACTOR_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H
 
 #include "component.h"
 #include "energy_container.h"
@@ -52,11 +52,9 @@ public:
             double conversion_ratio = 0.0001); // < 0.01 or very short flight
 
 
-    virtual void Load(std::string upgrade_key, std::string unit_key);      
+    virtual void Load(std::string upgrade_key, std::string unit_key = "");      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
-
-    virtual std::string Describe() const; // Describe component in base_computer 
 
     virtual bool CanDowngrade() const;
 
@@ -79,4 +77,4 @@ public:
     void SetCapacity(double capacity);
 };
 
-#endif // REACTOR_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H

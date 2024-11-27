@@ -30,11 +30,11 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-#include "vsfilesystem.h"
-
-const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
+const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
-                            "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	"Rapid_Mesh",	"BSP_Mesh",
+                            "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	
+                            "Rapid_Mesh", // TODO: find out if used in WC	
+                            "BSP_Mesh",
                             "Use_BSP", "Use_Rapid",	"NoDamageParticles", "Mass",	"Moment_Of_Inertia",
                             "Fuel_Capacity",	"Hull", "Armor_Front_Top_Right",	"Armor_Front_Top_Left",
                             "Armor_Front_Bottom_Right", "Armor_Front_Bottom_Left",	"Armor_Back_Top_Right",
@@ -63,7 +63,12 @@ const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
                             "Upgrade_Type", "Facets",
                             // These values are not in units.csv! There are probably more but I stopped mapping.
                             // TODO: map all missing values using the commented out code below!
-                            "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space"};
+                            "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space",
+
+                            // New stuff
+                            "armor", "shield_strength", "shield_facets"
+                            
+                            };
 
 
 class UnitCSVFactory {

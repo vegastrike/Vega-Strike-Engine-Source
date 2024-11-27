@@ -50,6 +50,5 @@
 #define FINITE(x) ( std::isfinite( x ) )
 #define ISNAN(x) ( std:: isnan( x ) )
 
-#define VS_PI 3.1415926535897931
 
 #endif //VEGA_STRIKE_ENGINE_VS_MATH_H

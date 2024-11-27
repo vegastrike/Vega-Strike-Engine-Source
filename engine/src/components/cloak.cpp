@@ -24,14 +24,13 @@
 
 #include "cloak.h"
 #include "unit_csv_factory.h"
-#include "vegastrike.h"
 #include "configuration/configuration.h"
-#include "unit_generic.h"
 
 Cloak::Cloak() : 
     Component(),
     EnergyConsumer(nullptr, 0, false)
 {
+    type = ComponentType::Cloak;
     _Downgrade();
 }
 
@@ -41,6 +40,7 @@ Cloak::Cloak(std::string unit_key, EnergyContainer* capacitor) :
                    UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0),
                    false)
 {
+    type = ComponentType::Cloak;
     _Upgrade(unit_key);
 }
 
@@ -53,9 +53,6 @@ void Cloak::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Cloak_Glass"] = std::to_string(glass);
 }
 
-std::string Cloak::Describe() const {
-    return std::string();
-}
 
 bool Cloak::CanDowngrade() const {
     return true;
@@ -117,7 +114,7 @@ bool Cloak::Installed() const {
 
 // Cloak Methods
 
-void Cloak::Update(Unit *unit)
+void Cloak::Update()
 {
     // Unit is not capable of cloaking or damaged or just not cloaking
     if(status == CloakingStatus::disabled ||

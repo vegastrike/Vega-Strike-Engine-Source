@@ -1,5 +1,5 @@
 /*
- * ftl_drive.h
+ * dummy_component.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,23 +22,15 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
-#define VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H
 
 #include "component.h"
-#include "energy_consumer.h"
 
-class EnergyContainer;
-
-class FtlDrive : public Component, public EnergyConsumer {
-    // TODO: implement damage so something will actually happen
-    // Right now, damage is recorded in component superclass but game doesn't
-    // take it into account.
+/** A dummy component. Does nothing. Comes in useful in some places. */
+class DummyComponent : public Component {
 public:
-    FtlDrive();
-    FtlDrive(EnergyContainer *source);
-
-    bool Enabled() const;
+    DummyComponent();
 
     // Component Methods
     virtual void Load(std::string upgrade_key, 
@@ -55,4 +47,4 @@ public:
     virtual bool Upgrade(const std::string upgrade_name);
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H

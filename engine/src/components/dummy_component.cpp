@@ -1,5 +1,5 @@
 /*
- * manifest.cpp
+ * dummy_component.cpp
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,37 +22,36 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#include <gtest/gtest.h>
-#include <iostream>
-
-#include "manifest.h"
+#include "dummy_component.h"
 
 
-
-TEST(Manifest, MPL) {
-    // TODO: reenable once we figure out how to find out the data folder location
-
-    /*boost::filesystem::path full_path(boost::filesystem::current_path());
-    std::cerr << "Current path is : " << full_path << std::endl;
-    std::string path = boost::filesystem::current_path().c_str();
-    path = path + "/../data/";
-
-    boost::filesystem::current_path(path);
-
-    Manifest mpl = Manifest::MPL();
-
-    std::cerr << "MPL Size" << mpl.size() << std::endl << std::flush;
-
-    EXPECT_GT(mpl.size(), 100);
-
-    Manifest food = mpl.GetCategoryManifest("Natural_Products/Food/Confed");
-
-    EXPECT_EQ(food.size(), 4);
-
-    Cargo c = mpl.GetRandomCargoFromCategory("Natural_Products/Food/Confed");
-
-    std::cout << c.GetName() << std::endl;
-
-    EXPECT_GT(c.GetName().size(), 0);*/
+DummyComponent::DummyComponent() : 
+    Component() {
+    type = ComponentType::Dummy;
 }
+
+
+// Component Methods
+void DummyComponent::Load(std::string upgrade_key, 
+                    std::string unit_key) {
+    Component::Load(upgrade_key, unit_key);
+}      
+
+void DummyComponent::SaveToCSV(std::map<std::string, std::string>& unit) const {}
+
+bool DummyComponent::CanDowngrade() const {
+    return false;
+}
+
+bool DummyComponent::Downgrade() {
+    return false;
+}
+
+bool DummyComponent::CanUpgrade(const std::string upgrade_name) const {
+    return false;
+}
+
+bool DummyComponent::Upgrade(const std::string upgrade_name) {
+    return false;
+}
+

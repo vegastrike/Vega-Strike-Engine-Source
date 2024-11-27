@@ -1,5 +1,5 @@
 /*
- * ftl_drive.h
+ * afterburner.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,24 +22,24 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
-#define VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
 
 #include "component.h"
 #include "energy_consumer.h"
 
 class EnergyContainer;
 
-class FtlDrive : public Component, public EnergyConsumer {
-    // TODO: implement damage so something will actually happen
-    // Right now, damage is recorded in component superclass but game doesn't
-    // take it into account.
+/** We split this class from Drive for one reason - it may use a different source. */
+class Afterburner : public Component, public EnergyConsumer {
 public:
-    FtlDrive();
-    FtlDrive(EnergyContainer *source);
+    //after burner acceleration max
+    Resource<double> thrust;
 
-    bool Enabled() const;
+    Resource<double> speed;
 
+    Afterburner(EnergyContainer *source = nullptr);
+    
     // Component Methods
     virtual void Load(std::string upgrade_key, 
                       std::string unit_key = "");      
@@ -47,12 +47,13 @@ public:
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
 
     virtual bool CanDowngrade() const;
-
     virtual bool Downgrade();
-
     virtual bool CanUpgrade(const std::string upgrade_name) const;
-
     virtual bool Upgrade(const std::string upgrade_name);
+
+    virtual void Damage();
+    virtual void DamageByPercent(double percent);
+    virtual void Repair();
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H

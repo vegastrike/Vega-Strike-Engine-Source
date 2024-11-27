@@ -1,5 +1,5 @@
 /*
- * ftl_drive.h
+ * afterburner_upgrade.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,23 +22,30 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
-#define VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_UPGRADE_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_UPGRADE_H
 
 #include "component.h"
-#include "energy_consumer.h"
 
-class EnergyContainer;
+class Afterburner;
 
-class FtlDrive : public Component, public EnergyConsumer {
-    // TODO: implement damage so something will actually happen
-    // Right now, damage is recorded in component superclass but game doesn't
-    // take it into account.
+/** An AfterburnerUpgrade applies a modifier to Afterburner class.
+ *  This is the same use case as DriveUpgrade. 
+ *  The game previously supported both additive and multiplicative upgrades.
+ *  I've removed the additive one for simplicity's sake. 
+ *  The default value is 1.0 (no change).
+ */
+class AfterburnerUpgrade : public Component {
+    Afterburner *afterburner;
 public:
-    FtlDrive();
-    FtlDrive(EnergyContainer *source);
+    //after burner acceleration 
+    double thrust;
+    double speed;
+    double consumption;
 
-    bool Enabled() const;
+    AfterburnerUpgrade(Afterburner *afterburner = nullptr);
+    
+    double MaxAfterburnerSpeed() const;
 
     // Component Methods
     virtual void Load(std::string upgrade_key, 
@@ -55,4 +62,4 @@ public:
     virtual bool Upgrade(const std::string upgrade_name);
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_UPGRADE_H

@@ -37,14 +37,9 @@ public:
 
 
     static float getFuelUsage(bool afterburner);
-    void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
-    float ExpendMomentaryFuelUsage(float magnitude);
-    float ExpendFuel(double quantity);
     void ExpendEnergy(const bool player_ship);
     void ExpendEnergy(float usage);
     void ExpendEnergyToRechargeShields();
-    void ExpendFuel();
-    float getWarpEnergy() const;
 
 
     float maxEnergyData() const;
@@ -55,14 +50,11 @@ public:
     void rechargeEnergy();
     void RechargeWarpCapacitors(const bool player_ship);
 
-    void setAfterburnerEnergy(float aft);
     void setEnergyRecharge(float enrech);
 
     float totalShieldEnergyCapacitance() const;
 
     static float VSDPercent();
-
-    float warpCapData() const;
 
     float WarpEnergyMultiplier(const bool player_ship);
 
@@ -70,7 +62,7 @@ public:
     float constrained_charge_to_shields;
     bool sufficient_energy_to_recharge_shields;
 
-    float afterburnenergy;              //short fix
+    // TODO: delete one and move the other to Afterburner class
     int afterburntype;   //0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };

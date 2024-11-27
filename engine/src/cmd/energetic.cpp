@@ -42,7 +42,6 @@
 Energetic::Energetic() : 
         constrained_charge_to_shields(0.0f),
         sufficient_energy_to_recharge_shields(true),
-        afterburnenergy(0),
         afterburntype(0) {
 }
 
@@ -73,48 +72,10 @@ float Energetic::getFuelUsage(bool afterburner) {
     return configuration()->fuel.normal_fuel_usage;
 }
 
-/**
- * @brief Energetic::WCWarpIsFuelHack - in Wing Commander, warp and fuel are the same variable.
- * Therefore, we need to transfer from one to the other to maintain equality
- * @param transfer_warp_to_fuel - true means fuel = warpenergy
- */
-// TODO: this is still an ugly hack
-void Energetic::WCWarpIsFuelHack(bool transfer_warp_to_fuel) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    if (!configuration()->fuel.fuel_equals_warp) {
-        return;
-    }
 
-    if (transfer_warp_to_fuel) {
-        unit->fuel.SetLevel(unit->ftl_energy.Level());
-    } else {
-        unit->ftl_energy.SetLevel(unit->fuel.Level());
-    }
-}
 
-float Energetic::ExpendMomentaryFuelUsage(float magnitude) {
-    // TODO: have this make some kind of sense to someone other than the person who wrote the comment below.
-    //HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
-    float quantity = Energetic::getFuelUsage(false) * simulation_atom_var * magnitude *
-            configuration()->fuel.fmec_exit_velocity_inverse / configuration()->fuel.fuel_efficiency;
 
-    return ExpendFuel(quantity);
-}
 
-/**
- * @brief expendFuel - reduce fuel by burning it
- * @param quantity - requested quantity to use
- * @return - actual quantity used
- */
-float Energetic::ExpendFuel(double quantity) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    return quantity * unit->fuel.Deplete(true, configuration()->fuel.normal_fuel_usage * quantity);
-}
-
-float Energetic::getWarpEnergy() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->ftl_energy.Level();
-}
 
 
 float Energetic::maxEnergyData() const {
@@ -129,20 +90,12 @@ void Energetic::rechargeEnergy() {
     }
 }
 
-void Energetic::setAfterburnerEnergy(float aft) {
-    afterburnenergy = aft;
-}
 
 void Energetic::setEnergyRecharge(float enrech) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     unit->reactor.SetCapacity(enrech);
 }
 
-
-float Energetic::warpCapData() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->ftl_energy.MaxLevel();
-}
 
 // Basically max or current shield x 0.2
 float Energetic::totalShieldEnergyCapacitance() const {
@@ -171,6 +124,8 @@ void Energetic::ExpendEnergy(const bool player_ship) {
     DecreaseWarpEnergyInWarp();
 
     unit->reactor.Generate();
+
+    unit->drive.Consume();
 }
 
 void Energetic::ExpendEnergy(float usage) {
@@ -179,18 +134,6 @@ void Energetic::ExpendEnergy(float usage) {
     unit->energy.Deplete(true, usage);
 }
 
-// The original code was a continuation of the comment above and simply unclear.
-// I replaced it with a very simple model.
-void Energetic::ExpendFuel() {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    if (!configuration()->fuel.reactor_uses_fuel) {
-        return;
-    }
-
-    const float fuel_usage = configuration()->fuel.fmec_exit_velocity_inverse * unit->reactor.Capacity() * simulation_atom_var;
-    unit->fuel.Deplete(true, fuel_usage);
-}
 
 void Energetic::MaintainECM() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
