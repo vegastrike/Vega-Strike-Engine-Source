@@ -1,5 +1,5 @@
 /*
- * ship_view.h
+ * get_string.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,12 +25,16 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_SHIP_VIEW_H
-#define VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_SHIP_VIEW_H
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_GET_STRING_H
+#define VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_GET_STRING_H
 
 #include <string>
 #include <map>
 
-const std::string GetShipView(const std::map<std::string, std::string>&ship_stats);
 
-#endif // VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_SHIP_VIEW_H
+const std::string GetString(const std::string function_name, 
+                            const std::string module_name,
+                            const std::string file_name,
+                            const std::map<std::string, std::string>& cpp_map);
+
+#endif // VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_GET_STRING_H
