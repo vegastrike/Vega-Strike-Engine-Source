@@ -32,31 +32,10 @@ Computer::Computer() : NavPoint(0, 0, 0),
         force_velocity_ref(false),
         threatlevel(0),
         set_speed(0),
-        max_combat_speed(1),
-        max_combat_ab_speed(1),
-        max_yaw_left(1),
-        max_yaw_right(1),
-        max_pitch_down(1),
-        max_pitch_up(1),
-        max_roll_left(1),
-        max_roll_right(1),
         slide_start(1),
         slide_end(1),
         itts(false),
         combat_mode(true) {
-}
-
-float Computer::max_speed() const {
-    static float
-            combat_mode_mult = XMLSupport::parse_float(vs_config->getVariable("physics", "combat_speed_boost", "100"));
-    return (!combat_mode) ? combat_mode_mult * max_combat_speed : max_combat_speed;
-}
-
-float Computer::max_ab_speed() const {
-    static float
-            combat_mode_mult = XMLSupport::parse_float(vs_config->getVariable("physics", "combat_speed_boost", "100"));
-    //same capped big speed as combat...else different
-    return (!combat_mode) ? combat_mode_mult * max_combat_speed : max_combat_ab_speed;
 }
 
 Computer::RADARLIM::RADARLIM() :

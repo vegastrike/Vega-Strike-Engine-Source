@@ -187,6 +187,7 @@ struct Fuel {
     float min_reactor_efficiency{0.00001F};
     float ecm_energy_cost{0.05F};
     
+    double megajoules_factor{100};
     double fuel_factor{60.0};   // Multiply fuel by this to get fuel by minutes
     double energy_factor{1.0};
     double ftl_energy_factor{1.0};
@@ -382,8 +383,9 @@ struct PhysicsConfig {
     uintmax_t max_ecm{4U};
     float max_lost_target_live_time{30.0F};
     float percent_missile_match_target_velocity{1.0F};
-    float game_speed{1.0F};
-    float game_accel{1.0F};
+    double game_speed{1.0};
+    double game_accel{1.0};
+    double combat_mode_multiplier{100.0};
     float velocity_max{10000.0F};
     float max_player_rotation_rate{24.0F};
     float max_non_player_rotation_rate{360.0F};

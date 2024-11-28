@@ -82,14 +82,9 @@ void JumpDrive::Load(std::string upgrade_key, std::string unit_key) {
     double energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     // Jump drive is unique - consumption and atom_consumption are identical
     atom_consumption = consumption = energy * configuration()->fuel.jump_drive_factor;
- 
 
     // Jump Drive
-    bool installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
-    if(!installed) {
-        this->unit_key = "";
-    }
-
+    installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
     delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
 }      
 

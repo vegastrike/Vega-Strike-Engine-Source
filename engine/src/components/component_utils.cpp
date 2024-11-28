@@ -22,13 +22,21 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "component_utils.h"
 
 #include "component.h"
+#include "dummy_component.h"
 
 #include "reactor.h"
 #include "energy_container.h"
 
+#include "afterburner.h"
+#include "afterburner_upgrade.h"
+#include "drive.h"
+#include "drive_upgrade.h"
 #include "jump_drive.h"
 #include "ftl_drive.h"
 #include "cloak.h"
@@ -36,7 +44,6 @@
 #include "unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-#include <math.h>
 
 
 
@@ -128,4 +135,39 @@ EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, E
         case EnergyConsumerSource::FTLEnergy: return ftl_energy;
         default: return nullptr;
     }
+}
+
+
+// For Drive and DriveUpgrade
+const std::string yaw_governor[] = {"Yaw_Governor", "Yaw_Governor", "Yaw_Governor"};
+const std::string pitch_governor[] = {"Pitch_Governor", "Pitch_Governor_Up", "Pitch_Governor_Down"};
+const std::string roll_governor[] = {"Roll_Governor", "Roll_Governor_Right", "Roll_Governor_Left"};
+
+const std::string* GetGovernor(const YPR ypr) {
+    switch(ypr) {
+        case YPR::Yaw: return yaw_governor; break;
+        case YPR::Pitch: return pitch_governor; break;
+        case YPR::Roll: return roll_governor; break;
+    }
+}
+
+
+void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr,
+                        double &right_value, double &left_value) {
+    const std::string* governor = GetGovernor(ypr);
+    
+    const double main_value = UnitCSVFactory::GetVariable(unit_key, governor[0], 1.0);
+    right_value = UnitCSVFactory::GetVariable(unit_key, governor[1], main_value);
+    left_value = UnitCSVFactory::GetVariable(unit_key, governor[2], main_value);
+}
+
+void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr,
+                        Resource<double> &right_value, Resource<double> &left_value, 
+                        const double minimum_functionality) {
+    double left, right;
+    DoubleYawPitchRollParser(unit_key, ypr, right, left);
+    left *= M_PI / 180.0;
+    right *= M_PI / 180.0;
+    right_value = Resource<double>(right,right * minimum_functionality,right);
+    left_value = Resource<double>(left,right * minimum_functionality,left);
 }

@@ -149,7 +149,7 @@ void ShipCommands::setkps(const char *in) {
         } else {
             kps /= game_options()->display_in_meters ? 1.0f : 3.6f;
         }
-        player->GetComputerData().set_speed = fmin(player->GetComputerData().max_speed(), kps);
+        player->GetComputerData().set_speed = fmin(player->MaxSpeed(), kps);
     }
 }
 
