@@ -77,6 +77,7 @@
 #include "resource/resource.h"
 #include "base_util.h"
 #include "unit_csv_factory.h"
+#include "unit_json_factory.h"
 #include "savegame.h"
 #include "manifest.h"
 
@@ -448,10 +449,9 @@ void Unit::Init(const char *filename,
         //Try to open save
         if (filename[0]) {
             VSFile unitTab;
-            VSError taberr = unitTab.OpenReadOnly(filepath + ".csv", UnitSaveFile);
+            VSError taberr = unitTab.OpenReadOnly(filepath + ".json", UnitSaveFile);
             if (taberr <= Ok) {
-                std::string data = unitTab.ReadFull();
-                UnitCSVFactory::ParseCSV(data, unitTab.GetRoot(), true);
+                UnitJSONFactory::ParseJSON(unitTab, true);
                 unitTab.Close();
                 saved_game = true;
             }

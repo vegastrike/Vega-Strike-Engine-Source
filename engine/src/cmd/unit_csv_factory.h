@@ -109,8 +109,6 @@ class UnitCSVFactory {
     friend class UnitJSONFactory;
     friend class UnitOptimizeFactory;
 public:
-    static void ParseCSV(std::string data, std::string root, bool saved_game);
-
     template<class T>
     static inline T GetVariable(std::string unit_key, std::string const &attribute_key, T default_value) = delete;
     static bool HasVariable(std::string unit_key, std::string const &attribute_key) {

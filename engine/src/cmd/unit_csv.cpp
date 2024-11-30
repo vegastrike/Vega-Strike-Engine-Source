@@ -63,7 +63,30 @@ extern void pushMesh(std::vector<Mesh *> &mesh,
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
+// TODO: This is a terrible kludge. Replace with boost::json
+std::string MapToJson(std::map<std::string, std::string> unit) {
+    std::string json_string = "[\n\t{\n";
+    
+    int len = unit.size();
+    int i = 0;
 
+    for (auto const& pair : unit) {
+        std::cout << pair.first << " = " << pair.second << std::endl;
+        boost::format new_line;
+        if(i < len-1) {
+            new_line = boost::format("\t\t\"%1%\": \"%2%\",\n") % pair.first % pair.second;
+        } else {
+            new_line = boost::format("\t\t\"%1%\": \"%2%\"\n") % pair.first % pair.second;
+        }
+        
+        i++;
+        json_string += new_line.str();
+    }
+
+    json_string += "\t}\n]\n";
+    
+    return json_string;
+}
 
 void AddMeshes(std::vector<Mesh *> &xmeshes,
         float &randomstartframe,
@@ -1088,12 +1111,14 @@ void Unit::WriteUnit(const char *modifications) {
     std::string savedir = modifications;
     VSFileSystem::CreateDirectoryHome(VSFileSystem::savedunitpath + "/" + savedir);
     VSFileSystem::VSFile f;
-    VSFileSystem::VSError err = f.OpenCreateWrite(savedir + "/" + name + ".csv", VSFileSystem::UnitFile);
+    VSFileSystem::VSError err = f.OpenCreateWrite(savedir + "/" + name + ".json", VSFileSystem::UnitFile);
     if (err > VSFileSystem::Ok) {
         VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
         return;
     }
-    std::string towrite = WriteUnitString();
+
+    std::map<std::string, std::string> map = UnitToMap();
+    std::string towrite = MapToJson(map);
     f.Write(towrite.c_str(), towrite.length());
     f.Close();
 }
@@ -1356,6 +1381,8 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
 
     return unit;
 }
+
+
 string Unit::WriteUnitString() {
     std::map<std::string, std::string> unit = UnitToMap();
     return writeCSV(unit);

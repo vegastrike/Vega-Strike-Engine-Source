@@ -32,6 +32,6 @@ class UnitJSONFactory {
     static std::string DEFAULT_ERROR_VALUE;
 
 public:
-    static void ParseJSON(VSFileSystem::VSFile &file);
+    static void ParseJSON(VSFileSystem::VSFile &file, bool player_ship = false);
 };
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_JSON_FACTORY_H
