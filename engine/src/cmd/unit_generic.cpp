@@ -3055,7 +3055,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
 
-    bool upgradedshield = false;
 
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Shield_Front_Top_Right")) {
@@ -3071,10 +3070,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     shield->facets[i].adjusted_health = shield->facets[i].max_health;
                     shield->facets[i].health = shield->facets[i].max_health;
                 }
-            }
-
-            if (touchme && retval == UPGRADEOK) {
-                upgradedshield = true;
             }
         } else if (up->FShieldData() > 0 || up->RShieldData() > 0 || up->LShieldData() > 0 || up->BShieldData() > 0) {
             cancompletefully = false;
@@ -3296,6 +3291,29 @@ int Unit::RepairCost() {
     if (LifeSupportFunctionalityMax < 1) {
         ++cost;
     }
+
+    // TODO: figure out better cost
+    if (afterburner.Damaged()) {
+        cost += 5;
+    }
+
+    if (afterburner_upgrade.Damaged()) {
+        cost += 3;
+    }
+
+    if (drive.Damaged()) {
+        cost += 7;
+    }
+
+    if (drive_upgrade.Damaged()) {
+        cost += 5;
+    }
+
+    if (ftl_drive.Damaged()) {
+        cost += 7;
+    }
+
+
     for (i = 0; i < numCargo(); ++i) {
         if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
             ++cost;
@@ -3304,6 +3322,7 @@ int Unit::RepairCost() {
     return cost;
 }
 
+// This is called when performing a BASIC_REPAIR
 int Unit::RepairUpgrade() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
@@ -3369,6 +3388,14 @@ int Unit::RepairUpgrade() {
         pct = 1;
         success += 1;
     }
+
+    // Repair components
+    afterburner.Repair();
+    afterburner_upgrade.Repair();
+    drive.Repair();
+    drive_upgrade.Repair();
+    ftl_drive.Repair();
+
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
@@ -3826,7 +3853,9 @@ bool isWeapon(std::string name) {
     }                                                        \
     while (0)
 
+// This is called every cycle - repair in flight by droids
 void Unit::Repair() {
+    // TODO: everything below here needs to go when we're done with lib_components
     static float repairtime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidTime", "180"));
     static float checktime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidCheckTime", "5"));
     if ((repairtime <= 0) || (checktime <= 0)) {

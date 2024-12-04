@@ -96,6 +96,12 @@ void Drive::Load(std::string upgrade_key,
 
     speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", std::string("0.0")), 
                                                          game_speed, minimal_drive_functionality);
+
+    operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
+                  lateral.Percent() + vertical.Percent() + forward.Percent() + 
+                  retro.Percent() + speed.Percent() +
+                  max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
+                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14 * 100;
 }      
 
 
