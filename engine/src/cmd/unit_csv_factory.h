@@ -66,7 +66,7 @@ const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space",
 
                             // New stuff
-                            "armor", "shield_strength", "shield_facets"
+                            "armor", "shield_strength", "shield_facets", "accel"
                             
                             };
 

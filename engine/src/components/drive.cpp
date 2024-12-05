@@ -84,16 +84,23 @@ void Drive::Load(std::string upgrade_key,
     retro = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", std::string("0.0")), 
                                                            game_accel_speed, minimal_drive_functionality);
     
-    const double lateral_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0) +
+    double accel = UnitCSVFactory::GetVariable(unit_key, "accel", -1.0f);
+    if(accel != -1.0f) {
+        const std::string accel_string = std::to_string(accel);
+        lateral = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
+        vertical = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
+    } else {
+        const double lateral_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0) +
                                  0.5 * UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0);
-    const std::string lateral_accel_string = std::to_string(lateral_accel);
-    lateral = Resource<double>(lateral_accel_string, game_accel_speed, minimal_drive_functionality);
+        const std::string lateral_accel_string = std::to_string(lateral_accel);
+        lateral = Resource<double>(lateral_accel_string, game_accel_speed, minimal_drive_functionality);
 
-    const double vertical_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0) +
-                                 0.5 * UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0);
-    const std::string vertical_accel_string = std::to_string(vertical_accel);
-    vertical = Resource<double>(vertical_accel_string, game_accel_speed, minimal_drive_functionality);
-
+        const double vertical_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0) +
+                                    0.5 * UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0);
+        const std::string vertical_accel_string = std::to_string(vertical_accel);
+        vertical = Resource<double>(vertical_accel_string, game_accel_speed, minimal_drive_functionality);
+    }
+    
     speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", std::string("0.0")), 
                                                          game_speed, minimal_drive_functionality);
 }      
