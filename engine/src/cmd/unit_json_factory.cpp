@@ -36,7 +36,7 @@
 #include "resource/json_utils.h"
 
 
-void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file) {
+void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     const std::string json_text = file.ReadFull();
 
     boost::json::value json_value = boost::json::parse(json_text);
@@ -52,7 +52,12 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file) {
         }
 
         // Add root
-        unit_attributes["root"] = file.GetRoot();
-        UnitCSVFactory::units[unit_attributes["Key"]] = unit_attributes;
+        unit_attributes["root"] = file.GetRoot();  
+
+        if(player_ship) {
+            UnitCSVFactory::units["player_ship"] = unit_attributes;
+        } else {
+            UnitCSVFactory::units[unit_attributes["Key"]] = unit_attributes;
+        }
     }
 }

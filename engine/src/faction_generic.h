@@ -23,6 +23,8 @@
 #define VEGA_STRIKE_ENGINE_FACTION_GENERIC_H
 
 #include <string>
+#include <map>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 //#include <gnuhash.h>
 
@@ -179,6 +181,13 @@ Animation *GetRandExplosionAnimation(int whichfaction, std::string &which);
 void LoadFactionPlaylists();
 /** Still in faction_xml.cpp because createUnit **/
 void LoadContrabandLists();
+
+const std::map<std::string, std::string> GetRelationsMap(const int privateer_faction);
+const std::map<std::string, std::string> GetKillsMap(const std::vector<float> *kill_list);
+
+const std::vector<std::string> GetFactionNames();
+const std::vector<std::string> GetFactionRelations();
+const std::vector<std::string> GetFactionKills(const std::vector<float> *kill_list);
 };
 
 #endif //VEGA_STRIKE_ENGINE_FACTION_GENERIC_H

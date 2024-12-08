@@ -421,10 +421,10 @@ void CopySavedShips(std::string filename, int player_num, const std::vector<std:
             srcnam = dstnam;
             dstnam = tmp;
         }
-        VSError e = src.OpenReadOnly(srcnam + "/" + starships[i] + ".csv", UnitSaveFile);
+        VSError e = src.OpenReadOnly(srcnam + "/" + starships[i] + ".json", UnitSaveFile);
         if (e <= Ok) {
             VSFileSystem::CreateDirectoryHome(VSFileSystem::savedunitpath + "/" + dstnam);
-            VSError f = dst.OpenCreateWrite(dstnam + "/" + starships[i] + ".csv", UnitFile);
+            VSError f = dst.OpenCreateWrite(dstnam + "/" + starships[i] + ".json", UnitFile);
             if (f <= Ok) {
                 string srcdata = src.ReadFull();
                 dst.Write(srcdata);

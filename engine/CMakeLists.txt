@@ -76,7 +76,7 @@ ENDIF ()
 # This is an incrementing number similar to the Google Android API Version
 # allowing us to differentiate our Assets API across multiple versions.
 # If a release is missing this value, then version `1` can be assumed.
-SET(VEGASTRIKE_ASSETS_API_VERSION "2")
+SET(VEGASTRIKE_ASSETS_API_VERSION "3")
 
 #IF (COMMAND cmake_policy)
 #    CMAKE_POLICY (SET CMP0003 NEW)
@@ -747,7 +747,7 @@ SET(LIBPYTHON_SOURCES
     src/python/unit_wrapper.cpp
     src/python/universe_util_export.cpp
 
-    src/python/base_computer/ship_view.cpp
+    src/python/infra/get_string.cpp
 )
 
 SET(LIBSCRIPT_SOURCES

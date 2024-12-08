@@ -84,18 +84,32 @@ void Drive::Load(std::string upgrade_key,
     retro = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", std::string("0.0")), 
                                                            game_accel_speed, minimal_drive_functionality);
     
-    const double lateral_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0) +
+    double accel = UnitCSVFactory::GetVariable(unit_key, "accel", -1.0f);
+    if(accel != -1.0f) {
+        const std::string accel_string = std::to_string(accel);
+        lateral = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
+        vertical = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
+    } else {
+        const double lateral_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0) +
                                  0.5 * UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0);
-    const std::string lateral_accel_string = std::to_string(lateral_accel);
-    lateral = Resource<double>(lateral_accel_string, game_accel_speed, minimal_drive_functionality);
+        const std::string lateral_accel_string = std::to_string(lateral_accel);
+        lateral = Resource<double>(lateral_accel_string, game_accel_speed, minimal_drive_functionality);
 
-    const double vertical_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0) +
-                                 0.5 * UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0);
-    const std::string vertical_accel_string = std::to_string(vertical_accel);
-    vertical = Resource<double>(vertical_accel_string, game_accel_speed, minimal_drive_functionality);
-
+        const double vertical_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0) +
+                                    0.5 * UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0);
+        const std::string vertical_accel_string = std::to_string(vertical_accel);
+        vertical = Resource<double>(vertical_accel_string, game_accel_speed, minimal_drive_functionality);
+    }
+    
     speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", std::string("0.0")), 
                                                          game_speed, minimal_drive_functionality);
+
+    // We calculate percent operational as a simple average
+    operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
+                  lateral.Percent() + vertical.Percent() + forward.Percent() + 
+                  retro.Percent() + speed.Percent() +
+                  max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
+                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14 * 100;
 }      
 
 
@@ -104,8 +118,8 @@ void Drive::Load(std::string upgrade_key,
 void Drive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     static const double game_speed = configuration()->physics_config.game_speed;
     static const double game_accel = configuration()->physics_config.game_accel;
-    static const double game_accel_speed = game_speed * game_accel;
-    const double to_degrees = 180 / M_PI;
+    static const double game_accel_speed = 1/ (game_speed * game_accel);
+    const double to_degrees = M_PI / 180;
     unit["Maneuver_Yaw"] = yaw.Serialize(to_degrees);
     unit["Maneuver_Pitch"] = pitch.Serialize(to_degrees);
     unit["Maneuver_Roll"] = roll.Serialize(to_degrees);
@@ -164,6 +178,7 @@ void Drive::Damage() {
     max_roll_left.RandomDamage();
     max_roll_right.RandomDamage();
 
+    // We calculate percent operational as a simple average
     operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
                   lateral.Percent() + vertical.Percent() + forward.Percent() + 
                   retro.Percent() + speed.Percent() +

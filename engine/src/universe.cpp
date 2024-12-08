@@ -281,28 +281,9 @@ void InitUnitTables() {
     VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
     if (err <= VSFileSystem::Ok) {
         UnitJSONFactory::ParseJSON(jsonFile);
-
-    } else {
-        // Try units.csv
-        VSFileSystem::VSFile csvFile;
-        VSFileSystem::VSError err = csvFile.OpenReadOnly("units.csv", VSFileSystem::UnitFile);
-        if (err <= VSFileSystem::Ok) {
-            std::string data = csvFile.ReadFull();
-            UnitCSVFactory::ParseCSV(data, csvFile.GetRoot(), true);
-        } else {
-            std::cerr << "Unable to open units file. Aborting.\n";
-            abort();
-        }
-        csvFile.Close();
     }
 
     jsonFile.Close();
-
-    // TODO: where did this code snippet come from???
-    /*if (f.GetFilename() == "units_description.csv" ||
-        f.GetFilename() == "master_part_list.csv") {
-        // TODO: handle master_part_list
-    */
 
     // Really New Init
     VSFileSystem::VSFile newJsonFile;
