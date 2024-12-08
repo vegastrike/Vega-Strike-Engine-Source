@@ -47,6 +47,9 @@ void Afterburner::Load(std::string upgrade_key,
     speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", std::string("0.0")), game_speed); 
     double consumption = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 1.0);
     SetConsumption(consumption);
+
+    // We calculate percent operational as a simple average
+    operational = (thrust.Percent() + speed.Percent()) / 2 * 100;
 }      
 
 void Afterburner::SaveToCSV(std::map<std::string, std::string>& unit) const {
@@ -79,6 +82,7 @@ void Afterburner::Damage() {
     thrust.RandomDamage();
     speed.RandomDamage();
 
+    // We calculate percent operational as a simple average
     operational = (thrust.Percent() + speed.Percent()) / 2 * 100;
 }
 
