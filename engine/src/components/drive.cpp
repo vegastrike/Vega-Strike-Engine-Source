@@ -97,6 +97,7 @@ void Drive::Load(std::string upgrade_key,
     speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", std::string("0.0")), 
                                                          game_speed, minimal_drive_functionality);
 
+    // We calculate percent operational as a simple average
     operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
                   lateral.Percent() + vertical.Percent() + forward.Percent() + 
                   retro.Percent() + speed.Percent() +
@@ -170,6 +171,7 @@ void Drive::Damage() {
     max_roll_left.RandomDamage();
     max_roll_right.RandomDamage();
 
+    // We calculate percent operational as a simple average
     operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
                   lateral.Percent() + vertical.Percent() + forward.Percent() + 
                   retro.Percent() + speed.Percent() +

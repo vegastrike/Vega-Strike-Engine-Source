@@ -48,6 +48,7 @@ void Afterburner::Load(std::string upgrade_key,
     double consumption = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 1.0);
     SetConsumption(consumption);
 
+    // We calculate percent operational as a simple average
     operational = (thrust.Percent() + speed.Percent()) / 2 * 100;
 }      
 
@@ -81,6 +82,7 @@ void Afterburner::Damage() {
     thrust.RandomDamage();
     speed.RandomDamage();
 
+    // We calculate percent operational as a simple average
     operational = (thrust.Percent() + speed.Percent()) / 2 * 100;
 }
 
