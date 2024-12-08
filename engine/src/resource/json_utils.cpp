@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * json_utils.cpp
+ *
+ * Copyright (C) 2001-2024 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,15 +21,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
-#define VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
 
-#include <string>
 #include <boost/json.hpp>
 
-class WeaponFactory {
-public:
-    WeaponFactory(std::string filename);
-};
 
-#endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
+const std::string JsonGetStringWithDefault(boost::json::object object, 
+                                           const std::string& key, 
+                                           const char* default_value) {
+    if (object.if_contains(key)) {
+        return boost::json::value_to<std::string>(object.at(key));
+    }
+
+    return default_value;
+}
