@@ -87,6 +87,7 @@ function bootstrapOnDebian()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -118,6 +119,7 @@ function bootstrapOnDebian()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -176,6 +178,7 @@ function bootstrapOnUbuntu()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -209,6 +212,7 @@ function bootstrapOnUbuntu()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -240,6 +244,7 @@ function bootstrapOnUbuntu()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -306,6 +311,7 @@ function bootstrapOnPopOS ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -339,6 +345,7 @@ function bootstrapOnPopOS ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -389,6 +396,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -422,6 +430,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -455,6 +464,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -488,6 +498,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -521,6 +532,7 @@ function bootstrapOnLinuxMint ()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
+                      libboost-json-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
@@ -551,6 +563,7 @@ function bootstrapOnLinuxMint ()
                       freeglut3-dev \
                       libboost-python-dev \
                       libboost-log-dev \
+                      libboost-json-dev \
                       libboost-regex-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
@@ -567,72 +580,6 @@ function bootstrapOnLinuxMint ()
 function bootstrapOnOpenSuseLeap ()
 {
   case "${LINUX_VERSION_ID}" in
-    "15.2")
-      zypper --non-interactive install -y \
-                              libboost_log1_66_0-devel \
-                              libboost_python-py3-1_66_0-devel \
-                              libboost_system1_66_0-devel \
-                              libboost_filesystem1_66_0-devel \
-                              libboost_thread1_66_0-devel \
-                              libboost_regex1_66_0-devel \
-                              libboost_chrono1_66_0-devel \
-                              libboost_atomic1_66_0-devel \
-                              libboost_program_options1_66_0-devel \
-                              cmake \
-                              gcc-c++ \
-                              freeglut-devel \
-                              libopenal0 \
-                              openal-soft-devel \
-                              libSDL-1_2-0 \
-                              libSDL-devel \
-                              libSDL2-devel \
-                              libvorbis-devel \
-                              libglvnd-devel \
-                              libjpeg-turbo \
-                              libjpeg62-devel \
-                              libpng16-devel \
-                              expat \
-                              libexpat-devel \
-                              libgtk-3-0 \
-                              gtk3-devel \
-                              python3-devel \
-                              git \
-                              rpm-build \
-                              clang
-      ;;
-    "15.3")
-      zypper --non-interactive install -y \
-                              libboost_log1_66_0-devel \
-                              libboost_python-py3-1_66_0-devel \
-                              libboost_system1_66_0-devel \
-                              libboost_filesystem1_66_0-devel \
-                              libboost_thread1_66_0-devel \
-                              libboost_regex1_66_0-devel \
-                              libboost_chrono1_66_0-devel \
-                              libboost_atomic1_66_0-devel \
-                              libboost_program_options1_66_0-devel \
-                              cmake \
-                              gcc-c++ \
-                              freeglut-devel \
-                              libopenal0 \
-                              openal-soft-devel \
-                              libSDL-1_2-0 \
-                              libSDL-devel \
-                              libSDL2-devel \
-                              libvorbis-devel \
-                              libglvnd-devel \
-                              libjpeg-turbo \
-                              libjpeg62-devel \
-                              libpng16-devel \
-                              expat \
-                              libexpat-devel \
-                              libgtk-3-0 \
-                              gtk3-devel \
-                              python3-devel \
-                              git \
-                              rpm-build \
-                              clang
-      ;;
     "15.4")
       zypper --non-interactive install -y \
                               libboost_log1_75_0-devel \
@@ -643,6 +590,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_regex1_75_0-devel \
                               libboost_chrono1_75_0-devel \
                               libboost_atomic1_75_0-devel \
+                              libboost_json1_75_0-devel \
                               libboost_program_options1_75_0-devel \
                               cmake \
                               gcc-c++ \
@@ -676,6 +624,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_regex1_75_0-devel \
                               libboost_chrono1_75_0-devel \
                               libboost_atomic1_75_0-devel \
+                              libboost_json1_75_0-devel \
                               libboost_program_options1_75_0-devel \
                               cmake \
                               gcc-c++ \
@@ -709,6 +658,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_regex1_75_0-devel \
                               libboost_chrono1_75_0-devel \
                               libboost_atomic1_75_0-devel \
+                              libboost_json1_75_0-devel \
                               libboost_program_options1_75_0-devel \
                               cmake \
                               gcc-c++ \
