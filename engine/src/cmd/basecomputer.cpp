@@ -62,8 +62,10 @@ using VSFileSystem::SaveFile;
 #include "facet_configuration.h"
 #include "vs_logging.h"
 #include "controls_factory.h"
+#include "python/infra/get_string.h"
+
+#include <boost/python.hpp>
 #include "configuration/configuration.h"
-#include "python/base_computer/ship_view.h"
 
 //for directory thing
 #if defined (_WIN32) && !defined (__CYGWIN__)
@@ -78,6 +80,12 @@ using VSFileSystem::SaveFile;
 #endif
 #include <sys/stat.h>
 #include "vega_cast_utils.h"
+
+// Can't declare in header because PyObject is problematic
+extern const std::string GetString(const std::string function_name, 
+                            const std::string module_name,
+                            const std::string file_name,
+                            PyObject* args);
 
 using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 
@@ -3931,22 +3939,11 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
 
 //UNDER CONSTRUCTION
 string buildUpgradeDescription(Cargo &item) {
-    //load the Unit
-    string blnk;     //modifications to an upgrade item???
-    Flightgroup *flightGroup = new Flightgroup();     //sigh
-    int fgsNumber = 0;
-    current_unit_load_mode = NO_MESH;
-    Unit *newPart = new Unit(item.GetName().c_str(), false,
-            FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber);
-    current_unit_load_mode = DEFAULT;
-    string str = "";
-    str += item.GetDescription();
-    
-    showUnitStats(newPart, str, 0, 1, item);
-    
-    newPart->Kill();
-    // delete newPart;
-    return str;
+    const std::string key = item.GetName() + "__upgrades";
+    PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(key.c_str()));
+    const std::string text = GetString("get_upgrade_info", "upgrade_view",
+        "python/base_computer/upgrade_view.py", args);
+    return text;
 }
 
 class PriceSort {
@@ -4476,86 +4473,39 @@ static std::string factionColorTextString(int faction) {
     return result;
 }
 
+
+// A utility to convert vector to list
+boost::python::list VectorToList(const std::vector<std::string> v) {
+    boost::python::list l;
+    for (const std::string& value : v) {
+        l.append(value);
+    }
+
+    return l;
+}
+
 //Show the player's basic information.
 bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *control) {
-    //Heading.
-    string text = "#b#Factions:#-b#n1.7#";
-
     //Number of kills for each faction.
-    vector<float> *killList = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
+    vector<float> *kill_list = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
 
-    //Make everything bold.
-    text += "#b#";
+    const std::vector<std::string> names_vector = FactionUtil::GetFactionNames();
+    const std::vector<std::string> relations_vector = FactionUtil::GetFactionRelations();
+    const std::vector<std::string> kills_vector = FactionUtil::GetFactionKills(kill_list);
 
-    //A line for each faction.
-    const size_t numFactions = FactionUtil::GetNumFactions();
-    size_t i = 0;
-    static string disallowedFactions = vs_config->getVariable("graphics", "unprintable_factions", "");
-    int totkills = 0;
-    size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
-    for (; i < numFactions; i++) {
-        Unit *currentplayer = UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
-        float relation = 0;
-        size_t upgrades = FactionUtil::GetUpgradeFaction();
-        size_t planets = FactionUtil::GetPlanetFaction();
-        static size_t privateer = FactionUtil::GetFactionIndex("privateer");
-        size_t neutral = FactionUtil::GetNeutralFaction();
-        if (i < killList->size() && i != upgrades && i != planets && i != neutral && i != privateer) {
-            totkills += (int) (*killList)[i];
-        }
-        string factionname = FactionUtil::GetFactionName(i);
-        fac_loc_after = 0;
-        fac_loc = disallowedFactions.find(factionname, fac_loc_after);
-        while (fac_loc != string::npos) {
-            if (fac_loc > 0) {
-                fac_loc_before = fac_loc - 1;
-            } else {
-                fac_loc_before = 0;
-            }
-            fac_loc_after = fac_loc + factionname.size();
-            if ((fac_loc == 0 || disallowedFactions[fac_loc_before] == ' '
-                    || disallowedFactions[fac_loc_before] == '\t')
-                    && (disallowedFactions[fac_loc_after] == ' ' || disallowedFactions[fac_loc_after] == '\t'
-                            || disallowedFactions[fac_loc_after] == '\0')) {
-                break;
-            }
-            fac_loc = disallowedFactions.find(factionname, fac_loc_after);
-        }
-        if (fac_loc != string::npos) {
-            continue;
-        }
-        if (currentplayer) {
-            relation = UnitUtil::getRelationFromFaction(currentplayer, i);
-        }
-        if (relation < -1) {
-            relation = -1;
-        }
-        if (relation > 1) {
-            relation = 1;
-        }
-        const int percent = (int) (relation * 100.0);
+    boost::python::list names_list = VectorToList(names_vector);
+    boost::python::list relations_list = VectorToList(relations_vector);
+    boost::python::list kills_list = VectorToList(kills_vector);
 
-        //Faction name.
-        text += factionColorTextString(i) + FactionUtil::GetFactionName(i) + ":#-c  ";
+    PyObject* args = PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr());
 
-        //Relation color.
-        float normRelation =
-                (relation + 1) / 2;                                    //Move relation value into 0-1 range.
-        normRelation = guiMax(0, guiMin(1, normRelation));          //Make *sure* it's in the right range.
-        text += colorsToCommandString(1 - normRelation, normRelation, guiMin(1 - normRelation, normRelation));
-
-        //End the line.
-        text += XMLSupport::tostring(percent) + "#-c";
-        if (i < killList->size()) {
-            text += ", kills: " + XMLSupport::tostring((int) (*killList)[i]);
-        }
-        text += "#n#";
-    }
-    //Total Kills if we have it.
-    text += "#n##b#Total Kills: " + XMLSupport::tostring(totkills) + "#-b#";
+    const std::string text = GetString("get_player_info", "player_info",
+        "python/base_computer/player_info.py", args);
+    
     //Put this in the description.
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
+
     desc->setText(text);
 
     return true;
@@ -4702,7 +4652,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
     if (!mode) {
         std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
-        text += GetShipView(ship_map);
+        text += GetString("get_ship_description", "ship_view",
+                          "python/base_computer/ship_view.py",
+                          ship_map);
     }
     if (mode && replacement_mode == 2 && playerUnit->getMass() != blankUnit->getMass())
         PRETTY_ADDU(statcolor + "Effective Mass reduced by: #-c", 100.0 * (1.0 - playerUnit->getMass()), 0, "%");
@@ -5124,12 +5076,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
     //cloaking device? If we don't have one, no need to mention it ever exists, right?
     if (playerUnit->cloak.Capable()) {
-        if (!mode) {
-            PRETTY_ADDU(statcolor + "Cloaking device available, energy usage: #-c",
-                    playerUnit->cloak.GetConsumption() * RSconverter,
-                    0,
-                    "MJ/s");
-        } else {
+        if (mode) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "Installs a cloaking device.#n#  Activated energy usage: #-c",
@@ -5149,38 +5096,25 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             }
         }
     }
-    bool anyweapons = false;
-    if (!mode) {
-        text += "#n##n##c0:1:.5#" + prefix + "[ARMAMENT]#n##-c";
-        text += prefix + "MOUNTPOINT RATINGS:";
-    }
+    
+    
     //let's go through all mountpoints
-    {
+    if(mode) {
+        bool anyweapons = false;
+
         for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-            if (!mode) {
-                PRETTY_ADD(" #c0:1:.3#[#-c", i + 1, 0);
-                text += "#c0:1:.3#]#-c #c0:1:1#" + getMountSizeString(playerUnit->mounts[i].size) + "#-c";
-            }
             const WeaponInfo *wi = playerUnit->mounts[i].type;
             if (wi && wi->name != "") {
                 anyweapons = true;
             }
         }
-    }
-    if (!mode) {
-        text += "#n#" + prefix + "MOUNTED:";
-    }          //need brace for namespace issues on VC++
-    {
+
         if (anyweapons) {
             for (int i = 0; i < playerUnit->getNumMounts(); i++) {
                 const WeaponInfo *wi = playerUnit->mounts[i].type;
                 if ((!wi) || (wi->name == "")) {
                     continue;
                 } else {
-                    if (!mode) {
-                        PRETTY_ADD("  #c0:1:.3#[#-c", i + 1, 0);
-                        text += "#c0:1:.3#]#-c ";
-                    }
                     text += wi->name + ": #c0:1:1#" + getMountSizeString(as_integer(wi->size)) + "#-c#c.9:.9:.5#"
                             + WeaponTypeStrings[as_integer(wi->type)] + " #-c";
                     if (wi->damage < 0) {
@@ -5286,15 +5220,10 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     text += "#n#";
                 }
             }
-        } else                  //end mountpoint list
-        if (!mode) {
-            text += "#n##c1:.3:.3#" + prefix + "  NO MOUNTED WEAPONS#n##-c";
-        }
+        } //end mountpoint list
     }
-    if (mode) {
-        return;
-    }
-    if (subunitlevel == 0 && mode == 0) {
+            
+    /*if (subunitlevel == 0 && mode == 0) {
         text += "#n##n##c0:1:.5#" + prefix + "[KEY FIGURES]#n##-c";
         float maxshield = playerUnit->totalShieldEnergyCapacitance();
         if (shields_require_power) {
@@ -5368,20 +5297,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     "seconds");
         }
         PRETTY_ADDU(statcolor + "Combined (non-missile) weapon damage: #-c", totalWeaponDamage * VSDM, 0, "MJ/s");
-    }
-    if (!mode) {
-        //handle SubUnits
-        Unit *sub;
-        int i = 1;
-        for (un_iter ki = playerUnit->getSubUnits(); (sub = *ki) != NULL; ++ki, ++i) {
-            if (i == 1) {
-                text += "#n##n##c0:1:.5#" + prefix + "[SUB UNITS]#-c";
-            }
-            PRETTY_ADD("#n#" + prefix + "#c0:1:.2#[#-csub unit ", i, 0);
-            text += "#c0:1:.2#]#-c#n#";
-            showUnitStats(sub, text, subunitlevel + 1, 0, item);
-        }
-    }
+    }*/
+    
     //last line sometimes gets lost in the interface
     text += "#n#";
 }
@@ -5408,46 +5325,7 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
             text += texture.substr(picend + 1);
         }
     }     //picture removed
-    text.append("#n##n##c0:1:.5#[RAW DIAGNOSTIC OUTPUT]#n##-c");
-    bool inQuote = false;
-    bool newLine = false;
-    static bool showdiags = XMLSupport::parse_bool(vs_config->getVariable("debug", "showdiagnostics", "false"));
-    if (showdiags) {
-        for (string::const_iterator i = rawText.begin(); i != rawText.end(); i++) {
-            switch (*i) {
-                case '\n':
-                    text.append("#n#");
-                    if (!newLine) {
-                        text.append("#c0:1:.5#");
-                        newLine = true;
-                    }
-                    break;
-                case '"':
-                    if (!inQuote) {
-                        text.append("#c1:.3:.3#");
-                        inQuote = true;
-                    } else {
-                        text.append("#-c");
-                        inQuote = false;
-                    }
-                    //Delete these, so do nothing.
-                    break;
-                case ' ':
-                    if (newLine) {
-                        newLine = false;
-                        text.append("#-c");
-                    }
-                    text += (*i);
-                    break;
-                default:
-                    text += (*i);
-                    break;
-            }
-        }
-    } else {
-        text.append("#n# #c1:.1:.1#SUPPRESSED #n##-c");
-        //Put this in the description.
-    }
+    
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText(text);

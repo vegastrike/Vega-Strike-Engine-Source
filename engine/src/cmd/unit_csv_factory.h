@@ -66,7 +66,7 @@ const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space",
 
                             // New stuff
-                            "armor", "shield_strength", "shield_facets"
+                            "armor", "shield_strength", "shield_facets", "accel"
                             
                             };
 
@@ -109,8 +109,6 @@ class UnitCSVFactory {
     friend class UnitJSONFactory;
     friend class UnitOptimizeFactory;
 public:
-    static void ParseCSV(std::string data, std::string root, bool saved_game);
-
     template<class T>
     static inline T GetVariable(std::string unit_key, std::string const &attribute_key, T default_value) = delete;
     static bool HasVariable(std::string unit_key, std::string const &attribute_key) {

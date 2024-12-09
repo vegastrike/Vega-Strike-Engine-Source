@@ -123,7 +123,7 @@ void Component::Repair() {
 }
 
 bool Component::Damaged() const {
-    return operational.Damaged();
+    return operational.Value() < operational.MaxValue();
 }
 
 bool Component::Destroyed() const {
