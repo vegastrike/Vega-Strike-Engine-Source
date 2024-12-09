@@ -93,7 +93,7 @@ void Unit::UpdatePhysics2(const Transformation &trans,
 
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
 
-
+// TODO: check if this code moved elsewhere.
 void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
     if (this->afterburntype == 0) {
         afterburn = afterburn && this->energy > this->afterburnenergy * simulation_atom_var;

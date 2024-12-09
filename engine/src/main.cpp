@@ -132,7 +132,7 @@ VegaConfig *createVegaConfig(const char *file) {
     return new GameVegaConfig(file);
 }
 
-std::string ParseCommandLine(int argc, char **CmdLine);
+std::pair<std::string, std::string> ParseCommandLine(int argc, char **CmdLine);
 /**
  * Returns an exit code >= 0 if the game is supposed to exit rightaway
  * Returns an exit code < 0 if the game can continue loading.
@@ -179,8 +179,6 @@ void cleanup(void) {
 }
 
 LeakVector<Mission *> active_missions;
-
-char mission_name[1024];
 
 void bootstrap_main_loop();
 void bootstrap_first_loop();
@@ -270,7 +268,6 @@ int main(int argc, char *argv[]) {
 //    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
 
     CONFIGFILE = nullptr;
-    mission_name[0] = '\0';
     {
         char pwd[8192] = "";
         if (nullptr != getcwd(pwd, 8191)) {
@@ -299,11 +296,19 @@ int main(int argc, char *argv[]) {
         //in benchmark mode, always use the same seed
         srand(171070);
     }
+
+    // Initial mission name. Can be loaded from command line arguments.
+    // Usually loaded from config.json
+    std::string mission_name;
+
     //this sets up the vegastrike config variable
     setup_game_data();
     //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
     {
-        std::string subdir = ParseCommandLine(argc, argv);
+        std::pair<std::string, std::string> pair = ParseCommandLine(argc, argv);
+        std::string subdir = pair.first;
+        mission_name = pair.second;
+
         VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
         if (CONFIGFILE == 0) {
             CONFIGFILE = new char[42];
@@ -338,9 +343,10 @@ int main(int argc, char *argv[]) {
     if (game_options()->force_client_connect) {
         ignore_network = false;
     }
-    if (mission_name[0] == '\0') {
-        strncpy(mission_name, game_options()->default_mission.c_str(), 1023);
-        mission_name[1023] = '\0';
+
+    // Override config with command line argument
+    if (!mission_name.empty()) {
+        configuration()->game_start.default_mission = mission_name;
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
@@ -566,7 +572,7 @@ void bootstrap_main_loop() {
     InitTime();
     if (LoadMission) {
         LoadMission = false;
-        active_missions.push_back(mission = new Mission(mission_name));
+        active_missions.push_back(mission = new Mission(configuration()->game_start.default_mission.c_str()));
 
         mission->initMission();
 
@@ -674,21 +680,11 @@ void bootstrap_main_loop() {
         UpdateTime();
         FactionUtil::LoadContrabandLists();
         {
-            // TODO: Figure out how to refactor this section to use a loop or similar, eliminating code duplication
-            if (!game_options()->intro1.empty()) {
-                UniverseUtil::IOmessage(0, "game", "all", game_options()->intro1);
-                if (!game_options()->intro2.empty()) {
-                    UniverseUtil::IOmessage(4, "game", "all", game_options()->intro2);
-                    if (!game_options()->intro3.empty()) {
-                        UniverseUtil::IOmessage(8, "game", "all", game_options()->intro3);
-                        if (!game_options()->intro4.empty()) {
-                            UniverseUtil::IOmessage(12, "game", "all", game_options()->intro4);
-                            if (!game_options()->intro5.empty()) {
-                                UniverseUtil::IOmessage(16, "game", "all", game_options()->intro5);
-                            }
-                        }
-                    }
-                }
+            std::vector<std::string> intro_lines;
+            boost::split(intro_lines, configuration()->game_start.introduction, boost::is_any_of("\n"));
+            
+            for(const std::string& line : intro_lines) {
+                UniverseUtil::IOmessage(0, "game", "all", line);
             }
         }
 
@@ -743,9 +739,11 @@ const char versionmessage[] =
         "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
         "\n";
 
-std::string ParseCommandLine(int argc, char **lpCmdLine) {
+std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine) {
+    // TODO: replace with boot::program_options
     std::string st;
     std::string retstr;
+    std::string mission_name;
     std::string datatmp;
     g_game.vsdebug = '0';
     QVector PlayerLocation;
@@ -867,8 +865,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
             }
         } else {
             //no "-" before it - it's the mission name
-            strncpy(mission_name, lpCmdLine[i], 1023);
-            mission_name[1023] = '\0';
+            mission_name = std::string(lpCmdLine[i]);
         }
     }
     if (false == legacy_data_dir_mode) {
@@ -878,7 +875,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
         }
     }
 
-    return retstr;
+    return std::pair<std::string, std::string>(retstr, mission_name);
 }
 
 #undef main
