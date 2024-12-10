@@ -193,6 +193,9 @@ jobs:
         run: |
           echo "${SHORT_SHA}"
 
+      - name: Execute bootstrap
+        run:  script/bootstrap
+
       - name: Build and Test
         env:
           FROM:       ${{ matrix.FROM }}
