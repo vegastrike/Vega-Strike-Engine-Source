@@ -194,7 +194,7 @@ jobs:
           echo "${SHORT_SHA}"
 
       - name: Execute bootstrap
-        run:  script/bootstrap
+        run:  sudo script/bootstrap
 
       - name: Build and Test
         env:

@@ -15,6 +15,7 @@
         "boost-atomic",
         "boost-assign",
         "boost-format",
+        "boost-json",
         "egl-registry",
         "expat",
         "freeglut",
