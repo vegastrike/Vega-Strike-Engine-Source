@@ -35,23 +35,8 @@ jobs:
       # provides some minimal functionality:
       #   XCode (which uses CLang/LLVM)
       #   git
-      - name: Install Base tooling via homebrew
-        run: brew install bash shtool
-
-      - name: Bootstrap MacOS
-        run: script/bootstrap-mac.sh
-
-      - name: Install dependencies using homebrew
-        run: brew install \
-            gcc \
-            cmake \
-            python3 \
-            boost-python3 \
-            jpeg \
-            libpng \
-            gtk+3 \
-            gtkglext \
-            sdl2 \
+      - name: Install the latest version of Bash so we can rely on it
+        run: brew install bash
 
       - name: Check out repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -63,6 +48,9 @@ jobs:
       - name: Conditionally relocate to PR HEAD
         if: github.event.pull_request
         run: git checkout HEAD^2
+
+      - name: Bootstrap MacOS
+        run: script/bootstrap-mac.sh
 
       # Note: it might be good to use a step to detect where OpenAL-Soft is
       # installed and set it to a GHA variable that can be consumed below
