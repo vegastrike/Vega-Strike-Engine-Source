@@ -32,6 +32,8 @@
 #include "unit_json_factory.h"
 #include "vs_exit.h"
 
+#include <boost/algorithm/string.hpp>
+
 using std::string;
 
 std::vector<string> readCSV(const string &s, string delim) {
@@ -116,10 +118,18 @@ string writeCSV(const std::map<std::string, std::string> &unit, string delim) {
     std::string first_line;
     std::string second_line;
     for (auto const& pair : unit) {
-        first_line += addQuote(pair.first, delim);
+        std::string pair_first = pair.first;
+        std::string pair_second = pair.second;
+
+        // Replaces standard comma with turned comma (U+2E32)
+        // Prevents CSV corruption on load.
+        boost::replace_all(pair_first, ",", "⸲");
+        boost::replace_all(pair_second, ",", "⸲");
+
+        first_line += addQuote(pair_first, delim);
         first_line += delim[0];
 
-        second_line += addQuote(pair.second, delim);
+        second_line += addQuote(pair_second, delim);
         second_line += delim[0];
     }
 
@@ -188,29 +198,6 @@ CSVTable::CSVTable(const string &data, const string &root) {
 }
 
 CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root) {
-    /*if (f.GetFilename() == "units_description.csv" ||
-            f.GetFilename() == "master_part_list.csv") {
-    } else if (f.GetFilename() == "units.csv") {
-        VSFileSystem::VSFile jsonFile;
-        VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
-        if (err <= VSFileSystem::Ok) {
-            UnitJSONFactory::ParseJSON(jsonFile);
-        }
-        jsonFile.Close();
-    }*/
-
-    if (f.GetFilename() == "units_description.csv" ||
-        f.GetFilename() == "master_part_list.csv") {
-        // Not the CSV file we expect. Will crash unit_csv_factory
-    } /*else if (f.GetFilename() != "units.csv") {
-        // Open a saved game.
-        std::cerr << "Parsing " << f.GetFilename() << std::endl;
-        //abort();
-        UnitCSVFactory factory;
-        factory.ParseCSV(f, true);
-        f.Begin();
-    }*/
-
     std::string data = f.ReadFull();
     this->rootdir = root;
     Init(data);

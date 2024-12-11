@@ -1,5 +1,5 @@
 /*
- * python_utils.cpp
+ * get_string.h
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
@@ -25,21 +25,16 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "python_utils.h"
+#ifndef VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_GET_STRING_H
+#define VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_GET_STRING_H
 
-#include <boost/python.hpp>
-#include <iostream>
+#include <string>
+#include <map>
 
-using namespace boost::python;
 
-const std::string GetPythonPath() {
-    Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
-    Py_Finalize();
-    
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
-    std::cout << "Python path: " << path << std::endl;
+const std::string GetString(const std::string function_name, 
+                            const std::string module_name,
+                            const std::string file_name,
+                            const std::map<std::string, std::string>& cpp_map);
 
-    return path;
-}
+#endif // VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_GET_STRING_H

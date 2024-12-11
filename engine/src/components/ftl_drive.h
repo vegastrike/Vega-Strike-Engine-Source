@@ -22,8 +22,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FTL_DRIVE_H
-#define FTL_DRIVE_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
 
 #include "component.h"
 #include "energy_consumer.h"
@@ -42,12 +42,9 @@ public:
 
     // Component Methods
     virtual void Load(std::string upgrade_key, 
-                      std::string unit_key, 
-                      double ftl_factor = 1.0);      
+                      std::string unit_key = "");      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
-
-    virtual std::string Describe() const; // Describe component in base_computer 
 
     virtual bool CanDowngrade() const;
 
@@ -58,4 +55,4 @@ public:
     virtual bool Upgrade(const std::string upgrade_name);
 };
 
-#endif // FTL_DRIVE_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H

@@ -44,6 +44,7 @@ public:
     Manifest(std::string category); // Create a subset of the MPL for a category
 
     static Manifest& MPL(); // Get the master part list singleton
+    Cargo GetCargoByName(const std::string name);
     Cargo GetRandomCargo(int quantity = 0);
     Cargo GetRandomCargoFromCategory(std::string category, int quantity = 0);
     Manifest GetCategoryManifest(std::string category);
@@ -52,6 +53,8 @@ public:
     std::vector<Cargo> getItems() { return _items; }
     bool empty() { return _items.empty(); }
     int size() { return _items.size(); }
+
+    const std::string GetShipDescription(const std::string unit_key);
 };
 
 

@@ -121,8 +121,8 @@ void setup_game_data() {
     g_game.music_volume = 1;
     g_game.warning_level = 20;
     g_game.capture_mouse = GFXFALSE;
-    g_game.y_resolution = 768;
-    g_game.x_resolution = 1024;
+    g_game.y_resolution = 1080;
+    g_game.x_resolution = 1920;
     g_game.fov = 78;
     g_game.MouseSensitivityX = 2;
     g_game.MouseSensitivityY = 4;
@@ -246,6 +246,8 @@ int main(int argc, char *argv[]) {
 
     const boost::filesystem::path program_name{program_path.filename()};  //canonical_program_path.filename();
     const boost::filesystem::path program_directory_path{program_path.parent_path()};
+
+    VSFileSystem::programdir = program_directory_path.string();
 
     // This will be set later
     boost::filesystem::path home_subdir_path{};

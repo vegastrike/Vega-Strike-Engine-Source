@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * dummy_component.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,21 +21,37 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef VEGA_STRIKE_ENGINE_ABSTRACT_CONFIG_H
-#define VEGA_STRIKE_ENGINE_ABSTRACT_CONFIG_H
 
-#include <string>
+#include "dummy_component.h"
 
-class AbstractConfig {
-private:
-    static std::string DEFAULT_ERROR_VALUE;
-    virtual inline std::string _GetStringVariable(std::string const &section, std::string const &name) = 0;
 
-    //template <class T>
-    //inline T GetVariable(std::string const &result, std::string const &default_value);
+DummyComponent::DummyComponent() : 
+    Component() {
+    type = ComponentType::Dummy;
+}
 
-public:
-    AbstractConfig();
-};
 
-#endif //VEGA_STRIKE_ENGINE_ABSTRACT_CONFIG_H
+// Component Methods
+void DummyComponent::Load(std::string upgrade_key, 
+                    std::string unit_key) {
+    Component::Load(upgrade_key, unit_key);
+}      
+
+void DummyComponent::SaveToCSV(std::map<std::string, std::string>& unit) const {}
+
+bool DummyComponent::CanDowngrade() const {
+    return false;
+}
+
+bool DummyComponent::Downgrade() {
+    return false;
+}
+
+bool DummyComponent::CanUpgrade(const std::string upgrade_name) const {
+    return false;
+}
+
+bool DummyComponent::Upgrade(const std::string upgrade_name) {
+    return false;
+}
+

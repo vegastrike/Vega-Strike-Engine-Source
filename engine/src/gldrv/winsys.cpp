@@ -251,10 +251,9 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
 //#endif
-    width = g_game.x_resolution;
-    height = g_game.y_resolution;
-
-    const int screen_number = configuration()->general_config.screen;
+    width = configuration()->graphics2_config.resolution_x;
+    height = configuration()->graphics2_config.resolution_y;
+    const int screen_number = configuration()->graphics2_config.screen;
     SDL_Window *window = nullptr;
     if(screen_number == 0) {
         window = SDL_CreateWindow("Vegastrike", 0, 0, width, height, video_flags);

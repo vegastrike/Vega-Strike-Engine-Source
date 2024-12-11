@@ -271,8 +271,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             failuremessage = configuration()->graphics_config.hud.already_near_message;
             return false;
         }
-        unit->ftl_energy.Deplete(true, static_cast<double>(totpercent) * unit->ftl_drive.GetAtomConsumption());
-        // TODO: figure out to do unit->ftl_drive.Consume() instead
+        
         if (unsafe == false && totpercent == 0) {
             end = endne;
         }
@@ -482,8 +481,8 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
 
 float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    if (unit->ViewComputerData().max_ab_speed() > .001) {
-        return (OriginalCourse - (FinalCourse)).Magnitude() / unit->ViewComputerData().max_ab_speed();
+    if (unit->MaxAfterburnerSpeed() > .001) {
+        return (OriginalCourse - (FinalCourse)).Magnitude() / unit->MaxAfterburnerSpeed();
     } else {
         return (FinalCourse - OriginalCourse).Magnitude();
     }

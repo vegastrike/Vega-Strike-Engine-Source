@@ -32,7 +32,6 @@
 #include "universe_util.h"
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
-#include "star_system_generic.h"
 #include <string>
 #include <set>
 #include "savegame.h"

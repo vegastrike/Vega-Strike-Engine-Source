@@ -27,17 +27,29 @@
 
 #include "energy_container.h"
 #include "unit_csv_factory.h"
+#include "configuration/configuration.h"
 
 #include <iostream>
 
 const std::string FUEL_CAPACITY = "Fuel_Capacity";
-const std::string CAPACITOR = "Warp_Capacitor";
-const std::string FTL_CAPACITOR = "Primary_Capacitor";
+const std::string CAPACITOR = "Primary_Capacitor";
+const std::string FTL_CAPACITOR = "Warp_Capacitor";
 
-EnergyContainer::EnergyContainer(EnergyType type): 
+EnergyContainer::EnergyContainer(ComponentType type): 
                                  Component(0.0, 0.0, false),
-                                 type(type),
-                                 level(Resource<double>(0.0,0.0,0.0)) {}
+                                 level(Resource<double>(0.0,0.0,0.0)) {
+    switch(type) {
+        case ComponentType::Fuel:
+        case ComponentType::Capacitor:
+        case ComponentType::FtlCapacitor:
+        this->type = type;
+        break;
+
+        default:
+        this->type = ComponentType::None;
+        break;
+    }
+}
 
 
 // Return value - any surplus charge
@@ -96,44 +108,50 @@ void EnergyContainer::Refill() {
 // Component Functions
 void EnergyContainer::Load(std::string upgrade_key, std::string unit_key) {
     // Component
-    upgrade_key = "";
+    Component::Load(upgrade_key, unit_key);
 
     // TODO: nice to have - ship mass goes down as fuel depleted
-    mass = 0; 
-    volume = 0;
 
-    double capacity = 0.0;
- 
     switch(type) {
-        case EnergyType::Fuel:
-        upgrade_name = "Fuel";
-        capacity = UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, 1.0);
+        case ComponentType::Fuel:
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, std::string("0.0")), configuration()->fuel.fuel_factor);
         break;
 
-        case EnergyType::Energy:
-        upgrade_name = "Capacitor";
-        capacity = UnitCSVFactory::GetVariable(unit_key, CAPACITOR, 1.0);
+        case ComponentType::Capacitor:
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), configuration()->fuel.energy_factor);
         break;
         
-        case EnergyType::FTL:
-        upgrade_name = "FTL_Capacitor";
-        capacity = UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, 1.0);
-        break;
+        case ComponentType::FtlCapacitor:
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration()->fuel.ftl_energy_factor);
+        break; 
 
-        case EnergyType::None:
-        break;
+        default: // This really can't happen
+        std::cerr << "Illegal container type in EnergyContainer::Load" << std::flush;
+        abort();       
     }
-    
-    SetCapacity(capacity);
 }
 
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit[FUEL_CAPACITY] = std::to_string(MaxLevel());
+    switch(type) {
+        case ComponentType::Fuel:
+        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.fuel_factor);
+        break;
+
+        case ComponentType::Capacitor:
+        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.energy_factor);
+        break;
+        
+        case ComponentType::FtlCapacitor:
+        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.ftl_energy_factor);
+        break; 
+
+        default: // This really can't happen
+        std::cerr << "Illegal container type in EnergyContainer::SaveToCSV" << std::flush;
+        abort();       
+    }
 }
 
-std::string EnergyContainer::Describe() const {
-    return std::string();
-}
+
 
 bool EnergyContainer::CanDowngrade() const {
     return !Damaged();
@@ -143,6 +161,9 @@ bool EnergyContainer::Downgrade() {
     if(!CanDowngrade()) {
         return false;
     }
+
+    // Component
+    Component::Downgrade();
 
     level.SetMaxValue(0.0);
     return true;
@@ -157,29 +178,28 @@ bool EnergyContainer::Upgrade(const std::string upgrade_key) {
         return false;
     }
 
-    this->upgrade_key = upgrade_key;
-    upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
+    // Component
+    Component::Upgrade(upgrade_key);
 
-    double capacity = 0.0;
- 
+    // TODO: nice to have - ship mass goes down as fuel depleted
+
     switch(type) {
-        case EnergyType::Fuel:
-        capacity = UnitCSVFactory::GetVariable(upgrade_key, FUEL_CAPACITY, 1.0);
+        case ComponentType::Fuel:
+        level.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, FUEL_CAPACITY, 0.0));
         break;
 
-        case EnergyType::Energy:
-        capacity = UnitCSVFactory::GetVariable(upgrade_key, CAPACITOR, 1.0);
+        case ComponentType::Capacitor:
+        level.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, CAPACITOR, 0.0));
         break;
         
-        case EnergyType::FTL:
-        capacity = UnitCSVFactory::GetVariable(upgrade_key, FTL_CAPACITOR, 1.0);
-        break;
+        case ComponentType::FtlCapacitor:
+        level.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, FTL_CAPACITOR, 0.0));
+        break;     
 
-        case EnergyType::None:
-        break;
+        default: // This really can't happen
+        abort();
     }
     
-    SetCapacity(capacity);
     return true;
 }
 

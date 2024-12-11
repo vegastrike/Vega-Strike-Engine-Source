@@ -2166,8 +2166,8 @@ int main(int argc, char **argv) {
     Base::CurrentBase = NULL;
     glutInit(&argc, argv);
     glutInitWindowSize(800, 600);
-    g_game.x_resolution = 800;
-    g_game.y_resolution = 600;
+    g_game.x_resolution = 1920;
+    g_game.y_resolution = 1080;
     glutInitWindowPosition(0, 0);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutCreateWindow("Vega Strike Base Maker");

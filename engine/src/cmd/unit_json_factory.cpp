@@ -35,7 +35,7 @@
 #include "json.h"
 
 
-void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file) {
+void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     const std::string json_text = file.ReadFull();
 
     std::vector<std::string> units = json::parsing::parse_array(json_text.c_str());
@@ -58,9 +58,14 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file) {
         // Add root
         unit_attributes["root"] = file.GetRoot();
 
-        std::string unit_key = unit.get("Key");
-        std::string stripped_unit_key = unit_key.substr(1, unit_key.size() - 2);
+        
 
-        UnitCSVFactory::units[stripped_unit_key] = unit_attributes;
+        if(player_ship) {
+            UnitCSVFactory::units["player_ship"] = unit_attributes;
+        } else {
+            std::string unit_key = unit.get("Key");
+            std::string stripped_unit_key = unit_key.substr(1, unit_key.size() - 2);
+            UnitCSVFactory::units[stripped_unit_key] = unit_attributes;
+        }
     }
 }

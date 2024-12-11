@@ -22,6 +22,8 @@
 #ifndef VEGA_STRIKE_ENGINE_RESOURCE_RESOURCE_H
 #define VEGA_STRIKE_ENGINE_RESOURCE_RESOURCE_H
 
+#include <string>
+
 /**
  * @brief A resource is any part of the game that can be used up and filled up.
  * The purpose of this class is to simplify code throughout the game by placing it here.
@@ -36,9 +38,14 @@ protected:
     T min_value_;
     T max_value_;
     T adjusted_max_value_;
+
+    // TODO: make this const
     bool no_max_;
 public:
     Resource(const T &value = 0, const T &min_value = 0, const T &max_value = -1);
+    Resource(const std::string input, const double modifier = 1.0, const double minimum_functionality = 0.0);
+
+    const std::string Serialize(const double modifier = 1.0) const;
 
     //const T operator=(Resource<T> value) const;
     Resource<T> operator=(const T &value);
@@ -116,6 +123,8 @@ public:
     T* MaxValuePtr() { return &max_value_; }
 };
 
+template<typename T>
+bool operator==(const Resource<T> &lhs, const Resource<T> &rhs);
 template<typename T>
 bool operator==(const Resource<T> &lhs, const T &rhs);
 template<typename T>
