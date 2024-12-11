@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 set -e
 
 DETECT_MAC_OS_VERSION=$(sw_vers -productVersion | cut -f 1,2 -d '.')
