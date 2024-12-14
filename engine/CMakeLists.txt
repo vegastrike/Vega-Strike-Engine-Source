@@ -395,7 +395,15 @@ IF (USE_SYSTEM_BOOST)
         SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
         MESSAGE("++ Found System Boost version : ${Boost_DERIVED_VERSION}")
 
-        SET(BOOST_PYTHON_COMPONENT "python3")
+        # With boost version 1.67 and above, python components are specified with a version suffix
+        # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
+        MESSAGE("-- We now require Boost >= 1.75")
+        SET(Boost_1_67_Or_Later_Result TRUE)
+        
+        MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
+        SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+        
+        UNSET(Boost_1_67_Or_Later_Result)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
