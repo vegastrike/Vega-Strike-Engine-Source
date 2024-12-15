@@ -117,6 +117,10 @@ SET(VEGASTRIKE_ASSETS_API_VERSION "3")
 #    CMAKE_POLICY (SET CMP0091 NEW)
 #ENDIF ()
 
+# TODO: this suppresses warnings about CMP0102 caching. 
+# We should do something about it instead.
+CMAKE_POLICY(SET CMP0102 OLD)
+
 PROJECT(Vega_Strike
     VERSION
     "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
@@ -384,62 +388,17 @@ ELSE (Python3_FOUND)
 ENDIF (Python3_FOUND)
 
 # Find Boost with boost_python library
-OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
-IF (USE_SYSTEM_BOOST)
-    MESSAGE("++ Using System Boost")
-    FIND_PACKAGE(Boost)
-    IF (Boost_FOUND)
-        # Note: we now use Cmake 3.16 and Boost 1.75.
-        # With boost version 1.67 and above, python components are specified with a version suffix
-        # (`python27`, `python38`)
-        SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
-        MESSAGE("++ Found System Boost version : ${Boost_DERIVED_VERSION}")
+# Note: we now use Cmake 3.16 and Boost 1.75.
+MESSAGE("++ From now on, always using System Boost (ver. 1.75 or higher)")
+SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic REQUIRED)
+MESSAGE("++ Found System Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 
-        # With boost version 1.67 and above, python components are specified with a version suffix
-        # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
-        MESSAGE("-- We now require Boost >= 1.75")
-        SET(Boost_1_67_Or_Later_Result TRUE)
-        
-        MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
-        SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-        
-        UNSET(Boost_1_67_Or_Later_Result)
-
-        UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
-        MESSAGE("++ Looking for System Boost::python")
-        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic REQUIRED)
-        IF (Boost_python3_FOUND)
-            MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
-        ELSEIF (Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
-            MESSAGE("++ Found System Boost::python")
-        ENDIF (Boost_python3_FOUND)
-
-        SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-        MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
-        SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
-        INCLUDE_DIRECTORIES(${TST_INCLUDES})
-    ELSE (Boost_FOUND)
-        SET(USE_SYSTEM_BOOST OFF)
-    ENDIF (Boost_FOUND)
-ENDIF (USE_SYSTEM_BOOST)
-
-IF (NOT USE_SYSTEM_BOOST)
-    MESSAGE("++ Using Internal Boost")
-    # This is just to cleanup advanced variable viewing, since they're not used anyway
-    UNSET(Boost_INCLUDE_DIRS)
-    UNSET(Boost_LIBRARIES)
-    UNSET(Boost_INCLUDE_DIR)
-    UNSET(Boost_LIBRARY_DIRS)
-    SET(Boost_DIR ../ext/)
-    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
-    MESSAGE("++ Using Internal Boost::python3")
-    SET(TST_LIBS ${TST_LIBS} boost_python3)
-    INCLUDE_DIRECTORIES(${TST_INCLUDES})
-    ADD_SUBDIRECTORY(${Boost_DIR} build)
-    MESSAGE("++ boost dir: ${Boost_DIR}")
-ENDIF (NOT USE_SYSTEM_BOOST)
+SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
+SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
+INCLUDE_DIRECTORIES(${TST_INCLUDES})
 
 IF (NOT DISABLE_CLIENT) ##########
 
