@@ -32,7 +32,7 @@ echo "docker-entrypoint.sh: Flags passed in: $FLAGS"
 # find /usr -iname '*libboost_python*'
 
 echo "Re-run bootstrap"
-sudo script/bootstrap
+script/bootstrap
 
 if [ $IS_RELEASE -eq 1 ]
 then
