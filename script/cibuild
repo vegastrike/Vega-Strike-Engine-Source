@@ -68,16 +68,18 @@ then
     echo "Review Homebrew Python Applications:"
     ls ${HOMEBREW_PYTHON_BIN}
 
-    HOMEBREW_PYTHON_VERSION=$(${HOMEBREW_BIN}/python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+    HOMEBREW_PYTHON_VERSION=$(${HOMEBREW_PYTHON_BIN}/python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     echo "Detected Python Version ${HOMEBREW_PYTHON_VERSION}"
 
     # Ensure it uses the correct Python version
     export PYTHONHOME="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}"
     export PYTHONPATH="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}/site-packages"
+    export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_PYTHON_BIN}/python-config --cflags)"
+    export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_PYTHON_BIN}/python-config --ldflags)"
 
     # Homebrew needs certain flags set so its installation parts are found
-    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${CFLAGS}"
-    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${LDFLAGS}"
+    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${CFLAGS}"
+    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${HOMEBREW_PYTHON3_LDFLAGS} ${LDFLAGS}"
 
     script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
     # On macOS, the following is done by the calling CI workflow
