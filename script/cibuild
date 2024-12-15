@@ -84,8 +84,8 @@ then
     # Ensure it uses the correct Python version
     export PYTHONHOME="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}"
     export PYTHONPATH="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}/site-packages"
-    export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_PYTHON_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --cflags)"
-    export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_PYTHON_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --ldflags)"
+    export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --cflags)"
+    export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --ldflags)"
     echo "              Python Home: ${PYTHONHOME}"
     echo "              Python Path: ${PYTHONPATH}"
     echo "   Homebrew Python CFlags: ${HOMEBREW_PYTHON3_CLFLAGS}"
