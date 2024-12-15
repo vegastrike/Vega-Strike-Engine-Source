@@ -63,8 +63,12 @@ then
 
     # Homebrew tooling needs to come first in the path search
     export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_BIN}:${PATH}
+    echo "Review Homebrew Applications:"
+    ls ${HOMEBREW_BIN}
+    echo "Review Homebrew Python Applications:"
+    ls ${HOMEBREW_PYTHON_BIN}
 
-    HOMEBREW_PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+    HOMEBREW_PYTHON_VERSION=$(${HOMEBREW_BIN}/python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     echo "Detected Python Version ${HOMEBREW_PYTHON_VERSION}"
 
     # Ensure it uses the correct Python version
