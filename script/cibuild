@@ -59,10 +59,17 @@ then
     # setup the environment for Homebrew
     HOMEBREW_PREFIX="$(brew --prefix)"
     HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
-    HOMEBREW_PYTHON_VERSION="$(brew --prefix python)/libexec/bin"
+    HOMEBREW_PYTHON_BIN="$(brew --prefix python)/libexec/bin"
 
     # Homebrew tooling needs to come first in the path search
-    export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_VERSION}:${PATH}
+    export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_BIN}:${PATH}
+
+    HOMEBREW_PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+    echo "Detected Python Version ${HOMEBREW_PYTHON_VERSION}"
+
+    # Ensure it uses the correct Python version
+    export PYTHONHOME="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}"
+    export PYTHONPATH="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}/site-packages"
 
     # Homebrew needs certain flags set so its installation parts are found
     export CFLAGS="-I${HOMEBREW_PREFIX}/include ${CFLAGS}"
