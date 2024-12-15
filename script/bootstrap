@@ -87,43 +87,15 @@ function bootstrapOnDebian()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev \
-                      libboost-json-dev \
+                      libboost-json1.81-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
       ;;
     "bullseye")
-      apt-get -qy install \
-                      git \
-                      cmake \
-                      python3-dev \
-                      build-essential \
-                      automake \
-                      autoconf \
-                      libpng16-16 \
-                      libpng-dev \
-                      libpng-tools \
-                      libjpeg62-turbo-dev \
-                      libexpat1-dev \
-                      libgtk-3-dev \
-                      libopenal-dev \
-                      libogg-dev \
-                      libvorbis-dev \
-                      libglvnd-dev \
-                      libgl1-mesa-dev \
-                      libsdl1.2-dev \
-                      libsdl2-dev \
-                      libpostproc-dev \
-                      freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
-                      libboost-json-dev \
-                      libboost-program-options-dev \
-                      libxmu-dev \
-                      clang \
-                      lsb-release
+      echo "Sorry, Debian bullseye is no longer supported"
+      exit 2
       ;;
     "buster")
       echo "Sorry, Debian buster is no longer supported"
@@ -1700,6 +1672,7 @@ function bootstrapOnRockyLinux ()
                           openal-soft-devel \
                           sdl12-compat-devel \
                           SDL2-devel \
+                          libboost-json1.81-dev \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1725,6 +1698,7 @@ function bootstrapOnRockyLinux ()
                           openal-soft-devel \
                           sdl12-compat-devel \
                           SDL2-devel \
+                          libboost-json1.81-dev \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1750,6 +1724,7 @@ function bootstrapOnRockyLinux ()
                           openal-soft-devel \
                           sdl12-compat-devel \
                           SDL2-devel \
+                          libboost-json1.81-dev \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1775,6 +1750,7 @@ function bootstrapOnRockyLinux ()
                           openal-soft-devel \
                           sdl12-compat-devel \
                           SDL2-devel \
+                          libboost-json1.81-dev \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
@@ -1800,6 +1776,7 @@ function bootstrapOnRockyLinux ()
                           openal-soft-devel \
                           sdl12-compat-devel \
                           SDL2-devel \
+                          libboost-json1.81-dev \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
