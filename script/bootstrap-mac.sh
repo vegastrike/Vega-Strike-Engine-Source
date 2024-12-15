@@ -8,18 +8,28 @@ MAC_OS_NAME="UNKOWN"
 case "${DETECT_MAC_OS_VERSION}" in
     "10.13")
         MAC_OS_NAME="High_Sierra"
+        echo "Unsupported Mac Version"
+        exit 2
         ;;
     "10.14")
         MAC_OS_NAME="Mojave"
+        echo "Unsupported Mac Version"
+        exit 2
         ;;
     "10.15")
         MAC_OS_NAME="Catalina"
+        echo "Unsupported Mac Version"
+        exit 2
         ;;
     "11.*")
         MAC_OS_NAME="Big_Sur"
+        echo "Unsupported Mac Version"
+        exit 2
         ;;
     "12.*")
         MAC_OS_NAME="Monterey"
+        echo "Unsupported Mac Version"
+        exit 2
         ;;
     "13.0"|"13.1"|"13.2"|"13.3"|"13.4"|"13.5"|"13.6"|"13.7")
         MAC_OS_NAME="Ventura"
@@ -57,8 +67,8 @@ brew install \
 # * OpenGL as of macOS 10.14
 # * GLUT as of macOS 10.9
 brew install mesa mesa-glu freeglut
-ln -s /usr/local/include/GL /usr/local/include/OpenGL
-ln -s /usr/local/include/GL /usr/local/include/GLUT
+#ln -s /usr/local/include/GL /usr/local/include/OpenGL
+#ln -s /usr/local/include/GL /usr/local/include/GLUT
 # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
 # find /usr/local/lib/ -iname '*gl*.dylib'
 

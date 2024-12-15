@@ -56,6 +56,18 @@ then
     docker rm $DOCKER_CONTAINER_NAME
 elif [ "$MY_OS_NAME" == "macos" ]
 then
+    # setup the environment for Homebrew
+    HOMEBREW_PREFIX="$(brew --prefix)"
+    HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
+    HOMEBREW_PYTHON_VERSION="$(brew --prefix python)/libexec/bin"
+
+    # Homebrew tooling needs to come first in the path search
+    export PATH=${HOMEBREW_BIN}:${HOMEBREW_PYTHON_VERSION}:${PATH}
+
+    # Homebrew needs certain flags set so its installation parts are found
+    export CFLAGS="-I${HOMEBREW_PREFIX}/include ${CFLAGS}"
+    export LDFLAGS="-L${HOMEBREW_PREFIX}/lib ${LDFLAGS}"
+
     script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
     # On macOS, the following is done by the calling CI workflow
     # ctest -V
