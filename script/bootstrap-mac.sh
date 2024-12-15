@@ -55,7 +55,7 @@ echo "Detected Mac OS X ${DETECT_MAC_OS_VERSION} - ${MAC_OS_NAME}"
 brew install \
     gcc \
     cmake \
-    python@3.12 \
+    python3 \
     boost-python3 \
     jpeg \
     libpng \

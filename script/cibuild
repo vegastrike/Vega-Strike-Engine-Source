@@ -57,6 +57,8 @@ then
 elif [ "$MY_OS_NAME" == "macos" ]
 then
     # setup the environment for Homebrew
+    BUILD_WITH_PYTHON_VERSION="3.12"
+
     HOMEBREW_PREFIX="$(brew --prefix)"
     HOMEBREW_BIN="${HOMEBREW_PREFIX}/bin"
     HOMEBREW_PYTHON_BIN="$(brew --prefix python)/libexec/bin"
@@ -68,14 +70,14 @@ then
     echo "Review Homebrew Python Applications:"
     ls ${HOMEBREW_PYTHON_BIN}
 
-    HOMEBREW_PYTHON_VERSION=$(${HOMEBREW_PYTHON_BIN}/python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+    HOMEBREW_PYTHON_VERSION=$(${HOMEBREW_PYTHON_BIN}/python${BUILD_WITH_PYTHON_VERSION} -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     echo "Detected Python Version ${HOMEBREW_PYTHON_VERSION}"
 
     # Ensure it uses the correct Python version
     export PYTHONHOME="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}"
     export PYTHONPATH="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}/site-packages"
-    export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_PYTHON_BIN}/python-config --cflags)"
-    export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_PYTHON_BIN}/python-config --ldflags)"
+    export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_PYTHON_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --cflags)"
+    export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_PYTHON_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --ldflags)"
 
     # Homebrew needs certain flags set so its installation parts are found
     export CFLAGS="-I${HOMEBREW_PREFIX}/include ${HOMEBREW_PYTHON3_CFLAGS} ${CFLAGS}"
