@@ -93,7 +93,7 @@ function bootstrapOnDebian()
                       libboost-log1.81-dev \
                       libboost-regex1.81-dev \
                       libboost-json1.81-dev \
-                      libboost-program-options-dev \
+                      libboost-program-options1.81-dev \
                       libxmu-dev \
                       clang \
                       lsb-release
