@@ -46,36 +46,6 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
-          - FROM:     'debian:bullseye'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
-          - FROM:     'opensuse/leap:15.6'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
-          - FROM:     'opensuse/leap:15.6'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
-          - FROM:     'opensuse/leap:15.5'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
-          - FROM:     'opensuse/leap:15.5'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
-          - FROM:     'opensuse/leap:15.4'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: false
           - FROM:     'fedora:39'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'

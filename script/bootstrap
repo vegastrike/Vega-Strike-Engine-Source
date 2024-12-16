@@ -62,6 +62,10 @@ function bootstrapOnDebian()
 
   case "$LINUX_CODENAME" in
     "bookworm")
+      apt-get -qy remove \
+                      libboost-python-dev \
+                      libboost-log-dev \
+                      libboost-regex-dev \
       apt-get -qy install \
                       git \
                       cmake \
@@ -84,9 +88,9 @@ function bootstrapOnDebian()
                       libsdl2-dev \
                       libpostproc-dev \
                       freeglut3-dev \
-                      libboost-python-dev \
-                      libboost-log-dev \
-                      libboost-regex-dev \
+                      libboost-python1.81-dev \
+                      libboost-log1.81-dev \
+                      libboost-regex1.81-dev \
                       libboost-json1.81-dev \
                       libboost-program-options-dev \
                       libxmu-dev \
@@ -539,6 +543,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_chrono1_75_0-devel \
                               libboost_atomic1_75_0-devel \
                               libboost_json1_75_0-devel \
+                              libboost_container1_75_0-devel \
                               libboost_program_options1_75_0-devel \
                               cmake \
                               gcc-c++ \
@@ -573,6 +578,7 @@ function bootstrapOnOpenSuseLeap ()
                               libboost_chrono1_75_0-devel \
                               libboost_atomic1_75_0-devel \
                               libboost_json1_75_0-devel \
+                              libboost_container1_75_0-devel \
                               libboost_program_options1_75_0-devel \
                               cmake \
                               gcc-c++ \
@@ -1776,7 +1782,6 @@ function bootstrapOnRockyLinux ()
                           openal-soft-devel \
                           sdl12-compat-devel \
                           SDL2-devel \
-                          libboost-json1.81-dev \
                           libvorbis-devel \
                           libglvnd-devel \
                           libjpeg-turbo-devel \
