@@ -66,6 +66,7 @@ function bootstrapOnDebian()
                       libboost-python-dev \
                       libboost-log-dev \
                       libboost-regex-dev
+      apt-get -qy autoremove
       apt-get -qy install \
                       git \
                       cmake \
