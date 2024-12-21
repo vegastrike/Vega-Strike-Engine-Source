@@ -22,7 +22,7 @@ jobs:
       matrix:
         os:
           - macos-13
-          # - macos-14
+          - macos-14
         compiler:
           - clang
           - gcc
@@ -48,7 +48,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          python-version: 3.13.1
+          python-version: 3.12.8
       
       - name: Install dependencies using homebrew
         run: brew install boost-python3 gtk+3 gtkglext sdl
@@ -60,10 +60,8 @@ jobs:
         if: ${{ matrix.homebrew-gl }}
         run: |
           brew install mesa mesa-glu freeglut
-          ln -s /usr/local/include/GL /usr/local/include/OpenGL
-          ln -s /usr/local/include/GL /usr/local/include/GLUT
-        # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
-        # find /usr/local/lib/ -iname '*gl*.dylib'
+          ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
+          ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
 
       # The Apple-provided OpenAL is deprecated as of macOS 10.15
       - name: Optionally install homebrewed OpenAL
@@ -86,7 +84,7 @@ jobs:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
           FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
-          OPENALDIR:  "/usr/local/opt/openal-soft"
+          OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
         run: script/cibuild $FLAGS
 
       - name: Test
