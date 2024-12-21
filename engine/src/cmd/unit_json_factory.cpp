@@ -31,41 +31,33 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <boost/json.hpp>
 
-#include "json.h"
+#include "resource/json_utils.h"
 
 
 void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     const std::string json_text = file.ReadFull();
 
-    std::vector<std::string> units = json::parsing::parse_array(json_text.c_str());
-    // Iterate over root
-    for (const std::string &unit_text : units) {
-        json::jobject unit = json::jobject::parse(unit_text);
+    boost::json::value json_value = boost::json::parse(json_text);
+    boost::json::array root_array = json_value.get_array();
+
+    for(boost::json::value& unit_value : root_array) {
+        boost::json::object unit_object = unit_value.get_object();
         std::map<std::string, std::string> unit_attributes;
 
-        for (const std::string &key : keys) {
-            // For some reason, parser adds quotes
-            if(unit.has_key(key)) {
-                const std::string attribute = unit.get(key);
-                const std::string stripped_attribute = attribute.substr(1, attribute.size() - 2);
-                unit_attributes[key] = stripped_attribute;
-            } else {
-                unit_attributes[key] = "";
-            }
+        for(boost::json::key_value_pair& pair : unit_object) {
+            const std::string value = boost::json::value_to<std::string>(pair.value());
+            unit_attributes[pair.key()] = value;
         }
 
         // Add root
-        unit_attributes["root"] = file.GetRoot();
-
-        
+        unit_attributes["root"] = file.GetRoot();  
 
         if(player_ship) {
             UnitCSVFactory::units["player_ship"] = unit_attributes;
         } else {
-            std::string unit_key = unit.get("Key");
-            std::string stripped_unit_key = unit_key.substr(1, unit_key.size() - 2);
-            UnitCSVFactory::units[stripped_unit_key] = unit_attributes;
+            UnitCSVFactory::units[unit_attributes["Key"]] = unit_attributes;
         }
     }
 }
