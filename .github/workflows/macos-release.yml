@@ -109,9 +109,12 @@ jobs:
           name: test_results_xml
           path: ${{github.workspace}}/build/test-results/**/*.xml
 
+      - name: Package it
+        run: cpack
+
       - name: Upload the artifacts
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "packages/*.${{ matrix.ARTIFACT_EXT }}"
+          files: "packages/*.dmg"
