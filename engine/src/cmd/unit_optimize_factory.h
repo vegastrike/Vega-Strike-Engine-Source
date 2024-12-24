@@ -34,7 +34,7 @@ class UnitOptimizeFactory
 public:
     static void ParseJSON(VSFileSystem::VSFile &file);
     static void RecursiveParse(std::map<std::string, std::string> unit_attributes,
-                       const std::string& json_text, bool is_root);
+                       const std::string& json_text);
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_OPTIMIZE_FACTORY_H

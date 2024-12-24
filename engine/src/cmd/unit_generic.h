@@ -83,9 +83,13 @@ void UncheckUnit( class Unit*un );
 #include "cargo_color.h"
 
 // Components
+#include "components/afterburner.h"
+#include "components/afterburner_upgrade.h"
 #include "components/cloak.h"
 #include "components/energy_container.h"
 #include "components/reactor.h"
+#include "components/drive.h"
+#include "components/drive_upgrade.h"
 #include "components/ftl_drive.h"
 #include "components/jump_drive.h"
 
@@ -107,7 +111,6 @@ class Box;
 class StarSystem;
 struct colTrees;
 class Pilot;
-class Limits;
 class MissileGeneric;
 class AsteroidGeneric;
 
@@ -145,6 +148,16 @@ struct PlanetaryOrbitData;
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
         public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
+    // We store relevant textual description here. 
+    // We stop relying on manifest and units data once we create the unit.
+    // The unit description is always taken from the manifest and not saved.
+    // Note the game confusingly refers to units:
+    // - class (Llama) - should be model
+    // - model (stock) - should be variant, but only if actually different without upgrades
+    // TODO: name is duplicated down below in some memory saving measure (StringPool::Reference)
+    std::string unit_key;           
+    std::string unit_name;
+    std::string unit_description;
 
 protected:
 //How many lists are referencing us
@@ -153,14 +166,18 @@ protected:
 
 public:
     // Components
-    EnergyContainer fuel = EnergyContainer(EnergyType::Fuel);
-    EnergyContainer energy = EnergyContainer(EnergyType::Energy);
-    EnergyContainer ftl_energy = EnergyContainer(EnergyType::FTL);
+    EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
+    EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
+    EnergyContainer ftl_energy = EnergyContainer(ComponentType::FtlCapacitor);
 
     // TODO: move this to a single constructor?!
     Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
 
+    Afterburner afterburner;
+    AfterburnerUpgrade afterburner_upgrade = AfterburnerUpgrade(&afterburner);
     Cloak cloak;
+    Drive drive;
+    DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
     FtlDrive ftl_drive = FtlDrive(&ftl_energy);
     JumpDrive jump_drive = JumpDrive(&ftl_energy);
 
@@ -289,6 +306,15 @@ public:
 
 //the turrets and spinning parts fun fun stuff
     UnitCollection SubUnits;
+
+// Turret limits
+    //the vector denoting the "front" of the turret cone!
+    // Again, an inconsistency between constructor and Init(). Chose Init
+    // value as it comes later
+    Vector structure_limits = Vector(0.0f, 0.0f, 1.0f);
+
+    //the minimum dot that the current heading can have with the structurelimit
+    double limit_min = -1;
 
 /**
  * Contains information about a particular Mount on a unit.
@@ -539,6 +565,8 @@ protected:
 public:
 //tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
     void WriteUnit(const char *modificationname = "");
+
+    const std::map<std::string, std::string> UnitToMap();
     std::string WriteUnitString();
 //Loads a unit from an xml file into a complete datastructure
     void LoadXML(const char *filename, const char *unitModifications = "", std::string *xmlbuffer = NULL);

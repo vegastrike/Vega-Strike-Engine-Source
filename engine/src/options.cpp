@@ -22,6 +22,7 @@
 
 #include "options.h"
 #include "configxml.h"
+#include "configuration/configuration.h"
 
 extern VegaConfig *vs_config;
 
@@ -189,8 +190,8 @@ void vs_options::init() {
     rgb_pixel_format = vs_config->getVariable("graphics", "rgb_pixel_format", "undefined");
     gl_accelerated_visual = XMLSupport::parse_bool(vs_config->getVariable("graphics", "gl_accelerated_visual", "true"));
     z_pixel_format = XMLSupport::parse_int(vs_config->getVariable("graphics", "z_pixel_format", "24"));
-    x_resolution = XMLSupport::parse_int(vs_config->getVariable("graphics", "x_resolution", "1024"));
-    y_resolution = XMLSupport::parse_int(vs_config->getVariable("graphics", "y_resolution", "768"));
+    x_resolution = configuration()->graphics2_config.resolution_x;
+    y_resolution = configuration()->graphics2_config.resolution_y;
     fullscreen = XMLSupport::parse_bool(vs_config->getVariable("graphics", "fullscreen", "false"));
     colordepth = XMLSupport::parse_int(vs_config->getVariable("graphics", "colordepth", "32"));
     glut_stencil = XMLSupport::parse_bool(vs_config->getVariable("graphics", "glut_stencil", "true"));
@@ -311,7 +312,6 @@ void vs_options::init() {
     universe_path = vs_config->getVariable("data", "universe_path", "universe");
     sectors = vs_config->getVariable("data", "sectors", "sectors");
     techniquesBasePath = vs_config->getVariable("data", "techniques", "techniques");
-    unitCSV = vs_config->getVariable("data", "UnitCSV", "units.csv");
     modUnitCSV = vs_config->getVariable("data", "ModUnitCSV", "");
     cockpits = vs_config->getVariable("data", "cockpits", "cockpits");
     animations = vs_config->getVariable("data", "animations", "animations");

@@ -33,6 +33,13 @@
 #include "json.h"
 #include "random_utils.h"
 
+// TODO: get rid of this function when we move to C++20
+
+static bool ends_with(const std::string& str, const std::string& suffix){
+    return str.size() >= suffix.size() && str.compare(str.size()-suffix.size(), suffix.size(), suffix) == 0;
+}
+
+
 
 // TODO: get rid of this helper function and others like it.
 static std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value) {
@@ -85,6 +92,11 @@ Manifest::Manifest(int dummy) {
 
     for(const std::string& json_filename : json_filenames) {
         std::ifstream ifs(json_filename, std::ifstream::in);
+
+        if(ifs.fail()) {
+            continue;
+        }
+        
         std::stringstream buffer;
         buffer << ifs.rdbuf();
 
@@ -113,6 +125,27 @@ Manifest& Manifest::MPL() {
     static Manifest mpl = Manifest(1);
     
     return mpl;
+}
+
+Cargo Manifest::GetCargoByName(const std::string name) {
+    const std::string upgrades_suffix = "__upgrades";
+    std::string filename;
+
+    // Check if we need to remove __upgrades suffix
+    if(ends_with(name, upgrades_suffix)) {
+        filename = name.substr(0, name.length() - upgrades_suffix.length());
+    } else {
+        filename = name;
+    }
+
+
+    for(const Cargo& c : getItems()) {
+        if(c.name == filename) {
+            return c;
+        }
+    }
+
+    return Cargo();
 }
 
 Cargo Manifest::GetRandomCargo(int quantity) {
@@ -163,4 +196,14 @@ Manifest Manifest::GetMissionManifest() {
     });
 
     return manifest;
+}
+
+const std::string Manifest::GetShipDescription(const std::string unit_key) {
+    for(const Cargo& cargo : _items) {
+        if(cargo.name == unit_key) {
+            return cargo.description;
+        }
+    }
+
+    return "";
 }

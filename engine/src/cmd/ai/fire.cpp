@@ -110,11 +110,11 @@ bool FireAt::PursueTarget(Unit *un, bool leader) {
 bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
     return true;
 
-    float limitmin = su->limits.limitmin;
+    float limitmin = su->limit_min;
     if (limitmin > -.99) {
         QVector pos = (targ->Position() - su->Position()).Normalize();
         QVector pnorm = pos.Cast();
-        Vector structurelimits = su->limits.structurelimits;
+        Vector structurelimits = su->structure_limits;
         Vector worldlimit = TransformNormal(matrix, structurelimits);
         if (pnorm.Dot(worldlimit) < limitmin) {
             return false;

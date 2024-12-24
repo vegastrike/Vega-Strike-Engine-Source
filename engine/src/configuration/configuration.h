@@ -30,6 +30,8 @@
 #include <memory>
 #include <string>
 
+#include "components/energy_consumer.h"
+
 #include "graphics_config.h"
 
 namespace vega_config {
@@ -171,7 +173,7 @@ struct Fuel {
      * There's some relevant context that's been removed from the original name of this variable "Lithium6constant" --
      * a better name would ultimately be "FuelToEnergyConversionRelativeToLithium6DeuterideFusion" -
      * that fully encodes what the efficiency is relative to. */
-    float fuel_efficiency;
+    double fuel_efficiency{1.0};
     bool fuel_equals_warp;
     float normal_fuel_usage;
     bool reactor_uses_fuel;
@@ -184,7 +186,25 @@ struct Fuel {
     float reactor_idle_efficiency{0.98F};
     float min_reactor_efficiency{0.00001F};
     float ecm_energy_cost{0.05F};
-    float fuel_conversion{0.00144F};
+    
+    double megajoules_factor{100};
+    double fuel_factor{60.0};   // Multiply fuel by this to get fuel by minutes
+    double energy_factor{1.0};
+    double ftl_energy_factor{1.0};
+
+    double reactor_factor{1.0};
+
+    double ftl_drive_factor{0.1};
+    double jump_drive_factor{1.0};
+
+    // 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled
+    EnergyConsumerSource drive_source{EnergyConsumerSource::Fuel}; 
+    EnergyConsumerSource reactor_source{EnergyConsumerSource::Fuel};
+    EnergyConsumerSource afterburner_source{EnergyConsumerSource::Fuel};
+    EnergyConsumerSource jump_drive_source{EnergyConsumerSource::FTLEnergy};
+    EnergyConsumerSource cloak_source{EnergyConsumerSource::Energy};
+
+    double minimum_drive{0.15};
 
     Fuel();
 };
@@ -363,12 +383,12 @@ struct PhysicsConfig {
     uintmax_t max_ecm{4U};
     float max_lost_target_live_time{30.0F};
     float percent_missile_match_target_velocity{1.0F};
-    float game_speed{1.0F};
-    float game_accel{1.0F};
+    double game_speed{1.0};
+    double game_accel{1.0};
+    double combat_mode_multiplier{100.0};
     float velocity_max{10000.0F};
     float max_player_rotation_rate{24.0F};
     float max_non_player_rotation_rate{360.0F};
-    bool unit_table{false};
     float capship_size{500.0F};
     float near_autotrack_cone{0.9F};
     float close_enough_to_autotrack{4.0F};

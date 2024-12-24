@@ -839,14 +839,14 @@ float maxSpeed(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    return my_unit->ViewComputerData().max_speed();
+    return my_unit->MaxSpeed();
 }
 
 float maxAfterburnerSpeed(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    return my_unit->ViewComputerData().max_ab_speed();
+    return my_unit->MaxAfterburnerSpeed();
 }
 
 void setECM(Unit *my_unit, int NewECM) {
