@@ -38,7 +38,7 @@ TEST(DamageableObject, Sanity) {
     Health shield_health(2, 150, 10.0f);
 
     DamageableLayer hull = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
-    DamageableLayer armor = DamageableLayer(1, FacetConfiguration::eight, armor_health, false);
+    DamageableLayer armor = DamageableLayer(1, FacetConfiguration::four, armor_health, false);
     DamageableLayer shield = DamageableLayer(2, FacetConfiguration::four, shield_health, false);
 
     EXPECT_EQ(hull.layer_index, 0);

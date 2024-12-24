@@ -337,8 +337,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     static float fpsval = 0;
     const float fpsmax = 1;
     static float numtimes = fpsmax;
-    float armordat[8];     //short fix
-    int armori;
     Unit *tmpunit;
 
     // TODO: lib_damage
@@ -347,31 +345,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     // Also, can't be defined within switch for some reason
     int shield_index = stat - UnitImages<void>::SHIELDF;
 
-    if (shield8) {
-        switch (stat) {
-            case UnitImages<void>::SHIELDF:
-            case UnitImages<void>::SHIELDR:
-            case UnitImages<void>::SHIELDL:
-            case UnitImages<void>::SHIELDB:
-            case UnitImages<void>::SHIELD4:
-            case UnitImages<void>::SHIELD5:
-            case UnitImages<void>::SHIELD6:
-            case UnitImages<void>::SHIELD7:
-                // TODO: lib_damage
-                // Not really sure what this is supposed to return.
-                // Probably a percent of the current/max shield values.
-                // Subtracing enum SHIELDF (first shield gauge) converts the
-                // stat parameter to the index of the shield.
-
-                if (target->GetShieldLayer().facets[shield_index].max_health > 0) {
-                    return target->GetShieldLayer().facets[shield_index].Percent();
-                } else {
-                    return 0;
-                }
-            default:
-                break;
-        }
-    }
     switch (stat) {
         case UnitImages<void>::SHIELDF:
             return target->FShieldData();
@@ -386,46 +359,23 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return target->BShieldData();
 
         case UnitImages<void>::ARMORF:
+            return target->armor->facets[1].Percent();
         case UnitImages<void>::ARMORR:
+            return target->armor->facets[0].Percent();
         case UnitImages<void>::ARMORL:
+            return target->armor->facets[1].Percent();
         case UnitImages<void>::ARMORB:
+            return target->armor->facets[0].Percent();
         case UnitImages<void>::ARMOR4:
+            return target->armor->facets[2].Percent();
         case UnitImages<void>::ARMOR5:
+            return target->armor->facets[2].Percent();
         case UnitImages<void>::ARMOR6:
+            return target->armor->facets[3].Percent();
         case UnitImages<void>::ARMOR7:
-            target->ArmorData(armordat);
-            if (armor8) {
-                return armordat[stat - UnitImages<void>::ARMORF] / StartArmor[stat - UnitImages<void>::ARMORF];
-            } else {
-                for (armori = 0; armori < 8; ++armori) {
-                    if (armordat[armori] > StartArmor[armori]) {
-                        StartArmor[armori] = armordat[armori];
-                    }
-                    armordat[armori] /= StartArmor[armori];
-                }
-            }
-            switch (stat) {
-                case UnitImages<void>::ARMORR:
-                    return .25 * (armordat[0] + armordat[1] + armordat[4] + armordat[5]);
-
-                case UnitImages<void>::ARMORL:
-                    return .25 * (armordat[2] + armordat[3] + armordat[6] + armordat[7]);
-
-                case UnitImages<void>::ARMORB:
-                    return .25 * (armordat[1] + armordat[3] + armordat[5] + armordat[7]);
-
-                case UnitImages<void>::ARMORF:
-                default:
-                    return .25 * (armordat[0] + armordat[2] + armordat[4] + armordat[6]);
-            }
+            return target->armor->facets[3].Percent();
         case UnitImages<void>::FUEL:
-            if (target->fuelData() > maxfuel) {
-                maxfuel = target->fuelData();
-            }
-            if (maxfuel > 0) {
-                return target->fuelData() / maxfuel;
-            }
-            return 0;
+            return target->fuel.Percent();
 
         case UnitImages<void>::ENERGY:
             return target->energyData();
@@ -435,14 +385,11 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return (warpifnojump || target->jump_drive.Installed()) ? target->ftl_energy.Percent() : 0;
         }
         case UnitImages<void>::HULL:
-            if (maxhull < target->GetHull()) {
-                maxhull = target->GetHull();
-            }
-            return target->GetHull() / maxhull;
-
+            return target->hull->facets[0].Percent();
+            
         case UnitImages<void>::EJECT: {
             int go =
-                    (((target->GetHull() / maxhull) < .25)
+                    ((target->hull->facets[0].Percent() < .25)
                             && (target->BShieldData() < .25 || target->FShieldData() < .25)) ? 1 : 0;
             static int overload = 0;
             if (overload != go) {
@@ -467,11 +414,12 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return go;
         }
         case UnitImages<void>::LOCK: {
+            float distance;
             static float
                     locklight_time = XMLSupport::parse_float(vs_config->getVariable("graphics", "locklight_time", "1"));
             bool res = false;
             if ((tmpunit = target->GetComputerData().threat.GetUnit())) {
-                res = tmpunit->cosAngleTo(target, *&armordat[0], FLT_MAX, FLT_MAX) > .95;
+                res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
                 if (res) {
                     last_locktime = UniverseUtil::GetGameTime();
                 }
@@ -921,8 +869,6 @@ void GameCockpit::TriggerEvents(Unit *un) {
 void GameCockpit::Init(const char *file) {
     smooth_fov = g_game.fov;
     editingTextMessage = false;
-    armor8 = false;
-    shield8 = false;
     Cockpit::Init(file);
     if (Panel.size() > 0) {
         float x, y;
@@ -1011,7 +957,6 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
         textcol(1, 1, 1, 1),
         text(NULL) {
     autoMessageTime = 0;
-    shield8 = armor8 = false;
     editingTextMessage = false;
     static int headlag = XMLSupport::parse_int(vs_config->getVariable("graphics", "head_lag", "10"));
     int i;
