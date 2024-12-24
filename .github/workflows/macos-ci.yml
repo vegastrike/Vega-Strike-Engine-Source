@@ -21,49 +21,28 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          #- macos-11
-          - macos-12
+          # x86-64
+          - macos-13
+          # M1 processor
+          #- macos-14
         compiler:
           - clang
           - gcc
-        homebrew-gl:
-          - true
-          # - false
-        homebrew-al:
-          - true
-          - false
 
     steps:
+      # specific setup for Python on Mac to ensure Python Version align
+      - name: Python Setup on Mac
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: 3.12.8
 
       # The following dependencies are already present within macos-* images:
-      # - clang (llvm)
-      # - cmake
-      # - expat
-      # - gcc
-      # - git
-      # - jpeg
-      # - libpng
-      # - libvorbis
-      # - python
-      - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl
-
-      # The following Apple-provided libraries are deprecated:
-      # * OpenGL as of macOS 10.14
-      # * GLUT as of macOS 10.9
-      - name: Optionally install homebrewed OpenGL and GLUT
-        if: ${{ matrix.homebrew-gl }}
-        run: |
-          brew install mesa mesa-glu freeglut
-          ln -s /usr/local/include/GL /usr/local/include/OpenGL
-          ln -s /usr/local/include/GL /usr/local/include/GLUT
-        # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
-        # find /usr/local/lib/ -iname '*gl*.dylib'
-
-      # The Apple-provided OpenAL is deprecated as of macOS 10.15
-      - name: Optionally install homebrewed OpenAL
-        if: ${{ matrix.homebrew-al }}
-        run: brew install openal-soft
+      # MacOS has a Developers Tools package from Apple that gets installed which
+      # provides some minimal functionality:
+      #   XCode (which uses CLang/LLVM)
+      #   git
+      - name: Install the latest version of Bash so we can rely on it
+        run: brew install bash
 
       - name: Check out repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
@@ -76,6 +55,11 @@ jobs:
         if: github.event.pull_request
         run: git checkout HEAD^2
 
+      - name: Bootstrap MacOS
+        run: script/bootstrap-mac.sh
+
+      # Note: it might be good to use a step to detect where OpenAL-Soft is
+      # installed and set it to a GHA variable that can be consumed below
       - name: Build it
         env:
           MY_OS_NAME: macos
