@@ -64,7 +64,8 @@ then
     # $(brew --prefix python) links to the wrong version of Python for Boost so while:
     # HOMEBREW_PYTHON_BIN="$(brew --prefix python)/libexec/bin"
     # would be preferred we need to do the following instead:
-    HOMEBREW_PYTHON_BIN="${HOMEBREW_PREFIX}/opt/python@${BUILD_WITH_PYTHON_VERSION}/libexec/bin"
+    #HOMEBREW_PYTHON_BIN="${HOMEBREW_PREFIX}/opt/python@${BUILD_WITH_PYTHON_VERSION}/libexec/bin"
+    HOMEBREW_PYTHON_BIN="$(brew --prefix python)/libexec/bin"
 
     echo "Build With Python Version: ${BUILD_WITH_PYTHON_VERSION}"
     echo "          Homebrew Prefix: ${HOMEBREW_PREFIX}"
@@ -82,12 +83,12 @@ then
     echo "  Detected Python Version: ${HOMEBREW_PYTHON_VERSION}"
 
     # Ensure it uses the correct Python version
-    export PYTHONHOME="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}"
-    export PYTHONPATH="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}/site-packages"
+    #export PYTHONHOME="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}"
+    #export PYTHONPATH="${HOMEBREW_BIN}/lib/python${HOMEBREW_PYTHON_VERSION}/site-packages"
     export HOMEBREW_PYTHON3_CFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --cflags)"
     export HOMEBREW_PYTHON3_LDFLAGS="$(${HOMEBREW_BIN}/python${BUILD_WITH_PYTHON_VERSION}-config --ldflags)"
-    echo "              Python Home: ${PYTHONHOME}"
-    echo "              Python Path: ${PYTHONPATH}"
+    #echo "              Python Home: ${PYTHONHOME}"
+    #echo "              Python Path: ${PYTHONPATH}"
     echo "   Homebrew Python CFlags: ${HOMEBREW_PYTHON3_CLFLAGS}"
     echo "  Homebrew Python LDFlags: ${HOMEBREW_PYTHON3_LDFLAGS}"
 
