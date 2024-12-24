@@ -43,7 +43,7 @@ TEST(LoadConfig, Sanity) {
     EXPECT_EQ(default_escaped_string, "#00FF00Hi\r\nthere!#000000");
 
     // Read the configuration from the config file
-    const std::string filename = "test_assets/vegastrike.config";
+    const std::string filename = "../test_assets/vegastrike.config";
     vega_config::GetGameConfig().LoadGameConfig(filename);
 
     // Test again
