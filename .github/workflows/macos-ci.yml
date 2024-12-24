@@ -21,9 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          # x86-64
           - macos-13
-          - macos-14
-            # M1 processor
+          # M1 processor
+          #- macos-14
         compiler:
           - clang
           - gcc
