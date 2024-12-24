@@ -4698,18 +4698,12 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     
     const Computer &uc = playerUnit->ViewComputerData();
     const Computer &buc = blankUnit->ViewComputerData();
-    if (!mode) {
-        text += "#n##n#" + prefix + "#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
-        text += "#n#" + prefix + statcolor + "Turning response: #-c";
-    }
+    
     if (playerUnit->drive.yaw.MaxValue() == playerUnit->drive.pitch.MaxValue() && 
         playerUnit->drive.yaw.MaxValue() == playerUnit->drive.roll.MaxValue()) {
         prettyPrintFloat(conversionBuffer, playerUnit->drive.yaw
                 / ((playerUnit->GetMoment() != 0) ? playerUnit->GetMoment() : 1), 0, 4);
-        if (!mode) {
-            text += conversionBuffer;
-            text += " radians/second^2#n#" + expstatcolor + "  (yaw, pitch, roll)#-c";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, drive.yaw)) {
+        if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, drive.yaw)) {
             switch (replacement_mode) {
                 case 0:                     //Replacement or new Module
                     PRETTY_ADDU(statcolor + "#n#Installs maneuvering jets with turning response #-c",
