@@ -28,28 +28,21 @@
 #include "weapon_factory.h"
 
 #include "weapon_info.h"
-#include "options.h"
 #include "role_bitmask.h"
 #include "audiolib.h"
+
 #include "hashtable.h"
-#include "json.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
+#include <boost/json.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 
-namespace pt = boost::property_tree;
-namespace alg = boost::algorithm;
+#include "resource/json_utils.h"
 
-using boost::property_tree::ptree;
-
-using std::string;
-using std::endl;
-
-extern Hashtable<string, WeaponInfo, 257> lookuptable;
+extern Hashtable<std::string, WeaponInfo, 257> lookuptable;
 
 // TODO: reenable this?
 /*constexpr int color_step(49);
@@ -61,59 +54,7 @@ bool gamma_needed(int gamma, int count, int depth)
                 -100);
 }*/
 
-WeaponFactory::WeaponFactory(std::string filename) {
-    pt::ptree tree;
-    pt::read_xml(filename, tree);
-
-    // Iterate over root
-    for (const auto &iterator : tree) {
-        //parse(iterator.second);
-
-        // There should be only one root. Exiting
-        break;
-    }
-
-    const std::string json_filename = "weapons.json";
-
-    std::ifstream ifs(json_filename, std::ifstream::in);
-    std::stringstream buffer;
-    buffer << ifs.rdbuf();
-
-    const std::string json_text = buffer.str();
-
-    std::vector<std::string> weapons = json::parsing::parse_array(json_text.c_str());
-    for (const std::string &weapon_text : weapons) {
-        parseJSON(weapon_text);
-    }
-}
-
-// TODO: dup in MPL. Remove
-static std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value) {
-    if(object.has_key(key)) {
-        std::string value = object.get(key);
-        value = value.substr(1, value.size() - 2);
-        return value;
-    }
-
-    return default_value;
-}
-
-static float getJSONValue(const json::jobject& object, const std::string &key, const float &default_value) {
-    if(object.has_key(key)) {
-        try {
-            return std::stof(object.get(key));
-        } catch(...) {}
-        try {
-            return std::stoi(object.get(key));
-        } catch(...) {}
-    }
-
-    return default_value;
-}
-
-
-void WeaponFactory::parseJSON(const std::string &weapon_text) {
-    json::jobject weapon = json::jobject::parse(weapon_text);
+void ParseWeapon(const boost::json::object& weapon) {
     WeaponInfo wi;
     /*static float gun_speed =
             game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
@@ -121,42 +62,43 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
 
 
     // Weapon Type
-    wi.type = getWeaponTypeFromString(getJSONValue(weapon, "type", ""));
+    const std::string weapon_type = JsonGetWithDefault(weapon, "type", std::string());
+    wi.type = getWeaponTypeFromString(weapon_type);
     wi.file = getFilenameFromWeaponType(wi.type);
 
     // Name
-    wi.name = getJSONValue(weapon, "name", "Unknown");
+    wi.name = JsonGetStringWithDefault(weapon, "name", "Unknown");
 
     // Mount Size
-    wi.size = getMountSize(getJSONValue(weapon, "mountsize", "Unknown_mount"));
+    wi.size = getMountSize(JsonGetStringWithDefault(weapon, "mountsize", "Unknown_mount"));
 
     // Energy
-    wi.energy_rate = getJSONValue(weapon, "Energy.rate", wi.energy_rate);
-    wi.stability = getJSONValue(weapon, "Energy.stability", wi.stability);
-    wi.refire_rate = getJSONValue(weapon, "Energy.refire", wi.refire_rate);
-    wi.lock_time = getJSONValue(weapon, "Energy.locktime", wi.lock_time);
+    wi.energy_rate = JsonGetWithDefault(weapon, "Energy.rate", wi.energy_rate);
+    wi.stability = JsonGetWithDefault(weapon, "Energy.stability", wi.stability);
+    wi.refire_rate = JsonGetWithDefault(weapon, "Energy.refire", wi.refire_rate);
+    wi.lock_time = JsonGetWithDefault(weapon, "Energy.locktime", wi.lock_time);
 
 
     // Damage
     // TODO: weapon_list.xml laser has damage. Everything else has rate. Correct.
-    wi.damage = getJSONValue(weapon, "Damage.rate", wi.damage);
-    wi.phase_damage = getJSONValue(weapon, "Damage.phasedamage", wi.phase_damage);
-    wi.radius = getJSONValue(weapon, "Damage.radius", wi.radius);
-    wi.radial_speed = getJSONValue(weapon, "Damage.radialspeed", wi.radial_speed);
-    wi.long_range = getJSONValue(weapon, "Damage.longrange", wi.long_range);
+    wi.damage = JsonGetWithDefault(weapon, "Damage.rate", wi.damage);
+    wi.phase_damage = JsonGetWithDefault(weapon, "Damage.phasedamage", wi.phase_damage);
+    wi.radius = JsonGetWithDefault(weapon, "Damage.radius", wi.radius);
+    wi.radial_speed = JsonGetWithDefault(weapon, "Damage.radialspeed", wi.radial_speed);
+    wi.long_range = JsonGetWithDefault(weapon, "Damage.longrange", wi.long_range);
 
 
     // Distance
-    wi.volume = getJSONValue(weapon, "Distance.volume", wi.volume);
-    wi.speed = getJSONValue(weapon, "Distance.speed", wi.speed);
-    wi.pulse_speed = getJSONValue(weapon, "Distance.pulsespeed", wi.pulse_speed);
-    wi.range = getJSONValue(weapon, "Distance.range", wi.range);
-    wi.length = getJSONValue(weapon, "Distance.length", wi.length);
+    wi.volume = JsonGetWithDefault(weapon, "Distance.volume", wi.volume);
+    wi.speed = JsonGetWithDefault(weapon, "Distance.speed", wi.speed);
+    wi.pulse_speed = JsonGetWithDefault(weapon, "Distance.pulsespeed", wi.pulse_speed);
+    wi.range = JsonGetWithDefault(weapon, "Distance.range", wi.range);
+    wi.length = JsonGetWithDefault(weapon, "Distance.length", wi.length);
 
 
     // TODO: this is a bug. It gets parsed into the same radius and radial_speed variables.
-    wi.radius = getJSONValue(weapon, "Distance.radius", wi.radius);
-    wi.radial_speed = getJSONValue(weapon, "Distance.radialspeed", wi.radial_speed);
+    wi.radius = JsonGetWithDefault(weapon, "Distance.radius", wi.radius);
+    wi.radial_speed = JsonGetWithDefault(weapon, "Distance.radialspeed", wi.radial_speed);
 
 
     // TODO: detonation range not implemented. Incorrectly assigns to pulse_speed...
@@ -176,11 +118,11 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
     }*/
 
     // Appearance
-    wi.file = getJSONValue(weapon, "Appearance.file", wi.file);
-    wi.r = getJSONValue(weapon, "Appearance.r", wi.r);
-    wi.g = getJSONValue(weapon, "Appearance.g", wi.g);
-    wi.b = getJSONValue(weapon, "Appearance.b", wi.b);
-    wi.a = getJSONValue(weapon, "Appearance.a", wi.a);
+    wi.file = JsonGetWithDefault(weapon, "Appearance.file", wi.file);
+    wi.r = JsonGetWithDefault(weapon, "Appearance.r", wi.r);
+    wi.g = JsonGetWithDefault(weapon, "Appearance.g", wi.g);
+    wi.b = JsonGetWithDefault(weapon, "Appearance.b", wi.b);
+    wi.a = JsonGetWithDefault(weapon, "Appearance.a", wi.a);
 
     // TODO: reenable? No idea why or what this is...
     /*if ( (gamma > 0) && gamma_needed( gamma, counts, 32 ) ) {
@@ -191,13 +133,13 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
     }*/
 
     // Sound
-    std::string sound_wave = getJSONValue(weapon, "Appearance.soundwav", "");
+    std::string sound_wave = JsonGetStringWithDefault(weapon, "Appearance.soundwav", "");
     if (!sound_wave.empty()) {
         // Missiles don't play the sound in a loop. Others do.
         wi.sound = AUDCreateSoundWAV(sound_wave, wi.type != WEAPON_TYPE::PROJECTILE);
     }
 
-    std::string sound_mp3 = getJSONValue(weapon, "Appearance.soundmp3", "");
+    std::string sound_mp3 = JsonGetStringWithDefault(weapon, "Appearance.soundmp3", "");
     if (!sound_mp3.empty()) {
         // Missiles don't play the sound in a loop. Others do.
         wi.sound = AUDCreateSoundMP3(sound_wave, wi.type != WEAPON_TYPE::PROJECTILE);
@@ -207,97 +149,23 @@ void WeaponFactory::parseJSON(const std::string &weapon_text) {
     lookuptable.Put(boost::to_upper_copy(wi.name), new WeaponInfo(wi));
 }
 
-void WeaponFactory::parse(ptree tree) {
-//    static float gun_speed =
-//            game_options()->gun_speed * (game_options()->gun_speed_adjusted_game_speed ? game_options()->game_speed : 1);
-//    static int gamma = (int) (20 * game_options()->weapon_gamma);
 
-    for (const auto &iterator : tree) {
-        WeaponInfo wi;
+WeaponFactory::WeaponFactory(std::string filename) {
+    std::ifstream ifs(filename, std::ifstream::in);
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
 
-        ptree inner = iterator.second;
+    const std::string json_text = buffer.str();
 
-        // Weapon Type
-        wi.type = getWeaponTypeFromString(iterator.first);
-        wi.file = getFilenameFromWeaponType(wi.type);
+    boost::json::value json_value = boost::json::parse(json_text);
+    boost::json::array root_array = json_value.get_array();
 
-        // Name
-        wi.name = inner.get("<xmlattr>.name", "Unknown");
-
-        // Mount Size
-        wi.size = getMountSize(inner.get("<xmlattr>.mountsize", "Unknown_mount"));
-
-        // Energy
-        wi.energy_rate = inner.get("Energy.<xmlattr>.rate", wi.energy_rate);
-        wi.stability = inner.get("Energy.<xmlattr>.stability", wi.stability);
-        wi.refire_rate = inner.get("Energy.<xmlattr>.refire", wi.refire_rate);
-        wi.lock_time = inner.get("Energy.<xmlattr>.locktime", wi.lock_time);
-
-        // Damage
-        // TODO: weapon_list.xml laser has damage. Everything else has rate. Correct.
-        wi.damage = inner.get("Damage.<xmlattr>.rate", wi.damage);
-        wi.phase_damage = inner.get("Damage.<xmlattr>.phasedamage", wi.phase_damage);
-        wi.radius = inner.get("Damage.<xmlattr>.radius", wi.radius);
-        wi.radial_speed = inner.get("Damage.<xmlattr>.radialspeed", wi.radial_speed);
-        wi.long_range = inner.get("Damage.<xmlattr>.longrange", wi.long_range);
-
-        // Distance
-        wi.volume = inner.get("Distance.<xmlattr>.volume", wi.volume);
-        wi.speed = inner.get("Distance.<xmlattr>.speed", wi.speed);
-        wi.pulse_speed = inner.get("Distance.<xmlattr>.pulsespeed", wi.pulse_speed);
-        wi.range = inner.get("Distance.<xmlattr>.range", wi.range);
-        wi.length = inner.get("Distance.<xmlattr>.length", wi.length);
-
-        // TODO: this is a bug. It gets parsed into the same radius and radial_speed variables.
-        wi.radius = inner.get("Distance.<xmlattr>.radius", wi.radius);
-        wi.radial_speed = inner.get("Distance.<xmlattr>.radialspeed", wi.radial_speed);
-
-        // TODO: detonation range not implemented. Incorrectly assigns to pulse_speed...
-        //wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
-
-        // TODO: is this really necessary???
-        /*if(game_options()->gun_speed_adjusted_game_speed) {
-            if (wi.speed < 1000) {
-                wi.speed *= 1.0+gun_speed/1.25;
-            } else if (wi.speed < 2000) {
-                wi.speed *= 1.0+gun_speed/2.5;
-            } else if (wi.speed < 4000) {
-                wi.speed *= 1.0+gun_speed/6.0;
-            } else if (wi.speed < 8000) {
-                wi.speed *= 1.0+gun_speed/17.0;
-            }
-        }*/
-
-        // Appearance
-        wi.file = inner.get("Appearance.<xmlattr>.file", wi.file);
-        wi.a = inner.get("Appearance.<xmlattr>.a", wi.a);
-        wi.r = inner.get("Appearance.<xmlattr>.r", wi.r);
-        wi.g = inner.get("Appearance.<xmlattr>.g", wi.g);
-        wi.b = inner.get("Appearance.<xmlattr>.b", wi.b);
-        wi.a = inner.get("Appearance.<xmlattr>.a", wi.a);
-
-        // TODO: reenable? No idea why or what this is...
-        /*if ( (gamma > 0) && gamma_needed( gamma, counts, 32 ) ) {
-            //approximate the color func
-            wi.b = (wi.b+color_step*5)/255.;
-            wi.g = (wi.g+color_step/5)/255.;
-            wi.r = (wi.r+color_step*2)/255.;
-        }*/
-
-        // Sound
-        std::string sound_wave = inner.get("Appearance.<xmlattr>.soundwav", "");
-        if (!sound_wave.empty()) {
-            // Missiles don't play the sound in a loop. Others do.
-            wi.sound = AUDCreateSoundWAV(sound_wave, wi.type != WEAPON_TYPE::PROJECTILE);
-        }
-
-        std::string sound_mp3 = inner.get("Appearance.<xmlattr>.soundmp3", "");
-        if (!sound_mp3.empty()) {
-            // Missiles don't play the sound in a loop. Others do.
-            wi.sound = AUDCreateSoundMP3(sound_wave, wi.type != WEAPON_TYPE::PROJECTILE);
-        }
-
-        // Add new WeaponInfo to weapons table
-        lookuptable.Put(boost::to_upper_copy(wi.name), new WeaponInfo(wi));
+    for(boost::json::value& weapon_value : root_array) {
+        boost::json::object weapon = weapon_value.get_object();
+        ParseWeapon(weapon);
     }
 }
+
+
+
+
