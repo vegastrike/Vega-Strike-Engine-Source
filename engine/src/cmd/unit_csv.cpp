@@ -1258,7 +1258,6 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
         unit["Cargo"] = carg;
     }
     unit["Mass"] = tos(Mass);
-    unit["Fuel_Capacity"] = tos(fuel.Level());
     unit["Hull"] = tos(GetHullLayer().facets[0].health);
     unit["Spec_Interdiction"] = tos(specInterdiction);
 
@@ -1323,12 +1322,16 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
     unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
     unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
-    unit["Warp_Capacitor"] = tos(ftl_energy.Level());
+    
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
-    unit["Primary_Capacitor"] = tos(energy.Level());
-    unit["Reactor_Recharge"] = tos(reactor.Capacity());
-
+    
+    
+    reactor.SaveToCSV(unit);
+    fuel.SaveToCSV(unit);
+    energy.SaveToCSV(unit);
+    ftl_energy.SaveToCSV(unit);
+    
     afterburner.SaveToCSV(unit);
     drive.SaveToCSV(unit);
     jump_drive.SaveToCSV(unit);

@@ -80,7 +80,7 @@ ENDIF ()
 # This is an incrementing number similar to the Google Android API Version
 # allowing us to differentiate our Assets API across multiple versions.
 # If a release is missing this value, then version `1` can be assumed.
-SET(VEGASTRIKE_ASSETS_API_VERSION "2")
+SET(VEGASTRIKE_ASSETS_API_VERSION "3")
 
 #IF (COMMAND cmake_policy)
 #    CMAKE_POLICY (SET CMP0003 NEW)
@@ -121,6 +121,10 @@ SET(VEGASTRIKE_ASSETS_API_VERSION "2")
 #    CMAKE_POLICY (SET CMP0091 NEW)
 #ENDIF ()
 
+# TODO: this suppresses warnings about CMP0102 caching.
+# We should do something about it instead.
+CMAKE_POLICY(SET CMP0102 OLD)
+
 PROJECT(Vega_Strike
     VERSION
     "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
@@ -130,7 +134,7 @@ PROJECT(Vega_Strike
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
-SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 SET(CMAKE_CXX_EXTENSIONS ON)
 SET(CMAKE_C_STANDARD 11)

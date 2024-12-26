@@ -29,41 +29,11 @@
 #include <algorithm>
 #include <iostream>
 
-//#include "xml_support.h"  // TODO: replace this later
-#include "json.h"
+#include <boost/json.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "random_utils.h"
-
-// TODO: get rid of this function when we move to C++20
-
-static bool ends_with(const std::string& str, const std::string& suffix){
-    return str.size() >= suffix.size() && str.compare(str.size()-suffix.size(), suffix.size(), suffix) == 0;
-}
-
-
-
-// TODO: get rid of this helper function and others like it.
-static std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value) {
-    if(object.has_key(key)) {
-        std::string value = object.get(key);
-        value = value.substr(1, value.size() - 2);
-        return value;
-    }
-
-    return default_value;
-}
-
-static float getJSONValue(const json::jobject& object, const std::string &key, const float &default_value) {
-    if(object.has_key(key)) {
-        try {
-            return std::stof(object.get(key));
-        } catch(...) {}
-        try {
-            return std::stoi(object.get(key));
-        } catch(...) {}
-    }
-
-    return default_value;
-}
+#include "resource/json_utils.h"
 
 
 Manifest::Manifest() {
@@ -101,21 +71,21 @@ Manifest::Manifest(int dummy) {
         buffer << ifs.rdbuf();
 
         const std::string json_text = buffer.str();
+        boost::json::value json_value = boost::json::parse(json_text);
+        boost::json::array root_array = json_value.get_array();
 
-        std::vector<std::string> parts = json::parsing::parse_array(json_text.c_str());
-        for (const std::string &part_text : parts) {
-            json::jobject part = json::jobject::parse(part_text);
+        for(boost::json::value& item_value : root_array) {
+            boost::json::object item = item_value.get_object();
 
-            std::string name = getJSONValue(part, "file", "");
-            std::string category = getJSONValue(part, "categoryname", "");
+            std::string name = JsonGetStringWithDefault(item, "file", "");
+            std::string category = JsonGetStringWithDefault(item, "categoryname", "");
+            int price = std::stoi(JsonGetStringWithDefault(item, "price", "0"));
+            double mass = std::stod(JsonGetStringWithDefault(item, "mass", "0.0"));
+            double volume = std::stod(JsonGetStringWithDefault(item, "volume", "0.0"));
+            std::string description = JsonGetStringWithDefault(item, "description", "");
 
-            Cargo cargo = Cargo(name,
-                                category,
-                                std::stoi(getJSONValue(part, "price", "")),     // Price
-                                1,                                              // Quantity
-                                std::stof(getJSONValue(part, "mass", "")),      // Mass
-                                std::stof(getJSONValue(part, "volume", "")));   // Volume
-            cargo.SetDescription(getJSONValue(part, "description", ""));        // Description
+            Cargo cargo = Cargo(name, category, price, 1, mass, volume);
+            cargo.SetDescription(description);
             _items.push_back(cargo);
         }
     }
@@ -132,7 +102,7 @@ Cargo Manifest::GetCargoByName(const std::string name) {
     std::string filename;
 
     // Check if we need to remove __upgrades suffix
-    if(ends_with(name, upgrades_suffix)) {
+    if(boost::algorithm::ends_with(name, upgrades_suffix)) {
         filename = name.substr(0, name.length() - upgrades_suffix.length());
     } else {
         filename = name;
