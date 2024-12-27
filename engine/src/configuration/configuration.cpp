@@ -25,7 +25,10 @@
 
 #include "configuration.h"
 #include "game_config.h"
-#include "json.h"
+#include "resource/json_utils.h"
+#include <algorithm>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/json.hpp>
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
@@ -35,35 +38,32 @@
 
 
 std::string GetString(std::string json_string, const std::string key, bool trim = true) {
-    json::jobject json = json::jobject::parse(json_string);
+    // parse the JSON data
+    boost::json::value json_value = boost::json::parse(json_string);
+    boost::json::object root = json_value.get_object();
+
+    // key can be a set of keys delimited by `|` so traverse
+    // the JSON structure through the list of keys
+    // boost::json support using `/` as a delimiter though
     std::vector<std::string> key_sections;
     boost::split(key_sections, key, boost::is_any_of("|"));
-    int key_sections_size = key_sections.size();
 
-    for(std::string& key_section : key_sections) {
-        key_sections_size--;
+    // rebuild the key_sections as a list using `/` per Boost::JSON
+    std::string new_key = boost::algorithm::join(key_sections, "/");
 
-        if(!json.has_key(key_section)) {
-            return "";
-        }
+    std::string value = JsonGetStringWithDefault(root, new_key, "");
 
-        if(key_sections_size > 0) {
-            json_string = json.get(key_section);
-            json = json::jobject::parse(json_string);
-        } else {
-            json_string = json.get(key_section);
-
-            if(!trim) {
-                return json_string;
-            }
-
-            int len = json_string.length();
-            json_string = json_string.substr(1,len-2);
-            return json_string;
-        }
+    // optionally trim the value
+    if (!trim) {
+        return value;
     }
-    
-    return "";
+
+    // trim off any whitespace from the start or end
+    const auto whitespace = " \t\n\r\f\v";
+    const unsigned long int start = value.find_first_not_of(whitespace);
+    const unsigned long int begin = 0;
+    const unsigned long int end = value.find_last_not_of(whitespace);
+    return value.substr(std::max(start, begin), std::min(end, value.length()));
 }
 
 bool GetBool(std::string json_string, const std::string key, bool default_value) {
