@@ -60,10 +60,11 @@ std::string GetString(std::string json_string, const std::string key, bool trim 
 
     // trim off any whitespace from the start or end
     const auto whitespace = " \t\n\r\f\v";
-    const unsigned long int start = value.find_first_not_of(whitespace);
-    const unsigned long int begin = 0;
-    const unsigned long int end = value.find_last_not_of(whitespace);
-    return value.substr(std::max(start, begin), std::min(end, value.length()));
+    const signed long int start = value.find_first_not_of(whitespace);
+    const signed long int the_start = 0;
+    const signed long int end = value.find_last_not_of(whitespace);
+    const signed long int the_end = value.length();
+    return value.substr(std::max(start, the_start), std::min(end, the_end));
 }
 
 bool GetBool(std::string json_string, const std::string key, bool default_value) {
