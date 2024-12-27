@@ -626,7 +626,7 @@ void LoadConfig(string subdir) {
     bool found = false;
     bool foundweapons = false;
     //First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
-    weapon_list = "weapon_list.xml";
+    weapon_list = "weapons.json";
     if (!subdir.empty()) {
         modname = subdir;
         if (DirectoryExists(homedir + "/mods/" + subdir)) {
@@ -634,8 +634,8 @@ void LoadConfig(string subdir) {
                 VS_LOG(info,
                         (boost::format("CONFIGFILE - Found a config file in home mod directory, using : %1%")
                                 % (homedir + "/mods/" + subdir + "/" + config_file)));
-                if (FileExists(homedir + "/mods/" + subdir, "weapon_list.xml") >= 0) {
-                    weapon_list = homedir + "/mods/" + subdir + "/weapon_list.xml";
+                if (FileExists(homedir + "/mods/" + subdir, "weapons.json") >= 0) {
+                    weapon_list = homedir + "/mods/" + subdir + "/weapons.json";
                     foundweapons = true;
                 }
                 config_file = homedir + "/mods/" + subdir + "/" + config_file;
@@ -652,8 +652,8 @@ void LoadConfig(string subdir) {
                             (boost::format("CONFIGFILE - Found a config file in mods directory, using : %1%")
                                     % (moddir + "/" + subdir + "/" + config_file)));
                 }
-                if ((!foundweapons) && FileExists(moddir + "/" + subdir, "weapon_list.xml") >= 0) {
-                    weapon_list = moddir + "/" + subdir + "/weapon_list.xml";
+                if ((!foundweapons) && FileExists(moddir + "/" + subdir, "weapons.json") >= 0) {
+                    weapon_list = moddir + "/" + subdir + "/weapons.json";
                     foundweapons = true;
                 }
                 if (!found) {
