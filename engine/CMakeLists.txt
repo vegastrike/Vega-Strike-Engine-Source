@@ -1336,7 +1336,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     #  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
     # Bundle -> Compressed Disk Image
     # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
-    SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
+    SET(CPACK_GENERATOR "DragNDrop")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     MESSAGE(STATUS "Configuring Packaging for Linux")
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
