@@ -118,4 +118,4 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: "packages/*.dmg"
+          files: "build/*.dmg"
