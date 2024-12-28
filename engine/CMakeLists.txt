@@ -1288,9 +1288,10 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # the executable a second time using a different name.
 IF (WIN32)
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
-ELSE (WIN32)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+ELSE()
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
-ENDIF (WIN32)
+ENDIF ()
 
 
 ADD_SUBDIRECTORY("../doc" "./doc")
@@ -1330,13 +1331,14 @@ IF (WIN32 AND NOT UNIX)
     SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
     SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe" "vega-meshtool.exe" "vegasettings.exe")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    MESSAGE(STATUS "Configuring Packaging for macOS (not fully implemented)")
+    MESSAGE(STATUS "Configuring Packaging for macOS")
     # There's a few options for MacOSX; not sure what we want to use
     # DragNDrop -> DMG
     #  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
     # Bundle -> Compressed Disk Image
     # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
     SET(CPACK_GENERATOR "DragNDrop")
+    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike-engine.app/Contents/MacOS/vegastrike-engine")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     MESSAGE(STATUS "Configuring Packaging for Linux")
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
