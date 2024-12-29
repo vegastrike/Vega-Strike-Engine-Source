@@ -1207,7 +1207,7 @@
       "name": "package-linux-pie-enabled-glvnd-debug",
       "configurePreset": "linux-pie-enabled-glvnd-debug",
       "displayName": "Linux, PIE Enabled, GLVND, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1218,7 +1218,7 @@
       "name": "package-linux-pie-enabled-glvnd-release",
       "configurePreset": "linux-pie-enabled-glvnd-release",
       "displayName": "Linux, PIE Enabled, GLVND, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1229,7 +1229,7 @@
       "name": "package-linux-pie-enabled-legacy-gl-debug",
       "configurePreset": "linux-pie-enabled-legacy-gl-debug",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1240,7 +1240,7 @@
       "name": "package-linux-pie-enabled-legacy-gl-release",
       "configurePreset": "linux-pie-enabled-legacy-gl-release",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1251,7 +1251,7 @@
       "name": "package-linux-pie-disabled-glvnd-debug",
       "configurePreset": "linux-pie-disabled-glvnd-debug",
       "displayName": "Linux, PIE Disabled, GLVND, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1262,7 +1262,7 @@
       "name": "package-linux-pie-disabled-glvnd-release",
       "configurePreset": "linux-pie-disabled-glvnd-release",
       "displayName": "Linux, PIE Disabled, GLVND, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1273,7 +1273,7 @@
       "name": "package-linux-pie-disabled-legacy-gl-debug",
       "configurePreset": "linux-pie-disabled-legacy-gl-debug",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1284,7 +1284,7 @@
       "name": "package-linux-pie-disabled-legacy-gl-release",
       "configurePreset": "linux-pie-disabled-legacy-gl-release",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1295,7 +1295,7 @@
       "name": "package-macos-pie-enabled-debug",
       "configurePreset": "macos-pie-enabled-debug",
       "displayName": "macOS, PIE Enabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1306,7 +1306,7 @@
       "name": "package-macos-pie-enabled-release",
       "configurePreset": "macos-pie-enabled-release",
       "displayName": "macOS, PIE Enabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1317,7 +1317,7 @@
       "name": "package-macos-pie-disabled-debug",
       "configurePreset": "macos-pie-disabled-debug",
       "displayName": "macOS, PIE Disabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1328,7 +1328,7 @@
       "name": "package-macos-pie-disabled-release",
       "configurePreset": "macos-pie-disabled-release",
       "displayName": "macOS, PIE Disabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1339,7 +1339,7 @@
       "name": "package-macOS-MacPorts-pie-enabled-debug",
       "configurePreset": "macOS-MacPorts-pie-enabled-debug",
       "displayName": "macOS (MacPorts), PIE Enabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1350,7 +1350,7 @@
       "name": "package-macOS-MacPorts-pie-enabled-release",
       "configurePreset": "macOS-MacPorts-pie-enabled-release",
       "displayName": "macOS (MacPorts), PIE Enabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1361,7 +1361,7 @@
       "name": "package-macOS-MacPorts-pie-disabled-debug",
       "configurePreset": "macOS-MacPorts-pie-disabled-debug",
       "displayName": "macOS (MacPorts), PIE Disabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1372,7 +1372,7 @@
       "name": "package-macOS-MacPorts-pie-disabled-release",
       "configurePreset": "macOS-MacPorts-pie-disabled-release",
       "displayName": "macOS (MacPorts), PIE Disabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1383,7 +1383,7 @@
       "name": "package-windows-ninja-pie-enabled-debug",
       "configurePreset": "windows-ninja-pie-enabled-debug",
       "displayName": "Windows, Ninja, PIE Enabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1394,7 +1394,7 @@
       "name": "package-windows-ninja-pie-enabled-release",
       "configurePreset": "windows-ninja-pie-enabled-release",
       "displayName": "Windows, Ninja, PIE Enabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1405,7 +1405,7 @@
       "name": "package-windows-ninja-pie-disabled-debug",
       "configurePreset": "windows-ninja-pie-disabled-debug",
       "displayName": "Windows, Ninja, PIE Disabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1416,7 +1416,7 @@
       "name": "package-windows-ninja-pie-disabled-release",
       "configurePreset": "windows-ninja-pie-disabled-release",
       "displayName": "Windows, Ninja, PIE Disabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1427,7 +1427,7 @@
       "name": "package-VS2019Win64-pie-enabled-debug",
       "configurePreset": "VS2019Win64-pie-enabled-debug",
       "displayName": "VS2019Win64, PIE Enabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1438,7 +1438,7 @@
       "name": "package-VS2019Win64-pie-enabled-release",
       "configurePreset": "VS2019Win64-pie-enabled-release",
       "displayName": "VS2019Win64, PIE Enabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1449,7 +1449,7 @@
       "name": "package-VS2019Win64-pie-disabled-debug",
       "configurePreset": "VS2019Win64-pie-disabled-debug",
       "displayName": "VS2019Win64, PIE Disabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1460,7 +1460,7 @@
       "name": "package-VS2019Win64-pie-disabled-release",
       "configurePreset": "VS2019Win64-pie-disabled-release",
       "displayName": "VS2019Win64, PIE Disabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1471,7 +1471,7 @@
       "name": "package-VS2022Win64-pie-enabled-debug",
       "configurePreset": "VS2022Win64-pie-enabled-debug",
       "displayName": "VS2022Win64, PIE Enabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1482,7 +1482,7 @@
       "name": "package-VS2022Win64-pie-enabled-release",
       "configurePreset": "VS2022Win64-pie-enabled-release",
       "displayName": "VS2022Win64, PIE Enabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1493,7 +1493,7 @@
       "name": "package-VS2022Win64-pie-disabled-debug",
       "configurePreset": "VS2022Win64-pie-disabled-debug",
       "displayName": "VS2022Win64, PIE Disabled, Debug",
-      "configuration": "Debug",
+      "configurations": [ "Debug" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -1504,7 +1504,7 @@
       "name": "package-VS2022Win64-pie-disabled-release",
       "configurePreset": "VS2022Win64-pie-disabled-release",
       "displayName": "VS2022Win64, PIE Disabled, Release",
-      "configuration": "Release",
+      "configurations": [ "Release" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
