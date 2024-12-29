@@ -67,6 +67,6 @@ if ($BuildType -ieq "Debug") {
 
 Push-Location $binaryDir
 
-cpack -V
+cpack -V -C $BuildType
 
 Pop-Location
