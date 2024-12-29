@@ -1328,8 +1328,10 @@ IF (WIN32 AND NOT UNIX)
     SET(CPACK_NSIS_MODIFY_PATH ON)
 
     # NSIS, Wix, and compressed archives (7z, Zip)
-    SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
-    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe" "vega-meshtool.exe" "vegasettings.exe")
+    SET(CPACK_GENERATOR "NSIS")
+    SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packages")
+    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_${CMAKE_SYSTEM_PROCESSOR}")
+    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     MESSAGE(STATUS "Configuring Packaging for macOS")
     # There's a few options for MacOSX; not sure what we want to use
@@ -1338,6 +1340,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     # Bundle -> Compressed Disk Image
     # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
     SET(CPACK_GENERATOR "DragNDrop")
+    SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packages")
+    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_${CMAKE_SYSTEM_PROCESSOR}")
     SET(CPACK_PACKAGE_EXECUTABLES "vegastrike-engine.app/Contents/MacOS/vegastrike-engine")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     MESSAGE(STATUS "Configuring Packaging for Linux")
