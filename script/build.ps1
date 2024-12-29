@@ -1,6 +1,6 @@
 # build.ps1
 
-# Copyright (C) 2021-2023 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2021-2024 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 

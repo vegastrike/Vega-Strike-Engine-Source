@@ -1286,8 +1286,8 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # CMake doesn't support doing symlinks directly; however,
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
-IF (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION bin)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 ELSE()
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
@@ -1315,8 +1315,8 @@ SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERS
 SET(CPACK_SOURCE_GENERATOR "TBZ2" "TXZ")
 
 # See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
-IF (WIN32 AND NOT UNIX)
-    MESSAGE(STATUS "Configuring Packaging for Windows (not fully implemented)")
+IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
+    MESSAGE(STATUS "Configuring Packaging for Windows")
     # NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
     # NSI bug requires at least 1 set of 4 forwards slashes??
     SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
@@ -1324,13 +1324,13 @@ IF (WIN32 AND NOT UNIX)
     SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
     SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\vega-strike.org/about")
-    SET(CPACK_NSIS_CONTACT "TBD@vega-strike.org")
+    SET(CPACK_NSIS_CONTACT "maintainers@vega-strike.org")
     SET(CPACK_NSIS_MODIFY_PATH ON)
 
     # NSIS, Wix, and compressed archives (7z, Zip)
     SET(CPACK_GENERATOR "NSIS")
     SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packages")
-    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_${CMAKE_SYSTEM_PROCESSOR}")
+    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_Windows_${CMAKE_SYSTEM_VERSION}_${CMAKE_SYSTEM_PROCESSOR}")
     SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     MESSAGE(STATUS "Configuring Packaging for macOS")
@@ -1341,7 +1341,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
     SET(CPACK_GENERATOR "DragNDrop")
     SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packages")
-    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_${CMAKE_SYSTEM_PROCESSOR}")
+    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_v${VEGASTRIKE_PKG_VERSION_STR}_macOS_${CMAKE_SYSTEM_VERSION}_${CMAKE_SYSTEM_PROCESSOR}")
     SET(CPACK_PACKAGE_EXECUTABLES "vegastrike-engine.app/Contents/MacOS/vegastrike-engine")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     MESSAGE(STATUS "Configuring Packaging for Linux")
@@ -1660,7 +1660,7 @@ ELSE ()
     MESSAGE(STATUS "Configuring Packaging for Unknown Platform - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
-ENDIF (WIN32 AND NOT UNIX)
+ENDIF ()
 
 INCLUDE(CPack)
 
@@ -1673,7 +1673,7 @@ IF (INSTALL_GTEST)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.11.0
+        GIT_TAG        v1.15.2
     )
 
     FetchContent_GetProperties(googletest)

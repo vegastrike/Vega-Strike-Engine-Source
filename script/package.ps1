@@ -1,6 +1,6 @@
-# test.ps1
+# package.ps1
 
-# Copyright (C) 2023-2024 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2024 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -13,18 +13,27 @@
 
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
-
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 param(
     [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
     [Boolean]$EnablePIE = $false,
-    [String]$BuildType = "Release" # You can also specify "Debug"
+    [String]$BuildType = "Release", # You can also specify "Debug"
+    [String]$GitTag = "not-applicable", # Git Tag, default empty string for PR builds
+    [String]$GitSha = "not-applicable"  # Git Short SHA Reference, default empty string for PR builds
 )
+
+# Hack around PowerShell not allowing empty string parameters
+if ($GitTag -ieq "not-applicable") {
+    $GitTag = ""
+}
+if ($GitSha -ieq "not-applicable" ) {
+    $GitSha = ""
+}
 
 [String]$cmakePresetName = ""
 if ($Generator -ieq "Ninja") {
@@ -57,5 +66,5 @@ if ($BuildType -ieq "Debug") {
 [String]$binaryDir = "$baseDir\build\$cmakePresetName"
 
 Push-Location $baseDir\engine
-ctest -V --preset "test-$cmakePresetName"
+cpack -V --preset "package-$cmakePresetName"
 Pop-Location
