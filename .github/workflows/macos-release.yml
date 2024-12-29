@@ -26,14 +26,14 @@ jobs:
           - macos-13
           # - macos-14
         compiler:
-          - clang
+          # - clang
           - gcc
         homebrew-gl:
           - true
           # - false
         homebrew-al:
           - true
-          - false
+          # - false
 
     steps:
 
