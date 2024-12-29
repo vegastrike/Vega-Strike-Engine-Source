@@ -123,8 +123,8 @@ jobs:
           path: ${{github.workspace}}/build/test-results/**/*.xml
 
       - name: Package the installer(s)
-        working-directory: ${{github.workspace}}/build
-        run: cpack -V
+        working-directory: ${{ github.workspace }}
+        run: .\script\package.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -GitTag ${{ env.TAG_NAME }} -GitSha ${{ env.SHORT_SHA }}
 
       - name: Upload the artifacts
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
