@@ -1324,7 +1324,7 @@ IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
     SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
     SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\vega-strike.org/about")
-    SET(CPACK_NSIS_CONTACT "TBD@vega-strike.org")
+    SET(CPACK_NSIS_CONTACT "maintainers@vega-strike.org")
     SET(CPACK_NSIS_MODIFY_PATH ON)
 
     # NSIS, Wix, and compressed archives (7z, Zip)
