@@ -1,6 +1,6 @@
 # test.ps1
 
-# Copyright (C) 2023 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2023-2024 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -55,6 +55,7 @@ if ($BuildType -ieq "Debug") {
 
 [String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
 [String]$binaryDir = "$baseDir\build\$cmakePresetName"
-Push-Location $binaryDir
-ctest -V -C $BuildType
+
+Push-Location $baseDir\engine
+ctest -V --preset "test-$cmakePresetName"
 Pop-Location

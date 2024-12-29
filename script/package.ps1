@@ -65,8 +65,6 @@ if ($BuildType -ieq "Debug") {
 [String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
 [String]$binaryDir = "$baseDir\build\$cmakePresetName"
 
-Push-Location $binaryDir
-
-cpack -V -C $BuildType
-
+Push-Location $baseDir\engine
+cpack -V --preset "package-$cmakePresetName"
 Pop-Location
