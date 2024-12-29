@@ -1286,8 +1286,8 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # CMake doesn't support doing symlinks directly; however,
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
-IF (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION bin)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 ELSE()
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
