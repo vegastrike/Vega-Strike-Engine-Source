@@ -1678,20 +1678,12 @@ IF (INSTALL_GTEST)
         GIT_TAG        v1.15.2
     )
 
-    FetchContent_GetProperties(googletest)
-    STRING(TOLOWER "googletest" lcName)
-    IF(NOT ${lcName}_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(googletest)
+    # Set custom variables, policies, etc.
 
-        # Set custom variables, policies, etc.
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-        # For Windows: Prevent overriding the parent project's compiler/linker settings
-        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-        # Bring the populated content into the build
-        ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-    ENDIF(NOT ${lcName}_POPULATED)
+    FetchContent_MakeAvailable(googletest)
 ENDIF (INSTALL_GTEST)
 
 IF (USE_GTEST)
