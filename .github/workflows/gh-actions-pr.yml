@@ -36,26 +36,6 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: true
-          - FROM:     'ubuntu:mantic'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'OFF'
-            allow_failure: true
-          - FROM:     'ubuntu:mantic'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'OFF'
-            allow_failure: true
-          - FROM:     'ubuntu:mantic'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: true
-          - FROM:     'ubuntu:mantic'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: true
           - FROM:     'ubuntu:jammy'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
@@ -96,24 +76,14 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
-          - FROM:     'debian:bullseye'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'OFF'
-            allow_failure: false
-          - FROM:     'opensuse/leap:15.6'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-            ENABLE_PIE: 'ON'
-            allow_failure: true
           - FROM:     'opensuse/leap:15.6'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'opensuse/leap:15.5'
+          - FROM:     'opensuse/leap:15.6'
             COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
+            OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
           - FROM:     'opensuse/leap:15.5'
@@ -126,27 +96,22 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
-          - FROM:     'fedora:40'
+          - FROM:     'fedora:41'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
             ENABLE_PIE: 'ON'
             allow_failure: true
+          - FROM:     'fedora:41'
+            COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
           - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
-          - FROM:     'fedora:39'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: false
-          - FROM:     'fedora:38'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-            ENABLE_PIE: 'ON'
-            allow_failure: false
-          - FROM:     'rockylinux:9.4'
+          - FROM:     'rockylinux:9.5'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
