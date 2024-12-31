@@ -7,7 +7,7 @@
 #====================================
 
 echo "--------------------------"
-echo "--- clean | 2020-08-17 ---"
+echo "--- clean | 2024-12-30 ---"
 echo "--------------------------"
 echo "!!!warning!!! for strict developer use"
 echo "--------------------------"
@@ -24,7 +24,7 @@ SRC_DIR=$ROOT_DIR/engine
 
 # delete build directory
 echo "deleting build directory ($BUILD_DIR)"
-rm -r $BUILD_DIR
+rm -rf $BUILD_DIR
 
 # delete .pyc files
 echo "deleting compiled python files (*.pyc)"
