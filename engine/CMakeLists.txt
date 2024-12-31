@@ -1281,23 +1281,25 @@ MARK_AS_ADVANCED(FORCE
     vorbis_LIBRARY
     vorbisfile_LIBRARY
 )
-INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 
 # CMake doesn't support doing symlinks directly; however,
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION bin)
+    INSTALL(TARGETS vegastrike-engine RUNTIME_DEPENDENCIES RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION ${CMAKE_INSTALL_BINDIR})
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    INSTALL(TARGETS vegastrike-engine RUNTIME_DEPENDENCIES RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 ELSE()
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+    INSTALL(TARGETS vegastrike-engine RUNTIME_DEPENDENCIES RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION ${CMAKE_INSTALL_BINDIR})
 ENDIF ()
 
 
 ADD_SUBDIRECTORY("../doc" "./doc")
 
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
-INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT Libraries)
+INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Libraries)
 
 SET(CPACK_PACKAGE_NAME "Vega-Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
