@@ -1305,7 +1305,7 @@ ENDIF ()
 ADD_SUBDIRECTORY("../doc" "./doc")
 
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
-INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT system_libraries REQUIRED)
+INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT system_libraries)
 
 IF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     SET(CPACK_COMPONENTS_ALL vegastrike_engine system_libraries objconv docs man vegasettings)
