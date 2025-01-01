@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2001-2024 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -1298,7 +1298,7 @@ IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
     INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CPACK_BUILD_CONFIG}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine BUNDLE DESTINATION Applications)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine BUNDLE DESTINATION "${CMAKE_OSX_APPLICATIONS_DIR}/VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
