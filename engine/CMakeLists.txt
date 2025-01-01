@@ -31,11 +31,18 @@
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
+
+IF (POLICY CMP0087)
+    cmake_policy(SET CMP0087 NEW)
+ENDIF ()
+SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 
 IF (POLICY CMP0167)
     CMAKE_POLICY (SET CMP0167 OLD)
 ENDIF (POLICY CMP0167)
+
+SET(CPACK_BUILD_CONFIG ${CMAKE_BUILD_TYPE})
 
 SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "9")
@@ -1281,23 +1288,79 @@ MARK_AS_ADVANCED(FORCE
     vorbis_LIBRARY
     vorbisfile_LIBRARY
 )
-INSTALL(TARGETS vegastrike-engine DESTINATION bin)
+
+INCLUDE(GNUInstallDirs)
 
 # CMake doesn't support doing symlinks directly; however,
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION bin)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CPACK_BUILD_CONFIG}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-ELSE()
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine BUNDLE DESTINATION Applications)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL BEOS)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ELSE ()
+    MESSAGE(SEND_WARNING "Unsupported platform; we don't know how to package Vega Strike for you")
 ENDIF ()
-
 
 ADD_SUBDIRECTORY("../doc" "./doc")
 
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
-INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT Libraries)
+INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
+
+IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
+    FILE(GLOB_RECURSE OurDependencies FOLLOW_SYMLINKS LIST_DIRECTORIES false
+            ${CMAKE_SOURCE_DIR}/../*.dll
+            ${CMAKE_SOURCE_DIR}/../bin/*.dll
+            ${CMAKE_SOURCE_DIR}/*.dll
+            ${CMAKE_SOURCE_DIR}/bin/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/bin/*.dll)
+    INSTALL(FILES ${OurDependencies} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
+ENDIF ()
+
+IF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    SET(CPACK_COMPONENTS_ALL vegastrike_engine system_libraries objconv docs man vegasettings)
+    SET(CPACK_COMPONENT_VEGASTRIKE_ENGINE_DISPLAY_NAME "The Vega Strike Game Engine")
+    SET(CPACK_COMPONENT_SYSTEM_LIBRARIES_DISPLAY_NAME "Required system runtime libraries")
+    SET(CPACK_COMPONENT_OBJCONV_DISPLAY_NAME "3D Object conversion/editing utilities")
+    SET(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Game documentation files")
+    SET(CPACK_COMPONENT_MAN_DISPLAY_NAME "Game manual (man) pages")
+    SET(CPACK_COMPONENT_VEGASETTINGS_DISPLAY_NAME "Game settings editor")
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Windows)
+    SET(CPACK_COMPONENTS_ALL vegastrike_engine vegastrike_alias system_libraries objconv docs man)
+    SET(CPACK_COMPONENT_VEGASTRIKE_ENGINE_DISPLAY_NAME "The Vega Strike Game Engine")
+    SET(CPACK_COMPONENT_VEGASTRIKE_ALIAS_DISPLAY_NAME "Shorter, backwards-compatible alias for vegastrike-engine.exe: 'vegastrike.exe'")
+    SET(CPACK_COMPONENT_SYSTEM_LIBRARIES_DISPLAY_NAME "Required system runtime libraries")
+    SET(CPACK_COMPONENT_OBJCONV_DISPLAY_NAME "3D Object conversion/editing utilities")
+    SET(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Game documentation files")
+    SET(CPACK_COMPONENT_MAN_DISPLAY_NAME "Game manual (man) pages")
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    SET(CPACK_COMPONENTS_ALL vegastrike_engine vegastrike_alias system_libraries objconv docs man vegasettings)
+    SET(CPACK_COMPONENT_VEGASTRIKE_ENGINE_DISPLAY_NAME "The Vega Strike Game Engine")
+    SET(CPACK_COMPONENT_VEGASTRIKE_ALIAS_DISPLAY_NAME "Shorter, backwards-compatible alias for the vegastrike-engine executable: 'vegastrike'")
+    SET(CPACK_COMPONENT_SYSTEM_LIBRARIES_DISPLAY_NAME "Required system runtime libraries")
+    SET(CPACK_COMPONENT_OBJCONV_DISPLAY_NAME "3D Object conversion/editing utilities")
+    SET(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Game documentation files")
+    SET(CPACK_COMPONENT_MAN_DISPLAY_NAME "Game manual (man) pages")
+    SET(CPACK_COMPONENT_VEGASETTINGS_DISPLAY_NAME "Game settings editor")
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL BEOS)
+    SET(CPACK_COMPONENTS_ALL vegastrike_engine system_libraries objconv docs man)
+    SET(CPACK_COMPONENT_VEGASTRIKE_ENGINE_DISPLAY_NAME "The Vega Strike Game Engine")
+    SET(CPACK_COMPONENT_SYSTEM_LIBRARIES_DISPLAY_NAME "Required system runtime libraries")
+    SET(CPACK_COMPONENT_OBJCONV_DISPLAY_NAME "3D Object conversion/editing utilities")
+    SET(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Game documentation files")
+    SET(CPACK_COMPONENT_MAN_DISPLAY_NAME "Game manual (man) pages")
+ELSE ()
+    MESSAGE(SEND_WARNING "Unsupported platform; we don't know what components to install")
+ENDIF ()
 
 SET(CPACK_PACKAGE_NAME "Vega-Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
@@ -1662,6 +1725,8 @@ ELSE ()
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
 ENDIF ()
 
+SET(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
+
 INCLUDE(CPack)
 
 IF (INSTALL_GTEST OR USE_GTEST)
@@ -1676,20 +1741,12 @@ IF (INSTALL_GTEST)
         GIT_TAG        v1.15.2
     )
 
-    FetchContent_GetProperties(googletest)
-    STRING(TOLOWER "googletest" lcName)
-    IF(NOT ${lcName}_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(googletest)
+    # Set custom variables, policies, etc.
 
-        # Set custom variables, policies, etc.
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-        # For Windows: Prevent overriding the parent project's compiler/linker settings
-        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-        # Bring the populated content into the build
-        ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-    ENDIF(NOT ${lcName}_POPULATED)
+    FetchContent_MakeAvailable(googletest)
 ENDIF (INSTALL_GTEST)
 
 IF (USE_GTEST)

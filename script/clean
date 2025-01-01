@@ -7,7 +7,7 @@
 #====================================
 
 echo "--------------------------"
-echo "--- clean | 2020-08-17 ---"
+echo "--- clean | 2025-01-01 ---"
 echo "--------------------------"
 echo "!!!warning!!! for strict developer use"
 echo "--------------------------"
@@ -23,12 +23,15 @@ DATA_DIR=$ROOT_DIR/data
 SRC_DIR=$ROOT_DIR/engine
 
 # delete build directory
-echo "deleting build directory ($BUILD_DIR)"
-rm -r $BUILD_DIR
+if [ -n "$BUILD_DIR" ] && [ "$BUILD_DIR" != "/" ]
+then
+  echo "deleting build directory ($BUILD_DIR)"
+  rm -rf "$BUILD_DIR"
+fi
 
 # delete .pyc files
 echo "deleting compiled python files (*.pyc)"
-find $DATA_DIR -name "*.pyc" -delete
+find "$DATA_DIR" -name "*.pyc" -delete
 
 # delete home vegastrike config
 echo "deleting home vegastrike.config"
