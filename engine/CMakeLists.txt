@@ -42,6 +42,8 @@ IF (POLICY CMP0167)
     CMAKE_POLICY (SET CMP0167 OLD)
 ENDIF (POLICY CMP0167)
 
+SET(CPACK_BUILD_CONFIG ${CMAKE_BUILD_TYPE})
+
 SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "9")
 SET(VEGASTRIKE_VERSION_PATCH "0")
@@ -1294,7 +1296,7 @@ INCLUDE(GNUInstallDirs)
 # the executable a second time using a different name.
 IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
     INSTALL(TARGETS vegastrike-engine DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_engine RUNTIME)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CPACK_BUILD_CONFIG}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     INSTALL(TARGETS vegastrike-engine DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_engine BUNDLE)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -1306,54 +1308,21 @@ ELSE ()
     MESSAGE(SEND_WARNING "Unsupported platform; we don't know how to package Vega Strike for you")
 ENDIF ()
 
-
 ADD_SUBDIRECTORY("../doc" "./doc")
 
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
 INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
 
-INSTALL(CODE [[
-    FILE(GLOB_RECURSE OurDependencies FOLLOW_SYMLINKS LIST_DIRECTORIES false ../*.(dll|pdb|exp|lib))
-    INSTALL(FILES ${OurDependencies} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
-]])
-
-
-install(CODE [[
-  function(install_library_with_deps LIBRARY)
-    file(INSTALL
-      DESTINATION "${CMAKE_INSTALL_BINDIR}"
-      TYPE SHARED_LIBRARY
-      FOLLOW_SYMLINK_CHAIN
-      FILES "${LIBRARY}"
-    )
-    file(GET_RUNTIME_DEPENDENCIES
-      LIBRARIES ${LIBRARY}
-      RESOLVED_DEPENDENCIES_VAR RESOLVED_DEPS
-      UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED_DEPS
-      PRE_EXCLUDE_REGEXES "api-ms-win-*.dll" "ext-ms-*.dll"
-    )
-    foreach(FILE ${RESOLVED_DEPS})
-      if(NOT IS_SYMLINK ${FILE})
-        install_library_with_deps(${FILE})
-      endif()
-    endforeach()
-    foreach(FILE ${UNRESOLVED_DEPS})
-      message(STATUS "Unresolved from ${LIBRARY}: ${FILE}")
-    endforeach()
-  endfunction()
-  file(GET_RUNTIME_DEPENDENCIES
-    EXECUTABLES  $<TARGET_FILE:vegastrike-engine>
-    RESOLVED_DEPENDENCIES_VAR RESOLVED_DEPS
-    UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED_DEPS
-    PRE_EXCLUDE_REGEXES "api-ms-win-*.dll" "ext-ms-*.dll"
-  )
-  foreach(FILE ${RESOLVED_DEPS})
-    install_library_with_deps(${FILE})
-  endforeach()
-  foreach(FILE ${UNRESOLVED_DEPS})
-    message(STATUS "Unresolved: ${FILE}")
-  endforeach()
-]])
+FILE(GLOB_RECURSE OurDependencies FOLLOW_SYMLINKS LIST_DIRECTORIES false
+        ${CMAKE_SOURCE_DIR}/../*.dll
+        ${CMAKE_SOURCE_DIR}/../bin/*.dll
+        ${CMAKE_SOURCE_DIR}/*.dll
+        ${CMAKE_SOURCE_DIR}/bin/*.dll
+        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/*.dll
+        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/*.dll
+        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/*.dll
+        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/bin/*.dll)
+INSTALL(FILES ${OurDependencies} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
 
 IF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     SET(CPACK_COMPONENTS_ALL vegastrike_engine system_libraries objconv docs man vegasettings)
