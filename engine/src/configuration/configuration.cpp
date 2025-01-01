@@ -37,59 +37,9 @@
 #include <stdio.h> 
 
 
-std::string GetString(std::string json_string, const std::string key, bool trim = true) {
-    // parse the JSON data
-    boost::json::value json_value = boost::json::parse(json_string);
-    boost::json::object root = json_value.get_object();
 
-    // key can be a set of keys delimited by `|` so traverse
-    // the JSON structure through the list of keys
-    // boost::json support using `/` as a delimiter though
-    std::vector<std::string> key_sections;
-    boost::split(key_sections, key, boost::is_any_of("|"));
 
-    // rebuild the key_sections as a list using `/` per Boost::JSON
-    std::string new_key = boost::algorithm::join(key_sections, "/");
 
-    std::string value = JsonGetStringWithDefault(root, new_key, "");
-
-    // optionally trim the value
-    if (!trim) {
-        return value;
-    }
-
-    // trim off any whitespace from the start or end
-    const auto whitespace = " \t\n\r\f\v";
-    const signed long int start = value.find_first_not_of(whitespace);
-    const signed long int the_start = 0;
-    const signed long int end = value.find_last_not_of(whitespace);
-    const signed long int the_end = value.length();
-    return value.substr(std::max(start, the_start), std::min(end, the_end));
-}
-
-bool GetBool(std::string json_string, const std::string key, bool default_value) {
-        std::string result = GetString(json_string, key, false);
-        if(result == "") {
-                return default_value;
-        } else {
-                return result == "true";
-        }
-}
-
-double GetDouble(std::string json_string, const std::string key, double default_value) {
-        std::string result = GetString(json_string, key, false);
-        if(result == "") {
-                return default_value;
-        } else {
-                try {
-                        return std::stod(result);
-                } catch(...) {
-                        std::cout << "Not a double: " << result << std::endl;
-                        abort();
-                }
-                
-        }
-}
 
 using vega_config::GetGameConfig;
 
@@ -101,9 +51,12 @@ Configuration::Configuration() {
     if(!ifs.fail()) {
         buffer << ifs.rdbuf();
         const std::string json_text = buffer.str();
-        graphics2_config = Graphics2Config(json_text);
-        game_start = vega_config::GameStart(json_text);
-        fuel = vega_config::Fuel(json_text);
+        boost::json::value json_value = boost::json::parse(json_text);
+        boost::json::object object = json_value.get_object();
+
+        graphics2_config = Graphics2Config(object);
+        game_start = vega_config::GameStart(object);
+        fuel = vega_config::Fuel(object);
     }
 }
 
@@ -491,16 +444,16 @@ vega_config::Fuel::Fuel() :
         reactor_uses_fuel(false) {
 }
 
-vega_config::Fuel::Fuel(const std::string config) {
-    fuel_equals_warp = GetBool(config, "components|fuel|fuel_equals_warp", false);
-    fuel_factor = GetDouble(config, "components|fuel|factor", 1.0);
-    energy_factor = GetDouble(config, "components|energy|factor", 1.0);
-    ftl_energy_factor = GetDouble(config, "components|ftl_energy|factor", 1.0);
+vega_config::Fuel::Fuel(boost::json::object object) {
+    fuel_equals_warp = GetBool(object, "components|fuel|fuel_equals_warp", false);
+    fuel_factor = GetDouble(object, "components|fuel|factor", 1.0);
+    energy_factor = GetDouble(object, "components|energy|factor", 1.0);
+    ftl_energy_factor = GetDouble(object, "components|ftl_energy|factor", 1.0);
     
-    reactor_factor = GetDouble(config, "components|reactor|factor", 1.0);
+    reactor_factor = GetDouble(object, "components|reactor|factor", 1.0);
 
-    ftl_drive_factor = GetDouble(config, "components|ftl_drive|factor", 1.0);
-    jump_drive_factor = GetDouble(config, "components|jump_drive|factor", 1.0);
+    ftl_drive_factor = GetDouble(object, "components|ftl_drive|factor", 1.0);
+    jump_drive_factor = GetDouble(object, "components|jump_drive|factor", 1.0);
 }
 
 vega_config::PhysicsConfig::PhysicsConfig() :
@@ -524,9 +477,9 @@ vega_config::GameStart::GameStart() :
         introduction("") {
 }
 
-vega_config::GameStart::GameStart(const std::string config) {
-    default_mission = GetString(config, "game_start|default_mission");
-    introduction = GetString(config, "game_start|introduction");
+vega_config::GameStart::GameStart(boost::json::object object) {
+    default_mission = JsonGetStringWithDefault(object, "game_start|default_mission", "");
+    introduction = JsonGetStringWithDefault(object, "game_start|introduction", "");
 }
 
 std::shared_ptr<Configuration> configuration() {

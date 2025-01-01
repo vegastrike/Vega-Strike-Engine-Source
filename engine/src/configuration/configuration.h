@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <boost/json.hpp>
 
 #include "components/energy_consumer.h"
 
@@ -198,7 +199,7 @@ struct Fuel {
     double minimum_drive{0.15};
 
     Fuel();
-    Fuel(const std::string config);
+    Fuel(boost::json::object object);
 };
 
 struct HudConfig {
@@ -458,7 +459,7 @@ struct GameStart {
     std::string introduction;
 
     GameStart();
-    GameStart(const std::string config);
+    GameStart(boost::json::object object);
 };
 
 }
