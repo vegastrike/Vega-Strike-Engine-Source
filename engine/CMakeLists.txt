@@ -1295,15 +1295,15 @@ INCLUDE(GNUInstallDirs)
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
-    INSTALL(TARGETS vegastrike-engine DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_engine RUNTIME)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CPACK_BUILD_CONFIG}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    INSTALL(TARGETS vegastrike-engine DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_engine BUNDLE)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine BUNDLE DESTINATION Applications)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    INSTALL(TARGETS vegastrike-engine DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_engine RUNTIME)
+    INSTALL(TARGETS vegastrike-engineCOMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_alias)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL BEOS)
-    INSTALL(TARGETS vegastrike-engine DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegastrike_engine RUNTIME)
+    INSTALL(TARGETS vegastrike-engine COMPONENT vegastrike_engine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 ELSE ()
     MESSAGE(SEND_WARNING "Unsupported platform; we don't know how to package Vega Strike for you")
 ENDIF ()
@@ -1313,16 +1313,18 @@ ADD_SUBDIRECTORY("../doc" "./doc")
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
 INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
 
-FILE(GLOB_RECURSE OurDependencies FOLLOW_SYMLINKS LIST_DIRECTORIES false
-        ${CMAKE_SOURCE_DIR}/../*.dll
-        ${CMAKE_SOURCE_DIR}/../bin/*.dll
-        ${CMAKE_SOURCE_DIR}/*.dll
-        ${CMAKE_SOURCE_DIR}/bin/*.dll
-        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/*.dll
-        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/*.dll
-        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/*.dll
-        ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/bin/*.dll)
-INSTALL(FILES ${OurDependencies} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
+IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
+    FILE(GLOB_RECURSE OurDependencies FOLLOW_SYMLINKS LIST_DIRECTORIES false
+            ${CMAKE_SOURCE_DIR}/../*.dll
+            ${CMAKE_SOURCE_DIR}/../bin/*.dll
+            ${CMAKE_SOURCE_DIR}/*.dll
+            ${CMAKE_SOURCE_DIR}/bin/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/*.dll
+            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/${CPACK_BUILD_CONFIG}/bin/*.dll)
+    INSTALL(FILES ${OurDependencies} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT system_libraries)
+ENDIF ()
 
 IF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     SET(CPACK_COMPONENTS_ALL vegastrike_engine system_libraries objconv docs man vegasettings)
