@@ -1,7 +1,7 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
 # Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -23,13 +23,13 @@
 #
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
 
 INCLUDE(GNUInstallDirs)
 MESSAGE("Always using preferred method now to install doc files")
-INSTALL(FILES AUTHORS TYPE DOC RENAME AUTHORS.SF)
-INSTALL(FILES "${PROJECT_SOURCE_DIR}/../AUTHORS" TYPE DOC RENAME AUTHORS.GITHUB)
-INSTALL(FILES ChangeLog TYPE DOC)
+INSTALL(FILES AUTHORS TYPE DOC RENAME AUTHORS.SF COMPONENT docs)
+INSTALL(FILES "${PROJECT_SOURCE_DIR}/../AUTHORS" TYPE DOC RENAME AUTHORS.GITHUB COMPONENT docs)
+INSTALL(FILES ChangeLog TYPE DOC COMPONENT docs)
 
 ADD_SUBDIRECTORY(man)
 

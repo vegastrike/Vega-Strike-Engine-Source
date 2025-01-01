@@ -1,7 +1,7 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
 # Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -23,7 +23,7 @@
 #
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
 
 #SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
 INCLUDE_DIRECTORIES("..")
@@ -110,4 +110,8 @@ IF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
 ENDIF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
 
 TARGET_LINK_LIBRARIES(vega-meshtool ${MSH_LIBS})
-INSTALL(TARGETS vega-meshtool DESTINATION bin)
+
+INSTALL(TARGETS vs-buildenv-trisort COMPONENT objconv RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+INSTALL(TARGETS vs-buildenv-asteroidgen COMPONENT objconv RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+INSTALL(TARGETS vs-buildenv-replace COMPONENT objconv RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+INSTALL(TARGETS vega-meshtool COMPONENT objconv RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

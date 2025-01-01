@@ -1,6 +1,6 @@
 # bootstrap.ps1
 
-# Copyright (C) 2021-2023 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2021-2024 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -41,14 +41,10 @@ $newPath = $path + ";$VCPKG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-wi
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
 $env:PATH = $newPath
 
-$triplet = 'x64-windows'
+$triplet = 'x64-windows-win10'
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', $triplet, 'User')
 $env:VCPKG_DEFAULT_TRIPLET = $triplet
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', $triplet, 'User')
 $env:VCPKG_DEFAULT_HOST_TRIPLET = $triplet
-
-$pythonHome = "$VCPKG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
-[Environment]::SetEnvironmentVariable('PYTHONHOME', $pythonHome, 'User')
-$env:PYTHONHOME = $pythonHome
 
 Pop-Location

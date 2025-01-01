@@ -1,7 +1,7 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
 # Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -23,13 +23,13 @@
 #
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
 
 IF (UNIX)
 	MESSAGE("Always using preferred method now to install man pages")
-	INSTALL(FILES vegastrike-engine.1 TYPE MAN)
-	INSTALL(FILES vegastrike-engine.1 TYPE MAN RENAME vegastrike.1)
-	INSTALL(FILES vsinstall.1 TYPE MAN)
-	INSTALL(FILES vslauncher.1 TYPE MAN)
-	INSTALL(FILES vegasettings.1 TYPE MAN)
+	INSTALL(FILES vegastrike-engine.1 TYPE MAN COMPONENT man)
+	INSTALL(FILES vegastrike-engine.1 TYPE MAN RENAME vegastrike.1 COMPONENT man)
+	INSTALL(FILES vsinstall.1 TYPE MAN COMPONENT man)
+	INSTALL(FILES vslauncher.1 TYPE MAN COMPONENT man)
+	INSTALL(FILES vegasettings.1 TYPE MAN COMPONENT man)
 ENDIF (UNIX)
