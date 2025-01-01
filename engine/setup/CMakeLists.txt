@@ -1,7 +1,7 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
 # Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -23,9 +23,11 @@
 #
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
 
-IF ((NOT BEOS) AND (NOT WIN32))
+IF (CMAKE_SYSTEM_NAME STREQUAL BEOS OR CMAKE_SYSTEM_NAME STREQUAL Windows)
+	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	#SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
 	SET(VEGASETTINGS_SOURCES
 		src/c/setup.cpp
@@ -39,8 +41,6 @@ IF ((NOT BEOS) AND (NOT WIN32))
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
 	target_compile_definitions(vegasettings PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
-
-	INSTALL(TARGETS vegasettings DESTINATION bin)
 
 	#find GTK3
 	FIND_PACKAGE(GTK3 3.0 REQUIRED gtk)
@@ -59,6 +59,41 @@ IF ((NOT BEOS) AND (NOT WIN32))
         ${GTK3_INCLUDE_DIRS}
     )
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
-ELSE ((NOT BEOS) AND (NOT WIN32))
+
+	INSTALL(TARGETS vegasettings DESTINATION bin RUNTIME_DEPENDENCIES COMPONENT vegasettings)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
+	SET(VEGASETTINGS_SOURCES
+			src/c/setup.cpp
+			src/include/central.cpp
+			src/include/display_gtk.cpp
+			src/include/display_dialog.cpp
+			src/include/file.cpp
+			src/include/general.cpp
+			../src/common/common.cpp
+	)
+
+	ADD_EXECUTABLE(vegasettings MACOSX_BUNDLE ${VEGASETTINGS_SOURCES})
+	target_compile_definitions(vegasettings PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+
+	#find GTK3
+	FIND_PACKAGE(GTK3 3.0 REQUIRED gtk)
+	IF(GTK3_FOUND)
+		SET(GTK_LIBS ${GTK3_LIBRARIES})
+		SET(GTK_CFLAGS ${GTK3_DEFINITIONS} -DGTK)
+	ELSE(GTK3_FOUND)
+		MESSAGE("Did not find GTK3")
+	ENDIF(GTK3_FOUND)
+
+	ADD_DEFINITIONS(${GTK_CFLAGS})
+	INCLUDE_DIRECTORIES(
+			${Vega_Strike_SOURCE_DIR}/setup/src/include
+			${Vega_Strike_SOURCE_DIR}/src/common
+			${Vega_Strike_BINARY_DIR}
+			${GTK3_INCLUDE_DIRS}
+	)
+	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
+
+	INSTALL(BUNDLE vegasettings DESTINATION bin RUNTIME_DEPENDENCIES COMPONENT vegasettings)
+ELSE ()
 	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
-ENDIF ((NOT BEOS) AND (NOT WIN32))
+ENDIF ()
