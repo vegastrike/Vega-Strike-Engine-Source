@@ -8,12 +8,9 @@
 
 
 // TODO: delete this. Graphics2Config should be generated automatically from config.json
-Graphics2Config::Graphics2Config(const std::string config) {
-    boost::json::value json_value = boost::json::parse(config);
-    boost::json::object root = json_value.get_object();
-
-    if (root.if_contains("graphics")) {
-        boost::json::object graphics = root.at("graphics").get_object();
+Graphics2Config::Graphics2Config(boost::json::object object) {
+    if (object.if_contains("graphics")) {
+        boost::json::object graphics = object.at("graphics").get_object();
         ConditionalJsonGet(graphics, screen, "screen");
         ConditionalJsonGet(graphics, resolution_x, "resolution_x");
         ConditionalJsonGet(graphics, resolution_y, "resolution_y");

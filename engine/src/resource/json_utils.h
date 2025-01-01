@@ -50,8 +50,18 @@ const T JsonGetWithDefault(boost::json::object object,
     return default_value;
 }
 
+
+
+// This function supports multi-level key
 const std::string JsonGetStringWithDefault(boost::json::object object, 
                                            const std::string& key, 
                                            const char* default_value);
+
+// This function supports multi-level key
+const boost::json::value JsonGetValue(boost::json::object object, 
+                                      const std::string& key);
+
+bool GetBool(boost::json::object object, const std::string key, bool default_value);
+double GetDouble(boost::json::object object, const std::string key, double default_value);
 
 #endif //VEGA_STRIKE_ENGINE_RESOURCE_JSON_UTILS_H
