@@ -1288,15 +1288,15 @@ INCLUDE(GNUInstallDirs)
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (CMAKE_SYSTEM_NAME STREQUAL Windows)
-    INSTALL(TARGETS vegastrike-engine DESTINATION bin RUNTIME_DEPENDENCIES COMPONENT vegastrike_engine RUNTIME)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION bin COMPONENT vegastrike_alias FILE)
+    INSTALL(TARGETS vegastrike-engine DESTINATION bin COMPONENT vegastrike_engine RUNTIME)
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/vegastrike-engine.exe" RENAME vegastrike.exe DESTINATION bin COMPONENT vegastrike_alias)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    INSTALL(TARGETS vegastrike-engine DESTINATION bin RUNTIME_DEPENDENCIES COMPONENT vegastrike_engine BUNDLE)
+    INSTALL(TARGETS vegastrike-engine DESTINATION bin COMPONENT vegastrike_engine BUNDLE)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    INSTALL(TARGETS vegastrike-engine DESTINATION bin RUNTIME_DEPENDENCIES COMPONENT vegastrike_engine RUNTIME)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin COMPONENT vegastrike_alias FILE)
+    INSTALL(TARGETS vegastrike-engine DESTINATION bin COMPONENT vegastrike_engine RUNTIME)
+    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin COMPONENT vegastrike_alias)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL BEOS)
-    INSTALL(TARGETS vegastrike-engine DESTINATION bin RUNTIME_DEPENDENCIES COMPONENT vegastrike_engine RUNTIME)
+    INSTALL(TARGETS vegastrike-engine DESTINATION bin COMPONENT vegastrike_engine RUNTIME)
 ELSE ()
     MESSAGE(SEND_WARNING "Unsupported platform; we don't know how to package Vega Strike for you")
 ENDIF ()
@@ -1306,6 +1306,43 @@ ADD_SUBDIRECTORY("../doc" "./doc")
 
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
 INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT system_libraries)
+
+install(CODE [[
+  function(install_library_with_deps LIBRARY)
+    file(INSTALL
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
+      TYPE SHARED_LIBRARY
+      FOLLOW_SYMLINK_CHAIN
+      FILES "${LIBRARY}"
+    )
+    file(GET_RUNTIME_DEPENDENCIES
+      LIBRARIES ${LIBRARY}
+      RESOLVED_DEPENDENCIES_VAR RESOLVED_DEPS
+      UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED_DEPS
+      PRE_EXCLUDE_REGEXES "^api\-ms\-win\-.*\.dll$" "^ext\-ms\-.*\.dll$"
+    )
+    foreach(FILE ${RESOLVED_DEPS})
+      if(NOT IS_SYMLINK ${FILE})
+        install_library_with_deps(${FILE})
+      endif()
+    endforeach()
+    foreach(FILE ${UNRESOLVED_DEPS})
+      message(STATUS "Unresolved from ${LIBRARY}: ${FILE}")
+    endforeach()
+  endfunction()
+  file(GET_RUNTIME_DEPENDENCIES
+    EXECUTABLES  $<TARGET_FILE:vegastrike-engine>
+    RESOLVED_DEPENDENCIES_VAR RESOLVED_DEPS
+    UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED_DEPS
+    PRE_EXCLUDE_REGEXES "^api\-ms\-win\-.*\.dll$" "^ext\-ms\-.*\.dll$"
+  )
+  foreach(FILE ${RESOLVED_DEPS})
+    install_library_with_deps(${FILE})
+  endforeach()
+  foreach(FILE ${UNRESOLVED_DEPS})
+    message(STATUS "Unresolved: ${FILE}")
+  endforeach()
+]])
 
 IF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
     SET(CPACK_COMPONENTS_ALL vegastrike_engine system_libraries objconv docs man vegasettings)
