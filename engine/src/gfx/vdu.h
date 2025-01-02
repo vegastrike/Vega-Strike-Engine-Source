@@ -122,9 +122,7 @@ public:
             TextPlane *textp,
             unsigned short modes,
             short rows,
-            short cols,
-            float *MaxArmor,
-            float *maxhull);
+            short cols);
 ///Draws the entire VDU, all data, etc
     void Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &c);
 ///Changes the mode of the current VDU to another legal mode
