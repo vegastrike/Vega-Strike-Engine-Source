@@ -125,38 +125,6 @@ IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
 ENDIF (DATADIR)
 
-# On some Ubuntu versions and derivatives, a bug exists whereby enabling
-# PIE compilation (Position Independent Executables) results in the
-# `file` utility incorrectly recognising the compiled vegastrike-engine binary
-# as a shared library instead of a position independent shared executable
-# object.
-#
-# The effect of the bug is that vegastrike-engine can still be started from the
-# command line but that it will not be recognised as an executable by GUI
-# file managers such as Nautilus and Dolphin.
-#
-# To avoid this scenario, turn off this flag by default and let packagers
-# on other distributions turn this on if their OS is able to correctly deal
-# with Position Independent Executables.
-
-# For more info, see:
-# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
-# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
-#
-OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
-MESSAGE("-- Always using preferred PIE logic now")
-
-include(CheckPIESupported)
-check_pie_supported()
-UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-IF (ENABLE_PIE)
-    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-ELSE (ENABLE_PIE)
-    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-    SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-ENDIF (ENABLE_PIE)
-
 ADD_COMPILE_DEFINITIONS("NV_CUBE_MAP"
         "BOOST_PYTHON_NO_PY_SIGNATURES"
         "BOOST_ALL_DYN_LINK"
@@ -482,7 +450,7 @@ SET(LIBCOMPONENT
     src/components/component.cpp
 
     src/components/dummy_component.cpp
-    src/components/component_utils
+    src/components/component_utils.cpp
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
     src/components/reactor.cpp
