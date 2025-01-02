@@ -77,8 +77,8 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
                     control_attributes["multiline"] = "false";
                 }
             } else {
-                const std::string attribute = JsonGetStringWithDefault(control, key, "");
-                control_attributes[key] = attribute;
+                const std::string text = boost::json::value_to<std::string>(control.at(key));
+                control_attributes[key] = text;
             }
         }
         
@@ -88,17 +88,7 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
     return controls_map;
 }
 
-static std::vector<std::string> split (const std::string &s, char delim) {
-    std::vector<std::string> result;
-    std::stringstream ss (s);
-    std::string item;
 
-    while (getline (ss, item, delim)) {
-        result.push_back (item);
-    }
-
-    return result;
-}
 
 static std::vector<double> splitAndConvert (const std::string &s, char delim) {
     std::vector<double> result;
