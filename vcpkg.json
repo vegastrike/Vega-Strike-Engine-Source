@@ -25,7 +25,6 @@
         "openal-soft",
         "opengl",
         "openssl",
-        "sdl1",
         "sdl2",
         "zlib"
     ]
