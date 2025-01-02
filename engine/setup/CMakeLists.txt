@@ -93,7 +93,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	)
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
 
-	INSTALL(TARGETS vegasettings COMPONENT vegasettings BUNDLE DESTINATION "${CMAKE_OSX_APPLICATIONS_DIR}/VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
+	INSTALL(TARGETS vegasettings COMPONENT vegasettings BUNDLE)
 ELSE ()
 	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
 ENDIF ()
