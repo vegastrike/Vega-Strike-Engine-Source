@@ -93,7 +93,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	)
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
 
-	INSTALL(TARGETS vegasettings COMPONENT vegasettings BUNDLE)
+	INSTALL(TARGETS vegasettings DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT vegasettings BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR})
 ELSE ()
 	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
 ENDIF ()
