@@ -1,7 +1,7 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
 # Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -93,7 +93,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	)
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
 
-	INSTALL(TARGETS vegasettings COMPONENT vegasettings BUNDLE DESTINATION Applications)
+	INSTALL(TARGETS vegasettings COMPONENT vegasettings BUNDLE DESTINATION "${CMAKE_OSX_APPLICATIONS_DIR}/VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
 ELSE ()
 	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
 ENDIF ()
