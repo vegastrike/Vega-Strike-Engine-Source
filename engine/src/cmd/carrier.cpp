@@ -36,27 +36,13 @@
 #include "vs_logging.h"
 #include "vega_cast_utils.h"
 
-#include "json.h"
 
 // TODO: find out where this is and maybe refactor
 extern int SelectDockPort(Unit *, Unit *parent);
 extern void SwitchUnits(Unit *, Unit *);
 extern void abletodock(int dock);
 
-// Replace with std:sto* here and at unit_csv.cpp
-static double stof(const string &inp, double def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_float(inp);
-    }
-    return def;
-}
 
-static int stoi(const string &inp, int def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_int(inp);
-    }
-    return def;
-}
 
 // TODO: probably replace with a lambda expression
 class CatCompare {

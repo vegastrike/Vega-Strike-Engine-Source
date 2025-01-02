@@ -31,11 +31,12 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <boost/json.hpp>
 
-#include "json.h"
 #include "drawable.h"
 #include "vs_globals.h"
 #include "configxml.h"
+#include "resource/json_utils.h"
 
 #include "gui/staticdisplay.h"
 #include "gui/newbutton.h"
@@ -55,39 +56,39 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
 
     std::map<std::string, std::map<std::string, std::string>> controls_map;
 
-    std::vector<std::string> controls_json = json::parsing::parse_array(json_text.c_str());
-     
-    // Iterate over root
-    for (const std::string &control_text : controls_json) {
-        json::jobject control_json = json::jobject::parse(control_text);
+    boost::json::value json_value = boost::json::parse(json_text);
+    boost::json::array root_array = json_value.get_array();
+
+    for(boost::json::value& control_value : root_array) {
+        boost::json::object control = control_value.get_object();
         std::map<std::string, std::string> control_attributes;
 
         for (const std::string &key : keys) {
-            // For some reason, parser adds quotes
-            if(control_json.has_key(key)) {
-                const std::string attribute = control_json.get(key);
-                const std::string stripped_attribute = attribute.substr(1, attribute.size() - 2);
-                control_attributes[key] = stripped_attribute;
-            } 
-        }
+            if(!control.if_contains(key)) {
+                continue;
+            }
 
+            // Worked in singleson because it saw everything as string.
+            if(key == "multiline") {
+                bool multiline = JsonGetWithDefault(control, key, false);
+                if(multiline) {
+                    control_attributes["multiline"] = "true";
+                } else {
+                    control_attributes["multiline"] = "false";
+                }
+            } else {
+                const std::string text = boost::json::value_to<std::string>(control.at(key));
+                control_attributes[key] = text;
+            }
+        }
+        
         controls_map[control_attributes["name"]] = control_attributes;
-    }
+    } 
 
     return controls_map;
 }
 
-static std::vector<std::string> split (const std::string &s, char delim) {
-    std::vector<std::string> result;
-    std::stringstream ss (s);
-    std::string item;
 
-    while (getline (ss, item, delim)) {
-        result.push_back (item);
-    }
-
-    return result;
-}
 
 static std::vector<double> splitAndConvert (const std::string &s, char delim) {
     std::vector<double> result;

@@ -23,15 +23,11 @@
 #define VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
 
 #include <string>
-#include <boost/property_tree/ptree.hpp>
+#include <boost/json.hpp>
 
 class WeaponFactory {
 public:
     WeaponFactory(std::string filename);
-
-private:
-    void parse(boost::property_tree::ptree tree);
-    void parseJSON(const std::string &weapon_text);
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_FACTORY_H
