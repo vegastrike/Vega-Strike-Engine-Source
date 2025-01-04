@@ -78,7 +78,7 @@ PyObject* GetClassFromPython(
     const std::string python_path = GetPythonPath();
     const std::wstring python_path_w(python_path.begin(), python_path.end());
     const std::wstring path_string_w = std::wstring(path_string.begin(), path_string.end());
-    const std::string yaml_path = "Python_SITELIB";
+    const std::string yaml_path = QUOTE(Python_SITELIB);
     const std::wstring yaml_path_wstring = std::wstring(yaml_path.begin(), yaml_path.end());
     const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
 
@@ -101,7 +101,7 @@ PyObject* GetClassFromPython(
     PyConfig_InitPythonConfig(&config);
 
     config.module_search_paths = python_path_py_wide_string_list;
-    config.isolated = 1;
+    config.isolated = 0;
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {

@@ -167,13 +167,16 @@ IF (Python3_FOUND)
     SET(TST_INCLUDES ${Python3_INCLUDE_DIRS})
     SET(TST_LIBS ${Python3_LIBRARIES})
     SET(HAVE_PYTHON 1)
-    add_compile_definitions(Python_SITELIB=${Python3_SITELIB})
+    SET(TMP_Python_SITELIB ${Python3_SITELIB})
+    STRING(REGEX REPLACE "\\\\" "/" TMP_Python_SITELIB ${TMP_Python_SITELIB})
+    MESSAGE("TMP_Python_SITELIB = ${TMP_Python_SITELIB}")
+    add_compile_definitions(Python_SITELIB=${TMP_Python_SITELIB})
 ELSE (Python3_FOUND)
     MESSAGE(FATAL_ERROR "Can't find python")
 ENDIF (Python3_FOUND)
 
 # Find Boost with boost_python library
-# Note: we now use Cmake 3.16 and Boost 1.75.
+# Note: we now use Cmake 3.21 and Boost 1.75.
 MESSAGE("++ From now on, always using System Boost (ver. 1.75 or higher)")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
 FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic REQUIRED)
