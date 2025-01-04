@@ -1,6 +1,6 @@
 # package.ps1
 
-# Copyright (C) 2024 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2024-2025 Stephen G. Tuggy and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -57,6 +57,8 @@ if ($BuildType -ieq "Debug") {
     $cmakePresetName += "debug"
 } elseif ($BuildType -ieq "Release") {
     $cmakePresetName += "release"
+} elseif ($BuildType -ieq "RelWithDebInfo") {
+    $cmakePresetName += "RelWithDebInfo"
 } else {
     Write-Error "Unrecognized value for BuildType: $BuildType"
     exit 1
