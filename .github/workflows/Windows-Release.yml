@@ -24,12 +24,12 @@ jobs:
           - os:              windows-2019
             cmake-generator: VS2019Win64
             enable-pie:      1
-            build-type:      Release
+            build-type:      RelWithDebInfo
             is-release:      1
           - os:              windows-2022
             cmake-generator: VS2022Win64
             enable-pie:      1
-            build-type:      Debug
+            build-type:      RelWithDebInfo
             is-release:      1
 
     env:
