@@ -189,7 +189,7 @@ void Python::init() {
     const std::string base_computer_path = VSFileSystem::datadir + "/python/base_computer/";
     const std::wstring base_computer_path_w = std::wstring(base_computer_path.begin(), base_computer_path.end());
 
-    PyWideStringList python_path_py_wide_string_list;
+    PyWideStringList python_path_py_wide_string_list{};
     status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
     if (PyStatus_Exception(status)) {
         Py_ExitStatusException(status);
