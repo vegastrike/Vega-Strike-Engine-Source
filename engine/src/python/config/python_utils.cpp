@@ -101,6 +101,7 @@ PyObject* GetClassFromPython(
     PyConfig_InitPythonConfig(&config);
 
     config.module_search_paths = python_path_py_wide_string_list;
+    config.isolated = 1;
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
