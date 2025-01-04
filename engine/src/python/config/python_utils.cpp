@@ -1,9 +1,8 @@
 /*
  * python_utils.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (c) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,7 +38,7 @@ using namespace boost::filesystem;
 
 // This is a kludge. It runs python before
 // just to get the python paths.
-const std::string GetPythonPath() {
+std::string GetPythonPath() {
     Py_Initialize();
     wchar_t* w_path_ptr = Py_GetPath();
     Py_Finalize();
@@ -65,18 +64,50 @@ PyObject* GetClassFromPython(
         // TODO: throw exception
         return nullptr;
     }
-    
-    const std::string yaml_path = QUOTE(Python_SITELIB);
-    const std::string python_path_string = GetPythonPath() 
-                                           + ":" + path_string
-                                           + ":" + yaml_path + ":" + build_path;
-    const std::wstring python_path_wstring = std::wstring(python_path_string.begin(), 
-                                                          python_path_string.end());
-    const wchar_t* python_path = python_path_wstring.c_str();
-    Py_SetPath(python_path);
-    Py_Initialize();
 
-    
+    PyPreConfig py_pre_config;
+    PyPreConfig_InitPythonConfig(&py_pre_config);
+
+    PyStatus status;
+
+    status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+
+    const std::string python_path = GetPythonPath();
+    const std::wstring python_path_w(python_path.begin(), python_path.end());
+    const std::wstring path_string_w = std::wstring(path_string.begin(), path_string.end());
+    const std::string yaml_path = "Python_SITELIB";
+    const std::wstring yaml_path_wstring = std::wstring(yaml_path.begin(), yaml_path.end());
+    const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
+
+    PyWideStringList python_path_py_wide_string_list;
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, path_string_w.c_str());
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, yaml_path_wstring.c_str());
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, build_path_w.c_str());
+
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+
+    config.module_search_paths = python_path_py_wide_string_list;
+
+    status = Py_InitializeFromConfig(&config);
+    if (PyStatus_Exception(status)) {
+        PyConfig_Clear(&config);
+        Py_ExitStatusException(status);
+    }
+
     PyObject* module = PyImport_ImportModule(module_name.c_str());
 
     if(!module) {
@@ -102,8 +133,3 @@ PyObject* GetClassFromPython(
 
     return pyResult;
 }
-
-
-
-
-
