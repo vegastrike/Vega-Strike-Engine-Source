@@ -73,16 +73,37 @@ TEST(Python, Call_Function) {
     exists = boost::filesystem::exists("python_tests.py");
     std::cout << "python_tests.py exists in current folder " << exists << std::endl;
 
-    // Set path is called before 
-    
-    //const wchar_t* path = L"/usr/lib/python38.zip:/usr/lib/python3.8:/usr/lib/python3.8/lib-dynload:.";
-    const std::string path_string = GetPythonPath();
-    const std::wstring path_wstring = std::wstring(path_string.begin(), path_string.end());
-    const wchar_t* path = path_wstring.c_str();
-    Py_SetPath(path);
-    
-    Py_Initialize();
-    
+    PyPreConfig py_pre_config;
+    PyPreConfig_InitPythonConfig(&py_pre_config);
+
+    PyStatus status;
+
+    status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+
+    const std::string python_path = GetPythonPath();
+    const std::wstring python_path_w(python_path.begin(), python_path.end());
+
+    PyWideStringList python_path_py_wide_string_list{};
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+
+    config.module_search_paths = python_path_py_wide_string_list;
+    config.isolated = 0;
+
+    status = Py_InitializeFromConfig(&config);
+    if (PyStatus_Exception(status)) {
+        PyConfig_Clear(&config);
+        Py_ExitStatusException(status);
+    }
+
     PyObject* module = PyImport_ImportModule("python_tests");
     std::cout << "PyImport_ImportModule did not crash\n" << std::flush;
     if(!module) {
