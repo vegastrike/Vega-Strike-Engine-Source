@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * unit_csv.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -842,8 +844,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     YawPitchRollParser(unit_key,
             "Yaw_Governor",
-            "Yaw_Governor",
-            "Yaw_Governor",
+            "Yaw_Governor_Right",
+            "Yaw_Governor_Left",
             computer.max_yaw_right,
             computer.max_yaw_left);
     YawPitchRollParser(unit_key,
