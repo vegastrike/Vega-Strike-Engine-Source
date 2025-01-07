@@ -157,12 +157,6 @@ protected:
     float radar_time;
     float gauge_time[UnitImages<void>::NUMGAUGES];
 
-    /// 8 armor vals and 1 for startfuel
-    float StartArmor[9]; //short fix
-
-    ///saved values to compare with current values (might need more for damage)
-    float maxfuel, maxhull;
-
     ///this is the parent that Cockpit will read data from
     UnitContainer parent;
     UnitContainer parentturret;
