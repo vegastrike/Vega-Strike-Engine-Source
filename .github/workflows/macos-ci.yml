@@ -27,6 +27,7 @@ jobs:
           - 3.12.8
           #- 3.13.1
         compiler:
+          - AppleClang
           - clang
           - gcc
         homebrew-gl:
