@@ -91,9 +91,11 @@ jobs:
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }}"
+          FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }} -DPython3_FIND_STRATEGY=LOCATION -DPython3_FIND_FRAMEWORK=LAST"
           OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
           Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
         run: script/cibuild $FLAGS
 
       - name: Test

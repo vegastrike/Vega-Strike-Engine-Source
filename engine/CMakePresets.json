@@ -279,7 +279,9 @@
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/usr/local",
-        "CMAKE_FIND_FRAMEWORK": "LAST"
+        "CMAKE_FIND_FRAMEWORK": "LAST",
+        "Python3_FIND_STRATEGY": "LOCATION",
+        "Python3_FIND_FRAMEWORK": "LAST"
       }
     },
     {
@@ -381,7 +383,10 @@
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/opt/local",
-        "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include"
+        "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include",
+        "CMAKE_FIND_FRAMEWORK": "LAST",
+        "Python3_FIND_STRATEGY": "LOCATION",
+        "Python3_FIND_FRAMEWORK": "LAST"
       }
     },
     {
