@@ -1,7 +1,7 @@
 /*
  * ani_texture.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -90,29 +90,29 @@ protected:
     bool done;
 
 public:
-    virtual void setTime(double tim);
+    void setTime(double tim) override;
 
-    virtual double curTime() const {
+    double curTime() const override {
         return curtime;
     }
 
-    virtual unsigned int numFrames() const {
+    unsigned int numFrames() const override {
         return numframes;
     }
 
-    virtual float framesPerSecond() const {
+    float framesPerSecond() const override {
         return 1 / timeperframe;
     }
 
-    virtual unsigned int numLayers() const;
+    unsigned int numLayers() const override;
 
-    virtual unsigned int numPasses() const;
+    unsigned int numPasses() const override;
 
-    virtual bool canMultiPass() const {
+    bool canMultiPass() const override {
         return true;
     }
 
-    virtual bool constFrameRate() const {
+    bool constFrameRate() const override {
         return constframerate;
     }
 
