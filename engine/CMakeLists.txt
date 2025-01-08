@@ -362,7 +362,6 @@ IF (Boost_FOUND)
     # Thus, build the version from parts, which should work across all supported CMake versions
     SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
     MESSAGE(STATUS "Found System Boost version : ${Boost_DERIVED_VERSION}")
-    MESSAGE(STATUS "Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
 
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
     SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})

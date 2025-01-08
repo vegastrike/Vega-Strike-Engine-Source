@@ -13,7 +13,6 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
-    continue-on-error: false
 
     defaults:
       run:
@@ -25,9 +24,13 @@ jobs:
         os:
           - macos-13
           # - macos-14
+        python-version:
+          # - 3.12.8
+          - 3.13.1
         compiler:
+          - AppleClang
           # - clang
-          - gcc
+          # - gcc
         homebrew-gl:
           - true
           # - false
@@ -53,10 +56,8 @@ jobs:
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         id: vega-py-setup
         with:
-          python-version: |
-            3.13.1
-            3.12.8
-          update-environment: false
+          python-version: ${{ matrix.python-version }}
+          update-environment: true # false
 
       - name: Install dependencies using homebrew
         run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
@@ -96,9 +97,13 @@ jobs:
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }}"
+          FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }}"
           OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
           Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
+          PYTHONHOME: ""
+          PYTHONPATH: ""
           IS_RELEASE: 1
         run: script/cibuild $FLAGS
 

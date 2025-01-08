@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
             auto style = static_cast<boost::program_options::command_line_style::style_t>(boost::program_options::command_line_style::unix_style
                                                                                         | boost::program_options::command_line_style::case_insensitive);
             boost::program_options::variables_map vm;
-            boost::program_options::store(boost::program_options::parse_command_line(argc, argv, setup_options), vm);
+            boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(setup_options).style(style).run(), vm);
             boost::program_options::notify(vm);
 
             if (vm.count("help")) {
