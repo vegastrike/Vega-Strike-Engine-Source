@@ -739,7 +739,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
         ("help,h", "Show this help")
         ("version", "Print the version and exit")
         ("net", "Networking Enabled (Experimental)")
-        ("debug", boost::program_options::value<char>()->default_value('1'), "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")
+        ("debug", boost::program_options::value<char>()->default_value('0'), "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")
         ("benchmark", boost::program_options::value<double>(), "Benchmark")
         ("test-audio", "Run audio tests")  // is handled in readCommandLineOptions, here is serves only for help message
         ("r", "No-op")
@@ -837,7 +837,35 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
     }
 
     if (cmd_args.count("debug")) {
-        g_game.vsdebug = cmd_args["debug"].as<char>() - '0';
+        int vs_debug_level_temp = cmd_args["debug"].as<int>();
+        switch (vs_debug_level_temp) {
+            case 0:
+                g_game.vsdebug = 0;
+                break;
+            case 1:
+                g_game.vsdebug = 1;
+                break;
+            case 2:
+                g_game.vsdebug = 2;
+                break;
+            case 3:
+                g_game.vsdebug = 3;
+                break;
+            case '0':
+                g_game.vsdebug = 0;
+                break;
+            case '1':
+                g_game.vsdebug = 1;
+                break;
+            case '2':
+                g_game.vsdebug = 2;
+                break;
+            case '3':
+                g_game.vsdebug = 3;
+                break;
+            default:
+                VS_LOG_FLUSH_EXIT(fatal, "Invalid debug level specified", EXIT_FAILURE);
+        }
     }
 
     if (cmd_args.count("net")) {
