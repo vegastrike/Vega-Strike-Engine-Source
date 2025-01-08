@@ -837,7 +837,7 @@ std::string ParseCommandLine(int argc, char **lpCmdLine) {
     }
 
     if (cmd_args.count("debug")) {
-        int vs_debug_level_temp = cmd_args["debug"].as<char>();
+        char vs_debug_level_temp = cmd_args["debug"].as<char>();
         switch (vs_debug_level_temp) {
             case 0:
                 g_game.vsdebug = 0;
