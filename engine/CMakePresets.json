@@ -275,15 +275,11 @@
         "rhs": "Darwin"
       },
       "environment": {
-        "VERBOSE": "ON",
-        "PYTHONHOME": "",
-        "PYTHONPATH": ""
+        "VERBOSE": "ON"
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/usr/local",
-        "CMAKE_FIND_FRAMEWORK": "LAST",
-        "Python3_FIND_STRATEGY": "VERSION",
-        "Python3_FIND_FRAMEWORK": "LAST"
+        "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
     {
@@ -381,16 +377,12 @@
         "rhs": "Darwin"
       },
       "environment": {
-        "VERBOSE": "ON",
-        "PYTHONHOME": "",
-        "PYTHONPATH": ""
+        "VERBOSE": "ON"
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/opt/local",
         "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include",
-        "CMAKE_FIND_FRAMEWORK": "LAST",
-        "Python3_FIND_STRATEGY": "VERSION",
-        "Python3_FIND_FRAMEWORK": "LAST"
+        "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
     {
