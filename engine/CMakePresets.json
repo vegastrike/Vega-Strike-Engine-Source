@@ -275,7 +275,9 @@
         "rhs": "Darwin"
       },
       "environment": {
-        "VERBOSE": "ON"
+        "VERBOSE": "ON",
+        "PYTHONHOME": "",
+        "PYTHONPATH": ""
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/usr/local",
@@ -379,7 +381,9 @@
         "rhs": "Darwin"
       },
       "environment": {
-        "VERBOSE": "ON"
+        "VERBOSE": "ON",
+        "PYTHONHOME": "",
+        "PYTHONPATH": ""
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/opt/local",
