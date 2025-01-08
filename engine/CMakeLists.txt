@@ -342,8 +342,8 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
-MESSAGE("++ Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
-MESSAGE("++ Python include dir : ${Python3_INCLUDE_DIRS}")
+MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
+MESSAGE(STATUS "Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
     SET(TST_INCLUDES ${Python3_INCLUDE_DIRS})
     SET(TST_LIBS ${Python3_LIBRARIES})
@@ -353,62 +353,25 @@ ELSE (Python3_FOUND)
 ENDIF (Python3_FOUND)
 
 # Find Boost with boost_python library
-OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
-IF (USE_SYSTEM_BOOST)
-    MESSAGE("++ Using System Boost")
-    FIND_PACKAGE(Boost)
-    IF (Boost_FOUND)
+MESSAGE(STATUS "Always using system Boost now")
+SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
+IF (Boost_FOUND)
+    # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
+    # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
+    # Thus, build the version from parts, which should work across all supported CMake versions
+    SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+    MESSAGE(STATUS "Found System Boost version : ${Boost_DERIVED_VERSION}")
+    MESSAGE(STATUS "Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
 
-        # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
-        # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
-        # Thus, build the version from parts, which should work across all supported CMake versions
-        SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
-        MESSAGE("++ Found System Boost version : ${Boost_DERIVED_VERSION}")
-
-        # With boost version 1.67 and above, python components are specified with a version suffix
-        # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
-        IF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-            SET(Boost_1_67_Or_Later_Result TRUE)
-        ELSEIF (Boost_DERIVED_VERSION VERSION_GREATER 1.67.0)
-            SET(Boost_1_67_Or_Later_Result TRUE)
-        ELSE (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-            SET(Boost_1_67_Or_Later_Result FALSE)
-        ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-        MESSAGE(STATUS "Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
-        IF (Boost_1_67_Or_Later_Result)
-            SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-        ELSE (Boost_1_67_Or_Later_Result)
-            SET(BOOST_PYTHON_COMPONENT "python3")
-
-            # Debian and Debian-based systems up to Boost 1.67 lack libboost_python3.{so|a}
-            # but have libboost_python-py{major}{minor}.{so|a}. E.g., Ubuntu xenial and
-            # Debian stretch.
-            IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-                IF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
-                    SET(BOOST_PYTHON_COMPONENT "python-py3${Python3_VERSION_MINOR}")
-                ENDIF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
-            ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-        ENDIF (Boost_1_67_Or_Later_Result)
-        UNSET(Boost_1_67_Or_Later_Result)
-
-        UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
-        MESSAGE("++ Looking for System Boost::python")
-        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
-        IF (Boost_python3_FOUND)
-            MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
-        ELSEIF (Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
-            MESSAGE("++ Found System Boost::python")
-        ENDIF (Boost_python3_FOUND)
-
-        SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-        MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
-        SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
-        INCLUDE_DIRECTORIES(${TST_INCLUDES})
-    ELSE (Boost_FOUND)
-        MESSAGE(FATAL_ERROR "Cannot find system Boost. Unable to continue.")
-    ENDIF (Boost_FOUND)
-ENDIF (USE_SYSTEM_BOOST)
+    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+    MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
+    SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
+    INCLUDE_DIRECTORIES(${TST_INCLUDES})
+ELSE (Boost_FOUND)
+    MESSAGE(FATAL_ERROR "Cannot find system Boost. Unable to continue.")
+ENDIF (Boost_FOUND)
 
 IF (NOT DISABLE_CLIENT) ##########
 
