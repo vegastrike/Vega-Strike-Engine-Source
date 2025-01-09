@@ -71,7 +71,6 @@ std::string MapToJson(std::map<std::string, std::string> unit) {
     int i = 0;
 
     for (auto const& pair : unit) {
-        std::cout << pair.first << " = " << pair.second << std::endl;
         boost::format new_line;
         if(i < len-1) {
             new_line = boost::format("\t\t\"%1%\": \"%2%\",\n") % pair.first % pair.second;
@@ -755,35 +754,70 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     specInterdiction = UnitCSVFactory::GetVariable(unit_key, "Spec_Interdiction", 0.0f);
 
-    // Init armor
-    // We support 2 options:
-    // 1. armor = x. Could be 0, 40, etc. This populaes the 8 facets below
-    // 2. armor = "". Use the old method of reading all 8 facets. 
+
+    // Armor
+    // We support 3 options:
+    // 1. Minimized armor = x (single value). 
+    // 2. New detailed armor (Front, back, left, right).
+    // 3. Old detailed (Front-left-top, ...). 8 facets converted to 4. 
     const std::string armor_single_value_string = UnitCSVFactory::GetVariable(unit_key, "armor", std::string());
-    float armor_values[8];
 
     if(armor_single_value_string != "") {
-        int armor_single_value = std::stoi(armor_single_value_string, 0);
-        
-        for (int i = 0; i < 8; i++) {
-            armor_values[i] = armor_single_value;
-        }
+        // Minimized
+        const double armor_single_value = std::stod(armor_single_value_string, 0);
+        armor->UpdateFacets(armor_single_value);
     } else {
-        std::string armor_keys[] = {"Armor_Front_Top_Left", "Armor_Front_Top_Right",
-            "Armor_Front_Bottom_Left", "Armor_Front_Bottom_Right",
-            "Armor_Back_Top_Left", "Armor_Back_Top_Right",
-            "Armor_Back_Bottom_Left", "Armor_Back_Bottom_Right"};
-    
-        for (int i = 0; i < 8; i++) {
-            float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
-            armor_values[i] = tmp_armor_value;
+        // Try new
+        std::string armor_keys[] = {"armor_front", "armor_back",
+            "armor_left", "armor_right"};
+        bool new_form = true;
+        for (int i = 0; i < 4; i++) {
+            const std::string armor_string_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], std::string());
+            if(armor_string_value.empty()) {
+                new_form = false;
+                break;
+            }
+
+            double armor_value = std::stod(armor_string_value);
+            armor->facets[i].health = armor_value;
+            armor->facets[i].max_health = armor_value;
+            armor->facets[i].adjusted_health = armor_value;
+        }
+
+        // Fallback to old
+        if(!new_form) {
+            const std::string armor_keys[] = {"Armor_Front_Top_Left", 
+                                              "Armor_Front_Top_Right",
+                                              "Armor_Front_Bottom_Left", 
+                                              "Armor_Front_Bottom_Right",
+                                              "Armor_Back_Top_Left", 
+                                              "Armor_Back_Top_Right",
+                                              "Armor_Back_Bottom_Left", 
+                                              "Armor_Back_Bottom_Right"};
+
+            double old_armor_values[8];
+            float new_armor_values[4];
+            for (int i = 0; i < 8; i++) {
+                old_armor_values[i] = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
+            }
+
+            // Conversion is tricky because new values are a square and old values are
+            // a two layered diamond.
+            new_armor_values[0] = (old_armor_values[0] + old_armor_values[1] + old_armor_values[2] + old_armor_values[3])/2;
+            new_armor_values[1] = (old_armor_values[4] + old_armor_values[5] + old_armor_values[5] + old_armor_values[5])/2;
+            new_armor_values[2] = (old_armor_values[0] + old_armor_values[2] + old_armor_values[4] + old_armor_values[6])/2;
+            new_armor_values[3] = (old_armor_values[1] + old_armor_values[3] + old_armor_values[5] + old_armor_values[7])/2;
+            armor->UpdateFacets(4,new_armor_values);
         }
     }
+       
+    // shield
 
-    armor->UpdateFacets(8, armor_values);
-
-
-    // Load shield
+    // We support 3 options:
+    // 1. Minimized shield_strength = x (single value). 
+    // 2. New detailed shield (Front, back, left, right).
+    // 3. Old detailed (Front-left-top, ...). 4/2 facets converted to 4/2. 
+    
     // Some basic shield variables
     // TODO: lib_damage figure out how leak and efficiency work
     //char leak = static_cast<char>(UnitCSVFactory::GetVariable(unit_key, "Shield_Leak", 0.0f) * 100);
@@ -803,15 +837,33 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     const std::string shield_strength_string = UnitCSVFactory::GetVariable(unit_key, "shield_strength", std::string());
     const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
     
-    if(shield_strength_string != "" && shield_facets_string != "") {
-        int shield_strength = std::stoi(shield_strength_string);
+    if(!shield_facets_string.empty()) {
         int shield_facets = std::stoi(shield_facets_string);
         shield->number_of_facets = shield_facets;
-        shield->UpdateFacets(shield_strength);        
-    } else {
-        int shield_count = 0;
+    }
+
+    if(!shield_strength_string.empty()) {
+        int shield_strength = std::stoi(shield_strength_string);
+        shield->UpdateFacets(shield_strength);
+    } else if(!shield_facets_string.empty()) {
+        // Try new longform
         float shield_values[4];
         
+        std::string shield_keys[] = {"shield_front", "shield_back",
+            "shield_left", "shield_right"};
+        
+        for (int i = 0; i < shield->number_of_facets; i++) {
+            const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
+            shield_values[i] = std::stoi(shield_string_value);            
+        }
+
+        if (shield->number_of_facets == 4 || shield->number_of_facets == 2) {
+            shield->UpdateFacets(shield->number_of_facets, shield_values);
+        }
+    } else {
+        // Fallback to old
+        int shield_count = 0;
+        float shield_values[4];
 
         // TODO: this mapping should really go away
         // I love macros, NOT.
@@ -830,27 +882,13 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             shield_values[i] = ::stof(shield_string_values[i]);
             // Should add up to the shield type - quad or dual
             shield_count++;
-        }
-
-        /*
-        We are making the following assumptions:
-        1. The CSV is correct
-        2. Dual shields are 0 front and 1 rear
-        3. Quad shields are front (0), rear(1), right(2) and left(3)
-        4. There is no support for 8 facet shields in the game.
-            This has more to do with the cockpit code than anything else
-        5. We map the above index to our own
-        */
+        }   
 
         if (shield_count == 4 || shield_count == 2) {
             shield->number_of_facets = shield_count;
             shield->UpdateFacets(shield_count, shield_values);
         }
     }
-
-    
-
-    // End shield section
 
     // Energy 
     // TODO: The following code has a bug.
@@ -1262,59 +1300,20 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     unit["Spec_Interdiction"] = tos(specInterdiction);
 
     // TODO: lib_damage figure out if this is correctly assigned
-    unit["Armor_Front_Top_Left"] = tos(GetArmorLayer().facets[0].health);
-    unit["Armor_Front_Top_Right"] = tos(GetArmorLayer().facets[2].health);
-    unit["Armor_Back_Top_Left"] = tos(GetArmorLayer().facets[4].health);
-    unit["Armor_Back_Top_Right"] = tos(GetArmorLayer().facets[6].health);
-    unit["Armor_Front_Bottom_Left"] = tos(GetArmorLayer().facets[1].health);
-    unit["Armor_Front_Bottom_Right"] = tos(GetArmorLayer().facets[3].health);
-    unit["Armor_Back_Bottom_Left"] = tos(GetArmorLayer().facets[5].health);
-    unit["Armor_Back_Bottom_Right"] = tos(GetArmorLayer().facets[7].health);
-
-    int number_of_shield_emitters = shield->number_of_facets;
-    {
-        unit["Shield_Front_Top_Right"] = "";
-        unit["Shield_Front_Top_Left"] = "";
-        unit["Shield_Back_Top_Right"] = "";
-        unit["Shield_Back_Top_Left"] = "";
-        unit["Shield_Front_Bottom_Right"] = "";
-        unit["Shield_Front_Bottom_Left"] = "";
-        unit["Shield_Back_Bottom_Right"] = "";
-        unit["Shield_Back_Bottom_Left"] = "";
-
-        switch (number_of_shield_emitters) {
-        case 8:
-            unit["Shield_Front_Top_Left"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[1].max_health);
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[2].max_health);
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[3].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[4].max_health);
-            unit["Shield_Back_Top_Right"] = tos(GetShieldLayer().facets[5].max_health);
-            unit["Shield_Back_Bottom_Left"] = tos(GetShieldLayer().facets[6].max_health);
-            unit["Shield_Back_Bottom_Right"] = tos(GetShieldLayer().facets[7].max_health);
-
-            break;
+    unit["armor_front"] = tos(GetArmorLayer().facets[0].health);
+    unit["armor_back"] = tos(GetArmorLayer().facets[1].health);
+    unit["armor_left"] = tos(GetArmorLayer().facets[2].health);
+    unit["armor_right"] = tos(GetArmorLayer().facets[3].health);
+    
+    unit["shield_facets"] = std::to_string(shield->number_of_facets);
+    switch (shield->number_of_facets) {
         case 4:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[2].max_health);
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[3].max_health);
-
-            break;
+            unit["shield_left"] = tos(GetShieldLayer().facets[2].max_health);
+            unit["shield_right"] = tos(GetShieldLayer().facets[3].max_health);
+            // Fallthrough     
         case 2:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
-            break;
-
-        case 0:
-            // No shields
-            break;
-
-        default:
-            // This should not happen
-            std::cout << number_of_shield_emitters << "\n";
-            assert(0);
-        }
+            unit["shield_front"] = tos(GetShieldLayer().facets[0].max_health);
+            unit["shield_back"] = tos(GetShieldLayer().facets[1].max_health);
     }
 
 
