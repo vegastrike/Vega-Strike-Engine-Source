@@ -33,17 +33,15 @@
  * I debated keeping the existing dual/quad but as it turns out, dual is Greek and Quad is latin.
  * It is also easier to understand five and six than penta and sexta (No! Hexa! Mixed again!).
  * This can also be extended to other facet configurations, such as pyramid
- * (left, right, top, bottom and rear).
+ * (left, right, top, bottom and back).
  *
- * For consistency's sake, always start left to right, top to bottom and finally front to rear.
+ * For consistency's sake, always start left to right, top to bottom and finally front to back.
  * That is x,y,z. This is also how both core vector and Vector class are ordered.
  */
 enum class FacetConfiguration {
     one = 1,    // A single facet covering all directions
-    two = 2,    // Front and rear
-    four = 4,   // Front, rear, left and right
-    //six     = 6,    // A cube. Front, rear, left, right, top and bottom.
-    eight = 8  // Front and rear, left and right, top and bottom
+    two = 2,    // Front and back
+    four = 4,   // Front, back, left and right
 };
 
 enum class FacetName {

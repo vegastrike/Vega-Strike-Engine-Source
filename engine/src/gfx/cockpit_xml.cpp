@@ -397,18 +397,11 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                 }
             }
             break;
-        case UnitImages<void>::SHIELD4:
-        case UnitImages<void>::SHIELD5:
-        case UnitImages<void>::SHIELD6:
-        case UnitImages<void>::SHIELD7:
-            shield8 = true;
-            goto pastarmor8;
+        
         case UnitImages<void>::ARMOR4:
         case UnitImages<void>::ARMOR5:
         case UnitImages<void>::ARMOR6:
         case UnitImages<void>::ARMOR7:
-            armor8 = true;
-        pastarmor8:
         case UnitImages<void>::JUMP:
         case UnitImages<void>::MISSILELOCK:
         case UnitImages<void>::ECM:
@@ -594,7 +587,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                             adjsprite = *newsprite;
                         } else if (newvdu) {
                             VDU *tmp =
-                                    new VDU((*iter).value.c_str(), text, mymodes, rows, cols, &StartArmor[0], &maxhull);
+                                    new VDU((*iter).value.c_str(), text, mymodes, rows, cols);
                             (*newvdu) = tmp;
                             adjsprite = *newvdu;
                             if (tmp->getMode() != default_mode) {

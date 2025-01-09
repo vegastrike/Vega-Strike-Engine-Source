@@ -170,16 +170,13 @@ int parse_vdu_type(const char *x) {
     return retval;
 }
 
-VDU::VDU(const char *file, TextPlane *textp, unsigned short modes, short rwws, short clls, float *ma,
-        float *mh) : VSSprite(file), tp(textp), posmodes(modes), rows(rwws), cols(clls), scrolloffset(0) {
+VDU::VDU(const char *file, TextPlane *textp, unsigned short modes, short rwws, short clls) : VSSprite(file), tp(textp), posmodes(modes), rows(rwws), cols(clls), scrolloffset(0) {
     thismode.push_back(MSG);
     if (_Universe->numPlayers() > 1) {
         posmodes &= (~VIEW);
     }
     comm_ani = NULL;
     viewStyle = CP_TARGET;
-    StartArmor = ma;
-    maxhull = mh;
     got_target_info = true;
     SwitchMode(NULL);
 }
@@ -632,27 +629,16 @@ static float TwoOfFour(float a, float b, float c, float d) {
 
 void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     float x, y, w, h;
-    float fs = target->FShieldData();
-    float rs = target->RShieldData();
-    float ls = target->LShieldData();
-    float bs = target->BShieldData();
+    
     GFXEnable(TEXTURE0);
     const bool invert_target_sprite = configuration()->graphics_config.hud.invert_target_sprite;
-    const bool invert_target_shields = configuration()->graphics_config.hud.invert_target_shields;
-    float armor[8];
-    target->ArmorData(armor);
-    float au, ar, al, ad;
-    au = OneOfFour(armor[0], armor[2], armor[4], armor[6]);
-    ar = TwoOfFour(armor[0], armor[1], armor[4], armor[5]);
-    al = TwoOfFour(armor[2], armor[3], armor[6], armor[7]);
-    ad = OneOfFour(armor[1], armor[3], armor[5], armor[7]);
-    if (invert_target_shields) {
-        float tmp = au;
-        au = ad;
-        ad = tmp;
-    }
+    
+    float armor_up = target->armor->facets[0].Percent();
+    float armor_down = target->armor->facets[1].Percent();
+    float armor_left = target->armor->facets[2].Percent();
+    float armor_right = target->armor->facets[3].Percent();
     if (target->isUnit() == Vega_UnitType::planet) {
-        au = ar = al = ad = target->GetHullPercent();
+        armor_up = armor_down = armor_left = armor_right = target->GetHullPercent();
     }
 
     DrawHUDSprite(this,
@@ -669,10 +655,10 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
             y,
             w,
             h,
-            au,
-            ar,
-            al,
-            ad,
+            armor_up,
+            armor_right,
+            armor_left,
+            armor_down,
             target->GetHullPercent(),
             true,
             invert_target_sprite);
@@ -754,7 +740,10 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         static bool builtin_shields =
                 XMLSupport::parse_bool(vs_config->getVariable("graphics", "vdu_builtin_shields", "false"));
         if (builtin_shields) {
-            DrawShield(fs, rs, ls, bs, x, y, w, h, invert_target_shields,
+            DrawShield(target->shield->facets[0].Percent(), 
+            target->shield->facets[3].Percent(), 
+            target->shield->facets[2].Percent(), 
+            target->shield->facets[1].Percent(), x, y, w, h, false,
                     GFXColor(ishieldcolor[0], ishieldcolor[1], ishieldcolor[2], ishieldcolor[3]),
                     GFXColor(mshieldcolor[0], mshieldcolor[1], mshieldcolor[2], mshieldcolor[3]),
                     GFXColor(oshieldcolor[0], oshieldcolor[1], oshieldcolor[2], oshieldcolor[3]));
