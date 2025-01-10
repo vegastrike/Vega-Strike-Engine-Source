@@ -97,8 +97,26 @@ MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 # Option to turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 
+OPTION (USE_OpenMP "Use OpenMP to enable <omp.h>" ON)
+
+# Find OpenMP
+if(APPLE AND USE_OpenMP)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang\$")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -Wno-unused-command-line-argument")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY omp)
+    endif()
+endif()
+
+if(USE_OpenMP)
+    find_package(OpenMP COMPONENTS CXX REQUIRED)
+endif ()
+
+if (OpenMP_FOUND)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif ()
+
 # Should we prefer the Mesa OpenGL implementation, or GLVND?
-# OPTION(VEGA_STRIKE_PREFER_LEGACY_OPENGL "Prefer legacy OpenGL implementation (such as Mesa's)? Or prefer GLVND?" OFF )
 IF (OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglu1-mesa")
 ELSEIF (OpenGL_GL_PREFERENCE STREQUAL "GLVND")
@@ -281,6 +299,15 @@ IF (NOT DISABLE_CLIENT) ##########
     ELSE (PNG_FOUND)
         MESSAGE("!! Can't find PNG lib")
     ENDIF (PNG_FOUND)
+
+    FIND_PACKAGE(OpenMP COMPONENTS CXX)
+    IF (OpenMP_FOUND)
+        MESSAGE(STATUS "OpenMP found!")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+        LIST(APPEND VS_INCLUDE_DIRS OpenMP_CXX_INCLUDE_DIRS)
+    ELSE ()
+        MESSAGE(STATUS "OpenMP not found")
+    ENDIF ()
 
 ENDIF(NOT DISABLE_CLIENT) ##########
 
@@ -1009,6 +1036,9 @@ IF (NOT DISABLE_CLIENT)
     #ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)
 
     TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU ${TST_LIBS})
+    IF (OpenMP_FOUND)
+        TARGET_LINK_LIBRARIES(vegastrike-engine OpenMP::OpenMP_CXX)
+    ENDIF ()
     #IF (MSVC)
         SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     #ELSE (MSVC)

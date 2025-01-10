@@ -380,7 +380,7 @@
         "VERBOSE": "ON"
       },
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "/opt/local",
+        "CMAKE_PREFIX_PATH": "/opt/local;/opt/local/libexec",
         "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include",
         "CMAKE_FIND_FRAMEWORK": "LAST"
       }
