@@ -272,9 +272,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
         VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
-    }
-    else
-    {
+    } else {
         VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) failed. Error: %1%") % SDL_GetError()));
         SDL_ClearError();
     }
@@ -282,8 +280,6 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     SDL_GL_GetDrawableSize(window, &width, &height);
 
     SDL_GLContext context = SDL_GL_CreateContext(window);
-
-    SDL_GL_MakeCurrent(window, context);
 
     if (!context) {
         std::cerr << "No GL context\n" << std::flush;
