@@ -97,7 +97,7 @@ MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 # Option to turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 
-OPTION (USE_OpenMP "Use OpenMP to enable <omp.h>" ON)
+OPTION (USE_OpenMP "Use OpenMP to enable <omp.h>" OFF)
 
 # Find OpenMP
 if(APPLE AND USE_OpenMP)
@@ -105,6 +105,7 @@ if(APPLE AND USE_OpenMP)
         set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -Wno-unused-command-line-argument")
         set(OpenMP_CXX_LIB_NAMES "omp")
         set(OpenMP_omp_LIBRARY omp)
+        set(OpenMP_CXX_INCLUDE_DIRS "${CMAKE_PREFIX_PATH}/opt/libomp/include;${CMAKE_PREFIX_PATH}/include/libomp")
     endif()
 endif()
 
@@ -1062,6 +1063,7 @@ IF (NOT DISABLE_CLIENT)
 
     TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU ${TST_LIBS})
     IF (OpenMP_FOUND)
+        TARGET_LINK_DIRECTORIES(vegastrike-engine PRIVATE "${OPENMP_LIBRARIES}")
         TARGET_LINK_LIBRARIES(vegastrike-engine OpenMP::OpenMP_CXX)
     ENDIF ()
     #IF (MSVC)

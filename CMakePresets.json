@@ -380,9 +380,10 @@
         "VERBOSE": "ON"
       },
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "/opt/local;/opt/local/libexec",
+        "CMAKE_PREFIX_PATH": "/opt/local",
         "CMAKE_FIND_FRAMEWORK": "LAST",
-        "CPU_OPTS": "-march=native"
+        "CPU_OPTS": "-march=native",
+        "USE_OpenMP": "OFF"
       }
     },
     {
