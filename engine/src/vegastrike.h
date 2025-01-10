@@ -52,6 +52,10 @@ extern float AUDIO_ATOM;
 #include <stdarg.h>
 #include "debug_vs.h"
 
+#if !defined(_WIN32)
+#   define GL_GLEXT_PROTOTYPES 1
+#endif
+
 #if defined (WIN32) || defined (__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already
  */

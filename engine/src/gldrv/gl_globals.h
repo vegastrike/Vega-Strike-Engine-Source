@@ -25,7 +25,7 @@
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_GLOBALS_H
 
 #include <queue>
-static constexpr bool GFX_BUFFER_MAP_UNMAP = false;
+const static bool GFX_BUFFER_MAP_UNMAP = false;
 /* Hack for multitexture on Mac, here and in gl_init, ifdefined - griff */
 //Moved this because defining GL_EXT_texture... doesn't work under Jaguar
 #ifdef __APPLE_PANTHER_GCC33_CLI__
