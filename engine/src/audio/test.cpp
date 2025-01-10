@@ -665,7 +665,8 @@ void closeRenderer() {
 }
 
 void VSExit(int code) {
-    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();;
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
     exit(code);
 }
 

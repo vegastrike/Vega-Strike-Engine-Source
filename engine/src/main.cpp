@@ -149,11 +149,11 @@ void VSExit(int code) {
 }
 
 void cleanup(void) {
-    STATIC_VARS_DESTROYED = true;
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
     VS_LOG(info, "Thank you for playing!");
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
     if (_Universe != nullptr) {
         _Universe->WriteSaveGame(true);
     }
@@ -409,7 +409,7 @@ int main(int argc, char *argv[]) {
     delete _Universe;
     CleanupUnitTables();
     // Just to be sure -- stephengtuggy 2020-07-27
-    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();;
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     return 0;
 }
 

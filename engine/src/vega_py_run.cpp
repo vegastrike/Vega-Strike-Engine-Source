@@ -49,7 +49,7 @@ void VegaPyRunString(char *py_snippet) {
         VS_LOG_AND_FLUSH(error, "VegaPyRunString: Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();;
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     }
 //#endif
 }

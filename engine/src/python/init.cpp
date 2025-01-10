@@ -123,7 +123,7 @@ void Python::reseterrors() {
         VS_LOG_AND_FLUSH(error, "void Python::reseterrors(): Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();;
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     }
 }
 

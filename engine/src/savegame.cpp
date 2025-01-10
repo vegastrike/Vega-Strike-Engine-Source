@@ -879,7 +879,7 @@ void SaveGame::LoadSavedMissions() {
                 VS_LOG_AND_FLUSH(error, "void SaveGame::LoadSavedMissions(): Python error occurred");
                 PyErr_Print();
                 PyErr_Clear();
-                VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();;
+                VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             } else {
                 throw;
             }
