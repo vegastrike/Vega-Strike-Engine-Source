@@ -78,10 +78,6 @@
 #include "cg_global.h"
 #endif
 
-#if defined (HAVE_OpenMP)
-#include <omp.h>
-#endif
-
 #include "vs_logging.h"
 #include "options.h"
 #include "version.h"
@@ -358,14 +354,6 @@ int main(int argc, char *argv[]) {
     if ((exitcode = readCommandLineOptions(argc, argv)) >= 0) {
         return exitcode;
     }
-
-#if defined (HAVE_OpenMP)
-#pragma omp parallel
-#pragma omp single
-    int nthreads = omp_get_num_threads();
-    omp_set_num_threads(nthreads);
-    VS_LOG(important_info, (boost::format("OpenMP number of threads set to %1%") % nthreads));
-#endif
 
     //might overwrite the default mission with the command line
     InitUnitTables();

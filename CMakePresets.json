@@ -381,9 +381,7 @@
       },
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/opt/local",
-        "CMAKE_FIND_FRAMEWORK": "LAST",
-        "CPU_OPTS": "-march=native",
-        "USE_OpenMP": "OFF"
+        "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
     {
@@ -426,6 +424,9 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
+      },
+      "cacheVariables": {
+        "CPU_OPTS": "-march=native"
       }
     },
     {
