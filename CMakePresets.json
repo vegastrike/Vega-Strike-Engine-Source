@@ -382,7 +382,6 @@
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "/opt/local",
         "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include",
-        "GTK3_GLIBCONFIG_INCLUDE_DIR": "/opt/local/include/glib-2.0",
         "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
