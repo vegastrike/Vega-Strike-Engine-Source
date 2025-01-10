@@ -28,6 +28,8 @@
 #ifndef VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H
 #define VEGA_STRIKE_ENGINE_PYTHON_CONFIG_GRAPHICS_CONFIG_H
 
+#include <boost/json.hpp>
+
 // TODO: remove the other GraphicsConfig and rename this
 struct Graphics2Config {
     int screen{0};
@@ -35,7 +37,7 @@ struct Graphics2Config {
     int resolution_y{1080};
 
     Graphics2Config() = default;
-    Graphics2Config(const std::string config);
+    Graphics2Config(boost::json::object object);
 };
 
 

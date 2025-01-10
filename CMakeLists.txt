@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2001-2023 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -31,7 +31,16 @@
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
+
+IF (POLICY CMP0087)
+    cmake_policy(SET CMP0087 NEW)
+ENDIF ()
+SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
+
+IF (POLICY CMP0167)
+    CMAKE_POLICY (SET CMP0167 OLD)
+ENDIF (POLICY CMP0167)
 
 # There are a number of custom CMake packages
 # Tell CMake where to find them
@@ -39,7 +48,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 IF (WIN32)
     SET(VCPKG_MANIFEST_MODE ON)
-    SET(VCPKG_MANIFEST_DIR "${CMAKE_SOURCE_DIR}/cmake")
+    SET(VCPKG_MANIFEST_DIR "${CMAKE_SOURCE_DIR}")
     SET(VCPKG_MANIFEST_INSTALL ON)
 ENDIF (WIN32)
 
@@ -88,45 +97,6 @@ ENDIF ()
 # If a release is missing this value, then version `1` can be assumed.
 SET(VEGASTRIKE_ASSETS_API_VERSION "3")
 
-#IF (COMMAND cmake_policy)
-#    CMAKE_POLICY (SET CMP0003 NEW)
-#ENDIF (COMMAND cmake_policy)
-#
-## VERSION Policy
-#IF (POLICY CMP0048)
-#    CMAKE_POLICY (SET CMP0048 NEW)
-#ENDIF (POLICY CMP0048)
-#
-## Used to be that without this, CMake couldn't find pow() -- at least not on my Windows machine.
-#IF (POLICY CMP0066)
-#    CMAKE_POLICY (SET CMP0066 NEW)
-#ENDIF ()
-#
-## FindOpenGL prefers GLVND by default when available. But there is an option to override that.
-#IF (POLICY CMP0072)
-#    CMAKE_POLICY (SET CMP0072 NEW)
-#ENDIF (POLICY CMP0072)
-#
-## find_package() uses <PackageName>_ROOT variables
-#IF (POLICY CMP0074)
-#    CMAKE_POLICY (SET CMP0074 NEW)
-#ENDIF (POLICY CMP0074)
-#
-## Include file check macros honor CMAKE_REQUIRED_LIBRARIES
-#IF (POLICY CMP0075)
-#    CMAKE_POLICY (SET CMP0075 NEW)
-#ENDIF ()
-#
-## Concerning link time flags for turning on or off Position Independent Executables (PIE)
-#IF (POLICY CMP0083)
-#    CMAKE_POLICY (SET CMP0083 NEW)
-#ENDIF ()
-#
-## MSVC runtime library flags are selected by an abstraction. Supported by CMake 3.15 and up
-#IF (POLICY CMP0091)
-#    CMAKE_POLICY (SET CMP0091 NEW)
-#ENDIF ()
-
 # TODO: this suppresses warnings about CMP0102 caching.
 # We should do something about it instead.
 CMAKE_POLICY(SET CMP0102 OLD)
@@ -147,6 +117,38 @@ SET(CMAKE_C_STANDARD 11)
 SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 
+# On some Ubuntu versions and derivatives, a bug exists whereby enabling
+# PIE compilation (Position Independent Executables) results in the
+# `file` utility incorrectly recognising the compiled vegastrike-engine binary
+# as a shared library instead of a position independent shared executable
+# object.
+#
+# The effect of the bug is that vegastrike-engine can still be started from the
+# command line but that it will not be recognised as an executable by GUI
+# file managers such as Nautilus and Dolphin.
+#
+# To avoid this scenario, turn off this flag by default and let packagers
+# on other distributions turn this on if their OS is able to correctly deal
+# with Position Independent Executables.
+
+# For more info, see:
+# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
+#
+OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
+MESSAGE("-- Always using preferred PIE logic now")
+
+include(CheckPIESupported)
+check_pie_supported()
+UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
+IF (ENABLE_PIE)
+    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ELSE (ENABLE_PIE)
+    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+    SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+ENDIF (ENABLE_PIE)
+
 # Should we install gtest?
 OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
 
@@ -154,7 +156,7 @@ OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
 OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 
 IF (INSTALL_GTEST OR USE_GTEST)
-    MESSAGE("-- Configuring Unit Tests")
+    MESSAGE(STATUS "Configuring Unit Tests")
     ENABLE_TESTING()
 
     IF (INSTALL_GTEST)
@@ -162,23 +164,15 @@ IF (INSTALL_GTEST OR USE_GTEST)
         FetchContent_Declare(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG        release-1.11.0
+            GIT_TAG        v1.15.2
         )
 
-        FetchContent_GetProperties(googletest)
-        STRING(TOLOWER "googletest" lcName)
-        IF(NOT ${lcName}_POPULATED)
-            # Fetch the content using previously declared details
-            FetchContent_Populate(googletest)
+        # Set custom variables, policies, etc.
 
-            # Set custom variables, policies, etc.
+        # For Windows: Prevent overriding the parent project's compiler/linker settings
+        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-            # For Windows: Prevent overriding the parent project's compiler/linker settings
-            SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-            # Bring the populated content into the build
-            ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-        ENDIF(NOT ${lcName}_POPULATED)
+        FetchContent_MakeAvailable(googletest)
     ENDIF (INSTALL_GTEST)
 ENDIF (INSTALL_GTEST OR USE_GTEST)
 
