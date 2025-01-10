@@ -123,7 +123,7 @@ void Python::reseterrors() {
         VS_LOG_AND_FLUSH(error, "void Python::reseterrors(): Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VegaStrikeLogging::vega_logger()->FlushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();;
     }
 }
 
@@ -281,7 +281,7 @@ void Python::test() {
 //vs_config->setVariable("data","test","NULL");
 //VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
 //VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
 }
 
 #endif

@@ -29,6 +29,6 @@
 #include "vs_logging.h"
 
 void VSExit(int code) {
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();;
     exit(code);
 }

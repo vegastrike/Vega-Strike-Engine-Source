@@ -202,7 +202,7 @@ void winsys_warp_pointer(int x, int y) {
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2021-09-07 - stephengtuggy
+ *  \date    Modified: 2025-01-10 - stephengtuggy
  */
 static bool setup_sdl_video_mode(int *argc, char **argv) {
     Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
@@ -267,8 +267,16 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     
 
     if(!window) {
-        std::cerr << "No window\n" << std::flush;
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
+    }
+
+    if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
+        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
+    }
+    else
+    {
+        VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) failed. Error: %1%") % SDL_GetError()));
+        SDL_ClearError();
     }
 
     SDL_GL_GetDrawableSize(window, &width, &height);
@@ -279,13 +287,40 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     if (!context) {
         std::cerr << "No GL context\n" << std::flush;
-        VS_LOG_AND_FLUSH(fatal, "No GL context");
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
     }
 
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
     VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
+
+    if (SDL_GL_MakeCurrent(window, context) < 0) {
+        VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
+    }
+
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (renderer == nullptr) {
+        VS_LOG_AND_FLUSH(error, (boost::format(
+            "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
+            SDL_GetError()));
+        SDL_ClearError();
+
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if (renderer == nullptr) {
+            VS_LOG_AND_FLUSH(error, (boost::format(
+                "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
+                SDL_GetError()));
+            SDL_ClearError();
+
+            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+            if (renderer == nullptr) {
+                VS_LOG_FLUSH_EXIT(fatal, (boost::format(
+                    "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
+                    SDL_GetError()),
+                    1);
+            }
+        }
+    }
 
     screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
     if (!screen) {
