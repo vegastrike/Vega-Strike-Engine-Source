@@ -72,8 +72,9 @@ extern float AUDIO_ATOM;
 #endif //defined (WIN32) || defined (__CYGWIN__)
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#ifndef NO_GFX
+#if !defined (NO_GFX)
 #   if defined(__APPLE__) && defined(__MACH__)
+#       define GL_GLEXT_FUNCTION_POINTERS 1
 #       include <gl.h>
 #       include <glu.h>
 #       include <glut.h>

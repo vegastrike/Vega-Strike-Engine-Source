@@ -457,7 +457,7 @@ void Mission::doSetVar(missionNode *node, int mode) {
             }
             vi = global_var->script.varinst;
         }
-        if (vi->type != VAR_BOOL || vi->type != VAR_FLOAT || vi->type != VAR_INT || vi->type != VAR_OBJECT) {
+        if (vi->type != VAR_BOOL && vi->type != VAR_FLOAT && vi->type != VAR_INT && vi->type != VAR_OBJECT) {
             fatalError(node, mode, "unsupported type in setvar");
             assert(0);
         }

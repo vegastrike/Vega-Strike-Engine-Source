@@ -70,17 +70,17 @@
  *******************************---------------------------------------------------------------------------
  */
 
-//static SDL_Window *window = NULL;
-static SDL_Surface *screen = NULL;
+//static SDL_Window *window = nullptr;
+static SDL_Surface *screen = nullptr;
 
-static winsys_display_func_t display_func = NULL;
-static winsys_idle_func_t idle_func = NULL;
-static winsys_reshape_func_t reshape_func = NULL;
-static winsys_keyboard_func_t keyboard_func = NULL;
-static winsys_mouse_func_t mouse_func = NULL;
-static winsys_motion_func_t motion_func = NULL;
-static winsys_motion_func_t passive_motion_func = NULL;
-static winsys_atexit_func_t atexit_func = NULL;
+static winsys_display_func_t display_func = nullptr;
+static winsys_idle_func_t idle_func = nullptr;
+static winsys_reshape_func_t reshape_func = nullptr;
+static winsys_keyboard_func_t keyboard_func = nullptr;
+static winsys_mouse_func_t mouse_func = nullptr;
+static winsys_motion_func_t motion_func = nullptr;
+static winsys_motion_func_t passive_motion_func = nullptr;
+static winsys_atexit_func_t atexit_func = nullptr;
 
 static bool redisplay = false;
 static bool keepRunning = true;
@@ -205,7 +205,7 @@ void winsys_warp_pointer(int x, int y) {
  *  \date    Modified: 2021-09-07 - stephengtuggy
  */
 static bool setup_sdl_video_mode(int *argc, char **argv) {
-    Uint32 video_flags = SDL_WINDOW_OPENGL;
+    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
     if (gl_options.fullscreen) {
@@ -219,7 +219,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
-    if (game_options()->rgb_pixel_format.compare("undefined") == 0) {
+    if (game_options()->rgb_pixel_format == "undefined") {
         game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
@@ -257,9 +257,9 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     const int screen_number = configuration()->graphics2_config.screen;
     SDL_Window *window = nullptr;
     if(screen_number == 0) {
-        window = SDL_CreateWindow("Vegastrike", 0, 0, width, height, video_flags);
+        window = SDL_CreateWindow("Vega Strike", 0, 0, width, height, video_flags);
     } else {
-        window = SDL_CreateWindow("Vegastrike", 
+        window = SDL_CreateWindow("Vega Strike",
                                 SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
                                 SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number), 
                                 0, 0, video_flags);
@@ -271,7 +271,21 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         VSExit(1);
     }
 
-    SDL_GL_CreateContext(window);
+    SDL_GL_GetDrawableSize(window, &width, &height);
+
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+
+    SDL_GL_MakeCurrent(window, context);
+
+    if (!context) {
+        std::cerr << "No GL context\n" << std::flush;
+        VS_LOG_AND_FLUSH(fatal, "No GL context");
+        VSExit(1);
+    }
+
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
 
     screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
     if (!screen) {
@@ -357,15 +371,13 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     }
 
     //signal( SIGSEGV, SIG_DFL );
-    SDL_Surface *icon = NULL;
-#if 1
+    SDL_Surface *icon = nullptr;
     if (icon_title) {
         icon = SDL_LoadBMP(icon_title);
     }
     if (icon) {
         SDL_SetColorKey(icon, SDL_TRUE, ((Uint32 *) (icon->pixels))[0]);
     }
-#endif
     /*
      * Init video
      */
@@ -506,6 +518,13 @@ void winsys_process_events() {
                     }
 #endif
                     break;
+
+                case SDL_QUIT:
+                    cleanexit = true;
+                    keepRunning = false;
+                    break;
+                default:
+                    break;
             }
             SDL_LockAudio();
             SDL_UnlockAudio();
@@ -564,7 +583,7 @@ void winsys_exit(int code) {
  *******************************---------------------------------------------------------------------------
  */
 
-static winsys_keyboard_func_t keyboard_func = NULL;
+static winsys_keyboard_func_t keyboard_func = nullptr;
 
 static bool redisplay = false;
 
