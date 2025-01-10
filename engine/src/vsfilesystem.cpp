@@ -706,21 +706,6 @@ void LoadConfig(string subdir) {
 
     vs_config = createVegaConfig(config_file.c_str());
 
-    //Now check if there is a data directory specified in it
-    //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
-    if (!game_options()->datadir.empty()) {
-        //We found a path to data in config file
-        VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
-        datadir = game_options()->datadir;
-    } else {
-        if (true == legacy_data_dir_mode) {
-            VS_LOG(info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
-        } else {
-            VS_LOG_AND_FLUSH(fatal, "DATADIR - No datadir specified in config file");
-            VSExit(1);
-        }
-    }
-
     string universe_file = datadir + "/" \
  + vs_config->getVariable("data", "universe_path", "universe") + "/" \
  + vs_config->getVariable("general", "galaxy", "milky_way.xml");
