@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * precompiled.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -51,11 +53,7 @@
 
 #define GL_GLEXT_PROTOTYPES 1
 
-#if defined (__APPLE__) || defined (MACOSX)
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glext.h>
-#else //defined (__APPLE__) || defined (MACOSX)
-    #include <GL/gl.h>
-    #include <GL/glext.h>
-#endif //defined (__APPLE__) || defined (MACOSX)
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#include <GL/gl.h>
+#include <GL/glext.h>
 

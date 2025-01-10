@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, Alan Shieh, pyramid3d,
+ * gl_globals.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, Alan Shieh, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -23,7 +25,7 @@
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_GLOBALS_H
 
 #include <queue>
-const static bool GFX_BUFFER_MAP_UNMAP = false;
+static constexpr bool GFX_BUFFER_MAP_UNMAP = false;
 /* Hack for multitexture on Mac, here and in gl_init, ifdefined - griff */
 //Moved this because defining GL_EXT_texture... doesn't work under Jaguar
 #ifdef __APPLE_PANTHER_GCC33_CLI__
@@ -91,17 +93,20 @@ struct GFXStats
 
 #ifndef _WIN32
 //#define GL_GLEXT_PROTOTYPES
-
 #endif
+
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined (_WIN32) || defined (__CYGWIN__)
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-#include <GL/gl.h>
+#include <gl.h>
 #endif
-#if defined (__APPLE__) || defined (MACOSX)
-#include <GLUT/glut.h>
+
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#if defined(__APPLE__) && defined(__MACH__)
+#include <glut.h>
 //#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
 #if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)
 #define OSX_AT_LEAST_10_4
@@ -110,7 +115,7 @@ struct GFXStats
 #endif
 #define GL_GLEXT_PROTOTYPES
 //#endif
-#include <OpenGL/glext.h>
+#include <glext.h>
 #else
 #define __glext_h_
 #include <GL/glut.h>

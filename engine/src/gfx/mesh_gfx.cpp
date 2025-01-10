@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, surfdargent, hellcatv, ace123,
+ * mesh_gfx.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, surfdargent, hellcatv, ace123,
  * klaussfreire, dan_w, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -14,7 +16,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -2070,7 +2072,7 @@ void Mesh::initTechnique(const std::string &xmltechnique) {
         string effective;
         if (Decal.size() > 1 || getEnvMap()) {
             //Use shader-ified technique for multitexture or environment-mapped meshes
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
             static string shader_technique = vs_config->getVariable( "graphics", "default_full_technique", "mac" );
 #else
             static string shader_technique = vs_config->getVariable("graphics", "default_full_technique", "default");

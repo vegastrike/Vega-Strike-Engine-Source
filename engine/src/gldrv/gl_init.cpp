@@ -1,7 +1,7 @@
 /*
  * gl_init.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -56,7 +56,7 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
-// #if defined (__APPLE__) || defined (MACOSX)
+// #if defined(__APPLE__) && defined (__MACH__)
 // #include <GL/glew.h>
 // #else
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS_ARB 0x884F
@@ -64,13 +64,14 @@
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1
-#if defined (__APPLE__) || defined (MACOSX)
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glext.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#if defined(__APPLE__) && defined (__MACH__)
+    #include <gl.h>
+    #include <glext.h>
     #include <dlfcn.h>
 #else
-    #include <GL/gl.h>
-    #include <GL/glext.h>
+    #include <gl.h>
+    #include <glext.h>
 #endif
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
@@ -159,7 +160,7 @@ typedef void ( *(*get_gl_proc_fptr_t)(const GLubyte *))();
     #if defined(__HAIKU__)
         typedef char * GET_GL_PTR_TYP;
         #define GET_GL_PROC glutGetProcAddress
-    #elif defined (__MACOSX__)
+    #elif defined (__APPLE__) && defined (__MACH__)
         typedef const char * GET_GL_PTR_TYP;
         void * vega_dlsym(GET_GL_PTR_TYP function_name) {
             return dlsym(RTLD_SELF, function_name);
@@ -260,7 +261,7 @@ void init_opengl_extensions() {
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if (vsExtensionSupported("GL_EXT_compiled_vertex_array")
             && game_options()->LockVertexArrays) {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 #if defined (glLockArraysEXT) && defined (glUnlockArraysEXT)
         glLockArraysEXT_p   = &glLockArraysEXT;
@@ -281,14 +282,14 @@ void init_opengl_extensions() {
 #endif
         VS_LOG(trace, "OpenGL::GL_EXT_compiled_vertex_array supported");
     } else {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
         glLockArraysEXT_p = nullptr;
         glUnlockArraysEXT_p = nullptr;
 #endif
         VS_LOG(debug, "OpenGL::GL_EXT_compiled_vertex_array unsupported");
     }
 #endif
-#if defined (__MACOSX__)
+#if defined(__APPLE__) && defined (__MACH__)
     if (vsExtensionSupported("GL_EXT_multi_draw_arrays")) {
         glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
                 GET_GL_PROC((GET_GL_PTR_TYP) "glMultiDrawArraysEXT");

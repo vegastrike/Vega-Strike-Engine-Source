@@ -1,9 +1,8 @@
 /*
  * star.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -37,10 +36,11 @@
 #include "universe.h"
 #include "vs_logging.h"
 
-#if defined (__APPLE__) || defined (MACOSX)
-#include <OpenGL/gl.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#if defined(__APPLE__) && defined (__MACH__)
+#include <gl.h>
 #else
-#include <GL/gl.h>
+#include <gl.h>
 #endif
 
 #define SINX 1
