@@ -32,5 +32,6 @@ export CMAKE_PREFIX_PATH="/opt/local/"
 
 echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
 
-ln -s $CMAKE_PREFIX_PATH/include/GL $CMAKE_PREFIX_PATH/include/OpenGL
-ln -s $CMAKE_PREFIX_PATH/include/GL $CMAKE_PREFIX_PATH/include/GLUT
+# Keep these lines! Otherwise you will likely get PFNGL... not found errors.
+ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/OpenGL"
+ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/GLUT"
