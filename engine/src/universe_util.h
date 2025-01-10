@@ -419,7 +419,7 @@ double asin(double);
 double atan(double);
 double tan(double);
 void micro_sleep(int n);
-void addParticle(QVector loc, Vector velocity, Vector color, float size);
+void addParticle(QVector loc, Vector velocity, GFXColor color, float size);
 
 std::string getSaveDir();
 std::string getSaveInfo(const std::string &filename, bool formatForTextbox);
