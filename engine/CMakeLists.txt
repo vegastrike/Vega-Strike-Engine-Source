@@ -32,6 +32,17 @@
 
 MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
+
+IF (POLICY CMP0087)
+    cmake_policy(SET CMP0087 NEW)
+ENDIF ()
+SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
+
+IF (POLICY CMP0167)
+    CMAKE_POLICY (SET CMP0167 OLD)
+ENDIF (POLICY CMP0167)
+
 # One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
@@ -159,7 +170,7 @@ ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CX
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
+FIND_PACKAGE(Python3 3.7...<3.13 REQUIRED COMPONENTS Development Interpreter)
 MESSAGE("++ Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE("++ Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
