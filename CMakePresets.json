@@ -1,8 +1,8 @@
 {
-  "version": 3,
+  "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 16,
+    "minor": 21,
     "patch": 0
   },
   "configurePresets": [
@@ -33,6 +33,15 @@
       "inherits": "default",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "RelWithDebInfo",
+      "hidden": true,
+      "displayName": "RelWithDebInfo",
+      "inherits": "default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
     {
@@ -116,6 +125,20 @@
       }
     },
     {
+      "name": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "inherits": [
+        "pie-enabled",
+        "glvnd",
+        "RelWithDebInfo"
+      ],
+      "displayName": "PIE Enabled, GLVND, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "linux-pie-enabled-legacy-gl-debug",
       "inherits": [
         "pie-enabled",
@@ -137,6 +160,20 @@
         "release"
       ],
       "displayName": "PIE Enabled, Legacy OpenGL, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "inherits": [
+        "pie-enabled",
+        "legacy-gl",
+        "RelWithDebInfo"
+      ],
+      "displayName": "PIE Enabled, Legacy OpenGL, RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -172,6 +209,20 @@
       }
     },
     {
+      "name": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "inherits": [
+        "pie-disabled",
+        "glvnd",
+        "RelWithDebInfo"
+      ],
+      "displayName": "PIE Disabled, GLVND, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "linux-pie-disabled-legacy-gl-debug",
       "inherits": [
         "pie-disabled",
@@ -200,6 +251,20 @@
       }
     },
     {
+      "name": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "inherits": [
+        "pie-disabled",
+        "legacy-gl",
+        "RelWithDebInfo"
+      ],
+      "displayName": "PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "macos-default",
       "hidden": true,
       "inherits": "default",
@@ -213,6 +278,7 @@
         "VERBOSE": "ON"
       },
       "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "/usr/local",
         "CMAKE_FIND_FRAMEWORK": "LAST"
       }
     },
@@ -238,6 +304,20 @@
         "release"
       ],
       "displayName": "macOS, PIE Enabled, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macos-pie-enabled-RelWithDebInfo",
+      "inherits": [
+        "macos-default",
+        "pie-enabled",
+        "RelWithDebInfo"
+      ],
+      "displayName": "macOS, PIE Enabled, RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -273,14 +353,132 @@
       }
     },
     {
-      "name": "windows-default",
+      "name": "macos-pie-disabled-RelWithDebInfo",
+      "inherits": [
+        "macos-default",
+        "pie-disabled",
+        "RelWithDebInfo"
+      ],
+      "displayName": "macOS, Pie Disabled, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-default",
+      "hidden": true,
+      "inherits": "default",
+      "displayName": "macOS (MacPorts) Default",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      },
+      "environment": {
+        "VERBOSE": "ON"
+      },
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "/opt/local",
+        "Boost_INCLUDE_DIR": "/opt/local/libexec/boost/1.81/include",
+        "CMAKE_FIND_FRAMEWORK": "LAST"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-debug",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-enabled",
+        "debug"
+      ],
+      "displayName": "macOS (MacPorts), PIE Enabled, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-release",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-enabled",
+        "release"
+      ],
+      "displayName": "macOS (MacPorts), PIE Enabled, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-enabled-RelWithDebInfo",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-enabled",
+        "RelWithDebInfo"
+      ],
+      "displayName": "macOS (MacPorts), PIE Enabled, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-debug",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-disabled",
+        "debug"
+      ],
+      "displayName": "macOS (MacPorts), PIE Disabled, Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-release",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-disabled",
+        "release"
+      ],
+      "displayName": "macOS (MacPorts), Pie Disabled, Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macOS-MacPorts-pie-disabled-RelWithDebInfo",
+      "inherits": [
+        "macOS-MacPorts-default",
+        "pie-disabled",
+        "RelWithDebInfo"
+      ],
+      "displayName": "macOS (MacPorts), Pie Disabled, RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "windows-base",
       "hidden": true,
       "inherits": "default",
       "displayName": "Windows Default",
       "description": "Default build for Windows",
       "environment": {
         "VCPKG_TARGET_TRIPLET": "x64-windows-win10",
-        "VCPKG_HOST_TRIPLET": "x64-windows-win10"
+        "VCPKG_HOST_TRIPLET": "x64-windows-win10",
+        "X_VCPKG_APPLOCAL_DEPS_INSTALL": "ON"
       },
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": {
@@ -303,7 +501,7 @@
     {
       "name": "VS2019Win64",
       "hidden": true,
-      "inherits": "windows-default",
+      "inherits": "windows-base",
       "displayName": "Visual Studio 2019 on Windows x64",
       "generator": "Visual Studio 16 2019",
       "architecture": "X64",
@@ -316,7 +514,7 @@
     {
       "name": "VS2022Win64",
       "hidden": true,
-      "inherits": "windows-default",
+      "inherits": "windows-base",
       "displayName": "Visual Studio 2022 on Windows x64",
       "generator": "Visual Studio 17 2022",
       "architecture": "X64",
@@ -329,7 +527,7 @@
     {
       "name": "ninja-windows",
       "hidden": true,
-      "inherits": "windows-default",
+      "inherits": "windows-base",
       "displayName": "Ninja on Windows",
       "generator": "Ninja Multi-Config",
       "condition": {
@@ -367,6 +565,20 @@
       }
     },
     {
+      "name": "windows-ninja-pie-enabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Enabled, RelWithDebInfo",
+      "inherits": [
+        "ninja-windows",
+        "pie-enabled",
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "windows-ninja-pie-disabled-debug",
       "displayName": "Windows, Ninja, PIE Disabled, Debug",
       "inherits": [
@@ -387,6 +599,20 @@
         "ninja-windows",
         "pie-disabled",
         "release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-ninja-pie-disabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Disabled, RelWithDebInfo",
+      "inherits": [
+        "ninja-windows",
+        "pie-disabled",
+        "RelWithDebInfo"
       ],
       "condition": {
         "type": "equals",
@@ -423,6 +649,20 @@
       }
     },
     {
+      "name": "VS2019Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Enabled, RelWithDebInfo",
+      "inherits": [
+        "VS2019Win64",
+        "pie-enabled",
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "VS2019Win64-pie-disabled-debug",
       "displayName": "VS2019Win64, PIE Disabled, Debug",
       "inherits": [
@@ -443,6 +683,20 @@
         "VS2019Win64",
         "pie-disabled",
         "release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2019Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Disabled, RelWithDebInfo",
+      "inherits": [
+        "VS2019Win64",
+        "pie-disabled",
+        "RelWithDebInfo"
       ],
       "condition": {
         "type": "equals",
@@ -479,6 +733,20 @@
       }
     },
     {
+      "name": "VS2022Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Enabled, RelWithDebInfo",
+      "inherits": [
+        "VS2022Win64",
+        "pie-enabled",
+        "RelWithDebInfo"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "VS2022Win64-pie-disabled-debug",
       "displayName": "VS2022Win64, PIE Disabled, Debug",
       "inherits": [
@@ -499,6 +767,20 @@
         "VS2022Win64",
         "pie-disabled",
         "release"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "VS2022Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "inherits": [
+        "VS2022Win64",
+        "pie-disabled",
+        "RelWithDebInfo"
       ],
       "condition": {
         "type": "equals",
@@ -531,6 +813,17 @@
       }
     },
     {
+      "name": "build-linux-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "build-linux-pie-enabled-legacy-gl-debug",
       "configurePreset": "linux-pie-enabled-legacy-gl-debug",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
@@ -546,6 +839,17 @@
       "configurePreset": "linux-pie-enabled-legacy-gl-release",
       "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
       "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -575,6 +879,17 @@
       }
     },
     {
+      "name": "build-linux-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "build-linux-pie-disabled-legacy-gl-debug",
       "configurePreset": "linux-pie-disabled-legacy-gl-debug",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
@@ -590,6 +905,17 @@
       "configurePreset": "linux-pie-disabled-legacy-gl-release",
       "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
       "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "build-linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -619,6 +945,17 @@
       }
     },
     {
+      "name": "build-macos-pie-enabled-RelWithDebInfo",
+      "configurePreset": "macos-pie-enabled-RelWithDebInfo",
+      "displayName": "macOS, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
       "name": "build-macos-pie-disabled-debug",
       "configurePreset": "macos-pie-disabled-debug",
       "displayName": "macOS, PIE Disabled, Debug",
@@ -634,6 +971,83 @@
       "configurePreset": "macos-pie-disabled-release",
       "displayName": "macOS, PIE Disabled, Release",
       "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macos-pie-disabled-RelWithDebInfo",
+      "configurePreset": "macos-pie-disabled-RelWithDebInfo",
+      "displayName": "macOS, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-enabled-debug",
+      "displayName": "macOS (MacPorts), PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-release",
+      "configurePreset": "macOS-MacPorts-pie-enabled-release",
+      "displayName": "macOS (MacPorts), PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-enabled-RelWithDebInfo",
+      "configurePreset": "macOS-MacPorts-pie-enabled-RelWithDebInfo",
+      "displayName": "macOS (MacPorts), PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-disabled-debug",
+      "displayName": "macOS (MacPorts), PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-release",
+      "configurePreset": "macOS-MacPorts-pie-disabled-release",
+      "displayName": "macOS (MacPorts), PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "build-macOS-MacPorts-pie-disabled-RelWithDebInfo",
+      "configurePreset": "macOS-MacPorts-pie-disabled-RelWithDebInfo",
+      "displayName": "macOS (MacPorts), PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -663,6 +1077,17 @@
       }
     },
     {
+      "name": "build-windows-ninja-pie-enabled-RelWithDebInfo",
+      "configurePreset": "windows-ninja-pie-enabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "build-windows-ninja-pie-disabled-debug",
       "configurePreset": "windows-ninja-pie-disabled-debug",
       "displayName": "Windows, Ninja, PIE Disabled, Debug",
@@ -678,6 +1103,17 @@
       "configurePreset": "windows-ninja-pie-disabled-release",
       "displayName": "Windows, Ninja, PIE Disabled, Release",
       "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-windows-ninja-pie-disabled-RelWithDebInfo",
+      "configurePreset": "windows-ninja-pie-disabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -707,6 +1143,17 @@
       }
     },
     {
+      "name": "build-VS2019Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2019Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "build-VS2019Win64-pie-disabled-debug",
       "configurePreset": "VS2019Win64-pie-disabled-debug",
       "displayName": "VS2019Win64, PIE Disabled, Debug",
@@ -722,6 +1169,17 @@
       "configurePreset": "VS2019Win64-pie-disabled-release",
       "displayName": "VS2019Win64, PIE Disabled, Release",
       "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2019Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2019Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -751,6 +1209,17 @@
       }
     },
     {
+      "name": "build-VS2022Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2022Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
       "name": "build-VS2022Win64-pie-disabled-debug",
       "configurePreset": "VS2022Win64-pie-disabled-debug",
       "displayName": "VS2022Win64, PIE Disabled, Debug",
@@ -766,6 +1235,945 @@
       "configurePreset": "VS2022Win64-pie-disabled-release",
       "displayName": "VS2022Win64, PIE Disabled, Release",
       "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-VS2022Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-linux-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-pie-enabled-glvnd-debug",
+      "displayName": "Linux, PIE Enabled, GLVND, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-enabled-glvnd-release",
+      "configurePreset": "linux-pie-enabled-glvnd-release",
+      "displayName": "Linux, PIE Enabled, GLVND, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-pie-disabled-glvnd-debug",
+      "displayName": "Linux, PIE Disabled, GLVND, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-disabled-glvnd-release",
+      "configurePreset": "linux-pie-disabled-glvnd-release",
+      "displayName": "Linux, PIE Disabled, GLVND, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "test-macos-pie-enabled-debug",
+      "configurePreset": "macos-pie-enabled-debug",
+      "displayName": "macOS, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macos-pie-enabled-release",
+      "configurePreset": "macos-pie-enabled-release",
+      "displayName": "macOS, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macos-pie-enabled-RelWithDebInfo",
+      "configurePreset": "macos-pie-enabled-RelWithDebInfo",
+      "displayName": "macOS, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macos-pie-disabled-debug",
+      "configurePreset": "macos-pie-disabled-debug",
+      "displayName": "macOS, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macos-pie-disabled-release",
+      "configurePreset": "macos-pie-disabled-release",
+      "displayName": "macOS, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macos-pie-disabled-RelWithDebInfo",
+      "configurePreset": "macos-pie-disabled-RelWithDebInfo",
+      "displayName": "macOS, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-enabled-debug",
+      "displayName": "macOS (MacPorts), PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-release",
+      "configurePreset": "macOS-MacPorts-pie-enabled-release",
+      "displayName": "macOS (MacPorts), PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-enabled-RelWithDebInfo",
+      "configurePreset": "macOS-MacPorts-pie-enabled-RelWithDebInfo",
+      "displayName": "macOS (MacPorts), PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-disabled-debug",
+      "displayName": "macOS (MacPorts), PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-release",
+      "configurePreset": "macOS-MacPorts-pie-disabled-release",
+      "displayName": "macOS (MacPorts), PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-macOS-MacPorts-pie-disabled-RelWithDebInfo",
+      "configurePreset": "macOS-MacPorts-pie-disabled-RelWithDebInfo",
+      "displayName": "macOS (MacPorts), PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "test-windows-ninja-pie-enabled-debug",
+      "configurePreset": "windows-ninja-pie-enabled-debug",
+      "displayName": "Windows, Ninja, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-windows-ninja-pie-enabled-release",
+      "configurePreset": "windows-ninja-pie-enabled-release",
+      "displayName": "Windows, Ninja, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-windows-ninja-pie-enabled-RelWithDebInfo",
+      "configurePreset": "windows-ninja-pie-enabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-windows-ninja-pie-disabled-debug",
+      "configurePreset": "windows-ninja-pie-disabled-debug",
+      "displayName": "Windows, Ninja, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-windows-ninja-pie-disabled-release",
+      "configurePreset": "windows-ninja-pie-disabled-release",
+      "displayName": "Windows, Ninja, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-windows-ninja-pie-disabled-RelWithDebInfo",
+      "configurePreset": "windows-ninja-pie-disabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-debug",
+      "configurePreset": "VS2019Win64-pie-enabled-debug",
+      "displayName": "VS2019Win64, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-release",
+      "configurePreset": "VS2019Win64-pie-enabled-release",
+      "displayName": "VS2019Win64, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2019Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2019Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-debug",
+      "configurePreset": "VS2019Win64-pie-disabled-debug",
+      "displayName": "VS2019Win64, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-release",
+      "configurePreset": "VS2019Win64-pie-disabled-release",
+      "displayName": "VS2019Win64, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2019Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2019Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-debug",
+      "configurePreset": "VS2022Win64-pie-enabled-debug",
+      "displayName": "VS2022Win64, PIE Enabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-release",
+      "configurePreset": "VS2022Win64-pie-enabled-release",
+      "displayName": "VS2022Win64, PIE Enabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2022Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2022Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Enabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-debug",
+      "configurePreset": "VS2022Win64-pie-disabled-debug",
+      "displayName": "VS2022Win64, PIE Disabled, Debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-release",
+      "configurePreset": "VS2022Win64-pie-disabled-release",
+      "displayName": "VS2022Win64, PIE Disabled, Release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "test-VS2022Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "package-linux-pie-enabled-glvnd-debug",
+      "configurePreset": "linux-pie-enabled-glvnd-debug",
+      "displayName": "Linux, PIE Enabled, GLVND, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-enabled-glvnd-release",
+      "configurePreset": "linux-pie-enabled-glvnd-release",
+      "displayName": "Linux, PIE Enabled, GLVND, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-enabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-pie-enabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, PIE Enabled, GLVND, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-enabled-legacy-gl-debug",
+      "configurePreset": "linux-pie-enabled-legacy-gl-debug",
+      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-enabled-legacy-gl-release",
+      "configurePreset": "linux-pie-enabled-legacy-gl-release",
+      "displayName": "Linux, PIE Enabled, Legacy OpenGL, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-pie-enabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, PIE Enabled, Legacy OpenGL, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-disabled-glvnd-debug",
+      "configurePreset": "linux-pie-disabled-glvnd-debug",
+      "displayName": "Linux, PIE Disabled, GLVND, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-disabled-glvnd-release",
+      "configurePreset": "linux-pie-disabled-glvnd-release",
+      "displayName": "Linux, PIE Disabled, GLVND, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-disabled-glvnd-RelWithDebInfo",
+      "configurePreset": "linux-pie-disabled-glvnd-RelWithDebInfo",
+      "displayName": "Linux, PIE Disabled, GLVND, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-disabled-legacy-gl-debug",
+      "configurePreset": "linux-pie-disabled-legacy-gl-debug",
+      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-disabled-legacy-gl-release",
+      "configurePreset": "linux-pie-disabled-legacy-gl-release",
+      "displayName": "Linux, PIE Disabled, Legacy OpenGL, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "configurePreset": "linux-pie-disabled-legacy-gl-RelWithDebInfo",
+      "displayName": "Linux, PIE Disabled, Legacy OpenGL, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "package-macos-pie-enabled-debug",
+      "configurePreset": "macos-pie-enabled-debug",
+      "displayName": "macOS, PIE Enabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macos-pie-enabled-release",
+      "configurePreset": "macos-pie-enabled-release",
+      "displayName": "macOS, PIE Enabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macos-pie-enabled-RelWithDebInfo",
+      "configurePreset": "macos-pie-enabled-RelWithDebInfo",
+      "displayName": "macOS, PIE Enabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macos-pie-disabled-debug",
+      "configurePreset": "macos-pie-disabled-debug",
+      "displayName": "macOS, PIE Disabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macos-pie-disabled-release",
+      "configurePreset": "macos-pie-disabled-release",
+      "displayName": "macOS, PIE Disabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macos-pie-disabled-RelWithDebInfo",
+      "configurePreset": "macos-pie-disabled-RelWithDebInfo",
+      "displayName": "macOS, PIE Disabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macOS-MacPorts-pie-enabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-enabled-debug",
+      "displayName": "macOS (MacPorts), PIE Enabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macOS-MacPorts-pie-enabled-release",
+      "configurePreset": "macOS-MacPorts-pie-enabled-release",
+      "displayName": "macOS (MacPorts), PIE Enabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macOS-MacPorts-pie-enabled-RelWithDebInfo",
+      "configurePreset": "macOS-MacPorts-pie-enabled-RelWithDebInfo",
+      "displayName": "macOS (MacPorts), PIE Enabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macOS-MacPorts-pie-disabled-debug",
+      "configurePreset": "macOS-MacPorts-pie-disabled-debug",
+      "displayName": "macOS (MacPorts), PIE Disabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macOS-MacPorts-pie-disabled-release",
+      "configurePreset": "macOS-MacPorts-pie-disabled-release",
+      "displayName": "macOS (MacPorts), PIE Disabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-macOS-MacPorts-pie-disabled-RelWithDebInfo",
+      "configurePreset": "macOS-MacPorts-pie-disabled-RelWithDebInfo",
+      "displayName": "macOS (MacPorts), PIE Disabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "package-windows-ninja-pie-enabled-debug",
+      "configurePreset": "windows-ninja-pie-enabled-debug",
+      "displayName": "Windows, Ninja, PIE Enabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-windows-ninja-pie-enabled-release",
+      "configurePreset": "windows-ninja-pie-enabled-release",
+      "displayName": "Windows, Ninja, PIE Enabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-windows-ninja-pie-enabled-RelWithDebInfo",
+      "configurePreset": "windows-ninja-pie-enabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Enabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-windows-ninja-pie-disabled-debug",
+      "configurePreset": "windows-ninja-pie-disabled-debug",
+      "displayName": "Windows, Ninja, PIE Disabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-windows-ninja-pie-disabled-release",
+      "configurePreset": "windows-ninja-pie-disabled-release",
+      "displayName": "Windows, Ninja, PIE Disabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-windows-ninja-pie-disabled-RelWithDebInfo",
+      "configurePreset": "windows-ninja-pie-disabled-RelWithDebInfo",
+      "displayName": "Windows, Ninja, PIE Disabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2019Win64-pie-enabled-debug",
+      "configurePreset": "VS2019Win64-pie-enabled-debug",
+      "displayName": "VS2019Win64, PIE Enabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2019Win64-pie-enabled-release",
+      "configurePreset": "VS2019Win64-pie-enabled-release",
+      "displayName": "VS2019Win64, PIE Enabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2019Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2019Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Enabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2019Win64-pie-disabled-debug",
+      "configurePreset": "VS2019Win64-pie-disabled-debug",
+      "displayName": "VS2019Win64, PIE Disabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2019Win64-pie-disabled-release",
+      "configurePreset": "VS2019Win64-pie-disabled-release",
+      "displayName": "VS2019Win64, PIE Disabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2019Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2019Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2019Win64, PIE Disabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2022Win64-pie-enabled-debug",
+      "configurePreset": "VS2022Win64-pie-enabled-debug",
+      "displayName": "VS2022Win64, PIE Enabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2022Win64-pie-enabled-release",
+      "configurePreset": "VS2022Win64-pie-enabled-release",
+      "displayName": "VS2022Win64, PIE Enabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2022Win64-pie-enabled-RelWithDebInfo",
+      "configurePreset": "VS2022Win64-pie-enabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Enabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2022Win64-pie-disabled-debug",
+      "configurePreset": "VS2022Win64-pie-disabled-debug",
+      "displayName": "VS2022Win64, PIE Disabled, Debug",
+      "configurations": [ "Debug" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2022Win64-pie-disabled-release",
+      "configurePreset": "VS2022Win64-pie-disabled-release",
+      "displayName": "VS2022Win64, PIE Disabled, Release",
+      "configurations": [ "Release" ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "package-VS2022Win64-pie-disabled-RelWithDebInfo",
+      "configurePreset": "VS2022Win64-pie-disabled-RelWithDebInfo",
+      "displayName": "VS2022Win64, PIE Disabled, RelWithDebInfo",
+      "configurations": [ "RelWithDebInfo" ],
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
