@@ -1,7 +1,7 @@
 /*
  * collide_map.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -585,8 +585,9 @@ bool CollideMap::CheckCollisions(Unit *un, const Collidable &updated) {
     //need to check beams
     if (un->activeStarSystem == nullptr) {
         un->activeStarSystem = _Universe->activeStarSystem();
-    } else
+    } else {
         assert(un->activeStarSystem == _Universe->activeStarSystem());
+    }
     return CollideChecker<Unit, true>::CheckCollisions(this, un, updated, Unit::UNIT_BOLT);
 }
 

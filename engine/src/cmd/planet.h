@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, pyramid3d,
+ * planet.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, Roy Falk, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -164,7 +166,7 @@ public:
             bool inside_out);
 
     void DisableLights();
-    virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix);
+    void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix) override;
     void DrawTerrain();
     void EnableLights();
     void endElement();

@@ -1,7 +1,7 @@
 /*
  * cg_global.h
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Benjamen R. Meyer, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -31,7 +31,7 @@
 #elif !defined (WIN32)
 #define UNIX 1
 
-#endif //defined (__APPLE__) || defined (MACOSX)
+#endif
 
 #include "gldrv/gl_globals.h"
 

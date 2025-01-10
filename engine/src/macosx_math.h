@@ -1,7 +1,7 @@
 /*
  * macosx_math.h
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -35,7 +35,7 @@ extern float sinf( float v );
 extern float tanf( float v );
 extern float powf( float v, float p );
 
-#endif //defined (__APPLE__) || defined (MACOSX)
+#endif
 
 #endif //VEGA_STRIKE_ENGINE_MACOSX_MATH
 

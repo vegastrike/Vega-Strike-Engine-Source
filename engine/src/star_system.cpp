@@ -1,7 +1,7 @@
 /*
  * star_system.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -282,9 +282,9 @@ public:
         if (parenttarget == unit || (parenttarget && parenttarget->isSubUnit() && parenttarget->owner == unit)) {
             parenttarget = nullptr;
         }
-        float backup = simulation_atom_var;
+        const float backup = simulation_atom_var;
         //VS_LOG(trace, (boost::format("UnitDrawer::draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
-        unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+        const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         interpolation_blend_factor = calc_blend_factor(saved_interpolation_blend_factor, unit->sim_atom_multiplier,
                 unit->cur_sim_queue_slot,
                 cur_sim_frame);
@@ -344,9 +344,9 @@ void StarSystem::Draw(bool DrawCockpit) {
         }
         //Array containing the two interesting units, so as not to have to copy-paste code
         Unit *camunits[2] = {saveparent, targ};
-        float backup = simulation_atom_var;
+        const float backup = simulation_atom_var;
         //VS_LOG(trace, (boost::format("StarSystem::Draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
-        unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+        const unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         for (int i = 0; i < 2; ++i) {
             Unit *unit = camunits[i];
             //Make sure unit is not null;
@@ -931,9 +931,9 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
             }
             throw;
         }
-//        double c0 = queryTime();
+//        double c0 = realTime();
         Bolt::UpdatePhysics(this);
-//        double cc = queryTime();
+//        double cc = realTime();
         last_collisions.clear();
         collide_map[Unit::UNIT_BOLT]->flatten();
         if (Unit::NUM_COLLIDE_MAPS > 1) {
@@ -941,8 +941,8 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
         }
         Unit *unit;
         for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter);) {
-            unsigned int priority = unit->sim_atom_multiplier;
-            float backup = simulation_atom_var;
+            const unsigned int priority = unit->sim_atom_multiplier;
+            const float backup = simulation_atom_var;
             //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg E: simulation_atom_var as backed up:  %1%") % simulation_atom_var));
             simulation_atom_var *= priority;
             //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg F: simulation_atom_var as multiplied: %1%") % simulation_atom_var));
@@ -956,7 +956,7 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                 iter.moveBefore(physics_buffer[newloc]);
             }
         }
-//        double dd = queryTime();
+//        double dd = realTime();
 //        collidetime += dd - cc;
 //        bolttime += cc - c0;
         current_sim_location = (current_sim_location + 1) % SIM_QUEUE_SIZE;
@@ -1108,7 +1108,7 @@ void StarSystem::Update(float priority, bool executeDirector) {
             priority = 1;
         }
     }
-    float normal_simulation_atom = simulation_atom_var;
+    const float normal_simulation_atom = simulation_atom_var;
     //VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Msg A: simulation_atom_var as backed up  = %1%") % simulation_atom_var));
     simulation_atom_var /= (priority / getTimeCompression());
     //VS_LOG(trace, (boost::format("void StarSystem::Update( float priority, bool executeDirector ): Msg B: simulation_atom_var as multiplied = %1%") % simulation_atom_var));
@@ -1175,8 +1175,8 @@ void StarSystem::Update(float priority, bool executeDirector) {
                 if (this == _Universe->getActiveStarSystem(0)) {
                     UpdateCameraSnds();
                 }
-                bolttime = queryTime();
-                bolttime = queryTime() - bolttime;
+                bolttime = realTime();
+                bolttime = realTime() - bolttime;
                 double processUnitStageEndTime = realTime();
                 processUnitTimeSubtotal += (processUnitStageEndTime - processUnitStageStartTime);
                 updateCameraSoundsTimeSubtotal += (processUnitStageEndTime - collideTableUpdateDoneTime);
