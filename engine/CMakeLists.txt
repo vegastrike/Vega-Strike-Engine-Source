@@ -305,6 +305,7 @@ IF (NOT DISABLE_CLIENT) ##########
         MESSAGE(STATUS "OpenMP found!")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
         LIST(APPEND VS_INCLUDE_DIRS OpenMP_CXX_INCLUDE_DIRS)
+        SET(HAVE_OpenMP 1)
     ELSE ()
         MESSAGE(STATUS "OpenMP not found")
     ENDIF ()

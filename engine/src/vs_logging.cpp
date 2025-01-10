@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2021-2022 Daniel Horn, Stephen G. Tuggy and
+ * vs_logging.cpp
+ *
+ * Copyright (C) 2021-2025 Daniel Horn, Stephen G. Tuggy and
  * other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -83,7 +85,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level,
                     boost::log::keywords::format =
                             "[%TimeStamp%]: %Message%",                                     /*< log record format >*/
                     boost::log::keywords::auto_flush =
-                            true, /*false,*/                                                /*< whether to auto flush to the file after every line >*/
+                            false, /*true,*/                                                /*< whether to auto flush to the file after every line >*/
                     boost::log::keywords::min_free_space = 2UL * 1024UL * 1024UL
                             * 1024UL                                      /*< stop boost::log when there's only 2 GiB free space left >*/
             );
@@ -113,7 +115,7 @@ VegaStrikeLogger::VegaStrikeLogger() {
                     boost::log::keywords::format =
                             "%Message%",                                                    /*< log record format specific to the console >*/
                     boost::log::keywords::auto_flush =
-                            true /*false*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+                            false /*true*/                                                  /*< whether to do the equivalent of fflush(stdout) after every msg >*/
             );
     file_log_sink_ = nullptr;
 }
