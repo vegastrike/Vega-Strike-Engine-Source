@@ -247,11 +247,9 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
-//#if SDL_VERSION_ATLEAST(1, 2, 10)
     if (game_options()->gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-//#endif
     width = configuration()->graphics2_config.resolution_x;
     height = configuration()->graphics2_config.resolution_y;
     const int screen_number = configuration()->graphics2_config.screen;
