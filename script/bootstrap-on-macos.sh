@@ -53,6 +53,10 @@ do
     export CMAKE_PREFIX_PATH="$PACKAGE_INSTALLED_PREFIX:$CMAKE_PREFIX_PATH"
 done
 
+# Keep these lines! Otherwise you will likely get PFNGL... not found errors.
+ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
+ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
+
 OPENALDIR="$(brew --prefix openal-soft)"
 export OPENALDIR
 
