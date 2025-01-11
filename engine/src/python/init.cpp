@@ -1,7 +1,7 @@
 /*
  * init.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -164,6 +164,16 @@ void Python::init() {
     }
     isinit = true;
 //initialize python library
+    PyPreConfig py_pre_config;
+    PyPreConfig_InitPythonConfig(&py_pre_config);
+
+    PyStatus status;
+
+    status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+
     Py_NoSiteFlag = 1;
 
 // These functions add these modules to the builtin package
@@ -173,13 +183,31 @@ void Python::init() {
     InitDirector();
 
 // Add relevant paths to python path
-    const std::string python_path_string = GetPythonPath() 
-                                           + ":" + VSFileSystem::programdir
-                                           + ":" + VSFileSystem::datadir + "/python/base_computer/";
-    const std::wstring python_path_wstring = std::wstring(python_path_string.begin(), 
-                                                          python_path_string.end());
-    const wchar_t* python_path = python_path_wstring.c_str();
-    Py_SetPath(python_path);
+    const std::string python_path = GetPythonPath();
+    const std::wstring python_path_w(python_path.begin(), python_path.end());
+    const std::wstring program_dir_w = std::wstring(VSFileSystem::programdir.begin(), VSFileSystem::programdir.end());
+    const std::string base_computer_path = VSFileSystem::datadir + "/python/base_computer/";
+    const std::wstring base_computer_path_w = std::wstring(base_computer_path.begin(), base_computer_path.end());
+
+    PyWideStringList python_path_py_wide_string_list{};
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, program_dir_w.c_str());
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, base_computer_path_w.c_str());
+    if (PyStatus_Exception(status)) {
+        Py_ExitStatusException(status);
+    }
+
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+
+    config.module_search_paths = python_path_py_wide_string_list;
+    config.isolated = 0;
 
 // Now we can do python things about them and initialize them
     Py_Initialize();

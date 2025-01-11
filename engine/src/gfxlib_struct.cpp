@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * gfxlib_struct.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -340,10 +342,10 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
 
         ++gl_batches_this_frame;
     } else {
-        int totoffset = 0;
+        uint64_t totoffset = 0;
         if (changed & HAS_INDEX) {
-            long stride = changed & HAS_INDEX;
-            GLenum indextype = (changed & INDEX_BYTE)
+            const uint64_t stride = changed & HAS_INDEX;
+            const GLenum indextype = (changed & INDEX_BYTE)
                     ? GL_UNSIGNED_BYTE
                     : ((changed & INDEX_SHORT)
                             ? GL_UNSIGNED_SHORT
@@ -363,7 +365,7 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                 }
                 #endif
             }
-            if (glMultiDrawElements_p != NULL && numlists > 1) {
+            if (glMultiDrawElements_p != nullptr && numlists > 1) {
                 static std::vector<bool> drawn;
                 static std::vector<const GLvoid *> glindices;
                 static std::vector<GLsizei> glcounts;
@@ -375,11 +377,11 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
                         glindices.clear();
                         glcounts.clear();
                         int totcount = 0;
-                        for (long j = i, offs = totoffset; j < numlists; offs += offsets[j++]) {
+                        for (uint64_t j = i, offs = totoffset; j < numlists; offs += offsets[j++]) {
                             totcount += offsets[j];
                             if (!drawn[j] && (mode[j] == mode[i])) {
-                                glindices.push_back(use_vbo ? (GLvoid *) (stride * offs)
-                                        : (GLvoid *) &index.b[stride * offs]);
+                                glindices.push_back(use_vbo ? reinterpret_cast<GLvoid *>(stride * offs)
+                                        : static_cast<GLvoid *>(&index.b[stride * offs]));
                                 glcounts.push_back(offsets[j]);
                                 drawn[j] = true;
                             }
@@ -397,9 +399,9 @@ void GFXVertexList::Draw(enum POLYTYPE *mode, const INDEX index, const int numli
             } else {
                 for (int i = 0; i < numlists; i++) {
                     glDrawElements(PolyLookup(mode[i]), offsets[i], indextype,
-                            use_vbo ? (GLvoid *) (stride * totoffset)
-                                    : (GLvoid *) &index.b[stride
-                                    * totoffset]);                     //changed&INDEX_BYTE == stride!
+                            use_vbo ? reinterpret_cast<GLvoid *>(stride * totoffset)
+                                    : static_cast<GLvoid *>(&index.b[stride
+                                                                     * totoffset]));                     //changed&INDEX_BYTE == stride!
                     totoffset += offsets[i];
                     ++gl_batches_this_frame;
                     gl_vertices_this_frame += offsets[i];

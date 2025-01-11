@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2001-2023 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -30,190 +30,49 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
-
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
-
-SET(VEGASTRIKE_VERSION_MAJOR "0")
-SET(VEGASTRIKE_VERSION_MINOR "10")
-SET(VEGASTRIKE_VERSION_PATCH "0")
-
-IF (DEFINED ENV{SHORT_SHA} AND NOT "$ENV{SHORT_SHA}" STREQUAL "")
-    SET(VEGASTRIKE_VERSION_TWEAK "$ENV{SHORT_SHA}")
-ELSE ()
-    SET (GIT_ROOT_DIR "${CMAKE_SOURCE_DIR}/..")
-    MESSAGE("-- CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
-    MESSAGE("-- GIT_ROOT_DIR = ${GIT_ROOT_DIR}")
-    EXECUTE_PROCESS(
-            COMMAND git rev-parse --short HEAD
-            WORKING_DIRECTORY ${GIT_ROOT_DIR}
-            OUTPUT_VARIABLE VEGASTRIKE_VERSION_TWEAK
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-ENDIF ()
-
-SET(VEGASTRIKE_VERSION_LONG_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}-${VEGASTRIKE_VERSION_TWEAK}")
-SET(VEGASTRIKE_VERSION_SHORT_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}")
-SET(VEGASTRIKE_PKG_VERSION_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}")
-
-IF (DEFINED ENV{TAG_NAME} AND NOT "$ENV{TAG_NAME}" STREQUAL "")
-    STRING(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" TAG_VERSION_MAJOR "$ENV{TAG_NAME}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" TAG_VERSION_MINOR "$ENV{TAG_NAME}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" TAG_VERSION_PATCH "$ENV{TAG_NAME}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" TAG_VERSION_TWEAK "$ENV{TAG_NAME}")
-
-    SET(TAG_VERSION_SHORT_STR "${TAG_VERSION_MAJOR}.${TAG_VERSION_MINOR}.${TAG_VERSION_PATCH}")
-
-    IF (NOT "${VEGASTRIKE_VERSION_SHORT_STR}" VERSION_EQUAL "${TAG_VERSION_SHORT_STR}")
-        MESSAGE(FATAL_ERROR "!! Project version spelled out in CMake file does not match project version from TAG_NAME environment variable")
-    ENDIF ()
-    IF (NOT "${TAG_VERSION_TWEAK}" STREQUAL "")
-        SET(VEGASTRIKE_VERSION_LONG_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}${TAG_VERSION_TWEAK}-${VEGASTRIKE_VERSION_TWEAK}")
-        SET(VEGASTRIKE_PKG_VERSION_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}${TAG_VERSION_TWEAK}")
-    ENDIF ()
-ENDIF ()
-
-# API Version for Game Assets
-# This is an incrementing number similar to the Google Android API Version
-# allowing us to differentiate our Assets API across multiple versions.
-# If a release is missing this value, then version `1` can be assumed.
-SET(VEGASTRIKE_ASSETS_API_VERSION "3")
-
-#IF (COMMAND cmake_policy)
-#    CMAKE_POLICY (SET CMP0003 NEW)
-#ENDIF (COMMAND cmake_policy)
-#
-## VERSION Policy
-#IF (POLICY CMP0048)
-#    CMAKE_POLICY (SET CMP0048 NEW)
-#ENDIF (POLICY CMP0048)
-#
-## Used to be that without this, CMake couldn't find pow() -- at least not on my Windows machine.
-#IF (POLICY CMP0066)
-#    CMAKE_POLICY (SET CMP0066 NEW)
-#ENDIF ()
-#
-## FindOpenGL prefers GLVND by default when available. But there is an option to override that.
-#IF (POLICY CMP0072)
-#    CMAKE_POLICY (SET CMP0072 NEW)
-#ENDIF (POLICY CMP0072)
-#
-## find_package() uses <PackageName>_ROOT variables
-#IF (POLICY CMP0074)
-#    CMAKE_POLICY (SET CMP0074 NEW)
-#ENDIF (POLICY CMP0074)
-#
-## Include file check macros honor CMAKE_REQUIRED_LIBRARIES
-#IF (POLICY CMP0075)
-#    CMAKE_POLICY (SET CMP0075 NEW)
-#ENDIF ()
-#
-## Concerning link time flags for turning on or off Position Independent Executables (PIE)
-#IF (POLICY CMP0083)
-#    CMAKE_POLICY (SET CMP0083 NEW)
-#ENDIF ()
-#
-## MSVC runtime library flags are selected by an abstraction. Supported by CMake 3.15 and up
-#IF (POLICY CMP0091)
-#    CMAKE_POLICY (SET CMP0091 NEW)
-#ENDIF ()
-
-# TODO: this suppresses warnings about CMP0102 caching. 
-# We should do something about it instead.
-CMAKE_POLICY(SET CMP0102 OLD)
-
-PROJECT(Vega_Strike
-    VERSION
-    "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
-    LANGUAGES
-    CXX C
-)
+MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 # One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
 
-MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
-
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-SET(CMAKE_CXX_EXTENSIONS ON)
-SET(CMAKE_C_STANDARD 11)
-SET(CMAKE_C_STANDARD_REQUIRED TRUE)
-SET(CMAKE_C_EXTENSIONS ON)
-
-UNSET(PYTHONLIBS_FOUND)
-UNSET(Boost_FOUND)
-UNSET(Boost_python3_FOUND)
-UNSET(OPENGL_FOUND)
-UNSET(OPENGL_GLU_FOUND)
-UNSET(GLUT_FOUND)
-UNSET(OPENAL_FOUND)
-UNSET(SDL_FOUND)
-UNSET(VORBIS_FOUND)
-UNSET(JPEG_FOUND)
-UNSET(PNG_FOUND)
-UNSET(ZLIB_FOUND)
-UNSET(EXPAT_FOUND)
-UNSET(MATH_FOUND)
-UNSET(FFMPEG_FOUND)
-UNSET(OGRE_FOUND)
-UNSET(Boost_DIR)
-
 SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
 
-IF (XCODE)
-    SET(CMAKE_FIND_FRAMEWORK "LAST")
-ENDIF (XCODE)
-
+LIST(APPEND
+    VS_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmd
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/components
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/damage
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/resource
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/python/base_computer
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/python/config
+    ${Vega_Strike_BINARY_DIR}
+    ${Vega_Strike_BINARY_DIR}/src
+)
 IF (UNIX)
-    INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_SOURCE_DIR}/src/damage
-        ${Vega_Strike_SOURCE_DIR}/src/resource
-        ${Vega_Strike_SOURCE_DIR}/src/components
-        ${Vega_Strike_SOURCE_DIR}/src/python/base_computer
-        ${Vega_Strike_SOURCE_DIR}/src/python/config
-        ${Vega_Strike_BINARY_DIR}
-        ${Vega_Strike_BINARY_DIR}/src
+    LIST(APPEND
+        VS_INCLUDE_DIRS
         /usr/include/harfbuzz/
     )
-ELSE ()
-    INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_SOURCE_DIR}/src/damage
-        ${Vega_Strike_SOURCE_DIR}/src/resource
-        ${Vega_Strike_SOURCE_DIR}/src/components
-        ${Vega_Strike_SOURCE_DIR}/src/python/base_computer
-        ${Vega_Strike_SOURCE_DIR}/src/python/config
-        ${Vega_Strike_BINARY_DIR}
-        ${Vega_Strike_BINARY_DIR}/src
-    )
-ENDIF ()
+ENDIF (UNIX)
+MESSAGE("VS INCLUDE DIRS: ${VS_INCLUDE_DIRS}")
 
 # The source files used to be listed here...
-
 
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
 INCLUDE(CMakePushCheckState)
-# cmake_push_check_state()
-UNSET(COMPILER_SPECIFIC_FLAGS)
 SET(SIZEOF_VOID_P CMAKE_SIZEOF_VOID_P)
-# SET(CMAKE_REQUIRED_LINK_OPTIONS "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}")
-# CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P) #BUILTIN_TYPES_ONLY)
-# cmake_pop_check_state()
-
 
 #Find Math
 INCLUDE(CheckSymbolExists)
 IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
     # cmake_push_check_state()
-    UNSET(COMPILER_SPECIFIC_FLAGS)
     check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
     IF(NOT POW_FUNCTION_EXISTS)
         UNSET(POW_FUNCTION_EXISTS CACHE)
@@ -235,11 +94,6 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
-
-#IF (NOT BUILD_OPT)
-#    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
-#ENDIF (NOT BUILD_OPT)
-
 # Option to turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 
@@ -254,23 +108,6 @@ ELSE ()
 ENDIF ()
 MESSAGE("** OpenGL_GL_PREFERENCE: ${OpenGL_GL_PREFERENCE}")
 
-# Should we install gtest?
-OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
-
-# Should we run gtest?
-OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
-
-# Provide boolean options for enabling various cpu optimizations.
-OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
-OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) " OFF )
-OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)" OFF )
-OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations" OFF )
-OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)" OFF )
-OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations" OFF )
-OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations" OFF )
-OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations" OFF )
-OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine" OFF )
-
 SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
@@ -280,25 +117,6 @@ MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
 
-# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
-IF (CPUAMD_k8)
-    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -fprefetch-loop-arrays ")
-ELSEIF (CPUAMD_K9)
-    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_p4)
-    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_prescott)
-    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops " )
-ELSEIF (CPUINTEL_nocona)
-    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_core2)
-    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_native)
-    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUAMD_vishera)
-    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 ")
-ENDIF (CPUAMD_k8)
-
 IF (CPU_SMP GREATER 1)
     SET(CPU_OPTS " ${CPU_OPTS} -ftree-parallelize-loops=${CPU_SMP} ")
 ENDIF (CPU_SMP GREATER 1)
@@ -307,43 +125,7 @@ IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
 ENDIF (DATADIR)
 
-# On some Ubuntu versions and derivatives, a bug exists whereby enabling
-# PIE compilation (Position Independent Executables) results in the
-# `file` utility incorrectly recognising the compiled vegastrike-engine binary
-# as a shared library instead of a position independent shared executable
-# object.
-#
-# The effect of the bug is that vegastrike-engine can still be started from the
-# command line but that it will not be recognised as an executable by GUI
-# file managers such as Nautilus and Dolphin.
-#
-# To avoid this scenario, turn off this flag by default and let packagers
-# on other distributions turn this on if their OS is able to correctly deal
-# with Position Independent Executables.
-
-# For more info, see:
-# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
-# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
-#
-OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
-MESSAGE("-- Always using preferred PIE logic now")
-
-include(CheckPIESupported)
-check_pie_supported()
-UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-IF (ENABLE_PIE)
-    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-ELSE (ENABLE_PIE)
-    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-    SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-ENDIF (ENABLE_PIE)
-
-#set_property(DIRECTORY APPEND PROPERTY
-#        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
-#        )
-
-add_compile_definitions("NV_CUBE_MAP"
+ADD_COMPILE_DEFINITIONS("NV_CUBE_MAP"
         "BOOST_PYTHON_NO_PY_SIGNATURES"
         "BOOST_ALL_DYN_LINK"
         "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>"
@@ -351,15 +133,15 @@ add_compile_definitions("NV_CUBE_MAP"
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
         )
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h>"
+ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/engine/config.h>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
         )
-add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
 # for DEBUG remove all optimizations
-add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
+ADD_LINK_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
+ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Debug>>:-fstandalone-debug>"
@@ -372,7 +154,6 @@ add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CX
         )
 
 # Let cmake find our in-tree modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 
 # Detect available Linux Distros that can be built for
 # 2021-09-18 stephengtuggy - This needs to happen before the boost_python detection logic,
@@ -386,13 +167,16 @@ IF (Python3_FOUND)
     SET(TST_INCLUDES ${Python3_INCLUDE_DIRS})
     SET(TST_LIBS ${Python3_LIBRARIES})
     SET(HAVE_PYTHON 1)
-    add_compile_definitions(Python_SITELIB=${Python3_SITELIB})
+    SET(TMP_Python_SITELIB ${Python3_SITELIB})
+    STRING(REGEX REPLACE "\\\\" "/" TMP_Python_SITELIB ${TMP_Python_SITELIB})
+    MESSAGE("TMP_Python_SITELIB = ${TMP_Python_SITELIB}")
+    add_compile_definitions(Python_SITELIB=${TMP_Python_SITELIB})
 ELSE (Python3_FOUND)
     MESSAGE(FATAL_ERROR "Can't find python")
 ENDIF (Python3_FOUND)
 
 # Find Boost with boost_python library
-# Note: we now use Cmake 3.16 and Boost 1.75.
+# Note: we now use Cmake 3.21 and Boost 1.75.
 MESSAGE("++ From now on, always using System Boost (ver. 1.75 or higher)")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
 FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic REQUIRED)
@@ -624,15 +408,15 @@ ELSE (UNIX)
     SET(HOSTOS "APPLE")
 ENDIF (UNIX)
 
-CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_DIR}/config.h)
+CONFIGURE_FILE(cmake-config.h.in config.h)
 
 #end config.h generation
 
 INCLUDE_DIRECTORIES(${TST_INCLUDES})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
-                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:config.h>")
-add_link_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
+                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${Vega_Strike_BINARY_DIR}/engine/config.h>")
+ADD_LINK_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
 
 # Now the source files are listed starting here!
 SET(LIBVS_LOGGING
@@ -667,9 +451,9 @@ SET(LIBPYTHON
 
 SET(LIBCOMPONENT
     src/components/component.cpp
+
     src/components/dummy_component.cpp
-    src/components/component_utils
-    
+    src/components/component_utils.cpp
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
     src/components/reactor.cpp
@@ -812,6 +596,7 @@ ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/OPC_VolumeCollider.cpp
     src/cmd/collide2/CSopcodecollider.cpp
 )
+TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PUBLIC ${VS_INCLUDE_DIRS})
 
 #TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 set_property(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -1117,6 +902,7 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBSCRIPT_SOURCES}
     ${LIBGFXGENERIC_SOURCES}
 )
+TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PUBLIC ${VS_INCLUDE_DIRS})
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
 set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -1206,6 +992,7 @@ SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PUBLIC ${VS_INCLUDE_DIRS})
 
     #TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
     IF (NEED_LINKING_AGAINST_LIBM)
@@ -1227,6 +1014,7 @@ IF (NOT DISABLE_CLIENT)
     #ELSE (MSVC)
     #    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib -L/usr/local/lib ${TST_LFLAGS}")
     #ENDIF (MSVC)
+    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
 
 # Vssetup Sub build file
@@ -1305,13 +1093,13 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
 ELSE (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
 ENDIF (WIN32)
 
 
-ADD_SUBDIRECTORY("../doc" "./doc")
+ADD_SUBDIRECTORY("${CMAKE_CURRENT_SOURCE_DIR}/../doc" "./doc")
 
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
 INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT Libraries)
@@ -1649,39 +1437,8 @@ ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
-IF (INSTALL_GTEST OR USE_GTEST)
-    MESSAGE("-- Configuring Unit Tests")
-ENDIF (INSTALL_GTEST OR USE_GTEST)
-
-IF (INSTALL_GTEST)
-    INCLUDE(FetchContent)
-    FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.11.0
-    )
-
-    FetchContent_GetProperties(googletest)
-    STRING(TOLOWER "googletest" lcName)
-    IF(NOT ${lcName}_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(googletest)
-
-        # Set custom variables, policies, etc.
-
-        # For Windows: Prevent overriding the parent project's compiler/linker settings
-        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-        # Bring the populated content into the build
-        ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-    ENDIF(NOT ${lcName}_POPULATED)
-ENDIF (INSTALL_GTEST)
-
 IF (USE_GTEST)
-    ENABLE_TESTING()
-
     SET(TEST_NAME ${PROJECT_NAME}_tests)
-
     ADD_EXECUTABLE(
         ${TEST_NAME}
         src/cmd/tests/csv_tests.cpp
@@ -1702,6 +1459,8 @@ IF (USE_GTEST)
         src/components/tests/afterburner_tests.cpp
         src/components/tests/jump_drive_tests.cpp
     )
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PUBLIC ${VS_INCLUDE_DIRS})
+    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Strike_BINARY_DIR}/)
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBPYTHON}
@@ -1713,13 +1472,14 @@ IF (USE_GTEST)
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
     )
-    target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
-    set_property(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)
-        target_compile_definitions(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-        target_compile_definitions(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
-        target_compile_definitions(vegastrike-testing PUBLIC WINVER=0x0A00)
-        target_compile_definitions(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     TARGET_LINK_LIBRARIES(
