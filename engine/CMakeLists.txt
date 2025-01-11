@@ -348,7 +348,7 @@ IF (PythonInstalledVia STREQUAL "Homebrew")
 ELSEIF (PythonInstalledVia STREQUAL "MacPorts")
     FIND_PACKAGE(Python3 3.12.8 EXACT REQUIRED COMPONENTS Development Interpreter)
 ELSE ()
-    FIND_PACKAGE(Python3 3.7...<3.14 REQUIRED COMPONENTS Development Interpreter)
+    FIND_PACKAGE(Python3 3.6...<3.14 REQUIRED COMPONENTS Development Interpreter)
 ENDIF ()
 
 MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
