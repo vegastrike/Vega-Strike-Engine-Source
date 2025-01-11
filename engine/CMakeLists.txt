@@ -341,7 +341,16 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
+SET(PythonInstalledVia "" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
+
+IF (${PythonInstalledVia} STREQUAL "Homebrew" OR ${PythonInstalledVia} STREQUAL "Brew")
+    FIND_PACKAGE(Python3 3.13.1 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSEIF (${PythonInstalledVia} STREQUAL "MacPorts" OR ${PythonInstalledVia} STREQUAL "Port")
+    FIND_PACKAGE(Python3 3.12.8 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSE ()
+    FIND_PACKAGE(Python3 3.7...3.13 REQUIRED COMPONENTS Development Interpreter)
+ENDIF ()
+
 MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE(STATUS "Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
