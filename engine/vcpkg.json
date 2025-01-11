@@ -15,6 +15,7 @@
         "boost-atomic",
         "boost-assign",
         "boost-format",
+        "boost-program-options",
         "egl-registry",
         "expat",
         "freeglut",

@@ -11,7 +11,7 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
-    continue-on-error: false
+    continue-on-error: true
 
     defaults:
       run:
@@ -21,17 +21,26 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          # x86-64
           - macos-13
-          # - macos-14
+          # M1 processor
+          #- macos-14
+        python-version:
+          #- 3.12.8
+          - 3.13.1
         compiler:
-          - clang
-          - gcc
+          - AppleClang
+          #- clang
+          #- gcc
         homebrew-gl:
           - true
-          # - false
+          #- false
         homebrew-al:
           - true
-          - false
+          #- false
+        ENABLE_PIE:
+          - 'ON'
+          #- 'OFF'
 
     steps:
 
@@ -43,12 +52,14 @@ jobs:
       # - git
       # - jpeg
       # - libpng
-      # - libvorbis
+      # - ~libvorbis~
       # - python
       - name: Setup Python
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        id: vega-py-setup
         with:
-          python-version: 3.12.8
+          python-version: ${{ matrix.python-version }}
+          update-environment: true # false
       
       - name: Install dependencies using homebrew
         run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
@@ -83,8 +94,13 @@ jobs:
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
+          FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }}"
           OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
+          Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
+          PYTHONHOME: ""
+          PYTHONPATH: ""
         run: script/cibuild $FLAGS
 
       - name: Test

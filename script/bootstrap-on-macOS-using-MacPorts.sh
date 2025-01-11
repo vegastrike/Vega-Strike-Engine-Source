@@ -6,7 +6,7 @@
 #
 # sudo ./script/bootstrap-on-macOS-using-MacPorts.sh
 #
-# Copyright (C) 2024 Stephen G. Tuggy, David Wales,
+# Copyright (C) 2024-2025 Stephen G. Tuggy, David Wales,
 # and other Vega Strike contributors
 #
 # This file is part of Vega Strike.
@@ -26,8 +26,12 @@
 
 set -e
 
-port install python312 boost181@1.81.0_10+cmake_scripts+no_single+no_static+python312 glib2 gtk3 gtkglext libsdl2 libGLU freeglut xorg-server openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja
+port install python312 boost181@1.81.0_12+cmake_scripts+no_single+no_static+python312 glib2 +quartz libepoxy +quartz gtk3 +quartz libsdl2 libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja
 
 export CMAKE_PREFIX_PATH="/opt/local/"
 
 echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+
+# Keep these lines! Otherwise you will likely get PFNGL... not found errors.
+ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/OpenGL"
+ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/GLUT"
