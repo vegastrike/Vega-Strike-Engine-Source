@@ -47,8 +47,4 @@ $env:VCPKG_DEFAULT_TRIPLET = $triplet
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', $triplet, 'User')
 $env:VCPKG_DEFAULT_HOST_TRIPLET = $triplet
 
-$pythonHome = "$VCPKG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
-[Environment]::SetEnvironmentVariable('PYTHONHOME', $pythonHome, 'User')
-$env:PYTHONHOME = $pythonHome
-
 Pop-Location
