@@ -963,7 +963,7 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     } else if (name.find("add_") != 0 && name.find("mult_") != 0) {
         float armor[8];
         upgrade->ArmorData(armor);
-        if (*upgrade->current_hull > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5]
+        if (upgrade->layers[0].facets[0].health > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5]
                 || armor[6]
                 || armor[7]) {
             if (countHullAndArmorAsFull) {

@@ -363,10 +363,13 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     bool damage_system;
+    double current_hull = layers[0].facets[0].health;
+    double max_hull = layers[0].facets[0].max_health;
+
     if (player) {
-        damage_system = DestroyPlayerSystem(*current_hull, *max_hull, 1);
+        damage_system = DestroyPlayerSystem(current_hull, max_hull, 1);
     } else {
-        damage_system = DestroySystem(*current_hull, *max_hull, 1);
+        damage_system = DestroySystem(current_hull, max_hull, 1);
     }
 
     if (!damage_system) {
@@ -374,7 +377,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     unit->DamageRandSys(configuration()->physics_config.indiscriminate_system_destruction * rand01() +
-                    (1 - configuration()->physics_config.indiscriminate_system_destruction) * (1 - ((*current_hull) > 0 ? hull_damage / (*current_hull) : 1.0f)),
+                    (1 - configuration()->physics_config.indiscriminate_system_destruction) * (1 - ((current_hull) > 0 ? hull_damage / (current_hull) : 1.0f)),
             attack_vector, 1.0f, 1.0f);
 }
 
@@ -410,7 +413,9 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     }
 
     // Is the hit unit, lucky or not
-    if (DestroySystem(*current_hull, *max_hull, unit->numCargo())) {
+    double current_hull = layers[0].facets[0].health;
+    double max_hull = layers[0].facets[0].max_health;
+    if (DestroySystem(current_hull, max_hull, unit->numCargo())) {
         return;
     }
 

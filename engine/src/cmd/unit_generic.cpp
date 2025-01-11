@@ -2968,25 +2968,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         shield->UpdateRegeneration(shield_regeneration);
     }
 
-    // Upgrade hull health
-    upgrade_hull = *current_hull;
-
-    if (up && up->current_hull) {
-        const_cast<Unit *>(up)->upgrade_hull = *up->current_hull;
-    }
-
-    if (templ && templ->current_hull) {
-        const_cast<Unit *>(templ)->upgrade_hull = *templ->current_hull;
-    }
-
-    if (!csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data(upgrade_name, up->faction, "Hull")) {
-        STDUPGRADE(upgrade_hull, up->upgrade_hull, templ->upgrade_hull, 0);
-    }
-
-    if ((hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed())) {
-        hull->facets[0].max_health = hull->facets[0].health;
-    }
-
     /*if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
         STDUPGRADE(recharge, up->recharge, templ->recharge, 0);*/

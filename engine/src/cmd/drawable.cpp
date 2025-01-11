@@ -207,9 +207,12 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
     Matrix wmat;
 
     if (!cam_setup_phase) {
+        double current_hull = unit->layers[0].facets[0].health;
+        double max_hull = unit->layers[0].facets[0].max_health;
+
         // Following stuff is only needed in actual drawing phase
-        if ((*unit->current_hull) < (*unit->max_hull)) {
-            damagelevel = (*unit->current_hull) / (*unit->max_hull);
+        if ((current_hull) < (max_hull)) {
+            damagelevel = (current_hull) / (max_hull);
             chardamage = (255 - (unsigned char) (damagelevel * 255));
         }
         avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
@@ -387,8 +390,8 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     }
     float damagelevel = 1.0;
     unsigned char chardamage = 0;
-    if (*unit->current_hull < *unit->max_hull) {
-        damagelevel = (*unit->current_hull) / (*unit->max_hull);
+    if (unit->layers[0].facets[0].health < unit->layers[0].facets[0].max_health) {
+        damagelevel = (unit->layers[0].facets[0].Percent());
         chardamage = (255 - (unsigned char) (damagelevel * 255));
     }
 #ifdef VARIABLE_LENGTH_PQR
@@ -661,7 +664,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     }
 
     // Undamaged units don't sparkle
-    float damage_level = (*unit->current_hull) / (*unit->max_hull);
+    float damage_level = unit->layers[0].facets[0].Percent();
     if (damage_level >= .99) {
         return;
     }
@@ -730,7 +733,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
     }
 
     Vector Scale(1, 1, 1);         //Now, HaloSystem handles that
-    float damage_level = (*unit->current_hull) / (*unit->max_hull);
+    float damage_level = unit->layers[0].facets[0].Percent();
     //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
@@ -927,7 +930,7 @@ void Drawable::Split(int level) {
             tempmeshes.push_back(old[k]);
         }
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
-        *splitsub->current_hull = 1000.0f;
+        splitsub->layers[0].facets[0] = Health(0, 1000);
         splitsub->name = "debris";
         splitsub->setMass(game_options()->debris_mass * splitsub->getMass() / level);
         splitsub->pImage->timeexplode = .1;
