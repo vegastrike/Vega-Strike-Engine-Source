@@ -75,15 +75,15 @@ jobs:
         shell: bash
 
       - name: install-cmake
-        uses: lukka/get-cmake@4931ab1fc1604964c055eb330edb3f6b26ba0cfa #v3.29.2
+        uses: lukka/get-cmake@acb35cf920333f4dc3fc4f424f1b30d5e7d561b4 #v3.31.4
         with:
-          cmakeVersion: 3.29.2
+          cmakeVersion: 3.31.4
           ninjaVersion: 1.11.1
 
       # Restore vcpkg from the GitHub Action cache service. Note that packages are restored by vcpkg's binary caching
       # when it is being run afterward by CMake.
       - name: restore-vcpkg
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #v4.0.2
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 #v4.2.0
         with:
           # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
           # built package archives (aka binary cache) which are located by VCPKG_DEFAULT_BINARY_CACHE env var.
