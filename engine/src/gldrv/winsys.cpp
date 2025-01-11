@@ -316,59 +316,36 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         }
     }
 
-    screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
-    if (!screen) {
-
-        VS_LOG(info, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()));
-        VSExit(1);
-
-        /*for (int counter = 0; window == nullptr && counter < 2; ++counter) {
-            for (int bpd = 4; bpd > 1; --bpd) {
-                SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, bpd * 8);
-                if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags | SDL_ANYFORMAT))
-                        == NULL) {
-                    VS_LOG_AND_FLUSH(error,
-                            (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
-                                    % bpp
-                                    % (bpd * 8)
-                                    % SDL_GetError()));
-                } else {
-                    break;
-                }
-            }
-            if (screen == NULL) {
-                SDL_GL_SetAttribute(SDL_GL_RED_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, otherattributes);
-                gl_options.color_depth = bpp = otherbpp;
-            }
-        }
-        if (screen == NULL) {
-            VS_LOG_AND_FLUSH(fatal, "FAILED to initialize video");
-            VSExit(1);
-        }*/
+    if (SDL_RenderSetLogicalSize(renderer, width, height) < 0) {
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_RenderSetLogicalSize(...) failed! Error: %1%") % SDL_GetError()),
+            8);
     }
 
-    std::string version = (const char *) glGetString(GL_RENDERER);
-    if (version == "GDI Generic") {
+#if defined (GL_RENDERER)
+    std::string version{};
+    const GLubyte * renderer_string = glGetString(GL_RENDERER);
+    if (renderer_string) {
+        version = reinterpret_cast<const char *>(renderer_string);
+    }
+    if (version == "GDI Generic" || version == "software") {
         if (game_options()->gl_accelerated_visual) {
-            VS_LOG(error, "GDI Generic software driver reported, trying to reset.");
+            VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
+            SDL_ClearError();
             SDL_Quit();
             game_options()->gl_accelerated_visual = false;
             return false;
         } else {
-            VS_LOG(error, "GDI Generic software driver reported, reset failed.\n");
-            VS_LOG(error, "Please make sure a graphics card driver is installed and functioning properly.\n");
+            VS_LOG(error, "GDI Generic software driver reported, reset failed.");
+            VS_LOG_AND_FLUSH(error, "Please make sure a graphics card driver is installed and functioning properly.");
         }
     }
+#endif
 
-    /*VS_LOG(trace,
-            (boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode")
-                    % window->w
-                    % window->h
-                    % window->pitch
-                    % window->format->BitsPerPixel
-                    % window->format->BytesPerPixel));*/
+    // This makes our buffer swap synchronized with the monitor's vertical refresh
+    if (SDL_GL_SetSwapInterval(1) < 0) {
+        VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
+        SDL_ClearError();
+    }
 
     return true;
 }
