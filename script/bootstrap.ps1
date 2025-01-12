@@ -1,6 +1,6 @@
 # bootstrap.ps1
 
-# Copyright (C) 2021-2024 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2021-2025 Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
