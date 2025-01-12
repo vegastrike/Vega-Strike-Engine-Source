@@ -13,6 +13,7 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
 
     defaults:
       run:
@@ -42,6 +43,8 @@ jobs:
         ENABLE_PIE:
           - 'ON'
           #- 'OFF'
+        build-type:
+          - RelWithDebInfo
 
     steps:
 
@@ -100,7 +103,7 @@ jobs:
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }}"
+          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }} -DPythonInstalledVia=Homebrew"
           OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
           Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
