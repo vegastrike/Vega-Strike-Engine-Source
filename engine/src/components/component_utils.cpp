@@ -139,7 +139,7 @@ EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, E
 
 
 // For Drive and DriveUpgrade
-const std::string yaw_governor[] = {"Yaw_Governor", "Yaw_Governor", "Yaw_Governor"};
+const std::string yaw_governor[] = {"Yaw_Governor", "Yaw_Governor_Right", "Yaw_Governor_Left"};
 const std::string pitch_governor[] = {"Pitch_Governor", "Pitch_Governor_Up", "Pitch_Governor_Down"};
 const std::string roll_governor[] = {"Roll_Governor", "Roll_Governor_Right", "Roll_Governor_Left"};
 
