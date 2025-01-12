@@ -856,11 +856,15 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         
         for (int i = 0; i < shield->number_of_facets; i++) {
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
-            try {
-                shield_values[i] = std::stoi(shield_string_value);
-            } catch (const std::invalid_argument& ex) {
-                VS_LOG(warning, (boost::format("Unable to convert shield value '%1%' to a number") % shield_string_value));
-                shield_values[i] = 0;
+            if (shield_string_value.empty()) {
+                shield_values[i] = 0.0f;
+            } else {
+                try {
+                    shield_values[i] = static_cast<float>(std::stoi(shield_string_value));
+                } catch (const std::invalid_argument& ex) {
+                    VS_LOG(warning, (boost::format("Unable to convert shield value '%1%' to a number") % shield_string_value));
+                    shield_values[i] = 0.0f;
+                }
             }
         }
 

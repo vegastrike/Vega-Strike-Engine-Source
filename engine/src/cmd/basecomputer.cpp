@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d, Stephen G. Tuggy,
+ * basecomputer.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -114,8 +116,8 @@ std::vector<std::string> getWeapFilterVec() {
 std::vector<std::string> weapfiltervec = getWeapFilterVec();
 
 bool upgradeNotAddedToCargo(std::string category) {
-    for (unsigned int i = 0; i < weapfiltervec.size(); ++i) {
-        if (weapfiltervec[i].find(category) == 0) {
+    for (const auto & i : weapfiltervec) {
+        if (i.find(category) == 0) {
             return true;
         }
     }
@@ -527,7 +529,7 @@ void BaseComputer::constructControls(void) {
         return;
     }
 
-    if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
+    if (m_displayModes.size() != 1 || m_displayModes.at(0) != NETWORK) {
         //Base info title.
         StaticDisplay *baseTitle = (StaticDisplay*)getControl(controls["baseTitle"]);
         window()->addControl(baseTitle);
@@ -974,7 +976,7 @@ void BaseComputer::constructControls(void) {
 
         //GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
 
-        if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
+        if (m_displayModes.size() != 1 || m_displayModes.at(0) != NETWORK) {
             NewButton *loadsave = new NewButton;
             loadsave->setRect(Rect(.7, -.9, .25, .1));
             loadsave->setColor(GFXColor(1, .5, .1, .1));
@@ -991,7 +993,7 @@ void BaseComputer::constructControls(void) {
             loadsave->setCommand("ShowOptionsMenu");
             networkGroup->addChild(loadsave);
         }
-        if ((m_displayModes.size() == 1 && m_displayModes[0] == NETWORK)) {
+        if ((m_displayModes.size() == 1 && m_displayModes.at(0) == NETWORK)) {
             NewButton *quit = new NewButton;
             quit->setRect(Rect(-.95, -.9, .3, .1));
             quit->setColor(GFXColor(.8, 1, .1, .1));
@@ -1258,8 +1260,7 @@ void BaseComputer::createModeButtons(void) {
     if (m_displayModes.size() > 1) {
         //Create a button for each display mode, copying the original button.
         Rect rect = originalButton->rect();
-        for (unsigned int i = 0; i < m_displayModes.size(); i++) {
-            DisplayMode mode = m_displayModes[i];
+        for (const auto mode : m_displayModes) {
             NewButton *newButton = new NewButton(*originalButton);
             newButton->setRect(rect);
             newButton->setLabel(modeInfo[mode].button);
@@ -1820,7 +1821,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     //The selected item.
     const PickerCell *cell = tlist->picker->selectedCell();
     assert(cell != NULL);
-    Cargo &item = tlist->masterList[cell->tag()].cargo;
+    Cargo &item = tlist->masterList.at(cell->tag()).cargo;
     bool damaged_mode = false;
     if (!isTransactionOK(item, tlist->transaction)) {
         //We can't do the transaction. so hide the transaction button.
@@ -2325,7 +2326,7 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
     string currentCategory = "--ILLEGAL CATEGORY--";     //Current category we are adding cells to.
     SimplePickerCell *parentCell = NULL;                //Place to add new items.  NULL = Add to picker.
     for (size_t i = 0; i < tlist.masterList.size(); i++) {
-        Cargo &item = tlist.masterList[i].cargo;
+        Cargo &item = tlist.masterList.at(i).cargo;
         std::string icategory = getDisplayCategory(item);
         if (icategory != currentCategory) {
             //Create new cell(s) for the new category.
@@ -2481,12 +2482,12 @@ void BaseComputer::loadMasterList(Unit *un,
         bool invfilter = true;
         size_t vecindex;
         for (vecindex = 0; !filter && (vecindex < filtervec.size()); vecindex++) {
-            if (un->GetCargo(i).GetCategory().find(filtervec[vecindex]) != string::npos) {
+            if (un->GetCargo(i).GetCategory().find(filtervec.at(vecindex)) != string::npos) {
                 filter = true;
             }
         }
         for (vecindex = 0; invfilter && (vecindex < invfiltervec.size()); vecindex++) {
-            if (un->GetCargo(i).GetCategory().find(invfiltervec[vecindex]) != string::npos) {
+            if (un->GetCargo(i).GetCategory().find(invfiltervec.at(vecindex)) != string::npos) {
                 invfilter = false;
             }
         }
@@ -2511,7 +2512,7 @@ Cargo *BaseComputer::selectedItem(void) {
         assert(m_selectedList->picker);
         PickerCell *cell = m_selectedList->picker->selectedCell();
         if (cell) {
-            result = &m_selectedList->masterList[cell->tag()].cargo;
+            result = &m_selectedList->masterList.at(cell->tag()).cargo;
         }
     }
     return result;
@@ -2923,7 +2924,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
     }
     //Sort the list.  Better for display, easier to compile into categories, etc.
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
-    if (active_missions.size()) {
+    if (!active_missions.empty()) {
         for (unsigned int i = 1; i < active_missions.size(); ++i) {
             CargoColor amission;
             amission.cargo.SetName(XMLSupport::tostring(i) + " " + active_missions[i]->mission_name);
@@ -2933,9 +2934,9 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
             amission.cargo.SetDescription("Objectives\\");
             for (unsigned int j = 0; j < active_missions[i]->objectives.size(); ++j) {
                 amission.cargo.SetDescription(
-                        amission.cargo.GetDescription() + active_missions[i]->objectives[j].objective + ": "
+                        amission.cargo.GetDescription() + active_missions[i]->objectives.at(j).objective + ": "
                                 + XMLSupport::tostring((int) (100
-                                        * active_missions[i]->objectives[j].completeness))
+                                        * active_missions[i]->objectives.at(j).completeness))
                                 + "%\\");
             }
             amission.color = DEFAULT_UPGRADE_COLOR();
@@ -3098,7 +3099,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     if (clearDowngrades) {
         std::set<std::string> downgradeMap = GetListOfDowngrades();
         for (unsigned int i = 0; i < tlist.masterList.size(); ++i) {
-            if (downgradeMap.find(tlist.masterList[i].cargo.GetName()) == downgradeMap.end()) {
+            if (downgradeMap.find(tlist.masterList.at(i).cargo.GetName()) == downgradeMap.end()) {
                 tlist.masterList.erase(tlist.masterList.begin() + i);
                 i--;
             }
@@ -3427,15 +3428,15 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
         GFXColor mountColor = MOUNT_POINT_NO_SELECT();
         string mountName;
         string ammoexp;
-        if (playerUnit->mounts[i].status == Mount::ACTIVE || playerUnit->mounts[i].status == Mount::INACTIVE) {
-            mountName = tostring(i + 1) + " " + playerUnit->mounts[i].type->name;
+        if (playerUnit->mounts.at(i).status == Mount::ACTIVE || playerUnit->mounts.at(i).status == Mount::INACTIVE) {
+            mountName = tostring(i + 1) + " " + playerUnit->mounts.at(i).type->name;
             ammoexp =
-                    (playerUnit->mounts[i].ammo == -1) ? string("") : string((" ammo: "
-                            + tostring(playerUnit->mounts[i].ammo)));
+                    (playerUnit->mounts.at(i).ammo == -1) ? string("") : string((" ammo: "
+                            + tostring(playerUnit->mounts.at(i).ammo)));
             mountName += ammoexp;
             mountColor = MOUNT_POINT_FULL();
         } else {
-            const std::string temp = getMountSizeString(playerUnit->mounts[i].size);
+            const std::string temp = getMountSizeString(playerUnit->mounts.at(i).size);
             mountName = tostring(i + 1) + " (Empty) " + temp.c_str();
             mountColor = MOUNT_POINT_EMPTY();
         }
@@ -3511,7 +3512,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         }
         if (m_newPart->mounts.size() == 0) {
             break;
-        } else if (m_newPart->mounts[0].ammo <= 0) {
+        } else if (m_newPart->mounts.at(0).ammo <= 0) {
             break;
         }
         numleft = basecargoassets(baseUnit, m_part.GetName());
@@ -3557,7 +3558,7 @@ void BaseComputer::SellUpgradeOperation::start(void) {
     }
 }
 
-//Try to match a mounted waepon name with the cargo name.
+//Try to match a mounted weapon name with the cargo name.
 //Returns true if they are the same.
 static bool matchCargoToWeapon(const std::string &cargoName, const std::string &weaponName) {
     //Weapon names have capitalized words, and no spaces between the words.
@@ -3619,20 +3620,20 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 
         //Get the name.
         string mountName;
-        if (playerUnit->mounts[i].status == Mount::ACTIVE || playerUnit->mounts[i].status == Mount::INACTIVE) {
+        if (playerUnit->mounts.at(i).status == Mount::ACTIVE || playerUnit->mounts.at(i).status == Mount::INACTIVE) {
             //Something is mounted here.
-            const std::string unitName = playerUnit->mounts[i].type->name;
+            const std::string unitName = playerUnit->mounts.at(i).type->name;
             const Unit *partUnit =
                     UnitConstCache::getCachedConst(StringIntKey(m_part.GetName(), FactionUtil::GetUpgradeFaction()));
             string ammoexp;
             mountName = tostring(i + 1) + " " + unitName.c_str();
             ammoexp =
-                    (playerUnit->mounts[i].ammo == -1) ? string("") : string((" ammo: "
-                            + tostring(playerUnit->mounts[i].ammo)));
+                    (playerUnit->mounts.at(i).ammo == -1) ? string("") : string((" ammo: "
+                            + tostring(playerUnit->mounts.at(i).ammo)));
             mountName += ammoexp;
             if (partUnit) {
                 if (partUnit->getNumMounts()) {
-                    if (partUnit->mounts[0].type == playerUnit->mounts[i].type) {
+                    if (partUnit->mounts.at(0).type == playerUnit->mounts.at(i).type) {
                         selectable = true;
                         selectableCount++;
                         mount = i;
@@ -3645,7 +3646,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
             }
         } else {
             //Nothing at this mount point.
-            const std::string temp = getMountSizeString(playerUnit->mounts[i].size);
+            const std::string temp = getMountSizeString(playerUnit->mounts.at(i).size);
             mountName = tostring(i + 1) + " (Empty) " + temp.c_str();
         }
         //Now we add the cell.  Note that "selectable" is stored in the tag property.
@@ -3957,9 +3958,9 @@ public:
 
     bool operator()(size_t a, size_t b) {
         if (reverse) {
-            return price[a] > price[b];
+            return price.at(a) > price.at(b);
         } else {
-            return price[a] < price[b];
+            return price.at(a) < price.at(b);
         }
     }
 };
@@ -4015,7 +4016,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 indices.resize(mymin(prices.size(), locs.size()));
                 {
                     for (size_t i = 0; i < indices.size(); ++i) {
-                        indices[i] = i;
+                        indices.at(i) = i;
                     }
                 }
 
@@ -4028,8 +4029,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 newprices.reserve(indices.size());
                 {
                     for (size_t i = 0; i < indices.size() && i < toprank; ++i) {
-                        newlocs.push_back(locs[indices[i]]);
-                        newprices.push_back(prices[indices[i]]);
+                        newlocs.push_back(locs[indices.at(i)]);
+                        newprices.push_back(prices[indices.at(i)]);
                     }
                 }
 
@@ -4045,7 +4046,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 // Limited lifetime iterator (points to invalid data after save data manipulation)
                 const vector<string> &recordedLowestLocs = getStringList(whichplayer, lolock);
                 const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
-                vector<string>::const_iterator prev = std::find(
+                auto prev = std::find(
                         recordedLowestLocs.begin(), recordedLowestLocs.end(),
                         locname);
 
@@ -4070,7 +4071,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 indices.resize(mymin(prices.size(), locs.size()));
                 {
                     for (size_t i = 0; i < indices.size(); ++i) {
-                        indices[i] = i;
+                        indices.at(i) = i;
                     }
                 }
 
@@ -4083,8 +4084,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 newprices.reserve(indices.size());
                 {
                     for (size_t i = 0; i < indices.size() && i < toprank; ++i) {
-                        newlocs.push_back(locs[indices[i]]);
-                        newprices.push_back(prices[indices[i]]);
+                        newlocs.push_back(locs.at(indices.at(i)));
+                        newprices.push_back(prices.at(indices.at(i)));
                     }
                 }
 
@@ -4109,7 +4110,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         VS_LOG(info, (boost::format("  highest locs: (%1%)") % recordedHighestLocs.size()));
         {
             for (size_t i = 0; i < recordedHighestLocs.size(); ++i) {
-                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedHighestLocs[i]));
+                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedHighestLocs.at(i)));
             }
         }
 
@@ -4117,14 +4118,14 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                 // POSIX-printf style
-                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices[i]));
+                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices.at(i)));
             }
         }
 
         VS_LOG(info, (boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size()));
         {
             for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
-                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedLowestLocs[i]));
+                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedLowestLocs.at(i)));
             }
         }
 
@@ -4132,7 +4133,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                 // POSIX-printf style
-                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices[i]));
+                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices.at(i)));
             }
         }
 
@@ -4143,8 +4144,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                 string &text = highest[i];
-                PRETTY_ADD("", recordedHighestPrices[i], 2);
-                text += " (at " + recordedHighestLocs[i] + ")";
+                PRETTY_ADD("", recordedHighestPrices.at(i), 2);
+                text += " (at " + recordedHighestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Highest item %1%") % text));
             }
@@ -4155,8 +4156,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                 string &text = lowest[i];
-                PRETTY_ADD("", recordedLowestPrices[i], 2);
-                text += " (at " + recordedLowestLocs[i] + ")";
+                PRETTY_ADD("", recordedLowestPrices.at(i), 2);
+                text += " (at " + recordedLowestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Lowest item %1%") % text));
             }
@@ -4930,7 +4931,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
 
     if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit,
-            armor->facets[as_integer(FacetName::left_top_front)].health)) {
+            armor->facets.at(as_integer(FacetName::left_top_front)).health)) {
         switch (replacement_mode) {
             case 0:                 //Replacement or new Module
                 text += "#n#" + prefix + statcolor + "Replaces existing armor, if any.#n#Armor damage resistance:#-c";
@@ -4948,7 +4949,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     }
 
     // Add Armor stats
-    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, armor->facets[2].health)) {
+    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, armor->facets.at(2).health)) {
         std::string armor_color_strings[8] = {
                 " - Fore-starboard-high: #-c",
                 " - Aft-starboard-high: #-c",
@@ -4966,8 +4967,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             PRETTY_ADDU(
                     substatcolor + armor_color_strings[i],
                     (mode && replacement_mode
-                            == 2) ? 100.0 * (playerUnit->armor->facets[armor_indices[i]].health - 1) :
-                            playerUnit->armor->facets[2].health * VSDM,
+                            == 2) ? 100.0 * (playerUnit->armor->facets.at(armor_indices[i]).health - 1) :
+                            playerUnit->armor->facets.at(2).health * VSDM,
                     0,
                     (2 == replacement_mode) ? "%" : "MJ");
         }
@@ -5038,8 +5039,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 shield->GetMaxHealth())) {
             for (int i = 0; i < num_shields; i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                        (100.0 * (playerUnit->shield->facets[i].max_health - 1)) :
-                        playerUnit->shield->facets[i].max_health * VSDM, 0,
+                        (100.0 * (playerUnit->shield->facets.at(i).max_health - 1)) :
+                        playerUnit->shield->facets.at(i).max_health * VSDM, 0,
                         (2 == replacement_mode) ? "%" : "MJ");
             }
         }
@@ -5097,7 +5098,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         bool anyweapons = false;
 
         for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-            const WeaponInfo *wi = playerUnit->mounts[i].type;
+            const WeaponInfo *wi = playerUnit->mounts.at(i).type;
             if (wi && wi->name != "") {
                 anyweapons = true;
             }
@@ -5105,7 +5106,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
 
         if (anyweapons) {
             for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-                const WeaponInfo *wi = playerUnit->mounts[i].type;
+                const WeaponInfo *wi = playerUnit->mounts.at(i).type;
                 if ((!wi) || (wi->name == "")) {
                     continue;
                 } else {
@@ -5152,11 +5153,11 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                             }                              //damage per second
 
                             PRETTY_ADDU(statcolor + "   Exit velocity: #-c", wi->speed, 0, "meters/second");
-                            if (playerUnit->mounts[i].ammo != -1) {
+                            if (playerUnit->mounts.at(i).ammo != -1) {
                                 if ((as_integer(wi->size) & as_integer(MOUNT_SIZE::SPECIALMISSILE)) == 0)
-                                    PRETTY_ADD(statcolor + "   Rounds remaining: #-c", playerUnit->mounts[i].ammo, 0);
+                                    PRETTY_ADD(statcolor + "   Rounds remaining: #-c", playerUnit->mounts.at(i).ammo, 0);
                                 else
-                                    PRETTY_ADD(statcolor + "   Rockets remaining: #-c", playerUnit->mounts[i].ammo, 0);
+                                    PRETTY_ADD(statcolor + "   Rockets remaining: #-c", playerUnit->mounts.at(i).ammo, 0);
                             }
                             totalWeaponEnergyUsage += (wi->energy_rate / wi->Refire());
                             break;
@@ -5172,7 +5173,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                                 text += statcolor
                                         + "   Missile Lock Type: #-c#c1:.3:.3#None.#-c Inertial Guidance Only";
                             }
-                            PRETTY_ADD(statcolor + "   Missiles remaining: #-c", playerUnit->mounts[i].ammo, 0);
+                            PRETTY_ADD(statcolor + "   Missiles remaining: #-c", playerUnit->mounts.at(i).ammo, 0);
                             totalWeaponEnergyUsage += (wi->energy_rate / wi->Refire());
                             break;
                         case WEAPON_TYPE::BEAM:
@@ -5183,8 +5184,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                                 totalWeaponDamage += wi->phase_damage;
                             }
                             PRETTY_ADDU(statcolor + "   Beam stability: #-c", wi->stability, 2, "seconds");
-                            if (playerUnit->mounts[i].ammo != -1)
-                                PRETTY_ADD(statcolor + "   Shots remaining: #-c", playerUnit->mounts[i].ammo, 0);
+                            if (playerUnit->mounts.at(i).ammo != -1)
+                                PRETTY_ADD(statcolor + "   Shots remaining: #-c", playerUnit->mounts.at(i).ammo, 0);
                             totalWeaponEnergyUsage += wi->energy_rate;
                             break;
                         default:
