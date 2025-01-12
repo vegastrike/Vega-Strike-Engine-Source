@@ -4,9 +4,8 @@
  *	Copyright (C) 2001 Pierre Terdiman
  *	Homepage: http://www.codercorner.com/Opcode.htm
  *
- *  Copyright (C) Daniel Horn, chuck starchaser, and pheonixstorm
- *  Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- *  Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ *  Copyright (C) 2001-2025 Daniel Horn, chuck starchaser, pheonixstorm,
+ *  Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors
  *
  *  https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,11 +18,11 @@
  *
  *  Vega Strike is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -46,6 +45,5 @@
 #include "opcodetypes.h"
 #include "opcodesysdef.h"
 #include "Opcode.h"
-#include "vs_vector.h"
 
 #endif    //VEGA_STRIKE_ENGINE_CMD_COLLSION2_STDAFX_H
