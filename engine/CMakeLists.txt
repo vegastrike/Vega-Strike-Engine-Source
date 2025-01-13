@@ -1,17 +1,12 @@
-#====================================
-# @file   : CMakeLists.txt
-# @brief  : cmake configuration file for VegaStrike
-#====================================
-# create a build directory somewhere outside of this source tree
-# > cd .. && mkdir build && cd build
-# run > cmake <path to source tree>
-# run > make
-# to change build target (in Release, RelWithDebInfo, Debug, Profiler)
-# > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
-#====================================
-# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
-# Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
-# Evert Vorster, and other Vega Strike contributors.
+##
+# CMakeLists.txt
+#
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+#
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -24,11 +19,12 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+#
 
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
