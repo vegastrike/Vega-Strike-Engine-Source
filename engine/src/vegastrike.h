@@ -1,8 +1,12 @@
 /*
  * vegastrike.h
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,13 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
- *
- * Portions of this code from Tux Racer by Jasmin F. Patry www.tuxracer.com
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_VEGASTRIKE_H
 #define VEGA_STRIKE_ENGINE_VEGASTRIKE_H

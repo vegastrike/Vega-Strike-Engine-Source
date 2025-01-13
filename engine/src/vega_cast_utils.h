@@ -1,8 +1,12 @@
 /*
  * vega_cast_utils.h
  *
- * Copyright (C) 2001-2024 Daniel Horn, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -19,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_VEGA_CAST_UTILS_H
 #define VEGA_STRIKE_ENGINE_VEGA_CAST_UTILS_H

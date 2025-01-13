@@ -1,8 +1,12 @@
 /*
  * movable.h
  *
- * Copyright (C) 2020-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
- * ministerofinformation, and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
