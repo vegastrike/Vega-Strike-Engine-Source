@@ -24,12 +24,12 @@ Vega Strike is a Space Flight Simulator that allows a player to explore, trade, 
 - Entire Sol sector and Vega sector included!
 - Fly through huge multilayered asteroid fields
 - Explore nebulae where your radar fritzes out
-- Jump to other systems at blue jump points with the 'j' key
+- Jump to other systems at green jump points with the 'j' key
 - Time compression
 - Sound effects that make starships roar as they pass and zap as they die
 - Bolt weapons with glowing lighting effects
 - Cloaking that renders a ship partially/fully invisible
-- Customizable fully working HUD with targetting displays, etc
+- Customizable fully working HUD with targeting displays, etc
 - Customizable Alien Race logos that will change on all starships by editing TerranPriA.bmp and TechPriA.bmp
 - Intelligent, Programmable AI
 - Encounter epic battles happening in many systems
@@ -40,11 +40,11 @@ Vega Strike is a Space Flight Simulator that allows a player to explore, trade, 
 - Customizable missions
 - Stars that fly past as you explore the system
 - RAPID collision system that allows no problems with collisions
-- BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models... unlike the victory from WC3.
+- BSP Trees that allow one to fly close to a starship, and in the runway of (well-formed) models... unlike the victory from WC3.
 - the Normal Force which bounces starships off of each other
 - Respawn with the ';' key (semicolon)
-- Switch Ships with the '\[' key
-- Joystick support for a full featured joystick
+- Switch Ships with the '[' key
+- Joystick support for a full-featured joystick
 
 ## How to Run
 
@@ -60,8 +60,8 @@ Vegastrike command line parameters allow for different start settings and are as
 
 OPTIONS
   -d/my/data/dir
-    specifies /my/data/dir as the path for finding the vega strike data.  De-
-    fault is /usr/local/share/vegastrike/data
+    specifies /my/data/dir as the path for finding the vega strike data.  Re-
+    quired.
 
   -p1024,2405,1245090101
     Forces  the  player's  starting  location  to  be  at  x=  1024, y= 2405,
@@ -71,14 +71,13 @@ OPTIONS
     Forces the player to start in the troy system in gemini sector.
 
   missionname
-    Specifies  a  mission  for  vegastrike  to  run.   Default  is   /usr/lo-
-    cal/share/vegastrike/data/mission/exploration/explore_universe.mission.
+    Specifies a mission for vegastrike to run. Default is main_menu.mission.
 ```
 
-Vegastrike takes a single command parameter indicating which mission it should load
+Vegastrike takes a single positional parameter indicating which mission it should load
 
 ```bash
-bin/vegastrike mission/explore_universe.mission -d../Assets-Production
+bin/vegastrike mission/explore_universe.mission -d$(pwd)/../Assets-Production
 ```
 
 is an example of a valid mission call
@@ -86,7 +85,7 @@ is an example of a valid mission call
 the -l flag (must be flushed with the system) will force a player to begin in a star system.
 
 ```bash
-bin/vegastrike -lvega_sector/vega mission/bomber.mission -d../Assets-Production
+bin/vegastrike -lvega_sector/vega mission/bomber.mission -d$(pwd)/../Assets-Production
 ```
 
 will force the bomber mission to run in the vega sector.
@@ -130,93 +129,8 @@ If you encounter any issues while playing, please create an issue with the Vega 
 
    a. Run `sudo script/bootstrap`
 
-   b. *OR* install the dependencies manually. Something like this:
+   b. *OR* install the dependencies manually. For Debian, Ubuntu, openSUSE Leap, Fedora, and Rocky Linux, you should be able to reference the contents of the bootstrap script to determine what dependencies to install yourself.
 
-   ```bash
-   sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev \
-                   libboost-regex-dev libgl1-mesa-glx freeglut3-dev libopenal-dev \
-                   libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
-   ```
-
-   On Debian 10 "buster":
-
-   ```bash
-   sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
-                   libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk-3-dev \
-                   libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
-                   libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
-                   libboost-regex1.67-dev
-   ```
-
-   On Ubuntu 20.04 LTS "focal":
-
-   ```bash
-   sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
-                   libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk-3-dev libopenal-dev \
-                   libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libopengl0 \
-                   libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
-                   libboost-regex1.67-dev
-   ```
-
-   On openSUSE Leap 15.2:
-
-   ```bash
-   sudo zypper install libboost_log1_66_0-devel \
-                       libboost_python-py2_7-1_66_0-devel \
-                       libboost_python-py3-1_66_0-devel \
-                       libboost_system1_66_0-devel \
-                       libboost_filesystem1_66_0-devel \
-                       libboost_thread1_66_0-devel \
-                       libboost_regex1_66_0-devel \
-                       libboost_chrono1_66_0-devel \
-                       libboost_atomic1_66_0-devel \
-                       cmake \
-                       gcc-c++ \
-                       freeglut-devel \
-                       libopenal0 \
-                       openal-soft-devel \
-                       libSDL-1_2-0 \
-                       libSDL-devel \
-                       libvorbis-devel \
-                       libjpeg-turbo \
-                       libjpeg62-devel \
-                       libpng16-devel \
-                       expat \
-                       libexpat-devel \
-                       libgtk-2_0-0 \
-                       gtk2-devel \
-                       libgtk-3-0 \
-                       gtk3-devel \
-                       python-devel \
-                       python3-devel \
-                       git \
-                       rpm-build
-   ```
-
-   On Fedora 30-34:
-
-   ```bash
-   sudo dnf install    git \
-                       cmake \
-                       boost-devel \
-                       boost-python3-devel \
-                       freeglut-devel \
-                       gcc-c++ \
-                       openal-soft-devel \
-                       SDL-devel \
-                       libvorbis-devel \
-                       libjpeg-turbo-devel \
-                       libpng-devel \
-                       expat-devel \
-                       gtk3-devel \
-                       python2-devel \
-                       python3-devel \
-                       rpm-build \
-                       make
-   ```
-
-   On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
-   on Fedora 32 or later.)
 
    On Funtoo(-current):
 
@@ -312,15 +226,15 @@ If you encounter any issues while playing, please create an issue with the Vega 
 4. When you run vegasettings, specify the path to the assets/game data on the command line with `--target` followed by a space. E.g.:
 
    ```bash
-   ./bin/vegasettings --target ../Assets-Production
+   ./bin/vegasettings --target $(pwd)/../Assets-Production
    ```
 
-   Absolute path may need to be supplied when running vegasettings for the first time.
+   The absolute path may need to be supplied, rather than a relative path.
 
    Do the same with vegastrike-engine using `-d` and no space. E.g.:
 
    ```bash
-   ./bin/vegastrike-engine -d../Assets-Production
+   ./bin/vegastrike-engine -d$(pwd)/../Assets-Production
    ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
@@ -329,48 +243,60 @@ If there are any problems with this installation method,
 please create an issue with the Vega Strike development team
 by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
-If you get compilation issues with the system `libboost`, download it manually from
-[here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
-and run `./script/build -DUSE_SYSTEM_BOOST=NO`
-
 ### Compiling On Windows
 
-Vega Strike is now compiling on Windows! If you want to compile it, try it out, and perhaps offer feedback, that would certainly be welcome.
+Vega Strike is now compiling on Windows! There are also installers available for Windows 10 and Windows 11, as of Vega Strike v0.9.0-beta1. If you want to try it out and perhaps offer feedback, that would certainly be welcome.
 
-To compile Vega Strike on Windows, start by installing either Visual Studio 2019 or just the Visual Studio 2019 Developer Tools. When selecting the Workloads and Components to install, include at least "C++ for Desktop" and a recent build of the Windows SDK. Probably Git and the GitHub for Windows extension also. Install the latest Visual Studio updates as well.
+To compile Vega Strike on Windows, start by installing either Visual Studio 2022 or just the Visual Studio 2022 Developer Tools. When selecting the Workloads and Components to install, include at least "C++ for Desktop" and a recent build of the Windows SDK. Probably Git and the GitHub for Windows extension also. Install the latest Visual Studio updates as well.
 
-Once the Visual Studio Installer finishes, reboot your computer. Then, find `Developer PowerShell for VS 2019` on the Start menu; alt-click it ("right-click"); and choose "Run as Administrator." Run `Set-ExecutionPolicy RemoteSigned` (or another suitable PowerShell Execution Policy of your choice). Type `Y` and press Enter to confirm. Exit PowerShell. Now reopen `Developer PowerShell for VS 2019`, this time without Admin privileges, and run `script/bootstrap.ps1`. Once that finishes, reboot your computer again. Finally, open `Developer PowerShell for VS 2019` one more time, and run `script/build.ps1`.
+Once the Visual Studio Installer finishes, reboot your computer. Then, find `Developer PowerShell for VS 2022` on the Start menu; alt-click it ("right-click"); and choose "Run as Administrator." Run `Set-ExecutionPolicy RemoteSigned` (or another suitable PowerShell Execution Policy of your choice). Type `Y` and press Enter to confirm. Exit PowerShell. Now reopen `Developer PowerShell for VS 2022`, this time without Admin privileges, and run `script/bootstrap.ps1`. Once that finishes, reboot your computer again. Finally, open `Developer PowerShell for VS 2022` one more time, and run `script/build.ps1 -Generator VS2022Win64`.
 
-Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed. Also note: Windows installer is still pending.
+Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed.
 
 Finally, note that the location of the `.vegastrike` folder has changed since v0.5.1r1. It will now be located here: `C:\Users\<YourUserName>\AppData\Local\.vegastrike`.
 
 ### Compiling On MacOS
 
-VegaStrike is now compiling on MacOS. However, it's currently experiencing segfaults. Any help will be appreciated to get it fixed. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/533)
+VegaStrike is now compiling on macOS as well! macOS 13 is the only version that we officially support at the moment, but the game will build and run on other macOS versions as well.
 
-To install the required build dependencies:
+Please note: We only support Intel-based Macs (x86_64) at this time. Help adding Apple Silicon support would be appreciated.
 
-If you have Homebrew, follow the steps in the GitHub action:
-
-```bash
-.github/workflows/macos-ci.yml
-```
-
-If you have MacPorts, install the following:
+To install the required build dependencies using Homebrew, run the following:
 
 ```bash
-sudo port install cmake expat jpeg libpng libvorbis boost gtk3 gtkglext libsdl mesa libGLU freeglut
+script/bootstrap-mac.sh
 ```
 
-Also set the environment variables to match those in the GitHub action.
+(Or `script/bootstrap-on-macos.sh`, depending on which branch of the code you have downloaded.)
+
+If you have MacPorts, run the following:
+
+```bash
+sudo port install python312 boost181@1.81.0_12+cmake_scripts+no_single+no_static+python312 glib2 +quartz libepoxy +quartz gtk3 +quartz libsdl2 libGLU freeglut openal-soft cmake expat libjpeg-turbo libpng libvorbis ninja
+
+export CMAKE_PREFIX_PATH="/opt/local/"
+
+echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+
+# Keep these lines! Otherwise you will likely get PFNGL... not found errors.
+ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/OpenGL"
+ln -s "$CMAKE_PREFIX_PATH/include/GL" "$CMAKE_PREFIX_PATH/include/GLUT"
+```
+
+Or, if the branch you're on has the `bootstrap-on-macOS-using-MacPorts.sh` script, just run that, with sudo privileges.
 
 3. Packaging Vega Strike:
 
-After building Vega Strike, then packages can be built using:
+After building Vega Strike, the packages can be built using:
 
 ```bash
 make package
+```
+
+Or:
+
+```bash
+cpack ./build
 ```
 
 ## Gameplay
@@ -381,11 +307,11 @@ Most starships come equipped with a warp drive. Unfortunately they can only be u
 
 To engage a jump drive, position your ship inside and press 'j'.
 
-Regulations state that starships should be stopped before jumping-- disasters have resulted from starships travelling at any great speed into a jump point.
+Regulations state that starships should be stopped before jumping -- disasters have resulted from starships travelling at any great speed into a jump point.
 
 ### Intrastellar SPEC Drive
 
-To travel inside star system, the ships are equiped with a SPEC drive that allow faster-than-light travel. This allows efficient travel between planets and stations inside the same star system. To toggle it press 'Shift-A'. To activate auto-pilot, that will handle this automatically, press 'A'.
+To travel inside star system, the ships are equipped with a SPEC drive that allows faster-than-light travel. This allows efficient travel between planets and stations inside the same star system. To toggle it press 'Shift-A'. To activate autopilot, that will handle this automatically, press 'A'.
 
 ### Respawn
 
@@ -395,34 +321,34 @@ A new starship will be created for you by Bob.
 
 ### Transfer Ship Command
 
-If you wish to transfer command to another starship, simply press '\[' to switch over.  This is useful if you have died and do not wish to call on Bob for help.
+If you wish to transfer command to another starship, simply press '[' to switch over.  This is useful if you have died and do not wish to call on Bob for help.
 
 ### Controls
 
 - `Arrow keys` - Flight Sim style turning
 - `\` - Full throttle
 - `Backspace` - Zero throttle
-- `=,+` - Accelerate
-- `\,-` - Decelerate
+- `+` - Accelerate
+- `-` - Decelerate
 - `Enter`- Fire missile
 - `Space` - Fire Guns
 - `Tab` - Afterburners
 - `J` - Engage interstellar warp drive (use at green donut-shaped wireframes)
-- `*, Insert` - Spin Right
-- `/, Delete` - Spin Left
+- `*` - Spin Right
+- `/` - Spin Left
 - `~` (hold down) - Engage shelton slide
 - `Y` - Match speed
 - `T` - Target
 - `P` - Target nearest to center of screen
-- `N` - Target enemy targetting you
+- `N` - Cycle through "significant" objects as your target / destination, such as planets and stations
 - `Shift-T` - Target enemies for your turret
 - `M` - Change active missile
 - `G` - Change active gun
-- `V` - Switch targetting computer mode to navigation mode and then view mode
-- `W` - Switch left targetting cpu
+- `V` - Switch targeting computer mode to navigation mode and then view mode
+- `W` - Switch left targeting cpu
 - `Shift-W` - Shift weapons computer mode to damage mode
 - `;` - Respawn (Use after death to recreate your starship)
-- `\[` - switch ships in battle (use to control allies)
+- `[` - switch ships in battle (use to control allies)
 - `F1` - toggle cockpit/background display
 - `F2` - Left camera
 - `F3` - Right camera
@@ -456,11 +382,9 @@ A mission must begin with the headers:
     </variables>
 ```
 
-Currently all of these options are ignored except for the "system".  It loads sol.system as the star system (which is in XML and stores all present planets)
+Currently, all of these options are ignored except for the "system".  It loads sol.system as the star system (which is in XML and stores all present planets)
 
-The only other system included in this beta release is the blank.mission
-
-which has 1 planet, 1 sun and 2 starbases.
+~~The only other system included in this beta release is the blank.mission, which has 1 planet, 1 sun and 2 starbases.~~ (Note by Stephen G. Tuggy 2025-01-13: I don't think this is accurate any longer.)
 
 After this, comes the actors in the mission, the flightgroups of fighters.
 
@@ -474,7 +398,9 @@ You must begin the flight group tag as above, and terminate it after all of your
                 <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="8" nr_ships="3">
 ```
 
-The name will be used later for targetting and offset purposes.  The faction is a faction listed in factions.xml (should be self explanatory 0 is neutral 1 is happy -1 is mad) Currently confed and aera are the two active factions.  AI must be default in this version as no other AI scripts are yet written.  nr_ships indicates how many starships will be in this flight squadron.
+The name will be used later for targeting and offset purposes.  The faction is a faction listed in factions.xml (should be self-explanatory) 0 is neutral 1 is happy -1 is mad
+
+Currently, confed and aera are the two active factions.  AI must be default in this version as no other AI scripts are yet written. (Note by Stephen G. Tuggy 2025-01-13: Is this still accurate?)  nr_ships indicates how many starships will be in this flight squadron.
 
 ```xml
             <pos x="10000.0" y="0.0" z="3000.0"/>
@@ -509,11 +435,9 @@ continue with any other flightgroups... you can have as many as you want from as
 
 The AI is completely scriptable, and I have not spent all that long perfecting it.  There are included instructions about editing the AI scripts yourself.
 
-Currently there is only 1 AI personality.  In the future there will be a method to assign different personalities to different starships.
+Right now there is only 1 AI personality.  It's the "default" personality.  In the future there will be a method to assign different personalities to different starships.
 
-it's the "default" personality.
-
-2 files are responsible for the control of the "default" personality
+2 files are responsible for the control of the "default" personality:
 
 default.agg.xml
 
@@ -527,7 +451,7 @@ When editing this file in notepad, you'll notice some tags and various numbers.
 
 The first tag, AggressiveAI has a parameter time="4"
 
-that's how often the AI checks if it should change its strategy.  This time can be any integer value... it can revise its plan more often or less often. 4 has been good because most maneuvers can mostly complete in 4 seconds and it's a good time to revise plans
+that's how often the AI checks if it should change its strategy.  This time can be any integer value... it can revise its plan more often or less often. 4 has been good because most maneuvers can mostly complete in 4 seconds, and it's a good time to revise plans.
 
 underneath the beginning tag exist a list of tags that describes the logic the AI uses to figure out its next strategy.
 
@@ -537,7 +461,7 @@ Each tag asserts if one of the tag-values above is between min and max.
 
 The AI needs to make a CHOICE about what it does next, so it takes a look at the list of tags and determines if any of the assertions is true.
 
-Nested statements mean that BOTH must be true. so you can say "if the distance is at most .5 and the hull is between .25 and .75 by writing:
+Nested statements mean that BOTH must be true. so you can say "if the distance is at most .5 and the hull is between .25 and .75" by writing:
 
 ```xml
 <distance max=".5">
@@ -546,7 +470,7 @@ Nested statements mean that BOTH must be true. so you can say "if the distance i
 </distance>
 ```
 
-this means "if the distance is at most half the range of my guns and the hull is between 1/4 and 3/4 of its capacity, then perform an afterburner slide.
+this means "if the distance is at most half the range of my guns and the hull is between 1/4 and 3/4 of its capacity, then perform an afterburner slide."
 
 It goes down the list of such assertions and chooses the appropriate AI script to run.
 
@@ -603,10 +527,10 @@ Number values may not be accurate.
 #### Guide 1: Hacking cash
 
 Step 1
-Locate you saved files. (Windows XP: Program files/VegaStrike/Vegastike-0.5.0/.vegastrike-0.5.0/save||||Mac: (disk)>Users>(user)>.vegastrike-0.5.0>saves>(savefile))
+Locate your saved files. (Windows: C:\Users\<user name>\AppData\Local\.vegastrike\save||||Mac: (disk)>Users>(user)>.vegastrike>saves>(savefile))
 
 Step 2
-Open the files using a word document editing program (preferably Notepad++)
+Open the files using a text editing program (preferably Notepad++).
 
 Step 3
 On the first line, you should see something roughly resembling this: [Crucible/Cephid_17^200000.000000^Llama.begin 119990000070.992740 -8999928.351833 -109989999927.749450]
@@ -614,7 +538,7 @@ On this line, find the numbers surrounded by carets “^”. This is your cash. 
 
 Step 4
 In order for the game not to go mad about this, you need to add this ending:[.000000]
-Basically, if you have, say a quadrillion cash (1000000000000000) you still need to add .000000 on the end, making it stupidly long. Yes, we know, its annoying.
+Basically, if you have, say a quadrillion cash (1000000000000000) you still need to add .000000 on the end, making it stupidly long. Yes, we know, it's annoying.
 
 Step 5
 Now you need to check if you are using commas or “‘” in your cash. Don’t.
@@ -629,7 +553,7 @@ Step 1
 Get your saved file from Guide 1.
 
 Step 2
-Now, find the cash (numbers in carets “^”). There is a name after this. At the start of the game, it is always “Llama.begin”
+Now, find the cash (numbers in carets “^”). There is a name after this. At the start of the game, it is always “Llama.begin”.
 
 Step 3
 Now you can change this name into any ship you like. However, it must be in the same format.
@@ -645,6 +569,7 @@ Step 5
 There is a ship list either in the game files or on the internet, check that out for some good models. (remember: add .stock or .milspec on the end!!!! (milspec is only on some specialised ships)) Finally, save the file as before.
 
 This guide was created by Munno 2010-10-08
+and last updated by Stephen G. Tuggy 2025-01-13
 
 ## Vega Strike Information
 
@@ -654,8 +579,7 @@ And if you can design some missions it would rock!
 
 ## Vega Strike Contacts
 
-Vega Strike is the product of many contributors from all around the world. If you need help, find a bug, want to request a feature, etc then please contact us all using one
-of the following methods:
+Vega Strike is the product of many contributors from all around the world. If you need help, find a bug, want to request a feature, etc. then please contact us all using one of the following methods:
 
 - [Gitter.im: Community](https://gitter.im/vegastrike/community)
 - [Gitter.im: Packaging](https://gitter.im/vegastrike/vegastrike-packaging)
