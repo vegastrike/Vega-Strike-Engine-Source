@@ -408,22 +408,21 @@ extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHash
 
 Mesh::~Mesh() {
     if (!orig || orig == this) {
-        for (int j = 0; j < NUM_MESH_SEQUENCE; j++) {
-            for (OrigMeshVector::iterator it = undrawn_meshes[j].begin(); it != undrawn_meshes[j].end(); ++it) {
-                if (it->orig == this) {
-                    undrawn_meshes[j].erase(it--);
-                    VS_LOG(debug, "stale mesh found in draw queue--removed!");
-                }
-            }
+        for (auto & undrawn_mesh : undrawn_meshes) {
+            const auto first_to_remove1 = std::stable_partition(undrawn_mesh.begin(), undrawn_mesh.end(),
+                [this](const Mesh * pi) { return pi->orig != this; });
+            intmax_t num_meshes_removed = undrawn_mesh.end() - first_to_remove1;
+            undrawn_mesh.erase(first_to_remove1, undrawn_mesh.end());
+            VS_LOG(debug, (boost::format("Found and removed %1% stale meshes in draw queue") % num_meshes_removed));
         }
         if (vlist != nullptr) {
             delete vlist;
             vlist = nullptr;
         }
-        for (size_t i = 0; i < Decal.size(); ++i) {
-            if (Decal[i] != nullptr) {
-                delete Decal[i];
-                Decal[i] = nullptr;
+        for (auto & i : Decal) {
+            if (i != nullptr) {
+                delete i;
+                i = nullptr;
             }
         }
         if (squadlogos != nullptr) {
@@ -439,43 +438,15 @@ Mesh::~Mesh() {
         }
         vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
         vector<Mesh *>::iterator finder;
-        if (hashers) {
-            // the foollowing loop has several tricks to it:
-            // 1. `std::vector::erase()` can take an interator and remove it from the vector; but invalidates
-            //      the iterator in the process
-            // 2. To overcome the invalid iterator issue, the next previous iterator is cached
-            // 3. In the case that the previous iterator would be invalid (e.g it's at the start) then it needs
-            //      to restart the loop without the loop conditions, therefore a simple GOTO is used instead to
-            //      avoid the incrementing the iterator so that values are not skipped
-            // A reverse iterator could kind of help this; however, `std::vector::erase` unfortunately
-            // does not work on reverse iterators.
-            for (auto hashItem = hashers->begin(); hashItem != hashers->end(); ++hashItem) {
-retryEraseItem:
-                if (*hashItem == this) {
-                    bool resetIter = false;
-                    auto cachedHashItem = hashers->begin();
-                    if (hashItem != hashers->begin()) {
-                        cachedHashItem = hashItem - 1;
-                    } else {
-                        resetIter = true;
-                        cachedHashItem = hashItem + 1;
-                    }
-                    hashers->erase(hashItem);
-                    if (hashers->empty()) {
-                        bfxmHashTable.Delete(hash_name);
-                        delete hashers;
-                        hashers = nullptr;
-                        break;
-                    }
-
-                    if (resetIter) {
-                        hashItem = hashers->begin();
-                        // a necessary use of Goto as we do not want to use ++hashItem
-                        goto retryEraseItem;
-                    } else {
-                        hashItem = cachedHashItem;
-                    }
-                }
+        if (hashers && !hashers->empty()) {
+            const auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(),
+                [this](const Mesh * pi) { return pi != this; });
+            hashers->erase(first_to_remove, hashers->end());
+            if (hashers->empty()) {
+                bfxmHashTable.Delete(hash_name);
+                delete hashers;
+                hashers = nullptr;
+                VS_LOG(debug, "Mesh::~Mesh(): deleted hashers");
             }
         }
         if (draw_queue != nullptr) {
