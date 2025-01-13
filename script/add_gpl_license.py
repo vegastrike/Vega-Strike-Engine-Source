@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-
+##
 # add_gpl_license.py
 #
-# Copyright (C) 2021-2025 David Wales, Stephen G. Tuggy, and other
-# Vega Strike contributors
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+#
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -21,6 +25,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+#
 
 """This script takes a file path (or paths) as an argument, and rewrites the file
 with the Vega Strike GPL 3 copyright notice prepended to it.
