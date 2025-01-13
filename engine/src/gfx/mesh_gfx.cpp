@@ -441,7 +441,9 @@ Mesh::~Mesh() {
         if (hashers && !hashers->empty()) {
             const auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(),
                 [this](const Mesh * pi) { return pi != this; });
+            intmax_t num_hashers_removed = hashers->end() - first_to_remove;
             hashers->erase(first_to_remove, hashers->end());
+            VS_LOG(debug, (boost::format("Mesh::~Mesh(): erased %1% meshes from hashers") % num_hashers_removed));
             if (hashers->empty()) {
                 bfxmHashTable.Delete(hash_name);
                 delete hashers;
