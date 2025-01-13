@@ -1,9 +1,8 @@
 /*
  * script_variables.cpp
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2025 Daniel Horn, Alexander Rawass, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +10,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -439,35 +438,42 @@ void Mission::doSetVar(missionNode *node, int mode) {
         node->script.name = node->attr_value("name");
         if (node->script.name.empty()) {
             fatalError(node, mode, "you have to give a variable name");
+            VS_LOG_FLUSH_EXIT(fatal, "you have to give a variable name", -1);
         }
     }
     debug(3, node, mode, "trying to set variable " + node->script.name);
     if (node->subnodes.size() != 1) {
         fatalError(node, mode, "setvar takes exactly one argument");
-        assert(0);
+        VS_LOG_FLUSH_EXIT(fatal, "setvar takes exactly one argument", -1);
     }
     missionNode *expr = (missionNode *) node->subnodes[0];
     if (mode == SCRIPT_PARSE) {
         varInst *vi = searchScopestack(node->script.name);
-        if (vi == NULL) {
+        if (vi == nullptr) {
             missionNode *global_var = runtime.global_variables[node->script.name];
-            if (global_var == NULL) {
+            if (global_var == nullptr) {
                 fatalError(node, mode, "no variable " + node->script.name + " found on the scopestack (setvar)");
-                assert(0);
+                VS_LOG_FLUSH_EXIT(fatal, (boost::format("no variable %1% found on the scopestack (setvar)") % node->script.name), -1);
             }
             vi = global_var->script.varinst;
         }
-        if (vi->type != VAR_BOOL && vi->type != VAR_FLOAT && vi->type != VAR_INT && vi->type != VAR_OBJECT) {
-            fatalError(node, mode, "unsupported type in setvar");
-            assert(0);
+        switch (vi->type) {
+            case VAR_FLOAT: // fall-through
+            case VAR_INT:   // fall-through
+            case VAR_BOOL:  // fall-through
+            case VAR_OBJECT:// fall-through
+                break;
+            default:
+                fatalError(node, mode, "unsupported type in setvar");
+                VS_LOG_FLUSH_EXIT(fatal, "unsupported type in setvar", -1);
         }
     }
     if (mode == SCRIPT_RUN) {
         varInst *var_inst = doVariable(node, mode);         //lookup variable instance
-        if (var_inst == NULL) {
+        if (var_inst == nullptr) {
             fatalError(node, mode, "variable lookup failed for " + node->script.name);
             printRuntime();
-            assert(0);
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("variable lookup failed for %1%") % node->script.name), -1);
         }
         if (var_inst->type == VAR_BOOL) {
             bool res = checkBoolExpr(expr, mode);
@@ -488,7 +494,7 @@ void Mission::doSetVar(missionNode *node, int mode) {
             deleteVarInst(ovi);
         } else {
             fatalError(node, mode, "unsupported datatype");
-            assert(0);
+            VS_LOG_FLUSH_EXIT(fatal, "unsupported datatype", -1);
         }
     }
 }
@@ -636,4 +642,3 @@ void Mission::saveVarInst(varInst *vi, std::ostream &aa_out) {
         }
     }
 }
-
