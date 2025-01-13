@@ -25,6 +25,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+/*
     Copyright (C) 2000 by Andrew Zabolotny (Intel version)
     Copyright (C) 2002 by Matthew Reda <reda@mac.com> (PowerPC version)
     Fast computation of sqrt(x) and 1/sqrt(x)

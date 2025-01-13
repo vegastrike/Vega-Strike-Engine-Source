@@ -25,6 +25,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+/*
 	Copyright (C) 2000 by Jorrit Tyberghein
 
 	This library is free software; you can redistribute it and/or

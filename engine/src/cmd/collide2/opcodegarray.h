@@ -25,6 +25,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+/*
     Crystal Space utility library: vector class interface
     Copyright (C) 1998,1999,2000 by Andrew Zabolotny <bit@eltech.ru>
     Copyright (C) 2020 pyramid3d
