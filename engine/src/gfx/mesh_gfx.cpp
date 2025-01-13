@@ -410,7 +410,7 @@ Mesh::~Mesh() {
     if (!orig || orig == this) {
         for (auto & undrawn_mesh : undrawn_meshes) {
             const auto first_to_remove1 = std::stable_partition(undrawn_mesh.begin(), undrawn_mesh.end(),
-                [this](const Mesh * pi) { return pi->orig != this; });
+                [this](const OrigMeshContainer & pi) { return pi.orig != this; });
             intmax_t num_meshes_removed = undrawn_mesh.end() - first_to_remove1;
             undrawn_mesh.erase(first_to_remove1, undrawn_mesh.end());
             VS_LOG(debug, (boost::format("Found and removed %1% stale meshes in draw queue") % num_meshes_removed));
