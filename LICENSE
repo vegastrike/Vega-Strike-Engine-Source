@@ -1,6 +1,8 @@
 Vega Strike - Space Simulation, Combat and Trading
-Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
-Roy Falk, Benjamen R. Meyer, and other Vega Strike Contributors
+Copyright (C) 2001-2025 The Vega Strike Contributors:
+Creator: Daniel Horn
+Original development team: As listed in the AUTHORS file
+Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
@@ -676,4 +678,3 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
-
