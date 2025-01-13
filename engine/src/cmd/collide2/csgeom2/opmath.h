@@ -25,6 +25,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+/*
   Copyright (C) 2005 by Marten Svanfeldt
   Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
   
