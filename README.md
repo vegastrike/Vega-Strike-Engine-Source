@@ -17,7 +17,7 @@ Vega Strike is a Space Flight Simulator that allows a player to explore, trade, 
 
 ## Features
 
-- All of the art assets are original.
+- All the art assets are original.
 - Never before seen ships modelled by the Vegastrike team!
 - Astounding soundtrack!
 - Multiple Systems
