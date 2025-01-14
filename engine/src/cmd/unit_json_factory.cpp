@@ -43,8 +43,7 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     try {
         json_value = boost::json::parse(json_text);
     } catch (boost::json::system_error& e) {
-        VS_LOG_AND_FLUSH(error, "Error parsing JSON in UnitJSONFactory::ParseJson()");
-        return;
+        VS_LOG_FLUSH_EXIT(fatal, "Error parsing JSON in UnitJSONFactory::ParseJSON()", e.code().value());
     }
     boost::json::array root_array = json_value.get_array();
 
