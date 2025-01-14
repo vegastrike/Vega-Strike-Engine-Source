@@ -4967,8 +4967,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             PRETTY_ADDU(
                     substatcolor + armor_color_strings[i],
                     (mode && replacement_mode
-                            == 2) ? 100.0 * (playerUnit->armor->facets.at(armor_indices[i]).health - 1) :
-                            playerUnit->armor->facets.at(2).health * VSDM,
+                            == 2) ? 100.0 * (playerUnit->armor->facets.at(armor_indices[i]).health - 1.0):
+                            static_cast<double>(playerUnit->armor->facets.at(2).health) * static_cast<double>(VSDM),
                     0,
                     (2 == replacement_mode) ? "%" : "MJ");
         }
@@ -5039,8 +5039,8 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 shield->GetMaxHealth())) {
             for (int i = 0; i < num_shields; i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                        (100.0 * (playerUnit->shield->facets.at(i).max_health - 1)) :
-                        playerUnit->shield->facets.at(i).max_health * VSDM, 0,
+                        (100.0 * (playerUnit->shield->facets.at(i).max_health - 1.0)) :
+                        static_cast<double>(playerUnit->shield->facets.at(i).max_health) * static_cast<double>(VSDM), 0,
                         (2 == replacement_mode) ? "%" : "MJ");
             }
         }
