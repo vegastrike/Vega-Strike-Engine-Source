@@ -126,6 +126,21 @@ If you encounter any issues while playing, please create an issue with the Vega 
 
 # Compiling Vegastrike
 
+## Saving some space while downloading
+
+The Vega Strike Engine Source repository contains a lot of history not all of which is relevant to current developers if they want to quickly download and build something.
+By default, the full clone will download over 800 MB of data. There are several options to minimize this:
+
+1. Download a compressed copy of the source from the release
+2. Download a master.zip from GitHub
+3. Do a shallow clone using the following:
+
+```bash
+$ git clone git@github.com:vegastrike/Vega-Strike-Engine-Source.git --shallow-since=2023-09-27
+```
+
+This will produce a significantly smaller download - in the order of 22-30 MB; well over a 10x reduction.
+
 ## Compiling On Linux
 
 1. Install the development dependencies:
