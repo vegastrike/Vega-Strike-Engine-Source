@@ -1,8 +1,7 @@
 /*
  * unit_csv_factory.cpp
  *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Roy Falk and Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -42,8 +41,8 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     boost::json::value json_value;
     try {
         json_value = boost::json::parse(json_text);
-    } catch (boost::json::system_error& e) {
-        VS_LOG_FLUSH_EXIT(fatal, "Error parsing JSON in UnitJSONFactory::ParseJSON()", e.code().value());
+    } catch (std::exception const& e) {
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Error parsing JSON in UnitJSONFactory::ParseJSON(): %1%") % e.what()), 42);
     }
     boost::json::array root_array = json_value.get_array();
 
