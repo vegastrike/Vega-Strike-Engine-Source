@@ -29,7 +29,7 @@ Vega Strike is a Space Flight Simulator that allows a player to explore, trade, 
 - Sound effects that make starships roar as they pass and zap as they die
 - Bolt weapons with glowing lighting effects
 - Cloaking that renders a ship partially/fully invisible
-- Customizable fully working HUD with targeting displays, etc
+- Customizable fully working HUD with targetting displays, etc
 - Customizable Alien Race logos that will change on all starships by editing TerranPriA.bmp and TechPriA.bmp
 - Intelligent, Programmable AI
 - Encounter epic battles happening in many systems
@@ -122,6 +122,21 @@ If you encounter any issues while playing, please create an issue with the Vega 
 ```
 
 ## Compiling Vegastrike
+
+## Saving some space while downloading
+
+The Vega Strike Engine Source repository contains a lot of history not all of which is relevant to current developers if they want to quickly download and build something.
+By default, the full clone will download over 800 MB of data. There are several options to minimize this:
+
+1. Download a compressed copy of the source from the release
+2. Download a master.zip from GitHub
+3. Do a shallow clone using the following:
+
+```bash
+$ git clone git@github.com:vegastrike/Vega-Strike-Engine-Source.git --shallow-since=2023-09-27
+```
+
+This will produce a significantly smaller download - in the order of 22-30 MB; well over a 10x reduction.
 
 ### Compiling On Linux
 
@@ -340,12 +355,12 @@ If you wish to transfer command to another starship, simply press '[' to switch 
 - `Y` - Match speed
 - `T` - Target
 - `P` - Target nearest to center of screen
-- `N` - Cycle through "significant" objects as your target / destination, such as planets and stations
+- `N` - Target enemy targetting you
 - `Shift-T` - Target enemies for your turret
 - `M` - Change active missile
 - `G` - Change active gun
-- `V` - Switch targeting computer mode to navigation mode and then view mode
-- `W` - Switch left targeting cpu
+- `V` - Switch targetting computer mode to navigation mode and then view mode
+- `W` - Switch left targetting cpu
 - `Shift-W` - Shift weapons computer mode to damage mode
 - `;` - Respawn (Use after death to recreate your starship)
 - `[` - switch ships in battle (use to control allies)
@@ -398,7 +413,7 @@ You must begin the flight group tag as above, and terminate it after all of your
                 <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="8" nr_ships="3">
 ```
 
-The name will be used later for targeting and offset purposes.  The faction is a faction listed in factions.xml (should be self-explanatory) 0 is neutral 1 is happy -1 is mad
+The name will be used later for targetting and offset purposes.  The faction is a faction listed in factions.xml (should be self-explanatory) 0 is neutral 1 is happy -1 is mad
 
 Currently, confed and aera are the two active factions.  AI must be default in this version as no other AI scripts are yet written. (Note by Stephen G. Tuggy 2025-01-13: Is this still accurate?)  nr_ships indicates how many starships will be in this flight squadron.
 
@@ -569,7 +584,7 @@ Step 5
 There is a ship list either in the game files or on the internet, check that out for some good models. (remember: add .stock or .milspec on the end!!!! (milspec is only on some specialised ships)) Finally, save the file as before.
 
 This guide was created by Munno 2010-10-08
-and last updated by Stephen G. Tuggy 2025-01-13
+and last updated by Stephen G. Tuggy 2025-01-14
 
 ## Vega Strike Information
 
