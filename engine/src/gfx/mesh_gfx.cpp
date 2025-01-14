@@ -411,7 +411,7 @@ Mesh::~Mesh() {
         for (auto & undrawn_mesh : undrawn_meshes) {
             const auto first_to_remove1 = std::stable_partition(undrawn_mesh.begin(), undrawn_mesh.end(),
                 [this](const OrigMeshContainer & pi) { return pi.orig != this; });
-            intmax_t num_meshes_removed = undrawn_mesh.end() - first_to_remove1;
+            const intmax_t num_meshes_removed = undrawn_mesh.end() - first_to_remove1;
             undrawn_mesh.erase(first_to_remove1, undrawn_mesh.end());
             if (num_meshes_removed > 0) {
                 VS_LOG(debug, (boost::format("Found and removed %1% stale meshes in draw queue") % num_meshes_removed));
@@ -421,10 +421,10 @@ Mesh::~Mesh() {
             delete vlist;
             vlist = nullptr;
         }
-        for (auto & i : Decal) {
-            if (i != nullptr) {
-                delete i;
-                i = nullptr;
+        for (auto & texture : Decal) {
+            if (texture != nullptr) {
+                delete texture;
+                texture = nullptr;
             }
         }
         if (squadlogos != nullptr) {
@@ -443,7 +443,7 @@ Mesh::~Mesh() {
         if (hashers && !hashers->empty()) {
             const auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(),
                 [this](const Mesh * pi) { return pi != this; });
-            intmax_t num_meshes_removed = hashers->end() - first_to_remove;
+            const intmax_t num_meshes_removed = hashers->end() - first_to_remove;
             hashers->erase(first_to_remove, hashers->end());
             if (num_meshes_removed > 0) {
                 VS_LOG(debug, (boost::format("Mesh::~Mesh(): erased %1% meshes from hashers") % num_meshes_removed));
