@@ -22,16 +22,7 @@
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
-
-IF (POLICY CMP0087)
-	cmake_policy(SET CMP0087 NEW)
-ENDIF ()
 SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
-
-IF (POLICY CMP0167)
-	CMAKE_POLICY (SET CMP0167 OLD)
-ENDIF (POLICY CMP0167)
 
 IF (CMAKE_SYSTEM_NAME STREQUAL BEOS OR CMAKE_SYSTEM_NAME STREQUAL Windows)
 	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
