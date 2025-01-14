@@ -3,7 +3,7 @@
 #
 # Vega Strike - Space Simulation, Combat and Trading
 # Copyright (C) 2001-2025 The Vega Strike Contributors:
-# Creator: Daniel Horn
+# Project creator: Daniel Horn
 # Original development team: As listed in the AUTHORS file
 # Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
 #
@@ -25,6 +25,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
+
 # - Try to find Ogre
 # Once done this will define
 #
@@ -63,4 +64,3 @@ else (OGRE_LIBRARIES AND OGRE_DEFINITIONS AND OGRE_INCLUDE_DIRS)
   mark_as_advanced(OGRE_LIBRARIES OGRE_DEFINITIONS OGRE_INCLUDE_DIRS)
 
 endif (OGRE_LIBRARIES AND OGRE_DEFINITIONS AND OGRE_INCLUDE_DIRS)
-

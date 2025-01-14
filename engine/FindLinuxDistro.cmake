@@ -3,7 +3,7 @@
 #
 # Vega Strike - Space Simulation, Combat and Trading
 # Copyright (C) 2001-2025 The Vega Strike Contributors:
-# Creator: Daniel Horn
+# Project creator: Daniel Horn
 # Original development team: As listed in the AUTHORS file
 # Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
 #
@@ -25,6 +25,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
+
 # - FindLinuxDistro.cmake
 # This module detects the Linux Distro and package build tooling, and provides
 # some variables for the primary CMake script to utilize to decide what to build.
