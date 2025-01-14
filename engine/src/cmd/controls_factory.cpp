@@ -271,8 +271,12 @@ Control* getControl(std::map<std::string, std::string> attributes) {
     // Font
     if(attributes.count("font")) {
         std::vector<double> font_array = splitAndConvert(attributes["font"], ',');
-        Font font(font_array.at(0), font_array.at(1));
-        c->setFont(font);
+        if (font_array.size() < 2) {
+            VS_LOG(error, "controls_factory getControl(): font_array doesn't have enough elements");
+        } else {
+            Font font(font_array.at(0), font_array.at(1));
+            c->setFont(font);
+        }
     }
 
     // Rect
