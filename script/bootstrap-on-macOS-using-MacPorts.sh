@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-#
+##
 # bootstrap-on-macOS-using-MacPorts.sh
 #
-# Run this script with root privileges. I.e.:
+# Vega Strike - Space Simulation, Combat and Trading
+# Copyright (C) 2001-2025 The Vega Strike Contributors:
+# Project creator: Daniel Horn
+# Original development team: As listed in the AUTHORS file
+# Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
 #
-# sudo ./script/bootstrap-on-macOS-using-MacPorts.sh
 #
-# Copyright (C) 2024-2025 Stephen G. Tuggy, David Wales,
-# and other Vega Strike contributors
+# https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
 # This file is part of Vega Strike.
 #
@@ -18,11 +20,12 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+#
 
 set -e
 
