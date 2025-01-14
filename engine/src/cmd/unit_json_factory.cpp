@@ -39,7 +39,13 @@
 void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     const std::string json_text = file.ReadFull();
 
-    boost::json::value json_value = boost::json::parse(json_text);
+    boost::json::value json_value;
+    try {
+        json_value = boost::json::parse(json_text);
+    } catch (boost::json::system_error& e) {
+        VS_LOG_AND_FLUSH(error, "Error parsing JSON in UnitJSONFactory::ParseJson()");
+        return;
+    }
     boost::json::array root_array = json_value.get_array();
 
     for(boost::json::value& unit_value : root_array) {
