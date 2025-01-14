@@ -579,7 +579,6 @@ ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/OPC_BaseModel.cpp
     src/cmd/collide2/OPC_BoxPruning.cpp
     src/cmd/collide2/OPC_Collider.cpp
-    src/cmd/collide2/OPC_Common.cpp
     src/cmd/collide2/OPC_HybridModel.cpp
     src/cmd/collide2/OPC_LSSCollider.cpp
     src/cmd/collide2/OPC_MeshInterface.cpp

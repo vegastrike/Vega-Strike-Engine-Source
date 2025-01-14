@@ -2,6 +2,7 @@
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
     Copyright (C) 2022 Stephen G. Tuggy
+    Copyright (C) 2025 Benjamen R. Meyer
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,12 +20,9 @@
 */
 
 
-#include <math.h>
-#include <float.h>
-#include "cmd/collide2/opcodesysdef.h"
-#include "cmd/collide2/opcodeqint.h"
+#include <cmath>
+#include <cfloat>
 #include "opmatrix3.h"
-#include "gfx/quaternion.h"
 
 //---------------------------------------------------------------------------
 
