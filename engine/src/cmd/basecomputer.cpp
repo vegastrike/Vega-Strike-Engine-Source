@@ -3943,7 +3943,7 @@ string buildUpgradeDescription(Cargo &item) {
     const std::string key = item.GetName() + "__upgrades";
     PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(key.c_str()));
     const std::string text = GetString("get_upgrade_info", "upgrade_view",
-        "python/base_computer/upgrade_view.py", args);
+        "upgrade_view.py", args);
     return text;
 }
 
@@ -4501,7 +4501,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
     PyObject* args = PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr());
 
     const std::string text = GetString("get_player_info", "player_info",
-        "python/base_computer/player_info.py", args);
+        "player_info.py", args);
     
     //Put this in the description.
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
@@ -4654,7 +4654,7 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
     if (!mode) {
         std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
         text += GetString("get_ship_description", "ship_view",
-                          "python/base_computer/ship_view.py",
+                          "ship_view.py",
                           ship_map);
     }
     if (mode && replacement_mode == 2 && playerUnit->getMass() != blankUnit->getMass())
@@ -4961,9 +4961,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                 " - Aft-port-low: #-c"
         };
 
-        int armor_indices[8] = {2, 6, 0, 4, 3, 7, 1, 5};
+        int armor_indices[4] = {0, 1, 2, 3};
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 4; ++i) {
             PRETTY_ADDU(
                     substatcolor + armor_color_strings[i],
                     (mode && replacement_mode
