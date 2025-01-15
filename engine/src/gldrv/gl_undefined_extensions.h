@@ -22,6 +22,7 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
+
 // NO HEADER GUARD
 
 #undef GL_ARB_depth_texture
@@ -125,4 +126,3 @@
 #undef GL_APPLE_transform_hint
 #undef GL_WIN_swap_hint
 #undef GL_NVX_ycrcb
-

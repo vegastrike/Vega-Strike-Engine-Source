@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // Version 2.2
 #ifndef VEGA_STRIKE_ENGINE_MISSION_GENERAL_H
 #define VEGA_STRIKE_ENGINE_MISSION_GENERAL_H

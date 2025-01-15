@@ -22,8 +22,8 @@
 * You should have received a copy of the GNU General Public License
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
+
 // NO HEADER GUARD
 
 #define DEFINE_BLENDFUNC
 #include "gfx/mesh_io.h"
-

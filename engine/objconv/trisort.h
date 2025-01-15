@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 enum POLYGON_RELATION {
@@ -87,4 +88,3 @@ public:
     void write(const char *filename) const;
     void writeIndex(FILE *fp, const Index &) const;
 };
-

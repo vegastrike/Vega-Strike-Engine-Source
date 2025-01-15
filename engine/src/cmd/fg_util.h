@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 namespace fg_util {
@@ -36,4 +37,3 @@ bool CheckFG(std::vector<std::string> &data);
 void PurgeZeroShips(SaveGame *sg, unsigned int faction);
 void PurgeZeroShips(SaveGame *sg);
 }
-

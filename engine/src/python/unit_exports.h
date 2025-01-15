@@ -21,6 +21,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #define PY_SSIZE_T_CLEAN
@@ -116,4 +117,3 @@ void EXP_UN(boost::python::class_builder<UnitWrapper> &Class) {
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
 }
-

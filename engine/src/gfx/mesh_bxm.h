@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #include <string>
@@ -34,4 +35,3 @@ using std::vector;
 #include <stdio.h>
 
 void BFXMToXmesh(FILE *Inputfile, FILE *Outputfile); //Translate BFXM file Inputfile to text file Outputfile
-

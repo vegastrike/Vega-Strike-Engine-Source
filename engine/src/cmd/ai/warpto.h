@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 class Unit;
@@ -33,4 +34,3 @@ bool DistanceWarrantsTravelTo(Unit *parent, float sigdistance, bool following);
 bool TargetWorthPursuing(Unit *parent, Unit *target);
 void WarpToP(Unit *parent, Unit *target, bool following);
 void WarpToP(Unit *parent, const QVector &target, float radius, bool following);
-

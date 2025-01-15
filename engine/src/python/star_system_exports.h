@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 /// Exports functions for python modules
@@ -137,4 +138,3 @@ voidEXPORT_UTIL(showSplashMessage)
 voidEXPORT_UTIL(showSplashProgress)
 voidEXPORT_UTIL(hideSplashScreen)
 EXPORT_UTIL(isSplashScreenShowing, true)
-

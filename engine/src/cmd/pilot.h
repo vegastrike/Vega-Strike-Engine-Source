@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #include "gnuhash.h"
@@ -73,4 +74,3 @@ public:
             int guessedFaction /*pass in neutral otherwise*/ );
     void DoHit(Unit *parent, void *aggressor, int guessedFaction /*pass in neutral otherwise*/ );
 };
-

@@ -18,8 +18,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
- */
-// NO HEADER GUARD
 
 ///A single OpenGL texture
 #include "gldrv/gl_globals.h"
@@ -104,4 +102,3 @@ public:
         return handle == oth.handle;
     }
 };
-
