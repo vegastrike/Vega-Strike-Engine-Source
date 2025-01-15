@@ -37,10 +37,6 @@ const std::string GetString(const std::string function_name,
                             const std::string module_name,
                             const std::string file_name,
                             PyObject* args) {
-    if(!boost::filesystem::exists(file_name)) {
-        return "Error:" + file_name + "not found";
-    }
-    
     PyObject* module = PyImport_ImportModule(module_name.c_str());
 
     if(!module) {
