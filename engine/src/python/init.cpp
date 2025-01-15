@@ -69,6 +69,9 @@ class Unit;
 #define PATHSEP "/"
 #endif
 
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+
 void Python::initpaths() {
     /*
      *  char pwd[2048];
@@ -163,7 +166,8 @@ void Python::init() {
         return;
     }
     isinit = true;
-//initialize python library
+
+    // initialize python library
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
 
@@ -171,35 +175,64 @@ void Python::init() {
 
     status = Py_PreInitialize(&py_pre_config);
     if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyPreInitialize failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         Py_ExitStatusException(status);
     }
 
     Py_NoSiteFlag = 1;
 
-// These functions add these modules to the builtin package
+    // These functions add these modules to the builtin package
     InitVS();
     InitBriefing();
     InitBase();
     InitDirector();
 
-// Add relevant paths to python path
+    // Add relevant paths to python path
     const std::string python_path = GetPythonPath();
     const std::wstring python_path_w(python_path.begin(), python_path.end());
     const std::wstring program_dir_w = std::wstring(VSFileSystem::programdir.begin(), VSFileSystem::programdir.end());
     const std::string base_computer_path = VSFileSystem::datadir + "/python/base_computer/";
     const std::wstring base_computer_path_w = std::wstring(base_computer_path.begin(), base_computer_path.end());
+    const std::string python_sitelib_path = QUOTE(Python_SITELIB);
+    const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
+    const std::wstring data_path_w = std::wstring(VSFileSystem::datadir.begin(), VSFileSystem::datadir.end());
 
     PyWideStringList python_path_py_wide_string_list{};
     status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
     if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyWideStringList_Append 1 failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         Py_ExitStatusException(status);
     }
     status = PyWideStringList_Append(&python_path_py_wide_string_list, program_dir_w.c_str());
     if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyWideStringList_Append 2 failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         Py_ExitStatusException(status);
     }
     status = PyWideStringList_Append(&python_path_py_wide_string_list, base_computer_path_w.c_str());
     if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyWideStringList_Append 3 failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_sitelib_path_wstring.c_str());
+    if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyWideStringList_Append 4 failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, data_path_w.c_str());
+    if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyWideStringList_Append 5 failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         Py_ExitStatusException(status);
     }
 
@@ -209,8 +242,17 @@ void Python::init() {
     config.module_search_paths = python_path_py_wide_string_list;
     config.isolated = 0;
 
-// Now we can do python things about them and initialize them
+    // Now we can do python things about them and initialize them
     Py_Initialize();
+    status = Py_InitializeFromConfig(&config);
+    if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): Py_InitializeFromConfig failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+        PyConfig_Clear(&config);
+        Py_ExitStatusException(status);
+    }
+
     initpaths();
 
 #if BOOST_VERSION != 102800
@@ -224,7 +266,6 @@ void Python::init() {
     InitVS2();
 #endif
     VS_LOG(important_info, "testing Python integration");
-//    VS_LOG(info, "testing VS random");
     std::string python_snippet_to_run_1("import sys\nprint(sys.path)\n");
     VegaPyRunString(python_snippet_to_run_1);
 
@@ -285,4 +326,3 @@ void Python::test() {
 }
 
 #endif
-

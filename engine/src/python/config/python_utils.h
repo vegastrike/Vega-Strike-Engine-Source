@@ -39,6 +39,7 @@ std::string GetPythonPath();
 PyObject* GetClassFromPython(
     std::string build_path,
     std::wstring path_string,
+    std::string datadir,
     std::string module_name,
     std::string function_name);
 
