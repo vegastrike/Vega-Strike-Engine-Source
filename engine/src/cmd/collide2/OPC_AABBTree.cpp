@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Pierre Terdiman, pyramid3d,
+ * OPC_AABBTree.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, Pierre Terdiman, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -61,8 +63,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Updated by Stephen G. Tuggy 2021-07-03
- * Updated by Stephen G. Tuggy 2022-01-06
+ * Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -617,4 +618,3 @@ size_t AABBTree::GetUsedBytes() const {
 bool AABBTree::IsComplete() const {
     return (GetNbNodes() == GetNbPrimitives() * 2 - 1);
 }
-

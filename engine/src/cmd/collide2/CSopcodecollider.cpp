@@ -1,5 +1,7 @@
 /*
 	Copyright (C) 2000 by Jorrit Tyberghein
+    Copyright (C) 2020 pyramid3d
+    Copyright (C) 2020-2025 Stephen G. Tuggy
 
 	This library is free software; you can redistribute it and/or
 	modify it under the terms of the GNU Library General Public
@@ -23,11 +25,6 @@
 *                  ported to VS from CS by Ed Sweetman
 -------------------------------------------------------------------------
 */
-
-/*
- * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2020-2022 Stephen G. Tuggy
- */
 
 
 #include "CSopcodecollider.h"

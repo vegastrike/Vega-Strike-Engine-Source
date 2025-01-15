@@ -4,13 +4,13 @@
  *	Copyright (C) 2001 Pierre Terdiman
  *	Homepage: http://www.codercorner.com/Opcode.htm
  *
- *  Copyright (C) Daniel Horn, chuck starchaser, and pheonixstorm
- *  Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- *  Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ *  Copyright (C) 2001-2025 Daniel Horn, chuck starchaser, pheonixstorm,
+ *  pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
- *  https://github.com/vegastrike/Vega-Strike-Engine-Source
- *
- *  This file is part of Vega Strike.
+ *  This file is part of OPCODE - Optimized Collision Detection
+ *  (http://www.codercorner.com/Opcode.htm) and has been
+ *  incorporated into Vega Strike
+ *  (https://github.com/vegastrike/Vega-Strike-Engine-Source).
  *
  *  Vega Strike is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

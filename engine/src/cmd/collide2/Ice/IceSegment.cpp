@@ -5,7 +5,7 @@
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
  *
- *  Updated by Stephen G. Tuggy 2022-01-06
+ *  Copyright (C) 2022, 2025 Stephen G. Tuggy
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,4 +52,3 @@ float Segment::SquareDistance(const Point &point, float *t) const {
 
     return Diff.SquareMagnitude();
 }
-

@@ -8,7 +8,7 @@
  * Copyright (C) 2000 Pierre Terdiman
  * Copyright (C) 2020 pyramid3d, LifWirser, Benjamen Meyer, Stephen G. Tuggy,
  * and other Vega Strike contributors.
- * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2021-2025 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * This file is part of Vega Strike.
  *
