@@ -4136,7 +4136,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
             }
         }
 
-        VegaStrikeLogging::vega_logger()->FlushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
 
         highest.clear();
         highest.resize(recordedHighestPrices.size());

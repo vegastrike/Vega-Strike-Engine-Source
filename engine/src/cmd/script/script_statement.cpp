@@ -76,18 +76,11 @@ void Mission::doIf(missionNode *node, int mode) {
 
         int nr_subnodes = node->subnodes.size();
         if (nr_subnodes != 3) {
-            fatalError(node, mode, "an if-statement needs exact three subnodes, not " + nr_subnodes);
+            fatalError(node, mode, (boost::format("an if-statement needs exact three subnodes, not %1%") % nr_subnodes).str());
             printf("nr_of_subnodes: %d\n", nr_subnodes);
 
             assert(0);
         }
-#if 0
-        int i = 0;
-        for (siter = node->subnodes.begin(); siter != node->subnodes.end() && i < 3; siter++) {
-            missionNode *snode = (missionNode*) *siter;
-            node->script.if_block[i] = snode;
-        }
-#endif
 
         node->script.if_block[0] = (missionNode *) node->subnodes[0];
         debug(8, node->script.if_block[0], mode, "if-node");

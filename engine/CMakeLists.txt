@@ -32,6 +32,8 @@
 
 MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
+SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
+
 # One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
@@ -69,6 +71,8 @@ INCLUDE(CheckTypeSize)
 INCLUDE(CMakePushCheckState)
 SET(SIZEOF_VOID_P CMAKE_SIZEOF_VOID_P)
 
+SET(CMAKE_FIND_FRAMEWORK "LAST")
+
 #Find Math
 INCLUDE(CheckSymbolExists)
 IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
@@ -98,7 +102,6 @@ MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 
 # Should we prefer the Mesa OpenGL implementation, or GLVND?
-# OPTION(VEGA_STRIKE_PREFER_LEGACY_OPENGL "Prefer legacy OpenGL implementation (such as Mesa's)? Or prefer GLVND?" OFF )
 IF (OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglu1-mesa")
 ELSEIF (OpenGL_GL_PREFERENCE STREQUAL "GLVND")
@@ -160,7 +163,16 @@ ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CX
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
+SET(PythonInstalledVia "" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
+
+IF (PythonInstalledVia STREQUAL "Homebrew")
+    FIND_PACKAGE(Python3 3.13.1 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSEIF (PythonInstalledVia STREQUAL "MacPorts")
+    FIND_PACKAGE(Python3 3.12.8 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSE ()
+    FIND_PACKAGE(Python3 3.7...<3.14 REQUIRED COMPONENTS Development Interpreter)
+ENDIF ()
+
 MESSAGE("++ Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE("++ Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
@@ -191,13 +203,23 @@ INCLUDE_DIRECTORIES(${TST_INCLUDES})
 IF (NOT DISABLE_CLIENT) ##########
 
     #Find GL
+    SET(CMAKE_FIND_FRAMEWORK "FIRST")
     FIND_PACKAGE(OpenGL REQUIRED)
     IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${OPENGL_INCLUDE_DIR})
-        # SET(TST_LIBS ${TST_LIBS} "${OpenGL::GL}" "${OpenGL::GLU}")
-        MESSAGE("++ OpenGL found")
+        MESSAGE(STATUS "OpenGL found")
+        SET(CMAKE_FIND_FRAMEWORK "LAST")
+        FIND_FILE(VEGA_GLEXT_H_PATH glext.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GLEXT_H_DIRECTORY ${VEGA_GLEXT_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glext.h: ${VEGA_GLEXT_H_PATH}")
+        FIND_FILE(VEGA_GL_H_PATH gl.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GL_H_DIRECTORY ${VEGA_GL_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to gl.h: ${VEGA_GL_H_PATH}")
+        FIND_FILE(VEGA_GLU_H_PATH glu.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GLU_H_DIRECTORY ${VEGA_GLU_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glu.h: ${VEGA_GLU_H_PATH}")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLEXT_H_DIRECTORY} ${VEGA_GL_H_DIRECTORY} ${VEGA_GLU_H_DIRECTORY})
     ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-        MESSAGE("!! Why you no have GL?")
+        MESSAGE(SEND_WARNING "Why you no have GL?")
     ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
 
     # Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
@@ -218,16 +240,22 @@ IF (NOT DISABLE_CLIENT) ##########
     SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
 
     #Find GLUT
+    SET(CMAKE_FIND_FRAMEWORK "FIRST")
     FIND_PACKAGE(GLUT REQUIRED)
     IF (GLUT_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
+        MESSAGE(STATUS "GLUT found : ${GLUT_LIBRARIES}")
+        SET(CMAKE_FIND_FRAMEWORK "LAST")
+        FIND_FILE(VEGA_GLUT_H_PATH glut.h PATH_SUFFIXES GL/ GLUT/)
+        get_filename_component(VEGA_GLUT_H_DIRECTORY ${VEGA_GLUT_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glut.h: ${VEGA_GLUT_H_PATH}")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLUT_H_DIRECTORY} ${GLUT_INCLUDE_DIR})
         SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
-        MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
     ELSE (GLUT_FOUND)
-        MESSAGE("!! I can't build this, missing GLUT")
+        MESSAGE(SEND_WARNING "I can't build this, missing GLUT")
     ENDIF (GLUT_FOUND)
 
     UNSET(OPENGL_LIBRARY_DIR)
+    SET(CMAKE_FIND_FRAMEWORK "LAST")
 
     #Find OpenAL
     FIND_PACKAGE(OpenAL REQUIRED)
@@ -888,6 +916,10 @@ TARGET_LINK_LIBRARIES(
 SET_TARGET_PROPERTIES(vegastrike_python PROPERTIES PREFIX "")
 
 ADD_LIBRARY(vegastrike-engine_com
+    ${VEGA_GL_H_PATH}
+    ${VEGA_GLU_H_PATH}
+    ${VEGA_GLEXT_H_PATH}
+    ${VEGA_GLUT_H_PATH}
     ${LIBPYTHON}
     ${LIBVS_LOGGING}
     ${LIBCONFIG}
@@ -918,6 +950,10 @@ IF (WIN32)
 ENDIF()
 
 SET(VEGASTRIKE_SOURCES
+    ${VEGA_GL_H_PATH}
+    ${VEGA_GLU_H_PATH}
+    ${VEGA_GLEXT_H_PATH}
+    ${VEGA_GLUT_H_PATH}
     ${LIBGUI_SOURCES}
     ${LIBNETCLIENT_SOURCES}
     ${LIBROOTCLIENT_SOURCES}
@@ -991,7 +1027,7 @@ SET(VEGASTRIKE_SOURCES
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 
 IF (NOT DISABLE_CLIENT)
-    ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
+    ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PUBLIC ${VS_INCLUDE_DIRS})
 
     #TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
@@ -1020,7 +1056,7 @@ ENDIF (NOT DISABLE_CLIENT)
 # Vssetup Sub build file
 ADD_SUBDIRECTORY(setup)
 
-# Add other utilies here
+# Add other utilities here
 ADD_SUBDIRECTORY(objconv)
 
 ## show debug output

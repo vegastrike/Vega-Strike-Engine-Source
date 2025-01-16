@@ -1,9 +1,8 @@
 /*
  * cg_global.h
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Benjamen R. Meyer,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,32 +15,33 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_CG_GLOBAL_H
 #define VEGA_STRIKE_ENGINE_CG_GLOBAL_H
 
 #if defined (CG_SUPPORT)
 
-#if defined (__APPLE__) || defined (MACOSX)
+#if defined(__APPLE__) && defined (__MACH__)
 #define MACOS 1
 #elif !defined (WIN32)
 #define UNIX 1
 
-#endif //defined (__APPLE__) || defined (MACOSX)
+#endif
 
 #include "gldrv/gl_globals.h"
 
 #if defined (UNIX)
 
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #define GLX_GLXEXT_PROTOTYPES 1
-#include <GL/glx.h>
+#include <glx.h>
 #include "gldrv/glx_undefined_extensions.h"
-#include <GL/glxext.h>
+#include <glxext.h>
 
 #endif //defined (UNIX)
 

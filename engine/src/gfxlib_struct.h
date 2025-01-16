@@ -1050,9 +1050,9 @@ public:
 ///Draws a single copy of the mass-loaded vlist
     void Draw() override;
     void EndDrawState(GFXBOOL lock = GFXTRUE) override;
-///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-    virtual void GetPolys(GFXVertex **vert, int *numPolys, int *numTris);
-///generates procedural planetdata to the actual detaillevel with the "plasma method"
+    ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
+    void GetPolys(GFXVertex **vert, int *numPolys, int *numTris) override;
+    ///generates procedural planetdata to the actual detaillevel with the "plasma method"
     virtual void ProceduralModification();
 };
 

@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * gl_include.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -23,10 +25,10 @@
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
 
-#if defined (__APPLE__) || defined (MACOSX)
-#   include <GLUT/glut.h>
+#if defined(__APPLE__) && defined (__MACH__)
+#   include <glut.h>
 #else
-#   include <GL/glut.h>
+#   include <glut.h>
 #endif
 
 #endif //VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H

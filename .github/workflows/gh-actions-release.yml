@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     continue-on-error: true
 
     defaults:

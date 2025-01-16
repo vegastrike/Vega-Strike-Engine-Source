@@ -1,8 +1,10 @@
-name: 'MacOS-CI'
+name: 'MacOS-Release'
 
 on:
-  push:
-  pull_request:
+  release:
+    types:
+      - created
+      - edited
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -11,7 +13,7 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
-    continue-on-error: false
+    continue-on-error: true
 
     defaults:
       run:
@@ -45,6 +47,17 @@ jobs:
           - RelWithDebInfo
 
     steps:
+
+      # The following dependencies are already present within macos-* images:
+      # - clang (llvm)
+      # - cmake
+      # - expat
+      # - gcc
+      # - git
+      # - jpeg
+      # - libpng
+      # - ~libvorbis~
+      # - python
       # specific setup for Python on Mac to ensure Python Version align
       - name: Python Setup on Mac
         uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
@@ -56,13 +69,20 @@ jobs:
       - name: Install dependencies using homebrew
         run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
 
-      # The following dependencies are already present within macos-* images:
-      # MacOS has a Developers Tools package from Apple that gets installed which
-      # provides some minimal functionality:
-      #   XCode (which uses CLang/LLVM)
-      #   git
-      - name: Install the latest version of Bash so we can rely on it
-        run: brew install bash
+      # The following Apple-provided libraries are deprecated:
+      # * OpenGL as of macOS 10.14
+      # * GLUT as of macOS 10.9
+      - name: Optionally install homebrewed OpenGL and GLUT
+        if: ${{ matrix.homebrew-gl }}
+        run: |
+          brew install mesa mesa-glu freeglut
+          ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
+          ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
+
+      # The Apple-provided OpenAL is deprecated as of macOS 10.15
+      - name: Optionally install homebrewed OpenAL
+        if: ${{ matrix.homebrew-al }}
+        run: brew install openal-soft
 
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -70,27 +90,28 @@ jobs:
           fetch-depth: 2
           submodules: false
 
-      # Ensure PRs are built against the PR Head as opposed to the merge commit
-      - name: Conditionally relocate to PR HEAD
-        if: github.event.pull_request
-        run: git checkout HEAD^2
+      - name: Extract tag name and short SHA
+        shell: bash
+        run: |
+          echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
+          echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      - name: Test tag name and short SHA
+        run: |
+          echo "${TAG_NAME}"
+          echo "${SHORT_SHA}"
 
-      - name: Bootstrap MacOS
-        run: script/bootstrap-mac.sh
-
-      # Note: it might be good to use a step to detect where OpenAL-Soft is
-      # installed and set it to a GHA variable that can be consumed below
       - name: Build it
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
           FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }} -DPythonInstalledVia=Homebrew"
-          OPENALDIR:  "/usr/local/opt/openal-soft"
+          OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
           Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
           PYTHONHOME: ""
           PYTHONPATH: ""
+          IS_RELEASE: 1
         run: script/cibuild $FLAGS
 
       - name: Test
@@ -106,3 +127,14 @@ jobs:
         with:
           name: test_results_xml
           path: ${{github.workspace}}/build/test-results/**/*.xml
+
+      - name: Package it
+        working-directory: ${{github.workspace}}/build
+        run: cpack -V
+
+      - name: Upload the artifacts
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "packages/*.*"

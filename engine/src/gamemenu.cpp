@@ -459,7 +459,7 @@ bool GameMenu::processMainMenuButton(const EventCommandId &command, Control *con
 }
 
 bool GameMenu::processExitGameButton(const EventCommandId &command, Control *control) {
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     winsys_exit(0);
     return true;
 }
