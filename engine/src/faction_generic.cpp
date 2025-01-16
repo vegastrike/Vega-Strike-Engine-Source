@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * faction_generic.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -83,7 +85,7 @@ const std::map<std::string, std::string> FactionUtil::GetRelationsMap(const int 
 const std::map<std::string, std::string> FactionUtil::GetKillsMap(const std::vector<float> *kill_list) {
     //Number of kills for each faction.
     std::map<std::string, std::string> kills;
-    for (int i; i < (int)FactionUtil::GetNumFactions(); i++) {
+    for (int i = 0; i < (int)FactionUtil::GetNumFactions(); i++) {
         string faction_name = FactionUtil::GetFactionName(i);
         int kills_for_faction = 0;
         size_t upgrades = FactionUtil::GetUpgradeFaction();

@@ -1,9 +1,8 @@
 /*
  * python_utils.h
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (c) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,14 +33,14 @@
 struct _object;
 typedef _object PyObject;
 
-const std::string GetPythonPath();
+std::string GetPythonPath();
 
 // A utility function to call a function and get a PyObject as a result
 PyObject* GetClassFromPython(
-    const std::string build_path,
-    const std::string path_string,
-    const std::string module_name,
-    const std::string function_name);
+    std::string build_path,
+    std::wstring path_string,
+    std::string module_name,
+    std::string function_name);
 
 
 #endif //VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H

@@ -1,6 +1,6 @@
 # bootstrap.ps1
 
-# Copyright (C) 2021-2024 Stephen G. Tuggy and other Vega Strike contributors
+# Copyright (C) 2021-2025 Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -46,9 +46,5 @@ $triplet = 'x64-windows'
 $env:VCPKG_DEFAULT_TRIPLET = $triplet
 [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', $triplet, 'User')
 $env:VCPKG_DEFAULT_HOST_TRIPLET = $triplet
-
-$pythonHome = "$VCPKG_PARENT_DIR\v\packages\python3_x64-windows\tools\python3"
-[Environment]::SetEnvironmentVariable('PYTHONHOME', $pythonHome, 'User')
-$env:PYTHONHOME = $pythonHome
 
 Pop-Location
