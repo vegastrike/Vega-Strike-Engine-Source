@@ -30,6 +30,9 @@
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 
+//#include "vsfilesystem.h"
+//#include "vs_logging.h"
+
 using namespace boost::python;
 using namespace boost::filesystem;
 
@@ -55,6 +58,7 @@ std::string GetPythonPath() {
 PyObject* GetClassFromPython(
     const std::string build_path,
     const std::string path_string,
+    const std::string datadir,
     const std::string module_name,
     const std::string function_name) {
     boost::filesystem::path full_path = boost::filesystem::path(path_string);
@@ -72,6 +76,7 @@ PyObject* GetClassFromPython(
 
     status = Py_PreInitialize(&py_pre_config);
     if (PyStatus_Exception(status)) {
+        std::cerr << "Python pre-initialization failed" << std::endl << std::flush;
         Py_ExitStatusException(status);
     }
 
@@ -81,21 +86,39 @@ PyObject* GetClassFromPython(
     const std::string python_sitelib_path = QUOTE(Python_SITELIB);
     const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
     const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
+    const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
 
     PyWideStringList python_path_py_wide_string_list{};
     status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
     if (PyStatus_Exception(status)) {
+        std::cerr << "Python path list append 1 failed" << std::endl << std::flush;
+        PyErr_Print();
         Py_ExitStatusException(status);
     }
     status = PyWideStringList_Append(&python_path_py_wide_string_list, path_string_w.c_str());
     if (PyStatus_Exception(status)) {
+        std::cerr << "Python path list append 2 failed" << std::endl << std::flush;
+        PyErr_Print();
         Py_ExitStatusException(status);
     }
     status = PyWideStringList_Append(&python_path_py_wide_string_list, python_sitelib_path_wstring.c_str());
     if (PyStatus_Exception(status)) {
+        std::cerr << "Python path list append 3 failed" << std::endl << std::flush;
+        PyErr_Print();
         Py_ExitStatusException(status);
     }
     status = PyWideStringList_Append(&python_path_py_wide_string_list, build_path_w.c_str());
+    if (PyStatus_Exception(status)) {
+        std::cerr << "Python path list append 4 failed" << std::endl << std::flush;
+        PyErr_Print();
+        Py_ExitStatusException(status);
+    }
+    status = PyWideStringList_Append(&python_path_py_wide_string_list, data_path_w.c_str());
+    if (PyStatus_Exception(status)) {
+        std::cerr << "Python path list append 5 failed" << std::endl << std::flush;
+        PyErr_Print();
+        Py_ExitStatusException(status);
+    }
 
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
@@ -105,6 +128,8 @@ PyObject* GetClassFromPython(
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
+        std::cerr << "Python config initialization failed" << std::endl << std::flush;
+        PyErr_Print();
         PyConfig_Clear(&config);
         Py_ExitStatusException(status);
     }
@@ -112,7 +137,7 @@ PyObject* GetClassFromPython(
     PyObject* module = PyImport_ImportModule(module_name.c_str());
 
     if(!module) {
-        std::cerr << "PyImport_ImportModule is null\n" << std::flush;
+        std::cerr << "Python module import failed (PyImport_ImportModule is null)" << std::endl << std::flush;
         PyErr_Print();
         Py_Finalize();
         // TODO: throw exception
@@ -121,7 +146,7 @@ PyObject* GetClassFromPython(
 
     PyObject* function = PyObject_GetAttrString(module,function_name.c_str());
     if(!function) {
-        std::cerr << "PyObject_GetAttrString is null\n" << std::flush;
+        std::cerr << "PyObject_GetAttrString is null" << std::endl << std::flush;
         PyErr_Print();
         Py_Finalize();
         // TODO: throw exception

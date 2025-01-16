@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * unit_csv.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Roy Falk, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -854,7 +856,16 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         
         for (int i = 0; i < shield->number_of_facets; i++) {
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
-            shield_values[i] = std::stoi(shield_string_value);            
+            if (shield_string_value.empty()) {
+                shield_values[i] = 0.0f;
+            } else {
+                try {
+                    shield_values[i] = static_cast<float>(std::stoi(shield_string_value));
+                } catch (const std::invalid_argument& ex) {
+                    VS_LOG(warning, (boost::format("Unable to convert shield value '%1%' to a number") % shield_string_value));
+                    shield_values[i] = 0.0f;
+                }
+            }
         }
 
         if (shield->number_of_facets == 4 || shield->number_of_facets == 2) {
@@ -1389,8 +1400,3 @@ string Unit::WriteUnitString() {
     std::map<std::string, std::string> unit = UnitToMap();
     return writeCSV(unit);
 }
-
-
-
-
-

@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * xml_support.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -17,7 +19,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_XML_SUPPORT_H
 #define VEGA_STRIKE_ENGINE_XML_SUPPORT_H
@@ -32,11 +34,6 @@
 #include <expat.h>
 #include <iostream>             //needed for cout calls in config_xml.cpp (and other places too I'm sure)
 #include "gfx/vec.h"
-
-//#if defined (_MSC_VER) && defined (_WIN32) && (_MSC_VER >= 1400)
-////Disable useless "sprintf deprecated" errors in Visual Studio 2005 Express.
-//#pragma warning(disable : 4996)
-//#endif
 
 #define ARRAY_LENGTH(a) ( sizeof (a)/sizeof (a[0]) )
 
