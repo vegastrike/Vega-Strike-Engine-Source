@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * vegastrike.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -50,6 +52,10 @@ extern float AUDIO_ATOM;
 #include <stdarg.h>
 #include "debug_vs.h"
 
+#if !defined(_WIN32)
+#   define GL_GLEXT_PROTOTYPES 1
+#endif
+
 #if defined (WIN32) || defined (__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already
  */
@@ -65,18 +71,20 @@ extern float AUDIO_ATOM;
     #include <unistd.h>
 #endif //defined (WIN32) || defined (__CYGWIN__)
 
-#ifndef NO_GFX
-    #if defined (__APPLE__) || defined (MACOSX)
-        #include <OpenGL/gl.h>
-        #include <OpenGL/glu.h>
-        #include <GLUT/glut.h>
-    #else //defined (__APPLE__) || defined (MACOSX)
-        #define __glext_h_
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-        #include <GL/glut.h>
-        #undef __glext_h_
-    #endif //defined (__APPLE__) || defined (MACOSX)
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#if !defined (NO_GFX)
+#   if defined(__APPLE__) && defined(__MACH__)
+#       define GL_GLEXT_FUNCTION_POINTERS 1
+#       include <gl.h>
+#       include <glu.h>
+#       include <glut.h>
+#   else //defined(__APPLE__) && defined(__MACH__)
+#       define __glext_h_
+#       include <gl.h>
+#       include <glu.h>
+#       include <glut.h>
+#       undef __glext_h_
+#   endif //defined(__APPLE__) && defined(__MACH__)
 #endif //NO_GFX
 
 #define PROG_NAME "vegastrike"

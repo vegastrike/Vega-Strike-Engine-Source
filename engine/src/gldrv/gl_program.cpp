@@ -1,7 +1,7 @@
 /*
  * gl_program.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -156,7 +156,7 @@ static VSFileSystem::VSError getProgramSource(const std::string &path,
                         } else {
                             // Append a blank line to avoid issues and restore line numbers
                             lines.push_back("\n");
-                            snprintf(buf, buflen, "#line %zu\n", lineno);
+                            snprintf(buf, buflen - 1, "#line %zu\n", lineno);
                             lines.push_back(buf);
                         }
                     } else {
@@ -395,7 +395,7 @@ static int hifiprog = 0;
 
 // THIS IS STUPID!
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
 std::string hifiProgramName  = "mac";
 std::string lowfiProgramName = "maclite";
 #else
@@ -410,7 +410,7 @@ int getDefaultProgram() {
     if (!initted) {
 
 // THIS IS STUPID,  Also why is lofi not configurable ?
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
         hifiProgramName = game_options()->mac_shader_name;
 #else
         hifiProgramName = game_options()->shader_name;

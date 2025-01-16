@@ -1,7 +1,7 @@
 /*
  * main.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -142,17 +142,19 @@ int readCommandLineOptions(int argc, char **argv);
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
 void VSExit(int code) {
     Music::CleanupMuzak();
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
+    AUDDestroy();
     winsys_exit(code);
 }
 
 void cleanup(void) {
-    STATIC_VARS_DESTROYED = true;
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
     VS_LOG(info, "Thank you for playing!");
-    VegaStrikeLogging::vega_logger()->FlushLogs();
-    if (_Universe != NULL) {
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+    STATIC_VARS_DESTROYED = true;
+    if (_Universe != nullptr) {
         _Universe->WriteSaveGame(true);
     }
 #ifdef _WIN32
@@ -337,7 +339,7 @@ int main(int argc, char *argv[]) {
         home_subdir_path = home_path;
     }
 
-    VegaStrikeLogging::vega_logger()->InitLoggingPart2(g_game.vsdebug, home_subdir_path);
+    VegaStrikeLogging::VegaStrikeLogger::instance().InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
     if (game_options()->force_client_connect) {
@@ -371,15 +373,13 @@ int main(int argc, char *argv[]) {
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()), 1);
     }
 #endif
 #endif
-#if 0
+
     InitTime();
     UpdateTime();
-#endif
 
     AUDInit();
     AUDListenerGain(game_options()->sound_gain);
@@ -409,7 +409,7 @@ int main(int argc, char *argv[]) {
     delete _Universe;
     CleanupUnitTables();
     // Just to be sure -- stephengtuggy 2020-07-27
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     return 0;
 }
 
@@ -569,7 +569,7 @@ void SetStartupView(Cockpit *cp) {
 
 void bootstrap_main_loop() {
     static bool LoadMission = true;
-    InitTime();
+    // InitTime();
     if (LoadMission) {
         LoadMission = false;
         active_missions.push_back(mission = new Mission(configuration()->game_start.default_mission.c_str()));

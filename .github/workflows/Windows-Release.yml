@@ -1,9 +1,11 @@
-name: Windows-CI
+name: Windows-Release
 
 # Controls when the action will run.
 on:
-  push:
-  pull_request:
+  release:
+    types:
+      - created
+      - edited
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -22,11 +24,13 @@ jobs:
           - os:              windows-2019
             cmake-generator: VS2019Win64
             enable-pie:      1
-            build-type:      Release
+            build-type:      RelWithDebInfo
+            is-release:      1
           - os:              windows-2022
             cmake-generator: VS2022Win64
             enable-pie:      1
-            build-type:      Debug
+            build-type:      RelWithDebInfo
+            is-release:      1
 
     env:
       # Indicates the location of vcpkg
@@ -37,23 +41,32 @@ jobs:
       VCPKG_BINARY_SOURCES: 'x-gha,readwrite'
       VCPKG_DEFAULT_TRIPLET: x64-windows
       VCPKG_DEFAULT_HOST_TRIPLET: x64-windows
+      TAG_NAME: '${{ github.ref_name }}'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Set env vars needed for vcpkg to leverage the GitHub Action cache as a storage
       # for Binary Caching.
+      # Also process the `github.sha` value to produce the SHORT_SHA we'll need later
       - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
+            const git_sha = context.sha.substring(0, 7)
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+            core.exportVariable('SHORT_SHA', git_sha);
+
+      - name: Test tag name and short SHA
+        run: |
+          echo "${TAG_NAME}"
+          echo "${SHORT_SHA}"
 
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
-        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f #v4.1.3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Python
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d #v5.1.0
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: 3.11
 
@@ -83,7 +96,7 @@ jobs:
             !${{ env.VCPKG_ROOT }}/installed
           # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
           key: |
-            ${{ matrix.os }}-${{ hashFiles( './vcpkg.json' )}}
+            ${{ matrix.os }}-${{ hashFiles( './engine/vcpkg.json' )}}
 
       - name: install-vcpkg
         if: steps.cache.outputs.cache-hit != 'true'
@@ -93,7 +106,7 @@ jobs:
 
       - name: run-build-script
         working-directory: ${{ github.workspace }}
-        run: .\script\build.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }}
+        run: .\script\build.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -IsRelease  ${{ matrix.is-release }} -GitTag ${{ env.TAG_NAME }} -GitSha ${{ env.SHORT_SHA }}
 
       - name: Test
         working-directory: ${{ github.workspace }}
@@ -107,4 +120,15 @@ jobs:
         if: failure()
         with:
           name: test_results_xml
-          path: ${{ github.workspace }}/**/test-results/**/*.xml
+          path: ${{github.workspace}}/build/test-results/**/*.xml
+
+      - name: Package the installer(s)
+        working-directory: ${{ github.workspace }}
+        run: .\script\package.ps1 -Generator ${{ matrix.cmake-generator }} -EnablePIE ${{ matrix.enable-pie }} -BuildType ${{ matrix.build-type }} -GitTag ${{ env.TAG_NAME }} -GitSha ${{ env.SHORT_SHA }}
+
+      - name: Upload the artifacts
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "packages/*.*"
