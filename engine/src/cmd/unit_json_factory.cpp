@@ -48,7 +48,7 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
 
     for(boost::json::value& unit_value : root_array) {
         boost::json::object unit_object = unit_value.get_object();
-        std::map<std::string, std::string> unit_attributes;
+        std::map<std::string, std::string> unit_attributes{};
 
         for(boost::json::key_value_pair& pair : unit_object) {
             const std::string value = boost::json::value_to<std::string>(pair.value());

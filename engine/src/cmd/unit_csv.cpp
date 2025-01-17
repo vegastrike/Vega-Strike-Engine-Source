@@ -65,28 +65,9 @@ extern void pushMesh(std::vector<Mesh *> &mesh,
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-// TODO: This is a terrible kludge. Replace with boost::json
 std::string MapToJson(std::map<std::string, std::string> unit) {
-    std::string json_string = "[\n\t{\n";
-    
-    int len = unit.size();
-    int i = 0;
-
-    for (auto const& pair : unit) {
-        boost::format new_line;
-        if(i < len-1) {
-            new_line = boost::format("\t\t\"%1%\": \"%2%\",\n") % pair.first % pair.second;
-        } else {
-            new_line = boost::format("\t\t\"%1%\": \"%2%\"\n") % pair.first % pair.second;
-        }
-        
-        i++;
-        json_string += new_line.str();
-    }
-
-    json_string += "\t}\n]\n";
-    
-    return json_string;
+    std::string return_value = boost::json::serialize(boost::json::value_from(unit));
+    return return_value;
 }
 
 void AddMeshes(std::vector<Mesh *> &xmeshes,
@@ -1127,12 +1108,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
     std::string hashname = filename + "__" + FactionUtil::GetFactionName(faction);
-    for (int i = ((int) unitTables.size()) - (readlast ? 1 : 2); i >= 0; --i) {
+    for (intmax_t i = unitTables.size() - (readlast ? 1 : 2); i >= 0; --i) {
         unsigned int where;
         if (unitTables[i]->RowExists(hashname, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        } else if (unitTables[i]->RowExists(filename, where)) {
             rread = true;
             return CSVRow(unitTables[i], where);
         }
