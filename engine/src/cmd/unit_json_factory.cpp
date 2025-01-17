@@ -40,24 +40,45 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     } catch (std::exception const& e) {
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("Error parsing JSON in UnitJSONFactory::ParseJSON(): %1%") % e.what()), 42);
     }
-    boost::json::object root_json_object = json_value.as_object();
-
-    for (boost::json::key_value_pair & unit_kvp : root_json_object) {
-        boost::json::object unit_object = unit_kvp.value().get_object();
+    if (json_value.is_object()) {
+        boost::json::object obj = json_value.as_object();
         std::map<std::string, std::string> unit_attributes{};
 
-        for (boost::json::key_value_pair& pair : unit_object) {
+        for (boost::json::key_value_pair& pair : obj) {
             const std::string value = boost::json::value_to<std::string>(pair.value());
             unit_attributes[pair.key()] = value;
         }
 
         // Add root
-        unit_attributes["root"] = file.GetRoot();  
+        unit_attributes["root"] = file.GetRoot();
 
         if (player_ship) {
             UnitCSVFactory::units["player_ship"] = unit_attributes;
         } else {
             UnitCSVFactory::units[unit_attributes["Key"]] = unit_attributes;
         }
+    } else if (json_value.is_array()) {
+        boost::json::array json_root = json_value.as_array();
+        for (boost::json::value & unit_value : json_root) {
+            boost::json::object unit_object = unit_value.get_object();
+            std::map<std::string, std::string> unit_attributes{};
+
+            for (boost::json::key_value_pair& pair : unit_object) {
+                const std::string value = boost::json::value_to<std::string>(pair.value());
+                unit_attributes[pair.key()] = value;
+            }
+
+            // Add root
+            unit_attributes["root"] = file.GetRoot();
+
+            if (player_ship) {
+                UnitCSVFactory::units["player_ship"] = unit_attributes;
+            } else {
+                UnitCSVFactory::units[unit_attributes["Key"]] = unit_attributes;
+            }
+        }
+    } else {
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Saved game unit file '%1%' had an unexpected JSON structure. We don't know how to process it.") % file.GetFilename()), 42);
     }
+
 }
