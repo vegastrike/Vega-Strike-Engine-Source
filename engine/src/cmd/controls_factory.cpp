@@ -1,9 +1,8 @@
-/**
+/*
  * controls_factory.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2023 Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer and other Vega Strike
- * contributors
+ * Copyright (C) 2001-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * Benjamen R. Meyer and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "controls_factory.h"
@@ -105,9 +104,9 @@ static std::vector<double> splitAndConvert (const std::string &s, char delim) {
 GFXColor getColor(const std::string& colorString) {
     std::vector<double> colorTuple = splitAndConvert(colorString, ',');
     if(colorTuple.size() == 4) {
-        return GFXColor(colorTuple[0], colorTuple[1], colorTuple[2], colorTuple[3]);
+        return GFXColor(colorTuple.at(0), colorTuple.at(1), colorTuple.at(2), colorTuple.at(3));
     } else {
-        return GFXColor(colorTuple[0], colorTuple[1], colorTuple[2]);
+        return GFXColor(colorTuple.at(0), colorTuple.at(1), colorTuple.at(2));
     }
     
 }
@@ -140,7 +139,7 @@ Control* getControl(std::map<std::string, std::string> attributes) {
         // Text Margin
         if(attributes.count("textMargins")) {
             std::vector<double> size = splitAndConvert(attributes["textMargins"], ',');
-            sd->setTextMargins(Size(size[0], size[1]));
+            sd->setTextMargins(Size(size.at(0), size.at(1)));
         }
 
         if(attributes.count("multiline")) {
@@ -258,7 +257,7 @@ Control* getControl(std::map<std::string, std::string> attributes) {
         // Text Margin
         if(attributes.count("textMargins")) {
             std::vector<double> size = splitAndConvert(attributes["textMargins"], ',');
-            p->setTextMargins(Size(size[0], size[1]));
+            p->setTextMargins(Size(size.at(0), size.at(1)));
         }
     } else if(type == "staticImageDisplay") {
         StaticImageDisplay* sid = new StaticImageDisplay;
@@ -272,14 +271,18 @@ Control* getControl(std::map<std::string, std::string> attributes) {
     // Font
     if(attributes.count("font")) {
         std::vector<double> font_array = splitAndConvert(attributes["font"], ',');
-        Font font(font_array[0], font_array[1]);
-        c->setFont(font);
+        if (font_array.size() < 2) {
+            VS_LOG(error, "controls_factory getControl(): font_array doesn't have enough elements");
+        } else {
+            Font font(font_array.at(0), font_array.at(1));
+            c->setFont(font);
+        }
     }
 
     // Rect
     if(attributes.count("rect")) {
         std::vector<double> rect = splitAndConvert(attributes["rect"], ',');
-        c->setRect(Rect(rect[0], rect[1], rect[2], rect[3]));
+        c->setRect(Rect(rect.at(0), rect.at(1), rect.at(2), rect.at(3)));
     }
 
     // Color

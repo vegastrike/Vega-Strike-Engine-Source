@@ -1191,7 +1191,7 @@ void VDU::DrawDamage(Unit *parent) {
     float armor[8];
     parent->ArmorData(armor);
     const bool draw_damage_sprite = configuration()->graphics_config.hud.draw_damage_sprite;
-    DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : NULL, .6, x, y, w, h,
+    DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : nullptr, .6, x, y, w, h,
             parent->layers[1].facets[0].Percent(),
             parent->layers[1].facets[3].Percent(),
             parent->layers[1].facets[2].Percent(),

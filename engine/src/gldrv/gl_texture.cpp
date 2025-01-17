@@ -331,7 +331,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width,
     GFXActiveTexture(texturestage);
     *handle = 0;
     while (*handle < static_cast<int>(textures.size())) {
-        if (!textures[*handle].alive) {
+        if (!textures.at(*handle).alive) {
             break;
         } else {
             (*handle)++;
@@ -346,58 +346,58 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width,
     }
     switch (texture_target) {
         case TEXTURE1D:
-            textures[*handle].targets = GL_TEXTURE_1D;
+            textures.at(*handle).targets = GL_TEXTURE_1D;
             break;
         case TEXTURE2D:
-            textures[*handle].targets = GL_TEXTURE_2D;
+            textures.at(*handle).targets = GL_TEXTURE_2D;
             break;
         case TEXTURE3D:
-            textures[*handle].targets = GL_TEXTURE_3D;
+            textures.at(*handle).targets = GL_TEXTURE_3D;
             break;
         case CUBEMAP:
-            textures[*handle].targets = GL_TEXTURE_CUBE_MAP_EXT;
+            textures.at(*handle).targets = GL_TEXTURE_CUBE_MAP_EXT;
             break;
         case TEXTURERECT:
-            textures[*handle].targets = GL_TEXTURE_RECTANGLE_ARB;
+            textures.at(*handle).targets = GL_TEXTURE_RECTANGLE_ARB;
             break;
     }
     //for those libs with stubbed out handle gen't
-    textures[*handle].name = *handle + 1;
-    textures[*handle].alive = GFXTRUE;
-    textures[*handle].texturestage = texturestage;
-    textures[*handle].mipmapped = mipmap;
-    glGenTextures(1, &textures[*handle].name);
-    glBindTexture(textures[*handle].targets, textures[*handle].name);
+    textures.at(*handle).name = *handle + 1;
+    textures.at(*handle).alive = GFXTRUE;
+    textures.at(*handle).texturestage = texturestage;
+    textures.at(*handle).mipmapped = mipmap;
+    glGenTextures(1, &textures.at(*handle).name);
+    glBindTexture(textures.at(*handle).targets, textures.at(*handle).name);
     activetexture[texturestage] = *handle;
     GFXTextureAddressMode(address_mode, texture_target);
-    if (textures[*handle].mipmapped & (TRILINEAR | MIPMAP) && gl_options.mipmap >= 2) {
-        glTexParameteri(textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        if (textures[*handle].mipmapped & TRILINEAR && gl_options.mipmap >= 3) {
-            glTexParameteri(textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    if (textures.at(*handle).mipmapped & (TRILINEAR | MIPMAP) && gl_options.mipmap >= 2) {
+        glTexParameteri(textures.at(*handle).targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        if (textures.at(*handle).mipmapped & TRILINEAR && gl_options.mipmap >= 3) {
+            glTexParameteri(textures.at(*handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         } else {
-            glTexParameteri(textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+            glTexParameteri(textures.at(*handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
         }
     } else {
-        if (textures[*handle].mipmapped == NEAREST || gl_options.mipmap == 0) {
-            glTexParameteri(textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        if (textures.at(*handle).mipmapped == NEAREST || gl_options.mipmap == 0) {
+            glTexParameteri(textures.at(*handle).targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(textures.at(*handle).targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         } else {
-            glTexParameteri(textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(textures.at(*handle).targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(textures.at(*handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         }
     }
-    glTexParameterf(textures[*handle].targets, GL_TEXTURE_PRIORITY, .5);
-    textures[*handle].width = width;
-    textures[*handle].height = height;
-    textures[*handle].iwidth = width;
-    textures[*handle].iheight = height;
-    textures[*handle].palette = NULL;
+    glTexParameterf(textures.at(*handle).targets, GL_TEXTURE_PRIORITY, .5);
+    textures.at(*handle).width = width;
+    textures.at(*handle).height = height;
+    textures.at(*handle).iwidth = width;
+    textures.at(*handle).iheight = height;
+    textures.at(*handle).palette = NULL;
     if (palette && textureformat == PALETTE8) {
         VS_LOG(trace, " palette ");
-        textures[*handle].palette = (GLubyte *) malloc(sizeof(GLubyte) * 1024);
-        ConvertPalette(textures[*handle].palette, (unsigned char *) palette);
+        textures.at(*handle).palette = (GLubyte *) malloc(sizeof(GLubyte) * 1024);
+        ConvertPalette(textures.at(*handle).palette, (unsigned char *) palette);
     }
-    textures[*handle].textureformat = GetUncompressedTextureFormat(textureformat);
+    textures.at(*handle).textureformat = GetUncompressedTextureFormat(textureformat);
     return GFXTRUE;
 }
 
@@ -410,8 +410,8 @@ void /*GFXDRVAPI*/ GFXPrioritizeTexture(unsigned int handle, float priority) {
 }
 
 void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle) {
-    ConvertPalette(textures[handle].palette, palette);
-    //memcpy (textures[handle].palette,palette,768);
+    ConvertPalette(textures.at(handle).palette, palette);
+    //memcpy (textures.at(handle).palette,palette,768);
 }
 
 static void DownSampleTexture(unsigned char **newbuf,
@@ -698,11 +698,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture(unsigned char *buffer,
         unsigned int height,
         enum TEXTURE_IMAGE_TARGET imagetarget) {
     GLenum image2D = GetImageTarget(imagetarget);
-    glBindTexture(textures[handle].targets, textures[handle].name);
+    glBindTexture(textures.at(handle).targets, textures.at(handle).name);
 
 //internalformat = GetTextureFormat (handle);
 
-    glTexSubImage2D(image2D, 0, x, y, width, height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
+    glTexSubImage2D(image2D, 0, x, y, width, height, textures.at(handle).textureformat, GL_UNSIGNED_BYTE, buffer);
     return GFXTRUE;
 }
 
@@ -726,7 +726,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
     unsigned char *tempbuf = NULL;
     GLenum internalformat;
     GLenum image2D = GetImageTarget(imagetarget);
-    glBindTexture(textures[handle].targets, textures[handle].name);
+    glBindTexture(textures.at(handle).targets, textures.at(handle).name);
     int blocksize = 16;
     bool comptemp = gl_options.compression;
 
@@ -744,14 +744,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         }
     }
     if (inWidth > 0) {
-        textures[handle].iwidth = textures[handle].width = inWidth;
+        textures.at(handle).iwidth = textures.at(handle).width = inWidth;
     }
     if (inHeight > 0) {
-        textures[handle].iheight = textures[handle].height = inHeight;
+        textures.at(handle).iheight = textures.at(handle).height = inHeight;
     }
     //This code i believe is executed if our texture isn't power of two
-    if ((textures[handle].mipmapped & (TRILINEAR | MIPMAP))
-            && (!isPowerOfTwo(textures[handle].width, logwid) || !isPowerOfTwo(textures[handle].height, logsize))) {
+    if ((textures.at(handle).mipmapped & (TRILINEAR | MIPMAP))
+            && (!isPowerOfTwo(textures.at(handle).width, logwid) || !isPowerOfTwo(textures.at(handle).height, logsize))) {
         static unsigned char NONPOWEROFTWO[1024] = {
                 255, 127, 127, 255,
                 255, 255, 0, 255,
@@ -759,8 +759,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
                 255, 127, 127, 255
         };
         buffer = NONPOWEROFTWO;
-        textures[handle].width = 2;
-        textures[handle].height = 2;
+        textures.at(handle).width = 2;
+        textures.at(handle).height = 2;
         //assert (false);
     }
     logsize = logsize > logwid ? logsize : logwid;
@@ -773,14 +773,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
     VS_LOG(debug,
             (boost::format(
                     "Transferring %1%x%2% texture, page %3% (eff: %4%x%5% - limited at %6% - %7% mips), onto name %8% (%9%)")
-                    % textures[handle].iwidth
-                    % textures[handle].iheight
+                    % textures.at(handle).iwidth
+                    % textures.at(handle).iheight
                     % pageIndex
-                    % textures[handle].width
-                    % textures[handle].height
+                    % textures.at(handle).width
+                    % textures.at(handle).height
                     % maxdimension
                     % mips
-                    % textures[handle].name
+                    % textures.at(handle).name
                     % GetImageTargetName(imagetarget)));
     if (maxdimension == 44) {
         detail_texture = 0;
@@ -791,19 +791,19 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         if (internformat >= DXT1 && internformat <= DXT5) {
-            if (textures[handle].width > 8 && textures[handle].height > 8 && mips > 0) {
-                offset1 += ((textures[handle].width + 3) / 4) * ((textures[handle].height + 3) / 4) * blocksize;
-                if (textures[handle].width > 1) {
-                    textures[handle].width >>= 1;
+            if (textures.at(handle).width > 8 && textures.at(handle).height > 8 && mips > 0) {
+                offset1 += ((textures.at(handle).width + 3) / 4) * ((textures.at(handle).height + 3) / 4) * blocksize;
+                if (textures.at(handle).width > 1) {
+                    textures.at(handle).width >>= 1;
                 }
-                if (textures[handle].height > 1) {
-                    textures[handle].height >>= 1;
+                if (textures.at(handle).height > 1) {
+                    textures.at(handle).height >>= 1;
                 }
-                if (textures[handle].iwidth > 1) {
-                    textures[handle].iwidth >>= 1;
+                if (textures.at(handle).iwidth > 1) {
+                    textures.at(handle).iwidth >>= 1;
                 }
-                if (textures[handle].iheight > 1) {
-                    textures[handle].iheight >>= 1;
+                if (textures.at(handle).iheight > 1) {
+                    textures.at(handle).iheight >>= 1;
                 }
                 --mips;
             }
@@ -814,25 +814,25 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         blocksize = 8;
     }
     if (internformat >= DXT1 && internformat <= DXT5) {
-        while ((textures[handle].width > maxdimension || textures[handle].height > maxdimension) && mips > 0) {
-            offset1 += ((textures[handle].width + 3) / 4) * ((textures[handle].height + 3) / 4) * blocksize;
-            if (textures[handle].width > 1) {
-                textures[handle].width >>= 1;
+        while ((textures.at(handle).width > maxdimension || textures.at(handle).height > maxdimension) && mips > 0) {
+            offset1 += ((textures.at(handle).width + 3) / 4) * ((textures.at(handle).height + 3) / 4) * blocksize;
+            if (textures.at(handle).width > 1) {
+                textures.at(handle).width >>= 1;
             }
-            if (textures[handle].height > 1) {
-                textures[handle].height >>= 1;
+            if (textures.at(handle).height > 1) {
+                textures.at(handle).height >>= 1;
             }
-            if (textures[handle].iwidth > 1) {
-                textures[handle].iwidth >>= 1;
+            if (textures.at(handle).iwidth > 1) {
+                textures.at(handle).iwidth >>= 1;
             }
-            if (textures[handle].iheight > 1) {
-                textures[handle].iheight >>= 1;
+            if (textures.at(handle).iheight > 1) {
+                textures.at(handle).iheight >>= 1;
             }
             --mips;
         }
         offset2 = offset1;
-        int w = textures[handle].width;
-        int h = textures[handle].height;
+        int w = textures.at(handle).width;
+        int h = textures.at(handle).height;
         for (int i = 0; i < mips; ++i) {
             offset2 += ((w + 3) / 4) * ((h + 3) / 4) * blocksize;
             if (w > 1) {
@@ -844,19 +844,19 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         }
     } else {
         //If we're not DDS, we have to generate a scaled version of the image
-        if (textures[handle].iwidth > maxdimension || textures[handle].iheight > maxdimension || textures[handle].iwidth
-                > MAX_TEXTURE_SIZE || textures[handle].iheight > MAX_TEXTURE_SIZE) {
+        if (textures.at(handle).iwidth > maxdimension || textures.at(handle).iheight > maxdimension || textures.at(handle).iwidth
+                > MAX_TEXTURE_SIZE || textures.at(handle).iheight > MAX_TEXTURE_SIZE) {
 #if !defined (GL_COLOR_INDEX8_EXT)
             if (internformat != PALETTE8) {
 #else
             if (internformat != PALETTE8 || gl_options.PaletteExt) {
 #endif
-                textures[handle].height = textures[handle].iheight;
-                textures[handle].width = textures[handle].iwidth;
+                textures.at(handle).height = textures.at(handle).iheight;
+                textures.at(handle).width = textures.at(handle).iwidth;
                 DownSampleTexture(&tempbuf,
                         buffer,
-                        textures[handle].height,
-                        textures[handle].width,
+                        textures.at(handle).height,
+                        textures.at(handle).width,
                         (internformat == PALETTE8 ? 1 : (internformat == RGBA32 ? 4 : 3))
                                 * sizeof(unsigned char),
                         handle,
@@ -866,17 +866,17 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
                 buffer = tempbuf;
                 VS_LOG(debug,
                         (boost::format("Downsampled %1%x%2% texture (target: %3%x%4% - limited at %5%)")
-                                % textures[handle].iwidth
-                                % textures[handle].iheight
-                                % textures[handle].width
-                                % textures[handle].height
+                                % textures.at(handle).iwidth
+                                % textures.at(handle).iheight
+                                % textures.at(handle).width
+                                % textures.at(handle).height
                                 % maxdimension));
             }
             offset2 = 2;
         } else {
             offset2 = offset1;
-            int w = textures[handle].width;
-            int h = textures[handle].height;
+            int w = textures.at(handle).width;
+            int h = textures.at(handle).height;
             switch (internformat) {
                 case PALETTE8:
                     offset2 += (w * h);
@@ -917,27 +917,27 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
     //skip to desired page
     offset1 += pageIndex * (offset2 - 2);
 
-    int height = textures[handle].height;
-    int width = textures[handle].width;
+    int height = textures.at(handle).height;
+    int width = textures.at(handle).width;
     //If s3tc compression is disabled, our DDS files must be software decompressed
     if (internformat >= DXT1 && internformat <= DXT5 && !gl_options.s3tc) {
         unsigned char *tmpbuffer = buffer + offset1;
-        ddsDecompress(tmpbuffer, data, internformat, textures[handle].height, textures[handle].width);
+        ddsDecompress(tmpbuffer, data, internformat, textures.at(handle).height, textures.at(handle).width);
         buffer = data;
         internformat = RGBA32;
-        textures[handle].textureformat = GL_RGBA;
+        textures.at(handle).textureformat = GL_RGBA;
     }
     if (internformat != PALETTE8 && internformat != PNGPALETTE8) {
         internalformat = GetTextureFormat(internformat);
-        if (((textures[handle].mipmapped & (TRILINEAR | MIPMAP)) && gl_options.mipmap >= 2) || detail_texture) {
+        if (((textures.at(handle).mipmapped & (TRILINEAR | MIPMAP)) && gl_options.mipmap >= 2) || detail_texture) {
             if (detail_texture) {
                 static FILTER fil = game_options()->detail_texture_trilinear ? TRILINEAR : MIPMAP;
-                textures[handle].mipmapped = fil;
-                glTexParameteri(textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                textures.at(handle).mipmapped = fil;
+                glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 if (fil & TRILINEAR) {
-                    glTexParameteri(textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                    glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
                 } else {
-                    glTexParameteri(textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+                    glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
                 }
             }
             //If we are DDS and we need to generate mipmaps (almost everything gets sent here, even non-3d visuals)
@@ -978,8 +978,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
                     size = ((width + 3) / 4) * ((height + 3) / 4) * blocksize;
                     //We need to reverse some parameters that are set cuz
                     //we're supposed to have mipmaps here.  But ani_texture hates us.
-                    glTexParameteri(textures[handle].targets, GL_TEXTURE_BASE_LEVEL, 0);
-                    glTexParameteri(textures[handle].targets, GL_TEXTURE_MAX_LEVEL, 0);
+                    glTexParameteri(textures.at(handle).targets, GL_TEXTURE_BASE_LEVEL, 0);
+                    glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MAX_LEVEL, 0);
                     glCompressedTexImage2D_p(image2D, 0, internalformat, width, height, 0, size, buffer + offset1);
                 }
                 /* END HACK */
@@ -987,9 +987,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
                 //We want mipmaps but we have uncompressed data
                 gluBuild2DMipmaps(image2D,
                         internalformat,
-                        textures[handle].width,
-                        textures[handle].height,
-                        textures[handle].textureformat,
+                        textures.at(handle).width,
+                        textures.at(handle).height,
+                        textures.at(handle).textureformat,
                         GL_UNSIGNED_BYTE,
                         buffer);
             }
@@ -1003,17 +1003,17 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
                 int size = 0;
                 size = ((width + 3) / 4) * ((height + 3) / 4) * blocksize;
                 //force GL to only display our one texture (just in case)
-                glTexParameteri(textures[handle].targets, GL_TEXTURE_BASE_LEVEL, 0);
-                glTexParameteri(textures[handle].targets, GL_TEXTURE_MAX_LEVEL, 0);
+                glTexParameteri(textures.at(handle).targets, GL_TEXTURE_BASE_LEVEL, 0);
+                glTexParameteri(textures.at(handle).targets, GL_TEXTURE_MAX_LEVEL, 0);
                 glCompressedTexImage2D_p(image2D, 0, internalformat, width, height, 0, size, buffer + offset1);
             } else {
                 glTexImage2D(image2D,
                         0,
                         internalformat,
-                        textures[handle].width,
-                        textures[handle].height,
+                        textures.at(handle).width,
+                        textures.at(handle).height,
                         0,
-                        textures[handle].textureformat,
+                        textures.at(handle).textureformat,
                         GL_UNSIGNED_BYTE,
                         buffer);
             }
@@ -1025,7 +1025,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
 #if defined (GL_COLOR_INDEX8_EXT)
         if (gl_options.PaletteExt) {
             error = glGetError();
-            glColorTable_p(textures[handle].targets, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
+            glColorTable_p(textures.at(handle).targets, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures.at(handle).palette);
             error = glGetError();
             if (error) {
                 if (tempbuf != nullptr) {
@@ -1039,11 +1039,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
                 }
                 return GFXFALSE;
             }
-            if ((textures[handle].mipmapped & (MIPMAP | TRILINEAR)) && gl_options.mipmap >= 2) {
+            if ((textures.at(handle).mipmapped & (MIPMAP | TRILINEAR)) && gl_options.mipmap >= 2) {
                 gluBuild2DMipmaps(image2D,
                         GL_COLOR_INDEX8_EXT,
-                        textures[handle].width,
-                        textures[handle].height,
+                        textures.at(handle).width,
+                        textures.at(handle).height,
                         GL_COLOR_INDEX,
                         GL_UNSIGNED_BYTE,
                         buffer);
@@ -1051,8 +1051,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
                 glTexImage2D(image2D,
                         0,
                         GL_COLOR_INDEX8_EXT,
-                        textures[handle].width,
-                        textures[handle].height,
+                        textures.at(handle).width,
+                        textures.at(handle).height,
                         0,
                         GL_COLOR_INDEX,
                         GL_UNSIGNED_BYTE,
@@ -1061,21 +1061,21 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
         } else
 #endif
         {
-            int nsize = 4 * textures[handle].iheight * textures[handle].iwidth;
+            int nsize = 4 * textures.at(handle).iheight * textures.at(handle).iwidth;
             unsigned char *tbuf = (unsigned char *) malloc(sizeof(unsigned char) * nsize);
-            //textures[handle].texture = tbuf;
+            //textures.at(handle).texture = tbuf;
             int j = 0;
             for (int i = 0; i < nsize; i += 4) {
-                tbuf[i] = textures[handle].palette[4 * buffer[j]];
-                tbuf[i + 1] = textures[handle].palette[4 * buffer[j] + 1];
-                tbuf[i + 2] = textures[handle].palette[4 * buffer[j] + 2];
+                tbuf[i] = textures.at(handle).palette[4 * buffer[j]];
+                tbuf[i + 1] = textures.at(handle).palette[4 * buffer[j] + 1];
+                tbuf[i + 2] = textures.at(handle).palette[4 * buffer[j] + 2];
                 //used to be 255
-                tbuf[i + 3] = textures[handle].palette[4 * buffer[j] + 3];
+                tbuf[i + 3] = textures.at(handle).palette[4 * buffer[j] + 3];
                 j++;
             }
             GFXTransferTexture(
                     tbuf, handle,
-                    textures[handle].iwidth, textures[handle].iheight,
+                    textures.at(handle).iwidth, textures.at(handle).iheight,
                     RGBA32, imagetarget, maxdimension, detail_texture);
             free(tbuf);
         }
@@ -1092,32 +1092,34 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
     return GFXTRUE;
 }
 
-void /*GFXDRVAPI*/ GFXDeleteTexture(int handle) {
-    if (textures[handle].alive) {
-        glDeleteTextures(1, &textures[handle].name);
-        for (size_t i = 0; i < sizeof(activetexture) / sizeof(int); ++i) {
-            if (activetexture[i] == handle) {
-                activetexture[i] = -1;
+void /*GFXDRVAPI*/ GFXDeleteTexture(const size_t handle) {
+    if (handle < textures.size()) {
+        if (textures.at(handle).alive) {
+            glDeleteTextures(1, &textures.at(handle).name);
+            for (int & texture : activetexture) {
+                if (texture == handle) {
+                    texture = -1;
+                }
             }
         }
+        if (textures.at(handle).palette != nullptr) {
+            free(textures.at(handle).palette);
+            textures.at(handle).palette = nullptr;
+        }
+        textures.at(handle).alive = GFXFALSE;
     }
-    if (textures[handle].palette != nullptr) {
-        free(textures[handle].palette);
-        textures[handle].palette = nullptr;
-    }
-    textures[handle].alive = GFXFALSE;
 }
 
 void GFXInitTextureManager() {
-    for (size_t handle = 0; handle < textures.size(); ++handle) {
-        textures[handle].palette = NULL;
-        textures[handle].width = textures[handle].height = textures[handle].iwidth = textures[handle].iheight = 0;
-        textures[handle].texturestage = 0;
-        textures[handle].name = 0;
-        textures[handle].alive = 0;
-        textures[handle].textureformat = DUMMY;
-        textures[handle].targets = 0;
-        textures[handle].mipmapped = NEAREST;
+    for (auto & texture : textures) {
+        texture.palette = nullptr;
+        texture.width = texture.height = texture.iwidth = texture.iheight = 0;
+        texture.texturestage = 0;
+        texture.name = 0;
+        texture.alive = 0;
+        texture.textureformat = DUMMY;
+        texture.targets = 0;
+        texture.mipmapped = NEAREST;
     }
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MAX_TEXTURE_SIZE);
 }
@@ -1187,7 +1189,7 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage) {
         GFXActiveTexture(stage);
         activetexture[stage] = handle;
         if (gl_options.Multitexture || (stage == 0)) {
-            glBindTexture(textures[handle].targets, textures[handle].name);
+            glBindTexture(textures.at(handle).targets, textures.at(handle).name);
         }
     }
 }

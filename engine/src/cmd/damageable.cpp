@@ -1,7 +1,7 @@
 /*
  * damageable.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and
+ * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -529,7 +529,7 @@ float Damageable::RShieldData() const {
 void Damageable::ArmorData(float armor[8]) const {
     Damageable *damageable = const_cast<Damageable *>(this);
     DamageableLayer armor_layer = damageable->GetArmorLayer();
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < armor_layer.number_of_facets; ++i) {
         armor[i] = armor_layer.facets[i].health;
     }
 }
@@ -617,5 +617,3 @@ bool Damageable::flickerDamage() {
     }
     return false;
 }
-
-
