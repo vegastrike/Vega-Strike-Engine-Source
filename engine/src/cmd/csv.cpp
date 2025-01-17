@@ -291,11 +291,6 @@ CSVRow::CSVRow(CSVTable *parent, const string &key) {
     iter = parent->rows[key] * parent->key.size();
 }
 
-CSVRow::CSVRow(CSVTable *parent, unsigned int which) {
-    this->parent = parent;
-    iter = which * parent->key.size();
-}
-
 const string &CSVRow::operator[](const string &col) const {
     static string empty_string;
     vsUMap<string, int>::iterator i = parent->columns.find(col);

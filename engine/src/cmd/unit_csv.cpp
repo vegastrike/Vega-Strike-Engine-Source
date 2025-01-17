@@ -65,19 +65,14 @@ extern void pushMesh(std::vector<Mesh *> &mesh,
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-std::string MapToJson(std::map<std::string, std::string> unit) {
-    std::string return_value = boost::json::serialize(boost::json::value_from(unit));
-    return return_value;
-}
-
 void AddMeshes(std::vector<Mesh *> &xmeshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        float unitscale,
-        const std::string &meshes,
-        int faction,
-        Flightgroup *fg,
-        vector<unsigned int> *counts) {
+               float &randomstartframe,
+               float &randomstartseconds,
+               float unitscale,
+               const std::string &meshes,
+               int faction,
+               Flightgroup *fg,
+               vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
 
     // Clear counts vector
@@ -1106,19 +1101,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     this->num_chunks = UnitCSVFactory::GetVariable(unit_key, "Num_Chunks", 0);
 }
 
-CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
-    std::string hashname = filename + "__" + FactionUtil::GetFactionName(faction);
-    for (intmax_t i = unitTables.size() - (readlast ? 1 : 2); i >= 0; --i) {
-        unsigned int where;
-        if (unitTables[i]->RowExists(hashname, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        }
-    }
-    rread = false;
-    return CSVRow();
-}
-
 void Unit::WriteUnit(const char *modifications) {
     bool bad = false;
     if (!modifications) {
@@ -1145,7 +1127,7 @@ void Unit::WriteUnit(const char *modifications) {
     }
 
     std::map<std::string, std::string> map = UnitToMap();
-    std::string towrite = MapToJson(map);
+    std::string towrite = boost::json::serialize(boost::json::value_from(map));
     f.Write(towrite.c_str(), towrite.length());
     f.Close();
 }
