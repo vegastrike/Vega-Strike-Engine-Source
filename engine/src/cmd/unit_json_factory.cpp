@@ -78,7 +78,7 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
             }
         }
     } else {
-        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Saved game unit file '%1%' had an unexpected JSON structure. We don't know how to process it.") % file.GetFilename()), 42);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("File '%1%' had an unexpected JSON structure. We don't know how to process it.") % file.GetFilename()), 42);
     }
 
 }
