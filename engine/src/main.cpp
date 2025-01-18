@@ -838,16 +838,16 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     if (cmd_args.count("debug")) {
         char vs_debug_level_temp = cmd_args["debug"].as<char>();
         switch (vs_debug_level_temp) {
-            case 0:
+            case '0':
                 g_game.vsdebug = 0;
                 break;
-            case 1:
+            case '1':
                 g_game.vsdebug = 1;
                 break;
-            case 2:
+            case '2':
                 g_game.vsdebug = 2;
                 break;
-            case 3:
+            case '3':
                 g_game.vsdebug = 3;
                 break;
             default:
