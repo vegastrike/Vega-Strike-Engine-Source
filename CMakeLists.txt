@@ -145,7 +145,7 @@ IF (ENABLE_PIE)
     MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ELSE (ENABLE_PIE)
-    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+    MESSAGE(STATUS "Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
 

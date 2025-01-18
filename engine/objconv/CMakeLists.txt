@@ -1,7 +1,7 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
 # Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -71,9 +71,9 @@ ENDIF (EXPAT_FOUND)
 IF (OGRE_FOUND)
     SET(MSH_INCLUDES ${MSH_INCLUDES} ${OGRE_INCLUDE_DIRS})
     SET(MSH_LIBS ${MSH_LIBS} ${OGRE_LIBRARIES})
-    MESSAGE("++ Compiling vega-meshtool with OgreMesh support")
+    MESSAGE(STATUS "Compiling vega-meshtool with OgreMesh support")
 ELSE (OGRE_FOUND)
-    MESSAGE("-- Compiling vega-meshtool without OgreMesh support: Ogre not found")
+    MESSAGE(STATUS "Compiling vega-meshtool without OgreMesh support: Ogre not found")
 ENDIF (OGRE_FOUND)
 
 SET(MESHER_SOURCES
