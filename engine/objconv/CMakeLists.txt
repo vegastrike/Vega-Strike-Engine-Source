@@ -64,7 +64,7 @@ IF (EXPAT_FOUND)
     SET(MSH_INCLUDES ${MSH_INCLUDES} ${EXPAT_INCLUDE_DIRS})
     SET(MSH_LIBS ${MSH_LIBS} ${EXPAT_LIBRARIES})
 ELSE (EXPAT_FOUND)
-    MESSAGE("!! We can't find expat for XML crap")
+    MESSAGE(WARNING "We can't find expat for XML crap")
 ENDIF (EXPAT_FOUND)
 
 #ogre already looked for by parent

@@ -26,6 +26,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 #include <Python.h>
+#include <boost/program_options.hpp>
 #include "audio/test.h"
 #if defined (HAVE_SDL)
 #include <SDL2/SDL.h>
@@ -716,162 +717,193 @@ void bootstrap_main_loop() {
     ///Draw Texture
 }
 
-// SGT 2020-07-16   This gets called from main() before initLogging,
-//                  so it gets a pass on not using the Boost logging stuff
-const char helpmessage[] =
-        "Command line options for vegastrike\n"
-        "\n"
-        " -D -d \t Specify data directory\n"
-        " -N -n \t Number of players\n"
-        " -M -m \t Specify a mod to play\n"
-        " -P -p \t Specify player location\n"
-        " -J -j \t Start in a specific system\n"
-        " -A -a \t Normal resolution (800x600)\n"
-        " -H -h \t High resolution (1024x768)\n"
-        " -V -v \t Super high resolution (1280x1024)\n"
-        " --net \t Networking Enabled (Experimental)\n"
-        " --debug[=#] \t Enable debugging output, 1 major warnings, 2 medium, 3 developer notes\n"
-        " --test-audio \t Run audio tests\n"
-        " --version \t Print the version and exit\n"
-        "\n";
 const char versionmessage[] =
         // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
         "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
         "\n";
 
 std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine) {
-    // TODO: replace with boot::program_options
-    std::string st;
     std::string retstr;
     std::string mission_name;
-    std::string datatmp;
     g_game.vsdebug = '0';
-    QVector PlayerLocation;
-    for (int i = 1; i < argc; i++) {
-        if (lpCmdLine[i][0] == '-') {
-            std::cerr << "ARG #" << i << " = " << lpCmdLine[i] << std::endl;
-            std::string input(lpCmdLine[i]);
-            std::istringstream iStringStream(input);
-            switch (lpCmdLine[i][1]) {
-                case 'd':
-                case 'D':
-                    //Specifying data directory
-                    if (lpCmdLine[i][2] == 0) {
-                        std::cout << "Option -D requires an argument" << std::endl;
-                        exit(1);
-                    }
-                    datatmp = &lpCmdLine[i][2];
-                    if (VSFileSystem::DirectoryExists(datatmp)) {
-                        VSFileSystem::datadir = datatmp;
-                    } else {
-                        std::cout << "Specified data directory not found... exiting" << std::endl;
-                        exit(1);
-                    }
-                    std::cout << "Using data dir specified on command line : " << datatmp << std::endl;
-                    break;
-                case 'r':
-                case 'R':
-                    break;
-                case 'N':
-                case 'n':
-                    if (!(lpCmdLine[i][2] == '1' && lpCmdLine[i][3] == '\0')) {
-                        CONFIGFILE = new char[40 + strlen(lpCmdLine[i]) + 1];
-                        sprintf(CONFIGFILE, "vegastrike.config.%splayer", lpCmdLine[i] + 2);
-                    }
-                    break;
-                case 'M':
-                case 'm':
-                    retstr = string(lpCmdLine[i] + 2);
-                    break;
-                case 'f':
-                case 'F':
-                    break;
-                case 'U':
-                case 'u':
-                    break;
-                case 'P':
-                case 'p':
-                    break;
-                case 'L':
-                case 'l':
-                    try {
-                        iStringStream.ignore(2);
-                        iStringStream >> PlayerLocation.i;
-                        iStringStream.ignore(1, ',');
-                        iStringStream >> PlayerLocation.j;
-                        iStringStream.ignore(1, ',');
-                        iStringStream >> PlayerLocation.k;
-                    } catch (std::ios_base::failure &inputFailure) {
-                        std::cout << "Error reading coordinates for player location: " << inputFailure.what()
-                                << std::endl;
-                        exit(1);
-                    }
-                    SetPlayerLoc(PlayerLocation, true);
-                    break;
-                case 'J':
-                case 'j':             //low rez
-                    st = string((lpCmdLine[i]) + 2);
-                    SetPlayerSystem(st, true);
-                    break;
-                case 'A':             //average rez
-                case 'a':
-                    g_game.y_resolution = 600;
-                    g_game.x_resolution = 800;
-                    break;
-                case 'H':
-                case 'h':             //high rez
-                    g_game.y_resolution = 768;
-                    g_game.x_resolution = 1024;
-                    break;
-                case 'V':
-                case 'v':
-                    g_game.y_resolution = 1024;
-                    g_game.x_resolution = 1280;
-                    break;
-                case 'G':
-                case 'g':
-                    break;
-                case '-':
-                    //long options
-                    if (strcmp(lpCmdLine[i], "--benchmark") == 0) {
-                        try {
-                            iStringStream.ignore(1);
-                            iStringStream >> benchmark;
-                        } catch (std::ios_base::failure &inputFailure) {
-                            std::cout << "Error parsing benchmark value: " << inputFailure.what() << std::endl;
-                            exit(1);
-                        }
-                        i++;
-                    } else if (strcmp(lpCmdLine[i], "--net") == 0) {
-                        //don't ignore the network section of the config file
-                        ignore_network = false;
-                    } else if (strcmp(lpCmdLine[i], "--help") == 0) {
-                        std::cout << helpmessage;
-                        exit(0);
-                    } else if (strcmp(lpCmdLine[i], "--version") == 0) {
-                        std::cout << versionmessage;
-                        exit(0);
-                    } else if (strncmp(lpCmdLine[i], "--debug", 7) == 0) {
-                        if (lpCmdLine[i][7] == 0) {
-                            g_game.vsdebug = 1;
-                        } else if (lpCmdLine[i][8] == 0) {
-                            std::cout << helpmessage;
-                            exit(0);
-                        }
-                        g_game.vsdebug = lpCmdLine[i][8] - '0';
-                        ++i;
-                    }
-                    break;
-            }
+
+    boost::program_options::options_description vs_switches("Command line options for vegastrike; short options are case insensitive");
+    vs_switches.add_options()
+        ("target,D", boost::program_options::value<std::string>(), "Specify data directory, full path expected")
+        ("num-players,n", boost::program_options::value<int>(), "Number of players")
+        ("mod,m", boost::program_options::value<std::string>(), "Specify a mod to play")
+        // ("player-location,p", boost::program_options::value<std::string>(), "Specify player location in X, Y, Z coordinates separated by commas")
+        ("start-in-system,j", boost::program_options::value<std::string>(), "Start in a specific system")
+        ("location,l", boost::program_options::value<std::string>(), "Specify player location")
+        ("a", "Low resolution (800x600)")
+        ("h", "Medium-low resolution (1024x768)")
+        ("v", "Medium resolution (1280x1024)")
+        ("help,h", "Show this help")
+        ("version", "Print the version and exit")
+        ("net", "Networking Enabled (Experimental)")
+        ("debug", boost::program_options::value<char>()->default_value('0'), "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")
+        ("benchmark", boost::program_options::value<double>(), "Benchmark")
+        ("test-audio", "Run audio tests")  // is handled in readCommandLineOptions, here is serves only for help message
+        ("r", "No-op")
+        ("f", "No-op")
+        ("p", "No-op")
+        ("g", "No-op")
+        ("u", "No-op")
+        ;
+
+    boost::program_options::options_description vs_modules;
+    vs_modules.add_options()
+        ("mission_name", boost::program_options::value<std::string>(), "Mission name")
+        ;
+
+    boost::program_options::options_description vs_options;
+    vs_options.add(vs_switches).add(vs_modules);
+
+    boost::program_options::positional_options_description vs_positionals;
+    vs_positionals.add("mission_name", 1);
+
+    auto style = static_cast<boost::program_options::command_line_style::style_t>(boost::program_options::command_line_style::unix_style
+                                                                                | boost::program_options::command_line_style::case_insensitive);
+    boost::program_options::variables_map cmd_args;
+    try {
+        boost::program_options::store(
+            boost::program_options::command_line_parser(argc, lpCmdLine).options(vs_options).positional(vs_positionals).style(style).run(),
+            cmd_args
+        );
+        boost::program_options::notify(cmd_args);
+    } catch (const boost::program_options::error& e) {
+        VS_LOG(fatal, (boost::format("Failed to parse arguments: %1%") % e.what()));
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%") % vs_switches), EXIT_FAILURE);
+    }
+
+    if (cmd_args.count("help")) {
+        std::cout << vs_switches << std::endl;
+        exit(0);
+    }
+
+    if (cmd_args.count("version")) {
+        std::cout << versionmessage << std::endl;
+        exit(0);
+    }
+
+    if (cmd_args.count("target")) {
+        std::string datatmp;
+        datatmp = cmd_args["target"].as<std::string>();
+        if (datatmp.empty()) {
+            VS_LOG_FLUSH_EXIT(fatal, "Target-data-directory option requires an argument", EXIT_FAILURE);
+        } else if (VSFileSystem::DirectoryExists(datatmp)) {
+            VSFileSystem::datadir = datatmp;
+            VS_LOG(important_info, (boost::format("Using target data directory specified on command line: '%1%'") % datatmp));
         } else {
-            //no "-" before it - it's the mission name
-            mission_name = std::string(lpCmdLine[i]);
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Specified target data directory '%1%' not found... exiting") % datatmp), EXIT_FAILURE);
         }
     }
+
+    if (cmd_args.count("num-players")) {
+        int num_players = cmd_args["num-players"].as<int>();
+        if (num_players > 1 && num_players <= 9) {
+            CONFIGFILE = new char[42];
+            snprintf(CONFIGFILE, 42, "vegastrike.config.%dplayer", num_players);
+        } else if (num_players != 1) {
+            VS_LOG(warning, "Specified number of players out of range (1-9)");
+        }
+    }
+
+    if (cmd_args.count("mod")) {
+        retstr = cmd_args["mod"].as<std::string>();
+    }
+
+    if (cmd_args.count("start-in-system")) {
+        std::string st;
+        st = cmd_args["start-in-system"].as<std::string>();
+        SetPlayerSystem(st, true);
+    }
+
+    if (cmd_args.count("location")) {
+        QVector PlayerLocation;
+        try {
+            std::string input = cmd_args["location"].as<std::string>();
+            std::istringstream iStringStream(input);
+            iStringStream.ignore(2);
+            iStringStream >> PlayerLocation.i;
+            iStringStream.ignore(1, ',');
+            iStringStream >> PlayerLocation.j;
+            iStringStream.ignore(1, ',');
+            iStringStream >> PlayerLocation.k;
+        } catch (std::ios_base::failure &inputFailure) {
+            std::cout << "Error reading coordinates for player location: " << inputFailure.what()
+                    << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        SetPlayerLoc(PlayerLocation, true);
+    }
+
+    if (cmd_args.count("debug")) {
+        char vs_debug_level_temp = cmd_args["debug"].as<char>();
+        switch (vs_debug_level_temp) {
+            case 0:
+                g_game.vsdebug = 0;
+                break;
+            case 1:
+                g_game.vsdebug = 1;
+                break;
+            case 2:
+                g_game.vsdebug = 2;
+                break;
+            case 3:
+                g_game.vsdebug = 3;
+                break;
+            case '0':
+                g_game.vsdebug = 0;
+                break;
+            case '1':
+                g_game.vsdebug = 1;
+                break;
+            case '2':
+                g_game.vsdebug = 2;
+                break;
+            case '3':
+                g_game.vsdebug = 3;
+                break;
+            default:
+                VS_LOG_FLUSH_EXIT(fatal, "Invalid debug level specified", EXIT_FAILURE);
+        }
+    }
+
+    if (cmd_args.count("net")) {
+        //don't ignore the network section of the config file
+        ignore_network = false;
+    }
+
+    if (cmd_args.count("benchmark")) {
+        benchmark = cmd_args["benchmark"].as<double>();
+    }
+
+    if (cmd_args.count("test-audio")) {
+        // This is handled separately, since we have to undefine main first
+        // return Audio::Test::main(argc, argv);
+    }
+
+    if (cmd_args.count("a")) {
+        g_game.x_resolution = 800;
+        g_game.y_resolution = 600;
+    }
+    if (cmd_args.count("h")) {
+        g_game.x_resolution = 1024;
+        g_game.y_resolution = 768;
+    }
+    if (cmd_args.count("v")) {
+        g_game.x_resolution = 1280;
+        g_game.y_resolution = 1024;
+    }
+
+    if (cmd_args.count("mission_name")) {
+        mission_name = cmd_args["mission_name"].as<std::string>();
+    }
+
     if (false == legacy_data_dir_mode) {
         if (true == VSFileSystem::datadir.empty()) {
-            std::cout << "Data directory not specified." << std::endl;
-            exit(1);
+            VS_LOG_FLUSH_EXIT(fatal, "Data directory not specified.", EXIT_FAILURE);
         }
     }
 
