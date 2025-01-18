@@ -732,15 +732,12 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
         ("target,D", boost::program_options::value<std::string>(), "Specify data directory, full path expected")
         ("num-players,n", boost::program_options::value<int>(), "Number of players")
         ("mod,m", boost::program_options::value<std::string>(), "Specify a mod to play")
-        // ("player-location,p", boost::program_options::value<std::string>(), "Specify player location in X, Y, Z coordinates separated by commas")
         ("start-in-system,j", boost::program_options::value<std::string>(), "Start in a specific system")
         ("location,l", boost::program_options::value<std::string>(), "Specify player location")
-        ("a", "Low resolution (800x600)")
         ("h", "Medium-low resolution (1024x768)")
         ("v", "Medium resolution (1280x1024)")
         ("help,h", "Show this help")
         ("version", "Print the version and exit")
-        ("net", "Networking Enabled (Experimental)")
         ("debug", boost::program_options::value<char>()->default_value('0'), "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")
         ("benchmark", boost::program_options::value<double>(), "Benchmark")
         ("test-audio", "Run audio tests")  // is handled in readCommandLineOptions, here is serves only for help message
@@ -853,18 +850,6 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
             case 3:
                 g_game.vsdebug = 3;
                 break;
-            case '0':
-                g_game.vsdebug = 0;
-                break;
-            case '1':
-                g_game.vsdebug = 1;
-                break;
-            case '2':
-                g_game.vsdebug = 2;
-                break;
-            case '3':
-                g_game.vsdebug = 3;
-                break;
             default:
                 VS_LOG_FLUSH_EXIT(fatal, "Invalid debug level specified", EXIT_FAILURE);
         }
@@ -884,10 +869,6 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
         // return Audio::Test::main(argc, argv);
     }
 
-    if (cmd_args.count("a")) {
-        g_game.x_resolution = 800;
-        g_game.y_resolution = 600;
-    }
     if (cmd_args.count("h")) {
         g_game.x_resolution = 1024;
         g_game.y_resolution = 768;
