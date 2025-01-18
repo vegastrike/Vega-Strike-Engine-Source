@@ -1127,7 +1127,9 @@ void Unit::WriteUnit(const char *modifications) {
     }
 
     std::map<std::string, std::string> map = UnitToMap();
-    std::string towrite = boost::json::serialize(boost::json::value_from(map));
+    boost::json::array json_root_array;
+    json_root_array.emplace_back(boost::json::value_from(map));
+    std::string towrite = boost::json::serialize(json_root_array);
     f.Write(towrite.c_str(), towrite.length());
     f.Close();
 }
