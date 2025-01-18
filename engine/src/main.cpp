@@ -837,21 +837,10 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
 
     if (cmd_args.count("debug")) {
         char vs_debug_level_temp = cmd_args["debug"].as<char>();
-        switch (vs_debug_level_temp) {
-            case '0':
-                g_game.vsdebug = 0;
-                break;
-            case '1':
-                g_game.vsdebug = 1;
-                break;
-            case '2':
-                g_game.vsdebug = 2;
-                break;
-            case '3':
-                g_game.vsdebug = 3;
-                break;
-            default:
-                VS_LOG_FLUSH_EXIT(fatal, "Invalid debug level specified", EXIT_FAILURE);
+        if (vs_debug_level_temp >= '0' && vs_debug_level_temp <= '3') {
+            g_game.vsdebug = vs_debug_level_temp - '0';
+        } else {
+            VS_LOG_FLUSH_EXIT(fatal, "Invalid debug level specified", EXIT_FAILURE);
         }
     }
 
