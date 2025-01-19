@@ -24,15 +24,11 @@
 #include "unit_json_factory.h"
 #include "unit_csv_factory.h"
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
 #include <string>
 #include <map>
 #include <boost/json.hpp>
-
-#include "resource/json_utils.h"
 
 
 void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
@@ -44,24 +40,45 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     } catch (std::exception const& e) {
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("Error parsing JSON in UnitJSONFactory::ParseJSON(): %1%") % e.what()), 42);
     }
-    boost::json::array root_array = json_value.get_array();
+    if (json_value.is_object()) {
+        boost::json::object obj = json_value.as_object();
+        std::map<std::string, std::string> unit_attributes{};
 
-    for(boost::json::value& unit_value : root_array) {
-        boost::json::object unit_object = unit_value.get_object();
-        std::map<std::string, std::string> unit_attributes;
-
-        for(boost::json::key_value_pair& pair : unit_object) {
+        for (boost::json::key_value_pair& pair : obj) {
             const std::string value = boost::json::value_to<std::string>(pair.value());
             unit_attributes[pair.key()] = value;
         }
 
         // Add root
-        unit_attributes["root"] = file.GetRoot();  
+        unit_attributes["root"] = file.GetRoot();
 
-        if(player_ship) {
+        if (player_ship) {
             UnitCSVFactory::units["player_ship"] = unit_attributes;
         } else {
             UnitCSVFactory::units[unit_attributes["Key"]] = unit_attributes;
         }
+    } else if (json_value.is_array()) {
+        boost::json::array json_root = json_value.as_array();
+        for (boost::json::value & unit_value : json_root) {
+            boost::json::object unit_object = unit_value.get_object();
+            std::map<std::string, std::string> unit_attributes{};
+
+            for (boost::json::key_value_pair& pair : unit_object) {
+                const std::string value = boost::json::value_to<std::string>(pair.value());
+                unit_attributes[pair.key()] = value;
+            }
+
+            // Add root
+            unit_attributes["root"] = file.GetRoot();
+
+            if (player_ship) {
+                UnitCSVFactory::units["player_ship"] = unit_attributes;
+            } else {
+                UnitCSVFactory::units[unit_attributes["Key"]] = unit_attributes;
+            }
+        }
+    } else {
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("File '%1%' had an unexpected JSON structure. We don't know how to process it.") % file.GetFilename()), 42);
     }
+
 }
