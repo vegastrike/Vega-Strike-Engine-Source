@@ -809,71 +809,109 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     //float efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
 
     // Get shield count
-    std::string shield_string_values[4];
-    std::vector<string> shield_sections;
-    
+    std::map<std::string, float> shield_sections{};
+    std::vector<std::string> shield_string_values{};
+
     const std::string shield_strength_string = UnitCSVFactory::GetVariable(unit_key, "shield_strength", std::string());
     const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
     
     if(!shield_facets_string.empty()) {
-        int shield_facets = std::stoi(shield_facets_string);
-        shield->number_of_facets = shield_facets;
+        try {
+            int shield_facets = std::stoi(shield_facets_string);
+            shield->number_of_facets = shield_facets;
+        } catch (std::invalid_argument const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
+            shield->number_of_facets = 1;
+        } catch (std::out_of_range const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
+            shield->number_of_facets = 1;
+        }
     }
 
     if(!shield_strength_string.empty()) {
-        int shield_strength = std::stoi(shield_strength_string);
-        shield->UpdateFacets(shield_strength);
+        try {
+            int shield_strength = std::stoi(shield_strength_string);
+            shield->UpdateFacets(static_cast<float>(shield_strength));
+        } catch (std::invalid_argument const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
+            shield->UpdateFacets(0.0F);
+        } catch (std::out_of_range const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
+            shield->UpdateFacets(0.0F);
+        }
     } else if(!shield_facets_string.empty()) {
         // Try new longform
-        float shield_values[4];
-        
+        std::vector<float> shield_values{};
         std::string shield_keys[] = {"shield_front", "shield_back",
             "shield_left", "shield_right"};
         
-        for (int i = 0; i < shield->number_of_facets; i++) {
+        for (int i = 0; i < shield->number_of_facets; ++i) {
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
             if (shield_string_value.empty()) {
-                shield_values[i] = 0.0f;
+                shield_sections[shield_keys[i]] = 0.0F;
+                shield_values.emplace_back(0.0F);
             } else {
                 try {
-                    shield_values[i] = static_cast<float>(std::stoi(shield_string_value));
+                    float tmp = static_cast<float>(std::stoi(shield_string_value));
+                    shield_sections[shield_keys[i]] = tmp;
+                    shield_values.emplace_back(tmp);
                 } catch (const std::invalid_argument& ex) {
-                    VS_LOG(warning, (boost::format("Unable to convert shield value '%1%' to a number") % shield_string_value));
-                    shield_values[i] = 0.0f;
+                    VS_LOG(error, (boost::format("%1%: Unable to convert shield value '%2%' to a number: %3%") % __FUNCTION__ % shield_string_value % ex.what()));
+                    shield_sections[shield_keys[i]] = 0.0F;
+                    shield_values.emplace_back(0.0F);
+                } catch (std::out_of_range const& ex) {
+                    VS_LOG(error, (boost::format("%1%: Unable to convert shield value '%2%' to a number: %3%") % __FUNCTION__ % shield_string_value % ex.what()));
+                    shield_sections[shield_keys[i]] = 0.0F;
+                    shield_values.emplace_back(0.0F);
                 }
             }
         }
 
         if (shield->number_of_facets == 4 || shield->number_of_facets == 2) {
-            shield->UpdateFacets(shield->number_of_facets, shield_values);
+            shield->UpdateFacets(shield->number_of_facets, shield_values.data());
         }
     } else {
-        // Fallback to old
+        // Fallback to old shield_keys
         int shield_count = 0;
-        float shield_values[4];
+        std::vector<std::string> tmp_keys{"Shield_Front_Top_Right", "Shield_Back_Top_Left", "Shield_Front_Bottom_Right", "Shield_Front_Bottom_Left"};
+        std::vector<float> shield_values{};
 
-        // TODO: this mapping should really go away
-        // I love macros, NOT.
-        shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string());
-        shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string());
-        shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string());
-        shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string());
-
-        for (int i = 0; i < 4; i++) {
-            shield_values[i] = 0.0f;
-
-            if (shield_string_values[i].empty()) {
-                continue;
+        try {
+            for (auto &key : tmp_keys) {
+                std::string tmp_string_value = UnitCSVFactory::GetVariable(unit_key, key, std::string());
+                float tmp_float_value = std::stof(tmp_string_value);
+                shield_sections[key] = tmp_float_value;
+                shield_values.emplace_back(tmp_float_value);
+                shield_string_values.emplace_back(tmp_string_value);
+                ++shield_count;
             }
-
-            shield_values[i] = ::stof(shield_string_values[i]);
-            // Should add up to the shield type - quad or dual
-            shield_count++;
-        }   
+        } catch (std::exception const& ex) {
+            shield_count = 0;
+            shield_string_values.clear();
+            shield_values.clear();
+            shield_sections.clear();
+            tmp_keys.clear();
+            tmp_keys.emplace_back("shield_front");
+            tmp_keys.emplace_back("shield_back");
+            tmp_keys.emplace_back("shield_left");
+            tmp_keys.emplace_back("shield_right");
+            try {
+                for (auto &key : tmp_keys) {
+                    std::string tmp_string_value = UnitCSVFactory::GetVariable(unit_key, key, std::string());
+                    float tmp_float_value = std::stof(tmp_string_value);
+                    shield_sections[key] = tmp_float_value;
+                    shield_values.emplace_back(tmp_float_value);
+                    shield_string_values.emplace_back(tmp_string_value);
+                    ++shield_count;
+                }
+            } catch (std::exception const& ex) {
+                VS_LOG(error, (boost::format("%1%: %2% trying to parse shield facets") % __FUNCTION__ % ex.what()));
+            }
+        }
 
         if (shield_count == 4 || shield_count == 2) {
             shield->number_of_facets = shield_count;
-            shield->UpdateFacets(shield_count, shield_values);
+            shield->UpdateFacets(shield_count, shield_values.data());
         }
     }
 
