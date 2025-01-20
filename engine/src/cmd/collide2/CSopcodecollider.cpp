@@ -26,7 +26,7 @@
 
 /*
  * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2020-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 Stephen G. Tuggy
  * Copyright (C) 2025 Benjamen R. Meyer
  */
 
@@ -35,7 +35,6 @@
 #include "CSopcodecollider.h"
 #include "opcodeqsqrt.h"
 #include "opcodeqint.h"
-#include "vs_vector.h"
 #include "vs_logging.h"
 // #include "opcodegarray.h"
 #define _X 1000
@@ -43,9 +42,8 @@
 #undef _X
 
 using namespace Opcode;
-using namespace VegaStrike;
 
-static vs_vector<csCollisionPair> pairs;
+static std::vector<csCollisionPair> pairs;
 
 csOPCODECollider::csOPCODECollider(const std::vector<mesh_polygon> &polygons) {
     m_pCollisionModel = nullptr;
@@ -73,8 +71,8 @@ void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polyg
     OPCODECREATE OPCC;
     unsigned int tri_count = 0;
     std::vector<Vector>::size_type vert_count = 0;
-    for (std::vector<mesh_polygon>::size_type i = 0; i < polygons.size(); ++i) {
-        vert_count += polygons.at(i).v.size();
+    for (const auto & polygon : polygons) {
+        vert_count += polygon.v.size();
     }
     tri_count = vert_count / 3;
     if (tri_count) {
@@ -91,11 +89,11 @@ void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polyg
 
         /* Copies the Vector's in mesh_polygon to Point's in vertholder.
         * This sucks but i dont see anyway around it */
-        for (std::vector<mesh_polygon>::size_type i = 0; i < polygons.size(); ++i) {
-            const mesh_polygon *p = (&polygons.at(i));
-            for (std::vector<Vector>::size_type j = 0; j < p->v.size(); ++j) {
-                vertholder[last++].Set(p->v[j].i, p->v[j].j, p->v[j].k);
-                tmp.AddBoundingVertex(p->v[j]);
+        for (const auto & polygon : polygons) {
+            const mesh_polygon *p = (&polygon);
+            for (const auto & j : p->v) {
+                vertholder[last++].Set(j.i, j.j, j.k);
+                tmp.AddBoundingVertex(j);
             }
         }
         radius = max3(tmp.MaxX() - tmp.MinX(), tmp.MaxY() - tmp.MinY(),
@@ -287,11 +285,12 @@ void csOPCODECollider::CopyCollisionPairs(csOPCODECollider *col1,
     const Pair *colPairs = TreeCollider.GetPairs();
     Point *vertholder0 = col1->vertholder;
     Point *vertholder1 = col2->vertholder;
-    int j;
+    uint32_t j;
     size_t oldlen = pairs.size();
-    pairs.resize(oldlen + N_pairs);
+    size_t newlen = oldlen + N_pairs;
+    pairs.resize(newlen);
 
-    for (unsigned int i = 0; i < N_pairs; ++i) {
+    for (unsigned int i = 0; i < N_pairs && oldlen < newlen; ++i) {
         j = 3 * colPairs[i].id0;
         pairs.at(oldlen).a1 = vertholder0[j];
         pairs.at(oldlen).b1 = vertholder0[j + 1];

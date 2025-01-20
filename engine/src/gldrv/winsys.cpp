@@ -1,20 +1,21 @@
 /*
  * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors as part of Vega Strike (see below)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
+ * as published by the Free Software Foundation; either version 3
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * Incorporated into Vega Strike
  *
@@ -69,17 +70,17 @@
  *******************************---------------------------------------------------------------------------
  */
 
-//static SDL_Window *window = NULL;
-static SDL_Surface *screen = NULL;
+//static SDL_Window *window = nullptr;
+static SDL_Surface *screen = nullptr;
 
-static winsys_display_func_t display_func = NULL;
-static winsys_idle_func_t idle_func = NULL;
-static winsys_reshape_func_t reshape_func = NULL;
-static winsys_keyboard_func_t keyboard_func = NULL;
-static winsys_mouse_func_t mouse_func = NULL;
-static winsys_motion_func_t motion_func = NULL;
-static winsys_motion_func_t passive_motion_func = NULL;
-static winsys_atexit_func_t atexit_func = NULL;
+static winsys_display_func_t display_func = nullptr;
+static winsys_idle_func_t idle_func = nullptr;
+static winsys_reshape_func_t reshape_func = nullptr;
+static winsys_keyboard_func_t keyboard_func = nullptr;
+static winsys_mouse_func_t mouse_func = nullptr;
+static winsys_motion_func_t motion_func = nullptr;
+static winsys_motion_func_t passive_motion_func = nullptr;
+static winsys_atexit_func_t atexit_func = nullptr;
 
 static bool redisplay = false;
 static bool keepRunning = true;
@@ -201,10 +202,10 @@ void winsys_warp_pointer(int x, int y) {
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2021-09-07 - stephengtuggy
+ *  \date    Modified: 2025-01-10 - stephengtuggy
  */
 static bool setup_sdl_video_mode(int *argc, char **argv) {
-    Uint32 video_flags = SDL_WINDOW_OPENGL;
+    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
     int bpp = 0; // Bits per pixel?
     int width, height;
     if (gl_options.fullscreen) {
@@ -218,7 +219,7 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
-    if (game_options()->rgb_pixel_format.compare("undefined") == 0) {
+    if (game_options()->rgb_pixel_format == "undefined") {
         game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
@@ -246,19 +247,17 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
-//#if SDL_VERSION_ATLEAST(1, 2, 10)
     if (game_options()->gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-//#endif
     width = configuration()->graphics2_config.resolution_x;
     height = configuration()->graphics2_config.resolution_y;
     const int screen_number = configuration()->graphics2_config.screen;
     SDL_Window *window = nullptr;
     if(screen_number == 0) {
-        window = SDL_CreateWindow("Vegastrike", 0, 0, width, height, video_flags);
+        window = SDL_CreateWindow("Vega Strike", 0, 0, width, height, video_flags);
     } else {
-        window = SDL_CreateWindow("Vegastrike", 
+        window = SDL_CreateWindow("Vega Strike",
                                 SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
                                 SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number), 
                                 0, 0, video_flags);
@@ -266,65 +265,87 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     
 
     if(!window) {
-        std::cerr << "No window\n" << std::flush;
-        VSExit(1);
+        VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
     }
 
-    SDL_GL_CreateContext(window);
+    if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
+        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
+    } else {
+        VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) failed. Error: %1%") % SDL_GetError()));
+        SDL_ClearError();
+    }
 
-    screen = SDL_GetWindowSurface(window); //SDL_CreateRenderer(window, -1, video_flags);
-    if (!screen) {
+    SDL_GL_GetDrawableSize(window, &width, &height);
 
-        VS_LOG(info, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()));
-        VSExit(1);
+    SDL_GLContext context = SDL_GL_CreateContext(window);
 
-        /*for (int counter = 0; window == nullptr && counter < 2; ++counter) {
-            for (int bpd = 4; bpd > 1; --bpd) {
-                SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, bpd * 8);
-                if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags | SDL_ANYFORMAT))
-                        == NULL) {
-                    VS_LOG_AND_FLUSH(error,
-                            (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
-                                    % bpp
-                                    % (bpd * 8)
-                                    % SDL_GetError()));
-                } else {
-                    break;
-                }
-            }
-            if (screen == NULL) {
-                SDL_GL_SetAttribute(SDL_GL_RED_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, otherattributes);
-                gl_options.color_depth = bpp = otherbpp;
+    if (!context) {
+        std::cerr << "No GL context\n" << std::flush;
+        VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
+    }
+
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
+
+    if (SDL_GL_MakeCurrent(window, context) < 0) {
+        VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
+    }
+
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (renderer == nullptr) {
+        VS_LOG_AND_FLUSH(error, (boost::format(
+            "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
+            SDL_GetError()));
+        SDL_ClearError();
+
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if (renderer == nullptr) {
+            VS_LOG_AND_FLUSH(error, (boost::format(
+                "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
+                SDL_GetError()));
+            SDL_ClearError();
+
+            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+            if (renderer == nullptr) {
+                VS_LOG_FLUSH_EXIT(fatal, (boost::format(
+                    "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
+                    SDL_GetError()),
+                    1);
             }
         }
-        if (screen == NULL) {
-            VS_LOG_AND_FLUSH(fatal, "FAILED to initialize video");
-            VSExit(1);
-        }*/
     }
 
-    std::string version = (const char *) glGetString(GL_RENDERER);
-    if (version == "GDI Generic") {
+    if (SDL_RenderSetLogicalSize(renderer, width, height) < 0) {
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_RenderSetLogicalSize(...) failed! Error: %1%") % SDL_GetError()),
+            8);
+    }
+
+#if defined (GL_RENDERER)
+    std::string version{};
+    const GLubyte * renderer_string = glGetString(GL_RENDERER);
+    if (renderer_string) {
+        version = reinterpret_cast<const char *>(renderer_string);
+    }
+    if (version == "GDI Generic" || version == "software") {
         if (game_options()->gl_accelerated_visual) {
-            VS_LOG(error, "GDI Generic software driver reported, trying to reset.");
+            VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
+            SDL_ClearError();
             SDL_Quit();
             game_options()->gl_accelerated_visual = false;
             return false;
         } else {
-            VS_LOG(error, "GDI Generic software driver reported, reset failed.\n");
-            VS_LOG(error, "Please make sure a graphics card driver is installed and functioning properly.\n");
+            VS_LOG(error, "GDI Generic software driver reported, reset failed.");
+            VS_LOG_AND_FLUSH(error, "Please make sure a graphics card driver is installed and functioning properly.");
         }
     }
+#endif
 
-    /*VS_LOG(trace,
-            (boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode")
-                    % window->w
-                    % window->h
-                    % window->pitch
-                    % window->format->BitsPerPixel
-                    % window->format->BytesPerPixel));*/
+    // This makes our buffer swap synchronized with the monitor's vertical refresh
+    if (SDL_GL_SetSwapInterval(1) < 0) {
+        VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
+        SDL_ClearError();
+    }
 
     return true;
 }
@@ -356,15 +377,13 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     }
 
     //signal( SIGSEGV, SIG_DFL );
-    SDL_Surface *icon = NULL;
-#if 1
+    SDL_Surface *icon = nullptr;
     if (icon_title) {
         icon = SDL_LoadBMP(icon_title);
     }
     if (icon) {
         SDL_SetColorKey(icon, SDL_TRUE, ((Uint32 *) (icon->pixels))[0]);
     }
-#endif
     /*
      * Init video
      */
@@ -505,6 +524,13 @@ void winsys_process_events() {
                     }
 #endif
                     break;
+
+                case SDL_QUIT:
+                    cleanexit = true;
+                    keepRunning = false;
+                    break;
+                default:
+                    break;
             }
             SDL_LockAudio();
             SDL_UnlockAudio();
@@ -563,7 +589,7 @@ void winsys_exit(int code) {
  *******************************---------------------------------------------------------------------------
  */
 
-static winsys_keyboard_func_t keyboard_func = NULL;
+static winsys_keyboard_func_t keyboard_func = nullptr;
 
 static bool redisplay = false;
 
@@ -762,7 +788,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     gl_options.color_depth = game_options()->colordepth;
     glutInit( argc, argv );
     if (game_options()->glut_stencil) {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
         if ( !(glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE|GLUT_STENCIL ), 1) )
             glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE );
 #else

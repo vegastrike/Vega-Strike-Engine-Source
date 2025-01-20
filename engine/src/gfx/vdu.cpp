@@ -1185,21 +1185,18 @@ void VDU::DrawDamage(Unit *parent) {
     float x, y, w, h;
     //float th;
     //char st[1024];
-    GFXColor4f(1, parent->GetHull() / (*maxhull), parent->GetHull() / (*maxhull), 1);
+    double health_percent = parent->layers[0].facets[0].Percent();
+    GFXColor4f(1, health_percent, health_percent, 1);
     GFXEnable(TEXTURE0);
     float armor[8];
     parent->ArmorData(armor);
     const bool draw_damage_sprite = configuration()->graphics_config.hud.draw_damage_sprite;
-    DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : NULL, .6, x, y, w, h,
-            (armor[0] + armor[2] + armor[4] + armor[6])
-                    / (float) (StartArmor[0] + StartArmor[2] + StartArmor[4] + StartArmor[6]),
-            (armor[0] + armor[1] + armor[4] + armor[5])
-                    / (float) (StartArmor[0] + StartArmor[1] + StartArmor[4] + StartArmor[5]),
-            (armor[2] + armor[3] + armor[6] + armor[7])
-                    / (float) (StartArmor[2] + StartArmor[3] + StartArmor[6] + StartArmor[7]),
-            (armor[1] + armor[3] + armor[5]
-                    + armor[7]) / (float) (StartArmor[1] + StartArmor[3] + StartArmor[5] + StartArmor[7]),
-            parent->GetHull() / (*maxhull), true, false);
+    DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : nullptr, .6, x, y, w, h,
+            parent->layers[1].facets[0].Percent(),
+            parent->layers[1].facets[3].Percent(),
+            parent->layers[1].facets[2].Percent(),
+            parent->layers[1].facets[1].Percent(),
+            health_percent, true, false);
     GFXDisable(TEXTURE0);
     //Unit *thr = parent->Threat();
     parent->Threat();

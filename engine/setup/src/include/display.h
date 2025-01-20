@@ -1,12 +1,5 @@
 /*
-#====================================
-# @file   : display.h
-# @brief  : setup configuration
-#====================================
-*/
-
-/*
- * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, David Ranger, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -39,7 +32,7 @@ void ShowMain();
 
 #define GET_TITLE char title[1000]="Vega Strike Settings"; \
   if (strlen(CONFIG.program_name)+strlen(VERSION)<800) { \
-    sprintf(title, "Settings - %s - Version %s", \
+    snprintf(title, 999, "Settings - %s - Version %s", \
     CONFIG.program_name, VEGASTRIKE_VERSION_STR); \
   }
 

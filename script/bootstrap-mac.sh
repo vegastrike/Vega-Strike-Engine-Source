@@ -67,10 +67,10 @@ brew install \
 # * OpenGL as of macOS 10.14
 # * GLUT as of macOS 10.9
 brew install mesa mesa-glu freeglut
-ln -s $(brew --prefix)/include/GL $(brew --prefix)/include/OpenGL
-ln -s $(brew --prefix)/include/GL $(brew --prefix)/include/GLUT
-# ln -s $(brew --prefix)/lib/libGL.dylib $(brew --prefix)/lib/libOpenGL.dylib
-# find $(brew --prefix)/lib/ -iname '*gl*.dylib'
+
+# Keep these lines! Otherwise you will likely get PFNGL... not found errors.
+ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
+ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
 
 # MacOS 13+ needs Vorbis support
 brew install vorbis-tools

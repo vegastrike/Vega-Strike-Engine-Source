@@ -33,8 +33,9 @@ void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit
         const boost::json::object data_object = object.at("data").as_object();
 
         for(const boost::json::key_value_pair& pair : data_object) {
+            const std::string key = pair.key();
             const std::string value = boost::json::value_to<std::string>(pair.value());
-            unit_attributes[pair.key()] = value;
+            unit_attributes[key] = value;
         }
 
         if(unit_attributes.count("Key")) {

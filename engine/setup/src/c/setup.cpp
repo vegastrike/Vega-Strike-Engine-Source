@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
+ * setup.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, David Ranger, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -36,6 +38,9 @@
 #endif
 #include <vector>
 #include <string>
+#include <boost/format.hpp>
+#include <boost/program_options.hpp>
+
 using std::string;
 using std::vector;
 char origpath[65536];
@@ -114,16 +119,42 @@ int main(int argc, char *argv[]) {
 
     changeToProgramDirectory(argv[0]);
     {
+        boost::program_options::options_description setup_options("Vega Strike setup utility");
+        setup_options.add_options()
+            ("target,D", boost::program_options::value<std::string>(), "Specify data directory, full path expected")
+            ("help,h", "Show this help and exit")
+            ("version,v", "Show version and exit")
+            ;
+
         vector<string> data_paths;
 
-        if (argc > 1) {
-            if (strcmp(argv[1], "--target") == 0 && argc > 2) {
-                data_paths.push_back(argv[2]);
-                fprintf(stdout, "Set data directory to %s\n", argv[2]);
-            } else {
-                fprintf(stderr, "Usage: vegasettings [--target DATADIR]\n");
-                return 1;
+        try {
+            auto style = static_cast<boost::program_options::command_line_style::style_t>(boost::program_options::command_line_style::unix_style
+                                                                                        | boost::program_options::command_line_style::case_insensitive);
+            boost::program_options::variables_map vm;
+            boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(setup_options).style(style).run(), vm);
+            boost::program_options::notify(vm);
+
+            if (vm.count("help")) {
+                std::cout << setup_options << std::endl;
+                return EXIT_SUCCESS;
             }
+
+            if (vm.count("version")) {
+                std::cout << (boost::format("VegaSettings - Version %1%") % VEGASTRIKE_VERSION_STR).str() << std::endl;
+                return EXIT_SUCCESS;
+            }
+
+            if (vm.count("target")) {
+                data_paths.push_back(vm["target"].as<std::string>());
+                std::cout << "Set data directory to " << vm["target"].as<std::string>() << std::endl;
+            } else {
+                std::cerr << setup_options << std::endl;
+                return EXIT_FAILURE;
+            }
+        } catch (const boost::program_options::error& e) {
+            std::cerr << setup_options << std::endl;
+            return EXIT_FAILURE;
         }
 
 #ifdef DATA_DIR
@@ -222,4 +253,3 @@ int main(int argc, char *argv[]) {
     Start(&argc, &argv);
     return 0;
 }
-

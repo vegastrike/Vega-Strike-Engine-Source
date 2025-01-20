@@ -23,8 +23,6 @@
 #
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
-
 IF (UNIX)
 	MESSAGE("Always using preferred method now to install man pages")
 	INSTALL(FILES vegastrike-engine.1 TYPE MAN)

@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -289,11 +289,6 @@ CSVTable::Merge(const CSVTable &other) {
 CSVRow::CSVRow(CSVTable *parent, const string &key) {
     this->parent = parent;
     iter = parent->rows[key] * parent->key.size();
-}
-
-CSVRow::CSVRow(CSVTable *parent, unsigned int i) {
-    this->parent = parent;
-    iter = i * parent->key.size();
 }
 
 const string &CSVRow::operator[](const string &col) const {

@@ -1,6 +1,8 @@
 /*
+ * unit_csv.cpp
+ *
  * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Benjamen R. Meyer, and other Vega Strike contributors.
+ * Roy Falk, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -63,38 +65,14 @@ extern void pushMesh(std::vector<Mesh *> &mesh,
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-// TODO: This is a terrible kludge. Replace with boost::json
-std::string MapToJson(std::map<std::string, std::string> unit) {
-    std::string json_string = "[\n\t{\n";
-    
-    int len = unit.size();
-    int i = 0;
-
-    for (auto const& pair : unit) {
-        boost::format new_line;
-        if(i < len-1) {
-            new_line = boost::format("\t\t\"%1%\": \"%2%\",\n") % pair.first % pair.second;
-        } else {
-            new_line = boost::format("\t\t\"%1%\": \"%2%\"\n") % pair.first % pair.second;
-        }
-        
-        i++;
-        json_string += new_line.str();
-    }
-
-    json_string += "\t}\n]\n";
-    
-    return json_string;
-}
-
 void AddMeshes(std::vector<Mesh *> &xmeshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        float unitscale,
-        const std::string &meshes,
-        int faction,
-        Flightgroup *fg,
-        vector<unsigned int> *counts) {
+               float &randomstartframe,
+               float &randomstartseconds,
+               float unitscale,
+               const std::string &meshes,
+               int faction,
+               Flightgroup *fg,
+               vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
 
     // Clear counts vector
@@ -854,7 +832,16 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         
         for (int i = 0; i < shield->number_of_facets; i++) {
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
-            shield_values[i] = std::stoi(shield_string_value);            
+            if (shield_string_value.empty()) {
+                shield_values[i] = 0.0f;
+            } else {
+                try {
+                    shield_values[i] = static_cast<float>(std::stoi(shield_string_value));
+                } catch (const std::invalid_argument& ex) {
+                    VS_LOG(warning, (boost::format("Unable to convert shield value '%1%' to a number") % shield_string_value));
+                    shield_values[i] = 0.0f;
+                }
+            }
         }
 
         if (shield->number_of_facets == 4 || shield->number_of_facets == 2) {
@@ -1114,22 +1101,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     this->num_chunks = UnitCSVFactory::GetVariable(unit_key, "Num_Chunks", 0);
 }
 
-CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
-    std::string hashname = filename + "__" + FactionUtil::GetFactionName(faction);
-    for (int i = ((int) unitTables.size()) - (readlast ? 1 : 2); i >= 0; --i) {
-        unsigned int where;
-        if (unitTables[i]->RowExists(hashname, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        } else if (unitTables[i]->RowExists(filename, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        }
-    }
-    rread = false;
-    return CSVRow();
-}
-
 void Unit::WriteUnit(const char *modifications) {
     bool bad = false;
     if (!modifications) {
@@ -1156,7 +1127,9 @@ void Unit::WriteUnit(const char *modifications) {
     }
 
     std::map<std::string, std::string> map = UnitToMap();
-    std::string towrite = MapToJson(map);
+    boost::json::array json_root_array;
+    json_root_array.emplace_back(boost::json::value_from(map));
+    std::string towrite = boost::json::serialize(json_root_array);
     f.Write(towrite.c_str(), towrite.length());
     f.Close();
 }
@@ -1389,8 +1362,3 @@ string Unit::WriteUnitString() {
     std::map<std::string, std::string> unit = UnitToMap();
     return writeCSV(unit);
 }
-
-
-
-
-

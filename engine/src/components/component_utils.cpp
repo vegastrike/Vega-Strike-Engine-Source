@@ -1,7 +1,7 @@
 /*
- * src/components/component_printer.cpp
+ * src/components/component_utils.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -139,7 +139,7 @@ EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, E
 
 
 // For Drive and DriveUpgrade
-const std::string yaw_governor[] = {"Yaw_Governor", "Yaw_Governor", "Yaw_Governor"};
+const std::string yaw_governor[] = {"Yaw_Governor", "Yaw_Governor_Right", "Yaw_Governor_Left"};
 const std::string pitch_governor[] = {"Pitch_Governor", "Pitch_Governor_Up", "Pitch_Governor_Down"};
 const std::string roll_governor[] = {"Roll_Governor", "Roll_Governor_Right", "Roll_Governor_Left"};
 

@@ -1,7 +1,7 @@
 /*
  * unit_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -19,7 +19,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
@@ -2941,7 +2941,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Armor_Front_Top_Right")) {
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < armor->number_of_facets; ++i) {
             STDUPGRADE(armor->facets[i].health,
                     up->armor->facets[i].health,
                     templ->armor->facets[i].health, 0);
@@ -2966,25 +2966,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
     if (upgradedrecharge) {
 
         shield->UpdateRegeneration(shield_regeneration);
-    }
-
-    // Upgrade hull health
-    upgrade_hull = *current_hull;
-
-    if (up && up->current_hull) {
-        const_cast<Unit *>(up)->upgrade_hull = *up->current_hull;
-    }
-
-    if (templ && templ->current_hull) {
-        const_cast<Unit *>(templ)->upgrade_hull = *templ->current_hull;
-    }
-
-    if (!csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data(upgrade_name, up->faction, "Hull")) {
-        STDUPGRADE(upgrade_hull, up->upgrade_hull, templ->upgrade_hull, 0);
-    }
-
-    if ((hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed())) {
-        hull->facets[0].max_health = hull->facets[0].health;
     }
 
     /*if (!csv_cell_null_check || force_change_on_nothing

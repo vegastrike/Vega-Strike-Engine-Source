@@ -60,8 +60,8 @@ IF (DEFINED ENV{SHORT_SHA} AND NOT "$ENV{SHORT_SHA}" STREQUAL "")
     SET(VEGASTRIKE_VERSION_TWEAK "$ENV{SHORT_SHA}")
 ELSE ()
     SET (GIT_ROOT_DIR "${CMAKE_SOURCE_DIR}")
-    MESSAGE("-- CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
-    MESSAGE("-- GIT_ROOT_DIR = ${GIT_ROOT_DIR}")
+    MESSAGE(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
+    MESSAGE(STATUS "GIT_ROOT_DIR = ${GIT_ROOT_DIR}")
     EXECUTE_PROCESS(
             COMMAND git rev-parse --short HEAD
             WORKING_DIRECTORY ${GIT_ROOT_DIR}
@@ -136,16 +136,16 @@ SET(CMAKE_C_EXTENSIONS ON)
 # - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 #
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
-MESSAGE("-- Always using preferred PIE logic now")
+MESSAGE(STATUS "Always using preferred PIE logic now")
 
 include(CheckPIESupported)
 check_pie_supported()
 UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 IF (ENABLE_PIE)
-    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+    MESSAGE(WARNING "Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ELSE (ENABLE_PIE)
-    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+    MESSAGE(STATUS "Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
 
@@ -175,6 +175,8 @@ IF (INSTALL_GTEST OR USE_GTEST)
         FetchContent_MakeAvailable(googletest)
     ENDIF (INSTALL_GTEST)
 ENDIF (INSTALL_GTEST OR USE_GTEST)
+
+INCLUDE(GNUInstallDirs)
 
 SET(VS_SUBDIRECTORIES "engine")
 FOREACH(VS_SUBDIR IN LISTS VS_SUBDIRECTORIES)
