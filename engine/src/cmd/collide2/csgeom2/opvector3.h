@@ -1,7 +1,7 @@
 /*
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
-    Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+    Copyright (C) 2022-2025 Stephen G. Tuggy, Benjamen R. Meyer
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,8 +21,8 @@
 
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
-#include "cmd/collide2/Stdafx.h"
-#include "cmd/collide2/opcodesysdef.h"
+#include <cmath>
+#include "cmd/collide2/Opcode.h"
 
 /**
  * A 3D vector.

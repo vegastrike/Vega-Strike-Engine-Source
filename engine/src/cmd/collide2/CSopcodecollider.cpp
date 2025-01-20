@@ -27,9 +27,11 @@
 /*
  * Copyright (C) 2020 pyramid3d
  * Copyright (C) 2020-2025 Stephen G. Tuggy
+ * Copyright (C) 2025 Benjamen R. Meyer
  */
 
 
+#include "Opcode.h"
 #include "CSopcodecollider.h"
 #include "opcodeqsqrt.h"
 #include "opcodeqint.h"

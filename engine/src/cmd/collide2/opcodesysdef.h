@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
- * Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2021-2025 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * This file is part of Vega Strike.
  *
@@ -51,9 +51,9 @@
 #define ABS(x) (x>=0?x:-x)
 #define __CS_CSSYSDEFS_H__
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 
 class csObject {
 };

@@ -4,7 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2022-2025 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,7 +30,7 @@
 #define CS_TERRAFORMER_COLLIDER  1
 #define CS_TERRAIN_COLLIDER 2
 
-#include "cmd/collide2/Stdafx.h"
+#include "cmd/collide2/Opcode.h"
 
 /**
  * A structure used to return collision pairs.

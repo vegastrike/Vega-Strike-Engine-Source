@@ -2,7 +2,7 @@
  * unit_csv.cpp
  *
  * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Roy Falk, and other Vega Strike contributors.
+ * Roy Falk, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,7 +30,7 @@
 #include "xml_serializer.h"
 #include "gfx/sphere.h"
 #include "unit_collide.h"
-#include "collide2/Stdafx.h"
+#include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"
 #include "audiolib.h"
 #include "unit_xml.h"
