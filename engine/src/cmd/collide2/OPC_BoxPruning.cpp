@@ -3,6 +3,7 @@
  *	OPCODE - Optimized Collision Detection
  *	Copyright (C) 2001 Pierre Terdiman
  *  Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
+ *  Public Domain
  *	Homepage: http://www.codercorner.com/Opcode.htm
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,13 +19,13 @@
 
 /*
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	You could use a complex sweep-and-prune as implemented in I-Collide.
-	You could use a complex hashing scheme as implemented in V-Clip or recently in ODE it seems.
-	You could use a "Recursive Dimensional Clustering" algorithm as implemented in GPG2.
+    You could use a complex sweep-and-prune as implemented in I-Collide.
+    You could use a complex hashing scheme as implemented in V-Clip or recently in ODE it seems.
+    You could use a "Recursive Dimensional Clustering" algorithm as implemented in GPG2.
 
-	Or you could use this.
-	Faster ? I don't know. Probably not. It would be a shame. But who knows ?
-	Easier ? Definitely. Enjoy the sheer simplicity.
+    Or you could use this.
+    Faster ? I don't know. Probably not. It would be a shame. But who knows ?
+    Easier ? Definitely. Enjoy the sheer simplicity.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
 

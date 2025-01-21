@@ -1,3 +1,17 @@
+/*
+ * OPC_LSSAABBOverlap.h
+ *
+ * Copyright (C) 2001-2025 Pierre Terdiman, Stephen G. Tuggy, Benjamen R. Meyer
+ *
+ * Following code from Magic-Software (http://www.magic-software.com/)
+ * A bit modified for OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and then
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
+ *
+ * Public Domain
+ */
+
 // NO HEADER GUARD
 
 // Following code from Magic-Software (http://www.magic-software.com/)

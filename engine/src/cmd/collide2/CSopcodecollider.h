@@ -1,21 +1,21 @@
 /*
-	Copyright (C) 2000 by Jorrit Tyberghein
+    Copyright (C) 2000 by Jorrit Tyberghein
     Copyright (C) 2020 pyramid3d
     Copyright (C) 2020-2025 Stephen G. Tuggy, Benjamen R. Meyer
 
-	This library is free software; you can redistribute it and/or
-	modify it under the terms of the GNU Library General Public
-	License as published by the Free Software Foundation; either
-	version 2 of the License, or (at your option) any later version.
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
 
-	This library is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-	Library General Public License for more details.
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
 
-	You should have received a copy of the GNU Library General Public
-	License along with this library; if not, write to the Free
-	Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
@@ -38,33 +38,33 @@
 #include "gfx/mesh.h"
 
 /*
- 	How to use Collider.
+    How to use Collider.
 
-	The next two calls happen usually once when you first create a unit.
+    The next two calls happen usually once when you first create a unit.
 
-	Create an instance of the collider sending it the appropriate geometry
-	csOPCODECollider(const vector<mesh_polygon>&);
+    Create an instance of the collider sending it the appropriate geometry
+    csOPCODECollider(const vector<mesh_polygon>&);
 
-	Optionally set if you want to return on first contact or not.
-	It defaults to not.
-	csOPCODECollider.SetOneHitOnly(bool);
+    Optionally set if you want to return on first contact or not.
+    It defaults to not.
+    csOPCODECollider.SetOneHitOnly(bool);
 
-	The rest of the calls occur in your physics loops
+    The rest of the calls occur in your physics loops
 
-	Reset our list of collided pairs of vectors.
-	csOPCODECollider.ResetCollisionPairs();
+    Reset our list of collided pairs of vectors.
+    csOPCODECollider.ResetCollisionPairs();
 
-	Check if a collision occurred, sending the other collider and transforms for
-	both colliders.   Returns true if we collided.
-	csOPCODECollider.Collide(csOPCODECollider&, const csReversibleTransform* first,
-	                                            const csReversibleTransform* second);
+    Check if a collision occurred, sending the other collider and transforms for
+    both colliders.   Returns true if we collided.
+    csOPCODECollider.Collide(csOPCODECollider&, const csReversibleTransform* first,
+                                                const csReversibleTransform* second);
 
-	If true, retrieve the vectors that collided so we can act upon them.
-	csOPCODECollider.GetCollisions();
+    If true, retrieve the vectors that collided so we can act upon them.
+    csOPCODECollider.GetCollisions();
 
-	We also need the number of collided vectors in case we dont have
-	first hit set to true.
-	csOPCodeCollider.GetCollisionPairCount();
+    We also need the number of collided vectors in case we dont have
+    first hit set to true.
+    csOPCodeCollider.GetCollisionPairCount();
 */
 
 

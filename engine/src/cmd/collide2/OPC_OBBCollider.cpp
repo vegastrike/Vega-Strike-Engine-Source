@@ -2,8 +2,9 @@
 /*
  *	OPCODE - Optimized Collision Detection
  *	Copyright (C) 2001 Pierre Terdiman
- *	Homepage: http://www.codercorner.com/Opcode.htm
  *  Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
+ *  Public Domain
+ *	Homepage: http://www.codercorner.com/Opcode.htm
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -345,21 +346,21 @@ inline_ bool OBBCollider::OBBContainsBox(const Point &bc, const Point &be) {
     // Sounds ok but maybe there's a better way?
 /*
 #define TEST_PT(a,b,c)																												\
-	p.x=a;	p.y=b;	p.z=c;		p+=bc;																								\
-	f = p.x * mRModelToBox.m[0][0] + p.y * mRModelToBox.m[1][0] + p.z * mRModelToBox.m[2][0];	if(f>mB0.x || f<mB1.x) return FALSE;\
-	f = p.x * mRModelToBox.m[0][1] + p.y * mRModelToBox.m[1][1] + p.z * mRModelToBox.m[2][1];	if(f>mB0.y || f<mB1.y) return FALSE;\
-	f = p.x * mRModelToBox.m[0][2] + p.y * mRModelToBox.m[1][2] + p.z * mRModelToBox.m[2][2];	if(f>mB0.z || f<mB1.z) return FALSE;
+    p.x=a;	p.y=b;	p.z=c;		p+=bc;																								\
+    f = p.x * mRModelToBox.m[0][0] + p.y * mRModelToBox.m[1][0] + p.z * mRModelToBox.m[2][0];	if(f>mB0.x || f<mB1.x) return FALSE;\
+    f = p.x * mRModelToBox.m[0][1] + p.y * mRModelToBox.m[1][1] + p.z * mRModelToBox.m[2][1];	if(f>mB0.y || f<mB1.y) return FALSE;\
+    f = p.x * mRModelToBox.m[0][2] + p.y * mRModelToBox.m[1][2] + p.z * mRModelToBox.m[2][2];	if(f>mB0.z || f<mB1.z) return FALSE;
 
-	Point p;
-	float f;
+    Point p;
+    float f;
 
-	TEST_PT(be.x, be.y, be.z)
-	TEST_PT(-be.x, be.y, be.z)
-	TEST_PT(be.x, -be.y, be.z)
-	TEST_PT(-be.x, -be.y, be.z)
-	TEST_PT(be.x, be.y, -be.z)
-	TEST_PT(-be.x, be.y, -be.z)
-	TEST_PT(be.x, -be.y, -be.z)
+    TEST_PT(be.x, be.y, be.z)
+    TEST_PT(-be.x, be.y, be.z)
+    TEST_PT(be.x, -be.y, be.z)
+    TEST_PT(-be.x, -be.y, be.z)
+    TEST_PT(be.x, be.y, -be.z)
+    TEST_PT(-be.x, be.y, -be.z)
+    TEST_PT(be.x, -be.y, -be.z)
 	TEST_PT(-be.x, -be.y, -be.z)
 
 	return TRUE;

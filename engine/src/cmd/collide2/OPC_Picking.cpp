@@ -2,8 +2,9 @@
 /*
  *	OPCODE - Optimized Collision Detection
  *	Copyright (C) 2001 Pierre Terdiman
- *	Homepage: http://www.codercorner.com/Opcode.htm
  *  Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
+ *	Public Domain
+ *	Homepage: http://www.codercorner.com/Opcode.htm
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -25,11 +26,11 @@ namespace Opcode {
 #ifdef OPC_RAYHIT_CALLBACK
 
 /*
-	Possible RayCollider usages:
-	- boolean query (shadow feeler)
-	- closest hit
-	- all hits
-	- number of intersection (boolean)
+    Possible RayCollider usages:
+    - boolean query (shadow feeler)
+    - closest hit
+    - all hits
+    - number of intersection (boolean)
 
 */
 

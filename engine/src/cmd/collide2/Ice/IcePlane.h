@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Contains code for planes.
- *	\file		IcePlane.h
- *	\author		Pierre Terdiman
- *	\date		April, 4, 2000
+ *  Contains code for planes.
+ *  \file		IcePlane.h
+ *  \author		Pierre Terdiman
+ *  \date		April, 4, 2000
  *
- *  Copyright (C) 2022, 2025 Stephen G. Tuggy
- *  Copyright (C) 2023 Benjamen R. Meyer
+ *  Copyright (C) 2000-2025 Pierre Terdiman, Stephen G. Tuggy, Benjamen R. Meyer
+ *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,11 +114,11 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Transforms a plane by a 4x4 matrix. Same as Plane * Matrix4x4 operator, but faster.
- *	\param		transformed	[out] transformed plane
- *	\param		plane		[in] source plane
- *	\param		transform	[in] transform matrix
- *	\warning	the plane normal must be unit-length
+ *  Transforms a plane by a 4x4 matrix. Same as Plane * Matrix4x4 operator, but faster.
+ *  \param		transformed	[out] transformed plane
+ *  \param		plane		[in] source plane
+ *  \param		transform	[in] transform matrix
+ *  \warning	the plane normal must be unit-length
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_    void TransformPlane(Plane &transformed, const Plane &plane, const Matrix4x4 &transform) {
@@ -131,10 +131,10 @@ inline_    void TransformPlane(Plane &transformed, const Plane &plane, const Mat
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Transforms a plane by a 4x4 matrix. Same as Plane * Matrix4x4 operator, but faster.
- *	\param		plane		[in/out] source plane (transformed on return)
- *	\param		transform	[in] transform matrix
- *	\warning	the plane normal must be unit-length
+ *  Transforms a plane by a 4x4 matrix. Same as Plane * Matrix4x4 operator, but faster.
+ *  \param		plane		[in/out] source plane (transformed on return)
+ *  \param		transform	[in] transform matrix
+ *  \warning	the plane normal must be unit-length
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_    void TransformPlane(Plane &plane, const Matrix4x4 &transform) {

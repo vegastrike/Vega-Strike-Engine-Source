@@ -2,9 +2,10 @@
 /*
  *	OPCODE - Optimized Collision Detection
  *	Copyright (C) 2001 Pierre Terdiman
- *	Homepage: http://www.codercorner.com/Opcode.htm
  *  Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
  *  Copyright (C) 2023 Benjamen R. Meyer
+ *  Public Domain
+ *	Homepage: http://www.codercorner.com/Opcode.htm
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

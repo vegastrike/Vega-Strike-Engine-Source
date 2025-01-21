@@ -1,32 +1,33 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Contains code for rays.
- *	\file		IceRay.cpp
- *	\author		Pierre Terdiman
- *	\date		April, 4, 2000
+ *  Contains code for rays.
+ *  \file		IceRay.cpp
+ *  \author		Pierre Terdiman
+ *  \date		April, 4, 2000
  *
- *  Copyright (C) 2022, 2025 Stephen G. Tuggy
+ *  Copyright (C) 2000-2025 Pierre Terdiman, Stephen G. Tuggy
+ *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Ray class.
- *	A ray is a half-line P(t) = mOrig + mDir * t, with 0 <= t <= +infinity
- *	\class		Ray
- *	\author		Pierre Terdiman
- *	\version	1.0
+ *  Ray class.
+ *  A ray is a half-line P(t) = mOrig + mDir * t, with 0 <= t <= +infinity
+ *  \class		Ray
+ *  \author		Pierre Terdiman
+ *  \version	1.0
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-	O = Origin = impact point
-	i = normalized vector along the x axis
-	j = normalized vector along the y axis = actually the normal vector in O
-	D = Direction vector, norm |D| = 1
-	N = Projection of D on y axis, norm |N| = normal reaction
-	T = Projection of D on x axis, norm |T| = tangential reaction
-	R = Reflexion vector
+    O = Origin = impact point
+    i = normalized vector along the x axis
+    j = normalized vector along the y axis = actually the normal vector in O
+    D = Direction vector, norm |D| = 1
+    N = Projection of D on y axis, norm |N| = normal reaction
+    T = Projection of D on x axis, norm |T| = tangential reaction
+    R = Reflexion vector
 
               ^y
               |
@@ -42,21 +43,21 @@
     _________\|/______*_______>x
                O    T
 
-	Let define theta = angle between D and N. Then cos(theta) = |N| / |D| = |N| since D is normalized.
+    Let define theta = angle between D and N. Then cos(theta) = |N| / |D| = |N| since D is normalized.
 
-	j|D = |j|*|D|*cos(theta) => |N| = j|D
+    j|D = |j|*|D|*cos(theta) => |N| = j|D
 
-	Then we simply have:
+    Then we simply have:
 
-	D = N + T
+    D = N + T
 
-	To compute tangential reaction :
+    To compute tangential reaction :
 
-	T = D - N
+    T = D - N
 
-	To compute reflexion vector :
+    To compute reflexion vector :
 
-	R = N - T = N - (D-N) = 2*N - D
+    R = N - T = N - (D-N) = 2*N - D
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
