@@ -37,7 +37,6 @@ const std::string MASS = "Mass";
 const std::string VOLUME = "Volume";
 
 Component::Component(double mass, double volume, bool installed, bool integral):
-                     unit_key(""),
                      upgrade_name(""),
                      description(""),
                      price(0.0),
@@ -47,12 +46,12 @@ Component::Component(double mass, double volume, bool installed, bool integral):
                      integral(integral) {}
 
 
-void Component::Load(std::string upgrade_key, std::string unit_key) {
-    this->unit_key = unit_key;
-    this->upgrade_key = upgrade_key;
+void Component::Load(std::string unit_key) {
+    this->upgrade_key = "";
 
     // Integrated components have no name, mass, price, volume or description
-    if(!integral) {
+    // TODO: need to get the upgrade name from somewhere
+    /*if(!integral) {
         upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
         mass = UnitCSVFactory::GetVariable(upgrade_key, "Mass", 0.0);
 
@@ -64,7 +63,7 @@ void Component::Load(std::string upgrade_key, std::string unit_key) {
             volume = cargo.GetVolume();
             description = cargo.GetDescription();
         }
-    }
+    }*/
 
     // TODO: bool integral = false;
 }
@@ -119,7 +118,11 @@ void Component::DamageByPercent(double percent) {
 }
 
 void Component::Repair() {
-    operational.RepairFully();
+    operational = 1.0;
+}
+
+void Component::Destroy() {
+    operational = 0;
 }
 
 bool Component::Damaged() const {
@@ -127,7 +130,7 @@ bool Component::Damaged() const {
 }
 
 bool Component::Destroyed() const {
-    return operational.Destroyed();
+    return operational == 0.0;
 }
 
 bool Component::Installed() const {
@@ -138,7 +141,7 @@ bool Component::Operational() const {
     return Installed() && !Destroyed();
 }
 
-double Component::Percent() const {
+double Component::PercentOperational() const {
     return operational.Percent();
 }
 
@@ -147,7 +150,6 @@ void Component::SetIntegral(bool integral) {
 }
 
 // Getters
-const std::string Component::GetUnitKey() const { return unit_key; }
 const std::string Component::GetUpgradeName() const { return upgrade_name; }
 const std::string Component::GetUpgradeKey() const { return upgrade_key; }
 const std::string Component::GetDescription() const { return description; }

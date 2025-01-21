@@ -981,7 +981,7 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     if (unit->GetWarpVelocity().MagnitudeSquared()
             < (static_cast<double>(game_options()->warp_stretch_cutoff) * game_options()->warp_stretch_cutoff * game_options()->game_speed
                     * game_options()->game_speed)
-            || (game_options()->only_stretch_in_warp && unit->graphicOptions.InWarp == 0)) {
+            || (game_options()->only_stretch_in_warp && unit->ftl_drive.Enabled())) {
         return ctm;
     } else {
         Matrix k(ctm);

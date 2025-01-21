@@ -260,16 +260,16 @@ void AggressiveAI::SetParent(Unit *parent1) {
     last_directive = "b";     //prevent escort race condition
 
     //INIT stored stuff
-    Fshield_prev = parent->graphicOptions.InWarp ? 1 : parent->FShieldData();
+    Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
     Fshield_rate_old = 0.0;
     Fshield_prev_time = UniverseUtil::GetGameTime();
-    Bshield_prev = parent->graphicOptions.InWarp ? 1 : parent->BShieldData();
+    Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
     Bshield_rate_old = 0.0;
     Bshield_prev_time = UniverseUtil::GetGameTime();
-    Lshield_prev = parent->graphicOptions.InWarp ? 1 : parent->LShieldData();
+    Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
     Lshield_rate_old = 0.0;
     Lshield_prev_time = UniverseUtil::GetGameTime();
-    Rshield_prev = parent->graphicOptions.InWarp ? 1 : parent->RShieldData();
+    Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
     Rshield_rate_old = 0.0;
     Rshield_prev_time = UniverseUtil::GetGameTime();
     Farmour_prev = 1.0;
@@ -333,30 +333,30 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             value = parent->GetComputerData().threatlevel;
             break;
         case FSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->FShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
             break;
         case BSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->BShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
             break;
         case HULL: {
             value = parent->GetHullPercent();
             break;
         }
         case LSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->LShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
             break;
         case RSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->RShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
             break;
         case FSHIELD_HEAL_RATE: {
             double delta_t = UniverseUtil::GetGameTime() - Fshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->FShieldData() - Fshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData() - Fshield_prev;
                 value = delta_v / delta_t;
                 Fshield_rate_old = value;
                 Fshield_prev_time = UniverseUtil::GetGameTime();
-                Fshield_prev = parent->graphicOptions.InWarp ? 1 : parent->FShieldData();
+                Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
             } else {
                 value = Fshield_rate_old;
             }
@@ -366,11 +366,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Bshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->BShieldData() - Bshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData() - Bshield_prev;
                 value = delta_v / delta_t;
                 Bshield_rate_old = value;
                 Bshield_prev_time = UniverseUtil::GetGameTime();
-                Bshield_prev = parent->graphicOptions.InWarp ? 1 : parent->BShieldData();
+                Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
             } else {
                 value = Bshield_rate_old;
             }
@@ -380,11 +380,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Lshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->LShieldData() - Lshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData() - Lshield_prev;
                 value = delta_v / delta_t;
                 Lshield_rate_old = value;
                 Lshield_prev_time = UniverseUtil::GetGameTime();
-                Lshield_prev = parent->graphicOptions.InWarp ? 1 : parent->LShieldData();
+                Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
             } else {
                 value = Lshield_rate_old;
             }
@@ -394,11 +394,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Rshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->RShieldData() - Rshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData() - Rshield_prev;
                 value = delta_v / delta_t;
                 Rshield_rate_old = value;
                 Rshield_prev_time = UniverseUtil::GetGameTime();
-                Rshield_prev = parent->graphicOptions.InWarp ? 1 : parent->RShieldData();
+                Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
             } else {
                 value = Rshield_rate_old;
             }
@@ -1562,7 +1562,7 @@ void AggressiveAI::ExecuteNoEnemies() {
             //slowdown
             parent->Thrust(-parent->getMass() * parent->UpCoordinateLevel(parent->GetVelocity()) / simulation_atom_var,
                     false);
-            parent->graphicOptions.InWarp = 0;
+            parent->ftl_drive.Disable();
             if (lurk_on_arrival <= 0) {
                 nav = QVector(0, 0, 0);
                 ExecuteNoEnemies();                 //select new place to go

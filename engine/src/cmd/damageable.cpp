@@ -378,7 +378,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
 
     unit->DamageRandSys(configuration()->physics_config.indiscriminate_system_destruction * rand01() +
                     (1 - configuration()->physics_config.indiscriminate_system_destruction) * (1 - ((current_hull) > 0 ? hull_damage / (current_hull) : 1.0f)),
-            attack_vector, 1.0f, 1.0f);
+            attack_vector);
 }
 
 void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
@@ -549,7 +549,7 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
 
     Unit *unit = static_cast<Unit *>(this);
 
-    const bool in_warp = unit->graphicOptions.InWarp;
+    const bool in_warp = unit->ftl_drive.Enabled();
     const int shield_facets = unit->shield->number_of_facets;
     const float total_max_shields = unit->shield->TotalMaxLayerValue();
 

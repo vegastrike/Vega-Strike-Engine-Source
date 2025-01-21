@@ -29,26 +29,38 @@
 
 FtlDrive::FtlDrive() : 
     Component(),
-    EnergyConsumer(nullptr, 0, false) {
+    EnergyConsumer(nullptr, false, 0),
+    enabled(false) {
     type = ComponentType::FtlDrive;
 }
 
 FtlDrive::FtlDrive(EnergyContainer *source):
     Component(0.0, 0.0, true),
-    EnergyConsumer(source, false) {
+    EnergyConsumer(source, false),
+    enabled(false) {
     type = ComponentType::FtlDrive;
 }
 
+void FtlDrive::Enable() {
+    enabled = true;
+}
+
+void FtlDrive::Disable() {
+    enabled = false;
+}
+    
+void FtlDrive::Toggle() {
+    enabled = !enabled;
+}
 
 bool FtlDrive::Enabled() const {
-    return Installed() && Operational();
+    return Installed() && Operational() && enabled;
 }
 
 
 // Component Methods
-void FtlDrive::Load(std::string upgrade_key, 
-                    std::string unit_key) {
-    Component::Load(upgrade_key, unit_key);
+void FtlDrive::Load(std::string unit_key) {
+    Component::Load(unit_key);
 
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
@@ -70,11 +82,11 @@ bool FtlDrive::Downgrade() {
     return false;
 }
 
-bool FtlDrive::CanUpgrade(const std::string upgrade_name) const {
+bool FtlDrive::CanUpgrade(const std::string upgrade_key) const {
     return false;
 }
 
-bool FtlDrive::Upgrade(const std::string upgrade_name) {
+bool FtlDrive::Upgrade(const std::string upgrade_key) {
     return false;
 }
 

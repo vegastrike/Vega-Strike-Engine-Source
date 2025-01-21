@@ -201,7 +201,7 @@ void Armed::Fire(unsigned int weapon_type_bitmask, bool listen_to_owner) {
     Unit *unit = static_cast<Unit *>(this);
 
     if ((unit->cloak.Active() && !configuration()->weapons.can_fire_in_cloak) ||
-            (unit->graphicOptions.InWarp && !configuration()->weapons.can_fire_in_spec)) {
+            (unit->ftl_drive.Enabled() && !configuration()->weapons.can_fire_in_spec)) {
         UnFire();
         return;
     }

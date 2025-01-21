@@ -33,8 +33,7 @@ public:
     DummyComponent();
 
     // Component Methods
-    virtual void Load(std::string upgrade_key, 
-                      std::string unit_key = "");      
+    virtual void Load(std::string unit_key);      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
 
@@ -42,9 +41,9 @@ public:
 
     virtual bool Downgrade();
 
-    virtual bool CanUpgrade(const std::string upgrade_name) const;
+    virtual bool CanUpgrade(const std::string upgrade_key) const;
 
-    virtual bool Upgrade(const std::string upgrade_name);
+    virtual bool Upgrade(const std::string upgrade_key);
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H

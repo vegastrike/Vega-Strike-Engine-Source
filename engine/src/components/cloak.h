@@ -63,7 +63,9 @@ class Cloak : public Component, public EnergyConsumer
 
 public:
     Cloak();
-    Cloak(std::string unit_key, EnergyContainer* capacitor);
+
+// Component Methods
+    virtual void Load(std::string unit_key);
 
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
 
@@ -98,24 +100,24 @@ public:
     }
 
     // Active is cloaking, cloaked or decloaking
-    bool Active() {
+    bool Active() const {
         return (status == CloakingStatus::cloaking ||
                 status == CloakingStatus::cloaked ||
                 status == CloakingStatus::decloaking);
     }
 
-    bool Ready() {
+    bool Ready() const {
         return (status == CloakingStatus::ready);
     }
 
-    bool Glass() {
+    bool Glass() const {
         return glass;
     }
 
     
 
     // Is the ship visible
-    bool Visible() {
+    bool Visible() const {
         return !Cloaked();
     }
 

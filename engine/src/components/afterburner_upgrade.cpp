@@ -39,13 +39,12 @@ AfterburnerUpgrade::AfterburnerUpgrade(Afterburner *afterburner):
 
 
 // Component Methods
-void AfterburnerUpgrade::Load(std::string upgrade_key, 
-                    std::string unit_key) {
-    Component::Load(upgrade_key, unit_key);
+void AfterburnerUpgrade::Load(std::string unit_key) {
+    Component::Load(unit_key);
 
-    thrust = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Accel", 1.0);
-    speed = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Speed_Governor", 1.0);
-    consumption = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Usage_Cost", 1.0);
+    thrust = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 1.0);
+    speed = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 1.0);
+    consumption = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 1.0);
 }      
 
 void AfterburnerUpgrade::SaveToCSV(std::map<std::string, std::string>& unit) const {
@@ -80,20 +79,22 @@ bool AfterburnerUpgrade::Downgrade() {
     return true;
 }
 
-bool AfterburnerUpgrade::CanUpgrade(const std::string upgrade_name) const {
+bool AfterburnerUpgrade::CanUpgrade(const std::string upgrade_key) const {
     return !afterburner->Damaged();
 }
 
-bool AfterburnerUpgrade::Upgrade(const std::string upgrade_name) {
-    if(!CanUpgrade(upgrade_name)) {
+bool AfterburnerUpgrade::Upgrade(const std::string upgrade_key) {
+    if(!CanUpgrade(upgrade_key)) {
         return false;
     }
     
     // Component
-    Component::Upgrade(upgrade_name + "__upgrades");
+    Component::Upgrade(upgrade_key);
     
     // Load modifiers
-    Load(upgrade_name + "__upgrades");
+    thrust = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Accel", 1.0);
+    speed = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Speed_Governor", 1.0);
+    consumption = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Usage_Cost", 1.0);
 
     // Add effects of upgrade on afterburner
     afterburner->thrust.SetMaxValue(afterburner->thrust.MaxValue() * thrust);

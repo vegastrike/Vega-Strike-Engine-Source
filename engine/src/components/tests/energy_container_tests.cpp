@@ -81,7 +81,7 @@ TEST(EnergyContainer, Upgrade) {
 
     EnergyContainer ship_capacitor = EnergyContainer(ComponentType::Capacitor);
 
-    ship_capacitor.Load(capacitor_string + upgrades_suffix_string, ship_name);
+    ship_capacitor.Load(capacitor_string + upgrades_suffix_string);
 
     // Check Values
     EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);  

@@ -542,7 +542,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                             "false"));
             if (target) {
                 if (!auto_valid) {
-                    abletoautopilot = (target->graphicOptions.InWarp);
+                    abletoautopilot = (target->ftl_drive.Enabled());
                 } else {
                     abletoautopilot = (target->AutoPilotTo(target, false) ? 1 : 0);
                     static float no_auto_light_below =
@@ -601,7 +601,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::SPEC_MODAL:
             if (target->graphicOptions.WarpRamping) {
                 return (float) UnitImages<void>::SWITCHING;
-            } else if (target->graphicOptions.InWarp) {
+            } else if (target->ftl_drive.Enabled()) {
                 return (float) UnitImages<void>::ACTIVE;
             } else {
                 return (float) UnitImages<void>::OFF;
@@ -680,7 +680,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::NODRIVE;
             } else if (!target->jump_drive.CanConsume()) {
                 return (float) UnitImages<void>::NOTENOUGHENERGY;
-            } else if (target->graphicOptions.InWarp) {          //FIXME
+            } else if (target->ftl_drive.Enabled()) {          //FIXME
                 return (float) UnitImages<void>::OFF;
             } else if (jumpok) {
                 return (float) UnitImages<void>::READY;

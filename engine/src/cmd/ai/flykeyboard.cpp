@@ -184,8 +184,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             this->eraseType(FACING | MOVEMENT);
             FlyByKeyboard::inauto = false;
             parent->autopilotactive = FlyByKeyboard::inauto;
-            if (parent->graphicOptions.InWarp) {
-                parent->graphicOptions.InWarp = 0;
+            if (parent->ftl_drive.Enabled()) {
+                parent->ftl_drive.Disable();
                 parent->graphicOptions.WarpRamping = 1;
             }
         } else {

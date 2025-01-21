@@ -1007,8 +1007,8 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 bool Unit::jumpReactToCollision(Unit *smalle) {
     const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
     const bool nojumpinSPEC = configuration()->physics_config.no_spec_jump;
-    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
-            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && graphicOptions.InWarp
+    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->ftl_drive.Enabled()
+            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && ftl_drive.Enabled()
             && nojumpinSPEC;
     //only allow big with small
     if (!GetDestinations().empty()) {
@@ -1132,10 +1132,10 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 }
 
 //NUMGAUGES has been moved to pImages.h in UnitImages<void>
-void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
+void Unit::DamageRandSys(float dam, const Vector &vec) {
     // TODO: take actual damage into account when damaging components.
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
-    randnum = rand01();
+    float randnum = rand01();
     const float inv_min_dam = 1.0F - configuration()->physics_config.min_damage;
     const float inv_max_dam = 1.0F - configuration()->physics_config.max_damage;
     if (dam < inv_max_dam) {
@@ -1144,7 +1144,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
     if (dam > inv_min_dam) {
         dam = inv_min_dam;
     }
-    degrees = deg;
+    float degrees = deg;
     if (degrees > 180) {
         degrees = 360 - degrees;
     }

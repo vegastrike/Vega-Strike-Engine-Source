@@ -41,15 +41,14 @@ public:
     Afterburner(EnergyContainer *source = nullptr);
     
     // Component Methods
-    virtual void Load(std::string upgrade_key, 
-                      std::string unit_key = "");      
+    virtual void Load(std::string unit_key);      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
 
     virtual bool CanDowngrade() const;
     virtual bool Downgrade();
-    virtual bool CanUpgrade(const std::string upgrade_name) const;
-    virtual bool Upgrade(const std::string upgrade_name);
+    virtual bool CanUpgrade(const std::string upgrade_key) const;
+    virtual bool Upgrade(const std::string upgrade_key);
 
     virtual void Damage();
     virtual void DamageByPercent(double percent);

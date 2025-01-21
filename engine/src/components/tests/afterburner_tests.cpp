@@ -57,7 +57,7 @@ TEST(Afterburner, Sanity) {
     Afterburner afterburner;
     AfterburnerUpgrade upgrade(&afterburner);
 
-    afterburner.Load("", afterburner_string + upgrades_suffix_string);
+    afterburner.Load(afterburner_string + upgrades_suffix_string);
     upgrade.Load(upgrade_string + upgrades_suffix_string);
 
     EXPECT_EQ(afterburner.GetMass(), 0.0);
@@ -78,7 +78,7 @@ TEST(Afterburner, UpgradeDowngrade) {
     Afterburner afterburner;
     AfterburnerUpgrade upgrade(&afterburner);
 
-    afterburner.Load("", afterburner_string + upgrades_suffix_string);
+    afterburner.Load(afterburner_string + upgrades_suffix_string);
 
     // Original
     EXPECT_EQ(afterburner.GetMass(), 0.0);

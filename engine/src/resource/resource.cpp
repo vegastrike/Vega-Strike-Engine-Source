@@ -90,11 +90,11 @@ const std::string Resource<double>::Serialize(const double modifier) const {
 template<typename T>
 double Resource<T>::Percent() const {
     if(no_max_) {   // Can't calculate percent if there's no max
-        return -1;
+        return 0;
     }
 
     if(max_value_ == 0) {   // Can't calculate percent if divider is 0
-        return -1;
+        return 0;
     }
 
     return value_ / max_value_;
@@ -190,6 +190,11 @@ bool Resource<T>::Destroyed() const {
 
 template<typename T>
 void Resource<T>::RandomDamage() {
+    // Can't damage a destroyed resource
+    if(Destroyed()) {
+        return;
+    }
+
     const double severity = randomDouble();
     DamageByPercent(severity);
 }
@@ -225,11 +230,21 @@ bool Resource<T>::Damaged() const {
 // TODO: partial repair
 template<typename T>
 void Resource<T>::RepairFully() {
+    // Can't fix a destroyed resource
+    if(Destroyed()) {
+        return;
+    }
+
     value_ = adjusted_max_value_ = max_value_;
 }
 
 template<typename T>
 void Resource<T>::RepairByValue(const T &value) {
+    // Can't fix a destroyed resource
+    if(Destroyed()) {
+        return;
+    }
+
     if(no_max_) {   // Can't upgrade max if there's no max
         return;
     }
@@ -240,6 +255,11 @@ void Resource<T>::RepairByValue(const T &value) {
 
 template<typename T>
 void Resource<T>::RepairByPercent(const T &value) {
+    // Can't fix a destroyed resource
+    if(Destroyed()) {
+        return;
+    }
+
     if(no_max_) {   // Can't upgrade max if there's no max
         return;
     }

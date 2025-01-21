@@ -52,7 +52,7 @@ public:
             double conversion_ratio = 0.0001); // < 0.01 or very short flight
 
 
-    virtual void Load(std::string upgrade_key, std::string unit_key = "");      
+    virtual void Load(std::string unit_key);      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
 

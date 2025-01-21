@@ -52,7 +52,7 @@ TEST(JumpDrive, Damage) {
 
     JumpDrive jump_drive;
 
-    jump_drive.Load("", jump_drive_string + upgrades_suffix_string);
+    jump_drive.Load(jump_drive_string + upgrades_suffix_string);
 
     jump_drive.DamageByPercent(0.1);
 
@@ -60,7 +60,7 @@ TEST(JumpDrive, Damage) {
     double chance_to_damage = randomDouble() - 0.01;
 
     std::cout << chance_to_damage << std::endl;
-    std::cout << jump_drive.Percent() << std::endl;
+    std::cout << jump_drive.PercentOperational() << std::endl;
     
     //EXPECT_FALSE(true);
 }

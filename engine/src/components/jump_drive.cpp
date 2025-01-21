@@ -29,7 +29,7 @@
 
 JumpDrive::JumpDrive() : 
     Component(),
-    EnergyConsumer(nullptr, 0, false),
+    EnergyConsumer(nullptr, false, 0),
     destination(-1),
     delay(0.0) {
     type = ComponentType::JumpDrive;
@@ -75,8 +75,8 @@ bool JumpDrive::Enabled() const {
 
 
 // Component Methods
-void JumpDrive::Load(std::string upgrade_key, std::string unit_key) {
-    Component::Load(upgrade_key, unit_key);
+void JumpDrive::Load(std::string unit_key) {
+    Component::Load(unit_key);
 
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
@@ -108,12 +108,12 @@ bool JumpDrive::Downgrade() {
     return true;
 }
 
-bool JumpDrive::CanUpgrade(const std::string upgrade_name) const {
+bool JumpDrive::CanUpgrade(const std::string upgrade_key) const {
     return !Damaged() && !Installed();
 }
 
-bool JumpDrive::Upgrade(const std::string upgrade_name) {
-    if(!CanUpgrade(upgrade_name)) {
+bool JumpDrive::Upgrade(const std::string upgrade_key) {
+    if(!CanUpgrade(upgrade_key)) {
         return false;
     }
 

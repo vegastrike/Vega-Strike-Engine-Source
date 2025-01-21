@@ -130,7 +130,7 @@ TEST(Drive, Sanity) {
     Drive drive;
     DriveUpgrade upgrade(&drive);
 
-    drive.Load("", drive_string + upgrades_suffix_string);
+    drive.Load(drive_string + upgrades_suffix_string);
     upgrade.Load(upgrade_string + upgrades_suffix_string);
 
     // Check Drive Values
@@ -157,7 +157,7 @@ TEST(Drive, UpgradeDowngrade) {
     Drive drive;
     DriveUpgrade upgrade(&drive);
 
-    drive.Load("", drive_string + upgrades_suffix_string);
+    drive.Load(drive_string + upgrades_suffix_string);
 
 // Original
     std::cout << "Original\n--------\n";
