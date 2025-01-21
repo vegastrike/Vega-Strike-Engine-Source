@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2025 Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,7 +32,7 @@
 #include "vegastrike.h"
 #include "gfx/mesh.h"
 #include "unit_generic.h"
-#include "collide2/Stdafx.h"
+#include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
 #include "collide2/basecollider.h"
