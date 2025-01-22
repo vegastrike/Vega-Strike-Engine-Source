@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #include "xml_support.h"
@@ -49,4 +50,3 @@ const EnumMap::Pair type_names[8] = {
 };
 const EnumMap type_map(type_names, 8);
 }
-

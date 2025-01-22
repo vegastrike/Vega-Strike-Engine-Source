@@ -2,6 +2,8 @@
 /*
  *	OPCODE - Optimized Collision Detection
  *	Copyright (C) 2001 Pierre Terdiman
+ *  Copyright (C) 2021, 2022, 2025 Stephen G. Tuggy
+ *  Public Domain
  *	Homepage: http://www.codercorner.com/Opcode.htm
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -766,4 +768,3 @@ bool HybridLSSCollider::Collide(LSSCache &cache,
 
     return true;
 }
-

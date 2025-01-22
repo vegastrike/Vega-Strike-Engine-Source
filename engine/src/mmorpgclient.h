@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 // well, technically the MMPORGC_INC acts as one...
 #ifndef MMORPGC_INC
@@ -62,4 +63,3 @@ public:
 
 int startThread(void *mmoc2use);
 #endif //MMORPGC_INC
-

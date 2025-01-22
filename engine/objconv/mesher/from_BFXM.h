@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #include <string>
@@ -36,4 +37,3 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile,
         std::string meshname,
         char hackaroundhack); //Translate BFXM file Inputfile to text file Outputfile
 void BFXMtoBoxDims(FILE *Inputfile, const char *name); //computes box dimensions given a bfxm
-

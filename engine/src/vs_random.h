@@ -32,6 +32,7 @@
  *  http://www.math.keio.ac.jp/matumoto/emt.html
  *  email: matumoto@math.keio.ac.jp
  */
+
 // NO HEADER GUARD
 
 /*
@@ -205,4 +206,3 @@ public:
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
 };
 extern VSRandom vsrandom;
-

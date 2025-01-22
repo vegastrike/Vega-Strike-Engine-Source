@@ -1,23 +1,15 @@
 /*
- * Copyright (C) 2001-2022 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * OPC_TreeBuilders.cpp
+ *
+ * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ * This file is part of OPCODE - Optimized Collision Detection
+ * (http://www.codercorner.com/Opcode.htm) and has been
+ * incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
  *
- * This file is part of Vega Strike.
- *
- * Vega Strike is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vega Strike is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * Public Domain
  */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,13 +55,6 @@
  *	\version	1.3
  *	\date		March, 20, 2001
 */
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Updated by Stephen G. Tuggy 2021-07-03
- * Updated by Stephen G. Tuggy 2022-01-06
- */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,10 +147,10 @@ bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const uint32_t *primitives,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float AABBTreeOfTrianglesBuilder::GetSplittingValue(uint32_t index, uint32_t axis) const {
 /*	// Compute center of triangle
-	Point Center;
-	mTriList[index].Center(mVerts, Center);
-	// Return value
-	return Center[axis];*/
+    Point Center;
+    mTriList[index].Center(mVerts, Center);
+    // Return value
+    return Center[axis];*/
 
     // Compute correct component from center of triangle
 //	return	(mVerts[mTriList[index].mVRef[0]][axis]
@@ -280,4 +265,3 @@ float AABBTreeOfVerticesBuilder::GetSplittingValue(const uint32_t *primitives,
         return AABBTreeBuilder::GetSplittingValue(primitives, nb_prims, global_box, axis);
     }
 }
-

@@ -5,7 +5,8 @@
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
  *
- *  Updated by Stephen G. Tuggy 2022-01-06
+ *  Copyright (C) 2000-2025 Pierre Terdiman, Stephen G. Tuggy
+ *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -44,4 +45,3 @@ Plane &Plane::Set(const Point &p0, const Point &p1, const Point &p2) {
 
     return *this;
 }
-

@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #include "sprite.h"
@@ -38,4 +39,3 @@ public:
     void SetSize(float x, float y);
     void GetSize(float &x, float &y);
 };
-

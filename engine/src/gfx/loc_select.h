@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #include "vec.h"
@@ -58,4 +59,3 @@ public:
     void SetPosition(const Vector &);
     void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 };
-

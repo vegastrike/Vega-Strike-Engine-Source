@@ -24,6 +24,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NOTE: The code use to include a C Macro definition for JPEG_SUPPORT.
 //  After a little investigation:
 //      1. It was always defined so had no impact on this file

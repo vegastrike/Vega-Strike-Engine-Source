@@ -21,6 +21,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 
@@ -352,4 +353,3 @@ public:
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
 #undef voidEXPORT_UTIL5
-

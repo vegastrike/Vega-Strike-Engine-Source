@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #ifndef WHICH_UNIT_EXPORT_NUMBER
@@ -344,4 +345,3 @@ EXPORT_UTIL3(float, PercentOperational, std::string, content, std::string, categ
 WRAPPED1( Vector, MountPercentOperational,
 int, whichMount, Vector( -1.0f, -1.0f, -1.0f ))
 #endif // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)
-

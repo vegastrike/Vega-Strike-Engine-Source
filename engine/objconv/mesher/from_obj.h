@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 #include "mesh_io.h"
@@ -27,4 +28,3 @@
 void ObjToXMESH(FILE *obj, FILE *mtl, std::vector<XML> &xml, bool forcenormals);
 void ObjToBFXM(FILE *, FILE *, FILE *, bool forcenormals);
 string ObjGetMtl(FILE *, string);
-

@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 //This draws the mouse cursor
@@ -431,4 +432,3 @@ void NavigationSystem::DrawNavCircle(float x, float y, float size, float rot_x, 
     GFXEnable(TEXTURE0);
 }
 //**********************************
-

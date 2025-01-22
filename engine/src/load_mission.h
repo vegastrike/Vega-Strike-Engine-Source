@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
 // NO HEADER GUARD
 
 void LoadMission(const char *, const std::string &scriptname, bool loadfirst);
@@ -30,4 +31,3 @@ std::string PickleAllMissions();
 std::string UnpickleAllMissions(FILE *);
 std::string UnpickleAllMissions(char *&buf);
 std::string PickledDataSansMissionName(std::string file);
-

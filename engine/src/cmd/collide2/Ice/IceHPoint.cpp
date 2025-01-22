@@ -5,7 +5,8 @@
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
  *
- *  Updated by Stephen G. Tuggy 2022-01-06
+ *  Copyright (C) 2000-2025 Pierre Terdiman, Stephen G. Tuggy
+ *  Public Domain
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,4 +70,3 @@ HPoint &HPoint::operator*=(const Matrix4x4 &mat) {
 
     return *this;
 }
-
