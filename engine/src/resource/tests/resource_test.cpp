@@ -132,7 +132,7 @@ TEST(Resource, Damage_Repair) {
     // Repair Fully
     // Can't repair a destroyed resource. Need to re-init
     resource = Resource<double>(10.0, 0.0, 10.0);
-    resource.RandomDamage();
+    resource.DamageByPercent(0.2);
     resource.RepairFully();
     EXPECT_EQ(resource.MaxValue(), 10.0);
     EXPECT_EQ(resource.MinValue(), 0.0);
