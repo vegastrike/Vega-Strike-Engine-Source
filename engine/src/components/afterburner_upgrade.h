@@ -14,7 +14,7 @@
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY override;without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -48,17 +48,17 @@ public:
     double MaxAfterburnerSpeed() const;
 
     // Component Methods
-    virtual void Load(std::string unit_key);      
+    void Load(std::string unit_key) override;
     
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
-    virtual bool CanDowngrade() const;
+    bool CanDowngrade() const override;
 
-    virtual bool Downgrade();
+    bool Downgrade() override;
 
-    virtual bool CanUpgrade(const std::string upgrade_key) const;
+    bool CanUpgrade(const std::string upgrade_key) const override;
 
-    virtual bool Upgrade(const std::string upgrade_key);
+    bool Upgrade(const std::string upgrade_key) override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_UPGRADE_H

@@ -79,17 +79,17 @@ public:
     DriveUpgrade(Drive *drive = nullptr);
 
     // Component Methods
-    virtual void Load(std::string unit_key);      
+    void Load(std::string unit_key) override;      
     
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
-    virtual bool CanDowngrade() const;
+    bool CanDowngrade() const override;
 
-    virtual bool Downgrade();
+    bool Downgrade() override;
 
-    virtual bool CanUpgrade(const std::string upgrade_key) const;
+    bool CanUpgrade(const std::string upgrade_key) const override;
 
-    virtual bool Upgrade(const std::string upgrade_key);
+    bool Upgrade(const std::string upgrade_key) override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_UPGRADE_H

@@ -115,7 +115,7 @@ public:
     virtual bool Damaged() const;
     bool Destroyed() const;
     virtual double PercentOperational() const;
-    bool Installed() const;
+    virtual bool Installed() const;
     bool Operational() const;
 
     void SetIntegral(bool integral);
@@ -132,7 +132,6 @@ public:
 
     const double GetOperational() const;
 
-    const bool GetInstalled() const;
-    const bool GetIntegral() const;
+    const bool Integral() const;
 };
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H

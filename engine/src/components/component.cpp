@@ -160,5 +160,4 @@ const double Component::GetVolume() const { return volume; }
 
 const double Component::GetOperational() const { return operational.Value(); }
 
-const bool Component::GetInstalled() const { return installed; }
-const bool Component::GetIntegral() const { return integral; }
+const bool Component::Integral() const { return integral; }
