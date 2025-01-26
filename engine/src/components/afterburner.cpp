@@ -36,12 +36,11 @@ Afterburner::Afterburner(EnergyContainer *source) :
 
 
 // Component Methods
-void Afterburner::Load(std::string upgrade_key, 
-                    std::string unit_key) {
+void Afterburner::Load(std::string unit_key) {
     static const double game_speed = configuration()->physics_config.game_speed;
     static const double game_accel = configuration()->physics_config.game_accel;
     static const double game_accel_speed = game_speed * game_accel;
-    Component::Load(upgrade_key, unit_key);
+    Component::Load(unit_key);
 
     thrust = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", std::string("0.0")), game_accel_speed); 
     speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", std::string("0.0")), game_speed); 
@@ -70,11 +69,11 @@ bool Afterburner::Downgrade() {
     return false;
 }
 
-bool Afterburner::CanUpgrade(const std::string upgrade_name) const {
+bool Afterburner::CanUpgrade(const std::string upgrade_key) const {
     return false;
 }
 
-bool Afterburner::Upgrade(const std::string upgrade_name) {
+bool Afterburner::Upgrade(const std::string upgrade_key) {
     return false;
 }
 

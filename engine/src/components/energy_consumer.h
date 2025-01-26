@@ -52,7 +52,7 @@ protected:
 public:
     EnergyConsumer(EnergyContainer *source = nullptr, bool partial = false, double consumption = 0.0, bool infinite = false);
     bool CanConsume() const;
-    double Consume();
+    virtual double Consume();
     double GetConsumption() const;
     double GetAtomConsumption() const;
     void SetConsumption(double consumption);

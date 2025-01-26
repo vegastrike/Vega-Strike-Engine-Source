@@ -130,6 +130,9 @@ TEST(Resource, Damage_Repair) {
     EXPECT_TRUE(resource.Destroyed());
 
     // Repair Fully
+    // Can't repair a destroyed resource. Need to re-init
+    resource = Resource<double>(10.0, 0.0, 10.0);
+    resource.DamageByPercent(0.2);
     resource.RepairFully();
     EXPECT_EQ(resource.MaxValue(), 10.0);
     EXPECT_EQ(resource.MinValue(), 0.0);
@@ -160,8 +163,10 @@ TEST(Resource, Damage_Repair) {
     EXPECT_GE(resource.Value(), 0.0);
 
     // Repair 
-    resource.Zero();
-    resource.RepairByValue(2.0);
+    // Can't repair a destroyed resource. Need to re-init
+    resource = Resource<double>(10.0, 0.0, 10.0);
+    resource.DamageByValue(9.0);
+    resource.RepairByValue(1.0);
     EXPECT_EQ(resource.MaxValue(), 10.0);
     EXPECT_EQ(resource.MinValue(), 0.0);
     EXPECT_EQ(resource.AdjustedValue(), 2.0);

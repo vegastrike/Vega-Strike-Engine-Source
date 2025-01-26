@@ -1418,23 +1418,6 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
                 DrawHUDSprite(this, getSunImage(), 1, x, y, w, h, 1, 1, 1, 1, 1, false, false);
                 h = fabs(h * .6);
                 w = fabs(w * .6);
-
-                //static float ishieldcolor[4]    = {.4, .4, 1, 1};
-                //static float mshieldcolor[4]    = {.4, .4, 1, 1};
-                //static float oshieldcolor[4]    = {.4, .4, 1, 1};
-/*
- *       static float iarmorcolor[4]={1,.6,0,1};
- *       static float marmorcolor[4]={1,.6,0,1};
- *       static float oarmorcolor[4]={1,.6,0,1};
- *       static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
- *       static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
- *       static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-*/                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //uncomment if these are ever actually used
-/*        static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
- *       DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,
- *           GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
- *           GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
- *           GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3])); */
             }
         }
         GFXColor4f(1, 1, 1, 1);

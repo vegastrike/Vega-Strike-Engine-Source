@@ -919,10 +919,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // TODO: The following code has a bug.
     // It will set the max of the component as the current value loaded from the 
     // CSV. If the component is damaged, this will be lower than the original value.
-    fuel.Load("", unit_key);
-    energy.Load("", unit_key);
-    ftl_energy.Load("", unit_key);
-    reactor.Load("", unit_key);
+    fuel.Load(unit_key);
+    energy.Load(unit_key);
+    ftl_energy.Load(unit_key);
+    reactor.Load(unit_key);
 
     // End Energy
 
@@ -932,13 +932,13 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // Begin Drive Section
     // Afterburner
     afterburner = Afterburner(GetSource(ComponentType::Afterburner, &fuel, &energy, &ftl_energy));
-    afterburner.Load("", unit_key);
+    afterburner.Load(unit_key);
 
     drive = Drive(GetSource(ComponentType::Drive, &fuel, &energy, &ftl_energy));
-    drive.Load("", unit_key);
+    drive.Load(unit_key);
 
-    ftl_drive.Load("", unit_key);
-    jump_drive.Load("", unit_key);
+    ftl_drive.Load(unit_key);
+    jump_drive.Load(unit_key);
     
     
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
@@ -999,7 +999,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * M_PI / 180);
 
     const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
-    cloak = Cloak(unit_key, (warp_energy_for_cloak ? &ftl_energy : &energy));
+    cloak.SetSource((warp_energy_for_cloak ? &ftl_energy : &energy));
+    cloak.Load(unit_key);
 
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
@@ -1194,7 +1195,7 @@ static string tos(int val) {
 }
 
 const std::map<std::string, std::string> Unit::UnitToMap() {
-    std::map<std::string, std::string> unit = UnitCSVFactory::GetUnit(name);
+    std::map<std::string, std::string> unit = std::map<std::string, std::string>();
     string val;
 
     // Textual Descriptions

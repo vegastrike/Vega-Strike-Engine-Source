@@ -69,7 +69,6 @@ enum class ComponentType {
 class Component
 {
 protected:
-    std::string unit_key;       // Areus.blank
     std::string upgrade_name;   // Isometal Armor
     std::string upgrade_key;    // armor03__upgrades
     std::string description;    // Long text and picture. Taken from master_parts_list
@@ -92,7 +91,7 @@ public:
 
     // Load from units dictionary
     // TODO: we should really switch the two parameters around.
-    virtual void Load(std::string upgrade_key, std::string unit_key = "");      
+    virtual void Load(std::string unit_key);      
     
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const = 0;
 
@@ -111,11 +110,12 @@ public:
     virtual void Damage();
     virtual void DamageByPercent(double percent);
     virtual void Repair();
+    virtual void Destroy();
 
     virtual bool Damaged() const;
     bool Destroyed() const;
-    double Percent() const;
-    bool Installed() const;
+    virtual double PercentOperational() const;
+    virtual bool Installed() const;
     bool Operational() const;
 
     void SetIntegral(bool integral);
@@ -132,7 +132,6 @@ public:
 
     const double GetOperational() const;
 
-    const bool GetInstalled() const;
-    const bool GetIntegral() const;
+    const bool Integral() const;
 };
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H

@@ -71,7 +71,7 @@ Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
 }
 
 Movable::graphic_options::graphic_options() {
-    FaceCamera = Animating = missilelock = InWarp = unused1 = WarpRamping = NoDamageParticles = 0;
+    FaceCamera = Animating = missilelock = unused1 = WarpRamping = NoDamageParticles = 0;
     specInterdictionOnline = 1;
     NumAnimationPoints = 0;
     RampCounter = 0;
@@ -191,14 +191,14 @@ void Movable::AddVelocity(float difficulty) {
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
-        if (graphicOptions.InWarp == 1) {             //Warp Turning on
+        if (unit->ftl_drive.Enabled()) {             //Warp Turning on
             graphicOptions.RampCounter = warprampuptime;
         } else {                                        //Warp Turning off
             graphicOptions.RampCounter = configuration()->warp_config.warp_ramp_down_time;
         }
         //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
         if (oldrampcounter != 0 && graphicOptions.RampCounter != 0) {
-            if (graphicOptions.InWarp == 1) {             //Warp is turning on before it turned off
+            if (unit->ftl_drive.Enabled()) {             //Warp is turning on before it turned off
                 graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->warp_config.warp_ramp_down_time);
             } else {                                        //Warp is turning off before it turned on
                 graphicOptions.RampCounter *= (1 - oldrampcounter / warprampuptime);
@@ -206,20 +206,20 @@ void Movable::AddVelocity(float difficulty) {
         }
         graphicOptions.WarpRamping = 0;
     }
-    if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
+    if (unit->ftl_drive.Enabled() || graphicOptions.RampCounter != 0) {
         float rampmult = 1.f;
         if (graphicOptions.RampCounter != 0) {
             graphicOptions.RampCounter -= simulation_atom_var;
             if (graphicOptions.RampCounter <= 0) {
                 graphicOptions.RampCounter = 0;
             }
-            if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > configuration()->warp_config.warp_ramp_down_time) {
+            if (!unit->ftl_drive.Enabled() && graphicOptions.RampCounter > configuration()->warp_config.warp_ramp_down_time) {
                 graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration()->warp_config.warp_ramp_down_time;
             }
-            if (graphicOptions.InWarp == 1 && graphicOptions.RampCounter > warprampuptime) {
+            if (unit->ftl_drive.Enabled() && graphicOptions.RampCounter > warprampuptime) {
                 graphicOptions.RampCounter = warprampuptime;
             }
-            rampmult = (graphicOptions.InWarp) ? 1.0F
+            rampmult = (unit->ftl_drive.Enabled()) ? 1.0F
                     - ((graphicOptions.RampCounter
                             / warprampuptime)
                             * (graphicOptions.RampCounter

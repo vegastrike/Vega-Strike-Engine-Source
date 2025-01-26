@@ -47,8 +47,7 @@ Drive::Drive(EnergyContainer *source):
 
 
 // Component Methods
-void Drive::Load(std::string upgrade_key, 
-                    std::string unit_key) {
+void Drive::Load(std::string unit_key) {
     static const double game_speed = configuration()->physics_config.game_speed;
     static const double game_accel = configuration()->physics_config.game_accel;
     static const double game_accel_speed = game_speed * game_accel;
@@ -56,7 +55,7 @@ void Drive::Load(std::string upgrade_key,
     // Minimum drive capability for limp home (in %)
     static const double minimal_drive_functionality = configuration()->fuel.minimum_drive;
 
-    Component::Load(upgrade_key, unit_key);
+    Component::Load(unit_key);
 
     // Consumer
     // We do not support all options here.
@@ -150,11 +149,11 @@ bool Drive::Downgrade() {
     return false;
 }
 
-bool Drive::CanUpgrade(const std::string upgrade_name) const {
+bool Drive::CanUpgrade(const std::string upgrade_key) const {
     return false;
 }
 
-bool Drive::Upgrade(const std::string upgrade_name) {
+bool Drive::Upgrade(const std::string upgrade_key) {
     return false;
 }
 

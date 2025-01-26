@@ -455,7 +455,7 @@ protected:
     friend class UpgradingInfo;
 public:
 //Have to pass the randnum and degrees in networking and client side since they must not be random in that case
-    void DamageRandSys(float dam, const Vector &vec, float randum = 1, float degrees = 1);
+    void DamageRandSys(float dam, const Vector &vec);
     void SetNebula(Nebula *);
 
     inline Nebula *GetNebula() const {

@@ -43,31 +43,30 @@ DriveUpgrade::DriveUpgrade(Drive *drive) :
 
 
 // Component Methods
-void DriveUpgrade::Load(std::string upgrade_key, 
-                    std::string unit_key) {
-    Component::Load(upgrade_key, unit_key);
+void DriveUpgrade::Load(std::string unit_key) {
+    Component::Load(unit_key);
 
     // Consumer
-    fuel_consumption = UnitCSVFactory::GetVariable(upgrade_key, "Fuel_Consumption", 1.0);
+    fuel_consumption = UnitCSVFactory::GetVariable(unit_key, "Fuel_Consumption", 1.0);
 
     // DriveUpgrade
-    yaw = UnitCSVFactory::GetVariable(upgrade_key, "Maneuver_Yaw", 1.0);
-    pitch = UnitCSVFactory::GetVariable(upgrade_key, "Maneuver_Pitch", 1.0);
-    roll = UnitCSVFactory::GetVariable(upgrade_key, "Maneuver_Roll", 1.0);
+    yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 1.0);
+    pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 1.0);
+    roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 1.0);
 
-    DoubleYawPitchRollParser(upgrade_key, YPR::Yaw, max_yaw_right, max_yaw_left);
-    DoubleYawPitchRollParser(upgrade_key, YPR::Pitch, max_pitch_up, max_pitch_down);
-    DoubleYawPitchRollParser(upgrade_key, YPR::Roll, max_roll_right, max_roll_left);
+    DoubleYawPitchRollParser(unit_key, YPR::Yaw, max_yaw_right, max_yaw_left);
+    DoubleYawPitchRollParser(unit_key, YPR::Pitch, max_pitch_up, max_pitch_down);
+    DoubleYawPitchRollParser(unit_key, YPR::Roll, max_roll_right, max_roll_left);
 
-    forward = UnitCSVFactory::GetVariable(upgrade_key, "Forward_Accel", 1.0);
-    retro = UnitCSVFactory::GetVariable(upgrade_key, "Retro_Accel", 1.0);
-    lateral = 0.5 * (UnitCSVFactory::GetVariable(upgrade_key, "Left_Accel", 1.0) +
-            UnitCSVFactory::GetVariable(upgrade_key, "Right_Accel", 1.0));
+    forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 1.0);
+    retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 1.0);
+    lateral = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 1.0) +
+            UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 1.0));
 
-    vertical = 0.5 * (UnitCSVFactory::GetVariable(upgrade_key, "Top_Accel", 1.0) +
-            UnitCSVFactory::GetVariable(upgrade_key, "Bottom_Accel", 1.0));
+    vertical = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 1.0) +
+            UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 1.0));
 
-    speed = UnitCSVFactory::GetVariable(upgrade_key, "Default_Speed_Governor", 1.0);
+    speed = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 1.0);
 }      
 
 
@@ -129,20 +128,20 @@ bool DriveUpgrade::Downgrade() {
     return true;
 }
 
-bool DriveUpgrade::CanUpgrade(const std::string upgrade_name) const {
+bool DriveUpgrade::CanUpgrade(const std::string upgrade_key) const {
     return !drive->Damaged();
 }
 
-bool DriveUpgrade::Upgrade(const std::string upgrade_name) {
-    if(!CanUpgrade(upgrade_name)) {
+bool DriveUpgrade::Upgrade(const std::string upgrade_key) {
+    if(!CanUpgrade(upgrade_key)) {
         return false;
     }
 
     // Component
-    Component::Upgrade(upgrade_name + "__upgrades");
+    Component::Upgrade(upgrade_key);
 
     // Load modifiers
-    Load(upgrade_name + "__upgrades");
+    Load(upgrade_key);
 
     // Add effects of upgrade on drive
     drive->yaw.SetMaxValue(drive->yaw.MaxValue() * yaw);

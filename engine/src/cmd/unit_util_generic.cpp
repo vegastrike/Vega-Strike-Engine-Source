@@ -294,7 +294,7 @@ int getPhysicsPriority(Unit *un) {
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
 
         float time_ramped = compwarprampuptime - un->graphicOptions.RampCounter;
-        if (un->graphicOptions.InWarp == 0) {
+        if (!un->ftl_drive.Enabled()) {
             time_ramped = warprampdowntime - un->graphicOptions.RampCounter;
         }
         if (un->graphicOptions.WarpRamping || time_ramped < lowest_priority_time) {
@@ -910,29 +910,27 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
 
     const std::string upgrade_category = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Type", std::string());
     if(upgrade_category == "Reactor") {
-        return un->reactor.Damaged() ? 0.5 : 1.0;
+        return un->reactor.PercentOperational();
     } 
     
     if(upgrade_category == "Capacitor") {
-        return un->reactor.Damaged() ? 0.5 : 1.0;
+        return un->reactor.PercentOperational();
     } 
     
     if(upgrade_category == "FTL_Capacitor") {
-        return un->reactor.Damaged() ? 0.5 : 1.0;
+        return un->reactor.PercentOperational();
     }
 
     if(upgrade_category == "Jump_Drive") {
-        return un->jump_drive.Operational();
+        return un->jump_drive.PercentOperational();
     }
 
     if(upgrade_category == "FTL Drive") {
-        return un->ftl_drive.Operational();
+        return un->ftl_drive.PercentOperational();
     }
 
-    // TODO: make cloak.current a resource
-    // Then implement damage properly
     if(upgrade_category == "Cloak") {
-        return un->cloak.Damaged() ? 0.5 : 1.0;
+        return un->cloak.PercentOperational();
     }
 
 
