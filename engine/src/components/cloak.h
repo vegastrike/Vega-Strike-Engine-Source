@@ -63,24 +63,26 @@ class Cloak : public Component, public EnergyConsumer
 
 public:
     Cloak();
-    Cloak(std::string unit_key, EnergyContainer* capacitor);
 
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+// Component Methods
+    void Load(std::string unit_key) override;
 
-    virtual bool CanDowngrade() const;
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
-    virtual bool Downgrade();
+    bool CanDowngrade() const override;
 
-    virtual bool CanUpgrade(const std::string upgrade_key) const;
+    bool Downgrade() override;
 
-    virtual bool Upgrade(const std::string upgrade_key);
+    bool CanUpgrade(const std::string upgrade_key) const override;
 
-    virtual void Damage();
-    virtual void DamageByPercent(double percent);
-    virtual void Repair();
+    bool Upgrade(const std::string upgrade_key) override;
 
-    virtual bool Damaged() const;
-    virtual bool Installed() const;
+    void Damage() override;
+    void DamageByPercent(double percent) override;
+    void Repair() override;
+
+    bool Damaged() const override;
+    bool Installed() const override;
 
     void Update();
     void Toggle(); // Toggle cloak on/off
@@ -98,24 +100,24 @@ public:
     }
 
     // Active is cloaking, cloaked or decloaking
-    bool Active() {
+    bool Active() const {
         return (status == CloakingStatus::cloaking ||
                 status == CloakingStatus::cloaked ||
                 status == CloakingStatus::decloaking);
     }
 
-    bool Ready() {
+    bool Ready() const {
         return (status == CloakingStatus::ready);
     }
 
-    bool Glass() {
+    bool Glass() const {
         return glass;
     }
 
     
 
     // Is the ship visible
-    bool Visible() {
+    bool Visible() const {
         return !Cloaked();
     }
 

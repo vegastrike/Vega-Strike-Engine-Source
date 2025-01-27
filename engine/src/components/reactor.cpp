@@ -51,8 +51,8 @@ Reactor::Reactor(EnergyContainer *source,
 }
 
 
-void Reactor::Load(std::string upgrade_key, std::string unit_key) {
-    Component::Load(upgrade_key, unit_key);
+void Reactor::Load(std::string unit_key) {
+    Component::Load(unit_key);
     capacity = Resource<double>(UnitCSVFactory::GetVariable(unit_key, REACTOR_RECHARGE, std::string("0.0")),
                                 configuration()->fuel.reactor_factor);
     

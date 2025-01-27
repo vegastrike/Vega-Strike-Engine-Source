@@ -28,23 +28,23 @@
 
 Cloak::Cloak() : 
     Component(),
-    EnergyConsumer(nullptr, 0, false)
+    EnergyConsumer(nullptr, false, 0)
 {
     type = ComponentType::Cloak;
     _Downgrade();
 }
 
-Cloak::Cloak(std::string unit_key, EnergyContainer* capacitor) :
-    Component(),
-    EnergyConsumer(capacitor, 
-                   UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0),
-                   false)
-{
-    type = ComponentType::Cloak;
+
+// Component Overrides
+void Cloak::Load(std::string unit_key) {
+    // Energy Consumer
+    SetConsumption(UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0));
+
+    // Cloak
     _Upgrade(unit_key);
 }
 
-// Component Overrides
+
 void Cloak::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Cloak_Min"] = std::to_string(minimum);
     unit["Can_Cloak"] = std::to_string(Capable());
@@ -88,6 +88,7 @@ bool Cloak::Upgrade(const std::string upgrade_key) {
 void Cloak::Damage() {
     status = CloakingStatus::damaged;
     current = 0;
+    operational  = 0;
 }
 
 void Cloak::DamageByPercent(double percent) {
@@ -99,6 +100,7 @@ void Cloak::Repair() {
     if(status == CloakingStatus::damaged) {
         status = CloakingStatus::ready;
         current = 0;
+        operational  = 1;
     }
 }
 

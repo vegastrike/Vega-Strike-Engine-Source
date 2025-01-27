@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001-2022 Pierre Terdiman, Daniel Horn, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,6 +32,7 @@
  *
  *  Updated by Stephen G. Tuggy 2022-01-06
  *  Updated by Benjamen R. Meyer 2023-05-27
+ *  Updated by Benjamen R. Meyer 2025-01-14
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,6 +40,9 @@
 // Include Guard
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODE_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODE_H
+
+#include "opcodetypes.h"
+#include "opcodesysdef.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Preprocessor

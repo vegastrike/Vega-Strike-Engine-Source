@@ -41,9 +41,6 @@ public:
     DamageableLayer *armor;
     DamageableLayer *shield;
 
-    float *current_hull;
-    float *max_hull;
-
     // These are only used for upgrade due to macros
     // TODO: refactor
     float upgrade_hull;
@@ -58,8 +55,6 @@ public:
     Damageable() : hull(&layers[0]),
             armor(&layers[1]),
             shield(&layers[2]),
-            current_hull(&hull->facets[as_integer(FacetName::single)].health),
-            max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
             upgrade_hull(0),
             shield_regeneration(0),
             killed(false) {
@@ -78,7 +73,7 @@ public:
     // be easily changed.
     // TODO: convert all calls to *current_hull
     const float GetHull() const {
-        return *current_hull;
+        return layers[0].facets[0].health;
     }
 
     // TODO: check for valid index

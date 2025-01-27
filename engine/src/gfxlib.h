@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * gfxlib.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -296,7 +298,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture(unsigned char *buffer,
         enum TEXTURE_IMAGE_TARGET image2D = TEXTURE_2D);
 
 ///Deletes the texture from the graphics card
-void /*GFXDRVAPI*/ GFXDeleteTexture(int handle);
+void /*GFXDRVAPI*/ GFXDeleteTexture(size_t handle);
 
 ///Cleans up all textures
 void /*GFXDRVAPI*/ GFXDestroyAllTextures();

@@ -1,7 +1,7 @@
 /*
  * init.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -69,6 +69,9 @@ class Unit;
 #define PATHSEP "/"
 #endif
 
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+
 void Python::initpaths() {
     /*
      *  char pwd[2048];
@@ -97,7 +100,8 @@ void Python::initpaths() {
         modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "missions\",";
         modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "ai\",";
         modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + "\",";
-        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + basesdir + "\"";
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + basesdir + "\",";
+        modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + "python" + PATHSEP + "base_computer\"";
         if (i + 1 < VSFileSystem::Rootdir.size()) {
             modpaths += ",";
         }
@@ -123,7 +127,7 @@ void Python::reseterrors() {
         VS_LOG_AND_FLUSH(error, "void Python::reseterrors(): Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VegaStrikeLogging::vega_logger()->FlushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     }
 }
 
@@ -163,26 +167,45 @@ void Python::init() {
         return;
     }
     isinit = true;
-//initialize python library
+
+    // initialize python library
+    PyPreConfig py_pre_config;
+    PyPreConfig_InitPythonConfig(&py_pre_config);
+
+    PyStatus status;
+
+    status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyPreInitialize failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+        Py_ExitStatusException(status);
+    }
+
     Py_NoSiteFlag = 1;
 
-// These functions add these modules to the builtin package
+    // These functions add these modules to the builtin package
     InitVS();
     InitBriefing();
     InitBase();
     InitDirector();
 
-// Add relevant paths to python path
-    const std::string python_path_string = GetPythonPath() 
-                                           + ":" + VSFileSystem::programdir
-                                           + ":" + VSFileSystem::datadir + "/python/base_computer/";
-    const std::wstring python_path_wstring = std::wstring(python_path_string.begin(), 
-                                                          python_path_string.end());
-    const wchar_t* python_path = python_path_wstring.c_str();
-    Py_SetPath(python_path);
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
 
-// Now we can do python things about them and initialize them
+    config.isolated = 1;
+
+    // Now we can do python things about them and initialize them
     Py_Initialize();
+    status = Py_InitializeFromConfig(&config);
+    if (PyStatus_Exception(status)) {
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): Py_InitializeFromConfig failed");
+        PyErr_Print();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+        PyConfig_Clear(&config);
+        Py_ExitStatusException(status);
+    }
+
     initpaths();
 
 #if BOOST_VERSION != 102800
@@ -196,7 +219,6 @@ void Python::init() {
     InitVS2();
 #endif
     VS_LOG(important_info, "testing Python integration");
-//    VS_LOG(info, "testing VS random");
     std::string python_snippet_to_run_1("import sys\nprint(sys.path)\n");
     VegaPyRunString(python_snippet_to_run_1);
 
@@ -253,8 +275,7 @@ void Python::test() {
 //vs_config->setVariable("data","test","NULL");
 //VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
 //VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
-    VegaStrikeLogging::vega_logger()->FlushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
 }
 
 #endif
-

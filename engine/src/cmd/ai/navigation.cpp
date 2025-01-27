@@ -537,9 +537,10 @@ static float mymin(float a, float b) {
     return a < b ? a : b;
 }
 
+// TODO: move this kludge to FtlDrive
 inline void WarpRampOff(Unit *un, bool rampdown) {
-    if (un->graphicOptions.InWarp == 1) {
-        un->graphicOptions.InWarp = 0;
+    if (un->ftl_drive.Enabled()) {
+        un->ftl_drive.Disable();
         if (rampdown) {
             un->graphicOptions.WarpRamping = 1;
         }
@@ -547,9 +548,9 @@ inline void WarpRampOff(Unit *un, bool rampdown) {
 }
 
 inline void CautiousWarpRampOn(Unit *un) {
-    if ((un->graphicOptions.InWarp == 0)
+    if ((!un->ftl_drive.Enabled())
             && (un->graphicOptions.RampCounter == 0)) { // don't restart warp during ramp-down - avoid shaking
-        un->graphicOptions.InWarp = 1;
+        un->ftl_drive.Enable();
         un->graphicOptions.WarpRamping = 1;
     }
 }
@@ -679,7 +680,7 @@ void AutoLongHaul::Execute() {
             }
         }
     }
-    if (parent->graphicOptions.InWarp == 0 && parent->graphicOptions.RampCounter == 0) {
+    if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
     double mass = parent->getMass();

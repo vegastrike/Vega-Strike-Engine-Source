@@ -49,16 +49,14 @@ Energetic::Energetic() :
 void Energetic::DecreaseWarpEnergyInWarp() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    const bool in_warp = unit->graphicOptions.InWarp;
-
-    if (!in_warp) {
+    if (!unit->ftl_drive.Enabled()) {
         return;
     }
 
     if(unit->ftl_drive.CanConsume()) {
         unit->ftl_drive.Consume();
     } else {
-        unit->graphicOptions.InWarp = 0;
+        unit->ftl_drive.Disable();
         unit->graphicOptions.WarpRamping = 1;
     }
 }
@@ -149,7 +147,7 @@ void Energetic::MaintainECM() {
 void Energetic::MaintainShields() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    const bool in_warp = unit->graphicOptions.InWarp;
+    const bool in_warp = unit->ftl_drive.Enabled();
     const int shield_facets = unit->shield->number_of_facets;
 
     if (in_warp && !configuration()->physics_config.shields_in_spec) {
@@ -175,7 +173,7 @@ void Energetic::MaintainShields() {
 void Energetic::ExpendEnergyToRechargeShields() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    const bool in_warp = unit->graphicOptions.InWarp;
+    const bool in_warp = unit->ftl_drive.Enabled();
 
     // TODO: add has_shields function instead of check below
     if (unit->shield->TotalMaxLayerValue() == 0) {

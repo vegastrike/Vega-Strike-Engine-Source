@@ -1,0 +1,140 @@
+name: 'MacOS-Release'
+
+on:
+  release:
+    types:
+      - created
+      - edited
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          # x86-64
+          - macos-13
+          # M1 processor
+          #- macos-14
+        python-version:
+          #- 3.12.8
+          - 3.13.1
+        compiler:
+          - AppleClang
+          #- clang
+          #- gcc
+        homebrew-gl:
+          - true
+          #- false
+        homebrew-al:
+          - true
+          #- false
+        ENABLE_PIE:
+          - 'ON'
+          #- 'OFF'
+        build-type:
+          - RelWithDebInfo
+
+    steps:
+
+      # The following dependencies are already present within macos-* images:
+      # - clang (llvm)
+      # - cmake
+      # - expat
+      # - gcc
+      # - git
+      # - jpeg
+      # - libpng
+      # - ~libvorbis~
+      # - python
+      # specific setup for Python on Mac to ensure Python Version align
+      - name: Python Setup on Mac
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        id: vega-py-setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          update-environment: true # false
+
+      - name: Install dependencies using homebrew
+        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
+
+      # The following Apple-provided libraries are deprecated:
+      # * OpenGL as of macOS 10.14
+      # * GLUT as of macOS 10.9
+      - name: Optionally install homebrewed OpenGL and GLUT
+        if: ${{ matrix.homebrew-gl }}
+        run: |
+          brew install mesa mesa-glu freeglut
+          ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/OpenGL"
+          ln -s "$(brew --prefix)/include/GL" "$(brew --prefix)/include/GLUT"
+
+      # The Apple-provided OpenAL is deprecated as of macOS 10.15
+      - name: Optionally install homebrewed OpenAL
+        if: ${{ matrix.homebrew-al }}
+        run: brew install openal-soft
+
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 2
+          submodules: false
+
+      - name: Extract tag name and short SHA
+        shell: bash
+        run: |
+          echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
+          echo "SHORT_SHA=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      - name: Test tag name and short SHA
+        run: |
+          echo "${TAG_NAME}"
+          echo "${SHORT_SHA}"
+
+      - name: Build it
+        env:
+          MY_OS_NAME: macos
+          COMPILER:   ${{ matrix.compiler }}
+          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }} -DPythonInstalledVia=Homebrew"
+          OPENALDIR:  "$(brew --prefix)/opt/openal-soft"
+          Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
+          PYTHONHOME: ""
+          PYTHONPATH: ""
+          IS_RELEASE: 1
+        run: script/cibuild $FLAGS
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        env:
+          GTEST_OUTPUT: xml
+          GTEST_COLOR: 1
+        run: ctest -V
+
+      - name: Upload test results
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        if: failure()
+        with:
+          name: test_results_xml
+          path: ${{github.workspace}}/build/test-results/**/*.xml
+
+      - name: Package it
+        working-directory: ${{github.workspace}}/build
+        run: cpack -V
+
+      - name: Upload the artifacts
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "packages/*.*"

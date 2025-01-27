@@ -52,24 +52,24 @@ public:
             double conversion_ratio = 0.0001); // < 0.01 or very short flight
 
 
-    virtual void Load(std::string upgrade_key, std::string unit_key = "");      
+    void Load(std::string unit_key) override;      
     
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
-    virtual bool CanDowngrade() const;
+    bool CanDowngrade() const override;
 
-    virtual bool Downgrade();
+    bool Downgrade() override;
 
-    virtual bool CanUpgrade(const std::string upgrade_key) const;
+    bool CanUpgrade(const std::string upgrade_key) const override;
 
-    virtual bool Upgrade(const std::string upgrade_key);
+    bool Upgrade(const std::string upgrade_key) override;
 
-    virtual void Damage();
-    virtual void DamageByPercent(double percent);
-    virtual void Repair();
+    void Damage() override;
+    void DamageByPercent(double percent) override;
+    void Repair() override;
 
-    virtual bool Damaged() const;
-    virtual bool Installed() const;
+    bool Damaged() const override;
+    bool Installed() const override;
 
     void Generate();
     double Capacity() const;

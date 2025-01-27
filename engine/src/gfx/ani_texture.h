@@ -90,29 +90,29 @@ protected:
     bool done;
 
 public:
-    virtual void setTime(double tim);
+    void setTime(double tim) override;
 
-    virtual double curTime() const {
+    double curTime() const override {
         return curtime;
     }
 
-    virtual unsigned int numFrames() const {
+    unsigned int numFrames() const override {
         return numframes;
     }
 
-    virtual float framesPerSecond() const {
+    float framesPerSecond() const override {
         return 1 / timeperframe;
     }
 
-    virtual unsigned int numLayers() const;
+    unsigned int numLayers() const override;
 
-    virtual unsigned int numPasses() const;
+    unsigned int numPasses() const override;
 
-    virtual bool canMultiPass() const {
+    bool canMultiPass() const override {
         return true;
     }
 
-    virtual bool constFrameRate() const {
+    bool constFrameRate() const override {
         return constframerate;
     }
 

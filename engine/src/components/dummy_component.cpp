@@ -32,9 +32,8 @@ DummyComponent::DummyComponent() :
 
 
 // Component Methods
-void DummyComponent::Load(std::string upgrade_key, 
-                    std::string unit_key) {
-    Component::Load(upgrade_key, unit_key);
+void DummyComponent::Load(std::string unit_key) {
+    Component::Load(unit_key);
 }      
 
 void DummyComponent::SaveToCSV(std::map<std::string, std::string>& unit) const {}
@@ -47,11 +46,11 @@ bool DummyComponent::Downgrade() {
     return false;
 }
 
-bool DummyComponent::CanUpgrade(const std::string upgrade_name) const {
+bool DummyComponent::CanUpgrade(const std::string upgrade_key) const {
     return false;
 }
 
-bool DummyComponent::Upgrade(const std::string upgrade_name) {
+bool DummyComponent::Upgrade(const std::string upgrade_key) {
     return false;
 }
 

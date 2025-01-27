@@ -41,24 +41,26 @@ IF (EXPAT_FOUND)
         Modules/XMesh_to_Ogre.cpp
         Modules/Wavefront_to_BFXM.cpp
         PrecompiledHeaders/Converter.cpp
-        ${Vega_Strike_SOURCE_DIR}/src/hashtable.cpp
-        ${Vega_Strike_SOURCE_DIR}/src/xml_support.cpp
+        ${Vega_Strike_SOURCE_DIR}/engine/src/hashtable.cpp
+        ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
     )
 
     # Still need to add CEGUI and OGRE find packages
     #if have OGRE to_OgreMesh.cpp
 
     ADD_EXECUTABLE(mesher ${MESHER_SOURCES})
-    target_compile_definitions(mesher PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+    TARGET_INCLUDE_DIRECTORIES(mesher PUBLIC ${VS_INCLUDE_DIRS})
+    SET_TARGET_PROPERTIES(mesher PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    TARGET_COMPILE_DEFINITIONS(mesher PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)
-        target_compile_definitions(mesher PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-        target_compile_definitions(mesher PUBLIC _WIN32_WINNT=0x0A00)
-        target_compile_definitions(mesher PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(mesher PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(mesher PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(mesher PUBLIC WINVER=0x0A00)
     ENDIF()
 
     # OGRE already looked for by parent
     # USE_SYSTEM_BOOST already set by main script
-    MESSAGE("-- ${OGRE_FOUND} ${USE_SYSTEM_BOOST}")
+    MESSAGE(STATUS "${OGRE_FOUND} ${USE_SYSTEM_BOOST}")
     IF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
         # Ogre usage in mesher requires boost::system
         ADD_DEPENDENCIES(mesher boost_system)
@@ -68,5 +70,5 @@ IF (EXPAT_FOUND)
     TARGET_LINK_LIBRARIES(mesher ${MESHER_LIBRARIES} ${EXPAT_LIBRARIES} ${OGRE_LIBRARIES})
     SET_TARGET_PROPERTIES(mesher PROPERTIES LINK_FLAGS "-L/usr/lib")
 ELSE (EXPAT_FOUND)
-    MESSAGE("!! Not going to be able to compile mesher, no expat found")
+    MESSAGE(WARNING "Not going to be able to compile mesher, no expat found")
 ENDIF(EXPAT_FOUND)

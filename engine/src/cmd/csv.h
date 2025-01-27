@@ -80,7 +80,6 @@ public:
     }
 
     CSVRow(CSVTable *parent, const std::string &key);
-    CSVRow(CSVTable *parent, unsigned int which);
 
     CSVRow() {
         parent = NULL;

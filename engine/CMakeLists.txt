@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2001-2023 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2001-2025 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -30,190 +30,53 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
+MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
-
-SET(VEGASTRIKE_VERSION_MAJOR "0")
-SET(VEGASTRIKE_VERSION_MINOR "10")
-SET(VEGASTRIKE_VERSION_PATCH "0")
-
-IF (DEFINED ENV{SHORT_SHA} AND NOT "$ENV{SHORT_SHA}" STREQUAL "")
-    SET(VEGASTRIKE_VERSION_TWEAK "$ENV{SHORT_SHA}")
-ELSE ()
-    SET (GIT_ROOT_DIR "${CMAKE_SOURCE_DIR}/..")
-    MESSAGE("-- CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
-    MESSAGE("-- GIT_ROOT_DIR = ${GIT_ROOT_DIR}")
-    EXECUTE_PROCESS(
-            COMMAND git rev-parse --short HEAD
-            WORKING_DIRECTORY ${GIT_ROOT_DIR}
-            OUTPUT_VARIABLE VEGASTRIKE_VERSION_TWEAK
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-ENDIF ()
-
-SET(VEGASTRIKE_VERSION_LONG_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}-${VEGASTRIKE_VERSION_TWEAK}")
-SET(VEGASTRIKE_VERSION_SHORT_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}")
-SET(VEGASTRIKE_PKG_VERSION_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}")
-
-IF (DEFINED ENV{TAG_NAME} AND NOT "$ENV{TAG_NAME}" STREQUAL "")
-    STRING(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" TAG_VERSION_MAJOR "$ENV{TAG_NAME}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" TAG_VERSION_MINOR "$ENV{TAG_NAME}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" TAG_VERSION_PATCH "$ENV{TAG_NAME}")
-    STRING(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" TAG_VERSION_TWEAK "$ENV{TAG_NAME}")
-
-    SET(TAG_VERSION_SHORT_STR "${TAG_VERSION_MAJOR}.${TAG_VERSION_MINOR}.${TAG_VERSION_PATCH}")
-
-    IF (NOT "${VEGASTRIKE_VERSION_SHORT_STR}" VERSION_EQUAL "${TAG_VERSION_SHORT_STR}")
-        MESSAGE(FATAL_ERROR "!! Project version spelled out in CMake file does not match project version from TAG_NAME environment variable")
-    ENDIF ()
-    IF (NOT "${TAG_VERSION_TWEAK}" STREQUAL "")
-        SET(VEGASTRIKE_VERSION_LONG_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}${TAG_VERSION_TWEAK}-${VEGASTRIKE_VERSION_TWEAK}")
-        SET(VEGASTRIKE_PKG_VERSION_STR "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}${TAG_VERSION_TWEAK}")
-    ENDIF ()
-ENDIF ()
-
-# API Version for Game Assets
-# This is an incrementing number similar to the Google Android API Version
-# allowing us to differentiate our Assets API across multiple versions.
-# If a release is missing this value, then version `1` can be assumed.
-SET(VEGASTRIKE_ASSETS_API_VERSION "3")
-
-#IF (COMMAND cmake_policy)
-#    CMAKE_POLICY (SET CMP0003 NEW)
-#ENDIF (COMMAND cmake_policy)
-#
-## VERSION Policy
-#IF (POLICY CMP0048)
-#    CMAKE_POLICY (SET CMP0048 NEW)
-#ENDIF (POLICY CMP0048)
-#
-## Used to be that without this, CMake couldn't find pow() -- at least not on my Windows machine.
-#IF (POLICY CMP0066)
-#    CMAKE_POLICY (SET CMP0066 NEW)
-#ENDIF ()
-#
-## FindOpenGL prefers GLVND by default when available. But there is an option to override that.
-#IF (POLICY CMP0072)
-#    CMAKE_POLICY (SET CMP0072 NEW)
-#ENDIF (POLICY CMP0072)
-#
-## find_package() uses <PackageName>_ROOT variables
-#IF (POLICY CMP0074)
-#    CMAKE_POLICY (SET CMP0074 NEW)
-#ENDIF (POLICY CMP0074)
-#
-## Include file check macros honor CMAKE_REQUIRED_LIBRARIES
-#IF (POLICY CMP0075)
-#    CMAKE_POLICY (SET CMP0075 NEW)
-#ENDIF ()
-#
-## Concerning link time flags for turning on or off Position Independent Executables (PIE)
-#IF (POLICY CMP0083)
-#    CMAKE_POLICY (SET CMP0083 NEW)
-#ENDIF ()
-#
-## MSVC runtime library flags are selected by an abstraction. Supported by CMake 3.15 and up
-#IF (POLICY CMP0091)
-#    CMAKE_POLICY (SET CMP0091 NEW)
-#ENDIF ()
-
-# TODO: this suppresses warnings about CMP0102 caching. 
-# We should do something about it instead.
-CMAKE_POLICY(SET CMP0102 OLD)
-
-PROJECT(Vega_Strike
-    VERSION
-    "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
-    LANGUAGES
-    CXX C
-)
+SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 
 # One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
 
-MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
-
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-SET(CMAKE_CXX_EXTENSIONS ON)
-SET(CMAKE_C_STANDARD 11)
-SET(CMAKE_C_STANDARD_REQUIRED TRUE)
-SET(CMAKE_C_EXTENSIONS ON)
-
-UNSET(PYTHONLIBS_FOUND)
-UNSET(Boost_FOUND)
-UNSET(Boost_python3_FOUND)
-UNSET(OPENGL_FOUND)
-UNSET(OPENGL_GLU_FOUND)
-UNSET(GLUT_FOUND)
-UNSET(OPENAL_FOUND)
-UNSET(SDL_FOUND)
-UNSET(VORBIS_FOUND)
-UNSET(JPEG_FOUND)
-UNSET(PNG_FOUND)
-UNSET(ZLIB_FOUND)
-UNSET(EXPAT_FOUND)
-UNSET(MATH_FOUND)
-UNSET(FFMPEG_FOUND)
-UNSET(OGRE_FOUND)
-UNSET(Boost_DIR)
-
 SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
 
-IF (XCODE)
-    SET(CMAKE_FIND_FRAMEWORK "LAST")
-ENDIF (XCODE)
-
+LIST(APPEND
+    VS_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmd
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/components
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/damage
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/resource
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/python/base_computer
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/python/config
+    ${Vega_Strike_BINARY_DIR}
+    ${Vega_Strike_BINARY_DIR}/src
+)
 IF (UNIX)
-    INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_SOURCE_DIR}/src/damage
-        ${Vega_Strike_SOURCE_DIR}/src/resource
-        ${Vega_Strike_SOURCE_DIR}/src/components
-        ${Vega_Strike_SOURCE_DIR}/src/python/base_computer
-        ${Vega_Strike_SOURCE_DIR}/src/python/config
-        ${Vega_Strike_BINARY_DIR}
-        ${Vega_Strike_BINARY_DIR}/src
+    LIST(APPEND
+        VS_INCLUDE_DIRS
         /usr/include/harfbuzz/
     )
-ELSE ()
-    INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_SOURCE_DIR}/src/damage
-        ${Vega_Strike_SOURCE_DIR}/src/resource
-        ${Vega_Strike_SOURCE_DIR}/src/components
-        ${Vega_Strike_SOURCE_DIR}/src/python/base_computer
-        ${Vega_Strike_SOURCE_DIR}/src/python/config
-        ${Vega_Strike_BINARY_DIR}
-        ${Vega_Strike_BINARY_DIR}/src
-    )
-ENDIF ()
+ENDIF (UNIX)
+MESSAGE("VS INCLUDE DIRS: ${VS_INCLUDE_DIRS}")
 
 # The source files used to be listed here...
-
 
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
 INCLUDE(CMakePushCheckState)
-# cmake_push_check_state()
-UNSET(COMPILER_SPECIFIC_FLAGS)
 SET(SIZEOF_VOID_P CMAKE_SIZEOF_VOID_P)
-# SET(CMAKE_REQUIRED_LINK_OPTIONS "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}")
-# CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P) #BUILTIN_TYPES_ONLY)
-# cmake_pop_check_state()
 
+SET(CMAKE_FIND_FRAMEWORK "LAST")
 
 #Find Math
 INCLUDE(CheckSymbolExists)
 IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
     # cmake_push_check_state()
-    UNSET(COMPILER_SPECIFIC_FLAGS)
     check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
     IF(NOT POW_FUNCTION_EXISTS)
         UNSET(POW_FUNCTION_EXISTS CACHE)
@@ -235,16 +98,10 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
-
-#IF (NOT BUILD_OPT)
-#    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
-#ENDIF (NOT BUILD_OPT)
-
 # Option to turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 
 # Should we prefer the Mesa OpenGL implementation, or GLVND?
-# OPTION(VEGA_STRIKE_PREFER_LEGACY_OPENGL "Prefer legacy OpenGL implementation (such as Mesa's)? Or prefer GLVND?" OFF )
 IF (OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglu1-mesa")
 ELSEIF (OpenGL_GL_PREFERENCE STREQUAL "GLVND")
@@ -253,23 +110,6 @@ ELSE ()
     UNSET (VEGA_STRIKE_GLU_DEPENDENCY)
 ENDIF ()
 MESSAGE("** OpenGL_GL_PREFERENCE: ${OpenGL_GL_PREFERENCE}")
-
-# Should we install gtest?
-OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
-
-# Should we run gtest?
-OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
-
-# Provide boolean options for enabling various cpu optimizations.
-OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
-OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) " OFF )
-OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)" OFF )
-OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations" OFF )
-OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)" OFF )
-OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations" OFF )
-OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations" OFF )
-OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations" OFF )
-OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine" OFF )
 
 SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
@@ -280,25 +120,6 @@ MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
 
-# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
-IF (CPUAMD_k8)
-    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -fprefetch-loop-arrays ")
-ELSEIF (CPUAMD_K9)
-    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_p4)
-    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_prescott)
-    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops " )
-ELSEIF (CPUINTEL_nocona)
-    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_core2)
-    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUINTEL_native)
-    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funroll-loops ")
-ELSEIF (CPUAMD_vishera)
-    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 ")
-ENDIF (CPUAMD_k8)
-
 IF (CPU_SMP GREATER 1)
     SET(CPU_OPTS " ${CPU_OPTS} -ftree-parallelize-loops=${CPU_SMP} ")
 ENDIF (CPU_SMP GREATER 1)
@@ -307,43 +128,7 @@ IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
 ENDIF (DATADIR)
 
-# On some Ubuntu versions and derivatives, a bug exists whereby enabling
-# PIE compilation (Position Independent Executables) results in the
-# `file` utility incorrectly recognising the compiled vegastrike-engine binary
-# as a shared library instead of a position independent shared executable
-# object.
-#
-# The effect of the bug is that vegastrike-engine can still be started from the
-# command line but that it will not be recognised as an executable by GUI
-# file managers such as Nautilus and Dolphin.
-#
-# To avoid this scenario, turn off this flag by default and let packagers
-# on other distributions turn this on if their OS is able to correctly deal
-# with Position Independent Executables.
-
-# For more info, see:
-# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
-# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
-#
-OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
-MESSAGE("-- Always using preferred PIE logic now")
-
-include(CheckPIESupported)
-check_pie_supported()
-UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-IF (ENABLE_PIE)
-    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-ELSE (ENABLE_PIE)
-    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-    SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-ENDIF (ENABLE_PIE)
-
-#set_property(DIRECTORY APPEND PROPERTY
-#        COMPILE_DEFINITIONS $<MSVC:/FI\"${Vega_Strike_BINARY_DIR}\"/config.h >
-#        )
-
-add_compile_definitions("NV_CUBE_MAP"
+ADD_COMPILE_DEFINITIONS("NV_CUBE_MAP"
         "BOOST_PYTHON_NO_PY_SIGNATURES"
         "BOOST_ALL_DYN_LINK"
         "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>"
@@ -351,15 +136,15 @@ add_compile_definitions("NV_CUBE_MAP"
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
         )
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/config.h>"
+ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/engine/config.h>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
         )
-add_link_options("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
 # for DEBUG remove all optimizations
-add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
+ADD_LINK_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
+ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
         "$<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Debug>>:-fstandalone-debug>"
@@ -372,31 +157,42 @@ add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CX
         )
 
 # Let cmake find our in-tree modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 
 # Detect available Linux Distros that can be built for
 # 2021-09-18 stephengtuggy - This needs to happen before the boost_python detection logic,
 # so that we can handle the special cases for Xenial and stretch
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
-FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development Interpreter)
-MESSAGE("++ Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
-MESSAGE("++ Python include dir : ${Python3_INCLUDE_DIRS}")
+SET(PythonInstalledVia "" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
+
+IF (PythonInstalledVia STREQUAL "Homebrew")
+    FIND_PACKAGE(Python3 3.13.1 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSEIF (PythonInstalledVia STREQUAL "MacPorts")
+    FIND_PACKAGE(Python3 3.12.8 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSE ()
+    FIND_PACKAGE(Python3 3.7...<3.14 REQUIRED COMPONENTS Development Interpreter)
+ENDIF ()
+
+MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
+MESSAGE(STATUS "Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
     SET(TST_INCLUDES ${Python3_INCLUDE_DIRS})
     SET(TST_LIBS ${Python3_LIBRARIES})
     SET(HAVE_PYTHON 1)
-    add_compile_definitions(Python_SITELIB=${Python3_SITELIB})
+    SET(TMP_Python_SITELIB ${Python3_SITELIB})
+    STRING(REGEX REPLACE "\\\\" "/" TMP_Python_SITELIB ${TMP_Python_SITELIB})
+    MESSAGE("TMP_Python_SITELIB = ${TMP_Python_SITELIB}")
+    add_compile_definitions(Python_SITELIB=${TMP_Python_SITELIB})
 ELSE (Python3_FOUND)
     MESSAGE(FATAL_ERROR "Can't find python")
 ENDIF (Python3_FOUND)
 
 # Find Boost with boost_python library
-# Note: we now use Cmake 3.16 and Boost 1.75.
-MESSAGE("++ From now on, always using System Boost (ver. 1.75 or higher)")
+# Note: we now use Cmake 3.21 and Boost 1.75.
+MESSAGE(STATUS "From now on, always using System Boost (ver. 1.75 or higher)")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic REQUIRED)
-MESSAGE("++ Found System Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
+MESSAGE(STATUS "Found System Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
 SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 
 SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
@@ -407,13 +203,23 @@ INCLUDE_DIRECTORIES(${TST_INCLUDES})
 IF (NOT DISABLE_CLIENT) ##########
 
     #Find GL
+    SET(CMAKE_FIND_FRAMEWORK "FIRST")
     FIND_PACKAGE(OpenGL REQUIRED)
     IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${OPENGL_INCLUDE_DIR})
-        # SET(TST_LIBS ${TST_LIBS} "${OpenGL::GL}" "${OpenGL::GLU}")
-        MESSAGE("++ OpenGL found")
+        MESSAGE(STATUS "OpenGL found")
+        SET(CMAKE_FIND_FRAMEWORK "LAST")
+        FIND_FILE(VEGA_GLEXT_H_PATH glext.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GLEXT_H_DIRECTORY ${VEGA_GLEXT_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glext.h: ${VEGA_GLEXT_H_PATH}")
+        FIND_FILE(VEGA_GL_H_PATH gl.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GL_H_DIRECTORY ${VEGA_GL_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to gl.h: ${VEGA_GL_H_PATH}")
+        FIND_FILE(VEGA_GLU_H_PATH glu.h PATH_SUFFIXES GL/ OpenGL/)
+        get_filename_component(VEGA_GLU_H_DIRECTORY ${VEGA_GLU_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glu.h: ${VEGA_GLU_H_PATH}")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLEXT_H_DIRECTORY} ${VEGA_GL_H_DIRECTORY} ${VEGA_GLU_H_DIRECTORY})
     ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-        MESSAGE("!! Why you no have GL?")
+        MESSAGE(WARNING "Why you no have GL?")
     ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
 
     # Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
@@ -434,26 +240,32 @@ IF (NOT DISABLE_CLIENT) ##########
     SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
 
     #Find GLUT
+    SET(CMAKE_FIND_FRAMEWORK "FIRST")
     FIND_PACKAGE(GLUT REQUIRED)
     IF (GLUT_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
+        MESSAGE(STATUS "GLUT found : ${GLUT_LIBRARIES}")
+        SET(CMAKE_FIND_FRAMEWORK "LAST")
+        FIND_FILE(VEGA_GLUT_H_PATH glut.h PATH_SUFFIXES GL/ GLUT/)
+        get_filename_component(VEGA_GLUT_H_DIRECTORY ${VEGA_GLUT_H_PATH} DIRECTORY)
+        MESSAGE(STATUS "Path to glut.h: ${VEGA_GLUT_H_PATH}")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLUT_H_DIRECTORY} ${GLUT_INCLUDE_DIR})
         SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
-        MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
     ELSE (GLUT_FOUND)
-        MESSAGE("!! I can't build this, missing GLUT")
+        MESSAGE(WARNING "I can't build this, missing GLUT")
     ENDIF (GLUT_FOUND)
 
     UNSET(OPENGL_LIBRARY_DIR)
+    SET(CMAKE_FIND_FRAMEWORK "LAST")
 
     #Find OpenAL
     FIND_PACKAGE(OpenAL REQUIRED)
     IF (OPENAL_FOUND)
-        MESSAGE("++ Found OpenAL")
+        MESSAGE(STATUS "Found OpenAL")
         SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
         SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
         SET(HAVE_AL 1)
     ELSE (OPENAL_FOUND)
-        MESSAGE("!! We aint got no sound")
+        MESSAGE(WARNING "We aint got no sound")
     ENDIF (OPENAL_FOUND)
 
     IF (NOT BEOS)
@@ -462,11 +274,11 @@ IF (NOT DISABLE_CLIENT) ##########
         IF (SDL2_FOUND)
             SET(TST_INCLUDES ${TST_INCLUDES} ${SDL2_INCLUDE_DIRS})
             SET(TST_LIBS ${TST_LIBS} ${SDL2_LIBRARIES})
-            MESSAGE("++ SDL2 Found")
+            MESSAGE(STATUS "SDL2 Found")
             SET(HAVE_SDL 1)
             SET(SDL_WINDOWING 1)
         ELSE (SDL2_FOUND)
-            MESSAGE("!! How will we render to OpenGL without SDL2?")
+            MESSAGE(WARNING "How will we render to OpenGL without SDL2?")
         ENDIF (SDL2_FOUND)
     ENDIF (NOT BEOS)
 
@@ -477,7 +289,7 @@ IF (NOT DISABLE_CLIENT) ##########
         SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
         SET(HAVE_OGG 1)
     ELSE (Vorbis_FOUND)
-        MESSAGE("!! Can't find Vorbis libs")
+        MESSAGE(WARNING "Can't find Vorbis libs")
     ENDIF (Vorbis_FOUND)
 
     #Find JPEG
@@ -486,7 +298,7 @@ IF (NOT DISABLE_CLIENT) ##########
         SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
         SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
     ELSE (JPEG_FOUND)
-        MESSAGE("!! How are we gonna open jpegs?")
+        MESSAGE(WARNING "How are we gonna open jpegs?")
     ENDIF (JPEG_FOUND)
 
     #Find PNG
@@ -495,7 +307,7 @@ IF (NOT DISABLE_CLIENT) ##########
         SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
         SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
     ELSE (PNG_FOUND)
-        MESSAGE("!! Can't find PNG lib")
+        MESSAGE(WARNING "Can't find PNG lib")
     ENDIF (PNG_FOUND)
 
 ENDIF(NOT DISABLE_CLIENT) ##########
@@ -506,7 +318,7 @@ IF (ZLIB_FOUND)
     SET(TST_INCLUDES ${TST_INCLUDES} ${ZLIB_INCLUDE_DIR})
     SET(TST_LIBS ${TST_LIBS} ${ZLIB_LIBRARIES})
 ELSE (ZLIB_FOUND)
-    MESSAGE("!! For the love of god, no zlib here")
+    MESSAGE(WARNING "For the love of god, no zlib here")
 ENDIF (ZLIB_FOUND)
 
 #find Expat
@@ -515,7 +327,7 @@ IF (EXPAT_FOUND)
     SET(TST_INCLUDES ${TST_INCLUDES} ${EXPAT_INCLUDE_DIRS})
     SET(TST_LIBS ${TST_LIBS} ${EXPAT_LIBRARIES})
 ELSE (EXPAT_FOUND)
-    MESSAGE("!! We can't find expat for XML crap")
+    MESSAGE(WARNING "We can't find expat for XML crap")
 ENDIF (EXPAT_FOUND)
 
 #Find FFMpeg
@@ -527,17 +339,17 @@ IF (NOT DISABLE_FFMPEG)
         SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
         ADD_DEFINITIONS(${FFMPEG_DEFINITIONS})
         SET(HAVE_FFMPEG 1 )
-        MESSAGE("++ FFmpeg found.")
+        MESSAGE(STATUS "FFmpeg found.")
         IF (swscale1_FOUND)
-            MESSAGE("++ FFmpeg's libswscale found.")
+            MESSAGE(STATUS "FFmpeg's libswscale found.")
         ELSE (swscale1_FOUND)
-            MESSAGE("-- FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
+            MESSAGE(STATUS "FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
         ENDIF (swscale1_FOUND)
     ELSE (FFMPEG_FOUND)
-        MESSAGE("-- FFMPEG Not Found")
+        MESSAGE(STATUS "FFMPEG Not Found")
     ENDIF (FFMPEG_FOUND)
 ELSE (NOT DISABLE_FFMPEG)
-    MESSAGE("-- FFMPEG disabled")
+    MESSAGE(STATUS "FFMPEG disabled")
 ENDIF (NOT DISABLE_FFMPEG)
 
 #Find Ogre
@@ -550,12 +362,12 @@ IF (NOT DISABLE_OGRE)
         SET(TST_LIBS ${TST_LIBS} ${OGRE_LIBRARY})
         ADD_DEFINITIONS(${OGRE_DEFINITIONS})
         SET(HAVE_OGRE 1)
-        MESSAGE("++ Found Ogre: ${OGRE_VERSION}")
+        MESSAGE(STATUS "Found Ogre: ${OGRE_VERSION}")
     ELSE (OGRE_FOUND)
-        MESSAGE("-- Ogre Not Found: compiling without")
+        MESSAGE(STATUS "Ogre Not Found: compiling without")
     ENDIF (OGRE_FOUND)
 ELSE (NOT DISABLE_OGRE)
-    MESSAGE("-- Ogre disabled")
+    MESSAGE(STATUS "Ogre disabled")
 ENDIF (NOT DISABLE_OGRE)
 
 IF (NOT BEOS)
@@ -624,15 +436,15 @@ ELSE (UNIX)
     SET(HOSTOS "APPLE")
 ENDIF (UNIX)
 
-CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_DIR}/config.h)
+CONFIGURE_FILE(cmake-config.h.in config.h)
 
 #end config.h generation
 
 INCLUDE_DIRECTORIES(${TST_INCLUDES})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-add_compile_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
-                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:config.h>")
-add_link_options("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
+                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${Vega_Strike_BINARY_DIR}/engine/config.h>")
+ADD_LINK_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
 
 # Now the source files are listed starting here!
 SET(LIBVS_LOGGING
@@ -667,9 +479,9 @@ SET(LIBPYTHON
 
 SET(LIBCOMPONENT
     src/components/component.cpp
+
     src/components/dummy_component.cpp
-    src/components/component_utils
-    
+    src/components/component_utils.cpp
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
     src/components/reactor.cpp
@@ -795,7 +607,6 @@ ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/OPC_BaseModel.cpp
     src/cmd/collide2/OPC_BoxPruning.cpp
     src/cmd/collide2/OPC_Collider.cpp
-    src/cmd/collide2/OPC_Common.cpp
     src/cmd/collide2/OPC_HybridModel.cpp
     src/cmd/collide2/OPC_LSSCollider.cpp
     src/cmd/collide2/OPC_MeshInterface.cpp
@@ -812,6 +623,7 @@ ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/OPC_VolumeCollider.cpp
     src/cmd/collide2/CSopcodecollider.cpp
 )
+TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PUBLIC ${VS_INCLUDE_DIRS})
 
 #TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 set_property(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -1103,6 +915,10 @@ TARGET_LINK_LIBRARIES(
 SET_TARGET_PROPERTIES(vegastrike_python PROPERTIES PREFIX "")
 
 ADD_LIBRARY(vegastrike-engine_com
+    ${VEGA_GL_H_PATH}
+    ${VEGA_GLU_H_PATH}
+    ${VEGA_GLEXT_H_PATH}
+    ${VEGA_GLUT_H_PATH}
     ${LIBPYTHON}
     ${LIBVS_LOGGING}
     ${LIBCONFIG}
@@ -1117,6 +933,7 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBSCRIPT_SOURCES}
     ${LIBGFXGENERIC_SOURCES}
 )
+TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PUBLIC ${VS_INCLUDE_DIRS})
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
 set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -1132,6 +949,10 @@ IF (WIN32)
 ENDIF()
 
 SET(VEGASTRIKE_SOURCES
+    ${VEGA_GL_H_PATH}
+    ${VEGA_GLU_H_PATH}
+    ${VEGA_GLEXT_H_PATH}
+    ${VEGA_GLUT_H_PATH}
     ${LIBGUI_SOURCES}
     ${LIBNETCLIENT_SOURCES}
     ${LIBROOTCLIENT_SOURCES}
@@ -1205,7 +1026,8 @@ SET(VEGASTRIKE_SOURCES
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 
 IF (NOT DISABLE_CLIENT)
-    ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
+    ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PUBLIC ${VS_INCLUDE_DIRS})
 
     #TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
     IF (NEED_LINKING_AGAINST_LIBM)
@@ -1227,19 +1049,20 @@ IF (NOT DISABLE_CLIENT)
     #ELSE (MSVC)
     #    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib -L/usr/local/lib ${TST_LFLAGS}")
     #ENDIF (MSVC)
+    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
 
 # Vssetup Sub build file
 ADD_SUBDIRECTORY(setup)
 
-# Add other utilies here
+# Add other utilities here
 ADD_SUBDIRECTORY(objconv)
 
 ## show debug output
 #GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-#MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
-#MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
-#MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+#MESSAGE(STATUS "Default build type is RelWithDebInfo, no cpu opts enabled. ")
+#MESSAGE(STATUS "Building with BUILD_OPT: ${BUILD_OPT}")
+#MESSAGE(STATUS "Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 #MESSAGE("Linking with : ${TST_LIBS}")
 #MESSAGE("including : ${TEMP_DIRECTORY}")
 ## end debug output
@@ -1305,13 +1128,13 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
 ELSE (WIN32)
-    INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
 ENDIF (WIN32)
 
 
-ADD_SUBDIRECTORY("../doc" "./doc")
+ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/doc" "./doc")
 
 # As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
 INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT Libraries)
@@ -1319,8 +1142,8 @@ INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT Lib
 SET(CPACK_PACKAGE_NAME "Vega-Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
 SET(CPACK_PACKAGE_VENDOR "Vega Strike")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE")
+SET(CPACK_PACKAGE_DESCRIPTION "Vega Strike is a Space Flight Simulator that allows a player to explore, trade, and fight in the vast openness of space. You start in an old beat up cargo ship, with endless possibilities in front of you and just enough cash to scrape together a life. Yet danger lurks in the space beyond.")
+SET(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 SET(CPACK_PACKAGE_VERSION_MAJOR "${VEGASTRIKE_VERSION_MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${VEGASTRIKE_VERSION_MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${VEGASTRIKE_VERSION_PATCH}")
@@ -1333,10 +1156,10 @@ SET(CPACK_SOURCE_GENERATOR "TBZ2" "TXZ")
 
 # See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
 IF (WIN32 AND NOT UNIX)
-    MESSAGE("-- Configuring Packaging for Windows")
+    MESSAGE(STATUS "Configuring Packaging for Windows")
     # NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
     # NSI bug requires at least 1 set of 4 forwards slashes??
-    SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
+    SET(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}\\\\icon4.ico")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\VegaStrike.exe")
     SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
     SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
@@ -1348,7 +1171,7 @@ IF (WIN32 AND NOT UNIX)
     SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
     SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe" "vega-meshtool.exe" "vegasettings.exe")
 ELSEIF (XCODE)
-    MESSAGE("-- Configuring Packaging for Mac OS X")
+    MESSAGE(STATUS "Configuring Packaging for Mac OS X")
     # Mac OS X
     # There's a few options for MacOSX; not sure what we want to use
     # DragNDrop -> DMG
@@ -1357,7 +1180,7 @@ ELSEIF (XCODE)
     # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
     SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    MESSAGE("-- Configuring Packaging for Linux")
+    MESSAGE(STATUS "Configuring Packaging for Linux")
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
     # Linux
 
@@ -1369,7 +1192,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
     # "DEB"
     IF(VS_CAN_BUILD_DEB)
-        MESSAGE("-- Configuring Debian Packaging")
+        MESSAGE(STATUS "Configuring Debian Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
         SET(CPACK_DEBIAN_PACKAGE_NAME "Vega-Strike")
         SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
@@ -1427,7 +1250,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "bullseye")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1435,7 +1258,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1443,7 +1266,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1451,9 +1274,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSE ()
-                    MESSAGE(SEND_WARNING "!! Unsupported Debian version.")
+                    MESSAGE(WARNING "!! Unsupported Debian version.")
                 ENDIF ()
 
             ELSE (USE_DEBIAN_VERSION)
@@ -1465,7 +1288,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, ${VEGA_STRIKE_GLU_DEPENDENCY}, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, ${VEGA_STRIKE_GLU_DEPENDENCY}, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1473,7 +1296,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bookworm") # Apparently some versions of Debian have lsb_release after all
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.11")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1481,7 +1304,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bullseye")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1489,7 +1312,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1497,7 +1320,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER} libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1505,7 +1328,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "groovy")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1513,7 +1336,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "hirsute")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.9")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1521,7 +1344,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "ulyana")  # Linux Mint 20 codename "ulyana"
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1529,7 +1352,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "vanessa")  # Linux Mint 20 codename "vanessa"
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1537,7 +1360,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "impish")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1545,7 +1368,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "jammy")
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.10")
                     IF (Boost_DERIVED_VERSION STREQUAL "")
@@ -1553,9 +1376,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     ELSE (Boost_DERIVED_VERSION STREQUAL "")
                         SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                     ENDIF (Boost_DERIVED_VERSION STREQUAL "")
-                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}")
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl2-gfx2.0.14, xdg-utils, libgl1, libopengl0, ${VEGA_STRIKE_GLU_DEPENDENCY}, libboost-atomic${BOOST_VER}, libboost-chrono${BOOST_VER}, libboost-date-time${BOOST_VER}, libboost-filesystem${BOOST_VER}, libboost-log${BOOST_VER}, libboost-python${BOOST_VER}, libboost-regex${BOOST_VER}, libboost-system${BOOST_VER}, libboost-thread${BOOST_VER}, libboost-json${BOOST_VER}, libboost-program-options${BOOST_VER}")
                 ELSE ()
-                    MESSAGE(SEND_WARNING "!! Unsupported Debian derivative.")
+                    MESSAGE(WARNING "!! Unsupported Debian derivative.")
                 ENDIF ()
 
             ENDIF (USE_DEBIAN_VERSION)
@@ -1576,7 +1399,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
     #  "RPM"
     IF (VS_CAN_BUILD_RPM)
-        MESSAGE("-- Configuring RPM Packaging")
+        MESSAGE(STATUS "Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
         SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
@@ -1596,7 +1419,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         IF (LINUX_ID STREQUAL opensuse-leap)
             IF (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-1_66_0, libpython3_6m1_0")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log1_66_0, libboost_system1_66_0, libboost_filesystem1_66_0, libboost_thread1_66_0, libboost_regex1_66_0, libboost_chrono1_66_0, libboost_atomic1_66_0")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log1_66_0, libboost_system1_66_0, libboost_filesystem1_66_0, libboost_thread1_66_0, libboost_regex1_66_0, libboost_chrono1_66_0, libboost_atomic1_66_0, libboost_program_options1_66_0")
             ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 15.4)
                 IF (Boost_DERIVED_VERSION STREQUAL "")
                     SET(BOOST_VER "1.75.0")
@@ -1604,7 +1427,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                     SET(BOOST_VER "${Boost_DERIVED_VERSION}")
                 ENDIF (Boost_DERIVED_VERSION STREQUAL "")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-${BOOST_VER}, libpython3_10-1_0")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log${BOOST_VER}, libboost_system${BOOST_VER}, libboost_filesystem${BOOST_VER}, libboost_thread${BOOST_VER}, libboost_regex${BOOST_VER}, libboost_chrono${BOOST_VER}, libboost_atomic${BOOST_VER}, libboost_json${BOOST_VER}")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log${BOOST_VER}, libboost_system${BOOST_VER}, libboost_filesystem${BOOST_VER}, libboost_thread${BOOST_VER}, libboost_regex${BOOST_VER}, libboost_chrono${BOOST_VER}, libboost_atomic${BOOST_VER}, libboost_json${BOOST_VER}, libboost_program_options${BOOST_VER}")
             ELSE (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
                 MESSAGE (SEND_WARNING "!! Unsupported version of openSUSE")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "")
@@ -1619,69 +1442,38 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ELSE (LINUX_VERSION_ID VERSION_GREATER_EQUAL 34)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python37, boost-python3")
             ENDIF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 34)
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
         ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")
             SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
         ELSEIF (LINUX_ID STREQUAL rhel OR LINUX_ID STREQUAL redhat)
             SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
         ELSEIF (LINUX_ID STREQUAL rocky)
             IF (LINUX_VERSION_ID VERSION_GREATER_EQUAL 8.0 AND LINUX_VERSION_ID VERSION_LESS_EQUAL 9.1)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
-                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic, boost-program-options")
             ELSE ()
-                MESSAGE(SEND_WARNING "!! This version of Rocky Linux is not currently supported.")
+                MESSAGE(WARNING "!! This version of Rocky Linux is not currently supported.")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "")
             ENDIF ()
         ELSE (LINUX_ID STREQUAL opensuse-leap)
-            MESSAGE(SEND_WARNING "!! Unrecognized RPM-based Linux distribution. RPM Dependencies may be wrong for this platform.")
+            MESSAGE(WARNING "!! Unrecognized RPM-based Linux distribution. RPM Dependencies may be wrong for this platform.")
             SET(CPACK_RPM_PACKAGE_REQUIRES "python3")
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL_mixer")
         ENDIF (LINUX_ID STREQUAL opensuse-leap)
         SET(CPACK_GENERATOR "RPM")
     ENDIF (VS_CAN_BUILD_RPM)
 ELSE ()
-    MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
+    MESSAGE(STATUS "Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
 ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
-IF (INSTALL_GTEST OR USE_GTEST)
-    MESSAGE("-- Configuring Unit Tests")
-ENDIF (INSTALL_GTEST OR USE_GTEST)
-
-IF (INSTALL_GTEST)
-    INCLUDE(FetchContent)
-    FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.11.0
-    )
-
-    FetchContent_GetProperties(googletest)
-    STRING(TOLOWER "googletest" lcName)
-    IF(NOT ${lcName}_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(googletest)
-
-        # Set custom variables, policies, etc.
-
-        # For Windows: Prevent overriding the parent project's compiler/linker settings
-        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-        # Bring the populated content into the build
-        ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-    ENDIF(NOT ${lcName}_POPULATED)
-ENDIF (INSTALL_GTEST)
-
 IF (USE_GTEST)
-    ENABLE_TESTING()
-
     SET(TEST_NAME ${PROJECT_NAME}_tests)
-
     ADD_EXECUTABLE(
         ${TEST_NAME}
         src/cmd/tests/csv_tests.cpp
@@ -1702,6 +1494,8 @@ IF (USE_GTEST)
         src/components/tests/afterburner_tests.cpp
         src/components/tests/jump_drive_tests.cpp
     )
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PUBLIC ${VS_INCLUDE_DIRS})
+    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Strike_BINARY_DIR}/)
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBPYTHON}
@@ -1713,13 +1507,14 @@ IF (USE_GTEST)
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
     )
-    target_compile_definitions(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
-    set_property(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)
-        target_compile_definitions(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-        target_compile_definitions(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
-        target_compile_definitions(vegastrike-testing PUBLIC WINVER=0x0A00)
-        target_compile_definitions(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     TARGET_LINK_LIBRARIES(

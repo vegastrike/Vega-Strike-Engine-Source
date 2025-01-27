@@ -3,7 +3,7 @@
 /*
  * cockpit.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -17,11 +17,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -542,7 +542,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                             "false"));
             if (target) {
                 if (!auto_valid) {
-                    abletoautopilot = (target->graphicOptions.InWarp);
+                    abletoautopilot = (target->ftl_drive.Enabled());
                 } else {
                     abletoautopilot = (target->AutoPilotTo(target, false) ? 1 : 0);
                     static float no_auto_light_below =
@@ -601,7 +601,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::SPEC_MODAL:
             if (target->graphicOptions.WarpRamping) {
                 return (float) UnitImages<void>::SWITCHING;
-            } else if (target->graphicOptions.InWarp) {
+            } else if (target->ftl_drive.Enabled()) {
                 return (float) UnitImages<void>::ACTIVE;
             } else {
                 return (float) UnitImages<void>::OFF;
@@ -680,7 +680,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::NODRIVE;
             } else if (!target->jump_drive.CanConsume()) {
                 return (float) UnitImages<void>::NOTENOUGHENERGY;
-            } else if (target->graphicOptions.InWarp) {          //FIXME
+            } else if (target->ftl_drive.Enabled()) {          //FIXME
                 return (float) UnitImages<void>::OFF;
             } else if (jumpok) {
                 return (float) UnitImages<void>::READY;
@@ -1836,20 +1836,27 @@ void GameCockpit::Draw() {
             //////////////////// DISPLAY CURRENT POSITION ////////////////////
             if (configuration()->graphics_config.hud.debug_position) {
                 TextPlane tp;
-                char str[400];                 //don't make the sprintf format too big... :-P
+                std::string str;
                 Unit *you = parent.GetUnit();
                 if (you) {
-                    sprintf(str, "Your Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f); Frame: %lf\n",
-                            you->curr_physical_state.position.i, you->curr_physical_state.position.j,
-                            you->curr_physical_state.position.k, you->Velocity.i, you->Velocity.j, you->Velocity.k,
-                            getNewTime());
+                    str = (boost::format("Your Position: (%1%,%2%,%3%); Velocity: (%4%,%5%,%6%); Frame: %7%\n")
+                            % you->curr_physical_state.position.i
+                            % you->curr_physical_state.position.j
+                            % you->curr_physical_state.position.k
+                            % you->Velocity.i
+                            % you->Velocity.j
+                            % you->Velocity.k
+                            % getNewTime()).str();
                     Unit *yourtarg = you->computer.target.GetUnit();
                     if (yourtarg) {
-                        sprintf(str + strlen(
-                                        str), "Target Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f); Now: %lf\n",
-                                yourtarg->curr_physical_state.position.i, yourtarg->curr_physical_state.position.j,
-                                yourtarg->curr_physical_state.position.k, yourtarg->Velocity.i, yourtarg->Velocity.j,
-                                yourtarg->Velocity.k, queryTime());
+                        str += (boost::format("Target Position: (%1%,%2%,%3%); Velocity: (%4%,%5%,%6%); Now: %7%\n")
+                                % yourtarg->curr_physical_state.position.i
+                                % yourtarg->curr_physical_state.position.j
+                                % yourtarg->curr_physical_state.position.k
+                                % yourtarg->Velocity.i
+                                % yourtarg->Velocity.j
+                                % yourtarg->Velocity.k
+                                % queryTime()).str();
                     }
                 }
                 tp.SetPos(-0.8, -0.8);

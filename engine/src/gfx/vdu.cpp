@@ -1185,21 +1185,18 @@ void VDU::DrawDamage(Unit *parent) {
     float x, y, w, h;
     //float th;
     //char st[1024];
-    GFXColor4f(1, parent->GetHull() / (*maxhull), parent->GetHull() / (*maxhull), 1);
+    double health_percent = parent->layers[0].facets[0].Percent();
+    GFXColor4f(1, health_percent, health_percent, 1);
     GFXEnable(TEXTURE0);
     float armor[8];
     parent->ArmorData(armor);
     const bool draw_damage_sprite = configuration()->graphics_config.hud.draw_damage_sprite;
-    DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : NULL, .6, x, y, w, h,
-            (armor[0] + armor[2] + armor[4] + armor[6])
-                    / (float) (StartArmor[0] + StartArmor[2] + StartArmor[4] + StartArmor[6]),
-            (armor[0] + armor[1] + armor[4] + armor[5])
-                    / (float) (StartArmor[0] + StartArmor[1] + StartArmor[4] + StartArmor[5]),
-            (armor[2] + armor[3] + armor[6] + armor[7])
-                    / (float) (StartArmor[2] + StartArmor[3] + StartArmor[6] + StartArmor[7]),
-            (armor[1] + armor[3] + armor[5]
-                    + armor[7]) / (float) (StartArmor[1] + StartArmor[3] + StartArmor[5] + StartArmor[7]),
-            parent->GetHull() / (*maxhull), true, false);
+    DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : nullptr, .6, x, y, w, h,
+            parent->layers[1].facets[0].Percent(),
+            parent->layers[1].facets[3].Percent(),
+            parent->layers[1].facets[2].Percent(),
+            parent->layers[1].facets[1].Percent(),
+            health_percent, true, false);
     GFXDisable(TEXTURE0);
     //Unit *thr = parent->Threat();
     parent->Threat();
@@ -1421,23 +1418,6 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
                 DrawHUDSprite(this, getSunImage(), 1, x, y, w, h, 1, 1, 1, 1, 1, false, false);
                 h = fabs(h * .6);
                 w = fabs(w * .6);
-
-                //static float ishieldcolor[4]    = {.4, .4, 1, 1};
-                //static float mshieldcolor[4]    = {.4, .4, 1, 1};
-                //static float oshieldcolor[4]    = {.4, .4, 1, 1};
-/*
- *       static float iarmorcolor[4]={1,.6,0,1};
- *       static float marmorcolor[4]={1,.6,0,1};
- *       static float oarmorcolor[4]={1,.6,0,1};
- *       static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
- *       static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
- *       static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-*/                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //uncomment if these are ever actually used
-/*        static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
- *       DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,
- *           GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
- *           GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
- *           GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3])); */
             }
         }
         GFXColor4f(1, 1, 1, 1);

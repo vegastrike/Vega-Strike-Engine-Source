@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * unit_csv.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Roy Falk, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -28,7 +30,7 @@
 #include "xml_serializer.h"
 #include "gfx/sphere.h"
 #include "unit_collide.h"
-#include "collide2/Stdafx.h"
+#include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"
 #include "audiolib.h"
 #include "unit_xml.h"
@@ -63,38 +65,14 @@ extern void pushMesh(std::vector<Mesh *> &mesh,
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-// TODO: This is a terrible kludge. Replace with boost::json
-std::string MapToJson(std::map<std::string, std::string> unit) {
-    std::string json_string = "[\n\t{\n";
-    
-    int len = unit.size();
-    int i = 0;
-
-    for (auto const& pair : unit) {
-        boost::format new_line;
-        if(i < len-1) {
-            new_line = boost::format("\t\t\"%1%\": \"%2%\",\n") % pair.first % pair.second;
-        } else {
-            new_line = boost::format("\t\t\"%1%\": \"%2%\"\n") % pair.first % pair.second;
-        }
-        
-        i++;
-        json_string += new_line.str();
-    }
-
-    json_string += "\t}\n]\n";
-    
-    return json_string;
-}
-
 void AddMeshes(std::vector<Mesh *> &xmeshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        float unitscale,
-        const std::string &meshes,
-        int faction,
-        Flightgroup *fg,
-        vector<unsigned int> *counts) {
+               float &randomstartframe,
+               float &randomstartseconds,
+               float unitscale,
+               const std::string &meshes,
+               int faction,
+               Flightgroup *fg,
+               vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
 
     // Clear counts vector
@@ -831,62 +809,109 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     //float efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
 
     // Get shield count
-    std::string shield_string_values[4];
-    std::vector<string> shield_sections;
-    
+    std::map<std::string, float> shield_sections{};
+    std::vector<std::string> shield_string_values{};
+
     const std::string shield_strength_string = UnitCSVFactory::GetVariable(unit_key, "shield_strength", std::string());
     const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
     
     if(!shield_facets_string.empty()) {
-        int shield_facets = std::stoi(shield_facets_string);
-        shield->number_of_facets = shield_facets;
+        try {
+            int shield_facets = std::stoi(shield_facets_string);
+            shield->number_of_facets = shield_facets;
+        } catch (std::invalid_argument const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
+            shield->number_of_facets = 1;
+        } catch (std::out_of_range const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
+            shield->number_of_facets = 1;
+        }
     }
 
     if(!shield_strength_string.empty()) {
-        int shield_strength = std::stoi(shield_strength_string);
-        shield->UpdateFacets(shield_strength);
+        try {
+            int shield_strength = std::stoi(shield_strength_string);
+            shield->UpdateFacets(static_cast<float>(shield_strength));
+        } catch (std::invalid_argument const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
+            shield->UpdateFacets(0.0F);
+        } catch (std::out_of_range const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
+            shield->UpdateFacets(0.0F);
+        }
     } else if(!shield_facets_string.empty()) {
         // Try new longform
-        float shield_values[4];
-        
+        std::vector<float> shield_values{};
         std::string shield_keys[] = {"shield_front", "shield_back",
             "shield_left", "shield_right"};
         
-        for (int i = 0; i < shield->number_of_facets; i++) {
+        for (int i = 0; i < shield->number_of_facets; ++i) {
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
-            shield_values[i] = std::stoi(shield_string_value);            
+            if (shield_string_value.empty()) {
+                shield_sections[shield_keys[i]] = 0.0F;
+                shield_values.emplace_back(0.0F);
+            } else {
+                try {
+                    float tmp = static_cast<float>(std::stoi(shield_string_value));
+                    shield_sections[shield_keys[i]] = tmp;
+                    shield_values.emplace_back(tmp);
+                } catch (const std::invalid_argument& ex) {
+                    VS_LOG(error, (boost::format("%1%: Unable to convert shield value '%2%' to a number: %3%") % __FUNCTION__ % shield_string_value % ex.what()));
+                    shield_sections[shield_keys[i]] = 0.0F;
+                    shield_values.emplace_back(0.0F);
+                } catch (std::out_of_range const& ex) {
+                    VS_LOG(error, (boost::format("%1%: Unable to convert shield value '%2%' to a number: %3%") % __FUNCTION__ % shield_string_value % ex.what()));
+                    shield_sections[shield_keys[i]] = 0.0F;
+                    shield_values.emplace_back(0.0F);
+                }
+            }
         }
 
         if (shield->number_of_facets == 4 || shield->number_of_facets == 2) {
-            shield->UpdateFacets(shield->number_of_facets, shield_values);
+            shield->UpdateFacets(shield->number_of_facets, shield_values.data());
         }
     } else {
-        // Fallback to old
+        // Fallback to old shield_keys
         int shield_count = 0;
-        float shield_values[4];
+        std::vector<std::string> tmp_keys{"Shield_Front_Top_Right", "Shield_Back_Top_Left", "Shield_Front_Bottom_Right", "Shield_Front_Bottom_Left"};
+        std::vector<float> shield_values{};
 
-        // TODO: this mapping should really go away
-        // I love macros, NOT.
-        shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string());
-        shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string());
-        shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string());
-        shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string());
-
-        for (int i = 0; i < 4; i++) {
-            shield_values[i] = 0.0f;
-
-            if (shield_string_values[i].empty()) {
-                continue;
+        try {
+            for (auto &key : tmp_keys) {
+                std::string tmp_string_value = UnitCSVFactory::GetVariable(unit_key, key, std::string());
+                float tmp_float_value = std::stof(tmp_string_value);
+                shield_sections[key] = tmp_float_value;
+                shield_values.emplace_back(tmp_float_value);
+                shield_string_values.emplace_back(tmp_string_value);
+                ++shield_count;
             }
-
-            shield_values[i] = ::stof(shield_string_values[i]);
-            // Should add up to the shield type - quad or dual
-            shield_count++;
-        }   
+        } catch (std::exception const& ex) {
+            shield_count = 0;
+            shield_string_values.clear();
+            shield_values.clear();
+            shield_sections.clear();
+            tmp_keys.clear();
+            tmp_keys.emplace_back("shield_front");
+            tmp_keys.emplace_back("shield_back");
+            tmp_keys.emplace_back("shield_left");
+            tmp_keys.emplace_back("shield_right");
+            try {
+                for (auto &key : tmp_keys) {
+                    std::string tmp_string_value = UnitCSVFactory::GetVariable(unit_key, key, std::string());
+                    float tmp_float_value = std::stof(tmp_string_value);
+                    shield_sections[key] = tmp_float_value;
+                    shield_values.emplace_back(tmp_float_value);
+                    shield_string_values.emplace_back(tmp_string_value);
+                    ++shield_count;
+                }
+            } catch (std::exception const& ex) {
+                VS_LOG(error, (boost::format("%1%: %2% trying to parse shield facets") % __FUNCTION__ % ex.what()));
+            }
+        }
 
         if (shield_count == 4 || shield_count == 2) {
             shield->number_of_facets = shield_count;
-            shield->UpdateFacets(shield_count, shield_values);
+            shield->UpdateFacets(shield_count, shield_values.data());
         }
     }
 
@@ -894,10 +919,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // TODO: The following code has a bug.
     // It will set the max of the component as the current value loaded from the 
     // CSV. If the component is damaged, this will be lower than the original value.
-    fuel.Load("", unit_key);
-    energy.Load("", unit_key);
-    ftl_energy.Load("", unit_key);
-    reactor.Load("", unit_key);
+    fuel.Load(unit_key);
+    energy.Load(unit_key);
+    ftl_energy.Load(unit_key);
+    reactor.Load(unit_key);
 
     // End Energy
 
@@ -907,13 +932,13 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // Begin Drive Section
     // Afterburner
     afterburner = Afterburner(GetSource(ComponentType::Afterburner, &fuel, &energy, &ftl_energy));
-    afterburner.Load("", unit_key);
+    afterburner.Load(unit_key);
 
     drive = Drive(GetSource(ComponentType::Drive, &fuel, &energy, &ftl_energy));
-    drive.Load("", unit_key);
+    drive.Load(unit_key);
 
-    ftl_drive.Load("", unit_key);
-    jump_drive.Load("", unit_key);
+    ftl_drive.Load(unit_key);
+    jump_drive.Load(unit_key);
     
     
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
@@ -974,7 +999,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     computer.radar.lockcone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * M_PI / 180);
 
     const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
-    cloak = Cloak(unit_key, (warp_energy_for_cloak ? &ftl_energy : &energy));
+    cloak.SetSource((warp_energy_for_cloak ? &ftl_energy : &energy));
+    cloak.Load(unit_key);
 
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
@@ -1114,22 +1140,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     this->num_chunks = UnitCSVFactory::GetVariable(unit_key, "Num_Chunks", 0);
 }
 
-CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
-    std::string hashname = filename + "__" + FactionUtil::GetFactionName(faction);
-    for (int i = ((int) unitTables.size()) - (readlast ? 1 : 2); i >= 0; --i) {
-        unsigned int where;
-        if (unitTables[i]->RowExists(hashname, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        } else if (unitTables[i]->RowExists(filename, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        }
-    }
-    rread = false;
-    return CSVRow();
-}
-
 void Unit::WriteUnit(const char *modifications) {
     bool bad = false;
     if (!modifications) {
@@ -1156,7 +1166,9 @@ void Unit::WriteUnit(const char *modifications) {
     }
 
     std::map<std::string, std::string> map = UnitToMap();
-    std::string towrite = MapToJson(map);
+    boost::json::array json_root_array;
+    json_root_array.emplace_back(boost::json::value_from(map));
+    std::string towrite = boost::json::serialize(json_root_array);
     f.Write(towrite.c_str(), towrite.length());
     f.Close();
 }
@@ -1183,7 +1195,7 @@ static string tos(int val) {
 }
 
 const std::map<std::string, std::string> Unit::UnitToMap() {
-    std::map<std::string, std::string> unit = UnitCSVFactory::GetUnit(name);
+    std::map<std::string, std::string> unit = std::map<std::string, std::string>();
     string val;
 
     // Textual Descriptions
@@ -1389,8 +1401,3 @@ string Unit::WriteUnitString() {
     std::map<std::string, std::string> unit = UnitToMap();
     return writeCSV(unit);
 }
-
-
-
-
-

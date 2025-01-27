@@ -258,7 +258,7 @@ void DealPossibleJumpDamage(Unit *un) {
     double chance_to_damage = randomDouble() - 0.01;
 
     // If jump drive is fully operational, there's no chance for damage
-    if(un->jump_drive.Percent() >= chance_to_damage) {
+    if(un->jump_drive.PercentOperational() >= chance_to_damage) {
         return;
     }
 

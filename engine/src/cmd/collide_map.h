@@ -1,7 +1,7 @@
 /*
  * collide_map.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Benjamen R. Meyer, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
@@ -52,7 +52,7 @@ public:
     void SetPosition(const QVector &bpos) {
         //in case we want to drop in an xtra radius parameter when we get performance testing
         this->position = bpos;
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
         if ( !FINITE( getKey() ) )
             position = QVector( 0, 0, 0 );      //hack for now
 
@@ -98,7 +98,7 @@ public:
         ref.bolt_index = bolt_index;
         radius = -speed * SIMULATION_ATOM;
         if (
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
                         !FINITE( radius )
 #else
                         ISNAN(radius)

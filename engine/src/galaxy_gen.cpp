@@ -1327,7 +1327,7 @@ void readplanetentity(vector<StarInfo> &starinfos, string planetlist, unsigned i
             if (starinfos[u % numstars].planets.back().num == 0) {
                 num[0] = 0;
             } else {
-                snprintf(num, sizeof(num), "%d", starinfos[u % numstars].planets.back().num);
+                snprintf(num, sizeof(num) - 1, "%d", starinfos[u % numstars].planets.back().num);
             }
 
             numpos = 0;
@@ -1517,4 +1517,3 @@ int main( int argc, char **argv )
     return 0;
 }
 #endif
-

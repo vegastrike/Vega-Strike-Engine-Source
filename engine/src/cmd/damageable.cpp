@@ -1,7 +1,7 @@
 /*
  * damageable.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy and
+ * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -363,10 +363,13 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     bool damage_system;
+    double current_hull = layers[0].facets[0].health;
+    double max_hull = layers[0].facets[0].max_health;
+
     if (player) {
-        damage_system = DestroyPlayerSystem(*current_hull, *max_hull, 1);
+        damage_system = DestroyPlayerSystem(current_hull, max_hull, 1);
     } else {
-        damage_system = DestroySystem(*current_hull, *max_hull, 1);
+        damage_system = DestroySystem(current_hull, max_hull, 1);
     }
 
     if (!damage_system) {
@@ -374,8 +377,8 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     unit->DamageRandSys(configuration()->physics_config.indiscriminate_system_destruction * rand01() +
-                    (1 - configuration()->physics_config.indiscriminate_system_destruction) * (1 - ((*current_hull) > 0 ? hull_damage / (*current_hull) : 1.0f)),
-            attack_vector, 1.0f, 1.0f);
+                    (1 - configuration()->physics_config.indiscriminate_system_destruction) * (1 - ((current_hull) > 0 ? hull_damage / (current_hull) : 1.0f)),
+            attack_vector);
 }
 
 void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
@@ -410,7 +413,9 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     }
 
     // Is the hit unit, lucky or not
-    if (DestroySystem(*current_hull, *max_hull, unit->numCargo())) {
+    double current_hull = layers[0].facets[0].health;
+    double max_hull = layers[0].facets[0].max_health;
+    if (DestroySystem(current_hull, max_hull, unit->numCargo())) {
         return;
     }
 
@@ -524,7 +529,7 @@ float Damageable::RShieldData() const {
 void Damageable::ArmorData(float armor[8]) const {
     Damageable *damageable = const_cast<Damageable *>(this);
     DamageableLayer armor_layer = damageable->GetArmorLayer();
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < armor_layer.number_of_facets; ++i) {
         armor[i] = armor_layer.facets[i].health;
     }
 }
@@ -544,7 +549,7 @@ void Damageable::RegenerateShields(const float difficulty, const bool player_shi
 
     Unit *unit = static_cast<Unit *>(this);
 
-    const bool in_warp = unit->graphicOptions.InWarp;
+    const bool in_warp = unit->ftl_drive.Enabled();
     const int shield_facets = unit->shield->number_of_facets;
     const float total_max_shields = unit->shield->TotalMaxLayerValue();
 
@@ -612,5 +617,3 @@ bool Damageable::flickerDamage() {
     }
     return false;
 }
-
-

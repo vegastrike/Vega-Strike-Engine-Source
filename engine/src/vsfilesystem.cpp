@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Nachum Barcohen, Roy Falk,
+ * vsfilesystem.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, Nachum Barcohen, Roy Falk,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -17,7 +19,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -705,21 +707,6 @@ void LoadConfig(string subdir) {
     vega_config::GetGameConfig().LoadGameConfig(config_file);
 
     vs_config = createVegaConfig(config_file.c_str());
-
-    //Now check if there is a data directory specified in it
-    //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
-    if (!game_options()->datadir.empty()) {
-        //We found a path to data in config file
-        VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options()->datadir));
-        datadir = game_options()->datadir;
-    } else {
-        if (true == legacy_data_dir_mode) {
-            VS_LOG(info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
-        } else {
-            VS_LOG_AND_FLUSH(fatal, "DATADIR - No datadir specified in config file");
-            VSExit(1);
-        }
-    }
 
     string universe_file = datadir + "/" \
  + vs_config->getVariable("data", "universe_path", "universe") + "/" \
@@ -1881,41 +1868,6 @@ int VSFile::Fprintf(const char *format, ...) {
     }
     return 0;
 }
-
-#if 0
-#ifdef HAVE_VFSCANF
-int VSFile::Fscanf( const char *format, ... )
-{
-    int   ret = -1;
-    int   readbytes     = 0;
-    //We add the parameter %n to the format string in order to get the number of bytes read
-    int   format_length = strlen( format );
-    char *newformat     = new char[format_length+3];
-    memset( newformat, 0, format_length+3 );
-    memcpy( newformat, format, format_length );
-    strcat( newformat, "%n" );
-    va_list arglist;
-    va_start( arglist, format );
-    if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
-        //return _input(fp,(unsigned char*)format,arglist);
-        ret = vfscanf( this->fp, newformat, arglist );
-        va_end( arglist );
-    } else {
-        if (q_volume_format == vfmtVSR) {} else if (q_volume_format == vfmtPK3) {
-            //If the file has not been extracted yet we do now
-            checkExtracted();
-            ret = vsscanf( pk3_extracted_file+offset, newformat, arglist );
-            readbytes     = GetReadBytes( newformat, arglist );
-            va_end( arglist );
-            cerr<<" SSCANF : Read "<<readbytes<<" bytes"<<endl;
-            this->offset += readbytes;
-        }
-    }
-    delete[] newformat;
-    return ret;
-}
-#endif
-#endif
 
 void VSFile::Begin() {
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone || this->file_mode != ReadOnly) {

@@ -41,19 +41,18 @@ public:
     Afterburner(EnergyContainer *source = nullptr);
     
     // Component Methods
-    virtual void Load(std::string upgrade_key, 
-                      std::string unit_key = "");      
+    void Load(std::string unit_key) override;      
     
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
-    virtual bool CanDowngrade() const;
-    virtual bool Downgrade();
-    virtual bool CanUpgrade(const std::string upgrade_name) const;
-    virtual bool Upgrade(const std::string upgrade_name);
+    bool CanDowngrade() const override;
+    bool Downgrade() override;
+    bool CanUpgrade(const std::string upgrade_key) const override;
+    bool Upgrade(const std::string upgrade_key) override;
 
-    virtual void Damage();
-    virtual void DamageByPercent(double percent);
-    virtual void Repair();
+    void Damage() override;
+    void DamageByPercent(double percent) override;
+    void Repair() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H

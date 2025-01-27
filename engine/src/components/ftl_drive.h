@@ -31,6 +31,8 @@
 class EnergyContainer;
 
 class FtlDrive : public Component, public EnergyConsumer {
+    bool enabled;
+
     // TODO: implement damage so something will actually happen
     // Right now, damage is recorded in component superclass but game doesn't
     // take it into account.
@@ -38,21 +40,23 @@ public:
     FtlDrive();
     FtlDrive(EnergyContainer *source);
 
+    void Enable();
+    void Disable();
+    void Toggle();
     bool Enabled() const;
 
     // Component Methods
-    virtual void Load(std::string upgrade_key, 
-                      std::string unit_key = "");      
+    void Load(std::string unit_key) override;      
     
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const;
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
-    virtual bool CanDowngrade() const;
+    bool CanDowngrade() const override;
 
-    virtual bool Downgrade();
+    bool Downgrade() override;
 
-    virtual bool CanUpgrade(const std::string upgrade_name) const;
+    bool CanUpgrade(const std::string upgrade_key) const override;
 
-    virtual bool Upgrade(const std::string upgrade_name);
+    bool Upgrade(const std::string upgrade_key) override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H

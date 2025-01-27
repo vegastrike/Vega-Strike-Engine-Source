@@ -106,9 +106,9 @@ void EnergyContainer::Refill() {
 
 
 // Component Functions
-void EnergyContainer::Load(std::string upgrade_key, std::string unit_key) {
+void EnergyContainer::Load(std::string unit_key) {
     // Component
-    Component::Load(upgrade_key, unit_key);
+    Component::Load(unit_key);
 
     // TODO: nice to have - ship mass goes down as fuel depleted
 
