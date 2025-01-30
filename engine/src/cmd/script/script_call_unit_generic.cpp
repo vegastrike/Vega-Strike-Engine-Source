@@ -454,7 +454,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_getFShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->FShieldData();
+                res = my_unit->shield.Percent(Shield::front);
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;
@@ -462,7 +462,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_getRShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->RShieldData();
+                res = my_unit->shield.Percent(Shield::right);
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;
@@ -470,7 +470,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_getLShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->LShieldData();
+                res = my_unit->shield.Percent(Shield::left);
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;
@@ -478,7 +478,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_getBShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->BShieldData();
+                res = my_unit->shield.Percent(Shield::back);
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;
@@ -486,7 +486,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_getEnergyData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->energyData();
+                res = my_unit->energy.Percent();
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;
@@ -494,7 +494,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         } else if (method_id == CMT_UNIT_getHullData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->layers[0].facets[0].health;
+                res = my_unit->hull.Percent();
             }
             viret = newVarInst(VI_TEMP);
             viret->type = VAR_FLOAT;

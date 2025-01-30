@@ -214,7 +214,6 @@ Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
     //int i;
     partial_number_of_attackers = -1;
     number_of_attackers = 0;
-    secondsWithZeroEnergy = 0;
     fg = NULL;
     jumpok = 0;
     TimeOfLastCollision = -200;
@@ -500,30 +499,7 @@ bool Cockpit::Update() {
     }
     UpdAutoPilot();
     Unit *par = GetParent();
-    if (par != NULL) {
-        static float minEnergyForShieldDownpower =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "shield_energy_downpower", "-.125"));
-        static float minEnergyShieldTime =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "shield_energy_downpower_time", "5"));
-        static float minEnergyShieldPercent =
-                XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "shield_energy_downpower_percent",
-                        ".66666666666666"));
-
-        bool toolittleenergy = (par->energyData() <= minEnergyForShieldDownpower);
-        if (toolittleenergy) {
-            secondsWithZeroEnergy += SIMULATION_ATOM;
-            if (secondsWithZeroEnergy > minEnergyShieldTime) {
-                secondsWithZeroEnergy = 0;
-
-                // TODO: lib_damage
-                // check the input is in the expected 0 to 1 values
-                par->GetShieldLayer().AdjustPower(minEnergyShieldPercent);
-            }
-        } else {
-            secondsWithZeroEnergy = 0;
-        }
-    }
+    
     if (turretcontrol.size() > _Universe->CurrentCockpit()) {
         if (turretcontrol[_Universe->CurrentCockpit()]) {
             turretcontrol[_Universe->CurrentCockpit()] = 0;

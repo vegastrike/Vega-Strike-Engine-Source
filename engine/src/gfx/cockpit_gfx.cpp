@@ -893,21 +893,24 @@ void DrawTargetGauges( Unit *target, Gauge *gauges[] )
 }
 
 
-float LookupTargetStat( int stat, Unit *target )
-{
-    switch (stat)
-    {
+float LookupTargetStat( int stat, Unit *target ) {
+    if(!target) {
+        return 0;
+    }
+
+    switch (stat) {
     case UnitImages< void >::TARGETSHIELDF:
-        return target->FShieldData();
-
-    case UnitImages< void >::TARGETSHIELDR:
-        return target->RShieldData();
-
-    case UnitImages< void >::TARGETSHIELDL:
-        return target->LShieldData();
+        return target->shield.Percent(Shield::front);
 
     case UnitImages< void >::TARGETSHIELDB:
-        return target->BShieldData();
+        return target->shield.Percent(Shield::back);
+     
+    case UnitImages< void >::TARGETSHIELDL:
+        return target->shield.Percent(Shield::left);
+
+    case UnitImages< void >::TARGETSHIELDR:
+        return target->shield.Percent(Shield::right);
     }
-    return 1;
+    
+    return 0;
 }

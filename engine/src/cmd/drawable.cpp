@@ -207,12 +207,9 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
     Matrix wmat;
 
     if (!cam_setup_phase) {
-        double current_hull = unit->layers[0].facets[0].health;
-        double max_hull = unit->layers[0].facets[0].max_health;
-
         // Following stuff is only needed in actual drawing phase
-        if ((current_hull) < (max_hull)) {
-            damagelevel = (current_hull) / (max_hull);
+        if (unit->hull.Damaged()) {
+            damagelevel = unit->hull.Percent();
             chardamage = (255 - (unsigned char) (damagelevel * 255));
         }
         avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
@@ -390,8 +387,8 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     }
     float damagelevel = 1.0;
     unsigned char chardamage = 0;
-    if (unit->layers[0].facets[0].health < unit->layers[0].facets[0].max_health) {
-        damagelevel = (unit->layers[0].facets[0].Percent());
+    if (unit->hull.Damaged()) {
+        damagelevel = unit->hull.Percent();
         chardamage = (255 - (unsigned char) (damagelevel * 255));
     }
 #ifdef VARIABLE_LENGTH_PQR
@@ -491,7 +488,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
                 Scale,
                 unit->cloak.Visibility(),
                 0,
-                unit->GetHullPercent(),
+                unit->hull.Percent(),
                 velocity,
                 linaccel,
                 angaccel,
@@ -654,7 +651,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     }
 
     // Destroyed units (dying?) don't sparkle
-    if (unit->GetHull() <= 0) {
+    if (unit->Destroyed()) {
         return;
     }
 
@@ -664,7 +661,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     }
 
     // Undamaged units don't sparkle
-    float damage_level = unit->layers[0].facets[0].Percent();
+    float damage_level = unit->hull.Percent();
     if (damage_level >= .99) {
         return;
     }
@@ -733,11 +730,10 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
     }
 
     Vector Scale(1, 1, 1);         //Now, HaloSystem handles that
-    float damage_level = unit->layers[0].facets[0].Percent();
     //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
-    float hulld = unit->GetHull() > 0 ? damage_level : 1.0;
+    float hulld = unit->Destroyed() > 0 ? 1 : unit->hull.Percent();
     halos->Draw(wmat, Scale, unit->cloak.Visibility(), nebd, hulld, velocity,
             linaccel, angaccel, maxaccel, cmas, unit->faction);
 
@@ -930,7 +926,7 @@ void Drawable::Split(int level) {
             tempmeshes.push_back(old[k]);
         }
         unit->SubUnits.prepend(splitsub = new Unit(tempmeshes, true, unit->faction));
-        splitsub->layers[0].facets[0] = Health(0, 1000);
+        splitsub->hull.Set(1000.0);
         splitsub->name = "debris";
         splitsub->setMass(game_options()->debris_mass * splitsub->getMass() / level);
         splitsub->pImage->timeexplode = .1;

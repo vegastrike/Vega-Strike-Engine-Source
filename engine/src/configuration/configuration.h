@@ -189,6 +189,9 @@ struct Fuel {
     double ftl_drive_factor{0.1};
     double jump_drive_factor{1.0};
 
+    double shield_maintenance_factor{0.05};
+    double shield_regeneration_factor{1.0};
+
     // 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled
     EnergyConsumerSource drive_source{EnergyConsumerSource::Fuel}; 
     EnergyConsumerSource reactor_source{EnergyConsumerSource::Fuel};

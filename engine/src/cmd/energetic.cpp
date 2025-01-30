@@ -95,17 +95,6 @@ void Energetic::setEnergyRecharge(float enrech) {
 }
 
 
-// Basically max or current shield x 0.2
-float Energetic::totalShieldEnergyCapacitance() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    DamageableLayer *shield = unit->shield;
-
-    float total_max_shield_value = shield->TotalMaxLayerValue();
-    float total_current_shield_value = shield->TotalLayerValue();
-
-    return configuration()->physics_config.shield_energy_capacitance * (configuration()->physics_config.use_max_shield_energy_usage ? total_max_shield_value : total_current_shield_value);
-}
-
 // The original code was in unit_generic:5476 RegenShields and was simply
 // incomprehensible. After several days, I've written a similar version.
 // However, someone who understands the previous code can refactor this easily
@@ -116,8 +105,6 @@ void Energetic::ExpendEnergy(const bool player_ship) {
 
     // TODO: if we run out of fuel or energy, we die from lack of air
 
-    MaintainShields();
-    ExpendEnergyToRechargeShields();
     MaintainECM();
     DecreaseWarpEnergyInWarp();
 
@@ -144,93 +131,6 @@ void Energetic::MaintainECM() {
     ExpendEnergy(sim_atom_ecm);
 }
 
-void Energetic::MaintainShields() {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    const bool in_warp = unit->ftl_drive.Enabled();
-    const int shield_facets = unit->shield->number_of_facets;
-
-    if (in_warp && !configuration()->physics_config.shields_in_spec) {
-        return;
-    }
-
-    if (unit->shield->TotalMaxLayerValue() == 0) {
-        return;
-    }
-
-    // TODO: lib_damage restore efficiency by replacing with shield->efficiency
-    const float efficiency = 1;
-
-    const float shield_maintenance = unit->shield->GetRegeneration() * VSDPercent() *
-            efficiency / configuration()->physics_config.shield_energy_capacitance * shield_facets *
-            configuration()->physics_config.shield_maintenance_charge * simulation_atom_var;
-
-    sufficient_energy_to_recharge_shields = shield_maintenance > unit->energy.Level();
-
-    ExpendEnergy(shield_maintenance);
-}
-
-void Energetic::ExpendEnergyToRechargeShields() {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    const bool in_warp = unit->ftl_drive.Enabled();
-
-    // TODO: add has_shields function instead of check below
-    if (unit->shield->TotalMaxLayerValue() == 0) {
-        return;
-    }
-
-    if (in_warp && !configuration()->physics_config.shields_in_spec) {
-        return;
-    }
-
-    double current_shield_value = unit->shield->TotalLayerValue();
-    double max_shield_value = unit->shield->TotalMaxLayerValue();
-    double regeneration = unit->shield->GetRegeneration();
-    double maximum_charge = std::min(max_shield_value - current_shield_value, regeneration);
-
-    // Here we store the actual charge we'll use in RegenShields
-    constrained_charge_to_shields = maximum_charge;
-    sufficient_energy_to_recharge_shields = (constrained_charge_to_shields > 0);
-    double actual_charge = std::min(maximum_charge, unit->energy.Level());
-    double energy_required_to_charge = actual_charge * VSDPercent() *
-            simulation_atom_var;
-    ExpendEnergy((float)energy_required_to_charge);
-}
-
-void Energetic::RechargeWarpCapacitors(const bool player_ship) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    // Will try to keep the percentage of warp and normal capacitors equal
-    const double transfer_capacity = 0.005f;
-    const double capacitor_percent = unit->energy.Percent();
-    const double warp_capacitor_percent = unit->ftl_energy.Percent();
-    const double warp_multiplier = WarpEnergyMultiplier(player_ship);
-
-    if (warp_capacitor_percent >= 1.0f ||
-            warp_capacitor_percent > capacitor_percent ||
-            capacitor_percent < 0.10f) {
-        return;
-    }
-
-    const double previous_energy = unit->energy.Level();
-    ExpendEnergy((float)(unit->energy.MaxLevel() * transfer_capacity));
-
-    const double actual_energy = previous_energy - unit->energy.Level();
-    unit->ftl_energy.SetLevel(std::min(unit->ftl_energy.MaxLevel(), unit->ftl_energy.Level() + actual_energy * warp_multiplier));
-}
-
-float Energetic::WarpEnergyMultiplier(const bool player_ship) {
-    Unit *unit = static_cast<Unit *>(this);
-    bool player = player_ship;
-
-    // We also apply player multiplier to wing members
-    Flightgroup *flight_group = unit->getFlightgroup();
-    if (flight_group && !player_ship) {
-        player = _Universe->isPlayerStarship(flight_group->leader.GetUnit()) != nullptr;
-    }
-    return player ? configuration()->warp_config.player_warp_energy_multiplier : configuration()->warp_config.warp_energy_multiplier;
-}
 
 float Energetic::VSDPercent() {
     return configuration()->fuel.vsd_mj_yield / 100;

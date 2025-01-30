@@ -187,10 +187,6 @@ Missile::Missile(const char *filename,
         discharged(false),
         retarget(-1),
         had_target(false) {
-    // TODO: why would a sparkling missile be four times as hard to kill???
-    if (configuration()->graphics_config.missile_sparkle) {
-        layers[0].facets[0] = Health(0, layers[0].facets[0].max_health * 4);
-    }
 }
 
 void Missile::Discharge() {
