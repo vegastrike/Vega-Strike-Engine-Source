@@ -453,9 +453,8 @@ void SetHull(Unit *my_unit, float newhull) {
     if (!my_unit) {
         return;
     }
-    // TODO: replace with a proper API in both lib_damage and damageable
-    // damageable SetHull linked to SetHealth which checks validity
-    my_unit->hull->facets[0].health = newhull;
+    
+    my_unit->hull.Set(newhull);
 }
 
 float getCredits(const Unit *my_unit) {
@@ -909,6 +908,18 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     }
 
     const std::string upgrade_category = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Type", std::string());
+    if(upgrade_category == "Hull") {
+        return un->hull.PercentOperational();
+    } 
+    
+    if(upgrade_category == "Armor") {
+        return un->armor.PercentOperational();
+    } 
+
+    if(upgrade_category == "Shield") {
+        return un->armor.PercentOperational();
+    } 
+    
     if(upgrade_category == "Reactor") {
         return un->reactor.PercentOperational();
     } 
@@ -959,15 +970,6 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
             }
         }
     } else if (name.find("add_") != 0 && name.find("mult_") != 0) {
-        float armor[8];
-        upgrade->ArmorData(armor);
-        if (upgrade->layers[0].facets[0].health > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5]
-                || armor[6]
-                || armor[7]) {
-            if (countHullAndArmorAsFull) {
-                return 1.0f;
-            }
-        }
         double percent = 0;
         if (un->canUpgrade(upgrade, -1, -1, 0, true, percent, makeTemplateUpgrade(un->name, un->faction), false)) {
             if (percent > 0 && percent < 1) {

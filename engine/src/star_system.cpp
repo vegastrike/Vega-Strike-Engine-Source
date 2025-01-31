@@ -1284,9 +1284,8 @@ void StarSystem::ProcessPendingJumps() {
                         un->SetVelocity(Vector(0, 0, 0));
                     }
                     if (game_options()->jump_disables_shields) {
-                        // Disable and then enable so they'll start recharging
-                        un->shield->Disable();
-                        un->shield->Enable();
+                        // Zero shield. They'll start recharging from zero.
+                        un->shield.Zero();
                     }
                 }
             }

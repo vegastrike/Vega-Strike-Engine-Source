@@ -187,8 +187,7 @@ public:
     void RestoreViewPort();
     GameCockpit(const char *file, Unit *parent, const std::string &pilotname);
     ~GameCockpit();
-    ///Looks up a particular Gauge stat on target unit
-    float LookupTargetStat(int stat, Unit *target);
+    
     ///Looks up a particular Gauge stat on unit
     float LookupUnitStat(int stat, Unit *target);
     ///Loads cockpit info...just as constructor

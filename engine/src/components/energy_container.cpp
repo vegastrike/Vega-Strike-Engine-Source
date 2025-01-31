@@ -138,11 +138,11 @@ void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const 
         break;
 
         case ComponentType::Capacitor:
-        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.energy_factor);
+        unit[CAPACITOR] = std::to_string(MaxLevel() / configuration()->fuel.energy_factor);
         break;
         
         case ComponentType::FtlCapacitor:
-        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.ftl_energy_factor);
+        unit[FTL_CAPACITOR] = std::to_string(MaxLevel() / configuration()->fuel.ftl_energy_factor);
         break; 
 
         default: // This really can't happen

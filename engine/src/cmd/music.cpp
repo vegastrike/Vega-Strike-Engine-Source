@@ -118,11 +118,6 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
         return;
     }
     lastlist = PEACELIST;
-    if (parent) {
-        maxhull = parent->GetHull();
-    } else {
-        maxhull = 1;
-    }
     int i;
     const char *listvars[MAXLIST] =
             {"battleplaylist", "peaceplaylist", "panicplaylist", "victoryplaylist", "lossplaylist"};

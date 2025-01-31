@@ -1989,8 +1989,8 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
 
                 //********************************************************************************************
             {
-                double percent_working = m_player.GetUnit() ? UnitUtil::PercentOperational(
-                        m_player.GetUnit(), item.GetName(), item.GetCategory(), false) : 0.0;
+                double percent_working = UnitUtil::PercentOperational(
+                        m_player.GetUnit(), item.GetName(), item.GetCategory(), false);
                 if (percent_working < 1) {
                     //IF DAMAGED
                     tempString = (boost::format("Damaged and Used value: #b#%1$.2f#-b, purchased for %2$.2f#n1.5#")

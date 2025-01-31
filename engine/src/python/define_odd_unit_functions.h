@@ -44,4 +44,14 @@ void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetJumpStatus, "GetJumpStatus");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::ApplyDamage, "ApplyDamage");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetMountInfo, "GetMountInfo");
+
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::FShieldData, "FShieldData");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::BShieldData, "BShieldData");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::LShieldData, "LShieldData");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::RShieldData, "RShieldData");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::fuelData, "fuelData");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::energyData, "energyData");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetHull, "GetHull");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetHullPercent, "GetHullPercent");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::rSize, "rSize");
 }

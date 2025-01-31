@@ -92,6 +92,9 @@ void UncheckUnit( class Unit*un );
 #include "components/drive_upgrade.h"
 #include "components/ftl_drive.h"
 #include "components/jump_drive.h"
+#include "components/armor.h"
+#include "components/hull.h"
+#include "components/shield.h"
 
 extern char *GetUnitDir(const char *filename);
 
@@ -175,11 +178,16 @@ public:
 
     Afterburner afterburner;
     AfterburnerUpgrade afterburner_upgrade = AfterburnerUpgrade(&afterburner);
-    Cloak cloak;
+    Cloak cloak = Cloak();
     Drive drive;
     DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
     FtlDrive ftl_drive = FtlDrive(&ftl_energy);
     JumpDrive jump_drive = JumpDrive(&ftl_energy);
+
+    Armor armor;
+    Hull hull;
+    Shield shield = Shield(&energy, &ftl_drive, &cloak);
+
 
     /// Radar and related systems
     // TODO: take a deeper look at this much later...
@@ -271,6 +279,11 @@ public:
             ""), Flightgroup *flightgroup = NULL, int fg_subnumber = 0);
 //table can be NULL, but setting it appropriately may increase performance
     void LoadRow(std::string unit_identifier, std::string unitMod, bool saved_game);
+
+    // Units take some time to blow up
+    // When they're done, their destructor is called ;)
+    bool GettingDestroyed() const;    
+                                    
 
     // TODO: implement enum class as type safe bitmask...
     // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/
@@ -711,9 +724,6 @@ public:
     void SetGlowVisible(bool isvis);
 
 
-
-
-
 //Applies damage to the local area given by pnt
     float ApplyLocalDamage(const Vector &pnt,
             const Vector &normal,
@@ -1028,11 +1038,6 @@ public:
     // MACRO_FUNCTION(field_a, object_a, object_b)
     // object_a->field_a = object_b->field_b;
     float temporary_upgrade_float_variable;
-
-
-    // Python Interfaces
-    float fuelData() const { return fuel.Level(); }
-    float energyData() const;
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);

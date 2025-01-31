@@ -44,7 +44,6 @@ extern DWORD WINAPI readerThread( PVOID input );
 
 class Music {
     bool random;
-    float maxhull;
     int socketr;
     int socketw;
     UnitContainer p;

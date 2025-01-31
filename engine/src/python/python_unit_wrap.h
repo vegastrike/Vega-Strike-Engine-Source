@@ -111,24 +111,7 @@ unsigned int, Missile, bool, OnlyCollideWithTarget )
 voidWRAPPED0( UnFire )
 WRAPPED0(float, computeLockingPercent,
 0 )  //how locked are we
-WRAPPED0(float, FShieldData,
-0 )
-WRAPPED0(float, RShieldData,
-0 )
-WRAPPED0(float, LShieldData,
-0 )
-WRAPPED0(float, BShieldData,
-0 )
-WRAPPED0(float, fuelData,
-0 )
-WRAPPED0(float, energyData,
-0 )
-WRAPPED0(float, GetHull,
-0 )
-WRAPPED0(float, GetHullPercent,
-0 )
-WRAPPED0(float, rSize,
-0 )
+
 #endif // ((WHICH_UNIT_EXPORT_NUMBER == 3) || (WHICH_UNIT_EXPORT_NUMBER == 2))
 
 #if (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 3)

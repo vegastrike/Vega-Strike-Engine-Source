@@ -128,14 +128,14 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
     UpgradeOperationResult result;
 
     switch(component_type) {
-        /*case ComponentType::Armor:
+        case ComponentType::Armor:
             result.upgradeable = true;
-            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->armor.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
         case ComponentType::Shield:
             result.upgradeable = true;
-            result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);
-            break;*/
+            result.success = unit->shield.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
 
         case ComponentType::Capacitor:
             result.upgradeable = true;

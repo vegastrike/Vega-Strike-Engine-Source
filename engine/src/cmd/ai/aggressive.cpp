@@ -260,16 +260,16 @@ void AggressiveAI::SetParent(Unit *parent1) {
     last_directive = "b";     //prevent escort race condition
 
     //INIT stored stuff
-    Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
+    Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::front);
     Fshield_rate_old = 0.0;
     Fshield_prev_time = UniverseUtil::GetGameTime();
-    Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
+    Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::back);
     Bshield_rate_old = 0.0;
     Bshield_prev_time = UniverseUtil::GetGameTime();
-    Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
+    Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::left);
     Lshield_rate_old = 0.0;
     Lshield_prev_time = UniverseUtil::GetGameTime();
-    Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
+    Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::right);
     Rshield_rate_old = 0.0;
     Rshield_prev_time = UniverseUtil::GetGameTime();
     Farmour_prev = 1.0;
@@ -284,7 +284,7 @@ void AggressiveAI::SetParent(Unit *parent1) {
     Rarmour_prev = 1.0;
     Rarmour_rate_old = 0.0;
     Rarmour_prev_time = UniverseUtil::GetGameTime();
-    Hull_prev = parent->GetHullPercent();
+    Hull_prev = parent->hull.Percent();
     Hull_rate_old = 0.0;
     Hull_prev_time = UniverseUtil::GetGameTime();
 }
@@ -333,30 +333,31 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             value = parent->GetComputerData().threatlevel;
             break;
         case FSHIELD:
-            value = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::front);
             break;
         case BSHIELD:
-            value = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::back);
             break;
         case HULL: {
-            value = parent->GetHullPercent();
+            value = parent->hull.Percent();
             break;
         }
         case LSHIELD:
-            value = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::left);
             break;
         case RSHIELD:
-            value = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::right);
             break;
         case FSHIELD_HEAL_RATE: {
+            // TODO: refactor this. We don't need to repeat this code
             double delta_t = UniverseUtil::GetGameTime() - Fshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData() - Fshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::front) - Fshield_prev;
                 value = delta_v / delta_t;
                 Fshield_rate_old = value;
                 Fshield_prev_time = UniverseUtil::GetGameTime();
-                Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
+                Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::front);
             } else {
                 value = Fshield_rate_old;
             }
@@ -366,11 +367,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Bshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData() - Bshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::back) - Bshield_prev;
                 value = delta_v / delta_t;
                 Bshield_rate_old = value;
                 Bshield_prev_time = UniverseUtil::GetGameTime();
-                Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
+                Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::back);
             } else {
                 value = Bshield_rate_old;
             }
@@ -380,11 +381,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Lshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData() - Lshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::left) - Lshield_prev;
                 value = delta_v / delta_t;
                 Lshield_rate_old = value;
                 Lshield_prev_time = UniverseUtil::GetGameTime();
-                Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
+                Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::left);
             } else {
                 value = Lshield_rate_old;
             }
@@ -394,11 +395,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Rshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData() - Rshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::right) - Rshield_prev;
                 value = delta_v / delta_t;
                 Rshield_rate_old = value;
                 Rshield_prev_time = UniverseUtil::GetGameTime();
-                Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
+                Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->shield.Percent(Shield::right);
             } else {
                 value = Rshield_rate_old;
             }
@@ -420,11 +421,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Hull_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->GetHullPercent() - Hull_prev;
+                double delta_v = parent->hull.Percent() - Hull_prev;
                 value = delta_v / delta_t;
                 Hull_rate_old = value;
                 Hull_prev_time = UniverseUtil::GetGameTime();
-                Hull_prev = parent->GetHullPercent();
+                Hull_prev = parent->hull.Percent();
             } else {
                 value = Hull_rate_old;
             }
@@ -1190,7 +1191,7 @@ void AggressiveAI::ReCommandWing(Flightgroup *fg) {
             //computer won't override capital orders
             if (nullptr != (lead = fg->leader.GetUnit())) {
                 if (float ( rand())/RAND_MAX < simulation_atom_var / time_to_recommand_wing) {
-                    if (parent->Threat() && (parent->FShieldData() < .2 || parent->RShieldData() < .2)) {
+                    if (parent->Threat() && (parent->shield.Percent() < .2)) {
                         fg->directive = string("h");
                         LeadMe(parent, "h", "I need help here!", false);
                         if (verbose_debug) {

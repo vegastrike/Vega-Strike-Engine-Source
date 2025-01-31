@@ -120,13 +120,11 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
                 return;
             }
 
-            // I've changed the behavior of enhancements for now.
-            // Instead of upgrading the shields, the simply max them out
-            // at 150%.
+            // disabled for now.
             // TODO: someone from the "product" team needs to define the
             // exact behavior. Preferably after we sort the upgrade
             // code.
-            other_unit->shield->Enhance();
+            
 
             /*double percent;
             char tempdata[sizeof(Shield)];

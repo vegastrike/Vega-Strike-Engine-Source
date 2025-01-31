@@ -30,43 +30,14 @@
  * @brief The FacetConfiguration enum represents how many facets a layer has and it what configuration.
  * @details The use of enum class enforces the correctness of the parameter without checking.
  * You can't pass 17 for example.
- * I debated keeping the existing dual/quad but as it turns out, dual is Greek and Quad is latin.
- * It is also easier to understand five and six than penta and sexta (No! Hexa! Mixed again!).
- * This can also be extended to other facet configurations, such as pyramid
- * (left, right, top, bottom and back).
- *
- * For consistency's sake, always start left to right, top to bottom and finally front to back.
- * That is x,y,z. This is also how both core vector and Vector class are ordered.
+ * The game originally supported 8 facets. 
+ * However, I disabled all facets except 1,2 and 4 due to complexity.
  */
 enum class FacetConfiguration {
     one = 1,    // A single facet covering all directions
     two = 2,    // Front and back
     four = 4,   // Front, back, left and right
 };
-
-enum class FacetName {
-    single = 0,
-
-    two_front = 0,
-    two_rear = 1,
-
-    four_left = 0,
-    four_right = 1,
-    four_front = 2,
-    four_rear = 3,
-
-    left_top_front = 0,
-    right_top_front = 1,
-    left_bottom_front = 2,
-    right_bottom_front = 3,
-    left_top_rear = 4,
-    right_top_rear = 5,
-    left_bottom_rear = 6,
-    right_bottom_rear = 7
-};
-
-// Same code as mount_size.h!
-// auto as_integer(Enumeration const value)
 
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_FACET_CONFIGURATION_H

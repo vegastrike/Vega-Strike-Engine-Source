@@ -1194,7 +1194,7 @@ bool ChooseTargets(Unit *me, bool (*typeofunit)(Unit *, Unit *), bool reverse) {
     int cur = 0;
     while (1) {
         while (veciter != vec.end()) {
-            if (((*veciter) != me) && ((*veciter)->GetHull() >= 0) && typeofunit(me, (*veciter))) {
+            if (((*veciter) != me) && ((*veciter)->hull.Get() >= 0) && typeofunit(me, (*veciter))) {
                 me->Target(*veciter);
 
                 if ((*veciter) != NULL) {
@@ -1541,7 +1541,7 @@ void FireKeyboard::ProcessCommMessage(class CommunicationMessage &c) {
     }          //wait till later
 
     bool reallydospeech = false;
-    if (un && un->GetHull() > 0) {
+    if (un && un->hull.Get() > 0) {
         reallydospeech = true;
         for (list<CommunicationMessage>::iterator i = resp.begin(); i != resp.end(); i++) {
             if ((*i).sender.GetUnit() == un) {
@@ -1715,7 +1715,7 @@ void FireKeyboard::Execute() {
     if (targ) {
         double mm = 0.0;
         ShouldFire(targ);
-        if (targ->GetHull() < 0) {
+        if (targ->hull.Get() < 0) {
             parent->Target(NULL);
             ForceChangeTarget(parent);
             refresh_target = true;
@@ -1732,7 +1732,7 @@ void FireKeyboard::Execute() {
 
     float f_result = f().shieldpowerstate;
     if (f_result != 1) {
-        parent->shield->AdjustPower(f_result);
+        parent->shield.AdjustPower(f_result);
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {

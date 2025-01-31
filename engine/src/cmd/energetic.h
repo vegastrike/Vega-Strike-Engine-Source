@@ -39,24 +39,19 @@ public:
     static float getFuelUsage(bool afterburner);
     void ExpendEnergy(const bool player_ship);
     void ExpendEnergy(float usage);
-    void ExpendEnergyToRechargeShields();
 
 
     float maxEnergyData() const;
 
     void MaintainECM();
-    void MaintainShields();
 
     void rechargeEnergy();
     void RechargeWarpCapacitors(const bool player_ship);
 
     void setEnergyRecharge(float enrech);
 
-    float totalShieldEnergyCapacitance() const;
-
     static float VSDPercent();
 
-    float WarpEnergyMultiplier(const bool player_ship);
 
 
     float constrained_charge_to_shields;
