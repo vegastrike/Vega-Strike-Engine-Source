@@ -1,8 +1,8 @@
 /*
  * engineVersion.cpp
  *
- * Copyright (C) 2021 Benjamen Meyer
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, Benjamen R. Meyer, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +23,7 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 //#include <cstdlib>
 #include <boost/python.hpp>
 

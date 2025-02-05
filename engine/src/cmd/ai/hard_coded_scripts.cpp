@@ -1,10 +1,8 @@
-/**
+/*
  * hard_coded_scripts.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,7 +23,9 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
+#include <boost/python.hpp>
 #include "python/python_class.h"
 #include "script.h"
 #include "cmd/unit_generic.h"
@@ -235,7 +235,7 @@ void BarrelRoll(Order *aisc, Unit *un) {
     bool afterburn = useAfterburner();
     broll->MatchSpeed(Vector(0,
             0,
-            afterburn ? un->GetComputerData().max_ab_speed() : un->GetComputerData().max_speed()));
+            afterburn ? un->MaxAfterburnerSpeed() : un->MaxSpeed()));
     broll->Afterburn(afterburn);
 }
 
@@ -246,7 +246,7 @@ static void EvadeWavy(Order *aisc, Unit *un, bool updown, bool ab) {
     bool afterburn = ab && useAfterburner();
     broll->MatchSpeed(Vector(0,
             0,
-            afterburn ? un->GetComputerData().max_ab_speed() : un->GetComputerData().max_speed()));
+            afterburn ? un->MaxAfterburnerSpeed() : un->MaxSpeed()));
     broll->Afterburn(afterburn);
 }
 
@@ -330,11 +330,10 @@ public:
             Vector r = targ->cumulative_transformation_matrix.getR();
             bool afterburn = useAfterburner() && this->afterburn;
             bool ab_needed =
-                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->GetComputerData().max_speed();
+                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->MaxSpeed();
             m.SetDesiredVelocity(Vector(0, 0, afterburn
-                    && ab_needed ? parent->GetComputerData().max_ab_speed()
-                    : parent->GetComputerData().
-                            max_speed()), true);
+                    && ab_needed ? parent->MaxAfterburnerSpeed()
+                    : parent->MaxSpeed()), true);
             float spseed, grange = 0, mrange = 0;
             parent->getAverageGunSpeed(spseed, grange, mrange);
             if (r.Dot(relloc) < 0) {
@@ -429,7 +428,7 @@ public:
             Vector r = targ->cumulative_transformation_matrix.getR();
             bool afterburn = useAfterburner() && this->afterburn;
             bool ab_needed =
-                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->GetComputerData().max_speed();
+                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->MaxSpeed();
             if (r.Dot(relloc) < 0) {
                 FaceTargetITTS::Execute();
                 m.SetAfterburn(afterburn && ab_needed);
@@ -530,11 +529,10 @@ public:
             Vector r = targ->cumulative_transformation_matrix.getR();
             bool afterburn = useAfterburner() && this->afterburn;
             bool ab_needed =
-                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->GetComputerData().max_speed();
+                    force_afterburn || targ->GetVelocity().MagnitudeSquared() > parent->MaxSpeed();
             m.SetDesiredVelocity(Vector(0, 0, afterburn
-                    && ab_needed ? parent->GetComputerData().max_ab_speed()
-                    : parent->GetComputerData().
-                            max_speed()), true);
+                    && ab_needed ? parent->MaxAfterburnerSpeed()
+                    : parent->MaxSpeed()), true);
             float speed, grange = 0, mrange = 0;
             parent->getAverageGunSpeed(speed, grange, mrange);
             if (r.Dot(relloc) < 0) {
@@ -585,7 +583,7 @@ void RollLeft(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(un->GetComputerData().max_roll_right, false), 1.0f));
+                new Orders::ExecuteFor(new Orders::MatchRoll(un->drive.max_roll_right, false), 1.0f));
     }
 }
 
@@ -593,7 +591,7 @@ void RollRight(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left, false), 1.0f));
+                new Orders::ExecuteFor(new Orders::MatchRoll(-un->drive.max_roll_left, false), 1.0f));
     }
 }
 
@@ -602,7 +600,7 @@ void RollLeftHard(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(un->GetComputerData().max_roll_right, false), durvar));
+                new Orders::ExecuteFor(new Orders::MatchRoll(un->drive.max_roll_right, false), durvar));
     }
 }
 
@@ -611,7 +609,7 @@ void RollRightHard(Order *aisc, Unit *un) {
     if (un->aistate) {
         AddOrd(un->aistate,
                 un,
-                new Orders::ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left, false), durvar));
+                new Orders::ExecuteFor(new Orders::MatchRoll(-un->drive.max_roll_left, false), durvar));
     }
 }
 

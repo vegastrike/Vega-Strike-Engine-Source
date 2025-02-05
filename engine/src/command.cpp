@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Nachum Barcohen,
+ * command.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,6 +23,8 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include "command.h"
 #include <Python.h>
 #include <pyerrors.h>
@@ -33,7 +37,7 @@
 #include <vector>
 
 #ifdef HAVE_SDL
-#   include <SDL/SDL.h>
+#   include <SDL2/SDL.h>
 #endif
 
 #include <string>
@@ -1605,9 +1609,6 @@ void BringConsole(const KBData &, KBSTATE newState) {
         if (CommandInterpretor) {
             winsys_set_keyboard_func((winsys_keyboard_func_t) &commandI::keypress);
             CommandInterpretor->console = true;
-#ifdef HAVE_SDL
-            SDL_EnableUNICODE(true);
-#endif
         }
     }
 }

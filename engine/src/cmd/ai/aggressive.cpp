@@ -1,9 +1,8 @@
 /*
  * aggressive.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,14 +15,16 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <list>
 #include <vector>
 #include "aggressive.h"
@@ -259,16 +260,16 @@ void AggressiveAI::SetParent(Unit *parent1) {
     last_directive = "b";     //prevent escort race condition
 
     //INIT stored stuff
-    Fshield_prev = parent->graphicOptions.InWarp ? 1 : parent->FShieldData();
+    Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
     Fshield_rate_old = 0.0;
     Fshield_prev_time = UniverseUtil::GetGameTime();
-    Bshield_prev = parent->graphicOptions.InWarp ? 1 : parent->BShieldData();
+    Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
     Bshield_rate_old = 0.0;
     Bshield_prev_time = UniverseUtil::GetGameTime();
-    Lshield_prev = parent->graphicOptions.InWarp ? 1 : parent->LShieldData();
+    Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
     Lshield_rate_old = 0.0;
     Lshield_prev_time = UniverseUtil::GetGameTime();
-    Rshield_prev = parent->graphicOptions.InWarp ? 1 : parent->RShieldData();
+    Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
     Rshield_rate_old = 0.0;
     Rshield_prev_time = UniverseUtil::GetGameTime();
     Farmour_prev = 1.0;
@@ -306,7 +307,7 @@ bool AggressiveAI::ExecuteLogicItem(const AIEvents::AIEvresult &item) {
 }
 
 bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
-    float value = 0.0;
+    double value = 0.0;
 
     switch (abs(item.type)) {
         case DISTANCE:
@@ -316,11 +317,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             Unit *targ = parent->Target();
             if (targ) {
                 Vector PosDifference = targ->Position().Cast() - parent->Position().Cast();
-                float pdmag = PosDifference.Magnitude();
+                double pdmag = PosDifference.Magnitude();
                 value = (pdmag - parent->rSize() - targ->rSize());
-                float myvel = PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / value;        ///pdmag;
+                double myvel = PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / value;        ///pdmag;
                 if (myvel > 0) {
-                    value -= myvel * myvel / (2 * (parent->limits.retro / parent->getMass()));
+                    value -= myvel * myvel / (2 * (parent->drive.retro / parent->getMass()));
                 }
             } else {
                 value = 10000;
@@ -332,30 +333,30 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             value = parent->GetComputerData().threatlevel;
             break;
         case FSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->FShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
             break;
         case BSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->BShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
             break;
         case HULL: {
             value = parent->GetHullPercent();
             break;
         }
         case LSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->LShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
             break;
         case RSHIELD:
-            value = parent->graphicOptions.InWarp ? 1 : parent->RShieldData();
+            value = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
             break;
         case FSHIELD_HEAL_RATE: {
             double delta_t = UniverseUtil::GetGameTime() - Fshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->FShieldData() - Fshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData() - Fshield_prev;
                 value = delta_v / delta_t;
                 Fshield_rate_old = value;
                 Fshield_prev_time = UniverseUtil::GetGameTime();
-                Fshield_prev = parent->graphicOptions.InWarp ? 1 : parent->FShieldData();
+                Fshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->FShieldData();
             } else {
                 value = Fshield_rate_old;
             }
@@ -365,11 +366,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Bshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->BShieldData() - Bshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData() - Bshield_prev;
                 value = delta_v / delta_t;
                 Bshield_rate_old = value;
                 Bshield_prev_time = UniverseUtil::GetGameTime();
-                Bshield_prev = parent->graphicOptions.InWarp ? 1 : parent->BShieldData();
+                Bshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->BShieldData();
             } else {
                 value = Bshield_rate_old;
             }
@@ -379,11 +380,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Lshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->LShieldData() - Lshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData() - Lshield_prev;
                 value = delta_v / delta_t;
                 Lshield_rate_old = value;
                 Lshield_prev_time = UniverseUtil::GetGameTime();
-                Lshield_prev = parent->graphicOptions.InWarp ? 1 : parent->LShieldData();
+                Lshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->LShieldData();
             } else {
                 value = Lshield_rate_old;
             }
@@ -393,11 +394,11 @@ bool AggressiveAI::ProcessLogicItem(const AIEvents::AIEvresult &item) {
             double delta_t = UniverseUtil::GetGameTime() - Rshield_prev_time;
             if (delta_t > 0.5) {
                 //0.5 = reaction time limit for hit rate
-                double delta_v = parent->graphicOptions.InWarp ? 1 : parent->RShieldData() - Rshield_prev;
+                double delta_v = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData() - Rshield_prev;
                 value = delta_v / delta_t;
                 Rshield_rate_old = value;
                 Rshield_prev_time = UniverseUtil::GetGameTime();
-                Rshield_prev = parent->graphicOptions.InWarp ? 1 : parent->RShieldData();
+                Rshield_prev = parent->ftl_drive.Enabled() ? 1 : parent->RShieldData();
             } else {
                 value = Rshield_rate_old;
             }
@@ -1292,7 +1293,7 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     int whichlist = 1;  //friendly
     std::string fgname = UnitUtil::getFlightgroupName(parent);
 
-    bool insys = (parent->GetJumpStatus().drive == -2) || fgname.find(insysString) != std::string::npos;
+    bool insys = (!parent->jump_drive.Installed()) || fgname.find(insysString) != std::string::npos;
     std::string::size_type whereconvoy = fgname.find(arrowString);
     bool convoy = (whereconvoy != std::string::npos);
     size_t total_size = stats->navs[0].size() + stats->navs[whichlist].size();     //friendly and neutral
@@ -1561,7 +1562,7 @@ void AggressiveAI::ExecuteNoEnemies() {
             //slowdown
             parent->Thrust(-parent->getMass() * parent->UpCoordinateLevel(parent->GetVelocity()) / simulation_atom_var,
                     false);
-            parent->graphicOptions.InWarp = 0;
+            parent->ftl_drive.Disable();
             if (lurk_on_arrival <= 0) {
                 nav = QVector(0, 0, 0);
                 ExecuteNoEnemies();                 //select new place to go
@@ -1640,9 +1641,9 @@ void AggressiveAI::Execute() {
     bool isjumpable = target ? (!target->GetDestinations().empty()) : false;
     if (!ProcessCurrentFgDirective(fg)) {
         if (isjumpable) {
-            if (parent->GetJumpStatus().drive < 0) {
+            if (!parent->jump_drive.IsDestinationSet()) {
                 parent->ActivateJumpDrive(0);
-                if (parent->GetJumpStatus().drive == -2) {
+                if (!parent->jump_drive.Installed()) {
                     static bool AIjumpCheat =
                             XMLSupport::parse_bool(vs_config->getVariable("AI",
                                     "always_have_jumpdrive_cheat",
@@ -1653,15 +1654,15 @@ void AggressiveAI::Execute() {
                             VS_LOG(warning, "FIXME: warning ship not equipped to jump");
                             i = 1;
                         }
-                        parent->jump.drive = -1;
+                        parent->jump_drive.UnsetDestination();
                     } else {
                         parent->Target(NULL);
                     }
-                } else if (parent->GetJumpStatus().drive < 0) {
+                } else if (!parent->jump_drive.IsDestinationSet()) {
                     static bool
                             AIjumpCheat = XMLSupport::parse_bool(vs_config->getVariable("AI", "jump_cheat", "true"));
                     if (AIjumpCheat) {
-                        parent->jump.drive = 0;
+                        parent->jump_drive.SetDestination(0);
                     }
                 }
             }
@@ -1726,14 +1727,14 @@ void AggressiveAI::Execute() {
             mag = 1 / mag;
         }
         parent->SetVelocity(
-                parent->GetVelocity() * (mag * parent->GetComputerData().max_speed() / getTimeCompression()));
+                parent->GetVelocity() * (mag * parent->MaxSpeed() / getTimeCompression()));
         parent->NetLocalForce = parent->NetForce = Vector(0, 0, 0);
     }
     target = parent->Target();
 
     isjumpable = target ? (!target->GetDestinations().empty()) : false;
     if (!isjumpable) {
-        if (parent->GetJumpStatus().drive >= 0) {
+        if (parent->jump_drive.IsDestinationSet()) {
             parent->ActivateJumpDrive(-1);
         }
     }

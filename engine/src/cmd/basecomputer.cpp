@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d, Stephen G. Tuggy,
+ * basecomputer.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -59,11 +61,12 @@ using VSFileSystem::SaveFile;
 #include "universe.h"
 #include "mount_size.h"
 #include "weapon_info.h"
-#include "facet_configuration.h"
 #include "vs_logging.h"
+#include "controls_factory.h"
+#include "python/infra/get_string.h"
 
-//#define VS_PI 3.1415926535897931
-
+#include <boost/python.hpp>
+#include "configuration/configuration.h"
 
 //for directory thing
 #if defined (_WIN32) && !defined (__CYGWIN__)
@@ -78,6 +81,12 @@ using VSFileSystem::SaveFile;
 #endif
 #include <sys/stat.h>
 #include "vega_cast_utils.h"
+
+// Can't declare in header because PyObject is problematic
+extern const std::string GetString(const std::string function_name, 
+                            const std::string module_name,
+                            const std::string file_name,
+                            PyObject* args);
 
 using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 
@@ -106,8 +115,8 @@ std::vector<std::string> getWeapFilterVec() {
 std::vector<std::string> weapfiltervec = getWeapFilterVec();
 
 bool upgradeNotAddedToCargo(std::string category) {
-    for (unsigned int i = 0; i < weapfiltervec.size(); ++i) {
-        if (weapfiltervec[i].find(category) == 0) {
+    for (const auto & i : weapfiltervec) {
+        if (i.find(category) == 0) {
             return true;
         }
     }
@@ -230,8 +239,6 @@ extern string MakeUnitXMLPretty(std::string, Unit *);
 extern void RespawnNow(Cockpit *cockpit);
 
 //headers for functions used internally
-//add to text a nicely-formated description of the unit and its subunits
-void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item);
 //build the previous description for a ship purchase item
 string buildShipDescription(Cargo &item, string &descriptiontexture);
 //build the previous description from a cargo purchase item
@@ -503,74 +510,41 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
     }
 }
 
+
+
+
 //Hack that constructs controls in code.
 void BaseComputer::constructControls(void) {
-    if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
-        //Base info title.
-        StaticDisplay *baseTitle = new StaticDisplay;
-        baseTitle->setRect(Rect(-.96, .76, 1.9, .08));
-        baseTitle->setText("ERROR");
-        static GFXColor baseNameColor = vs_config->getColor("base_name_color", GFXColor(.1, .8, .1));
-        baseTitle->setTextColor(baseNameColor);
-        baseTitle->setColor(GUI_CLEAR);
-        baseTitle->setFont(Font(.07, 1.75));
-        baseTitle->setId("BaseInfoTitle");
-        //Put it on the window.
-        window()->addControl(baseTitle);
+    std::map<std::string, std::map<std::string, std::string>> controls;
 
+    VSFileSystem::VSFile jsonFile;
+    VSFileSystem::VSError err = jsonFile.OpenReadOnly("controls.json");
+    if (err <= VSFileSystem::Ok) {
+        controls = parseControlsJSON(jsonFile);
+    } else {
+        std::cerr << "controls.json not found\n";
+        return;
+    }
+
+    if (m_displayModes.size() != 1 || m_displayModes.at(0) != NETWORK) {
+        //Base info title.
+        StaticDisplay *baseTitle = (StaticDisplay*)getControl(controls["baseTitle"]);
+        window()->addControl(baseTitle);
+        
         //Player info title.
-        StaticDisplay *playerTitle = new StaticDisplay;
-        static GFXColor basePlayerColor = vs_config->getColor("base_player_color", GFXColor(.7, .7, .9));
-        playerTitle->setRect(Rect(-.96, .69, 1.9, .07));
-        playerTitle->setTextColor(basePlayerColor);
-        playerTitle->setColor(GUI_CLEAR);
-        playerTitle->setFont(Font(.06, BOLD_STROKE));
-        playerTitle->setId("PlayerInfoTitle");
-        //Put it on the window.
+        StaticDisplay *playerTitle = (StaticDisplay*)getControl(controls["playerTitle"]);
         window()->addControl(playerTitle);
 
-        static GFXColor saveLoadColor = vs_config->getColor("base_save_load_color", GFXColor(.75, 0, 0));
         //Options button.
-        NewButton *options = new NewButton;
-        options->setRect(Rect(.64, .85, .32, .1));
-        options->setLabel("Save/Load");
-        options->setCommand("ShowOptionsMenu");
-        options->setColor(UnsaturatedColor(saveLoadColor.r, saveLoadColor.g, saveLoadColor.b, .25));
-        options->setTextColor(GUI_OPAQUE_WHITE());
-        options->setDownColor(UnsaturatedColor(saveLoadColor.r, saveLoadColor.g, saveLoadColor.b, .6));
-        options->setDownTextColor(GUI_OPAQUE_BLACK());
-        options->setHighlightColor(GFXColor(0, 0, 1, .4));
-        options->setFont(Font(.08));
-        //Put the button on the window.
+        NewButton *options = (NewButton*)getControl(controls["saveLoad"]);
         window()->addControl(options);
     }
-    static GFXColor doneColor = vs_config->getColor("base_done_color", GFXColor(.75, 0, 0));
-    //Done button.
-    NewButton *done = new NewButton;
-    done->setRect(Rect(.74, .71, .22, .1));
-    done->setLabel("Done");
-    done->setCommand("DoneComputer");
-    done->setColor(UnsaturatedColor(doneColor.r, doneColor.g, doneColor.b, .25));
-    done->setTextColor(GUI_OPAQUE_WHITE());
-    done->setDownColor(UnsaturatedColor(doneColor.r, doneColor.g, doneColor.b, .6));
-    done->setDownTextColor(GUI_OPAQUE_BLACK());
-    done->setHighlightColor(GFXColor(0, 0, 1, .4));
-    done->setFont(Font(.08, BOLD_STROKE));
+    
+    NewButton *done = (NewButton*)getControl(controls["done"]);
     window()->addControl(done);
 
     //Mode button.
-    NewButton *mode = new NewButton;
-    static GFXColor mode_color = vs_config->getColor("base_mode_color", GFXColor(0, .5, 0));
-    mode->setRect(Rect(-.96, .86, .24, .09));
-    mode->setLabel("ERROR");
-    mode->setColor(GFXColor(mode_color.r, mode_color.g, mode_color.b, .25));
-    mode->setTextColor(GUI_OPAQUE_WHITE());
-    mode->setDownColor(GFXColor(mode_color.r, mode_color.g, mode_color.b, .5));
-    mode->setDownTextColor(GUI_OPAQUE_BLACK());
-    mode->setHighlightColor(GFXColor(mode_color.r, mode_color.g, mode_color.b, .4));
-    mode->setFont(Font(.07, BOLD_STROKE));
-    mode->setId("ModeButton");
-    //Put the button on the window.
+    NewButton *mode = (NewButton*)getControl(controls["mode"]);
     window()->addControl(mode);
     {
         //CARGO group control.
@@ -580,13 +554,7 @@ void BaseComputer::constructControls(void) {
         GFXColor color = getColorForGroup("CargoGroup");
 
         //Seller text display.
-        StaticDisplay *sellLabel = new StaticDisplay;
-        sellLabel->setRect(Rect(-.96, .56, .81, .1));
-        sellLabel->setText("Seller");
-        sellLabel->setTextColor(GUI_OPAQUE_WHITE());
-        sellLabel->setColor(GUI_CLEAR);
-        sellLabel->setFont(Font(.08, BOLD_STROKE));
-        sellLabel->setJustification(CENTER_JUSTIFY);
+        StaticDisplay *sellLabel = (StaticDisplay*)getControl(controls["seller"]);
         cargoGroup->addChild(sellLabel);
 
         //Player inventory text display.
@@ -597,145 +565,52 @@ void BaseComputer::constructControls(void) {
         cargoGroup->addChild(inv);
 
         //Total price text display.
-        StaticDisplay *totalPrice = new StaticDisplay;
-        totalPrice->setRect(Rect(-.2, .56, .4, .07));
-        totalPrice->setTextColor(GUI_OPAQUE_WHITE());
-        totalPrice->setColor(GUI_CLEAR);
-        totalPrice->setFont(Font(.06));
-        totalPrice->setJustification(CENTER_JUSTIFY);
-        totalPrice->setId("TotalPrice");
+        StaticDisplay *totalPrice = (StaticDisplay*)getControl(controls["totalPrice"]);
         cargoGroup->addChild(totalPrice);
 
         //"Max" text display.
-        StaticDisplay *maxForPlayer = new StaticDisplay;
-        maxForPlayer->setRect(Rect(-.14, .49, .28, .07));
-        maxForPlayer->setTextColor(GUI_OPAQUE_WHITE());
-        maxForPlayer->setColor(GUI_CLEAR);
-        maxForPlayer->setFont(Font(.06));
-        maxForPlayer->setJustification(CENTER_JUSTIFY);
-        maxForPlayer->setId("MaxQuantity");
+        StaticDisplay *maxForPlayer = (StaticDisplay*)getControl(controls["maxQuantity"]);
         cargoGroup->addChild(maxForPlayer);
 
         //Scroller for seller.
-        Scroller *sellerScroller = new Scroller;
-        sellerScroller->setRect(Rect(-.20, -.4, .05, .95));
-        sellerScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        sellerScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        sellerScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
-        sellerScroller->setTextColor(GUI_OPAQUE_WHITE());
-        sellerScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        Scroller *sellerScroller = (Scroller*)getControl(controls["sellerScroller"]);
+        
 
         //Seller picker.
-        SimplePicker *sellpick = new SimplePicker;
-        sellpick->setRect(Rect(-.96, -.4, .76, .95));
-        sellpick->setColor(GFXColor(color.r, color.g, color.b, .1));
-        sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-        sellpick->setTextColor(GUI_OPAQUE_WHITE());
-        sellpick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        sellpick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
-        sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE());
-        sellpick->setFont(Font(.07));
-        sellpick->setTextMargins(Size(0.02, 0.01));
-        sellpick->setId("BaseCargo");
+        SimplePicker *sellpick = (SimplePicker*)getControl(controls["sellerPicker"]);
         sellpick->setScroller(sellerScroller);
         cargoGroup->addChild(sellpick);
 
         cargoGroup->addChild(sellerScroller);                 //Want this "over" the picker.
 
         //Scroller for inventory.
-        Scroller *invScroller = new Scroller;
-        invScroller->setRect(Rect(.91, -.4, .05, .95));
-        invScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        invScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        invScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
-        invScroller->setTextColor(GUI_OPAQUE_WHITE());
-        invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        Scroller *inventoryScroller = (Scroller*)getControl(controls["inventoryScroller"]);
 
         //Inventory picker.
-        SimplePicker *ipick = new SimplePicker;
-        ipick->setRect(Rect(.15, -.4, .76, .95));
-        ipick->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-        ipick->setTextColor(GUI_OPAQUE_WHITE());
-        ipick->setFont(Font(.07));
-        ipick->setTextMargins(Size(0.02, 0.01));
-        ipick->setSelectionColor(UnsaturatedColor(0, .6, 0, .8));
-        ipick->setHighlightColor(UnsaturatedColor(0, .6, 0, .35));
-        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE());
-        ipick->setId("PlayerCargo");
-        ipick->setScroller(invScroller);
-        cargoGroup->addChild(ipick);
+        SimplePicker *inventoryPick = (SimplePicker*)getControl(controls["inventoryPicker"]);
+        inventoryPick->setScroller(inventoryScroller);
+        cargoGroup->addChild(inventoryPick);
 
-        cargoGroup->addChild(invScroller);            //Want this "over" the picker.
+        cargoGroup->addChild(inventoryScroller);            //Want this "over" the picker.
 
         //Buy button.
-        NewButton *buy = new NewButton;
-        buy->setRect(Rect(-.11, .3, .22, .13));
-        buy->setColor(GFXColor(0, 1, 1, .1));
-        buy->setTextColor(GUI_OPAQUE_WHITE());
-        buy->setDownColor(GFXColor(0, 1, 1, .4));
-        buy->setDownTextColor(GFXColor(.2, .2, .2));
-        buy->setVariableBorderCycleTime(1.0);
-        buy->setBorderColor(GFXColor(.2, .2, .2));
-        buy->setEndBorderColor(GFXColor(.4, .4, .4));
-        buy->setShadowWidth(2.0);
-        buy->setFont(Font(.1, BOLD_STROKE));
-        buy->setId("CommitAll");
+        NewButton *buy = (NewButton*)getControl(controls["buy"]);
         cargoGroup->addChild(buy);
 
         //"Buy 10" button.
-        NewButton *buy10 = new NewButton;
-        buy10->setRect(Rect(-.11, .1, .22, .1));
-        buy10->setColor(GFXColor(0, 1, 1, .1));
-        buy10->setTextColor(GUI_OPAQUE_WHITE());
-        buy10->setDownColor(GFXColor(0, 1, 1, .4));
-        buy10->setDownTextColor(GFXColor(.2, .2, .2));
-        buy10->setVariableBorderCycleTime(1.0);
-        buy10->setBorderColor(GFXColor(.2, .2, .2));
-        buy10->setEndBorderColor(GFXColor(.4, .4, .4));
-        buy10->setShadowWidth(2.0);
-        buy10->setFont(Font(.08, BOLD_STROKE));
-        buy10->setId("Commit10");
+        NewButton *buy10 = (NewButton*)getControl(controls["buy10"]);
         cargoGroup->addChild(buy10);
 
         //"Buy 1" button.
-        NewButton *buy1 = new NewButton;
-        buy1->setRect(Rect(-.11, -.1, .22, .1));
-        buy1->setColor(GFXColor(0, 1, 1, .1));
-        buy1->setTextColor(GUI_OPAQUE_WHITE());
-        buy1->setDownColor(GFXColor(0, 1, 1, .4));
-        buy1->setDownTextColor(GFXColor(.2, .2, .2));
-        buy1->setVariableBorderCycleTime(1.0);
-        buy1->setBorderColor(GFXColor(.2, .2, .2));
-        buy1->setEndBorderColor(GFXColor(.4, .4, .4));
-        buy1->setShadowWidth(2.0);
-        buy1->setFont(Font(.08, BOLD_STROKE));
-        buy1->setId("Commit");
+        NewButton *buy1 = (NewButton*)getControl(controls["buy1"]);
         cargoGroup->addChild(buy1);
 
         //Scroller for description.
-        Scroller *descScroller = new Scroller;
-        descScroller->setRect(Rect(.91, -.95, .05, .5));
-        descScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        descScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        descScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
-        descScroller->setTextColor(GUI_OPAQUE_WHITE());
-        descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        Scroller *descScroller = (Scroller*)getControl(controls["descriptionScroller"]);
 
         //Description box.
-        StaticDisplay *ms = new StaticDisplay;
-        StaticImageDisplay *picture = new StaticImageDisplay;
-        picture->setRect(Rect(-.96, -.45, .46 * .75, -.47));
-        picture->setTexture("blackclear.png");
-        picture->setId("DescriptionImage");
-        ms->setRect(Rect(-.6, -.95, 1.51, .5));
-        ms->setColor(GFXColor(color.r, color.g, color.b, .1));
-        ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-        ms->setFont(Font(.06));
-        ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE());
-        ms->setTextMargins(Size(.02, .01));
-        ms->setId("Description");
+        StaticDisplay *ms = (StaticDisplay*)getControl(controls["description"]);
+        StaticImageDisplay *picture = (StaticImageDisplay*)getControl(controls["picture"]);
         ms->setScroller(descScroller);
         cargoGroup->addChild(ms);
 
@@ -750,13 +625,7 @@ void BaseComputer::constructControls(void) {
         GFXColor color = getColorForGroup("UpgradeGroup");
 
         //Seller text display.
-        StaticDisplay *sellLabel = new StaticDisplay;
-        sellLabel->setRect(Rect(-.96, .55, .81, .1));
-        sellLabel->setText("Available Upgrades");
-        sellLabel->setTextColor(GUI_OPAQUE_WHITE());
-        sellLabel->setColor(GUI_CLEAR);
-        sellLabel->setFont(Font(.07, BOLD_STROKE));
-        sellLabel->setJustification(CENTER_JUSTIFY);
+        StaticDisplay *sellLabel = (StaticDisplay*)getControl(controls["sellLabel"]);
         upgradeGroup->addChild(sellLabel);
 
         //Player inventory text display.
@@ -767,14 +636,8 @@ void BaseComputer::constructControls(void) {
         upgradeGroup->addChild(inv);
 
         //Scroller for seller.
-        Scroller *sellerScroller = new Scroller;
-        sellerScroller->setRect(Rect(-.20, -.4, .05, .95));
-        sellerScroller->setColor(UnsaturatedColor(color.r, color.g, color.b, .1));
-        sellerScroller->setThumbColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4), GUI_OPAQUE_WHITE());
-        sellerScroller->setButtonColor(UnsaturatedColor(color.r * .4, color.g * .4, color.b * .4));
-        sellerScroller->setTextColor(GUI_OPAQUE_WHITE());
-        sellerScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-
+        Scroller *sellerScroller = (Scroller*)getControl(controls["sellerScroller"]);
+        
         //Seller picker.
         SimplePicker *sellpick = new SimplePicker;
         sellpick->setRect(Rect(-.96, -.4, .76, .95));
@@ -1110,7 +973,7 @@ void BaseComputer::constructControls(void) {
 
         //GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
 
-        if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
+        if (m_displayModes.size() != 1 || m_displayModes.at(0) != NETWORK) {
             NewButton *loadsave = new NewButton;
             loadsave->setRect(Rect(.7, -.9, .25, .1));
             loadsave->setColor(GFXColor(1, .5, .1, .1));
@@ -1127,7 +990,7 @@ void BaseComputer::constructControls(void) {
             loadsave->setCommand("ShowOptionsMenu");
             networkGroup->addChild(loadsave);
         }
-        if ((m_displayModes.size() == 1 && m_displayModes[0] == NETWORK)) {
+        if ((m_displayModes.size() == 1 && m_displayModes.at(0) == NETWORK)) {
             NewButton *quit = new NewButton;
             quit->setRect(Rect(-.95, -.9, .3, .1));
             quit->setColor(GFXColor(.8, 1, .1, .1));
@@ -1394,8 +1257,7 @@ void BaseComputer::createModeButtons(void) {
     if (m_displayModes.size() > 1) {
         //Create a button for each display mode, copying the original button.
         Rect rect = originalButton->rect();
-        for (unsigned int i = 0; i < m_displayModes.size(); i++) {
-            DisplayMode mode = m_displayModes[i];
+        for (const auto mode : m_displayModes) {
             NewButton *newButton = new NewButton(*originalButton);
             newButton->setRect(rect);
             newButton->setLabel(modeInfo[mode].button);
@@ -1956,7 +1818,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     //The selected item.
     const PickerCell *cell = tlist->picker->selectedCell();
     assert(cell != NULL);
-    Cargo &item = tlist->masterList[cell->tag()].cargo;
+    Cargo &item = tlist->masterList.at(cell->tag()).cargo;
     bool damaged_mode = false;
     if (!isTransactionOK(item, tlist->transaction)) {
         //We can't do the transaction. so hide the transaction button.
@@ -2165,6 +2027,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
         }
     }
     //Description.
+    // TODO: this adds the description to the price. We should move everything to component.
     descString += item.GetDescription();
     descString += tailString;
 
@@ -2460,7 +2323,7 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
     string currentCategory = "--ILLEGAL CATEGORY--";     //Current category we are adding cells to.
     SimplePickerCell *parentCell = NULL;                //Place to add new items.  NULL = Add to picker.
     for (size_t i = 0; i < tlist.masterList.size(); i++) {
-        Cargo &item = tlist.masterList[i].cargo;
+        Cargo &item = tlist.masterList.at(i).cargo;
         std::string icategory = getDisplayCategory(item);
         if (icategory != currentCategory) {
             //Create new cell(s) for the new category.
@@ -2616,12 +2479,12 @@ void BaseComputer::loadMasterList(Unit *un,
         bool invfilter = true;
         size_t vecindex;
         for (vecindex = 0; !filter && (vecindex < filtervec.size()); vecindex++) {
-            if (un->GetCargo(i).GetCategory().find(filtervec[vecindex]) != string::npos) {
+            if (un->GetCargo(i).GetCategory().find(filtervec.at(vecindex)) != string::npos) {
                 filter = true;
             }
         }
         for (vecindex = 0; invfilter && (vecindex < invfiltervec.size()); vecindex++) {
-            if (un->GetCargo(i).GetCategory().find(invfiltervec[vecindex]) != string::npos) {
+            if (un->GetCargo(i).GetCategory().find(invfiltervec.at(vecindex)) != string::npos) {
                 invfilter = false;
             }
         }
@@ -2646,7 +2509,7 @@ Cargo *BaseComputer::selectedItem(void) {
         assert(m_selectedList->picker);
         PickerCell *cell = m_selectedList->picker->selectedCell();
         if (cell) {
-            result = &m_selectedList->masterList[cell->tag()].cargo;
+            result = &m_selectedList->masterList.at(cell->tag()).cargo;
         }
     }
     return result;
@@ -3058,7 +2921,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
     }
     //Sort the list.  Better for display, easier to compile into categories, etc.
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
-    if (active_missions.size()) {
+    if (!active_missions.empty()) {
         for (unsigned int i = 1; i < active_missions.size(); ++i) {
             CargoColor amission;
             amission.cargo.SetName(XMLSupport::tostring(i) + " " + active_missions[i]->mission_name);
@@ -3068,9 +2931,9 @@ void BaseComputer::loadMissionsMasterList(TransactionList &tlist) {
             amission.cargo.SetDescription("Objectives\\");
             for (unsigned int j = 0; j < active_missions[i]->objectives.size(); ++j) {
                 amission.cargo.SetDescription(
-                        amission.cargo.GetDescription() + active_missions[i]->objectives[j].objective + ": "
+                        amission.cargo.GetDescription() + active_missions[i]->objectives.at(j).objective + ": "
                                 + XMLSupport::tostring((int) (100
-                                        * active_missions[i]->objectives[j].completeness))
+                                        * active_missions[i]->objectives.at(j).completeness))
                                 + "%\\");
             }
             amission.color = DEFAULT_UPGRADE_COLOR();
@@ -3233,7 +3096,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     if (clearDowngrades) {
         std::set<std::string> downgradeMap = GetListOfDowngrades();
         for (unsigned int i = 0; i < tlist.masterList.size(); ++i) {
-            if (downgradeMap.find(tlist.masterList[i].cargo.GetName()) == downgradeMap.end()) {
+            if (downgradeMap.find(tlist.masterList.at(i).cargo.GetName()) == downgradeMap.end()) {
                 tlist.masterList.erase(tlist.masterList.begin() + i);
                 i--;
             }
@@ -3562,15 +3425,15 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
         GFXColor mountColor = MOUNT_POINT_NO_SELECT();
         string mountName;
         string ammoexp;
-        if (playerUnit->mounts[i].status == Mount::ACTIVE || playerUnit->mounts[i].status == Mount::INACTIVE) {
-            mountName = tostring(i + 1) + " " + playerUnit->mounts[i].type->name;
+        if (playerUnit->mounts.at(i).status == Mount::ACTIVE || playerUnit->mounts.at(i).status == Mount::INACTIVE) {
+            mountName = tostring(i + 1) + " " + playerUnit->mounts.at(i).type->name;
             ammoexp =
-                    (playerUnit->mounts[i].ammo == -1) ? string("") : string((" ammo: "
-                            + tostring(playerUnit->mounts[i].ammo)));
+                    (playerUnit->mounts.at(i).ammo == -1) ? string("") : string((" ammo: "
+                            + tostring(playerUnit->mounts.at(i).ammo)));
             mountName += ammoexp;
             mountColor = MOUNT_POINT_FULL();
         } else {
-            const std::string temp = getMountSizeString(playerUnit->mounts[i].size);
+            const std::string temp = getMountSizeString(playerUnit->mounts.at(i).size);
             mountName = tostring(i + 1) + " (Empty) " + temp.c_str();
             mountColor = MOUNT_POINT_EMPTY();
         }
@@ -3646,7 +3509,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         }
         if (m_newPart->mounts.size() == 0) {
             break;
-        } else if (m_newPart->mounts[0].ammo <= 0) {
+        } else if (m_newPart->mounts.at(0).ammo <= 0) {
             break;
         }
         numleft = basecargoassets(baseUnit, m_part.GetName());
@@ -3692,7 +3555,7 @@ void BaseComputer::SellUpgradeOperation::start(void) {
     }
 }
 
-//Try to match a mounted waepon name with the cargo name.
+//Try to match a mounted weapon name with the cargo name.
 //Returns true if they are the same.
 static bool matchCargoToWeapon(const std::string &cargoName, const std::string &weaponName) {
     //Weapon names have capitalized words, and no spaces between the words.
@@ -3754,20 +3617,20 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 
         //Get the name.
         string mountName;
-        if (playerUnit->mounts[i].status == Mount::ACTIVE || playerUnit->mounts[i].status == Mount::INACTIVE) {
+        if (playerUnit->mounts.at(i).status == Mount::ACTIVE || playerUnit->mounts.at(i).status == Mount::INACTIVE) {
             //Something is mounted here.
-            const std::string unitName = playerUnit->mounts[i].type->name;
+            const std::string unitName = playerUnit->mounts.at(i).type->name;
             const Unit *partUnit =
                     UnitConstCache::getCachedConst(StringIntKey(m_part.GetName(), FactionUtil::GetUpgradeFaction()));
             string ammoexp;
             mountName = tostring(i + 1) + " " + unitName.c_str();
             ammoexp =
-                    (playerUnit->mounts[i].ammo == -1) ? string("") : string((" ammo: "
-                            + tostring(playerUnit->mounts[i].ammo)));
+                    (playerUnit->mounts.at(i).ammo == -1) ? string("") : string((" ammo: "
+                            + tostring(playerUnit->mounts.at(i).ammo)));
             mountName += ammoexp;
             if (partUnit) {
                 if (partUnit->getNumMounts()) {
-                    if (partUnit->mounts[0].type == playerUnit->mounts[i].type) {
+                    if (partUnit->mounts.at(0).type == playerUnit->mounts.at(i).type) {
                         selectable = true;
                         selectableCount++;
                         mount = i;
@@ -3780,7 +3643,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
             }
         } else {
             //Nothing at this mount point.
-            const std::string temp = getMountSizeString(playerUnit->mounts[i].size);
+            const std::string temp = getMountSizeString(playerUnit->mounts.at(i).size);
             mountName = tostring(i + 1) + " (Empty) " + temp.c_str();
         }
         //Now we add the cell.  Note that "selectable" is stored in the tag property.
@@ -3799,6 +3662,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 }
 
 //Check, and verify user wants Sell Upgrade transaction.  Returns true if more input is required.
+// Only applies to mounts!
 bool BaseComputer::SellUpgradeOperation::checkTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     if (!playerUnit) {
@@ -3818,6 +3682,7 @@ bool BaseComputer::SellUpgradeOperation::checkTransaction(void) {
 }
 
 //Finish the transaction.
+// Only applies to mounts!
 void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
     Unit *playerUnit = m_parent.m_player.GetUnit();
     Unit *baseUnit = m_parent.m_base.GetUnit();
@@ -3893,7 +3758,12 @@ bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) 
             Unit *baseUnit = m_base.GetUnit();
             if (baseUnit && playerUnit) {
                 playerUnit->SellCargo(item->GetName(), quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+                
+                // Old system
                 UnitUtil::RecomputeUnitUpgrades(playerUnit);
+
+                // New system
+                UpgradeOperationResult result = playerUnit->UpgradeUnit(item->GetName(), false, true);
                 refresh();
             }
             return true;
@@ -4049,8 +3919,12 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
             texturedescription = "../units/" + sHudImage + "/" + sImage;
         }
     }
-    std::string str;
-    showUnitStats(newPart, str, 0, 0, item);
+
+    std::map<std::string, std::string> ship_map = newPart->UnitToMap();
+    std::string str = GetString("get_ship_description", "ship_view",
+                          "ship_view.py",
+                          ship_map);
+    
     VS_LOG(debug, "buildShipDescription: killing newPart");
     newPart->Kill();
     // VS_LOG(debug, "buildShipDescription: deleting newPart");
@@ -4067,20 +3941,11 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
 
 //UNDER CONSTRUCTION
 string buildUpgradeDescription(Cargo &item) {
-    //load the Unit
-    string blnk;     //modifications to an upgrade item???
-    Flightgroup *flightGroup = new Flightgroup();     //sigh
-    int fgsNumber = 0;
-    current_unit_load_mode = NO_MESH;
-    Unit *newPart = new Unit(item.GetName().c_str(), false,
-            FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber);
-    current_unit_load_mode = DEFAULT;
-    string str = "";
-    str += item.GetDescription();
-    showUnitStats(newPart, str, 0, 1, item);
-    newPart->Kill();
-    // delete newPart;
-    return str;
+    const std::string key = item.GetName() + "__upgrades";
+     PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(key.c_str()));
+    const std::string text = GetString("get_upgrade_info", "upgrade_view",
+        "upgrade_view.py", args);
+    return text;
 }
 
 class PriceSort {
@@ -4094,9 +3959,9 @@ public:
 
     bool operator()(size_t a, size_t b) {
         if (reverse) {
-            return price[a] > price[b];
+            return price.at(a) > price.at(b);
         } else {
-            return price[a] < price[b];
+            return price.at(a) < price.at(b);
         }
     }
 };
@@ -4152,7 +4017,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 indices.resize(mymin(prices.size(), locs.size()));
                 {
                     for (size_t i = 0; i < indices.size(); ++i) {
-                        indices[i] = i;
+                        indices.at(i) = i;
                     }
                 }
 
@@ -4165,8 +4030,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 newprices.reserve(indices.size());
                 {
                     for (size_t i = 0; i < indices.size() && i < toprank; ++i) {
-                        newlocs.push_back(locs[indices[i]]);
-                        newprices.push_back(prices[indices[i]]);
+                        newlocs.push_back(locs[indices.at(i)]);
+                        newprices.push_back(prices[indices.at(i)]);
                     }
                 }
 
@@ -4182,7 +4047,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 // Limited lifetime iterator (points to invalid data after save data manipulation)
                 const vector<string> &recordedLowestLocs = getStringList(whichplayer, lolock);
                 const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
-                vector<string>::const_iterator prev = std::find(
+                auto prev = std::find(
                         recordedLowestLocs.begin(), recordedLowestLocs.end(),
                         locname);
 
@@ -4207,7 +4072,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 indices.resize(mymin(prices.size(), locs.size()));
                 {
                     for (size_t i = 0; i < indices.size(); ++i) {
-                        indices[i] = i;
+                        indices.at(i) = i;
                     }
                 }
 
@@ -4220,8 +4085,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 newprices.reserve(indices.size());
                 {
                     for (size_t i = 0; i < indices.size() && i < toprank; ++i) {
-                        newlocs.push_back(locs[indices[i]]);
-                        newprices.push_back(prices[indices[i]]);
+                        newlocs.push_back(locs.at(indices.at(i)));
+                        newprices.push_back(prices.at(indices.at(i)));
                     }
                 }
 
@@ -4246,7 +4111,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         VS_LOG(info, (boost::format("  highest locs: (%1%)") % recordedHighestLocs.size()));
         {
             for (size_t i = 0; i < recordedHighestLocs.size(); ++i) {
-                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedHighestLocs[i]));
+                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedHighestLocs.at(i)));
             }
         }
 
@@ -4254,14 +4119,14 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                 // POSIX-printf style
-                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices[i]));
+                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices.at(i)));
             }
         }
 
         VS_LOG(info, (boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size()));
         {
             for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
-                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedLowestLocs[i]));
+                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedLowestLocs.at(i)));
             }
         }
 
@@ -4269,19 +4134,19 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                 // POSIX-printf style
-                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices[i]));
+                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices.at(i)));
             }
         }
 
-        VegaStrikeLogging::vega_logger()->FlushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
 
         highest.clear();
         highest.resize(recordedHighestPrices.size());
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                 string &text = highest[i];
-                PRETTY_ADD("", recordedHighestPrices[i], 2);
-                text += " (at " + recordedHighestLocs[i] + ")";
+                PRETTY_ADD("", recordedHighestPrices.at(i), 2);
+                text += " (at " + recordedHighestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Highest item %1%") % text));
             }
@@ -4292,8 +4157,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                 string &text = lowest[i];
-                PRETTY_ADD("", recordedLowestPrices[i], 2);
-                text += " (at " + recordedLowestLocs[i] + ")";
+                PRETTY_ADD("", recordedLowestPrices.at(i), 2);
+                text += " (at " + recordedLowestLocs.at(i) + ")";
 
                 VS_LOG(info, (boost::format("Lowest item %1%") % text));
             }
@@ -4610,86 +4475,39 @@ static std::string factionColorTextString(int faction) {
     return result;
 }
 
+
+// A utility to convert vector to list
+boost::python::list VectorToList(const std::vector<std::string> v) {
+    boost::python::list l;
+    for (const std::string& value : v) {
+        l.append(value);
+    }
+
+    return l;
+}
+
 //Show the player's basic information.
 bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *control) {
-    //Heading.
-    string text = "#b#Factions:#-b#n1.7#";
-
     //Number of kills for each faction.
-    vector<float> *killList = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
+    vector<float> *kill_list = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
 
-    //Make everything bold.
-    text += "#b#";
+    const std::vector<std::string> names_vector = FactionUtil::GetFactionNames();
+    const std::vector<std::string> relations_vector = FactionUtil::GetFactionRelations();
+    const std::vector<std::string> kills_vector = FactionUtil::GetFactionKills(kill_list);
 
-    //A line for each faction.
-    const size_t numFactions = FactionUtil::GetNumFactions();
-    size_t i = 0;
-    static string disallowedFactions = vs_config->getVariable("graphics", "unprintable_factions", "");
-    int totkills = 0;
-    size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
-    for (; i < numFactions; i++) {
-        Unit *currentplayer = UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
-        float relation = 0;
-        size_t upgrades = FactionUtil::GetUpgradeFaction();
-        size_t planets = FactionUtil::GetPlanetFaction();
-        static size_t privateer = FactionUtil::GetFactionIndex("privateer");
-        size_t neutral = FactionUtil::GetNeutralFaction();
-        if (i < killList->size() && i != upgrades && i != planets && i != neutral && i != privateer) {
-            totkills += (int) (*killList)[i];
-        }
-        string factionname = FactionUtil::GetFactionName(i);
-        fac_loc_after = 0;
-        fac_loc = disallowedFactions.find(factionname, fac_loc_after);
-        while (fac_loc != string::npos) {
-            if (fac_loc > 0) {
-                fac_loc_before = fac_loc - 1;
-            } else {
-                fac_loc_before = 0;
-            }
-            fac_loc_after = fac_loc + factionname.size();
-            if ((fac_loc == 0 || disallowedFactions[fac_loc_before] == ' '
-                    || disallowedFactions[fac_loc_before] == '\t')
-                    && (disallowedFactions[fac_loc_after] == ' ' || disallowedFactions[fac_loc_after] == '\t'
-                            || disallowedFactions[fac_loc_after] == '\0')) {
-                break;
-            }
-            fac_loc = disallowedFactions.find(factionname, fac_loc_after);
-        }
-        if (fac_loc != string::npos) {
-            continue;
-        }
-        if (currentplayer) {
-            relation = UnitUtil::getRelationFromFaction(currentplayer, i);
-        }
-        if (relation < -1) {
-            relation = -1;
-        }
-        if (relation > 1) {
-            relation = 1;
-        }
-        const int percent = (int) (relation * 100.0);
+    boost::python::list names_list = VectorToList(names_vector);
+    boost::python::list relations_list = VectorToList(relations_vector);
+    boost::python::list kills_list = VectorToList(kills_vector);
 
-        //Faction name.
-        text += factionColorTextString(i) + FactionUtil::GetFactionName(i) + ":#-c  ";
+    PyObject* args = PyTuple_Pack(3, names_list.ptr(), relations_list.ptr(), kills_list.ptr());
 
-        //Relation color.
-        float normRelation =
-                (relation + 1) / 2;                                    //Move relation value into 0-1 range.
-        normRelation = guiMax(0, guiMin(1, normRelation));          //Make *sure* it's in the right range.
-        text += colorsToCommandString(1 - normRelation, normRelation, guiMin(1 - normRelation, normRelation));
-
-        //End the line.
-        text += XMLSupport::tostring(percent) + "#-c";
-        if (i < killList->size()) {
-            text += ", kills: " + XMLSupport::tostring((int) (*killList)[i]);
-        }
-        text += "#n#";
-    }
-    //Total Kills if we have it.
-    text += "#n##b#Total Kills: " + XMLSupport::tostring(totkills) + "#-b#";
+    const std::string text = GetString("get_player_info", "player_info",
+        "player_info.py", args);
+    
     //Put this in the description.
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
+
     desc->setText(text);
 
     return true;
@@ -4766,1068 +4584,7 @@ static const char *WeaponTypeStrings[] = {
         "PROJECTILE"
 };
 
-void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item) {
-    static Unit *blankUnit = new Unit("upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex("upgrades"));
-    static float
-            warpenratio = XMLSupport::parse_float(vs_config->getVariable("physics", "warp_energy_multiplier", "0.12"));
-    static float warpbleed = XMLSupport::parse_float(vs_config->getVariable("physics", "warpbleed", "20"));
-    static float shield_maintenance_cost =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "shield_maintenance_charge", ".25"));
-    static bool shields_require_power =
-            XMLSupport::parse_bool(vs_config->getVariable("physics",
-                    "shields_require_passive_recharge_maintenance",
-                    "true"));
-    static float shieldenergycap =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "shield_energy_capacitance", ".2"));
 
-    float Wconv = warpenratio == 0.0 ? 0.0 : (1.0 / warpenratio);      //converts from reactor to warp energy scales
-    char conversionBuffer[128];
-    string prefix = "";
-    for (int i = 0; i < subunitlevel; i++) {
-        prefix += "  ";
-    }
-    //get conversion factor for damage -> MJ; note that shield and reactor stats use a different constant.
-    static float kj_per_unit_damage =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "kilojoules_per_unit_damage", "5400"));
-    float VSDM = kj_per_unit_damage / 1000.0;
-    float RSconverter = 100;    //100MJ per reactor or shield recharge energy unit
-    float totalWeaponEnergyUsage = 0;
-    float totalWeaponDamage = 0;
-    string MPLdesc = "";
-    string statcolor = "#c.75:.9:1#";
-    string substatcolor = "#c.675:.925:.825#";
-    string expstatcolor = "#c.6:.7:.8#";
-    string nametemp = "";
-    string model = "";
-    size_t nameindex = 0;
-    int replacement_mode = -1;
-    if (mode) {
-        replacement_mode = GetModeFromName(item.GetName().c_str());
-        MPLdesc += text;
-        text = "";
-        string nametemp = "";
-        string model = "";
-        if (item.GetName() == BASIC_REPAIR_NAME) {
-            text += MPLdesc;
-            return;
-        }
-        nametemp = playerUnit->getFullname();
-        if (nametemp == "") {
-            const std::string &name = playerUnit->name.get();
-            for (nameindex = 0; (nameindex < name.size()) && name[nameindex] != '.'; ++nameindex) {
-                nametemp += name[nameindex];
-            }
-        }
-        if (nametemp.length()) {
-            nametemp[0] = toupper(nametemp[0]);
-        }
-        nametemp = beautify(nametemp);
-        text += statcolor + "Selected Part: #-c" + nametemp;
-        if (item.GetMass() == 1)
-            PRETTY_ADDU(statcolor + "Mass: #-c", item.GetMass(), 0, "metric ton.");
-        else
-            PRETTY_ADDU(statcolor + "Mass: #-c", item.GetMass(), 1, "metric tons.");
-        if (item.GetVolume() == 1) {
-            PRETTY_ADDN(statcolor + "  Space required: #-c", item.GetVolume(), 0);
-            text += " cubic meter.#n##n##c0:1:.5#" + prefix + "[DESCRIPTION]#n##-c";
-        } else {
-            PRETTY_ADDN(statcolor + "  Space required: #-c", item.GetVolume(), 1);
-            text += " cubic meters.#n##n##c0:1:.5#" + prefix + "[DESCRIPTION]#n##-c";
-        }
-        text += MPLdesc;
-        text += "#n#";
-        text += "#n##c0:1:.5#[STATS]#n##-c";
-    }
-    if (!mode) {
-        const std::string &name = playerUnit->name;
-        for (nameindex = 0; (nameindex < name.size()) && name[nameindex] != '.'; nameindex++) {
-        }
-        nametemp = playerUnit->getFullname();
-        if (nametemp.length()) {
-            nametemp[0] = toupper(nametemp[0]);
-        }
-        for (nameindex = nameindex + 1; nameindex < name.size(); nameindex++) {
-            model += name[nameindex];
-        }
-        if (model == "blank") {
-            model = "TEMPLATE--WARNING--BUG";
-        } else if (model == "") {
-            model = "Military Issue (equipped)";
-        } else if (model == "rg") {
-            model = "Regional Guard Issue (equipped)";
-        } else if (model == "milspec") {
-            model = "Military Spec.";
-        } else if (model == "rgspec") {
-            model = "Regional Guard Spec.";
-        } else if (model == "stock") {
-            model = "Stock";
-        } else if (model == "begin") {
-            model = "Stock(Refurbished)";
-        } else {
-            model = "Military Spec. Variant (" + model + ")";
-        }
-        Cargo *fullname = GetMasterPartList(playerUnit->name.get().c_str());
-        Cargo *milname = GetMasterPartList(nametemp.c_str());
-        Cargo *blankname = GetMasterPartList((nametemp + ".blank").c_str());
-        if (!subunitlevel && (fullname || milname || blankname)) {
-            text += "#c0:1:.5#" + prefix + "[NOTES]#n##n##-c";
-            if (fullname) {
-                text += fullname->GetDescription();
-            } else if (blankname) {
-                text += blankname->GetDescription();
-            } else if (milname) {
-                text += milname->GetDescription();
-            }
-            text += "#n#";
-        }
-        text += "#n##c0:1:.5#" + prefix + "[GENERAL INFORMATION]#n##-c";
-
-        text += "#n#" + prefix + statcolor + "Class: #-c" + nametemp + statcolor + "    Model: #-c" + model;
-        PRETTY_ADDU(statcolor + "Mass: #-c", playerUnit->getMass(), 0, "metric tons");
-        //Irrelevant to player as is proportional to mass in our physics system.
-        //PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m�");
-    }
-    if (mode && replacement_mode == 2 && playerUnit->getMass() != blankUnit->getMass())
-        PRETTY_ADDU(statcolor + "Effective Mass reduced by: #-c", 100.0 * (1.0 - playerUnit->getMass()), 0, "%");
-    if (!subunitlevel) {
-        float vol[2];
-        float bvol[2];
-        const char *dvol[2] = {"Hold", "Upgrade"};
-        vol[0] = playerUnit->getEmptyCargoVolume();
-        vol[1] = playerUnit->getEmptyUpgradeVolume();
-        bvol[0] = blankUnit->getEmptyCargoVolume();
-        bvol[1] = blankUnit->getEmptyUpgradeVolume();
-        for (int index = 0; index < 2; ++index) {
-            if (!mode) {
-                PRETTY_ADDU(statcolor + dvol[index] + " volume: #-c", vol[index], 0, "cubic meters");
-            } else if (bvol[index] != vol[index]) {
-                switch (replacement_mode) {
-                    case 0:                 //Replacement or new Module
-                        PRETTY_ADDU(statcolor + "Changes " + dvol[index] + " Volume to: #-c",
-                                vol[index],
-                                0,
-                                "cubic meters");
-                        break;
-                    case 1:                 //Additive
-                        PRETTY_ADDU(statcolor + "Adds #-c",
-                                vol[index],
-                                0,
-                                "cubic meters " + statcolor + "to " + dvol[index] + " Volume #-c");
-                        break;
-                    case 2:                 //multiplicative
-                        PRETTY_ADDU(statcolor + "Increases " + dvol[index] + " Volume by #-c",
-                                100.0 * (vol[index] - 1),
-                                0,
-                                "%");
-                        break;
-                    default:                 //Failure
-                        text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                        break;
-                }
-            }
-        }
-    }
-    //following lines somewhat borken in terms of semantics for quantity of fuel
-    //and policy of upgrades to fuel
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Fuel capacity: #-c", playerUnit->fuelData(), 2, "metric tons of Lithium-6");
-    } else if (blankUnit->fuelData() != playerUnit->fuelData()) {
-        switch (replacement_mode) {
-            case 0:                 //Replacement or new Module
-                break;
-            case 1:                 //Additive
-                PRETTY_ADDU(statcolor + "Adds #-c",
-                        playerUnit->fuelData(),
-                        2,
-                        "metric tons of Lithium-6 " /*+statcolor+"to Fuel Capacity #-c"*/ );
-                break;
-            case 2:                 //multiplicative
-                break;
-            default:                 //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-    //const Unit::Computer uc  = playerUnit->ViewComputerData();
-    //const Unit::Computer buc = blankUnit->ViewComputerData();
-    const Computer &uc = playerUnit->ViewComputerData();
-    const Computer &buc = blankUnit->ViewComputerData();
-    if (!mode) {
-        text += "#n##n#" + prefix + "#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
-        text += "#n#" + prefix + statcolor + "Turning response: #-c";
-    }
-    if (playerUnit->limits.yaw == playerUnit->limits.pitch && playerUnit->limits.yaw == playerUnit->limits.roll) {
-        prettyPrintFloat(conversionBuffer, playerUnit->limits.yaw
-                / ((playerUnit->GetMoment() != 0) ? playerUnit->GetMoment() : 1), 0, 4);
-        if (!mode) {
-            text += conversionBuffer;
-            text += " radians/second^2#n#" + expstatcolor + "  (yaw, pitch, roll)#-c";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) {
-            switch (replacement_mode) {
-                case 0:                     //Replacement or new Module
-                    PRETTY_ADDU(statcolor + "#n#Installs maneuvering jets with turning response #-c",
-                            playerUnit->limits.yaw,
-                            0,
-                            " radians/second^2#n#" + statcolor + "  (yaw, pitch, roll)#-c");
-                    break;
-                case 1:                     //Additive
-                    break;
-                case 2:                     //multiplicative
-                    PRETTY_ADDU(statcolor + "#n#Increases turning response by #-c",
-                            100.0 * ((playerUnit->limits.yaw * 180 / PI) - 1),
-                            0,
-                            "%#n#" + statcolor + "  (yaw, pitch, roll)#-c");
-                    break;
-                default:                     //Failure
-                    text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                    break;
-            }
-        }
-    } else {
-        if (!mode) {
-            float moment = (playerUnit->GetMoment() != 0) ? playerUnit->GetMoment() : 1;
-            PRETTY_ADDN(substatcolor + "  yaw #-c", playerUnit->limits.yaw / (moment), 4);
-            PRETTY_ADDN(substatcolor + "  pitch #-c", playerUnit->limits.pitch / (moment), 4);
-            PRETTY_ADDN(substatcolor + "  roll #-c", playerUnit->limits.roll / (moment), 4);
-            text += " radians/second^2";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)
-                || MODIFIES(replacement_mode, playerUnit, blankUnit, limits.pitch)
-                || MODIFIES(replacement_mode, playerUnit, blankUnit, limits.roll)) {
-            switch (replacement_mode) {
-                case 0:                     //Replacement or new Module
-                    text += "#n#Replaces existing maneuvering system with one rated at: #-c#n#";
-                    PRETTY_ADDN(substatcolor + "Yaw #-c", playerUnit->limits.yaw, 2);
-                    PRETTY_ADDN(substatcolor + "  Pitch #-c", playerUnit->limits.pitch, 2);
-                    PRETTY_ADDN(substatcolor + "  Roll #-c", playerUnit->limits.roll, 2);
-                    text += " metric-ton*radians/second^2";
-                    break;
-                case 1:                     //Additive
-                    text += "#n#Upgrades existing maneuvering system by the following amounts: #-c#n#";
-                    PRETTY_ADDN(substatcolor + "Yaw #-c", playerUnit->limits.yaw, 2);
-                    PRETTY_ADDN(substatcolor + "  Pitch #-c", playerUnit->limits.pitch, 2);
-                    PRETTY_ADDN(substatcolor + "  Roll #-c", playerUnit->limits.roll, 2);
-                    text += " metric-ton*radians/second^2";
-                    break;
-                case 2:                     //multiplicative
-                    text +=
-                            "#n#Increases performance of existing maneuvering system by the following percentages: #-c#n#";
-                    PRETTY_ADDN(substatcolor + "Yaw #-c", 100.0 * ((playerUnit->limits.yaw * 180 / PI) - 1), 0);
-                    PRETTY_ADDN(substatcolor + "  Pitch #-c", 100.0 * ((playerUnit->limits.pitch * 180 / PI) - 1), 0);
-                    PRETTY_ADDN(substatcolor + "  Roll #-c", 100.0 * ((playerUnit->limits.roll * 180 / PI) - 1), 0);
-                    break;
-                default:                     //Failure
-                    text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                    break;
-            }
-        }
-    }
-    if (!subunitlevel) {
-        if (!mode && (playerUnit->getMass() != 0)) {
-            PRETTY_ADDU(statcolor + "Fore acceleration: #-c",
-                    playerUnit->limits.forward / (9.8 * playerUnit->getMass()), 2, "gravities");
-            PRETTY_ADDU(statcolor + "Aft acceleration: #-c",
-                    playerUnit->limits.retro / (9.8 * playerUnit->getMass()), 2, "gravities");
-            if (playerUnit->limits.lateral == playerUnit->limits.vertical) {
-                PRETTY_ADDU(statcolor + "Orthogonal acceleration: #-c",
-                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2, "gravities");
-                text += expstatcolor + "#n#  (vertical and lateral axes)#-c";
-            } else {
-                PRETTY_ADDN(statcolor + " Lateral acceleration #-c",
-                        playerUnit->limits.lateral / (9.8 * playerUnit->getMass()),
-                        2);
-                PRETTY_ADDN(statcolor + " Vertical acceleration #-c",
-                        playerUnit->limits.vertical / (9.8 * playerUnit->getMass()), 2);
-                text += " gravities";
-            }
-            PRETTY_ADDU(statcolor + "Forward acceleration with overthrust: #-c", playerUnit->limits.afterburn
-                    / (9.8 * playerUnit->getMass()), 2, "gravities");
-            text.append("#n##n##c0:1:.5#" + prefix + "[GOVERNOR SETTINGS]#n##-c");
-        } else {
-            switch (replacement_mode) {
-                case 0:                     //Replacement or new Module
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
-                        PRETTY_ADDU(statcolor + "Provides forward thrust rated at: #-c",
-                                playerUnit->limits.forward / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
-                        PRETTY_ADDU(statcolor + "Provides aftward thrust rated at: #-c",
-                                playerUnit->limits.retro / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
-                        PRETTY_ADDU(statcolor + "Provides vertical thrust rated at: #-c",
-                                playerUnit->limits.vertical / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
-                        PRETTY_ADDU(statcolor + "Provides lateral thrust rated at: #-c",
-                                playerUnit->limits.lateral / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn)) {
-                        PRETTY_ADDU(statcolor + "Overdrive thrust rated at: #-c",
-                                playerUnit->limits.afterburn / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    break;
-                case 1:                     //Additive
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
-                        PRETTY_ADDU(statcolor + "Increases forward thrust rating by: #-c",
-                                playerUnit->limits.forward / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
-                        PRETTY_ADDU(statcolor + "Increases aftward thrust rating by: #-c",
-                                playerUnit->limits.retro / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
-                        PRETTY_ADDU(statcolor + "Increases vertical thrust rating by: #-c",
-                                playerUnit->limits.vertical / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
-                        PRETTY_ADDU(statcolor + "Increases lateral thrust rating by: #-c",
-                                playerUnit->limits.lateral / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn)) {
-                        PRETTY_ADDU(statcolor + "Increases overdrive thrust rating by: #-c",
-                                playerUnit->limits.afterburn / 1000.0,
-                                2,
-                                "MegaNewtons");
-                    }
-                    break;
-                case 2:                     //multiplicative
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.forward)) {
-                        PRETTY_ADDU(statcolor + "Increases forward thrust rating by: #-c",
-                                (playerUnit->limits.forward - 1) * 100,
-                                0,
-                                "%");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.retro)) {
-                        PRETTY_ADDU(statcolor + "Increases aftward thrust rating by: #-c",
-                                (playerUnit->limits.retro - 1) * 100,
-                                0,
-                                "%");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.vertical)) {
-                        PRETTY_ADDU(statcolor + "Increases vertical thrust rating by: #-c",
-                                (playerUnit->limits.vertical - 1) * 100,
-                                0,
-                                "%");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.lateral)) {
-                        PRETTY_ADDU(statcolor + "Increases lateral thrust rating by: #-c",
-                                (playerUnit->limits.lateral - 1) * 100,
-                                0,
-                                "%");
-                    }
-                    if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.afterburn))
-                        PRETTY_ADDU(statcolor + "Overdrive thrust rating by: #-c",
-                                (playerUnit->limits.afterburn - 1) * 100,
-                                0,
-                                "%");
-                    break;
-                default:                     //Failure
-                    text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                    break;
-            }
-        }
-        static float non_combat_mode_mult =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "combat_speed_boost", "100"));
-        if (!mode) {
-            PRETTY_ADDU(statcolor + "Max combat speed: #-c", uc.max_speed(), 0, "m/s");
-            PRETTY_ADDU(statcolor + "Max overdrive combat speed: #-c", uc.max_ab_speed(), 0, "m/s");
-            PRETTY_ADDU(statcolor + "Max non-combat speed: #-c", uc.max_speed() * non_combat_mode_mult, 0, "m/s");
-        } else {
-            switch (replacement_mode) {
-                case 0:                     //Replacement or new Module
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
-                        PRETTY_ADDU(statcolor + "Sets max combat speed governor to: #-c", uc.max_speed(), 0, "m/s");
-                        PRETTY_ADDU(statcolor + "Sets max non-combat speed governor to: #-c",
-                                uc.max_speed() * non_combat_mode_mult, 0, "m/s");
-                    }
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
-                        PRETTY_ADDU(statcolor + "Sets max overdrive combat speed governor to: #-c",
-                                uc.max_ab_speed(),
-                                0,
-                                "m/s");
-                    break;
-                case 1:                     //Additive
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
-                        PRETTY_ADDU(statcolor + "Increases max combat speed governor setting by: #-c",
-                                uc.max_speed(),
-                                0,
-                                "m/s");
-                        PRETTY_ADDU(statcolor + "Increases max non-combat speed governor setting by: #-c",
-                                uc.max_speed() * non_combat_mode_mult, 0, "m/s");
-                    }
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
-                        PRETTY_ADDU(statcolor + "Increases max overdrive combat speed governor setting by: #-c",
-                                uc.max_ab_speed(), 0, "m/s");
-                    break;
-                case 2:                     //multiplicative
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_speed())) {
-                        PRETTY_ADDU(statcolor + "Increases max combat speed governor settings by: #-c",
-                                100.0 * (uc.max_speed() - 1), 0, "%");
-                        PRETTY_ADDU(statcolor + "Increases max non-combat speed governor settings by: #-c",
-                                100.0 * (uc.max_speed() - 1), 0, "%");
-                    }
-                    if (MODIFIES(replacement_mode, &uc, &buc, max_ab_speed()))
-                        PRETTY_ADDU(statcolor + "Increases max overdrive combat speed governor settings by: #-c",
-                                (uc.max_ab_speed() - 1) * 100, 0, "%");
-                    break;
-                default:                     //Failure
-                    text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                    break;
-            }
-        }
-    }
-    if (!mode) {
-        if (uc.max_yaw_right == uc.max_pitch_up && uc.max_yaw_right == uc.max_roll_right) {
-            PRETTY_ADD(statcolor + "Max turn rate: #-c", uc.max_yaw_right, 2);
-            text += " radians/second " + expstatcolor + "(yaw, pitch, roll)#-c";
-        } else {
-            text += ("#n#" + prefix + statcolor + "Max turn rates:#-c");
-            PRETTY_ADDU(substatcolor + " - yaw: #-c", uc.max_yaw_right, 2, "radians/second");
-            PRETTY_ADDU(substatcolor + " - pitch: #-c", uc.max_pitch_up, 2, "radians/second");
-            PRETTY_ADDU(substatcolor + " - roll: #-c", uc.max_roll_right, 2, "radians/second");
-        }
-        text += "#n##n##c0:1:.5#" + prefix + "[TARGETTING SUBSYSTEM]#n##-c";
-    } else if (MODIFIES(replacement_mode, &uc, &buc, max_yaw_right)
-            || MODIFIES(replacement_mode, &uc, &buc, max_pitch_up)
-            || MODIFIES(replacement_mode, &uc, &buc, max_roll_right)) {
-        switch (replacement_mode) {
-            case 0:                         //Replacement or new Module
-                text += ("#n#" + prefix + "Governor settings for maximum turn rates set to: ");
-                PRETTY_ADDN(substatcolor + "  yaw #-c", uc.max_yaw_right, 2);
-                PRETTY_ADDN(substatcolor + "  pitch #-c", uc.max_pitch_up, 2);
-                PRETTY_ADDN(substatcolor + "  roll #-c", uc.max_roll_right, 2);
-                text += " radians/second";
-                break;
-            case 1:                         //Additive
-                text += ("#n#" + prefix + "Governor settings for maximum turn rates increased by: ");
-                PRETTY_ADDN(substatcolor + "  yaw #-c", uc.max_yaw_right, 2);
-                PRETTY_ADDN(substatcolor + "  pitch #-c", uc.max_pitch_up, 2);
-                PRETTY_ADDN(substatcolor + "  roll #-c", uc.max_roll_right, 2);
-                text += " radians/second";
-                break;
-            case 2:                         //multiplicative
-                text += ("#n#" + substatcolor + "Increases governor settings for maximum turn rates by: #-c");
-                PRETTY_ADDN(substatcolor + "  yaw #-c", 100.0 * ((uc.max_yaw_right * 180 / PI) - 1), 0);
-                PRETTY_ADDN(substatcolor + "  pitch #-c", 100.0 * ((uc.max_pitch_up * 180 / PI) - 1), 0);
-                PRETTY_ADDN(substatcolor + "  roll #-c", 100.0 * ((uc.max_roll_right * 180 / PI) - 1), 0);
-                text += " %";
-                break;
-            default:                         //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Tracking range: #-c", playerUnit->radar.GetMaxRange() / 1000, 0, "km");
-        if ((acos(playerUnit->radar.GetMaxCone()) * 360 / PI) < 359) {
-            PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(playerUnit->radar.GetMaxCone()) * 2, 2, "radians");
-            text += expstatcolor + "#n#  (planar angle: 2 pi means full space)#-c";
-        } else {
-            text += "#n#" + prefix + statcolor + "Tracking cone: #-cOMNIDIRECTIONAL";
-        }
-        PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c", acos(playerUnit->radar.GetTrackingCone()) * 2, 2, "radians");
-        PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(playerUnit->radar.GetLockCone()) * 2, 2, "radians");
-        if (!subunitlevel) {
-            //Always zero PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
-            text += "#n#" + prefix + statcolor + "ITTS (Intelligent Target Tracking System) support: #-c";
-            if (uc.itts) {
-                text += "yes";
-            } else {
-                text += "no";
-            }
-            text += "#n#" + prefix + statcolor + "AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-            std::string afhh;
-            if (playerUnit->radar.UseFriendFoe()) {
-                afhh += "friendly/hostile ";
-            }
-            if (playerUnit->radar.UseThreatAssessment()) {
-                afhh += "threat ";
-            }
-            if (afhh.empty()) {
-                afhh = "no";
-            }
-            text += afhh;
-        }
-        text.append("#n##n##c0:1:.5#" + prefix + "[ENERGY SUBSYSTEM]#n##-c");
-    } else {
-        CRadar *radar = &playerUnit->radar;
-        std::string afhh;
-        switch (replacement_mode) {
-            case 0:                 //Replacement or new Module
-
-            PRETTY_ADDU(statcolor + "Tracking range: #-c", radar->GetMaxRange() / 1000, 0, "km");
-            if ((acos(radar->GetMaxCone()) * 360 / PI) < 359) {
-                PRETTY_ADDU(statcolor + "Tracking cone: #-c", acos(playerUnit->radar.GetMaxCone()) * 2, 2, "radians");
-                text += statcolor + " (planar angle: 2 pi means full space)#-c";
-            } else {
-                text += "#n#" + prefix + statcolor + "Tracking cone: #-cOMNIDIRECTIONAL";
-            }
-            PRETTY_ADDU(statcolor + "Assisted targeting cone: #-c",
-                        acos(radar->GetTrackingCone()) * 2,
-                        2,
-                        "radians");
-            PRETTY_ADDU(statcolor + "Missile locking cone: #-c", acos(radar->GetLockCone()) * 2, 2, "radians");
-            text += "#n#" + prefix + statcolor + "ITTS (Intelligent Target Tracking System) support: #-c";
-            if (uc.itts) {
-                text += "yes";
-            } else {
-                text += "no";
-            }
-            text += "#n#" + prefix + statcolor + "AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-
-            if (radar->UseFriendFoe()) {
-                afhh += "friendly/hostile ";
-            }
-            if (radar->UseThreatAssessment()) {
-                afhh += "threat ";
-            }
-            if (afhh.empty()) {
-                afhh = "no";
-            }
-            text += afhh;
-
-            break;
-            case 1:                 //Additive
-                break;
-            case 2:                 //multiplicative
-                break;
-            default:                 //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-    const Unit::UnitJump &uj = playerUnit->GetJumpStatus();
-    const Unit::UnitJump &buj = blankUnit->GetJumpStatus();
-    if (!mode) {
-        float maxshield = playerUnit->totalShieldEnergyCapacitance();
-        if (shields_require_power) {
-            maxshield = 0;
-        }
-        PRETTY_ADDU(statcolor + "Recharge: #-c", playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
-        PRETTY_ADDU(statcolor + "Weapon capacitor bank storage: #-c",
-                ((playerUnit->maxEnergyData() - maxshield) * RSconverter), 0, "MJ");
-        //note: I found no function to get max warp energy, but since we're docked they are the same
-        if (!subunitlevel) {
-            PRETTY_ADDU(statcolor + "Warp capacitor bank storage: #-c",
-                    playerUnit->warpCapData() * RSconverter * Wconv,
-                    0,
-                    "MJ");
-
-            text += "#n##n##c0:1:.5#" + prefix + "[SPEC SUBSYSTEM]#n##-c";
-
-            PRETTY_ADDU(statcolor + "Active SPEC Energy Requirements: #-c",
-                    uj.insysenergy * RSconverter * Wconv / warpbleed,
-                    0,
-                    "MJ/s");
-
-            text += "#n##n##c0:1:.5#" + prefix + "[JUMP SUBSYSTEM]#n##-c";
-            if (uj.drive == -2) {
-                text += "#n##c1:.3:.3#No outsystem jump drive present#-c";                 //fixed??
-            } else {
-                PRETTY_ADDU(statcolor + "Energy cost for jumpnode travel: #-c",
-                        uj.energy * RSconverter * Wconv,
-                        0,
-                        "MJ");
-                if (uj.delay)
-                    PRETTY_ADDU(statcolor + "Delay: #-c", uj.delay, 0, "seconds");
-                if (uj.damage > 0)
-                    PRETTY_ADDU(statcolor + "Damage to outsystem jump drive: #-c", uj.damage * VSDM, 0, "MJ");
-                if (playerUnit->warpCapData() < uj.energy) {
-                    text += "#n##c1:.3:.3#" + prefix
-                            +
-                                    "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
-                }
-            }
-        }
-    } else {
-        switch (replacement_mode) {
-            case 0:                 //Replacement or new Module
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
-                    PRETTY_ADDU(statcolor + "Installs reactor with recharge rate: #-c",
-                            playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
-                    PRETTY_ADDU(statcolor + "Installs main capacitor bank with storage capacity: #-c",
-                            (playerUnit->maxEnergyData() * RSconverter), 0, "MJ");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
-                    PRETTY_ADDU(statcolor + "Installs warp capacitor bank with storage capacity: #-c",
-                            playerUnit->getWarpEnergy() * RSconverter * Wconv, 0, "MJ");
-                if (buj.drive != uj.drive) {
-                    text += statcolor +
-                            "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
-                }
-                break;
-            case 1:                 //Additive
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
-                    PRETTY_ADDU(statcolor + "Increases recharge rate by #-c",
-                            playerUnit->energyRechargeData() * RSconverter, 0, "MJ/s");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
-                    PRETTY_ADDU(statcolor + "Adds #-c",
-                            (playerUnit->maxEnergyData() * RSconverter),
-                            0,
-                            "MJ of storage to main capacitor banks");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
-                    PRETTY_ADDU(statcolor + "Adds #-c",
-                            playerUnit->getWarpEnergy() * RSconverter * Wconv,
-                            0,
-                            "MJ of storage to warp capacitor bank");
-                break;
-            case 2:                 //multiplicative
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()))
-                    PRETTY_ADDU(statcolor + "Increases reactor recharge rate by #-c",
-                            100.0 * (playerUnit->energyRechargeData() - 1), 0, "%");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()))
-                    PRETTY_ADDU(statcolor + "Increases main capacitor bank storage by #-c",
-                            100.0 * (playerUnit->maxEnergyData() - 1), 0, "%");
-                if (MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()))
-                    PRETTY_ADDU(statcolor + "Increases warp capacitor bank storage by #-c",
-                            (playerUnit->getWarpEnergy() - 1) * 100, 0, "%");
-                break;
-            default:                 //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-    if (!mode) {
-        text += "#n##n##c0:1:.5#" + prefix + "[DURABILITY STATISTICS]#n##-c";
-        text += "#n#" + prefix + statcolor + "Armor damage resistance:#-c";
-    }
-
-    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit,
-            armor->facets[as_integer(FacetName::left_top_front)].health)) {
-        switch (replacement_mode) {
-            case 0:                 //Replacement or new Module
-                text += "#n#" + prefix + statcolor + "Replaces existing armor, if any.#n#Armor damage resistance:#-c";
-                break;
-            case 1:                 //Additive
-                text += "#n#" + prefix + statcolor + "Adds the following to armor damage resistance ratings:#-c";
-                break;
-            case 2:                 //multiplicative
-                text += "#n#" + prefix + statcolor + "Armor damage resistance increased by following percentages:#-c";
-                break;
-            default:                 //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-
-    // Add Armor stats
-    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, armor->facets[2].health)) {
-        std::string armor_color_strings[8] = {
-                " - Fore-starboard-high: #-c",
-                " - Aft-starboard-high: #-c",
-                " - Fore-port-high: #-c",
-                " - Aft-port-high: #-c",
-                " - Fore-starboard-low: #-c",
-                " - Aft-starboard-low: #-c",
-                " - Fore-port-low: #-c",
-                " - Aft-port-low: #-c"
-        };
-
-        int armor_indices[8] = {2, 6, 0, 4, 3, 7, 1, 5};
-
-        for (int i = 0; i < 8; i++) {
-            PRETTY_ADDU(
-                    substatcolor + armor_color_strings[i],
-                    (mode && replacement_mode
-                            == 2) ? 100.0 * (playerUnit->armor->facets[armor_indices[i]].health - 1) :
-                            playerUnit->armor->facets[2].health * VSDM,
-                    0,
-                    (2 == replacement_mode) ? "%" : "MJ");
-        }
-    }
-
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Sustainable Hull Damage: #-c",
-                playerUnit->GetHull() / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
-        if (1 != playerUnit->GetHullPercent()) {
-            PRETTY_ADD("  Current condition: ", playerUnit->GetHullPercent() * 100, 2);
-            text += "% of normal";
-        }
-    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, GetHull())) {
-        switch (replacement_mode) {
-            case 0:                         //Replacement or new Module
-                PRETTY_ADDU(statcolor + "New Sustained Hull Damage Rating: #-c",
-                        playerUnit->GetHull() / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
-                break;
-            case 1:                         //Additive
-                PRETTY_ADDU(statcolor + "Increases sustainable hull damage by #-c", playerUnit->GetHull()
-                        / (playerUnit->GetHullPercent()) * VSDM, 0, "MJ");
-                break;
-            case 2:                         //multiplicative
-                PRETTY_ADDU(statcolor + "Hull Strength increased by #-c", 100.0 * (playerUnit->GetHull() - 1), 0, "%");
-                break;
-            default:                         //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-
-    // Shields
-    const int num_shields = playerUnit->shield->number_of_facets;
-    if (!mode) {
-        if (num_shields) {
-            PRETTY_ADD(statcolor + "Number of shield emitter facings: #-c", num_shields, 0);
-            text += "#n#" + prefix + statcolor + "Shield protection rating:#-c";
-        } else {
-            text += "#n#" + prefix + statcolor + "No shielding. #-c";
-        }
-    } else if (replacement_mode != 0 || playerUnit->shield->GetMaxHealth() != blankUnit->shield->GetMaxHealth()) {
-        switch (replacement_mode) {
-            case 0:                         //Replacement or new Module
-                text += "#n#" + prefix + statcolor + "Installs shield with following protection ratings:#-c";
-                break;
-            case 1:                         //Additive
-                text += "#n#" + prefix + statcolor + "Adds following amounts to shield protection ratings:#-c";
-                break;
-            case 2:                         //multiplicative
-                text += "#n#" + prefix + statcolor
-                        + "Shield protection rating for each emitter increased by listed percentage:#-c";
-                break;
-            default:                         //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-
-    std::string shield_two_strings[2] = {" - fore: #-c", " - aft: #-c"};
-    std::string shield_four_strings[4] = {" - port: #-c", " - starboard: #-c", " - fore: #-c", " - aft: #-c"};
-    // TODO: replace with fore aft port starboard top bottom
-    std::string shield_eight_strings[8] = {" - ltf: #-c", " - rtf: #-c", " - lbf: #-c", " - rbf: #-c",
-            " - ltr: #-c", " - rtr: #-c", " - lbr: #-c", " - rbr: #-c"};
-
-    std::string *shield_strings = nullptr;
-
-    switch (num_shields) {
-        case 2:
-            shield_strings = shield_two_strings;
-            break;
-        case 4:
-            shield_strings = shield_four_strings;
-            break;
-        case 8:
-            shield_strings = shield_eight_strings;
-            break;
-    }
-
-    if (shield_strings) {
-        if (!mode || MODIFIES(replacement_mode, playerUnit,
-                blankUnit,
-                shield->GetMaxHealth())) {
-            for (int i = 0; i < num_shields; i++) {
-                PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                        (100.0 * (playerUnit->shield->facets[i].max_health - 1)) :
-                        playerUnit->shield->facets[i].max_health * VSDM, 0,
-                        (2 == replacement_mode) ? "%" : "MJ");
-            }
-        }
-    }
-
-    const float regeneration = playerUnit->shield->GetRegeneration();
-    if (!mode) {
-        PRETTY_ADDU(statcolor + "Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s");
-    } else if (replacement_mode != 0 || playerUnit->shield->GetRegeneration() != blankUnit->shield->GetRegeneration()) {
-        switch (replacement_mode) {
-            case 0:                         //Replacement or new Module
-                PRETTY_ADDU(statcolor + "Shield protection recharge speed set to: #-c", regeneration * VSDM, 0, "MJ/s");
-                break;
-            case 1:                         //Additive
-                PRETTY_ADDU(statcolor + "Increases shield protection recharge speed by #-c",
-                        regeneration * VSDM,
-                        0,
-                        "MJ/s");
-                break;
-            case 2:                         //multiplicative
-                PRETTY_ADDU(statcolor + "Shield protection recharge speed increased by #-c",
-                        100.0 * (regeneration - 1),
-                        0,
-                        "%");
-                break;
-            default:                         //Failure
-                text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                break;
-        }
-    }
-    //cloaking device? If we don't have one, no need to mention it ever exists, right?
-    if (playerUnit->cloak.Capable()) {
-        if (!mode) {
-            PRETTY_ADDU(statcolor + "Cloaking device available, energy usage: #-c",
-                    playerUnit->cloak.Energy() * RSconverter * Wconv,
-                    0,
-                    "MJ/s");
-        } else {
-            switch (replacement_mode) {
-                case 0:                     //Replacement or new Module
-                    PRETTY_ADDU(statcolor + "Installs a cloaking device.#n#  Activated energy usage: #-c",
-                            playerUnit->cloak.Energy() * RSconverter * Wconv,
-                            0,
-                            "MJ/s");
-                    break;
-                case 1:                     //Additive
-                    text += "#n#Additive Cloaking...Seems like a bug to me.#n#";
-                    break;
-                case 2:                     //multiplicative
-                    text += "#n#Multiplicative Cloaking...Seems like a bug to me.#n#";
-                    break;
-                default:                     //Failure
-                    text += "Oh dear, this wasn't an upgrade. Please debug code.";
-                    break;
-            }
-        }
-    }
-    bool anyweapons = false;
-    if (!mode) {
-        text += "#n##n##c0:1:.5#" + prefix + "[ARMAMENT]#n##-c";
-        text += prefix + "MOUNTPOINT RATINGS:";
-    }
-    //let's go through all mountpoints
-    {
-        for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-            if (!mode) {
-                PRETTY_ADD(" #c0:1:.3#[#-c", i + 1, 0);
-                text += "#c0:1:.3#]#-c #c0:1:1#" + getMountSizeString(playerUnit->mounts[i].size) + "#-c";
-            }
-            const WeaponInfo *wi = playerUnit->mounts[i].type;
-            if (wi && wi->name != "") {
-                anyweapons = true;
-            }
-        }
-    }
-    if (!mode) {
-        text += "#n#" + prefix + "MOUNTED:";
-    }          //need brace for namespace issues on VC++
-    {
-        if (anyweapons) {
-            for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-                const WeaponInfo *wi = playerUnit->mounts[i].type;
-                if ((!wi) || (wi->name == "")) {
-                    continue;
-                } else {
-                    if (!mode) {
-                        PRETTY_ADD("  #c0:1:.3#[#-c", i + 1, 0);
-                        text += "#c0:1:.3#]#-c ";
-                    }
-                    text += wi->name + ": #c0:1:1#" + getMountSizeString(as_integer(wi->size)) + "#-c#c.9:.9:.5#"
-                            + WeaponTypeStrings[as_integer(wi->type)] + " #-c";
-                    if (wi->damage < 0) {
-                        text += "#n#" + prefix + statcolor + "   Damage:#-c special";
-                    } else {
-                        PRETTY_ADDU(statcolor + "   Damage: #-c",
-                                wi->damage * VSDM,
-                                0,
-                                wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ");
-                        if (wi->phase_damage > 0)
-                            PRETTY_ADDU(statcolor + "   Phase damage: #-c",
-                                    wi->phase_damage * VSDM,
-                                    0,
-                                    wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ");
-                    }
-                    PRETTY_ADDU(statcolor + "   Energy usage: #-c",
-                            wi->energy_rate * RSconverter,
-                            0,
-                            wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ/shot");
-                    PRETTY_ADDU(statcolor + "   Refire delay: #-c", wi->Refire(), 2, "seconds");
-                    //display info specific to some weapons type
-
-                    PRETTY_ADDU(statcolor + "   Range: #-c", wi->range, 0, "meters");
-                    if ((100000 * (1.0 - wi->long_range) / (wi->range)) > 0.00001) {
-                        PRETTY_ADD(statcolor + "   Range attenuation factor: #-c",
-                                100000 * (1.0 - wi->long_range) / (wi->range),
-                                2);
-                        text += "% per km";
-                    }
-
-                    switch (wi->type) {
-                        case WEAPON_TYPE::BALL:                     //may need ammo
-                        case WEAPON_TYPE::BOLT:
-                            if (wi->damage > 0) {
-                                totalWeaponDamage +=
-                                        (wi->damage / wi->Refire());
-                            }                              //damage per second
-                            if (wi->phase_damage > 0) {
-                                totalWeaponDamage += (wi->phase_damage
-                                        / wi->Refire());
-                            }                              //damage per second
-
-                            PRETTY_ADDU(statcolor + "   Exit velocity: #-c", wi->speed, 0, "meters/second");
-                            if (playerUnit->mounts[i].ammo != -1) {
-                                if ((as_integer(wi->size) & as_integer(MOUNT_SIZE::SPECIALMISSILE)) == 0)
-                                    PRETTY_ADD(statcolor + "   Rounds remaining: #-c", playerUnit->mounts[i].ammo, 0);
-                                else
-                                    PRETTY_ADD(statcolor + "   Rockets remaining: #-c", playerUnit->mounts[i].ammo, 0);
-                            }
-                            totalWeaponEnergyUsage += (wi->energy_rate / wi->Refire());
-                            break;
-                        case WEAPON_TYPE::PROJECTILE:                     //need ammo
-                            if (wi->lock_time > 0) {
-                                PRETTY_ADDU(statcolor + "   'Fire and Forget' lock time: #-c",
-                                        wi->lock_time,
-                                        0,
-                                        "seconds");
-                            } else {
-                                text += "#n#";
-                                text += prefix;
-                                text += statcolor
-                                        + "   Missile Lock Type: #-c#c1:.3:.3#None.#-c Inertial Guidance Only";
-                            }
-                            PRETTY_ADD(statcolor + "   Missiles remaining: #-c", playerUnit->mounts[i].ammo, 0);
-                            totalWeaponEnergyUsage += (wi->energy_rate / wi->Refire());
-                            break;
-                        case WEAPON_TYPE::BEAM:
-                            if (wi->damage > 0) {
-                                totalWeaponDamage += wi->damage;
-                            }
-                            if (wi->phase_damage > 0) {
-                                totalWeaponDamage += wi->phase_damage;
-                            }
-                            PRETTY_ADDU(statcolor + "   Beam stability: #-c", wi->stability, 2, "seconds");
-                            if (playerUnit->mounts[i].ammo != -1)
-                                PRETTY_ADD(statcolor + "   Shots remaining: #-c", playerUnit->mounts[i].ammo, 0);
-                            totalWeaponEnergyUsage += wi->energy_rate;
-                            break;
-                        default:
-                            break;
-                    }
-                    if ((mode != 0) &&
-                            (wi->type != WEAPON_TYPE::PROJECTILE) &&
-                            (wi->Refire() > 0) &&
-                            ((wi->damage != 0) || (wi->phase_damage != 0) || (wi->energy_rate != 0))) {
-                        text += "#n##n#" + prefix + statcolor + "   Average for continuous firing:#-c";
-                        float shot_cycle_mul = wi->type == WEAPON_TYPE::BEAM ?
-                                wi->stability / (wi->Refire() + wi->stability) :
-                                1 / wi->Refire();
-                        if (wi->damage != 0)
-                            PRETTY_ADDU(statcolor + "   Damage: #-c",
-                                    wi->damage * VSDM * shot_cycle_mul,
-                                    2, "MJ/s");
-                        if (wi->phase_damage != 0)
-                            PRETTY_ADDU(statcolor + "   Phase damage: #-c",
-                                    wi->phase_damage * VSDM * shot_cycle_mul,
-                                    2, "MJ/s");
-                        if (wi->energy_rate != 0)
-                            PRETTY_ADDU(statcolor + "   Energy usage: #-c",
-                                    wi->energy_rate * RSconverter * shot_cycle_mul,
-                                    2, "MJ/s");
-                    }
-                    text += "#n#";
-                }
-            }
-        } else                  //end mountpoint list
-        if (!mode) {
-            text += "#n##c1:.3:.3#" + prefix + "  NO MOUNTED WEAPONS#n##-c";
-        }
-    }
-    if (mode) {
-        return;
-    }
-    if (subunitlevel == 0 && mode == 0) {
-        text += "#n##n##c0:1:.5#" + prefix + "[KEY FIGURES]#n##-c";
-        float maxshield = playerUnit->totalShieldEnergyCapacitance();
-        if (shields_require_power) {
-            maxshield = 0;
-        }
-        PRETTY_ADDU(statcolor + "Minimum time to reach full overthrust speed: #-c",
-                playerUnit->getMass() * uc.max_ab_speed() / playerUnit->limits.afterburn, 2, "seconds");
-        //reactor
-        float avail = (playerUnit->maxEnergyData() * RSconverter - maxshield * VSDM);
-
-        int num_shields = playerUnit->shield->number_of_facets;
-        float regeneration = playerUnit->shield->GetRegeneration();
-        float overhead = (shields_require_power) ?
-                (regeneration / shieldenergycap * shield_maintenance_cost
-                        * num_shields * VSDM) : 0;
-        float nrt = avail / (playerUnit->energyRechargeData() * RSconverter); // TODO -overhead);
-        PRETTY_ADDU(statcolor + "Reactor nominal replenish time: #-c", nrt, 2, "seconds");
-        //shield related stuff
-        //code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
-        static float low_power_mode =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "low_power_mode_energy", "10"));
-        if (playerUnit->maxEnergyData() - maxshield < low_power_mode) {
-            text += "#n##c1:.3:.3#" + prefix
-                    +
-                            "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
-        }
-        if (uj.drive != -2 && playerUnit->warpCapData() < uj.energy) {
-            text += "#n##c1:.3:.3#" + prefix
-                    +
-                            "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
-        }
-
-        if (num_shields) {
-            if (regeneration * num_shields * VSDM / shieldenergycap > playerUnit->energyRechargeData()
-                    * RSconverter) {
-                text += "#n##c1:1:.1#" + prefix
-                        + "WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
-                text += "Your shields won't be able to regenerate at their optimal speed!#-c";
-            }
-            if (shields_require_power) {
-                text += "#n#" + prefix + statcolor + "Reactor recharge slowdown caused by shield maintenance: #-c";
-                float maint_draw_percent = regeneration * VSDM * 100.0 / shieldenergycap * shield_maintenance_cost
-                        * num_shields / (playerUnit->energyRechargeData() * RSconverter);
-                text += (boost::format("%1$.2f") % maint_draw_percent).str();
-                text += " %.";
-                if (maint_draw_percent > 60) {
-                    text += "#n##c1:1:.1#" + prefix
-                            +
-                                    "WARNING: Reactor power is heavily consumed by passive shield maintenance: consider downgrading shield or upgrading reactor.#-c";
-                } else if (maint_draw_percent > 95) {
-                    text += "#n##c1:.3:.3#" + prefix
-                            +
-                                    "SEVERE WARNING: Reactor power is overdrawn! Unsustainable power is being consumed by passive shield maintenance: downgrade shield or upgrade reactor immediately!#-c";
-                }
-            }
-        }
-        totalWeaponEnergyUsage = totalWeaponEnergyUsage * RSconverter;
-        PRETTY_ADDU(statcolor + "Combined weapon energy usage: #-c", totalWeaponEnergyUsage, 0, "MJ/s");
-        float maint_draw =
-                (shields_require_power && num_shields) ? (regeneration * VSDM / shieldenergycap
-                        * shield_maintenance_cost * num_shields) : 0;
-        if (totalWeaponEnergyUsage < (playerUnit->energyRechargeData() * RSconverter - maint_draw)) {
-            //waouh, impressive...
-            text += "#n##c0:1:.2#" + prefix + "Your reactor produces more energy than your weapons can use!#-c";
-        } else {
-            PRETTY_ADDU(statcolor + "Reactor energy depletion time if weapons in continuous use: #-c",
-                    (playerUnit->maxEnergyData()
-                            * RSconverter) / (totalWeaponEnergyUsage
-                            - ((playerUnit->energyRechargeData() * RSconverter - maint_draw))),
-                    2,
-                    "seconds");
-        }
-        PRETTY_ADDU(statcolor + "Combined (non-missile) weapon damage: #-c", totalWeaponDamage * VSDM, 0, "MJ/s");
-    }
-    if (!mode) {
-        //handle SubUnits
-        Unit *sub;
-        int i = 1;
-        for (un_iter ki = playerUnit->getSubUnits(); (sub = *ki) != NULL; ++ki, ++i) {
-            if (i == 1) {
-                text += "#n##n##c0:1:.5#" + prefix + "[SUB UNITS]#-c";
-            }
-            PRETTY_ADD("#n#" + prefix + "#c0:1:.2#[#-csub unit ", i, 0);
-            text += "#c0:1:.2#]#-c#n#";
-            showUnitStats(sub, text, subunitlevel + 1, 0, item);
-        }
-    }
-    //last line sometimes gets lost in the interface
-    text += "#n#";
-}
 
 //Show the stats on the player's current ship.
 bool BaseComputer::showShipStats(const EventCommandId &command, Control *control) {
@@ -5836,11 +4593,13 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
     current_unit_load_mode = DEFAULT;
     const string rawText = MakeUnitXMLPretty(playerUnit->WriteUnitString(), playerUnit);
 
-    //Need to translate some characters to make it even prettier.
-    string text;
-    text = "";
     Cargo uninitcargo;
-    showUnitStats(playerUnit, text, 0, 0, uninitcargo);
+
+    std::map<std::string, std::string> ship_map = playerUnit->UnitToMap();
+    std::string text = GetString("get_ship_description", "ship_view",
+                          "ship_view.py",
+                          ship_map);
+
     //remove picture, if any
     string::size_type pic;
     if ((pic = text.find("@")) != string::npos) {
@@ -5851,46 +4610,7 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
             text += texture.substr(picend + 1);
         }
     }     //picture removed
-    text.append("#n##n##c0:1:.5#[RAW DIAGNOSTIC OUTPUT]#n##-c");
-    bool inQuote = false;
-    bool newLine = false;
-    static bool showdiags = XMLSupport::parse_bool(vs_config->getVariable("debug", "showdiagnostics", "false"));
-    if (showdiags) {
-        for (string::const_iterator i = rawText.begin(); i != rawText.end(); i++) {
-            switch (*i) {
-                case '\n':
-                    text.append("#n#");
-                    if (!newLine) {
-                        text.append("#c0:1:.5#");
-                        newLine = true;
-                    }
-                    break;
-                case '"':
-                    if (!inQuote) {
-                        text.append("#c1:.3:.3#");
-                        inQuote = true;
-                    } else {
-                        text.append("#-c");
-                        inQuote = false;
-                    }
-                    //Delete these, so do nothing.
-                    break;
-                case ' ':
-                    if (newLine) {
-                        newLine = false;
-                        text.append("#-c");
-                    }
-                    text += (*i);
-                    break;
-                default:
-                    text += (*i);
-                    break;
-            }
-        }
-    } else {
-        text.append("#n# #c1:.1:.1#SUPPRESSED #n##-c");
-        //Put this in the description.
-    }
+    
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText(text);

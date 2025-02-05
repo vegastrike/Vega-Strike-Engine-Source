@@ -1,7 +1,7 @@
 /*
  * vega_py_run.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,13 +15,15 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
@@ -37,9 +39,9 @@ void VegaPyRunString(const std::string &py_snippet) {
 }
 
 void VegaPyRunString(char *py_snippet) {
-#if defined(_WINDOWS) && defined(_DEBUG)
-    VS_LOG(important_info, (boost::format("Debug mode on Windows; not running %1%") % py_snippet));
-#else
+//#if defined(_WINDOWS) && defined(_DEBUG)
+//    VS_LOG(important_info, (boost::format("Debug mode on Windows; not running %1%") % py_snippet));
+//#else
     VS_LOG(important_info, (boost::format("running %1%") % py_snippet));
     PyRun_SimpleString(py_snippet);
     //Python::reseterrors();
@@ -47,7 +49,18 @@ void VegaPyRunString(char *py_snippet) {
         VS_LOG_AND_FLUSH(error, "VegaPyRunString: Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VegaStrikeLogging::vega_logger()->FlushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     }
-#endif
+//#endif
+}
+
+void VegaPyRunFile(FILE* fp, std::string file_path_or_description) {
+    VS_LOG(important_info, (boost::format("running file '%1%'") % file_path_or_description));
+    PyRun_SimpleFile(fp, file_path_or_description.c_str());
+    //Python::reseterrors();
+    if (PyErr_Occurred()) {
+        VS_LOG_AND_FLUSH(error, "VegaPyRunFile: Python error occurred");
+        PyErr_Print();
+        PyErr_Clear();
+    }
 }

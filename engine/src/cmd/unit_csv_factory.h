@@ -30,11 +30,11 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-#include "vsfilesystem.h"
-
-const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
+const std::string keys[] = {"Key", "Directory",	"Name",	"Object_Type",
                             "Combat_Role",	"Textual_Description",	"Hud_image",	"Unit_Scale",	"Cockpit",
-                            "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	"Rapid_Mesh",	"BSP_Mesh",
+                            "CockpitX", "CockpitY",	"CockpitZ",	"Mesh",	"Shield_Mesh",	
+                            "Rapid_Mesh", // TODO: find out if used in WC	
+                            "BSP_Mesh",
                             "Use_BSP", "Use_Rapid",	"NoDamageParticles", "Mass",	"Moment_Of_Inertia",
                             "Fuel_Capacity",	"Hull", "Armor_Front_Top_Right",	"Armor_Front_Top_Left",
                             "Armor_Front_Bottom_Right", "Armor_Front_Bottom_Left",	"Armor_Back_Top_Right",
@@ -59,9 +59,18 @@ const std::string keys[] = {"Key", "Directory",	"Name",	"STATUS",	"Object_Type",
                             "Explosion",	"Num_Animation_Stages",	"Upgrade_Storage_Volume",	"Heat_Sink_Rating",
                             "Shield_Efficiency",	"Num_Chunks",	"Chunk_0",	"Collide_Subunits",	"Spec_Interdiction",
                             "Tractorability",
+                            // For component upgrade
+                            "Upgrade_Type", "Facets",
                             // These values are not in units.csv! There are probably more but I stopped mapping.
                             // TODO: map all missing values using the commented out code below!
-                            "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space"};
+                            "FaceCamera", "Unit_Role", "Attack_Preference", "Hidden_Hold_Volume", "Equipment_Space",
+
+                            // New stuff
+                            "armor", "shield_strength", "shield_facets", "accel",
+                            "armor_front", "armor_back", "armor_left", "armor_right",
+                            "shield_front", "shield_back", "shield_left", "shield_right"
+                            
+                            };
 
 
 class UnitCSVFactory {
@@ -102,8 +111,6 @@ class UnitCSVFactory {
     friend class UnitJSONFactory;
     friend class UnitOptimizeFactory;
 public:
-    static void ParseCSV(VSFileSystem::VSFile &file, bool saved_game);
-
     template<class T>
     static inline T GetVariable(std::string unit_key, std::string const &attribute_key, T default_value) = delete;
     static bool HasVariable(std::string unit_key, std::string const &attribute_key) {
@@ -124,6 +131,9 @@ public:
     static std::map<std::string, std::string> GetUnit(std::string key) {
         return UnitCSVFactory::units[key];
     }
+
+    static void LoadUnit(std::string key, 
+                         std::map<std::string,std::string> unit_map);
 };
 
 // Template Specialization

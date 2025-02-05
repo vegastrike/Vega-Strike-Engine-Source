@@ -36,7 +36,7 @@
 #include "universe.h"
 #include "mount_size.h"
 #include "damageable.h"
-
+#include "resource/random_utils.h"
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
@@ -250,28 +250,34 @@ int parseMountSizes(const char *str) {
 }
 
 void DealPossibleJumpDamage(Unit *un) {
-
-    float speed = un->GetVelocity().Magnitude();
-    float jump_damage = un->GetJumpStatus().damage + (rand() % 100 < 1) ? (rand() % 20) : 0;
-    static float jump_damage_multiplier =
+    static double jump_damage_multiplier =
             XMLSupport::parse_float(vs_config->getVariable("physics", "jump_damage_multiplier", ".1"));
-    static float max_damage = XMLSupport::parse_float(vs_config->getVariable("physics", "max_jump_damage", "100"));
+    static double max_damage = XMLSupport::parse_float(vs_config->getVariable("physics", "max_jump_damage", "100"));
 
-    jump_damage = std::min(speed * (jump_damage * jump_damage_multiplier), max_damage);
+    // Also damage multiplier
+    double chance_to_damage = randomDouble() - 0.01;
 
-    if (jump_damage > 1) {
-        Damage damage;
-        damage.normal_damage = jump_damage;
-        un->ApplyDamage((un->Position() + un->GetVelocity().Cast()),
-                un->GetVelocity(),
-                damage,
-                un,
-                GFXColor(((float) (rand() % 100)) / 100,
-                        ((float) (rand() % 100)) / 100,
-                        ((float) (rand() % 100)) / 100), NULL);
-        un->SetCurPosition(
-                un->LocalPosition() + (((float) rand()) / RAND_MAX) * jump_damage * un->GetVelocity().Cast());
+    // If jump drive is fully operational, there's no chance for damage
+    if(un->jump_drive.PercentOperational() >= chance_to_damage) {
+        return;
     }
+
+    double speed = un->GetVelocity().Magnitude();
+    double mass = un->GetMass();
+
+    double jump_damage = mass * speed * chance_to_damage * jump_damage_multiplier;
+    
+    jump_damage = std::min(jump_damage, max_damage);
+
+    Damage damage;
+    damage.normal_damage = jump_damage;
+    un->ApplyDamage((un->Position() + un->GetVelocity().Cast()),
+                     un->GetVelocity(),
+                     damage,
+                     un,
+                     GFXColor(((float) (rand() % 100)) / 100,
+                        ((float) (rand() % 100)) / 100,
+                        ((float) (rand() % 100)) / 100), nullptr);
 }
 
 void Enslave(Unit *parent, bool enslave) {

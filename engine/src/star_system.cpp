@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * star_system.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,6 +23,8 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <assert.h>
 #include "star_system.h"
 
@@ -329,7 +333,7 @@ void StarSystem::Draw(bool DrawCockpit) {
         }
         _Universe->AccessCockpit()->SetupViewPort(true);
     }
-    double setupdrawtime = queryTime();
+    double setupdrawtime = realTime();
     {
         cam_setup_phase = true;
 
@@ -368,10 +372,10 @@ void StarSystem::Draw(bool DrawCockpit) {
 
         cam_setup_phase = false;
     }
-    setupdrawtime = queryTime() - setupdrawtime;
+    setupdrawtime = realTime() - setupdrawtime;
     GFXDisable(LIGHTING);
     background->Draw();
-    double drawtime = queryTime();
+    double drawtime = realTime();
 
     // Initialize occluder system (we'll populate it during unit render)
     Occlusion::start();
@@ -401,7 +405,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     drawer.action.drawParents();     //draw units targeted by camera
     //FIXME  maybe we could do bolts & units instead of unit only--and avoid bolt drawing step
 
-    drawtime = queryTime() - drawtime;
+    drawtime = realTime() - drawtime;
     WarpTrailDraw();
 
     GFXFogMode(FOG_OFF);
@@ -411,7 +415,7 @@ void StarSystem::Draw(bool DrawCockpit) {
 
     GFXColor tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
-    double processmesh = queryTime();
+    double processmesh = realTime();
     if (!game_options()->draw_near_stars_in_front_of_planets) {
         stars->Draw();
     }
@@ -425,7 +429,7 @@ void StarSystem::Draw(bool DrawCockpit) {
     Planet::ProcessTerrains();
     Terrain::RenderAll();
     Mesh::ProcessUndrawnMeshes(true);
-    processmesh = queryTime() - processmesh;
+    processmesh = realTime() - processmesh;
     Nebula *neb;
 
     Matrix ident;
@@ -680,7 +684,7 @@ void StarSystem::ExecuteUnitAI() {
             VS_LOG_AND_FLUSH(fatal, "void StarSystem::ExecuteUnitAI(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
-            VegaStrikeLogging::vega_logger()->FlushLogs();
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         }
         throw;
     }
@@ -903,8 +907,8 @@ void StarSystem::RequestPhysics(Unit *un, unsigned int queue) {
 //randomization on priority changes, so we're fine.
 void StarSystem::UpdateUnitsPhysics(bool firstframe) {
     static int batchcount = SIM_QUEUE_SIZE - 1;
-//    double collidetime = 0.0;
-//    double bolttime = 0.0;
+    double collidetime = 0.0;
+    double bolttime = 0.0;
     targetpick = 0.0;
     aggfire = 0.0;
     numprocessed = 0;
@@ -914,8 +918,7 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
         try {
             UnitCollection col = physics_buffer[current_sim_location];
             un_iter iter = physics_buffer[current_sim_location].createIterator();
-            Unit *unit = nullptr;
-            for (; (unit = *iter); ++iter) {
+            for (Unit *unit = nullptr; (unit = *iter); ++iter) {
                 UpdateUnitPhysics(firstframe, unit);
             }
         } catch (const boost::python::error_already_set &) {
@@ -924,13 +927,13 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                         "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred");
                 PyErr_Print();
                 PyErr_Clear();
-                VegaStrikeLogging::vega_logger()->FlushLogs();
+                VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
             }
             throw;
         }
-//        double c0 = queryTime();
+        const double c0 = realTime();
         Bolt::UpdatePhysics(this);
-//        double cc = queryTime();
+        const double cc = realTime();
         last_collisions.clear();
         collide_map[Unit::UNIT_BOLT]->flatten();
         if (Unit::NUM_COLLIDE_MAPS > 1) {
@@ -938,12 +941,12 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
         }
         Unit *unit;
         for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter);) {
-            unsigned int priority = unit->sim_atom_multiplier;
-            float backup = simulation_atom_var;
+            const unsigned int priority = unit->sim_atom_multiplier;
+            const float backup = simulation_atom_var;
             //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg E: simulation_atom_var as backed up:  %1%") % simulation_atom_var));
             simulation_atom_var *= priority;
             //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg F: simulation_atom_var as multiplied: %1%") % simulation_atom_var));
-            unsigned int newloc = (current_sim_location + priority) % SIM_QUEUE_SIZE;
+            const unsigned int newloc = (current_sim_location + priority) % SIM_QUEUE_SIZE;
             unit->CollideAll();
             simulation_atom_var = backup;
             //VS_LOG(trace, (boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg G: simulation_atom_var as restored:   %1%") % simulation_atom_var));
@@ -953,14 +956,16 @@ void StarSystem::UpdateUnitsPhysics(bool firstframe) {
                 iter.moveBefore(physics_buffer[newloc]);
             }
         }
-//        double dd = queryTime();
-//        collidetime += dd - cc;
-//        bolttime += cc - c0;
+        const double dd = realTime();
+        collidetime += dd - cc;
+        bolttime += cc - c0;
         current_sim_location = (current_sim_location + 1) % SIM_QUEUE_SIZE;
         ++physicsframecounter;
         totalprocessed += theunitcounter;
         theunitcounter = 0;
     }
+    VS_LOG(trace, (boost::format("collidetime: %1%") % collidetime));
+    VS_LOG(trace, (boost::format("bolttime: %1%") % bolttime));
 }
 
 void StarSystem::UpdateUnitPhysics(bool firstframe, Unit *unit) {
@@ -1172,8 +1177,8 @@ void StarSystem::Update(float priority, bool executeDirector) {
                 if (this == _Universe->getActiveStarSystem(0)) {
                     UpdateCameraSnds();
                 }
-//                bolttime = queryTime();
-//                bolttime = queryTime() - bolttime;
+//                bolttime = realTime();
+//                bolttime = realTime() - bolttime;
 //                double processUnitStageEndTime = realTime();
 //                processUnitTimeSubtotal += (processUnitStageEndTime - processUnitStageStartTime);
 //                updateCameraSoundsTimeSubtotal += (processUnitStageEndTime - collideTableUpdateDoneTime);
@@ -1313,7 +1318,7 @@ void StarSystem::ProcessPendingJumps() {
         bool dosightandsound = ((pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship(un));
         _Universe->setActiveStarSystem(pendingjump[kk]->orig);
         if (un->TransferUnitToSystem(kk, savedStarSystem, dosightandsound)) {
-            un->decreaseWarpEnergy(false, 1.0f);
+            un->jump_drive.Consume();
         }
         if (dosightandsound) {
             _Universe->activeStarSystem()->DoJumpingComeSightAndSound(un);
@@ -1394,9 +1399,8 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
         return false;
     }
 
-    if (un->jump.drive >= 0) {
-        un->jump.drive = -1;
-    }
+    un->jump_drive.UnsetDestination();
+    
 #ifdef JUMP_DEBUG
     VS_LOG(trace, (boost::format("jumping to %1%.  ") % system));
 #endif
@@ -1420,7 +1424,7 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
             ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound(un);
         }
         _Universe->AccessCockpit()->OnJumpBegin(un);
-        pendingjump.push_back(new unorigdest(un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
+        pendingjump.push_back(new unorigdest(un, jumppoint, this, ss, un->jump_drive.Delay(), ani, justloaded,
                 save_coordinates ? ComputeJumpPointArrival(un->Position(),
                         this->getFileName(),
                         system) : QVector(0, 0, 0)));

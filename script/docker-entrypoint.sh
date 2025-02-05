@@ -31,6 +31,9 @@ echo "docker-entrypoint.sh: Flags passed in: $FLAGS"
 
 # find /usr -iname '*libboost_python*'
 
+echo "Re-run bootstrap"
+script/bootstrap
+
 if [ $IS_RELEASE -eq 1 ]
 then
     script/build -DCMAKE_BUILD_TYPE=RelWithDebInfo $FLAGS
@@ -42,8 +45,8 @@ else
     else
         script/build -DCMAKE_BUILD_TYPE=Debug $FLAGS
     fi
-
-    pushd build
-    GTEST_OUTPUT=xml:test-results ctest -V
-    popd
 fi
+
+pushd build
+GTEST_OUTPUT=xml:$(pwd)/test-results ctest -V
+popd

@@ -1,8 +1,8 @@
 ##
 # CMakeLists.txt
 #
-# Copyright (c) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
-# Benjamen Meyer, and other Vega Strike contributors
+# Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+# Benjamen R. Meyer, and other Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -15,15 +15,13 @@
 #
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
 
-
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 IF (UNIX)
 	MESSAGE("Always using preferred method now to install man pages")

@@ -1,10 +1,8 @@
-/**
+/*
  * base_init.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,16 +23,17 @@
  */
 
 
-#include <math.h>
+#define PY_SSIZE_T_CLEAN
 
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
+#if BOOST_VERSION != 102800
 typedef boost::python::dict BoostPythonDictionary;
 #else
 #include <boost/python/objects.hpp>
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif
+#include <math.h>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
@@ -83,60 +82,60 @@ static boost::python::tuple GetRandomBarMessage() {
     }
 }
 
-PYTHON_BEGIN_MODULE(Base)
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Room, "Room");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetCurRoom, "SetCurRoom");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::GetCurRoom, "GetCurRoom");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::GetNumRoom, "GetNumRoom");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::GetNumRoom, "HasObject");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Comp, "Comp");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::CompPython, "CompPython");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Launch, "Launch");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::LaunchPython, "LaunchPython");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Link, "Link");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::LinkPython, "LinkPython");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Python, "Python");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::EraseLink, "EraseLink");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Ship, "Ship");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Texture, "Texture");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Video, "Video");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::VideoStream, "VideoStream");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::PlayVideo, "PlayVideo");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::StopVideo, "StopVideo");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetVideoCallback, "SetVideoCallback");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetDJEnabled, "SetDJEnabled");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetTexture, "SetTexture");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetTextureSize, "SetTextureSize");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetTexturePos, "SetTexturePos");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::EnqueueMessageToRoom, "EnqueueMessageToRoom");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::MessageToRoom, "MessageToRoom");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::EnqueueMessage, "EnqueueMessage");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::Message, "Message");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::EraseObj, "EraseObj");
-    PYTHON_DEFINE_GLOBAL(Base, &::GetRandomBarMessage, "GetRandomBarMessage");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::RunScript, "RunScript");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::TextBox, "TextBox");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetTextBoxText, "SetTextBoxText");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::GlobalKeyPython, "GlobalKeyPython");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetLinkArea, "SetLinkArea");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetLinkText, "SetLinkText");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetLinkPython, "SetLinkPython");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetLinkRoom, "SetLinkRoom");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetLinkEventMask, "SetLinkEventMask");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::BuyShip, "BuyShip");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SellShip, "SellShip");
+BOOST_PYTHON_MODULE(Base) {
+    boost::python::def("Room", &BaseUtil::Room);
+    boost::python::def("SetCurRoom", &BaseUtil::SetCurRoom);
+    boost::python::def("GetCurRoom", &BaseUtil::GetCurRoom);
+    boost::python::def("GetNumRoom", &BaseUtil::GetNumRoom);
+    boost::python::def("HasObject", &BaseUtil::GetNumRoom);
+    boost::python::def("Comp", &BaseUtil::Comp);
+    boost::python::def("CompPython", &BaseUtil::CompPython);
+    boost::python::def("Launch", &BaseUtil::Launch);
+    boost::python::def("LaunchPython", &BaseUtil::LaunchPython);
+    boost::python::def("Link", &BaseUtil::Link);
+    boost::python::def("LinkPython", &BaseUtil::LinkPython);
+    boost::python::def("Python", &BaseUtil::Python);
+    boost::python::def("EraseLink", &BaseUtil::EraseLink);
+    boost::python::def("Ship", &BaseUtil::Ship);
+    boost::python::def("Texture", &BaseUtil::Texture);
+    boost::python::def("Video", &BaseUtil::Video);
+    boost::python::def("VideoStream", &BaseUtil::VideoStream);
+    boost::python::def("PlayVideo", &BaseUtil::PlayVideo);
+    boost::python::def("StopVideo", &BaseUtil::StopVideo);
+    boost::python::def("SetVideoCallback", &BaseUtil::SetVideoCallback);
+    boost::python::def("SetDJEnabled", &BaseUtil::SetDJEnabled);
+    boost::python::def("SetTexture", &BaseUtil::SetTexture);
+    boost::python::def("SetTextureSize", &BaseUtil::SetTextureSize);
+    boost::python::def("SetTexturePos", &BaseUtil::SetTexturePos);
+    boost::python::def("EnqueueMessageToRoom", &BaseUtil::EnqueueMessageToRoom);
+    boost::python::def("MessageToRoom", &BaseUtil::MessageToRoom);
+    boost::python::def("EnqueueMessage", &BaseUtil::EnqueueMessage);
+    boost::python::def("Message", &BaseUtil::Message);
+    boost::python::def("EraseObj", &BaseUtil::EraseObj);
+    boost::python::def("GetRandomBarMessage", &::GetRandomBarMessage);
+    boost::python::def("RunScript", &BaseUtil::RunScript);
+    boost::python::def("TextBox", &BaseUtil::TextBox);
+    boost::python::def("SetTextBoxText", &BaseUtil::SetTextBoxText);
+    boost::python::def("GlobalKeyPython", &BaseUtil::GlobalKeyPython);
+    boost::python::def("SetLinkArea", &BaseUtil::SetLinkArea);
+    boost::python::def("SetLinkText", &BaseUtil::SetLinkText);
+    boost::python::def("SetLinkPython", &BaseUtil::SetLinkPython);
+    boost::python::def("SetLinkRoom", &BaseUtil::SetLinkRoom);
+    boost::python::def("SetLinkEventMask", &BaseUtil::SetLinkEventMask);
+    boost::python::def("BuyShip", &BaseUtil::BuyShip);
+    boost::python::def("SellShip", &BaseUtil::SellShip);
 
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetEventData, "SetEventData");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::SetMouseEventData, "SetMouseEventData");
-    PYTHON_DEFINE_GLOBAL(Base, &::GetEventDataPython, "GetEventData");
+    boost::python::def("SetEventData", &BaseUtil::SetEventData);
+    boost::python::def("SetMouseEventData", &BaseUtil::SetMouseEventData);
+    boost::python::def("GetEventData", &::GetEventDataPython);
 
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::GetTextWidth, "GetTextWidth");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::GetTextHeight, "GetTextHeight");
+    boost::python::def("GetTextWidth", &BaseUtil::GetTextWidth);
+    boost::python::def("GetTextHeight", &BaseUtil::GetTextHeight);
 
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::LoadBaseInterface, "LoadBaseInterface");
-    PYTHON_DEFINE_GLOBAL(Base, &BaseUtil::ExitGame, "ExitGame");
+    boost::python::def("LoadBaseInterface", &BaseUtil::LoadBaseInterface);
+    boost::python::def("ExitGame", &BaseUtil::ExitGame);
 
-PYTHON_END_MODULE(Base)
+}
 
 void InitBase() {
     PyImport_AppendInittab("Base", PYTHON_MODULE_INIT_FUNCTION(Base));

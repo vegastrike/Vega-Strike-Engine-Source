@@ -4,7 +4,7 @@
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
  * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022-2023 Stephen G. Tuggy, Benjamen R. Meyer
+ * Copyright (C) 2022-2025 Stephen G. Tuggy, Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "cmd/collide2/Stdafx.h"
+#include "cmd/collide2/Opcode.h"
 #include "cmd/collide2/CSopcodecollider.h"
 #include "terrain.h"
 

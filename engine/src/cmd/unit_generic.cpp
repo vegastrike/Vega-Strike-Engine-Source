@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * unit_generic.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,15 +15,17 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include "unit_generic.h"
 
 #include <set>
@@ -73,11 +77,15 @@
 #include "resource/resource.h"
 #include "base_util.h"
 #include "unit_csv_factory.h"
+#include "unit_json_factory.h"
+#include "savegame.h"
+#include "manifest.h"
 
 #include <math.h>
 #include <list>
 #include <cstdint>
 #include <boost/format.hpp>
+#include <random>
 
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -92,22 +100,21 @@
 using std::endl;
 using std::list;
 
-std::string getMasterPartListUnitName() {
-    return configuration()->data_config.master_part_list;
-}
 
-Unit *_masterPartList = nullptr;
 
+// This is a left over kludge because I don't want to mess with python interfaces yet.
+// TODO: remove
 Unit *getMasterPartList() {
-    if (_masterPartList == nullptr) {
-        static bool making = true;
-        if (making) {
-            making = false;
-            _masterPartList = Unit::makeMasterPartList();
-            making = true;
+    static Unit ret;
+
+    if(ret.cargo.empty()) {
+        ret.name = "master_part_list";
+        for(const Cargo& c : Manifest::MPL().getItems()) {
+            ret.AddCargo(c);
         }
+
     }
-    return _masterPartList;
+    return &ret;
 }
 
 using namespace XMLSupport;
@@ -418,11 +425,6 @@ void Unit::Init(const char *filename,
         std::string unitModifications,
         Flightgroup *flightgrp,
         int fg_subnumber) {
-    // Deprecated UNITTAB and configuration()->physics_config.unit_table options.
-    // Game will always load units from the JSON or CSV files.
-    // The other option was not implemented wholly. It simply opened the file
-    // but didn't do anything with it. See VSFile f variable.
-
     // TODO: something with the following line
     this->Unit::Init();
     graphicOptions.SubUnit = SubU ? 1 : 0;
@@ -447,9 +449,9 @@ void Unit::Init(const char *filename,
         //Try to open save
         if (filename[0]) {
             VSFile unitTab;
-            VSError taberr = unitTab.OpenReadOnly(filepath + ".csv", UnitSaveFile);
+            VSError taberr = unitTab.OpenReadOnly(filepath + ".json", UnitSaveFile);
             if (taberr <= Ok) {
-                UnitCSVFactory::ParseCSV(unitTab, true);
+                UnitJSONFactory::ParseJSON(unitTab, true);
                 unitTab.Close();
                 saved_game = true;
             }
@@ -529,9 +531,9 @@ static float tmpmax(float a, float b) {
 bool CheckAccessory(Unit *tur) {
     bool accessory = tur->name.get().find("accessory") != string::npos;
     if (accessory) {
-        tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector(tur->GetComputerData().max_pitch_up,
-                tur->GetComputerData().max_yaw_right,
-                tur->GetComputerData().max_roll_right)));
+        tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector(tur->drive.max_pitch_up,
+                tur->drive.max_yaw_right,
+                tur->drive.max_roll_right)));
     }
     return accessory;
 }
@@ -633,11 +635,11 @@ float Unit::cosAngleTo(Unit *targ, float &dist, float speed, float range, bool t
 
     //Trial code
     float turnlimit =
-            tmpmax(tmpmax(computer.max_yaw_left, computer.max_yaw_right),
-                    tmpmax(computer.max_pitch_up, computer.max_pitch_down));
+            tmpmax(tmpmax(drive.max_yaw_left.Value(), drive.max_yaw_right.Value()),
+                    tmpmax(drive.max_pitch_up.Value(), drive.max_pitch_down.Value()));
     float turnangle = simulation_atom_var
             * tmpmax(turnlimit,
-                    tmpmax(simulation_atom_var * .5 * (limits.yaw + limits.pitch),
+                    tmpmax(simulation_atom_var * .5 * (drive.yaw.Value() + drive.pitch.Value()),
                             sqrtf(AngularVelocity.i * AngularVelocity.i + AngularVelocity.j * AngularVelocity.j)));
     float ittsangle = safeacos(Normal.Cast().Dot(totarget.Scale(1. / totarget.Magnitude())));
     QVector edgeLocation = (targ->cumulative_transformation_matrix.getP() * targ->rSize() + totarget);
@@ -645,7 +647,7 @@ float Unit::cosAngleTo(Unit *targ, float &dist, float speed, float range, bool t
     float rv = ittsangle - radangle - (turnmargin ? turnangle : 0);
 
     float rsize = targ->rSize() + rSize();
-    if ((!targ->GetDestinations().empty() && jump.drive >= 0) || (targ->faction == faction)) {
+    if ((!targ->GetDestinations().empty() && jump_drive.IsDestinationSet()) || (targ->faction == faction)) {
         rsize = 0;
     }                                       //HACK so missions work well
     if (range != 0) {
@@ -987,20 +989,26 @@ float globQueryShell(QVector pos, QVector dir, float rad);
 extern void ActivateAnimation(Unit *jp);
 
 void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
-    if (cp) {
-        if (un->getWarpEnergy() >= un->GetJumpStatus().energy) {
-            if (un->GetJumpStatus().drive > -2) {
-                cp->jumpok = 1;
-            }
-        }
+    if(!cp) {
+        return;
     }
+
+    if(!un->jump_drive.Operational()) {
+       return;
+    }
+
+    if (!un->jump_drive.CanConsume()) {
+        return;    
+    }
+
+    cp->jumpok = 1;
 }
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
     const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
     const bool nojumpinSPEC = configuration()->physics_config.no_spec_jump;
-    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->graphicOptions.InWarp
-            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && graphicOptions.InWarp
+    bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->ftl_drive.Enabled()
+            && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && ftl_drive.Enabled()
             && nojumpinSPEC;
     //only allow big with small
     if (!GetDestinations().empty()) {
@@ -1011,20 +1019,20 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
             return false;
         }
         //we have a drive
-        if ((!SPEC_interference && (smalle->GetJumpStatus().drive >= 0
-                &&          //we have power
-                        (smalle->warpenergy >= smalle->GetJumpStatus().energy
-                                //or we're being cheap
-                                || (ai_jump_cheat && cp == nullptr)
-                        )))
-                || forcejump) {
-            //or the jump is being forced?
-            //NOW done in star_system_generic.cpp before TransferUnitToSystem smalle->warpenergy-=smalle->GetJumpStatus().energy;
-            int dest = smalle->GetJumpStatus().drive;
-            if (dest < 0) {
-                dest = 0;
+        if ((!SPEC_interference && 
+                (smalle->jump_drive.IsDestinationSet() &&          //we have power
+                    (smalle->jump_drive.CanConsume() ||
+                    //or we're being cheap
+                    (ai_jump_cheat && cp == nullptr))
+                )
+            ) || forcejump) {
+            
+            if(!smalle->jump_drive.IsDestinationSet()) {
+                smalle->jump_drive.SetDestination(0);
             }
-            smalle->DeactivateJumpDrive();
+            int dest = smalle->jump_drive.Destination();
+           
+            smalle->jump_drive.UnsetDestination();
             Unit *jumppoint = this;
             _Universe->activeStarSystem()
                     ->JumpTo(smalle, jumppoint, GetDestinations()[dest % GetDestinations().size()]);
@@ -1039,15 +1047,15 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
         } else {
             return false;
         }
-        if ((!SPEC_interference && (GetJumpStatus().drive >= 0
-                && (warpenergy >= GetJumpStatus().energy || (ai_jump_cheat && cp == NULL))
+        if ((!SPEC_interference && (jump_drive.IsDestinationSet()
+                && (jump_drive.CanConsume() || (ai_jump_cheat && cp == NULL))
         )) || smalle->forcejump) {
-            warpenergy -= GetJumpStatus().energy;
-            DeactivateJumpDrive();
+            jump_drive.Consume();
+            jump_drive.UnsetDestination();
             Unit *jumppoint = smalle;
 
             _Universe->activeStarSystem()->JumpTo(this, jumppoint,
-                    smalle->GetDestinations()[GetJumpStatus().drive
+                    smalle->GetDestinations()[jump_drive.Destination()
                             % smalle->GetDestinations().size()]);
 
             return true;
@@ -1124,9 +1132,10 @@ Unit *findUnitInStarsystem(const void *unitDoNotDereference) {
 }
 
 //NUMGAUGES has been moved to pImages.h in UnitImages<void>
-void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
+void Unit::DamageRandSys(float dam, const Vector &vec) {
+    // TODO: take actual damage into account when damaging components.
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
-    randnum = rand01();
+    float randnum = rand01();
     const float inv_min_dam = 1.0F - configuration()->physics_config.min_damage;
     const float inv_max_dam = 1.0F - configuration()->physics_config.max_damage;
     if (dam < inv_max_dam) {
@@ -1135,7 +1144,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
     if (dam > inv_min_dam) {
         dam = inv_min_dam;
     }
-    degrees = deg;
+    float degrees = deg;
     if (degrees > 180) {
         degrees = 360 - degrees;
     }
@@ -1159,7 +1168,9 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
             //THIS IS NOT YET SUPPORTED IN NETWORKING
             computer.target = nullptr;             //set the target to NULL
         } else if (randnum >= .4) {
-            limits.retro *= dam;
+            drive.retro.RandomDamage();
+        } else if (randnum >= .25) {
+            radar.Damage();
         } else if (randnum >= .175) {
             radar.Damage();
         } else {
@@ -1173,29 +1184,13 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         return;
     }
     if (rand01() < configuration()->physics_config.thruster_hit_chance) {
-        //DAMAGE ROLL/YAW/PITCH/THRUST
-        float orandnum = rand01() * .82 + .18;
-        if (randnum >= .9) {
-            computer.max_pitch_up *= orandnum;
-        } else if (randnum >= .8) {
-            computer.max_yaw_right *= orandnum;
-        } else if (randnum >= .6) {
-            computer.max_yaw_left *= orandnum;
-        } else if (randnum >= .4) {
-            computer.max_pitch_down *= orandnum;
-        } else if (randnum >= .2) {
-            computer.max_roll_right *= orandnum;
-        } else if (randnum >= .18) {
-            computer.max_roll_left *= orandnum;
-        } else if (randnum >= .17) {
-            limits.roll *= dam;
-        } else if (randnum >= .10) {
-            limits.yaw *= dam;
-        } else if (randnum >= .03) {
-            limits.pitch *= dam;
-        } else {
-            limits.lateral *= dam;
-        }
+        // This is fairly severe. One or two hits can disable the engine.
+        // Note that retro can be damaged by both this and above.
+        // Drive can also be damaged by code below - really computer.
+        // TODO: figure out a better damage system that doesn't rely on where 
+        // the shots are coming from.
+        drive.Damage();
+        afterburner.Damage();
         damages |= Damages::LIMITS_DAMAGED;
         return;
     }
@@ -1221,36 +1216,24 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         return;
     }
     if (degrees >= 35 && degrees < 60) {
-        //DAMAGE FUEL
-        static float fuel_damage_prob = 1.f
-                - XMLSupport::parse_float(vs_config->getVariable("physics", "fuel_damage_prob", ".25"));
-        static float warpenergy_damage_prob = fuel_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "warpenergy_damage_prob",
-                        "0.05"));
-        static float ab_damage_prob = warpenergy_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics", "ab_damage_prob", ".2"));
-        static float cargovolume_damage_prob = ab_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "cargovolume_damage_prob",
-                        ".15"));
-        static float upgradevolume_damage_prob = cargovolume_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "upgradevolume_damage_prob",
-                        ".1"));
-        static float cargo_damage_prob = upgradevolume_damage_prob
-                - XMLSupport::parse_float(vs_config->getVariable("physics", "cargo_damage_prob", "1"));
-        if (randnum >= fuel_damage_prob) {
-            fuel *= dam;
-        } else if (randnum >= warpenergy_damage_prob) {
-            warpenergy *= dam;
-        } else if (randnum >= ab_damage_prob) {
-            this->afterburnenergy += ((1 - dam) * recharge);
-        } else if (randnum >= cargovolume_damage_prob) {
-            CargoVolume *= dam;
-        } else if (randnum >= upgradevolume_damage_prob) {
-            UpgradeVolume *= dam;
-        } else if (randnum >= cargo_damage_prob) {
+        // This code potentially damages a whole bunch of components.
+        // We generate a random int (0-19). 0-8 damages something.
+        // 9-19 doesn't.
+        // This is really a stopgap code until we refactor this better.
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist20(0,19); // distribution in range [1, 6]
+
+        switch(dist20(rng)) {
+            case 0: fuel.Damage(); break;   // Fuel
+            case 1: energy.Damage(); break; // Energy
+            case 2: ftl_energy.Damage(); break;
+            case 3: ftl_drive.Damage(); break;
+            case 4: jump_drive.Damage(); break;
+            case 5: afterburner.Damage(); break;
+            case 6: CargoVolume *= dam; break;
+            case 7: UpgradeVolume *= dam; break;
+            case 8:
             //Do something NASTY to the cargo
             if (cargo.size() > 0) {
                 unsigned int i = 0;
@@ -1262,7 +1245,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
                         || cargo[cargorand].GetMissionFlag()) && (++i) < cargo.size());
                 cargo[cargorand].SetQuantity(cargo[cargorand].GetQuantity() * float_to_int(dam));
             }
+            break;
+            //default:
+                // No damage
         }
+
         damages |= Damages::CARGOFUEL_DAMAGED;
         return;
     }
@@ -1296,19 +1283,21 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         } else if (randnum >= .7) {
             // TODO: lib_damage shield.recharge *= dam;
         } else if (randnum >= .5) {
-            static float mindam =
+            /*static float mindam =
                     XMLSupport::parse_float(vs_config->getVariable("physics", "min_recharge_shot_damage", "0.5"));
             if (dam < mindam) {
                 dam = mindam;
             }
-            this->recharge *= dam;
+            this->recharge *= dam;*/
+            // TODO: do the above
+            reactor.Damage();
         } else if (randnum >= .2) {
             static float mindam =
                     XMLSupport::parse_float(vs_config->getVariable("physics", "min_maxenergy_shot_damage", "0.2"));
             if (dam < mindam) {
                 dam = mindam;
             }
-            energy.DowngradeByPercent(dam);
+            energy.DamageByPercent(dam);
         } else if (repair_droid > 0) {
             repair_droid--;
         }
@@ -1317,17 +1306,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
     }
     if (degrees >= 150 && degrees <= 180) {
         //DAMAGE ENGINES
-        if (randnum >= .8) {
-            computer.max_combat_ab_speed *= dam;
-        } else if (randnum >= .6) {
-            computer.max_combat_speed *= dam;
-        } else if (randnum >= .4) {
-            limits.afterburn *= dam;
-        } else if (randnum >= .2) {
-            limits.vertical *= dam;
-        } else {
-            limits.forward *= dam;
-        }
+        drive.Damage();
         damages |= Damages::LIMITS_DAMAGED;
         return;
     }
@@ -1565,9 +1544,9 @@ void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination) {
         float ttime =
                 (SystemLocation(sourcess->getFileName()) - SystemLocation(destination)).Magnitude()
                         * seconds_per_parsec;
-        un->jump.delay += float_to_int(ttime);
+        un->jump_drive.SetDelay(float_to_int(ttime));
         sourcess->JumpTo(un, NULL, destination, true, true);
-        un->jump.delay -= float_to_int(ttime);
+        un->jump_drive.SetDelay(-float_to_int(ttime));
     }
 }
 
@@ -1597,7 +1576,9 @@ void Unit::Target(Unit *targ) {
                 radar.Unlock();
             }
         } else {
-            if (jump.drive != -1) {
+            // TODO: this is unclear code. I translated it fully but 
+            // it doesn't really make sense. Maybe targets don't have destinations?!
+            if (!jump_drive.Installed() || jump_drive.IsDestinationSet()) {
                 bool found = false;
                 Unit *u;
                 for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (u = *i) != NULL; ++i) {
@@ -1992,8 +1973,28 @@ void Unit::PerformDockingOperations() {
 
 std::set<Unit *> arrested_list_do_not_dereference;
 
-void UpdateMasterPartList(Unit *);
+// A simple utility to recharge energy, ftl_energy and shields
+// Also to charge for docking and refueling
+void rechargeShip(Unit *unit, unsigned int cockpit) {
+    unit->fuel.Refill();
+    unit->energy.Refill();
+    unit->ftl_energy.Refill();
+    unit->shield->FullyCharge();
 
+    if (cockpit < 0 || cockpit >= _Universe->numPlayers()) {
+        return;
+    }
+
+    // Refueling fee
+    static float refueling_fee = XMLSupport::parse_float(vs_config->getVariable("general", "fuel_docking_fee", "0"));
+    _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
+
+    static float docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "docking_fee", "0"));
+    _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
+}
+
+
+// UTDW - unit to dock with
 int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     if (utdw->pImage->dockingports.size() <= whichdockport) {
         return 0;
@@ -2015,39 +2016,12 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     if (this == _Universe->AccessCockpit()->GetParent()) {
         this->RestoreGodliness();
     }
-    UpdateMasterPartList(UniverseUtil::GetMasterPartList());
+    
     unsigned int cockpit = UnitUtil::isPlayerStarship(this);
+  
+    // Refuel and recharge and charge docking/refueling fees
+    rechargeShip(this, cockpit);
 
-    static float MinimumCapacityToRefuelOnLand =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "MinimumWarpCapToRefuelDockeesAutomatically",
-                    "0"));
-    float capdata = utdw->warpCapData();
-    if ((capdata >= MinimumCapacityToRefuelOnLand) && (this->refillWarpEnergy())) {
-        if (cockpit >= 0 && cockpit < _Universe->numPlayers()) {
-            static float
-                    docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "fuel_docking_fee", "0"));
-            _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
-        }
-    }
-    if ((capdata < MinimumCapacityToRefuelOnLand) && (this->faction == utdw->faction)) {
-        if (utdw->warpEnergyData() > this->warpEnergyData() && utdw->warpEnergyData() > this->jump.energy) {
-            this->increaseWarpEnergy(false, this->jump.energy);
-            utdw->decreaseWarpEnergy(false, this->jump.energy);
-        }
-        if (utdw->warpEnergyData() < this->warpEnergyData() && this->warpEnergyData() > utdw->jump.energy) {
-            utdw->increaseWarpEnergy(false, utdw->jump.energy);
-            this->decreaseWarpEnergy(false, utdw->jump.energy);
-        }
-    }
-    if (cockpit >= 0 && cockpit < _Universe->numPlayers()) {
-        static float docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "docking_fee", "0"));
-        if (_Universe->AccessCockpit(cockpit)->credits >= docking_fee) {
-            _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
-        } else if (_Universe->AccessCockpit(cockpit)->credits >= 0) {
-            _Universe->AccessCockpit(cockpit)->credits = 0;
-        }
-    }
     std::set<Unit *>::iterator arrested = arrested_list_do_not_dereference.find(this);
     if (arrested != arrested_list_do_not_dereference.end()) {
         arrested_list_do_not_dereference.erase(arrested);
@@ -2479,10 +2453,10 @@ bool Unit::UpgradeSubUnitsWithFactory(const Unit *up, int subunitoffset, bool to
                     un->SetFaction(faction);
                     un->curr_physical_state = addToMeCur;
                     un->prev_physical_state = addToMePrev;
-                    un->limits.yaw = 0;
-                    un->limits.pitch = 0;
-                    un->limits.roll = 0;
-                    un->limits.lateral = un->limits.retro = un->limits.forward = un->limits.afterburn = 0.0;
+                    un->drive.yaw = 0;
+                    un->drive.pitch = 0;
+                    un->drive.roll = 0;
+                    un->drive.lateral = un->drive.retro = un->drive.forward = un->afterburner.thrust = 0.0;
 
                     un->name = turSize + "_blank";
                     if (un->pImage->unitwriter != NULL) {
@@ -2824,6 +2798,15 @@ bool Unit::UpAndDownGrade(const Unit *up,
         const Unit *downgradelimit,
         bool force_change_on_nothing,
         bool gen_downgrade_list) {
+    // New Code
+    UpgradeOperationResult result = UpgradeUnit(up->name, !downgrade, touchme);
+    if(result.upgradeable) {
+        percentage = result.percent;
+        return result.success;
+    }
+
+
+    // Old Code
     percentage = 0;
 
     static bool
@@ -2849,22 +2832,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
             AddToDowngradeMap(up->name, 1, curdowngrademapoffset++, tempdownmap);
         }
     }
-    float tmax_speed = up->computer.max_combat_speed;
-    float tmax_ab_speed = up->computer.max_combat_ab_speed;
-    float tmax_yaw_right = up->computer.max_yaw_right;
-    float tmax_yaw_left = up->computer.max_yaw_left;
-    float tmax_pitch_up = up->computer.max_pitch_up;
-    float tmax_pitch_down = up->computer.max_pitch_down;
-    float tmax_roll_right = up->computer.max_roll_right;
-    float tmax_roll_left = up->computer.max_roll_left;
-    float tlimits_yaw = up->limits.yaw;
-    float tlimits_roll = up->limits.roll;
-    float tlimits_pitch = up->limits.pitch;
-    float tlimits_lateral = up->limits.lateral;
-    float tlimits_vertical = up->limits.vertical;
-    float tlimits_forward = up->limits.forward;
-    float tlimits_retro = up->limits.retro;
-    float tlimits_afterburn = up->limits.afterburn;
+    
     if (downgrade) {
         Adder = &SubtractUp;
         Percenter = &computeDowngradePercent;
@@ -2876,22 +2844,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         } else if (additive == 2) {
             Adder = &MultUp;
             Percenter = &computeMultPercent;
-            tmax_speed = speedStarHandler(tmax_speed);
-            tmax_ab_speed = speedStarHandler(tmax_ab_speed);
-            tmax_yaw_right = speedStarHandler(tmax_yaw_right);
-            tmax_yaw_left = speedStarHandler(tmax_yaw_left);
-            tmax_pitch_up = speedStarHandler(tmax_pitch_up);
-            tmax_pitch_down = speedStarHandler(tmax_pitch_down);
-            tmax_roll_right = speedStarHandler(tmax_roll_right);
-            tmax_roll_left = speedStarHandler(tmax_roll_left);
-            tlimits_yaw = speedStarHandler(tlimits_yaw);
-            tlimits_pitch = speedStarHandler(tlimits_pitch);
-            tlimits_roll = speedStarHandler(tlimits_roll);
-            tlimits_forward = accelStarHandler(tlimits_forward);
-            tlimits_retro = accelStarHandler(tlimits_retro);
-            tlimits_lateral = accelStarHandler(tlimits_lateral);
-            tlimits_vertical = accelStarHandler(tlimits_vertical);
-            tlimits_afterburn = accelStarHandler(tlimits_afterburn);
         } else {
             Adder = &GetsB;
             Percenter = &computePercent;
@@ -2960,30 +2912,11 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     1);
         }
     }
-    //Check jump and jump/SPEC stuff
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction,
-                    "Warp_Capacitor|Warp_Usage_Cost")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Capacitor"))
-            STDUPGRADE(maxwarpenergy, up->maxwarpenergy, templ->maxwarpenergy, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Usage_Cost"))
-            STDUPGRADE(jump.insysenergy, up->jump.insysenergy, templ->jump.insysenergy, 0);
-
-// for when we'll need more than one jump drive upgrade (Elite Strike?)
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Outsystem_Jump_Cost"))
-            STDUPGRADE(jump.energy, up->jump.energy, templ->jump.energy, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Jump_Drive_Delay"))
-            STDUPGRADE(jump.delay, up->jump.delay, templ->jump.delay, 0);
-
-    }
+    
 
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Armor_Front_Top_Right")) {
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < armor->number_of_facets; ++i) {
             STDUPGRADE(armor->facets[i].health,
                     up->armor->facets[i].health,
                     templ->armor->facets[i].health, 0);
@@ -3010,28 +2943,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
         shield->UpdateRegeneration(shield_regeneration);
     }
 
-    // Upgrade hull health
-    upgrade_hull = *current_hull;
-
-    if (up && up->current_hull) {
-        const_cast<Unit *>(up)->upgrade_hull = *up->current_hull;
-    }
-
-    if (templ && templ->current_hull) {
-        const_cast<Unit *>(templ)->upgrade_hull = *templ->current_hull;
-    }
-
-    if (!csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data(upgrade_name, up->faction, "Hull")) {
-        STDUPGRADE(upgrade_hull, up->upgrade_hull, templ->upgrade_hull, 0);
-    }
-
-    if ((hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed())) {
-        hull->facets[0].max_health = hull->facets[0].health;
-    }
-
-    if (!csv_cell_null_check || force_change_on_nothing
+    /*if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
-        STDUPGRADE(recharge, up->recharge, templ->recharge, 0);
+        STDUPGRADE(recharge, up->recharge, templ->recharge, 0);*/
     static bool unittable = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
     //Uncommon fields (capacities... rates... etc...)
     if (!csv_cell_null_check || force_change_on_nothing
@@ -3059,67 +2973,8 @@ bool Unit::UpAndDownGrade(const Unit *up,
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "ECM_Rating"))
             STDUPGRADE(ecm, up->ecm, templ->ecm, 0); //ecm is unsigned --chuck_starchaser
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Primary_Capacitor")) {
-            temporary_upgrade_float_variable = static_cast<float>(energy.MaxValue());
-            STDUPGRADE(temporary_upgrade_float_variable, up->energy.MaxValue(), templ->energy.MaxValue(), 0);
-            energy.SetMaxValue(temporary_upgrade_float_variable);
-        }
     }
-    //Maneuvering stuff
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name,
-                    up->faction,
-                    "Maneuver_Yaw|Maneuver_Pitch|Maneuver_Roll|Left_Accel|Top_Accel|Retro_Accel|Forward_Accel|Afterburner_Accel|Default_Speed_Governor|Afterburner_Speed_Governor|Yaw_Governor|Pitch_Governor|Roll_Speed_Governor")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Maneuver_Yaw"))
-            STDUPGRADE(limits.yaw, tlimits_yaw, templ->limits.yaw, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Maneuver_Pitch"))
-            STDUPGRADE(limits.pitch, tlimits_pitch, templ->limits.pitch, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Maneuver_Roll"))
-            STDUPGRADE(limits.roll, tlimits_roll, templ->limits.roll, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Left_Accel"))
-            STDUPGRADE(limits.lateral, tlimits_lateral, templ->limits.lateral, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Top_Accel"))
-            STDUPGRADE(limits.vertical, tlimits_vertical, templ->limits.vertical, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Retro_Accel"))
-            STDUPGRADE(limits.retro, tlimits_retro, templ->limits.retro, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Forward_Accel"))
-            STDUPGRADE(limits.forward, tlimits_forward, templ->limits.forward, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Afterburner_Accel"))
-            STDUPGRADE(limits.afterburn, tlimits_afterburn, templ->limits.afterburn, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Fuel_Capacity"))
-            STDUPGRADE(fuel, up->fuel, templ->fuel, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Default_Speed_Governor"))
-            STDUPGRADE(computer.max_combat_speed, tmax_speed, templ->computer.max_combat_speed, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Afterburner_Speed_Governor"))
-            STDUPGRADE(computer.max_combat_ab_speed, tmax_ab_speed, templ->computer.max_combat_ab_speed, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Yaw_Governor")) {
-            STDUPGRADE(computer.max_yaw_right, tmax_yaw_right, templ->computer.max_yaw_right, 0);
-            STDUPGRADE(computer.max_yaw_left, tmax_yaw_left, templ->computer.max_yaw_left, 0);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Pitch_Governor")) {
-            STDUPGRADE(computer.max_pitch_down, tmax_pitch_down, templ->computer.max_pitch_down, 0);
-            STDUPGRADE(computer.max_pitch_up, tmax_pitch_up, templ->computer.max_pitch_up, 0);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Roll_Speed_Governor")) {
-            STDUPGRADE(computer.max_roll_left, tmax_roll_left, templ->computer.max_roll_left, 0);
-            STDUPGRADE(computer.max_roll_right, tmax_roll_right, templ->computer.max_roll_right, 0);
-        }
-    }
+    
     //FIXME - do cell lookup later here
     static bool UpgradeCockpitDamage =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "upgrade_cockpit_damage", "false"));
@@ -3156,7 +3011,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
         }
     }
 
-    bool upgradedshield = false;
 
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Shield_Front_Top_Right")) {
@@ -3172,10 +3026,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     shield->facets[i].adjusted_health = shield->facets[i].max_health;
                     shield->facets[i].health = shield->facets[i].max_health;
                 }
-            }
-
-            if (touchme && retval == UPGRADEOK) {
-                upgradedshield = true;
             }
         } else if (up->FShieldData() > 0 || up->RShieldData() > 0 || up->LShieldData() > 0 || up->BShieldData() > 0) {
             cancompletefully = false;
@@ -3208,129 +3058,9 @@ bool Unit::UpAndDownGrade(const Unit *up,
     static float tc = XMLSupport::parse_float(vs_config->getVariable("physics", "autotracking", ".93"));
     static bool use_template_maxrange =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "use_upgrade_template_maxrange", "true"));
-    //Radar stuff
-    if (!csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data(upgrade_name, up->faction,
-                    "Radar_Range|Radar_Color|ITTS|Can_Lock|Max_Cone|Lock_Cone|Tracking_Cone")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Radar_Range")) {
-            STDUPGRADECLAMP(radar.max_range,
-                    up->radar.max_range,
-                    use_template_maxrange ? templ->radar.max_range : FLT_MAX,
-                    0);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Radar_Color"))
-            STDUPGRADE(radar.capabilities, up->radar.capabilities, templ->radar.capabilities, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "ITTS")) {
-            computer.itts = UpgradeBoolval(computer.itts,
-                    up->computer.itts,
-                    touchme,
-                    downgrade,
-                    numave,
-                    percentage,
-                    force_change_on_nothing);
-        }
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Can_Lock")) {
-            radar.can_lock = UpgradeBoolval(radar.can_lock,
-                    up->radar.can_lock,
-                    touchme,
-                    downgrade,
-                    numave,
-                    percentage,
-                    force_change_on_nothing);
-        }
-        //Do the two reversed ones below
-        bool ccf = cancompletefully;
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Max_Cone")) {
-            double myleak = 1 - radar.max_cone;
-            double upleak = 1 - up->radar.max_cone;
-            double templeak = 1 - (templ != NULL ? templ->radar.max_cone : -1);
-            STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, radar.max_cone);
-            if (touchme) {
-                radar.max_cone = 1 - myleak;
-            }
-        }
-        if (up->radar.lock_cone != lc) {
-            double myleak = 1 - radar.lock_cone;
-            double upleak = 1 - up->radar.lock_cone;
-            double templeak = 1 - (templ != NULL ? templ->radar.lock_cone : -1);
-            if (templeak == 1 - lc) {
-                templeak = 2;
-            }
-            if (!csv_cell_null_check || force_change_on_nothing
-                    || cell_has_recursive_data(upgrade_name, up->faction, "Lock_Cone")) {
-                STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, radar.lock_cone);
-                if (touchme) {
-                    radar.lock_cone = 1 - myleak;
-                }
-            }
-        }
-        if (up->radar.tracking_cone != tc) {
-            double myleak = 1 - radar.tracking_cone;
-            double upleak = 1 - up->radar.tracking_cone;
-            double templeak = 1 - (templ != NULL ? templ->radar.tracking_cone : -1);
-            if (templeak == 1 - tc) {
-                templeak = 2;
-            }
-            if (!csv_cell_null_check || force_change_on_nothing
-                    || cell_has_recursive_data(upgrade_name, up->faction, "Tracking_Cone")) {
-                STDUPGRADE_SPECIFY_DEFAULTS(myleak, upleak, templeak, 0, 0, 0, false, radar.tracking_cone);
-                if (touchme) {
-                    radar.tracking_cone = 1 - myleak;
-                }
-            }
-        }
-        cancompletefully = ccf;
-    }
+    
     //NO CLUE FOR BELOW
-    if (downgrade) {
-        if (jump.drive >= -1 && up->jump.drive >= -1) {
-            if (touchme) {
-                jump.drive = -2;
-            }
-            ++numave;
-            percentage += .5 * ((float) (100 - jump.damage)) / (101 - up->jump.damage);
-            if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name,
-                        up->jump.drive,
-                        ((char *) &this->jump.drive) - ((char *) this),
-                        tempdownmap);
-            }
-        }
-        if (cloak.Capable() && up->cloak.Capable()) {
-            if (touchme) {
-                cloak.Disable();
-            }
-            ++numave;
-            ++percentage;
-            if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name,
-                                  up->cloak.current,
-                                  ((char *) &this->cloak.current) - ((char *) this),
-                                  tempdownmap);
-            }
-        }
-        //NOTE: Afterburner type 2 (jmp)
-        //NOTE: Afterburner type 1 (gas)
-        //NOTE: Afterburner type 0 (pwr)
-        if (afterburnenergy < 32767 && afterburnenergy <= up->afterburnenergy && up->afterburnenergy != 32767
-                && up->afterburnenergy != 0) {
-            if (touchme) {
-                afterburnenergy = 32767, afterburntype = 0;
-            }
-            ++numave;
-            ++percentage;
-            if (gen_downgrade_list) {
-                AddToDowngradeMap(up->name,
-                        up->afterburntype,
-                        ((char *) &this->afterburnenergy) - ((char *) this),
-                        tempdownmap);
-            }
-        }
+    if (downgrade) {       
     } else {
         //we are upgrading!
         if (touchme) {
@@ -3339,42 +3069,6 @@ bool Unit::UpAndDownGrade(const Unit *up,
                     AddCargo(up->cargo[i], false);
                 }
             }
-        }
-        if ((!cloak.Capable() && up->cloak.Capable()) || force_change_on_nothing) {
-            if (touchme) {
-                cloak.Enable();
-
-                cloak.minimum = up->cloak.minimum;
-                cloak.rate = up->cloak.rate;
-                cloak.glass = up->cloak.glass;
-                cloak.energy = up->cloak.energy;
-            }
-            ++numave;
-        } else if (cloak.Capable() && up->cloak.Capable()) {
-            cancompletefully = false;
-        }
-        //NOTE: Afterburner type 2 (jmp)
-        //NOTE: Afterburner type 1 (gas)
-        //NOTE: Afterburner type 0 (pwr)
-        if (((afterburnenergy > up->afterburnenergy
-                || (afterburntype != up->afterburntype && up->afterburnenergy != 32767))
-                && up->afterburnenergy > 0) || force_change_on_nothing) {
-            ++numave;
-            if (touchme) {
-                afterburnenergy = up->afterburnenergy, afterburntype = up->afterburntype;
-            }
-        } else if (afterburnenergy <= up->afterburnenergy && afterburnenergy >= 0 && up->afterburnenergy > 0
-                && up->afterburnenergy < 32767) {
-            cancompletefully = false;
-        }
-        if ((jump.drive == -2 && up->jump.drive >= -1) || force_change_on_nothing) {
-            if (touchme) {
-                jump.drive = up->jump.drive;
-                jump.damage = 0;
-            }
-            ++numave;
-        } else if (jump.drive >= -1 && up->jump.drive >= -1) {
-            cancompletefully = false;
         }
     }
     if (needs_redemption) {
@@ -3475,6 +3169,29 @@ int Unit::RepairCost() {
     if (LifeSupportFunctionalityMax < 1) {
         ++cost;
     }
+
+    // TODO: figure out better cost
+    if (afterburner.Damaged()) {
+        cost += 5;
+    }
+
+    if (afterburner_upgrade.Damaged()) {
+        cost += 3;
+    }
+
+    if (drive.Damaged()) {
+        cost += 7;
+    }
+
+    if (drive_upgrade.Damaged()) {
+        cost += 5;
+    }
+
+    if (ftl_drive.Damaged()) {
+        cost += 7;
+    }
+
+
     for (i = 0; i < numCargo(); ++i) {
         if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
             ++cost;
@@ -3483,6 +3200,7 @@ int Unit::RepairCost() {
     return cost;
 }
 
+// This is called when performing a BASIC_REPAIR
 int Unit::RepairUpgrade() {
     vector<Cargo> savedCargo;
     savedCargo.swap(cargo);
@@ -3548,6 +3266,14 @@ int Unit::RepairUpgrade() {
         pct = 1;
         success += 1;
     }
+
+    // Repair components
+    afterburner.Repair();
+    afterburner_upgrade.Repair();
+    drive.Repair();
+    drive_upgrade.Repair();
+    ftl_drive.Repair();
+
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
@@ -3575,12 +3301,6 @@ int Unit::RepairUpgrade() {
                         if (shield.recharge > maxrecharge->shield.recharge)
                             shield.recharge = maxrecharge->shield.recharge;
                 }*/
-                if (up->energy.MaxValue() == energy.MaxValue() && up->recharge > recharge) {
-                    recharge = up->recharge;
-                    if (recharge > maxrecharge->recharge) {
-                        recharge = maxrecharge->recharge;
-                    }
-                }
             }
         }
     }
@@ -4011,7 +3731,9 @@ bool isWeapon(std::string name) {
     }                                                        \
     while (0)
 
+// This is called every cycle - repair in flight by droids
 void Unit::Repair() {
+    // TODO: everything below here needs to go when we're done with lib_components
     static float repairtime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidTime", "180"));
     static float checktime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidCheckTime", "5"));
     if ((repairtime <= 0) || (checktime <= 0)) {
@@ -4304,12 +4026,8 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         Unit *superunit) {
     ActTurn();
 
-    if (fuel < 0) {
-        fuel = 0;
-    }
-
     static CloakingStatus previous_status = cloak.status;
-    cloak.Update(this);
+    cloak.Update();
 
     // Play once per cloaking
     if(cloak.Cloaking() && previous_status != CloakingStatus::cloaking) {
@@ -4538,7 +4256,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     tracking_cone,
                     hint)) {
                 const WeaponInfo *typ = mounts[i].type;
-                energy += typ->energy_rate * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1);
+                energy.Charge(static_cast<double>(typ->energy_rate) * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1));
             }
         } else if (mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2 * mounts[i].type->Refire()) {
             mounts[i].processed = Mount::UNFIRED;
@@ -4830,4 +4548,19 @@ bool Unit::TransferUnitToSystem(unsigned int kk, StarSystem *&savedStarSystem, b
         VS_LOG(warning, "Already jumped\n");
     }
     return ret;
+}
+
+// TODO: move this to energy or just simplify
+// Why single out shields from other constant drains?
+float Unit::energyData() const {
+    float capacitance = totalShieldEnergyCapacitance();
+
+    if (configuration()->physics_config.max_shield_lowers_capacitance) {
+        if (energy.MaxLevel() <= capacitance) {
+            return 0;
+        }
+        return (energy.Level()) / (energy.MaxLevel() - capacitance);
+    } else {
+        return energy.Percent();
+    }
 }

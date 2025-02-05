@@ -32,7 +32,6 @@
 #include "configxml.h"
 #include "images.h"
 #include "collection.h"
-#include "star_system_generic.h"
 #include "role_bitmask.h"
 #include "ai/order.h"
 #include "faction_generic.h"
@@ -190,7 +189,7 @@ Missile::Missile(const char *filename,
         had_target(false) {
     // TODO: why would a sparkling missile be four times as hard to kill???
     if (configuration()->graphics_config.missile_sparkle) {
-        *current_hull *= 4;
+        layers[0].facets[0] = Health(0, layers[0].facets[0].max_health * 4);
     }
 }
 

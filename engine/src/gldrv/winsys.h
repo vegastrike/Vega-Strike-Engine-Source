@@ -1,26 +1,27 @@
 /*
  * Tux Racer
+ *
  * Copyright (C) 1999-2001 Jasmin F. Patry
- * Copyright (C) 2023 Benjamen R. Meyer
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
+ * as published by the Free Software Foundation; either version 3
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * Incorporated into Vega Strike
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,7 +32,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -49,13 +50,10 @@
 #endif
 
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
-#   include <SDL/SDL.h>
+#   include "SDL2/SDL.h"
 #elif defined( HAVE_GLUT )
-#if defined(__APPLE__) || defined(MACOSX)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#   include <glut.h>
 #else
 #   error "Neither SDL nor GLUT are present."
 #endif
@@ -78,16 +76,16 @@ typedef enum {
     WSK_NOT_AVAIL = SDLK_UNKNOWN,
 
     /* Numeric keypad */
-    WSK_KP0 = SDLK_KP0,
-    WSK_KP1 = SDLK_KP1,
-    WSK_KP2 = SDLK_KP2,
-    WSK_KP3 = SDLK_KP3,
-    WSK_KP4 = SDLK_KP4,
-    WSK_KP5 = SDLK_KP5,
-    WSK_KP6 = SDLK_KP6,
-    WSK_KP7 = SDLK_KP7,
-    WSK_KP8 = SDLK_KP8,
-    WSK_KP9 = SDLK_KP9,
+    WSK_KP0 = SDLK_KP_0,
+    WSK_KP1 = SDLK_KP_1,
+    WSK_KP2 = SDLK_KP_2,
+    WSK_KP3 = SDLK_KP_3,
+    WSK_KP4 = SDLK_KP_4,
+    WSK_KP5 = SDLK_KP_5,
+    WSK_KP6 = SDLK_KP_6,
+    WSK_KP7 = SDLK_KP_7,
+    WSK_KP8 = SDLK_KP_8,
+    WSK_KP9 = SDLK_KP_9,
     WSK_KP_PERIOD = SDLK_KP_PERIOD,
     WSK_KP_DIVIDE = SDLK_KP_DIVIDE,
     WSK_KP_MULTIPLY = SDLK_KP_MULTIPLY,
@@ -100,13 +98,13 @@ typedef enum {
     WSK_TAB = '\t',
     WSK_ESCAPE = 27,
     WSK_BACKSPACE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
     127,
 #else
     8,
 #endif
     WSK_DELETE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
     8,
 #else
     127,
@@ -140,20 +138,20 @@ typedef enum {
     WSK_F15 = SDLK_F15,
 
     /* Key state modifier keys */
-    WSK_NUMLOCK = SDLK_NUMLOCK,
+    WSK_NUMLOCK = SDLK_NUMLOCKCLEAR,
     WSK_CAPSLOCK = SDLK_CAPSLOCK,
-    WSK_SCROLLOCK = SDLK_SCROLLOCK,
+    WSK_SCROLLOCK = SDLK_SCROLLLOCK,
     WSK_RSHIFT = SDLK_RSHIFT,
     WSK_LSHIFT = SDLK_LSHIFT,
     WSK_RCTRL = SDLK_RCTRL,
     WSK_LCTRL = SDLK_LCTRL,
     WSK_RALT = SDLK_RALT,
     WSK_LALT = SDLK_LALT,
-    WSK_RMETA = SDLK_RMETA,
-    WSK_LMETA = SDLK_LMETA,
-    WSK_BREAK = SDLK_BREAK,
+    WSK_RMETA = SDLK_RGUI,
+    WSK_LMETA = SDLK_LGUI,
+    WSK_BREAK = SDLK_PAUSE,
     WSK_PAUSE = SDLK_PAUSE,
-    WSK_LAST = SDLK_LAST
+    WSK_LAST = SDL_NUM_SCANCODES // Could be an issue. Needs investigating. See https://wiki.libsdl.org/SDL2/MigrationGuide.
 
 } winsys_keysym_t;
 typedef enum {
@@ -164,8 +162,8 @@ typedef enum {
     WSK_MOD_RCTRL = KMOD_RCTRL,
     WSK_MOD_LALT = KMOD_LALT,
     WSK_MOD_RALT = KMOD_RALT,
-    WSK_MOD_LMETA = KMOD_LMETA,
-    WSK_MOD_RMETA = KMOD_RMETA,
+    WSK_MOD_LMETA = SDLK_LGUI, // This is an issue for these two entries. We are ignoring the modifier.
+    WSK_MOD_RMETA = SDLK_RGUI, // Need to figure out how to do modifier in sdl2.
     WSK_MOD_NUM = KMOD_NUM,
     WSK_MOD_CAPS = KMOD_CAPS,
     WSK_MOD_MODE = KMOD_MODE
@@ -227,13 +225,13 @@ typedef enum {
     WSK_TAB = '\t',
     WSK_ESCAPE = 27,
     WSK_BACKSPACE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
     127,
 #else
     8,
 #endif
     WSK_DELETE =
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
     8,
 #else
     127,
@@ -334,7 +332,6 @@ void winsys_set_motion_func(winsys_motion_func_t func);
 void winsys_set_passive_motion_func(winsys_motion_func_t func);
 
 void winsys_swap_buffers();
-void winsys_enable_key_repeat(bool enabled);
 void winsys_warp_pointer(int x, int y);
 void winsys_show_cursor(bool visible);
 

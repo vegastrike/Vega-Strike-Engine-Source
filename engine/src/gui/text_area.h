@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d,
+ * text_area.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, David Ranger, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -28,16 +30,17 @@
 //1.2 - Added sorting
 //1.3 - Added DoMouse to classes. Also fixed bug where button class would always 1 for dragging
 
-/* This class is designed to be self sufficient.
+/* This class is designed to be self-sufficient.
  * The only external functions it requires that aren't provided by system libs are in glut_support.h
  */
 
 //There are places where a float is converted to an int. This define takes extra steps to convert without a warning (float -> char -> int)
 #define NO_WARNINGS
 
-#if defined (__APPLE__) || defined (MACOSX)
-    #include <OpenGL/gl.h>
-    #include <GLUT/glut.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#if defined (__APPLE__) && defined (__MACH__)
+    #include <gl.h>
+    #include <glut.h>
 #else
 #ifdef _WIN32
     #ifndef NOMINMAX
@@ -45,8 +48,8 @@
     #endif //tells VCC not to generate min/max macros
     #include <windows.h>
 #endif
-    #include <GL/gl.h>
-    #include <GL/glut.h>
+    #include <gl.h>
+    #include <glut.h>
 #endif
 
 #include "glut_support.h"

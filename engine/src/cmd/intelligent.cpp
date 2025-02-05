@@ -1,8 +1,8 @@
-/**
+/*
  * intelligent.cpp
  *
- * Copyright (C) 2020 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +15,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -27,6 +27,8 @@
  * ships, space installations, missiles, drones, etc. */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include "intelligent.h"
 
 #include "ai/order.h"
@@ -40,6 +42,7 @@
 #include "gfx/mesh.h"
 #include "ai/turretai.h"
 #include "collide2/CSopcodecollider.h"
+#include "vega_cast_utils.h"
 
 #include <string>
 
@@ -218,13 +221,13 @@ string Intelligent::getFullAIDescription() {
 }
 
 float Intelligent::getRelation(const Unit *targ) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     return unit->pilot->GetEffectiveRelationship(unit, targ);
 }
 
 double Intelligent::getMinDis(const QVector &pnt) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     float minsofar = 1e+10;
     float tmpvar;

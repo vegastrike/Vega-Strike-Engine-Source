@@ -25,7 +25,6 @@
 #define VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 
 #include "gfx/vec.h"
-#include "vs_limits.h"
 #include "gfx/quaternion.h"
 #include "star_system.h"
 
@@ -59,8 +58,6 @@ public:
     }
 
     // Fields
-
-    Limits limits;
     //The velocity this unit has in World Space
     Vector cumulative_velocity;
     //The force applied from outside accrued over the whole physics frame
@@ -109,27 +106,25 @@ public:
     //How big is this unit
     float radial_size;
 
-    class graphic_options {
-    public:
-        unsigned SubUnit: 1;
-        unsigned RecurseIntoSubUnitsOnCollision: 1;
-        unsigned missilelock: 1;
-        unsigned FaceCamera: 1;
-        unsigned Animating: 1;
-        unsigned InWarp: 1;
-        unsigned WarpRamping: 1;
-        unsigned unused1: 1;
-        unsigned NoDamageParticles: 1;
-        unsigned specInterdictionOnline: 1;
+    struct graphic_options {
+        // TODO: Most of these should migrate to ftl_drive
+        unsigned SubUnit;
+        unsigned RecurseIntoSubUnitsOnCollision;
+        unsigned missilelock;
+        unsigned FaceCamera;
+        unsigned Animating;
+        
+        unsigned WarpRamping;
+        unsigned unused1;
+        unsigned NoDamageParticles;
+        unsigned specInterdictionOnline;
         unsigned char NumAnimationPoints;
         float WarpFieldStrength = 1;
         float RampCounter;
         float MinWarpMultiplier;
         float MaxWarpMultiplier;
-
         graphic_options();
-    }
-            graphicOptions;
+    } graphicOptions;
 protected:
     //Moment of intertia of this unit
     float Momentofinertia; // Was 0 but Init says 0.01
@@ -295,6 +290,9 @@ public:
     void PitchTorque(float amt);
     //Applies a roll of amt
     void RollTorque(float amt);
+
+    double MaxSpeed() const;
+    double MaxAfterburnerSpeed() const;
 };
 
 #endif //VEGA_STRIKE_ENGINE_CMD_MOVABLE_H

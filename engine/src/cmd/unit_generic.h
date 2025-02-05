@@ -69,7 +69,6 @@ void UncheckUnit( class Unit*un );
 #include "collection.h"
 #include "script/flightgroup.h"
 #include "faction_generic.h"
-#include "star_system_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
 #include "collide_map.h"
@@ -77,10 +76,25 @@ void UncheckUnit( class Unit*un );
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
 #include "cloak.h"
-#include "components/radar.h"
+
+
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
+
+#include "cargo_color.h"
+
+// Components
+#include "components/afterburner.h"
+#include "components/afterburner_upgrade.h"
+#include "components/cloak.h"
+#include "components/energy_container.h"
+#include "components/reactor.h"
+#include "components/drive.h"
+#include "components/drive_upgrade.h"
+#include "components/ftl_drive.h"
+#include "components/jump_drive.h"
+#include "components/radar.h"
 
 extern char *GetUnitDir(const char *filename);
 
@@ -100,7 +114,6 @@ class Box;
 class StarSystem;
 struct colTrees;
 class Pilot;
-class Limits;
 class MissileGeneric;
 class AsteroidGeneric;
 
@@ -138,6 +151,16 @@ struct PlanetaryOrbitData;
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
         public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
+    // We store relevant textual description here. 
+    // We stop relying on manifest and units data once we create the unit.
+    // The unit description is always taken from the manifest and not saved.
+    // Note the game confusingly refers to units:
+    // - class (Llama) - should be model
+    // - model (stock) - should be variant, but only if actually different without upgrades
+    // TODO: name is duplicated down below in some memory saving measure (StringPool::Reference)
+    std::string unit_key;           
+    std::string unit_name;
+    std::string unit_description;
 
 protected:
 //How many lists are referencing us
@@ -145,7 +168,22 @@ protected:
     StringPool::Reference csvRow;
 
 public:
+    // Components
+    EnergyContainer fuel = EnergyContainer(ComponentType::Fuel);
+    EnergyContainer energy = EnergyContainer(ComponentType::Capacitor);
+    EnergyContainer ftl_energy = EnergyContainer(ComponentType::FtlCapacitor);
+
+    // TODO: move this to a single constructor?!
+    Reactor reactor = Reactor(&fuel, &energy, &ftl_energy);
+
+    Afterburner afterburner;
+    AfterburnerUpgrade afterburner_upgrade = AfterburnerUpgrade(&afterburner);
     Cloak cloak;
+    Drive drive;
+    DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
+    FtlDrive ftl_drive = FtlDrive(&ftl_energy);
+    JumpDrive jump_drive = JumpDrive(&ftl_energy);
+    CRadar radar;
 
     /// Radar and related systems
     // TODO: take a deeper look at this much later...
@@ -272,6 +310,15 @@ public:
 
 //the turrets and spinning parts fun fun stuff
     UnitCollection SubUnits;
+
+// Turret limits
+    //the vector denoting the "front" of the turret cone!
+    // Again, an inconsistency between constructor and Init(). Chose Init
+    // value as it comes later
+    Vector structure_limits = Vector(0.0f, 0.0f, 1.0f);
+
+    //the minimum dot that the current heading can have with the structurelimit
+    double limit_min = -1;
 
 /**
  * Contains information about a particular Mount on a unit.
@@ -412,7 +459,7 @@ protected:
     friend class UpgradingInfo;
 public:
 //Have to pass the randnum and degrees in networking and client side since they must not be random in that case
-    void DamageRandSys(float dam, const Vector &vec, float randum = 1, float degrees = 1);
+    void DamageRandSys(float dam, const Vector &vec);
     void SetNebula(Nebula *);
 
     inline Nebula *GetNebula() const {
@@ -481,7 +528,6 @@ public:
             bool DoSightAndSound) override;
 
     Computer computer;
-    CRadar radar;
     void SwitchCombatFlightMode();
     bool CombatMode();
 
@@ -523,6 +569,8 @@ protected:
 public:
 //tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
     void WriteUnit(const char *modificationname = "");
+
+    const std::map<std::string, std::string> UnitToMap();
     std::string WriteUnitString();
 //Loads a unit from an xml file into a complete datastructure
     void LoadXML(const char *filename, const char *unitModifications = "", std::string *xmlbuffer = NULL);
@@ -985,6 +1033,10 @@ public:
     // object_a->field_a = object_b->field_b;
     float temporary_upgrade_float_variable;
 
+
+    // Python Interfaces
+    float fuelData() const { return fuel.Level(); }
+    float energyData() const;
 };
 
 Unit *findUnitInStarsystem(const void *unitDoNotDereference);
@@ -1042,13 +1094,9 @@ extern std::set<std::string> GetListOfDowngrades();
 extern void ClearDowngradeMap();
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
-/*
- **************************************************************************************
- **** MESH ANIMATION STUFF                                                       ***
- **************************************************************************************
- */
 
 
+void rechargeShip(Unit *unit, unsigned int cockpit);
 
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_GENERIC_H
 

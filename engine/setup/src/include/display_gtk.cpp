@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, David Ranger,
+ * display_gtk.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, David Ranger,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -36,6 +38,8 @@ void ClickButton(GtkWidget *w, struct catagory *CUR);
 
 #include <string>
 
+#include <boost/format.hpp>
+
 //#define USE_RADIO
 
 
@@ -47,11 +51,13 @@ void exit_0(GtkWidget *w, void *arg) {
 
 void InitGraphics(int *argc, char ***argv) {
     gtk_init(argc, argv);
-    GET_TITLE; // sets title; uses sprintf, not snprintf -- //[MSVC-Warn]
+    GET_TITLE;
     GET_STATIC_TEXT;
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
-    gtk_window_set_title(GTK_WINDOW(window), title);
+    gtk_window_set_title(
+        GTK_WINDOW(window),
+        (boost::format("Settings - %1% - Version %2%") % CONFIG.program_name % VEGASTRIKE_VERSION_STR).str().c_str());
 
     g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(exit_0), NULL);
     g_signal_connect(G_OBJECT(window), "delete_event", G_CALLBACK(exit_0), NULL);

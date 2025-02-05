@@ -1,0 +1,32 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "vega-strike",
+    "version-string": "0.10.0",
+    "builtin-baseline": "da4b78d35084ec4e9808aa02017028da03b8d2ab",
+    "dependencies": [
+        "boost-python",
+        "boost-log",
+        "boost-date-time",
+        "boost-iostreams",
+        "boost-system",
+        "boost-filesystem",
+        "boost-thread",
+        "boost-chrono",
+        "boost-atomic",
+        "boost-assign",
+        "boost-format",
+        "boost-json",
+        "boost-program-options",
+        "egl-registry",
+        "expat",
+        "freeglut",
+        "libpng",
+        "libjpeg-turbo",
+        "libvorbis",
+        "openal-soft",
+        "opengl",
+        "openssl",
+        "sdl2",
+        "zlib"
+    ]
+}

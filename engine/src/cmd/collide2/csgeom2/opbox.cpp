@@ -2,6 +2,7 @@
     Copyright (C) 1998 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
     Copyright (C) 2022 Stephen G. Tuggy
+    Copyright (C) 2025 Benjamen R. Meyer
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,8 +22,7 @@
 
 #define MIN(a, b) ((a)<(b)?(a):(b))
 #define MAX(a, b) ((a)>(b)?(a):(b))
-#include <math.h>
-#include "cmd/collide2/opcodesysdef.h"
+#include <cmath>
 #include "opbox.h"
 
 //---------------------------------------------------------------------------

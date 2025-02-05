@@ -1,10 +1,8 @@
-/**
+/*
  * docking.cpp
  *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,6 +23,8 @@
  */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include "python/python_compile.h"
 #include "docking.h"
 #include "xml_support.h"
@@ -182,6 +182,7 @@ QVector DockingOps::Movement(Unit *utdw) {
     return loc;
 }
 
+
 bool DockingOps::DockToTarget(Unit *utdw) {
     if (utdw->DockingPortLocations()[port].IsOccupied()) {
         if (keeptrying) {
@@ -197,19 +198,13 @@ bool DockingOps::DockToTarget(Unit *utdw) {
     float rad = utdw->DockingPortLocations()[port].GetRadius() + parent->rSize();
     float diss = (parent->Position() - loc).MagnitudeSquared() - .1;
     bool isplanet = utdw->isUnit() == Vega_UnitType::planet;
-    static float MinimumCapacityToRefuelOnLand =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "MinimumWarpCapToRefuelDockeesAutomatically",
-                    "0"));
+
     if (diss <= (isplanet ? rad * rad : parent->rSize() * parent->rSize())) {
         DockedScript(parent, utdw);
         if (physicallyDock) {
             return parent->Dock(utdw);
         } else {
-            float maxWillingToRefill = utdw->warpCapData();
-            if (maxWillingToRefill >= MinimumCapacityToRefuelOnLand) {
-                parent->refillWarpEnergy();
-            }                  //BUCO! This needs its own units.csv column to see how much we refill!
+            rechargeShip(parent, 0);
             return true;
         }
     } else if (diss <= 1.2 * rad * rad) {
@@ -219,10 +214,7 @@ bool DockingOps::DockToTarget(Unit *utdw) {
             if (physicallyDock) {
                 return parent->Dock(utdw);
             } else {
-                float maxWillingToRefill = utdw->warpCapData();
-                if (maxWillingToRefill >= MinimumCapacityToRefuelOnLand) {
-                    parent->refillWarpEnergy();
-                }                      //BUCO! This needs its own units.csv column to see how much we refill!
+                rechargeShip(parent, 0);
                 return true;
             }
         }

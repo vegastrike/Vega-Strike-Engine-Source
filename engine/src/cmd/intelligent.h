@@ -35,6 +35,7 @@ class Order;
 class Intelligent {
 public:
     Intelligent();
+    virtual ~Intelligent() = default;
 
 public:
     class csOPCODECollider *getCollideTree(const Vector &scale = Vector(1,

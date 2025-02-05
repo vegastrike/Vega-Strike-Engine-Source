@@ -1,7 +1,7 @@
 /*
  * upgradeable_unit.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -33,11 +33,15 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include "components/component.h"
+#include "components/component_utils.h"
 #include "unit_const_cache.h"
 #include "faction_generic.h"
 #include "unit_generic.h"
 #include "weapon_info.h"
 #include "vega_cast_utils.h"
+#include "vs_logging.h"
+#include "unit_csv_factory.h"
 
 std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     if(upgrades.size() == 0) {
@@ -65,6 +69,34 @@ std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     return upgrades_vector;
 }
 
+// A simple struct for holding all the data
+// TODO: figure out what the numbers mean
+// TODO: move this to Cargo or a subclass of cargo
+// TODO: separate cargo from upgrades 
+struct CargoUpgrade {
+    std::string name;
+    std::string category;
+
+    CargoUpgrade(const std::string upgrade_string) {
+        if(upgrade_string.empty()) {
+            return;
+        }
+
+        const std::string delimiter = ";";
+
+        std::vector<std::string> upgrade_vector;
+        boost::split(upgrade_vector, upgrade_string, boost::is_any_of(delimiter));
+
+        // TODO: figure out format and change 3 to the real size and implement the rest
+        if(upgrade_vector.size() < 3) {
+            return;
+        }
+
+        name = upgrade_vector.at(0);
+        category = upgrade_vector.at(1);
+    }
+};
+
 // TODO: why do we have to use such kludges?!
 unsigned int convert_to_int(std::string s) {
     if(s.size() == 0) {
@@ -84,6 +116,88 @@ UpgradeableUnit::UpgradeableUnit()
 }
 
 extern int GetModeFromName(const char *input_buffer);
+
+
+
+UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_name,
+                     bool upgrade, bool apply) {
+    Unit* unit = vega_dynamic_cast_ptr<Unit>(this);
+    const std::string upgrade_key = upgrade_name + UPGRADES_SUFFIX;
+    const ComponentType component_type = GetComponentTypeFromName(upgrade_name);
+    
+    UpgradeOperationResult result;
+
+    switch(component_type) {
+        /*case ComponentType::Armor:
+            result.upgradeable = true;
+            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case ComponentType::Shield:
+            result.upgradeable = true;
+            result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
+        case ComponentType::Capacitor:
+            result.upgradeable = true;
+            result.success = unit->energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case ComponentType::FtlCapacitor:
+            result.upgradeable = true;
+            result.success = unit->ftl_energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case ComponentType::Reactor:
+            result.upgradeable = true;
+            result.success = unit->reactor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
+        case ComponentType::Afterburner: break; // Integrated
+        case ComponentType::AfterburnerUpgrade:
+            result.upgradeable = true;
+            result.success = unit->afterburner_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case ComponentType::Drive: break; // Integrated
+        case ComponentType::DriveUpgrade:
+            result.upgradeable = true;
+            result.success = unit->drive_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case ComponentType::FtlDrive:
+            result.upgradeable = true;
+            result.success = unit->ftl_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+        
+        case ComponentType::JumpDrive:
+            result.upgradeable = true;
+            result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
+
+        case ComponentType::Cloak:
+            result.upgradeable = true;
+            result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+
+        
+        /*case UpgradeType::ECM:
+            result.upgradeable = true;
+            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        case UpgradeType::Radar:
+            result.upgradeable = true;
+            result.success = unit->radar.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
+        /*case UpgradeType::Repair_Droid:
+            result.upgradeable = true;
+            result.success = unit->repair_droid.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
+        default:
+            //std::cout << "Unhandled type for " << upgrade_name << std::endl;
+            break;
+    }
+
+    return result;
+}
+
 
 // TODO: remove unit parameter
 void UpgradeableUnit::UpgradeUnit(const std::string &upgrades) {
@@ -112,6 +226,16 @@ void UpgradeableUnit::UpgradeUnit(const std::string &upgrades) {
         // TODO: change this when we make this a sub-class of unit
         Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
         unit->Upgrade(upgradee, mount_offset, subunit_offset, mode, true, percent, nullptr);
+
+        // Code to handle DriveUpgrade and AfterburnerUpgrade
+        // Should eventually replace all the code above
+        CargoUpgrade cargo_upgrade(upgrade);
+        ComponentType component_type = GetComponentTypeFromName(cargo_upgrade.name);
+        if(component_type == ComponentType::AfterburnerUpgrade) {
+            unit->afterburner_upgrade.Load(cargo_upgrade.name + "__upgrades");
+        } else if(component_type == ComponentType::DriveUpgrade) {
+            unit->drive_upgrade.Load(cargo_upgrade.name + "__upgrades");
+        }
     }
 }
 
@@ -139,6 +263,14 @@ bool UpgradeableUnit::UpgradeMounts(const Unit *up,
     // All weapons come with one mount at least
     if(num_up_mounts == 0) {
         return true;
+    }
+
+    // there needs to be some mounts to be able to mount to
+    if (num_mounts == 0) {
+        // would be nice to make this more meaningful but that's a little harder given
+        // the casting of `unit` from `this`.
+        VS_LOG(debug, "No mounts to attach to.");
+        return false;
     }
 
     int j = mountoffset;

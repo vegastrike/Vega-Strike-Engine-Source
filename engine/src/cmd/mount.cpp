@@ -253,7 +253,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         if (type->type == WEAPON_TYPE::BEAM || type->isMissile()) {
             //Missiles and beams set to processed.
             processed = PROCESSED;
-        } else if (ref.refire < type->Refire() || type->energy_rate > caller->energy) {
+        } else if (ref.refire < type->Refire() || type->energy_rate > caller->energy.Level()) {
             //Wait until refire has expired and reactor has produced enough energy for the next bolt.
             return true;
         }              //Not ready to refire yet.  But don't stop firing.
@@ -299,7 +299,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 }
                 break;
             case WEAPON_TYPE::BOLT:
-                caller->energy -= type->energy_rate;
+                caller->energy.Deplete(true, type->energy_rate);
                 hint[Unit::UNIT_BOLT] = Bolt(type,
                         mat,
                         velocity,
@@ -308,7 +308,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 break;
 
             case WEAPON_TYPE::BALL: {
-                caller->energy -= type->energy_rate;
+                caller->energy.Deplete(true, type->energy_rate);
                 hint[Unit::UNIT_BOLT] =
                         BoltDrawManager::GetInstance().AddBall(type, mat, velocity, owner, hint[Unit::UNIT_BOLT]);
                 break;
@@ -330,8 +330,8 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                             type->radial_speed,
                             type->pulse_speed /*detonation_radius*/);
                     if (!match_speed_with_target) {
-                        temp->GetComputerData().max_combat_speed = type->speed + velocity.Magnitude();
-                        temp->GetComputerData().max_combat_ab_speed = type->speed + velocity.Magnitude();
+                        temp->drive.speed = type->speed + velocity.Magnitude();
+                        temp->afterburner.speed = type->speed + velocity.Magnitude();
                     }
                 } else {
                     Flightgroup *testfg = caller->getFlightgroup();

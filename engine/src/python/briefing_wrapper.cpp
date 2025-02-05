@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * briefing_wrapper.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -21,6 +23,8 @@
  */
 
 #ifndef PYTHON_STUB
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <math.h>
 #include "python_class.h"
 #include "cmd/briefing.h"
@@ -70,18 +74,19 @@ void setCloak(int whichship, float cloak) {
     mission->briefing->SetCloak(whichship, cloak);
 }
 }
-PYTHON_BEGIN_MODULE(Briefing)
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::addShip, "addShip");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::removeShip, "removeShip");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::enqueueOrder, "enqueueOrder");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::replaceOrder, "replaceOrder");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::getShipPosition, "getShipPosition");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setShipPosition, "setShipPosition");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::terminate, "terminate");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setCamPosition, "setCamPosition");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setCamOrientation, "setCamOrientation");
-    PYTHON_DEFINE_GLOBAL(Briefing, &BriefingUtil::setCloak, "setCloak");
-PYTHON_END_MODULE(Briefing)
+
+BOOST_PYTHON_MODULE(Briefing) {
+    boost::python::def("addShip", &BriefingUtil::addShip);
+    boost::python::def("removeShip", &BriefingUtil::removeShip);
+    boost::python::def("enqueueOrder", &BriefingUtil::enqueueOrder);
+    boost::python::def("replaceOrder", &BriefingUtil::replaceOrder);
+    boost::python::def("getShipPosition", &BriefingUtil::getShipPosition);
+    boost::python::def("setShipPosition", &BriefingUtil::setShipPosition);
+    boost::python::def("terminate", &BriefingUtil::terminate);
+    boost::python::def("setCamPosition", &BriefingUtil::setCamPosition);
+    boost::python::def("setCamOrientation", &BriefingUtil::setCamOrientation);
+    boost::python::def("setCloak", &BriefingUtil::setCloak);
+}
 
 void InitBriefing() {
     PyImport_AppendInittab("Briefing", PYTHON_MODULE_INIT_FUNCTION(Briefing));

@@ -11,7 +11,7 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
+    continue-on-error: false
 
     defaults:
       run:
@@ -21,66 +21,76 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-11
-          - macos-12
+          # x86-64
+          - macos-13
+          # M1 processor
+          #- macos-14
+        python-version:
+          #- 3.12.8
+          - 3.13.1
         compiler:
-          - clang
-          - gcc
+          - AppleClang
+          #- clang
+          #- gcc
         homebrew-gl:
           - true
-          # - false
+          #- false
         homebrew-al:
           - true
-          - false
+          #- false
+        ENABLE_PIE:
+          - 'ON'
+          #- 'OFF'
+        build-type:
+          - RelWithDebInfo
 
     steps:
+      # specific setup for Python on Mac to ensure Python Version align
+      - name: Python Setup on Mac
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        id: vega-py-setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          update-environment: true # false
+
+      - name: Install dependencies using homebrew
+        run: brew install boost-python3 gtk+3 gtkglext sdl libvorbis
 
       # The following dependencies are already present within macos-* images:
-      # - clang (llvm)
-      # - cmake
-      # - expat
-      # - gcc
-      # - git
-      # - jpeg
-      # - libpng
-      # - libvorbis
-      # - python
-      - name: Install dependencies using homebrew
-        run: brew install boost-python3 gtk+3 gtkglext sdl
-
-      # The following Apple-provided libraries are deprecated:
-      # * OpenGL as of MacOS 10.14
-      # * GLUT as of MacOS 10.9
-      - name: Optionally install homebrewed OpenGL and GLUT
-        if: ${{ matrix.homebrew-gl }}
-        run: |
-          brew install mesa mesa-glu freeglut
-          ln -s /usr/local/include/GL /usr/local/include/OpenGL
-          ln -s /usr/local/include/GL /usr/local/include/GLUT
-        # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
-        # find /usr/local/lib/ -iname '*gl*.dylib'
-
-      # The Apple-provided OpenAL is deprecated as of MacOS 10.15
-      - name: Optionally install homebrewed OpenAL
-        if: ${{ matrix.homebrew-al }}
-        run: brew install openal-soft
+      # MacOS has a Developers Tools package from Apple that gets installed which
+      # provides some minimal functionality:
+      #   XCode (which uses CLang/LLVM)
+      #   git
+      - name: Install the latest version of Bash so we can rely on it
+        run: brew install bash
 
       - name: Check out repository
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 2
           submodules: false
 
+      # Ensure PRs are built against the PR Head as opposed to the merge commit
       - name: Conditionally relocate to PR HEAD
         if: github.event.pull_request
         run: git checkout HEAD^2
 
+      - name: Bootstrap MacOS
+        run: script/bootstrap-mac.sh
+
+      # Note: it might be good to use a step to detect where OpenAL-Soft is
+      # installed and set it to a GHA variable that can be consumed below
       - name: Build it
         env:
           MY_OS_NAME: macos
           COMPILER:   ${{ matrix.compiler }}
-          FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
+          FLAGS:      "-DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DCMAKE_FIND_FRAMEWORK=LAST -DENABLE_PIE=${{ matrix.ENABLE_PIE }} -DPython3_ROOT_DIR=${{ matrix.vega-py-setup.outputs.python-path }} -DPythonInstalledVia=Homebrew"
           OPENALDIR:  "/usr/local/opt/openal-soft"
+          Python3_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          Python_ROOT_DIR: ${{ matrix.vega-py-setup.outputs.python-path }}
+          pythonLocation: ${{ matrix.vega-py-setup.outputs.python-path }}
+          PYTHONHOME: ""
+          PYTHONPATH: ""
         run: script/cibuild $FLAGS
 
       - name: Test
@@ -91,7 +101,7 @@ jobs:
         run: ctest -V
 
       - name: Upload test results
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #v3.1.2
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
         if: failure()
         with:
           name: test_results_xml

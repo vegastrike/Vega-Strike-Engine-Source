@@ -26,20 +26,138 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "component.h"
-
-#include <random>
-
-/*Component::Component()
-{
-
-}*/
+#include "unit_csv_factory.h"
+#include "resource/cargo.h"
+#include "resource/manifest.h"
 
 
-double random20()
-{
-    if(std::rand() < 0.2) {
-        return std::rand();
-    }
 
-    return 1.0;
+const std::string NAME = "Name";
+const std::string MASS = "Mass";
+const std::string VOLUME = "Volume";
+
+Component::Component(double mass, double volume, bool installed, bool integral):
+                     upgrade_name(""),
+                     description(""),
+                     price(0.0),
+                     mass(mass), volume(volume),
+                     operational(Resource<double>(100.0,0.0,100.0)),
+                     installed(installed),
+                     integral(integral) {}
+
+
+void Component::Load(std::string unit_key) {
+    this->upgrade_key = "";
+
+    // Integrated components have no name, mass, price, volume or description
+    // TODO: need to get the upgrade name from somewhere
+    /*if(!integral) {
+        upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, "Name", std::string());
+        mass = UnitCSVFactory::GetVariable(upgrade_key, "Mass", 0.0);
+
+        // Get volume and description from MasterPartList.
+        // We need try/catch for unit tests where MPL isn't loaded.
+        const Cargo cargo = Manifest::MPL().GetCargoByName(upgrade_key);
+        if(!cargo.GetName().empty()) {
+            price = cargo.GetPrice();
+            volume = cargo.GetVolume();
+            description = cargo.GetDescription();
+        }
+    }*/
+
+    // TODO: bool integral = false;
 }
+
+
+
+// TODO: convert to std::pair<bool, double>
+bool Component::CanWillUpDowngrade(const std::string upgrade_key,
+                                   bool upgrade, bool apply) {
+    if(upgrade) {
+        if(apply) {
+            return Upgrade(upgrade_key);
+        } else {
+            return CanUpgrade(upgrade_key);
+        }
+    } else {
+        if(apply) {
+            return Downgrade();
+        } else {
+            return CanDowngrade();
+        }
+    }                                        
+}
+
+bool Component::Downgrade() {
+    upgrade_name = std::string();
+    upgrade_key = std::string();
+    
+    mass = 0.0;
+    volume = 0.0;
+    installed = false;
+    return true;
+}
+
+bool Component::Upgrade(const std::string upgrade_key) {
+    this->upgrade_key = upgrade_key;
+    upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, NAME, std::string());
+    
+    mass = UnitCSVFactory::GetVariable(upgrade_key, MASS, 0.0);
+    // TODO: volume currently not in units.json. need to merge with items list
+    volume = UnitCSVFactory::GetVariable(upgrade_key, VOLUME, 0.0);
+    installed = true;
+    return true;
+}
+
+void Component::Damage() {
+    operational.RandomDamage();
+}
+
+void Component::DamageByPercent(double percent) {
+    operational.DamageByPercent(percent);
+}
+
+void Component::Repair() {
+    operational = 1.0;
+}
+
+void Component::Destroy() {
+    operational = 0;
+}
+
+bool Component::Damaged() const {
+    return operational.Value() < operational.MaxValue();
+}
+
+bool Component::Destroyed() const {
+    return operational == 0.0;
+}
+
+bool Component::Installed() const {
+    return installed;
+}
+
+bool Component::Operational() const {
+    return Installed() && !Destroyed();
+}
+
+double Component::PercentOperational() const {
+    return operational.Percent();
+}
+
+void Component::SetIntegral(bool integral) {
+    this->integral = integral;
+}
+
+// Getters
+const std::string Component::GetUpgradeName() const { return upgrade_name; }
+const std::string Component::GetUpgradeKey() const { return upgrade_key; }
+const std::string Component::GetDescription() const { return description; }
+
+const double Component::GetPrice() const { return price; }
+const double Component::GetMass() const { return mass; }
+const double Component::GetVolume() const { return volume; }
+
+const double Component::GetOperational() const { return operational.Value(); }
+
+const bool Component::Integral() const { return integral; }

@@ -5,184 +5,147 @@ on: [ pull_request ]
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    continue-on-error: ${{ matrix.allow_failure }}
 
     defaults:
       run:
         shell: bash
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
-          - FROM:     'ubuntu:jammy'
+          - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'ubuntu:jammy'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'ubuntu:jammy'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'ubuntu:noble'
             COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:jammy'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'ubuntu:noble'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:focal'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'ubuntu:focal'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'ubuntu:focal'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:focal'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'linuxmintd/mint22-amd64'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'gcc'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'linuxmintd/mint21-amd64'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'linuxmintd/mint21-amd64'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'linuxmintd/mint20-amd64'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'linuxmintd/mint20-amd64'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'debian:bookworm'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'debian:bullseye'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          #- FROM:     'opensuse/leap:15.6'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'LEGACY'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: true
+          - FROM:     'fedora:41'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'debian:bullseye'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
+          - FROM:     'fedora:41'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'debian:buster'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
+          - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'debian:buster'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
+          - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'opensuse/leap:15.4'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'opensuse/leap:15.4'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'opensuse/leap:15.3'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'opensuse/leap:15.3'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'opensuse/leap:15.2'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'opensuse/leap:15.2'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'fedora:37'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'fedora:37'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'fedora:36'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'fedora:36'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'fedora:35'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'fedora:35'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'rockylinux:9.0'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'rockylinux:9.0'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'rockylinux:8.6'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'rockylinux:8.6'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-          - FROM:     'rockylinux:8.5'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'LEGACY'
-          - FROM:     'rockylinux:8.5'
-            COMPILER: 'clang'
-            OpenGL_GL_PREFERENCE: 'GLVND'
-         # Disabling Manjaro builds as there is an issue with the distro
-         # - FROM:     'manjarolinux/base'
-         #   COMPILER: 'clang'
-         #   OpenGL_GL_PREFERENCE: 'LEGACY'
-         # - FROM:     'manjarolinux/base'
-         #   COMPILER: 'clang'
-         #   OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
+          #- FROM:     'rockylinux_rockylinux:9.5'
+          #  COMPILER: 'gcc'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: true
+          # Disabled until the build can be fixed
+          #- FROM:     'rockylinux_rockylinux:8.10'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: false
+          #- FROM:     'manjarolinux/base'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'LEGACY'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: true
+          #- FROM:     'manjarolinux/base'
+          #  COMPILER: 'clang'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: true
+          #- FROM:     'funtoo/stage3-generic_64'
+          #  COMPILER: 'gcc'
+          #  OpenGL_GL_PREFERENCE: 'LEGACY'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: true
+          #- FROM:     'funtoo/stage3-generic_64'
+          #  COMPILER: 'gcc'
+          #  OpenGL_GL_PREFERENCE: 'GLVND'
+          #  ENABLE_PIE: 'ON'
+          #  allow_failure: true
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
-      with:
-        fetch-depth: 2
-        submodules: false
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 2
+          submodules: false
 
-    # Ensure PRs are built against the PR Head
-    # As opposed to the merge commit
-    - name: Move to PR HEAD
-      run: git checkout ${{ github.event.pull_request.head.sha }}
+      # Ensure PRs are built against the PR Head
+      # As opposed to the merge commit
+      - name: Move to PR HEAD
+        run: git checkout ${{ github.event.pull_request.head.sha }}
 
-    - name: Extract short SHA
-      shell: bash
-      run: |
-        echo "SHORT_SHA=`git rev-parse --short ${{ github.event.pull_request.head.sha }}`" >> $GITHUB_ENV
-    - name: Test short SHA
-      run: |
-        echo "${SHORT_SHA}"
+      - name: Extract short SHA
+        shell: bash
+        run: |
+          echo "SHORT_SHA=`git rev-parse --short ${{ github.event.pull_request.head.sha }}`" >> $GITHUB_ENV
+      - name: Test short SHA
+        run: |
+          echo "${SHORT_SHA}"
 
-    - name: Build and Test
-      env:
-        FROM:       ${{ matrix.FROM }}
-        COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }}'
-        MY_OS_NAME: linux
-        IS_RELEASE: 0
-      run: script/cibuild $FLAGS
+      - name: Execute bootstrap
+        run:  sudo script/bootstrap
 
-    # This is run from inside the Docker container, by script/docker-entrypoint.sh
-    # - name: Test
-    #   working-directory: ${{github.workspace}}/build
-    #   env:
-    #     GTEST_OUTPUT: xml
-    #     GTEST_COLOR: 1
-    #   run: ctest -V
+      - name: Build and Test
+        env:
+          FROM:       ${{ matrix.FROM }}
+          COMPILER:   ${{ matrix.COMPILER }}
+          FLAGS:      '-DOpenGL_GL_PREFERENCE=${{ matrix.OpenGL_GL_PREFERENCE }} -DENABLE_PIE=${{ matrix.ENABLE_PIE }}'
+          MY_OS_NAME: linux
+          IS_RELEASE: 0
+        run: script/cibuild $FLAGS
 
-    - name: Upload test results
-      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #v3.1.2
-      if: failure()
-      with:
-        name: test_results_xml
-        path: ${{github.workspace}}/test-results/**/*.xml
+      # This is run from inside the Docker container, by script/docker-entrypoint.sh
+      # - name: Test
+      #   working-directory: ${{github.workspace}}/build
+      #   env:
+      #     GTEST_OUTPUT: xml
+      #     GTEST_COLOR: 1
+      #   run: ctest -V
+
+      - name: Upload test results
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        if: failure()
+        with:
+          name: test_results_xml
+          path: ${{github.workspace}}/test-results/**/*.xml

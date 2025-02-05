@@ -29,12 +29,20 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <boost/json.hpp>
+
+#include "components/energy_consumer.h"
+
+#include "graphics_config.h"
 
 namespace vega_config {
 // Config Structs Declaration
 
 struct GeneralConfig {
     GeneralConfig() = default;
+
+    int screen{0};  // TODO: move to a dedicated section along with other such paramters.
+                    // e.g. screen width and height, resolution, color, etc.
 
     float pitch{0.0F};
     float yaw{0.0F};
@@ -151,22 +159,13 @@ struct EjectConfig {
 
 struct Fuel {
     float afterburner_fuel_usage;
-    /* There are a pair of "FMEC" variables - they both involve "Fuel Mass to Energy Conversion" -
-     * this one happens to specify the inverse (it's only ever used as 1/Value, so just encode 1/Value, not Value)
-     * of the assumed exit velocity of the mass ejected as thrust, calculated based on energy-possible
-     * (if not necessarily plausible) outcomes from a Li-6 + Deuterium fusion reaction.
-     * The other variable (not present here) FMEC_factor, is used in reactor --> energy production.
-     * As the comment in the code next to the variable init says, it specifies how many metric tons (1 VS mass unit)
-     * of fuel are used to produce 100MJ (one units.csv energy recharge unit) of recharge.
-     * At some point, it wouldn't kill us to renormalize the engine and dataset to both just use SI units, but that's not a priority.
-     */
-    float fmec_exit_velocity_inverse{0.0000002F};
+    
 
     /* This used to be Lithium6constant.
      * There's some relevant context that's been removed from the original name of this variable "Lithium6constant" --
      * a better name would ultimately be "FuelToEnergyConversionRelativeToLithium6DeuterideFusion" -
      * that fully encodes what the efficiency is relative to. */
-    float fuel_efficiency;
+    double fuel_efficiency{1.0};
     bool fuel_equals_warp;
     float normal_fuel_usage;
     bool reactor_uses_fuel;
@@ -179,9 +178,28 @@ struct Fuel {
     float reactor_idle_efficiency{0.98F};
     float min_reactor_efficiency{0.00001F};
     float ecm_energy_cost{0.05F};
-    float fuel_conversion{0.00144F};
+    
+    double megajoules_factor{100};
+    double fuel_factor{60.0};   // Multiply fuel by this to get fuel by minutes
+    double energy_factor{1.0};
+    double ftl_energy_factor{1.0};
+
+    double reactor_factor{1.0};
+
+    double ftl_drive_factor{0.1};
+    double jump_drive_factor{1.0};
+
+    // 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled
+    EnergyConsumerSource drive_source{EnergyConsumerSource::Fuel}; 
+    EnergyConsumerSource reactor_source{EnergyConsumerSource::Fuel};
+    EnergyConsumerSource afterburner_source{EnergyConsumerSource::Fuel};
+    EnergyConsumerSource jump_drive_source{EnergyConsumerSource::FTLEnergy};
+    EnergyConsumerSource cloak_source{EnergyConsumerSource::Energy};
+
+    double minimum_drive{0.15};
 
     Fuel();
+    Fuel(boost::json::object object);
 };
 
 struct HudConfig {
@@ -358,12 +376,12 @@ struct PhysicsConfig {
     uintmax_t max_ecm{4U};
     float max_lost_target_live_time{30.0F};
     float percent_missile_match_target_velocity{1.0F};
-    float game_speed{1.0F};
-    float game_accel{1.0F};
+    double game_speed{1.0};
+    double game_accel{1.0};
+    double combat_mode_multiplier{100.0};
     float velocity_max{10000.0F};
     float max_player_rotation_rate{24.0F};
     float max_non_player_rotation_rate{360.0F};
-    bool unit_table{false};
     float capship_size{500.0F};
     float near_autotrack_cone{0.9F};
     float close_enough_to_autotrack{4.0F};
@@ -436,6 +454,14 @@ struct WeaponsConfig {
     WeaponsConfig();
 };
 
+struct GameStart {
+    std::string default_mission;
+    std::string introduction;
+
+    GameStart();
+    GameStart(boost::json::object object);
+};
+
 }
 
 // not using namespace vega_config, because ComputerConfig would be ambiguous
@@ -446,6 +472,7 @@ public:
     Configuration();
     void OverrideDefaultsWithUserConfiguration();
     vega_config::GeneralConfig general_config;
+    Graphics2Config graphics2_config;
     vega_config::DataConfig data_config;
     vega_config::AIConfig ai;
     vega_config::AudioConfig audio_config;
@@ -459,6 +486,7 @@ public:
     vega_config::UnitConfig unit_config;
     vega_config::WarpConfig warp_config;
     vega_config::WeaponsConfig weapons;
+    vega_config::GameStart game_start;
 };
 
 extern std::shared_ptr<Configuration> configuration();

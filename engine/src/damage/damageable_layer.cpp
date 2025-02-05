@@ -23,12 +23,13 @@
 
 #include "damageable_layer.h"
 
-#include <random>
 #include <cassert>
 
 // TODO: this is a use of the code in a different library.
 // I'm unhappy with this, so it needs to change.
 #include "mount_size.h"
+
+#include "random_utils.h"
 
 DamageableLayer::DamageableLayer(int layer_index,
         FacetConfiguration configuration,
@@ -189,31 +190,6 @@ int DamageableLayer::GetFacetIndex(const CoreVector &attack_vector) {
 
         return 0;
 
-    } else if (configuration == FacetConfiguration::eight) {
-        if (i >= 0 && j >= 0 && k >= 0) {
-            return 0;
-        }
-        if (i < 0 && j >= 0 && k >= 0) {
-            return 1;
-        }
-        if (i >= 0 && j < 0 && k >= 0) {
-            return 2;
-        }
-        if (i < 0 && j < 0 && k >= 0) {
-            return 3;
-        }
-        if (i >= 0 && j >= 0 && k < 0) {
-            return 4;
-        }
-        if (i < 0 && j >= 0 && k < 0) {
-            return 5;
-        }
-        if (i >= 0 && j < 0 && k < 0) {
-            return 6;
-        }
-        if (i < 0 && j < 0 && k < 0) {
-            return 7;
-        }
     }
 
     // The default
@@ -229,15 +205,8 @@ void DamageableLayer::ReduceLayerCapability(const float &percent,
         return;
     }
 
-    static std::random_device randome_device;
-    static std::mt19937 gen(randome_device());
-
-    // TODO: this feels a bit sloppy, as we're dealing in integers here.
-    static std::uniform_int_distribution<> impact_distribution(1, 100);
-    static std::uniform_int_distribution<> facet_distribution(0, facets.size() - 1);
-
-    bool affect_regeneration = impact_distribution(gen) <= chance_to_reduce_regeneration;
-    int facet_index = facet_distribution(gen);
+    bool affect_regeneration = randomDouble() <= chance_to_reduce_regeneration;
+    int facet_index = randomInt(number_of_facets);
 
     if (affect_regeneration) {
         // Reduce regeneration
@@ -282,30 +251,6 @@ float DamageableLayer::AverageMaxLayerValue() {
 
 float CalculatePercentage(float numerator, float denominator) {
     return numerator / denominator;
-
-    // All these checks potentially slow down the game
-    // and cause the graphics to flicker
-    /*if(denominator < numerator) {
-        return 0.0; // This should really be an error
-    }
-
-    if(denominator <= 0.0f || numerator <0.0f) {
-        return 0.0;
-    }
-
-    float percent = numerator / denominator;
-
-    if(percent > 1.0f) {
-        return 1.0;
-    }
-
-    if(percent <0.01) {
-        return 0.0f;
-    }
-
-    // Possibly nicer alternative
-    //return roundf(percent * 100) / 100.0;
-    return percent;*/
 }
 
 float DamageableLayer::GetMaxHealth() {
@@ -333,52 +278,14 @@ float DamageableLayer::GetPercent(FacetName facet_name) {
             return CalculatePercentage(numerator, denominator);
 
         default:
-            break; // Noop
+            return 0.0;
     }
+}
 
-
-    // We handle the eight configuration outside the switch
-    // as it is longer and more complex
-    float percent = 0.0f;
-
-    // Indices of facets for shield configuration eight
-    static const int indices_array[4][4] = {{0, 2, 4, 6},    // left
-            {1, 3, 5, 7},    // right
-            {0, 1, 4, 5},    // front
-            {2, 3, 6, 7}};   // rear
-
-    int indices_index; // An index to the top array dimension
-
-    switch (facet_name) {
-        case FacetName::four_left:
-            indices_index = 0;
-            break;
-        case FacetName::four_right:
-            indices_index = 1;
-            break;
-        case FacetName::four_front:
-            indices_index = 2;
-            break;
-        case FacetName::four_rear:
-            indices_index = 3;
-            break;
-        default:
-            // We received a malformed facet name
-            return 0;
+void DamageableLayer::FullyCharge() {
+    for (Health &facet : facets) {
+        facet.SetHealth(facet.adjusted_health);
     }
-
-    float aggregate_health = 0;
-    float aggregate_max_health = 0;
-
-    for (int i = 0; i < 4; i++) {
-        int facet_index = indices_array[indices_index][i];
-        Health &facet = facets[facet_index];
-        aggregate_health += facet.health;
-        aggregate_max_health += facet.max_health;
-    }
-
-    percent = CalculatePercentage(aggregate_health, aggregate_max_health);
-    return percent;
 }
 
 void DamageableLayer::Regenerate(float recharge_rate) {
@@ -401,6 +308,12 @@ float DamageableLayer::GetRegeneration() {
     return facets[0].regeneration;
 }
 
+void DamageableLayer::UpdateFacets(const float new_facet_strength) {
+    for (unsigned int i = 0; i < number_of_facets; i++) {
+        facets[i].Update(new_facet_strength);
+    }
+}
+
 void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_facets[4]) {
     assert(new_size == number_of_facets);
 
@@ -410,17 +323,11 @@ void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_
             break;
 
         case 4:
-            facets[0].Update(new_facets[3]);
-            facets[1].Update(new_facets[2]);
             facets[2].Update(new_facets[0]);
             facets[3].Update(new_facets[1]);
-            break;
         case 2: // Note the fallthrough
-        case 8:
-            for (unsigned int i = 0; i < number_of_facets; i++) {
-                facets[i].Update(new_facets[i]);
-            }
-            break;
+            facets[0].Update(new_facets[3]);
+            facets[1].Update(new_facets[2]);    
     }
 }
 

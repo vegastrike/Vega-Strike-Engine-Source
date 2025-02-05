@@ -5,6 +5,7 @@
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
  * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2025 Benjamen R. Meyer
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -44,7 +45,7 @@
 #include "unit_generic.h"
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
-#include "cmd/collide2/Stdafx.h"
+#include "cmd/collide2/Opcode.h"
 #include "cmd/collide2/CSopcodecollider.h"
 #include "vs_math.h"
 #include "mount_size.h"
@@ -54,7 +55,6 @@ using namespace XMLSupport;
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
 UNITLOADTYPE current_unit_load_mode = DEFAULT;
-extern float getFuelConversion();
 
 string KillQuadZeros(string inp) {
     std::string::size_type text = 0;
@@ -115,6 +115,8 @@ string MakeUnitXMLPretty(string str, Unit *un) {
     return writestr;
 }
 
+// TODO: delete this at some point. 
+// We no longer support add/mul modes of upgrades
 int GetModeFromName(const char *input_buffer) {
     if (strlen(input_buffer) > 3) {
         if (input_buffer[0] == 'a'

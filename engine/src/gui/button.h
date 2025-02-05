@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2023 Daniel Horn, David Ranger, pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
- * and other Vega Strike contributors.
+ * button.h
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,13 +26,14 @@
 
 //Version: 1.0 - Initial Release (Feb 18, 2002)
 
-/* This class is designed to be self sufficient.
+/* This class is designed to be self-sufficient.
  * The only external functions it requires that aren't provided by system libs are in glut_support.h
  */
 
-#if defined (__APPLE__) || defined (MACOSX)
-    #include <OpenGL/gl.h>
-    #include <GLUT/glut.h>
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
+#if defined(__APPLE__) && defined(__MACH__)
+    #include <gl.h>
+    #include <glut.h>
 #else
 #ifdef _WIN32
     #ifndef NOMINMAX
@@ -38,9 +41,9 @@
     #endif //tells VCC not to generate min/max macros
     #include <windows.h>
 #else
-    #include <GL/gl.h>
+    #include <gl.h>
 #endif
-    #include <GL/glut.h>
+    #include <glut.h>
 #endif
 
 #include "glut_support.h"

@@ -32,6 +32,7 @@
 #include "gfx/warptrail.h"
 #include "vsfilesystem.h"
 #include "vs_exit.h"
+#include "vega_cast_utils.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -103,8 +104,8 @@ JumpCapable::JumpCapable() : activeStarSystem(nullptr) {
 
 void JumpCapable::ActivateJumpDrive(int destination) {
     Unit *unit = static_cast<Unit *>(this);
-    if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && unit->jump.drive != -2) {
-        unit->jump.drive = destination;
+    if (((unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE)) == 0) && unit->jump_drive.Installed()) {
+        unit->jump_drive.SetDestination(destination);
     }
 }
 
@@ -138,7 +139,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             return AutoPilotToErrorMessage(targ, ignore_energy_requirements, failuremessage, recursive_level);
         }
     }
-    if (unit->warpenergy < unit->jump.insysenergy) {
+    if (!unit->ftl_drive.CanConsume()) {
         if (!ignore_energy_requirements) {
             return false;
         }
@@ -270,7 +271,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             failuremessage = configuration()->graphics_config.hud.already_near_message;
             return false;
         }
-        unit->warpenergy -= totpercent * unit->jump.insysenergy;
+        
         if (unsafe == false && totpercent == 0) {
             end = endne;
         }
@@ -386,7 +387,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         Unit **nearest_unit,
         bool count_negative_warp_units) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     static float smallwarphack = XMLSupport::parse_float(vs_config->getVariable("physics", "minwarpeffectsize", "100"));
     static float bigwarphack =
@@ -479,9 +480,9 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
 }
 
 float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const {
-    const Unit *unit = static_cast<const Unit *>(this);
-    if (unit->ViewComputerData().max_ab_speed() > .001) {
-        return (OriginalCourse - (FinalCourse)).Magnitude() / unit->ViewComputerData().max_ab_speed();
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
+    if (unit->MaxAfterburnerSpeed() > .001) {
+        return (OriginalCourse - (FinalCourse)).Magnitude() / unit->MaxAfterburnerSpeed();
     } else {
         return (FinalCourse - OriginalCourse).Magnitude();
     }
@@ -489,19 +490,12 @@ float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &F
 
 void JumpCapable::DeactivateJumpDrive() {
     Unit *unit = static_cast<Unit *>(this);
-    if (unit->jump.drive >= 0) {
-        unit->jump.drive = -1;
-    }
+    unit->jump_drive.UnsetDestination();
 }
 
 const std::vector<std::string> &JumpCapable::GetDestinations() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->pImage->destination;
-}
-
-const Energetic::UnitJump &JumpCapable::GetJumpStatus() const {
-    const Unit *unit = static_cast<const Unit *>(this);
-    return unit->jump;
 }
 
 StarSystem *JumpCapable::getStarSystem() {
@@ -520,7 +514,7 @@ StarSystem *JumpCapable::getStarSystem() {
 }
 
 const StarSystem *JumpCapable::getStarSystem() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     if (activeStarSystem) {
         return activeStarSystem;
     } else {
@@ -535,7 +529,7 @@ const StarSystem *JumpCapable::getStarSystem() const {
 }
 
 Vector JumpCapable::GetWarpRefVelocity() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     //Velocity
     Vector VelocityRef(0, 0, 0);
@@ -555,7 +549,7 @@ Vector JumpCapable::GetWarpRefVelocity() const {
 }
 
 Vector JumpCapable::GetWarpVelocity() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     if (unit->graphicOptions.WarpFieldStrength == 1.0) {
         // Short circuit, most ships won't be at warp, so it simplifies math a lot

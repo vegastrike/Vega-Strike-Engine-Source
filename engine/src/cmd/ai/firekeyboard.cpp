@@ -1,9 +1,8 @@
 /*
  * firekeyboard.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,17 +15,19 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
 /// Keyboard parsing
 /// Parses keyboard commands
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <set>
 #include "firekeyboard.h"
 #include "flybywire.h"
@@ -1377,7 +1378,7 @@ static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity)
             XMLSupport::parse_bool(vs_config->getVariable("AI", "can_dock_to_enemy_base", "true"));
     static bool nojumpinSPEC = XMLSupport::parse_bool(vs_config->getVariable("physics", "noSPECJUMP", "true"));
     bool SPEC_interference = targ && parent && nojumpinSPEC
-            && (targ->graphicOptions.InWarp || parent->graphicOptions.InWarp);
+            && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
     unsigned char gender = 0;
     vector<Animation *> *anim = NULL;
     if (SPEC_interference) {
@@ -1421,10 +1422,10 @@ static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity)
 static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
     bool tmp = endt->RequestClearance(parent);
     if (endt->getRelation(parent) >= 0) {
-        if (endt->graphicOptions.InWarp) {
+        if (endt->ftl_drive.Enabled()) {
             endt->graphicOptions.WarpRamping = 1;
         }
-        endt->graphicOptions.InWarp = 0;
+        endt->ftl_drive.Disable();
         static float clearencetime = (XMLSupport::parse_float(vs_config->getVariable("general", "dockingtime", "20")));
         endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
                 Vector(0, 0, 0),
@@ -2027,7 +2028,7 @@ void FireKeyboard::Execute() {
     }
     if (f().togglewarpdrive == PRESS) {
         f().togglewarpdrive = DOWN;
-        parent->graphicOptions.InWarp = 1 - parent->graphicOptions.InWarp;
+        parent->ftl_drive.Toggle();
         parent->graphicOptions.WarpRamping = 1;
     }
     if (f().toggleautotracking == PRESS) {
@@ -2177,7 +2178,7 @@ void FireKeyboard::Execute() {
         }              //use specialized ejectdock in the future
     }
     static bool actually_arrest = XMLSupport::parse_bool(vs_config->getVariable("AI", "arrest_energy_zero", "false"));
-    if (actually_arrest && parent->energyRechargeData() == 0) {
+    if (actually_arrest && parent->reactor.Capacity() == 0) {
         Arrested(parent);
     }
 }

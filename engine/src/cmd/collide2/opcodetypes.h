@@ -2,7 +2,7 @@
     Copyright (C) 1998-2004 by Jorrit Tyberghein
     Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other
     Vega Strike contributors
-    Copyright (C) 2021-2023 Stephen G. Tuggy, Benjamen R. Meyer
+    Copyright (C) 2021-2025 Stephen G. Tuggy, Benjamen R. Meyer
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -22,8 +22,8 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_CSTYPES_H
 
 // config.h is the VS ./configure determined header.
-#include <float.h>
-#include <wchar.h>
+#include <cfloat>
+#include <cwchar>
 #if defined(_WIN32) && !defined(__CYGWIN__) // && defined(_MSC_VER)
 // Hack
 #define CS_COMPILER_MSVC 1

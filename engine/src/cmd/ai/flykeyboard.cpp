@@ -184,8 +184,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             this->eraseType(FACING | MOVEMENT);
             FlyByKeyboard::inauto = false;
             parent->autopilotactive = FlyByKeyboard::inauto;
-            if (parent->graphicOptions.InWarp) {
-                parent->graphicOptions.InWarp = 0;
+            if (parent->ftl_drive.Enabled()) {
+                parent->ftl_drive.Disable();
                 parent->graphicOptions.WarpRamping = 1;
             }
         } else {
@@ -453,7 +453,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         if ((counter - last_jumped) > static_cast<unsigned>(jump_key_delay / SIMULATION_ATOM) || last_jumped == 0) {
             last_jumped = counter;
             parent->ActivateJumpDrive();
-            if (parent->GetJumpStatus().drive >= 0) {
+            if (parent->jump_drive.IsDestinationSet()) {
                 static soundContainer foobar;
                 if (foobar.sound == -2) {
                     static string str = vs_config->getVariable("cockpitaudio", "jump_engaged", "jump");

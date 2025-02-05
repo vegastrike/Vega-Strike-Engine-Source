@@ -1,7 +1,7 @@
 /*
  * director.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -15,18 +15,20 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
 /*
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
+#include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include "python/python_class.h"
 #include <stdlib.h>
@@ -92,7 +94,7 @@ void Mission::DirectorLoop() {
             VS_LOG_AND_FLUSH(fatal, "void Mission::DirectorLoop(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
-            VegaStrikeLogging::vega_logger()->FlushLogs();
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         }
         throw;
     }

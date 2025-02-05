@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * faction_generic.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -67,3 +69,74 @@ void Faction::ParseAllies(unsigned int thisfaction) {
 
 }
 
+
+const std::map<std::string, std::string> FactionUtil::GetRelationsMap(const int privateer_faction) {
+    std::map<std::string, std::string> relations;
+
+    for (int i = 0; i < (int)FactionUtil::GetNumFactions(); i++) {
+        float relation = FactionUtil::GetIntRelation(i, privateer_faction);
+        string faction_name = FactionUtil::GetFactionName(i);
+        const int percent = (int) (relation * 100.0);
+        relations.insert(std::pair<std::string, std::string>(faction_name, std::to_string(percent)));
+    }
+    return relations;
+}
+
+const std::map<std::string, std::string> FactionUtil::GetKillsMap(const std::vector<float> *kill_list) {
+    //Number of kills for each faction.
+    std::map<std::string, std::string> kills;
+    for (int i = 0; i < (int)FactionUtil::GetNumFactions(); i++) {
+        string faction_name = FactionUtil::GetFactionName(i);
+        int kills_for_faction = 0;
+        size_t upgrades = FactionUtil::GetUpgradeFaction();
+        size_t planets = FactionUtil::GetPlanetFaction();
+        static size_t privateer = FactionUtil::GetFactionIndex("privateer");
+        size_t neutral = FactionUtil::GetNeutralFaction();
+        if (i < kill_list->size() && i != upgrades && i != planets && i != neutral && i != privateer) {
+            kills_for_faction = (int) (*kill_list)[i];
+        }
+
+        kills.insert(std::pair<std::string, std::string>(faction_name, std::to_string(kills_for_faction)));
+    }
+
+    return kills;
+}
+
+const std::vector<std::string> FactionUtil::GetFactionNames() {
+    std::vector<std::string> names;
+
+    for (int i = 0; i < factions.size(); i++) {
+        string faction_name = std::string(factions[i]->factionname);
+        names.push_back(faction_name);
+    }
+
+    return names;
+}
+
+const std::vector<std::string> FactionUtil::GetFactionRelations() {
+    static const int privateer_faction = FactionUtil::GetFactionIndex("privateer");
+
+    std::vector<std::string> relations;
+
+    for (int i = 0; i < factions.size(); i++) {
+        double relation = FactionUtil::GetIntRelation(i, privateer_faction);
+        relations.push_back(std::to_string(relation));
+    }
+
+    return relations;
+}
+
+const std::vector<std::string> FactionUtil::GetFactionKills(const std::vector<float> *kill_list) {
+    std::vector<std::string> kills;
+
+    for (int i = 0; i < factions.size(); i++) {
+        int kills_for_faction = 0;
+        if (i < (int)kill_list->size()) {
+            kills_for_faction = (int) (*kill_list)[i];
+        }
+
+        kills.push_back(std::to_string(kills_for_faction));
+    }
+
+    return kills;
+}

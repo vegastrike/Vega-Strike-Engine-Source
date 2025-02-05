@@ -3,9 +3,8 @@
 /*
  * cockpit.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,7 +28,9 @@
 /// Draws cockpit parts
 /// Draws gauges, info strings, radar, ...
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
+#include <boost/python.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
@@ -336,8 +337,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     static float fpsval = 0;
     const float fpsmax = 1;
     static float numtimes = fpsmax;
-    float armordat[8];     //short fix
-    int armori;
     Unit *tmpunit;
 
     // TODO: lib_damage
@@ -346,31 +345,6 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     // Also, can't be defined within switch for some reason
     int shield_index = stat - UnitImages<void>::SHIELDF;
 
-    if (shield8) {
-        switch (stat) {
-            case UnitImages<void>::SHIELDF:
-            case UnitImages<void>::SHIELDR:
-            case UnitImages<void>::SHIELDL:
-            case UnitImages<void>::SHIELDB:
-            case UnitImages<void>::SHIELD4:
-            case UnitImages<void>::SHIELD5:
-            case UnitImages<void>::SHIELD6:
-            case UnitImages<void>::SHIELD7:
-                // TODO: lib_damage
-                // Not really sure what this is supposed to return.
-                // Probably a percent of the current/max shield values.
-                // Subtracing enum SHIELDF (first shield gauge) converts the
-                // stat parameter to the index of the shield.
-
-                if (target->GetShieldLayer().facets[shield_index].max_health > 0) {
-                    return target->GetShieldLayer().facets[shield_index].Percent();
-                } else {
-                    return 0;
-                }
-            default:
-                break;
-        }
-    }
     switch (stat) {
         case UnitImages<void>::SHIELDF:
             return target->FShieldData();
@@ -385,63 +359,37 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return target->BShieldData();
 
         case UnitImages<void>::ARMORF:
+            return target->armor->facets[1].Percent();
         case UnitImages<void>::ARMORR:
+            return target->armor->facets[0].Percent();
         case UnitImages<void>::ARMORL:
+            return target->armor->facets[1].Percent();
         case UnitImages<void>::ARMORB:
+            return target->armor->facets[0].Percent();
         case UnitImages<void>::ARMOR4:
+            return target->armor->facets[2].Percent();
         case UnitImages<void>::ARMOR5:
+            return target->armor->facets[2].Percent();
         case UnitImages<void>::ARMOR6:
+            return target->armor->facets[3].Percent();
         case UnitImages<void>::ARMOR7:
-            target->ArmorData(armordat);
-            if (armor8) {
-                return armordat[stat - UnitImages<void>::ARMORF] / StartArmor[stat - UnitImages<void>::ARMORF];
-            } else {
-                for (armori = 0; armori < 8; ++armori) {
-                    if (armordat[armori] > StartArmor[armori]) {
-                        StartArmor[armori] = armordat[armori];
-                    }
-                    armordat[armori] /= StartArmor[armori];
-                }
-            }
-            switch (stat) {
-                case UnitImages<void>::ARMORR:
-                    return .25 * (armordat[0] + armordat[1] + armordat[4] + armordat[5]);
-
-                case UnitImages<void>::ARMORL:
-                    return .25 * (armordat[2] + armordat[3] + armordat[6] + armordat[7]);
-
-                case UnitImages<void>::ARMORB:
-                    return .25 * (armordat[1] + armordat[3] + armordat[5] + armordat[7]);
-
-                case UnitImages<void>::ARMORF:
-                default:
-                    return .25 * (armordat[0] + armordat[2] + armordat[4] + armordat[6]);
-            }
+            return target->armor->facets[3].Percent();
         case UnitImages<void>::FUEL:
-            if (target->fuelData() > maxfuel) {
-                maxfuel = target->fuelData();
-            }
-            if (maxfuel > 0) {
-                return target->fuelData() / maxfuel;
-            }
-            return 0;
+            return target->fuel.Percent();
 
         case UnitImages<void>::ENERGY:
             return target->energyData();
 
         case UnitImages<void>::WARPENERGY: {
             const bool warpifnojump = configuration()->graphics_config.hud.display_warp_energy_if_no_jump_drive;
-            return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->warpEnergyData() : 0;
+            return (warpifnojump || target->jump_drive.Installed()) ? target->ftl_energy.Percent() : 0;
         }
         case UnitImages<void>::HULL:
-            if (maxhull < target->GetHull()) {
-                maxhull = target->GetHull();
-            }
-            return target->GetHull() / maxhull;
-
+            return target->hull->facets[0].Percent();
+            
         case UnitImages<void>::EJECT: {
             int go =
-                    (((target->GetHull() / maxhull) < .25)
+                    ((target->hull->facets[0].Percent() < .25)
                             && (target->BShieldData() < .25 || target->FShieldData() < .25)) ? 1 : 0;
             static int overload = 0;
             if (overload != go) {
@@ -466,11 +414,12 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return go;
         }
         case UnitImages<void>::LOCK: {
+            float distance;
             static float
                     locklight_time = XMLSupport::parse_float(vs_config->getVariable("graphics", "locklight_time", "1"));
             bool res = false;
             if ((tmpunit = target->GetComputerData().threat.GetUnit())) {
-                res = tmpunit->cosAngleTo(target, *&armordat[0], FLT_MAX, FLT_MAX) > .95;
+                res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
                 if (res) {
                     last_locktime = UniverseUtil::GetGameTime();
                 }
@@ -558,13 +507,13 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                     value = target->GetComputerData().set_speed;
                     break;
                 case UnitImages<void>::MAXKPS:
-                    value = target->GetComputerData().max_speed();
+                    value = target->MaxSpeed();
                     break;
                 case UnitImages<void>::MAXCOMBATKPS:
-                    value = target->GetComputerData().max_combat_speed;
+                    value = target->drive.speed.Value();
                     break;
                 case UnitImages<void>::MAXCOMBATABKPS:
-                    value = target->GetComputerData().max_combat_ab_speed;
+                    value = target->afterburner.speed.Value();
                     break;
                 default:
                     value = 0;
@@ -593,7 +542,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                             "false"));
             if (target) {
                 if (!auto_valid) {
-                    abletoautopilot = (target->graphicOptions.InWarp);
+                    abletoautopilot = (target->ftl_drive.Enabled());
                 } else {
                     abletoautopilot = (target->AutoPilotTo(target, false) ? 1 : 0);
                     static float no_auto_light_below =
@@ -652,7 +601,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::SPEC_MODAL:
             if (target->graphicOptions.WarpRamping) {
                 return (float) UnitImages<void>::SWITCHING;
-            } else if (target->graphicOptions.InWarp) {
+            } else if (target->ftl_drive.Enabled()) {
                 return (float) UnitImages<void>::ACTIVE;
             } else {
                 return (float) UnitImages<void>::OFF;
@@ -727,11 +676,11 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::NOMINAL;
             }
         case UnitImages<void>::CANJUMP_MODAL:
-            if (-2 == target->GetJumpStatus().drive) {
+            if (!target->jump_drive.Installed() || !target->jump_drive.Operational()) {
                 return (float) UnitImages<void>::NODRIVE;
-            } else if (target->getWarpEnergy() < target->GetJumpStatus().energy) {
+            } else if (!target->jump_drive.CanConsume()) {
                 return (float) UnitImages<void>::NOTENOUGHENERGY;
-            } else if (target->graphicOptions.InWarp) {          //FIXME
+            } else if (target->ftl_drive.Enabled()) {          //FIXME
                 return (float) UnitImages<void>::OFF;
             } else if (jumpok) {
                 return (float) UnitImages<void>::READY;
@@ -920,8 +869,6 @@ void GameCockpit::TriggerEvents(Unit *un) {
 void GameCockpit::Init(const char *file) {
     smooth_fov = g_game.fov;
     editingTextMessage = false;
-    armor8 = false;
-    shield8 = false;
     Cockpit::Init(file);
     if (Panel.size() > 0) {
         float x, y;
@@ -1010,7 +957,6 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
         textcol(1, 1, 1, 1),
         text(NULL) {
     autoMessageTime = 0;
-    shield8 = armor8 = false;
     editingTextMessage = false;
     static int headlag = XMLSupport::parse_int(vs_config->getVariable("graphics", "head_lag", "10"));
     int i;
@@ -1890,20 +1836,27 @@ void GameCockpit::Draw() {
             //////////////////// DISPLAY CURRENT POSITION ////////////////////
             if (configuration()->graphics_config.hud.debug_position) {
                 TextPlane tp;
-                char str[400];                 //don't make the sprintf format too big... :-P
+                std::string str;
                 Unit *you = parent.GetUnit();
                 if (you) {
-                    sprintf(str, "Your Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f); Frame: %lf\n",
-                            you->curr_physical_state.position.i, you->curr_physical_state.position.j,
-                            you->curr_physical_state.position.k, you->Velocity.i, you->Velocity.j, you->Velocity.k,
-                            getNewTime());
+                    str = (boost::format("Your Position: (%1%,%2%,%3%); Velocity: (%4%,%5%,%6%); Frame: %7%\n")
+                            % you->curr_physical_state.position.i
+                            % you->curr_physical_state.position.j
+                            % you->curr_physical_state.position.k
+                            % you->Velocity.i
+                            % you->Velocity.j
+                            % you->Velocity.k
+                            % getNewTime()).str();
                     Unit *yourtarg = you->computer.target.GetUnit();
                     if (yourtarg) {
-                        sprintf(str + strlen(
-                                        str), "Target Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f); Now: %lf\n",
-                                yourtarg->curr_physical_state.position.i, yourtarg->curr_physical_state.position.j,
-                                yourtarg->curr_physical_state.position.k, yourtarg->Velocity.i, yourtarg->Velocity.j,
-                                yourtarg->Velocity.k, queryTime());
+                        str += (boost::format("Target Position: (%1%,%2%,%3%); Velocity: (%4%,%5%,%6%); Now: %7%\n")
+                                % yourtarg->curr_physical_state.position.i
+                                % yourtarg->curr_physical_state.position.j
+                                % yourtarg->curr_physical_state.position.k
+                                % yourtarg->Velocity.i
+                                % yourtarg->Velocity.j
+                                % yourtarg->Velocity.k
+                                % queryTime()).str();
                     }
                 }
                 tp.SetPos(-0.8, -0.8);

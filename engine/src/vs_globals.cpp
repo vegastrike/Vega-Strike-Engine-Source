@@ -22,6 +22,8 @@
 
 #include "vs_globals.h"
 #include <time.h>
+#include <stdio.h>
+
 /*
  * Globals
  */

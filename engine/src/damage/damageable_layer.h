@@ -38,7 +38,7 @@ struct DamageableLayer {
     int layer_index;
     FacetConfiguration configuration;
 
-    unsigned int number_of_facets;    // How many facets. e.g. dual shield (front and rear).
+    unsigned int number_of_facets;    // How many facets. e.g. dual shield (front and back).
     std::vector<Health> facets;    // The facets container
 
     bool core_layer;    // Damage to the core layer has a chance of also
@@ -88,9 +88,11 @@ struct DamageableLayer {
     float GetMaxHealth();
     float GetPercent(FacetName facet_name);
 
+    void FullyCharge();
     void Regenerate(float recharge_rate);
     void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
     float GetRegeneration();
+    void UpdateFacets(const float new_facet_strength);
     void UpdateFacets(const unsigned int size, const float new_facets[4]);
     void UpdateRegeneration(const float &new_regeneration_value);
 };

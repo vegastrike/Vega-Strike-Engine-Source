@@ -31,26 +31,16 @@
 class Energetic {
 public:
     Energetic();
+    virtual ~Energetic() = default;
 
-    void decreaseWarpEnergy(bool insys, float time);
     void DecreaseWarpEnergyInWarp();
 
-    float energyData() const;
-    float energyRechargeData() const;
-
-    float fuelData() const;
 
     static float getFuelUsage(bool afterburner);
-    void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
-    float ExpendMomentaryFuelUsage(float magnitude);
-    float ExpendFuel(float quantity);
     void ExpendEnergy(const bool player_ship);
     void ExpendEnergy(float usage);
     void ExpendEnergyToRechargeShields();
-    void ExpendFuel();
-    float getWarpEnergy() const;
 
-    void increaseWarpEnergy(bool insys, float time);
 
     float maxEnergyData() const;
 
@@ -59,49 +49,20 @@ public:
 
     void rechargeEnergy();
     void RechargeWarpCapacitors(const bool player_ship);
-    bool refillWarpEnergy();
 
-    void setAfterburnerEnergy(float aft);
     void setEnergyRecharge(float enrech);
-    void setFuel(float f);
 
-    float totalShieldEnergyCapacitance();
+    float totalShieldEnergyCapacitance() const;
 
     static float VSDPercent();
 
-    float warpCapData() const;
-    float warpEnergyData() const;
-
     float WarpEnergyMultiplier(const bool player_ship);
 
-    // TODO: move to StarFaring class when available
-    struct UnitJump {
-        float warpDriveRating;
-        float energy;       //short fix
-        float insysenergy;  //short fix
-        signed char drive; // disabled
-        unsigned char delay;
-        unsigned char damage;
-        //negative means fuel
-    }
-            jump{};
 
-    //current energy
-    Resource<float> energy;
-
-    //how much the energy recharges per second
-    float recharge;
-
-    //maximum energy
-    float maxwarpenergy; //short fix
-    //current energy
-    float warpenergy;    //short fix
     float constrained_charge_to_shields;
     bool sufficient_energy_to_recharge_shields;
 
-    //fuel of this unit
-    float fuel;
-    float afterburnenergy;              //short fix
+    // TODO: delete one and move the other to Afterburner class
     int afterburntype;   //0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };

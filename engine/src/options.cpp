@@ -22,30 +22,15 @@
 
 #include "options.h"
 #include "configxml.h"
+#include "configuration/configuration.h"
 
 extern VegaConfig *vs_config;
 
 void vs_options::init() {
     /* General Options */
-    default_mission = vs_config->getVariable("general", "default_mission", "test/test1.mission");
     galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
     command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
     load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
-    intro1 = vs_config->getVariable("general",
-            "intro1",
-            "Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
-    intro2 = vs_config->getVariable("general",
-            "intro2",
-            "The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive. To");
-    intro3 = vs_config->getVariable("general",
-            "intro3",
-            "go to another star system, buy a jump drive for about 10000 credits, fly to a");
-    intro4 = vs_config->getVariable("general",
-            "intro4",
-            "wireframe jump-point and press #8080FFj#000000 to warp to a near star. Target a base or planet;");
-    intro5 = vs_config->getVariable("general",
-            "intro5",
-            "When you get close a green box will appear. Inside the box, #8080FFd#000000 will land.");
     debug_fs = XMLSupport::parse_int(vs_config->getVariable("general", "debug_fs", "0"));
     simulation_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "simulation_atom", "0.1"));
     audio_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "audio_atom", "0.05555555556"));
@@ -189,8 +174,8 @@ void vs_options::init() {
     rgb_pixel_format = vs_config->getVariable("graphics", "rgb_pixel_format", "undefined");
     gl_accelerated_visual = XMLSupport::parse_bool(vs_config->getVariable("graphics", "gl_accelerated_visual", "true"));
     z_pixel_format = XMLSupport::parse_int(vs_config->getVariable("graphics", "z_pixel_format", "24"));
-    x_resolution = XMLSupport::parse_int(vs_config->getVariable("graphics", "x_resolution", "1024"));
-    y_resolution = XMLSupport::parse_int(vs_config->getVariable("graphics", "y_resolution", "768"));
+    x_resolution = configuration()->graphics2_config.resolution_x;
+    y_resolution = configuration()->graphics2_config.resolution_y;
     fullscreen = XMLSupport::parse_bool(vs_config->getVariable("graphics", "fullscreen", "false"));
     colordepth = XMLSupport::parse_int(vs_config->getVariable("graphics", "colordepth", "32"));
     glut_stencil = XMLSupport::parse_bool(vs_config->getVariable("graphics", "glut_stencil", "true"));
@@ -311,7 +296,6 @@ void vs_options::init() {
     universe_path = vs_config->getVariable("data", "universe_path", "universe");
     sectors = vs_config->getVariable("data", "sectors", "sectors");
     techniquesBasePath = vs_config->getVariable("data", "techniques", "techniques");
-    unitCSV = vs_config->getVariable("data", "UnitCSV", "units.csv");
     modUnitCSV = vs_config->getVariable("data", "ModUnitCSV", "");
     cockpits = vs_config->getVariable("data", "cockpits", "cockpits");
     animations = vs_config->getVariable("data", "animations", "animations");

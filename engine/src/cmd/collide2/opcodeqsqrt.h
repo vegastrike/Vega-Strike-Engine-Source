@@ -2,7 +2,7 @@
     Copyright (C) 2000 by Andrew Zabolotny (Intel version)
     Copyright (C) 2002 by Matthew Reda <reda@mac.com> (PowerPC version)
     Fast computation of sqrt(x) and 1/sqrt(x)
-    Copyright (C) 2023 by Benjamen R. Meyer
+    Copyright (C) 2023, 2025 by Benjamen R. Meyer
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -30,7 +30,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H
 
 #if (!defined (CS_NO_QSQRT)) && defined (CS_PROCESSOR_X86) && defined (CS_COMPILER_GCC)
-#include "Stdafx.h"
+#include "cmd/collide2/Opcode.h"
 /*
   NB: Single-precision floating-point format (32 bits):
     SEEEEEEE.EMMMMMMM.MMMMMMMM.MMMMMMMM

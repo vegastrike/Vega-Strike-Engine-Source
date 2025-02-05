@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * unit_csv.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Roy Falk, Benjamen R. Meyer, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -28,7 +30,7 @@
 #include "xml_serializer.h"
 #include "gfx/sphere.h"
 #include "unit_collide.h"
-#include "collide2/Stdafx.h"
+#include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"
 #include "audiolib.h"
 #include "unit_xml.h"
@@ -47,6 +49,8 @@
 #include "resource/resource.h"
 #include "unit_csv_factory.h"
 #include "upgradeable_unit.h"
+#include "resource/manifest.h"
+#include "components/component_utils.h"
 
 extern int GetModeFromName(const char *input_buffer);
 extern void pushMesh(std::vector<Mesh *> &mesh,
@@ -61,16 +65,14 @@ extern void pushMesh(std::vector<Mesh *> &mesh,
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-
-
 void AddMeshes(std::vector<Mesh *> &xmeshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        float unitscale,
-        const std::string &meshes,
-        int faction,
-        Flightgroup *fg,
-        vector<unsigned int> *counts) {
+               float &randomstartframe,
+               float &randomstartseconds,
+               float unitscale,
+               const std::string &meshes,
+               int faction,
+               Flightgroup *fg,
+               vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
 
     // Clear counts vector
@@ -346,7 +348,7 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
             Q.i = nextElementFloat(subunits, elemstart, elemend);
             Q.j = nextElementFloat(subunits, elemstart, elemend);
             Q.k = nextElementFloat(subunits, elemstart, elemend);
-            double restricted = cos(nextElementFloat(subunits, elemstart, elemend, 180) * VS_PI / 180.0);
+            double restricted = cos(nextElementFloat(subunits, elemstart, elemend, 180) * M_PI / 180.0);
 
             ret.push_back(SubUnitStruct(filename, pos, Q, R, restricted));
         } else {
@@ -375,13 +377,7 @@ static void AddSubUnits(Unit *thus,
                         faction,
                         modification,
                         NULL));         //I set here the fg arg to NULL
-        if (xml.units.back()->name == "LOAD_FAILED") {
-            xml.units.back()->limits.yaw = 0;
-            xml.units.back()->limits.pitch = 0;
-            xml.units.back()->limits.roll = 0;
-            xml.units.back()->limits.lateral = xml.units.back()->limits.retro = xml.units.back()->limits.forward =
-                    xml.units.back()->limits.afterburn = 0.0;
-        }
+        
         if (!thus->isSubUnit()) {         //Useless to set recursive owner in subunits - as parent will do the same
             xml.units.back()->SetRecursiveOwner(thus);
         }
@@ -389,8 +385,11 @@ static void AddSubUnits(Unit *thus,
         R.Normalize();
         xml.units.back()->prev_physical_state = xml.units.back()->curr_physical_state;
         xml.units.back()->SetPosition(pos * xml.unitscale);
-        xml.units.back()->limits.structurelimits = R.Cast();
-        xml.units.back()->limits.limitmin = restricted;
+
+        // Subunit movement restrictions
+        xml.units.back()->structure_limits = R.Cast();
+        xml.units.back()->limit_min = restricted;
+
         xml.units.back()->name = filename;
         if (xml.units.back()->pImage->unitwriter != NULL) {
             xml.units.back()->pImage->unitwriter->setName(filename);
@@ -400,7 +399,7 @@ static void AddSubUnits(Unit *thus,
     for (int a = xml.units.size() - 1; a >= 0; a--) {
         bool randomspawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
         if (randomspawn) {
-            int chancetospawn = float_to_int(xml.units[a]->warpCapData());
+            int chancetospawn = float_to_int(xml.units[a]->ftl_energy.MaxLevel());
             if (chancetospawn > rand() % 100) {
                 thus->SubUnits.prepend(xml.units[a]);
             } else {
@@ -608,24 +607,10 @@ void LoadCockpit(Unit *thus, const string &cockpit) {
     thus->pImage->CockpitCenter.k = nextElementFloat(cockpit, elemstart, elemend);
 }
 
-float getFuelConversion() {
-    return configuration()->fuel.fuel_conversion;
-}
 
 const std::string EMPTY_STRING("");
 
-void YawPitchRollParser(std::string unit_key,
-        std::string main_string,
-        std::string left_string,
-        std::string right_string,
-        float &left_pointer,
-        float &right_pointer) {
-    float main_value = UnitCSVFactory::GetVariable(unit_key, main_string, 0.0f);
-    float right_value = UnitCSVFactory::GetVariable(unit_key, right_string, 0.0f);
-    float left_value = UnitCSVFactory::GetVariable(unit_key, left_string, 0.0f);
-    right_pointer = (right_value > 0 ? right_value : main_value) * VS_PI / 180.;
-    left_pointer = (left_value > 0 ? left_value : main_value) * VS_PI / 180.;
-}
+
 
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
@@ -643,6 +628,13 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     string tmpstr;
     csvRow = unit_identifier;
 
+    // Textual Descriptions
+    this->unit_key = unit_identifier;            
+    this->unit_name = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
+    this->unit_description = Manifest::MPL().GetShipDescription(unit_identifier);
+
+    // This shadows the unit variable. It also doesn't support more than one ship.
+    // TODO: figure this out.
     std::string unit_key = (saved_game ? "player_ship" : unit_identifier);
 
     fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
@@ -730,8 +722,8 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f) * xml.unitscale;
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
     Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f);
-    Momentofinertia = UnitCSVFactory::GetVariable(unit_key, "Moment_Of_Inertia", 1.0f);
-    fuel = UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0f);
+    Momentofinertia = Mass;
+    
 
     // Hull
     float temp_hull = UnitCSVFactory::GetVariable(unit_key, "Hull", 0.0f);
@@ -740,21 +732,70 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     specInterdiction = UnitCSVFactory::GetVariable(unit_key, "Spec_Interdiction", 0.0f);
 
-    // Init armor
-    std::string armor_keys[] = {"Armor_Front_Top_Left", "Armor_Front_Top_Right",
-            "Armor_Front_Bottom_Left", "Armor_Front_Bottom_Right",
-            "Armor_Back_Top_Left", "Armor_Back_Top_Right",
-            "Armor_Back_Bottom_Left", "Armor_Back_Bottom_Right"};
-    float armor_values[8];
-    for (int i = 0; i < 8; i++) {
-        float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
-        armor_values[i] = tmp_armor_value;
+
+    // Armor
+    // We support 3 options:
+    // 1. Minimized armor = x (single value). 
+    // 2. New detailed armor (Front, back, left, right).
+    // 3. Old detailed (Front-left-top, ...). 8 facets converted to 4. 
+    const std::string armor_single_value_string = UnitCSVFactory::GetVariable(unit_key, "armor", std::string());
+
+    if(armor_single_value_string != "") {
+        // Minimized
+        const double armor_single_value = std::stod(armor_single_value_string, 0);
+        armor->UpdateFacets(armor_single_value);
+    } else {
+        // Try new
+        std::string armor_keys[] = {"armor_front", "armor_back",
+            "armor_left", "armor_right"};
+        bool new_form = true;
+        for (int i = 0; i < 4; i++) {
+            const std::string armor_string_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], std::string());
+            if(armor_string_value.empty()) {
+                new_form = false;
+                break;
+            }
+
+            double armor_value = std::stod(armor_string_value);
+            armor->facets[i].health = armor_value;
+            armor->facets[i].max_health = armor_value;
+            armor->facets[i].adjusted_health = armor_value;
+        }
+
+        // Fallback to old
+        if(!new_form) {
+            const std::string armor_keys[] = {"Armor_Front_Top_Left", 
+                                              "Armor_Front_Top_Right",
+                                              "Armor_Front_Bottom_Left", 
+                                              "Armor_Front_Bottom_Right",
+                                              "Armor_Back_Top_Left", 
+                                              "Armor_Back_Top_Right",
+                                              "Armor_Back_Bottom_Left", 
+                                              "Armor_Back_Bottom_Right"};
+
+            double old_armor_values[8];
+            float new_armor_values[4];
+            for (int i = 0; i < 8; i++) {
+                old_armor_values[i] = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
+            }
+
+            // Conversion is tricky because new values are a square and old values are
+            // a two layered diamond.
+            new_armor_values[0] = (old_armor_values[0] + old_armor_values[1] + old_armor_values[2] + old_armor_values[3])/2;
+            new_armor_values[1] = (old_armor_values[4] + old_armor_values[5] + old_armor_values[5] + old_armor_values[5])/2;
+            new_armor_values[2] = (old_armor_values[0] + old_armor_values[2] + old_armor_values[4] + old_armor_values[6])/2;
+            new_armor_values[3] = (old_armor_values[1] + old_armor_values[3] + old_armor_values[5] + old_armor_values[7])/2;
+            armor->UpdateFacets(4,new_armor_values);
+        }
     }
+       
+    // shield
 
-    armor->UpdateFacets(8, armor_values);
-
-
-    // Load shield
+    // We support 3 options:
+    // 1. Minimized shield_strength = x (single value). 
+    // 2. New detailed shield (Front, back, left, right).
+    // 3. Old detailed (Front-left-top, ...). 4/2 facets converted to 4/2. 
+    
     // Some basic shield variables
     // TODO: lib_damage figure out how leak and efficiency work
     //char leak = static_cast<char>(UnitCSVFactory::GetVariable(unit_key, "Shield_Leak", 0.0f) * 100);
@@ -768,116 +809,153 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     //float efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
 
     // Get shield count
+    std::map<std::string, float> shield_sections{};
+    std::vector<std::string> shield_string_values{};
 
-    int shield_count = 0;
-    float shield_values[4];
-    std::string shield_string_values[4];
+    const std::string shield_strength_string = UnitCSVFactory::GetVariable(unit_key, "shield_strength", std::string());
+    const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
+    
+    if(!shield_facets_string.empty()) {
+        try {
+            int shield_facets = std::stoi(shield_facets_string);
+            shield->number_of_facets = shield_facets;
+        } catch (std::invalid_argument const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
+            shield->number_of_facets = 1;
+        } catch (std::out_of_range const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_facets_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_facets_string));
+            shield->number_of_facets = 1;
+        }
+    }
 
-    // TODO: this mapping should really go away
-    // I love macros, NOT.
-    shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string());
-    shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string());
-    shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string());
-    shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string());
-
-    for (int i = 0; i < 4; i++) {
-        shield_values[i] = 0.0f;
-
-        if (shield_string_values[i].empty()) {
-            continue;
+    if(!shield_strength_string.empty()) {
+        try {
+            int shield_strength = std::stoi(shield_strength_string);
+            shield->UpdateFacets(static_cast<float>(shield_strength));
+        } catch (std::invalid_argument const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
+            shield->UpdateFacets(0.0F);
+        } catch (std::out_of_range const& ex) {
+            VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
+            shield->UpdateFacets(0.0F);
+        }
+    } else if(!shield_facets_string.empty()) {
+        // Try new longform
+        std::vector<float> shield_values{};
+        std::string shield_keys[] = {"shield_front", "shield_back",
+            "shield_left", "shield_right"};
+        
+        for (int i = 0; i < shield->number_of_facets; ++i) {
+            const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
+            if (shield_string_value.empty()) {
+                shield_sections[shield_keys[i]] = 0.0F;
+                shield_values.emplace_back(0.0F);
+            } else {
+                try {
+                    float tmp = static_cast<float>(std::stoi(shield_string_value));
+                    shield_sections[shield_keys[i]] = tmp;
+                    shield_values.emplace_back(tmp);
+                } catch (const std::invalid_argument& ex) {
+                    VS_LOG(error, (boost::format("%1%: Unable to convert shield value '%2%' to a number: %3%") % __FUNCTION__ % shield_string_value % ex.what()));
+                    shield_sections[shield_keys[i]] = 0.0F;
+                    shield_values.emplace_back(0.0F);
+                } catch (std::out_of_range const& ex) {
+                    VS_LOG(error, (boost::format("%1%: Unable to convert shield value '%2%' to a number: %3%") % __FUNCTION__ % shield_string_value % ex.what()));
+                    shield_sections[shield_keys[i]] = 0.0F;
+                    shield_values.emplace_back(0.0F);
+                }
+            }
         }
 
-        shield_values[i] = ::stof(shield_string_values[i]);
-        // Should add up to the shield type - quad or dual
-        shield_count++;
+        if (shield->number_of_facets == 4 || shield->number_of_facets == 2) {
+            shield->UpdateFacets(shield->number_of_facets, shield_values.data());
+        }
+    } else {
+        // Fallback to old shield_keys
+        int shield_count = 0;
+        std::vector<std::string> tmp_keys{"Shield_Front_Top_Right", "Shield_Back_Top_Left", "Shield_Front_Bottom_Right", "Shield_Front_Bottom_Left"};
+        std::vector<float> shield_values{};
+
+        try {
+            for (auto &key : tmp_keys) {
+                std::string tmp_string_value = UnitCSVFactory::GetVariable(unit_key, key, std::string());
+                float tmp_float_value = std::stof(tmp_string_value);
+                shield_sections[key] = tmp_float_value;
+                shield_values.emplace_back(tmp_float_value);
+                shield_string_values.emplace_back(tmp_string_value);
+                ++shield_count;
+            }
+        } catch (std::exception const& ex) {
+            shield_count = 0;
+            shield_string_values.clear();
+            shield_values.clear();
+            shield_sections.clear();
+            tmp_keys.clear();
+            tmp_keys.emplace_back("shield_front");
+            tmp_keys.emplace_back("shield_back");
+            tmp_keys.emplace_back("shield_left");
+            tmp_keys.emplace_back("shield_right");
+            try {
+                for (auto &key : tmp_keys) {
+                    std::string tmp_string_value = UnitCSVFactory::GetVariable(unit_key, key, std::string());
+                    float tmp_float_value = std::stof(tmp_string_value);
+                    shield_sections[key] = tmp_float_value;
+                    shield_values.emplace_back(tmp_float_value);
+                    shield_string_values.emplace_back(tmp_string_value);
+                    ++shield_count;
+                }
+            } catch (std::exception const& ex) {
+                VS_LOG(error, (boost::format("%1%: %2% trying to parse shield facets") % __FUNCTION__ % ex.what()));
+            }
+        }
+
+        if (shield_count == 4 || shield_count == 2) {
+            shield->number_of_facets = shield_count;
+            shield->UpdateFacets(shield_count, shield_values.data());
+        }
     }
 
-    /*
-     We are making the following assumptions:
-     1. The CSV is correct
-     2. Dual shields are 0 front and 1 rear
-     3. Quad shields are front (0), rear(1), right(2) and left(3)
-     4. There is no support for 8 facet shields in the game.
-        This has more to do with the cockpit code than anything else
-     5. We map the above index to our own
-     */
+    // Energy 
+    // TODO: The following code has a bug.
+    // It will set the max of the component as the current value loaded from the 
+    // CSV. If the component is damaged, this will be lower than the original value.
+    fuel.Load(unit_key);
+    energy.Load(unit_key);
+    ftl_energy.Load(unit_key);
+    reactor.Load(unit_key);
 
-    if (shield_count == 4 || shield_count == 2) {
-        shield->number_of_facets = shield_count;
-        shield->UpdateFacets(shield_count, shield_values);
-    }
-
-    // End shield section
-
-
-    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
-    maxwarpenergy = warpenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f);
+    // End Energy
 
     graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
     graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    double capacitor = UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f);
-    energy = Resource<float>(capacitor, 0.0f, capacitor);
-    recharge = UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f);
-    jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false) ? -1 : -2;
-    jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
+    // Begin Drive Section
+    // Afterburner
+    afterburner = Afterburner(GetSource(ComponentType::Afterburner, &fuel, &energy, &ftl_energy));
+    afterburner.Load(unit_key);
+
+    drive = Drive(GetSource(ComponentType::Drive, &fuel, &energy, &ftl_energy));
+    drive.Load(unit_key);
+
+    ftl_drive.Load(unit_key);
+    jump_drive.Load(unit_key);
+    
+    
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
     graphicOptions.RecurseIntoSubUnitsOnCollision = UnitCSVFactory::GetVariable(unit_key,
             "Collide_Subunits",
             graphicOptions.RecurseIntoSubUnitsOnCollision
                     ? true : false) ? 1 : 0;
-    jump.energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
-    jump.insysenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    if (WCfuelhack) {
-        fuel = warpenergy = warpenergy + jump.energy
-                * 0.1f;
-    }       //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
-    afterburnenergy = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
-    afterburntype = UnitCSVFactory::GetVariable(unit_key,
-            "Afterburner_Type",
-            0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
-    limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) * VS_PI / 180.0;
-    limits.pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) * VS_PI / 180.0;
-    limits.roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) * VS_PI / 180.0;
+            
+    // End Drive Section
 
-    YawPitchRollParser(unit_key,
-            "Yaw_Governor",
-            "Yaw_Governor",
-            "Yaw_Governor",
-            computer.max_yaw_right,
-            computer.max_yaw_left);
-    YawPitchRollParser(unit_key,
-            "Pitch_Governor",
-            "Pitch_Governor_Up",
-            "Pitch_Governor_Down",
-            computer.max_pitch_up,
-            computer.max_pitch_down);
-    YawPitchRollParser(unit_key,
-            "Roll_Governor",
-            "Roll_Governor_Right",
-            "Roll_Governor_Left",
-            computer.max_roll_right,
-            computer.max_roll_left);
-
-    const float game_accel = configuration()->physics_config.game_accel;
-    const float game_speed = configuration()->physics_config.game_speed;
-    limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
-    limits.forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
-    limits.retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
-    limits.lateral = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0f) +
-            UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0f)) * game_accel * game_speed;
-
-    limits.vertical = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0f) +
-            UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0f)) * game_accel * game_speed;
-
-    computer.max_combat_speed = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 0.0f) * game_speed;
-    computer.max_combat_ab_speed =
-            UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 0.0f) * game_speed;
     computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
 
-    radar = CRadar(unit_key, &computer);
+    radar.Load(unit_key);
 
-    cloak = Cloak(unit_key);
+    const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
+    cloak.SetSource((warp_energy_for_cloak ? &ftl_energy : &energy));
+    cloak.Load(unit_key);
 
     repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
@@ -1017,59 +1095,37 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     this->num_chunks = UnitCSVFactory::GetVariable(unit_key, "Num_Chunks", 0);
 }
 
-CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
-    std::string hashname = filename + "__" + FactionUtil::GetFactionName(faction);
-    for (int i = ((int) unitTables.size()) - (readlast ? 1 : 2); i >= 0; --i) {
-        unsigned int where;
-        if (unitTables[i]->RowExists(hashname, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        } else if (unitTables[i]->RowExists(filename, where)) {
-            rread = true;
-            return CSVRow(unitTables[i], where);
-        }
-    }
-    rread = false;
-    return CSVRow();
-}
-
 void Unit::WriteUnit(const char *modifications) {
-    const bool UNITTAB = configuration()->physics_config.unit_table;
-    if (UNITTAB) {
-        bool bad = false;
-        if (!modifications) {
+    bool bad = false;
+    if (!modifications) {
+        bad = true;
+    }
+    if (!bad) {
+        if (!strlen(modifications)) {
             bad = true;
         }
-        if (!bad) {
-            if (!strlen(modifications)) {
-                bad = true;
-            }
-        }
-        if (bad) {
-            VS_LOG(error,
-                    (boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str()
-                            % csvRow.get().c_str()));
-            return;
-        }
-        std::string savedir = modifications;
-        VSFileSystem::CreateDirectoryHome(VSFileSystem::savedunitpath + "/" + savedir);
-        VSFileSystem::VSFile f;
-        VSFileSystem::VSError err = f.OpenCreateWrite(savedir + "/" + name + ".csv", VSFileSystem::UnitFile);
-        if (err > VSFileSystem::Ok) {
-            VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
-            return;
-        }
-        std::string towrite = WriteUnitString();
-        f.Write(towrite.c_str(), towrite.length());
-        f.Close();
-    } else {
-        if (pImage->unitwriter) {
-            pImage->unitwriter->Write(modifications);
-        }
-        for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui) {
-            (*ui)->WriteUnit(modifications);
-        }
     }
+    if (bad) {
+        VS_LOG(error,
+                (boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str()
+                        % csvRow.get().c_str()));
+        return;
+    }
+    std::string savedir = modifications;
+    VSFileSystem::CreateDirectoryHome(VSFileSystem::savedunitpath + "/" + savedir);
+    VSFileSystem::VSFile f;
+    VSFileSystem::VSError err = f.OpenCreateWrite(savedir + "/" + name + ".json", VSFileSystem::UnitFile);
+    if (err > VSFileSystem::Ok) {
+        VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
+        return;
+    }
+
+    std::map<std::string, std::string> map = UnitToMap();
+    boost::json::array json_root_array;
+    json_root_array.emplace_back(boost::json::value_from(map));
+    std::string towrite = boost::json::serialize(json_root_array);
+    f.Write(towrite.c_str(), towrite.length());
+    f.Close();
 }
 
 using XMLSupport::tostring;
@@ -1093,23 +1149,14 @@ static string tos(int val) {
     return XMLSupport::tostring(val);
 }
 
-string Unit::WriteUnitString() {
-    const bool UNITTAB = configuration()->physics_config.unit_table;
-    string ret = "";
-    if (!UNITTAB) {
-        // Is this code doing something? Is it legacy?
-        // TODO: figure this out
-        if (pImage->unitwriter) {
-            ret = pImage->unitwriter->WriteString();
-        }
-        for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui) {
-            ret = ret + ((*ui)->WriteUnitString());
-        }
-        return ret;
-    }
-
-    std::map<std::string, std::string> unit = UnitCSVFactory::GetUnit(name);
+const std::map<std::string, std::string> Unit::UnitToMap() {
+    std::map<std::string, std::string> unit = std::map<std::string, std::string>();
     string val;
+
+    // Textual Descriptions
+    unit["Key"] = unit_key;            
+    unit["Name"] = unit_name;
+    unit["Textual_Description"] = unit_description; // Used in ship view
 
     //mutable things
     unit["Equipment_Space"] = XMLSupport::tostring(equipment_volume);
@@ -1190,7 +1237,7 @@ string Unit::WriteUnitString() {
                         subunits[k].Q.i,
                         subunits[k].Q.j,
                         subunits[k].Q.k,
-                        ((double) acos(subunits[k].restricted) * 180. / VS_PI));
+                        ((double) acos(subunits[k].restricted) * 180. / M_PI));
                 str += "{" + subunits[k].filename + tmp;
             }
             unit["Sub_Units"] = str;
@@ -1216,65 +1263,24 @@ string Unit::WriteUnitString() {
         unit["Cargo"] = carg;
     }
     unit["Mass"] = tos(Mass);
-    unit["Moment_Of_Inertia"] = tos(Momentofinertia);
-    unit["Fuel_Capacity"] = tos(fuel);
     unit["Hull"] = tos(GetHullLayer().facets[0].health);
     unit["Spec_Interdiction"] = tos(specInterdiction);
 
     // TODO: lib_damage figure out if this is correctly assigned
-    unit["Armor_Front_Top_Left"] = tos(GetArmorLayer().facets[0].health);
-    unit["Armor_Front_Top_Right"] = tos(GetArmorLayer().facets[2].health);
-    unit["Armor_Back_Top_Left"] = tos(GetArmorLayer().facets[4].health);
-    unit["Armor_Back_Top_Right"] = tos(GetArmorLayer().facets[6].health);
-    unit["Armor_Front_Bottom_Left"] = tos(GetArmorLayer().facets[1].health);
-    unit["Armor_Front_Bottom_Right"] = tos(GetArmorLayer().facets[3].health);
-    unit["Armor_Back_Bottom_Left"] = tos(GetArmorLayer().facets[5].health);
-    unit["Armor_Back_Bottom_Right"] = tos(GetArmorLayer().facets[7].health);
-
-    int number_of_shield_emitters = shield->number_of_facets;
-    {
-        unit["Shield_Front_Top_Right"] = "";
-        unit["Shield_Front_Top_Left"] = "";
-        unit["Shield_Back_Top_Right"] = "";
-        unit["Shield_Back_Top_Left"] = "";
-        unit["Shield_Front_Bottom_Right"] = "";
-        unit["Shield_Front_Bottom_Left"] = "";
-        unit["Shield_Back_Bottom_Right"] = "";
-        unit["Shield_Back_Bottom_Left"] = "";
-
-        switch (number_of_shield_emitters) {
-        case 8:
-            unit["Shield_Front_Top_Left"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[1].max_health);
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[2].max_health);
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[3].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[4].max_health);
-            unit["Shield_Back_Top_Right"] = tos(GetShieldLayer().facets[5].max_health);
-            unit["Shield_Back_Bottom_Left"] = tos(GetShieldLayer().facets[6].max_health);
-            unit["Shield_Back_Bottom_Right"] = tos(GetShieldLayer().facets[7].max_health);
-
-            break;
+    unit["armor_front"] = tos(GetArmorLayer().facets[0].health);
+    unit["armor_back"] = tos(GetArmorLayer().facets[1].health);
+    unit["armor_left"] = tos(GetArmorLayer().facets[2].health);
+    unit["armor_right"] = tos(GetArmorLayer().facets[3].health);
+    
+    unit["shield_facets"] = std::to_string(shield->number_of_facets);
+    switch (shield->number_of_facets) {
         case 4:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
-            unit["Shield_Front_Bottom_Right"] = tos(GetShieldLayer().facets[2].max_health);
-            unit["Shield_Front_Bottom_Left"] = tos(GetShieldLayer().facets[3].max_health);
-
-            break;
+            unit["shield_left"] = tos(GetShieldLayer().facets[2].max_health);
+            unit["shield_right"] = tos(GetShieldLayer().facets[3].max_health);
+            // Fallthrough     
         case 2:
-            unit["Shield_Front_Top_Right"] = tos(GetShieldLayer().facets[0].max_health);
-            unit["Shield_Back_Top_Left"] = tos(GetShieldLayer().facets[1].max_health);
-            break;
-
-        case 0:
-            // No shields
-            break;
-
-        default:
-            // This should not happen
-            std::cout << number_of_shield_emitters << "\n";
-            assert(0);
-        }
+            unit["shield_front"] = tos(GetShieldLayer().facets[0].max_health);
+            unit["shield_back"] = tos(GetShieldLayer().facets[1].max_health);
     }
 
 
@@ -1282,40 +1288,30 @@ string Unit::WriteUnitString() {
     unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
     unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
     unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
-    unit["Warp_Capacitor"] = tos(maxwarpenergy);
+    
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
-    unit["Primary_Capacitor"] = tos(energy.MaxValue());
-    unit["Reactor_Recharge"] = tos(recharge);
-    unit["Jump_Drive_Present"] = tos(jump.drive >= -1);
-    unit["Jump_Drive_Delay"] = tos(jump.delay);
+    
+    
+    reactor.SaveToCSV(unit);
+    fuel.SaveToCSV(unit);
+    energy.SaveToCSV(unit);
+    ftl_energy.SaveToCSV(unit);
+    
+    afterburner.SaveToCSV(unit);
+    drive.SaveToCSV(unit);
+    jump_drive.SaveToCSV(unit);
+    ftl_drive.SaveToCSV(unit);
+
+    radar.SaveToCSV(unit);
+    cloak.SaveToCSV(unit);
+
     unit["Wormhole"] = tos(forcejump != 0);
-    unit["Outsystem_Jump_Cost"] = tos(jump.energy);
-    unit["Warp_Usage_Cost"] = tos(jump.insysenergy);
-    unit["Afterburner_Usage_Cost"] = tos(afterburnenergy);
-    unit["Afterburner_Type"] = tos(afterburntype);
-    unit["Maneuver_Yaw"] = tos(limits.yaw * 180 / (VS_PI));
-    unit["Maneuver_Pitch"] = tos(limits.pitch * 180 / (VS_PI));
-    unit["Maneuver_Roll"] = tos(limits.roll * 180 / (VS_PI));
-    unit["Yaw_Governor_Right"] = tos(computer.max_yaw_right * 180 / VS_PI);
-    unit["Yaw_Governor_Left"] = tos(computer.max_yaw_left * 180 / VS_PI);
-    unit["Pitch_Governor_Up"] = tos(computer.max_pitch_up * 180 / VS_PI);
-    unit["Pitch_Governor_Down"] = tos(computer.max_pitch_down * 180 / VS_PI);
-    unit["Roll_Governor_Right"] = tos(computer.max_roll_right * 180 / VS_PI);
-    unit["Roll_Governor_Left"] = tos(computer.max_roll_left * 180 / VS_PI);
-    const float game_accel = configuration()->physics_config.game_accel;
-    const float game_speed = configuration()->physics_config.game_speed;
-    unit["Afterburner_Accel"] = tos(limits.afterburn / (game_accel * game_speed));
-    unit["Forward_Accel"] = tos(limits.forward / (game_accel * game_speed));
-    unit["Retro_Accel"] = tos(limits.retro / (game_accel * game_speed));
-    unit["Left_Accel"] = unit["Right_Accel"] = tos(limits.lateral / (game_accel * game_speed));
-    unit["Bottom_Accel"] = unit["Top_Accel"] = tos(limits.vertical / (game_accel * game_speed));
-    unit["Default_Speed_Governor"] = tos(computer.max_combat_speed / game_speed);
-    unit["Afterburner_Speed_Governor"] = tos(computer.max_combat_ab_speed / game_speed);
+    
+    
     unit["ITTS"] = tos(computer.itts);
 
 
-    cloak.Save(unit);
     unit["Repair_Droid"] = tos(repair_droid);
     unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
     unit["Hud_Functionality"] = WriteHudDamage(this);
@@ -1348,44 +1344,11 @@ string Unit::WriteUnitString() {
         unit["Tractorability"] = trac;
     }
 
+    return unit;
+}
+
+
+string Unit::WriteUnitString() {
+    std::map<std::string, std::string> unit = UnitToMap();
     return writeCSV(unit);
 }
-
-void UpdateMasterPartList(Unit *ret) {
-    for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
-        Cockpit *cp = _Universe->AccessCockpit(i);
-        std::vector<std::string> *addedcargoname = &cp->savegame->getMissionStringData("master_part_list_content");
-        std::vector<std::string> *addedcargocat = &cp->savegame->getMissionStringData("master_part_list_category");
-        std::vector<std::string> *addedcargovol = &cp->savegame->getMissionStringData("master_part_list_volume");
-        std::vector<std::string> *addedcargoprice = &cp->savegame->getMissionStringData("master_part_list_price");
-        std::vector<std::string> *addedcargomass = &cp->savegame->getMissionStringData("master_part_list_mass");
-        std::vector<std::string> *addedcargodesc = &cp->savegame->getMissionStringData("master_part_list_description");
-        for (unsigned int j = 0; j < addedcargoname->size(); ++j) {
-            Cargo carg;
-            carg.SetName((*addedcargoname)[j]);
-            carg.SetCategory((j < addedcargocat->size() ? (*addedcargocat)[j] : std::string("Uncategorized")));
-            carg.SetVolume((j < addedcargovol->size() ? XMLSupport::parse_float((*addedcargovol)[j]) : 1.0));
-            carg.SetPrice((j < addedcargoprice->size() ? XMLSupport::parse_float((*addedcargoprice)[j]) : 0.0));
-            carg.SetMass((j < addedcargomass->size() ? XMLSupport::parse_float((*addedcargomass)[j]) : .01));
-            carg.SetDescription(
-                    (j < addedcargodesc->size() ? (*addedcargodesc)[j] : std::string("No Description Added")));
-            carg.SetQuantity(1);
-            ret->cargo.push_back(carg);
-        }
-    }
-    std::sort(ret->cargo.begin(), ret->cargo.end());
-    {
-        Cargo last_cargo;
-        for (int i = ret->numCargo() - 1; i >= 0; --i) {
-            if (ret->GetCargo(i).GetName() == last_cargo.GetName()
-                    && ret->GetCargo(i).GetCategory() == last_cargo.GetCategory()) {
-                ret->RemoveCargo(i, ret->GetCargo(i).GetQuantity(), true);
-            } else {
-                last_cargo = ret->GetCargo(i);
-            }
-        }
-    }
-}
-
-
-

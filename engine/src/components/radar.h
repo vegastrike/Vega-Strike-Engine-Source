@@ -25,17 +25,17 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef RADAR_H
-#define RADAR_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H
 
 #include <string>
 #include <map>
 #include <memory>
 #include <iostream>
 
-#include "computer.h"
+#include "component.h"
+#include "energy_consumer.h"
 
-class Unit;
 
 enum class RadarType {
     SPHERE,
@@ -51,19 +51,18 @@ enum RadarCapabilities {
 };
 
 // Can't call it radar because of namespace collision
-class CRadar
-{
+class CRadar : public Component, public EnergyConsumer {
     // TODO: move floats to doubles
     //the max range the radar can handle
-    float max_range;
+    Resource<double> max_range;
 
     //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
-    float max_cone;
-    float lock_cone;
-    float tracking_cone;
+    Resource<double> max_cone;
+    Resource<double> lock_cone;
+    Resource<double> tracking_cone;
 
     //The minimum radius of the target
-    float min_target_size;
+    double min_target_size;
 
     // What kind of type and capability the radar supports
     RadarType type;
@@ -72,20 +71,30 @@ class CRadar
     bool can_lock;
     bool tracking_active;
 
-    std::unique_ptr<CRadar> original;
-
-    Computer *computer;
-
     friend class Armed;
     friend class Unit;
 public:
     CRadar();
-    CRadar(std::string unit_key, Computer* computer);
 
-    void WriteUnitString(std::map<std::string, std::string> &unit);
+// Component Methods
+    void Load(std::string unit_key) override;      
+    
+    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
-    void Damage();
-    void Repair();
+    bool CanDowngrade() const override;
+
+    bool Downgrade() override;
+
+    bool CanUpgrade(const std::string upgrade_key) const override;
+
+    bool Upgrade(const std::string upgrade_key) override;
+
+    void Damage() override;
+    void DamageByPercent(double percent) override;
+    void Repair() override;
+    void Destroy() override;
+
+// Radar Methods
 
     void Lock();
     void Unlock() {
@@ -103,15 +112,15 @@ public:
     bool UseObjectRecognition() const;
     bool UseThreatAssessment() const;
 
-    float GetMaxRange() const { return max_range; }
-    float GetMaxCone() const { return max_cone; }
-    float GetLockCone() const { return lock_cone; }
-    float GetTrackingCone() const { return tracking_cone; }
-    float GetMinTargetSize() const { return min_target_size; }
+    float GetMaxRange() const;
+    float GetMaxCone() const;
+    float GetLockCone() const;
+    float GetTrackingCone() const;
+    float GetMinTargetSize() const;
 
-    bool Locked() const { return locked; }
-    bool CanLock() const { return can_lock; }
-    bool Tracking() const { return tracking_active; }
+    bool Locked() const;
+    bool CanLock() const;
+    bool Tracking() const;
 };
 
-#endif // RADAR_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H

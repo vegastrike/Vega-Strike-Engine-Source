@@ -23,7 +23,6 @@
 
 #include <expat.h>
 #include "xml_support.h"
-#include "star_system_generic.h"
 #include "cmd/planet.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"

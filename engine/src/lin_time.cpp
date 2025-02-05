@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * lin_time.cpp
+ *
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -34,13 +36,14 @@ VSRandom vsrandom(time(NULL));
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
-static LONGLONG ttime;
-static LONGLONG newtime = 0;
-static LONGLONG freq;
-static double   dblnewtime;
+static LARGE_INTEGER ttime{};
+static LARGE_INTEGER newtime{};
+static LARGE_INTEGER freq{};
+static double dblnewtime;
+static double lasttime;
 #else
 #if defined (HAVE_SDL)
-#   include <SDL/SDL.h>
+#   include <SDL2/SDL.h>
 #endif /* defined( HAVE_SDL ) */
 static double newtime;
 static double lasttime;
@@ -144,7 +147,13 @@ void micro_sleep( unsigned int n )
 
 void micro_sleep( unsigned int n )
 {
-    (void) usleep( (useconds_t) n );
+    usleep(static_cast<useconds_t>(n));
+}
+
+#elif defined (__APPLE__) && defined (__MACH__)
+
+void micro_sleep(unsigned int n) {
+    usleep(static_cast<useconds_t>(n));
 }
 
 #else
@@ -162,14 +171,24 @@ void micro_sleep(unsigned int n) {
 #endif
 
 void InitTime() {
+    VS_LOG(trace, "InitTime() called");
 #ifdef WIN32
-    QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
-    QueryPerformanceCounter( (LARGE_INTEGER*) &ttime );
+    QueryPerformanceFrequency(&freq);
+    if (freq.QuadPart == 0) {
+        VS_LOG(serious_warning, "InitTime(): freq is zero!");
+    }
+    QueryPerformanceCounter(&ttime);
+    if (freq.QuadPart == 0) {
+        dblnewtime = static_cast<double>(ttime.QuadPart);
+    } else {
+        dblnewtime = static_cast<double>(ttime.QuadPart) / static_cast<double>(freq.QuadPart);
+    }
+    lasttime = dblnewtime - .0001;
 
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    newtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
+    newtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     lasttime = newtime - .0001;
 
 #elif defined (HAVE_GETTIMEOFDAY)
@@ -195,13 +214,19 @@ double GetElapsedTime() {
 
 double queryTime() {
 #ifdef WIN32
-    LONGLONG tmpnewtime;
-    QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
-    return ( (double) tmpnewtime )/(double) freq-firsttime;
+    LARGE_INTEGER ticks;
+    QueryPerformanceCounter(&ticks);
+    double tmpnewtime = 0;
+    if (freq.QuadPart > 0) {
+        tmpnewtime = static_cast<double>(ticks.QuadPart) / static_cast<double>(freq.QuadPart);
+    } else {
+        tmpnewtime = static_cast<double>(ticks.QuadPart);
+    }
+    return tmpnewtime - firsttime;
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    double tmpnewtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
+    double tmpnewtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
     return tmpnewtime - firsttime;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
@@ -219,13 +244,21 @@ double queryTime() {
 
 double realTime() {
 #ifdef WIN32
-    LONGLONG tmpnewtime;
-    QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
-    return ( (double) tmpnewtime )/(double) freq;
+    LARGE_INTEGER ticks;
+    QueryPerformanceCounter(&ticks);
+    double tmpnewtime = 0;
+    if (freq.QuadPart > 0) {
+        tmpnewtime = static_cast<double>(ticks.QuadPart) / static_cast<double>(freq.QuadPart);
+    } else {
+        tmpnewtime = static_cast<double>(ticks.QuadPart);
+    }
+    if (tmpnewtime == INFINITY) {
+        tmpnewtime = 0;
+    }
 #elif defined (_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    double tmpnewtime = (double) ts.tv_sec + ((double) ts.tv_nsec) * 1.e-9;
+    double tmpnewtime = static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.e-9;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
@@ -244,15 +277,26 @@ double realTime() {
 void UpdateTime() {
     static bool first = true;
 #ifdef WIN32
-    QueryPerformanceCounter( (LARGE_INTEGER*) &newtime );
-    elapsedtime = ( (double) (newtime-ttime) )/freq;
+    LARGE_INTEGER ticks;
+    QueryPerformanceCounter(&ticks);
+    lasttime = dblnewtime;
+    if (freq.QuadPart > 0) {
+        dblnewtime = static_cast<double>(ticks.QuadPart) / static_cast<double>(freq.QuadPart);
+    } else {
+        dblnewtime = static_cast<double>(ticks.QuadPart);
+    }
+    double dblttime = 0;
+    if (freq.QuadPart > 0) {
+        dblttime = static_cast<double>(ttime.QuadPart) / static_cast<double>(freq.QuadPart);
+    } else {
+        dblttime = static_cast<double>(ttime.QuadPart);
+    }
+    elapsedtime = (dblnewtime - lasttime);
     ttime = newtime;
-    if (freq == 0)
-        dblnewtime = 0.;
-    else
-        dblnewtime = ( (double) newtime )/( (double) freq );
     if (first)
+    {
         firsttime = dblnewtime;
+    }
 #elif defined(_POSIX_MONOTONIC_CLOCK)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);

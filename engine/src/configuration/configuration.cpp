@@ -25,15 +25,39 @@
 
 #include "configuration.h"
 #include "game_config.h"
+#include "resource/json_utils.h"
+#include <algorithm>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/json.hpp>
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
 
+#include <stdio.h> 
+
+
+
+
+
+
 using vega_config::GetGameConfig;
 
 Configuration::Configuration() {
     //logging.verbose_debug = GetGameConfig().GetBool("data.verbose_debug", false);
+    
+    std::ifstream ifs("config.json", std::ifstream::in);
+    std::stringstream buffer;
+    if(!ifs.fail()) {
+        buffer << ifs.rdbuf();
+        const std::string json_text = buffer.str();
+        boost::json::value json_value = boost::json::parse(json_text);
+        boost::json::object object = json_value.get_object();
+
+        graphics2_config = Graphics2Config(object);
+        game_start = vega_config::GameStart(object);
+        fuel = vega_config::Fuel(object);
+    }
 }
 
 /* Override the default value(provided by constructor) with the value from the user specified configuration file, if any.
@@ -42,6 +66,8 @@ Configuration::Configuration() {
 * behavior/range bounding is complicated/necessary-for-stability abd additional validation code is required for checking/adjusting user inputs
 */
 void Configuration::OverrideDefaultsWithUserConfiguration() {
+    general_config.screen = GetGameConfig().GetInt16("general.screen", general_config.screen);
+
     general_config.pitch = GetGameConfig().GetFloat("general.pitch", general_config.pitch);
     general_config.yaw = GetGameConfig().GetFloat("general.yaw", general_config.yaw);
     general_config.roll = GetGameConfig().GetFloat("general.roll", general_config.roll);
@@ -113,11 +139,9 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     // fuel substruct
     fuel.afterburner_fuel_usage =
             GetGameConfig().GetFloat("physics.AfterburnerFuelUsage", fuel.afterburner_fuel_usage);
-    fuel.fmec_exit_velocity_inverse = GetGameConfig().GetFloat("physics.FMEC_exit_vel_inverse", fuel.fmec_exit_velocity_inverse);
-//    fuel.fmec_exit_velocity_inverse =
-//            1.0F / GetGameConfig().GetFloat("physics.FMEC_exit_vel", 1.0F / 0.0000002F);
+    
     fuel.fuel_efficiency =
-            GetGameConfig().GetFloat("physics.LithiumRelativeEfficiency_Lithium", fuel.fuel_efficiency);
+            GetGameConfig().GetDouble("physics.LithiumRelativeEfficiency_Lithium", fuel.fuel_efficiency);
     fuel.fuel_equals_warp = GetGameConfig().GetBool("physics.fuel_equals_warp", fuel.fuel_equals_warp);
     fuel.normal_fuel_usage = GetGameConfig().GetFloat("physics.FuelUsage", fuel.normal_fuel_usage);
     fuel.reactor_uses_fuel = GetGameConfig().GetBool("physics.reactor_uses_fuel", fuel.reactor_uses_fuel);
@@ -132,7 +156,25 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     fuel.reactor_idle_efficiency = GetGameConfig().GetFloat("physics.reactor_idle_efficiency", fuel.reactor_idle_efficiency);
     fuel.min_reactor_efficiency = GetGameConfig().GetFloat("physics.min_reactor_efficiency", fuel.min_reactor_efficiency);
     fuel.ecm_energy_cost = GetGameConfig().GetFloat("physics.ecm_energy_cost", fuel.ecm_energy_cost);
-    fuel.fuel_conversion = GetGameConfig().GetFloat("physics.FuelConversion", fuel.fuel_conversion);
+    
+    fuel.fuel_factor = GetGameConfig().GetDouble("physics.FuelFactor", fuel.fuel_factor);
+    fuel.energy_factor = GetGameConfig().GetDouble("physics.EnergyFactor", fuel.energy_factor);
+    fuel.ftl_energy_factor = GetGameConfig().GetDouble("physics.FtlEnergyFactor", fuel.ftl_energy_factor);
+
+    fuel.reactor_factor = GetGameConfig().GetDouble("physics.ReactorFactor", fuel.reactor_factor);
+
+    fuel.ftl_drive_factor = GetGameConfig().GetDouble("physics.FtlDriveFactor", fuel.ftl_drive_factor);
+    fuel.jump_drive_factor = GetGameConfig().GetDouble("physics.JumpDriveFactor", fuel.jump_drive_factor);
+
+    // Inelegant. Hard coded defaults here and in header
+    fuel.drive_source = GetSource(GetGameConfig().GetUInt8("physics.DriveSource", 1));
+    fuel.reactor_source = GetSource(GetGameConfig().GetUInt8("physics.ReactorSource", 1));
+    fuel.afterburner_source = GetSource(GetGameConfig().GetUInt8("physics.AfterburnerSource", 1));
+    fuel.jump_drive_source = GetSource(GetGameConfig().GetUInt8("physics.JumpDriveSource", 3));
+    fuel.cloak_source = GetSource(GetGameConfig().GetUInt8("physics.CloakSource", 2));
+
+    fuel.minimum_drive =
+            GetGameConfig().GetDouble("physics.MinimumDriveFuntionality", fuel.minimum_drive);
 
     // graphics substruct
     graphics_config.automatic_landing_zone_warning = GetGameConfig().GetString("graphics.automatic_landing_zone_warning", graphics_config.automatic_landing_zone_warning);
@@ -298,12 +340,12 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config.max_ecm = GetGameConfig().GetSizeT("physics.max_ecm", physics_config.max_ecm);
     physics_config.max_lost_target_live_time = GetGameConfig().GetFloat("physics.max_lost_target_live_time", physics_config.max_lost_target_live_time);
     physics_config.percent_missile_match_target_velocity = GetGameConfig().GetFloat("physics.percent_missile_match_target_velocity", physics_config.percent_missile_match_target_velocity);
-    physics_config.game_speed = GetGameConfig().GetFloat("physics.game_speed", physics_config.game_speed);
-    physics_config.game_accel = GetGameConfig().GetFloat("physics.game_accel", physics_config.game_accel);
+    physics_config.game_speed = GetGameConfig().GetDouble("physics.game_speed", physics_config.game_speed);
+    physics_config.game_accel = GetGameConfig().GetDouble("physics.game_accel", physics_config.game_accel);
+    physics_config.combat_mode_multiplier = GetGameConfig().GetDouble("physics.combat_mode_multiplier", physics_config.combat_mode_multiplier);
     physics_config.velocity_max = GetGameConfig().GetFloat("physics.velocity_max", physics_config.velocity_max);
     physics_config.max_player_rotation_rate = GetGameConfig().GetFloat("physics.maxplayerrot", physics_config.max_player_rotation_rate);
     physics_config.max_non_player_rotation_rate = GetGameConfig().GetFloat("physics.maxNPCrot", physics_config.max_non_player_rotation_rate);
-    physics_config.unit_table = GetGameConfig().GetBool("physics.UnitTable", physics_config.unit_table);
     physics_config.capship_size = GetGameConfig().GetFloat("physics.capship_size", physics_config.capship_size);
     physics_config.near_autotrack_cone = GetGameConfig().GetFloat("physics.near_autotrack_cone", physics_config.near_autotrack_cone);
     physics_config.close_enough_to_autotrack = GetGameConfig().GetFloat("physics.close_enough_to_autotrack", physics_config.close_enough_to_autotrack);
@@ -402,6 +444,18 @@ vega_config::Fuel::Fuel() :
         reactor_uses_fuel(false) {
 }
 
+vega_config::Fuel::Fuel(boost::json::object object) {
+    fuel_equals_warp = GetBool(object, "components|fuel|fuel_equals_warp", false);
+    fuel_factor = GetDouble(object, "components|fuel|factor", 1.0);
+    energy_factor = GetDouble(object, "components|energy|factor", 1.0);
+    ftl_energy_factor = GetDouble(object, "components|ftl_energy|factor", 1.0);
+    
+    reactor_factor = GetDouble(object, "components|reactor|factor", 1.0);
+
+    ftl_drive_factor = GetDouble(object, "components|ftl_drive|factor", 1.0);
+    jump_drive_factor = GetDouble(object, "components|jump_drive|factor", 1.0);
+}
+
 vega_config::PhysicsConfig::PhysicsConfig() :
         collision_scale_factor(1.0f),
         inelastic_scale(0.8f),
@@ -416,6 +470,16 @@ vega_config::PhysicsConfig::PhysicsConfig() :
 vega_config::WeaponsConfig::WeaponsConfig() :
         can_fire_in_cloak(false),
         can_fire_in_spec(false) {
+}
+
+vega_config::GameStart::GameStart() :
+        default_mission(""),
+        introduction("") {
+}
+
+vega_config::GameStart::GameStart(boost::json::object object) {
+    default_mission = JsonGetStringWithDefault(object, "game_start|default_mission", "");
+    introduction = JsonGetStringWithDefault(object, "game_start|introduction", "");
 }
 
 std::shared_ptr<Configuration> configuration() {

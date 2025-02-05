@@ -281,27 +281,9 @@ void InitUnitTables() {
     VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
     if (err <= VSFileSystem::Ok) {
         UnitJSONFactory::ParseJSON(jsonFile);
-
-    } else {
-        // Try units.csv
-        VSFileSystem::VSFile csvFile;
-        VSFileSystem::VSError err = csvFile.OpenReadOnly("units.csv", VSFileSystem::UnitFile);
-        if (err <= VSFileSystem::Ok) {
-            UnitCSVFactory::ParseCSV(csvFile, true);
-        } else {
-            std::cerr << "Unable to open units file. Aborting.\n";
-            abort();
-        }
-        csvFile.Close();
     }
 
     jsonFile.Close();
-
-    // TODO: where did this code snippet come from???
-    /*if (f.GetFilename() == "units_description.csv" ||
-        f.GetFilename() == "master_part_list.csv") {
-        // TODO: handle master_part_list
-    */
 
     // Really New Init
     VSFileSystem::VSFile newJsonFile;
@@ -343,7 +325,6 @@ Universe::Universe(int argc, char **argv, const char *galaxy_str) {
     bootstrap_first_loop();
 
     ROLES::getAllRolePriorities();
-    //LoadWeapons( VSFileSystem::weapon_list.c_str() );
     WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
 
     galaxy.reset(new GalaxyXML::Galaxy(galaxy_str));
@@ -373,7 +354,6 @@ StarSystem *Universe::Init(string systemfile, const Vector &centr, const string 
     static bool js = true;
     if (js) {
         js = false;
-        // LoadWeapons( VSFileSystem::weapon_list.c_str() );
         WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
 
         CacheJumpStar(false);
@@ -392,18 +372,6 @@ void Universe::WriteSaveGame(bool auto_save) {
     for (unsigned int i = 0; i < _cockpits.size(); ++i) {
         if (AccessCockpit(i)) {
             ::WriteSaveGame(AccessCockpit(i), auto_save);
-#if 0
-            if ( AccessCockpit( i )->GetParent() )
-                if (AccessCockpit( i )->GetParent()->GetHull() > 0) {
-                    AccessCockpit( i )->savegame->WriteSaveGame( AccessCockpit(
-                                                                    i )->activeStarSystem->getFileName().c_str(),
-                                                                AccessCockpit( i )->GetParent()->Position(), AccessCockpit(
-                                                                    i )->credits, AccessCockpit( i )->GetUnitFileName() );
-                    AccessCockpit( i )->GetParent()->WriteUnit( AccessCockpit( i )->GetUnitModifications().c_str() );
-                }
-
-#endif
-
         }
     }
 }

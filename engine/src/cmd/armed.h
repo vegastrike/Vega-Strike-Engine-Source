@@ -49,6 +49,7 @@ protected:
 
 public:
     Armed();
+    virtual ~Armed() = default;
 
     //Fires all active guns that are or arent Missiles
     //if bitmask is (1<<31) then fire off autotracking of that type;

@@ -1,24 +1,25 @@
 /*
  * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors as part of Vega Strike (see below)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
+ * as published by the Free Software Foundation; either version 3
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * Incorporated into Vega Strike
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -30,7 +31,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -50,8 +51,9 @@
 #include "vs_logging.h"
 #include "options.h"
 #include "vs_exit.h"
+#include "configuration/configuration.h"
 
-
+#include "SDL2/SDL_video.h"
 
 /*
  * Windowing System Abstraction Layer
@@ -68,16 +70,17 @@
  *******************************---------------------------------------------------------------------------
  */
 
-static SDL_Surface *screen = NULL;
+//static SDL_Window *window = nullptr;
+static SDL_Surface *screen = nullptr;
 
-static winsys_display_func_t display_func = NULL;
-static winsys_idle_func_t idle_func = NULL;
-static winsys_reshape_func_t reshape_func = NULL;
-static winsys_keyboard_func_t keyboard_func = NULL;
-static winsys_mouse_func_t mouse_func = NULL;
-static winsys_motion_func_t motion_func = NULL;
-static winsys_motion_func_t passive_motion_func = NULL;
-static winsys_atexit_func_t atexit_func = NULL;
+static winsys_display_func_t display_func = nullptr;
+static winsys_idle_func_t idle_func = nullptr;
+static winsys_reshape_func_t reshape_func = nullptr;
+static winsys_keyboard_func_t keyboard_func = nullptr;
+static winsys_mouse_func_t mouse_func = nullptr;
+static winsys_motion_func_t motion_func = nullptr;
+static winsys_motion_func_t passive_motion_func = nullptr;
+static winsys_atexit_func_t atexit_func = nullptr;
 
 static bool redisplay = false;
 static bool keepRunning = true;
@@ -178,7 +181,8 @@ void winsys_set_passive_motion_func(winsys_motion_func_t func) {
  *  \date    Modified: 2000-10-19
  */
 void winsys_swap_buffers() {
-    SDL_GL_SwapBuffers();
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_GL_SwapWindow(current_window);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -189,7 +193,8 @@ void winsys_swap_buffers() {
  *  \date    Modified: 2000-10-19
  */
 void winsys_warp_pointer(int x, int y) {
-    SDL_WarpMouse(x, y);
+    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_WarpMouseInWindow(current_window, x, y);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -197,24 +202,24 @@ void winsys_warp_pointer(int x, int y) {
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2021-09-07 - stephengtuggy
+ *  \date    Modified: 2025-01-10 - stephengtuggy
  */
-static bool setup_sdl_video_mode() {
-    Uint32 video_flags = SDL_OPENGL;
-    int bpp = 0;
+static bool setup_sdl_video_mode(int *argc, char **argv) {
+    Uint32 video_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
+    int bpp = 0; // Bits per pixel?
     int width, height;
     if (gl_options.fullscreen) {
-        video_flags |= SDL_FULLSCREEN;
+        video_flags |= SDL_WINDOW_FULLSCREEN;
     } else {
 #ifndef _WIN32
-        video_flags |= SDL_RESIZABLE;
+        video_flags |= SDL_WINDOW_RESIZABLE;
 #endif
     }
     bpp = gl_options.color_depth;
 
     int rs, gs, bs;
     rs = gs = bs = (bpp == 16) ? 5 : 8;
-    if (game_options()->rgb_pixel_format.compare("undefined") == 0) {
+    if (game_options()->rgb_pixel_format == "undefined") {
         game_options()->rgb_pixel_format = ((bpp == 16) ? "555" : "888");
     }
     if ((game_options()->rgb_pixel_format.length() == 3) && isdigit(game_options()->rgb_pixel_format[0])
@@ -242,62 +247,105 @@ static bool setup_sdl_video_mode() {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, game_options()->z_pixel_format);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     }
-#if SDL_VERSION_ATLEAST(1, 2, 10)
     if (game_options()->gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-#endif
-    width = g_game.x_resolution;
-    height = g_game.y_resolution;
-    if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags)) == NULL) {
-        VS_LOG(info, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()));
-        for (int counter = 0; screen == NULL && counter < 2; ++counter) {
-            for (int bpd = 4; bpd > 1; --bpd) {
-                SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, bpd * 8);
-                if ((screen = SDL_SetVideoMode(width, height, bpp, video_flags | SDL_ANYFORMAT))
-                        == NULL) {
-                    VS_LOG_AND_FLUSH(error,
-                            (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
-                                    % bpp
-                                    % (bpd * 8)
-                                    % SDL_GetError()));
-                } else {
-                    break;
-                }
+    width = configuration()->graphics2_config.resolution_x;
+    height = configuration()->graphics2_config.resolution_y;
+    const int screen_number = configuration()->graphics2_config.screen;
+    SDL_Window *window = nullptr;
+    if(screen_number == 0) {
+        window = SDL_CreateWindow("Vega Strike", 0, 0, width, height, video_flags);
+    } else {
+        window = SDL_CreateWindow("Vega Strike",
+                                SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number),
+                                SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen_number), 
+                                0, 0, video_flags);
+    }
+    
+
+    if(!window) {
+        VS_LOG_FLUSH_EXIT(fatal, "No window", 1);
+    }
+
+    if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl")) {
+        VS_LOG_AND_FLUSH(important_info, "SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) succeeded");
+    } else {
+        VS_LOG_AND_FLUSH(error, (boost::format("SDL_SetHint(SDL_HINT_RENDER_DRIVER, ...) failed. Error: %1%") % SDL_GetError()));
+        SDL_ClearError();
+    }
+
+    SDL_GL_GetDrawableSize(window, &width, &height);
+
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+
+    if (!context) {
+        std::cerr << "No GL context\n" << std::flush;
+        VS_LOG_FLUSH_EXIT(fatal, "No GL context", 1);
+    }
+
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Vendor: %1%") % glGetString(GL_VENDOR)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Renderer: %1%") % glGetString(GL_RENDERER)));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("GL Version: %1%") % glGetString(GL_VERSION)));
+
+    if (SDL_GL_MakeCurrent(window, context) < 0) {
+        VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
+    }
+
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (renderer == nullptr) {
+        VS_LOG_AND_FLUSH(error, (boost::format(
+            "SDL_CreateRenderer(...) with VSync option failed; trying again without VSync option. Error was: %1%") %
+            SDL_GetError()));
+        SDL_ClearError();
+
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if (renderer == nullptr) {
+            VS_LOG_AND_FLUSH(error, (boost::format(
+                "SDL_CreateRenderer(...) with SDL_RENDERER_ACCELERATED failed; trying again with software rendering option. Error was: %1%") %
+                SDL_GetError()));
+            SDL_ClearError();
+
+            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+            if (renderer == nullptr) {
+                VS_LOG_FLUSH_EXIT(fatal, (boost::format(
+                    "SDL_CreateRenderer(...) failed on the third try, with software rendering! Error: %1%") %
+                    SDL_GetError()),
+                    1);
             }
-            if (screen == NULL) {
-                SDL_GL_SetAttribute(SDL_GL_RED_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, otherattributes);
-                SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, otherattributes);
-                gl_options.color_depth = bpp = otherbpp;
-            }
-        }
-        if (screen == NULL) {
-            VS_LOG_AND_FLUSH(fatal, "FAILED to initialize video");
-            VSExit(1);
         }
     }
 
-    std::string version = (const char *) glGetString(GL_RENDERER);
-    if (version == "GDI Generic") {
+    if (SDL_RenderSetLogicalSize(renderer, width, height) < 0) {
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("SDL_RenderSetLogicalSize(...) failed! Error: %1%") % SDL_GetError()),
+            8);
+    }
+
+#if defined (GL_RENDERER)
+    std::string version{};
+    const GLubyte * renderer_string = glGetString(GL_RENDERER);
+    if (renderer_string) {
+        version = reinterpret_cast<const char *>(renderer_string);
+    }
+    if (version == "GDI Generic" || version == "software") {
         if (game_options()->gl_accelerated_visual) {
-            VS_LOG(error, "GDI Generic software driver reported, trying to reset.");
+            VS_LOG_AND_FLUSH(error, "GDI Generic software driver reported, trying to reset.");
+            SDL_ClearError();
             SDL_Quit();
             game_options()->gl_accelerated_visual = false;
             return false;
         } else {
-            VS_LOG(error, "GDI Generic software driver reported, reset failed.\n");
-            VS_LOG(error, "Please make sure a graphics card driver is installed and functioning properly.\n");
+            VS_LOG(error, "GDI Generic software driver reported, reset failed.");
+            VS_LOG_AND_FLUSH(error, "Please make sure a graphics card driver is installed and functioning properly.");
         }
     }
+#endif
 
-    VS_LOG(trace,
-            (boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode")
-                    % screen->w
-                    % screen->h
-                    % screen->pitch
-                    % screen->format->BitsPerPixel
-                    % screen->format->BytesPerPixel));
+    // This makes our buffer swap synchronized with the monitor's vertical refresh
+    if (SDL_GL_SetSwapInterval(1) < 0) {
+        VS_LOG_AND_FLUSH(error, "SDL_GL_SetSwapInterval(1) failed");
+        SDL_ClearError();
+    }
 
     return true;
 }
@@ -327,18 +375,15 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
         VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
         exit(1);              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
-    SDL_EnableUNICODE(1);     //supposedly fixes int'l keyboards.
 
     //signal( SIGSEGV, SIG_DFL );
-    SDL_Surface *icon = NULL;
-#if 1
+    SDL_Surface *icon = nullptr;
     if (icon_title) {
         icon = SDL_LoadBMP(icon_title);
     }
     if (icon) {
-        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, ((Uint32 *) (icon->pixels))[0]);
+        SDL_SetColorKey(icon, SDL_TRUE, ((Uint32 *) (icon->pixels))[0]);
     }
-#endif
     /*
      * Init video
      */
@@ -349,12 +394,7 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 #endif
 
-    SDL_WM_SetCaption(window_title, window_title);
-    if (icon) {
-        SDL_WM_SetIcon(icon, 0);
-    }
-
-    if (!setup_sdl_video_mode()) {
+    if (!setup_sdl_video_mode(argc, argv)) {
         winsys_init(argc, argv, window_title, icon_title);
     } else {
         glutInit(argc, argv);
@@ -378,23 +418,6 @@ void winsys_cleanup() {
 
 void winsys_shutdown() {
     keepRunning = false;
-}
-
-/*---------------------------------------------------------------------------*/
-/*!
- *  Enables/disables key repeat messages from being generated
- *  \return
- *  \author  jfpatry
- *  \date    Created:  2000-10-19
- *  \date    Modified: 2000-10-19
- */
-void winsys_enable_key_repeat(bool enabled) {
-    if (enabled) {
-        SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
-                SDL_DEFAULT_REPEAT_INTERVAL);
-    } else {
-        SDL_EnableKeyRepeat(0, 0);
-    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -428,7 +451,6 @@ extern int shiftup(int);
 
 void winsys_process_events() {
     SDL_Event event;
-    unsigned int key;
     int x, y;
     bool state;
 
@@ -442,65 +464,25 @@ void winsys_process_events() {
         SDL_LockAudio();
         SDL_UnlockAudio();
         while (SDL_PollEvent(&event)) {
+
             state = false;
             switch (event.type) {
                 case SDL_KEYUP:
                     state = true;
                     //does same thing as KEYDOWN, but with different state.
                 case SDL_KEYDOWN:
+
                     if (keyboard_func) {
                         SDL_GetMouseState(&x, &y);
+//                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x scan:%4$x")
+//                                       % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
+//                                       % event.key.keysym.mod
+//                                       % event.key.keysym.sym
+//                                       % event.key.keysym.scancode
+//                                      ));
 
-                        bool maybe_unicode = game_options()->enable_unicode && !(event.key.keysym.sym & ~0xFF);
-                        bool is_unicode = maybe_unicode && event.key.keysym.unicode;
-
-                        //Fix up ctrl unicode codes
-                        if (is_unicode && event.key.keysym.unicode <= 0x1a && (event.key.keysym.sym & 0xFF) > 0x1a
-                                && event.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) {
-                            event.key.keysym.unicode += 0x60; // 0x01 (^A) --> 0x61 (A)
-                        }
-
-                        //Translate untranslated release events
-                        if (state && maybe_unicode
-                                && keysym_to_unicode[event.key.keysym.sym & 0xFF]) {
-                            event.key.keysym.unicode = keysym_to_unicode[event.key.keysym.sym & 0xFF];
-                        }
-
-                        //Remember translation for translating release events
-                        if (is_unicode) {
-                            keysym_to_unicode[event.key.keysym.sym & 0xFF] = event.key.keysym.unicode;
-                        }
-
-                        //Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
-                        //Note: Thank god we'll have OIS for 0.5.x
-                        bool shifton = event.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT | KMOD_CAPS);
-
-                        VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x unicode:%4$x sh:%5$c u:%6$c mu:%7$c")
-                                % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
-                                % event.key.keysym.mod
-                                % event.key.keysym.sym
-                                % event.key.keysym.unicode
-                                % ((shifton) ? 't' : 'f')
-                                % ((is_unicode) ? 't' : 'f')
-                                % ((maybe_unicode) ? 't' : 'f')));
-
-                        if (shifton && is_unicode
-                                && shiftup(shiftdown(event.key.keysym.unicode)) != event.key.keysym.unicode) {
-                            event.key.keysym.mod =
-                                    SDLMod(event.key.keysym.mod & ~(KMOD_LSHIFT | KMOD_RSHIFT | KMOD_CAPS));
-                            shifton = false;
-                        }
-                        //Choose unicode or symbolic, depending on whether ther is or not a unicode code
-                        //(unicode codes must be postprocessed to make sure application of the shiftup
-                        //modifier does not destroy it)
-                        key = is_unicode
-                                ? ((shifton)
-                                        ? shiftdown(event.key.keysym.unicode)
-                                        : event.key.keysym.unicode
-                                ) : event.key.keysym.sym;
                         //Send the event
-                        (*keyboard_func)(key,
-                                event.key.keysym.mod,
+                        (*keyboard_func)(event.key.keysym.sym, event.key.keysym.mod,
                                 state,
                                 x, y);
                     }
@@ -531,16 +513,23 @@ void winsys_process_events() {
                     }
                     break;
 
-                case SDL_VIDEORESIZE:
+                case SDL_WINDOWEVENT_RESIZED:
 #if !(defined (_WIN32) && defined (SDL_WINDOWING ))
-                    g_game.x_resolution = event.resize.w;
-                    g_game.y_resolution = event.resize.h;
-                    setup_sdl_video_mode();
+                    g_game.x_resolution = event.window.data1;
+                    g_game.y_resolution = event.window.data2;
+                    //setup_sdl_video_mode(argc, argv);
                     if (reshape_func) {
-                        (*reshape_func)(event.resize.w,
-                                event.resize.h);
+                        (*reshape_func)(event.window.data1,
+                                event.window.data2);
                     }
 #endif
+                    break;
+
+                case SDL_QUIT:
+                    cleanexit = true;
+                    keepRunning = false;
+                    break;
+                default:
                     break;
             }
             SDL_LockAudio();
@@ -587,7 +576,7 @@ void winsys_exit(int code) {
     if (atexit_func) {
         (*atexit_func)();
     }
-    // exit( code );
+    exit( code );
 }
 
 #else
@@ -600,7 +589,7 @@ void winsys_exit(int code) {
  *******************************---------------------------------------------------------------------------
  */
 
-static winsys_keyboard_func_t keyboard_func = NULL;
+static winsys_keyboard_func_t keyboard_func = nullptr;
 
 static bool redisplay = false;
 
@@ -799,7 +788,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     gl_options.color_depth = game_options()->colordepth;
     glutInit( argc, argv );
     if (game_options()->glut_stencil) {
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined (__MACH__)
         if ( !(glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE|GLUT_STENCIL ), 1) )
             glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE );
 #else

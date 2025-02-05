@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,6 +31,8 @@
 #include "unit_csv_factory.h"
 #include "unit_json_factory.h"
 #include "vs_exit.h"
+
+#include <boost/algorithm/string.hpp>
 
 using std::string;
 
@@ -116,10 +118,18 @@ string writeCSV(const std::map<std::string, std::string> &unit, string delim) {
     std::string first_line;
     std::string second_line;
     for (auto const& pair : unit) {
-        first_line += addQuote(pair.first, delim);
+        std::string pair_first = pair.first;
+        std::string pair_second = pair.second;
+
+        // Replaces standard comma with turned comma (U+2E32)
+        // Prevents CSV corruption on load.
+        boost::replace_all(pair_first, ",", "⸲");
+        boost::replace_all(pair_second, ",", "⸲");
+
+        first_line += addQuote(pair_first, delim);
         first_line += delim[0];
 
-        second_line += addQuote(pair.second, delim);
+        second_line += addQuote(pair_second, delim);
         second_line += delim[0];
     }
 
@@ -188,29 +198,6 @@ CSVTable::CSVTable(const string &data, const string &root) {
 }
 
 CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root) {
-    /*if (f.GetFilename() == "units_description.csv" ||
-            f.GetFilename() == "master_part_list.csv") {
-    } else if (f.GetFilename() == "units.csv") {
-        VSFileSystem::VSFile jsonFile;
-        VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
-        if (err <= VSFileSystem::Ok) {
-            UnitJSONFactory::ParseJSON(jsonFile);
-        }
-        jsonFile.Close();
-    }*/
-
-    if (f.GetFilename() == "units_description.csv" ||
-        f.GetFilename() == "master_part_list.csv") {
-        // Not the CSV file we expect. Will crash unit_csv_factory
-    } /*else if (f.GetFilename() != "units.csv") {
-        // Open a saved game.
-        std::cerr << "Parsing " << f.GetFilename() << std::endl;
-        //abort();
-        UnitCSVFactory factory;
-        factory.ParseCSV(f, true);
-        f.Begin();
-    }*/
-
     std::string data = f.ReadFull();
     this->rootdir = root;
     Init(data);
@@ -302,11 +289,6 @@ CSVTable::Merge(const CSVTable &other) {
 CSVRow::CSVRow(CSVTable *parent, const string &key) {
     this->parent = parent;
     iter = parent->rows[key] * parent->key.size();
-}
-
-CSVRow::CSVRow(CSVTable *parent, unsigned int i) {
-    this->parent = parent;
-    iter = i * parent->key.size();
 }
 
 const string &CSVRow::operator[](const string &col) const {

@@ -1,9 +1,8 @@
 /*
  * unit_util_generic.cpp
  *
- * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
- * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -14,14 +13,16 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <string>
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
@@ -41,6 +42,9 @@
 #include "universe.h"
 #include "vs_logging.h"
 #include "weapon_info.h"
+#include "unit_csv_factory.h"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "cmd/script/pythonmission.h"
 #ifndef NO_GFX
@@ -290,7 +294,7 @@ int getPhysicsPriority(Unit *un) {
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
 
         float time_ramped = compwarprampuptime - un->graphicOptions.RampCounter;
-        if (un->graphicOptions.InWarp == 0) {
+        if (!un->ftl_drive.Enabled()) {
             time_ramped = warprampdowntime - un->graphicOptions.RampCounter;
         }
         if (un->graphicOptions.WarpRamping || time_ramped < lowest_priority_time) {
@@ -835,14 +839,14 @@ float maxSpeed(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    return my_unit->ViewComputerData().max_speed();
+    return my_unit->MaxSpeed();
 }
 
 float maxAfterburnerSpeed(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    return my_unit->ViewComputerData().max_ab_speed();
+    return my_unit->MaxAfterburnerSpeed();
 }
 
 void setECM(Unit *my_unit, int NewECM) {
@@ -893,6 +897,44 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     if (!un) {
         return 0;
     }
+
+    // New Code
+    // TODO: Make actually return percent damaged
+
+    // name is unit_key with stripped suffix. Need to add it again
+    // TODO: check for prefixes: add_ mult_
+    std::string unit_key = name;
+    if(!boost::algorithm::ends_with(unit_key, "__upgrades")) {
+        unit_key = name + "__upgrades";
+    }
+
+    const std::string upgrade_category = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Type", std::string());
+    if(upgrade_category == "Reactor") {
+        return un->reactor.PercentOperational();
+    } 
+    
+    if(upgrade_category == "Capacitor") {
+        return un->reactor.PercentOperational();
+    } 
+    
+    if(upgrade_category == "FTL_Capacitor") {
+        return un->reactor.PercentOperational();
+    }
+
+    if(upgrade_category == "Jump_Drive") {
+        return un->jump_drive.PercentOperational();
+    }
+
+    if(upgrade_category == "FTL Drive") {
+        return un->ftl_drive.PercentOperational();
+    }
+
+    if(upgrade_category == "Cloak") {
+        return un->cloak.PercentOperational();
+    }
+
+
+    // Old Code
     if (category.find(DamagedCategory) == 0) {
         return 0.0f;
     }
@@ -919,7 +961,7 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     } else if (name.find("add_") != 0 && name.find("mult_") != 0) {
         float armor[8];
         upgrade->ArmorData(armor);
-        if (*upgrade->current_hull > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5]
+        if (upgrade->layers[0].facets[0].health > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5]
                 || armor[6]
                 || armor[7]) {
             if (countHullAndArmorAsFull) {

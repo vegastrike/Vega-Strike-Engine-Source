@@ -25,46 +25,32 @@
 #include "unit_optimize_factory.h"
 #include "unit_csv_factory.h"
 
-#include "json.h"
 
 void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit_attributes,
-                   const std::string& json_text, bool is_root) {
-    json::jobject json = json::jobject::parse(json_text);
-
+                                         const boost::json::object object) {
     // Parse the data section
-    std::string data = json.get("data");
-    json::jobject data_json = json::jobject::parse(data);
+    if(object.if_contains("data")) {
+        const boost::json::object data_object = object.at("data").as_object();
 
-    for (const std::string &key : keys) {
-        // For some reason, parser adds quotes
-        if(data_json.has_key(key)) {
-            const std::string attribute = data_json.get(key);
-            const std::string stripped_attribute = attribute.substr(1, attribute.size() - 2);
-            unit_attributes[key] = stripped_attribute;
-        } else {
-            // If we do this for non-root, we'll overwrite existing attributes
-            if(is_root) {
-                unit_attributes[key] = "";
-            }
+        for(const boost::json::key_value_pair& pair : data_object) {
+            const std::string key = pair.key();
+            const std::string value = boost::json::value_to<std::string>(pair.value());
+            unit_attributes[key] = value;
+        }
+
+        if(unit_attributes.count("Key")) {
+            std::string unit_key = unit_attributes["Key"];
+            UnitCSVFactory::units[unit_key] = unit_attributes;
         }
     }
 
-    // Parse the units array
-    if(json.has_key("units")) {
-        std::vector<std::string> units = json::parsing::parse_array(json.get("units").c_str());
-        // Iterate over root
-        for (const std::string &unit_text : units) {
-            RecursiveParse(unit_attributes, unit_text, false);
-        }
-    } else {
-        // Add moment of intertia
-        if(unit_attributes.count("Mass")) {
-            unit_attributes["Moment_Of_Inertia"] = unit_attributes["Mass"];
-        }
 
-        std::string unit_key = unit_attributes["Key"];
+    if(object.if_contains("units")) {
+        const boost::json::array units_array = object.at("units").as_array();
 
-        UnitCSVFactory::units[unit_key] = unit_attributes;
+        for(const boost::json::value& value : units_array) {
+            RecursiveParse(unit_attributes, value.as_object());
+        } 
     }
 }
 
@@ -72,6 +58,8 @@ void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit
 void UnitOptimizeFactory::ParseJSON(VSFileSystem::VSFile &file) {
     const std::string json_text = file.ReadFull();
 
+    boost::json::value json_value = boost::json::parse(json_text);
+    boost::json::object root_object = json_value.as_object();
 
 
     std::map<std::string, std::string> unit_attributes;
@@ -79,5 +67,5 @@ void UnitOptimizeFactory::ParseJSON(VSFileSystem::VSFile &file) {
     // Add root
     unit_attributes["root"] = file.GetRoot();
 
-    RecursiveParse(unit_attributes, json_text, true);
+    RecursiveParse(unit_attributes, root_object);
 }

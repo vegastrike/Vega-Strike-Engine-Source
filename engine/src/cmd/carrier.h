@@ -26,9 +26,13 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_CARRIER_H
 #define VEGA_STRIKE_ENGINE_CMD_CARRIER_H
 
-#include "cargo.h"
+#include "resource/cargo.h"
+#include "gfx/vec.h"
 
 #include <string>
+#include <vector>
+
+class Unit;
 
 // A unit (ship) that carries cargo
 class Carrier {
@@ -36,10 +40,10 @@ public:
     std::vector<Cargo> cargo;
 
     Carrier();
+    virtual ~Carrier() = default;
     void SortCargo();
     static std::string cargoSerializer(const struct XMLType &input, void *mythis);
 
-    static Unit *makeMasterPartList();
     bool CanAddCargo(const Cargo &carg) const;
     void AddCargo(const Cargo &carg, bool sort = true);
     int RemoveCargo(unsigned int i, int quantity, bool eraseZero = true);

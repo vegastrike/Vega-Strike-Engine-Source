@@ -25,24 +25,113 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H
 
+#include <string>
+#include <map>
 
-/*class Component
+#include "resource/resource.h"
+
+/**
+ * LibComponent is currently tightly coupled to LibDamage and
+ * other various libraries in VegaStrike engine.
+ * Consider decoupling and subclassing every component in it.
+ */
+
+class Unit;
+
+// TODO: add complete list
+enum class ComponentType {
+    None, 
+    Dummy, 
+
+    Hull, 
+    Armor, 
+    Shield,
+    
+    Afterburner,
+    AfterburnerUpgrade,
+    Drive,
+    DriveUpgrade,
+    FtlDrive,
+    JumpDrive,
+
+    Reactor,
+    Capacitor,
+    FtlCapacitor,
+    Fuel,
+
+    Cloak
+    // TODO: all the rest of the upgrades, shady or not...
+};
+
+class Component
 {
+protected:
+    std::string upgrade_name;   // Isometal Armor
+    std::string upgrade_key;    // armor03__upgrades
+    std::string description;    // Long text and picture. Taken from master_parts_list
+    
+    double price = 0;
+    double mass = 0;
+    double volume = 0;
+
+    Resource<double> operational; // Percent operational
+
+    bool installed = false;
+    bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
-    Component();
-    virtual ~Component() {}
+    ComponentType type = ComponentType::None;
 
-    virtual void damage();
-    virtual void fix();
+    Component(double mass = 0, 
+              double volume = 0, 
+              bool installed = false, 
+              bool integral = false);
 
+    // Load from units dictionary
+    // TODO: we should really switch the two parameters around.
+    virtual void Load(std::string unit_key);      
+    
+    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const = 0;
 
-};*/
+    // Handle the four cases of CanUpgrade/Upgrade/CanDowngrade/Downgrade
+    bool CanWillUpDowngrade(const std::string upgrade_key,
+                                           bool upgrade, bool apply);
 
-// These functions reduce functionality by a uniform distribution 0-1.
-// The function name's number component is the chance of the damage occurring.
-double random20();
+    virtual bool CanDowngrade() const = 0;
 
-#endif // COMPONENT_H
+    virtual bool Downgrade();
+
+    virtual bool CanUpgrade(const std::string upgrade_key) const = 0;
+
+    virtual bool Upgrade(const std::string upgrade_key);
+
+    virtual void Damage();
+    virtual void DamageByPercent(double percent);
+    virtual void Repair();
+    virtual void Destroy();
+
+    virtual bool Damaged() const;
+    bool Destroyed() const;
+    virtual double PercentOperational() const;
+    virtual bool Installed() const;
+    bool Operational() const;
+
+    void SetIntegral(bool integral);
+
+    // Getters
+    const std::string GetUnitKey() const;
+    const std::string GetUpgradeName() const;
+    const std::string GetUpgradeKey() const;
+    const std::string GetDescription() const;
+    
+    const double GetPrice() const;
+    const double GetMass() const;
+    const double GetVolume() const;
+
+    const double GetOperational() const;
+
+    const bool Integral() const;
+};
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H

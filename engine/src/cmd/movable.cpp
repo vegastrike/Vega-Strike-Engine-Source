@@ -71,7 +71,7 @@ Movable::Movable() : cumulative_transformation_matrix(identity_matrix),
 }
 
 Movable::graphic_options::graphic_options() {
-    FaceCamera = Animating = missilelock = InWarp = unused1 = WarpRamping = NoDamageParticles = 0;
+    FaceCamera = Animating = missilelock = unused1 = WarpRamping = NoDamageParticles = 0;
     specInterdictionOnline = 1;
     NumAnimationPoints = 0;
     RampCounter = 0;
@@ -113,12 +113,14 @@ Vector Movable::GetNetAngularAcceleration() const {
 }
 
 float Movable::GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn) const {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     Vector p, q, r;
     GetOrientation(p, q, r);
     Vector lref(ref * p, ref * q, ref * r);
-    float tp = (lref.i == 0) ? 0 : fabs(Limits().lateral / lref.i);
-    float tq = (lref.j == 0) ? 0 : fabs(Limits().vertical / lref.j);
-    float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? Limits().forward : Limits().retro) / lref.k);
+    float tp = (lref.i == 0) ? 0 : fabs(unit->drive.lateral.Value() / lref.i);
+    float tq = (lref.j == 0) ? 0 : fabs(unit->drive.vertical.Value() / lref.j);
+    float tr = (lref.k == 0) ? 0 : fabs(((lref.k > 0) ? unit->drive.forward.Value() : unit->drive.retro.Value()) / lref.k);
     float trqmin = (tr < tq) ? tr : tq;
     float tm = tp < trqmin ? tp : trqmin;
     return lref.Magnitude() * tm / Mass;
@@ -154,6 +156,7 @@ void Movable::UpdatePhysics(const Transformation &trans,
 
     if (resolveforces) {
         //clamp velocity
+        // TODO: use resource class to do this more elegantly
         ResolveForces(trans, transmat);
         float velocity_max = configuration()->physics_config.velocity_max;
         if (Velocity.i > velocity_max) {
@@ -179,7 +182,7 @@ void Movable::UpdatePhysics(const Transformation &trans,
 }
 
 void Movable::AddVelocity(float difficulty) {
-    Unit *unit = static_cast<Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     float lastWarpField = graphicOptions.WarpFieldStrength;
 
     bool playa = isPlayerShip();
@@ -188,14 +191,14 @@ void Movable::AddVelocity(float difficulty) {
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
         float oldrampcounter = graphicOptions.RampCounter;
-        if (graphicOptions.InWarp == 1) {             //Warp Turning on
+        if (unit->ftl_drive.Enabled()) {             //Warp Turning on
             graphicOptions.RampCounter = warprampuptime;
         } else {                                        //Warp Turning off
             graphicOptions.RampCounter = configuration()->warp_config.warp_ramp_down_time;
         }
         //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
         if (oldrampcounter != 0 && graphicOptions.RampCounter != 0) {
-            if (graphicOptions.InWarp == 1) {             //Warp is turning on before it turned off
+            if (unit->ftl_drive.Enabled()) {             //Warp is turning on before it turned off
                 graphicOptions.RampCounter *= (1 - oldrampcounter / configuration()->warp_config.warp_ramp_down_time);
             } else {                                        //Warp is turning off before it turned on
                 graphicOptions.RampCounter *= (1 - oldrampcounter / warprampuptime);
@@ -203,20 +206,20 @@ void Movable::AddVelocity(float difficulty) {
         }
         graphicOptions.WarpRamping = 0;
     }
-    if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
+    if (unit->ftl_drive.Enabled() || graphicOptions.RampCounter != 0) {
         float rampmult = 1.f;
         if (graphicOptions.RampCounter != 0) {
             graphicOptions.RampCounter -= simulation_atom_var;
             if (graphicOptions.RampCounter <= 0) {
                 graphicOptions.RampCounter = 0;
             }
-            if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > configuration()->warp_config.warp_ramp_down_time) {
+            if (!unit->ftl_drive.Enabled() && graphicOptions.RampCounter > configuration()->warp_config.warp_ramp_down_time) {
                 graphicOptions.RampCounter = (1 - graphicOptions.RampCounter / warprampuptime) * configuration()->warp_config.warp_ramp_down_time;
             }
-            if (graphicOptions.InWarp == 1 && graphicOptions.RampCounter > warprampuptime) {
+            if (unit->ftl_drive.Enabled() && graphicOptions.RampCounter > warprampuptime) {
                 graphicOptions.RampCounter = warprampuptime;
             }
-            rampmult = (graphicOptions.InWarp) ? 1.0F
+            rampmult = (unit->ftl_drive.Enabled()) ? 1.0F
                     - ((graphicOptions.RampCounter
                             / warprampuptime)
                             * (graphicOptions.RampCounter
@@ -258,6 +261,7 @@ void Movable::UpdatePhysics2(const Transformation &trans,
 }
 
 void Movable::Rotate(const Vector &axis) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
     double theta = axis.Magnitude();
     double ootheta = 0;
     if (theta == 0) {
@@ -270,10 +274,10 @@ void Movable::Rotate(const Vector &axis) {
         rot = identity_quaternion;
     }
     curr_physical_state.orientation *= rot;
-    if (limits.limitmin > -1) {
+    if (unit->limit_min > -1) {
         Matrix mat;
         curr_physical_state.orientation.to_matrix(mat);
-        if (limits.structurelimits.Dot(mat.getR()) < limits.limitmin) {
+        if (unit->structure_limits.Dot(mat.getR()) < unit->limit_min) {
             curr_physical_state.orientation = prev_physical_state.orientation;
         }
     }
@@ -474,8 +478,6 @@ double Movable::GetMaxWarpFieldStrength(float rampmult) const {
 void Movable::FireEngines(const Vector &Direction /*unit vector... might default to "r"*/,
         float FuelSpeed,
         float FMass) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
-    FMass = energetic->ExpendFuel(FMass);
     NetForce += Direction * ((double)FuelSpeed * (double)FMass / GetElapsedTime());
 }
 
@@ -526,261 +528,213 @@ void Movable::ApplyLocalTorque(const Vector &torque) {
 }
 
 Vector Movable::MaxTorque(const Vector &torque) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     //torque is a normal
-    return torque * (Vector(copysign(limits.pitch, torque.i),
-            copysign(limits.yaw, torque.j),
-            copysign(limits.roll, torque.k)) * torque);
+    return torque * (Vector(copysign(unit->drive.pitch.Value(), torque.i),
+            copysign(unit->drive.yaw.Value(), torque.j),
+            copysign(unit->drive.roll.Value(), torque.k)) * torque);
 }
 
 Vector Movable::ClampTorque(const Vector &amt1) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Vector Res = amt1;
 
-    energetic->WCWarpIsFuelHack(true);
-
-    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    if (fabs(amt1.i) > fuelclamp * limits.pitch) {
-        Res.i = copysign(fuelclamp * limits.pitch, amt1.i);
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    if (fabs(amt1.i) > fuelclamp * unit->drive.pitch) {
+        Res.i = copysign(fuelclamp * unit->drive.pitch, amt1.i);
     }
-    if (fabs(amt1.j) > fuelclamp * limits.yaw) {
-        Res.j = copysign(fuelclamp * limits.yaw, amt1.j);
+    if (fabs(amt1.j) > fuelclamp * unit->drive.yaw) {
+        Res.j = copysign(fuelclamp * unit->drive.yaw, amt1.j);
     }
-    if (fabs(amt1.k) > fuelclamp * limits.roll) {
-        Res.k = copysign(fuelclamp * limits.roll, amt1.k);
+    if (fabs(amt1.k) > fuelclamp * unit->drive.roll) {
+        Res.k = copysign(fuelclamp * unit->drive.roll, amt1.k);
     }
     //1/5,000,000 m/s
 
-    energetic->ExpendMomentaryFuelUsage(Res.Magnitude());
-    energetic->WCWarpIsFuelHack(false);
     return Res;
 }
 
 
 Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
-    Energetic *energetic = dynamic_cast<Energetic*>(this);
-    Unit *unit = static_cast<Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
-    float fuelclamp = (energetic->fuelData() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (energetic->fuelData() <= 0 || (energetic->energy < unit->afterburnenergy * simulation_atom_var)) ? configuration()->fuel.no_fuel_afterburn : 1;
-    float limit =
-            afterburn ? (abfuelclamp
-                    * (unit->computer.max_ab_speed()
-                            - unit->computer.max_speed()) + (fuelclamp * unit->computer.max_speed())) : fuelclamp
-                    * unit->computer.max_speed();
-    float tmp = velocity.Magnitude();
-    if (tmp > fabs(limit)) {
-        return velocity * (limit / tmp);
+    double max_speed;
+    double magnitude = velocity.Magnitude();
+
+    // If we're using afterburn and have enough energy
+    // TODO: Need to make sure somewhere that damage to Afterburner.speed does not 
+    // reduce it below Drive.speed
+    if(afterburn && (unit->afterburner.CanConsume() || configuration()->fuel.no_fuel_afterburn)) {
+        max_speed = unit->MaxAfterburnerSpeed(); 
+    } else if(unit->drive.CanConsume() ) { //|| configuration()->fuel.no_fuel_thrust) {
+        max_speed = unit->MaxSpeed();
+    } else {
+        max_speed = 0;
     }
+    
+    if(magnitude > max_speed) {
+        return velocity * (max_speed / magnitude);
+    }
+
     return velocity;
 }
 
 
+// TODO: move somewhere (drive?) or do something more elegant.
+// Would this be fixed by simply setting the Resource and getting the value back?
+// Yes. If we use the drive resources, we don't need this.
 Vector Movable::ClampAngVel(const Vector &velocity) {
-    Unit *unit = static_cast<Unit *>(this);
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     Vector res(velocity);
     if (res.i >= 0) {
-        if (res.i > unit->computer.max_pitch_down) {
-            res.i = unit->computer.max_pitch_down;
+        if (res.i > unit->drive.max_pitch_down.Value()) {
+            res.i = unit->drive.max_pitch_down.Value();
         }
-    } else if (-res.i > unit->computer.max_pitch_up) {
-        res.i = -unit->computer.max_pitch_up;
+    } else if (-res.i > unit->drive.max_pitch_up.Value()) {
+        res.i = -unit->drive.max_pitch_up.Value();
     }
     if (res.j >= 0) {
-        if (res.j > unit->computer.max_yaw_left) {
-            res.j = unit->computer.max_yaw_left;
+        if (res.j > unit->drive.max_yaw_left.Value()) {
+            res.j = unit->drive.max_yaw_left.Value();
         }
-    } else if (-res.j > unit->computer.max_yaw_right) {
-        res.j = -unit->computer.max_yaw_right;
+    } else if (-res.j > unit->drive.max_yaw_right.Value()) {
+        res.j = -unit->drive.max_yaw_right.Value();
     }
     if (res.k >= 0) {
-        if (res.k > unit->computer.max_roll_left) {
-            res.k = unit->computer.max_roll_left;
+        if (res.k > unit->drive.max_roll_left.Value()) {
+            res.k = unit->drive.max_roll_left.Value();
         }
-    } else if (-res.k > unit->computer.max_roll_right) {
-        res.k = -unit->computer.max_roll_right;
+    } else if (-res.k > unit->drive.max_roll_right.Value()) {
+        res.k = -unit->drive.max_roll_right.Value();
     }
     return res;
 }
 
 Vector Movable::MaxThrust(const Vector &amt1) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     //amt1 is a normal
-    return amt1 * (Vector(copysign(limits.lateral, amt1.i),
-            copysign(limits.vertical, amt1.j),
-            amt1.k > 0 ? limits.forward : -limits.retro) * amt1);
+    return amt1 * (Vector(copysign(unit->drive.lateral.Value(), amt1.i),
+            copysign(unit->drive.vertical.Value(), amt1.j),
+            amt1.k > 0 ? unit->drive.forward.Value() : -unit->drive.retro.Value()) * amt1);
 }
 
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 // TODO: refactor soon. Especially access to the fuel variable
 Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    const bool WCfuelhack = configuration()->fuel.fuel_equals_warp;
     const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
-    if (WCfuelhack) {
-        if (unit->fuel > unit->warpenergy) {
-            unit->fuel = unit->warpenergy;
-        }
-        if (unit->fuel < unit->warpenergy) {
-            unit->warpenergy = unit->fuel;
-        }
-    }
-    float instantenergy = unit->afterburnenergy * simulation_atom_var;
-    if ((unit->afterburntype == 0) && unit->energy < instantenergy) {
+    
+
+    if(!unit->afterburner.CanConsume()) {
         afterburn = false;
     }
-    if ((unit->afterburntype == 1) && unit->fuel < 0) {
-        unit->fuel = 0;
-        afterburn = false;
-    }
-    if ((unit->afterburntype == 2) && unit->warpenergy < 0) {
-        unit->warpenergy = 0;
-        afterburn = false;
-    }
-    if (3 == unit->afterburntype) {      //no afterburner -- we should really make these types an enum :-/
-        afterburn = false;
-    }
+    
+    
     Vector Res = amt1;
 
-    float fuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
-    float abfuelclamp = (unit->fuel <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
-    if (fabs(amt1.i) > fabs(fuelclamp * limits.lateral)) {
-        Res.i = copysign(fuelclamp * limits.lateral, amt1.i);
+    float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
+    float abfuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_afterburn : 1;
+    if (fabs(amt1.i) > fabs(fuelclamp * unit->drive.lateral)) {
+        Res.i = copysign(fuelclamp * unit->drive.lateral, amt1.i);
     }
-    if (fabs(amt1.j) > fabs(fuelclamp * limits.vertical)) {
-        Res.j = copysign(fuelclamp * limits.vertical, amt1.j);
+    if (fabs(amt1.j) > fabs(fuelclamp * unit->drive.vertical)) {
+        Res.j = copysign(fuelclamp * unit->drive.vertical, amt1.j);
     }
     float ablimit =
             afterburn
-                    ? ((limits.afterburn - limits.forward) * abfuelclamp + limits.forward * fuelclamp)
-                    : limits.forward;
+                    ? ((unit->afterburner.thrust - unit->drive.forward.Value()) * abfuelclamp + unit->drive.forward.Value() * fuelclamp)
+                    : unit->drive.forward.Value();
     if (amt1.k > ablimit) {
         Res.k = ablimit;
     }
-    if (amt1.k < -limits.retro) {
-        Res.k = -limits.retro;
+    if (amt1.k < -unit->drive.retro) {
+        Res.k = -unit->drive.retro;
     }
-    const float Lithium6constant = configuration()->fuel.deuterium_relative_efficiency_lithium;
-    //1/5,000,000 m/s
-    const float FMEC_exit_vel_inverse = configuration()->fuel.fmec_exit_velocity_inverse;
-    if (unit->afterburntype == 2) {
-        //Energy-consuming afterburner
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->warpenergy -= unit->afterburnenergy * Energetic::getFuelUsage(afterburn) * simulation_atom_var * Res.Magnitude()
-                * FMEC_exit_vel_inverse
-                / Lithium6constant;
+   
+    if (afterburn) {
+        unit->afterburner.Consume();
     }
-    if (3 == unit->afterburntype || unit->afterburntype == 1) {
-        //fuel-burning overdrive - uses afterburner efficiency. In NO_AFTERBURNER case, "afterburn" will always be false, so can reuse code.
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->fuel -=
-                ((afterburn
-                        && finegrainedFuelEfficiency) ? unit->afterburnenergy : Energetic::getFuelUsage(afterburn))
-                        * simulation_atom_var * Res.Magnitude()
-                        * FMEC_exit_vel_inverse / Lithium6constant;
-#ifndef __APPLE__
-        if (ISNAN(unit->fuel)) {
-            VS_LOG(error, "Fuel is NAN A");
-            unit->fuel = 0;
-        }
-#endif
-    }
-    if (unit->afterburntype == 0) {
-        //fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
-        //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        unit->fuel -= unit->getFuelUsage(false) * simulation_atom_var * Res.Magnitude() * FMEC_exit_vel_inverse / Lithium6constant;
-#ifndef __APPLE__
-        if (ISNAN(unit->fuel)) {
-            VS_LOG(error, "Fuel is NAN B");
-            unit->fuel = 0;
-        }
-#endif
-    }
-    if ((afterburn) && (unit->afterburntype == 0)) {
-        unit->energy -= instantenergy;
-    }
-    if (WCfuelhack) {
-        if (unit->fuel > unit->warpenergy) {
-            unit->fuel = unit->warpenergy;
-        }
-        if (unit->fuel < unit->warpenergy) {
-            unit->warpenergy = unit->fuel;
-        }
-    }
+    
     return Res;
 }
 
 void Movable::LateralThrust(float amt) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     if (amt > 1.0) {
         amt = 1.0;
     }
     if (amt < -1.0) {
         amt = -1.0;
     }
-    ApplyLocalForce(amt * limits.lateral * Vector(1, 0, 0));
+    ApplyLocalForce(amt * unit->drive.lateral.Value() * Vector(1, 0, 0));
 }
 
 void Movable::VerticalThrust(float amt) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     if (amt > 1.0) {
         amt = 1.0;
     }
     if (amt < -1.0) {
         amt = -1.0;
     }
-    ApplyLocalForce(amt * limits.vertical * Vector(0, 1, 0));
+    ApplyLocalForce(amt * unit->drive.vertical.Value() * Vector(0, 1, 0));
 }
 
 void Movable::LongitudinalThrust(float amt) {
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
     if (amt > 1.0) {
         amt = 1.0;
     }
     if (amt < -1.0) {
         amt = -1.0;
     }
-    ApplyLocalForce(amt * limits.forward * Vector(0, 0, 1));
+    ApplyLocalForce(amt * unit->drive.forward.Value() * Vector(0, 0, 1));
 }
 
 void Movable::YawTorque(float amt) {
-    if (amt > limits.yaw) {
-        amt = limits.yaw;
-    } else if (amt < -limits.yaw) {
-        amt = -limits.yaw;
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
+    if (amt > unit->drive.yaw.Value()) {
+        amt = unit->drive.yaw.Value();
+    } else if (amt < -unit->drive.yaw.Value()) {
+        amt = -unit->drive.yaw.Value();
     }
     ApplyLocalTorque(amt * Vector(0, 1, 0));
 }
 
 void Movable::PitchTorque(float amt) {
-    if (amt > limits.pitch) {
-        amt = limits.pitch;
-    } else if (amt < -limits.pitch) {
-        amt = -limits.pitch;
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
+    if (amt > unit->drive.pitch.Value()) {
+        amt = unit->drive.pitch.Value();
+    } else if (amt < -unit->drive.pitch.Value()) {
+        amt = -unit->drive.pitch.Value();
     }
     ApplyLocalTorque(amt * Vector(1, 0, 0));
 }
 
 void Movable::RollTorque(float amt) {
-    if (amt > limits.roll) {
-        amt = limits.roll;
-    } else if (amt < -limits.roll) {
-        amt = -limits.roll;
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
+    if (amt > unit->drive.roll.Value()) {
+        amt = unit->drive.roll.Value();
+    } else if (amt < -unit->drive.roll.Value()) {
+        amt = -unit->drive.roll.Value();
     }
     ApplyLocalTorque(amt * Vector(0, 0, 1));
 }
 
 void Movable::Thrust(const Vector &amt1, bool afterburn) {
-    Unit *unit = static_cast<Unit *>(this);
-
-    if (unit->afterburntype == 0) {
-        afterburn = afterburn && unit->energy > unit->afterburnenergy * simulation_atom_var;
-    } //SIMULATION_ATOM; ?
-    if (unit->afterburntype == 1) {
-        afterburn = afterburn && unit->fuel > 0;
-    }
-    if (unit->afterburntype == 2) {
-        afterburn = afterburn && unit->warpenergy > 0;
-    }
-
-
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    afterburn = afterburn && unit->afterburner.CanConsume();
+    
     //Unit::Thrust( amt1, afterburn );
     {
         Vector amt = ClampThrust(amt1, afterburn);
@@ -828,4 +782,20 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
             }
         }
     }
+}
+
+// If in Travel mode (non-combat), speed is limited to x100
+double Movable::MaxSpeed() const {
+    static const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+    return (unit->computer.combat_mode) ? unit->drive.speed.AdjustedValue() : combat_mode_multiplier * unit->drive.speed.AdjustedValue();
+}
+
+// Same as comment above. It makes less sense to limit travel speed with afterburners to afterburner speed x 100.
+double Movable::MaxAfterburnerSpeed() const {
+    static const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
+    const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
+
+    //same capped big speed as combat...else different
+    return (unit->computer.combat_mode) ? unit->afterburner.speed.AdjustedValue() : combat_mode_multiplier * unit->drive.speed.AdjustedValue();
 }

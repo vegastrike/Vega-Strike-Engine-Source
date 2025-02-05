@@ -2,7 +2,7 @@
 /*
  * upgradeable_unit.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjaman Meyer, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
+ * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy, Benjamen R. Meyer,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -32,6 +32,17 @@
 class Unit;
 class Mount;
 
+const std::string UPGRADES_SUFFIX = "__upgrades";
+
+// A struct to hold all results of the upgrade operation
+struct UpgradeOperationResult {
+    double percent = 0.0;       // Old part percent operational
+    bool success = false;       // Can we upgrade/downgrade
+    bool upgradeable = false;   // Temp variable. Until we map all types.
+};
+
+
+
 // TODO: make this into a subclass of unit later
 
 class UpgradeableUnit
@@ -39,6 +50,8 @@ class UpgradeableUnit
 public:
     UpgradeableUnit();
     virtual ~UpgradeableUnit() {}
+    UpgradeOperationResult UpgradeUnit(const std::string upgrade_name,
+                     bool upgrade, bool apply);
     void UpgradeUnit(const std::string &upgrades);
     bool UpgradeMounts(const Unit *up,
                   int subunitoffset,

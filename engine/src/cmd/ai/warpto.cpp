@@ -44,7 +44,7 @@ bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
     float toodamnclose = following ? tooclosefollowing : tooclose;
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
-    float timetolive = dist / (diff * parent->GetComputerData().max_combat_speed);
+    float timetolive = dist / (diff * parent->drive.speed);
     if (timetolive > (5 * max_allowable_travel_time())) {
         return true;
     } else if (timetolive > (max_allowable_travel_time())) {
@@ -69,7 +69,7 @@ bool DistanceWarrantsTravelTo(Unit *parent, float dist, bool following) {
     //first let us decide whether the target is far enough to warrant using warp
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
-    float timetolive = dist / (diff * parent->GetComputerData().max_combat_speed);
+    float timetolive = dist / (diff * parent->drive.speed);
     if (timetolive > max_allowable_travel_time()) {
         return true;
     }
@@ -96,15 +96,15 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
                 XMLSupport::parse_float(vs_config->getVariable("AI", "min_energy_to_enter_warp", ".33"));
         static float min_warpfield_to_enter_warp =
                 XMLSupport::parse_float(vs_config->getVariable("AI", "min_warp_to_try", "1.5"));
-        if ((parent->warpEnergyData() > min_energy_to_enter_warp)
+        if ((parent->ftl_energy.Percent() > min_energy_to_enter_warp)
                 && (parent->GetMaxWarpFieldStrength(1) > min_warpfield_to_enter_warp)) {
-            if (parent->graphicOptions.InWarp == 0) {
-                parent->graphicOptions.InWarp = 1;                 //don't want the AI thrashing
+            if (!parent->ftl_drive.Enabled()) {
+                parent->ftl_drive.Enable();                 //don't want the AI thrashing
                 parent->graphicOptions.WarpRamping = 1;                 //don't want the AI thrashing
             }
         }
     } else {
-        parent->graphicOptions.InWarp = 0;
+        parent->ftl_drive.Disable();
     }
     static bool domatch = XMLSupport::parse_bool(vs_config->getVariable("AI", "match_velocity_of_pursuant", "false"));
     if (chasedot > mintarveldot || !domatch) {
@@ -130,7 +130,7 @@ void WarpToP(Unit *parent, Unit *target, bool following) {
             }
         }
     } else {
-        parent->graphicOptions.InWarp = 0;
+        parent->ftl_drive.Disable();
     }
 }
 
@@ -145,7 +145,7 @@ void WarpToP(Unit *parent, const QVector &target, float radius, bool following) 
             ActuallyWarpTo(parent, target, QVector(0, 0, .00001));
         }
     } else {
-        parent->graphicOptions.InWarp = 0;
+        parent->ftl_drive.Disable();
     }
 }
 

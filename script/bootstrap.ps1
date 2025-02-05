@@ -1,4 +1,6 @@
-# Copyright (C) 2021 Stephen G. Tuggy
+# bootstrap.ps1
+
+# Copyright (C) 2021-2025 Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors
 
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 
@@ -11,31 +13,38 @@
 
 # Vega Strike is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+
 
 # You can customize this directory location if desired, but it should be
 # something very short. Otherwise, you will run into problems.
-Set-Variable -Name VCKPG_PARENT_DIR -Value "C:\Projects"
-Set-Variable -Name CMAKE_VERSION -Value "3.21.1"
+param(
+    [String]$VCPKG_PARENT_DIR = "C:\Projects"
+)
 
-New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
-Push-Location "$VCKPG_PARENT_DIR"
-git clone https://github.com/Microsoft/vcpkg.git
-.\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+Set-Variable -Name CMAKE_VERSION -Value "3.29.2"
 
-[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCKPG_PARENT_DIR\vcpkg", 'User')
+New-Item "$VCPKG_PARENT_DIR" -ItemType Directory -Force
+Push-Location "$VCPKG_PARENT_DIR"
+git clone https://github.com/vegastrike/vcpkg-local.git ./v
+.\v\bootstrap-vcpkg.bat -disableMetrics
+
+[Environment]::SetEnvironmentVariable('VCPKG_ROOT', "$VCPKG_PARENT_DIR\v", 'User')
+$env:VCPKG_ROOT = "$VCPKG_PARENT_DIR\v"
 
 $path = [Environment]::GetEnvironmentVariable('PATH', 'User')
-$newPath = $path + ";$VCKPG_PARENT_DIR\vcpkg\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
+$newPath = $path + ";$VCPKG_PARENT_DIR\v\downloads\tools\cmake-$CMAKE_VERSION-windows\cmake-$CMAKE_VERSION-windows-i386\bin"
 [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
+$env:PATH = $newPath
 
-[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', 'x64-windows', 'User')
-[Environment]::SetEnvironmentVariable('PYTHONHOME', "$VCKPG_PARENT_DIR\vcpkg\packages\python3_x64-windows\tools\python3", 'User')
+$triplet = 'x64-windows'
+[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', $triplet, 'User')
+$env:VCPKG_DEFAULT_TRIPLET = $triplet
+[Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_HOST_TRIPLET', $triplet, 'User')
+$env:VCPKG_DEFAULT_HOST_TRIPLET = $triplet
 
 Pop-Location
-
-. refreshenv

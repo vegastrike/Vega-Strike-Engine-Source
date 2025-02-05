@@ -34,29 +34,15 @@
 #include "missile.h"
 #include "vs_random.h"
 #include "vs_logging.h"
+#include "vega_cast_utils.h"
 
-#include "json.h"
 
 // TODO: find out where this is and maybe refactor
 extern int SelectDockPort(Unit *, Unit *parent);
 extern void SwitchUnits(Unit *, Unit *);
 extern void abletodock(int dock);
-extern void UpdateMasterPartList(Unit *ret);
 
-// Replace with std:sto* here and at unit_csv.cpp
-static double stof(const string &inp, double def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_float(inp);
-    }
-    return def;
-}
 
-static int stoi(const string &inp, int def = 0) {
-    if (inp.length() != 0) {
-        return XMLSupport::parse_int(inp);
-    }
-    return def;
-}
 
 // TODO: probably replace with a lambda expression
 class CatCompare {
@@ -495,12 +481,12 @@ bool cargoIsUpgrade(const Cargo &c) {
 }
 
 float Carrier::getHiddenCargoVolume() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->HiddenCargoVolume;
 }
 
 bool Carrier::CanAddCargo(const Cargo &carg) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     //Always can, in this case (this accounts for some odd precision issues)
     if ((carg.quantity == 0) || (carg.GetVolume() == 0)) {
@@ -524,17 +510,17 @@ bool Carrier::CanAddCargo(const Cargo &carg) const {
 
 //The cargo volume of this ship when empty.  Max cargo volume.
 float Carrier::getEmptyCargoVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->CargoVolume;
 }
 
 float Carrier::getEmptyUpgradeVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->UpgradeVolume;
 }
 
 float Carrier::getCargoVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
         if (!cargoIsUpgrade(unit->cargo[i])) {
@@ -544,58 +530,7 @@ float Carrier::getCargoVolume(void) const {
     return result;
 }
 
-// TODO: get rid of this helper function and others like it.
-extern std::string getJSONValue(const json::jobject& object, const std::string &key, const std::string &default_value);
 
-Unit *Carrier::makeMasterPartList() {
-    unsigned int i;
-    Unit *ret = new Unit();
-    ret->name = "master_part_list";
-
-    //vs_config->getVariable("data", "master_part_list", "master_part_list");
-    static std::string json_filenames[] = {
-        "master_part_list.json",
-        "master_ship_list.json",
-        "master_component_list.json",
-        "master_asteroid_list.json",
-    };
-
-    for(const std::string& json_filename : json_filenames) {
-        std::ifstream ifs(json_filename, std::ifstream::in);
-        std::stringstream buffer;
-        buffer << ifs.rdbuf();
-
-        const std::string json_text = buffer.str();
-
-        std::vector<std::string> parts = json::parsing::parse_array(json_text.c_str());
-        for (const std::string &part_text : parts) {
-            json::jobject part = json::jobject::parse(part_text);
-            Cargo carg;
-
-            carg.name = getJSONValue(part, "file", "");
-            carg.SetCategory(getJSONValue(part, "categoryname", ""));
-            carg.SetVolume(std::stof(getJSONValue(part, "volume", "")));
-            carg.SetMass(std::stof(getJSONValue(part, "mass", "")));
-            carg.quantity = 1;
-            carg.price = std::stoi(getJSONValue(part, "price", ""));
-            carg.SetDescription(getJSONValue(part, "description", ""));
-            ret->cargo.push_back(carg);
-        }
-    }
-
-
-    UpdateMasterPartList(ret);
-    if (!ret->GetCargo("Pilot", i)) {    //required items
-        ret->AddCargo(Cargo("Pilot", "Contraband", 800, 1, .01, 1, 1.0, 1.0), true);
-    }
-    if (!ret->GetCargo("Hitchhiker", i)) {
-        ret->AddCargo(Cargo("Hitchhiker", "Passengers", 42, 1, .01, 5.0, 1.0, 1.0), true);
-    }
-    if (!ret->GetCargo("Slaves", i)) {
-        ret->AddCargo(Cargo("Slaves", "Contraband", 800, 1, .01, 1, 1, 1), true);
-    }
-    return ret;
-}
 
 float Carrier::PriceCargo(const std::string &s) {
     Unit *unit = static_cast<Unit *>(this);
@@ -619,7 +554,7 @@ float Carrier::PriceCargo(const std::string &s) {
 }
 
 float Carrier::getUpgradeVolume(void) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     float result = 0.0;
     for (unsigned int i = 0; i < unit->cargo.size(); ++i) {
         if (cargoIsUpgrade(unit->cargo[i])) {
@@ -635,7 +570,7 @@ Cargo &Carrier::GetCargo(unsigned int i) {
 }
 
 const Cargo &Carrier::GetCargo(unsigned int i) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->cargo[i];
 }
 
@@ -661,7 +596,7 @@ void Carrier::GetSortedCargoCat(const std::string &cat, size_t &begin, size_t &e
 // The game also crashed due to endless loop.
 // I returned the code and now it works and I don't know why.
 Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     if (unit->GetCargo(s, i)) {
         return &GetCargo(i);
     }
@@ -669,7 +604,7 @@ Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) {
 }
 
 const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     static Hashtable<string, unsigned int, 2047> index_cache_table;
     Unit *mpl = getMasterPartList();
@@ -722,12 +657,12 @@ const Cargo *Carrier::GetCargo(const std::string &s, unsigned int &i) const {
 }
 
 unsigned int Carrier::numCargo() const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
     return unit->cargo.size();
 }
 
 std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vector &oldspd) const {
-    const Unit *unit = static_cast<const Unit *>(this);
+    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     ///FIXME somehow mangle string
     string mangled = unit->cargo[i].name;
@@ -752,7 +687,7 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
 }
 
 bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg, Unit *buyer) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     if (i < 0 || i >= unit->cargo.size() || !buyer->CanAddCargo(unit->cargo[i])
             || unit->getMass() < unit->cargo[i].GetMass()) {
@@ -773,7 +708,7 @@ bool Carrier::SellCargo(unsigned int i, int quantity, float &creds, Cargo &carg,
 }
 
 bool Carrier::SellCargo(const std::string &s, int quantity, float &creds, Cargo &carg, Unit *buyer) {
-    const Unit *unit = static_cast<const Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     Cargo tmp;
     tmp.name = s;

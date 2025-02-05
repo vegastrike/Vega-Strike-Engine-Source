@@ -27,7 +27,6 @@
 #include "cmd/unit_factory.h"    //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "networking/netserver.h"
-#include "star_system_generic.h"
 #include <string>
 #include "lin_time.h"
 #include "load_mission.h"

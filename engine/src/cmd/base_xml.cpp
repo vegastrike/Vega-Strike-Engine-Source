@@ -1,9 +1,8 @@
 /*
  * base_xml.cpp
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -16,15 +15,17 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
+#define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
+#include <boost/python.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #else
@@ -78,7 +79,7 @@ void BaseInterface::Load(const char *filename, const char *time_of_day_hint, con
     //now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
     string compilefile = string(filename) + time_of_day_hint + string(faction) + BASE_EXTENSION;
     Python::reseterrors();
-    PyRun_SimpleFile(inFile, compilefile.c_str());
+    VegaPyRunFile(inFile, compilefile);
     Python::reseterrors();
     VSFileSystem::vs_close(inFile);
 }

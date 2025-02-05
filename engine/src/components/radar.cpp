@@ -27,12 +27,12 @@
 
 #include "radar.h"
 #include "configuration/configuration.h"
-#include "unit_generic.h"
-#include "unit_util.h"
 #include "unit_csv_factory.h"
 #include "components/component.h"
 
-#include <random>
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 
 CRadar::CRadar():
         max_range(0),
@@ -44,29 +44,21 @@ CRadar::CRadar():
         capabilities(RadarCapabilities::NONE),
         locked(false),
         can_lock(false),
-        tracking_active(true),
-        original(nullptr),
-        computer(nullptr)
-{
-
+        tracking_active(true) {
     max_range = configuration()->computer_config.default_max_range;
     tracking_cone = configuration()->computer_config.default_tracking_cone;
     lock_cone = configuration()->computer_config.default_lock_cone;
 }
 
-CRadar::CRadar(std::string unit_key, Computer* computer):
-        max_range(0),
-        max_cone(-1),
-        lock_cone(0),
-        tracking_cone(0),
-        min_target_size(0),
-        type(RadarType::SPHERE),
-        capabilities(RadarCapabilities::NONE),
-        locked(false),
-        can_lock(false),
-        tracking_active(true),
-        original(nullptr),
-        computer(nullptr) {
+// Component Methods
+void CRadar::Load(std::string unit_key) {
+    Component::Load(unit_key);
+
+    // Consumer
+    double energy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
+    SetConsumption(energy * configuration()->fuel.ftl_drive_factor);
+
+    // Radar
     can_lock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
 
     // TODO: fix this
@@ -100,7 +92,9 @@ CRadar::CRadar(std::string unit_key, Computer* computer):
                 RadarCapabilities::OBJECT_RECOGNITION |
                 RadarCapabilities::THREAT_ASSESSMENT;
     } else {
+        std::cout << "Try stoi " << unit_key << std::endl;
         unsigned int value = stoi(iffval, 0);
+        std::cout << "Success stoi " << unit_key << std::endl;
         if (value == 0) {
             // Unknown value
             capabilities = RadarCapabilities::NONE;
@@ -110,97 +104,100 @@ CRadar::CRadar(std::string unit_key, Computer* computer):
     }
 
     tracking_active = true;
-    max_range = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", FLT_MAX);
-    max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * VS_PI / 180);
-    tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI / 180);
-    lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * VS_PI / 180);
-    original = nullptr;
-    this->computer = computer;
-}
+    max_range = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", 1000000);
+    max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * M_PI / 180);
+    tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * M_PI / 180);
+    lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * M_PI / 180);
+}      
 
-void CRadar::WriteUnitString(std::map<std::string, std::string> &unit) {
+void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Can_Lock"] = std::to_string(can_lock);
     unit["Radar_Color"] = std::to_string(capabilities);
-    unit["Radar_Range"] = std::to_string(max_range);
-    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone) * 180. / VS_PI);
-    unit["Max_Cone"] = std::to_string(acos(max_cone) * 180. / VS_PI);
-    unit["Lock_Cone"] = std::to_string(acos(lock_cone) * 180. / VS_PI);
+    unit["Radar_Range"] = max_range.Serialize();
+
+    // TODO: can't serialize if also doing acos on it
+    const double modifier = M_PI / 180;
+    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone.Value()) * 180. / M_PI);
+    unit["Max_Cone"] = std::to_string(acos(max_cone.Value()) * 180. / M_PI);
+    unit["Lock_Cone"] = std::to_string(acos(lock_cone.Value()) * 180. / M_PI);
 }
 
-void CRadar::Damage()
-{
-    return;
-    std::random_device rd;  // a seed source for the random number engine
-    std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-    std::uniform_int_distribution<> damage_distribution(0, 6);
-    std::uniform_int_distribution<> size_distribution(0, 6);
+// FTL drive is integrated and so cannot be upgraded/downgraded
+bool CRadar::CanDowngrade() const {
+    return false;
+}
 
-    // Damage IFF capabilities
-    if(std::rand() < 0.2) {
-        // TODO: make this smarter and maybe degrade capabilities
-        capabilities = NONE;
-    }
+bool CRadar::Downgrade() {
+    return false;
+}
 
-    max_range = max_range * random20();
-    max_cone = max_cone * random20();
-    lock_cone = lock_cone * random20();
-    tracking_cone = tracking_cone * random20();
-    min_target_size = min_target_size * random20();
+bool CRadar::CanUpgrade(const std::string upgrade_key) const {
+    return false;
+}
 
-    // Original cone damage
-    /*const float maxdam = configuration()->physics_config.max_radar_cone_damage;
-    radar.max_cone += (1 - dam);
-    if (radar.max_cone > maxdam) {
-        radar.max_cone = maxdam;
-    }
+bool CRadar::Upgrade(const std::string upgrade_key) {
+    return false;
+}
 
-    const float maxdam = configuration()->physics_config.max_radar_lock_cone_damage;
-    radar.lock_cone += (1 - dam);
-    if (radar.lock_cone > maxdam) {
-        radar.lock_cone = maxdam;
-    }
+void CRadar::Damage() {
+    max_range.RandomDamage();
+    max_cone.RandomDamage();
+    lock_cone.RandomDamage();
+    tracking_cone.RandomDamage();
 
-    const float maxdam = configuration()->physics_config.max_radar_track_cone_damage;
-    radar.tracking_cone += (1 - dam);
-    if (radar.tracking_cone > maxdam) {
-        radar.tracking_cone = maxdam;
-    }*/
+    // We calculate percent operational as a simple average
+    operational = (max_range.Percent() + max_cone.Percent() + lock_cone.Percent() +
+                  tracking_cone.Percent()) / 4 * 100;
+}
+
+void CRadar::DamageByPercent(double percent) {
+    max_range.DamageByPercent(percent);
+    max_cone.DamageByPercent(percent);
+    lock_cone.DamageByPercent(percent);
+    tracking_cone.DamageByPercent(percent);
+
+    // We calculate percent operational as a simple average
+    operational = (max_range.Percent() + max_cone.Percent() + lock_cone.Percent() +
+                  tracking_cone.Percent()) / 4 * 100;
+}
+
+void CRadar::Repair() {
+    max_range.RepairFully();
+    max_cone.RepairFully();
+    lock_cone.RepairFully();
+    tracking_cone.RepairFully();
+
+    operational.RepairFully();
+}
+
+void CRadar::Destroy() {
+    max_range.Destroy();
+    max_cone.Destroy();
+    lock_cone.Destroy();
+    tracking_cone.Destroy();
+
+    operational = 0;
 
 }
 
-void CRadar::Repair()
-{
 
-}
+// Radar Code
 
 // This code replaces and fixes the old code in Armed::LockTarget(bool)
 void CRadar::Lock() {
-    if(!computer) {
-        return;
-    }
-
-    const Unit *target = computer->target.GetConstUnit();
-
-    if(!target) {
-        //std::cerr << "Target is null\n";
-        return;
-    }
-
     if(!can_lock) {
-        std::cerr << "Can't lock\n";
         this->locked = false;
         return;
     }
 
+    // TODO: re-enable
     /*if(!UnitUtil::isSignificant(target)) {
         std::cerr << "Target insignificant\n";
         this->locked = false;
         return;
     }*/
 
-    std::cout << "Target locked\n";
     this->locked = true;
-
 }
 
 RadarType CRadar::GetType() const {
@@ -217,4 +214,36 @@ bool CRadar::UseObjectRecognition() const {
 
 bool CRadar::UseThreatAssessment() const {
     return (capabilities & RadarCapabilities::THREAT_ASSESSMENT);
+}
+
+float CRadar::GetMaxRange() const { 
+    return max_range.Value(); 
+}
+
+float CRadar::GetMaxCone() const { 
+    return max_cone.Value(); 
+}
+
+float CRadar::GetLockCone() const { 
+    return lock_cone.Value(); 
+}
+
+float CRadar::GetTrackingCone() const { 
+    return tracking_cone.Value(); 
+}
+
+float CRadar::GetMinTargetSize() const { 
+    return min_target_size; 
+}
+
+bool CRadar::Locked() const { 
+    return locked; 
+}
+
+bool CRadar::CanLock() const { 
+    return can_lock; 
+}
+
+bool CRadar::Tracking() const { 
+    return tracking_active; 
 }

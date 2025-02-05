@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * config_xml.cpp
+ *
+ * Copyright (C) 2001-2023 Daniel Horn, Alexander Rawass, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -13,7 +15,7 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,6 +26,8 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
+#define PY_SSIZE_T_CLEAN
+#include <boost/python.hpp>
 #include <expat.h>
 #include "xml_support.h"
 #include "vegastrike.h"
@@ -42,6 +46,7 @@
 #include "python/python_compile.h"
 #include "gfx/screenshot.h"
 #include "vs_logging.h"
+#include "sdl_key_converter.h"
 
 /* *********************************************************** */
 
@@ -355,8 +360,8 @@ void GameVegaConfig::checkBind(configNode *node) {
         VS_LOG(warning, "not a bind node ");
         return;
     }
-    std::string tmp = node->attr_value("modifier");
-    int modifier = getModifier(tmp.c_str());
+    std::string modifier_string = node->attr_value("modifier");
+    int modifier = getModifier(modifier_string);
 
     string cmdstr = node->attr_value("command");
     string player_bound = node->attr_value("player");
@@ -371,7 +376,7 @@ void GameVegaConfig::checkBind(configNode *node) {
     string player_str = node->attr_value("player");
     string joy_str = node->attr_value("joystick");
     string mouse_str = node->attr_value("mouse");
-    string keystr = node->attr_value("key");
+    const std::string keystr = node->attr_value("key");
     string additional_data = node->attr_value("data");
     string buttonstr = node->attr_value("button");
     string hat_str = node->attr_value("hatswitch");
@@ -391,6 +396,7 @@ void GameVegaConfig::checkBind(configNode *node) {
         //normal keyboard key
         //now map the command to a callback function and bind it
         if (keystr.length() == 1) {
+            const int sdl_key_value = SDLKeyConverter::Convert(keystr);
             BindKey(keystr[0], modifier, XMLSupport::parse_int(player_bound), handler, KBData(additional_data));
         } else {
             int glut_key = key_map[keystr];
