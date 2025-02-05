@@ -96,13 +96,10 @@ public:
 
 // Radar Methods
 
-    void Lock();
-    void Unlock() {
-        locked = false;
-    }
-    void ToggleLock() {
-        locked = !locked;
-    }
+    // always_lock - override some checks for targets such as planets
+    void Lock(bool always_lock = false);
+    void Unlock();
+    void ToggleLock(bool always_lock = false);
 
     void Track(const bool track) { tracking_active = track; }
     void ToggleTracking() { tracking_active = !tracking_active; }

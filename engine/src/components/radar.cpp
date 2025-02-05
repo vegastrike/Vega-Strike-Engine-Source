@@ -55,8 +55,8 @@ void CRadar::Load(std::string unit_key) {
     Component::Load(unit_key);
 
     // Consumer
-    double energy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    SetConsumption(energy * configuration()->fuel.ftl_drive_factor);
+    // TODO: energy
+    SetConsumption(0);
 
     // Radar
     can_lock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
@@ -184,20 +184,26 @@ void CRadar::Destroy() {
 // Radar Code
 
 // This code replaces and fixes the old code in Armed::LockTarget(bool)
-void CRadar::Lock() {
-    if(!can_lock) {
+void CRadar::Lock(bool always_lock) {
+    if(!can_lock && !always_lock) {
         this->locked = false;
         return;
     }
 
-    // TODO: re-enable
-    /*if(!UnitUtil::isSignificant(target)) {
-        std::cerr << "Target insignificant\n";
-        this->locked = false;
-        return;
-    }*/
-
     this->locked = true;
+}
+
+void CRadar::Unlock() {
+    locked = false;
+}
+
+void CRadar::ToggleLock(bool always_lock) {
+    if(locked) {
+        locked = false;
+        return;
+    }
+
+    Lock(always_lock);
 }
 
 RadarType CRadar::GetType() const {

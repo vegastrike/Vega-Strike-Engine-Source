@@ -60,6 +60,7 @@
 #include "navscreen.h"
 #include "gfx/masks.h"
 #include "galaxy_gen.h"
+#include "unit_util.h"
 
 //**********************************
 //Main function for drawing a CURRENT system
@@ -438,6 +439,7 @@ void NavigationSystem::DrawSystem() {
     //give back the selected tail IF there is one
     //IF given back, undo the selection state
     //**********************************
+    Unit *current_player = UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
     if (1 || checkbit(buttonstates, 1)) {
         //button #2 is down, wanting a (selection)
         if (mouselist.get_n_contents() > 0) {
@@ -448,8 +450,8 @@ void NavigationSystem::DrawSystem() {
                 unsetbit(buttonstates, 1);
                 //JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
                 if (currentselection.GetUnit()) {
-                    (UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()))->Target(currentselection.GetUnit());
-                    (UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()))->radar.Lock();
+                    current_player->Target(currentselection.GetUnit());
+                    current_player->radar.Lock(UnitUtil::isSignificant(current_player));
                 }
             }
         }

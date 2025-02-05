@@ -39,6 +39,7 @@
 #include "lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
 #include "universe.h"
+#include "unit_util.h"
 
 extern int numprocessed;
 extern double targetpick;
@@ -657,7 +658,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
         }
     }
     parent->Target(mytarg);
-    parent->radar.Lock();
+    parent->radar.Lock(UnitUtil::isSignificant(parent));
     SignalChosenTarget();
 }
 

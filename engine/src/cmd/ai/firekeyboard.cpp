@@ -58,6 +58,7 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "vs_logging.h"
+#include "unit_util.h"
 
 extern bool toggle_pause();
 
@@ -1814,7 +1815,7 @@ void FireKeyboard::Execute() {
         f().targetskey = DOWN;
         ChooseTargets(parent, TargSig, false);
         refresh_target = true;
-        parent->radar.Lock();
+        parent->radar.Lock(UnitUtil::isSignificant(parent));
     }
     if (f().targetukey == PRESS) {
         f().targetukey = DOWN;
@@ -1895,7 +1896,7 @@ void FireKeyboard::Execute() {
         f().rtargetskey = DOWN;
         ChooseTargets(parent, TargSig, true);
         refresh_target = true;
-        parent->radar.Lock();
+        parent->radar.Lock(UnitUtil::isSignificant(parent));
     }
     if (f().rtargetukey == PRESS) {
         f().rtargetukey = DOWN;
