@@ -57,9 +57,10 @@ class CRadar : public Component, public EnergyConsumer {
     Resource<double> max_range;
 
     //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
-    Resource<double> max_cone;
-    Resource<double> lock_cone;
-    Resource<double> tracking_cone;
+    // TODO: make this a resource when we move from radian to degrees
+    double max_cone;
+    double lock_cone;
+    double tracking_cone;
 
     //The minimum radius of the target
     double min_target_size;

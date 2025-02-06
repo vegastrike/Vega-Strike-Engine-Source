@@ -116,13 +116,13 @@ void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Radar_Range"] = max_range.Serialize();
 
     // TODO: can't serialize if also doing acos on it
-    const double modifier = M_PI / 180;
-    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone.Value()) * 180. / M_PI);
-    unit["Max_Cone"] = std::to_string(acos(max_cone.Value()) * 180. / M_PI);
-    unit["Lock_Cone"] = std::to_string(acos(lock_cone.Value()) * 180. / M_PI);
+    // Also, can't use Resource because games stores in radian
+    // and these can be minus.
+    unit["Tracking_Cone"] = std::to_string(acos(tracking_cone) * 180. / M_PI);
+    unit["Max_Cone"] = std::to_string(acos(max_cone) * 180. / M_PI);
+    unit["Lock_Cone"] = std::to_string(acos(lock_cone) * 180. / M_PI);
 }
 
-// FTL drive is integrated and so cannot be upgraded/downgraded
 bool CRadar::CanDowngrade() const {
     return false;
 }
@@ -141,43 +141,37 @@ bool CRadar::Upgrade(const std::string upgrade_key) {
 
 void CRadar::Damage() {
     max_range.RandomDamage();
-    max_cone.RandomDamage();
-    lock_cone.RandomDamage();
-    tracking_cone.RandomDamage();
+    // max_cone.RandomDamage();
+    // lock_cone.RandomDamage();
+    // tracking_cone.RandomDamage();
 
     // We calculate percent operational as a simple average
-    operational = (max_range.Percent() + max_cone.Percent() + lock_cone.Percent() +
-                  tracking_cone.Percent()) / 4 * 100;
+    operational = max_range.Percent() * 100;
+
+    // Leaving this code here when we move to Resource<double> for max, lock and tracking cones.
+    // operational = (max_range.Percent() + max_cone.Percent() + lock_cone.Percent() +
+    //               tracking_cone.Percent()) / 4 * 100;
 }
 
 void CRadar::DamageByPercent(double percent) {
     max_range.DamageByPercent(percent);
-    max_cone.DamageByPercent(percent);
-    lock_cone.DamageByPercent(percent);
-    tracking_cone.DamageByPercent(percent);
+    // max_cone.DamageByPercent(percent);
+    // lock_cone.DamageByPercent(percent);
+    // tracking_cone.DamageByPercent(percent);
 
     // We calculate percent operational as a simple average
-    operational = (max_range.Percent() + max_cone.Percent() + lock_cone.Percent() +
-                  tracking_cone.Percent()) / 4 * 100;
+    operational = max_range.Percent() * 100;
 }
 
 void CRadar::Repair() {
     max_range.RepairFully();
-    max_cone.RepairFully();
-    lock_cone.RepairFully();
-    tracking_cone.RepairFully();
 
     operational.RepairFully();
 }
 
 void CRadar::Destroy() {
     max_range.Destroy();
-    max_cone.Destroy();
-    lock_cone.Destroy();
-    tracking_cone.Destroy();
-
     operational = 0;
-
 }
 
 
@@ -227,15 +221,15 @@ float CRadar::GetMaxRange() const {
 }
 
 float CRadar::GetMaxCone() const { 
-    return max_cone.Value(); 
+    return max_cone; 
 }
 
 float CRadar::GetLockCone() const { 
-    return lock_cone.Value(); 
+    return lock_cone; 
 }
 
 float CRadar::GetTrackingCone() const { 
-    return tracking_cone.Value(); 
+    return tracking_cone; 
 }
 
 float CRadar::GetMinTargetSize() const { 
