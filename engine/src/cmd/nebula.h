@@ -5,8 +5,7 @@
  * Copyright (C) 2001-2025 The Vega Strike Contributors:
  * Project creator: Daniel Horn
  * Original development team: As listed in the AUTHORS file
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
- *
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy, David Wales
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *

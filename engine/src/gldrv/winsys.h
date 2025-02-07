@@ -1,16 +1,11 @@
 /*
  * winsys.h
  *
- * Vega Strike - Space Simulation, Combat and Trading
- * Copyright (C) 2001-2025 The Vega Strike Contributors:
- * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ * Copyright (C) 1999-2025 Jasmin F. Patry, Daniel Horn, pyramid3d, Roy Falk,
+ * Benjamen R. Meyer, Stephen G. Tuggy, and other Vega Strike contributors.
  *
- *
- * https://github.com/vegastrike/Vega-Strike-Engine-Source
- *
- * This file is part of Vega Strike.
+ * This file is part of Tux Racer and has been incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

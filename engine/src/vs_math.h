@@ -7,7 +7,6 @@
  * Original development team: As listed in the AUTHORS file
  * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
- *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
@@ -24,6 +23,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Portions of this code from Tux Racer by Jasmin F. Patry www.tuxracer.com
  */
 #ifndef VEGA_STRIKE_ENGINE_VS_MATH_H
 #define VEGA_STRIKE_ENGINE_VS_MATH_H
