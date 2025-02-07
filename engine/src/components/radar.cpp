@@ -104,10 +104,13 @@ void CRadar::Load(std::string unit_key) {
     }
 
     tracking_active = true;
-    max_range = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", 1000000);
+    const std::string max_range_string = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", std::string("300000000"));
+    max_range = Resource<double>(max_range_string,1,0);
     max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * M_PI / 180);
     tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * M_PI / 180);
     lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * M_PI / 180);
+    operational = max_range.Percent() * 100;
+    installed = max_range > 0;
 }      
 
 void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
@@ -124,19 +127,39 @@ void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
 }
 
 bool CRadar::CanDowngrade() const {
-    return false;
+    return installed && !integral;
 }
 
 bool CRadar::Downgrade() {
-    return false;
+    if(!CanDowngrade()) {
+        return false;
+    }
+
+    max_range = Resource<double>(0,0,0);
+    max_cone = cos(0);
+    tracking_cone = cos(0);
+    lock_cone = cos(0);
+    type = RadarType::SPHERE;
+    capabilities = RadarCapabilities::NONE;
+    locked = false;
+    can_lock = false;
+
+    installed = false;
+    return true;
 }
 
 bool CRadar::CanUpgrade(const std::string upgrade_key) const {
-    return false;
+    return !integral;
 }
 
 bool CRadar::Upgrade(const std::string upgrade_key) {
-    return false;
+    if(!CanUpgrade(upgrade_key)) {
+        return false;
+    }
+
+    Load(upgrade_key);
+    installed = true;
+    return true;
 }
 
 void CRadar::Damage() {

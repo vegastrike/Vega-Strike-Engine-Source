@@ -1254,8 +1254,6 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         return;
     }
     if (degrees >= 90 && degrees < 120) {
-        //DAMAGE Shield
-        //DAMAGE cloak
         if (randnum >= .7) {
             this->cloak.Damage();
             damages |= Damages::CLOAK_DAMAGED;
@@ -3273,6 +3271,7 @@ int Unit::RepairUpgrade() {
     drive.Repair();
     drive_upgrade.Repair();
     ftl_drive.Repair();
+    radar.Repair();
 
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;

@@ -175,15 +175,15 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
 
-        
+        case ComponentType::Radar:
+            result.upgradeable = true;
+            result.success = unit->radar.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
         /*case UpgradeType::ECM:
             result.upgradeable = true;
             result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
-        case UpgradeType::Radar:
-            result.upgradeable = true;
-            result.success = unit->radar.CanWillUpDowngrade(upgrade_key, upgrade, apply);
-            break;*/
+        */
 
         /*case UpgradeType::Repair_Droid:
             result.upgradeable = true;
