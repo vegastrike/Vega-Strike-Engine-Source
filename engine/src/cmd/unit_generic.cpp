@@ -4088,21 +4088,14 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
     }
 
-    // Recharge energy and shields
-    
-    const bool energy_before_shield = configuration()->physics_config.engine_energy_takes_priority;
-    if (energy_before_shield) {
-        rechargeEnergy();
-    }
+    // Recharge Energy
+    rechargeEnergy();    
     
     bool is_player_ship = _Universe->isPlayerStarship(this);
     shield.Regenerate(is_player_ship);
     ExpendEnergy(is_player_ship);
 
-    if (!energy_before_shield) {
-        rechargeEnergy();
-    }
-
+    
     if (lastframe) {
         if (!(docked & (DOCKED | DOCKED_INSIDE))) {
             //the AIscript should take care

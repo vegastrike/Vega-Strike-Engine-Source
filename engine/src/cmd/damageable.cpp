@@ -105,7 +105,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Stop processing for destroyed units
-    if (unit->hull.Destroyed()) {
+    if (unit->Destroyed()) {
         return;
     }
 
@@ -157,7 +157,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
     }
 
-    if (unit->hull.Destroyed()) {
+    if (unit->Destroyed()) {
         unit->ClearMounts();
 
         if (shooter_is_player) {
@@ -342,7 +342,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     
     // Ship destroyed. No point in further work
-    if(unit->hull.Destroyed()) {
+    if(unit->Destroyed()) {
         return;
     }
 

@@ -281,19 +281,17 @@ void InitUnitTables() {
     VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
     if (err <= VSFileSystem::Ok) {
         UnitJSONFactory::ParseJSON(jsonFile);
+        jsonFile.Close();
     }
 
-    jsonFile.Close();
 
     // Really New Init
     VSFileSystem::VSFile newJsonFile;
     err = newJsonFile.OpenReadOnly("ships.json", VSFileSystem::UnitFile);
     if (err <= VSFileSystem::Ok) {
         UnitOptimizeFactory::ParseJSON(newJsonFile);
-
+        newJsonFile.Close();
     }
-
-    newJsonFile.Close();
 }
 
 void CleanupUnitTables() {

@@ -1541,7 +1541,7 @@ void FireKeyboard::ProcessCommMessage(class CommunicationMessage &c) {
     }          //wait till later
 
     bool reallydospeech = false;
-    if (un && un->hull.Get() > 0) {
+    if (un && !un->Destroyed()) {
         reallydospeech = true;
         for (list<CommunicationMessage>::iterator i = resp.begin(); i != resp.end(); i++) {
             if ((*i).sender.GetUnit() == un) {
@@ -1715,7 +1715,7 @@ void FireKeyboard::Execute() {
     if (targ) {
         double mm = 0.0;
         ShouldFire(targ);
-        if (targ->hull.Get() < 0) {
+        if (targ->Destroyed()) {
             parent->Target(NULL);
             ForceChangeTarget(parent);
             refresh_target = true;

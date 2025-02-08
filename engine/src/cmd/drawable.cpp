@@ -733,7 +733,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
     //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
-    float hulld = unit->Destroyed() > 0 ? 1 : unit->hull.Percent();
+    float hulld = unit->Destroyed() ? 1 : unit->hull.Percent();
     halos->Draw(wmat, Scale, unit->cloak.Visibility(), nebd, hulld, velocity,
             linaccel, angaccel, maxaccel, cmas, unit->faction);
 
