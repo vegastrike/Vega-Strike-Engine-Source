@@ -4,7 +4,8 @@
  *  Before using, initialize the state by using init_genrand(seed)
  *  or init_by_array(init_key, key_length).
  *  Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
- *  Copyright (C) 2023 Benjamen R. Meyer
+ *  Copyright (C) 2023 Benjamen R. Meyer,
+ *  Copyright (C) 2025 Stephen G. Tuggy,
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions

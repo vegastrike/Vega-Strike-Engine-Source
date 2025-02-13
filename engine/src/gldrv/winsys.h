@@ -1,12 +1,11 @@
 /*
  * winsys.h
  *
- * Incorporated into Vega Strike from Tux Racer
- *
- * Copyright (C) 1999-2024 Jasmin F. Patry, Daniel Horn, pyramid3d,
+ * Copyright (C) 1999-2025 Jasmin F. Patry, Daniel Horn, pyramid3d, Roy Falk,
  * Benjamen R. Meyer, Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ * This file is part of Tux Racer and has been incorporated into Vega Strike
+ * (https://github.com/vegastrike/Vega-Strike-Engine-Source).
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +14,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_WINSYS_H
 #define VEGA_STRIKE_ENGINE_GLDRV_WINSYS_H
