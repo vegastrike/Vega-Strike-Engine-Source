@@ -245,7 +245,7 @@ string buildShipDescription(Cargo &item, string &descriptiontexture);
 string buildCargoDescription(const Cargo &item, BaseComputer &computer, float price);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
 void prettyPrintFloat(char *buffer, float f, int digitsBefore, int digitsAfter, int bufferLen = 128);
-string buildUpgradeDescription(Cargo &item);
+string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map);
 int basecargoassets(Unit *base, string cargoname);
 
 //"Basic Repair" item that is added to Buy UPGRADE mode.
@@ -1922,7 +1922,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 }
                 descString += tempString;
                 if (item.GetDescription() == "" || item.GetDescription()[0] != '#') {
-                    item.SetDescription(buildUpgradeDescription(item));
+                    item.SetDescription(buildUpgradeDescription(item, std::map<std::string, std::string>()));
                 }
                 break;
             case BUY_SHIP:
@@ -2017,7 +2017,8 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                 }
                 //********************************************************************************************
                 if (item.GetDescription() == "" || item.GetDescription()[0] != '#') {
-                    item.SetDescription(buildUpgradeDescription(item));
+                    std::map<std::string, std::string> ship_map = m_player.GetUnit()->UnitToMap();
+                    item.SetDescription(buildUpgradeDescription(item, ship_map));
                 }
                 break;
             }
@@ -3940,11 +3941,11 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
 }
 
 //UNDER CONSTRUCTION
-string buildUpgradeDescription(Cargo &item) {
+string buildUpgradeDescription(Cargo &item, std::map<std::string, std::string> ship_map) {
     const std::string key = item.GetName() + "__upgrades";
-     PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(key.c_str()));
+    ship_map["upgrade_key"] = key;
     const std::string text = GetString("get_upgrade_info", "upgrade_view",
-        "upgrade_view.py", args);
+        "upgrade_view.py", ship_map);
     return text;
 }
 

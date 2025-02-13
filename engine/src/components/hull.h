@@ -46,6 +46,8 @@ public:
 
     bool Upgrade(const std::string upgrade_name) override;
 
+    double PercentOperational() const override;
+
     double Percent() const;
 
     void Destroy() override;

@@ -55,11 +55,9 @@ void Armor::Load(std::string unit_key) {
 
     if(armor_single_value_string != "") {
         // Minimized
-        const double armor_single_value = std::stod(armor_single_value_string, 0);
-        
-        for (unsigned int i = 0; i < number_of_facets; i++) {
-            facets.push_back(Resource<double>(armor_single_value,0,armor_single_value));
-        }
+        Resource<double> armor_single_value = Resource<double>(armor_single_value_string);
+        facets = std::vector<Resource<double>>(number_of_facets, 
+                armor_single_value);
     } else {
         // Try new
         std::string armor_keys[] = {"armor_front", "armor_back",
@@ -72,8 +70,8 @@ void Armor::Load(std::string unit_key) {
                 break;
             }
 
-            double armor_value = std::stod(armor_string_value);
-            facets.push_back(Resource<double>(armor_value,0,armor_value));
+            Resource<double> armor_single_value = Resource<double>(armor_string_value);
+            facets.push_back(armor_single_value);
         }
 
         // Fallback to old
@@ -148,4 +146,8 @@ bool Armor::Upgrade(const std::string upgrade_key) {
     }
 
     return true;
+}
+
+double Armor::PercentOperational() const {
+    return Percent();
 }

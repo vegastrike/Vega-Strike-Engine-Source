@@ -83,3 +83,7 @@ double Hull::GetMax() {
 void Hull::Set(double value) {
     facets[0] = Resource<double>(value, 0, value);
 }
+
+double Hull::PercentOperational() const {
+    return Percent();
+}

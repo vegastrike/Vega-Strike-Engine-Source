@@ -134,15 +134,15 @@ void EnergyContainer::Load(std::string unit_key) {
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
     switch(type) {
         case ComponentType::Fuel:
-        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.fuel_factor);
+        unit[FUEL_CAPACITY] = level.Serialize(1/configuration()->fuel.fuel_factor);
         break;
 
         case ComponentType::Capacitor:
-        unit[CAPACITOR] = std::to_string(MaxLevel() / configuration()->fuel.energy_factor);
+        unit[CAPACITOR] = level.Serialize(1/configuration()->fuel.fuel_factor);
         break;
         
         case ComponentType::FtlCapacitor:
-        unit[FTL_CAPACITOR] = std::to_string(MaxLevel() / configuration()->fuel.ftl_energy_factor);
+        unit[FTL_CAPACITOR] = level.Serialize(1/configuration()->fuel.fuel_factor);
         break; 
 
         default: // This really can't happen

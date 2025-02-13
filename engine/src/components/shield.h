@@ -55,6 +55,8 @@ public:
     bool CanUpgrade(const std::string upgrade_key) const override;
     bool Upgrade(const std::string upgrade_key) override;
 
+    double PercentOperational() const override;
+    
     void Damage();
     void DamageByPercent(double percent);
     void Repair();

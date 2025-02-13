@@ -90,9 +90,9 @@ void Shield::Load(std::string unit_key) {
     // Single value (short form)
     if(!shield_strength_string.empty()) {
         try {
-            double shield_strength = std::stod(shield_strength_string);
+            Resource<double> facet_strength = Resource<double>(shield_strength_string);
             facets = std::vector<Resource<double>>(number_of_facets, 
-                Resource<double>(shield_strength, 0.0, shield_strength));
+                facet_strength);
             return;
         } catch (std::invalid_argument const& ex) {
             VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
@@ -120,8 +120,8 @@ void Shield::Load(std::string unit_key) {
             } 
 
             try {
-                double facet_strength = std::stod(shield_string_value);
-                shield_values.push_back(Resource<double>(facet_strength, 0.0, facet_strength));
+                Resource<double> facet_strength = Resource<double>(shield_string_value);
+                shield_values.push_back(facet_strength);
                 continue;
             } catch (const std::invalid_argument& ex) {
                 VS_LOG(error, (boost::format("%1%: Unable to convert shield value '%2%' to a number: %3%") % __FUNCTION__ % shield_string_value % ex.what()));
@@ -227,6 +227,10 @@ bool Shield::Upgrade(const std::string upgrade_key) {
     }
 
     return true;
+}
+
+double Shield::PercentOperational() const {
+    return Percent();
 }
 
 void Shield::Damage() {

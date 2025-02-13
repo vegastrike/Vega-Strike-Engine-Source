@@ -54,6 +54,8 @@ public:
     bool CanUpgrade(const std::string upgrade_key) const override;
 
     bool Upgrade(const std::string upgrade_key) override;
+
+    double PercentOperational() const override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_ARMOR_H

@@ -1016,9 +1016,18 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     string val;
 
     // Textual Descriptions
-    unit["Key"] = unit_key;            
+    unit["Key"] = unit_key;
     unit["Name"] = unit_name;
     unit["Textual_Description"] = unit_description; // Used in ship view
+
+    // Take some immutable stats directly from the original unit
+    const std::string immutable_stats[] = {"Directory", "STATUS", "Combat_Role", "Hud_image",
+                                           "Unit_Scale", "CockpitZ", "Mesh", "Prohibited_Upgrades",
+                                           "Light"};
+
+    for(const auto& stat : immutable_stats) {
+        unit[stat] = UnitCSVFactory::GetVariable(unit_key, stat, std::string());
+    }
 
     //mutable things
     unit["Equipment_Space"] = XMLSupport::tostring(equipment_volume);
@@ -1026,7 +1035,7 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     unit["Hidden_Hold_Volume"] = XMLSupport::tostring(HiddenCargoVolume);
     unit["Upgrade_Storage_Volume"] = XMLSupport::tostring(UpgradeVolume);
     string mountstr;
-    double unitScale = stof(unit["Unit_Scale"], 1);
+    double unitScale = UnitCSVFactory::GetVariable(unit_key, "Unit_Scale", 1.0f);
     {
         //mounts
         for (unsigned int j = 0; j < mounts.size(); ++j) {
@@ -1153,7 +1162,7 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     unit["ITTS"] = tos(computer.itts);
     unit["Can_Lock"] = tos(computer.radar.canlock);
     unit["Radar_Color"] = std::to_string(computer.radar.capability);
-    unit["Radar_Range"] = tos(computer.radar.maxrange);
+    unit["Radar_Range"] = tos(int(computer.radar.maxrange));
     unit["Tracking_Cone"] = tos(acos(computer.radar.trackingcone) * 180. / M_PI);
     unit["Max_Cone"] = tos(acos(computer.radar.maxcone) * 180. / M_PI);
     unit["Lock_Cone"] = tos(acos(computer.radar.lockcone) * 180. / M_PI);
