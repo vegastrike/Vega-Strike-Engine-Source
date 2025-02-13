@@ -3782,6 +3782,12 @@ bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control) {
     Cargo *item = selectedItem();
     Unit *playerUnit = m_player.GetUnit();
     Unit *baseUnit = m_base.GetUnit();
+    
+    if(playerUnit->RepairUnit(item->GetName())) {
+        refresh();
+        return true;
+    }
+
     if (baseUnit && playerUnit && item) {
         float *credits = NULL;
         Cockpit *cp = _Universe->isPlayerStarship(playerUnit);

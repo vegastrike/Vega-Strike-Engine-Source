@@ -56,11 +56,12 @@ public:
     bool Upgrade(const std::string upgrade_key) override;
 
     double PercentOperational() const override;
-    
+
     void Damage();
     void DamageByPercent(double percent);
-    void Repair();
-
+    void Repair() override;
+    bool Damaged() const override;
+    
     void Regenerate(const bool player_ship);
 
     // Manipulate shield strength

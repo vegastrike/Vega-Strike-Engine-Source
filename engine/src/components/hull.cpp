@@ -31,7 +31,9 @@ static const Damage normal_and_phase_damage = Damage(1.0,1.0);
 
 Hull::Hull() : 
     Component(), 
-    DamageableLayer(0, FacetConfiguration::one, 0.0, normal_and_phase_damage, true) {}
+    DamageableLayer(0, FacetConfiguration::one, 0.0, normal_and_phase_damage, true) {
+    type = ComponentType::Hull;
+}
 
 
 // Component Methods
@@ -86,4 +88,14 @@ void Hull::Set(double value) {
 
 double Hull::PercentOperational() const {
     return Percent();
+}
+
+bool Hull::Damaged() const {
+    return Percent() < 1;
+}
+
+void Hull::Repair() {
+    for(auto& facet : facets) {
+        facet.RepairFully();
+    }
 }

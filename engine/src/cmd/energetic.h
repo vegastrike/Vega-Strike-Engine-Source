@@ -37,15 +37,10 @@ public:
 
 
     static float getFuelUsage(bool afterburner);
-    void ExpendEnergy(const bool player_ship);
-    void ExpendEnergy(float usage);
 
-
-    float maxEnergyData() const;
 
     void MaintainECM();
 
-    void rechargeEnergy();
     void RechargeWarpCapacitors(const bool player_ship);
 
     void setEnergyRecharge(float enrech);

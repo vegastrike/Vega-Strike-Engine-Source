@@ -71,53 +71,14 @@ float Energetic::getFuelUsage(bool afterburner) {
 }
 
 
-
-
-
-
-
-float Energetic::maxEnergyData() const {
-    const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    return unit->energy.MaxLevel();
-}
-
-void Energetic::rechargeEnergy() {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    if ((!configuration()->fuel.reactor_uses_fuel) || (!unit->fuel.Depleted())) {
-        unit->energy.Charge(unit->reactor.Capacity() * simulation_atom_var);
-    }
-}
-
-
 void Energetic::setEnergyRecharge(float enrech) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     unit->reactor.SetCapacity(enrech);
 }
 
 
-// The original code was in unit_generic:5476 RegenShields and was simply
-// incomprehensible. After several days, I've written a similar version.
-// However, someone who understands the previous code can refactor this easily
-// or better yet, write plugable consumption models.
-//GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
-void Energetic::ExpendEnergy(const bool player_ship) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    // TODO: if we run out of fuel or energy, we die from lack of air
 
-    MaintainECM();
-    DecreaseWarpEnergyInWarp();
-
-    unit->reactor.Generate();
-
-    unit->drive.Consume();
-}
-
-void Energetic::ExpendEnergy(float usage) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    // Operator overloaded to prevent negative usage
-    unit->energy.Deplete(true, usage);
-}
 
 
 void Energetic::MaintainECM() {
@@ -128,7 +89,7 @@ void Energetic::MaintainECM() {
     }
 
     float sim_atom_ecm = configuration()->fuel.ecm_energy_cost * unit->ecm * simulation_atom_var;
-    ExpendEnergy(sim_atom_ecm);
+    unit->energy.Deplete(false, sim_atom_ecm);
 }
 
 

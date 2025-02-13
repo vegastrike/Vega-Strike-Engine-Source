@@ -58,11 +58,12 @@ void Reactor::Load(std::string unit_key) {
     
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
+    operational = capacity.Percent();
 }     
     
 void Reactor::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // TODO: This won't record damage to recharge
-    unit[REACTOR_RECHARGE] = capacity.Serialize(1/configuration()->fuel.reactor_factor);
+    unit[REACTOR_RECHARGE] = capacity.Serialize(configuration()->fuel.reactor_factor);
 }
 
 
@@ -105,16 +106,19 @@ bool Reactor::Upgrade(const std::string upgrade_key) {
 void Reactor::Damage() {
     capacity.RandomDamage();
     atom_capacity = capacity.Value() * simulation_atom_var;
+    operational = capacity.Percent();
 }
 
 void Reactor::DamageByPercent(double percent) {
     capacity.DamageByPercent(percent); 
-    atom_capacity = capacity.Value() * simulation_atom_var;   
+    atom_capacity = capacity.Value() * simulation_atom_var;
+    operational = capacity.Percent();  
 }
 
 void Reactor::Repair() {
     capacity.RepairFully();
     atom_capacity = capacity.Value() * simulation_atom_var;
+    operational = 1.0;
 }
 
 bool Reactor::Damaged() const {
@@ -150,4 +154,5 @@ void Reactor::SetCapacity(double capacity) {
     this->capacity.SetMaxValue(capacity * configuration()->fuel.reactor_factor);
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
+    operational = 1.0;
 }

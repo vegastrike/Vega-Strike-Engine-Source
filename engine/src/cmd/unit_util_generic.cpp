@@ -917,19 +917,31 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     } 
 
     if(upgrade_category == "Shield") {
-        return un->armor.PercentOperational();
+        return un->shield.PercentOperational();
     } 
     
+    if(upgrade_category == "Afterburner") {
+        return un->afterburner.PercentOperational();
+    } 
+
+    if(upgrade_category == "Drive") {
+        return un->drive.PercentOperational();
+    }
+
+    if(upgrade_category == "FTL_Drive") {
+        return un->ftl_drive.PercentOperational();
+    } 
+
     if(upgrade_category == "Reactor") {
         return un->reactor.PercentOperational();
     } 
     
     if(upgrade_category == "Capacitor") {
-        return un->reactor.PercentOperational();
+        return un->energy.PercentOperational();
     } 
     
     if(upgrade_category == "FTL_Capacitor") {
-        return un->reactor.PercentOperational();
+        return un->ftl_energy.PercentOperational();
     }
 
     if(upgrade_category == "Jump_Drive") {

@@ -60,8 +60,8 @@ void Shield::Load(std::string unit_key) {
     //char leak = static_cast<char>(UnitCSVFactory::GetVariable(unit_key, "Shield_Leak", 0.0f) * 100);
     //double efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
     
-    double regen = UnitCSVFactory::GetVariable(unit_key, "Shield_Recharge", 0.0);
-    regeneration = Resource<double>(regen, 0.0, regen);
+    const std::string regen_string = UnitCSVFactory::GetVariable(unit_key, "Shield_Recharge", std::string());
+    regeneration = Resource<double>(regen_string);
 
     // We support 3 options:
     // 1. Minimized shield_strength = x (single value). 
@@ -271,6 +271,9 @@ void Shield::Repair() {
     operational = 1.0;
 }
 
+bool Shield::Damaged() const {
+    return Percent() < 1;
+}
 
 
 void Shield::Regenerate(const bool player_ship) {

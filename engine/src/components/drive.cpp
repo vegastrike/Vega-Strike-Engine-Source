@@ -108,7 +108,7 @@ void Drive::Load(std::string unit_key) {
                   lateral.Percent() + vertical.Percent() + forward.Percent() + 
                   retro.Percent() + speed.Percent() +
                   max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
-                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14 * 100;
+                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14;
 }      
 
 
@@ -182,7 +182,7 @@ void Drive::Damage() {
                   lateral.Percent() + vertical.Percent() + forward.Percent() + 
                   retro.Percent() + speed.Percent() +
                   max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
-                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14 * 100;
+                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14;
 }
 
 void Drive::DamageByPercent(double percent) {
@@ -208,7 +208,7 @@ void Drive::DamageByPercent(double percent) {
                   lateral.Percent() + vertical.Percent() + forward.Percent() + 
                   retro.Percent() + speed.Percent() +
                   max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
-                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14 * 100;
+                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14;
 }
 
 void Drive::Repair() {

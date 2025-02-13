@@ -151,3 +151,13 @@ bool Armor::Upgrade(const std::string upgrade_key) {
 double Armor::PercentOperational() const {
     return Percent();
 }
+
+bool Armor::Damaged() const {
+    return Percent() < 1;
+}
+
+void Armor::Repair() {
+    for(auto& facet : facets) {
+        facet.RepairFully();
+    }
+}

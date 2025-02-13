@@ -4088,13 +4088,16 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
     }
 
-    // Recharge Energy
-    rechargeEnergy();    
+     
     
     bool is_player_ship = _Universe->isPlayerStarship(this);
-    shield.Regenerate(is_player_ship);
-    ExpendEnergy(is_player_ship);
 
+    reactor.Generate();
+    drive.Consume();
+
+    shield.Regenerate(is_player_ship);
+    MaintainECM();
+    DecreaseWarpEnergyInWarp();
     
     if (lastframe) {
         if (!(docked & (DOCKED | DOCKED_INSIDE))) {
