@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, dan_w, pyramid3d,
- * Stephen G. Tuggy, and other Vega Strike contributors.
+ * aux_palette.cpp
+ *
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file; dan_w specifically
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -17,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -208,4 +214,3 @@ void ShiftPalette(unsigned char Palette[769], double DH, double DS, double DV, d
         Palette[i * 3 + 2] = (unsigned char) (b * 255);
     }
 }
-

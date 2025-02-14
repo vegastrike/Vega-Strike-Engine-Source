@@ -1,4 +1,6 @@
 /*
+ *  pk3.h
+ *
  *  Copyright 2002-2003 LibPK3, Inc. All rights reserved.
  *  Copyright 2001-2025 The Vega Strike Contributors:
  *  Project creator: Daniel Horn
