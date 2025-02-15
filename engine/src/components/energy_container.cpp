@@ -130,7 +130,7 @@ void EnergyContainer::Load(std::string unit_key) {
         abort();       
     }
 
-    operational = level.Percent();
+    operational = level.AdjustedValue() / level.MaxValue();
 }
 
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
@@ -208,12 +208,12 @@ bool EnergyContainer::Upgrade(const std::string upgrade_key) {
 
 void EnergyContainer::Damage() {
     level.RandomDamage();  
-    operational = level.Percent();  
+    operational = level.AdjustedValue() / level.MaxValue();
 }
 
 void EnergyContainer::DamageByPercent(double percent) {
     level.DamageByPercent(percent);  
-    operational = level.Percent();  
+    operational = level.AdjustedValue() / level.MaxValue();
 }
 
 void EnergyContainer::Repair() {

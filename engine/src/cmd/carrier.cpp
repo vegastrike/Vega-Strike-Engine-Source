@@ -186,6 +186,21 @@ void Carrier::EjectCargo(unsigned int index) {
     if (index < numCargo()) {
         tmp = &GetCargo(index);
     }
+
+    // Some sanity checks for tmp
+    // Can't eject an upgrade, unless ship is destroyed
+    if(tmp->GetInstalled() && !unit->hull.Destroyed()) {
+        return;
+    }
+
+    // Can't eject cargo from the hidden hold unless ship is destroyed.
+    // TODO: implement
+
+    // Make sure ejected mass isn't 0. This causes game to mishandle
+    if(tmp->GetMass() == 0) {
+        tmp->SetMass(0.01);
+    }
+
     static float cargotime = XMLSupport::parse_float(vs_config->getVariable("physics", "cargo_live_time", "600"));
     if (tmp) {
         string tmpcontent = tmp->name;

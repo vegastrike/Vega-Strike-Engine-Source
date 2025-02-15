@@ -3286,16 +3286,7 @@ int Unit::RepairUpgrade() {
         pct = 1;
         success += 1;
     }
-    if (SPECDriveFunctionality < 1) {
-        SPECDriveFunctionality = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (SPECDriveFunctionalityMax < 1) {
-        SPECDriveFunctionalityMax = 1;
-        pct = 1;
-        success += 1;
-    }
+    
     if (CommFunctionality < 1) {
         CommFunctionality = 1;
         pct = 1;
@@ -3316,13 +3307,6 @@ int Unit::RepairUpgrade() {
         pct = 1;
         success += 1;
     }
-
-    // Repair components
-    afterburner.Repair();
-    afterburner_upgrade.Repair();
-    drive.Repair();
-    drive_upgrade.Repair();
-    ftl_drive.Repair();
 
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
@@ -3367,6 +3351,16 @@ extern bool isWeapon(std::string name);
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
     double itemPrice = baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
+
+    // New repair
+    if(RepairUnit(item->GetName())) {
+        if (credits) {
+            // Pay for repair
+            (*credits) -= itemPrice;
+        }
+        return true;
+    }
+
     if (isWeapon(item->GetCategory())) {
         const Unit *upgrade = getUnitFromUpgradeName(item->GetName(), this->faction);
         if (upgrade->getNumMounts()) {

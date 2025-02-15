@@ -56,6 +56,7 @@ public:
     bool Upgrade(const std::string upgrade_key) override;
 
     double PercentOperational() const override;
+    void CalculatePercentOperational();
 
     void Damage();
     void DamageByPercent(double percent);

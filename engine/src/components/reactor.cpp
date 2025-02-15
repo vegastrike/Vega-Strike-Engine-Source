@@ -106,13 +106,13 @@ bool Reactor::Upgrade(const std::string upgrade_key) {
 void Reactor::Damage() {
     capacity.RandomDamage();
     atom_capacity = capacity.Value() * simulation_atom_var;
-    operational = capacity.Percent();
+    operational = capacity.AdjustedValue() / capacity.MaxValue();
 }
 
 void Reactor::DamageByPercent(double percent) {
     capacity.DamageByPercent(percent); 
     atom_capacity = capacity.Value() * simulation_atom_var;
-    operational = capacity.Percent();  
+    operational = capacity.AdjustedValue() / capacity.MaxValue();
 }
 
 void Reactor::Repair() {

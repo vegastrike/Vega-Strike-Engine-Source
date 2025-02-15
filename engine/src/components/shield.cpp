@@ -93,6 +93,8 @@ void Shield::Load(std::string unit_key) {
             Resource<double> facet_strength = Resource<double>(shield_strength_string);
             facets = std::vector<Resource<double>>(number_of_facets, 
                 facet_strength);
+            
+            CalculatePercentOperational();
             return;
         } catch (std::invalid_argument const& ex) {
             VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
@@ -132,6 +134,7 @@ void Shield::Load(std::string unit_key) {
         }
 
         facets = shield_values;
+        CalculatePercentOperational();
         return;
     } 
 
@@ -158,6 +161,7 @@ void Shield::Load(std::string unit_key) {
         if (shield_count == 4 || shield_count == 2) {
             number_of_facets = shield_count;
             facets = shield_values;
+            CalculatePercentOperational();
             return;
         }
     } catch (std::exception const& ex) {
@@ -167,6 +171,7 @@ void Shield::Load(std::string unit_key) {
     // This should already be set, but good practice to do it anyway.
     number_of_facets = 0;
     facets.clear();
+    operational = 0.0;
 }      
 
         
@@ -230,7 +235,19 @@ bool Shield::Upgrade(const std::string upgrade_key) {
 }
 
 double Shield::PercentOperational() const {
-    return Percent();
+    return operational.Value();
+}
+
+void Shield::CalculatePercentOperational() {
+    double percent = regeneration.Percent();
+
+    for (Resource<double> &facet : facets) {
+        percent += facet.Percent();
+    }
+
+    // A simple average of regeneration and facets
+    // 4 facet shields assign less importance to regeneration
+    operational = percent / (number_of_facets + 1);
 }
 
 void Shield::Damage() {
