@@ -36,7 +36,8 @@ GameSoundContainer::GameSoundContainer(const SoundContainer &other)
 }
 
 GameSoundContainer::~GameSoundContainer() {
-    unload();
+    // Unsafe use of this in constructor
+    // unload();
 }
 
 void GameSoundContainer::load() {

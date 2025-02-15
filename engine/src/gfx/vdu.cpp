@@ -731,7 +731,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         double dist = DistanceTwoTargets(parent, target);
         double actual_range = dist;
         if ((target->isUnit() == Vega_UnitType::planet) && (target->CanDockWithMe(parent, 1) != -1)) {
-            dist -= target->rSize() * UniverseUtil::getPlanetRadiusPercent();
+            dist -= static_cast<double>(target->rSize()) * static_cast<double>(UniverseUtil::getPlanetRadiusPercent());
             if (dist < 0) {
                 newst += string("Docking: Ready");
             } else if (dist < target->rSize()) {
@@ -1900,4 +1900,3 @@ bool VDU::CheckCommAnimation(Unit *un) const {
     }
     return false;
 }
-

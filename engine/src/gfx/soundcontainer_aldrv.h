@@ -43,18 +43,18 @@ private:
 
 public:
     /**
-     * Create a refernece to an optionally-looping sound file.
+     * Create a reference to an optionally-looping sound file.
      */
-    AldrvSoundContainer(const SoundContainer &other);
+    explicit AldrvSoundContainer(const SoundContainer &other);
 
-    virtual ~AldrvSoundContainer();
+    ~AldrvSoundContainer() override;
 
 protected:
-    virtual void loadImpl();
-    virtual void unloadImpl();
-    virtual void playImpl();
-    virtual void stopImpl();
-    virtual bool isPlayingImpl() const;
+    void loadImpl() override;
+    void unloadImpl() override;
+    void playImpl() override;
+    void stopImpl() override;
+    bool isPlayingImpl() const override;
 };
 
 #endif //VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_ALDRV_H

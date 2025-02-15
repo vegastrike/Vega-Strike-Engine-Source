@@ -35,7 +35,11 @@ AldrvSoundContainer::AldrvSoundContainer(const SoundContainer &other)
 }
 
 AldrvSoundContainer::~AldrvSoundContainer() {
-    // unload already takes care
+    if (sound >= 0) {
+        AUDStopPlaying(sound);
+        AUDDeleteSound(sound, false);
+        sound = -2;
+    }
 }
 
 void AldrvSoundContainer::loadImpl() {
@@ -62,4 +66,3 @@ void AldrvSoundContainer::stopImpl() {
 bool AldrvSoundContainer::isPlayingImpl() const {
     return AUDIsPlaying(sound);
 }
-

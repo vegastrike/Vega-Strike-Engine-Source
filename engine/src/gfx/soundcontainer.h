@@ -45,11 +45,11 @@ class GameSoundContainer : public SoundContainer {
 
 public:
     /**
-     * Create a refernece to an optionally-looping sound file.
+     * Create a reference to an optionally-looping sound file.
      */
-    GameSoundContainer(const SoundContainer &other);
+    explicit GameSoundContainer(const SoundContainer &other);
 
-    virtual ~GameSoundContainer();
+    ~GameSoundContainer() override;
 
     /**
      * Forced loading of the resource. It's not necessary to call it,
@@ -77,12 +77,12 @@ public:
     void stop();
 
     /**
-     * Return whether or not the sound is really playing now.
+     * Return whether the sound is really playing now.
      */
     bool isPlaying() const;
 
     /**
-     * Return whether or not the sound was triggered with play().
+     * Return whether the sound was triggered with play().
      * Will return true after play(), false after stop() and right
      * after creation.
      */
@@ -96,7 +96,7 @@ protected:
     virtual void unloadImpl() = 0;
 
     /**
-     * Start playing. Needs not account for loopgin vs non-looping,
+     * Start playing. Needs not account for looping vs non-looping,
      * just start playing the sound.
      */
     virtual void playImpl() = 0;
@@ -104,7 +104,7 @@ protected:
     virtual void stopImpl() = 0;
 
     /**
-     * Return whether or not the sound is really playing now.
+     * Return whether the sound is really playing now.
      */
     virtual bool isPlayingImpl() const = 0;
 

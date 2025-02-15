@@ -159,13 +159,15 @@ void ddsDecompress(unsigned char *&RESTRICT buffer,
         TEXTUREFORMAT internformat,
         int height,
         int width) {
-    unsigned char *pos_out = NULL, *pos_in = NULL;
+    unsigned char *pos_out = nullptr, *pos_in = nullptr;
     int bpp = 4;
     unsigned int sx, sy;
 
     sx = (width < 4) ? width : 4;
     sy = (height < 4) ? width : 4;
-    data = (unsigned char *) malloc(height * width * bpp);
+    data = static_cast<unsigned char*>(malloc(static_cast<size_t>(height)
+                                                * static_cast<size_t>(width)
+                                                * static_cast<size_t>(bpp)));
     pos_out = data;
     pos_in = buffer;
     for (int y = 0; y < height; y += 4) {
@@ -185,4 +187,3 @@ void ddsDecompress(unsigned char *&RESTRICT buffer,
 }
 
 /*  END of software decompression for DDS helper functions */
-
