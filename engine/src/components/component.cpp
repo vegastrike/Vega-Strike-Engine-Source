@@ -126,7 +126,7 @@ void Component::Destroy() {
 }
 
 bool Component::Damaged() const {
-    return operational.Value() < operational.MaxValue();
+    return operational.Value() < 1.0;
 }
 
 bool Component::Destroyed() const {

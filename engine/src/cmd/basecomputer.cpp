@@ -1998,10 +1998,11 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                             % item.GetPrice())
                             .str();
                     descString += tempString;
-
+                    double repair_price = RepairPrice(percent_working, baseUnit->PriceCargo(item.GetName()));
+                    
                     tempString = (boost::format("Percent Working: #b#%1$.2f#-b, Repair Cost: %2$.2f#n1.5#")
                             % (percent_working * 100)
-                            % RepairPrice(percent_working, baseUnit->PriceCargo(item.GetName())))
+                            % repair_price)
                             .str();
                     descString += tempString;
                 } else {

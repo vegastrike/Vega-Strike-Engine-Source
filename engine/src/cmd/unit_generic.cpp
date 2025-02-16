@@ -3351,12 +3351,16 @@ extern bool isWeapon(std::string name);
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
     double itemPrice = baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
+    
+    // This needs to happen before we repair the part, obviously.
+    double percent_working = UnitUtil::PercentOperational(this, item->GetName(), "upgrades/", false);
 
     // New repair
-    if(RepairUnit(item->GetName())) {
+    if(RepairUnit(item->GetName())) { 
+        double repair_price = RepairPrice(percent_working, itemPrice);
         if (credits) {
             // Pay for repair
-            (*credits) -= itemPrice;
+            (*credits) -= repair_price;
         }
         return true;
     }

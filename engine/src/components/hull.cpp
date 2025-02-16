@@ -70,7 +70,6 @@ double Hull::Percent() const {
 }
 
 void Hull::Destroy() {
-    operational = 0;
     facets[0] = 0;
 }
 

@@ -958,13 +958,16 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     // Add integral components
     // Make this a factor of unit price
-    const std::string integral_components = 
+    if(!saved_game) {
+        const std::string integral_components = 
         "{hull;upgrades/integral;12000;1;0.1;0.1;1;1;@cargo/hull_patches.image@The ship's hull.;0;1}\
         {afterburner;upgrades/integral;2000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency.;0;1}\
         {drive;upgrades/integral;6000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@The ship's engine.;0;1}\
         {ftl_drive;upgrades/integral;4500;1;0.1;0.1;1;1;@upgrades/jump_drive.image@The ship's faster than light engine.;0;1}";
     
-    AddCarg(this, integral_components);
+        AddCarg(this, integral_components);
+    }
+    
 }
 
 void Unit::WriteUnit(const char *modifications) {
