@@ -623,8 +623,8 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::OFF;
             }
         case UnitImages<void>::ECM_MODAL:
-            if (target->ecm > 0) {
-                return (target->GetComputerData().ecmactive ? (float) UnitImages<void>::ACTIVE
+            if (target->ecm.Get() > 0) {
+                return (target->ecm.Active() ? (float) UnitImages<void>::ACTIVE
                         : (float) UnitImages<void>::READY);
             } else {
                 return (float) UnitImages<void>::NOTAPPLICABLE;
@@ -1798,7 +1798,7 @@ void GameCockpit::Draw() {
                 if (vdu[vd]) {
                     vdu[vd]->Draw(this, un, textcol);
                     GFXColor4f(1, 1, 1, 1);
-                    float damage = un->GetImageInformation().cockpit_damage[(1 + vd) % (MAXVDUS + 1)];
+                    float damage = un->ship_functions.Value(Function::cockpit);
                     if (vdu[vd]->staticable()) {
                         if (damage < .985) {
                             if (vdu_time[vd] >= 0) {

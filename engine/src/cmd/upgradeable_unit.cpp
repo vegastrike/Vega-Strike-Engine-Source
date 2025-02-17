@@ -176,19 +176,19 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
             break;
 
         
-        /*case UpgradeType::ECM:
+        case ComponentType::ECM:
             result.upgradeable = true;
             result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
-        case UpgradeType::Radar:
+        /*case UpgradeType::Radar:
             result.upgradeable = true;
             result.success = unit->radar.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;*/
 
-        /*case UpgradeType::Repair_Droid:
+        case ComponentType::RepairBot:
             result.upgradeable = true;
-            result.success = unit->repair_droid.CanWillUpDowngrade(upgrade_key, upgrade, apply);
-            break;*/
+            result.success = unit->repair_bot.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
 
         default:
             //std::cout << "Unhandled type for " << upgrade_name << std::endl;

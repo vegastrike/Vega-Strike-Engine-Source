@@ -44,7 +44,6 @@ public:
 
     float maxEnergyData() const;
 
-    void MaintainECM();
     void MaintainShields();
 
     void rechargeEnergy();

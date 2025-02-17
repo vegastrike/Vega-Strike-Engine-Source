@@ -854,7 +854,7 @@ void setECM(Unit *my_unit, int NewECM) {
     if (!my_unit) {
         return;
     }
-    my_unit->ecm = NewECM;
+    my_unit->ecm.Set(NewECM);
 }
 
 int getECM(const Unit *my_unit) {
@@ -862,7 +862,8 @@ int getECM(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    return my_unit->computer.ecmactive ? my_unit->ecm : 0;
+
+    return my_unit->ecm.Get();
 }
 
 static bool ishere(const Unit *par, const Unit *look) {
@@ -925,11 +926,19 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         return un->jump_drive.PercentOperational();
     }
 
-    if(upgrade_category == "FTL Drive") {
+    if(upgrade_category == "FTL_Drive") {
         return un->ftl_drive.PercentOperational();
     }
 
     if(upgrade_category == "Cloak") {
+        return un->cloak.PercentOperational();
+    }
+
+    if(upgrade_category == "ECM") {
+        return un->ftl_drive.PercentOperational();
+    }
+
+    if(upgrade_category == "Repair_Bot") {
         return un->cloak.PercentOperational();
     }
 

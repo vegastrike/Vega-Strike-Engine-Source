@@ -83,6 +83,10 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
         return ComponentType::Fuel;
     } else if(upgrade_category == "Cloak") {
         return ComponentType::Cloak;
+    } else if(upgrade_category == "ECM") {
+        return ComponentType::ECM;
+    } else if(upgrade_category == "Repair_Bot") {
+        return ComponentType::RepairBot;
     } else {
         return ComponentType::None;
     }
@@ -92,17 +96,6 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
 EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
                            EnergyContainer* energy, EnergyContainer* ftl_energy) {
     switch(component_type) {
-        case ComponentType::None: 
-        case ComponentType::Dummy:
-        case ComponentType::Hull:
-        case ComponentType::Armor:
-        case ComponentType::AfterburnerUpgrade:
-        case ComponentType::DriveUpgrade:
-        case ComponentType::Capacitor:
-        case ComponentType::FtlCapacitor:
-        case ComponentType::Fuel:
-            return nullptr;
-
         case ComponentType::Shield: return energy;
     
         case ComponentType::FtlDrive: return ftl_energy;
@@ -122,6 +115,9 @@ EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
         case ComponentType::Cloak:
             return GetSourceFromConfiguration(configuration()->fuel.cloak_source, 
                                               fuel, energy, ftl_energy);
+
+        default:
+            return nullptr;
     }
 }
 

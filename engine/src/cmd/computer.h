@@ -93,7 +93,6 @@ public:
     };
 
     RADARLIM radar;
-    bool ecmactive;
     //The nav point the unit may be heading for
     Vector NavPoint;
     //The target that the unit has in computer

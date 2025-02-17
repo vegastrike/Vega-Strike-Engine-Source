@@ -182,9 +182,7 @@ struct UnitImages {
     Animation *pExplosion = nullptr;
     float timeexplode = 0;
 
-    // TODO: use smart pointer
-    float *cockpit_damage;     //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
-
+    
 
 
 

@@ -115,15 +115,15 @@ void Energetic::ExpendEnergy(const bool player_ship) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // TODO: if we run out of fuel or energy, we die from lack of air
-
+ 
     MaintainShields();
     ExpendEnergyToRechargeShields();
-    MaintainECM();
     DecreaseWarpEnergyInWarp();
 
     unit->reactor.Generate();
 
     unit->drive.Consume();
+    unit->ecm.Consume();
 }
 
 void Energetic::ExpendEnergy(float usage) {
@@ -133,16 +133,6 @@ void Energetic::ExpendEnergy(float usage) {
 }
 
 
-void Energetic::MaintainECM() {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    if (!unit->computer.ecmactive) {
-        return;
-    }
-
-    float sim_atom_ecm = configuration()->fuel.ecm_energy_cost * unit->ecm * simulation_atom_var;
-    ExpendEnergy(sim_atom_ecm);
-}
 
 void Energetic::MaintainShields() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);

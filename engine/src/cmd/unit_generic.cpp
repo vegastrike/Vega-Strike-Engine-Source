@@ -282,7 +282,6 @@ char *GetUnitDir(const char *filename) {
 // Called by Planet
 Unit::Unit(int dummy) : Drawable(), Damageable(), Movable() {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO: delete
     Init();
@@ -292,7 +291,6 @@ Unit::Unit(int dummy) : Drawable(), Damageable(), Movable() {
 Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage = (new UnitImages<void>);
-    pImage->cockpit_damage = NULL;
     pilot = new Pilot(FactionUtil::GetNeutralFaction());
     // TODO:
     Init();
@@ -304,7 +302,6 @@ Unit::Unit(std::vector<Mesh *> &meshes, bool SubU, int fact)
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(fact);
-    pImage->cockpit_damage = NULL;
     // TODO:
     Init();
 
@@ -330,13 +327,11 @@ Unit::Unit(const char *filename,
 {
     pImage = (new UnitImages<void>);
     pilot = new Pilot(faction);
-    pImage->cockpit_damage = NULL;
     Init(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber);
     pilot->SetComm(this);
 }
 
 Unit::~Unit() {
-    free(pImage->cockpit_damage);
     if ((!killed)) {
         // stephengtuggy 2020-07-27 - I think this message was mistakenly put in. This happens all the time when buying and selling cargo or ship upgrades.
         // stephengtuggy 2020-08-03 - Maybe not.
@@ -405,15 +400,6 @@ void Unit::Init() {
 #ifdef CONTAINER_DEBUG
     UncheckUnit( this );
 #endif
-
-    //No cockpit reference here
-    if (!pImage->cockpit_damage) {
-        unsigned int numg = (1 + MAXVDUS + UnitImages<void>::NUMGAUGES) * 2;
-        pImage->cockpit_damage = (float *) malloc((numg) * sizeof(float));
-        for (unsigned int damageiterator = 0; damageiterator < numg; ++damageiterator) {
-            pImage->cockpit_damage[damageiterator] = 1;
-        }
-    }
 }
 
 using namespace VSFileSystem;
@@ -1149,17 +1135,10 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         degrees = 360 - degrees;
     }
     if (degrees >= 0 && degrees < 20) {
-        int which = rand() % (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
-        pImage->cockpit_damage[which] *= dam;
-        if (pImage->cockpit_damage[which] < .1) {
-            pImage->cockpit_damage[which] = 0;
-        }
+        
         //DAMAGE COCKPIT
         if (randnum >= .85) {//do 25% damage to a gauge
-            pImage->cockpit_damage[which] *= .75;
-            if (pImage->cockpit_damage[which] < .1) {
-                pImage->cockpit_damage[which] = 0;
-            }
+            ship_functions.Damage(Function::cockpit);
         } else if (randnum >= .775) {
             computer.itts = false;             //Set the computer to not have an itts
         } else if (randnum >= .7) {
@@ -1199,11 +1178,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         } else if (randnum >= .175) {
             computer.radar.maxrange *= dam;
         } else {
-            int which = rand() % (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
-            pImage->cockpit_damage[which] *= dam;
-            if (pImage->cockpit_damage[which] < .1) {
-                pImage->cockpit_damage[which] = 0;
-            }
+            // Duplicate of above
+            ship_functions.Damage(Function::cockpit);
         }
         damages |= Damages::COMPUTER_DAMAGED;
         return;
@@ -1222,7 +1198,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
     if (degrees >= 20 && degrees < 35) {
         //DAMAGE MOUNT
         if (randnum >= .65 && randnum < .9) {
-            ecm *= float_to_int(dam);
+            ecm.Damage();
         } else if (getNumMounts()) {
             unsigned int whichmount = rand() % getNumMounts();
             if (randnum >= .9) {
@@ -1323,8 +1299,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
                 dam = mindam;
             }
             energy.DamageByPercent(dam);
-        } else if (repair_droid > 0) {
-            repair_droid--;
+        } else {
+            repair_bot.Damage();
         }
         damages |= Damages::JUMP_DAMAGED;
         return;
@@ -2890,38 +2866,8 @@ bool Unit::UpAndDownGrade(const Unit *up,
     //Check SPEC stuff
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction,
-                    "Spec_Interdiction|Warp_Min_Multiplier|Warp_Max_Multiplier")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Spec_Interdiction")) {
-            bool upneg = up->specInterdiction < 0;
-            bool interdictionUnits = specInterdiction > 0;
-            specInterdiction = fabs(specInterdiction);
-            STDUPGRADE(specInterdiction, fabs(up->specInterdiction), upneg ? fabs(
-                    templ->specInterdiction) : templ->specInterdiction, 0);
-            if (upneg) {
-                specInterdiction = -specInterdiction;
-            }
-            if (interdictionUnits != (specInterdiction > 0)) {
-                StarSystem *ss = activeStarSystem;
-                if (_Universe->getNumActiveStarSystem() && !ss) {
-                    ss = _Universe->activeStarSystem();
-                }
-                if (ss) {
-                    Unit *un;
-                    for (un_iter i = ss->gravitationalUnits().createIterator(); (un = *i); ++i) {
-                        if (un == this) {
-                            i.remove();
-                            //NOTE: I think we can only be in here once
-                            break;
-                        }
-                    }
-                    if (!interdictionUnits) {
-                        //will interdict
-                        ss->gravitationalUnits().prepend(this);
-                    }
-                }
-            }
-        }
+                    "Warp_Min_Multiplier|Warp_Max_Multiplier")) {
+        
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Min_Multiplier")) {
             STDUPGRADE(graphicOptions.MinWarpMultiplier,
@@ -2976,13 +2922,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name,
                     up->faction,
-                    "Heat_Sink_Rating|Repair_Droid|Hold_Volume|Upgrade_Storage_Volume|Equipment_Space|Hidden_Hold_Volume|ECM_Rating|Primary_Capacitor|Warp_Capacitor")) {
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Heat_Sink_Rating"))
-            STDUPGRADE(HeatSink, up->HeatSink, templ->HeatSink, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Repair_Droid"))
-            STDUPGRADE(repair_droid, up->repair_droid, templ->repair_droid, 0);
+                    "Hold_Volume|Upgrade_Storage_Volume|Equipment_Space|Hidden_Hold_Volume")) {
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Hold_Volume"))
             STDUPGRADE(CargoVolume, up->CargoVolume, templ->CargoVolume, 0);
@@ -2990,50 +2930,8 @@ bool Unit::UpAndDownGrade(const Unit *up,
                 || cell_has_recursive_data(upgrade_name, up->faction, "Upgrade_Storage_Volume"))
             STDUPGRADE(UpgradeVolume, up->UpgradeVolume, templ->UpgradeVolume, 0);
         if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "Equipment_Space"))
-            STDUPGRADE(equipment_volume, up->equipment_volume, templ->equipment_volume, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Hidden_Hold_Volume"))
             STDUPGRADE(HiddenCargoVolume, up->HiddenCargoVolume, templ->HiddenCargoVolume, 0);
-        if (!csv_cell_null_check || force_change_on_nothing
-                || cell_has_recursive_data(upgrade_name, up->faction, "ECM_Rating"))
-            STDUPGRADE(ecm, up->ecm, templ->ecm, 0); //ecm is unsigned --chuck_starchaser
-    }
-    
-    //FIXME - do cell lookup later here
-    static bool UpgradeCockpitDamage =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "upgrade_cockpit_damage", "false"));
-    if (UpgradeCockpitDamage) {
-        STDUPGRADE(fireControlFunctionality, up->fireControlFunctionality,
-                templ->fireControlFunctionality,
-                (unittable ? 0 : 1));
-        STDUPGRADE(fireControlFunctionalityMax, up->fireControlFunctionalityMax,
-                templ->fireControlFunctionalityMax,
-                (unittable ? 0 : 1));
-        STDUPGRADE(SPECDriveFunctionality, up->SPECDriveFunctionality, templ->SPECDriveFunctionality,
-                (unittable ? 0 : 1));
-        STDUPGRADE(SPECDriveFunctionalityMax, up->SPECDriveFunctionalityMax,
-                templ->SPECDriveFunctionalityMax,
-                (unittable ? 0 : 1));
-        STDUPGRADE(CommFunctionality, up->CommFunctionality, templ->CommFunctionality,
-                (unittable ? 0 : 1));
-        STDUPGRADE(CommFunctionalityMax, up->CommFunctionalityMax, templ->CommFunctionalityMax,
-                (unittable ? 0 : 1));
-        STDUPGRADE(LifeSupportFunctionality, up->LifeSupportFunctionality,
-                templ->LifeSupportFunctionality,
-                (unittable ? 0 : 1));
-        STDUPGRADE(LifeSupportFunctionalityMax, up->LifeSupportFunctionalityMax,
-                templ->LifeSupportFunctionalityMax,
-                (unittable ? 0 : 1));
-        unsigned int upgrmax = (UnitImages<void>::NUMGAUGES + 1 + MAXVDUS) * 2;
-        for (unsigned int upgr = 0; upgr < upgrmax; upgr++)
-            STDUPGRADE(pImage->cockpit_damage[upgr],
-                    up->pImage->cockpit_damage[upgr],
-                    templ->pImage->cockpit_damage[upgr],
-                    (unittable ? 0 : 1));
-        for (unsigned int upgr = 0; upgr < upgrmax; ++upgr) {
-            GCCBugCheckFloat(pImage->cockpit_damage, upgr);
-        }
     }
 
 
@@ -3243,34 +3141,10 @@ Vector Unit::MountPercentOperational(int whichmount) {
 int Unit::RepairCost() {
     int cost = 1;
     unsigned int i;
-    for (i = 0; i < (1 + MAXVDUS + UnitImages<void>::NUMGAUGES) * 2; ++i) {
-        if (pImage->cockpit_damage[i] < 1) {
-            ++cost;
-        }
-    }
-    if (fireControlFunctionality < 1) {
-        ++cost;
-    }
-    if (fireControlFunctionalityMax < 1) {
-        ++cost;
-    }
-    if (SPECDriveFunctionality < 1) {
-        ++cost;
-    }
-    if (SPECDriveFunctionalityMax < 1) {
-        ++cost;
-    }
-    if (CommFunctionality < 1) {
-        ++cost;
-    }
-    if (CommFunctionalityMax < 1) {
-        ++cost;
-    }
-    if (LifeSupportFunctionality < 1) {
-        ++cost;
-    }
-    if (LifeSupportFunctionalityMax < 1) {
-        ++cost;
+
+    // TODO: something better
+    if(ship_functions.Damaged()) {
+        cost += 15;
     }
 
     // TODO: figure out better cost
@@ -3322,53 +3196,7 @@ int Unit::RepairUpgrade() {
     savedCargo.swap(cargo);
     savedWeap.swap(mounts);
     UnitImages<void> *im = &GetImageInformation();
-    for (int i = 0; i < (1 + MAXVDUS + UnitImages<void>::NUMGAUGES) * 2; ++i) {
-        if (im->cockpit_damage[i] < 1) {
-            im->cockpit_damage[i] = 1;
-            success += 1;
-            pct = 1;
-        }
-    }
-    if (fireControlFunctionality < 1) {
-        fireControlFunctionality = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (fireControlFunctionalityMax < 1) {
-        fireControlFunctionalityMax = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (SPECDriveFunctionality < 1) {
-        SPECDriveFunctionality = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (SPECDriveFunctionalityMax < 1) {
-        SPECDriveFunctionalityMax = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (CommFunctionality < 1) {
-        CommFunctionality = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (CommFunctionalityMax < 1) {
-        CommFunctionalityMax = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (LifeSupportFunctionality < 1) {
-        LifeSupportFunctionality = 1;
-        pct = 1;
-        success += 1;
-    }
-    if (LifeSupportFunctionalityMax < 1) {
-        LifeSupportFunctionalityMax = 1;
-        pct = 1;
-        success += 1;
-    }
+    
 
     // Repair components
     afterburner.Repair();
@@ -3376,6 +3204,7 @@ int Unit::RepairUpgrade() {
     drive.Repair();
     drive_upgrade.Repair();
     ftl_drive.Repair();
+    ship_functions.Repair();
 
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
@@ -3835,6 +3664,7 @@ bool isWeapon(std::string name) {
     while (0)
 
 // This is called every cycle - repair in flight by droids
+// TODO: move this to RepairBot
 void Unit::Repair() {
     // TODO: everything below here needs to go when we're done with lib_components
     static float repairtime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidTime", "180"));
@@ -3842,84 +3672,78 @@ void Unit::Repair() {
     if ((repairtime <= 0) || (checktime <= 0)) {
         return;
     }
-    if (repair_droid > 0) {
-        if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
-            unsigned int numcargo = numCargo();
-            if (numcargo > 0) {
-                if (next_repair_cargo >= numCargo()) {
-                    next_repair_cargo = 0;
-                }
-                Cargo *carg = &GetCargo(next_repair_cargo);
-                float percentoperational = 1;
-                if (carg->GetCategory().find("upgrades/") == 0
-                        && carg->GetCategory().find(DamagedCategory) != 0
-                        && carg->GetName().find("add_") != 0
-                        && carg->GetName().find("mult_") != 0
-                        && ((percentoperational =
-                                UnitUtil::PercentOperational(this, carg->GetName(), carg->GetCategory(), true)) < 1.f)) {
-                    if (next_repair_time == -FLT_MAX) {
-                        next_repair_time =
-                                UniverseUtil::GetGameTime() + repairtime * (1 - percentoperational) / repair_droid;
+
+    if (repair_bot.Get() == 0) {
+        return;
+    }
+
+    if (next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime()) {
+        unsigned int numcargo = numCargo();
+        if (numcargo > 0) {
+            if (next_repair_cargo >= numCargo()) {
+                next_repair_cargo = 0;
+            }
+            Cargo *carg = &GetCargo(next_repair_cargo);
+            float percentoperational = 1;
+            if (carg->GetCategory().find("upgrades/") == 0
+                    && carg->GetCategory().find(DamagedCategory) != 0
+                    && carg->GetName().find("add_") != 0
+                    && carg->GetName().find("mult_") != 0
+                    && ((percentoperational =
+                            UnitUtil::PercentOperational(this, carg->GetName(), carg->GetCategory(), true)) < 1.f)) {
+                if (next_repair_time == -FLT_MAX) {
+                    next_repair_time =
+                            UniverseUtil::GetGameTime() + repairtime * (1 - percentoperational) / repair_bot.Get();
+                } else {
+                    //ACtually fix the cargo here
+                    static int upfac = FactionUtil::GetUpgradeFaction();
+                    const Unit *up = getUnitFromUpgradeName(carg->GetName(), upfac);
+                    static std::string loadfailed("LOAD_FAILED");
+                    if (up->name == loadfailed) {
+                        VS_LOG(info,
+                                "Bug: Load failed cargo encountered: report on https://github.com/vegastrike/Vega-Strike-Engine-Source");
                     } else {
-                        //ACtually fix the cargo here
-                        static int upfac = FactionUtil::GetUpgradeFaction();
-                        const Unit *up = getUnitFromUpgradeName(carg->GetName(), upfac);
-                        static std::string loadfailed("LOAD_FAILED");
-                        if (up->name == loadfailed) {
-                            VS_LOG(info,
-                                    "Bug: Load failed cargo encountered: report on https://github.com/vegastrike/Vega-Strike-Engine-Source");
-                        } else {
-                            double percentage = 0;
-                            //don't want to repair these things
-                            if (up->SubUnits.empty() && up->getNumMounts() == 0) {
-                                this->Upgrade(up, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name,
-                                                this->faction), false,
-                                        false);
-                                if (percentage == 0) {
-                                    VS_LOG(error,
-                                            (boost::format(
-                                                    "Failed repair for unit %1%, cargo item %2%: %3% (%4%) - please report error")
-                                                    % name.get().c_str()
-                                                    % next_repair_cargo
-                                                    % carg->GetName().c_str()
-                                                    % carg->GetCategory().c_str()));
-                                }
+                        double percentage = 0;
+                        //don't want to repair these things
+                        if (up->SubUnits.empty() && up->getNumMounts() == 0) {
+                            this->Upgrade(up, 0, 0, 0, true, percentage, makeTemplateUpgrade(this->name,
+                                            this->faction), false,
+                                    false);
+                            if (percentage == 0) {
+                                VS_LOG(error,
+                                        (boost::format(
+                                                "Failed repair for unit %1%, cargo item %2%: %3% (%4%) - please report error")
+                                                % name.get().c_str()
+                                                % next_repair_cargo
+                                                % carg->GetName().c_str()
+                                                % carg->GetCategory().c_str()));
                             }
                         }
-                        next_repair_time = -FLT_MAX;
-                        ++(next_repair_cargo);
                     }
-                } else {
+                    next_repair_time = -FLT_MAX;
                     ++(next_repair_cargo);
                 }
+            } else {
+                ++(next_repair_cargo);
             }
         }
-        float ammt_repair = simulation_atom_var / repairtime * repair_droid;
-        REPAIRINTEGRATED(LifeSupportFunctionality, LifeSupportFunctionalityMax);
-        REPAIRINTEGRATED(fireControlFunctionality, fireControlFunctionalityMax);
-        REPAIRINTEGRATED(SPECDriveFunctionality, SPECDriveFunctionalityMax);
-        REPAIRINTEGRATED(CommFunctionality, CommFunctionalityMax);
-        unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
-        unsigned int which = vsrandom.genrand_int31() % numg;
-        static float hud_repair_quantity =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "hud_repair_unit", ".25"));
-        //total damage
-        if (pImage->cockpit_damage[which] < pImage->cockpit_damage[which + numg]) {
-            pImage->cockpit_damage[which] += hud_repair_quantity;
-            if (pImage->cockpit_damage[which] > pImage->cockpit_damage[which + numg]) {
-                //total damage
-                pImage->cockpit_damage[which] = pImage->cockpit_damage[which + numg];
-            }
-        }
-        if (mounts.size()) {
-            static float mount_repair_quantity =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "mount_repair_unit", ".25"));
-            unsigned int i = vsrandom.genrand_int31() % mounts.size();
-            if (mounts[i].functionality < mounts[i].maxfunctionality) {
-                mounts[i].functionality += mount_repair_quantity;
-                if (mounts[i].functionality > mounts[i].maxfunctionality) {
-                    mounts[i].functionality = mounts[i].maxfunctionality;
-                }
+    }
+
+    float ammt_repair = simulation_atom_var / repairtime * repair_bot.Get();
+    
+    unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
+    unsigned int which = vsrandom.genrand_int31() % numg;
+    static float hud_repair_quantity =
+            XMLSupport::parse_float(vs_config->getVariable("physics", "hud_repair_unit", ".25"));
+    
+    if (mounts.size()) {
+        static float mount_repair_quantity =
+                XMLSupport::parse_float(vs_config->getVariable("physics", "mount_repair_unit", ".25"));
+        unsigned int i = vsrandom.genrand_int31() % mounts.size();
+        if (mounts[i].functionality < mounts[i].maxfunctionality) {
+            mounts[i].functionality += mount_repair_quantity;
+            if (mounts[i].functionality > mounts[i].maxfunctionality) {
+                mounts[i].functionality = mounts[i].maxfunctionality;
             }
         }
     }
@@ -4317,12 +4141,11 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                         autotarg,
                         trackingcone,
                         target,
-                        (HeatSink ? HeatSink : 1.0f) * mounts[i].functionality,
                         this,
                         superunit);
             }
         } else {
-            mounts[i].ref.refire += simulation_atom_var * (HeatSink ? HeatSink : 1.0f) * mounts[i].functionality;
+            mounts[i].ref.refire += simulation_atom_var * mounts[i].functionality;
         }
         if (mounts[i].processed == Mount::FIRED) {
             Transformation t1;

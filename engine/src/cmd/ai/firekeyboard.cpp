@@ -1787,7 +1787,7 @@ void FireKeyboard::Execute() {
     }
     if (f().ECMkey == PRESS) {
         f().ECMkey = DOWN;
-        parent->GetComputerData().ecmactive = !parent->GetComputerData().ecmactive;
+        parent->ecm.Toggle();;
     }
     if (f().targetkey == PRESS || j().jtargetkey == PRESS) {
         f().targetkey = DOWN;
