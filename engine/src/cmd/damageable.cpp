@@ -39,34 +39,24 @@
 #include "pilot.h"
 #include "ai/comm_ai.h"
 #include "gfx/mesh.h"
+#include "vega_cast_utils.h"
 
 #include <algorithm>
 #include "configuration/configuration.h"
 
-bool Damageable::ShieldUp(const Vector &pnt) const {
-    const int shield_min = 5;
-
-    // TODO: think about this. I have no idea why a nebula needs shields
-//    static float nebshields = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
-//    if (nebula != NULL || nebshields > 0)
-//        return false;
-
-    CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
-
-    DamageableLayer shield = const_cast<Damageable *>(this)->GetShieldLayer();
-    int facet_index = shield.GetFacetIndex(attack_vector);
-    return shield.facets[facet_index].health > shield_min;
-}
 
 float Damageable::DealDamageToHull(const Vector &pnt, float damage) {
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    
     Damage dmg(0, damage); // Bypass shield with phase damage
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
     InflictedDamage inflicted_damage(3);
-    armor->DealDamage(attack_vector, dmg, inflicted_damage);
-    hull->DealDamage(attack_vector, dmg, inflicted_damage);
-    int facet_index = armor->GetFacetIndex(attack_vector);
+    unit->armor.DealDamage(attack_vector, dmg, inflicted_damage);
+    unit->hull.DealDamage(attack_vector, dmg, inflicted_damage);
+    int facet_index = unit->armor.GetFacetIndex(attack_vector);
 
-    float denominator = GetArmor(facet_index) + GetHull();
+    float denominator = unit->armor.facets[facet_index].Value() + 
+        unit->hull.Get();
     if (denominator == 0) {
         return 0;
     }
@@ -75,13 +65,15 @@ float Damageable::DealDamageToHull(const Vector &pnt, float damage) {
 }
 
 float Damageable::DealDamageToShield(const Vector &pnt, float &damage) {
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Damage dmg(damage);
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
     InflictedDamage inflicted_damage(3);
-    shield->DealDamage(attack_vector, dmg, inflicted_damage);
-    int facet_index = shield->GetFacetIndex(attack_vector);
+    unit->shield.DealDamage(attack_vector, dmg, inflicted_damage);
+    int facet_index = unit->shield.GetFacetIndex(attack_vector);
 
-    float denominator = GetShield(facet_index) + GetHull();
+    float denominator = unit->shield.facets[facet_index].Value() + 
+        unit->hull.Get();
     if (denominator == 0) {
         return 0;
     }
@@ -98,10 +90,9 @@ void Damageable::ApplyDamage(const Vector &pnt,
         Unit *affected_unit,
         const GFXColor &color,
         void *ownerDoNotDereference) {
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    
     InflictedDamage inflicted_damage(3);
-
-    const Damageable *const_damagable = static_cast<const Damageable *>(this);
-    Unit *unit = static_cast<Unit *>(this);
 
     //We also do the following lock on client side in order not to display shield hits
     const bool no_dock_damage = configuration()->physics_config.no_damage_to_docked_ships;
@@ -114,7 +105,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Stop processing for destroyed units
-    if (Destroyed()) {
+    if (unit->Destroyed()) {
         return;
     }
 
@@ -129,11 +120,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
     Vector localpnt(InvTransform(unit->cumulative_transformation_matrix, pnt));
     Vector localnorm(unit->ToLocalCoordinates(normal));
     CoreVector attack_vector(localpnt.i, localpnt.j, localpnt.k);
-    float previous_hull_percent = GetHullPercent();
-
-    /*float        hullpercent = GetHullPercent();
-    bool         mykilled    = Destroyed();
-    bool         armor_damage = false;*/
+    float previous_hull_percent = unit->hull.Percent();
 
     inflicted_damage = DealDamage(attack_vector, damage);
 
@@ -170,7 +157,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
     }
 
-    if (Destroyed()) {
+    if (unit->Destroyed()) {
         unit->ClearMounts();
 
         if (shooter_is_player) {
@@ -245,7 +232,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
     // Light shields if hit
     if (inflicted_damage.inflicted_damage_by_layer[2] > 0) {
-        unit->LightShields(pnt, normal, GetShieldPercent(), color);
+        unit->LightShields(pnt, normal, unit->shield.Percent(), color);
     }
 
     // Apply damage to meshes
@@ -255,7 +242,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         for (unsigned int i = 0; i < unit->nummesh(); ++i) {
             // TODO: figure out how to adjust looks for armor damage
-            float hull_damage_percent = static_cast<float>(const_damagable->GetHullPercent());
+            float hull_damage_percent = unit->hull.Percent();
             unit->meshdata[i]->AddDamageFX(pnt, unit->shieldtight ? unit->shieldtight * normal : Vector(0, 0, 0),
                     hull_damage_percent, color);
         }
@@ -286,7 +273,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
     // Only happens if we crossed the threshold in this attack
     if (previous_hull_percent >= configuration()->ai.hull_percent_for_comm &&
-            GetHullPercent() < configuration()->ai.hull_percent_for_comm &&
+            unit->hull.Percent() < configuration()->ai.hull_percent_for_comm &&
             (shooter_is_player || shot_at_is_player)) {
         Unit *computer_ai = nullptr;
         Unit *player = nullptr;
@@ -310,7 +297,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
                 if (shooter_is_player && configuration()->ai.assist_friend_in_need) {
                     AllUnitsCloseAndEngage(player, computer_ai->faction);
                 }
-                if (GetHullPercent() > 0 || !shooter_cockpit) {
+                if (unit->hull.Percent() > 0 || !shooter_cockpit) {
                     CommunicationMessage c(computer_ai, player, anim, gender);
                     c.SetCurrentState(shooter_cockpit ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(),
                             anim,
@@ -346,13 +333,18 @@ void Damageable::ApplyDamage(const Vector &pnt,
 }
 
 // TODO: get rid of extern
-extern bool DestroySystem(float hull, float maxhull, float numhits);
-extern bool DestroyPlayerSystem(float hull, float maxhull, float numhits);
+extern bool DestroySystem(float hull_percent, float numhits);
+extern bool DestroyPlayerSystem(float hull_percent, float numhits);
 extern float rand01();
 extern const Unit *loadUnitByCache(std::string name, int faction);
 
 void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector) {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    
+    // Ship destroyed. No point in further work
+    if(unit->Destroyed()) {
+        return;
+    }
 
     bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
     bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
@@ -363,22 +355,26 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     bool damage_system;
-    double current_hull = layers[0].facets[0].health;
-    double max_hull = layers[0].facets[0].max_health;
 
     if (player) {
-        damage_system = DestroyPlayerSystem(current_hull, max_hull, 1);
+        damage_system = DestroyPlayerSystem(unit->hull.Percent(), 1);
     } else {
-        damage_system = DestroySystem(current_hull, max_hull, 1);
+        damage_system = DestroySystem(unit->hull.Percent(), 1);
     }
 
     if (!damage_system) {
         return;
     }
 
-    unit->DamageRandSys(configuration()->physics_config.indiscriminate_system_destruction * rand01() +
-                    (1 - configuration()->physics_config.indiscriminate_system_destruction) * (1 - ((current_hull) > 0 ? hull_damage / (current_hull) : 1.0f)),
-            attack_vector);
+    // A brief explanation
+    // indiscriminate is a fraction (25% by default). 
+    // Damage is calculated as 0.25 * rand + 0.75 * (hull_damage)/(current_hull)
+    // Therefore, 
+    double indiscriminate_system_destruction = configuration()->physics_config.indiscriminate_system_destruction;
+    double random_damage_factor = indiscriminate_system_destruction * rand01();
+    double hull_damage_modifier = 1 - indiscriminate_system_destruction;
+    double hull_damage_factor = hull_damage_modifier * (1 - hull_damage / unit->hull.Get());
+    unit->DamageRandSys(random_damage_factor + hull_damage_factor, attack_vector);
 }
 
 void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
@@ -405,7 +401,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
         return;
     }
 
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     // If nothing to damage, exit
     if (unit->numCargo() == 0) {
@@ -413,9 +409,7 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     }
 
     // Is the hit unit, lucky or not
-    double current_hull = layers[0].facets[0].health;
-    double max_hull = layers[0].facets[0].max_health;
-    if (DestroySystem(current_hull, max_hull, unit->numCargo())) {
+    if (DestroySystem(unit->hull.Percent(), unit->numCargo())) {
         return;
     }
 
@@ -459,9 +453,9 @@ extern void DestroyMount(Mount *);
 
 // TODO: a lot of this should be handled by RAII
 void Damageable::Destroy() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    DamageableObject::Destroy();
+    unit->hull.Destroy();
 
     if (!unit->killed) {
         for (int beamcount = 0; beamcount < unit->getNumMounts(); ++beamcount) {
@@ -474,119 +468,20 @@ void Damageable::Destroy() {
     }
 }
 
-// We only support 2 and 4 facet shields ATM
-// This doesn't have proper checks
-float ShieldData(const Damageable *unit, int facet_index) {
-    return (unit->shield->facets[facet_index].health) /
-            (unit->shield->facets[facet_index].max_health);
-}
 
-float Damageable::FShieldData() const {
-    switch (shield->number_of_facets) {
-        case 2:
-            return ShieldData(this, 0);
-        case 4:
-            return ShieldData(this, 2);
-        default:
-            return 0.0f; // We only support 2 and 4 facet shields ATM
-    }
-}
 
-float Damageable::BShieldData() const {
-    switch (shield->number_of_facets) {
-        case 2:
-            return ShieldData(this, 1);
-        case 4:
-            return ShieldData(this, 3);
-        default:
-            return 0.0f; // We only support 2 and 4 facet shields ATM
-    }
-}
 
-float Damageable::LShieldData() const {
-    switch (shield->number_of_facets) {
-        case 2:
-            return 0.0f;
-        case 4:
-            return ShieldData(this, 0);
-        default:
-            return 0.0f; // We only support 2 and 4 facet shields ATM
-    }
-}
-
-float Damageable::RShieldData() const {
-    switch (shield->number_of_facets) {
-        case 2:
-            return 0.0f;
-        case 4:
-            return ShieldData(this, 1);
-        default:
-            return 0.0f; // We only support 2 and 4 facet shields ATM
-    }
-}
-
-//short fix
-void Damageable::ArmorData(float armor[8]) const {
-    Damageable *damageable = const_cast<Damageable *>(this);
-    DamageableLayer armor_layer = damageable->GetArmorLayer();
-    for (int i = 0; i < armor_layer.number_of_facets; ++i) {
-        armor[i] = armor_layer.facets[i].health;
-    }
-}
 
 // TODO: fix typo
 void Damageable::leach(float damShield, float damShieldRecharge, float damEnRecharge) {
     // TODO: restore this lib_damage
 }
 
-void Damageable::RegenerateShields(const float difficulty, const bool player_ship) {
-    const bool shields_in_spec = configuration()->physics_config.shields_in_spec;
-    const float discharge_per_second = configuration()->physics_config.speeding_discharge;
-    //approx
-    const float discharge_rate = (1 - (1 - discharge_per_second) * simulation_atom_var);
-    const float min_shield_discharge = configuration()->physics_config.min_shield_speeding_discharge;
-    const float nebshields = configuration()->physics_config.nebula_shield_recharge;
-
-    Unit *unit = static_cast<Unit *>(this);
-
-    const bool in_warp = unit->ftl_drive.Enabled();
-    const int shield_facets = unit->shield->number_of_facets;
-    const float total_max_shields = unit->shield->TotalMaxLayerValue();
-
-    // No point in all this code if there are no shields.
-    if (shield_facets < 2 || total_max_shields == 0) {
-        return;
-    }
-
-    float shield_recharge = unit->constrained_charge_to_shields * simulation_atom_var;
-
-    if (unit->GetNebula() != nullptr) {
-        shield_recharge *= nebshields;
-    }
-
-    // Adjust other (enemy) ships for difficulty
-    if (!player_ship) {
-        shield_recharge *= difficulty;
-    }
-
-
-    // Discharge shields due to energy or SPEC or cloak
-    if ((in_warp && !shields_in_spec) || !unit->sufficient_energy_to_recharge_shields ||
-            unit->cloak.Active()) {
-        shield->Discharge(discharge_rate, min_shield_discharge);
-    } else {
-        // Shield regeneration
-        shield->Regenerate(shield_recharge);
-    }
-}
-
-float Damageable::MaxShieldVal() const {
-    Damageable *damageable = const_cast<Damageable *>(this);
-    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).AverageMaxLayerValue();
-}
 
 bool Damageable::flickerDamage() {
-    float damagelevel = GetHullPercent();
+    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+
+    float damagelevel = unit->hull.Percent();
     if (damagelevel == 0) {
         return false;
     }

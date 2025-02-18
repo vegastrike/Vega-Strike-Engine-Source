@@ -45,7 +45,8 @@ CRadar::CRadar():
         locked(false),
         can_lock(false),
         tracking_active(true) {
-    max_range = configuration()->computer_config.default_max_range;
+    long default_max_range = configuration()->computer_config.default_max_range;
+    max_range = Resource<long>(default_max_range,0,default_max_range);
     tracking_cone = configuration()->computer_config.default_tracking_cone;
     lock_cone = configuration()->computer_config.default_lock_cone;
 }
@@ -105,11 +106,11 @@ void CRadar::Load(std::string unit_key) {
 
     tracking_active = true;
     const std::string max_range_string = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", std::string("300000000"));
-    max_range = Resource<double>(max_range_string,1,0);
+    max_range = Resource<long>(max_range_string,1,0);
     max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * M_PI / 180);
     tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * M_PI / 180);
     lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * M_PI / 180);
-    operational = max_range.Percent() * 100;
+    operational = max_range.Percent();
     installed = max_range > 0;
 }      
 
@@ -159,6 +160,7 @@ bool CRadar::Upgrade(const std::string upgrade_key) {
 
     Load(upgrade_key);
     installed = true;
+    operational = 1.0;
     return true;
 }
 
@@ -169,7 +171,7 @@ void CRadar::Damage() {
     // tracking_cone.RandomDamage();
 
     // We calculate percent operational as a simple average
-    operational = max_range.Percent() * 100;
+    operational = max_range.Percent();
 
     // Leaving this code here when we move to Resource<double> for max, lock and tracking cones.
     // operational = (max_range.Percent() + max_cone.Percent() + lock_cone.Percent() +
@@ -183,13 +185,13 @@ void CRadar::DamageByPercent(double percent) {
     // tracking_cone.DamageByPercent(percent);
 
     // We calculate percent operational as a simple average
-    operational = max_range.Percent() * 100;
+    operational = max_range.Percent();
 }
 
 void CRadar::Repair() {
     max_range.RepairFully();
 
-    operational.RepairFully();
+    operational = 1.0;
 }
 
 void CRadar::Destroy() {

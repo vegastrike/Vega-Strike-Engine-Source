@@ -52,6 +52,7 @@ public:
     virtual ~UpgradeableUnit() {}
     UpgradeOperationResult UpgradeUnit(const std::string upgrade_name,
                      bool upgrade, bool apply);
+    bool RepairUnit(const std::string upgrade_name);
     void UpgradeUnit(const std::string &upgrades);
     bool UpgradeMounts(const Unit *up,
                   int subunitoffset,

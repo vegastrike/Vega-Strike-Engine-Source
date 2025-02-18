@@ -26,75 +26,53 @@
 
 #include "facet_configuration.h"
 #include "core_vector.h"
-#include "health.h"
+#include "damage.h"
+#include "resource/resource.h"
 
 /**
  * @brief The DamageableLayer class represents an object to be damaged.
  * This can be shields, armor, hull or subsystem.
- * A layer can be regenerative (e.g. shields) or not (pretty much everything else).
+ * A layer can be regenerative (e.g. shields) or not (armor/hull).
  */
-struct DamageableLayer {
-
-    int layer_index;
-    FacetConfiguration configuration;
-
-    unsigned int number_of_facets;    // How many facets. e.g. dual shield (front and back).
-    std::vector<Health> facets;    // The facets container
+class DamageableLayer {
+protected:
+    int layer; // The layer we're in, for recording damage
+    
+    Damage vulnerabilities;
+    // TODO: implement "shield leaks"
 
     bool core_layer;    // Damage to the core layer has a chance of also
-    // damaging internal components such as propulsion.
+                        // damaging internal components such as propulsion.
+
+    int number_of_facets;    // How many facets. e.g. dual shield (front and rear).
+    std::vector<Resource<double>> facets;    // The facets container
 
     friend class Damageable;
     friend struct DamageableObject;
 
-    //static float damage_component_chance = 0.03;
-    DamageableLayer(int layer_index,
+public:
+    DamageableLayer(int layer,
             FacetConfiguration configuration,
-            Health health_template,
-            bool core_layer);
+            double health_template,
+            Damage vulnerabilities = Damage(1.0,1.0),
+            bool core_layer = false, 
+            double regeneration = 0.0);
 
-    DamageableLayer(int layer_index,
-            FacetConfiguration configuration,
-            float health_array[],
-            float regeneration,
-            bool core_layer);
+    DamageableLayer() = delete;
 
-    DamageableLayer(int layer_index,
-            int number_of_facets,
-            std::vector<Health> &facets,
-            bool core_layer);
-    DamageableLayer();
-
-    void AdjustPower(const float &percent);
     void DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage);
-    void Destroy();
-    void Disable();
-    void GradualDisable();
-    void Discharge(float discharge_rate, float minimum_discharge);
-    void Enable();
-    bool Enabled();
-    void Enhance();
+    void DealDamageComponent(int impacted_facet_index, int type, double &damage, double vulnerability, InflictedDamage &inflicted_damage);
+    
+    int GetFacetIndex(const CoreVector &attack_vector) const;
 
-    int GetFacetIndex(const CoreVector &attack_vector);
+    double TotalLayerValue() const;
+    double TotalMaxLayerValue() const;
+    double AverageLayerValue() const;
+    double AverageMaxLayerValue() const;
+    double Percent() const;
+    double Percent(int facet) const;
 
-    void ReduceLayerCapability(const float &percent,
-            const float &chance_to_reduce_regeneration);
-
-    float TotalLayerValue();
-    float TotalMaxLayerValue();
-    float AverageLayerValue();
-    float AverageMaxLayerValue();
-
-    float GetMaxHealth();
-    float GetPercent(FacetName facet_name);
-
-    void FullyCharge();
-    void Regenerate(float recharge_rate);
-    void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
-    float GetRegeneration();
-    void UpdateFacets(const float new_facet_strength);
-    void UpdateFacets(const unsigned int size, const float new_facets[4]);
-    void UpdateRegeneration(const float &new_regeneration_value);
+    int Layer() const;
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H

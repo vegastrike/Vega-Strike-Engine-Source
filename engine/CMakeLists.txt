@@ -460,7 +460,6 @@ SET(LIBCONFIG
 SET(LIBDAMAGE
     src/damage/damageable_layer.cpp
     src/damage/damageable_object.cpp
-    src/damage/health.cpp
 )
 
 SET(LIBRESOURCE
@@ -485,6 +484,10 @@ SET(LIBCOMPONENT
     src/components/energy_consumer.cpp
     src/components/energy_container.cpp
     src/components/reactor.cpp
+
+    src/components/armor.cpp
+    src/components/hull.cpp
+    src/components/shield.cpp
 
     src/components/afterburner.cpp
     src/components/afterburner_upgrade.cpp
@@ -1480,7 +1483,6 @@ IF (USE_GTEST)
         src/cmd/tests/csv_tests.cpp
         src/cmd/tests/json_tests.cpp
         src/configuration/tests/configuration_tests.cpp
-        src/damage/tests/health_tests.cpp
         src/damage/tests/layer_tests.cpp
         src/damage/tests/object_tests.cpp
         src/resource/tests/buy_sell.cpp

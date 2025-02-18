@@ -54,7 +54,7 @@ enum RadarCapabilities {
 class CRadar : public Component, public EnergyConsumer {
     // TODO: move floats to doubles
     //the max range the radar can handle
-    Resource<double> max_range;
+    Resource<long> max_range;
 
     //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
     // TODO: make this a resource when we move from radian to degrees

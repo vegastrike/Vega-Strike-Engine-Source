@@ -128,14 +128,14 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
     UpgradeOperationResult result;
 
     switch(component_type) {
-        /*case ComponentType::Armor:
+        case ComponentType::Armor:
             result.upgradeable = true;
-            result.success = unit->armor->CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->armor.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
             break;
         case ComponentType::Shield:
             result.upgradeable = true;
-            result.success = unit->shield->CanWillUpDowngrade(upgrade_key, upgrade, apply);
-            break;*/
+            result.success = unit->shield.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;
 
         case ComponentType::Capacitor:
             result.upgradeable = true;
@@ -198,6 +198,116 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
     return result;
 }
 
+bool UpgradeableUnit::RepairUnit(const std::string upgrade_name) {
+    Unit* unit = vega_dynamic_cast_ptr<Unit>(this);
+    const std::string upgrade_key = upgrade_name + UPGRADES_SUFFIX;
+    const ComponentType component_type = GetComponentTypeFromName(upgrade_name);
+
+    switch(component_type) {
+        case ComponentType::Hull:
+            if(unit->hull.Damaged()) {
+                unit->hull.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::Armor:
+            if(unit->armor.Damaged()) {
+                unit->armor.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::Shield:
+            if(unit->shield.Damaged()) {
+                unit->shield.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::Capacitor:
+            if(unit->energy.Damaged()) {
+                unit->energy.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::FtlCapacitor:
+            if(unit->ftl_energy.Damaged()) {
+                unit->ftl_energy.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::Reactor:
+            if(unit->reactor.Damaged()) {
+                unit->reactor.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::Afterburner: 
+            if(unit->afterburner.Damaged()) {
+                unit->afterburner.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::AfterburnerUpgrade:
+            if(unit->afterburner_upgrade.Damaged()) {
+                unit->afterburner_upgrade.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::Drive:
+            if(unit->drive.Damaged()) {
+                unit->drive.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::DriveUpgrade:
+            if(unit->drive_upgrade.Damaged()) {
+                unit->drive_upgrade.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::FtlDrive:
+            if(unit->ftl_drive.Damaged()) {
+                unit->ftl_drive.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::JumpDrive:
+            if(unit->jump_drive.Damaged()) {
+                unit->jump_drive.Repair();
+                return true;
+            }
+            break;
+        case ComponentType::Cloak:
+            if(unit->cloak.Damaged()) {
+                unit->cloak.Repair();
+                return true;
+            }
+            break;
+
+        case ComponentType::Radar:
+            if(unit->radar.Damaged()) {
+                unit->radar.Repair();
+                return true;
+            }
+            break;
+            
+        /*case UpgradeType::ECM:
+            result.upgradeable = true;
+            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            break;
+        */
+
+        /*case UpgradeType::Repair_Droid:
+            result.upgradeable = true;
+            result.success = unit->repair_droid.CanWillUpDowngrade(upgrade_key, upgrade, apply);
+            break;*/
+
+        default:
+            //std::cout << "Unhandled type for " << upgrade_name << std::endl;
+            break;
+    }
+
+    return false;
+}
 
 // TODO: remove unit parameter
 void UpgradeableUnit::UpgradeUnit(const std::string &upgrades) {
