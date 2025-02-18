@@ -219,7 +219,6 @@ private:
     std::vector<SoundContainer *> sounds;
 
 public:
-    double secondsWithZeroEnergy;
     int number_of_attackers;
     unsigned int retry_dock;
     double TimeOfLastCollision;
@@ -313,11 +312,6 @@ public:
     float zoomfactor;
     Cockpit(const char *file, Unit *parent, const std::string &pilotname);
     virtual ~Cockpit();
-
-    ///Looks up a particular Gauge stat on target unit
-    virtual float LookupTargetStat(int stat, Unit *target) {
-        return 1;
-    }
 
     ///Loads cockpit info...just as constructor
     virtual void Init(const char *file, bool defaultCockpit = false);

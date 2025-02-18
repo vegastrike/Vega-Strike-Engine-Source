@@ -48,7 +48,7 @@ void Afterburner::Load(std::string unit_key) {
     SetConsumption(consumption);
 
     // We calculate percent operational as a simple average
-    operational = (thrust.Percent() + speed.Percent()) / 2 * 100;
+    operational = (thrust.Percent() + speed.Percent()) / 2;
 }      
 
 void Afterburner::SaveToCSV(std::map<std::string, std::string>& unit) const {
@@ -82,14 +82,14 @@ void Afterburner::Damage() {
     speed.RandomDamage();
 
     // We calculate percent operational as a simple average
-    operational = (thrust.Percent() + speed.Percent()) / 2 * 100;
+    operational = (thrust.Percent() + speed.Percent()) / 2;
 }
 
 void Afterburner::DamageByPercent(double percent) {
     thrust.DamageByPercent(percent);
     speed.DamageByPercent(percent);
 
-    operational = (thrust.Percent() + speed.Percent()) / 2 * 100;
+    operational = (thrust.Percent() + speed.Percent()) / 2;
 }
 
 void Afterburner::Repair() {

@@ -298,6 +298,53 @@ public:
         Damage damage(amt);
         unit->ApplyDamage(pnt, normal, damage, unit, GFXColor(r, g, b, a), dealer.GetUnit());
     }
+
+    double FShieldData() {
+        {CHECKME 0.0;}
+        return me->shield.Percent(Shield::front);
+    }
+
+    double BShieldData() {
+        {CHECKME 0.0;}
+        return me->shield.Percent(Shield::back);
+    }
+
+    double LShieldData() {
+        {CHECKME 0.0;}
+        return me->shield.Percent(Shield::left);
+    }
+
+    double RShieldData() {
+        {CHECKME 0.0;}
+        return me->shield.Percent(Shield::right);
+    }
+
+    float fuelData() {
+        {CHECKME 0.0;}
+        return me->fuel.Level();
+    }
+
+    float energyData() {
+        {CHECKME 0.0;}
+        return me->energy.Percent();
+    }
+
+    float GetHull() {
+        {CHECKME 0.0;}
+        return me->hull.Get();
+    }
+
+    float GetHullPercent() {
+        {CHECKME 0.0;}
+        return me->hull.Percent();
+    }
+
+    float rSize() {
+        {CHECKME 0.0;}
+        return me->rSize();
+    }
+
+
 /////////////////////////////MANUAL WRAP//////
 /*
  *  WRAPPED1(bool,TransferUnitToSystem,class StarSystem *,NewSystem,false)
