@@ -1403,11 +1403,7 @@ string Unit::WriteUnitString() {
         }
         unit["Tractorability"] = trac;
     }
+    unit["Unit_Role"] = getUnitRole();
 
     return writeCSV(unit);
 }
-
-
-
-
-
