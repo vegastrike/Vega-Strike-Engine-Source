@@ -636,16 +636,16 @@ void YawPitchRollParser(std::string unit_key,
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
     xml.unitModifications = modification.c_str();
-    xml.randomstartframe = ((float) rand()) / RAND_MAX;
+    xml.randomstartframe = static_cast<float>(rand()) / RAND_MAX;
     xml.randomstartseconds = 0;
     xml.calculated_role = false;
     xml.damageiterator = 0;
-    xml.shieldmesh = NULL;
-    xml.rapidmesh = NULL;
+    xml.shieldmesh = nullptr;
+    xml.rapidmesh = nullptr;
     xml.hasColTree = true;
     xml.unitlevel = 0;
     xml.unitscale = 1;
-    xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
+    xml.data = xml.shieldmesh = xml.rapidmesh = nullptr;     //was uninitialized memory
     string tmpstr;
     csvRow = unit_identifier;
 
