@@ -52,7 +52,7 @@ Energetic::Energetic() : energy(0, 0),
         afterburnenergy(0),
         afterburntype(0) {
     jump.warpDriveRating = 0;
-    jump.energy = 1;
+    jump.energy = 0.1;
     jump.insysenergy = configuration()->warp_config.insystem_jump_cost * jump.energy;
     jump.drive = -2;
     jump.delay = 5;
