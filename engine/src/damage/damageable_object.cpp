@@ -28,38 +28,30 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <iostream>
 
-DamageableObject::DamageableObject() {
-    Health hull_health = Health(1, 1, 0);
-    Health armor_health = Health(0, 0, 0);
-    Health shield_health = Health(0, 0, 5);
 
-    DamageableLayer hull_layer = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
-    DamageableLayer armor_layer = DamageableLayer(1, FacetConfiguration::four, armor_health, false);
-    DamageableLayer shield_layer = DamageableLayer(2, FacetConfiguration::four, shield_health, false);
+DamageableObject::DamageableObject():
+    number_of_layers(0) {}
 
-    layers = {hull_layer, armor_layer, shield_layer};
-    number_of_layers = 3;
+
+DamageableObject::DamageableObject(std::vector<DamageableLayer*> layers):
+    number_of_layers(3), layers(layers) {}
+
+
+void DamageableObject::AddLayer(DamageableLayer* layer) {
+    number_of_layers++;
+    layers.push_back(layer);
 }
-
-DamageableObject::DamageableObject(std::vector<DamageableLayer> layers,
-        std::vector<DamageableObject> components) {
-    number_of_layers = layers.size();
-    this->layers = layers;
-    this->components = components;
-}
-
-/*DamageableObject::DamageableObject()
-{
-    layers.push_back(DamageableLayer());
-}*/
-
 
 InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Damage &damage) {
     InflictedDamage inflicted_damage(3); // Currently hard-coded default is 3!
 
     // Higher index layers are outer layers. We therefore need to reverse the order.
-    for (DamageableLayer &layer : boost::adaptors::reverse(layers)) {
-        layer.DealDamage(attack_vector, damage, inflicted_damage);
+    for (DamageableLayer* layer : boost::adaptors::reverse(layers)) {
+        if(!layer) {
+            continue;
+        }
+
+        layer->DealDamage(attack_vector, damage, inflicted_damage);
 
         // TODO: handle damage to components here?
         // Assumed the core layer has only one facet
@@ -77,9 +69,7 @@ InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Da
 }
 
 void DamageableObject::Destroy() {
-    for (DamageableLayer layer : layers) {
-        layer.Destroy();
-    }
+    layers[0]->facets[0] = 0;
 }
 
 // We make a lot of assumptions here:
@@ -91,5 +81,5 @@ bool DamageableObject::Destroyed() {
         return true;
     }
 
-    return layers[0].facets[0].destroyed;
+    return layers[0]->facets[0] == 0;
 }

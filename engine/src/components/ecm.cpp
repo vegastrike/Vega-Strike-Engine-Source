@@ -30,12 +30,12 @@
 #include <boost/format.hpp>
 
 ECM::ECM() : 
-    Component(), EnergyConsumer(nullptr, false, 0), ecm(0), active(false) {
+    Component(), EnergyConsumer(nullptr, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
 }
 
 ECM::ECM(EnergyContainer *source): 
-    Component(), EnergyConsumer(source, false, 0), ecm(0), active(false) {
+    Component(), EnergyConsumer(source, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
 }
 
@@ -136,7 +136,7 @@ int ECM::Get() const {
 }
 
 void ECM::Set(int ecm) {
-    this->ecm = ecm;
+    this->ecm = Resource<int>(ecm, 0, ecm);;
 }
 
 void ECM::Toggle() {

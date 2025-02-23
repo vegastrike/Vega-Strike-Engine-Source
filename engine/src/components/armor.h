@@ -1,5 +1,5 @@
 /*
- * ecm.h
+ * armor.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,26 +22,28 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H
-#define VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_ARMOR_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_ARMOR_H
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "damage/damageable_layer.h"
 
-class EnergyContainer;
-
-/** A dummy component. Does nothing. Comes in useful in some places. */
-class ECM : public Component, public EnergyConsumer {
-    // TODO: take a deeper look at this much later...
-    //how likely to fool missiles
-    Resource<int> ecm;
-    bool active;
+/** Armor component 
+ * 
+ * Always present and always implemented as a 4 facet DL.
+ * If no armor, each facet is 0.
+*/
+class Armor : public Component, public DamageableLayer {
 public:
-    ECM();
-    ECM(EnergyContainer *source);
+    static int front;
+    static int back;
+    static int left;
+    static int right;
+
+    Armor();
 
     // Component Methods
-    void Load(std::string unit_key) override;
+    void Load(std::string unit_key) override;      
     
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
@@ -53,20 +55,10 @@ public:
 
     bool Upgrade(const std::string upgrade_key) override;
 
-    void Damage() override;
+    double PercentOperational() const override;
+
+    bool Damaged() const override;
     void Repair() override;
-
-    // EnergyConsumer override
-    double Consume() override;
-
-    // ECM Methods
-    bool Active() const;
-    bool BreakLock(void* missile) const;
-    int Get() const;
-    void Set(int ecm);
-    void Toggle();
-
-    void _upgrade(const std::string key);
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ARMOR_H

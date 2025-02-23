@@ -499,16 +499,18 @@ void VDU::DrawVDUShield(Unit *parent) {
 
     h = fabs(h * .6);
     w = fabs(w * .6);
+
+    double hull_percent = parent->hull.Percent();
     //static bool invert_friendly_shields =
     //    XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "invert_friendly_shields", "false" ) );
     //DrawShieldArmor(parent,StartArmor,x,y,w,h,invert_friendly_shields);
-    GFXColor4f(1, parent->GetHullPercent(), parent->GetHullPercent(), 1);
+    GFXColor4f(1, hull_percent, hull_percent, 1);
     GFXEnable(TEXTURE0);
-    GFXColor4f(1, parent->GetHullPercent(), parent->GetHullPercent(), 1);
+    GFXColor4f(1, hull_percent, hull_percent, 1);
     const bool invert_friendly_sprite = configuration()->graphics_config.hud.invert_friendly_sprite;
-    DrawHUDSprite(this, parent->getHudImage(), .25, x, y, w, h, parent->GetHullPercent(),
-            parent->GetHullPercent(), parent->GetHullPercent(), parent->GetHullPercent(),
-            parent->GetHullPercent(), true, invert_friendly_sprite);
+    DrawHUDSprite(this, parent->getHudImage(), .25, x, y, w, h, hull_percent,
+            hull_percent, hull_percent, hull_percent,
+            hull_percent, true, invert_friendly_sprite);
 }
 
 // TODO: make into function
@@ -634,12 +636,12 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     GFXEnable(TEXTURE0);
     const bool invert_target_sprite = configuration()->graphics_config.hud.invert_target_sprite;
     
-    float armor_up = target->armor->facets[0].Percent();
-    float armor_down = target->armor->facets[1].Percent();
-    float armor_left = target->armor->facets[2].Percent();
-    float armor_right = target->armor->facets[3].Percent();
+    float armor_up = target->armor.Percent(Armor::front);
+    float armor_down = target->armor.Percent(Armor::back);
+    float armor_left = target->armor.Percent(Armor::right);
+    float armor_right = target->armor.Percent(Armor::left);
     if (target->isUnit() == Vega_UnitType::planet) {
-        armor_up = armor_down = armor_left = armor_right = target->GetHullPercent();
+        armor_up = armor_down = armor_left = armor_right = target->hull.Percent();
     }
 
     DrawHUDSprite(this,
@@ -660,7 +662,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
             armor_right,
             armor_left,
             armor_down,
-            target->GetHullPercent(),
+            target->hull.Percent(),
             true,
             invert_target_sprite);
 
@@ -741,10 +743,10 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         static bool builtin_shields =
                 XMLSupport::parse_bool(vs_config->getVariable("graphics", "vdu_builtin_shields", "false"));
         if (builtin_shields) {
-            DrawShield(target->shield->facets[0].Percent(), 
-            target->shield->facets[3].Percent(), 
-            target->shield->facets[2].Percent(), 
-            target->shield->facets[1].Percent(), x, y, w, h, false,
+            DrawShield(target->shield.Percent(Shield::front), 
+            target->shield.Percent(Shield::right), 
+            target->shield.Percent(Shield::left), 
+            target->shield.Percent(Shield::back), x, y, w, h, false,
                     GFXColor(ishieldcolor[0], ishieldcolor[1], ishieldcolor[2], ishieldcolor[3]),
                     GFXColor(mshieldcolor[0], mshieldcolor[1], mshieldcolor[2], mshieldcolor[3]),
                     GFXColor(oshieldcolor[0], oshieldcolor[1], oshieldcolor[2], oshieldcolor[3]));
@@ -1186,18 +1188,16 @@ void VDU::DrawDamage(Unit *parent) {
     float x, y, w, h;
     //float th;
     //char st[1024];
-    double health_percent = parent->layers[0].facets[0].Percent();
-    GFXColor4f(1, health_percent, health_percent, 1);
+    double hull_percent = parent->hull.Percent();
+    GFXColor4f(1, hull_percent, hull_percent, 1);
     GFXEnable(TEXTURE0);
-    float armor[8];
-    parent->ArmorData(armor);
     const bool draw_damage_sprite = configuration()->graphics_config.hud.draw_damage_sprite;
     DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : nullptr, .6, x, y, w, h,
-            parent->layers[1].facets[0].Percent(),
-            parent->layers[1].facets[3].Percent(),
-            parent->layers[1].facets[2].Percent(),
-            parent->layers[1].facets[1].Percent(),
-            health_percent, true, false);
+            parent->armor.Percent(Armor::front),
+            parent->armor.Percent(Armor::right),
+            parent->armor.Percent(Armor::left),
+            parent->armor.Percent(Armor::back),
+            hull_percent, true, false);
     GFXDisable(TEXTURE0);
     //Unit *thr = parent->Threat();
     parent->Threat();

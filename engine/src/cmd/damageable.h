@@ -32,33 +32,20 @@
 class Unit;
 struct GFXColor;
 
+// TODO: most of what's left in this class should go up to lib damage.
+// The rest can be refactored elsewhere and the class deleted.
+
 /**
  * @brief The Damageable class TODO
  */
 class Damageable : public DamageableObject {
 public:
-    DamageableLayer *hull;
-    DamageableLayer *armor;
-    DamageableLayer *shield;
-
-    // These are only used for upgrade due to macros
-    // TODO: refactor
-    float upgrade_hull;
-
-    float shield_regeneration;
-
     //Is dead already?
     bool killed;
 
     // Methods
 public:
-    Damageable() : hull(&layers[0]),
-            armor(&layers[1]),
-            shield(&layers[2]),
-            upgrade_hull(0),
-            shield_regeneration(0),
-            killed(false) {
-    }
+    Damageable() : killed(false) {}
 
 protected:
     virtual ~Damageable() = default;
@@ -68,51 +55,6 @@ protected:
     Damageable &operator=(const Damageable &) = delete;
 
 public:
-    // We follow the existing convention of GetX for the actual health value
-    // because we are constrained by existing python interfaces, which cannot
-    // be easily changed.
-    // TODO: convert all calls to *current_hull
-    const float GetHull() const {
-        return layers[0].facets[0].health;
-    }
-
-    // TODO: check for valid index
-    const float GetArmor(int facet = 0) const {
-        return armor->facets[facet].health;
-    }
-
-    const float GetShield(int facet = 0) const {
-        return shield->facets[facet].health;
-    }
-
-    DamageableLayer &GetHullLayer() {
-        return layers[0];
-    }
-
-    DamageableLayer &GetArmorLayer() {
-        return layers[1];
-    }
-
-    DamageableLayer &GetShieldLayer() {
-        return layers[2];
-    }
-
-    const float GetShieldRegeneration() const {
-        return shield->facets[as_integer(FacetName::left_top_front)].regeneration;
-    }
-
-    virtual const float GetHullPercent() const {
-        return hull->GetPercent(FacetName::single);
-    }
-
-    virtual const float GetShieldPercent() const {
-        return shield->GetPercent(FacetName::left_top_front);
-    }
-
-    void ArmorData(float armor[8]) const;
-
-    // Is the shield up from this position
-    bool ShieldUp(const Vector &) const;
 
     // Currently available in case someone wants to call from python
     // but there isn't an interface
@@ -131,26 +73,12 @@ public:
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
     void Destroy(); //explodes then deletes
-
-    float FShieldData() const;
-    float RShieldData() const;
-    float LShieldData() const;
-    float BShieldData() const;
-    //short fix
-    //  void ArmorData( float armor[8] ) const;
-    //Gets the current status of the hull
-    //  float GetHull() const
-    //  {
-    //      return hull;
-    //  }
+   
 
 
 
     //reduces shields to X percentage and reduces shield recharge to Y percentage
     void leach(float XshieldPercent, float YrechargePercent, float ZenergyPercent);
-
-    float MaxShieldVal() const;
-    void RegenerateShields(const float difficulty, const bool player_ship);
 
     bool flickerDamage();
 };

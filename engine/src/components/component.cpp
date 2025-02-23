@@ -41,7 +41,7 @@ Component::Component(double mass, double volume, bool installed, bool integral):
                      description(""),
                      price(0.0),
                      mass(mass), volume(volume),
-                     operational(Resource<double>(100.0,0.0,100.0)),
+                     operational(Resource<double>(1.0,0.0,1.0)),
                      installed(installed),
                      integral(integral) {}
 
@@ -126,7 +126,7 @@ void Component::Destroy() {
 }
 
 bool Component::Damaged() const {
-    return operational.Value() < operational.MaxValue();
+    return operational.Value() < 1.0;
 }
 
 bool Component::Destroyed() const {
@@ -142,7 +142,7 @@ bool Component::Operational() const {
 }
 
 double Component::PercentOperational() const {
-    return operational.Percent();
+    return operational.Value();
 }
 
 void Component::SetIntegral(bool integral) {

@@ -101,7 +101,7 @@ void EnergyContainer::Zero() { level = 0; }
 
 
 void EnergyContainer::Refill() {
-    level.SetToMax();
+    level.Set(level.AdjustedValue());
 }
 
 
@@ -129,20 +129,22 @@ void EnergyContainer::Load(std::string unit_key) {
         std::cerr << "Illegal container type in EnergyContainer::Load" << std::flush;
         abort();       
     }
+
+    operational = level.AdjustedValue() / level.MaxValue();
 }
 
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
     switch(type) {
         case ComponentType::Fuel:
-        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.fuel_factor);
+        unit[FUEL_CAPACITY] = level.Serialize(configuration()->fuel.fuel_factor);
         break;
 
         case ComponentType::Capacitor:
-        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.energy_factor);
+        unit[CAPACITOR] = level.Serialize(configuration()->fuel.energy_factor);
         break;
         
         case ComponentType::FtlCapacitor:
-        unit[FUEL_CAPACITY] = std::to_string(MaxLevel() / configuration()->fuel.ftl_energy_factor);
+        unit[FTL_CAPACITOR] = level.Serialize(configuration()->fuel.ftl_energy_factor);
         break; 
 
         default: // This really can't happen
@@ -205,15 +207,18 @@ bool EnergyContainer::Upgrade(const std::string upgrade_key) {
 
 
 void EnergyContainer::Damage() {
-    level.RandomDamage();    
+    level.RandomDamage();  
+    operational = level.AdjustedValue() / level.MaxValue();
 }
 
 void EnergyContainer::DamageByPercent(double percent) {
-    level.DamageByPercent(percent);    
+    level.DamageByPercent(percent);  
+    operational = level.AdjustedValue() / level.MaxValue();
 }
 
 void EnergyContainer::Repair() {
     level.RepairFully();
+    operational = 1.0;
 }
 
 bool EnergyContainer::Damaged() const {
