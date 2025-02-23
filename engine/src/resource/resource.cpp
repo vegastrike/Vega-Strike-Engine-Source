@@ -38,9 +38,9 @@ T _convert(const std::string input, const T modifier);
 template<>
 float _convert<float>(const std::string input, const float modifier) {
     try {
-        return std::stod(input) * modifier;
+        return std::stof(input) * modifier;
     } catch(...) {
-        return 0.0;
+        return 0.0f;
     }
 }
 
