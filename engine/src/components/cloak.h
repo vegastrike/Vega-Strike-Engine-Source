@@ -84,6 +84,8 @@ public:
     bool Damaged() const override;
     bool Installed() const override;
 
+// Cloak Methods
+
     void Update();
     void Toggle(); // Toggle cloak on/off
 

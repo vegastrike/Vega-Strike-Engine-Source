@@ -242,7 +242,11 @@ void Shield::CalculatePercentOperational() {
     double percent = regeneration.Percent();
 
     for (Resource<double> &facet : facets) {
-        percent += facet.Percent();
+        if(facet.MaxValue() == 0.0) {
+            continue;
+        }
+
+        percent += facet.AdjustedValue() / facet.MaxValue();
     }
 
     // A simple average of regeneration and facets
@@ -289,7 +293,7 @@ void Shield::Repair() {
 }
 
 bool Shield::Damaged() const {
-    return Percent() < 1;
+    return operational.Value() < 1;
 }
 
 

@@ -37,14 +37,11 @@ AfterburnerUpgrade::AfterburnerUpgrade(Afterburner *afterburner):
 }
 
 
-
 // Component Methods
 void AfterburnerUpgrade::Load(std::string unit_key) {
-    Component::Load(unit_key);
-
-    thrust = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 1.0);
-    speed = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 1.0);
-    consumption = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 1.0);
+    // Not supported with the current file format
+    // Instead, we save the modified Afterburner stats and load the upgrade above.
+    // Then, if we sell the upgrade, we get the original.
 }      
 
 void AfterburnerUpgrade::SaveToCSV(std::map<std::string, std::string>& unit) const {
@@ -104,3 +101,5 @@ bool AfterburnerUpgrade::Upgrade(const std::string upgrade_key) {
     return true;
 }
 
+
+// TODO: deal with damage somehow

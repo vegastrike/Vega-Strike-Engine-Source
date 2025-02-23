@@ -31,6 +31,49 @@
 
 #include "random_utils.h"
 
+
+template<typename T>
+T _convert(const std::string input, const T modifier);
+
+template<>
+float _convert<float>(const std::string input, const float modifier) {
+    try {
+        return std::stof(input) * modifier;
+    } catch(...) {
+        return 0.0f;
+    }
+}
+
+
+template<>
+double _convert<double>(const std::string input, const double modifier) {
+    try {
+        return std::stod(input) * modifier;
+    } catch(...) {
+        return 0.0;
+    }
+}
+
+template<>
+int _convert<int>(const std::string input, const int modifier) {
+    try {
+        return std::stoi(input) * modifier;
+    } catch(...) {
+        return 0;
+    }
+}
+
+template<>
+long _convert<long>(const std::string input, const long modifier) {
+    try {
+        return std::stol(input) * modifier;
+    } catch(...) {
+        return 0l;
+    }
+}
+
+
+
 /*
  * Constructors
  */
@@ -42,8 +85,8 @@ Resource<T>::Resource(const T &value, const T &min_value, const T &max_value):
         adjusted_max_value_(max_value),
         no_max_(max_value==-1) {}
 
-template<>
-Resource<double>::Resource(const std::string input, const double modifier, const double minimum_functionality):
+template<typename T>
+Resource<T>::Resource(const std::string input, const T modifier, const T minimum_functionality):
         value_(0),
         min_value_(0),
         max_value_(1),
@@ -59,16 +102,16 @@ Resource<double>::Resource(const std::string input, const double modifier, const
 
     switch(result.size()) {
         case 1:
-            value_ = max_value_ = adjusted_max_value_ = std::stod(result[0]) * modifier;
+            value_ = max_value_ = adjusted_max_value_ = _convert(result[0], modifier);
             break;
         case 2:
-            value_ = adjusted_max_value_ = std::stod(result[0]) * modifier;
-            max_value_ = std::stod(result[1]) * modifier;
+            value_ = adjusted_max_value_ = _convert(result[0], modifier);
+            max_value_ = _convert(result[1], modifier);
             break;
         case 3:
-            value_ = std::stod(result[0]) * modifier;
-            adjusted_max_value_ = std::stod(result[1]) * modifier;
-            max_value_ = std::stod(result[2]) * modifier;
+            value_ = _convert(result[0], modifier);
+            adjusted_max_value_ = _convert(result[1], modifier);
+            max_value_ = _convert(result[2], modifier);
             break;
         default:
             value_ = max_value_ = adjusted_max_value_ = 0.0;
@@ -86,6 +129,18 @@ const std::string Resource<double>::Serialize(const double modifier) const {
             (adjusted_max_value_/modifier) % (max_value_/modifier)).str();
 }
 
+template<>
+const std::string Resource<int>::Serialize(const int modifier) const {
+    return (boost::format("%1%/%2%/%3%") % (value_/modifier) %
+            (adjusted_max_value_/modifier) % (max_value_/modifier)).str();
+}
+
+template<>
+const std::string Resource<long>::Serialize(const long modifier) const {
+    return (boost::format("%1%/%2%/%3%") % (value_/modifier) %
+            (adjusted_max_value_/modifier) % (max_value_/modifier)).str();
+}
+
 
 template<typename T>
 double Resource<T>::Percent() const {
@@ -97,7 +152,7 @@ double Resource<T>::Percent() const {
         return 0;
     }
 
-    return value_ / max_value_;
+    return static_cast<double>(value_) / static_cast<double>(max_value_);
 }
 
 template<typename T>
@@ -444,3 +499,20 @@ template bool operator<=(const int &lhs, const Resource<int> &rhs);
 template bool operator>=(const int &lhs, const Resource<int> &rhs);
 template int operator/(const Resource<int> &lhs, const int &rhs);
 template int operator/(const int &lhs, const Resource<int> &rhs);
+
+template
+class Resource<long>;
+
+template bool operator==(const Resource<long> &lhs, const Resource<long> &rhs);
+template bool operator==(const Resource<long> &lhs, const long &rhs);
+template bool operator>(const Resource<long> &lhs, const long &rhs);
+template bool operator<(const Resource<long> &lhs, const long &rhs);
+template bool operator<=(const Resource<long> &lhs, const long &rhs);
+template bool operator>=(const Resource<long> &lhs, const long &rhs);
+template bool operator==(const long &lhs, const Resource<long> &rhs);
+template bool operator>(const long &lhs, const Resource<long> &rhs);
+template bool operator<(const long &lhs, const Resource<long> &rhs);
+template bool operator<=(const long &lhs, const Resource<long> &rhs);
+template bool operator>=(const long &lhs, const Resource<long> &rhs);
+template long operator/(const Resource<long> &lhs, const long &rhs);
+template long operator/(const long &lhs, const Resource<long> &rhs);

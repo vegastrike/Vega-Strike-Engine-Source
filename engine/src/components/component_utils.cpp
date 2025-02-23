@@ -83,6 +83,8 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
         return ComponentType::Fuel;
     } else if(upgrade_category == "Cloak") {
         return ComponentType::Cloak;
+    } else if(upgrade_category == "Radar") {
+        return ComponentType::Radar;
     } else {
         return ComponentType::None;
     }

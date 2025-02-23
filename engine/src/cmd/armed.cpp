@@ -325,13 +325,7 @@ int Armed::LockMissile() const {
     return missilelock ? 1 : (dumblock ? -1 : 0);
 }
 
-void Armed::LockTarget(bool myboo) {
-    Unit *unit = static_cast<Unit *>(this);
-    unit->computer.radar.locked = myboo;
-    if (myboo && unit->computer.radar.canlock == false && false == UnitUtil::isSignificant(unit->Target())) {
-        unit->computer.radar.locked = false;
-    }
-}
+
 
 QVector Armed::PositionITTS(const QVector &absposit, Vector velocity, float speed, bool steady_itts) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
@@ -414,7 +408,7 @@ void Armed::setAverageGunSpeed() {
 
 bool Armed::TargetLocked(const Unit *checktarget) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    if (!unit->computer.radar.locked) {
+    if (!unit->radar.locked) {
         return false;
     }
     return (checktarget == NULL) || (unit->computer.target == checktarget);
@@ -424,19 +418,24 @@ bool Armed::TargetTracked(const Unit *checktarget) {
     Unit *unit = static_cast<Unit *>(this);
     static bool must_lock_to_autotrack = XMLSupport::parse_bool(
             vs_config->getVariable("physics", "must_lock_to_autotrack", "true"));
-    bool we_do_track = unit->computer.radar.trackingactive
+
+    bool we_do_track = unit->radar.tracking_active
             && (!_Universe->isPlayerStarship(unit) || TargetLocked() || !must_lock_to_autotrack);
     if (!we_do_track) {
         return false;
     }
+
     if (checktarget == NULL) {
         return true;
     }
+
     if (unit->computer.target != checktarget) {
         return false;
     }
-    float mycone = unit->computer.radar.trackingcone;
+
+    float mycone = unit->radar.tracking_cone;
     we_do_track = CloseEnoughToAutotrack(unit, unit->computer.target.GetUnit(), mycone);
+
     return we_do_track;
 }
 
@@ -455,7 +454,7 @@ float Armed::TrackingGuns(bool &missilelock) {
     missilelock = false;
     for (int i = 0; i < getNumMounts(); ++i) {
         if (mounts[i].status == Mount::ACTIVE && isAutoTrackingMount(mounts[i].size)) {
-            trackingcone = unit->computer.radar.trackingcone;
+            trackingcone = unit->radar.tracking_cone;
         }
         if (mounts[i].status == Mount::ACTIVE && mounts[i].type->lock_time > 0 && mounts[i].time_to_lock <= 0) {
             missilelock = true;

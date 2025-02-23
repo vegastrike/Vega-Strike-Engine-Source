@@ -756,7 +756,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
                         (isAutoTrackingMount(unit->mounts[i].size)
                                 && (unit->mounts[i].time_to_lock <= 0)
                                 && unit->TargetTracked()) ? unit->Target() : NULL,
-                        unit->computer.radar.trackingcone);
+                        unit->radar.GetTrackingCone());
             }
         }
 
