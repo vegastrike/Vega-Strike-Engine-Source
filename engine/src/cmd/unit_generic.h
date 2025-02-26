@@ -914,8 +914,6 @@ public:
 
 public:
 
-//returns -1 if unit cannot dock, otherwise returns which dock it can dock at
-    int CanDockWithMe(Unit *dockingunit, bool forcedock = false);
     int ForceDock(Unit *utdw, unsigned int whichdockport);
     void PerformDockingOperations();
     void FreeDockingPort(unsigned int whichport);
