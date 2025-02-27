@@ -138,7 +138,7 @@ SET(CMAKE_C_EXTENSIONS ON)
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
 MESSAGE(STATUS "Always using preferred PIE logic now")
 
-include(CheckPIESupported)
+INCLUDE(CheckPIESupported)
 check_pie_supported()
 UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 IF (ENABLE_PIE)
@@ -148,6 +148,39 @@ ELSE (ENABLE_PIE)
     MESSAGE(STATUS "Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
     SET(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 ENDIF (ENABLE_PIE)
+
+INCLUDE(CheckIncludeFile)
+INCLUDE(CheckIncludeFileCXX)
+INCLUDE(CheckTypeSize)
+INCLUDE(CMakePushCheckState)
+SET(SIZEOF_VOID_P CMAKE_SIZEOF_VOID_P)
+
+SET(CMAKE_FIND_FRAMEWORK "LAST")
+
+#Find Math
+INCLUDE(CheckSymbolExists)
+IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
+    # cmake_push_check_state()
+    check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
+    IF(NOT POW_FUNCTION_EXISTS)
+        UNSET(POW_FUNCTION_EXISTS CACHE)
+        LIST(APPEND CMAKE_REQUIRED_LIBRARIES m)
+        # LIST(APPEND CMAKE_REQUIRED_INCLUDES math.h)
+        check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
+        IF(POW_FUNCTION_EXISTS)
+            SET(NEED_LINKING_AGAINST_LIBM True CACHE BOOL "" FORCE)
+        ELSE(POW_FUNCTION_EXISTS)
+            MESSAGE(FATAL_ERROR "Failed making the pow() function available")
+        ENDIF(POW_FUNCTION_EXISTS)
+    ENDIF(NOT POW_FUNCTION_EXISTS)
+    # cmake_pop_check_state()
+ENDIF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
+
+# Set the default build type
+IF (NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
+ENDIF (NOT CMAKE_BUILD_TYPE)
+MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
 # Should we install gtest?
 OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
@@ -178,7 +211,7 @@ ENDIF (INSTALL_GTEST OR USE_GTEST)
 
 INCLUDE(GNUInstallDirs)
 
-SET(VS_SUBDIRECTORIES "engine")
+SET(VS_SUBDIRECTORIES "libraries" "engine")
 FOREACH(VS_SUBDIR IN LISTS VS_SUBDIRECTORIES)
     ADD_SUBDIRECTORY(${VS_SUBDIR})
 ENDFOREACH(VS_SUBDIR)

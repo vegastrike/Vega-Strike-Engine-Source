@@ -36,7 +36,7 @@
 #include "gfx/sphere.h"
 #include "gfx/sprite.h"
 #include "audiolib.h"
-#include "collide2/CSopcodecollider.h"
+#include "CSopcodecollider.h"
 #include "unit_collide.h"
 #include <string>
 #include <set>

@@ -75,14 +75,14 @@ extern float AUDIO_ATOM;
 #if !defined (NO_GFX)
 #   if defined(__APPLE__) && defined(__MACH__)
 #       define GL_GLEXT_FUNCTION_POINTERS 1
-#       include <gl.h>
-#       include <glu.h>
-#       include <glut.h>
+#       include <GL/gl.h>
+#       include <GL/glu.h>
+#       include <GL/glut.h>
 #   else //defined(__APPLE__) && defined(__MACH__)
 #       define __glext_h_
-#       include <gl.h>
-#       include <glu.h>
-#       include <glut.h>
+#       include <GL/gl.h>
+#       include <GL/glu.h>
+#       include <GL/glut.h>
 #       undef __glext_h_
 #   endif //defined(__APPLE__) && defined(__MACH__)
 #endif //NO_GFX

@@ -43,7 +43,7 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
-#include "cmd/collide2/CSopcodecollider.h"
+#include "CSopcodecollider.h"
 #include "options.h"
 #include "cmd/unit_collide.h"
 

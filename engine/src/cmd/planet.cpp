@@ -44,7 +44,7 @@
 #include "gfx/planetary_transform.h"
 #endif
 
-#include "collide2/CSopcodecollider.h"
+#include "CSopcodecollider.h"
 #include "images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"

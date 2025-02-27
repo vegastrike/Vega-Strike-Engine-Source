@@ -36,9 +36,9 @@
 #include "unit_collide.h"
 #include "physics.h"
 
-#include "collide2/CSopcodecollider.h"
-#include "collide2/csgeom2/optransfrm.h"
-#include "collide2/basecollider.h"
+#include "CSopcodecollider.h"
+#include "csgeom2/optransfrm.h"
+#include "basecollider.h"
 
 #include "hashtable.h"
 

@@ -44,6 +44,7 @@ INCLUDE(InstallRequiredSystemLibraries)
 
 LIST(APPEND
     VS_INCLUDE_DIRS
+    # VS engine headers
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cmd
@@ -52,6 +53,9 @@ LIST(APPEND
     ${CMAKE_CURRENT_SOURCE_DIR}/src/resource
     ${CMAKE_CURRENT_SOURCE_DIR}/src/python/base_computer
     ${CMAKE_CURRENT_SOURCE_DIR}/src/python/config
+    # Library Headers
+    ${CMAKE_SOURCE_DIR}/libraries/collide2
+    # CMake Artifacts
     ${Vega_Strike_BINARY_DIR}
     ${Vega_Strike_BINARY_DIR}/src
 )
@@ -64,39 +68,6 @@ ENDIF (UNIX)
 MESSAGE("VS INCLUDE DIRS: ${VS_INCLUDE_DIRS}")
 
 # The source files used to be listed here...
-
-INCLUDE(CheckIncludeFile)
-INCLUDE(CheckIncludeFileCXX)
-INCLUDE(CheckTypeSize)
-INCLUDE(CMakePushCheckState)
-SET(SIZEOF_VOID_P CMAKE_SIZEOF_VOID_P)
-
-SET(CMAKE_FIND_FRAMEWORK "LAST")
-
-#Find Math
-INCLUDE(CheckSymbolExists)
-IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
-    # cmake_push_check_state()
-    check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
-    IF(NOT POW_FUNCTION_EXISTS)
-        UNSET(POW_FUNCTION_EXISTS CACHE)
-        LIST(APPEND CMAKE_REQUIRED_LIBRARIES m)
-        # LIST(APPEND CMAKE_REQUIRED_INCLUDES math.h)
-        check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
-        IF(POW_FUNCTION_EXISTS)
-            SET(NEED_LINKING_AGAINST_LIBM True CACHE BOOL "" FORCE)
-        ELSE(POW_FUNCTION_EXISTS)
-            MESSAGE(FATAL_ERROR "Failed making the pow() function available")
-        ENDIF(POW_FUNCTION_EXISTS)
-    ENDIF(NOT POW_FUNCTION_EXISTS)
-    # cmake_pop_check_state()
-ENDIF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
-
-# Set the default build type
-IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
-ENDIF (NOT CMAKE_BUILD_TYPE)
-MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
 # Option to turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
@@ -586,61 +557,6 @@ SET(LIBAI_SOURCES
     src/cmd/ai/flykeyboard_generic.cpp
 )
 
-ADD_LIBRARY(vegastrike-OPcollide
-    src/cmd/collide2/Ice/IceAABB.cpp
-    src/cmd/collide2/Ice/IceContainer.cpp
-    src/cmd/collide2/Ice/IceHPoint.cpp
-    src/cmd/collide2/Ice/IceIndexedTriangle.cpp
-    src/cmd/collide2/Ice/IceMatrix3x3.cpp
-    src/cmd/collide2/Ice/IceMatrix4x4.cpp
-    src/cmd/collide2/Ice/IceOBB.cpp
-    src/cmd/collide2/Ice/IcePlane.cpp
-    src/cmd/collide2/Ice/IcePoint.cpp
-    src/cmd/collide2/Ice/IceRandom.cpp
-    src/cmd/collide2/Ice/IceRay.cpp
-    src/cmd/collide2/Ice/IceRevisitedRadix.cpp
-    src/cmd/collide2/Ice/IceSegment.cpp
-    src/cmd/collide2/Ice/IceTriangle.cpp
-    src/cmd/collide2/Ice/IceUtils.cpp
-    src/cmd/collide2/csgeom2/opbox.cpp
-    src/cmd/collide2/csgeom2/opmatrix3.cpp
-    src/cmd/collide2/csgeom2/opvector3.cpp
-    src/cmd/collide2/OPC_AABBCollider.cpp
-    src/cmd/collide2/OPC_AABBTree.cpp
-    src/cmd/collide2/OPC_BaseModel.cpp
-    src/cmd/collide2/OPC_BoxPruning.cpp
-    src/cmd/collide2/OPC_Collider.cpp
-    src/cmd/collide2/OPC_HybridModel.cpp
-    src/cmd/collide2/OPC_LSSCollider.cpp
-    src/cmd/collide2/OPC_MeshInterface.cpp
-    src/cmd/collide2/OPC_Model.cpp
-    src/cmd/collide2/OPC_OBBCollider.cpp
-    src/cmd/collide2/OPC_OptimizedTree.cpp
-    src/cmd/collide2/OPC_Picking.cpp
-    src/cmd/collide2/OPC_PlanesCollider.cpp
-    src/cmd/collide2/OPC_RayCollider.cpp
-    src/cmd/collide2/OPC_SphereCollider.cpp
-    src/cmd/collide2/OPC_SweepAndPrune.cpp
-    src/cmd/collide2/OPC_TreeBuilders.cpp
-    src/cmd/collide2/OPC_TreeCollider.cpp
-    src/cmd/collide2/OPC_VolumeCollider.cpp
-    src/cmd/collide2/CSopcodecollider.cpp
-)
-TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PUBLIC ${VS_INCLUDE_DIRS})
-
-#TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
-set_property(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
-ENDIF()
-TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
-IF (WIN32)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC _WIN32_WINNT=0x0A00)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC WINVER=0x0A00)
-    TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
-ENDIF()
-
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
     src/cmd/carrier.cpp
@@ -1024,7 +940,6 @@ SET(VEGASTRIKE_SOURCES
     src/main.cpp
     src/python/briefing_wrapper.cpp
 )
-
 
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 
