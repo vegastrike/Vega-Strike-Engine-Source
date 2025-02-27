@@ -121,7 +121,7 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
     }
     
     
-    // Non-planets don't display this text
+    // Planets/non-planets calculate differently
     if (target->isUnit() == Vega_UnitType::planet) {
         // TODO: move from here. We shouldn't have kill and land logic here.
         if(range < 0) {
@@ -164,8 +164,6 @@ std::string PrettyDistanceString(double distance) {
     if (distance < 20000) {                                   
         return (boost::format("%.0lf meters") % distance).str();
     }
-
-    distance /= 1000;
 
     // Use kilometers with two decimals up to 100 km
     if (distance < 100000) {
