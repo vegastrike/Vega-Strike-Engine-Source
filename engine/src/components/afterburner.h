@@ -53,6 +53,7 @@ public:
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+    // TODO: virtual void Destroy(); and other functions
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H

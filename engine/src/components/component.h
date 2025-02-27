@@ -62,7 +62,8 @@ enum class ComponentType {
     FtlCapacitor,
     Fuel,
 
-    Cloak
+    Cloak, 
+    Radar
     // TODO: all the rest of the upgrades, shady or not...
 };
 
