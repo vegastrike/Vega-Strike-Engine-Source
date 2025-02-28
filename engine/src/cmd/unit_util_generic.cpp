@@ -577,6 +577,9 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
+            if(c->GetCategory().find("upgrades/integral") == 0) {
+                continue;
+            }
             if (c->GetName().find("mult_") != 0
                     && c->GetName().find("add_") != 0) {
                 un->Upgrade(c->GetName(), 0, 0, true, false);
@@ -586,6 +589,9 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
+            if(c->GetCategory().find("upgrades/integral") == 0) {
+                continue;
+            }
             if (c->GetName().find("add_") == 0) {
                 for (int j = 0; j < c->GetQuantity(); ++j) {
                     un->Upgrade(c->GetName(), 0, 0, true, false);
@@ -596,6 +602,9 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
+            if(c->GetCategory().find("upgrades/integral") == 0) {
+                continue;
+            }
             if (c->GetName().find("mult_") == 0) {
                 for (int j = 0; j < c->GetQuantity(); ++j) {
                     un->Upgrade(c->GetName(), 0, 0, true, false);
