@@ -957,6 +957,9 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         return un->cloak.PercentOperational();
     }
 
+    if(upgrade_category == "Radar") {
+        return un->radar.PercentOperational();
+    }
     if(upgrade_category == "ECM") {
         return un->ftl_drive.PercentOperational();
     }

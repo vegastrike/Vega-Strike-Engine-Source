@@ -62,8 +62,6 @@ public:
     //-1 is no lock necessary 1 is locked
     int LockMissile() const;
 
-    void LockTarget(bool myboo);
-
     //Finds the position from the local position if guns are aimed at it with speed
     QVector PositionITTS(const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts) const;
 

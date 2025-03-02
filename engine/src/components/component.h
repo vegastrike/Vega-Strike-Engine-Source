@@ -63,9 +63,11 @@ enum class ComponentType {
     Fuel,
 
     Cloak, 
+    Radar,
     ECM, 
     RepairBot,
     ShipFunctions
+
     // TODO: all the rest of the upgrades, shady or not...
 };
 

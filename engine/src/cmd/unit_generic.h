@@ -75,6 +75,8 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
+#include "cloak.h"
+
 
 
 #include "configuration/configuration.h"
@@ -95,6 +97,7 @@ void UncheckUnit( class Unit*un );
 #include "components/armor.h"
 #include "components/hull.h"
 #include "components/shield.h"
+#include "components/radar.h"
 #include "components/ecm.h"
 #include "components/repair_bot.h"
 #include "components/ship_functions.h"
@@ -186,6 +189,7 @@ public:
     DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
     FtlDrive ftl_drive = FtlDrive(&ftl_energy);
     JumpDrive jump_drive = JumpDrive(&ftl_energy);
+    CRadar radar;
 
     Armor armor;
     Hull hull;
