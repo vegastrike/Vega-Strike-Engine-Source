@@ -139,9 +139,6 @@ void showSplashScreen(const string &filename) {
 void showSplashMessage(const string &text) {
 }
 
-void showSplashProgress(float progress) {
-}
-
 void hideSplashScreen() {
 }
 

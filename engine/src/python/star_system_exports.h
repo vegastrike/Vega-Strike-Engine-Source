@@ -134,7 +134,6 @@ voidEXPORT_UTIL(receivedCustom)
 
 voidEXPORT_UTIL(showSplashScreen)
 voidEXPORT_UTIL(showSplashMessage)
-voidEXPORT_UTIL(showSplashProgress)
 voidEXPORT_UTIL(hideSplashScreen)
 EXPORT_UTIL(isSplashScreenShowing, true)
 
