@@ -210,7 +210,6 @@ struct RendererData {
     }
 
     void suspend() {
-        // FIXME: There's a residual error here on Windows. Can't track down where it's from.
         alGetError();
         checkAlError();
         alcMakeContextCurrent(alContext);
