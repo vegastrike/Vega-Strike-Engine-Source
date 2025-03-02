@@ -88,6 +88,7 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "cockpit_gfx.h"
+#include "dock_utils.h"
 
 #include <cstddef>
 #include <cfloat>
@@ -679,8 +680,12 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::CANDOCK_MODAL: {
             Unit *station = target->Target();
             if (station) {
-                if (station->CanDockWithMe(target, true) != -1) {
-                    if (station->CanDockWithMe(target, false) != -1) {
+                if(target->isUnit() != Vega_UnitType::planet ) {
+                    return (float) UnitImages<void>::NOMINAL;
+                }
+
+                if (CanDock(station, target, true) != -1) {
+                    if (CanDock(station, target, false) != -1) {
                         return (float) UnitImages<void>::READY;
                     }
                     if (Orders::AutoDocking::CanDock(target, station)) {

@@ -40,7 +40,7 @@
 // TODO: find out where this is and maybe refactor
 extern int SelectDockPort(Unit *, Unit *parent);
 extern void SwitchUnits(Unit *, Unit *);
-extern void abletodock(int dock);
+extern void PlayDockingSound(int dock);
 
 
 
@@ -429,7 +429,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargo->SetPosAndCumPos(unit->Position());
                         //claims to be docked, stops speed and taking damage etc. but doesn't seem to call the base script
                         cargo->ForceDock(unit, 0);
-                        abletodock(3);
+                        PlayDockingSound(3);
                         //actually calls the interface, meow. yay!
                         cargo->UpgradeInterface(unit);
                         if ((simulate_while_at_base) || (_Universe->numPlayers() > 1)) {

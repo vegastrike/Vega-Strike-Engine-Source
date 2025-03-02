@@ -39,7 +39,7 @@ bool isVSSpriteLoaded(const VSSprite *file) {
 void deleteVSSprite(VSSprite *file) {
 }
 
-void abletodock(int) {
+void PlayDockingSound(int) {
 }
 
 void cache_ani(std::string s) {
