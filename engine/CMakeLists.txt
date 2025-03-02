@@ -73,25 +73,6 @@ SET(SIZEOF_VOID_P CMAKE_SIZEOF_VOID_P)
 
 SET(CMAKE_FIND_FRAMEWORK "LAST")
 
-#Find Math
-INCLUDE(CheckSymbolExists)
-IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
-    # cmake_push_check_state()
-    check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
-    IF(NOT POW_FUNCTION_EXISTS)
-        UNSET(POW_FUNCTION_EXISTS CACHE)
-        LIST(APPEND CMAKE_REQUIRED_LIBRARIES m)
-        # LIST(APPEND CMAKE_REQUIRED_INCLUDES math.h)
-        check_symbol_exists(pow math.h POW_FUNCTION_EXISTS)
-        IF(POW_FUNCTION_EXISTS)
-            SET(NEED_LINKING_AGAINST_LIBM True CACHE BOOL "" FORCE)
-        ELSE(POW_FUNCTION_EXISTS)
-            MESSAGE(FATAL_ERROR "Failed making the pow() function available")
-        ENDIF(POW_FUNCTION_EXISTS)
-    ENDIF(NOT POW_FUNCTION_EXISTS)
-    # cmake_pop_check_state()
-ENDIF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
-
 # Set the default build type
 IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
