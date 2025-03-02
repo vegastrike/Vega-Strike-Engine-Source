@@ -370,7 +370,7 @@ void Configuration::OverrideDefaultsWithUserConfiguration() {
     physics_config.engine_energy_takes_priority = GetGameConfig().GetBool("physics.engine_energy_priority", physics_config.engine_energy_takes_priority);
     physics_config.density_of_rock = GetGameConfig().GetFloat("physics.density_of_rock", physics_config.density_of_rock);
     physics_config.density_of_jump_point = GetGameConfig().GetFloat("physics.density_of_jump_point", physics_config.density_of_jump_point);
-     physics_config.jump_mesh_radius_scale = GetGameConfig().GetFloat("physics.jump_mesh_radius_scale", physics_config.jump_mesh_radius_scale);
+    physics_config.jump_mesh_radius_scale = GetGameConfig().GetFloat("physics.jump_mesh_radius_scale", physics_config.jump_mesh_radius_scale);
     physics_config.planets_can_have_subunits = GetGameConfig().GetBool("physics.planets_can_have_subunits", physics_config.planets_can_have_subunits);
     physics_config.planets_always_neutral = GetGameConfig().GetBool("physics.planets_always_neutral", physics_config.planets_always_neutral);
     physics_config.no_damage_to_docked_ships = GetGameConfig().GetBool("physics.no_damage_to_docked_ships", physics_config.no_damage_to_docked_ships);
@@ -483,10 +483,12 @@ vega_config::GameStart::GameStart(boost::json::object object) {
     
 
 vega_config::Dock::Dock(boost::json::object object) {
-    planet_dock_port_size = GetDouble(object, "game_play|planet_dock_port_size", planet_dock_port_size);
-    planet_dock_port_min_size = GetDouble(object, "game_play|planet_dock_port_min_size", planet_dock_port_min_size);
-    dock_planet_radius_percent = GetDouble(object, "game_play|dock_planet_radius_percent", dock_planet_radius_percent);
-    simple_dock = GetBool(object, "game_play|dock_planet_radius_percent", simple_dock);
+    planet_dock_port_size = GetDouble(object, "dock|planet_dock_port_size", planet_dock_port_size);
+    planet_dock_port_min_size = GetDouble(object, "dock|planet_dock_port_min_size", planet_dock_port_min_size);
+    dock_planet_radius_percent = GetDouble(object, "dock|dock_planet_radius_percent", dock_planet_radius_percent);
+    simple_dock = GetBool(object, "dock|dock_planet_radius_percent", simple_dock);
+    count_to_dock_range = GetDouble(object, "dock|count_to_dock_range", count_to_dock_range);
+    simple_dock_range = GetDouble(object, "dock|simple_dock_range", simple_dock_range);
 }
 
 std::shared_ptr<Configuration> configuration() {

@@ -883,7 +883,7 @@ void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
                     + FactionUtil::GetFactionName(faction)
                     + ")\n\n#ff0000Target:\n  #ffff00" + (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing"))
                     + "\n\n#ff0000Range: #ffff00"
-                    + PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you,targ) : 0.0));
+                    + PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you, targ) : 0.0));
     static float auto_message_lim =
             XMLSupport::parse_float(vs_config->getVariable("graphics", "auto_message_time_lim", "5"));
     float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;

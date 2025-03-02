@@ -27,6 +27,7 @@
 #include "unit_generic.h"
 #include "universe_util.h"
 #include "configuration/configuration.h"
+#include "physics.h"
 
 #include <boost/format.hpp>
 
@@ -39,9 +40,11 @@ bool insideDock(const DockingPorts &dock, const QVector &pos, float radius) {
 
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
     double distance = (first_unit->Position() - second_unit->Position()).Magnitude();
-    double first_size = first_unit->rSize();
-    double second_size = second_unit->rSize();
-    distance -= (first_size + second_size);
+    
+    if(second_unit->isUnit() == Vega_UnitType::planet) {
+        distance -= second_unit->rSize();
+    }
+    
     return std::max(0.0, distance);
 }
 
@@ -53,6 +56,17 @@ double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
  * @returns the dock number or -1 for fail
  */
 int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
+    // Nowhere to dock. Exit
+    if(dock->pImage->dockingports.size() == 0) {
+        return -1;
+    }
+
+    // Jump point. Exit
+    if(dock->pImage->destination.size() > 0) {
+        return -1;
+    }
+
+
     double range = DistanceTwoTargets(dock, ship);
 
     // Planet Code
@@ -119,26 +133,33 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
     if (CanDock(target, unit, false) != -1) {
         return std::string("Docking: Ready");
     }
-    
-    
+
+    // Nowhere to dock. Exit
+    if(target->pImage->dockingports.size() == 0) {
+        return std::string();
+    }
+
+    // Jump point. Exit
+    if(target->pImage->destination.size() > 0) {
+        return std::string();
+    }
+
+
     // Planets/non-planets calculate differently
     if (target->isUnit() == Vega_UnitType::planet) {
         // TODO: move from here. We shouldn't have kill and land logic here.
-        if(range < 0) {
+        if(range <= 0) {
             unit->hull.Destroy();
         }
 
         range -= target->rSize() * configuration()->dock.dock_planet_radius_percent;
-        if (range < 0) {
-            // Should be caught by dock check above
-            abort();
-        } else if (range < 100000) {
+        if (range > 0 && range < configuration()->dock.count_to_dock_range) {
             return std::string("Docking: ") + string(PrettyDistanceString(range));
         }
     } else {
         if(configuration()->dock.simple_dock && target->pImage->dockingports.size() != 0 && 
-            range < 100000) {
-            if (range > 5000) {
+            range < configuration()->dock.count_to_dock_range) {
+            if (range > configuration()->dock.simple_dock_range) {
                 return std::string("Docking: ") + string(PrettyDistanceString(range-5000));
             } 
         }
@@ -154,7 +175,7 @@ std::string PrettyDistanceString(double distance) {
     }
 
     // Distance in km
-    static const double light_second = 299792458;
+    static const double light_second = c;
     static const double light_minute = light_second * 60;
     static const double light_hour = light_minute * 60;
     static const double light_day = light_hour * 24;
@@ -167,12 +188,12 @@ std::string PrettyDistanceString(double distance) {
 
     // Use kilometers with two decimals up to 100 km
     if (distance < 100000) {
-        return (boost::format("%.2lf kilometers") % distance).str();
+        return (boost::format("%.2lf kilometers") % (distance / 1000)).str();
     } 
     
     // Use kilometers without decimals up to a light second
     if (distance < light_second) {
-        return (boost::format("%.0lf kilometers") % distance).str();
+        return (boost::format("%.0lf kilometers") % (distance / 1000)).str();
     }
 
     // Use light seconds up to 2 light minutes

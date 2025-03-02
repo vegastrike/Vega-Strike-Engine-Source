@@ -469,6 +469,8 @@ struct Dock {
     float planet_dock_port_min_size{300.0F};
     double dock_planet_radius_percent{1.5};
     bool simple_dock{true};
+    double count_to_dock_range{100000};
+    double simple_dock_range{5000};
 
     Dock() {}
     Dock(boost::json::object object);
