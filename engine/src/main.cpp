@@ -110,7 +110,7 @@ void enableNetwork(bool usenetwork) {
 void setup_game_data() {
     //pass in config file l8r??
     g_game.audio_frequency_mode = 4;     //22050/16
-    g_game.sound_enabled = 1;
+    g_game.sound_enabled = 0;
     g_game.use_textures = 1;
     g_game.use_ship_textures = 0;
     g_game.use_planet_textures = 0;
@@ -207,13 +207,11 @@ void initALRenderer() {
     VS_LOG(info, "  Initializing renderer...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
-    if (g_game.sound_enabled) {
-        SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
-        renderer->setMeterDistance(1.0);
-        renderer->setDopplerFactor(0.0);
+    SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
+    renderer->setMeterDistance(1.0);
+    renderer->setDopplerFactor(0.0);
 
-        sm->setRenderer(renderer);
-    }
+    sm->setRenderer(renderer);
 }
 
 void initScenes() {
@@ -382,13 +380,17 @@ int main(int argc, char *argv[]) {
     InitTime();
     UpdateTime();
 
-    AUDInit();
-    AUDListenerGain(game_options()->sound_gain);
-    Music::InitMuzak();
-
-    initSceneManager();
-    initALRenderer();
-    initScenes();
+    // Sound & Music config file options are used, return value reflects them
+    if (!AUDInit()) {
+        VS_LOG(warning, "Audio not initialized (disabled in config or failure)");
+    } else {
+        g_game.sound_enabled = 1;
+        AUDListenerGain(game_options()->sound_gain);
+        initALRenderer();
+        Music::InitMuzak();
+        initSceneManager();
+        initScenes();
+    }
 
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
@@ -403,7 +405,8 @@ int main(int argc, char *argv[]) {
     //Unregister commands - and cleanup memory
     UninitShipCommands();
 
-    closeRenderer();
+    if (g_game.sound_enabled)
+        closeRenderer();
 
     cleanup();
 
@@ -439,7 +442,6 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     if (!BootstrapMyStarSystemLoading || reentryWatchdog) {
         return;
     }
-    Music::MuzakCycle();     //Allow for loading music...
     if (SplashScreen == NULL && newSplashScreen == NULL) {
         //if there's no splashscreen, we don't draw on it
         //this happens, when the splash screens texture is loaded
@@ -543,8 +545,11 @@ void bootstrap_first_loop() {
         vector<string> sa = parse_space_string(game_options()->splash_audio);
         int snum = time(nullptr) % s.size();
         SplashScreen = new Animation(s[snum].c_str(), false);
-        if (!sa.empty() && sa[0].length()) {
-            muzak->GotoSong(sa[snum % sa.size()]);
+        if (g_game.sound_enabled) {
+            Music::MuzakCycle(); //Allow for loading music...
+            if (!sa.empty() && sa[0].length()) {
+                muzak->GotoSong(sa[snum % sa.size()]);
+            }
         }
         bs_tp = new TextPlane();
     }
