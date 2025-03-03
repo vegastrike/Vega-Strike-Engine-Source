@@ -184,21 +184,27 @@ This will produce a significantly smaller download - in the order of 22-30 MB; w
    b. *OR* configure and compile VS manually, using the ncurses ccmake frontend:
 
    ```bash
-   mkdir build & cd build
+   mkdir build
+   cd build
    ccmake ..
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
+   cd ..
    cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
-   mkdir ../bin && cp vegastrike-engine ../bin/ && cp setup/vegasettings ../bin/ && cd ..
+   mkdir bin
+   cp build/vegastrike-engine build/setup/vegasettings bin
    ```
 
    c. *OR* configure and compile VS manually, using the command-line cmake frontend:
 
    ```bash
-   mkdir build & cd build
+   mkdir build
+   cd build
    cmake ..
+   cd ..
    cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
-   mkdir ../bin && cp vegastrike-engine ../bin/ && cp setup/vegasettings ../bin/ && cd ..
+   mkdir bin
+   cp build/vegastrike-engine build/setup/vegasettings bin
    ```
 
    __TIPS__:
