@@ -68,7 +68,7 @@
 #include "configuration/configuration.h"
 #include <time.h>
 #if !defined(_WIN32) && !defined (__HAIKU__)
-#include <sys/signal.h>
+#include <signal.h>
 #endif
 
 #if defined (_MSC_VER) && defined (_DEBUG)
