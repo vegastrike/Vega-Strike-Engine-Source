@@ -328,7 +328,7 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
         if (gauges[i]) {
             gauges[i]->Draw( cockpit->LookupUnitStat( i, un ) );
             float damage =
-                un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages < void > ::NUMGAUGES)];
+                un->ship_functions.Value(Function::cockpit);
             if (gauge_time[i] >= 0) {
                 if ( damage > .0001 && ( cockpit_time > ( gauge_time[i]+(1-damage) ) ) )
                     if (rand01() > SWITCH_CONST)
@@ -548,7 +548,7 @@ void DrawRadar(const Radar::Sensor& sensor, float  cockpit_time, float radar_tim
         GFXEnable(TEXTURE0);
 
         // Draw radar damage
-        float damage = (sensor.GetPlayer()->GetImageInformation().cockpit_damage[0]);
+        float damage = sensor.GetPlayer()->ship_functions.Value(Function::cockpit);
         if (sensor.GetMaxRange() < 1.0)
             damage = std::min(damage, 0.25f);
         if (damage < .985) {

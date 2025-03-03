@@ -77,22 +77,6 @@ void Energetic::setEnergyRecharge(float enrech) {
 }
 
 
-
-
-
-
-void Energetic::MaintainECM() {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-
-    if (!unit->computer.ecmactive) {
-        return;
-    }
-
-    float sim_atom_ecm = configuration()->fuel.ecm_energy_cost * unit->ecm * simulation_atom_var;
-    unit->energy.Deplete(false, sim_atom_ecm);
-}
-
-
 float Energetic::VSDPercent() {
     return configuration()->fuel.vsd_mj_yield / 100;
 }

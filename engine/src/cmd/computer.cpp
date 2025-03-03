@@ -27,7 +27,6 @@
 #include "configuration/configuration.h"
 
 Computer::Computer() : NavPoint(0, 0, 0),
-        ecmactive(true),
         velocity_ref(nullptr),
         force_velocity_ref(false),
         threatlevel(0),
