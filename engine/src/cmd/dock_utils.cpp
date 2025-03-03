@@ -41,6 +41,10 @@ bool insideDock(const DockingPorts &dock, const QVector &pos, float radius) {
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
     double distance = (first_unit->Position() - second_unit->Position()).Magnitude();
     
+    if(first_unit->isUnit() == Vega_UnitType::planet) {
+        distance -= first_unit->rSize();
+    }
+
     if(second_unit->isUnit() == Vega_UnitType::planet) {
         distance -= second_unit->rSize();
     }
@@ -71,7 +75,7 @@ int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy) {
 
     // Planet Code
     if (dock->isUnit() == Vega_UnitType::planet) {
-        range -= dock->rSize() * configuration()->dock.dock_planet_radius_percent;
+        range -= dock->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
         if (range < 0) {
             return 0;
         } else {
@@ -152,8 +156,8 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
             unit->hull.Destroy();
         }
 
-        range -= target->rSize() * configuration()->dock.dock_planet_radius_percent;
-        if (range > 0 && range < configuration()->dock.count_to_dock_range) {
+        range -= target->rSize() * (configuration()->dock.dock_planet_radius_percent - 1);
+        if (range > 0 && range < target->rSize()) {
             return std::string("Docking: ") + string(PrettyDistanceString(range));
         }
     } else {
