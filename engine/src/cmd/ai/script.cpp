@@ -811,8 +811,8 @@ void AIScript::LoadXML() {
         }
         if (_Universe->isPlayerStarship(parent->Target())) {
             double value;
-            static const double game_speed = configuration()->physics_config.game_speed;
-            static const double game_accel = configuration()->physics_config.game_accel;
+            static const double game_speed = configuration()->physics.game_speed;
+            static const double game_accel = configuration()->physics.game_accel;
             {
                 Unit *targ = parent->Target();
                 if (targ) {

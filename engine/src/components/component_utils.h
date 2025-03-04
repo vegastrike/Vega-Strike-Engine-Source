@@ -38,7 +38,7 @@ const ComponentType GetComponentTypeFromName(const std::string name);
 EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
                            EnergyContainer* energy, EnergyContainer* ftl_energy);
 
-EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer* fuel,
+EnergyContainer* GetSourceFromConfiguration(const std::string source, EnergyContainer* fuel,
                                             EnergyContainer* energy, EnergyContainer* ftl_energy);
 
 enum class YPR {

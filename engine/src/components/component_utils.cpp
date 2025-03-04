@@ -125,15 +125,19 @@ EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
     }
 }
 
-// 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled
-EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer* fuel,
+
+EnergyContainer* GetSourceFromConfiguration(const std::string source, EnergyContainer* fuel,
                                       EnergyContainer* energy, EnergyContainer* ftl_energy) {
-    switch(source) {
-        case EnergyConsumerSource::Infinite: return nullptr;
-        case EnergyConsumerSource::Fuel: return fuel;
-        case EnergyConsumerSource::Energy: return energy;
-        case EnergyConsumerSource::FTLEnergy: return ftl_energy;
-        default: return nullptr;
+    if(source == "Infinite") {
+        return nullptr; 
+    } else if(source == "Fuel") {
+        return fuel;
+    } else if(source == "Energy") {
+        return energy;
+    } else if(source == "FTLEnergy") {
+        return ftl_energy;
+    } else {
+        return nullptr;
     }
 }
 

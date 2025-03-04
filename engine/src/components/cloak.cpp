@@ -132,7 +132,7 @@ void Cloak::Update()
     } 
 
     // TODO: Use warp power for cloaking (SPEC capacitor)
-    //const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
+    //const static bool warp_energy_for_cloak = configuration()->ftl.use_warp_energy_for_cloak;
     
 
 

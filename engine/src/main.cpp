@@ -320,10 +320,10 @@ int main(int argc, char *argv[]) {
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths(CONFIGFILE, subdir);
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
-    }
 
-    // now that the user config file has been loaded from disk, update the global configuration struct values
-    configuration()->OverrideDefaultsWithUserConfiguration();
+        // Load the configuration file
+        configuration();
+    }
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {

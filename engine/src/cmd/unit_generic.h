@@ -644,7 +644,7 @@ public:
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
-    float shieldtight = configuration()->physics_config.default_shield_tightness;
+    float shieldtight = configuration()->physics.default_shield_tightness;
 
 public:
     // TODO: move to jump_capable?
