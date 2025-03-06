@@ -562,7 +562,7 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
                     ".05"));
     if (target->isPlanet() == false
             && (target->graphicOptions.specInterdictionOnline == 0
-                    || fabs(target->specInterdiction) < specInterdictionLimit)) {
+                    || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
         return true;
     }
     if (parent->computer.combat_mode == false) {

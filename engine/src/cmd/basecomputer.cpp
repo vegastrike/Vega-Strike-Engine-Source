@@ -1754,6 +1754,10 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                 commitButton->setLabel("Fix1st");
                 commitButton->setCommand("");
             }
+            
+            if(item.GetCategory().find("upgrades/integral") == 0) {
+                commitButton->setHidden(true);
+            }
         }
         NewButton *commitFixButton = static_cast< NewButton * > ( window()->findControlById("CommitFix"));
         bool unhidden = true;

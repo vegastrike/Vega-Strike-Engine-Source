@@ -177,7 +177,7 @@ struct Fuel {
     float fmec_factor{0.000000008F};
     float reactor_idle_efficiency{0.98F};
     float min_reactor_efficiency{0.00001F};
-    float ecm_energy_cost{0.05F};
+    double ecm_energy_cost{0.05F};
     
     double megajoules_factor{100};
     double fuel_factor{60.0};   // Multiply fuel by this to get fuel by minutes

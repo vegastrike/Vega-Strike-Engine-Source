@@ -743,7 +743,6 @@ void Beam::UpdatePhysics(const Transformation &trans,
         Unit *targ,
         float tracking_cone,
         Unit *targetToCollideWith,
-        float HeatSink,
         Unit *firer,
         Unit *superunit) {
     curlength += simulation_atom_var * speed;
@@ -757,7 +756,6 @@ void Beam::UpdatePhysics(const Transformation &trans,
         if (AUDIsPlaying(sound) && refiretime >= simulation_atom_var) {
             AUDStopPlaying(sound);
         }
-        refiretime += simulation_atom_var * HeatSink;
         return;
     }
     if (stability && numframes * simulation_atom_var > stability) {

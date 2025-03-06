@@ -574,30 +574,6 @@ void HudDamage(float *dam, const string &damages) {
     }
 }
 
-string WriteHudDamage(Unit *un) {
-    string ret;
-    const string semi = ";";
-    if (un->pImage->cockpit_damage) {
-        for (int i = 0; i < 1 + MAXVDUS + UnitImages<void>::NUMGAUGES; ++i) {
-            ret += XMLSupport::tostring(un->pImage->cockpit_damage[i]);
-            ret += semi;
-        }
-    }
-    return ret;
-}
-
-string WriteHudDamageFunc(Unit *un) {
-    string ret;
-    const string semi = ";";
-    if (un->pImage->cockpit_damage) {
-        int numg = 1 + MAXVDUS + UnitImages<void>::NUMGAUGES;
-        for (int i = numg; i < 2 * numg; ++i) {
-            ret += XMLSupport::tostring(un->pImage->cockpit_damage[i]);
-            ret += semi;
-        }
-    }
-    return ret;
-}
 
 void LoadCockpit(Unit *thus, const string &cockpit) {
     string::size_type elemstart = 0, elemend = string::npos;
@@ -706,7 +682,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     this->CargoVolume = UnitCSVFactory::GetVariable(unit_key, "Hold_Volume", 0.0f);
     this->HiddenCargoVolume = UnitCSVFactory::GetVariable(unit_key, "Hidden_Hold_Volume", 0.0f);
     this->UpgradeVolume = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Storage_Volume", 0.0f);
-    this->equipment_volume = UnitCSVFactory::GetVariable(unit_key, "Equipment_Space", 0.0f);
 
     std::string cargo_import_string = UnitCSVFactory::GetVariable(unit_key, "Cargo_Import", std::string());
     ImportCargo(this, cargo_import_string);     //if this changes change planet_generic.cpp
@@ -730,7 +705,6 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     armor.Load(unit_key);
     shield.Load(unit_key);
 
-    specInterdiction = UnitCSVFactory::GetVariable(unit_key, "Spec_Interdiction", 0.0f);
 
     // Energy 
     // TODO: The following code has a bug.
@@ -774,29 +748,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     cloak.SetSource((warp_energy_for_cloak ? &ftl_energy : &energy));
     cloak.Load(unit_key);
 
-    repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
-    ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
-
-    this->HeatSink = UnitCSVFactory::GetVariable(unit_key, "Heat_Sink_Rating", 0.0f);
-    if (ecm < 0) {
-        ecm *= -1;
-    }
-    if (pImage->cockpit_damage) {
-        std::string hud_functionality = UnitCSVFactory::GetVariable(unit_key, "Hud_Functionality", std::string());
-        std::string
-                max_hud_functionality = UnitCSVFactory::GetVariable(unit_key, "Max_Hud_Functionality", std::string());
-
-        HudDamage(pImage->cockpit_damage, hud_functionality);
-        HudDamage(pImage->cockpit_damage + 1 + MAXVDUS + UnitImages<void>::NUMGAUGES, max_hud_functionality);
-    }
-    LifeSupportFunctionality = UnitCSVFactory::GetVariable(unit_key, "Lifesupport_Functionality", 1.0f);
-    LifeSupportFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_Lifesupport_Functionality", 1.0f);
-    CommFunctionality = UnitCSVFactory::GetVariable(unit_key, "Comm_Functionality", 1.0f);
-    CommFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_Comm_Functionality", 1.0f);
-    fireControlFunctionality = UnitCSVFactory::GetVariable(unit_key, "FireControl_Functionality", 1.0f);
-    fireControlFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_FireControl_Functionality", 1.0f);
-    SPECDriveFunctionality = UnitCSVFactory::GetVariable(unit_key, "SPECDrive_Functionality", 1.0f);
-    SPECDriveFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_SPECDrive_Functionality", 1.0f);
+    ecm.Load(unit_key);
+    repair_bot.Load(unit_key);
+    ship_functions.Load(unit_key);
+    
     computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
     computer.slide_end = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
 
@@ -998,7 +953,6 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     }
 
     //mutable things
-    unit["Equipment_Space"] = XMLSupport::tostring(equipment_volume);
     unit["Hold_Volume"] = XMLSupport::tostring(CargoVolume);
     unit["Hidden_Hold_Volume"] = XMLSupport::tostring(HiddenCargoVolume);
     unit["Upgrade_Storage_Volume"] = XMLSupport::tostring(UpgradeVolume);
@@ -1105,9 +1059,7 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
 
     hull.SaveToCSV(unit);
     armor.SaveToCSV(unit);
-    shield.SaveToCSV(unit);
-
-    unit["Spec_Interdiction"] = tos(specInterdiction);
+    shield.SaveToCSV(unit);  
     
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
@@ -1131,22 +1083,10 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     
     unit["ITTS"] = tos(computer.itts);
 
-
-    unit["Repair_Droid"] = tos(repair_droid);
-    unit["ECM_Rating"] = tos(ecm > 0 ? ecm : -ecm);
-    unit["Hud_Functionality"] = WriteHudDamage(this);
-    unit["Max_Hud_Functionality"] = WriteHudDamageFunc(this);
-    unit["Heat_Sink_Rating"] = tos(this->HeatSink);
-    unit["Lifesupport_Functionality"] = tos(LifeSupportFunctionality);
-    unit["Max_Lifesupport_Functionality"] = tos(LifeSupportFunctionalityMax);
-    unit["Comm_Functionality"] = tos(CommFunctionality);
-    unit["Max_Comm_Functionality"] = tos(CommFunctionalityMax);
-    unit["Comm_Functionality"] = tos(CommFunctionality);
-    unit["Max_Comm_Functionality"] = tos(CommFunctionalityMax);
-    unit["FireControl_Functionality"] = tos(fireControlFunctionality);
-    unit["Max_FireControl_Functionality"] = tos(fireControlFunctionalityMax);
-    unit["SPECDrive_Functionality"] = tos(SPECDriveFunctionality);
-    unit["Max_SPECDrive_Functionality"] = tos(SPECDriveFunctionalityMax);
+    ecm.SaveToCSV(unit);
+    repair_bot.SaveToCSV(unit);
+    ship_functions.SaveToCSV(unit);
+    
     unit["Slide_Start"] = tos(computer.slide_start);
     unit["Slide_End"] = tos(computer.slide_end);
     unit["Cargo_Import"] = unit["Upgrades"] = "";                 //make sure those are empty

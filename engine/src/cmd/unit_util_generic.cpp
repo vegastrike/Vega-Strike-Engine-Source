@@ -577,6 +577,9 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
+            if(c->GetCategory().find("upgrades/integral") == 0) {
+                continue;
+            }
             if (c->GetName().find("mult_") != 0
                     && c->GetName().find("add_") != 0) {
                 un->Upgrade(c->GetName(), 0, 0, true, false);
@@ -586,6 +589,9 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
+            if(c->GetCategory().find("upgrades/integral") == 0) {
+                continue;
+            }
             if (c->GetName().find("add_") == 0) {
                 for (int j = 0; j < c->GetQuantity(); ++j) {
                     un->Upgrade(c->GetName(), 0, 0, true, false);
@@ -596,6 +602,9 @@ void RecomputeUnitUpgrades(Unit *un) {
     for (i = 0; i < un->numCargo(); ++i) {
         Cargo *c = &un->GetCargo(i);
         if (c->GetCategory().find("upgrades") == 0 && c->GetCategory().find(DamagedCategory) != 0) {
+            if(c->GetCategory().find("upgrades/integral") == 0) {
+                continue;
+            }
             if (c->GetName().find("mult_") == 0) {
                 for (int j = 0; j < c->GetQuantity(); ++j) {
                     un->Upgrade(c->GetName(), 0, 0, true, false);
@@ -853,7 +862,7 @@ void setECM(Unit *my_unit, int NewECM) {
     if (!my_unit) {
         return;
     }
-    my_unit->ecm = NewECM;
+    my_unit->ecm.Set(NewECM);
 }
 
 int getECM(const Unit *my_unit) {
@@ -861,7 +870,8 @@ int getECM(const Unit *my_unit) {
     if (!my_unit) {
         return 0;
     }
-    return my_unit->computer.ecmactive ? my_unit->ecm : 0;
+
+    return my_unit->ecm.Get();
 }
 
 static bool ishere(const Unit *par, const Unit *look) {
@@ -948,7 +958,7 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         return un->jump_drive.PercentOperational();
     }
 
-    if(upgrade_category == "FTL Drive") {
+    if(upgrade_category == "FTL_Drive") {
         return un->ftl_drive.PercentOperational();
     }
 
@@ -958,6 +968,13 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
 
     if(upgrade_category == "Radar") {
         return un->radar.PercentOperational();
+    }
+    if(upgrade_category == "ECM") {
+        return un->ftl_drive.PercentOperational();
+    }
+
+    if(upgrade_category == "Repair_Bot") {
+        return un->cloak.PercentOperational();
     }
 
 
