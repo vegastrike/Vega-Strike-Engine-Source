@@ -956,6 +956,10 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
         return un->cloak.PercentOperational();
     }
 
+    if(upgrade_category == "Radar") {
+        return un->radar.PercentOperational();
+    }
+
 
     // Old Code
     if (category.find(DamagedCategory) == 0) {

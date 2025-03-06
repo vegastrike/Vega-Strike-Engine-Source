@@ -58,6 +58,7 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "vs_logging.h"
+#include "unit_util.h"
 
 extern bool toggle_pause();
 
@@ -1783,7 +1784,7 @@ void FireKeyboard::Execute() {
     }
     if (f().lockkey == PRESS) {
         f().lockkey = DOWN;
-        parent->LockTarget(!parent->TargetLocked());
+        parent->radar.ToggleLock();
     }
     if (f().ECMkey == PRESS) {
         f().ECMkey = DOWN;
@@ -1814,7 +1815,7 @@ void FireKeyboard::Execute() {
         f().targetskey = DOWN;
         ChooseTargets(parent, TargSig, false);
         refresh_target = true;
-        parent->LockTarget(true);
+        parent->radar.Lock(UnitUtil::isSignificant(parent));
     }
     if (f().targetukey == PRESS) {
         f().targetukey = DOWN;
@@ -1895,7 +1896,7 @@ void FireKeyboard::Execute() {
         f().rtargetskey = DOWN;
         ChooseTargets(parent, TargSig, true);
         refresh_target = true;
-        parent->LockTarget(true);
+        parent->radar.Lock(UnitUtil::isSignificant(parent));
     }
     if (f().rtargetukey == PRESS) {
         f().rtargetukey = DOWN;
@@ -2033,7 +2034,7 @@ void FireKeyboard::Execute() {
     }
     if (f().toggleautotracking == PRESS) {
         f().toggleautotracking = DOWN;
-        parent->GetComputerData().radar.trackingactive = !parent->GetComputerData().radar.trackingactive;
+        parent->radar.ToggleTracking();
     }
     if (f().misk == PRESS || f().rmisk == PRESS) {
         bool forward;
@@ -2059,7 +2060,7 @@ void FireKeyboard::Execute() {
             f().saveTargetKeys[i] = RELEASE;
             savedTargets[i] = parent->Target();
         }
-        if (f().restoreTargetKeys[i] == PRESS && parent->GetComputerData().radar.canlock) {
+        if (f().restoreTargetKeys[i] == PRESS && parent->radar.CanLock()) {
             f().restoreTargetKeys[i] = RELEASE;
             Unit *un;
             for (un_iter u = _Universe->activeStarSystem()->getUnitList().createIterator();

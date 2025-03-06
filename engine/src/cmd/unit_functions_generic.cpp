@@ -48,22 +48,7 @@ double saved_interpolation_blend_factor;
 double interpolation_blend_factor;
 bool cam_setup_phase = false;
 
-int cloakVal(int cloak, int cloakmin, int cloakrate, bool cloakglass) {
-    //Short fix ?
-    if (cloak < 0 && cloakrate < 0) {
-        cloak = -2147483647 - 1;
-    }          //intended warning should be max neg :-) leave it be
-    if (cloak < cloakmin && cloakrate > 0) {
-        cloak = cloakmin;
-    }
-    if ((cloak & 0x1) && !cloakglass) {
-        cloak -= 1;
-    }
-    if ((cloak & 0x1) == 0 && cloakglass) {
-        cloak += 1;
-    }
-    return cloak;
-}
+
 
 const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0) {
     const char *name = upgradeName.c_str();

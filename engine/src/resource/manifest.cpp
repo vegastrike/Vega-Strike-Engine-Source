@@ -75,18 +75,23 @@ Manifest::Manifest(int dummy) {
         boost::json::array root_array = json_value.get_array();
 
         for(boost::json::value& item_value : root_array) {
-            boost::json::object item = item_value.get_object();
+            try {
+                boost::json::object item = item_value.get_object();
 
-            std::string name = JsonGetStringWithDefault(item, "file", "");
-            std::string category = JsonGetStringWithDefault(item, "categoryname", "");
-            int price = std::stoi(JsonGetStringWithDefault(item, "price", "0"));
-            double mass = std::stod(JsonGetStringWithDefault(item, "mass", "0.0"));
-            double volume = std::stod(JsonGetStringWithDefault(item, "volume", "0.0"));
-            std::string description = JsonGetStringWithDefault(item, "description", "");
+                std::string name = JsonGetStringWithDefault(item, "file", "");
+                std::string category = JsonGetStringWithDefault(item, "categoryname", "");
+                int price = std::stoi(JsonGetStringWithDefault(item, "price", "0"));
+                double mass = std::stod(JsonGetStringWithDefault(item, "mass", "0.0"));
+                double volume = std::stod(JsonGetStringWithDefault(item, "volume", "0.0"));
+                std::string description = JsonGetStringWithDefault(item, "description", "");
 
-            Cargo cargo = Cargo(name, category, price, 1, mass, volume);
-            cargo.SetDescription(description);
-            _items.push_back(cargo);
+                Cargo cargo = Cargo(name, category, price, 1, mass, volume);
+                cargo.SetDescription(description);
+                _items.push_back(cargo);
+            } catch (...) {
+                std::cerr << "Failed to parse " << item_value << std::endl;
+            }
+            
         }
     }
 }

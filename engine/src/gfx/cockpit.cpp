@@ -2649,26 +2649,29 @@ void GameCockpit::OnPauseEnd() {
 }
 
 void GameCockpit::updateRadar(Unit *ship) {
-    if (ship) {
-        // We may have bought a new radar brand while docked, so the actual
-        // radar display is instantiated when we undock.
-        switch (ship->GetComputerData().radar.GetBrand()) {
-            case Computer::RADARLIM::Brand::BUBBLE:
-                radarDisplay = Radar::Factory(Radar::Type::BubbleDisplay);
-                break;
-
-            case Computer::RADARLIM::Brand::PLANE:
-                radarDisplay = Radar::Factory(Radar::Type::PlaneDisplay);
-                break;
-
-            default:
-                radarDisplay = Radar::Factory(Radar::Type::SphereDisplay);
-                break;
-        }
-        // Send notification that I have undocked
-        radarDisplay->OnDockEnd();
+    if (!ship) {
+        return;
     }
 
+    // We may have bought a new radar brand while docked, so the actual
+    // radar display is instantiated when we undock.
+    RadarType type = ship->radar.GetType();
+    Radar::Type::Value displayType = Radar::Type::Value::NullDisplay;
+
+    if(type == RadarType::BUBBLE) {
+        displayType = Radar::Type::BubbleDisplay;
+    } else if(type == RadarType::PLANE) {
+        displayType = Radar::Type::PlaneDisplay;
+    } else if(type == RadarType::SPHERE) {
+        displayType = Radar::Type::SphereDisplay;
+    }
+
+    if(displayType != Radar::Type::Value::NullDisplay) {
+        radarDisplay = Radar::Factory(displayType);
+    }
+
+    // Send notification that I have undocked
+    radarDisplay->OnDockEnd();
 }
 
 void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) {
