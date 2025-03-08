@@ -122,7 +122,12 @@ Mesh::Mesh() {
 }
 
 bool Mesh::LoadExistant(Mesh *oldmesh) {
-    *this = *oldmesh;
+    try {
+        *this = *oldmesh;
+    } catch (std::exception& ex) {
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCSIG__ % ex.what()));
+        return false;
+    }
     oldmesh->refcount++;
     orig = oldmesh;
     return true;
@@ -131,14 +136,19 @@ bool Mesh::LoadExistant(Mesh *oldmesh) {
 bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction) {
     Mesh *oldmesh;
 
-    hash_name = VSFileSystem::GetHashName(filehash, scale, faction);
-    oldmesh = meshHashTable.Get(hash_name);
-    if (oldmesh == nullptr) {
-        hash_name = VSFileSystem::GetSharedMeshHashName(filehash, scale, faction);
+    try {
+        hash_name = VSFileSystem::GetHashName(filehash, scale, faction);
         oldmesh = meshHashTable.Get(hash_name);
-    }
-    if (nullptr != oldmesh) {
-        return LoadExistant(oldmesh);
+        if (oldmesh == nullptr) {
+            hash_name = VSFileSystem::GetSharedMeshHashName(filehash, scale, faction);
+            oldmesh = meshHashTable.Get(hash_name);
+        }
+        if (nullptr != oldmesh) {
+            return LoadExistant(oldmesh);
+        }
+    } catch (std::exception& ex) {
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCSIG__ % ex.what()));
+        return false;
     }
     return false;
 }
