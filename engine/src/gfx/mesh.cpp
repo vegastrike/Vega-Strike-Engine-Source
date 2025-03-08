@@ -125,7 +125,7 @@ bool Mesh::LoadExistant(Mesh *oldmesh) {
     try {
         *this = *oldmesh;
     } catch (std::exception& ex) {
-        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCSIG__ % ex.what()));
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCTION__ % ex.what()));
         return false;
     }
     oldmesh->refcount++;
@@ -147,7 +147,7 @@ bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction)
             return LoadExistant(oldmesh);
         }
     } catch (std::exception& ex) {
-        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCSIG__ % ex.what()));
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCTION__ % ex.what()));
         return false;
     }
     return false;
