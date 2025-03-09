@@ -1,16 +1,13 @@
 /*
  * json.h
  *
- * Vega Strike - Space Simulation, Combat and Trading
- * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * This file is part of Simpleson, and has been adapted and incorporated into
+ * Vega Strike (https://github.com/vegastrike/Vega-Strike-Engine-Source).
+ *
+ * Vega Strike adaptations copyright (C) 2001-2025 The Vega Strike Contributors:
  * Project creator: Daniel Horn
  * Original development team: As listed in the AUTHORS file
  * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
- *
- *
- * https://github.com/vegastrike/Vega-Strike-Engine-Source
- *
- * This file is part of Vega Strike.
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,8 +1,12 @@
 /*
  * vdu.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -727,7 +731,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         double dist = DistanceTwoTargets(parent, target);
         double actual_range = dist;
         if ((target->isUnit() == Vega_UnitType::planet) && (target->CanDockWithMe(parent, 1) != -1)) {
-            dist -= target->rSize() * UniverseUtil::getPlanetRadiusPercent();
+            dist -= static_cast<double>(target->rSize()) * static_cast<double>(UniverseUtil::getPlanetRadiusPercent());
             if (dist < 0) {
                 newst += string("Docking: Ready");
             } else if (dist < target->rSize()) {
@@ -1896,4 +1900,3 @@ bool VDU::CheckCommAnimation(Unit *un) const {
     }
     return false;
 }
-

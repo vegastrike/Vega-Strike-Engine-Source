@@ -1,8 +1,12 @@
 /*
  * vsimage.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -955,14 +959,15 @@ VSError VSImage::WritePNG(unsigned char *data) {
         png_set_swap(png_ptr);
     }
 #endif
-    int stride = (this->img_depth / 8) * (this->img_alpha ? 4 : 3);
+    const uintmax_t stride = (static_cast<uintmax_t>(this->img_depth) / 8ULL)
+                            * (static_cast<uintmax_t>(this->img_alpha) ? 4ULL : 3ULL);
     png_byte **row_pointers = new png_byte *[this->sizeY];
     if (this->flip) {
-        for (int i = this->sizeY - 1, j = 0; i >= 0; i--, ++j) {
+        for (intmax_t i = this->sizeY - 1, j = 0; i >= 0; i--, ++j) {
             row_pointers[j] = (png_byte *) &data[stride * i * sizeX];
         }
     } else {
-        for (unsigned int i = 0; i < this->sizeY; i++) {
+        for (uintmax_t i = 0; i < this->sizeY; i++) {
             row_pointers[i] = (png_byte *) &data[stride * i * sizeX];
         }
     }

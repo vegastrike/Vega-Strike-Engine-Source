@@ -1,8 +1,12 @@
 /*
  * star.cpp
  *
- * Copyright (C) 2001-2024 Daniel Horn, pyramid3d, Stephen G. Tuggy,
- * Benjamen R. Meyer, and other Vega Strike contributors
+ * Vega Strike - Space Simulation, Combat and Trading
+ * Copyright (C) 2001-2025 The Vega Strike Contributors:
+ * Project creator: Daniel Horn
+ * Original development team: As listed in the AUTHORS file
+ * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ *
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -15,11 +19,11 @@
  *
  * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -612,7 +616,7 @@ void Stars::ResetPosition(const QVector &cent) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 3; k++) {
-                pos[i * 9 + j * 3 + k].Set((i - 1) * spread, (j - 1) * spread, (k - 1) * spread);
+                pos[i * 9 + j * 3 + k].Set(static_cast<double>(i - 1) * spread, static_cast<double>(j - 1) * spread, static_cast<double>(k - 1) * spread);
                 pos[i * 9 + j * 3 + k] += cent;
             }
         }
@@ -832,4 +836,3 @@ SpriteStarVlist::~SpriteStarVlist() {
         }
     }
 }
-
