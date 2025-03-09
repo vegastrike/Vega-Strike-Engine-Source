@@ -62,17 +62,17 @@ inline static float perspectiveFactor(float d) {
     }
 }
 
-Drawable::Drawable() :
-        halos(new HaloSystem()),
-        animatedMesh(true),
-        activeAnimation(0),
-        timeperframe(3.0),
-        done(true),
-        activeMesh(0),
-        nextactiveMesh(1),
-        infiniteLoop(true),
-        loopCount(0),
-        curtime(0.0) {
+Drawable::Drawable() : halos(new HaloSystem()),
+                       animatedMesh(true),
+                       activeAnimation(0),
+                       timeperframe(3.0),
+                       done(true),
+                       activeMesh(0),
+                       nextactiveMesh(1),
+                       infiniteLoop(true),
+                       loopCount(0),
+                       num_chunks(0),
+                       curtime(0.0) {
 }
 
 Drawable::~Drawable() {
