@@ -455,10 +455,6 @@ Mesh::~Mesh() {
     } else {
         orig->refcount--;
         VS_LOG(debug, (boost::format("orig refcount: %1%") % refcount));
-        // if (orig->refcount == 0) {
-        //     delete[] orig;
-        //     orig = nullptr;
-        // }
     }
 }
 
