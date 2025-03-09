@@ -1323,17 +1323,23 @@ vector<Mesh *> Mesh::LoadMeshes(const char *filename,
      *  }*/
     string hash_name = VSFileSystem::GetHashName(filename, scale, faction);
     vector<Mesh *> *oldmesh = bfxmHashTable.Get(hash_name);
-    if (oldmesh == 0) {
+    if (oldmesh == nullptr) {
         hash_name = VSFileSystem::GetSharedMeshHashName(filename, scale, faction);
         oldmesh = bfxmHashTable.Get(hash_name);
     }
-    if (oldmesh && !oldmesh->empty() && oldmesh->size() < UINT32_MAX) {
-        vector<Mesh *> ret;
-        for (auto m : *oldmesh) {
-            ret.push_back(new Mesh());
-            ret.back()->LoadExistant(m->orig ? m->orig : m);
+    if (oldmesh) {
+        if (oldmesh->size() > 0 && oldmesh->size() < UINT32_MAX) {
+            vector<Mesh *> ret;
+            for (auto m : *oldmesh) {
+                ret.push_back(new Mesh());
+                ret.back()->LoadExistant(m->orig ? m->orig : m);
+            }
+            return ret;
+        } else {
+            VS_LOG_FLUSH_EXIT(fatal,
+                             (boost::format("Fatal error in %1%: oldmesh->size() out of range!") % __FUNCTION__),
+                             -25);
         }
-        return ret;
     }
     VSFile f;
     VSError err = f.OpenReadOnly(filename, MeshFile);
