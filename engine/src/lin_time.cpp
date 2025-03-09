@@ -31,6 +31,10 @@
 static double firsttime;
 VSRandom vsrandom(time(NULL));
 
+#if !defined WIN32 && !defined _POSIX_MONOTONIC_CLOCK && !defined HAVE_GETTIMEOFDAY && !defined HAVE_SDL
+# error "We have no way to determine the time on this system."
+#endif
+
 #ifdef WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -179,8 +183,6 @@ void InitTime() {
     newtime  = SDL_GetTicks()*1.e-3;
     lasttime = newtime-.0001;
 
-#else
-# error "We have no way to determine the time on this system."
 #endif
     elapsedtime = .0001;
 }
@@ -213,9 +215,6 @@ double queryTime() {
 #elif defined (HAVE_SDL)
     double tmpnewtime = SDL_GetTicks()*1.e-3;
     return tmpnewtime-firsttime;
-#else
-# error "We have no way to determine the time on this system."
-    return 0.;
 #endif
 }
 
@@ -242,9 +241,6 @@ double realTime() {
     double tmpnewtime = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
 #elif defined (HAVE_SDL)
     double tmpnewtime = SDL_GetTicks()*1.e-3;
-#else
-# error "We have no way to determine the time on this system."
-    double tmpnewtime = 0.;
 #endif
 
     static double reallyfirsttime = tmpnewtime;
@@ -298,8 +294,6 @@ void UpdateTime() {
     elapsedtime = newtime-lasttime;
     if (first)
         firsttime = newtime;
-#else
-# error "We have no way to determine the time on this system."
 #endif
     elapsedtime *= timecompression;
     // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime));
