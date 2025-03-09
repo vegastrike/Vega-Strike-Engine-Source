@@ -612,8 +612,8 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                 return (float) UnitImages<void>::OFF;
             }
         case UnitImages<void>::ECM_MODAL:
-            if (target->ecm > 0) {
-                return (target->GetComputerData().ecmactive ? (float) UnitImages<void>::ACTIVE
+            if (target->ecm.Get() > 0) {
+                return (target->ecm.Active() ? (float) UnitImages<void>::ACTIVE
                         : (float) UnitImages<void>::READY);
             } else {
                 return (float) UnitImages<void>::NOTAPPLICABLE;
@@ -1787,7 +1787,7 @@ void GameCockpit::Draw() {
                 if (vdu[vd]) {
                     vdu[vd]->Draw(this, un, textcol);
                     GFXColor4f(1, 1, 1, 1);
-                    float damage = un->GetImageInformation().cockpit_damage[(1 + vd) % (MAXVDUS + 1)];
+                    float damage = un->ship_functions.Value(Function::cockpit);
                     if (vdu[vd]->staticable()) {
                         if (damage < .985) {
                             if (vdu_time[vd] >= 0) {
@@ -2644,26 +2644,29 @@ void GameCockpit::OnPauseEnd() {
 }
 
 void GameCockpit::updateRadar(Unit *ship) {
-    if (ship) {
-        // We may have bought a new radar brand while docked, so the actual
-        // radar display is instantiated when we undock.
-        switch (ship->GetComputerData().radar.GetBrand()) {
-            case Computer::RADARLIM::Brand::BUBBLE:
-                radarDisplay = Radar::Factory(Radar::Type::BubbleDisplay);
-                break;
-
-            case Computer::RADARLIM::Brand::PLANE:
-                radarDisplay = Radar::Factory(Radar::Type::PlaneDisplay);
-                break;
-
-            default:
-                radarDisplay = Radar::Factory(Radar::Type::SphereDisplay);
-                break;
-        }
-        // Send notification that I have undocked
-        radarDisplay->OnDockEnd();
+    if (!ship) {
+        return;
     }
 
+    // We may have bought a new radar brand while docked, so the actual
+    // radar display is instantiated when we undock.
+    RadarType type = ship->radar.GetType();
+    Radar::Type::Value displayType = Radar::Type::Value::NullDisplay;
+
+    if(type == RadarType::BUBBLE) {
+        displayType = Radar::Type::BubbleDisplay;
+    } else if(type == RadarType::PLANE) {
+        displayType = Radar::Type::PlaneDisplay;
+    } else if(type == RadarType::SPHERE) {
+        displayType = Radar::Type::SphereDisplay;
+    }
+
+    if(displayType != Radar::Type::Value::NullDisplay) {
+        radarDisplay = Radar::Factory(displayType);
+    }
+
+    // Send notification that I have undocked
+    radarDisplay->OnDockEnd();
 }
 
 void GameCockpit::SetParent(Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc) {

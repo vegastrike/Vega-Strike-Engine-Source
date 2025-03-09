@@ -1,5 +1,5 @@
 /*
- * afterburner.h
+ * ship_functions.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,38 +22,51 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
-#define VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_SHIP_FUNCTIONS_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_SHIP_FUNCTIONS_H
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "resource/resource.h"
 
-class EnergyContainer;
+enum class Function {
+    cockpit, communications, fire_control, life_support, ftl_interdiction
+};
 
-/** We split this class from Drive for one reason - it may use a different source. */
-class Afterburner : public Component, public EnergyConsumer {
+/** A catch-all component for anything not part of another component. 
+ *  Cannot be upgraded or sold. Can be repaired. */
+class ShipFunctions : public Component {
+    Resource<double> cockpit;
+    Resource<double> communications;
+    Resource<double> fire_control;
+    Resource<double> life_support;
+    double ftl_interdiction = 0;
+
 public:
-    //after burner acceleration max
-    Resource<double> thrust;
+    ShipFunctions();
 
-    Resource<double> speed;
-
-    Afterburner(EnergyContainer *source = nullptr);
-    
     // Component Methods
     void Load(std::string unit_key) override;      
     
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
+
     bool Downgrade() override;
+
     bool CanUpgrade(const std::string upgrade_key) const override;
+
     bool Upgrade(const std::string upgrade_key) override;
 
-    void Damage() override;
-    void DamageByPercent(double percent) override;
     void Repair() override;
-    // TODO: virtual void Destroy(); and other functions
+    
+    // Ship Function Methods
+    double Value(Function function) const;
+    double Max(Function function) const;
+    double Percent(Function function) const;
+    
+    void Damage(Function function);
+    void Repair(Function function);
+    
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_SHIP_FUNCTIONS_H

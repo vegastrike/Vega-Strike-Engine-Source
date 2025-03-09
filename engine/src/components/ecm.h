@@ -1,5 +1,5 @@
 /*
- * afterburner.h
+ * ecm.h
  *
  * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
@@ -22,38 +22,51 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
-#define VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
+#ifndef VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H
+#define VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H
 
 #include "component.h"
 #include "energy_consumer.h"
 
 class EnergyContainer;
 
-/** We split this class from Drive for one reason - it may use a different source. */
-class Afterburner : public Component, public EnergyConsumer {
+/** A dummy component. Does nothing. Comes in useful in some places. */
+class ECM : public Component, public EnergyConsumer {
+    // TODO: take a deeper look at this much later...
+    //how likely to fool missiles
+    Resource<int> ecm;
+    bool active;
 public:
-    //after burner acceleration max
-    Resource<double> thrust;
+    ECM();
+    ECM(EnergyContainer *source);
 
-    Resource<double> speed;
-
-    Afterburner(EnergyContainer *source = nullptr);
-    
     // Component Methods
-    void Load(std::string unit_key) override;      
+    void Load(std::string unit_key) override;
     
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
+
     bool Downgrade() override;
+
     bool CanUpgrade(const std::string upgrade_key) const override;
+
     bool Upgrade(const std::string upgrade_key) override;
 
     void Damage() override;
-    void DamageByPercent(double percent) override;
     void Repair() override;
-    // TODO: virtual void Destroy(); and other functions
+
+    // EnergyConsumer override
+    double Consume() override;
+
+    // ECM Methods
+    bool Active() const;
+    bool BreakLock(void* missile) const;
+    int Get() const;
+    void Set(int ecm);
+    void Toggle();
+
+    void _upgrade(const std::string key);
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
+#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H

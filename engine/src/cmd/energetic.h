@@ -38,9 +38,6 @@ public:
 
     static float getFuelUsage(bool afterburner);
 
-
-    void MaintainECM();
-
     void RechargeWarpCapacitors(const bool player_ship);
 
     void setEnergyRecharge(float enrech);

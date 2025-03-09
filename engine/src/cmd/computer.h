@@ -42,58 +42,6 @@
  */
 class Computer {
 public:
-    class RADARLIM {
-    public:
-        struct Brand {
-            enum Value {
-                SPHERE = 0,
-                BUBBLE = 1,
-                PLANE = 2
-            };
-        };
-        struct Capability {
-            enum Value {
-                // For internal use
-                IFF_UPPER_SHIFT = 16,
-                IFF_LOWER_MASK = (1 << IFF_UPPER_SHIFT) - 1,
-                IFF_UPPER_MASK = ~IFF_LOWER_MASK,
-
-                // The lower 16 bits
-                IFF_NONE = 0,
-                IFF_FRIEND_FOE = 1 << 0,
-                IFF_OBJECT_RECOGNITION = 1 << 1,
-                IFF_THREAT_ASSESSMENT = 1 << 2,
-
-                // The upper 16 bits
-                IFF_SPHERE = Brand::SPHERE << IFF_UPPER_SHIFT,
-                IFF_BUBBLE = Brand::BUBBLE << IFF_UPPER_SHIFT,
-                IFF_PLANE = Brand::PLANE << IFF_UPPER_SHIFT
-            };
-        };
-        //the max range the radar can handle
-        float maxrange;
-        //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
-        float maxcone;
-        float lockcone;
-        float trackingcone;
-        //The minimum radius of the target
-        float mintargetsize;
-        // What kind of type and capability the radar supports
-        int capability;
-        bool locked;
-        bool canlock;
-        bool trackingactive;
-
-        Brand::Value GetBrand() const;
-        bool UseFriendFoe() const;
-        bool UseObjectRecognition() const;
-        bool UseThreatAssessment() const;
-
-        RADARLIM();
-    };
-
-    RADARLIM radar;
-    bool ecmactive;
     //The nav point the unit may be heading for
     Vector NavPoint;
     //The target that the unit has in computer

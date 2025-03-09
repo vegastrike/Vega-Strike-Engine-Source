@@ -48,6 +48,7 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "configuration/configuration.h"
+#include "components/ship_functions.h"
 
 template<typename T>
 inline T mymin(T a, T b) {
@@ -1315,11 +1316,12 @@ void VDU::DrawDamage(Unit *parent) {
     }
     if (parent->pImage != nullptr) {
         // Integrated systems with percent working values
-        REPORTINTEGRATED(LifeSupport, "damage.names.life_support", "Life Support");
-        REPORTINTEGRATED(fireControl, "damage.names.fire_control", "Fire Control");
-        REPORTINTEGRATED(SPECDrive, "damage.names.spec_drive", "SPEC Drive");
-        REPORTINTEGRATED(Comm, "damage.names.comm", "Comm");
-
+        // TODO: get labels from config
+        REPORTITEM( parent->ship_functions.Percent(Function::life_support), 1.0, print_percent_working, "Life Support"); 
+        REPORTITEM( parent->ship_functions.Percent(Function::fire_control), 1.0, print_percent_working, "Fire Control"); 
+        REPORTITEM( parent->ftl_drive.PercentOperational(), 1.0, print_percent_working, "SPEC Drive"); 
+        REPORTITEM( parent->ship_functions.Percent(Function::communications), 1.0, print_percent_working, "Comm"); 
+        
         // Integrated system with boolean damage flags
         REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
         REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade

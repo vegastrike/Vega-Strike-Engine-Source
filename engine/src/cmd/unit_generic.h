@@ -75,6 +75,8 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
+#include "cloak.h"
+
 
 
 #include "configuration/configuration.h"
@@ -95,6 +97,10 @@ void UncheckUnit( class Unit*un );
 #include "components/armor.h"
 #include "components/hull.h"
 #include "components/shield.h"
+#include "components/radar.h"
+#include "components/ecm.h"
+#include "components/repair_bot.h"
+#include "components/ship_functions.h"
 
 extern char *GetUnitDir(const char *filename);
 
@@ -183,41 +189,26 @@ public:
     DriveUpgrade drive_upgrade = DriveUpgrade(&drive);
     FtlDrive ftl_drive = FtlDrive(&ftl_energy);
     JumpDrive jump_drive = JumpDrive(&ftl_energy);
+    CRadar radar;
 
     Armor armor;
     Hull hull;
     Shield shield = Shield(&energy, &ftl_drive, &cloak);
 
 
-    /// Radar and related systems
-    // TODO: take a deeper look at this much later...
-    //how likely to fool missiles
-    // -2 = inactive L2, -1 = inactive L1, 0 = not available, 1 = active L1, 2 = active L2, etc...
-    int ecm;
-
+    ECM ecm;
+    RepairBot repair_bot;
+    ShipFunctions ship_functions;
+    
     /// Repair
-    // TODO: Maybe move to damageable
-    // holds the info for the repair bot type. 0 is no bot;
-    unsigned char repair_droid;
     float next_repair_time;
     unsigned int next_repair_cargo;    //(~0 : select randomly)
-
-    float fireControlFunctionality;
-    float fireControlFunctionalityMax;
-    float SPECDriveFunctionality;
-    float SPECDriveFunctionalityMax;
-    float CommFunctionality;
-    float CommFunctionalityMax;
-    float LifeSupportFunctionality;
-    float LifeSupportFunctionalityMax;
 
     /// Volume
     // This isn't mass. Denser materials translate to more mass
     // TODO: move this to ship class
     float UpgradeVolume = 0;
     float CargoVolume = 0;     ///mass just makes you turn worse
-    float equipment_volume =
-            0;     //this one should be more general--might want to apply it to radioactive goods, passengers, ships (hangar), etc
     float HiddenCargoVolume = 0;
 
 //The name (type) of this unit shouldn't be public
@@ -638,9 +629,7 @@ public:
 //The image that will appear on those screens of units targetting this unit
     UnitImages<void> *pImage = nullptr;
 //positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
-    float specInterdiction = 0;
-
-    float HeatSink = 0;
+    
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble

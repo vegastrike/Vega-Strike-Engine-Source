@@ -22,8 +22,6 @@
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 #
 
-SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
-
 IF (CMAKE_SYSTEM_NAME STREQUAL BEOS OR CMAKE_SYSTEM_NAME STREQUAL Windows)
 	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
