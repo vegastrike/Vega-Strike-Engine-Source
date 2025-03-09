@@ -86,20 +86,6 @@ void reset_time_compression(const KBData &, KBSTATE a) {
     }
 }
 
-void pause_key(const KBData &s, KBSTATE a) {
-    static bool paused = false;
-    if (a == PRESS) {
-        if (paused == false) {
-            timecompression = .0000001;
-            timecount = 0;
-            paused = true;
-        } else {
-            paused = false;
-            reset_time_compression(s, a);
-        }
-    }
-}
-
 float getTimeCompression() {
     return timecompression;
 }
