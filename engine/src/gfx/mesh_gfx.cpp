@@ -417,7 +417,7 @@ Mesh::~Mesh() {
             if (!undrawn_mesh_vec.empty()) {
                 auto first_to_remove = std::stable_partition(undrawn_mesh_vec.begin(),
                                                                   undrawn_mesh_vec.end(),
-                                                             [this](const auto *pi) { return pi->orig != this; });
+                                                             [this](const auto &pi) { return pi.orig != this; });
                 undrawn_mesh_vec.erase(first_to_remove, undrawn_mesh_vec.end());
             }
         }
