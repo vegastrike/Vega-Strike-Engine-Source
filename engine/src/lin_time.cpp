@@ -63,8 +63,6 @@ double getNewTime() {
 #endif
 }
 
-class NetClient;
-
 int timecount;
 
 void inc_time_compression(const KBData &, KBSTATE a) {
