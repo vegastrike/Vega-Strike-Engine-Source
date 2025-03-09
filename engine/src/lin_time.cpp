@@ -97,7 +97,6 @@ void setTimeCompression(float tc) {
 
 bool toggle_pause() {
     static bool paused = false;
-    VS_LOG(debug, "toggle_pause() called in lin_time.cpp");
     if (paused) {
         VS_LOG(debug, "toggle_pause() in lin_time.cpp: Resuming (unpausing)");
         setTimeCompression(1);
