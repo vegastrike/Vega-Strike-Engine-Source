@@ -89,11 +89,10 @@ public:
 
     VALUE *Get(const KEY &key) const {
         typename supertype::const_iterator iter = this->find(key);
-        typename supertype::const_iterator end = this->end();
-        if (iter != end) {
+        if (iter != this->end()) {
             return iter->second;
         }
-        return NULL;
+        return nullptr;
     }
 
     void Put(const KEY &key, VALUE *value) {

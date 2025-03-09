@@ -413,22 +413,22 @@ extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHash
 
 Mesh::~Mesh() {
     if (!orig || orig == this) {
-        for (int j = 0; j < NUM_MESH_SEQUENCE; j++) {
-            for (OrigMeshVector::iterator it = undrawn_meshes[j].begin(); it != undrawn_meshes[j].end(); ++it) {
-                if (it->orig == this) {
-                    undrawn_meshes[j].erase(it--);
-                    VS_LOG(debug, "stale mesh found in draw queue--removed!");
-                }
+        for (auto & undrawn_mesh_vec : undrawn_meshes) {
+            if (!undrawn_mesh_vec.empty()) {
+                auto first_to_remove = std::stable_partition(undrawn_mesh_vec.begin(),
+                                                                  undrawn_mesh_vec.end(),
+                                                             [this](const auto *pi) { return pi->orig != this; });
+                undrawn_mesh_vec.erase(first_to_remove, undrawn_mesh_vec.end());
             }
         }
         if (vlist != nullptr) {
             delete vlist;
             vlist = nullptr;
         }
-        for (size_t i = 0; i < Decal.size(); ++i) {
-            if (Decal[i] != nullptr) {
-                delete Decal[i];
-                Decal[i] = nullptr;
+        for (auto & i : Decal) {
+            if (i != nullptr) {
+                delete i;
+                i = nullptr;
             }
         }
         if (squadlogos != nullptr) {
@@ -455,6 +455,7 @@ Mesh::~Mesh() {
     } else {
         orig->refcount--;
         VS_LOG(debug, (boost::format("orig refcount: %1%") % refcount));
+        // TODO: Comment out?
         if (orig->refcount == 0) {
             delete[] orig;
             orig = nullptr;
