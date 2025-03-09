@@ -64,8 +64,8 @@ using std::endl;
 
 extern float ScaleJumpRadius(float);
 extern Flightgroup *getStaticBaseFlightgroup(int faction);
-extern bool CrashForceDock(Unit *thus, Unit *dockingUn, bool force);
-extern void abletodock(int dock);
+//extern bool CrashForceDock(Unit *thus, Unit *dockingUn, bool force);
+extern void PlayDockingSound(int dock);
 
 //////////////////////////////////////////////
 // Functions
@@ -436,8 +436,8 @@ void Planet::InitPlanet(QVector x,
     colTrees = nullptr;
     SetAngularVelocity(rotvel);
     // The docking port is 20% bigger than the planet
-    const float planetdockportsize = configuration()->physics_config.planet_dock_port_size;
-    const float planetdockportminsize = configuration()->physics_config.planet_dock_port_min_size;
+    const float planetdockportsize = configuration()->dock.planet_dock_port_size;
+    const float planetdockportminsize = configuration()->dock.planet_dock_port_min_size;
     if ((!atmospheric) && notJumppoint) {
         float dock = radius * planetdockportsize;
         if (dock - radius < planetdockportminsize) {

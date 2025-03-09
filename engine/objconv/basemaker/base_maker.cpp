@@ -2045,7 +2045,7 @@ void Base::Terminate() {
     delete this;
 }
 
-extern void abletodock(int dock);
+extern void PlayDockingSound(int dock);
 
 void Base::Room::Launch::Click(Base *base, float x, float y, int button, int state) {
     if (state == GLUT_UP) {
