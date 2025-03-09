@@ -96,6 +96,15 @@ float MissileEffect::GetRadius() const {
 }
 
 void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
+    // Some sanity
+    if(damage_fraction == 0.0f) {
+        return;
+    }
+
+    if(damage == 0.0f && phasedamage == 0.0f) {
+        return;
+    }
+
     QVector norm = pos - un->Position();
     norm.Normalize();
     float damage_left = 1.0F;
@@ -155,6 +164,10 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                         % distance
                         % radius
                         % (damage * damage_fraction * damage_left)));
+        VS_LOG(info,
+                (boost::format("damage=%1% fraction=%2% left=%3%")
+                        % damage % damage_fraction % damage_left));
+        
         Damage damage(this->damage * damage_fraction * damage_left,
                 phasedamage * damage_fraction * damage_left);
         parent->ApplyDamage(pos.Cast(), norm, damage, un, GFXColor(1, 1, 1, 1),
