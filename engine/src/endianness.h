@@ -26,7 +26,7 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
 
 #if defined (__HAIKU__) //For unknow reasons, Haiku don't fit into any case below
     #include <endian.h>
-#elif defined (BSD) || defined (__FreeBSD__)
+#elif defined (BSD) || defined (__FreeBSD__) || defined(__APPLE__)
     #include <machine/endian.h>
 #else //defined (__HAIKU__)
 
