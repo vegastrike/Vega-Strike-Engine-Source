@@ -58,6 +58,8 @@ LIST(APPEND
     # CMake Artifacts
     ${Vega_Strike_BINARY_DIR}
     ${Vega_Strike_BINARY_DIR}/src
+    # Dependencies
+    ${TST_INCLUDES}
 )
 IF (UNIX)
     LIST(APPEND
