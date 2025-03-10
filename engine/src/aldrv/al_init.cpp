@@ -159,7 +159,6 @@ static ALCcontext *context_id = NULL;
 
 bool AUDInit() {
 #ifdef HAVE_AL
-    // g_game.sound_enabled =
     usedoppler = game_options()->Doppler;
     usepositional = game_options()->Positional;
     double linuxadjust = 1;
@@ -213,8 +212,6 @@ bool AUDInit() {
     }
 
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-
-    g_game.sound_enabled = game_options()->Sound;
 
     return true;
 #endif
