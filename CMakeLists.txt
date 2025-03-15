@@ -34,12 +34,18 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
 
 IF (POLICY CMP0087)
-    cmake_policy(SET CMP0087 NEW)
+    CMAKE_POLICY(SET CMP0087 NEW)
+ENDIF ()
+
+# TODO: this suppresses warnings about CMP0102 caching.
+# We should do something about it instead.
+IF (POLICY CMP0102)
+    CMAKE_POLICY(SET CMP0102 OLD)
 ENDIF ()
 
 IF (POLICY CMP0167)
     CMAKE_POLICY (SET CMP0167 OLD)
-ENDIF (POLICY CMP0167)
+ENDIF ()
 
 # There are a number of custom CMake packages
 # Tell CMake where to find them
@@ -96,10 +102,6 @@ ENDIF ()
 # allowing us to differentiate our Assets API across multiple versions.
 # If a release is missing this value, then version `1` can be assumed.
 SET(VEGASTRIKE_ASSETS_API_VERSION "3")
-
-# TODO: this suppresses warnings about CMP0102 caching.
-# We should do something about it instead.
-CMAKE_POLICY(SET CMP0102 OLD)
 
 PROJECT(Vega_Strike
     VERSION

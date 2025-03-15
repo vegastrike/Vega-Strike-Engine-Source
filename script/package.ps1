@@ -1,5 +1,5 @@
 ##
-# test.ps1
+# package.ps1
 #
 # Vega Strike - Space Simulation, Combat and Trading
 # Copyright (C) 2001-2025 The Vega Strike Contributors:
@@ -26,12 +26,21 @@
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-
 param(
     [String]$Generator = "VS2019Win64", # Other options include "ninja" and "VS2022Win64"
     [Boolean]$EnablePIE = $false,
-    [String]$BuildType = "Release" # You can also specify "Debug"
+    [String]$BuildType = "Release", # You can also specify "Debug"
+    [String]$GitTag = "not-applicable", # Git Tag, default empty string for PR builds
+    [String]$GitSha = "not-applicable"  # Git Short SHA Reference, default empty string for PR builds
 )
+
+# Hack around PowerShell not allowing empty string parameters
+if ($GitTag -ieq "not-applicable") {
+    $GitTag = ""
+}
+if ($GitSha -ieq "not-applicable" ) {
+    $GitSha = ""
+}
 
 [String]$cmakePresetName = ""
 if ($Generator -ieq "Ninja") {
@@ -66,5 +75,5 @@ if ($BuildType -ieq "Debug") {
 [String]$binaryDir = "$baseDir\build\$cmakePresetName"
 
 Push-Location $baseDir
-ctest -V --preset "test-$cmakePresetName"
+cpack -V --preset "package-$cmakePresetName"
 Pop-Location
