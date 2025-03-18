@@ -371,13 +371,6 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::vector<std::vector<char> > temp = ROLES::getAllRolePriorities();
-#if defined(HAVE_SDL)
-#ifndef NO_SDL_JOYSTICK
-    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
-        VS_LOG_FLUSH_EXIT(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()), 1);
-    }
-#endif
-#endif
 
     InitTime();
     UpdateTime();
@@ -683,7 +676,7 @@ void bootstrap_main_loop() {
         {
             std::vector<std::string> intro_lines;
             boost::split(intro_lines, configuration()->game_start.introduction, boost::is_any_of("\n"));
-            
+
             for(const std::string& line : intro_lines) {
                 UniverseUtil::IOmessage(0, "game", "all", line);
             }
