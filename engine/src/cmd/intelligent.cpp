@@ -41,7 +41,7 @@
 #include "pilot.h"
 #include "gfx/mesh.h"
 #include "ai/turretai.h"
-#include "collide2/CSopcodecollider.h"
+#include "CSopcodecollider.h"
 #include "vega_cast_utils.h"
 
 #include <string>
