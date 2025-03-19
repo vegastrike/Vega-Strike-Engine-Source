@@ -42,33 +42,6 @@ SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
 
-LIST(APPEND
-    VS_INCLUDE_DIRS
-    # VS engine headers
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cmd
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/components
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/damage
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/resource
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/python/base_computer
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/python/config
-    # Library Headers
-    ${CMAKE_SOURCE_DIR}/libraries/collide2
-    # CMake Artifacts
-    ${Vega_Strike_BINARY_DIR}
-    ${Vega_Strike_BINARY_DIR}/src
-    # Dependencies
-    ${TST_INCLUDES}
-)
-IF (UNIX)
-    LIST(APPEND
-        VS_INCLUDE_DIRS
-        /usr/include/harfbuzz/
-    )
-ENDIF (UNIX)
-MESSAGE("VS INCLUDE DIRS: ${VS_INCLUDE_DIRS}")
-
 # The source files used to be listed here...
 
 # Option to turn off compiling vegastrike bin
@@ -149,7 +122,6 @@ ENDIF ()
 MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE(STATUS "Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
-    SET(VSE_TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS})
     SET(VSE_TST_LIBS ${TST_LIBS} ${Python3_LIBRARIES})
     SET(HAVE_PYTHON 1)
     SET(TMP_Python_SITELIB ${Python3_SITELIB})
@@ -168,10 +140,10 @@ FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_
 MESSAGE(STATUS "Found System Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
 SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 
+SET(VSE_TST_INCLUDES "")
 SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
 SET(VSE_TST_LIBS ${VSE_TST_LIBS} ${Boost_LIBRARIES})
-INCLUDE_DIRECTORIES(${VSE_TST_INCLUDES})
 
 IF (NOT DISABLE_CLIENT) ##########
 
@@ -284,6 +256,11 @@ IF (NOT DISABLE_CLIENT) ##########
     ENDIF (PNG_FOUND)
 
 ENDIF(NOT DISABLE_CLIENT) ##########
+
+IF (UNIX)
+    SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} /usr/include/harfbuzz/)
+ENDIF ()
+
 IF (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB util)
 ELSEIF (WIN32)
@@ -354,8 +331,6 @@ CONFIGURE_FILE(cmake-config.h.in config.h)
 
 #end config.h generation
 
-INCLUDE_DIRECTORIES(${VSE_TST_INCLUDES})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
                     "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${Vega_Strike_BINARY_DIR}/engine/config.h>")
 ADD_LINK_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
@@ -766,10 +741,8 @@ SET(LIBAUDIO_SOURCES
 ADD_LIBRARY(vegastrike_python SHARED
     ${LIBPYTHON}
 )
-
-TARGET_COMPILE_OPTIONS(
-    vegastrike_python PRIVATE -fPIC
-)
+# Enable PIE for this library in a cross-platform-compatible way
+set_property(TARGET vegastrike_python PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 TARGET_LINK_LIBRARIES(
     vegastrike_python
@@ -780,7 +753,7 @@ TARGET_LINK_LIBRARIES(
 # Name must be witout the lib prefix
 SET_TARGET_PROPERTIES(vegastrike_python PROPERTIES PREFIX "")
 
-ADD_LIBRARY(vegastrike-engine_com
+ADD_LIBRARY(vegastrike-engine_com SHARED
     ${VEGA_GL_H_PATH}
     ${VEGA_GLU_H_PATH}
     ${VEGA_GLEXT_H_PATH}
@@ -799,7 +772,29 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBSCRIPT_SOURCES}
     ${LIBGFXGENERIC_SOURCES}
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PUBLIC ${VS_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com INTERFACE
+        # VS engine headers
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        # Library Headers
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        # CMake Artifacts
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+)
+TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
 set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -892,7 +887,29 @@ SET(VSE_TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${VSE_TST_LIBS})
 
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
-    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PRIVATE
+            # VS engine headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            # Library Headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            # CMake Artifacts
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+    )
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
     #TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
     IF (NEED_LINKING_AGAINST_LIBM)
@@ -1358,7 +1375,29 @@ IF (USE_GTEST)
         src/components/tests/afterburner_tests.cpp
         src/components/tests/jump_drive_tests.cpp
     )
-    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} INTERFACE
+            # VS engine headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            # Library Headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            # CMake Artifacts
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+    )
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Strike_BINARY_DIR}/)
 
     ADD_LIBRARY(vegastrike-testing
@@ -1371,7 +1410,29 @@ IF (USE_GTEST)
         ${LIBCMD_SOURCES}
         ${LIBVS_LOGGING}
     )
-    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
+            # VS engine headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            # Library Headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            # CMake Artifacts
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+    )
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)

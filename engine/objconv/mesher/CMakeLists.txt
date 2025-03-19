@@ -49,7 +49,29 @@ IF (EXPAT_FOUND)
     #if have OGRE to_OgreMesh.cpp
 
     ADD_EXECUTABLE(mesher ${MESHER_SOURCES})
-    TARGET_INCLUDE_DIRECTORIES(mesher PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(mesher PRIVATE
+            # VS engine headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            # Library Headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            # CMake Artifacts
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+    )
+    TARGET_INCLUDE_DIRECTORIES(mesher SYSTEM PRIVATE ${TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(mesher SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     SET_TARGET_PROPERTIES(mesher PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     TARGET_COMPILE_DEFINITIONS(mesher PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)

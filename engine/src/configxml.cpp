@@ -25,7 +25,6 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <expat.h>
 #include "xml_support.h"
 #include <assert.h>
 #include "configxml.h"

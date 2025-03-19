@@ -37,7 +37,6 @@
 #include "csgeom2/opvector3.h"
 #include "csgeom2/opbox.h"
 #include "csgeom2/optransfrm.h"
-#include "opcodegarray.h"
 #include "basecollider.h"
 #include "gfx/mesh.h"
 

@@ -53,7 +53,6 @@
 #include "universe.h"
 
 #include "vs_globals.h"
-#include "configxml.h"
 
 /* *********************************************************** */
 

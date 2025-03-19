@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <time.h>
 #include <ctype.h>
 #include <assert.h>
 #ifndef WIN32
@@ -43,11 +42,7 @@
 #include <pwd.h>
 #endif
 
-#include <expat.h>
-
 #include <fstream>
-
-#include "xml_support.h"
 
 #include "vegastrike.h"
 #include "lin_time.h"
@@ -55,10 +50,8 @@
 
 #include "cmd/ai/order.h"
 #include "mission.h"
-#include "easydom.h"
 
 #include "vs_globals.h"
-#include "config_xml.h"
 #include "savegame.h"
 #include "msgcenter.h"
 #include "cmd/briefing.h"
@@ -68,7 +61,6 @@
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
-#include "gfx/cockpit_generic.h"
 #include "vs_logging.h"
 
 /* *********************************************************** */

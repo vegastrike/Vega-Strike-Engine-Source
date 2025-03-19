@@ -34,9 +34,6 @@
 #include "Opcode.h"
 #include "CSopcodecollider.h"
 #include "opcodeqsqrt.h"
-#include "opcodeqint.h"
-#include "vs_logging.h"
-// #include "opcodegarray.h"
 #define _X 1000
 
 #undef _X

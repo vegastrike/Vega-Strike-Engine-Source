@@ -26,7 +26,6 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <expat.h>
 #include <string>
 #include "xml_support.h"
 #include "easydom.h"

@@ -101,7 +101,7 @@ string inline tostring(float num) {
 /*#else
   template<class T> inline string tostring(T num) {
     return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
-	
+
   }
 #endif*/
 }

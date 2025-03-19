@@ -30,9 +30,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <time.h>
-#include <ctype.h>
-#include <assert.h>
 #ifndef WIN32
 //this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
@@ -45,25 +42,17 @@
 #include "cmd/collection.h"
 #include "cmd/planet.h"
 #include "cmd/ai/order.h"
-#include "cmd/ai/aggressive.h"
-#include "cmd/ai/missionscript.h"
 #include "mission.h"
 #include "easydom.h"
-#include "msgcenter.h"
 #include "flightgroup.h"
 #include "vs_globals.h"
-#include "configxml.h"
 #include "gfx/cockpit_generic.h"
 #include "cmd/images.h"
 #include "savegame.h"
 #include "cmd/nebula.h"
-#include "hashtable.h"
-#include "flightgroup.h"
-#include "nebula.h"
 #include "gfxlib.h"
 #include "cmd/pilot.h"
 #include "cmd/unit_util.h"
-#include "planet.h"
 #include "asteroid.h"
 #include "star_system.h"
 #include "universe.h"

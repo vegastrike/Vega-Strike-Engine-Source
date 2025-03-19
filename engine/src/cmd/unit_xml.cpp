@@ -115,7 +115,7 @@ string MakeUnitXMLPretty(string str, Unit *un) {
     return writestr;
 }
 
-// TODO: delete this at some point. 
+// TODO: delete this at some point.
 // We no longer support add/mul modes of upgrades
 int GetModeFromName(const char *input_buffer) {
     if (strlen(input_buffer) > 3) {

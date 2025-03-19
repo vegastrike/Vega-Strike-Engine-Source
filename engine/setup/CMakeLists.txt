@@ -38,7 +38,29 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 		)
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
-	TARGET_INCLUDE_DIRECTORIES(vegasettings PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
+            # VS engine headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            # Library Headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            # CMake Artifacts
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+    )
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 	TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
 
@@ -80,7 +102,29 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	)
 
 	ADD_EXECUTABLE(vegasettings MACOSX_BUNDLE ${VEGASETTINGS_SOURCES})
-	TARGET_INCLUDE_DIRECTORIES(vegasettings PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
+            # VS engine headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            # Library Headers
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            # CMake Artifacts
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+    )
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 	TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
 

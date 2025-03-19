@@ -26,7 +26,6 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <expat.h>
 #include <string>
 #include <gnuhash.h>
 #include "configxml.h"

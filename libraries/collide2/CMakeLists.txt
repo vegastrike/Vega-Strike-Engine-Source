@@ -19,27 +19,7 @@
 
 MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-LIST(APPEND
-    OPCOLLIDE_INCLUDES
-    # collide2 headers
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    # VS engine headers
-    #${CMAKE_SOURCE_DIR}/engine
-    ${CMAKE_SOURCE_DIR}/engine/src
-    ${CMAKE_SOURCE_DIR}/engine/src/cmd
-    ${CMAKE_SOURCE_DIR}/engine/src/components
-    ${CMAKE_SOURCE_DIR}/engine/src/damage
-    ${CMAKE_SOURCE_DIR}/engine/src/resource
-    ${CMAKE_SOURCE_DIR}/engine/src/python/base_computer
-    ${CMAKE_SOURCE_DIR}/engine/src/python/config
-    # CMake Artifacts
-    ${Vega_Strike_BINARY_DIR}
-    ${Vega_Strike_BINARY_DIR}/engine
-    ${Vega_Strike_BINARY_DIR}/src
-)
-MESSAGE("OpCollide Includes: ${OPCOLLIDE_INCLUDES}")
-
-ADD_LIBRARY(vegastrike-OPcollide STATIC
+ADD_LIBRARY(vegastrike-OPcollide SHARED
     Ice/IceAABB.cpp
     Ice/IceContainer.cpp
     Ice/IceHPoint.cpp
@@ -79,9 +59,31 @@ ADD_LIBRARY(vegastrike-OPcollide STATIC
     OPC_VolumeCollider.cpp
     CSopcodecollider.cpp
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PUBLIC ${OPCOLLIDE_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
+        # VS engine headers
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        # Library Headers
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
+        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        # CMake Artifacts
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
+        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+)
+TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide SYSTEM PRIVATE ${TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
-TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
+#TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 SET_PROPERTY(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)

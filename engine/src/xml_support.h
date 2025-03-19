@@ -148,7 +148,7 @@ inline std::string VectorToString(const Vector &v) {
  *
  *  }
  * #endif //WIN32
- */ 
+ */
 }
 
 #endif //VEGA_STRIKE_ENGINE_XML_SUPPORT_H
