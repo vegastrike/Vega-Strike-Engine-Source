@@ -25,5 +25,5 @@
 // NO HEADER GUARD
 
 #define DEFINE_BLENDFUNC
-#include "gfx/mesh_io.h"
+#include "libraries/gfx_generic/mesh_io.h"
 

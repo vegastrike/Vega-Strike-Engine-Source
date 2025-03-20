@@ -40,6 +40,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
             # VS engine headers
+            ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
             ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -106,6 +107,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	ADD_EXECUTABLE(vegasettings MACOSX_BUNDLE ${VEGASETTINGS_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
             # VS engine headers
+            ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
             ${Vega_Root_SOURCE_DIR}/engine/src/cmd

@@ -133,6 +133,7 @@ ADD_LIBRARY(vegastrike-OPcollide STATIC
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
         # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
         ${Vega_Root_SOURCE_DIR}/engine/src/cmd

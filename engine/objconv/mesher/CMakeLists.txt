@@ -51,6 +51,7 @@ IF (EXPAT_FOUND)
     ADD_EXECUTABLE(mesher ${MESHER_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(mesher PRIVATE
             # VS engine headers
+            ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
             ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -74,7 +75,6 @@ IF (EXPAT_FOUND)
             ${Vega_Root_BINARY_DIR}/engine/src
     )
     TARGET_INCLUDE_DIRECTORIES(mesher SYSTEM PRIVATE ${TST_INCLUDES})
-    TARGET_INCLUDE_DIRECTORIES(mesher SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     SET_TARGET_PROPERTIES(mesher PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     TARGET_COMPILE_DEFINITIONS(mesher PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)

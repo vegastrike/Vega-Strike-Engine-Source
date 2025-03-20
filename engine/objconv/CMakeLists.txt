@@ -29,6 +29,7 @@ SET(TRISORT_SOURCES trisort.cpp)
 ADD_EXECUTABLE(vs-buildenv-trisort ${TRISORT_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort PRIVATE
         # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
         ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -64,6 +65,7 @@ SET(ASTEROID_SOURCES asteroidgen.cpp)
 ADD_EXECUTABLE(vs-buildenv-asteroidgen ${ASTEROID_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen PRIVATE
         # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
         ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -99,6 +101,7 @@ SET(REPLACE_SOURCES replace.cpp)
 ADD_EXECUTABLE(vs-buildenv-replace ${REPLACE_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace PRIVATE
         # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
         ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -171,6 +174,7 @@ INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
 ADD_EXECUTABLE(vega-meshtool ${MESHER_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
         # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
         ${Vega_Root_SOURCE_DIR}/engine/src/cmd

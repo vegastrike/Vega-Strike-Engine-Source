@@ -50,6 +50,7 @@ ADD_LIBRARY(vegastrike_gfx_generic STATIC
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
         # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
         ${Vega_Root_SOURCE_DIR}/engine/src/cmd

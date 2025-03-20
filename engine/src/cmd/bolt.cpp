@@ -42,7 +42,7 @@
 #include "universe.h"
 #include "damageable.h"
 #include "vs_logging.h"
-#include "gfx/texture_manager.h"
+#include "texture_manager.h"
 
 using std::vector;
 using std::string;

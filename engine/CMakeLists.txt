@@ -586,7 +586,7 @@ TARGET_LINK_LIBRARIES(
 # Name must be witout the lib prefix
 SET_TARGET_PROPERTIES(vegastrike_python PROPERTIES PREFIX "")
 
-ADD_LIBRARY(vegastrike-engine_com SHARED
+ADD_LIBRARY(vegastrike-engine_com STATIC
     ${VEGA_GL_H_PATH}
     ${VEGA_GLU_H_PATH}
     ${VEGA_GLEXT_H_PATH}
@@ -605,6 +605,7 @@ ADD_LIBRARY(vegastrike-engine_com SHARED
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
         ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -722,6 +723,7 @@ IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PRIVATE
             # VS engine headers
+            ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
             ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -1207,6 +1209,7 @@ IF (USE_GTEST)
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
             # VS engine headers
+            ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
             ${Vega_Root_SOURCE_DIR}/engine/src/cmd
@@ -1244,6 +1247,7 @@ IF (USE_GTEST)
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
             # VS engine headers
+            ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
             ${Vega_Root_SOURCE_DIR}/engine/src/cmd
