@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
 #define VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "star_system.h"
 #include "ai/order.h"
 

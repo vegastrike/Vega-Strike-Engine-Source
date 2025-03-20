@@ -92,6 +92,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
@@ -108,7 +109,7 @@ SET_PROPERTY(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-OPcollide ${VSE_TST_LIBS} GLUT::GLUT)
+TARGET_LINK_LIBRARIES(vegastrike-OPcollide ${VSE_TST_LIBS} GLUT::GLUT vegastrike_gfx_generic)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)

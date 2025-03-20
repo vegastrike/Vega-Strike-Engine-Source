@@ -61,15 +61,15 @@ void UncheckUnit( class Unit*un );
 #include <string>
 #include <set>
 #include <map>
-#include "gfx/matrix.h"
-#include "gfx/quaternion.h"
+#include "matrix.h"
+#include "quaternion.h"
 #include "gfxlib_struct.h"
 #include "xml_support.h"
 #include "container.h"
 #include "collection.h"
 #include "script/flightgroup.h"
 #include "faction_generic.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "vsfilesystem.h"
 #include "collide_map.h"
 #include "SharedPool.h"
@@ -157,14 +157,14 @@ struct PlanetaryOrbitData;
 // TODO: move Armed to subclasses
 class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
         public Intelligent, public Movable, public JumpCapable, public Carrier, public UpgradeableUnit {
-    // We store relevant textual description here. 
+    // We store relevant textual description here.
     // We stop relying on manifest and units data once we create the unit.
     // The unit description is always taken from the manifest and not saved.
     // Note the game confusingly refers to units:
     // - class (Llama) - should be model
     // - model (stock) - should be variant, but only if actually different without upgrades
     // TODO: name is duplicated down below in some memory saving measure (StringPool::Reference)
-    std::string unit_key;           
+    std::string unit_key;
     std::string unit_name;
     std::string unit_description;
 
@@ -199,7 +199,7 @@ public:
     ECM ecm;
     RepairBot repair_bot;
     ShipFunctions ship_functions;
-    
+
     /// Repair
     float next_repair_time;
     unsigned int next_repair_cargo;    //(~0 : select randomly)
@@ -273,8 +273,8 @@ public:
 
     // Units take some time to blow up
     // When they're done, their destructor is called ;)
-    bool GettingDestroyed() const;    
-                                    
+    bool GettingDestroyed() const;
+
 
     // TODO: implement enum class as type safe bitmask...
     // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/
@@ -629,7 +629,7 @@ public:
 //The image that will appear on those screens of units targetting this unit
     UnitImages<void> *pImage = nullptr;
 //positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
-    
+
 public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble

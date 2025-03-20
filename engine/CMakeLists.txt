@@ -538,22 +538,6 @@ SET(LIBCMDSERVER_SOURCES
     src/cmd/faction_xml_server.cpp
 )
 
-SET(LIBGFXGENERIC_SOURCES
-    src/gfx/texture_manager.cpp
-    src/gfx/boltdrawmanager.cpp
-    src/gfx/cockpit_generic.cpp
-    src/gfx/lerp.cpp
-    src/gfx/matrix.cpp
-    src/gfx/mesh_bxm.cpp
-    src/gfx/mesh_poly.cpp
-    src/gfx/mesh_xml.cpp
-    src/gfx/mesh.cpp
-    src/gfx/quaternion.cpp
-    src/gfx/soundcontainer_generic.cpp
-    src/gfx/sphere_generic.cpp
-    src/gfx/tvector.cpp
-)
-
 SET(LIBGFXCLIENT_SOURCES
     src/gfx/ani_texture.cpp
     src/gfx/animation.cpp
@@ -773,7 +757,6 @@ ADD_LIBRARY(vegastrike-engine_com SHARED
     ${LIBPYTHON_SOURCES}
     ${LIBROOTGENERIC_SOURCES}
     ${LIBSCRIPT_SOURCES}
-    ${LIBGFXGENERIC_SOURCES}
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         # VS engine headers
@@ -788,6 +771,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
@@ -804,7 +788,7 @@ set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRU
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS})
+TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS} vegastrike_gfx_generic)
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -904,6 +888,7 @@ IF (NOT DISABLE_CLIENT)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
@@ -1392,6 +1377,7 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
@@ -1427,6 +1413,7 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
@@ -1452,6 +1439,7 @@ IF (USE_GTEST)
         ${Python3_LIBRARIES}
         gtest_main
         vegastrike-testing
+        vegastrike_gfx_generic
         Boost::log
         Boost::log_setup
         Boost::json

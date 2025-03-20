@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
 
 //#include "vegastrike.h"
-#include "gfx/matrix.h"
+#include "matrix.h"
 #include "collection.h"
 #include "star_system.h"
 Vector MouseCoordinate(int x, int y); //FIXME

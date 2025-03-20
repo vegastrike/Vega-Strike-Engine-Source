@@ -22,7 +22,7 @@
 
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
-#include "gfx/matrix.h"
+#include "matrix.h"
 #include "gl_globals.h"
 #include <assert.h>
 

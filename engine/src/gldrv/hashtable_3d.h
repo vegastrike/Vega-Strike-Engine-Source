@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_HASHTABLE_3D_H
 #define VEGA_STRIKE_ENGINE_GLDRV_HASHTABLE_3D_H
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include <algorithm>
 #include <vector>
 #include <stdio.h>

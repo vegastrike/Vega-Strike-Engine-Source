@@ -41,7 +41,7 @@
 #include "flybywire.h"
 #include "hard_coded_scripts.h"
 #include "cmd/script/mission.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "lin_time.h"
 #include "faction_generic.h"
 #include "cmd/role_bitmask.h"

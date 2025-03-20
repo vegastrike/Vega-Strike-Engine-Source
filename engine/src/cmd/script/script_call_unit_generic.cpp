@@ -46,7 +46,7 @@
 #include "easydom.h"
 #include "flightgroup.h"
 #include "vs_globals.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "cmd/images.h"
 #include "savegame.h"
 #include "cmd/nebula.h"

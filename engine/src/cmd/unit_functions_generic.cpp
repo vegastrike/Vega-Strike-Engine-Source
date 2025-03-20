@@ -22,8 +22,8 @@
 
 
 #include "unit_generic.h"
-#include "gfx/vec.h"
-#include "gfx/cockpit_generic.h"
+#include "vec.h"
+#include "cockpit_generic.h"
 #include "faction_generic.h"
 #include "ai/communication.h"
 #include "savegame.h"
@@ -251,7 +251,7 @@ void DealPossibleJumpDamage(Unit *un) {
     double mass = un->GetMass();
 
     double jump_damage = mass * speed * chance_to_damage * jump_damage_multiplier;
-    
+
     jump_damage = std::min(jump_damage, max_damage);
 
     Damage damage;

@@ -39,7 +39,7 @@
 #include "cmd/ai/missionscript.h"
 #include "unit_generic.h"
 #include "pilot.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "ai/turretai.h"
 #include "CSopcodecollider.h"
 #include "vega_cast_utils.h"

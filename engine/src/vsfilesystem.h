@@ -27,7 +27,7 @@
 #include <vector>
 #include <iostream>
 #include <cstdarg>
-#include "gfx/vec.h"
+#include "vec.h"
 #include "pk3.h"
 #include <gnuhash.h>
 #include "vs_logging.h"

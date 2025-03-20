@@ -27,7 +27,7 @@
 
 #include "audible.h"
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "vs_globals.h"
 #include "universe.h"
 #include "audiolib.h"

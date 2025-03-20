@@ -28,13 +28,13 @@
 #include "csv.h"
 #include "savegame.h"
 #include "xml_serializer.h"
-#include "gfx/sphere.h"
+#include "sphere.h"
 #include "unit_collide.h"
 #include "Opcode.h"
 #include "CSopcodecollider.h"
 #include "audiolib.h"
 #include "unit_xml.h"
-#include "gfx/quaternion.h"
+#include "quaternion.h"
 #include "role_bitmask.h"
 #include "unit_csv.h"
 #include <algorithm>
@@ -377,7 +377,7 @@ static void AddSubUnits(Unit *thus,
                         faction,
                         modification,
                         NULL));         //I set here the fg arg to NULL
-        
+
         if (!thus->isSubUnit()) {         //Useless to set recursive owner in subunits - as parent will do the same
             xml.units.back()->SetRecursiveOwner(thus);
         }
@@ -605,7 +605,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     csvRow = unit_identifier;
 
     // Textual Descriptions
-    this->unit_key = unit_identifier;            
+    this->unit_key = unit_identifier;
     this->unit_name = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
     this->unit_description = Manifest::MPL().GetShipDescription(unit_identifier);
 
@@ -698,7 +698,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f) * xml.unitscale;
     Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f);
     Momentofinertia = Mass;
-    
+
 
     // Hull
     hull.Load(unit_key);
@@ -706,9 +706,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     shield.Load(unit_key);
 
 
-    // Energy 
+    // Energy
     // TODO: The following code has a bug.
-    // It will set the max of the component as the current value loaded from the 
+    // It will set the max of the component as the current value loaded from the
     // CSV. If the component is damaged, this will be lower than the original value.
     fuel.Load(unit_key);
     energy.Load(unit_key);
@@ -730,14 +730,14 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     ftl_drive.Load(unit_key);
     jump_drive.Load(unit_key);
-    
-    
+
+
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
     graphicOptions.RecurseIntoSubUnitsOnCollision = UnitCSVFactory::GetVariable(unit_key,
             "Collide_Subunits",
             graphicOptions.RecurseIntoSubUnitsOnCollision
                     ? true : false) ? 1 : 0;
-            
+
     // End Drive Section
 
     computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
@@ -751,7 +751,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     ecm.Load(unit_key);
     repair_bot.Load(unit_key);
     ship_functions.Load(unit_key);
-    
+
     computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
     computer.slide_end = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
 
@@ -869,15 +869,15 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     // Add integral components
     // Make this a factor of unit price
     if(!saved_game) {
-        const std::string integral_components = 
+        const std::string integral_components =
         "{hull;upgrades/integral;12000;1;0.1;0.1;1;1;@cargo/hull_patches.image@The ship's hull.;0;1}\
         {afterburner;upgrades/integral;2000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency.;0;1}\
         {drive;upgrades/integral;6000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@The ship's engine.;0;1}\
         {ftl_drive;upgrades/integral;4500;1;0.1;0.1;1;1;@upgrades/jump_drive.image@The ship's faster than light engine.;0;1}";
-    
+
         AddCarg(this, integral_components);
     }
-    
+
 }
 
 void Unit::WriteUnit(const char *modifications) {
@@ -1059,17 +1059,17 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
 
     hull.SaveToCSV(unit);
     armor.SaveToCSV(unit);
-    shield.SaveToCSV(unit);  
-    
+    shield.SaveToCSV(unit);
+
     unit["Warp_Min_Multiplier"] = tos(graphicOptions.MinWarpMultiplier);
     unit["Warp_Max_Multiplier"] = tos(graphicOptions.MaxWarpMultiplier);
-    
-    
+
+
     reactor.SaveToCSV(unit);
     fuel.SaveToCSV(unit);
     energy.SaveToCSV(unit);
     ftl_energy.SaveToCSV(unit);
-    
+
     afterburner.SaveToCSV(unit);
     drive.SaveToCSV(unit);
     jump_drive.SaveToCSV(unit);
@@ -1079,14 +1079,14 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     cloak.SaveToCSV(unit);
 
     unit["Wormhole"] = tos(forcejump != 0);
-    
-    
+
+
     unit["ITTS"] = tos(computer.itts);
 
     ecm.SaveToCSV(unit);
     repair_bot.SaveToCSV(unit);
     ship_functions.SaveToCSV(unit);
-    
+
     unit["Slide_Start"] = tos(computer.slide_start);
     unit["Slide_End"] = tos(computer.slide_end);
     unit["Cargo_Import"] = unit["Upgrades"] = "";                 //make sure those are empty

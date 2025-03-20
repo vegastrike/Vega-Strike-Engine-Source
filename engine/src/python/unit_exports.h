@@ -29,7 +29,7 @@
 #include "cmd/container.h"
 #include <string>
 #include "init.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #include "cmd/unit_generic.h"
 #include <boost/version.hpp>
 

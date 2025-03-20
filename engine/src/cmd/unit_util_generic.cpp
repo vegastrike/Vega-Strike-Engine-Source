@@ -28,14 +28,14 @@
 #include "cmd/unit_util.h"
 #include "configxml.h"
 #include "vs_globals.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "universe_util.h"
 #include "cmd/ai/docking.h"
 #include "savegame.h"
 #include "cmd/planet.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "role_bitmask.h"
 #include "lin_time.h"
 #include "planetary_orbit.h"
@@ -453,7 +453,7 @@ void SetHull(Unit *my_unit, float newhull) {
     if (!my_unit) {
         return;
     }
-    
+
     my_unit->hull.Set(newhull);
 }
 
@@ -920,19 +920,19 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
     const std::string upgrade_category = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Type", std::string());
     if(upgrade_category == "Hull") {
         return un->hull.PercentOperational();
-    } 
-    
+    }
+
     if(upgrade_category == "Armor") {
         return un->armor.PercentOperational();
-    } 
+    }
 
     if(upgrade_category == "Shield") {
         return un->shield.PercentOperational();
-    } 
-    
+    }
+
     if(upgrade_category == "Afterburner") {
         return un->afterburner.PercentOperational();
-    } 
+    }
 
     if(upgrade_category == "Drive") {
         return un->drive.PercentOperational();
@@ -940,16 +940,16 @@ float PercentOperational(Unit *un, std::string name, std::string category, bool 
 
     if(upgrade_category == "FTL_Drive") {
         return un->ftl_drive.PercentOperational();
-    } 
+    }
 
     if(upgrade_category == "Reactor") {
         return un->reactor.PercentOperational();
-    } 
-    
+    }
+
     if(upgrade_category == "Capacitor") {
         return un->energy.PercentOperational();
-    } 
-    
+    }
+
     if(upgrade_category == "FTL_Capacitor") {
         return un->ftl_energy.PercentOperational();
     }

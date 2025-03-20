@@ -26,7 +26,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 
 #include "damageable_object.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #include "mount_size.h"
 
 class Unit;
@@ -73,7 +73,7 @@ public:
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
     void Destroy(); //explodes then deletes
-   
+
 
 
 

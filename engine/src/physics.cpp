@@ -22,7 +22,7 @@
 #include "macosx_math.h"
 #include "lin_time.h"
 #include "physics.h"
-#include "gfx/quaternion.h"
+#include "quaternion.h"
 
 PhysicsSystem::PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r) :
         mass(M),

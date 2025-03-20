@@ -28,7 +28,7 @@
 #include "xml_support.h"
 #include "cmd/container.h"
 #include <vector>
-#include "gfx/vec.h"
+#include "vec.h"
 #include "vsfilesystem.h"
 //using namespace XMLSupport;  DONT DO THIS IN HEADERS
 enum VIEWSTYLE {

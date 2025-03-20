@@ -26,10 +26,10 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_BEAM_H
 #define VEGA_STRIKE_ENGINE_CMD_BEAM_H
 
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "unit_collide.h"
-#include "gfx/matrix.h"
-#include "gfx/quaternion.h"
+#include "matrix.h"
+#include "quaternion.h"
 #include <vector>
 class GFXVertexList;
 class Texture;

@@ -24,7 +24,7 @@
 
 //#include "cmd/script/mission.h"
 
-#include "gfx/vec.h"
+#include "vec.h"
 
 //WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
 

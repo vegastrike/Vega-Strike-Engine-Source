@@ -24,8 +24,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 #define VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 
-#include "gfx/vec.h"
-#include "gfx/quaternion.h"
+#include "vec.h"
+#include "quaternion.h"
 #include "star_system.h"
 
 #include <cfloat>
@@ -113,7 +113,7 @@ public:
         unsigned missilelock;
         unsigned FaceCamera;
         unsigned Animating;
-        
+
         unsigned WarpRamping;
         unsigned unused1;
         unsigned NoDamageParticles;

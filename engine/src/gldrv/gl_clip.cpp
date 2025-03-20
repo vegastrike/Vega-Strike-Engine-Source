@@ -22,7 +22,7 @@
 
 
 #include "gfxlib.h"
-#include "gfx/matrix.h"
+#include "matrix.h"
 #include "gl_matrix.h"
 #include "lin_time.h"
 #include <stdio.h>

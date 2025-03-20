@@ -30,7 +30,7 @@
 #include <deque>
 #include <boost/shared_ptr.hpp>
 #include "cmd/ai/order.h"
-#include "gfx/vec.h"
+#include "vec.h"
 
 class Unit;
 

@@ -29,9 +29,9 @@
 
 #include "bolt.h"
 
-#include "gfx/boltdrawmanager.h"
+#include "boltdrawmanager.h"
 #include "gfxlib.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"

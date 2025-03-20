@@ -21,14 +21,14 @@
  */
 #include "gl_globals.h"
 #include "gfxlib.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #include <stdio.h>
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
 #include <assert.h>
 //#include "vegastrike.h"
-#include "gfx/matrix.h"
+#include "matrix.h"
 #include "vs_globals.h"
 #ifdef WIN32
 #ifndef NOMINMAX

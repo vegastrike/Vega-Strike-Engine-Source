@@ -23,7 +23,7 @@
 
 #include "gl_globals.h"
 #include "gfxlib.h"
-#include "gfx/matrix.h"
+#include "matrix.h"
 //Matrix model = {0};
 //Matrix view = {0};
 

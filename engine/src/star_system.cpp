@@ -69,10 +69,10 @@
 #include "cmd/unit_util.h"
 #include "cmd/missile.h"
 
-#include "gfx/boltdrawmanager.h"
-#include "gfx/sphere.h"
+#include "boltdrawmanager.h"
+#include "sphere.h"
 #include "gfx/particle.h"
-#include "gfx/lerp.h"
+#include "lerp.h"
 #include "gfx/warptrail.h"
 #include "gfx/env_map_gent.h"
 #include "gfx/halo.h"
@@ -82,8 +82,8 @@
 #include "gfx/star.h"
 #include "gfx/cockpit.h"
 #include "gfx/occlusion.h"
-#include "gfx/vec.h"
-#include "gfx/cockpit_generic.h"
+#include "vec.h"
+#include "cockpit_generic.h"
 
 #include <boost/python/errors.hpp>
 
@@ -1399,7 +1399,7 @@ bool StarSystem::JumpTo(Unit *un, Unit *jumppoint, const std::string &system, bo
     }
 
     un->jump_drive.UnsetDestination();
-    
+
 #ifdef JUMP_DEBUG
     VS_LOG(trace, (boost::format("jumping to %1%.  ") % system));
 #endif

@@ -38,7 +38,7 @@
 #include "csgeom2/opbox.h"
 #include "csgeom2/optransfrm.h"
 #include "basecollider.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 
 /*
  	How to use Collider.

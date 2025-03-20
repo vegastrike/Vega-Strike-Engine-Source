@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
 
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "lin_time.h"
 #include "beam.h"
 #include "planet.h"

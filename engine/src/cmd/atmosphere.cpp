@@ -26,11 +26,11 @@
 
 
 #include "cmd/atmosphere.h"
-#include "gfx/mesh.h"
-#include "gfx/matrix.h"
-#include "gfx/vec.h"
+#include "mesh.h"
+#include "matrix.h"
+#include "vec.h"
 #include "gfxlib_struct.h"
-#include "gfx/sphere.h"
+#include "sphere.h"
 #include "cmd/planet.h"
 #include "star_system.h"
 #include "cmd/collection.h"

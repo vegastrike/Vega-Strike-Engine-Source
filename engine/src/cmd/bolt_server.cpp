@@ -27,7 +27,7 @@
 
 #include "bolt.h"
 #include "gfxlib.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "gfxlib_struct.h"
 #include <vector>
 

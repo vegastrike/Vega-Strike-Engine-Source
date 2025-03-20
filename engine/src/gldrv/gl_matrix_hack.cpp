@@ -22,7 +22,7 @@
 
 
 #include "gfxlib.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #include <stdio.h>
 //typedef float GLdouble;
 #include <math.h>

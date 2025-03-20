@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_CARRIER_H
 
 #include "resource/cargo.h"
-#include "gfx/vec.h"
+#include "vec.h"
 
 #include <string>
 #include <vector>

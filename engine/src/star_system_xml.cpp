@@ -29,7 +29,7 @@
 #include "configxml.h"
 #include "vegastrike.h"
 #include <assert.h>                              /// needed for assert() calls.
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/fire.h"

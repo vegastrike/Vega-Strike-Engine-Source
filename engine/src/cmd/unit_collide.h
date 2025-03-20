@@ -23,7 +23,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLIDE_H
 
 #define SAFE_COLLIDE_DEBUG
-#include "gfx/vec.h"
+#include "vec.h"
 #include <algorithm>
 #include <vector>
 #include <stdio.h>

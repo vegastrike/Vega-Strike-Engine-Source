@@ -26,7 +26,7 @@
 
 #include "key_mutable_set.h"
 #include "vegastrike.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #if defined (_WIN32) || __GNUC__ != 2
 #include <limits>
 #endif

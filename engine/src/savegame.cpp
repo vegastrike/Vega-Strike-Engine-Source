@@ -39,7 +39,7 @@
 #include "load_mission.h"
 #include <algorithm>
 #include "cmd/script/mission.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "cmd/fg_util.h"
 #include "star_system.h"
 #include "universe.h"

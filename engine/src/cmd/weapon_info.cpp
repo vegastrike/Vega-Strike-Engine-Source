@@ -29,7 +29,7 @@
 
 // TODO: this should not be here
 #include "vsfilesystem.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 
 #include <boost/algorithm/string.hpp>
 

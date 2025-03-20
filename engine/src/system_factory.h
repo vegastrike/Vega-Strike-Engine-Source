@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H
 #define VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "gfxlib_struct.h"
 
 #include <string>

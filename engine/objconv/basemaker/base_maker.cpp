@@ -34,8 +34,8 @@
 #include "sprite.h"
 #include <stdio.h>
 #include "base_maker_texture.h"
-#include "gfx/vec.h"
-#include "gfx/matrix.h"
+#include "vec.h"
+#include "matrix.h"
 #include "gfx/hud.h"
 #include "vs_globals.h"
 
@@ -100,7 +100,7 @@ double cur_check = 1;
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "gfx/quaternion.h"
+#include "quaternion.h"
 
 class Texture;
 

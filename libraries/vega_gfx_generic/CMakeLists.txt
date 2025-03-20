@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Benjamen Meyer and other Vega Strike contributors.
+# Copyright (C) 2025 Stephen G. Tuggy and other Vega Strike contributors.
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -19,9 +19,19 @@
 
 MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-#FILE(GLOB VS_LIBRARIES LIST_DIRECTORIES true RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
-SET(VS_LIBRARIES "collide2" "vega_gfx_generic")
-FOREACH(VS_LIBDIR IN LISTS VS_LIBRARIES)
-    MESSAGE("Found Library Directory " ${VS_LIBDIR})
-    ADD_SUBDIRECTORY(${VS_LIBDIR})
-ENDFOREACH(VS_LIBDIR)
+ADD_LIBRARY(vegastrike_gfx_generic SHARED
+        texture_manager.cpp
+        boltdrawmanager.cpp
+        cockpit_generic.cpp
+        lerp.cpp
+        matrix.cpp
+        mesh_bxm.cpp
+        mesh_poly.cpp
+        mesh_xml.cpp
+        mesh.cpp
+        quaternion.cpp
+        soundcontainer_generic.cpp
+        sphere_generic.cpp
+        tvector.cpp
+        macosx_math.cpp
+)

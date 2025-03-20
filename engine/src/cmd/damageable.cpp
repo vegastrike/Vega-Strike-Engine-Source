@@ -25,7 +25,7 @@
 
 #include "damageable.h"
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "vs_math.h"
 #include "configuration/game_config.h"
 #include "vs_globals.h"
@@ -38,7 +38,7 @@
 #include "ai/order.h"
 #include "pilot.h"
 #include "ai/comm_ai.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "vega_cast_utils.h"
 
 #include <algorithm>
@@ -47,7 +47,7 @@
 
 float Damageable::DealDamageToHull(const Vector &pnt, float damage) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    
+
     Damage dmg(0, damage); // Bypass shield with phase damage
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
     InflictedDamage inflicted_damage(3);
@@ -55,7 +55,7 @@ float Damageable::DealDamageToHull(const Vector &pnt, float damage) {
     unit->hull.DealDamage(attack_vector, dmg, inflicted_damage);
     int facet_index = unit->armor.GetFacetIndex(attack_vector);
 
-    float denominator = unit->armor.facets[facet_index].Value() + 
+    float denominator = unit->armor.facets[facet_index].Value() +
         unit->hull.Get();
     if (denominator == 0) {
         return 0;
@@ -72,7 +72,7 @@ float Damageable::DealDamageToShield(const Vector &pnt, float &damage) {
     unit->shield.DealDamage(attack_vector, dmg, inflicted_damage);
     int facet_index = unit->shield.GetFacetIndex(attack_vector);
 
-    float denominator = unit->shield.facets[facet_index].Value() + 
+    float denominator = unit->shield.facets[facet_index].Value() +
         unit->hull.Get();
     if (denominator == 0) {
         return 0;
@@ -91,7 +91,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         const GFXColor &color,
         void *ownerDoNotDereference) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    
+
     InflictedDamage inflicted_damage(3);
 
     //We also do the following lock on client side in order not to display shield hits
@@ -340,7 +340,7 @@ extern const Unit *loadUnitByCache(std::string name, int faction);
 
 void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    
+
     // Ship destroyed. No point in further work
     if(unit->Destroyed()) {
         return;
@@ -367,9 +367,9 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     // A brief explanation
-    // indiscriminate is a fraction (25% by default). 
+    // indiscriminate is a fraction (25% by default).
     // Damage is calculated as 0.25 * rand + 0.75 * (hull_damage)/(current_hull)
-    // Therefore, 
+    // Therefore,
     double indiscriminate_system_destruction = configuration()->physics_config.indiscriminate_system_destruction;
     double random_damage_factor = indiscriminate_system_destruction * rand01();
     double hull_damage_modifier = 1 - indiscriminate_system_destruction;

@@ -22,7 +22,7 @@
  */
 
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "cmd/unit_generic.h"
 #include "vertex.h"
 #include "aux_logo.h"

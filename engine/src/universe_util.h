@@ -25,7 +25,7 @@
 /// Headers for python modules
 ///
 #include "cmd/collection.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #include "cmd/unit_util.h"
 #include "manifest.h"
 

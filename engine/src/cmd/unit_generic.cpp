@@ -54,14 +54,14 @@
 #include "cmd/ai/aggressive.h"
 #include "python/python_class.h"
 #include "missile.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "gfx/vsbox.h"
 #include <algorithm>
 #include "cmd/ai/ikarus.h"
 #include "role_bitmask.h"
 #include "unit_const_cache.h"
 #include "gfx/warptrail.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "csv.h"
 #include "vs_random.h"
 #include "galaxy_xml.h"
@@ -997,7 +997,7 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
     }
 
     if (!un->jump_drive.CanConsume()) {
-        return;    
+        return;
     }
 
     cp->jumpok = 1;
@@ -1018,19 +1018,19 @@ bool Unit::jumpReactToCollision(Unit *smalle) {
             return false;
         }
         //we have a drive
-        if ((!SPEC_interference && 
+        if ((!SPEC_interference &&
                 (smalle->jump_drive.IsDestinationSet() &&          //we have power
                     (smalle->jump_drive.CanConsume() ||
                     //or we're being cheap
                     (ai_jump_cheat && cp == nullptr))
                 )
             ) || forcejump) {
-            
+
             if(!smalle->jump_drive.IsDestinationSet()) {
                 smalle->jump_drive.SetDestination(0);
             }
             int dest = smalle->jump_drive.Destination();
-           
+
             smalle->jump_drive.UnsetDestination();
             Unit *jumppoint = this;
             _Universe->activeStarSystem()
@@ -1148,7 +1148,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         degrees = 360 - degrees;
     }
     if (degrees >= 0 && degrees < 20) {
-        
+
         //DAMAGE COCKPIT
         if (randnum >= .85) {//do 25% damage to a gauge
             ship_functions.Damage(Function::cockpit);
@@ -1176,7 +1176,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         // This is fairly severe. One or two hits can disable the engine.
         // Note that retro can be damaged by both this and above.
         // Drive can also be damaged by code below - really computer.
-        // TODO: figure out a better damage system that doesn't rely on where 
+        // TODO: figure out a better damage system that doesn't rely on where
         // the shots are coming from.
         drive.Damage();
         afterburner.Damage();
@@ -1563,7 +1563,7 @@ void Unit::Target(Unit *targ) {
                 radar.Unlock();
             }
         } else {
-            // TODO: this is unclear code. I translated it fully but 
+            // TODO: this is unclear code. I translated it fully but
             // it doesn't really make sense. Maybe targets don't have destinations?!
             if (!jump_drive.Installed() || jump_drive.IsDestinationSet()) {
                 bool found = false;
@@ -2003,9 +2003,9 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     if (this == _Universe->AccessCockpit()->GetParent()) {
         this->RestoreGodliness();
     }
-    
+
     unsigned int cockpit = UnitUtil::isPlayerStarship(this);
-  
+
     // Refuel and recharge and charge docking/refueling fees
     rechargeShip(this, cockpit);
 
@@ -2819,7 +2819,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
             AddToDowngradeMap(up->name, 1, curdowngrademapoffset++, tempdownmap);
         }
     }
-    
+
     if (downgrade) {
         Adder = &SubtractUp;
         Percenter = &computeDowngradePercent;
@@ -2853,7 +2853,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction,
                     "Warp_Min_Multiplier|Warp_Max_Multiplier")) {
-        
+
         if (!csv_cell_null_check || force_change_on_nothing
                 || cell_has_recursive_data(upgrade_name, up->faction, "Warp_Min_Multiplier")) {
             STDUPGRADE(graphicOptions.MinWarpMultiplier,
@@ -2891,18 +2891,18 @@ bool Unit::UpAndDownGrade(const Unit *up,
     }
 
 
-    
 
-    
+
+
     //DO NOT CHANGE see unit_customize.cpp
     static float lc = XMLSupport::parse_float(vs_config->getVariable("physics", "lock_cone", ".8"));
     //DO NOT CHANGE! see unit.cpp:258
     static float tc = XMLSupport::parse_float(vs_config->getVariable("physics", "autotracking", ".93"));
     static bool use_template_maxrange =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "use_upgrade_template_maxrange", "true"));
-    
+
     //NO CLUE FOR BELOW
-    if (downgrade) {       
+    if (downgrade) {
     } else {
         //we are upgrading!
         if (touchme) {
@@ -2955,9 +2955,9 @@ bool Unit::ReduceToTemplate() {
     savedCargo.swap(cargo);
 
     // Remove integral components, because they become duplicates
-    savedCargo.erase(std::remove_if(savedCargo.begin(), 
-                                    savedCargo.end(), 
-                                    [](const Cargo& c) { return c.GetCategory().find("upgrades/integral") == 0; }), 
+    savedCargo.erase(std::remove_if(savedCargo.begin(),
+                                    savedCargo.end(),
+                                    [](const Cargo& c) { return c.GetCategory().find("upgrades/integral") == 0; }),
                                     savedCargo.end());
 
     vector<Mount> savedWeap;
@@ -3044,7 +3044,7 @@ int Unit::RepairUpgrade() {
     savedCargo.swap(cargo);
     savedWeap.swap(mounts);
     UnitImages<void> *im = &GetImageInformation();
-    
+
 
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
@@ -3089,12 +3089,12 @@ extern bool isWeapon(std::string name);
 bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
     assert((item != NULL) | !"Unit::RepairUpgradeCargo got a null item."); //added by chuck_starchaser
     double itemPrice = baseUnit ? baseUnit->PriceCargo(item->GetName()) : item->GetPrice();
-    
+
     // This needs to happen before we repair the part, obviously.
     double percent_working = UnitUtil::PercentOperational(this, item->GetName(), "upgrades/", false);
 
     // New repair
-    if(RepairUnit(item->GetName())) { 
+    if(RepairUnit(item->GetName())) {
         double repair_price = RepairPrice(percent_working, itemPrice);
         if (credits) {
             // Pay for repair
@@ -3584,12 +3584,12 @@ void Unit::Repair() {
     }
 
     float ammt_repair = simulation_atom_var / repairtime * repair_bot.Get();
-    
+
     unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
     unsigned int which = vsrandom.genrand_int31() % numg;
     static float hud_repair_quantity =
             XMLSupport::parse_float(vs_config->getVariable("physics", "hud_repair_unit", ".25"));
-    
+
     if (mounts.size()) {
         static float mount_repair_quantity =
                 XMLSupport::parse_float(vs_config->getVariable("physics", "mount_repair_unit", ".25"));
@@ -3819,8 +3819,8 @@ void Unit::UpdatePhysics3(const Transformation &trans,
         adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
     }
 
-     
-    
+
+
     bool is_player_ship = _Universe->isPlayerStarship(this);
 
     reactor.Generate();
@@ -3829,7 +3829,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     shield.Regenerate(is_player_ship);
     ecm.Consume();
     DecreaseWarpEnergyInWarp();
-    
+
     if (lastframe) {
         if (!(docked & (DOCKED | DOCKED_INSIDE))) {
             //the AIscript should take care

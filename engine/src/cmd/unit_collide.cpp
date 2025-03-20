@@ -32,7 +32,7 @@
 #include "beam.h"
 
 #include "bolt.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
 

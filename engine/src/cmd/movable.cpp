@@ -22,7 +22,7 @@
 
 
 #include "movable.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #include "unit_generic.h"
 #include "universe_util.h"
 #include "unit_find.h"
@@ -563,16 +563,16 @@ Vector Movable::ClampVelocity(const Vector &velocity, const bool afterburn) {
     double magnitude = velocity.Magnitude();
 
     // If we're using afterburn and have enough energy
-    // TODO: Need to make sure somewhere that damage to Afterburner.speed does not 
+    // TODO: Need to make sure somewhere that damage to Afterburner.speed does not
     // reduce it below Drive.speed
     if(afterburn && (unit->afterburner.CanConsume() || configuration()->fuel.no_fuel_afterburn)) {
-        max_speed = unit->MaxAfterburnerSpeed(); 
+        max_speed = unit->MaxAfterburnerSpeed();
     } else if(unit->drive.CanConsume() ) { //|| configuration()->fuel.no_fuel_thrust) {
         max_speed = unit->MaxSpeed();
     } else {
         max_speed = 0;
     }
-    
+
     if(magnitude > max_speed) {
         return velocity * (max_speed / magnitude);
     }
@@ -627,13 +627,13 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     const bool finegrainedFuelEfficiency = configuration()->fuel.variable_fuel_consumption;
-    
+
 
     if(!unit->afterburner.CanConsume()) {
         afterburn = false;
     }
-    
-    
+
+
     Vector Res = amt1;
 
     float fuelclamp = (unit->fuel.Level() <= 0) ? configuration()->fuel.no_fuel_thrust : 1;
@@ -654,11 +654,11 @@ Vector Movable::ClampThrust(const Vector &amt1, bool afterburn) {
     if (amt1.k < -unit->drive.retro) {
         Res.k = -unit->drive.retro;
     }
-   
+
     if (afterburn) {
         unit->afterburner.Consume();
     }
-    
+
     return Res;
 }
 
@@ -734,7 +734,7 @@ void Movable::RollTorque(float amt) {
 void Movable::Thrust(const Vector &amt1, bool afterburn) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     afterburn = afterburn && unit->afterburner.CanConsume();
-    
+
     //Unit::Thrust( amt1, afterburn );
     {
         Vector amt = ClampThrust(amt1, afterburn);

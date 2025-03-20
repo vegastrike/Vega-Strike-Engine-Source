@@ -26,7 +26,7 @@
 #include "vs_logging.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "cmd/unit_generic.h"
 #include "universe.h"
 

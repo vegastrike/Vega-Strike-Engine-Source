@@ -24,9 +24,9 @@
 #ifndef VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H
 #define VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H
 
-#include "gfx/quaternion.h"
-#include "gfx/vec.h"
-#include "gfx/matrix.h"
+#include "quaternion.h"
+#include "vec.h"
+#include "matrix.h"
 #include "gfx/hud.h"
 #include "vs_globals.h"
 

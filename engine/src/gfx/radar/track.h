@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_TRACK_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_TRACK_H
 
-#include "gfx/vec.h"
+#include "vec.h"
 
 class Unit;
 struct GFXColor;  // Edit from class to struct as defined in gfxlib_struct.

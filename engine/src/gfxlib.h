@@ -27,7 +27,7 @@
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #ifdef GLDRV_EXPORTS
 #define GFXDRVAPI __declspec( dllexport )
-#else //GLDRV_EXPORTS 
+#else //GLDRV_EXPORTS
 #define GFXDRVAPI __declspec( dllimport )
 #endif //GLDRV_EXPORTS
 #else //defined (_WIN32) && !defined (__CYGWIN__)
@@ -50,7 +50,7 @@ class Matrix;
 
 using std::vector;
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "gfxlib_struct.h"
 
 //Init functions

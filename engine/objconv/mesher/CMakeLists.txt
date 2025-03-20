@@ -62,6 +62,7 @@ IF (EXPAT_FOUND)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts

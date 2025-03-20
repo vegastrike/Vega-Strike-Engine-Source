@@ -25,7 +25,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "gfx/vec.h"
+#include "vec.h"
 #include "vsfilesystem.h"
 
 void ComputeSerials(std::vector<std::string> &stak);

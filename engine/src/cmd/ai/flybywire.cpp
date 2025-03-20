@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include "cmd/unit_generic.h"
 #include "lin_time.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "universe.h"

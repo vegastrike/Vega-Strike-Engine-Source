@@ -33,7 +33,7 @@
 #include <vector>
 #include <expat.h>
 #include <iostream>             //needed for cout calls in config_xml.cpp (and other places too I'm sure)
-#include "gfx/vec.h"
+#include "vec.h"
 
 #define ARRAY_LENGTH(a) ( sizeof (a)/sizeof (a[0]) )
 

@@ -26,7 +26,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_SCRIPT_MOUNT_H
 
 #include "collide_map.h"
-#include "gfx/quaternion.h"
+#include "quaternion.h"
 
 // TODO: move to cpp
 #include "weapon_info.h"

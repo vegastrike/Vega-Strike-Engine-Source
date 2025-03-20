@@ -25,7 +25,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "linecollide.h"
 #include "star_system.h"
 

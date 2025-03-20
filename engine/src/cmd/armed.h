@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ARMED_H
 #define VEGA_STRIKE_ENGINE_CMD_ARMED_H
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "movable.h"
 #include "mount.h"
 #include <vector>

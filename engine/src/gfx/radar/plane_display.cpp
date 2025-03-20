@@ -35,7 +35,7 @@
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
 #include "gfxlib.h"
-#include "gfx/quaternion.h"
+#include "quaternion.h"
 #include "viewarea.h"
 #include "plane_display.h"
 

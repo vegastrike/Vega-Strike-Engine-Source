@@ -33,7 +33,7 @@
 #include "ai/navigation.h"
 #include "ai/flybywire.h"
 #include "configxml.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "force_feedback.h"
 #include "ai/aggressive.h"
 #include "lin_time.h"
@@ -42,7 +42,7 @@
 #include "universe.h"
 #include "weapon_info.h"
 #include "resource/resource.h"
-#include "gfx/boltdrawmanager.h"
+#include "boltdrawmanager.h"
 
 extern char SERVER;
 

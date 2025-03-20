@@ -37,7 +37,7 @@
 #include "savegame.h"
 #include "save_util.h"
 #include "cmd/unit_csv.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "lin_time.h"
 #include "load_mission.h"
 #include "configxml.h"

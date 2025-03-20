@@ -25,7 +25,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
 #define VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "endianness.h"
 
 #include <vector>

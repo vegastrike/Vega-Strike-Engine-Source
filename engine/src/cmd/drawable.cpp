@@ -27,9 +27,9 @@
 #include "drawable.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"
-#include "gfx/mesh.h"
-#include "gfx/quaternion.h"
-#include "gfx/lerp.h"
+#include "mesh.h"
+#include "quaternion.h"
+#include "lerp.h"
 #include "gfx/occlusion.h"
 
 #include "unit_generic.h"
