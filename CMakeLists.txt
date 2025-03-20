@@ -247,6 +247,9 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
 
+SET(Vega_Root_SOURCE_DIR "${Vega_Strike_SOURCE_DIR}")
+SET(Vega_Root_BINARY_DIR "${Vega_Strike_BINARY_DIR}")
+
 # Should we install gtest?
 OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
 

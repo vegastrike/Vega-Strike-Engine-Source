@@ -29,24 +29,24 @@ SET(TRISORT_SOURCES trisort.cpp)
 ADD_EXECUTABLE(vs-buildenv-trisort ${TRISORT_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort PRIVATE
         # VS engine headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+        ${Vega_Root_SOURCE_DIR}/engine/src/components
+        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+        ${Vega_Root_SOURCE_DIR}/engine/src/damage
+        ${Vega_Root_SOURCE_DIR}/engine/src/resource
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
 )
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -62,24 +62,24 @@ SET(ASTEROID_SOURCES asteroidgen.cpp)
 ADD_EXECUTABLE(vs-buildenv-asteroidgen ${ASTEROID_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen PRIVATE
         # VS engine headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+        ${Vega_Root_SOURCE_DIR}/engine/src/components
+        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+        ${Vega_Root_SOURCE_DIR}/engine/src/damage
+        ${Vega_Root_SOURCE_DIR}/engine/src/resource
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
 )
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -95,24 +95,24 @@ SET(REPLACE_SOURCES replace.cpp)
 ADD_EXECUTABLE(vs-buildenv-replace ${REPLACE_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace PRIVATE
         # VS engine headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+        ${Vega_Root_SOURCE_DIR}/engine/src/components
+        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+        ${Vega_Root_SOURCE_DIR}/engine/src/damage
+        ${Vega_Root_SOURCE_DIR}/engine/src/resource
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
 )
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -165,24 +165,24 @@ INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
 ADD_EXECUTABLE(vega-meshtool ${MESHER_SOURCES})
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
         # VS engine headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+        ${Vega_Root_SOURCE_DIR}/engine/src/components
+        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+        ${Vega_Root_SOURCE_DIR}/engine/src/damage
+        ${Vega_Root_SOURCE_DIR}/engine/src/resource
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
 )
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${VSE_TST_INCLUDES})

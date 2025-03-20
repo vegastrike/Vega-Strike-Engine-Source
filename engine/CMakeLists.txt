@@ -35,8 +35,8 @@ MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 
 # One version header generator to rule them all
-CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
-CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
+CONFIGURE_FILE(src/version.h.in ${Vega_Root_BINARY_DIR}/src/version.h)
+CONFIGURE_FILE(src/version.h.in ${Vega_Root_BINARY_DIR}/setup/src/include/version.h)
 
 SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
@@ -82,7 +82,7 @@ ADD_COMPILE_DEFINITIONS("NV_CUBE_MAP"
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
         )
-ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/engine/config.h>"
+ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Root_BINARY_DIR}/engine/config.h>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
         "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
@@ -332,7 +332,7 @@ CONFIGURE_FILE(cmake-config.h.in config.h)
 #end config.h generation
 
 ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-include>"
-                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${Vega_Strike_BINARY_DIR}/engine/config.h>")
+                    "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:${Vega_Root_BINARY_DIR}/engine/config.h>")
 ADD_LINK_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Bsymbolic>")
 
 # Now the source files are listed starting here!
@@ -743,6 +743,9 @@ ADD_LIBRARY(vegastrike_python SHARED
 )
 # Enable PIE for this library in a cross-platform-compatible way
 set_property(TARGET vegastrike_python PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+TARGET_INCLUDE_DIRECTORIES(vegastrike_python SYSTEM PRIVATE ${TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike_python SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+
 
 TARGET_LINK_LIBRARIES(
     vegastrike_python
@@ -772,26 +775,26 @@ ADD_LIBRARY(vegastrike-engine_com SHARED
     ${LIBSCRIPT_SOURCES}
     ${LIBGFXGENERIC_SOURCES}
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com INTERFACE
+TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         # VS engine headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+        ${Vega_Root_SOURCE_DIR}/engine/src/components
+        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+        ${Vega_Root_SOURCE_DIR}/engine/src/damage
+        ${Vega_Root_SOURCE_DIR}/engine/src/resource
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -801,6 +804,7 @@ set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRU
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
+TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS})
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -889,24 +893,24 @@ IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine PRIVATE
             # VS engine headers
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            ${Vega_Root_SOURCE_DIR}/engine
+            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+            ${Vega_Root_SOURCE_DIR}/engine/src/components
+            ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+            ${Vega_Root_SOURCE_DIR}/engine/src/damage
+            ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+            ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+            ${Vega_Root_BINARY_DIR}
+            ${Vega_Root_BINARY_DIR}/src
+            ${Vega_Root_BINARY_DIR}/engine
+            ${Vega_Root_BINARY_DIR}/engine/src
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -1010,9 +1014,9 @@ INSTALL(TARGETS vegastrike-engine DESTINATION bin)
 # it's easy enough to mimic such behavior via CMake by installing
 # the executable a second time using a different name.
 IF (WIN32)
-    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Root_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
 ELSE (WIN32)
-    INSTALL(PROGRAMS "${Vega_Strike_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+    INSTALL(PROGRAMS "${Vega_Root_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
 ENDIF (WIN32)
 
 
@@ -1375,30 +1379,30 @@ IF (USE_GTEST)
         src/components/tests/afterburner_tests.cpp
         src/components/tests/jump_drive_tests.cpp
     )
-    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} INTERFACE
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
             # VS engine headers
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            ${Vega_Root_SOURCE_DIR}/engine
+            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+            ${Vega_Root_SOURCE_DIR}/engine/src/components
+            ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+            ${Vega_Root_SOURCE_DIR}/engine/src/damage
+            ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+            ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+            ${Vega_Root_BINARY_DIR}
+            ${Vega_Root_BINARY_DIR}/src
+            ${Vega_Root_BINARY_DIR}/engine
+            ${Vega_Root_BINARY_DIR}/engine/src
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
-    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Strike_BINARY_DIR}/)
+    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Root_BINARY_DIR}/)
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBPYTHON}
@@ -1412,24 +1416,24 @@ IF (USE_GTEST)
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
             # VS engine headers
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+            ${Vega_Root_SOURCE_DIR}/engine
+            ${Vega_Root_SOURCE_DIR}/engine/src
+            ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+            ${Vega_Root_SOURCE_DIR}/engine/src/components
+            ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+            ${Vega_Root_SOURCE_DIR}/engine/src/damage
+            ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+            ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-            $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+            ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-            $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+            ${Vega_Root_BINARY_DIR}
+            ${Vega_Root_BINARY_DIR}/src
+            ${Vega_Root_BINARY_DIR}/engine
+            ${Vega_Root_BINARY_DIR}/engine/src
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${VSE_TST_INCLUDES})

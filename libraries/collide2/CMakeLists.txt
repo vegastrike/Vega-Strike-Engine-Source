@@ -19,6 +19,40 @@
 
 MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
+# Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
+#
+# 1. Use of OPENGL_LIBRARY_DIR
+#    This was added to FindOpenGL in June 2002, then removed 3 months later. In that time it had
+#    made its way into use within FindGLUT, where (oddly) it was used as a possible
+#    location of GLUT's headers but not its libraries. From here, it was never removed.
+#
+# 2. Missing path component
+#    FindGLUT looks for glut.h in various locations when (on MacOS) it should be looking for
+#    GLUT/glut.h. We use the latter in our headers when building on MacOS, so the include path
+#    FindGLUT returns isn't actually of any use, but if FindGLUT can't find glut.h the build
+#    ends up using Apple's deprecated Framework (which defeats the purpose of using freeglut).
+#
+# If we're not on MacOS and using freeglut this line is not required, but as OPENGL_LIBRARY_DIR
+# is not used by anything else the following does no harm either.
+SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
+
+#Find GLUT
+SET(CMAKE_FIND_FRAMEWORK "FIRST")
+FIND_PACKAGE(GLUT REQUIRED)
+IF (GLUT_FOUND)
+    MESSAGE(STATUS "GLUT found : ${GLUT_LIBRARIES}")
+    SET(CMAKE_FIND_FRAMEWORK "LAST")
+    FIND_FILE(VEGA_COLLIDE2_GLUT_H_PATH glut.h PATH_SUFFIXES GL/ GLUT/)
+    get_filename_component(VEGA_COLLIDE2_GLUT_H_DIRECTORY ${VEGA_COLLIDE2_GLUT_H_PATH} DIRECTORY)
+    MESSAGE(STATUS "Path to glut.h: ${VEGA_GLUT_H_PATH}")
+#    SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} ${VEGA_COLLIDE2_GLUT_H_DIRECTORY} ${GLUT_INCLUDE_DIR})
+ELSE (GLUT_FOUND)
+    MESSAGE(WARNING "I can't build this, missing GLUT")
+ENDIF (GLUT_FOUND)
+
+UNSET(OPENGL_LIBRARY_DIR)
+SET(CMAKE_FIND_FRAMEWORK "LAST")
+
 ADD_LIBRARY(vegastrike-OPcollide SHARED
     Ice/IceAABB.cpp
     Ice/IceContainer.cpp
@@ -61,24 +95,24 @@ ADD_LIBRARY(vegastrike-OPcollide SHARED
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
         # VS engine headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/cmd>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/components>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/configuration>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/damage>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/resource>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/base_computer>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/engine/src/python/config>
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
+        ${Vega_Root_SOURCE_DIR}/engine/src/components
+        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
+        ${Vega_Root_SOURCE_DIR}/engine/src/damage
+        ${Vega_Root_SOURCE_DIR}/engine/src/resource
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
+        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/csgeom2>
-        $<BUILD_INTERFACE:${Vega_Strike_SOURCE_DIR}/libraries/collide2/Ice>
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
+        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
         # CMake Artifacts
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/src>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine>
-        $<BUILD_INTERFACE:${Vega_Strike_BINARY_DIR}/engine/src>
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide SYSTEM PRIVATE ${VSE_TST_INCLUDES})
@@ -88,6 +122,7 @@ SET_PROPERTY(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
 ENDIF()
+TARGET_LINK_LIBRARIES(vegastrike-OPcollide ${VSE_TST_LIBS} GLUT::GLUT)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
