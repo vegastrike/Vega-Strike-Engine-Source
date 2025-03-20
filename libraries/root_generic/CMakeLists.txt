@@ -94,4 +94,3 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_root_generic PRIVATE
         ${Vega_Root_BINARY_DIR}/engine/src
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike_root_generic SYSTEM PRIVATE ${TST_INCLUDES})
-TARGET_INCLUDE_DIRECTORIES(vegastrike_root_generic SYSTEM PRIVATE ${VSE_TST_INCLUDES})

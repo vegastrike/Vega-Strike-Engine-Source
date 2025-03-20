@@ -117,6 +117,37 @@ SET(CMAKE_C_STANDARD 11)
 SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 SET(CMAKE_C_EXTENSIONS ON)
 
+SET(Vega_Root_SOURCE_DIR "${Vega_Strike_SOURCE_DIR}")
+SET(Vega_Root_BINARY_DIR "${Vega_Strike_BINARY_DIR}")
+
+ADD_COMPILE_DEFINITIONS("NV_CUBE_MAP"
+        "BOOST_PYTHON_NO_PY_SIGNATURES"
+        "BOOST_ALL_DYN_LINK"
+        "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>"
+        "$<$<CXX_COMPILER_ID:MSVC>:__x86_64__>"
+        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
+        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
+)
+ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Root_BINARY_DIR}/engine/config.h>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
+        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
+)
+# for DEBUG remove all optimizations
+ADD_LINK_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/DEBUG>")
+ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
+        "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
+        "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Debug>>:-fstandalone-debug>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Debug>>:-O0>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Profiler>,$<CONFIG:RelWithDebInfo>>>:-Og>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:-g3>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-pg>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Profiler>>:-g2>"
+        "$<$<AND:$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>,$<CONFIG:Release>>:-O3>"
+)
+
 # On some Ubuntu versions and derivatives, a bug exists whereby enabling
 # PIE compilation (Position Independent Executables) results in the
 # `file` utility incorrectly recognising the compiled vegastrike-engine binary
@@ -240,15 +271,52 @@ ELSE (NOT DISABLE_OGRE)
     MESSAGE(STATUS "Ogre disabled")
 ENDIF (NOT DISABLE_OGRE)
 
+# Detect available Linux Distros that can be built for
+# 2021-09-18 stephengtuggy - This needs to happen before the boost_python detection logic,
+# so that we can handle the special cases for Xenial and stretch
+FIND_PACKAGE(LinuxDistro REQUIRED)
+
+SET(PythonInstalledVia "" CACHE STRING "How Python was installed, such as via Homebrew or MacPorts")
+
+IF (PythonInstalledVia STREQUAL "Homebrew")
+    FIND_PACKAGE(Python3 3.13.1 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSEIF (PythonInstalledVia STREQUAL "MacPorts")
+    FIND_PACKAGE(Python3 3.12.8 EXACT REQUIRED COMPONENTS Development Interpreter)
+ELSE ()
+    FIND_PACKAGE(Python3 3.7...<3.14 REQUIRED COMPONENTS Development Interpreter)
+ENDIF ()
+
+MESSAGE(STATUS "Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
+MESSAGE(STATUS "Python include dir : ${Python3_INCLUDE_DIRS}")
+IF (Python3_FOUND)
+    SET(TST_LIBS ${TST_LIBS} ${Python3_LIBRARIES})
+    SET(HAVE_PYTHON 1)
+    SET(TMP_Python_SITELIB ${Python3_SITELIB})
+    STRING(REGEX REPLACE "\\\\" "/" TMP_Python_SITELIB ${TMP_Python_SITELIB})
+    MESSAGE("TMP_Python_SITELIB = ${TMP_Python_SITELIB}")
+    add_compile_definitions(Python_SITELIB=${TMP_Python_SITELIB})
+ELSE (Python3_FOUND)
+    MESSAGE(FATAL_ERROR "Can't find python")
+ENDIF (Python3_FOUND)
+
+# Find Boost with boost_python library
+# Note: we now use Cmake 3.21 and Boost 1.75.
+MESSAGE(STATUS "From now on, always using System Boost (ver. 1.75 or higher)")
+SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time system filesystem thread chrono atomic program_options REQUIRED)
+MESSAGE(STATUS "Found System Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
+
+SET(TST_INCLUDES "")
+SET(TST_INCLUDES ${TST_INCLUDES} ${Python3_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+MESSAGE("** Boost_LIBRARIES: ${Boost_LIBRARIES}")
+SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
 
 # Set the default build type
 IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
 MESSAGE("** Build Type: ${CMAKE_BUILD_TYPE}")
-
-SET(Vega_Root_SOURCE_DIR "${Vega_Strike_SOURCE_DIR}")
-SET(Vega_Root_BINARY_DIR "${Vega_Strike_BINARY_DIR}")
 
 # Should we install gtest?
 OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
