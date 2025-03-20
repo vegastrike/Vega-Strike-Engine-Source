@@ -271,6 +271,61 @@ ELSE (NOT DISABLE_OGRE)
     MESSAGE(STATUS "Ogre disabled")
 ENDIF (NOT DISABLE_OGRE)
 
+#Find GL
+SET(CMAKE_FIND_FRAMEWORK "FIRST")
+FIND_PACKAGE(OpenGL REQUIRED)
+IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    MESSAGE(STATUS "OpenGL found")
+    SET(CMAKE_FIND_FRAMEWORK "LAST")
+    FIND_FILE(VEGA_GLEXT_H_PATH glext.h PATH_SUFFIXES GL/ OpenGL/)
+    get_filename_component(VEGA_GLEXT_H_DIRECTORY ${VEGA_GLEXT_H_PATH} DIRECTORY)
+    MESSAGE(STATUS "Path to glext.h: ${VEGA_GLEXT_H_PATH}")
+    FIND_FILE(VEGA_GL_H_PATH gl.h PATH_SUFFIXES GL/ OpenGL/)
+    get_filename_component(VEGA_GL_H_DIRECTORY ${VEGA_GL_H_PATH} DIRECTORY)
+    MESSAGE(STATUS "Path to gl.h: ${VEGA_GL_H_PATH}")
+    FIND_FILE(VEGA_GLU_H_PATH glu.h PATH_SUFFIXES GL/ OpenGL/)
+    get_filename_component(VEGA_GLU_H_DIRECTORY ${VEGA_GLU_H_PATH} DIRECTORY)
+    MESSAGE(STATUS "Path to glu.h: ${VEGA_GLU_H_PATH}")
+    SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLEXT_H_DIRECTORY} ${VEGA_GL_H_DIRECTORY} ${VEGA_GLU_H_DIRECTORY})
+ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    MESSAGE(WARNING "Why you no have GL?")
+ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+
+# Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
+#
+# 1. Use of OPENGL_LIBRARY_DIR
+#    This was added to FindOpenGL in June 2002, then removed 3 months later. In that time it had
+#    made its way into use within FindGLUT, where (oddly) it was used as a possible
+#    location of GLUT's headers but not its libraries. From here, it was never removed.
+#
+# 2. Missing path component
+#    FindGLUT looks for glut.h in various locations when (on MacOS) it should be looking for
+#    GLUT/glut.h. We use the latter in our headers when building on MacOS, so the include path
+#    FindGLUT returns isn't actually of any use, but if FindGLUT can't find glut.h the build
+#    ends up using Apple's deprecated Framework (which defeats the purpose of using freeglut).
+#
+# If we're not on MacOS and using freeglut this line is not required, but as OPENGL_LIBRARY_DIR
+# is not used by anything else the following does no harm either.
+SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
+
+#Find GLUT
+SET(CMAKE_FIND_FRAMEWORK "FIRST")
+FIND_PACKAGE(GLUT REQUIRED)
+IF (GLUT_FOUND)
+    MESSAGE(STATUS "GLUT found : ${GLUT_LIBRARIES}")
+    SET(CMAKE_FIND_FRAMEWORK "LAST")
+    FIND_FILE(VEGA_GLUT_H_PATH glut.h PATH_SUFFIXES GL/ GLUT/)
+    get_filename_component(VEGA_GLUT_H_DIRECTORY ${VEGA_GLUT_H_PATH} DIRECTORY)
+    MESSAGE(STATUS "Path to glut.h: ${VEGA_GLUT_H_PATH}")
+    SET(TST_INCLUDES ${TST_INCLUDES} ${VEGA_GLUT_H_DIRECTORY} ${GLUT_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
+ELSE (GLUT_FOUND)
+    MESSAGE(WARNING "I can't build this, missing GLUT")
+ENDIF (GLUT_FOUND)
+
+UNSET(OPENGL_LIBRARY_DIR)
+SET(CMAKE_FIND_FRAMEWORK "LAST")
+
 # Detect available Linux Distros that can be built for
 # 2021-09-18 stephengtuggy - This needs to happen before the boost_python detection logic,
 # so that we can handle the special cases for Xenial and stretch
