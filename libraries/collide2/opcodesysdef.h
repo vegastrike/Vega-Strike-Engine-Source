@@ -45,16 +45,11 @@
 # define CS_FORCEINLINE_TEMPLATEMETHOD CS_FORCEINLINE
 #endif
 
-#include "gfx/quaternion.h"
-#include <cstdint>
-#include <gfx/tvector.h>
 #define SMALL_EPSILON .000001
 #define EPSILON .00001
 #define ABS(x) (x>=0?x:-x)
 #define __CS_CSSYSDEFS_H__
 
-#include <cstdlib>
-#include <cstring>
 #include <cassert>
 
 class csObject {
