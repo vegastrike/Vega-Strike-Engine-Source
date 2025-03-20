@@ -19,7 +19,7 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-ADD_LIBRARY(vegastrike-OPcollide SHARED
+ADD_LIBRARY(vegastrike-OPcollide STATIC
         Ice/IceAABB.cpp
         Ice/IceAABB.h
         Ice/IceAxes.h

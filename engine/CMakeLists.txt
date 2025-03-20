@@ -75,14 +75,15 @@ IF (DATADIR)
 ENDIF (DATADIR)
 
 IF (NOT DISABLE_CLIENT) ##########
-    SET(VSE_TST_LIBS "${TST_LIBS}")
-    
+    SET(VSE_TST_LIBS ${TST_LIBS})
+    SET(VSE_TST_INCLUDES ${TST_INCLUDES})
+
     #Find OpenAL
     FIND_PACKAGE(OpenAL REQUIRED)
     IF (OPENAL_FOUND)
         MESSAGE(STATUS "Found OpenAL")
-        SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
-        SET(VSE_TST_LIBS ${VSE_TST_LIBS} ${OPENAL_LIBRARY})
+        LIST(APPEND VSE_TST_INCLUDES ${OPENAL_INCLUDE_DIR})
+        LIST(APPEND VSE_TST_LIBS ${OPENAL_LIBRARY})
         SET(HAVE_AL 1)
     ELSE (OPENAL_FOUND)
         MESSAGE(WARNING "We aint got no sound")
@@ -92,8 +93,8 @@ IF (NOT DISABLE_CLIENT) ##########
         #Find SDL
         FIND_PACKAGE(SDL2)
         IF (SDL2_FOUND)
-            SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} ${SDL2_INCLUDE_DIRS})
-            SET(VSE_TST_LIBS ${VSE_TST_LIBS} ${SDL2_LIBRARIES})
+            LIST(APPEND VSE_TST_INCLUDES ${SDL2_INCLUDE_DIRS})
+            LIST(APPEND VSE_TST_LIBS ${SDL2_LIBRARIES})
             MESSAGE(STATUS "SDL2 Found")
             SET(HAVE_SDL 1)
             SET(SDL_WINDOWING 1)
@@ -105,8 +106,8 @@ IF (NOT DISABLE_CLIENT) ##########
     #find Vorbis
     FIND_PACKAGE(Vorbis REQUIRED)
     IF (Vorbis_FOUND)
-        SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
-        SET(VSE_TST_LIBS ${VSE_TST_LIBS} ${Vorbis_LIBRARIES})
+        LIST(APPEND VSE_TST_INCLUDES ${Vorbis_INCLUDE_DIRS})
+        LIST(APPEND VSE_TST_LIBS ${Vorbis_LIBRARIES})
         SET(HAVE_OGG 1)
     ELSE (Vorbis_FOUND)
         MESSAGE(WARNING "Can't find Vorbis libs")
@@ -115,8 +116,8 @@ IF (NOT DISABLE_CLIENT) ##########
     #Find JPEG
     FIND_PACKAGE(JPEG REQUIRED)
     IF (JPEG_FOUND)
-        SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} ${JPEG_INCLUDE_DIR})
-        SET(VSE_TST_LIBS ${VSE_TST_LIBS} ${JPEG_LIBRARIES})
+        LIST(APPEND VSE_TST_INCLUDES ${JPEG_INCLUDE_DIR})
+        LIST(APPEND VSE_TST_LIBS ${JPEG_LIBRARIES})
     ELSE (JPEG_FOUND)
         MESSAGE(WARNING "How are we gonna open jpegs?")
     ENDIF (JPEG_FOUND)
@@ -124,8 +125,8 @@ IF (NOT DISABLE_CLIENT) ##########
     #Find PNG
     FIND_PACKAGE(PNG REQUIRED)
     IF (PNG_FOUND)
-        SET(VSE_TST_INCLUDES ${VSE_TST_INCLUDES} ${PNG_INCLUDE_DIRS})
-        SET(VSE_TST_LIBS ${VSE_TST_LIBS} ${PNG_LIBRARIES})
+        LIST(APPEND VSE_TST_INCLUDES ${PNG_INCLUDE_DIRS})
+        LIST(APPEND VSE_TST_LIBS ${PNG_LIBRARIES})
     ELSE (PNG_FOUND)
         MESSAGE(WARNING "Can't find PNG lib")
     ENDIF (PNG_FOUND)
@@ -145,7 +146,7 @@ ELSE (NOT BEOS)
 ENDIF (NOT BEOS)
 
 IF (NOT WIN32)
-    SET(VSE_TST_LIBS ${VSE_TST_LIBS} ${UTIL_LIB})
+    LIST(APPEND VSE_TST_LIBS ${UTIL_LIB})
 ENDIF (NOT WIN32)
 
 # Still need to add CEGUI and OGRE find packages
@@ -573,7 +574,6 @@ ADD_LIBRARY(vegastrike_python SHARED
 )
 # Enable PIE for this library in a cross-platform-compatible way
 set_property(TARGET vegastrike_python PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-TARGET_INCLUDE_DIRECTORIES(vegastrike_python SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike_python SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
 
@@ -626,7 +626,6 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
@@ -634,7 +633,7 @@ set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRU
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic)
+TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU GLUT::GLUT ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic vegastrike-OPcollide)
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -760,7 +759,7 @@ IF (NOT DISABLE_CLIENT)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic)
+    TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU GLUT::GLUT ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic)
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)

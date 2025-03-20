@@ -19,7 +19,7 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-ADD_LIBRARY(vegastrike_gfx_generic SHARED
+ADD_LIBRARY(vegastrike_gfx_generic STATIC
         texture_manager.cpp
         texture_manager.h
         boltdrawmanager.cpp
