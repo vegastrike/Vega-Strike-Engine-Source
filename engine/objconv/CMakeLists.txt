@@ -164,7 +164,7 @@ SET(MESHER_SOURCES
     mesher/Modules/XMesh_to_BFXM.cpp
     mesher/Modules/XMesh_to_Ogre.cpp
     mesher/Modules/Wavefront_to_BFXM.cpp
-    ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
+    ${Vega_Root_SOURCE_DIR}/libraries/root_generic/xml_support.cpp
 )
 
 INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
@@ -177,6 +177,7 @@ TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/components
         ${Vega_Root_SOURCE_DIR}/engine/src/configuration
         ${Vega_Root_SOURCE_DIR}/engine/src/damage
+        ${Vega_Root_SOURCE_DIR}/engine/src/gfx
         ${Vega_Root_SOURCE_DIR}/engine/src/resource
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config

@@ -854,15 +854,16 @@ IF (NOT DISABLE_CLIENT)
             ${Vega_Root_SOURCE_DIR}/engine/src/components
             ${Vega_Root_SOURCE_DIR}/engine/src/configuration
             ${Vega_Root_SOURCE_DIR}/engine/src/damage
+            ${Vega_Root_SOURCE_DIR}/engine/src/gfx
             ${Vega_Root_SOURCE_DIR}/engine/src/resource
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+            ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+            ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             # CMake Artifacts
             ${Vega_Root_BINARY_DIR}
             ${Vega_Root_BINARY_DIR}/src
