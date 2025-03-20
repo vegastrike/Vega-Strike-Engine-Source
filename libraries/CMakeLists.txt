@@ -17,11 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
-MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
+MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 #FILE(GLOB VS_LIBRARIES LIST_DIRECTORIES true RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
-SET(VS_LIBRARIES "collide2" "gfx_generic")
+SET(VS_LIBRARIES "collide2" "gfx_generic" "root_generic")
 FOREACH(VS_LIBDIR IN LISTS VS_LIBRARIES)
-    MESSAGE("Found Library Directory " ${VS_LIBDIR})
+    MESSAGE(STATUS "Found Library Directory " ${VS_LIBDIR})
     ADD_SUBDIRECTORY(${VS_LIBDIR})
 ENDFOREACH(VS_LIBDIR)

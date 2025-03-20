@@ -30,7 +30,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
-MESSAGE("PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
+MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 SET(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 
@@ -625,35 +625,6 @@ SET(LIBGFXSERVER_SOURCES
     src/gfx/mesh_bin_server.cpp
 )
 
-SET(LIBROOTGENERIC_SOURCES
-    src/atmospheric_fog_mesh.cpp
-    src/configxml.cpp
-    src/easydom.cpp
-    src/macosx_math.cpp
-    src/faction_generic.cpp
-    src/faction_util_generic.cpp
-    src/galaxy.cpp
-    src/galaxy_gen.cpp
-    src/galaxy_xml.cpp
-    src/galaxy_utils.cpp
-    src/lin_time.cpp
-    src/load_mission.cpp
-    src/pk3.cpp
-    src/posh.cpp
-    src/savegame.cpp
-    src/system_factory.cpp
-    src/star_system_xml.cpp
-    src/stardate.cpp
-    src/universe_globals.cpp
-    src/universe_util_generic.cpp
-    src/vs_globals.cpp
-    src/vsfilesystem.cpp
-    src/xml_serializer.cpp
-    src/xml_support.cpp
-    src/XMLDocument.cpp
-    src/options.cpp
-)
-
 SET(LIBROOTCLIENT_SOURCES
     src/cg_global.cpp
     src/command.cpp
@@ -755,7 +726,6 @@ ADD_LIBRARY(vegastrike-engine_com SHARED
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
     ${LIBPYTHON_SOURCES}
-    ${LIBROOTGENERIC_SOURCES}
     ${LIBSCRIPT_SOURCES}
 )
 TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
@@ -771,9 +741,10 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         # CMake Artifacts
         ${Vega_Root_BINARY_DIR}
         ${Vega_Root_BINARY_DIR}/src
@@ -788,7 +759,7 @@ set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRU
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS} vegastrike_gfx_generic)
+TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic)
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -888,7 +859,8 @@ IF (NOT DISABLE_CLIENT)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
@@ -912,14 +884,8 @@ IF (NOT DISABLE_CLIENT)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    #ADD_DEPENDENCIES(vegastrike-engine OpenGL::GL OpenGL::GLU)
-
-    TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS})
-    #IF (MSVC)
-        SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
-    #ELSE (MSVC)
-    #    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib -L/usr/local/lib ${TST_LFLAGS}")
-    #ENDIF (MSVC)
+    TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic)
+    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
 
@@ -1377,7 +1343,8 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
@@ -1413,7 +1380,8 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/vega_gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
             # CMake Artifacts
@@ -1440,6 +1408,7 @@ IF (USE_GTEST)
         gtest_main
         vegastrike-testing
         vegastrike_gfx_generic
+        vegastrike_root_generic
         Boost::log
         Boost::log_setup
         Boost::json

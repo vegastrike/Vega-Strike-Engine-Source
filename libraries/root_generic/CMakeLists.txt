@@ -20,35 +20,56 @@
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 ADD_LIBRARY(vegastrike_gfx_generic SHARED
-        texture_manager.cpp
-        texture_manager.h
-        boltdrawmanager.cpp
-        boltdrawmanager.h
-        cockpit_generic.cpp
-        cockpit_generic.h
-        lerp.cpp
-        lerp.h
-        matrix.cpp
-        matrix.h
-        mesh_bxm.cpp
-        mesh_bxm.h
-        mesh_poly.cpp
-        mesh_xml.cpp
-        mesh_xml.h
-        mesh.cpp
-        mesh.h
-        quaternion.cpp
-        quaternion.h
-        soundcontainer_generic.cpp
-        soundcontainer_generic.h
-        sphere_generic.cpp
-        sphere.h
-        tvector.cpp
-        tvector.h
-        vec.h
-        mesh_io.h
+        atmospheric_fog_mesh.cpp
+        atmospheric_fog_mesh.h
+        configxml.cpp
+        configxml.h
+        easydom.cpp
+        easydom.h
+        macosx_math.cpp
+        macosx_math.h
+        faction_generic.cpp
+        faction_generic.h
+        faction_util_generic.cpp
+        galaxy.cpp
+        galaxy.h
+        galaxy_gen.cpp
+        galaxy_gen.h
+        galaxy_xml.cpp
+        galaxy_xml.h
+        galaxy_utils.cpp
+        lin_time.cpp
+        lin_time.h
+        load_mission.cpp
+        load_mission.h
+        pk3.cpp
+        pk3.h
+        posh.cpp
+        posh.h
+        savegame.cpp
+        savegame.h
+        system_factory.cpp
+        system_factory.h
+        star_system_xml.cpp
+        stardate.cpp
+        stardate.h
+        universe_globals.cpp
+        universe_globals.h
+        universe_util_generic.cpp
+        vs_globals.cpp
+        vs_globals.h
+        vsfilesystem.cpp
+        vsfilesystem.h
+        xml_serializer.cpp
+        xml_serializer.h
+        xml_support.cpp
+        xml_support.h
+        XMLDocument.cpp
+        XMLDocument.h
+        options.cpp
+        options.h
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
+TARGET_INCLUDE_DIRECTORIES(vegastrike_root_generic PRIVATE
         # VS engine headers
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
@@ -71,5 +92,5 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic SYSTEM PRIVATE ${TST_INCLUDES})
-TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic SYSTEM PRIVATE ${VSE_TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike_root_generic SYSTEM PRIVATE ${TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike_root_generic SYSTEM PRIVATE ${VSE_TST_INCLUDES})
