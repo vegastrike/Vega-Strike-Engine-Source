@@ -441,6 +441,4 @@ void startMenuInterface(bool firsttime,
         string alert = string());         //If game fails, bring it back to a common starting point.
 }
 
-#undef activeSys
-
 #endif //VEGA_STRIKE_ENGINE_UNIVERSE_UTIL_GENERIC_H
