@@ -740,10 +740,9 @@ void SaveGame::ReadMissionStringData(char *&buf, bool select_data, const std::se
 
 void SaveGame::PurgeZeroStarships() // DELETE unused function?
 {
-    for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(), ie = missionstringdata->m.end(); i != ie;
-         ++i) {
-        if (fg_util::IsFGKey(i->first)) {
-            if (fg_util::CheckFG(i->second)) {
+    for (auto & pair : missionstringdata->m) {
+        if (fg_util::IsFGKey(pair.first)) {
+            if (fg_util::CheckFG(pair.second)) {
                 // VS_LOG(info, (boost::format("correcting flightgroup %1% to have right landed ships") % i->first.c_str()));
             }
         }
