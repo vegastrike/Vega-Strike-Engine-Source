@@ -355,51 +355,6 @@ SET(LIBAI_SOURCES
     src/cmd/ai/flykeyboard_generic.cpp
 )
 
-SET(LIBCMD_SOURCES
-    src/cmd/alphacurve.cpp
-    src/cmd/carrier.cpp
-    src/cmd/collection.cpp
-    src/cmd/collide_map.cpp
-    src/cmd/collide.cpp
-    src/cmd/container.cpp
-    src/cmd/csv.cpp
-    src/cmd/mount.cpp
-    src/cmd/armed.cpp
-    src/cmd/audible.cpp
-    src/cmd/jump_capable.cpp
-    src/cmd/role_bitmask.cpp
-    src/cmd/unit_collide.cpp
-    src/cmd/unit_const_cache.cpp
-    src/cmd/unit_csv.cpp
-    src/cmd/unit_csv_factory.cpp
-    src/cmd/unit_json_factory.cpp
-    src/cmd/unit_optimize_factory.cpp
-    src/cmd/unit_functions_generic.cpp
-    src/cmd/unit_generic.cpp
-    src/cmd/upgradeable_unit.cpp
-    src/cmd/fg_util.cpp
-    src/cmd/unit_util_generic.cpp
-    src/cmd/unit_xml.cpp
-    src/cmd/engineVersion.cpp
-
-    src/cmd/collision.cpp
-    src/cmd/damageable.cpp
-    src/cmd/drawable.cpp
-    src/cmd/movable.cpp
-    src/cmd/computer.cpp
-
-    src/cmd/intelligent.cpp
-    src/cmd/energetic.cpp
-
-    src/cmd/planetary_orbit.cpp
-
-    src/cmd/weapon_factory.cpp
-    src/cmd/weapon_info.cpp
-    src/cmd/mount_size.cpp
-    src/cmd/weapon_type.cpp
-    src/vega_py_run.cpp
-)
-
 SET(LIBCMDSERVER_SOURCES
     src/cmd/atmosphere_server.cpp
     src/cmd/base_util_server.cpp
@@ -598,7 +553,6 @@ ADD_LIBRARY(vegastrike-engine_com STATIC
     ${LIBRESOURCE}
     ${LIBCOMPONENT}
     ${LIBAI_SOURCES}
-    ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
     ${LIBPYTHON_SOURCES}
     ${LIBSCRIPT_SOURCES}
@@ -616,6 +570,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries/cmd
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
@@ -634,7 +589,7 @@ set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRU
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU GLUT::GLUT ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic vegastrike-OPcollide)
+TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU GLUT::GLUT ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic vegastrike_cmd vegastrike-OPcollide)
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -735,6 +690,7 @@ IF (NOT DISABLE_CLIENT)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries/cmd
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
@@ -1243,7 +1199,6 @@ IF (USE_GTEST)
         ${LIBDAMAGE}
         ${LIBRESOURCE}
         ${LIBCOMPONENT}
-        ${LIBCMD_SOURCES}
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
             # VS engine headers
@@ -1258,6 +1213,7 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries/cmd
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
             ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
             ${Vega_Root_SOURCE_DIR}/libraries/root_generic
@@ -1285,6 +1241,7 @@ IF (USE_GTEST)
         vegastrike-testing
         vegastrike_gfx_generic
         vegastrike_root_generic
+        vegastrike_cmd
         Boost::log
         Boost::log_setup
         Boost::json

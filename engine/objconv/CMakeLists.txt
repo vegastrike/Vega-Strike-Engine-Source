@@ -40,6 +40,7 @@ TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries/cmd
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
@@ -76,6 +77,7 @@ TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries/cmd
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
@@ -112,6 +114,7 @@ TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries/cmd
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
@@ -186,6 +189,7 @@ TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries/cmd
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
