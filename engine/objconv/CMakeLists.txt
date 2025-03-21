@@ -41,19 +41,19 @@ TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         # CMake Artifacts
         ${Vega_Root_BINARY_DIR}
         ${Vega_Root_BINARY_DIR}/src
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-trisort SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 SET_TARGET_PROPERTIES(vs-buildenv-trisort PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET_PROPERTY(TARGET vs-buildenv-trisort PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-trisort PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -77,19 +77,19 @@ TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         # CMake Artifacts
         ${Vega_Root_BINARY_DIR}
         ${Vega_Root_BINARY_DIR}/src
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-asteroidgen SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 SET_TARGET_PROPERTIES(vs-buildenv-asteroidgen PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET_PROPERTY(TARGET vs-buildenv-asteroidgen PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-asteroidgen PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -113,19 +113,19 @@ TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         # CMake Artifacts
         ${Vega_Root_BINARY_DIR}
         ${Vega_Root_BINARY_DIR}/src
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vs-buildenv-replace SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 SET_TARGET_PROPERTIES(vs-buildenv-replace PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET_PROPERTY(TARGET vs-buildenv-replace PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vs-buildenv-replace PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -197,9 +197,9 @@ TARGET_INCLUDE_DIRECTORIES(vega-meshtool PRIVATE
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vega-meshtool SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 SET_TARGET_PROPERTIES(vega-meshtool PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET_PROPERTY(TARGET vega-meshtool PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vega-meshtool PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)

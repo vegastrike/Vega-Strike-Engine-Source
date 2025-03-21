@@ -746,7 +746,6 @@ IF (NOT DISABLE_CLIENT)
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-engine SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
     #TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
@@ -1220,20 +1219,22 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+            ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+            ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             # CMake Artifacts
             ${Vega_Root_BINARY_DIR}
             ${Vega_Root_BINARY_DIR}/src
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Root_BINARY_DIR}/)
+
+    #TARGET_COMPILE_FEATURES(${TEST_NAME} PUBLIC cxx_std_11)
+    set_property(TARGET ${TEST_NAME} PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+    IF (NEED_LINKING_AGAINST_LIBM)
+        TARGET_LINK_LIBRARIES(${TEST_NAME} m)
+    ENDIF()
 
     ADD_LIBRARY(vegastrike-testing
         ${LIBPYTHON}
@@ -1243,7 +1244,6 @@ IF (USE_GTEST)
         ${LIBRESOURCE}
         ${LIBCOMPONENT}
         ${LIBCMD_SOURCES}
-        ${LIBVS_LOGGING}
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
             # VS engine headers
@@ -1259,17 +1259,14 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+            ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+            ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             # CMake Artifacts
             ${Vega_Root_BINARY_DIR}
             ${Vega_Root_BINARY_DIR}/src
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)

@@ -62,9 +62,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    SET_PROPERTY(TARGET vegasettings PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 	TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
 
 	#find GTK3
@@ -120,20 +120,20 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
+            ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
+            ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             # CMake Artifacts
             ${Vega_Root_BINARY_DIR}
             ${Vega_Root_BINARY_DIR}/src
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-	TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
+    SET_PROPERTY(TARGET vegasettings PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+    TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
 
 	#find GTK3
 	FIND_PACKAGE(GTK3 3.0 REQUIRED gtk)
