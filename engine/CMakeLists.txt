@@ -591,7 +591,18 @@ set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRU
 IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-engine_com OpenGL::GL OpenGL::GLU GLUT::GLUT ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic vegastrike_cmd vegastrike-OPcollide)
+TARGET_LINK_LIBRARIES(vegastrike-engine_com
+        OpenGL::GL
+        OpenGL::GLU
+        GLUT::GLUT
+        ${VSE_TST_LIBS}
+        vegastrike_gfx_generic
+        vegastrike_root_generic
+        vegastrike_cmd
+        vegastrike-OPcollide
+        ${Boost_LIBRARIES}
+        ${Python3_LIBRARIES}
+)
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -720,7 +731,17 @@ IF (NOT DISABLE_CLIENT)
         TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(vegastrike-engine OpenGL::GL OpenGL::GLU GLUT::GLUT ${VSE_TST_LIBS} vegastrike_gfx_generic vegastrike_root_generic)
+    TARGET_LINK_LIBRARIES(vegastrike-engine
+            OpenGL::GL
+            OpenGL::GLU
+            GLUT::GLUT
+            ${VSE_TST_LIBS}
+            vegastrike_gfx_generic
+            vegastrike_root_generic
+            vegastrike_cmd
+            ${Boost_LIBRARIES}
+            ${Python3_LIBRARIES}
+    )
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF (NOT DISABLE_CLIENT)
