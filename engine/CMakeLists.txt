@@ -567,6 +567,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/configuration
         ${Vega_Root_SOURCE_DIR}/engine/src/damage
         ${Vega_Root_SOURCE_DIR}/engine/src/resource
+        ${Vega_Root_SOURCE_DIR}/engine/src/python
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
@@ -688,6 +689,7 @@ IF (NOT DISABLE_CLIENT)
             ${Vega_Root_SOURCE_DIR}/engine/src/damage
             ${Vega_Root_SOURCE_DIR}/engine/src/gfx
             ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
@@ -1174,6 +1176,7 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/configuration
             ${Vega_Root_SOURCE_DIR}/engine/src/damage
             ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
@@ -1214,6 +1217,7 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/configuration
             ${Vega_Root_SOURCE_DIR}/engine/src/damage
             ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers

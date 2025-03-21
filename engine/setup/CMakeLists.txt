@@ -48,6 +48,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ${Vega_Root_SOURCE_DIR}/engine/src/configuration
             ${Vega_Root_SOURCE_DIR}/engine/src/damage
             ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
@@ -118,6 +119,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
             ${Vega_Root_SOURCE_DIR}/engine/src/damage
             ${Vega_Root_SOURCE_DIR}/engine/src/gfx
             ${Vega_Root_SOURCE_DIR}/engine/src/resource
+            ${Vega_Root_SOURCE_DIR}/engine/src/python
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
