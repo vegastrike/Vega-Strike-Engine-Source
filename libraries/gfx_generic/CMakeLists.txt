@@ -62,6 +62,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries
         ${Vega_Root_SOURCE_DIR}/libraries/cmd
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2

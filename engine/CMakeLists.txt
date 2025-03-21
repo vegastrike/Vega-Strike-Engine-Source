@@ -570,6 +570,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
         ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries
         ${Vega_Root_SOURCE_DIR}/libraries/cmd
         ${Vega_Root_SOURCE_DIR}/libraries/collide2
         ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
@@ -690,6 +691,7 @@ IF (NOT DISABLE_CLIENT)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries
             ${Vega_Root_SOURCE_DIR}/libraries/cmd
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
@@ -1175,6 +1177,8 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries
+            ${Vega_Root_SOURCE_DIR}/libraries/cmd
             ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
             ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             # CMake Artifacts
@@ -1213,6 +1217,7 @@ IF (USE_GTEST)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries
             ${Vega_Root_SOURCE_DIR}/libraries/cmd
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
             ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic

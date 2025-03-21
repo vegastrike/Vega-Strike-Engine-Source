@@ -51,6 +51,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries
             ${Vega_Root_SOURCE_DIR}/libraries/cmd
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
@@ -120,6 +121,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
             ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
             ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries
             ${Vega_Root_SOURCE_DIR}/libraries/cmd
             ${Vega_Root_SOURCE_DIR}/libraries/collide2
             ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
