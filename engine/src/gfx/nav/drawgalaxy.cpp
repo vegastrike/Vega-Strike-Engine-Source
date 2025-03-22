@@ -53,7 +53,7 @@
 #include <assert.h>     //needed for assert() calls
 #include "savegame.h"
 #include "gfx/animation.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "universe_util.h"
 #include "in_mouse.h"
 #include "gui/glut_support.h"

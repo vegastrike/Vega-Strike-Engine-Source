@@ -28,7 +28,7 @@
 
 #include <string>
 #include <vector>
-#include "gfx/vec.h"
+#include "vec.h"
 #include "container.h"
 #include "../SharedPool.h"
 #include "gfx/sprite.h"
@@ -182,7 +182,7 @@ struct UnitImages {
     Animation *pExplosion = nullptr;
     float timeexplode = 0;
 
-    
+
 
 
 

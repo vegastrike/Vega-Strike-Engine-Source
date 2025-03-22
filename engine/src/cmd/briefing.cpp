@@ -27,10 +27,10 @@
 
 #include "briefing.h"
 #include "unit_generic.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "script/mission.h"
 #include "gfx/ani_texture.h"
-#include "gfx/matrix.h"
+#include "matrix.h"
 #include "universe.h"
 
 Briefing::Ship::Ship(const char *filename, int faction, const Vector &position) {

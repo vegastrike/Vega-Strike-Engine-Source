@@ -44,7 +44,6 @@
 #include "gfx/cockpit.h"
 #include "in_kb_data.h"
 #include "python/python_compile.h"
-#include "gfx/screenshot.h"
 #include "vs_logging.h"
 #include "sdl_key_converter.h"
 

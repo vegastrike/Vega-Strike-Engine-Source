@@ -29,8 +29,8 @@
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include "weapon_info.h"
-#include "gfx/matrix.h"
-#include "gfx/quaternion.h"
+#include "matrix.h"
+#include "quaternion.h"
 #include "collide_map.h"
 #include "gfx/animation.h"
 

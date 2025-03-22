@@ -43,9 +43,9 @@
 #define Vector Vactor
 #endif //defined (_MSC_VER) && _MSC_VER <= 1200
 
-#include "boost/python/object.hpp"
-#include "boost/python/class.hpp"
-#include "boost/python/call_method.hpp"
+#include <boost/python/object.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/call_method.hpp>
 
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector

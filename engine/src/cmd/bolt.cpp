@@ -29,9 +29,9 @@
 
 #include "bolt.h"
 
-#include "gfx/boltdrawmanager.h"
+#include "boltdrawmanager.h"
 #include "gfxlib.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
@@ -42,7 +42,7 @@
 #include "universe.h"
 #include "damageable.h"
 #include "vs_logging.h"
-#include "gfx/texture_manager.h"
+#include "texture_manager.h"
 
 using std::vector;
 using std::string;

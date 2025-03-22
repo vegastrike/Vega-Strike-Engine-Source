@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include <vector>
@@ -187,7 +187,7 @@ public:
     void RestoreViewPort();
     GameCockpit(const char *file, Unit *parent, const std::string &pilotname);
     ~GameCockpit();
-    
+
     ///Looks up a particular Gauge stat on unit
     float LookupUnitStat(int stat, Unit *target);
     ///Loads cockpit info...just as constructor

@@ -26,7 +26,7 @@
 
 /* #undef SOUND_DEBUG */
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include <string>
 #include <vector>
 

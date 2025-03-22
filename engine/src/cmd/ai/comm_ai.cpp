@@ -29,7 +29,7 @@
 #include "faction_generic.h"
 #include "communication.h"
 #include "cmd/collection.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 #include "cmd/images.h"
 #include "configxml.h"
 #include "vs_globals.h"

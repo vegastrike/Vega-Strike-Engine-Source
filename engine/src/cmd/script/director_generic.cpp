@@ -33,7 +33,7 @@
 #include "cmd/ai/order.h"
 
 #include "configxml.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 
 #include "python/python_class.h"
 

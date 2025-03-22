@@ -28,9 +28,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <time.h>
-#include <ctype.h>
-#include <assert.h>
 #ifndef WIN32
 //this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
@@ -47,7 +44,6 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 
-#include "msgcenter.h"
 #include "cmd/unit_generic.h"
 
 /* *********************************************************** */

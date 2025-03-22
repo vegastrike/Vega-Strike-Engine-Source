@@ -34,7 +34,7 @@
 #include "vs_globals.h"
 #include <sys/stat.h>
 #include "xml_support.h"
-#include "gfx/mesh.h"
+#include "mesh.h"
 #include "gfx/cockpit.h"
 #include "universe.h"
 

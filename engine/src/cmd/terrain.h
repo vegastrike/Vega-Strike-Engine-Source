@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_TERRAIN_H
 
 #include "gfx/quadtree.h"
-#include "gfx/vec.h"
+#include "vec.h"
 
 class Unit;
 

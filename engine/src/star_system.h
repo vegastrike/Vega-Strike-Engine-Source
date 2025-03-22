@@ -25,7 +25,7 @@
 #include "cmd/collection.h"
 #include "cmd/container.h"
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 

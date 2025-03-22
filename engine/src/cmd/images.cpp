@@ -26,7 +26,7 @@
 
 
 #include "cmd/images.h"
-#include "gfx/cockpit_generic.h"
+#include "cockpit_generic.h"
 
 template<typename BOGUS>
 UnitImages<BOGUS>::UnitImages() {

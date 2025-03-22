@@ -25,7 +25,7 @@
  */
 
 
-#include "gfx/vec.h"
+#include "vec.h"
 #include "al_globals.h"
 #include "hashtable.h"
 #ifdef HAVE_AL

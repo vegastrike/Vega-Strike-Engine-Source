@@ -29,7 +29,7 @@
 #include "vegastrike.h"
 #include "planet.h"
 #include "gfxlib.h"
-#include "gfx/sphere.h"
+#include "sphere.h"
 #include "collection.h"
 #include "ai/order.h"
 #include "gfxlib_struct.h"
@@ -44,7 +44,7 @@
 #include "gfx/planetary_transform.h"
 #endif
 
-#include "collide2/CSopcodecollider.h"
+#include "CSopcodecollider.h"
 #include "images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"

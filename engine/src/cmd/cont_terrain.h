@@ -25,8 +25,8 @@
  */
 // NO HEADER GUARD
 
-#include "cmd/collide2/Opcode.h"
-#include "cmd/collide2/CSopcodecollider.h"
+#include "Opcode.h"
+#include "CSopcodecollider.h"
 #include "terrain.h"
 
 class StarSystem;

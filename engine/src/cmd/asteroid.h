@@ -26,9 +26,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
 #define VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
 
-#include "gfx/quaternion.h"
-#include "gfx/vec.h"
-#include "gfx/matrix.h"
+#include "quaternion.h"
+#include "vec.h"
+#include "matrix.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
 #include "unit_generic.h"

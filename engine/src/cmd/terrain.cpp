@@ -31,7 +31,7 @@
 #include "xml_support.h"
 #include "star_system.h"
 #include "unit_generic.h"
-#include "gfx/vec.h"
+#include "vec.h"
 #include "vegastrike.h"
 #include "universe.h"
 #include <vector>
