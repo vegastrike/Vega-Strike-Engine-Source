@@ -27,11 +27,11 @@
 /// Draws shield, armor, comm strings and animation, messages, manifest,
 /// target info, and objectives
 
-#include "vdu.h"
+#include "gfx/vdu.h"
 #include "cmd/unit_util.h"
-#include "hud.h"
+#include "gfx/hud.h"
 #include "root_generic/vs_globals.h"
-#include "cockpit.h"
+#include "gfx/cockpit.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/script/msgcenter.h"

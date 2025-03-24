@@ -32,7 +32,7 @@
 #include "point_to_cam.h"
 #include "src/config_xml.h"
 #include "root_generic/xml_support.h"
-#include "gfx/central.h"
+#include "sprite.h"
 #include <algorithm>
 #include "../gldrv/gl_globals.h"
 #include "src/universe.h"

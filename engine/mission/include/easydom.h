@@ -32,8 +32,8 @@
 #include <vector>
 #include <stack>
 #include <map>
-#include "./xml_support.h"
-#include "../../src/vs_logging.h"
+#include "mission/include/xml_support.h"
+#include "vs_logging.h"
 
 // FIXME: Shouldn't have these in a header file
 using std::ostream;

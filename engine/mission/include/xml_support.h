@@ -27,7 +27,7 @@
 #ifndef WIN32
 #include <strstream>
 #endif
-#include "mission/include/hashtable.h"
+#include "hashtable.h"
 #include <vector>
 #include <expat.h>
 #include <iostream>        // needed for cout calls in config_xml.cpp (and other places too i'm sure)

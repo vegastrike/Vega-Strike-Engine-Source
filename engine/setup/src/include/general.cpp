@@ -23,7 +23,7 @@
 /* This include has been designed to act independant of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
-#include "./general.h"
+#include "setup/src/include/general.h"
 
 int RANDOMIZED = 0;
 
