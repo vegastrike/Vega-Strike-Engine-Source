@@ -35,7 +35,7 @@
 
 #include "root_generic/xml_support.h"
 #include "technique.h"
-#include "Root_generic/xMLDocument.h"
+#include "root_generic/XMLDocument.h"
 #include "src/vs_logging.h"
 #include "src/gfxlib.h"
 #include "gfx/aux_texture.h"
