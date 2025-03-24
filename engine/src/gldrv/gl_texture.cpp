@@ -1093,21 +1093,25 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
 }
 
 void /*GFXDRVAPI*/ GFXDeleteTexture(const size_t handle) {
-    if (handle < textures.size()) {
-        if (textures.at(handle).alive) {
-            glDeleteTextures(1, &textures.at(handle).name);
-            for (int & texture : activetexture) {
-                if (texture == handle) {
-                    texture = -1;
-                }
+    if (handle >= textures.size()) {
+        VS_LOG(error, (boost::format("GFXDeleteTexture(const size_t handle) called with invalid handle value %1%, which is greater than textures.size(): %2%")
+                % handle
+                % textures.size()));
+        return;
+    }
+    if (textures.at(handle).alive) {
+        glDeleteTextures(1, &textures.at(handle).name);
+        for (int & texture : activetexture) {
+            if (texture == handle) {
+                texture = -1;
             }
         }
-        if (textures.at(handle).palette != nullptr) {
-            free(textures.at(handle).palette);
-            textures.at(handle).palette = nullptr;
-        }
-        textures.at(handle).alive = GFXFALSE;
     }
+    if (textures.at(handle).palette != nullptr) {
+        free(textures.at(handle).palette);
+        textures.at(handle).palette = nullptr;
+    }
+    textures.at(handle).alive = GFXFALSE;
 }
 
 void GFXInitTextureManager() {
@@ -1125,6 +1129,7 @@ void GFXInitTextureManager() {
 }
 
 void GFXDestroyAllTextures() {
+    // TODO: There's got to be a more efficient way to do this -- SGT 2024-04-18
     for (size_t handle = 0; handle < textures.size(); handle++) {
         GFXDeleteTexture(handle);
     }
