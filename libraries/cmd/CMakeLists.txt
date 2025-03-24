@@ -100,6 +100,7 @@ ADD_LIBRARY(vegastrike_cmd STATIC
         vega_py_run.cpp
         vega_py_run.h
 )
+TARGET_INCLUDE_DIRECTORIES(vegastrike_cmd SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike_cmd PRIVATE
         # VS engine headers
         ${Vega_Root_SOURCE_DIR}
@@ -128,7 +129,6 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_cmd PRIVATE
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike_cmd SYSTEM PRIVATE ${TST_INCLUDES})
 
 #TARGET_COMPILE_FEATURES(vegastrike_cmd PUBLIC cxx_std_11)
 SET_PROPERTY(TARGET vegastrike_cmd PROPERTY POSITION_INDEPENDENT_CODE TRUE)

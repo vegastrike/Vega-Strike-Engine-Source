@@ -34,8 +34,6 @@
 
 using namespace VegaStrike;
 
-EngineVersionData::
-
 EngineVersionData::EngineVersionData() {
     this->major = static_cast<uint8_t>(VEGASTRIKE_VERSION_MAJOR_UINT);
     this->minor = static_cast<uint8_t>(VEGASTRIKE_VERSION_MINOR_UINT);
