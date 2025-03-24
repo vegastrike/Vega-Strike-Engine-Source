@@ -31,11 +31,11 @@
 #include <algorithm>
 #include <vector>
 #include <boost/assign/std/vector.hpp>
-#include "lin_time.h" // GetElapsedTime
+#include "root_generic/lin_time.h" // GetElapsedTime
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "gfxlib.h"
-#include "quaternion.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/quaternion.h"
 #include "viewarea.h"
 #include "plane_display.h"
 

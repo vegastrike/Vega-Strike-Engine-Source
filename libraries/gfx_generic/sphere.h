@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_SPHERE_H
 #define VEGA_STRIKE_ENGINE_GFX_SPHERE_H
 
-#include "mesh.h"
-#include "quaternion.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/quaternion.h"
 #include <assert.h>
 #include <string>
 

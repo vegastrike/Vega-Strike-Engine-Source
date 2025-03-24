@@ -25,13 +25,13 @@
  */
 
 
-#include "boltdrawmanager.h"
+#include "gfx_generic/boltdrawmanager.h"
 
 #include "gfx/animation.h"
 
-#include "lin_time.h"
-#include "options.h"
-#include "universe.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/options.h"
+#include "src/universe.h"
 
 QVector BoltDrawManager::camera_position = QVector();
 float BoltDrawManager::pixel_angle = 0.0;

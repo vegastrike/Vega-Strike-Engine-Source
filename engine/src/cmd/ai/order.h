@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include "cmd/container.h"
 #include <list>
 #include <vector>

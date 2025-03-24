@@ -26,8 +26,8 @@
 
 
 #include "atmosphere.h"
-#include "vec.h"
-#include "matrix.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/matrix.h"
 
 Atmosphere::Atmosphere(const Parameters &params) : user_params(params) {
 }

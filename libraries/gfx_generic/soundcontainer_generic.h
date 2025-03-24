@@ -28,11 +28,11 @@
 
 #include <string>
 
-#include "SharedPool.h"
+#include "src/SharedPool.h"
 
 /**
  * A reference to a soundfile that can be lazily loaded.
- * 
+ *
  * This base class implement no actions on it, see concrete subclasses for that,
  * but it does contain all common data points.
  */

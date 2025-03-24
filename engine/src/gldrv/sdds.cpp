@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include "gldrv/sdds.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 
 #ifndef GETL16
 #define GETL16(buf) ( ( (unsigned short) (buf)[0] )|( (unsigned short) (buf)[1]<<8 ) )

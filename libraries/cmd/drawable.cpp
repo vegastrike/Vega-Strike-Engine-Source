@@ -25,22 +25,22 @@
 //#include <cassert>
 
 #include "drawable.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "mesh.h"
-#include "quaternion.h"
-#include "lerp.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/quaternion.h"
+#include "gfx_generic/lerp.h"
 #include "gfx/occlusion.h"
 
 #include "unit_generic.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/point_to_cam.h"
 #include "gfx/halo_system.h"
-#include "options.h"
-#include "weapon_info.h"
+#include "root_generic/options.h"
+#include "cmd/weapon_info.h"
 #include "beam.h"
 #include "unit_csv.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 
 #include <boost/algorithm/string.hpp>
 #include "vega_cast_utils.h"

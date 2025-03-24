@@ -25,24 +25,24 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "configxml.h"
+#include "root_generic/configxml.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "cmd/unit_generic.h"
-#include "cockpit_generic.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"
 #include "cmd/script/flightgroup.h"
 #include "python/python_class.h"
-#include "savegame.h"
-#include "save_util.h"
-#include "load_mission.h"
-#include "universe.h"
-#include "options.h"
+#include "root_generic/savegame.h"
+#include "src/save_util.h"
+#include "root_generic/load_mission.h"
+#include "src/universe.h"
+#include "root_generic/options.h"
 
 std::string PickledDataSansMissionName(std::string pickled) {
     string::size_type newline = pickled.find('\n');

@@ -25,10 +25,10 @@
 #include "afterburner.h"
 
 #include "component_utils.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-Afterburner::Afterburner(EnergyContainer *source) : 
+Afterburner::Afterburner(EnergyContainer *source) :
     Component(0.0, 0.0, true, true), EnergyConsumer(source, false), thrust(1,0,1), speed(1,0,1) {
     type = ComponentType::Afterburner;
 }
@@ -42,14 +42,14 @@ void Afterburner::Load(std::string unit_key) {
     static const double game_accel_speed = game_speed * game_accel;
     Component::Load(unit_key);
 
-    thrust = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", std::string("0.0")), game_accel_speed); 
-    speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", std::string("0.0")), game_speed); 
+    thrust = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", std::string("0.0")), game_accel_speed);
+    speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", std::string("0.0")), game_speed);
     double consumption = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 1.0);
     SetConsumption(consumption);
 
     // We calculate percent operational as a simple average
     operational = (thrust.Percent() + speed.Percent()) / 2;
-}      
+}
 
 void Afterburner::SaveToCSV(std::map<std::string, std::string>& unit) const {
     static const double game_speed = configuration()->physics_config.game_speed;

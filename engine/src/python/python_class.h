@@ -65,8 +65,8 @@
 #include "cmd/ai/fire.h"
 #include <memory>
 #include "init.h"
-#include "vs_logging.h"
-#include "vega_py_run.h"
+#include "src/vs_logging.h"
+#include "cmd/vega_py_run.h"
 
 #define PYTHONCALLBACK(rtype, ptr, str) \
   boost::python::call_method<rtype>(ptr, str)

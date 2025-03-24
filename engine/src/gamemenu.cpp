@@ -21,13 +21,13 @@
  */
 
 
-#include "vegastrike.h"
-#include "in_kb.h"
+#include "src/vegastrike.h"
+#include "src/in_kb.h"
 #include "in_kb_data.h"
 #include "in_mouse.h"
 #include "main_loop.h"
-#include "universe_util.h"
-#include "lin_time.h"
+#include "src/universe_util.h"
+#include "root_generic/lin_time.h"
 #include "gui/modaldialog.h"
 #include "gui/eventmanager.h"
 #include "gui/newbutton.h"
@@ -37,11 +37,11 @@
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
 #include "gamemenu.h"
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 #include "cmd/music.h"
-#include "options.h"
-#include "configxml.h"
-#include "vs_logging.h"
+#include "root_generic/options.h"
+#include "root_generic/configxml.h"
+#include "src/vs_logging.h"
 
 extern void TerminateCurrentBase(void);
 vector<unsigned int> gamemenu_keyboard_queue;

@@ -27,9 +27,9 @@
 #include "configuration/game_config.h"
 #include "configuration/configuration.h"
 #include "damageable.h"
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include "unit_generic.h"
-#include "universe.h"
+#include "src/universe.h"
 #include "resource/resource.h"
 #include "vega_cast_utils.h"
 
@@ -39,7 +39,7 @@
  * ships, space installations, missiles, drones, etc. */
 
 
-Energetic::Energetic() : 
+Energetic::Energetic() :
         constrained_charge_to_shields(0.0f),
         sufficient_energy_to_recharge_shields(true),
         afterburntype(0) {

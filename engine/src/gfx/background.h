@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_BACKGROUND_H
 #define VEGA_STRIKE_ENGINE_GFX_BACKGROUND_H
 
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 
 class SphereMesh;
 class Texture;

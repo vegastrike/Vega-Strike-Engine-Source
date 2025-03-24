@@ -27,13 +27,13 @@
 
 #include "unit_generic.h"
 #include "ship.h"
-#include "universe.h"
-#include "universe_util.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
 
 #include "ai/aggressive.h"
 #include "missile.h"
-#include "vs_random.h"
-#include "vs_logging.h"
+#include "src/vs_random.h"
+#include "src/vs_logging.h"
 #include "vega_cast_utils.h"
 
 

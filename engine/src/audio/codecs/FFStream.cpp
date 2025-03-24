@@ -39,7 +39,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 #ifndef BUFFER_SIZE
 // in samples

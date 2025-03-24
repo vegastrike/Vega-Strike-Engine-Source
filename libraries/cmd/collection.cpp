@@ -40,7 +40,7 @@
 #include "testcollection/unit.h"
 #endif
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 using std::list;
 using std::vector;

@@ -20,8 +20,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "options.h"
-#include "configxml.h"
+#include "root_generic/options.h"
+#include "root_generic/configxml.h"
 #include "configuration/configuration.h"
 
 extern VegaConfig *vs_config;

@@ -29,14 +29,14 @@
 #include "cockpit_gfx.h"
 
 #include "configuration/game_config.h"
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "unit_generic.h"
-#include "universe.h"
-#include "planet.h"
+#include "src/universe.h"
+#include "cmd/planet.h"
 #include "unit_util.h"
-#include "weapon_info.h"
+#include "cmd/weapon_info.h"
 #include "vdu.h"
-#include "camera.h"
+#include "gfx/camera.h"
 #include "nav/navcomputer.h"
 #include "gauge.h"
 #include "cockpit_gfx_utils.h"
@@ -904,13 +904,13 @@ float LookupTargetStat( int stat, Unit *target ) {
 
     case UnitImages< void >::TARGETSHIELDB:
         return target->shield.Percent(Shield::back);
-     
+
     case UnitImages< void >::TARGETSHIELDL:
         return target->shield.Percent(Shield::left);
 
     case UnitImages< void >::TARGETSHIELDR:
         return target->shield.Percent(Shield::right);
     }
-    
+
     return 0;
 }

@@ -52,14 +52,14 @@
  * - Use VS_LOG or VS_LOG_AND_FLUSH instead of BOOST_LOG_TRIVIAL
  */
 
-#include "pk3.h"
+#include "root_generic/pk3.h"
 #include <cstdlib>
 #include <iostream>
-#include "posh.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "root_generic/posh.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 using std::hex;
 

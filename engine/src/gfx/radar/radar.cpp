@@ -30,7 +30,7 @@
 #include <cassert>
 #include <stdexcept>
 #include "sensor.h"
-#include "radar.h"
+#include "gfx/radar/radar.h"
 #include "null_display.h"
 #include "sphere_display.h"
 #include "bubble_display.h"

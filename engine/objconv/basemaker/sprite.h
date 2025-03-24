@@ -24,11 +24,11 @@
 #ifndef VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H
 #define VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H
 
-#include "quaternion.h"
-#include "vec.h"
-#include "matrix.h"
+#include "gfx_generic/quaternion.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/matrix.h"
 #include "gfx/hud.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>

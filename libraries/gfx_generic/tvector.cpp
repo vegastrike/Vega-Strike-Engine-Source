@@ -25,15 +25,15 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "tvector.h"
-#include "matrix.h"
+#include "gfx_generic/tvector.h"
+#include "gfx_generic/matrix.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python/to_python_indirect.hpp>
 #include <boost/python/to_python_value.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include <math.h>
 #define _CZ (761.465325527)
 

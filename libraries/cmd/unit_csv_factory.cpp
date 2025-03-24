@@ -23,7 +23,7 @@
  */
 
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 #include <iostream>
 #include <vector>
@@ -51,7 +51,7 @@ std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std:
     return std::string();
 }
 
-void UnitCSVFactory::LoadUnit(std::string key, 
+void UnitCSVFactory::LoadUnit(std::string key,
                               std::map<std::string,std::string> unit_map) {
     UnitCSVFactory::units[key] = unit_map;
 }

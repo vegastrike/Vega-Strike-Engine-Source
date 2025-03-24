@@ -24,8 +24,8 @@
 #ifndef VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H
 #define VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H
 
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 inline char *vega_str_dup(const char *string) {
 #if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L

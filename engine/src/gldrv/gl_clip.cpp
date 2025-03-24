@@ -21,10 +21,10 @@
  */
 
 
-#include "gfxlib.h"
-#include "matrix.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/matrix.h"
 #include "gl_matrix.h"
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 #include <stdio.h>
 using namespace GFXMatrices;  //causes problems with g_game
 double BoxFrust[6][4];

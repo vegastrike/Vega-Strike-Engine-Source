@@ -27,9 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 
-#include "cockpit_generic.h"
-#include "gfxlib.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
 #include <vector>
 #include <list>
 
@@ -38,10 +38,10 @@ class VSSprite;
 class Gauge;
 class Unit;
 class NavigationSystem;
-#include "radar/radar.h"
+#include "gfx/radar/radar.h"
 #include "radar/sensor.h"
 #include "vdu.h"
-#include "camera.h"
+#include "gfx/camera.h"
 #include "physics.h"
 #include "nav/navscreen.h"
 using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS

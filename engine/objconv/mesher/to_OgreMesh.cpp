@@ -29,7 +29,7 @@
 #include "OgreDefaultHardwareBufferManager.h"
 
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
 #include <limits>
 #include <vector>
@@ -366,7 +366,7 @@ void * Init( const char *inputfile, const char *matfile )
         Ogre::DataStreamPtr stream( new Ogre::FileStreamDataStream( String( inputfile ), &fi, false ) );         //Do not free fi
 
         ctxt->name = "export-mesh-"+getID();
-        ctxt->top  = Ogre::MeshManager::getSingleton().createManual( ctxt->name, 
+        ctxt->top  = Ogre::MeshManager::getSingleton().createManual( ctxt->name,
                                                                      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
 
         meshSerializer->importMesh( stream, ctxt->top.getPointer() );
@@ -1139,9 +1139,9 @@ void AutoLOD( void *outputcontext, bool force, int numLod, float reductionFactor
             newMesh->removeLodLevels();
         const Ogre::ProgressiveMesh::VertexReductionQuota quota = Ogre::ProgressiveMesh::VRQ_PROPORTIONAL;
         const Real reduction  = Real( 1-reductionFactor );
-        
+
         Real currDist = refDistance;
-        
+
 #if (OGRE_VERSION >= 0x010700)
         Ogre::Mesh::LodValueList distanceList;
 
@@ -1198,13 +1198,13 @@ void AutoEdgeList( void *outputcontext )
 void AutoTangents( void *outputcontext )
 {
     struct outputContext *ctxt = (struct outputContext*) outputcontext;
-    
+
     Ogre::VertexElementSemantic oves;
-    
+
 #if (OGRE_VERSION >= 0x010700)
     oves = Ogre::VES_TANGENT;
 #endif
-    
+
     unsigned short src, dest;
     ctxt->top->suggestTangentVectorBuildParams( oves, src, dest );
     ctxt->top->buildTangentVectors( oves, src, dest );

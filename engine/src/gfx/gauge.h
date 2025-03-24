@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "sprite.h"
+#include "gfx/central.h"
 class Cockpit;
 class Gauge : public VSSprite {
 public:

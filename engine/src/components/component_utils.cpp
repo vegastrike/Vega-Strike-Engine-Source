@@ -41,7 +41,7 @@
 #include "ftl_drive.h"
 #include "cloak.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
 
@@ -99,23 +99,23 @@ EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
                            EnergyContainer* energy, EnergyContainer* ftl_energy) {
     switch(component_type) {
         case ComponentType::Shield: return energy;
-    
+
         case ComponentType::FtlDrive: return ftl_energy;
-        
+
         case ComponentType::Reactor:
-            return GetSourceFromConfiguration(configuration()->fuel.reactor_source, 
+            return GetSourceFromConfiguration(configuration()->fuel.reactor_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Drive:
-            return GetSourceFromConfiguration(configuration()->fuel.drive_source, 
+            return GetSourceFromConfiguration(configuration()->fuel.drive_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Afterburner:
-            return GetSourceFromConfiguration(configuration()->fuel.afterburner_source, 
+            return GetSourceFromConfiguration(configuration()->fuel.afterburner_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::JumpDrive:
-            return GetSourceFromConfiguration(configuration()->fuel.jump_drive_source, 
+            return GetSourceFromConfiguration(configuration()->fuel.jump_drive_source,
                                               fuel, energy, ftl_energy);
         case ComponentType::Cloak:
-            return GetSourceFromConfiguration(configuration()->fuel.cloak_source, 
+            return GetSourceFromConfiguration(configuration()->fuel.cloak_source,
                                               fuel, energy, ftl_energy);
 
         default:
@@ -153,14 +153,14 @@ const std::string* GetGovernor(const YPR ypr) {
 void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr,
                         double &right_value, double &left_value) {
     const std::string* governor = GetGovernor(ypr);
-    
+
     const double main_value = UnitCSVFactory::GetVariable(unit_key, governor[0], 1.0);
     right_value = UnitCSVFactory::GetVariable(unit_key, governor[1], main_value);
     left_value = UnitCSVFactory::GetVariable(unit_key, governor[2], main_value);
 }
 
 void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr,
-                        Resource<double> &right_value, Resource<double> &left_value, 
+                        Resource<double> &right_value, Resource<double> &left_value,
                         const double minimum_functionality) {
     double left, right;
     DoubleYawPitchRollParser(unit_key, ypr, right, left);

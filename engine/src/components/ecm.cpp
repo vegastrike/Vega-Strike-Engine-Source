@@ -24,17 +24,17 @@
 
 #include "ecm.h"
 #include "configuration/configuration.h"
-#include "unit_csv_factory.h"
-#include "vs_logging.h"
+#include "cmd/unit_csv_factory.h"
+#include "src/vs_logging.h"
 
 #include <boost/format.hpp>
 
-ECM::ECM() : 
+ECM::ECM() :
     Component(), EnergyConsumer(nullptr, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
 }
 
-ECM::ECM(EnergyContainer *source): 
+ECM::ECM(EnergyContainer *source):
     Component(), EnergyConsumer(source, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
 }
@@ -48,7 +48,7 @@ void ECM::Load(std::string unit_key) {
     SetConsumption(consumption);
 
     _upgrade(upgrade_key);
-}      
+}
 
 void ECM::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // Can't use serialize. Only supports double.
@@ -81,7 +81,7 @@ bool ECM::Upgrade(const std::string upgrade_key) {
 
 void ECM::Damage() {
     if(ecm) {
-        ecm--;    
+        ecm--;
     }
 }
 
@@ -145,7 +145,7 @@ void ECM::Toggle() {
 
 void ECM::_upgrade(const std::string key) {
     // Can't use serialize. Only supports double.
-    std::vector<std::string> result; 
+    std::vector<std::string> result;
     const std::string ecm_string = UnitCSVFactory::GetVariable(key, "ecm", std::string());
 
     if(ecm_string.empty()) {
@@ -172,6 +172,6 @@ void ECM::_upgrade(const std::string key) {
     } catch (std::out_of_range const& ex) {
         VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() % ecm_string));
     }
-    
+
     ecm = Resource<int>(current_ecm, 0, max_ecm);
 }

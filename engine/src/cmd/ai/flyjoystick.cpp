@@ -30,8 +30,8 @@
 #include "flyjoystick.h"
 #include "firekeyboard.h"
 #include "flykeyboard.h"
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include  "in_kb_data.h"
 
 FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile) {

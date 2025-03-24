@@ -27,8 +27,8 @@
 #define VEGA_STRIKE_ENGINE_CMD_WEAPON_INFO_H
 
 #include "weapon_type.h"
-#include "vec.h"
-#include "mount_size.h"
+#include "gfx_generic/vec.h"
+#include "cmd/mount_size.h"
 
 #include <string>
 

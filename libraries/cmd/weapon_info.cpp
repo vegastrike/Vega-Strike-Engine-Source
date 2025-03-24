@@ -21,15 +21,15 @@
  */
 
 
-#include "weapon_info.h"
+#include "cmd/weapon_info.h"
 
-#include "vs_globals.h"
-#include "options.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/options.h"
 #include "unit_const_cache.h"
 
 // TODO: this should not be here
-#include "vsfilesystem.h"
-#include "mesh.h"
+#include "root_generic/vsfilesystem.h"
+#include "gfx_generic/mesh.h"
 
 #include <boost/algorithm/string.hpp>
 

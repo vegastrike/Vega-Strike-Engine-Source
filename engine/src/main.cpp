@@ -39,26 +39,26 @@
 #include <direct.h>
 #include <process.h>
 #endif
-#include "gfxlib.h"
-#include "in_kb.h"
-#include "lin_time.h"
+#include "src/gfxlib.h"
+#include "src/in_kb.h"
+#include "root_generic/lin_time.h"
 #include "main_loop.h"
-#include "config_xml.h"
+#include "src/config_xml.h"
 #include "cmd/script/mission.h"
 #include "audiolib.h"
-#include "config_xml.h"
-#include "vsfilesystem.h"
-#include "vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/animation.h"
 #include "gfx/cockpit.h"
 #include "python/init.h"
-#include "savegame.h"
+#include "root_generic/savegame.h"
 #include "force_feedback.h"
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
-#include "universe_util.h"
-#include "universe.h"
-#include "save_util.h"
+#include "src/universe_util.h"
+#include "src/universe.h"
+#include "src/save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
 #include "ship_commands.h"
@@ -76,13 +76,13 @@
 #endif
 
 #if defined (CG_SUPPORT)
-#include "cg_global.h"
+#include "src/cg_global.h"
 #endif
 
-#include "vs_logging.h"
-#include "options.h"
+#include "src/vs_logging.h"
+#include "root_generic/options.h"
 #include "version.h"
-#include "vs_exit.h"
+#include "src/vs_exit.h"
 
 /*
  * Globals

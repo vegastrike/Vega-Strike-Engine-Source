@@ -28,7 +28,7 @@
 #include "afterburner.h"
 #include "afterburner_upgrade.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 static const std::string upgrades_suffix_string = "__upgrades";
 const std::string afterburner_string = "afterburner";
@@ -38,7 +38,7 @@ std::map<std::string,std::string> afterburner_map = {
     { "Name", "Afterburner"},
     { "Mass", "5.0"},
     { "Afterburner_Accel", "10"},
-    { "Afterburner_Speed_Governor", "100"}, 
+    { "Afterburner_Speed_Governor", "100"},
     { "Afterburner_Usage_Cost", "2.0"}
 };
 
@@ -46,7 +46,7 @@ std::map<std::string,std::string> afterburner_upgrade_map = {
     { "Name", "AfterburnerUpgrade"},
     { "Mass", "5.0"},
     { "Afterburner_Accel", "1.5"},
-    { "Afterburner_Speed_Governor", "1.5"}, 
+    { "Afterburner_Speed_Governor", "1.5"},
     { "Afterburner_Usage_Cost", "1.5"}
 };
 

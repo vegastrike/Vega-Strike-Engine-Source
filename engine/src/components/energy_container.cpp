@@ -26,7 +26,7 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "energy_container.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
 #include <iostream>
@@ -35,7 +35,7 @@ const std::string FUEL_CAPACITY = "Fuel_Capacity";
 const std::string CAPACITOR = "Primary_Capacitor";
 const std::string FTL_CAPACITOR = "Warp_Capacitor";
 
-EnergyContainer::EnergyContainer(ComponentType type): 
+EnergyContainer::EnergyContainer(ComponentType type):
                                  Component(0.0, 0.0, false),
                                  level(Resource<double>(0.0,0.0,0.0)) {
     switch(type) {
@@ -87,14 +87,14 @@ void EnergyContainer::SetCapacity(const double capacity, bool refill) {
 double EnergyContainer::Level() const { return level.Value(); }
 void EnergyContainer::SetLevel(double new_level) {
     level = new_level;
-} 
+}
 double EnergyContainer::MaxLevel() const { return level.MaxValue(); }
-double EnergyContainer::Percent() const { 
+double EnergyContainer::Percent() const {
     if(level.MaxValue() == 0.0) {
         return 0.0;
     }
-    
-    return level.Value()/level.MaxValue(); 
+
+    return level.Value()/level.MaxValue();
 }
 
 void EnergyContainer::Zero() { level = 0; }
@@ -120,14 +120,14 @@ void EnergyContainer::Load(std::string unit_key) {
         case ComponentType::Capacitor:
         level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), configuration()->fuel.energy_factor);
         break;
-        
+
         case ComponentType::FtlCapacitor:
         level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), configuration()->fuel.ftl_energy_factor);
-        break; 
+        break;
 
         default: // This really can't happen
         std::cerr << "Illegal container type in EnergyContainer::Load" << std::flush;
-        abort();       
+        abort();
     }
 
     operational = level.AdjustedValue() / level.MaxValue();
@@ -142,14 +142,14 @@ void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const 
         case ComponentType::Capacitor:
         unit[CAPACITOR] = level.Serialize(configuration()->fuel.energy_factor);
         break;
-        
+
         case ComponentType::FtlCapacitor:
         unit[FTL_CAPACITOR] = level.Serialize(configuration()->fuel.ftl_energy_factor);
-        break; 
+        break;
 
         default: // This really can't happen
         std::cerr << "Illegal container type in EnergyContainer::SaveToCSV" << std::flush;
-        abort();       
+        abort();
     }
 }
 
@@ -193,26 +193,26 @@ bool EnergyContainer::Upgrade(const std::string upgrade_key) {
         case ComponentType::Capacitor:
         level.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, CAPACITOR, 0.0));
         break;
-        
+
         case ComponentType::FtlCapacitor:
         level.SetMaxValue(UnitCSVFactory::GetVariable(upgrade_key, FTL_CAPACITOR, 0.0));
-        break;     
+        break;
 
         default: // This really can't happen
         abort();
     }
-    
+
     return true;
 }
 
 
 void EnergyContainer::Damage() {
-    level.RandomDamage();  
+    level.RandomDamage();
     operational = level.AdjustedValue() / level.MaxValue();
 }
 
 void EnergyContainer::DamageByPercent(double percent) {
-    level.DamageByPercent(percent);  
+    level.DamageByPercent(percent);
     operational = level.AdjustedValue() / level.MaxValue();
 }
 

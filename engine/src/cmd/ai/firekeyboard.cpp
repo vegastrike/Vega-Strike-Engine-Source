@@ -38,12 +38,12 @@
 #include "gfx/cockpit.h"
 #include "gfx/animation.h"
 #include "audiolib.h"
-#include "config_xml.h"
+#include "src/config_xml.h"
 #include "cmd/images.h"
 #include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/script/mission.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/car_assist.h"
 #include "cmd/unit_util.h"
 #include <algorithm>
@@ -53,11 +53,11 @@
 //for getatmospheric
 #include "cmd/role_bitmask.h"
 #include "cmd/script/pythonmission.h"
-#include "universe_util.h"
-#include "universe.h"
-#include "mount_size.h"
-#include "weapon_info.h"
-#include "vs_logging.h"
+#include "src/universe_util.h"
+#include "src/universe.h"
+#include "cmd/mount_size.h"
+#include "cmd/weapon_info.h"
+#include "src/vs_logging.h"
 #include "unit_util.h"
 
 extern bool toggle_pause();

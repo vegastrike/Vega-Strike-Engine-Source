@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
 #define VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
 
-#include "savegame.h"
-#include "universe.h"
+#include "root_generic/savegame.h"
+#include "src/universe.h"
 #include "unit_generic.h"
 
 class Enhancement : public Unit {

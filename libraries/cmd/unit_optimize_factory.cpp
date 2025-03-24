@@ -23,7 +23,7 @@
  */
 
 #include "unit_optimize_factory.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 
 void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit_attributes,
@@ -50,7 +50,7 @@ void UnitOptimizeFactory::RecursiveParse(std::map<std::string, std::string> unit
 
         for(const boost::json::value& value : units_array) {
             RecursiveParse(unit_attributes, value.as_object());
-        } 
+        }
     }
 }
 

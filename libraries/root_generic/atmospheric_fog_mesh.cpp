@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "atmospheric_fog_mesh.h"
+#include "root_generic/atmospheric_fog_mesh.h"
 
 AtmosphericFogMesh::AtmosphericFogMesh() {
     er = eg = eb = ea = .5;

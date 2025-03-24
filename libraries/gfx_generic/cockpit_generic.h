@@ -25,11 +25,11 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "cmd/container.h"
 #include <vector>
-#include "vec.h"
-#include "vsfilesystem.h"
+#include "gfx_generic/vec.h"
+#include "root_generic/vsfilesystem.h"
 //using namespace XMLSupport;  DONT DO THIS IN HEADERS
 enum VIEWSTYLE {
     CP_FRONT,
@@ -59,9 +59,9 @@ class NavigationSystem;
 namespace Radar {
 class Sensor;
 }
-#include "in.h"
+#include "src/in.h"
 #include "cmd/images.h"
-#include "soundcontainer_generic.h"
+#include "gfx_generic/soundcontainer_generic.h"
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
  * Gauges are used to indicate analog controls, and some diagital ones

@@ -50,29 +50,29 @@
 #define CONTAINER_DEBUG
 #endif
 #ifdef CONTAINER_DEBUG
-#include "hashtable.h"
+#include "src/hashtable.h"
 class Unit;
 void CheckUnit( class Unit* );
 void UncheckUnit( class Unit*un );
 #endif
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 
 #include <string>
 #include <set>
 #include <map>
-#include "matrix.h"
-#include "quaternion.h"
-#include "gfxlib_struct.h"
-#include "xml_support.h"
+#include "gfx_generic/matrix.h"
+#include "gfx_generic/quaternion.h"
+#include "src/gfxlib_struct.h"
+#include "root_generic/xml_support.h"
 #include "container.h"
 #include "collection.h"
 #include "script/flightgroup.h"
-#include "faction_generic.h"
-#include "cockpit_generic.h"
-#include "vsfilesystem.h"
+#include "root_generic/faction_generic.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "root_generic/vsfilesystem.h"
 #include "collide_map.h"
-#include "SharedPool.h"
+#include "src/SharedPool.h"
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
 #include "cloak.h"

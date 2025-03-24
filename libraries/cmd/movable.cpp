@@ -22,14 +22,14 @@
 
 
 #include "movable.h"
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include "unit_generic.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include "unit_find.h"
-#include "star_system.h"
-#include "universe.h"
+#include "src/star_system.h"
+#include "src/universe.h"
 #include "configuration/game_config.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "audiolib.h"
 #include "audible.h"
 

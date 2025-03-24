@@ -27,10 +27,10 @@
  */
 
 #include <string>
-#include "xml_support.h"
-#include "easydom.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/easydom.h"
 #include <map>
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 
 using std::string;
 using std::map;

@@ -32,7 +32,7 @@ class CriteriaParent;
 #include <vector>
 #include <set>
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
 enum CriteriaType { CONTAINS, SECTOR, OWNEDBY };
 

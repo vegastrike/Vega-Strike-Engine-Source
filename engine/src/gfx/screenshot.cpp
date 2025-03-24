@@ -23,9 +23,9 @@
  */
 
 
-#include "in_kb.h"
-#include "vs_globals.h"
-#include "xml_support.h"
+#include "src/in_kb.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
 #include "vsimage.h"
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>

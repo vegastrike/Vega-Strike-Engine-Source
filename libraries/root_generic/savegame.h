@@ -24,14 +24,14 @@
 
 //#include "cmd/script/mission.h"
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 
 //WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
 
 #include <string>
 #include <set>
 #include <vector>
-#include "SharedPool.h"
+#include "src/SharedPool.h"
 
 struct SavedUnits {
     StringPool::Reference filename;

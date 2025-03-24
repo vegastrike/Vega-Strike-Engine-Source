@@ -31,8 +31,8 @@
 
 #include "utils.h"
 
-#include "universe_util.h"
-#include "lin_time.h"
+#include "src/universe_util.h"
+#include "root_generic/lin_time.h"
 
 #include "Source.h"
 #include "Listener.h"

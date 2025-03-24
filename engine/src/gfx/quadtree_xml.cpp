@@ -26,11 +26,11 @@
 
 
 #include "quadtree.h"
-#include "xml_support.h"
-#include "gfxlib.h"
-#include "ani_texture.h"
+#include "root_generic/xml_support.h"
+#include "src/gfxlib.h"
+#include "gfx/ani_texture.h"
 #include <assert.h>
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 #include "vsimage.h"
 
 using namespace VSFileSystem;

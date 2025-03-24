@@ -33,13 +33,13 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/filesystem.hpp>
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "technique.h"
-#include "XMLDocument.h"
-#include "vs_logging.h"
-#include "gfxlib.h"
-#include "aux_texture.h"
-#include "options.h"
+#include "Root_generic/xMLDocument.h"
+#include "src/vs_logging.h"
+#include "src/gfxlib.h"
+#include "gfx/aux_texture.h"
+#include "root_generic/options.h"
 #include "gldrv/gl_globals.h"
 #include "audio/Exceptions.h"
 

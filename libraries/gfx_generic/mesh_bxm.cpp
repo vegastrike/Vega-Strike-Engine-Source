@@ -21,22 +21,22 @@
  */
 
 
-#include "mesh_io.h"
-#include "mesh_bxm.h"
-#include "mesh.h"
-#include "mesh_xml.h"
+#include "gfx_generic/mesh_io.h"
+#include "gfx_generic/mesh_bxm.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/mesh_xml.h"
 
-#include "configxml.h"
+#include "root_generic/configxml.h"
 
 #ifndef STANDALONE
-#include "aux_texture.h"
-#include "animation.h"
-#include "faction_generic.h"
+#include "gfx/aux_texture.h"
+#include "gfx/animation.h"
+#include "root_generic/faction_generic.h"
 #endif
 #include <assert.h>
 
-#include "vegastrike.h"
-#include "vs_logging.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
 
 string inverseblend[16] = {
         "ZERO", "ZERO", "ONE", "SRCCOLOR", "INVSRCCOLOR", "SRCALPHA", "INVSRCALPHA",

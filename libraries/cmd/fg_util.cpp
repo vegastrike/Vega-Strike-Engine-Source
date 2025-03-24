@@ -25,9 +25,9 @@
  */
 
 
-#include "savegame.h"
+#include "root_generic/savegame.h"
 #include "fg_util.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include <algorithm>
 
 namespace fg_util {

@@ -24,9 +24,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 #define VEGA_STRIKE_ENGINE_CMD_MOVABLE_H
 
-#include "vec.h"
-#include "quaternion.h"
-#include "star_system.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/quaternion.h"
+#include "src/star_system.h"
 
 #include <cfloat>
 

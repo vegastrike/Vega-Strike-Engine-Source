@@ -25,13 +25,13 @@
 #define VEGA_STRIKE_ENGINE_GFX_TEXTURE_H
 
 #include "vsimage.h"
-#include "gfxlib.h"
-#include "gfxlib_struct.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
 #include "../SharedPool.h"
 
 #include <string>
 //#include "vsimage.h"
-//#include "vsfilesystem.h" this is included by gfxlib.h
+//#include "root_generic/vsfilesystem.h" this is included by gfxlib.h
 
 /**
  *  The texture class defines a method of loading bitmap textures

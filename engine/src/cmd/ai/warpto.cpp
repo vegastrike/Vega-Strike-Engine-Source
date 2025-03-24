@@ -27,8 +27,8 @@
 
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "universe_util.h"
-#include "config_xml.h"
+#include "src/universe_util.h"
+#include "src/config_xml.h"
 
 float max_allowable_travel_time() {
     static float mat = XMLSupport::parse_float(vs_config->getVariable("AI", "max_allowable_travel_time", "15"));

@@ -24,7 +24,7 @@
 #include <cctype>
 #include <cassert>
 #include <cstdarg>
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>

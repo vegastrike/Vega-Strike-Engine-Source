@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include <time.h>
 #include <stdio.h>
 

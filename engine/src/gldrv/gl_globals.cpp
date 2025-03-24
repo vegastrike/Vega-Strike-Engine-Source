@@ -22,8 +22,8 @@
 
 
 #include "gl_globals.h"
-#include "gfxlib.h"
-#include "matrix.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/matrix.h"
 //Matrix model = {0};
 //Matrix view = {0};
 

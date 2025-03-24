@@ -28,11 +28,11 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_VEC_H
 #define VEGA_STRIKE_ENGINE_GFX_VEC_H
 
-#include "macosx_math.h"
+#include "root_generic/macosx_math.h"
 #include <math.h>
 
-#include "endianness.h"
+#include "src/endianness.h"
 
-#include "tvector.h"
+#include "gfx_generic/tvector.h"
 
 #endif //VEGA_STRIKE_ENGINE_GFX_VEC_H

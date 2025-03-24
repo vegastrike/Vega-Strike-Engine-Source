@@ -25,7 +25,7 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "occlusion.h"
 
@@ -33,12 +33,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "vs_logging.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "camera.h"
-#include "universe.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
+#include "gfx/camera.h"
+#include "src/universe.h"
 
 #include "../gldrv/gl_globals.h"
 #include <physics.h>

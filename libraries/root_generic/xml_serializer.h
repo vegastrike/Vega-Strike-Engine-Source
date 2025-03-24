@@ -23,10 +23,9 @@
 #ifndef VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
 #define VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
 
-#include "xml_support.h"
 #include <vector>
 #include <string>
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 using std::string;
 using std::vector;

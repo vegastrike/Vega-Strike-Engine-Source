@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
 #define VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
 
-#include "vec.h" // TODO: replace with class Vector;
+#include "gfx_generic/vec.h" // TODO: replace with class Vector;
 #include <map>
 #include <string>
 

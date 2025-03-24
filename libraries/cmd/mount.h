@@ -26,10 +26,10 @@
 #define VEGA_STRIKE_ENGINE_CMD_SCRIPT_MOUNT_H
 
 #include "collide_map.h"
-#include "quaternion.h"
+#include "gfx_generic/quaternion.h"
 
 // TODO: move to cpp
-#include "weapon_info.h"
+#include "cmd/weapon_info.h"
 
 class Beam;
 struct WeaponInfo;

@@ -25,37 +25,29 @@
  */
 
 
-#include "in.h"
-#include "vsfilesystem.h"
-#include "vs_globals.h"
-#include "vegastrike.h"
-#include "cockpit_generic.h"
+#include "src/in.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
 #include "cmd/collection.h"
-#include "lin_time.h" //for fps
-#include "configxml.h"
+#include "root_generic/lin_time.h" //for fps
+#include "root_generic/configxml.h"
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
-#include "cmd/script/msgcenter.h"
-//#include "cmd/ai/flyjoystick.h"
-//#include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
-//#include "main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "savegame.h"
-//#include "animation.h"
-//#include "mesh.h"
-#include "universe_util.h"
+#include "root_generic/savegame.h"
+#include "src/universe_util.h"
 #include "cmd/ai/fire.h"
-#include "background.h"
-//#include "in_mouse.h"
-//#include "gui/glut_support.h"
-#include "save_util.h"
-#include "star_system.h"
-#include "universe.h"
-#include "mount_size.h"
-#include "weapon_info.h"
+#include "gfx/background.h"
+#include "src/save_util.h"
+#include "src/star_system.h"
+#include "src/universe.h"
+#include "cmd/mount_size.h"
+#include "cmd/weapon_info.h"
 
 #include <algorithm>
 
@@ -499,7 +491,7 @@ bool Cockpit::Update() {
     }
     UpdAutoPilot();
     Unit *par = GetParent();
-    
+
     if (turretcontrol.size() > _Universe->CurrentCockpit()) {
         if (turretcontrol[_Universe->CurrentCockpit()]) {
             turretcontrol[_Universe->CurrentCockpit()] = 0;

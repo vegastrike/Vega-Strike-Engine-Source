@@ -44,15 +44,15 @@
 
 #include <fstream>
 
-#include "vegastrike.h"
-#include "lin_time.h"
+#include "src/vegastrike.h"
+#include "root_generic/lin_time.h"
 #include "cmd/unit_generic.h"
 
 #include "cmd/ai/order.h"
 #include "mission.h"
 
-#include "vs_globals.h"
-#include "savegame.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/savegame.h"
 #include "msgcenter.h"
 #include "cmd/briefing.h"
 #include "pythonmission.h"
@@ -61,7 +61,7 @@
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)

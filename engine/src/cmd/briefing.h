@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "matrix.h"
+#include "gfx_generic/matrix.h"
 #include "gfx/camera.h"
 #include "gfx/hud.h"
 #include <list>

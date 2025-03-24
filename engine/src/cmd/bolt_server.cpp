@@ -25,16 +25,16 @@
  */
 
 
-#include "bolt.h"
-#include "gfxlib.h"
-#include "mesh.h"
-#include "gfxlib_struct.h"
+#include "cmd/bolt.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/mesh.h"
+#include "src/gfxlib_struct.h"
 #include <vector>
 
 #include <string>
 #include <algorithm>
 #include "unit_generic.h"
-#include "configxml.h"
+#include "root_generic/configxml.h"
 GFXVertexList *bolt_draw::boltmesh = NULL;
 
 bolt_draw::~bolt_draw() {

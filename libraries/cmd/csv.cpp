@@ -25,12 +25,12 @@
 
 
 #include "csv.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "unit_csv_factory.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "cmd/unit_csv_factory.h"
 #include "unit_json_factory.h"
-#include "vs_exit.h"
+#include "src/vs_exit.h"
 
 #include <boost/algorithm/string.hpp>
 

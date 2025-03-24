@@ -30,7 +30,7 @@
 #include "drive.h"
 #include "drive_upgrade.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 using boost::math::float_constants::pi;
 
@@ -51,14 +51,14 @@ static const std::map<std::string,std::string> drive_map = {
     { "Top_Accel", "10.0" },
     { "Bottom_Accel", "10.0" },
     { "Default_Speed_Governor", "10.0" },
-    { "Yaw_Governor", "10.0" }, 
-    { "Yaw_Governor", "10.0" }, 
     { "Yaw_Governor", "10.0" },
-    { "Pitch_Governor", "10.0" }, 
-    { "Pitch_Governor_Up", "10.0" }, 
+    { "Yaw_Governor", "10.0" },
+    { "Yaw_Governor", "10.0" },
+    { "Pitch_Governor", "10.0" },
+    { "Pitch_Governor_Up", "10.0" },
     { "Pitch_Governor_Down", "10.0" },
-    { "Roll_Governor", "10.0" }, 
-    { "Roll_Governor_Right", "10.0" }, 
+    { "Roll_Governor", "10.0" },
+    { "Roll_Governor_Right", "10.0" },
     { "Roll_Governor_Left", "10.0" }
 };
 
@@ -76,14 +76,14 @@ static const std::map<std::string,std::string> drive_upgrade_map = {
     { "Top_Accel", "1.5" },
     { "Bottom_Accel", "1.5" },
     { "Default_Speed_Governor", "1.5" },
-    { "Yaw_Governor", "1.5" }, 
-    { "Yaw_Governor", "1.5" }, 
     { "Yaw_Governor", "1.5" },
-    { "Pitch_Governor", "1.5" }, 
-    { "Pitch_Governor_Up", "1.5" }, 
+    { "Yaw_Governor", "1.5" },
+    { "Yaw_Governor", "1.5" },
+    { "Pitch_Governor", "1.5" },
+    { "Pitch_Governor_Up", "1.5" },
     { "Pitch_Governor_Down", "1.5" },
-    { "Roll_Governor", "1.5" }, 
-    { "Roll_Governor_Right", "1.5" }, 
+    { "Roll_Governor", "1.5" },
+    { "Roll_Governor_Right", "1.5" },
     { "Roll_Governor_Left", "1.5" }
 };
 
@@ -138,7 +138,7 @@ TEST(Drive, Sanity) {
     EXPECT_EQ(drive.GetMass(), 0.0);
 
     DriveExpectEq(drive, 10.0);
-    
+
     EXPECT_EQ(drive.GetConsumption(), 1.0);
 
     // Check DriveUpgrade Values
@@ -146,7 +146,7 @@ TEST(Drive, Sanity) {
     //EXPECT_EQ(upgrade.GetMass(), 5.0);
 
     DriveUpgradeExpectEq(upgrade, 1.5);
-    
+
     EXPECT_EQ(upgrade.fuel_consumption, 1.5);
 }
 
@@ -167,7 +167,7 @@ TEST(Drive, UpgradeDowngrade) {
     //EXPECT_EQ(drive.GetMass(), 0.0);
 
     DriveExpectEq(drive, 10.0);
-    
+
     EXPECT_EQ(drive.GetConsumption(), 1.0);
 
     // Upgrade
@@ -175,12 +175,12 @@ TEST(Drive, UpgradeDowngrade) {
     //EXPECT_EQ(upgrade.GetMass(), 0.0);
 
     DriveUpgradeExpectEq(upgrade, 1.0);
-    
+
     EXPECT_EQ(upgrade.fuel_consumption, 1.0);
 
 // Upgrade
     std::cout << "Upgrade\n-------\n";
-    
+
     // Drive
     upgrade.Upgrade(upgrade_string + upgrades_suffix_string);
 
@@ -188,7 +188,7 @@ TEST(Drive, UpgradeDowngrade) {
     //EXPECT_EQ(drive.GetMass(), 0.0);
 
     DriveExpectEq(drive, 15.0);
-    
+
     EXPECT_EQ(drive.GetConsumption(), 1.5);
 
     // Upgrade
@@ -196,7 +196,7 @@ TEST(Drive, UpgradeDowngrade) {
     EXPECT_EQ(upgrade.GetMass(), 5.0);
 
     DriveUpgradeExpectEq(upgrade, 1.5);
-    
+
     EXPECT_EQ(upgrade.fuel_consumption, 1.5);
 
 // Downgrade
@@ -208,7 +208,7 @@ TEST(Drive, UpgradeDowngrade) {
     EXPECT_EQ(drive.GetMass(), 0.0);
 
     DriveExpectEq(drive, 10.0);
-    
+
     EXPECT_EQ(drive.GetConsumption(), 1.0);
 
     // Upgrade
@@ -216,6 +216,6 @@ TEST(Drive, UpgradeDowngrade) {
     EXPECT_EQ(upgrade.GetMass(), 0.0);
 
     DriveUpgradeExpectEq(upgrade, 1.0);
-    
+
     EXPECT_EQ(upgrade.fuel_consumption, 1.0);
 }

@@ -28,10 +28,10 @@
 #include "vega_cast_utils.h"
 #include "collide_map.h"
 #include "unit_generic.h"
-#include "bolt.h"
-#include "star_system.h"
-#include "universe.h"
-#include "vs_logging.h"
+#include "cmd/bolt.h"
+#include "src/star_system.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
 
 volatile bool apart_return = true;
 

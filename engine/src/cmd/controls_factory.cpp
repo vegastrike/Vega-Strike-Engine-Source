@@ -33,8 +33,8 @@
 #include <boost/json.hpp>
 
 #include "drawable.h"
-#include "vs_globals.h"
-#include "configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/configxml.h"
 #include "resource/json_utils.h"
 
 #include "gui/staticdisplay.h"
@@ -43,8 +43,8 @@
 #include "gui/control.h"
 #include "gui/simplepicker.h"
 
-const std::string keys[] = {"name", "type", "rect",	"text", "textColor", 
-                            "defaultTextColor", "color", "font", "id", 
+const std::string keys[] = {"name", "type", "rect",	"text", "textColor",
+                            "defaultTextColor", "color", "font", "id",
                             "label", "command", "justification","thumbColor",
                             "buttonColor", "outlineColor", "selectionColor",
                             "highlightColor", "highlightTextColor",
@@ -80,9 +80,9 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
                 control_attributes[key] = text;
             }
         }
-        
+
         controls_map[control_attributes["name"]] = control_attributes;
-    } 
+    }
 
     return controls_map;
 }
@@ -108,10 +108,10 @@ GFXColor getColor(const std::string& colorString) {
     } else {
         return GFXColor(colorTuple.at(0), colorTuple.at(1), colorTuple.at(2));
     }
-    
+
 }
 
-Control* getControl(std::map<std::string, std::string> attributes) {    
+Control* getControl(std::map<std::string, std::string> attributes) {
     const std::string type = attributes["type"];
 
     Control* c;
@@ -160,48 +160,48 @@ Control* getControl(std::map<std::string, std::string> attributes) {
         }
 
         // Down Text Color
-        if(attributes.count("downTextColor")) { 
+        if(attributes.count("downTextColor")) {
             std::string colorString = attributes["downTextColor"];
             GFXColor color = getColor(colorString);
             b->setDownTextColor(color);
         }
 
         // Down Color
-        if(attributes.count("downColor")) { 
+        if(attributes.count("downColor")) {
             std::string colorString = attributes["downColor"];
             GFXColor color = getColor(colorString);
             b->setDownColor(color);
         }
 
         // Highlight Color
-        if(attributes.count("highlightColor")) { 
+        if(attributes.count("highlightColor")) {
             std::string colorString = attributes["highlightColor"];
             GFXColor color = getColor(colorString);
             b->setHighlightColor(color);
         }
 
         // Border Color
-        if(attributes.count("borderColor")) { 
+        if(attributes.count("borderColor")) {
             std::string colorString = attributes["borderColor"];
             GFXColor color = getColor(colorString);
             b->setBorderColor(color);
         }
 
         // End Border Color
-        if(attributes.count("endBorderColor")) { 
+        if(attributes.count("endBorderColor")) {
             std::string colorString = attributes["endBorderColor"];
             GFXColor color = getColor(colorString);
             b->setEndBorderColor(color);
         }
 
         // Variable Border Cycle Time
-        if(attributes.count("cycleTime")) { 
+        if(attributes.count("cycleTime")) {
             std::string cycleTimeString = attributes["cycleTime"];
             b->setVariableBorderCycleTime(std::stod(cycleTimeString));
         }
 
         // Shadow Width
-        if(attributes.count("shadowWidth")) { 
+        if(attributes.count("shadowWidth")) {
             std::string shadowWidth = attributes["shadowWidth"];
             b->setShadowWidth(std::stod(shadowWidth));
         }
@@ -210,14 +210,14 @@ Control* getControl(std::map<std::string, std::string> attributes) {
         c = s;
 
         // Button Color
-        if(attributes.count("buttonColor")) { 
+        if(attributes.count("buttonColor")) {
             std::string colorString = attributes["buttonColor"];
             GFXColor color = getColor(colorString);
             s->setButtonColor(color);
         }
 
         // Outline Color
-        if(attributes.count("outlineColor")) { 
+        if(attributes.count("outlineColor")) {
             std::string colorString = attributes["outlineColor"];
             GFXColor color = getColor(colorString);
             s->setOutlineColor(color);
@@ -227,28 +227,28 @@ Control* getControl(std::map<std::string, std::string> attributes) {
         c = p;
 
         // Outline Color
-        if(attributes.count("outlineColor")) { 
+        if(attributes.count("outlineColor")) {
             std::string colorString = attributes["outlineColor"];
             GFXColor color = getColor(colorString);
             p->setOutlineColor(color);
         }
 
         // Selection Color
-        if(attributes.count("selectionColor")) { 
+        if(attributes.count("selectionColor")) {
             std::string colorString = attributes["selectionColor"];
             GFXColor color = getColor(colorString);
             p->setOutlineColor(color);
         }
 
         // Highlight Color
-        if(attributes.count("highlightColor")) { 
+        if(attributes.count("highlightColor")) {
             std::string colorString = attributes["highlightColor"];
             GFXColor color = getColor(colorString);
             p->setHighlightColor(color);
         }
 
         // Highlight Text Color
-        if(attributes.count("highlightTextColor")) { 
+        if(attributes.count("highlightTextColor")) {
             std::string colorString = attributes["highlightTextColor"];
             GFXColor color = getColor(colorString);
             p->setHighlightTextColor(color);
@@ -286,18 +286,18 @@ Control* getControl(std::map<std::string, std::string> attributes) {
     }
 
     // Color
-    if(attributes.count("color")) { 
+    if(attributes.count("color")) {
         std::string colorString = attributes["color"];
         GFXColor color = getColor(colorString);
         c->setColor(color);
-    }    
+    }
 
     // Text Color
-    if(attributes.count("textColor")) { 
+    if(attributes.count("textColor")) {
         std::string colorString = attributes["textColor"];
         GFXColor color = getColor(colorString);
         c->setTextColor(color);
-    }  
+    }
 
     // ID
     if(attributes.count("id")) {

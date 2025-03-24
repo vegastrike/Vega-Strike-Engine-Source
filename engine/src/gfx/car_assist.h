@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 using XMLSupport::EnumMap;
 namespace CAR {
 const int FORWARD_BLINKEN = 1;

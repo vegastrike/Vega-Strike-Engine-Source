@@ -28,7 +28,7 @@
 
 
 #include <cmath>
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 #include "viewarea.h"
 
 namespace Radar {

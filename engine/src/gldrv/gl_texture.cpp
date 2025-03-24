@@ -26,13 +26,13 @@
 #define GL_EXT_texture_env_combine 1
 #include "gldrv/sdds.h"
 #include "gl_globals.h"
-#include "vs_globals.h"
-#include "vegastrike.h"
-#include "config_xml.h"
-#include "gfxlib.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
+#include "src/config_xml.h"
+#include "src/gfxlib.h"
 
-#include "options.h"
-#include "vs_logging.h"
+#include "root_generic/options.h"
+#include "src/vs_logging.h"
 
 #ifndef GL_TEXTURE_CUBE_MAP_EXT
 #define GL_TEXTURE_CUBE_MAP_EXT 0x8513

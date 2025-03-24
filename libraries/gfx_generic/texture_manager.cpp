@@ -23,7 +23,7 @@
  */
 
 
-#include "texture_manager.h"
+#include "gfx_generic/texture_manager.h"
 
 TextureManager::TextureManager() {
 

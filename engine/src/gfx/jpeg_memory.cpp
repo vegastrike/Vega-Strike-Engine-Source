@@ -29,7 +29,7 @@
 
 #include "jpeg_memory.h"
 #include <iostream>
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 // NOTE: There was a JPEG_SUPPORT C Macro wrapper here; however, it was always defined
 //  in jpeg_memory.h so removing it makes no difference.

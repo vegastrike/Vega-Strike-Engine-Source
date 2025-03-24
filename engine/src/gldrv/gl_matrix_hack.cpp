@@ -21,8 +21,8 @@
  */
 
 
-#include "gfxlib.h"
-#include "vec.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/vec.h"
 #include <stdio.h>
 //typedef float GLdouble;
 #include <math.h>
@@ -39,9 +39,9 @@
 #endif
 #include "gl_matrix.h"
 
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 
 //#include <GL/glu.h>
 

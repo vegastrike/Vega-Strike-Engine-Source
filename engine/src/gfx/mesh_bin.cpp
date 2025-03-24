@@ -23,16 +23,16 @@
  */
 
 
-#include "mesh.h"
+#include "gfx_generic/mesh.h"
 //#include "aux_logo.h"
 //#include "aux_texture.h"
 #include <stdio.h>
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 #include "file_main.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 using namespace VSFileSystem;   // FIXME -- Shouldn't include the entire namespace
 

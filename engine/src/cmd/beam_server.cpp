@@ -25,7 +25,7 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include <vector>
 #include "beam.h"
 #include "unit_generic.h"

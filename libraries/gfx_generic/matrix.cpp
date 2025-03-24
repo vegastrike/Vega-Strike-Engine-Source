@@ -25,5 +25,5 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "matrix.h"
+#include "gfx_generic/matrix.h"
 

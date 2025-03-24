@@ -37,10 +37,10 @@
 
 #include "python/python_class.h"
 #include "python/python_compile.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "pythonai.h"
 
 using namespace Orders;

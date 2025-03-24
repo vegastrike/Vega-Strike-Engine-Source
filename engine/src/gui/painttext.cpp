@@ -20,12 +20,12 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "painttext.h"
 
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "gldrv/gl_globals.h"
 const size_t PaintText::END_LINE = 1000000;           //Draw to the end.
 extern bool useStroke();

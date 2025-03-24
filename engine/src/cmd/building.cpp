@@ -24,8 +24,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "building.h"
-#include "cont_terrain.h"
+#include "cmd/building.h"
+#include "cmd/cont_terrain.h"
 #include "unit_generic.h"
 
 Building::Building(ContinuousTerrain *parent,

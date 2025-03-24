@@ -42,19 +42,19 @@
 #include <stdlib.h>
 #endif
 
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 
 #include "audiolib.h"
-#include "universe.h"
-#include "star_system.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "lin_time.h"
+#include "src/universe.h"
+#include "src/star_system.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/lin_time.h"
 #include "collection.h"
 #include "unit_generic.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "music.h"
 #include "base.h"
 
@@ -62,7 +62,7 @@
 
 //To allow for loading in another thread, we must handle some AL vars ourselves...
 #include "aldrv/al_globals.h"
-#include "options.h"
+#include "root_generic/options.h"
 
 #define MAX_RECENT_HISTORY "5"
 

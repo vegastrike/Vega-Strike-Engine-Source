@@ -26,16 +26,16 @@
 #include "collision.h"
 
 #include "unit_generic.h"
-#include "universe.h"
-#include "universe_util.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
 #include "configuration/configuration.h"
 #include "missile.h"
-#include "enhancement.h"
+#include "cmd/enhancement.h"
 #include "damageable.h"
 
 #include <typeinfo>
 // #include <boost/log/trivial.hpp>
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 // TODO: convert all float to double and all Vector to QVector.
 
@@ -124,7 +124,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit *other_unit) {
             // TODO: someone from the "product" team needs to define the
             // exact behavior. Preferably after we sort the upgrade
             // code.
-            
+
 
             /*double percent;
             char tempdata[sizeof(Shield)];

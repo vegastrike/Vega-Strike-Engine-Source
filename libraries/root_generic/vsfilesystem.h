@@ -27,10 +27,10 @@
 #include <vector>
 #include <iostream>
 #include <cstdarg>
-#include "vec.h"
-#include "pk3.h"
-#include <gnuhash.h>
-#include "vs_logging.h"
+#include "gfx_generic/vec.h"
+#include "root_generic/pk3.h"
+#include "src/gnuhash.h"
+#include "src/vs_logging.h"
 
 #include <boost/filesystem.hpp>
 

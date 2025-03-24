@@ -35,7 +35,7 @@
 #include <unistd.h>
 #endif
 
-#include "SharedPool.h"
+#include "src/SharedPool.h"
 
 class gameMessage {
 public:

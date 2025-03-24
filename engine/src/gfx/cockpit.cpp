@@ -38,14 +38,14 @@
 #include <boost/python/objects.hpp>
 #endif
 
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
-#include "vegastrike.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
 #include "gauge.h"
 #include "cockpit.h"
-#include "universe.h"
-#include "star_system.h"
+#include "src/universe.h"
+#include "src/star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/movable.h"
 #include "cmd/collection.h"
@@ -54,10 +54,10 @@
 #include "cmd/base_util.h"
 #include "hud.h"
 #include "vdu.h"
-#include "lin_time.h" //for fps
+#include "root_generic/lin_time.h" //for fps
 #include "cmd/beam.h"
-#include "config_xml.h"
-#include "lin_time.h"
+#include "src/config_xml.h"
+#include "root_generic/lin_time.h"
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
@@ -67,26 +67,26 @@
 #include "cmd/ai/autodocking.h"
 #include "main_loop.h"
 #include <assert.h>     //needed for assert() calls
-#include "savegame.h"
-#include "animation.h"
-#include "mesh.h"
-#include "universe_util.h"
+#include "root_generic/savegame.h"
+#include "gfx/animation.h"
+#include "gfx_generic/mesh.h"
+#include "src/universe_util.h"
 #include "in_mouse.h"
 #include "gui/glut_support.h"
 #include "audiolib.h"
-#include "save_util.h"
+#include "src/save_util.h"
 #include "cmd/base.h"
 #include "in_kb_data.h"
 #include "main_loop.h"
 #include <set>
 #include <string>
 #include "cmd/unit_const_cache.h"
-#include "options.h"
+#include "root_generic/options.h"
 #include "soundcontainer_aldrv.h"
-#include "configxml.h"
-#include "planet.h"
-#include "mount_size.h"
-#include "weapon_info.h"
+#include "root_generic/configxml.h"
+#include "cmd/planet.h"
+#include "cmd/mount_size.h"
+#include "cmd/weapon_info.h"
 #include "cockpit_gfx.h"
 
 #include <cstddef>
@@ -333,7 +333,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
     switch (stat) {
         case UnitImages<void>::SHIELDF:
             return target->shield.Percent(Shield::front);
-        
+
         case UnitImages<void>::SHIELDB:
             return target->shield.Percent(Shield::back);
 
@@ -345,16 +345,16 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
 
         case UnitImages<void>::ARMORF:
             return target->armor.Percent(Armor::front);
-        
+
         case UnitImages<void>::ARMORB:
             return target->armor.Percent(Armor::back);
-            
+
         case UnitImages<void>::ARMORL:
             return target->armor.Percent(Armor::left);
-        
+
         case UnitImages<void>::ARMORR:
             return target->armor.Percent(Armor::right);
-        
+
         case UnitImages<void>::ARMOR4:
             return target->armor.Percent(Armor::left);
         case UnitImages<void>::ARMOR5:
@@ -375,7 +375,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         }
         case UnitImages<void>::HULL:
             return target->hull.Percent();
-            
+
         case UnitImages<void>::EJECT: {
             int go =
                     ((target->hull.Percent() < .25)

@@ -25,7 +25,7 @@
  */
 
 
-#include "lerp.h"
+#include "gfx_generic/lerp.h"
 
 Transformation linear_interpolate_uncapped(const Transformation &A, const Transformation &B, double blend) {
     Quaternion result;

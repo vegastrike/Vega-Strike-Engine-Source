@@ -21,17 +21,15 @@
  */
 
 
-#include "mesh.h"
-#include "mesh_xml.h"
-#include "aux_texture.h"
-#include "aux_logo.h"
-#include "vegastrike.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/mesh_xml.h"
+#include "gfx/aux_texture.h"
+#include "gfx/aux_logo.h"
+#include "src/vegastrike.h"
 #include <iostream>
-//#include <fstream>
 #include <expat.h>
 #include <cfloat>
 #include <cassert>
-//#include "ani_texture.h"
 #ifndef _WIN32
 #include <unistd.h>
 #include <sys/types.h>
@@ -43,15 +41,12 @@
 #if !defined (_WIN32) && !(defined (__APPLE__) || defined (MACOSX )) && !defined (BSD) && !defined(__HAIKU__)
 #include <values.h>
 #endif
-#include "xml_support.h"
-#include "vec.h"
-//#include "config_xml.h"
-#include "vs_globals.h"
-//#include "cmd/script/mission.h"
-#include "cmd/script/flightgroup.h"
-#include "hashtable.h"
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "root_generic/xml_support.h"
+#include "gfx_generic/vec.h"
+#include "root_generic/vs_globals.h"
+#include "src/hashtable.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 #ifdef max
 #undef max

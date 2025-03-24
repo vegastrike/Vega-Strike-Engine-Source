@@ -26,8 +26,8 @@
 #define VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 
 #include "damageable_object.h"
-#include "vec.h"
-#include "mount_size.h"
+#include "gfx_generic/vec.h"
+#include "cmd/mount_size.h"
 
 class Unit;
 struct GFXColor;

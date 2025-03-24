@@ -29,8 +29,8 @@
 
 #include <vector>
 #include <queue>
-#include "vec.h"
-#include "matrix.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/matrix.h"
 #include "sensor.h"
 #include "dual_display.h"
 

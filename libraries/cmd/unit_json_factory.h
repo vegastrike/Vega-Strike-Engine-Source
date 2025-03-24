@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 class UnitJSONFactory {
     static std::string DEFAULT_ERROR_VALUE;

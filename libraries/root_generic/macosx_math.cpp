@@ -22,7 +22,7 @@
 
 #include <macosx_math.h>
 #include <string>
-#include "posh.h"
+#include "root_generic/posh.h"
 #if defined (__APPLE__)
 //these stuffs are included in OSX 10.4 and above--so just check for x86
 #include <stdio.h>

@@ -29,7 +29,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include <boost/version.hpp>
 
 #if BOOST_VERSION != 102800

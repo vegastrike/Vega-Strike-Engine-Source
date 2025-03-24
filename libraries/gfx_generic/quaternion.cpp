@@ -25,7 +25,7 @@
  */
 
 
-#include "quaternion.h"
+#include "gfx_generic/quaternion.h"
 
 Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Vector &v3) {
     float T = v1.i + v2.j + v3.k + 1, S, W, X, Y, Z;

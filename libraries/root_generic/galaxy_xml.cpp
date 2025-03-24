@@ -25,13 +25,12 @@
  */
 
 #include <expat.h>
-#include "xml_support.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
 
-#include "galaxy_xml.h"
-#include "galaxy_gen.h"
+#include "root_generic/galaxy_xml.h"
 #ifdef WRITEGALAXYCOORDS
 #include "gfx/nav/navscreen.h"
 #endif

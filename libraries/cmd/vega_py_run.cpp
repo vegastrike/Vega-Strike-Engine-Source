@@ -27,9 +27,9 @@
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
-#include "vega_py_run.h"
+#include "cmd/vega_py_run.h"
 #include "vega_string_utils.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 void VegaPyRunString(const std::string &py_snippet) {
     VS_LOG(important_info, (boost::format("running %1%") % py_snippet));

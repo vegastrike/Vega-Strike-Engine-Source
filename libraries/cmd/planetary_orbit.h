@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
 #define VEGA_STRIKE_ENGINE_CMD_PLANETARY_ORBIT_H
 
-#include "vec.h"
-#include "star_system.h"
+#include "gfx_generic/vec.h"
+#include "src/star_system.h"
 #include "ai/order.h"
 
 class PlanetaryOrbit : public Order {

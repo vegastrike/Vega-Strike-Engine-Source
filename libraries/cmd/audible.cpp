@@ -27,11 +27,11 @@
 
 #include "audible.h"
 
-#include "vec.h"
-#include "vs_globals.h"
-#include "universe.h"
+#include "gfx_generic/vec.h"
+#include "root_generic/vs_globals.h"
+#include "src/universe.h"
 #include "audiolib.h"
-#include "options.h"
+#include "root_generic/options.h"
 
 static const SoundType typesArray[] = {SoundType::engine, SoundType::shield, SoundType::armor,
         SoundType::hull, SoundType::explosion, SoundType::cloaking,

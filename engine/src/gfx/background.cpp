@@ -22,19 +22,19 @@
  */
 
 
-#include "vegastrike.h"
-#include "camera.h"
-#include "aux_texture.h"
+#include "src/vegastrike.h"
+#include "gfx/camera.h"
+#include "gfx/aux_texture.h"
 #include "star.h"
-#include "background.h"
-#include "gfxlib.h"
-#include "aux_texture.h"
-#include "sphere.h"
-#include "vs_globals.h"
+#include "gfx/background.h"
+#include "src/gfxlib.h"
+#include "gfx/aux_texture.h"
+#include "gfx_generic/sphere.h"
+#include "root_generic/vs_globals.h"
 #include "../gldrv/gl_globals.h"
-#include "config_xml.h"
-#include "universe_util.h"
-#include "universe.h"
+#include "src/config_xml.h"
+#include "src/universe_util.h"
+#include "src/universe.h"
 
 #include <float.h>
 const float size = 100;

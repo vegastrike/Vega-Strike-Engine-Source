@@ -29,7 +29,7 @@
 #include <vector>
 using std::string;
 using std::vector;
-#include "endianness.h"
+#include "src/endianness.h"
 #include <stdlib.h>
 #include <stdio.h>
 

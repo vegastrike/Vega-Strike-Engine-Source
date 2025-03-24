@@ -22,20 +22,20 @@
  */
 
 #include "cmd/unit_generic.h"
-#include "animation.h"
-#include "aux_texture.h"
-#include "camera.h"
-#include "lin_time.h"
+#include "gfx/animation.h"
+#include "gfx/aux_texture.h"
+#include "gfx/camera.h"
+#include "root_generic/lin_time.h"
 #include <stack>
-#include "vsfilesystem.h"
-#include "vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/vs_globals.h"
 #include "point_to_cam.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "sprite.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
+#include "gfx/central.h"
 #include <algorithm>
 #include "../gldrv/gl_globals.h"
-#include "universe.h"
+#include "src/universe.h"
 
 using std::vector;
 using std::stack;

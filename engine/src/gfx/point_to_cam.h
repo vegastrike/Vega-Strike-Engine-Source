@@ -41,7 +41,7 @@
  */
 
 #include "gfx/camera.h"
-#include "universe.h"
+#include "src/universe.h"
 
 inline bool CalculateOrientation(QVector &Pos,
         Vector &p,

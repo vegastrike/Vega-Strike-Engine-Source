@@ -21,16 +21,14 @@
  */
 
 #include "cmd/script/mission.h"
-#include "universe.h"
-#include "galaxy_xml.h"
-#include "galaxy_gen.h"
-#include "vsfilesystem.h"
-#include "configxml.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "lin_time.h"
+#include "src/universe.h"
+#include "root_generic/galaxy_xml.h"
+#include "root_generic/galaxy_gen.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
 
-#include "options.h"
+#include "root_generic/options.h"
 
 #include <vector>
 #include <string>

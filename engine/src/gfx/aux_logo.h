@@ -23,10 +23,10 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_LOGO_H
 #define VEGA_STRIKE_ENGINE_GFX_LOGO_H
 
-#include "matrix.h"
-#include "gfxlib.h"
-#include "hashtable.h"
-#include "vec.h"
+#include "gfx_generic/matrix.h"
+#include "src/gfxlib.h"
+#include "src/hashtable.h"
+#include "gfx_generic/vec.h"
 
 #include <vector>
 

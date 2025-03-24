@@ -23,10 +23,10 @@
  */
 
 #include "cloak.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-Cloak::Cloak() : 
+Cloak::Cloak() :
     Component(),
     EnergyConsumer(nullptr, false, 0)
 {
@@ -129,17 +129,17 @@ void Cloak::Update()
     if(actual_available_energy < 1.0) {
         // Insufficient energy to cloak ship
         status = CloakingStatus::decloaking;
-    } 
+    }
 
     // TODO: Use warp power for cloaking (SPEC capacitor)
     //const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
-    
 
 
-    
+
+
     // TODO: deplete has a more elegant solution for this code.
     // Also use a pointer to which is used instead of ifs
-    
+
 
     if(status == CloakingStatus::decloaking) {
         current = std::max(0.0, current - rate * simulation_atom_var);
@@ -196,7 +196,7 @@ void Cloak::Deactivate() {
 void Cloak::_Downgrade() {
     Component::Downgrade();
     SetConsumption(0);
-    
+
     status = CloakingStatus::disabled;
 
     rate = 100;
@@ -204,7 +204,7 @@ void Cloak::_Downgrade() {
     current = 0;
     minimum = 0;
 
-    
+
 }
 
 void Cloak::_Upgrade(const std::string upgrade_key) {

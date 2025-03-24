@@ -24,18 +24,18 @@
 
 
 #include "audiolib.h"
-#include "hashtable.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "src/hashtable.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include <string>
 #include "al_globals.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "cmd/unit_generic.h"
-#include "cockpit_generic.h"
-#include "options.h"
-#include "posh.h"
-#include "universe.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "root_generic/options.h"
+#include "root_generic/posh.h"
+#include "src/universe.h"
 
 #ifdef HAVE_AL
 
@@ -197,7 +197,7 @@ void blutLoadWAVMemory(ALbyte *memory, ALenum
 //#include <AL/alext.h>
 #endif
 #include <vector>
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include <algorithm>
 #include <stdio.h>
 #ifdef HAVE_AL

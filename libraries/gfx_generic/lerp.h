@@ -27,8 +27,8 @@
 #define VEGA_STRIKE_ENGINE_GFX_LERP_H
 
 #include <assert.h>
-#include "vec.h"
-#include "quaternion.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/quaternion.h"
 
 //Interpolates A and B, but does not cap the interpolation to less than 1.0
 Transformation linear_interpolate_uncapped(const Transformation &a, const Transformation &b, double blend);

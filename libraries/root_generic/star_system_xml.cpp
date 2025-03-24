@@ -22,29 +22,29 @@
 
 
 #include <expat.h>
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "cmd/planet.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "configxml.h"
-#include "vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/configxml.h"
+#include "src/vegastrike.h"
 #include <assert.h>                              /// needed for assert() calls.
-#include "mesh.h"
+#include "gfx_generic/mesh.h"
 #include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/fire.h"
 #include "cmd/nebula.h"
 #include "cmd/enhancement.h"
 #include "cmd/script/flightgroup.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include "cmd/atmosphere.h"
-#include "star_xml.h"
-#include "planetary_orbit.h"
-#include "atmospheric_fog_mesh.h"
+#include "src/star_xml.h"
+#include "cmd/planetary_orbit.h"
+#include "root_generic/atmospheric_fog_mesh.h"
 
-#include "options.h"
+#include "root_generic/options.h"
 
-#include "system_factory.h"
+#include "root_generic/system_factory.h"
 
 #include <stdlib.h>
 

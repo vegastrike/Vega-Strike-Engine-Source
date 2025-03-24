@@ -28,7 +28,7 @@
 
 #include <string>
 #include <vector>
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include "container.h"
 #include "../SharedPool.h"
 #include "gfx/sprite.h"

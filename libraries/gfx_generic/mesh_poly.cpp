@@ -25,8 +25,8 @@
  */
 
 
-#include "mesh.h"
-#include "aux_texture.h"
+#include "gfx_generic/mesh.h"
+#include "gfx/aux_texture.h"
 #if !defined (_WIN32) && !defined (__CYGWIN__) && !(defined (__APPLE__) || defined (MACOSX )) && !defined (BSD) && !defined(__HAIKU__)
 #include <values.h>
 #endif
@@ -221,7 +221,7 @@ void Mesh::GetPolys(vector<mesh_polygon> &polys) {
     int offset = 0;
     int last = numtris;
     mesh_polygon tmppolygon;
-    // Unroll this loop a bit to remove conditional 
+    // Unroll this loop a bit to remove conditional
     for (i = 0; i < last; i++) {
         polys.push_back(tmppolygon);
         for (int j = 0; j < 3; j++, polys.back().v.push_back(vv)) {

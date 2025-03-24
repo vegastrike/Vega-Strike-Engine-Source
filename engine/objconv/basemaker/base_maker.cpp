@@ -31,13 +31,13 @@
 #include <vector>
 #include <queue>
 #include <iostream>
-#include "sprite.h"
+#include "objconv/basemaker/sprite.h"
 #include <stdio.h>
-#include "base_maker_texture.h"
-#include "vec.h"
-#include "matrix.h"
+#include "objconv/basemaker/base_maker_texture.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/matrix.h"
 #include "gfx/hud.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 
 #include <time.h>
 #ifdef _WIN32
@@ -100,7 +100,7 @@ double cur_check = 1;
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "quaternion.h"
+#include "gfx_generic/quaternion.h"
 
 class Texture;
 

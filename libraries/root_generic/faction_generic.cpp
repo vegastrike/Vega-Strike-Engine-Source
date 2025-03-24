@@ -22,9 +22,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "cmd/unit_generic.h"
-#include "string.h"
+#include <cstring>
 
 using namespace FactionUtil;
 

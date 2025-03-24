@@ -34,12 +34,12 @@
 
 #include <expat.h>
 #include "cmd/unit_generic.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "mission.h"
-#include "easydom.h"
+#include "root_generic/easydom.h"
 
 varInst *Mission::call_omap(missionNode *node, int mode) {
     varInst *viret = NULL;

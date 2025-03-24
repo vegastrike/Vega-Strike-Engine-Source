@@ -23,10 +23,10 @@
  */
 
 
-#include "vegastrike.h"
-#include "in_kb.h"
-#include "vs_random.h"
-#include "vs_logging.h"
+#include "src/vegastrike.h"
+#include "src/in_kb.h"
+#include "src/vs_random.h"
+#include "src/vs_logging.h"
 
 static double firsttime;
 VSRandom vsrandom(time(NULL));

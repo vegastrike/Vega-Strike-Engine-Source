@@ -19,10 +19,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#include "macosx_math.h"
-#include "lin_time.h"
+#include "root_generic/macosx_math.h"
+#include "root_generic/lin_time.h"
 #include "physics.h"
-#include "quaternion.h"
+#include "gfx_generic/quaternion.h"
 
 PhysicsSystem::PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r) :
         mass(M),

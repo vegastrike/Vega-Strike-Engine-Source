@@ -26,9 +26,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_MATRIX_H
 #define VEGA_STRIKE_ENGINE_GFX_MATRIX_H
 
-#include "vec.h"
-#include "endianness.h"
-#include "vs_globals.h"
+#include "gfx_generic/vec.h"
+#include "src/endianness.h"
+#include "root_generic/vs_globals.h"
 
 class Matrix {
 private:

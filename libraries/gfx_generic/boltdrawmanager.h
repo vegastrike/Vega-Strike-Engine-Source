@@ -27,8 +27,8 @@
 #define VEGA_STRIKE_ENGINE_GFX_BOLT_DRAW_MANAGER_H
 
 #include "gfx/decalqueue.h"
-#include "bolt.h"
-#include "vec.h"
+#include "cmd/bolt.h"
+#include "gfx_generic/vec.h"
 
 #include <vector>
 

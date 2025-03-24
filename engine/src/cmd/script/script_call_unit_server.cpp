@@ -26,7 +26,7 @@
 
 
 #include <string>
-#include "cockpit_generic.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "cmd/planet_generic.h"
 
 void AddAnimation(Cockpit *cp, std::string anim) {

@@ -25,11 +25,11 @@
 #include "cmd/collection.h"
 #include "cmd/container.h"
 
-#include "vec.h"
-#include "gfxlib.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
 
-#include "star_xml.h"
+#include "src/star_xml.h"
 
 #include <string>
 #include <vector>

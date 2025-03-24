@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H
 #define VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H
 
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 #include "cargo.h"
 
 // TODO: remove this. That's what std::pair is for.

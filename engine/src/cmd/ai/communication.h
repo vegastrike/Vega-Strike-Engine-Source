@@ -26,8 +26,8 @@
 #define VEGA_STRIKE_ENGINE_CMD_AI_COMMUNICATION_H
 
 #include "cmd/unit_generic.h"
-#include "gfxlib_struct.h"
-#include "vs_logging.h"
+#include "src/gfxlib_struct.h"
+#include "src/vs_logging.h"
 
 class FSM {
 protected:

@@ -29,7 +29,7 @@
 
 #include "configuration/game_config.h"
 #include "configuration/configuration.h"
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "vs_math.h"
 
 VertexBuilder<> GetCross(const QVector &location, const Vector& cam_p,

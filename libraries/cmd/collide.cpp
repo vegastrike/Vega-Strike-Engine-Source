@@ -24,24 +24,24 @@
 
 
 #include "cmd/collide.h"
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include "unit_generic.h"
 #include "beam.h"
-#include "bolt.h"
-#include "mesh.h"
+#include "cmd/bolt.h"
+#include "gfx_generic/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
-#include "universe.h"
+#include "src/universe.h"
 
 #include "CSopcodecollider.h"
 #include "csgeom2/optransfrm.h"
 #include "basecollider.h"
 
-#include "hashtable.h"
+#include "src/hashtable.h"
 #include <string>
-#include "vs_globals.h"
-#include "configxml.h"
-#include "vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/configxml.h"
+#include "src/vs_logging.h"
 
 static Hashtable<std::string, collideTrees, 127> unitColliders;
 

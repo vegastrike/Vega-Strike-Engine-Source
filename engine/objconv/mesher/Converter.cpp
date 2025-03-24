@@ -21,7 +21,7 @@
  */
 
 #include "PrecompiledHeaders/Converter.h"
-#include "Converter.h"
+#include "objconv/mesher/Converter.h"
 
 #include <algorithm>
 

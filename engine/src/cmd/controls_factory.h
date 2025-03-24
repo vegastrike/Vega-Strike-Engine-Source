@@ -29,7 +29,7 @@
 #include <string>
 #include <map>
 
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 #include "gui/control.h"
 
 std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile &file);

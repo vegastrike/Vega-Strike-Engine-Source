@@ -25,8 +25,8 @@
 #include <vector>
 #include <stddef.h>
 
-#include "command.h"
-#include "vs_exit.h"
+#include "src/command.h"
+#include "src/vs_exit.h"
 
 class Universe;
 

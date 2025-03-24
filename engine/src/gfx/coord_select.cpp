@@ -25,13 +25,13 @@
  */
 
 #include "cmd/unit_generic.h"
-#include "star_system.h"
+#include "src/star_system.h"
 #include "loc_select.h"
 #include "coord_select.h"
-#include "vs_globals.h"
-#include "in_kb.h"
+#include "root_generic/vs_globals.h"
+#include "src/in_kb.h"
 #include "gfx/camera.h"
-#include "universe.h"
+#include "src/universe.h"
 
 int CoordinateSelectChange = 0;
 int CoordinateSelectmousex;

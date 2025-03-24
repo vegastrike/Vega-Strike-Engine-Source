@@ -27,14 +27,14 @@
  */
 
 
-#include "lin_time.h" // GetElapsedTime
+#include "root_generic/lin_time.h" // GetElapsedTime
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "viewarea.h"
 #include "sphere_display.h"
 #include <physics.h>
-#include "configxml.h"
+#include "root_generic/configxml.h"
 
 #define TRACK_SIZE 2.0
 

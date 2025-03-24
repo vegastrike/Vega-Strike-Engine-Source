@@ -32,8 +32,8 @@
 #include <unistd.h>
 #endif
 
-#include "xml_support.h"
-#include "vegastrike.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
 
 #include "cmd/unit_generic.h"
 #include "mission.h"

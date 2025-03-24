@@ -35,12 +35,12 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
-#include "general.h"
-#include "display_gtk.h"
-#include "file.h"
-#include "easydom.h"
-#include "xml_support.h"
-#include "hashtable.h"
+#include "./general.h"
+#include "./display_gtk.h"
+#include "./file.h"
+#include "./easydom.h"
+#include "./xml_support.h"
+#include "src/hashtable.h"
 
 #ifndef MAX_READ
 #define MAX_READ 1024	// Maximum number of characters to read from a line

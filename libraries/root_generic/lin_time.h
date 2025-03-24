@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_LIN_TIME_H
 #define VEGA_STRIKE_ENGINE_LIN_TIME_H
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #define VEGA_EPOCH 1136073600. //Jan 1, 2006 GMT
 

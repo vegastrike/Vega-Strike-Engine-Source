@@ -25,7 +25,7 @@
   @todo Proper documentation.
  */
 
-#include "common.h"
+#include "tools/common.h"
 #include <errno.h>
 #include <vector>
 

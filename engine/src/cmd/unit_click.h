@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CLICK_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CLICK_H
 
-#include "vegastrike.h"
-#include "mesh.h"
+#include "src/vegastrike.h"
+#include "gfx_generic/mesh.h"
 
 extern Vector mouseline;
 extern vector<Vector> perplines;

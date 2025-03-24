@@ -23,7 +23,7 @@
 /* This include has been designed to act independant of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
-#include "general.h"
+#include "launcher/general.h"
 #if defined(__APPLE__) || defined(MACOSX)
 #include <sys/param.h> // For MAXPATHLEN
 #endif

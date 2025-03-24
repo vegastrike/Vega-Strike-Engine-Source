@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_GFX_VDU_H
 
 #include "cmd/unit_generic.h"
-#include "sprite.h"
+#include "gfx/central.h"
 #include <string>
 #include <vector>
 

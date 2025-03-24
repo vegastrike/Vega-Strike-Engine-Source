@@ -29,11 +29,11 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 #include <expat.h>
-#include "xml_support.h"
-#include "vegastrike.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
 #include <assert.h>
-#include "config_xml.h"
-#include "easydom.h"
+#include "src/config_xml.h"
+#include "root_generic/easydom.h"
 #include "cmd/ai/flykeyboard.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/music.h"
@@ -44,7 +44,7 @@
 #include "gfx/cockpit.h"
 #include "in_kb_data.h"
 #include "python/python_compile.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "sdl_key_converter.h"
 
 /* *********************************************************** */

@@ -506,7 +506,7 @@ char *makeasc(wchar_t *str) {
     return (char *) str;
 }
 
-#include "general.h"
+#include "launcher/general.h"
 
 void fileop_destroy(GtkWidget *w,
         GtkFileSelection *fs) {

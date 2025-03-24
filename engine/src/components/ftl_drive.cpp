@@ -24,10 +24,10 @@
 
 #include "ftl_drive.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-FtlDrive::FtlDrive() : 
+FtlDrive::FtlDrive() :
     Component(),
     EnergyConsumer(nullptr, false, 0),
     enabled(false) {
@@ -48,7 +48,7 @@ void FtlDrive::Enable() {
 void FtlDrive::Disable() {
     enabled = false;
 }
-    
+
 void FtlDrive::Toggle() {
     enabled = !enabled;
 }
@@ -67,7 +67,7 @@ void FtlDrive::Load(std::string unit_key) {
     SetConsumption(energy * configuration()->fuel.ftl_drive_factor);
 
     // FTL Drive
-}      
+}
 
 void FtlDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Warp_Usage_Cost"] = std::to_string(consumption  / configuration()->fuel.ftl_drive_factor);

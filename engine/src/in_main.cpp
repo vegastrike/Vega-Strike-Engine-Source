@@ -24,7 +24,7 @@
 using std::queue;
 using std::list;
 
-#include "in_kb.h"
+#include "src/in_kb.h"
 #include "in_mouse.h"
 #include "in_joystick.h"
 #include "in_handler.h"

@@ -27,9 +27,9 @@
 
 #include <string>
 
-#include "soundcontainer_generic.h"
+#include "gfx_generic/soundcontainer_generic.h"
 
-#include "SharedPool.h"
+#include "src/SharedPool.h"
 
 void SoundContainer::init(const StringPool::Reference &_soundfile, bool _looping, float _gain) {
     this->soundFile = _soundfile;

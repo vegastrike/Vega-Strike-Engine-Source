@@ -24,10 +24,10 @@
  */
 
 
-#include "planetary_orbit.h"
+#include "cmd/planetary_orbit.h"
 
 #include "unit_generic.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 PlanetaryOrbit::PlanetaryOrbit(Unit *p,
         double velocity,

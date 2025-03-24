@@ -23,7 +23,7 @@
  */
 
 
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 #include <cstdio>
 #include <cassert>
@@ -49,23 +49,23 @@ struct dirent
 #include <dirent.h>
 #endif
 #include <sys/stat.h>
-#include "configxml.h"
-#include "vs_globals.h"
-#include "vegastrike.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
 #include "common/common.h"
-#include "galaxy_gen.h"
-#include "pk3.h"
+#include "root_generic/galaxy_gen.h"
+#include "root_generic/pk3.h"
 
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 
-#include "options.h"
+#include "root_generic/options.h"
 
-#include "galaxy.h"
+#include "root_generic/galaxy.h"
 
 #include <boost/filesystem.hpp>
 
 #include "configuration/game_config.h"
-#include "vs_exit.h"
+#include "src/vs_exit.h"
 
 #include <string>
 #include <utility>

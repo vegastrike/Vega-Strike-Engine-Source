@@ -27,7 +27,7 @@
 
 #include "Opcode.h"
 #include "CSopcodecollider.h"
-#include "terrain.h"
+#include "cmd/terrain.h"
 
 class StarSystem;
 const int numcontterr = 4;

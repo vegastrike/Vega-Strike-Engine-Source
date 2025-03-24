@@ -50,8 +50,8 @@ class Matrix;
 
 using std::vector;
 
-#include "vec.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
 
 //Init functions
 

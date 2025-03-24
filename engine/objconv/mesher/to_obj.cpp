@@ -23,5 +23,5 @@
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "to_obj.h"
+#include "objconv/mesher/to_obj.h"
 

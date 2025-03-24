@@ -25,12 +25,12 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include <assert.h>
-#include "configxml.h"
-#include "easydom.h"
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "root_generic/configxml.h"
+#include "root_generic/easydom.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 /* *********************************************************** */
 

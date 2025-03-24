@@ -32,11 +32,11 @@
 #include <stack>
 #include <gnuhash.h>
 #include <stdlib.h>
-#include "vsfilesystem.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 extern std::string parseCalike(char const *filename);
 

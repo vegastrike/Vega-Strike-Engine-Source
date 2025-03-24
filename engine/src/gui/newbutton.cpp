@@ -20,11 +20,11 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "newbutton.h"
 
-#include "lin_time.h"                           //For cycling borders.
+#include "root_generic/lin_time.h"                           //For cycling borders.
 #include "eventmanager.h"
 #include "painttext.h"
 

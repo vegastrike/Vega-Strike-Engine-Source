@@ -20,28 +20,23 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "system_factory.h"
+#include "root_generic/system_factory.h"
 
-#include "star_xml.h"
-#include "planet.h"
-#include "gfxlib_struct.h"
-#include "universe_util.h"
-#include "options.h"
+#include "src/star_xml.h"
+#include "cmd/planet.h"
+#include "src/gfxlib_struct.h"
+#include "src/universe_util.h"
+#include "root_generic/options.h"
 #include "ai/fire.h"
-#include "asteroid.h"
+#include "cmd/asteroid.h"
 #include "ai/aggressive.h"
-#include "enhancement.h"
-#include "building.h"
-#include "planetary_orbit.h"
-#include "enhancement.h"
-#include "building.h"
-#include "asteroid.h"
-#include "atmospheric_fog_mesh.h"
+#include "cmd/enhancement.h"
+#include "cmd/building.h"
+#include "cmd/planetary_orbit.h"
+#include "root_generic/atmospheric_fog_mesh.h"
 
 
-// TODO: For comparison only - remove
-#include "terrain.h"
-#include "cont_terrain.h"
+#include "cmd/cont_terrain.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>

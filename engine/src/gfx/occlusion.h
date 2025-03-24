@@ -26,10 +26,10 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
 #define VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
 
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 
-#include "gfxlib.h"
-#include "vec.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/vec.h"
 
 namespace Occlusion {
 

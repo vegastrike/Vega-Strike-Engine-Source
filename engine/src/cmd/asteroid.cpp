@@ -27,9 +27,9 @@
 #include "cmd/asteroid.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
-#include "vec.h"
-#include "quaternion.h"
-#include "matrix.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/quaternion.h"
+#include "gfx_generic/matrix.h"
 
 static void RecursiveSetSchedule(Unit *un) {
     if (un) {

@@ -24,26 +24,26 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
                                                                                                                         //For WIN32 debugging.
 #include <crtdbg.h>
 #endif
 #include "basecomputer.h"
 using VSFileSystem::SaveFile;
-#include "savegame.h"
-#include "universe_util.h"
-#include "save_util.h"
+#include "root_generic/savegame.h"
+#include "src/universe_util.h"
+#include "src/save_util.h"
 #include <algorithm>                //For std::sort.
 #include <set>
-#include "load_mission.h"
+#include "root_generic/load_mission.h"
 #include "cmd/planet.h"
 #include "cmd/unit_util.h"
 #include "cmd/music.h"
 #include "cmd/unit_const_cache.h"
 #include "gui/modaldialog.h"
 #include "main_loop.h"              //For QuitNow().
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 //FIXME mbyron -- Hack instead of reading XML.
 #include "gui/newbutton.h"
 #include "gui/staticdisplay.h"
@@ -58,10 +58,10 @@ using VSFileSystem::SaveFile;
 #include "audiolib.h"
 #include "vs_math.h"
 #include "damageable.h"
-#include "universe.h"
-#include "mount_size.h"
-#include "weapon_info.h"
-#include "vs_logging.h"
+#include "src/universe.h"
+#include "cmd/mount_size.h"
+#include "cmd/weapon_info.h"
+#include "src/vs_logging.h"
 #include "controls_factory.h"
 #include "python/infra/get_string.h"
 
@@ -83,7 +83,7 @@ using VSFileSystem::SaveFile;
 #include "vega_cast_utils.h"
 
 // Can't declare in header because PyObject is problematic
-extern const std::string GetString(const std::string function_name, 
+extern const std::string GetString(const std::string function_name,
                             const std::string module_name,
                             const std::string file_name,
                             PyObject* args);
@@ -530,7 +530,7 @@ void BaseComputer::constructControls(void) {
         //Base info title.
         StaticDisplay *baseTitle = (StaticDisplay*)getControl(controls["baseTitle"]);
         window()->addControl(baseTitle);
-        
+
         //Player info title.
         StaticDisplay *playerTitle = (StaticDisplay*)getControl(controls["playerTitle"]);
         window()->addControl(playerTitle);
@@ -539,7 +539,7 @@ void BaseComputer::constructControls(void) {
         NewButton *options = (NewButton*)getControl(controls["saveLoad"]);
         window()->addControl(options);
     }
-    
+
     NewButton *done = (NewButton*)getControl(controls["done"]);
     window()->addControl(done);
 
@@ -574,7 +574,7 @@ void BaseComputer::constructControls(void) {
 
         //Scroller for seller.
         Scroller *sellerScroller = (Scroller*)getControl(controls["sellerScroller"]);
-        
+
 
         //Seller picker.
         SimplePicker *sellpick = (SimplePicker*)getControl(controls["sellerPicker"]);
@@ -637,7 +637,7 @@ void BaseComputer::constructControls(void) {
 
         //Scroller for seller.
         Scroller *sellerScroller = (Scroller*)getControl(controls["sellerScroller"]);
-        
+
         //Seller picker.
         SimplePicker *sellpick = new SimplePicker;
         sellpick->setRect(Rect(-.96, -.4, .76, .95));
@@ -1754,7 +1754,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                 commitButton->setLabel("Fix1st");
                 commitButton->setCommand("");
             }
-            
+
             if(item.GetCategory().find("upgrades/integral") == 0) {
                 commitButton->setHidden(true);
             }
@@ -2003,7 +2003,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                             .str();
                     descString += tempString;
                     double repair_price = RepairPrice(percent_working, baseUnit->PriceCargo(item.GetName()));
-                    
+
                     tempString = (boost::format("Percent Working: #b#%1$.2f#-b, Repair Cost: %2$.2f#n1.5#")
                             % (percent_working * 100)
                             % repair_price)
@@ -3764,7 +3764,7 @@ bool BaseComputer::sellUpgrade(const EventCommandId &command, Control *control) 
             Unit *baseUnit = m_base.GetUnit();
             if (baseUnit && playerUnit) {
                 playerUnit->SellCargo(item->GetName(), quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
-                
+
                 // Old system
                 UnitUtil::RecomputeUnitUpgrades(playerUnit);
 
@@ -3931,7 +3931,7 @@ string buildShipDescription(Cargo &item, std::string &texturedescription) {
     std::string str = GetString("get_ship_description", "ship_view",
                           "ship_view.py",
                           ship_map);
-    
+
     VS_LOG(debug, "buildShipDescription: killing newPart");
     newPart->Kill();
     // VS_LOG(debug, "buildShipDescription: deleting newPart");
@@ -4510,7 +4510,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId &command, Control *contro
 
     const std::string text = GetString("get_player_info", "player_info",
         "player_info.py", args);
-    
+
     //Put this in the description.
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
@@ -4617,7 +4617,7 @@ bool BaseComputer::showShipStats(const EventCommandId &command, Control *control
             text += texture.substr(picend + 1);
         }
     }     //picture removed
-    
+
     StaticDisplay *desc = static_cast< StaticDisplay * > ( window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText(text);

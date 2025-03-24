@@ -24,7 +24,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 #define VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 
-#include "star_system.h"
+#include "src/star_system.h"
 
 #include <string>
 

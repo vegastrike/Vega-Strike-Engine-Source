@@ -26,16 +26,16 @@
 
 
 #include "cmd/atmosphere.h"
-#include "mesh.h"
-#include "matrix.h"
-#include "vec.h"
-#include "gfxlib_struct.h"
-#include "sphere.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/matrix.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
+#include "gfx_generic/sphere.h"
 #include "cmd/planet.h"
-#include "star_system.h"
+#include "src/star_system.h"
 #include "cmd/collection.h"
 #include "cmd/unit_generic.h"
-#include "universe.h"
+#include "src/universe.h"
 
 Atmosphere::SunBox::~SunBox() {
     if (sunbox != nullptr) {

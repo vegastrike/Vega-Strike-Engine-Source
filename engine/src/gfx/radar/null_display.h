@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_NULL_DISPLAY_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_NULL_DISPLAY_H
 
-#include "radar.h"
+#include "gfx/radar/radar.h"
 
 namespace Radar {
 

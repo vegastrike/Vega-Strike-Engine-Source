@@ -40,7 +40,7 @@
 #define SharedFromThis boost::enable_shared_from_this
 
 #include "Vector.h"
-#include "Matrix.h"
+#include "Audio/matrix.h"
 
 namespace Audio {
 

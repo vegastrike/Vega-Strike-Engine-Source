@@ -29,7 +29,7 @@
 #include "python_class.h"
 #include "cmd/briefing.h"
 #include "cmd/script/mission.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 
 namespace BriefingUtil {
 int addShip(string name, string faction, Vector vec) {

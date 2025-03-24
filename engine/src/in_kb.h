@@ -25,7 +25,7 @@
 #include <map>
 #include <string>
 
-#include "in.h"
+#include "src/in.h"
 #include "in_kb_data.h"
 
 //#ifdef HAVE_SDL
@@ -68,7 +68,7 @@ const int LAST_MODIFIER = 0;
 
 //#endif //HAVE_SDL
 
-#include "in.h"
+#include "src/in.h"
 
 unsigned int getActiveModifiers();
 unsigned int pullActiveModifiers();

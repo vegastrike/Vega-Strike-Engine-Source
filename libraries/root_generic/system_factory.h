@@ -22,8 +22,8 @@
 #ifndef VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H
 #define VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H
 
-#include "vec.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
 
 #include <string>
 #include <vector>

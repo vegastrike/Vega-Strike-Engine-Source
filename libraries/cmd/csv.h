@@ -30,8 +30,8 @@
 #include <gnuhash.h>
 #include <map>
 
-#include "hashtable.h"
-#include "vsfilesystem.h"
+#include "src/hashtable.h"
+#include "root_generic/vsfilesystem.h"
 
 // delim should be read as separator and not to be confused with text delimiter see http://creativyst.com/Doc/Articles/CSV/CSV01.htm
 // separator values , and ; while delimiter is listed as quote or "

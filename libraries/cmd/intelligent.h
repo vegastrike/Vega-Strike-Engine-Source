@@ -24,7 +24,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_INTELLIGENT_H
 #define VEGA_STRIKE_ENGINE_CMD_INTELLIGENT_H
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 
 #include <vector>
 #include <string>

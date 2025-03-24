@@ -33,7 +33,7 @@
 #endif //_POSIX_C_SOURCE
 
 #include <Python.h>
-#include "hashtable.h"
+#include "src/hashtable.h"
 #include <string>
 #include <compile.h>
 

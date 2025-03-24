@@ -25,15 +25,13 @@
  */
 
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include "gfx/animation.h"
-#include "cockpit_generic.h"
-#include "faction_generic.h"
-#include "savegame.h"
-#include "xml_support.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "root_generic/xml_support.h"
 #include "gfx/halo.h"
-#include "mesh.h"
-#include "sphere.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/sphere.h"
 #include "gfx/sprite.h"
 #include "audiolib.h"
 #include "CSopcodecollider.h"

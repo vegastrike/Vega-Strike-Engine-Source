@@ -29,7 +29,7 @@
 #include "cmd/container.h"
 #include <string>
 #include "init.h"
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
 #include <boost/version.hpp>
 
@@ -41,9 +41,9 @@ typedef boost::python::dict BoostPythonDictionary;
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif //BOOST_VERSION != 102800
 
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include "cmd/unit_util.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "cmd/ai/fire.h"
 
 #include "unit_wrapper_class.h"

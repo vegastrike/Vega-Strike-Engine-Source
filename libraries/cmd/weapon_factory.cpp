@@ -27,11 +27,11 @@
 
 #include "weapon_factory.h"
 
-#include "weapon_info.h"
+#include "cmd/weapon_info.h"
 #include "role_bitmask.h"
 #include "audiolib.h"
 
-#include "hashtable.h"
+#include "src/hashtable.h"
 
 #include <iostream>
 #include <fstream>

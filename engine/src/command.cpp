@@ -25,15 +25,15 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "command.h"
+#include "src/command.h"
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include "gldrv/winsys.h"
 #include "main_loop.h"
-#include "vs_random.h"
+#include "src/vs_random.h"
 #include "python/python_class.h"
-#include "vega_py_run.h"
+#include "cmd/vega_py_run.h"
 #include <vector>
 
 #ifdef HAVE_SDL

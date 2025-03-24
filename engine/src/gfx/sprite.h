@@ -25,9 +25,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_SPRITE_H
 #define VEGA_STRIKE_ENGINE_GFX_SPRITE_H
 
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 
-#include "quaternion.h"
+#include "gfx_generic/quaternion.h"
 
 #include "audio/Types.h"
 #include "audio/Source.h"

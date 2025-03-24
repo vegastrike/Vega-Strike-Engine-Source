@@ -37,12 +37,12 @@
 #include <string>
 #include <fstream>
 
-#include "easydom.h"
+#include "root_generic/easydom.h"
 
 #ifndef VS_MIS_SEL
-#include "vegastrike.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
 #include "msgcenter.h"
 #include "cmd/container.h"
 class Unit;
@@ -50,7 +50,7 @@ class Order;
 class MessageCenter;
 #endif
 
-#include "star_system.h"
+#include "src/star_system.h"
 
 #include <assert.h>
 

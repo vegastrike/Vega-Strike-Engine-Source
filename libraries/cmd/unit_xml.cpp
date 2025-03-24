@@ -28,28 +28,18 @@
 
 #include "unit_xml.h"
 #include "audiolib.h"
-#include "xml_support.h"
-#include <fstream>
-#include <expat.h>
+#include "root_generic/xml_support.h"
 #include <float.h>
 #include <limits.h>
-#include "configxml.h"
-#include "vs_globals.h"
-#include "vegastrike.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
 #include <assert.h>
-#include "images.h"
 #include "xml_serializer.h"
-#include "vsfilesystem.h"
-#include "cockpit_generic.h"
 #include "unit_collide.h"
 #include "unit_generic.h"
-#include "sphere.h"
-#include "role_bitmask.h"
 #include "Opcode.h"
 #include "CSopcodecollider.h"
-#include "vs_math.h"
-#include "mount_size.h"
-#include "weapon_info.h"
 
 using namespace XMLSupport;
 

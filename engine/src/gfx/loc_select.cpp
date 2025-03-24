@@ -27,9 +27,9 @@
 
 #include "cmd/unit_generic.h"
 #include "loc_select.h"
-#include "gfxlib.h"
-#include "in_kb.h"
-#include "vs_globals.h"
+#include "src/gfxlib.h"
+#include "src/in_kb.h"
+#include "root_generic/vs_globals.h"
 #include <stdio.h>
 
 extern KBSTATE mouseButtonState;

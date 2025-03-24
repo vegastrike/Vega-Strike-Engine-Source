@@ -21,7 +21,7 @@
  */
 
 #include "PrecompiledHeaders/Converter.h"
-#include "Converter.h"
+#include "objconv/mesher/Converter.h"
 
 #if defined (_WIN32) && !defined (__CYGWIN__)
     #define PATH_SEPARATORS "/\\"

@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 #define VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 
-#include "macosx_math.h"
+#include "root_generic/macosx_math.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI (3.1415926536)

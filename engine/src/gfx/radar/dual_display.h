@@ -29,7 +29,7 @@
 
 #include <boost/random.hpp>
 
-#include "radar.h"
+#include "gfx/radar/radar.h"
 #include "viewarea.h"
 
 namespace Radar {

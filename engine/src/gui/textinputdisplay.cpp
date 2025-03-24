@@ -21,7 +21,7 @@
  */
 
 #include "textinputdisplay.h"
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 #include "guidefs.h"
 using std::vector;
 using std::string;

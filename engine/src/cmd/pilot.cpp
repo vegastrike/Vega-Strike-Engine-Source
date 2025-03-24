@@ -24,15 +24,15 @@
  */
 
 
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "unit_generic.h"
 #include "pilot.h"
 #include "ai/order.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include "cmd/unit_util.h"
-#include "configxml.h"
-#include "universe.h"
-#include "vs_logging.h"
+#include "root_generic/configxml.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
 #include <vector>
 
 Pilot::Pilot(int faction) {

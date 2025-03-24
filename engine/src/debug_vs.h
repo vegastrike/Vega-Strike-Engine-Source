@@ -43,7 +43,7 @@ inline void VS_DEBUG_ERROR() {
 void VS_DEBUG_ERROR();
 
 #error
-#include "hashtable.h"
+#include "src/hashtable.h"
 extern Hashtable< long, char, 65535 >constructed;
 extern Hashtable< long, char, 65535 >destructed;
 #define VSCONST( a )                                                                  \

@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "XMLDocument.h"
+#include "Root_generic/xMLDocument.h"
 
 #include <cassert>
 #include <fstream>

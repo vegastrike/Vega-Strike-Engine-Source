@@ -27,7 +27,7 @@
 
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
-#include "hashtable.h"
+#include "src/hashtable.h"
 #include <string>
 #include <gnuhash.h>
 #include <functional>

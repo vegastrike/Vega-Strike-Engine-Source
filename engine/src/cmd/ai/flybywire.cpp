@@ -25,16 +25,16 @@
 
 
 #include "flybywire.h"
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include <math.h>
 #include <stdio.h>
 #include "cmd/unit_generic.h"
-#include "lin_time.h"
-#include "cockpit_generic.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "universe.h"
-#include "vs_logging.h"
+#include "root_generic/lin_time.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
 
 #define VELTHRESHOLD .1
 #define ANGVELTHRESHOLD .01

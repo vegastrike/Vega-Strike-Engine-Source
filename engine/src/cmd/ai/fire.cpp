@@ -25,20 +25,20 @@
 #include "flybywire.h"
 #include "navigation.h"
 #include "cmd/planet.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/role_bitmask.h"
 #include "cmd/ai/communication.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include <algorithm>
 #include "cmd/unit_find.h"
-#include "vs_random.h"
-#include "lin_time.h" //DEBUG ONLY
+#include "src/vs_random.h"
+#include "root_generic/lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
-#include "universe.h"
+#include "src/universe.h"
 #include "unit_util.h"
 
 extern int numprocessed;

@@ -28,11 +28,11 @@
 /// Unit mesh collision detection
 /// Provides various functions for collision detection
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include "beam.h"
 
-#include "bolt.h"
-#include "mesh.h"
+#include "cmd/bolt.h"
+#include "gfx_generic/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
 
@@ -40,16 +40,16 @@
 #include "csgeom2/optransfrm.h"
 #include "basecollider.h"
 
-#include "hashtable.h"
+#include "src/hashtable.h"
 
 #include <string>
-#include "vs_globals.h"
-#include "configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/configxml.h"
 #include "collide.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 #include "collision.h"
-#include "universe.h"
+#include "src/universe.h"
 
 static bool operator==(const Collidable &a, const Collidable &b) {
     return memcmp(&a, &b, sizeof(Collidable)) == 0;

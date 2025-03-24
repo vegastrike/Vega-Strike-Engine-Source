@@ -23,11 +23,11 @@
 #define VEGA_STRIKE_ENGINE_UNIVERSE_H
 
 #include "gfx/camera.h"
-#include "star_system.h"
+#include "src/star_system.h"
 #include "gfx/cockpit.h"
-#include "faction_generic.h"
-#include "galaxy_xml.h"
-#include "stardate.h"
+#include "root_generic/faction_generic.h"
+#include "root_generic/galaxy_xml.h"
+#include "root_generic/stardate.h"
 
 /**
  * Class Universe Deals with universal constants. It is a global,

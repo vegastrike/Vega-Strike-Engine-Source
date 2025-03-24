@@ -29,7 +29,7 @@
 
 #include "energy_container.h"
 #include "energy_consumer.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 void printContainer(EnergyContainer& container) {
     std::cout << "Max Level: " << container.MaxLevel();
@@ -44,10 +44,10 @@ TEST(EnergyContainer, Sanity) {
 
     printContainer(container);
 
-    EnergyConsumer consumer = EnergyConsumer(&container, 
+    EnergyConsumer consumer = EnergyConsumer(&container,
                                              false,
                                              1.0);
-    
+
 
     int i=0;
     while(!container.Depleted() && i < 100) {
@@ -84,23 +84,23 @@ TEST(EnergyContainer, Upgrade) {
     ship_capacitor.Load(capacitor_string + upgrades_suffix_string);
 
     // Check Values
-    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);  
+    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);
     //EXPECT_EQ(ship_capacitor.GetMass(), 5.0);
-    
+
     EXPECT_EQ(ship_capacitor.Level(), 10.0);
 
     // Downgrade
     ship_capacitor.Downgrade();
 
-    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), "");  
+    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), "");
     //EXPECT_EQ(ship_capacitor.GetMass(), 0.0);
-    
+
     EXPECT_EQ(ship_capacitor.Level(), 0.0);
 
     ship_capacitor.Upgrade(capacitor_string + upgrades_suffix_string);
 
-    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);  
+    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);
     //EXPECT_EQ(ship_capacitor.GetMass(), 5.0);
-    
+
     EXPECT_EQ(ship_capacitor.Level(), 10.0);
 }

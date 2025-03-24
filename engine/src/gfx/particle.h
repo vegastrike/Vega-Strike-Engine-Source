@@ -29,8 +29,8 @@
 #include <memory>
 #include <string>
 #include "aligned.h"
-#include "vec.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
 
 class Texture;
 

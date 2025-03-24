@@ -27,7 +27,7 @@
 
 #include "jump_drive.h"
 #include "resource/random_utils.h"
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 static const std::string upgrades_suffix_string = "__upgrades";
 static const std::string jump_drive_string = "jump_drive";
@@ -61,6 +61,6 @@ TEST(JumpDrive, Damage) {
 
     std::cout << chance_to_damage << std::endl;
     std::cout << jump_drive.PercentOperational() << std::endl;
-    
+
     //EXPECT_FALSE(true);
 }

@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RING_H
 #define VEGA_STRIKE_ENGINE_GFX_RING_H
 
-#include "mesh.h"
-#include "vegastrike.h"
+#include "gfx_generic/mesh.h"
+#include "src/vegastrike.h"
 
 class RingMesh : public Mesh {
     virtual Mesh *AllocNewMeshesEachInSizeofMeshSpace(int num) {

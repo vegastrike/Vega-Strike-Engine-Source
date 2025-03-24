@@ -45,7 +45,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 static BoostPythonDictionary GetEventDataPython() {
     return BaseUtil::GetEventData();

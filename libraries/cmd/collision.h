@@ -25,7 +25,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLISION_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLISION_H
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include "unit_generic.h"
 
 class Unit;

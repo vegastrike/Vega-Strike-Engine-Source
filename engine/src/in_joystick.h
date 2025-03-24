@@ -31,10 +31,10 @@
 #include <SDL2/SDL.h>
 #endif //defined (HAVE_SDL)
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 //#include "glob.h"
 //#include "dbg.h"
-#include "in_kb.h"
+#include "src/in_kb.h"
 #define NUMJBUTTONS 32
 
 class JoyStick;

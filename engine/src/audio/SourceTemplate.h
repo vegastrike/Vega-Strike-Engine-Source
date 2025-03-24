@@ -34,7 +34,7 @@
 #include "Exceptions.h"
 #include "Types.h"
 
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 namespace Audio {
 

@@ -27,7 +27,7 @@
  *  @date    2002
  *  @brief   Portable Open Source Harness primary source file
  */
-#include "posh.h"
+#include "root_generic/posh.h"
 
 #if !defined POSH_NO_FLOAT
 #  define POSH_FLOAT_STRING "enabled"

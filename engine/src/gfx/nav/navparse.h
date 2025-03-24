@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 //using namespace VSFileSystem;
 using VSFileSystem::CockpitFile;

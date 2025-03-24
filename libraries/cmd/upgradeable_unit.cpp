@@ -36,12 +36,12 @@
 #include "components/component.h"
 #include "components/component_utils.h"
 #include "unit_const_cache.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "unit_generic.h"
-#include "weapon_info.h"
+#include "cmd/weapon_info.h"
 #include "vega_cast_utils.h"
-#include "vs_logging.h"
-#include "unit_csv_factory.h"
+#include "src/vs_logging.h"
+#include "cmd/unit_csv_factory.h"
 
 std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
     if(upgrades.size() == 0) {
@@ -72,7 +72,7 @@ std::vector<std::string> ParseUnitUpgrades(const std::string &upgrades) {
 // A simple struct for holding all the data
 // TODO: figure out what the numbers mean
 // TODO: move this to Cargo or a subclass of cargo
-// TODO: separate cargo from upgrades 
+// TODO: separate cargo from upgrades
 struct CargoUpgrade {
     std::string name;
     std::string category;
@@ -124,13 +124,13 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
     Unit* unit = vega_dynamic_cast_ptr<Unit>(this);
     const std::string upgrade_key = upgrade_name + UPGRADES_SUFFIX;
     const ComponentType component_type = GetComponentTypeFromName(upgrade_name);
-    
+
     UpgradeOperationResult result;
 
     switch(component_type) {
         case ComponentType::Armor:
             result.upgradeable = true;
-            result.success = unit->armor.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->armor.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         case ComponentType::Shield:
             result.upgradeable = true;
@@ -139,11 +139,11 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
 
         case ComponentType::Capacitor:
             result.upgradeable = true;
-            result.success = unit->energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         case ComponentType::FtlCapacitor:
             result.upgradeable = true;
-            result.success = unit->ftl_energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->ftl_energy.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         case ComponentType::Reactor:
             result.upgradeable = true;
@@ -153,18 +153,18 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
         case ComponentType::Afterburner: break; // Integrated
         case ComponentType::AfterburnerUpgrade:
             result.upgradeable = true;
-            result.success = unit->afterburner_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->afterburner_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         case ComponentType::Drive: break; // Integrated
         case ComponentType::DriveUpgrade:
             result.upgradeable = true;
-            result.success = unit->drive_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->drive_upgrade.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         case ComponentType::FtlDrive:
             result.upgradeable = true;
             result.success = unit->ftl_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
-        
+
         case ComponentType::JumpDrive:
             result.upgradeable = true;
             result.success = unit->jump_drive.CanWillUpDowngrade(upgrade_key, upgrade, apply);
@@ -172,17 +172,17 @@ UpgradeOperationResult UpgradeableUnit::UpgradeUnit(const std::string upgrade_na
 
         case ComponentType::Cloak:
             result.upgradeable = true;
-            result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->cloak.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
 
         case ComponentType::Radar:
             result.upgradeable = true;
             result.success = unit->radar.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
-            
+
         case ComponentType::ECM:
             result.upgradeable = true;
-            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
 
         case ComponentType::RepairBot:
@@ -240,7 +240,7 @@ bool UpgradeableUnit::RepairUnit(const std::string upgrade_name) {
                 return true;
             }
             break;
-        case ComponentType::Afterburner: 
+        case ComponentType::Afterburner:
             if(unit->afterburner.Damaged()) {
                 unit->afterburner.Repair();
                 return true;
@@ -289,10 +289,10 @@ bool UpgradeableUnit::RepairUnit(const std::string upgrade_name) {
                 return true;
             }
             break;
-            
+
         /*case UpgradeType::ECM:
             result.upgradeable = true;
-            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);    
+            result.success = unit->ecm.CanWillUpDowngrade(upgrade_key, upgrade, apply);
             break;
         */
 

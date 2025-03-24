@@ -47,9 +47,9 @@
 #include <iostream>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include "stardate.h"
-#include "lin_time.h"
-#include "vs_logging.h"
+#include "root_generic/stardate.h"
+#include "root_generic/lin_time.h"
+#include "src/vs_logging.h"
 #include "cmd/script/mission.h"
 
 using std::vector;

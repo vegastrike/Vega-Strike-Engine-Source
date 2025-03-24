@@ -25,13 +25,13 @@
  */
 
 
-#include "mesh.h"
-#include "lin_time.h"
-#include "faction_generic.h"
+#include "gfx_generic/mesh.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/faction_generic.h"
 #include "cmd/unit_generic.h"
 #include "gfx/camera.h"
-#include "config_xml.h"
-#include "universe.h"
+#include "src/config_xml.h"
+#include "src/universe.h"
 
 struct warptrails {
     vector<Mesh *> factions;

@@ -25,13 +25,13 @@
  */
 #include <list>
 #include <lin_time.h>
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 
 #include "in_handler.h"
 #include "in_joystick.h"
-#include "config_xml.h"
+#include "src/config_xml.h"
 #include "in_mouse.h"
 #ifndef HAVE_SDL
 #include "gldrv/gl_include.h"
@@ -41,7 +41,7 @@
 #endif
 #endif
 
-#include "options.h"
+#include "root_generic/options.h"
 #include "SDL2/SDL_joystick.h"
 
 

@@ -33,7 +33,7 @@
 #include <string>
 #include "python/init.h"
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "cmd/container.h"
 
 PythonMissionBaseClass::PythonMissionBaseClass() {

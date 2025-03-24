@@ -28,8 +28,8 @@
 
 #include "container.h"
 #include "config.h"
-#include "vs_globals.h"
-#include "configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/configxml.h"
 
 /**
  * The computer holds all data in the navigation computer of the current unit
@@ -55,12 +55,12 @@ public:
     float threatlevel;
     //The speed the flybywire system attempts to maintain
     float set_speed;
-    
+
     //Whether or not an 'lead' indicator appears in front of target
     unsigned char slide_start;
     unsigned char slide_end;
     bool itts;
-    
+
     // In hud - Maneuver (true) Travel (false)
     bool combat_mode;
 

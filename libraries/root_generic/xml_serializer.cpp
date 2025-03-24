@@ -21,12 +21,13 @@
  */
 
 
-#include "xml_serializer.h"
+#include "root_generic/xml_serializer.h"
 #include "cmd/images.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
-#include "vegastrike.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/xml_support.h"
 
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>
 using namespace XMLSupport;

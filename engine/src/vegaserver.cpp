@@ -28,15 +28,15 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include "networking/netserver.h"
 #include "cmd/script/mission.h"
 #include "force_feedback.h"
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 #include "cmd/unit_factory.h"
 
-#include "options.h"
-#include "vs_exit.h"
+#include "root_generic/options.h"
+#include "src/vs_exit.h"
 //#ifndef _WIN32
 //#include <fenv.h>
 //#endif
@@ -55,7 +55,7 @@ void VSExit(int code) {
     exit(1);
 }
 
-// I dont think vegaserver makes use of this but it has to be defined.  
+// I dont think vegaserver makes use of this but it has to be defined.
 Unit *TheTopLevelUnit = NULL;
 
 int main(int argc, char **argv) {

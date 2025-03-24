@@ -34,12 +34,12 @@
 #include <gtk/gtk.h>
 #endif
 
-#include "display.h"
+#include "setup/src/include/display.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "general.h"
-#include "file.h"
+#include "setup/src/include/general.h"
+#include "setup/src/include/file.h"
 
 #ifndef MAX_READ
 #define MAX_READ 1024	// Maximum number of characters to read from a line

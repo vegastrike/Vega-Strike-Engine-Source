@@ -36,7 +36,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <time.h>
 #include <ctype.h>
 #include <assert.h>
 #ifndef WIN32
@@ -45,19 +44,18 @@
 #endif
 
 #include <expat.h>
-#include "xml_support.h"
-#include "vegastrike.h"
-#include "lin_time.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
+#include "root_generic/lin_time.h"
 
 #include "cmd/unit_generic.h"
 #include "mission.h"
-#include "easydom.h"
+#include "root_generic/easydom.h"
 
 #include "msgcenter.h"
-#include "pythonmission.h"
 
-#include "star_system.h"
-#include "universe.h"
+#include "src/star_system.h"
+#include "src/universe.h"
 
 using std::cout;
 using std::cerr;

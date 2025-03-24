@@ -25,20 +25,20 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
-#include "macosx_math.h"
+#include "root_generic/macosx_math.h"
 #include <math.h>
 #include <time.h>
 #include <assert.h>
 
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "gfxlib.h"
-#include "galaxy_xml.h"
-#include "galaxy_gen.h"
-#include "vs_random.h"
-#include "options.h"
-#include "universe.h"
-#include "vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/gfxlib.h"
+#include "root_generic/galaxy_xml.h"
+#include "root_generic/galaxy_gen.h"
+#include "src/vs_random.h"
+#include "root_generic/options.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
 
 #ifndef _WIN32
 #include <ctype.h>
@@ -51,7 +51,7 @@
 #ifndef M_PI
 #define M_PI 3.1415926536
 #endif
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
 using namespace VSFileSystem;
 using std::string;

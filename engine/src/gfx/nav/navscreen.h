@@ -33,7 +33,7 @@
 #include "navcomputer.h"
 #include "navpath.h"
 #include "gfx/hud.h"
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 
 #include <map>
 

@@ -25,9 +25,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H
 
-#include "vec.h"
-#include "linecollide.h"
-#include "star_system.h"
+#include "gfx_generic/vec.h"
+#include "src/linecollide.h"
+#include "src/star_system.h"
 
 bool TableLocationChanged(const QVector &Mini, const QVector &minz);
 bool TableLocationChanged(const LineCollide &lc, const QVector &minx, const QVector &maxx);

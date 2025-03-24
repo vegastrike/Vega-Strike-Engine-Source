@@ -21,7 +21,7 @@
  */
 
 
-#include "galaxy.h"
+#include "root_generic/galaxy.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>

@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_QUATERNION_H
 #define VEGA_STRIKE_ENGINE_GFX_QUATERNION_H
 
-#include "vec.h"
-#include "matrix.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/matrix.h"
 
 struct Quaternion {
     float s;

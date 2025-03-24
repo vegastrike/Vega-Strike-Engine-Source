@@ -25,20 +25,20 @@
 
 #include "damageable.h"
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include "vs_math.h"
 #include "configuration/game_config.h"
-#include "vs_globals.h"
-#include "configxml.h"
-#include "lin_time.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/configxml.h"
+#include "root_generic/lin_time.h"
 #include "damage.h"
 #include "unit_generic.h"
 #include "ai/communication.h"
-#include "universe.h"
+#include "src/universe.h"
 #include "ai/order.h"
 #include "pilot.h"
 #include "ai/comm_ai.h"
-#include "mesh.h"
+#include "gfx_generic/mesh.h"
 #include "vega_cast_utils.h"
 
 #include <algorithm>

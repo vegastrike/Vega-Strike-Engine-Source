@@ -27,7 +27,7 @@
 #include <vector>
 #include "functors.h"
 #include "rendertext.h" //menusystem
-#include "in.h"
+#include "src/in.h"
 
 //#include "areas.h" //must be at the bottom
 

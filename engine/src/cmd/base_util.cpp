@@ -50,11 +50,11 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "audiolib.h"
 #include "base.h"
 #include "base_util.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include "basecomputer.h"
 #include "main_loop.h"
 #include "music.h"
-#include "in_kb.h"
+#include "src/in_kb.h"
 
 #include "audio/SceneManager.h"
 #include "audio/Sound.h"
@@ -63,8 +63,8 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "audio/Renderer.h"
 #include "audio/Scene.h"
 
-#include "configxml.h"
-#include "vs_logging.h"
+#include "root_generic/configxml.h"
+#include "src/vs_logging.h"
 
 extern float getFontHeight();
 

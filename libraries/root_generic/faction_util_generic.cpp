@@ -22,15 +22,15 @@
 
 
 #include <assert.h>
-#include "faction_generic.h"
-#include "vs_logging.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "cockpit_generic.h"
+#include "root_generic/faction_generic.h"
+#include "src/vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "cmd/unit_generic.h"
-#include "universe.h"
+#include "src/universe.h"
 
-#include "options.h"
+#include "root_generic/options.h"
 
 using namespace FactionUtil;
 int FactionUtil::upgradefac = 0;

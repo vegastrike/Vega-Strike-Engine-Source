@@ -29,13 +29,13 @@
 #include "cmd/unit_generic.h"
 #include "navigation.h"
 #include "autodocking.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 #include "gfx/cockpit.h"
-#include "lin_time.h"
-#include "universe.h"
+#include "root_generic/lin_time.h"
+#include "src/universe.h"
 
 struct StarShipControlKeyboard {
     bool switchmode;

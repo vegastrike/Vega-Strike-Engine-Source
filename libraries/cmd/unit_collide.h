@@ -23,15 +23,15 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLIDE_H
 
 #define SAFE_COLLIDE_DEBUG
-#include "vec.h"
+#include "gfx_generic/vec.h"
 #include <algorithm>
 #include <vector>
 #include <stdio.h>
 #include <assert.h>
-#include "linecollide.h"
+#include "src/linecollide.h"
 #include "collection.h"
 #include "cmd/unit_generic.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include <set>
 #define COLLIDETABLESIZE sizeof (CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)

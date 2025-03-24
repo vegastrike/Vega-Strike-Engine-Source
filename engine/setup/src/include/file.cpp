@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 
 using std::string;
-#include "file.h"
+#include "setup/src/include/file.h"
 extern char origpath[65536];
 bool origconfig = false;
 

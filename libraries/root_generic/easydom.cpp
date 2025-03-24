@@ -25,7 +25,7 @@
  */
 
 #include <expat.h>
-#include "easydom.h"
+#include "root_generic/easydom.h"
 
 #include <assert.h>     /// needed for assert() calls.
 

@@ -20,16 +20,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "gl_globals.h"
-#include "gfxlib.h"
-#include "vec.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/vec.h"
 #include <stdio.h>
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
 #include <assert.h>
-//#include "vegastrike.h"
-#include "matrix.h"
-#include "vs_globals.h"
+//#include "src/vegastrike.h"
+#include "gfx_generic/matrix.h"
+#include "root_generic/vs_globals.h"
 #ifdef WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -40,7 +40,7 @@
 #endif
 #endif
 #include "gl_matrix.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 
 using namespace GFXMatrices;  //causes problems with g_game
 

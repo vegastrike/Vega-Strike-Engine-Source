@@ -25,15 +25,15 @@
 
 
 #include "role_bitmask.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include <gnuhash.h>
 
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "csv.h"
-#include "vs_exit.h"
+#include "src/vs_exit.h"
 using std::string;
 using std::pair;
 using namespace VSFileSystem;   // FIXME -- Shouldn't import an entire namespace like this, at least according to Google Style Guide

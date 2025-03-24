@@ -30,12 +30,10 @@
 
 #include <string>
 #include <vector>
-#include "xml_support.h"
-#include "quaternion.h"
-#include "matrix.h"
-#include "gfxlib.h"
-#include "gfxlib_struct.h"
-#include "vsfilesystem.h"
+#include "root_generic/xml_support.h"
+#include "gfx_generic/matrix.h"
+#include "src/gfxlib_struct.h"
+#include "root_generic/vsfilesystem.h"
 #include "cmd/unit_generic.h"
 #include "gfx/technique.h"
 

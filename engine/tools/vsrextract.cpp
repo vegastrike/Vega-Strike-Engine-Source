@@ -33,11 +33,11 @@
   @todo Implement proper error handling.
 
   @todo Allow files to be extracted in a directory other than the current.
-  
+
   @todo Allow only specified files to be extracted. (Low priority)
  */
 #include "vsrtools.h"
-#include "common.h"
+#include "tools/common.h"
 #include <stdlib.h>
 #include <string>
 #include <vector>

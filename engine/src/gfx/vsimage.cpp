@@ -31,12 +31,12 @@
 
 #include "cmd/unit_generic.h"
 
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
 #include <string.h>
 #include <png.h>
-#include "posh.h"
+#include "root_generic/posh.h"
 
 #ifndef png_jmpbuf
 #   define png_jmpbuf( png_ptr ) ( (png_ptr)->jmpbuf )

@@ -27,11 +27,11 @@
 #include "jump_capable.h"
 #include "ai/order.h"
 #include "unit_find.h"
-#include "universe.h"
-#include "universe_util.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
 #include "gfx/warptrail.h"
-#include "vsfilesystem.h"
-#include "vs_exit.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_exit.h"
 #include "vega_cast_utils.h"
 
 // TODO: once implementation is refactored, deal with this too
@@ -271,7 +271,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             failuremessage = configuration()->graphics_config.hud.already_near_message;
             return false;
         }
-        
+
         if (unsafe == false && totpercent == 0) {
             end = endne;
         }

@@ -33,9 +33,9 @@
 
 #include "gui/glut_support.h"
 
-#include "universe_util.h"
+#include "src/universe_util.h"
 
-#include "config_xml.h"
+#include "src/config_xml.h"
 
 #include "drawlist.h"
 #include "gfx/masks.h"

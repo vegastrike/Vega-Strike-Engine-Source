@@ -34,15 +34,15 @@
 #endif
 
 #include <expat.h>
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "mission.h"
-#include "easydom.h"
+#include "root_generic/easydom.h"
 
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 
 #include "cmd/unit_generic.h"
 

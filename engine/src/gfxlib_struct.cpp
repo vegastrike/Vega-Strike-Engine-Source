@@ -23,17 +23,17 @@
  */
 
 
-#include "gfxlib_struct.h"
-#include "gfxlib.h"
+#include "src/gfxlib_struct.h"
+#include "src/gfxlib.h"
 #include "gldrv/gl_globals.h"
 #include <stdio.h>
-#include "xml_support.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vs_random.h"
-#include "vs_logging.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_random.h"
+#include "src/vs_logging.h"
 
-#include "options.h"
+#include "root_generic/options.h"
 
 #include <vector>
 

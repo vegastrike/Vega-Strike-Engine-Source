@@ -20,9 +20,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gfxlib.h"
-#include "gfxlib_struct.h"
-#include "matrix.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
+#include "gfx_generic/matrix.h"
 #include <assert.h>
 
 void GFXSphereVertexList::Draw() {

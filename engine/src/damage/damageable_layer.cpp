@@ -27,7 +27,7 @@
 
 // TODO: this is a use of the code in a different library.
 // I'm unhappy with this, so it needs to change.
-#include "mount_size.h"
+#include "cmd/mount_size.h"
 
 #include "random_utils.h"
 
@@ -38,8 +38,8 @@ DamageableLayer::DamageableLayer(int layer,
         FacetConfiguration configuration,
         double health_template,
         Damage vulnerabilities,
-        bool core_layer, double regeneration): 
-        layer(layer), 
+        bool core_layer, double regeneration):
+        layer(layer),
         vulnerabilities(vulnerabilities),
         core_layer(core_layer),
         number_of_facets(as_integer(configuration)) {
@@ -61,7 +61,7 @@ void DamageableLayer::DealDamage(const CoreVector &attack_vector, Damage &damage
     }
 
     int impacted_facet_index = GetFacetIndex(attack_vector);
-    
+
     DealDamageComponent(impacted_facet_index, 0, damage.normal_damage, vulnerabilities.normal_damage, inflicted_damage);
     DealDamageComponent(impacted_facet_index, 1, damage.phase_damage, vulnerabilities.phase_damage, inflicted_damage);
 
@@ -76,8 +76,8 @@ void DamageableLayer::DealDamage(const CoreVector &attack_vector, Damage &damage
  * @param vulnerability - adjust for
  */
 // TODO: type is ugly hack
-void DamageableLayer::DealDamageComponent(int impacted_facet_index, int type, 
-                                          double &damage, double vulnerability, 
+void DamageableLayer::DealDamageComponent(int impacted_facet_index, int type,
+                                          double &damage, double vulnerability,
                                           InflictedDamage &inflicted_damage) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.

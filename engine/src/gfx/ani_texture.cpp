@@ -22,18 +22,18 @@
 
 
 #include "cmd/unit_generic.h"
-#include "ani_texture.h"
+#include "gfx/ani_texture.h"
 #include "audiolib.h"
 
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
-#include "lin_time.h"
-#include "vegastrike.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
-#include "vs_random.h"
+#include "root_generic/lin_time.h"
+#include "src/vegastrike.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_random.h"
 #include "../gldrv/gl_globals.h"
 #include <set>
 #include <math.h>
