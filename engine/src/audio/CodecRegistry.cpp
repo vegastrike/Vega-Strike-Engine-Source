@@ -57,23 +57,24 @@ void CodecRegistry::add(Codec *codec, int priority) {
         codecPriority[codec] = priority;
         nameCodec[codec->getName()] = codec;
 
-        // static initializer ordering issue between boost logger and other code?
-        VS_LOG(trace, (boost::format("Registering codec %1%") % codec->getName().c_str()));
+        // Output to cerr directly instead of using VS_LOG in order to fix static initializer ordering issue between
+        // boost logger and other code
+        std::cerr << (boost::format("Registering codec %1%\n") % codec->getName()).str();
 
         const Codec::Extensions *ext = codec->getExtensions();
         if (ext) {
-            for (Codec::Extensions::const_iterator it = ext->begin(); it != ext->end(); ++it) {
-                VS_LOG(trace, (boost::format(" %1%") % it->c_str()));
-                extensionCodecs[*it].insert(codec);
+            for (const auto & it : *ext) {
+                std::cerr << (boost::format(" %1%\n") % it.c_str()).str();
+                extensionCodecs[it].insert(codec);
             }
         } else {
-            VS_LOG(trace, " as universal");
+            std::cerr << " as universal\n";
             universalCodecs.insert(codec);
         }
 
-        VS_LOG(trace, ".");
+        std::cerr << ".\n";
     } else {
-        VS_LOG(trace, (boost::format("Codec %1% already registered") % codec->getName().c_str()));
+        std::cerr << (boost::format("Coded %1% already registered\n") % codec->getName()).str();
     }
 }
 
