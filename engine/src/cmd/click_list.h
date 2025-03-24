@@ -28,7 +28,7 @@
 
 //#include "src/vegastrike.h"
 #include "gfx_generic/matrix.h"
-#include "collection.h"
+#include "cmd/collection.h"
 #include "src/star_system.h"
 Vector MouseCoordinate(int x, int y); //FIXME
 

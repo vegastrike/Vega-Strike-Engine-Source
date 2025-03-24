@@ -31,7 +31,7 @@
 #include "cmd/weapon_info.h"
 #include "gfx_generic/matrix.h"
 #include "gfx_generic/quaternion.h"
-#include "collide_map.h"
+#include "cmd/collide_map.h"
 #include "gfx/animation.h"
 
 class Unit;

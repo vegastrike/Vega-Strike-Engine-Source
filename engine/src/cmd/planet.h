@@ -28,9 +28,9 @@
  */
 
 #include <stdio.h>
-#include "unit_generic.h"
-#include "ai/order.h"
-#include "collection.h"
+#include "cmd/unit_generic.h"
+#include "cmd/ai/order.h"
+#include "cmd/collection.h"
 #include <vector>
 #include <string>
 

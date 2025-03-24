@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <macosx_math.h>
+#include "root_generic/macosx_math.h"
 #include <string>
 #include "root_generic/posh.h"
 #if defined (__APPLE__)

@@ -65,24 +65,24 @@ void UncheckUnit( class Unit*un );
 #include "gfx_generic/quaternion.h"
 #include "src/gfxlib_struct.h"
 #include "root_generic/xml_support.h"
-#include "container.h"
-#include "collection.h"
-#include "script/flightgroup.h"
+#include "cmd/container.h"
+#include "cmd/collection.h"
+#include "cmd/script/flightgroup.h"
 #include "root_generic/faction_generic.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "root_generic/vsfilesystem.h"
-#include "collide_map.h"
+#include "cmd/collide_map.h"
 #include "src/SharedPool.h"
 #include "role_bitmask.h"
 #include "upgradeable_unit.h"
-#include "cloak.h"
+#include "components/cloak.h"
 
 
 
 #include "configuration/configuration.h"
 #include "configuration/game_config.h"
 
-#include "cargo_color.h"
+#include "cmd/cargo_color.h"
 
 // Components
 #include "components/afterburner.h"

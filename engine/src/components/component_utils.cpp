@@ -39,7 +39,7 @@
 #include "drive_upgrade.h"
 #include "jump_drive.h"
 #include "ftl_drive.h"
-#include "cloak.h"
+#include "components/cloak.h"
 
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"

@@ -27,7 +27,7 @@
 
 #include <string>
 #include <stdlib.h>
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "base_util.h"
 namespace BaseUtil {
 int Room(std::string text) {

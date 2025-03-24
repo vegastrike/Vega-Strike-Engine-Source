@@ -37,7 +37,7 @@
 #include "components/component_utils.h"
 #include "unit_const_cache.h"
 #include "root_generic/faction_generic.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "cmd/weapon_info.h"
 #include "vega_cast_utils.h"
 #include "src/vs_logging.h"

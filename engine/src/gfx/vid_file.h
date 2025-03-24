@@ -30,7 +30,7 @@
 //
 
 #include <string>
-#include <vsfilesystem.h>
+#include "root_generic/vsfilesystem.h"
 #include <exception>
 
 class VidFileImpl;

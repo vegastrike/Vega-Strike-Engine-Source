@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_XML_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_XML_H
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);

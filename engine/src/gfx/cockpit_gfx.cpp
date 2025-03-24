@@ -30,7 +30,7 @@
 
 #include "configuration/game_config.h"
 #include "src/gfxlib.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "src/universe.h"
 #include "cmd/planet.h"
 #include "unit_util.h"

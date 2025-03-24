@@ -38,34 +38,20 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 		)
 
 	ADD_EXECUTABLE(vegasettings ${VEGASETTINGS_SOURCES})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
             # VS engine headers
             ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
-            ${Vega_Root_SOURCE_DIR}/engine/src/cmd
-            ${Vega_Root_SOURCE_DIR}/engine/src/components
-            ${Vega_Root_SOURCE_DIR}/engine/src/configuration
-            ${Vega_Root_SOURCE_DIR}/engine/src/damage
-            ${Vega_Root_SOURCE_DIR}/engine/src/resource
-            ${Vega_Root_SOURCE_DIR}/engine/src/python
-            ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
-            ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries
-            ${Vega_Root_SOURCE_DIR}/libraries/cmd
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
-            ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-            ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             # CMake Artifacts
             ${Vega_Root_BINARY_DIR}
             ${Vega_Root_BINARY_DIR}/src
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     SET_PROPERTY(TARGET vegasettings PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 	TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")
@@ -108,35 +94,20 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Darwin)
 	)
 
 	ADD_EXECUTABLE(vegasettings MACOSX_BUNDLE ${VEGASETTINGS_SOURCES})
+    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegasettings PRIVATE
             # VS engine headers
             ${Vega_Root_SOURCE_DIR}
             ${Vega_Root_SOURCE_DIR}/engine
             ${Vega_Root_SOURCE_DIR}/engine/src
-            ${Vega_Root_SOURCE_DIR}/engine/src/cmd
-            ${Vega_Root_SOURCE_DIR}/engine/src/components
-            ${Vega_Root_SOURCE_DIR}/engine/src/configuration
-            ${Vega_Root_SOURCE_DIR}/engine/src/damage
-            ${Vega_Root_SOURCE_DIR}/engine/src/gfx
-            ${Vega_Root_SOURCE_DIR}/engine/src/resource
-            ${Vega_Root_SOURCE_DIR}/engine/src/python
-            ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
-            ${Vega_Root_SOURCE_DIR}/engine/src/python/config
             # Library Headers
             ${Vega_Root_SOURCE_DIR}/libraries
-            ${Vega_Root_SOURCE_DIR}/libraries/cmd
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
-            ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
-            ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-            ${Vega_Root_SOURCE_DIR}/libraries/root_generic
             # CMake Artifacts
             ${Vega_Root_BINARY_DIR}
             ${Vega_Root_BINARY_DIR}/src
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_INCLUDE_DIRECTORIES(vegasettings SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 	SET_TARGET_PROPERTIES(vegasettings PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     SET_PROPERTY(TARGET vegasettings PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     TARGET_COMPILE_DEFINITIONS(vegasettings PUBLIC "BOOST_ALL_DYN_LINK")

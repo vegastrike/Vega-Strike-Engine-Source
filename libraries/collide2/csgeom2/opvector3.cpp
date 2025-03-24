@@ -3,26 +3,26 @@
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
     Copyright (C) 2022 Stephen G. Tuggy
     Copyright (C) 2025 Benjamen R. Meyer
-  
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
-  
+
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Library General Public License for more details.
-  
+
     You should have received a copy of the GNU Library General Public
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 
-#include "opcodesysdef.h"
-#include "opcodeqsqrt.h"
-#include "opvector3.h"
+#include "collide2/opcodesysdef.h"
+#include "collide2/opcodeqsqrt.h"
+#include "collide2/csgeom2/opvector3.h"
 
 //---------------------------------------------------------------------------
 

@@ -59,5 +59,5 @@ struct iBase {
 
 #define CS_ASSERT assert
 
-#include "opcodetypes.h"
+#include "collide2/opcodetypes.h"
 #endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H

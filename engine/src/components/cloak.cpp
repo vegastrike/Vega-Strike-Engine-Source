@@ -22,7 +22,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cloak.h"
+#include "components/cloak.h"
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 

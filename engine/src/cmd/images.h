@@ -29,11 +29,11 @@
 #include <string>
 #include <vector>
 #include "gfx_generic/vec.h"
-#include "container.h"
+#include "cmd/container.h"
 #include "../SharedPool.h"
 #include "gfx/sprite.h"
 #include "gfx/animation.h"
-#include "cargo.h"
+#include "resource/cargo.h"
 
 struct DockingPorts {
     struct Type {

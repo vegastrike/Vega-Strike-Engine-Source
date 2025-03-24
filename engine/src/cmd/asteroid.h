@@ -31,7 +31,7 @@
 #include "gfx_generic/matrix.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 class Asteroid : public Unit {
 private:

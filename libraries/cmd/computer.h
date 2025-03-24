@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COMPUTER_H
 #define VEGA_STRIKE_ENGINE_CMD_COMPUTER_H
 
-#include "container.h"
+#include "cmd/container.h"
 #include "config.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"

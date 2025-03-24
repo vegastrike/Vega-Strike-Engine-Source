@@ -43,7 +43,7 @@
 #include "root_generic/lin_time.h"
 #include "gfx/animation.h"
 #include "car_assist.h"
-#include "CSopcodecollider.h"
+#include "collide2/CSopcodecollider.h"
 #include "root_generic/options.h"
 #include "cmd/unit_collide.h"
 

@@ -26,7 +26,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLISION_H
 
 #include "gfx_generic/vec.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 class Unit;
 class Cockpit;

@@ -26,7 +26,7 @@
 
 
 #include <string>
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "gfx/cockpit.h"
 #include "cmd/planet.h"
 #include "gfx/animation.h"

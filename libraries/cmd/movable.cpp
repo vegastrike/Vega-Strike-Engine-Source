@@ -23,7 +23,7 @@
 
 #include "movable.h"
 #include "gfx_generic/vec.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "src/universe_util.h"
 #include "unit_find.h"
 #include "src/star_system.h"

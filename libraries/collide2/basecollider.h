@@ -30,7 +30,7 @@
 #define CS_TERRAFORMER_COLLIDER  1
 #define CS_TERRAIN_COLLIDER 2
 
-#include "Opcode.h"
+#include "collide2/Opcode.h"
 
 /**
  * A structure used to return collision pairs.

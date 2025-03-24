@@ -26,8 +26,8 @@
 #include <algorithm>
 #include <cassert>
 #include "vega_cast_utils.h"
-#include "collide_map.h"
-#include "unit_generic.h"
+#include "cmd/collide_map.h"
+#include "cmd/unit_generic.h"
 #include "cmd/bolt.h"
 #include "src/star_system.h"
 #include "src/universe.h"

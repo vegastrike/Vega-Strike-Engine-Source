@@ -25,7 +25,7 @@
 
 #include <gtest/gtest.h>
 
-#include "damageable_object.h"
+#include "damage/damageable_object.h"
 
 // Demonstrate some basic assertions.
 TEST(DamageableObject, Sanity) {

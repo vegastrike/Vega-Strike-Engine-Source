@@ -20,7 +20,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_MATRIX3_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_MATRIX3_H
 
-#include "opvector3.h"
+#include "collide2/csgeom2/opvector3.h"
 
 struct Quaternion;
 

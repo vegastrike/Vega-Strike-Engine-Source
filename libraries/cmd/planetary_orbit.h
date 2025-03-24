@@ -28,7 +28,7 @@
 
 #include "gfx_generic/vec.h"
 #include "src/star_system.h"
-#include "ai/order.h"
+#include "cmd/ai/order.h"
 
 class PlanetaryOrbit : public Order {
 private:

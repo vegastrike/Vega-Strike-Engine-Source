@@ -23,7 +23,7 @@
 #include "src/vegastrike.h"
 #include <vector>
 #include "beam.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "gfx/aux_texture.h"
 #include "gfx/decalqueue.h"
 using std::vector;

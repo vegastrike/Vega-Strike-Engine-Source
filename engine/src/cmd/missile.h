@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_MISSILE_H
 
 #include "unit_util.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 class MissileEffect {
 private:

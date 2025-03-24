@@ -26,7 +26,7 @@
 
 
 #include "unit_factory.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "nebula_generic.h"
 #include "planet_generic.h"

@@ -26,7 +26,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 #include <set>
 #include "root_generic/configxml.h"
@@ -43,7 +43,7 @@
 #include "src/universe_util.h"
 #include "unit_util.h"
 #include "script/mission.h"
-#include "script/flightgroup.h"
+#include "cmd/script/flightgroup.h"
 #include "cmd/ai/fire.h"
 #include "cmd/ai/turretai.h"
 #include "cmd/ai/communication.h"

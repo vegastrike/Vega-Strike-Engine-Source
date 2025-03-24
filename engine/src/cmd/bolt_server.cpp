@@ -33,7 +33,7 @@
 
 #include <string>
 #include <algorithm>
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "root_generic/configxml.h"
 GFXVertexList *bolt_draw::boltmesh = NULL;
 

@@ -24,7 +24,7 @@
 
 #include "shield.h"
 #include "ftl_drive.h"
-#include "cloak.h"
+#include "components/cloak.h"
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 #include "src/vs_logging.h"

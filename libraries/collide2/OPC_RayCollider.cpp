@@ -77,7 +77,7 @@
  *
  *		- You can enable or disable backface culling with RayCollider::SetCulling().
  *		- If culling is enabled, ray will not hit back faces (only front faces).
- *		
+ *
  *
  *
  *	\class		RayCollider
@@ -118,7 +118,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Opcode.h"
+#include "collide2/Opcode.h"
 
 using namespace Opcode;
 

@@ -24,7 +24,7 @@
  */
 
 
-#include "collection.h"
+#include "cmd/collection.h"
 
 #if defined (USE_OLD_COLLECTION)
 #include "oldcollection.cpp"
@@ -34,7 +34,7 @@
 #include <vector>
 #ifndef LIST_TESTING
 #include "unit_util.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 #else
 #include "testcollection/unit.h"

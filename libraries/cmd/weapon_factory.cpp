@@ -25,7 +25,7 @@
  */
 
 
-#include "weapon_factory.h"
+#include "cmd/weapon_factory"
 
 #include "cmd/weapon_info.h"
 #include "role_bitmask.h"

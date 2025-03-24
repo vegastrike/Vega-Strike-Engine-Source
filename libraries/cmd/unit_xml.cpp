@@ -37,9 +37,9 @@
 #include <assert.h>
 #include "xml_serializer.h"
 #include "unit_collide.h"
-#include "unit_generic.h"
-#include "Opcode.h"
-#include "CSopcodecollider.h"
+#include "cmd/unit_generic.h"
+#include "collide2/Opcode.h"
+#include "collide2/CSopcodecollider.h"
 
 using namespace XMLSupport;
 

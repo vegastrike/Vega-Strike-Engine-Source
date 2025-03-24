@@ -18,43 +18,43 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	An hybrid collision model.
- *	
+ *
  *	The problem :
- *	
+ *
  *	Opcode really shines for mesh-mesh collision, especially when meshes are deeply overlapping
  *	(it typically outperforms RAPID in those cases).
- *	
+ *
  *	Unfortunately this is not the typical scenario in games.
- *	
+ *
  *	For close-proximity cases, especially for volume-mesh queries, it's relatively easy to run faster
  *	than Opcode, that suffers from a relatively high setup time.
- *	
+ *
  *	In particular, Opcode's "vanilla" trees in those cases -can- run faster. They can also use -less-
  *	memory than the optimized ones, when you let the system stop at ~10 triangles / leaf for example
  *	(i.e. when you don't use "complete" trees). However, those trees tend to fragment memory quite a
  *	lot, increasing cache misses : since they're not "complete", we can't predict the final number of
  *	nodes and we have to allocate nodes on-the-fly. For the same reasons we can't use Opcode's "optimized"
  *	trees here, since they rely on a known layout to perform the "optimization".
- *	
+ *
  *	Hybrid trees :
- *	
+ *
  *	Hybrid trees try to combine best of both worlds :
- *	
+ *
  *	- they use a maximum limit of 16 triangles/leaf. "16" is used so that we'll be able to save the
  *	number of triangles using 4 bits only.
- *	
+ *
  *	- they're still "complete" trees thanks to a two-passes building phase. First we create a "vanilla"
  *	AABB-tree with Opcode, limited to 16 triangles/leaf. Then we create a *second* vanilla tree, this
  *	time using the leaves of the first one. The trick is : this second tree is now "complete"... so we
  *	can further transform it into an Opcode's optimized tree.
- *	
+ *
  *	- then we run the collision queries on that standard Opcode tree. The only difference is that leaf
  *	nodes contain indices to leaf nodes of another tree. Also, we have to skip all primitive tests in
  *	Opcode optimized trees, since our leaves don't contain triangles anymore.
- *	
+ *
  *	- finally, for each collided leaf, we simply loop through 16 triangles max, and collide them with
  *	the bounding volume used in the query (we only support volume-vs-mesh queries here, not mesh-vs-mesh)
- *	
+ *
  *	All of that is wrapped in this "hybrid model" that contains the minimal data required for this to work.
  *	It's a mix between old "vanilla" trees, and old "optimized" trees.
  *
@@ -66,7 +66,7 @@
  *	- In rigid body simulation, using temporal coherence and sleeping objects greatly reduce the actual
  *	influence of one tree over another (i.e. the speed difference is often invisible). So memory is really
  *	the key element to consider, and in this regard hybrid trees are just better.
- *	
+ *
  *	Information to take home:
  *	- they use less ram
  *	- they're not slower (they're faster or slower depending on cases, overall there's no significant
@@ -88,7 +88,7 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Opcode.h"
+#include "collide2/Opcode.h"
 
 namespace Opcode {
 

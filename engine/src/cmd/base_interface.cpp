@@ -58,7 +58,7 @@
 #include "src/in_kb.h"
 #include "src/universe.h"
 
-#include "ai/communication.h"
+#include "cmd/ai/communication.h"
 #include "audio/SceneManager.h"
 
 static unsigned int &getMouseButtonMask() {

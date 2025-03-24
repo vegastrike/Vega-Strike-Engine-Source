@@ -21,11 +21,11 @@
  */
 
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "gfx_generic/vec.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "root_generic/faction_generic.h"
-#include "ai/communication.h"
+#include "cmd/ai/communication.h"
 #include "root_generic/savegame.h"
 #include "root_generic/xml_support.h"
 #include "unit_util.h"

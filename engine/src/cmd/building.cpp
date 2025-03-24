@@ -26,7 +26,7 @@
 
 #include "cmd/building.h"
 #include "cmd/cont_terrain.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 Building::Building(ContinuousTerrain *parent,
         bool vehicle,

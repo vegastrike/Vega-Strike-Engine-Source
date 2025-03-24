@@ -28,7 +28,7 @@
 #include "configuration/configuration.h"
 #include "damageable.h"
 #include "src/vegastrike.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "src/universe.h"
 #include "resource/resource.h"
 #include "vega_cast_utils.h"

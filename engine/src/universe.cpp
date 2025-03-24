@@ -52,7 +52,7 @@
 #include "universe_globals.h"
 #include "src/vs_logging.h"
 
-#include "weapon_factory.h"
+#include "cmd/weapon_factory"
 #include "cmd/unit_csv_factory.h"
 #include "unit_json_factory.h"
 #include "unit_optimize_factory.h"

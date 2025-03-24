@@ -24,7 +24,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
 
-#include "key_mutable_set.h"
+#include "cmd/key_mutable_set.h"
 #include "src/vegastrike.h"
 #include "gfx_generic/vec.h"
 #if defined (_WIN32) || __GNUC__ != 2

@@ -32,7 +32,7 @@
 #include "src/vegastrike.h"
 #include "root_generic/xml_support.h"
 #include <assert.h>
-#include "ai/communication.h"
+#include "cmd/ai/communication.h"
 #include "cmd/music.h"
 #include "root_generic/faction_generic.h"
 #include "faction_factory.h"

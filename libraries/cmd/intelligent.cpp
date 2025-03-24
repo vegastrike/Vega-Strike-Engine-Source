@@ -31,17 +31,17 @@
 #include <boost/python.hpp>
 #include "intelligent.h"
 
-#include "ai/order.h"
+#include "cmd/ai/order.h"
 #include "python/python_class.h"
 #include "script/mission.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/ikarus.h"
 #include "cmd/ai/missionscript.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "pilot.h"
 #include "gfx_generic/mesh.h"
-#include "ai/turretai.h"
-#include "CSopcodecollider.h"
+#include "cmd/ai/turretai.h"
+#include "collide2/CSopcodecollider.h"
 #include "vega_cast_utils.h"
 
 #include <string>

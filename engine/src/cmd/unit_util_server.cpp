@@ -26,7 +26,7 @@
 
 
 #include <string>
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "root_generic/configxml.h"
 #include "unit_util.h"
 #include "root_generic/vs_globals.h"

@@ -30,7 +30,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H
 
 #if (!defined (CS_NO_QSQRT)) && defined (CS_PROCESSOR_X86) && defined (CS_COMPILER_GCC)
-#include "Opcode.h"
+#include "collide2/Opcode.h"
 /*
   NB: Single-precision floating-point format (32 bits):
     SEEEEEEE.EMMMMMMM.MMMMMMMM.MMMMMMMM
@@ -144,11 +144,11 @@ static inline float qsqrt(float x)
     float x0 = x * 0.5f;
 
     asm ("frsqrte %0,%1" : "=f" (y0) : "f" (x));
-    
+
     y0 = y0 * (1.5f - x0 * y0 * y0);
     y0 = (y0 * (1.5f - x0 * y0 * y0)) * x;
   };
-    
+
   return y0;
 };
 
@@ -161,7 +161,7 @@ static inline float qisqrt(float x)
   float x0 = x * 0.5f;
   float y0;
   asm ("frsqrte %0,%1" : "=f" (y0) : "f" (x));
-    
+
   y0 = y0 * (1.5f - x0 * y0 * y0);
   y0 = y0 * (1.5f - x0 * y0 * y0);
 

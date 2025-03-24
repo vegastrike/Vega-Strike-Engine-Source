@@ -48,35 +48,20 @@ ADD_LIBRARY(vegastrike_gfx_generic STATIC
         vec.h
         mesh_io.h
 )
+TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic SYSTEM PRIVATE ${TST_INCLUDES})
 TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
         # VS engine headers
         ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
-        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
-        ${Vega_Root_SOURCE_DIR}/engine/src/components
-        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
-        ${Vega_Root_SOURCE_DIR}/engine/src/damage
-        ${Vega_Root_SOURCE_DIR}/engine/src/gfx
-        ${Vega_Root_SOURCE_DIR}/engine/src/resource
-        ${Vega_Root_SOURCE_DIR}/engine/src/python
-        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
-        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries
-        ${Vega_Root_SOURCE_DIR}/libraries/cmd
-        ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
-        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         # CMake Artifacts
         ${Vega_Root_BINARY_DIR}
         ${Vega_Root_BINARY_DIR}/src
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic SYSTEM PRIVATE ${TST_INCLUDES})
 
 #TARGET_COMPILE_FEATURES(vegastrike_gfx_generic PUBLIC cxx_std_11)
 SET_PROPERTY(TARGET vegastrike_gfx_generic PROPERTY POSITION_INDEPENDENT_CODE TRUE)

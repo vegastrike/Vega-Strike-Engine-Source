@@ -25,7 +25,7 @@
 
 #include "cmd/collide.h"
 #include "src/vegastrike.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "beam.h"
 #include "cmd/bolt.h"
 #include "gfx_generic/mesh.h"
@@ -33,9 +33,9 @@
 #include "physics.h"
 #include "src/universe.h"
 
-#include "CSopcodecollider.h"
+#include "collide2/CSopcodecollider.h"
 #include "csgeom2/optransfrm.h"
-#include "basecollider.h"
+#include "collide2/basecollider.h"
 
 #include "src/hashtable.h"
 #include <string>

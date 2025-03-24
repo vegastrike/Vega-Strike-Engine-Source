@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
 #include <cmath>
-#include <Opcode.h>
+#include "collide2/Opcode.h"
 
 /**
  * A 3D vector.

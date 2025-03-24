@@ -30,8 +30,8 @@
 #include "cmd/planet.h"
 #include "src/gfxlib.h"
 #include "gfx_generic/sphere.h"
-#include "collection.h"
-#include "ai/order.h"
+#include "cmd/collection.h"
+#include "cmd/ai/order.h"
 #include "src/gfxlib_struct.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
@@ -44,7 +44,7 @@
 #include "gfx/planetary_transform.h"
 #endif
 
-#include "CSopcodecollider.h"
+#include "collide2/CSopcodecollider.h"
 #include "images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"

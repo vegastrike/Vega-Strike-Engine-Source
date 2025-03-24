@@ -41,8 +41,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODE_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODE_H
 
-#include "opcodetypes.h"
-#include "opcodesysdef.h"
+#include "collide2/opcodetypes.h"
+#include "collide2/opcodesysdef.h"
 
 #include <cstdlib>
 #include <cstring>

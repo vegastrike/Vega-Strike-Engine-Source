@@ -24,14 +24,14 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "csv.h"
 #include "root_generic/savegame.h"
 #include "xml_serializer.h"
 #include "gfx_generic/sphere.h"
 #include "unit_collide.h"
-#include "Opcode.h"
-#include "CSopcodecollider.h"
+#include "collide2/Opcode.h"
+#include "collide2/CSopcodecollider.h"
 #include "audiolib.h"
 #include "unit_xml.h"
 #include "gfx_generic/quaternion.h"

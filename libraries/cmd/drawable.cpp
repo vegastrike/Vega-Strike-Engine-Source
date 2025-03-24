@@ -32,7 +32,7 @@
 #include "gfx_generic/lerp.h"
 #include "gfx/occlusion.h"
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/point_to_cam.h"
 #include "gfx/halo_system.h"

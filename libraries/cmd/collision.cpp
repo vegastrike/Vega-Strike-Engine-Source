@@ -25,7 +25,7 @@
 
 #include "collision.h"
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "src/universe.h"
 #include "src/universe_util.h"
 #include "configuration/configuration.h"

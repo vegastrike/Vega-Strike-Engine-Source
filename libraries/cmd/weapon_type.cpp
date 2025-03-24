@@ -25,7 +25,7 @@
  */
 
 
-#include "weapon_type.h"
+#include "cmd/weapon_type.h"
 
 WEAPON_TYPE getWeaponTypeFromString(std::string type) {
     if (type == "Bolt") {

@@ -28,7 +28,7 @@
 
 #include "root_generic/savegame.h"
 #include "src/universe.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 class Enhancement : public Unit {
 public:

@@ -2,17 +2,17 @@
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
     Copyright (C) 2021-2025 Stephen G Tuggy, Benjamen R. Meyer
-  
+
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
-  
+
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Library General Public License for more details.
-  
+
     You should have received a copy of the GNU Library General Public
     License along with this library; if not, write to the Free
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -20,9 +20,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H
 
-#include "opcodetypes.h"
-#include "opcodesysdef.h"
-#include "opvector3.h"
+#include "collide2/opcodetypes.h"
+#include "collide2/opcodesysdef.h"
+#include "collide2/csgeom2/opvector3.h"
 
 class csPlane3;
 
@@ -90,7 +90,7 @@ class csPlane3;
 /**
  * A bounding box in 3D space.
  * In order to operate correctly, this bounding box assumes that all values
- * entered or compared against lie within the range 
+ * entered or compared against lie within the range
  * (-CS_BOUNDINGBOX_MAXVALUE, CS_BOUNDINGBOX_MAXVALUE).  It is not
  * recommended to use points outside of this range.
  */

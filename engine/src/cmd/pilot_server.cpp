@@ -26,9 +26,9 @@
 
 
 #include "root_generic/faction_generic.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "pilot.h"
-#include "ai/order.h"
+#include "cmd/ai/order.h"
 #include "src/universe_util.h"
 #include "cmd/unit_util.h"
 

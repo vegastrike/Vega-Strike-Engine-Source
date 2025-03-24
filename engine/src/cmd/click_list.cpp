@@ -23,7 +23,7 @@
 
 #include "src/gfxlib.h"
 #include "click_list.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include "gfx/camera.h"

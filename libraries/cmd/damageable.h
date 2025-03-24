@@ -25,7 +25,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 #define VEGA_STRIKE_ENGINE_CMD_DAMAGEABLE_H
 
-#include "damageable_object.h"
+#include "damage/damageable_object.h"
 #include "gfx_generic/vec.h"
 #include "cmd/mount_size.h"
 

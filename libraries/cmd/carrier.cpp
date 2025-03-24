@@ -25,12 +25,12 @@
 
 #include "carrier.h"
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "ship.h"
 #include "src/universe.h"
 #include "src/universe_util.h"
 
-#include "ai/aggressive.h"
+#include "cmd/ai/aggressive.h"
 #include "missile.h"
 #include "src/vs_random.h"
 #include "src/vs_logging.h"

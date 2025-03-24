@@ -25,7 +25,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_SCRIPT_MOUNT_H
 #define VEGA_STRIKE_ENGINE_CMD_SCRIPT_MOUNT_H
 
-#include "collide_map.h"
+#include "cmd/collide_map.h"
 #include "gfx_generic/quaternion.h"
 
 // TODO: move to cpp

@@ -25,7 +25,7 @@
 
 
 #include "jump_capable.h"
-#include "ai/order.h"
+#include "cmd/ai/order.h"
 #include "unit_find.h"
 #include "src/universe.h"
 #include "src/universe_util.h"

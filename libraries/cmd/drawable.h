@@ -32,7 +32,7 @@
 #include <string>
 #include <memory>
 
-#include "cloak.h"
+#include "components/cloak.h"
 
 class Mesh;
 class Flightgroup;

@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "src/linecollide.h"
-#include "collection.h"
+#include "cmd/collection.h"
 #include "cmd/unit_generic.h"
 #include "src/vs_logging.h"
 #include <set>
