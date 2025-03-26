@@ -584,6 +584,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
         Flightgroup *fg = getStaticBaseFlightgroup(faction);
         unit = new Unit(filename.c_str(), false, faction, "", fg, fg->nr_ships - 1);
         unit->setFullname(fullname);
+        unit->SetInvulnerable(true);
 
         if (unit->faction != neutralfaction) {
             unit->SetTurretAI(); //FIXME un de-referenced before allocation
