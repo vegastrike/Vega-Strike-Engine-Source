@@ -22,7 +22,6 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#ifdef HAVE_PYTHON
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
@@ -35,7 +34,6 @@
 #endif //_POSIX_C_SOURCE
 
 #include <Python.h>
-#endif
 
 #include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"

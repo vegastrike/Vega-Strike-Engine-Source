@@ -39,28 +39,20 @@ typedef boost::python::dict BoostPythonDictionary;
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif
 
-#if defined (HAVE_PYTHON)
 namespace boost {
 namespace python {
 class dict;
 }
 }
-#else
-#include <map>
-#endif
 
 #include "audio/Types.h"
 #include "audio/Stream.h"
 
 namespace BaseUtil {
-#if defined (HAVE_PYTHON)
 #if BOOST_VERSION != 102800
 typedef boost::python::dict Dictionary;
 #else
 typedef boost::python::dictionary           Dictionary;
-#endif
-#else
-typedef std::map< std::string, std::string >Dictionary;
 #endif
 
 int Room(std::string text);

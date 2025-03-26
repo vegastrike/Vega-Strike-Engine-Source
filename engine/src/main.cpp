@@ -372,11 +372,9 @@ int main(int argc, char *argv[]) {
     // Initialise the master parts list before first use.
     Manifest::MPL();
 
-#ifdef HAVE_PYTHON
     Python::init();
 
     Python::test();
-#endif
 
     std::vector<std::vector<char> > temp = ROLES::getAllRolePriorities();
 

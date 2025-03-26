@@ -29,7 +29,6 @@
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
-#ifdef HAVE_PYTHON
 //This takes care of the fact that several systems use the _POSIX_C_SOURCE
 //variable and don't set them to the same thing.
 //Python.h sets and uses it
@@ -38,7 +37,6 @@
 #endif //_POSIX_C_SOURCE
 
 #include <Python.h>
-#endif
 
 #include <math.h>
 #include <stdlib.h>
