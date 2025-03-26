@@ -28,7 +28,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>///module.hpp>
 
-//This takes care of the fact that several systems use the _POSIX_C_SOURCES
+//This takes care of the fact that several systems use the _POSIX_C_SOURCE
 //variable and don't set them to the same thing.
 //Python.h sets and uses it
 #ifdef _POSIX_C_SOURCE

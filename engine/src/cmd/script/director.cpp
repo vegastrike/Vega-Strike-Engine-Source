@@ -30,6 +30,16 @@
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
+
+//This takes care of the fact that several systems use the _POSIX_C_SOURCE
+//variable and don't set them to the same thing.
+//Python.h sets and uses it
+#ifdef _POSIX_C_SOURCE
+#undef _POSIX_C_SOURCE
+#endif //_POSIX_C_SOURCE
+
+#include <Python.h>
+
 #include "src/python/python_class.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,9 +66,6 @@
 #include "msgcenter.h"
 #include "cmd/briefing.h"
 #include "pythonmission.h"
-#ifdef HAVE_PYTHON
-#include <Python.h>
-#endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
 #include "src/vs_logging.h"
