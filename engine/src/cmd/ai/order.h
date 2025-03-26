@@ -45,10 +45,10 @@
 class Animation;
 typedef std::vector<class varInst *> olist_t;
 class Order {
-private:
+public:
+    virtual ~Order();
 
 protected:
-    virtual ~Order();
 ///The unit this order is attached to
     Unit *parent;
 ///The bit code (from ORDERTYPES) that this order is (for parallel execution)

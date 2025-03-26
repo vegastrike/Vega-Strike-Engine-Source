@@ -53,6 +53,8 @@ public:
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+
+    ~Afterburner() override = default;
     // TODO: virtual void Destroy(); and other functions
 };
 

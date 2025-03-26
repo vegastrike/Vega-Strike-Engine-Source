@@ -584,21 +584,6 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_BINARY_DIR}/engine/src
 )
 
-IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
-ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-engine_com
-        OpenGL::GL
-        OpenGL::GLU
-        GLUT::GLUT
-        ${VSE_TST_LIBS}
-        vegastrike_gfx_generic
-        vegastrike_root_generic
-        vegastrike_cmd
-        vegastrike-OPcollide
-        ${Boost_LIBRARIES}
-        ${Python3_LIBRARIES}
-)
 
 SET(VEGASTRIKE_SOURCES
     ${VEGA_GL_H_PATH}
@@ -674,8 +659,6 @@ SET(VEGASTRIKE_SOURCES
     src/python/briefing_wrapper.cpp
 )
 
-LIST(APPEND VSE_TST_LIBS vegastrike-engine_com vegastrike-OPcollide)
-
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
 
@@ -713,6 +696,8 @@ IF (NOT DISABLE_CLIENT)
             OpenGL::GLU
             GLUT::GLUT
             ${VSE_TST_LIBS}
+            vegastrike-engine_com
+            vegastrike-OPcollide
             vegastrike_gfx_generic
             vegastrike_root_generic
             vegastrike_cmd

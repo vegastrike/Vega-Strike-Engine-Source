@@ -24,13 +24,16 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 // NO HEADER GUARD
+#ifndef FIREALL_H
+#define FIREALL_H
 
 #include "order.h"
 namespace Orders {
 class FireAllYouGot : public Order {
 public:
     FireAllYouGot();
-    void Execute();
+    void Execute() override;
 };
 }
 
+#endif // FIREALL_H
