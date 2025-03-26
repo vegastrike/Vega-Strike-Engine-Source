@@ -43,7 +43,7 @@
 #include "src/main_loop.h" //for CockpitKeys
 #include "gfx/cockpit.h"
 #include "src/in_kb_data.h"
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 #include "src/vs_logging.h"
 #include "src/sdl_key_converter.h"
 

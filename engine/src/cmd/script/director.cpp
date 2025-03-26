@@ -30,7 +30,7 @@
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>

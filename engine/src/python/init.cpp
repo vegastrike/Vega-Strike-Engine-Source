@@ -48,11 +48,11 @@
 #include "root_generic/vs_globals.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "python/init.h"
-#include "python/python_compile.h"
-#include "python/python_class.h"
+#include "src/python/init.h"
+#include "src/python/python_compile.h"
+#include "src/python/python_class.h"
 #include "cmd/unit_generic.h"
-#include "python/config/python_utils.h"
+#include "src/python/config/python_utils.h"
 #include "cmd/vega_py_run.h"
 
 #if defined (_WIN32) && !defined (__CYGWIN__)

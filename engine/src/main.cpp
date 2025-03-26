@@ -51,7 +51,7 @@
 #include "root_generic/vs_globals.h"
 #include "gfx/animation.h"
 #include "gfx/cockpit.h"
-#include "python/init.h"
+#include "src/python/init.h"
 #include "root_generic/savegame.h"
 #include "src/force_feedback.h"
 #include "gfx/hud.h"

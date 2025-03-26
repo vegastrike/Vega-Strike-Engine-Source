@@ -58,7 +58,7 @@
 #include "cmd/music.h"
 #include "cmd/base.h"
 
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 
 //To allow for loading in another thread, we must handle some AL vars ourselves...
 #include "aldrv/al_globals.h"

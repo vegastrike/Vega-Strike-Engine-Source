@@ -63,7 +63,7 @@ using VSFileSystem::SaveFile;
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
 #include "controls_factory.h"
-#include "python/infra/get_string.h"
+#include "src/python/infra/get_string.h"
 
 #include <boost/python.hpp>
 #include "configuration/configuration.h"

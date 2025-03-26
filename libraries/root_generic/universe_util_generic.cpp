@@ -52,7 +52,7 @@
 #include "cmd/unit_csv_factory.h"
 #include "resource/manifest.h"
 
-#include "python/init.h"
+#include "src/python/init.h"
 #include <Python.h>
 #include "root_generic/options.h"
 

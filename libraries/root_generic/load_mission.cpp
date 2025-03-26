@@ -37,7 +37,7 @@
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"
 #include "cmd/script/flightgroup.h"
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 #include "root_generic/savegame.h"
 #include "src/save_util.h"
 #include "root_generic/load_mission.h"

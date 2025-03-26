@@ -29,9 +29,9 @@
 #include <Python.h>
 #include <math.h>
 #include "pythonmission.h"
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 #include <string>
-#include "python/init.h"
+#include "src/python/init.h"
 
 #include "src/vs_logging.h"
 #include "cmd/container.h"

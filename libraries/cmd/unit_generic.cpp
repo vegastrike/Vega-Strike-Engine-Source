@@ -52,7 +52,7 @@
 #include "cmd/ai/missionscript.h"
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/aggressive.h"
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 #include "cmd/missile.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "gfx/vsbox.h"

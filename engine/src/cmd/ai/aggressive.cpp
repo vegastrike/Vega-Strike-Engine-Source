@@ -50,7 +50,7 @@
 #include "cmd/csv.h"
 #include "src/universe_util.h"
 #include "src/vs_random.h"
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 #include "cmd/unit_find.h"
 #include "root_generic/faction_generic.h"
 #include "docking.h"

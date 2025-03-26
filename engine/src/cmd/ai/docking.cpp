@@ -25,7 +25,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 #include "docking.h"
 #include "root_generic/xml_support.h"
 #include "src/config_xml.h"

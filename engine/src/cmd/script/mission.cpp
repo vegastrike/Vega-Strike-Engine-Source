@@ -45,7 +45,7 @@
 #include "mission.h"
 #include "flightgroup.h"
 
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 #include "root_generic/savegame.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"

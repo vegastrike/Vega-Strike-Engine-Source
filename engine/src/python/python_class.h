@@ -53,7 +53,7 @@
 
 #define class_builder class_
 
-#include "python/init.h"
+#include "src/python/init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
 
@@ -61,7 +61,7 @@
 #include <eval.h>
 #endif //PY_VERSION_HEX < 0x030B0000
 
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
 #include "src/vs_logging.h"

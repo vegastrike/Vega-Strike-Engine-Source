@@ -35,7 +35,7 @@
 #include "root_generic/configxml.h"
 #include "gfx_generic/cockpit_generic.h"
 
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 
 #include "pythonmission.h"
 #include "mission.h"

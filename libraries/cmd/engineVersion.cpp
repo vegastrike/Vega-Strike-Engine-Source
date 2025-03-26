@@ -30,7 +30,7 @@
 #include <Python.h>
 
 #include "cmd/engineVersion.h"
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 
 #include "version.h"
 

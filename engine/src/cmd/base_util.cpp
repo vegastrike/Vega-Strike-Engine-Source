@@ -42,7 +42,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include <boost/python/objects.hpp>
 #endif
 
-#include "python/python_class.h"
+#include "src/python/python_class.h"
 #include <string>
 #include <cstdlib>
 #include <cassert>
