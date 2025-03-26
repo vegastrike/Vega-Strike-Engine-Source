@@ -29,7 +29,7 @@
                                                                                                                         //For WIN32 debugging.
 #include <crtdbg.h>
 #endif
-#include "basecomputer.h"
+#include "cmd/basecomputer.h"
 using VSFileSystem::SaveFile;
 #include "root_generic/savegame.h"
 #include "src/universe_util.h"
@@ -42,7 +42,7 @@ using VSFileSystem::SaveFile;
 #include "cmd/music.h"
 #include "cmd/unit_const_cache.h"
 #include "gui/modaldialog.h"
-#include "main_loop.h"              //For QuitNow().
+#include "src/main_loop.h"              //For QuitNow().
 #include "root_generic/lin_time.h"
 //FIXME mbyron -- Hack instead of reading XML.
 #include "gui/newbutton.h"
@@ -51,13 +51,13 @@ using VSFileSystem::SaveFile;
 #include "gui/simplepicker.h"
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
-#include "unit_xml.h"
+#include "cmd/unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
-#include "gamemenu.h" //network menu.
-#include "audiolib.h"
-#include "vs_math.h"
-#include "damageable.h"
+#include "src/gamemenu.h" //network menu.
+#include "src/audiolib.h"
+#include "src/vs_math.h"
+#include "cmd/damageable.h"
 #include "src/universe.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
@@ -80,7 +80,7 @@ using VSFileSystem::SaveFile;
 #include <sys/types.h>
 #endif
 #include <sys/stat.h>
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 // Can't declare in header because PyObject is problematic
 extern const std::string GetString(const std::string function_name,

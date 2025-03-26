@@ -53,7 +53,7 @@
 
 #define class_builder class_
 
-#include "init.h"
+#include "python/init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
 
@@ -64,7 +64,6 @@
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
-#include "init.h"
 #include "src/vs_logging.h"
 #include "cmd/vega_py_run.h"
 

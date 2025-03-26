@@ -39,7 +39,7 @@
 #include "root_generic/lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
 #include "src/universe.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 
 extern int numprocessed;
 extern double targetpick;

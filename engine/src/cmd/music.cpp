@@ -45,7 +45,7 @@
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "src/universe.h"
 #include "src/star_system.h"
 #include "root_generic/vs_globals.h"
@@ -55,8 +55,8 @@
 #include "cmd/unit_generic.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "music.h"
-#include "base.h"
+#include "cmd/music.h"
+#include "cmd/base.h"
 
 #include "python/python_compile.h"
 

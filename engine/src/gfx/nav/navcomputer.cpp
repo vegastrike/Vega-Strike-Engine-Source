@@ -31,13 +31,13 @@
 #include <crtdbg.h>
 #endif
 
-#include "navscreen.h"
-#include "navpath.h"
+#include "gfx/nav/navscreen.h"
+#include "gfx/nav/navpath.h"
 #include "src/in_kb.h"
-#include "in_kb_data.h"
-#include "in_mouse.h"
+#include "src/in_kb_data.h"
+#include "src/in_mouse.h"
 #include "gfx/cockpit.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include "root_generic/lin_time.h"
 #include "gui/modaldialog.h"
 #include "gui/eventmanager.h"

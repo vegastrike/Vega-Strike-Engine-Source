@@ -32,7 +32,7 @@
 #include <map>
 #include <boost/json.hpp>
 
-#include "drawable.h"
+#include "cmd/drawable.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"
 #include "resource/json_utils.h"

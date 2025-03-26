@@ -23,18 +23,18 @@
  */
 
 
-#include "carrier.h"
+#include "cmd/carrier.h"
 
 #include "cmd/unit_generic.h"
-#include "ship.h"
+#include "cmd/ship.h"
 #include "src/universe.h"
 #include "src/universe_util.h"
 
 #include "cmd/ai/aggressive.h"
-#include "missile.h"
+#include "cmd/missile.h"
 #include "src/vs_random.h"
 #include "src/vs_logging.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 
 // TODO: find out where this is and maybe refactor

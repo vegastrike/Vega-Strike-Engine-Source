@@ -27,6 +27,8 @@
 //#include <cstdlib>
 #include <boost/python.hpp>
 
+#include <Python.h>
+
 #include "cmd/engineVersion.h"
 #include "python/python_class.h"
 

@@ -27,8 +27,8 @@
 #define VEGA_STRIKE_ENGINE_CMD_ARMED_H
 
 #include "gfx_generic/vec.h"
-#include "movable.h"
-#include "mount.h"
+#include "cmd/movable.h"
+#include "cmd/mount.h"
 #include <vector>
 
 struct WeaponInfo;

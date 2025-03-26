@@ -25,7 +25,7 @@
  */
 
 
-#include "vsimage.h"
+#include "gfx/vsimage.h"
 
 #include <string.h>
 #include <png.h>

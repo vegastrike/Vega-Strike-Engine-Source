@@ -31,10 +31,10 @@
 #include "cmd/planet.h"
 #include "gfx/animation.h"
 #include "src/config_xml.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
-#include "pilot.h"
+#include "cmd/pilot.h"
 #include "src/universe.h"
 
 using std::string;

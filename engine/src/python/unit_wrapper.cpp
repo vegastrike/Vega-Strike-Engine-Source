@@ -28,10 +28,10 @@
 #include <boost/python.hpp>
 typedef boost::python::dict BoostPythonDictionary;
 
-#include "python_class.h"
+#include "python/python_class.h"
 #include "cmd/container.h"
 #include <string>
-#include "init.h"
+#include "python/init.h"
 #include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
 #include "src/universe_util.h"
@@ -39,12 +39,12 @@ typedef boost::python::dict BoostPythonDictionary;
 #include "root_generic/faction_generic.h"
 #include "cmd/ai/fire.h"
 #include "cmd/engineVersion.h"
-#include "unit_wrapper_class.h"
-#include "unit_from_to_python.h"
+#include "python/unit_wrapper_class.h"
+#include "python/unit_from_to_python.h"
 #include "cmd/weapon_info.h"
 #if _MSC_VER <= 1200
 #else
-#include "define_odd_unit_functions.h"
+#include "python/define_odd_unit_functions.h"
 #endif
 
 extern void StarSystemExports();

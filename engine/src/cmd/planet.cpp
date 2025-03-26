@@ -45,12 +45,12 @@
 #endif
 
 #include "collide2/CSopcodecollider.h"
-#include "images.h"
+#include "cmd/images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"
 #include "cmd/script/flightgroup.h"
 #include "gfx/ring.h"
-#include "alphacurve.h"
+#include "cmd/alphacurve.h"
 #include "gfx/vsimage.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"

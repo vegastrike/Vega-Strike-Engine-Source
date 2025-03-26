@@ -46,21 +46,21 @@
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
 #include "root_generic/savegame.h"
 #include "gfx/animation.h"
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
-#include "in_mouse.h"
+#include "src/in_mouse.h"
 #include "gui/glut_support.h"
 #include "cmd/unit_util.h"
 #include "math.h"
 #include "src/save_util.h"
-#include "navscreen.h"
+#include "gfx/nav/navscreen.h"
 #include "gfx/masks.h"
 #include "root_generic/galaxy_gen.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 
 //**********************************
 //Main function for drawing a CURRENT system

@@ -29,7 +29,7 @@
 #include "src/star_system.h"
 
 #include "root_generic/lin_time.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
@@ -38,7 +38,7 @@
 #include "root_generic/load_mission.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "drawable.h"
+#include "cmd/drawable.h"
 #include "root_generic/options.h"
 #include "root_generic/configxml.h"
 #include "src/vs_random.h"

@@ -25,13 +25,13 @@
  */
 
 
-#include "quadtree.h"
+#include "gfx/quadtree.h"
 #include "root_generic/xml_support.h"
 #include "src/gfxlib.h"
 #include "gfx/ani_texture.h"
 #include <assert.h>
 #include "root_generic/vsfilesystem.h"
-#include "vsimage.h"
+#include "gfx/vsimage.h"
 
 using namespace VSFileSystem;
 

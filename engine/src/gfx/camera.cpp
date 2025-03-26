@@ -30,7 +30,7 @@
 //Remove GL specific stuff here
 
 #include "root_generic/vs_globals.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "root_generic/lin_time.h"
 
 #include <assert.h>     //needed for assert() calls

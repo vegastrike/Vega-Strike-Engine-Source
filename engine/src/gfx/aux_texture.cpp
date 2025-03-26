@@ -32,10 +32,10 @@
 #include "src/endianness.h"
 #include "src/hashtable.h"
 #include "root_generic/vsfilesystem.h"
-#include "vsimage.h"
+#include "gfx/vsimage.h"
 #include "root_generic/vs_globals.h"
 #include "src/in_kb.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include "gfx/aux_texture.h"
 #include "root_generic/configxml.h"
 

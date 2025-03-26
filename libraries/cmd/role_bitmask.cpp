@@ -24,7 +24,7 @@
  */
 
 
-#include "role_bitmask.h"
+#include "cmd/role_bitmask.h"
 #include "root_generic/xml_support.h"
 #include <gnuhash.h>
 
@@ -32,7 +32,7 @@
 #include "src/config_xml.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "csv.h"
+#include "cmd/csv.h"
 #include "src/vs_exit.h"
 using std::string;
 using std::pair;

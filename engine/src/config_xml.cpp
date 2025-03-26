@@ -38,14 +38,14 @@
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/music.h"
 #include "gfx/loc_select.h"
-#include "audiolib.h"
-#include "in_joystick.h"
-#include "main_loop.h" //for CockpitKeys
+#include "src/audiolib.h"
+#include "src/in_joystick.h"
+#include "src/main_loop.h" //for CockpitKeys
 #include "gfx/cockpit.h"
-#include "in_kb_data.h"
+#include "src/in_kb_data.h"
 #include "python/python_compile.h"
 #include "src/vs_logging.h"
-#include "sdl_key_converter.h"
+#include "src/sdl_key_converter.h"
 
 /* *********************************************************** */
 

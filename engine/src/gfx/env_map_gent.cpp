@@ -33,7 +33,7 @@
 #include <string.h>
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "vsimage.h"
+#include "gfx/vsimage.h"
 #include "gfx/aux_texture.h"
 #include "gldrv/sdds.h"
 #ifndef WIN32

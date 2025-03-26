@@ -25,7 +25,7 @@
  */
 
 
-#include "alphacurve.h"
+#include "cmd/alphacurve.h"
 
 //GET ALPHA CURVE
 //***************************************************

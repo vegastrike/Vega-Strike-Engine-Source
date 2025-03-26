@@ -22,7 +22,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "unit_optimize_factory.h"
+#include "cmd/unit_optimize_factory.h"
 #include "cmd/unit_csv_factory.h"
 
 

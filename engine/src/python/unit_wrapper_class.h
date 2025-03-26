@@ -118,7 +118,7 @@ static const char *kNullUnitErrorMsg = "\nERROR: NULL Unit used in Python script
 //End of Macro City
 class UnitWrapper : public UnitContainer {
 public:
-#include "python_unit_wrap.h"
+#include "python/python_unit_wrap.h"
 
 ///////////////////////////////MANUAL WRAP//////
 //WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)

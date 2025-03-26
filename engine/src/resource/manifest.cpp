@@ -32,7 +32,7 @@
 #include <boost/json.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "random_utils.h"
+#include "resource/random_utils.h"
 #include "resource/json_utils.h"
 
 

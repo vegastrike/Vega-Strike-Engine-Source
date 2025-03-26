@@ -21,7 +21,7 @@
  */
 #include "root_generic/macosx_math.h"
 #include "root_generic/lin_time.h"
-#include "physics.h"
+#include "src/physics.h"
 #include "gfx_generic/quaternion.h"
 
 PhysicsSystem::PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r) :

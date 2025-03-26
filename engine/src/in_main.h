@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_IN_MAIN_H
 #define VEGA_STRIKE_ENGINE_IN_MAIN_H
 
-#include "in_handler.h"
+#include "src/in_handler.h"
 
 void InitInput();
 void DeInitInput();

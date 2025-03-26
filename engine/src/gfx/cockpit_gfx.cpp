@@ -26,20 +26,20 @@
  */
 
 
-#include "cockpit_gfx.h"
+#include "gfx/cockpit_gfx.h"
 
 #include "configuration/game_config.h"
 #include "src/gfxlib.h"
 #include "cmd/unit_generic.h"
 #include "src/universe.h"
 #include "cmd/planet.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 #include "cmd/weapon_info.h"
-#include "vdu.h"
+#include "gfx/vdu.h"
 #include "gfx/camera.h"
 #include "nav/navcomputer.h"
-#include "gauge.h"
-#include "cockpit_gfx_utils.h"
+#include "gfx/gauge.h"
+#include "gfx/cockpit_gfx_utils.h"
 
 #include <algorithm>
 

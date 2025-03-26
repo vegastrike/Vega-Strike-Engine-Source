@@ -29,7 +29,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "intelligent.h"
+#include "cmd/intelligent.h"
 
 #include "cmd/ai/order.h"
 #include "python/python_class.h"
@@ -38,11 +38,11 @@
 #include "cmd/ai/ikarus.h"
 #include "cmd/ai/missionscript.h"
 #include "cmd/unit_generic.h"
-#include "pilot.h"
+#include "cmd/pilot.h"
 #include "gfx_generic/mesh.h"
 #include "cmd/ai/turretai.h"
 #include "collide2/CSopcodecollider.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 #include <string>
 

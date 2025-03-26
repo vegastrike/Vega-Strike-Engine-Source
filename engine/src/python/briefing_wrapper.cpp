@@ -26,7 +26,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 #include <math.h>
-#include "python_class.h"
+#include "python/python_class.h"
 #include "cmd/briefing.h"
 #include "cmd/script/mission.h"
 #include "root_generic/faction_generic.h"

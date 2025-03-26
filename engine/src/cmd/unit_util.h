@@ -28,7 +28,7 @@
 
 #include <string>
 #include "cmd/unit_generic.h"
-#include "images.h"
+#include "cmd/images.h"
 using std::string;
 
 namespace UnitUtil {

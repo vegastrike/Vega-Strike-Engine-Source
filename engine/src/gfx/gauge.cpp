@@ -25,7 +25,7 @@
  */
 
 
-#include "gauge.h"
+#include "gfx/gauge.h"
 
 Gauge::Gauge(const char *file, DIRECTION up) : VSSprite(file) {
     dir = up;

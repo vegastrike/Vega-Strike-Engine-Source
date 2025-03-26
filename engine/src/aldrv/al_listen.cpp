@@ -32,7 +32,7 @@
 #endif
 #include <stdio.h>
 #include <vector>
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "al_globals.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"

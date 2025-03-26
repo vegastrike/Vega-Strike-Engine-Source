@@ -21,12 +21,12 @@
  */
 
 
-#include "cockpit.h"
+#include "gfx/cockpit.h"
 #include "root_generic/xml_support.h"
-#include "gauge.h"
+#include "gfx/gauge.h"
 #include <float.h>
-#include "hud.h"
-#include "vdu.h"
+#include "gfx/hud.h"
+#include "gfx/vdu.h"
 #include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
 

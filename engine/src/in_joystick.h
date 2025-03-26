@@ -25,7 +25,7 @@
 /*
  *  Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-#include "in_kb_data.h"
+#include "src/in_kb_data.h"
 
 #if defined (HAVE_SDL)
 #include <SDL2/SDL.h>

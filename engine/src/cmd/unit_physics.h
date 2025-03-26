@@ -24,18 +24,18 @@
 
 #include "gfx_generic/mesh.h"
 #include "root_generic/lin_time.h"
-#include "beam.h"
+#include "cmd/beam.h"
 #include "cmd/planet.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "vs_math.h"
+#include "src/vs_math.h"
 
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
 #endif
 #include "gfx/cockpit.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 #include "src/universe_util.h"
 #include "cmd/script/mission.h"
 

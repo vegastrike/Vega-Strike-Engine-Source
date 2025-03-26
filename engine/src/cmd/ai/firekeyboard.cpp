@@ -32,12 +32,12 @@
 #include "firekeyboard.h"
 #include "flybywire.h"
 #include "navigation.h"
-#include "in_joystick.h"
+#include "src/in_joystick.h"
 #include "cmd/unit_generic.h"
 #include "communication.h"
 #include "gfx/cockpit.h"
 #include "gfx/animation.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "src/config_xml.h"
 #include "cmd/images.h"
 #include "cmd/planet.h"
@@ -58,7 +58,7 @@
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
 #include "src/vs_logging.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 
 extern bool toggle_pause();
 

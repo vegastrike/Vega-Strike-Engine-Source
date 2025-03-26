@@ -29,7 +29,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "random_utils.h"
+#include "resource/random_utils.h"
 
 
 template<typename T>

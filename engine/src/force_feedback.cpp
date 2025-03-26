@@ -24,7 +24,7 @@
  *  Force Feedback support by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include "force_feedback.h"
+#include "src/force_feedback.h"
 
 #include "src/vegastrike.h"
 #include "src/vs_logging.h"

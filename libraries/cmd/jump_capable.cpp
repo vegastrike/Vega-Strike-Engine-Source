@@ -24,15 +24,15 @@
  */
 
 
-#include "jump_capable.h"
+#include "cmd/jump_capable.h"
 #include "cmd/ai/order.h"
-#include "unit_find.h"
+#include "cmd/unit_find.h"
 #include "src/universe.h"
 #include "src/universe_util.h"
 #include "gfx/warptrail.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_exit.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);

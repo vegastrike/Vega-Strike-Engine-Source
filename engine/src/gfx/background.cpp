@@ -31,7 +31,7 @@
 #include "gfx/aux_texture.h"
 #include "gfx_generic/sphere.h"
 #include "root_generic/vs_globals.h"
-#include "../gldrv/gl_globals.h"
+#include "gldrv/gl_globals.h"
 #include "src/config_xml.h"
 #include "src/universe_util.h"
 #include "src/universe.h"

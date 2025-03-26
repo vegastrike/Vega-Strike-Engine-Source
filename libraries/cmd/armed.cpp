@@ -23,21 +23,21 @@
  */
 
 
-#include "armed.h"
+#include "cmd/armed.h"
 
 #include "configuration/configuration.h"
-#include "mount.h"
+#include "cmd/mount.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
 #include "root_generic/vs_globals.h"
-#include "movable.h"
+#include "cmd/movable.h"
 #include "src/universe.h"
-#include "role_bitmask.h"
-#include "beam.h"
-#include "unit_util.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/beam.h"
+#include "cmd/unit_util.h"
 #include "src/vs_logging.h"
 #include "resource/resource.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 #include <vector>
 

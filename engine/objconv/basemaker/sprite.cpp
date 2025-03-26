@@ -34,7 +34,7 @@
 #include <unistd.h>
 #endif
 
-#include "sprite.h"
+#include "gfx/sprite.h"
 #include "objconv/basemaker/base_maker_texture.h"
 
 #ifndef M_PI_2

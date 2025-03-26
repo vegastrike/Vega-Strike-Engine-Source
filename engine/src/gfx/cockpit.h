@@ -40,9 +40,9 @@ class Unit;
 class NavigationSystem;
 #include "gfx/radar/radar.h"
 #include "radar/sensor.h"
-#include "vdu.h"
+#include "gfx/vdu.h"
 #include "gfx/camera.h"
-#include "physics.h"
+#include "src/physics.h"
 #include "nav/navscreen.h"
 using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS
 #define NUM_CAM CP_NUMVIEWS

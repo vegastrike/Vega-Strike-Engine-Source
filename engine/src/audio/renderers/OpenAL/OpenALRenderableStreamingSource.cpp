@@ -27,7 +27,7 @@
 //
 // C++ Implementation: Audio::OpenALRenderableListener
 //
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "OpenALRenderableStreamingSource.h"
 #include "OpenALStreamingSound.h"
 #include "OpenALHelpers.h"
@@ -37,7 +37,7 @@
 #include "../../Source.h"
 #include "../../Listener.h"
 
-#include "vs_math.h"
+#include "src/vs_math.h"
 #include "src/vs_logging.h"
 
 namespace Audio {

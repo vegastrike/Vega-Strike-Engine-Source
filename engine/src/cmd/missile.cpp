@@ -21,8 +21,8 @@
  */
 
 
-#include "missile.h"
-#include "damageable.h"
+#include "cmd/missile.h"
+#include "cmd/damageable.h"
 
 #include "cmd/mount_size.h"
 #include "src/universe_util.h"
@@ -30,12 +30,12 @@
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"
-#include "images.h"
+#include "cmd/images.h"
 #include "cmd/collection.h"
-#include "role_bitmask.h"
+#include "cmd/role_bitmask.h"
 #include "cmd/ai/order.h"
 #include "root_generic/faction_generic.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 #include "src/vs_logging.h"
 #include "src/star_system.h"
 #include "src/universe.h"

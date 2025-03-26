@@ -25,7 +25,7 @@
  */
 
 
-#include "in_joystick.h"
+#include "src/in_joystick.h"
 
 #include "flyjoystick.h"
 #include "firekeyboard.h"

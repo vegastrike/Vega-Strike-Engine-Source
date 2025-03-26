@@ -39,7 +39,7 @@ extern float audio_atom_var;
 extern float SIMULATION_ATOM;
 extern float AUDIO_ATOM;
 
-#include "vs_math.h"
+#include "src/vs_math.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,7 +50,7 @@ extern float AUDIO_ATOM;
 #include <string.h>
 #include <limits.h>
 #include <stdarg.h>
-#include "debug_vs.h"
+#include "src/debug_vs.h"
 
 #if !defined(_WIN32)
 #   define GL_GLEXT_PROTOTYPES 1

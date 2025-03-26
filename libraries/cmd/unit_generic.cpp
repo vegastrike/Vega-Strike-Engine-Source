@@ -30,18 +30,18 @@
 
 #include <set>
 #include "root_generic/configxml.h"
-#include "audiolib.h"
-#include "base.h"
-#include "music.h"
+#include "src/audiolib.h"
+#include "cmd/base.h"
+#include "cmd/music.h"
 
-#include "beam.h"
+#include "cmd/beam.h"
 #include "root_generic/lin_time.h"
-#include "xml_serializer.h"
+#include "root_generic/xml_serializer.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "file_main.h"
+#include "src/file_main.h"
 #include "src/universe_util.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 #include "script/mission.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/ai/fire.h"
@@ -53,16 +53,16 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/aggressive.h"
 #include "python/python_class.h"
-#include "missile.h"
+#include "cmd/missile.h"
 #include "gfx_generic/cockpit_generic.h"
 #include "gfx/vsbox.h"
 #include <algorithm>
 #include "cmd/ai/ikarus.h"
-#include "role_bitmask.h"
-#include "unit_const_cache.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/unit_const_cache.h"
 #include "gfx/warptrail.h"
 #include "gfx_generic/cockpit_generic.h"
-#include "csv.h"
+#include "cmd/csv.h"
 #include "src/vs_random.h"
 #include "root_generic/galaxy_xml.h"
 #include "gfx/camera.h"
@@ -71,13 +71,13 @@
 #include "src/universe.h"
 #include "cmd/weapon_info.h"
 #include "cmd/mount_size.h"
-#include "turret.h"
-#include "energetic.h"
+#include "cmd/turret.h"
+#include "cmd/energetic.h"
 #include "configuration/game_config.h"
 #include "resource/resource.h"
-#include "base_util.h"
+#include "cmd/base_util.h"
 #include "cmd/unit_csv_factory.h"
-#include "unit_json_factory.h"
+#include "cmd/unit_json_factory.h"
 #include "root_generic/savegame.h"
 #include "resource/manifest.h"
 
@@ -91,8 +91,8 @@
 #define strcasecmp stricmp
 #endif
 
-#include "unit_find.h"
-#include "pilot.h"
+#include "cmd/unit_find.h"
+#include "cmd/pilot.h"
 
 #include <iostream>
 #define DEBUG_MESH_ANI

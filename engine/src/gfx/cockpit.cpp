@@ -42,8 +42,8 @@
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
-#include "gauge.h"
-#include "cockpit.h"
+#include "gfx/gauge.h"
+#include "gfx/cockpit.h"
 #include "src/universe.h"
 #include "src/star_system.h"
 #include "cmd/unit_generic.h"
@@ -52,8 +52,8 @@
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h" //for radar iteration.
 #include "cmd/base_util.h"
-#include "hud.h"
-#include "vdu.h"
+#include "gfx/hud.h"
+#include "gfx/vdu.h"
 #include "root_generic/lin_time.h" //for fps
 #include "cmd/beam.h"
 #include "src/config_xml.h"
@@ -65,29 +65,29 @@
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/autodocking.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
 #include "root_generic/savegame.h"
 #include "gfx/animation.h"
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
-#include "in_mouse.h"
+#include "src/in_mouse.h"
 #include "gui/glut_support.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "src/save_util.h"
 #include "cmd/base.h"
-#include "in_kb_data.h"
-#include "main_loop.h"
+#include "src/in_kb_data.h"
+#include "src/main_loop.h"
 #include <set>
 #include <string>
 #include "cmd/unit_const_cache.h"
 #include "root_generic/options.h"
-#include "soundcontainer_aldrv.h"
+#include "gfx/soundcontainer_aldrv.h"
 #include "root_generic/configxml.h"
 #include "cmd/planet.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
-#include "cockpit_gfx.h"
+#include "gfx/cockpit_gfx.h"
 
 #include <cstddef>
 #include <cfloat>

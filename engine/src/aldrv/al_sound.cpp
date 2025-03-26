@@ -23,7 +23,7 @@
  */
 
 
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "src/hashtable.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"

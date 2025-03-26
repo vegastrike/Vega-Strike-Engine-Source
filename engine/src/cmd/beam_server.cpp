@@ -27,10 +27,10 @@
 
 #include "src/vegastrike.h"
 #include <vector>
-#include "beam.h"
+#include "cmd/beam.h"
 #include "cmd/unit_generic.h"
-//#include "unit_collide.h"
-#include "images.h"
+//#include "cmd/unit_collide.h"
+#include "cmd/images.h"
 
 Beam::Beam(const Transformation &trans, const weapon_info &clne, void *own, Unit *self, int sound)
         : vlist(NULL), Col(clne.r, clne.g, clne.b, clne.a) {

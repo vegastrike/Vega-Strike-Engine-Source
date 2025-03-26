@@ -31,12 +31,12 @@
 #include "cmd/unit_generic.h"
 #include "gfx/aux_texture.h"
 #include "gfx/ani_texture.h"
-#include "sprite.h"
+#include "gfx/sprite.h"
 #include "gfx_generic/matrix.h"
 #include "src/gfxlib.h"
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
-#include "../gldrv/gl_globals.h"
+#include "gldrv/gl_globals.h"
 #include <assert.h>
 #include <math.h>
 #include "src/gnuhash.h"

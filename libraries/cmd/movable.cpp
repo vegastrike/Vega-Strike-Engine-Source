@@ -21,22 +21,22 @@
  */
 
 
-#include "movable.h"
+#include "cmd/movable.h"
 #include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
 #include "src/universe_util.h"
-#include "unit_find.h"
+#include "cmd/unit_find.h"
 #include "src/star_system.h"
 #include "src/universe.h"
 #include "configuration/game_config.h"
 #include "src/vs_logging.h"
-#include "audiolib.h"
-#include "audible.h"
+#include "src/audiolib.h"
+#include "cmd/audible.h"
 
 
 #include <iostream>
 #include <string>
-#include <vega_cast_utils.h>
+#include "src/vega_cast_utils.h"
 #include <limits.h>
 
 float accelStarHandler(float &input) {

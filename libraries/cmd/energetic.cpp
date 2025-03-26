@@ -22,16 +22,16 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "energetic.h"
+#include "cmd/energetic.h"
 
 #include "configuration/game_config.h"
 #include "configuration/configuration.h"
-#include "damageable.h"
+#include "cmd/damageable.h"
 #include "src/vegastrike.h"
 #include "cmd/unit_generic.h"
 #include "src/universe.h"
 #include "resource/resource.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 #include <algorithm>
 

@@ -23,7 +23,7 @@
  */
 
 
-#include "computer.h"
+#include "cmd/computer.h"
 #include "configuration/configuration.h"
 
 Computer::Computer() : NavPoint(0, 0, 0),

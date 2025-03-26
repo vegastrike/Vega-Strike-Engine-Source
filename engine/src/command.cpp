@@ -30,7 +30,7 @@
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include "gldrv/winsys.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include "src/vs_random.h"
 #include "python/python_class.h"
 #include "cmd/vega_py_run.h"

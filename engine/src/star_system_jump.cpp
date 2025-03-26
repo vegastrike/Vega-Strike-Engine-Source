@@ -32,7 +32,7 @@
 #include "root_generic/xml_support.h"
 #include <assert.h>
 #include "gfx/cockpit.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "cmd/images.h"
 #include "cmd/script/flightgroup.h"
 #include <string>

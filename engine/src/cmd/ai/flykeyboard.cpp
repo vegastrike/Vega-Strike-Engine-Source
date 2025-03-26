@@ -24,7 +24,7 @@
  */
 
 
-#include "in_joystick.h"
+#include "src/in_joystick.h"
 #include "flykeyboard.h"
 #include "cmd/unit_generic.h"
 #include "navigation.h"

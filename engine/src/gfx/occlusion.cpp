@@ -27,7 +27,7 @@
 
 #include "src/vegastrike.h"
 
-#include "occlusion.h"
+#include "gfx/occlusion.h"
 
 #include <vector>
 #include <stdio.h>
@@ -40,12 +40,12 @@
 #include "gfx/camera.h"
 #include "src/universe.h"
 
-#include "../gldrv/gl_globals.h"
-#include <physics.h>
+#include "gldrv/gl_globals.h"
+#include "src/physics.h"
 
 #include <limits>
 #include <set>
-#include "heap.h"
+#include "src/heap.h"
 
 namespace Occlusion {
 

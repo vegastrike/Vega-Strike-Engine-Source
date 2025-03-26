@@ -30,9 +30,9 @@
 #include <ctype.h>
 #include "src/gfxlib.h"
 #include "cmd/unit_generic.h"
-#include "hud.h"
+#include "gfx/hud.h"
 #include "root_generic/lin_time.h"
-#include "file_main.h"
+#include "src/file_main.h"
 #include "gfx/aux_texture.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"

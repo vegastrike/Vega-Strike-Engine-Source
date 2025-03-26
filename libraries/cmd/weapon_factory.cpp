@@ -25,11 +25,11 @@
  */
 
 
-#include "cmd/weapon_factory"
+#include "cmd/weapon_factory.h"
 
 #include "cmd/weapon_info.h"
-#include "role_bitmask.h"
-#include "audiolib.h"
+#include "cmd/role_bitmask.h"
+#include "src/audiolib.h"
 
 #include "src/hashtable.h"
 

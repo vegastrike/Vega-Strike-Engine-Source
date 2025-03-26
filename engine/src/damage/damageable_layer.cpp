@@ -21,7 +21,7 @@
  */
 
 
-#include "damageable_layer.h"
+#include "damage/damageable_layer.h"
 
 #include <cassert>
 
@@ -29,7 +29,7 @@
 // I'm unhappy with this, so it needs to change.
 #include "cmd/mount_size.h"
 
-#include "random_utils.h"
+#include "resource/random_utils.h"
 
 
 

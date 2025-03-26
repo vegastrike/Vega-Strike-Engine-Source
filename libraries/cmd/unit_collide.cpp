@@ -29,15 +29,15 @@
 /// Provides various functions for collision detection
 
 #include "src/vegastrike.h"
-#include "beam.h"
+#include "cmd/beam.h"
 
 #include "cmd/bolt.h"
 #include "gfx_generic/mesh.h"
-#include "unit_collide.h"
-#include "physics.h"
+#include "cmd/unit_collide.h"
+#include "src/physics.h"
 
 #include "collide2/CSopcodecollider.h"
-#include "csgeom2/optransfrm.h"
+#include "collide2/csgeom2/optransfrm.h"
 #include "collide2/basecollider.h"
 
 #include "src/hashtable.h"
@@ -45,10 +45,10 @@
 #include <string>
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"
-#include "collide.h"
+#include "cmd/collide.h"
 #include "src/vs_logging.h"
 
-#include "collision.h"
+#include "cmd/collision.h"
 #include "src/universe.h"
 
 static bool operator==(const Collidable &a, const Collidable &b) {

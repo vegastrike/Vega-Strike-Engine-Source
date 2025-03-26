@@ -25,7 +25,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "cmd/collide_map.h"
 #include "cmd/unit_generic.h"
 #include "cmd/bolt.h"

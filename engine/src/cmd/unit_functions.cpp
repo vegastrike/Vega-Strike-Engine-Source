@@ -33,9 +33,9 @@
 #include "gfx_generic/mesh.h"
 #include "gfx_generic/sphere.h"
 #include "gfx/sprite.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "collide2/CSopcodecollider.h"
-#include "unit_collide.h"
+#include "cmd/unit_collide.h"
 #include <string>
 #include <set>
 

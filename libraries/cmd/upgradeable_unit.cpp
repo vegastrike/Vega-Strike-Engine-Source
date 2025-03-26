@@ -24,7 +24,7 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "upgradeable_unit.h"
+#include "cmd/upgradeable_unit.h"
 
 
 #include <boost/algorithm/string/trim.hpp>
@@ -35,11 +35,11 @@
 
 #include "components/component.h"
 #include "components/component_utils.h"
-#include "unit_const_cache.h"
+#include "cmd/unit_const_cache.h"
 #include "root_generic/faction_generic.h"
 #include "cmd/unit_generic.h"
 #include "cmd/weapon_info.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 #include "src/vs_logging.h"
 #include "cmd/unit_csv_factory.h"
 

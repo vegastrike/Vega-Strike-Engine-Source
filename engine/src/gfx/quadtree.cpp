@@ -24,7 +24,7 @@
  */
 
 
-#include "quadtree.h"
+#include "gfx/quadtree.h"
 #include "gfx_generic/matrix.h"
 #include "gfx/aux_texture.h"
 #include "src/universe.h"

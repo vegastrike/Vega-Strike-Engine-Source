@@ -29,7 +29,7 @@
 #include "src/vs_logging.h"
 #include "src/config_xml.h"
 #include <assert.h>
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "root_generic/options.h"
 #include "src/universe.h"
 

@@ -49,19 +49,19 @@
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include <assert.h>     //needed for assert() calls
 #include "root_generic/savegame.h"
 #include "gfx/animation.h"
 #include "gfx_generic/mesh.h"
 #include "src/universe_util.h"
-#include "in_mouse.h"
+#include "src/in_mouse.h"
 #include "gui/glut_support.h"
 #include "cmd/unit_util.h"
 #include "src/hashtable.h"
-#include "navscreen.h"
+#include "gfx/nav/navscreen.h"
 #include "gfx/masks.h"
-#include "navscreenoccupied.h"
+#include "gfx/nav/navscreenoccupied.h"
 
 using std::string;
 using std::vector;

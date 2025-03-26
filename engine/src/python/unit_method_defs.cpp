@@ -30,17 +30,17 @@ typedef boost::python::dict BoostPythonDictionary;
 
 #include "cmd/container.h"
 #include <string>
-#include "init.h"
+#include "python/init.h"
 #include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
 #include "src/universe_util.h"
 #include "cmd/unit_util.h"
 #include "root_generic/faction_generic.h"
 #include "cmd/ai/fire.h"
-#include "python_class.h"
-#include "unit_wrapper_class.h"
-#include "unit_from_to_python.h"
+#include "python/python_class.h"
+#include "python/unit_wrapper_class.h"
+#include "python/unit_from_to_python.h"
 
-#include "define_odd_unit_functions.h"
+#include "python/define_odd_unit_functions.h"
 #endif
 

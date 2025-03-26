@@ -22,17 +22,17 @@
 
 #include "src/vegastrike.h"
 #include <vector>
-#include "beam.h"
+#include "cmd/beam.h"
 #include "cmd/unit_generic.h"
 #include "gfx/aux_texture.h"
 #include "gfx/decalqueue.h"
 using std::vector;
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "root_generic/configxml.h"
-#include "images.h"
+#include "cmd/images.h"
 #include "cmd/mount_size.h"
 #include "cmd/weapon_info.h"
-#include "damageable.h"
+#include "cmd/damageable.h"
 #include "src/universe.h"
 
 #include <algorithm>

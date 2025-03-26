@@ -25,12 +25,12 @@
  */
 
 
-#include "audible.h"
+#include "cmd/audible.h"
 
 #include "gfx_generic/vec.h"
 #include "root_generic/vs_globals.h"
 #include "src/universe.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "root_generic/options.h"
 
 static const SoundType typesArray[] = {SoundType::engine, SoundType::shield, SoundType::armor,

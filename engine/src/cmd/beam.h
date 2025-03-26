@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_BEAM_H
 
 #include "gfx_generic/mesh.h"
-#include "unit_collide.h"
+#include "cmd/unit_collide.h"
 #include "gfx_generic/matrix.h"
 #include "gfx_generic/quaternion.h"
 #include <vector>

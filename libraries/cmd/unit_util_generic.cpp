@@ -36,7 +36,7 @@
 #include "root_generic/faction_generic.h"
 #include "cmd/ai/fire.h"
 #include "gfx_generic/cockpit_generic.h"
-#include "role_bitmask.h"
+#include "cmd/role_bitmask.h"
 #include "root_generic/lin_time.h"
 #include "cmd/planetary_orbit.h"
 #include "src/universe.h"

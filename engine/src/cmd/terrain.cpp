@@ -37,7 +37,7 @@
 #include <vector>
 #include "cmd/collection.h"
 #include "cmd/building.h"
-#include "damageable.h"
+#include "cmd/damageable.h"
 
 static std::vector<Terrain *> allterrains;
 

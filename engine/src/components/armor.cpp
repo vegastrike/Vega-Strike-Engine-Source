@@ -22,8 +22,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "armor.h"
-#include "damage.h"
+#include "components/armor.h"
+#include "damage/damage.h"
 #include "cmd/unit_csv_factory.h"
 
 int Armor::front = 0;

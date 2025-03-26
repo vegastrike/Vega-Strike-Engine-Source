@@ -25,7 +25,7 @@
 
 #include "root_generic/vs_globals.h"
 #include "root_generic/options.h"
-#include "unit_const_cache.h"
+#include "cmd/unit_const_cache.h"
 
 // TODO: this should not be here
 #include "root_generic/vsfilesystem.h"

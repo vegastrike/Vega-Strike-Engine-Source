@@ -38,7 +38,7 @@
 
 #include <vector>
 
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
 #include "al_globals.h"

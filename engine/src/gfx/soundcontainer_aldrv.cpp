@@ -25,8 +25,8 @@
  */
 
 
-#include "soundcontainer_aldrv.h"
-#include "audiolib.h"
+#include "gfx/soundcontainer_aldrv.h"
+#include "src/audiolib.h"
 
 AldrvSoundContainer::AldrvSoundContainer(const SoundContainer &other)
         : GameSoundContainer(other), sound(-2) {

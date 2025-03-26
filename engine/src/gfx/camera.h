@@ -26,7 +26,7 @@
 
 #include "gfx_generic/matrix.h"
 #include "src/gfxlib.h"
-#include "physics.h"
+#include "src/physics.h"
 
 //class PlanetaryTransform; commented out by chuck_starchaser --never used
 #include "cmd/container.h"

@@ -23,7 +23,7 @@
 
 #include "cmd/unit_generic.h"
 #include "gfx/ani_texture.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 
 #include <vector>
 #include <stdio.h>
@@ -34,7 +34,7 @@
 #include "src/vs_logging.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_random.h"
-#include "../gldrv/gl_globals.h"
+#include "gldrv/gl_globals.h"
 #include <set>
 #include <math.h>
 

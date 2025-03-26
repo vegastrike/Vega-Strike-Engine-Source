@@ -31,7 +31,7 @@
 #include "root_generic/vs_globals.h"
 #include "networking/netserver.h"
 #include "cmd/script/mission.h"
-#include "force_feedback.h"
+#include "src/force_feedback.h"
 #include "root_generic/lin_time.h"
 #include "cmd/unit_factory.h"
 

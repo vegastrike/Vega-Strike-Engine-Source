@@ -26,7 +26,7 @@
 #include <string>
 
 #include "src/in.h"
-#include "in_kb_data.h"
+#include "src/in_kb_data.h"
 
 //#ifdef HAVE_SDL
 #include <SDL2/SDL.h>

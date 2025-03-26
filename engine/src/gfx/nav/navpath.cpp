@@ -31,9 +31,9 @@
 #include <crtdbg.h>
 #endif
 
-#include "navpath.h"
+#include "gfx/nav/navpath.h"
 #include "gfx/cockpit.h"
-#include "navscreen.h"
+#include "gfx/nav/navscreen.h"
 #include "root_generic/configxml.h"
 #include "src/universe.h"
 

@@ -33,10 +33,10 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODECOL_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPCODECOL_H
 #include "collide2/Opcode.h"
-#include "csgeom2/opmatrix3.h"
-#include "csgeom2/opvector3.h"
-#include "csgeom2/opbox.h"
-#include "csgeom2/optransfrm.h"
+#include "collide2/csgeom2/opmatrix3.h"
+#include "collide2/csgeom2/opvector3.h"
+#include "collide2/csgeom2/opbox.h"
+#include "collide2/csgeom2/optransfrm.h"
 #include "collide2/basecollider.h"
 #include "gfx_generic/mesh.h"
 

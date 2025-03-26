@@ -31,7 +31,7 @@
 #include "vid_file.h"
 
 #include <stdio.h>
-#include "../SharedPool.h"
+#include "src/SharedPool.h"
 
 #include "audio/Types.h"
 #include "audio/Source.h"

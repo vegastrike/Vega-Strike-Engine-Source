@@ -23,23 +23,23 @@
  */
 
 
-#include "damageable.h"
+#include "cmd/damageable.h"
 
 #include "gfx_generic/vec.h"
-#include "vs_math.h"
+#include "src/vs_math.h"
 #include "configuration/game_config.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/configxml.h"
 #include "root_generic/lin_time.h"
-#include "damage.h"
+#include "damage/damage.h"
 #include "cmd/unit_generic.h"
 #include "cmd/ai/communication.h"
 #include "src/universe.h"
 #include "cmd/ai/order.h"
-#include "pilot.h"
+#include "cmd/pilot.h"
 #include "cmd/ai/comm_ai.h"
 #include "gfx_generic/mesh.h"
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 #include <algorithm>
 #include "configuration/configuration.h"

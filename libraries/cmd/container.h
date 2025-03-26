@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNITCONTAINER_H
 #define VEGA_STRIKE_ENGINE_CMD_UNITCONTAINER_H
 
-#include "debug_vs.h"
+#include "src/debug_vs.h"
 
 class Unit;
 

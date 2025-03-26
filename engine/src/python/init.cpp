@@ -48,15 +48,15 @@
 #include "root_generic/vs_globals.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "init.h"
-#include "python_compile.h"
-#include "python_class.h"
+#include "python/init.h"
+#include "python/python_compile.h"
+#include "python/python_class.h"
 #include "cmd/unit_generic.h"
 #include "python/config/python_utils.h"
+#include "cmd/vega_py_run.h"
 
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <direct.h>
-#include <vega_py_run.h>
 #endif
 class Unit;
 //FROM_PYTHON_SMART_POINTER(Unit)

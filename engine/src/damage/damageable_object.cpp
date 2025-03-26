@@ -24,7 +24,7 @@
 
 
 #include "damage/damageable_object.h"
-#include "core_vector.h"
+#include "damage/core_vector.h"
 #include <boost/range/adaptor/reversed.hpp>
 #include <iostream>
 

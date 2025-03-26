@@ -32,18 +32,18 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_H
 
-#include "armed.h"
-#include "audible.h"
-#include "damageable.h"
-#include "drawable.h"
-#include "movable.h"
-#include "computer.h"
-#include "intelligent.h"
-#include "energetic.h"
-#include "carrier.h"
-#include "jump_capable.h"
+#include "cmd/armed.h"
+#include "cmd/audible.h"
+#include "cmd/damageable.h"
+#include "cmd/drawable.h"
+#include "cmd/movable.h"
+#include "cmd/computer.h"
+#include "cmd/intelligent.h"
+#include "cmd/energetic.h"
+#include "cmd/carrier.h"
+#include "cmd/jump_capable.h"
 
-#include "mount.h"
+#include "cmd/mount.h"
 #include "damage/damage.h"
 
 #ifdef VS_DEBUG
@@ -73,8 +73,8 @@ void UncheckUnit( class Unit*un );
 #include "root_generic/vsfilesystem.h"
 #include "cmd/collide_map.h"
 #include "src/SharedPool.h"
-#include "role_bitmask.h"
-#include "upgradeable_unit.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/upgradeable_unit.h"
 #include "components/cloak.h"
 
 

@@ -28,14 +28,14 @@
 #include "cmd/ai/communication.h"
 #include "root_generic/savegame.h"
 #include "root_generic/xml_support.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 #include "src/universe_util.h"
-#include "unit_const_cache.h"
-#include "pilot.h"
+#include "cmd/unit_const_cache.h"
+#include "cmd/pilot.h"
 #include "cmd/ai/order.h"
 #include "src/universe.h"
 #include "cmd/mount_size.h"
-#include "damageable.h"
+#include "cmd/damageable.h"
 #include "resource/random_utils.h"
 
 //Various functions that were used in .cpp files that are now included because of

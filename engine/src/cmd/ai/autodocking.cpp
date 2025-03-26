@@ -37,7 +37,7 @@
 
 #include "flykeyboard.h"
 #include "src/in.h"
-#include "in_kb_data.h"
+#include "src/in_kb_data.h"
 
 namespace {
 

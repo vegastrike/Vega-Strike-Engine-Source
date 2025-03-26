@@ -27,7 +27,7 @@
 #include "src/universe_util.h"
 #include "gldrv/winsys.h"
 #include "root_generic/options.h"
-#include "computer.h"
+#include "cmd/computer.h"
 
 #include <math.h>
 

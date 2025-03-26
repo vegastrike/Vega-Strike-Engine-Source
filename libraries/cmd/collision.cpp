@@ -23,15 +23,15 @@
  */
 
 
-#include "collision.h"
+#include "cmd/collision.h"
 
 #include "cmd/unit_generic.h"
 #include "src/universe.h"
 #include "src/universe_util.h"
 #include "configuration/configuration.h"
-#include "missile.h"
+#include "cmd/missile.h"
 #include "cmd/enhancement.h"
-#include "damageable.h"
+#include "cmd/damageable.h"
 
 #include <typeinfo>
 // #include <boost/log/trivial.hpp>

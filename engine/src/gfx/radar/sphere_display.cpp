@@ -33,7 +33,7 @@
 #include "src/gfxlib.h"
 #include "viewarea.h"
 #include "sphere_display.h"
-#include <physics.h>
+#include "src/physics.h"
 #include "root_generic/configxml.h"
 
 #define TRACK_SIZE 2.0

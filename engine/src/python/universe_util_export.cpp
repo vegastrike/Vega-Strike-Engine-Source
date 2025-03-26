@@ -25,9 +25,9 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python.hpp>
-#include "python_class.h"
+#include "python/python_class.h"
 #include "cmd/container.h"
-#include "init.h"
+#include "python/init.h"
 #include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
 #include "src/universe_util.h"

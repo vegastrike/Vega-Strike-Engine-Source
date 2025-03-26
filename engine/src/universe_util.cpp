@@ -30,7 +30,7 @@
 #include "src/star_system.h"
 #include <string>
 #include "cmd/music.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "gfx/animation.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/load_mission.h"

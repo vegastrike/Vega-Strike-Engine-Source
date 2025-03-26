@@ -30,7 +30,7 @@
 #include <vector>
 #include "gfx_generic/vec.h"
 #include "cmd/container.h"
-#include "../SharedPool.h"
+#include "src/SharedPool.h"
 #include "gfx/sprite.h"
 #include "gfx/animation.h"
 #include "resource/cargo.h"

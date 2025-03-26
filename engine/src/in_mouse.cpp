@@ -21,12 +21,12 @@
  */
 
 #include "src/vegastrike.h"
-#include "in_handler.h"
-#include "in_mouse.h"
+#include "src/in_handler.h"
+#include "src/in_mouse.h"
 #include <deque>
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
-#include "in_joystick.h"
+#include "src/in_joystick.h"
 #include "gldrv/winsys.h"
 #include "root_generic/options.h"
 #include "src/universe.h"

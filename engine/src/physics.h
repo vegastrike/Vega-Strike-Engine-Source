@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_PHYSICS_H
 #define VEGA_STRIKE_ENGINE_PHYSICS_H
 
-#include "vs_math.h"
+#include "src/vs_math.h"
 #include "gfx_generic/vec.h"
 
 static const float oocc = (float) 0.0000000000000000111265005605; //1/c^2

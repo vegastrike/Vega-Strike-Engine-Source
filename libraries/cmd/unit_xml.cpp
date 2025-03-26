@@ -26,8 +26,8 @@
  */
 
 
-#include "unit_xml.h"
-#include "audiolib.h"
+#include "cmd/unit_xml.h"
+#include "src/audiolib.h"
 #include "root_generic/xml_support.h"
 #include <float.h>
 #include <limits.h>
@@ -35,8 +35,8 @@
 #include "root_generic/vs_globals.h"
 #include "src/vegastrike.h"
 #include <assert.h>
-#include "xml_serializer.h"
-#include "unit_collide.h"
+#include "root_generic/xml_serializer.h"
+#include "cmd/unit_collide.h"
 #include "cmd/unit_generic.h"
 #include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"

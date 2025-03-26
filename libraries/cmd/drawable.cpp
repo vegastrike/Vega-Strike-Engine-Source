@@ -24,7 +24,7 @@
 
 //#include <cassert>
 
-#include "drawable.h"
+#include "cmd/drawable.h"
 #include "root_generic/vsfilesystem.h"
 #include "src/vs_logging.h"
 #include "gfx_generic/mesh.h"
@@ -38,12 +38,12 @@
 #include "gfx/halo_system.h"
 #include "root_generic/options.h"
 #include "cmd/weapon_info.h"
-#include "beam.h"
-#include "unit_csv.h"
+#include "cmd/beam.h"
+#include "cmd/unit_csv.h"
 #include "src/universe_util.h"
 
 #include <boost/algorithm/string.hpp>
-#include "vega_cast_utils.h"
+#include "src/vega_cast_utils.h"
 
 // Required definition of static variable
 std::string Drawable::root;

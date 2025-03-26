@@ -28,7 +28,7 @@
 
 #include <vector>
 #include <string>
-#include "basecomputer.h"
+#include "cmd/basecomputer.h"
 #include "gfx/hud.h"
 #include "gfx/sprite.h"
 #include <stdio.h>
