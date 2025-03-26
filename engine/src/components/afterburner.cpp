@@ -22,7 +22,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "afterburner.h"
+#include "components/afterburner.h"
 
 #include "component_utils.h"
 #include "cmd/unit_csv_factory.h"

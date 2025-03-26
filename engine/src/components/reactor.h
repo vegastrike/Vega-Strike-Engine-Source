@@ -29,8 +29,8 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H
 
 #include "component.h"
-#include "energy_container.h"
-#include "energy_consumer.h"
+#include "components/energy_container.h"
+#include "components/energy_consumer.h"
 #include "resource/resource.h"
 
 class EnergyManager;
@@ -52,8 +52,8 @@ public:
             double conversion_ratio = 0.0001); // < 0.01 or very short flight
 
 
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;

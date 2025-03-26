@@ -27,8 +27,8 @@
 #include <boost/math/constants/constants.hpp>
 #include <utility>
 
-#include "drive.h"
-#include "drive_upgrade.h"
+#include "components/drive.h"
+#include "components/drive_upgrade.h"
 
 #include "cmd/unit_csv_factory.h"
 

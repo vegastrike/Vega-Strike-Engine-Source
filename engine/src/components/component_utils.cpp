@@ -30,14 +30,14 @@
 #include "component.h"
 #include "dummy_component.h"
 
-#include "reactor.h"
-#include "energy_container.h"
+#include "components/reactor.h"
+#include "components/energy_container.h"
 
-#include "afterburner.h"
-#include "afterburner_upgrade.h"
-#include "drive.h"
-#include "drive_upgrade.h"
-#include "jump_drive.h"
+#include "components/afterburner.h"
+#include "components/afterburner_upgrade.h"
+#include "components/drive.h"
+#include "components/drive_upgrade.h"
+#include "components/jump_drive.h"
 #include "ftl_drive.h"
 #include "components/cloak.h"
 

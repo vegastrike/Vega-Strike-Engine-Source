@@ -22,7 +22,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "jump_drive.h"
+#include "components/jump_drive.h"
 
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"

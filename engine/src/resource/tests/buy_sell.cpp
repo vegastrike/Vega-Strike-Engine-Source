@@ -24,8 +24,8 @@
 
 #include <gtest/gtest.h>
 
-#include "store.h"
-#include "product.h"
+#include "resource/store.h"
+#include "resource/product.h"
 
 TEST(Store, Sanity) {
     Product used_car("Used Car", 1, 1000);

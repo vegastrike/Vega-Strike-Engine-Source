@@ -34,7 +34,7 @@
 #include <iostream>
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 
 enum class RadarType {
@@ -78,8 +78,8 @@ public:
     CRadar();
 
 // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;

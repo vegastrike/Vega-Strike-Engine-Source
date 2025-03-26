@@ -26,8 +26,8 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H
 
 #include "component.h"
-#include "energy_consumer.h"
-#include "energy_container.h"
+#include "components/energy_consumer.h"
+#include "components/energy_container.h"
 #include "resource/resource.h"
 
 #include <string>
@@ -52,5 +52,5 @@ void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr,
  void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr,
                         Resource<double> &right_value, Resource<double> &left_value,
                         const double minimum_functionality = 0.0);
-                                               
+
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H

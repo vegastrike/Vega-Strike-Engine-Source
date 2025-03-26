@@ -22,9 +22,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "afterburner_upgrade.h"
+#include "components/afterburner_upgrade.h"
 
-#include "afterburner.h"
+#include "components/afterburner.h"
 #include "cmd/unit_csv_factory.h"
 
 #include <boost/format.hpp>

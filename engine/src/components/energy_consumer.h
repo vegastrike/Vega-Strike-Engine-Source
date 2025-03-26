@@ -28,7 +28,7 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONSUMER_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONSUMER_H
 
-#include "energy_container.h"
+#include "components/energy_container.h"
 
 enum class EnergyConsumerSource {
     Infinite, Fuel, Energy, FTLEnergy, None

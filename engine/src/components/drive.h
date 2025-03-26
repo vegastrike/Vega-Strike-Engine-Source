@@ -26,7 +26,7 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_H
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 #include "resource/resource.h"
 
@@ -39,7 +39,7 @@ class Drive : public Component, public EnergyConsumer {
 
     /* @discussion use of Resource class in Drive
         Unlike other use cases, where max, adjusted and value are all used, here
-        we only use max and adjusted. This shouldn't be an issue as adjusted and 
+        we only use max and adjusted. This shouldn't be an issue as adjusted and
         value should be identical unless someone sets value to less. */
 
     /* Afterburner was split from drive. Same comments apply there. */
@@ -75,11 +75,11 @@ public:
     Resource<double> max_roll_right;
 
 // Constructors
-    Drive(EnergyContainer *source = nullptr);    
+    Drive(EnergyContainer *source = nullptr);
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;

@@ -25,7 +25,7 @@
 #include <gtest/gtest.h>
 #include <map>
 
-#include "jump_drive.h"
+#include "components/jump_drive.h"
 #include "resource/random_utils.h"
 #include "cmd/unit_csv_factory.h"
 

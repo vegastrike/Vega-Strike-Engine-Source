@@ -22,9 +22,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "drive_upgrade.h"
+#include "components/drive_upgrade.h"
 
-#include "drive.h"
+#include "components/drive.h"
 #include "component_utils.h"
 #include "cmd/unit_csv_factory.h"
 

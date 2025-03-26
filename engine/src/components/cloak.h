@@ -28,7 +28,7 @@
 #include <string>
 #include <map>
 
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 // TODO: remove dependency on unit
 class EnergyContainer;
@@ -116,7 +116,7 @@ public:
         return glass;
     }
 
-    
+
 
     // Is the ship visible
     bool Visible() const {

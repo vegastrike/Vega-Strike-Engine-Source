@@ -48,20 +48,6 @@ ADD_LIBRARY(vegastrike_gfx_generic STATIC
         vec.h
         mesh_io.h
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic SYSTEM PRIVATE ${TST_INCLUDES})
-TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
-        # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
-        # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
-        # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
-)
 
 #TARGET_COMPILE_FEATURES(vegastrike_gfx_generic PUBLIC cxx_std_11)
 SET_PROPERTY(TARGET vegastrike_gfx_generic PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -77,3 +63,18 @@ IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike_gfx_generic PUBLIC WINVER=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vegastrike_gfx_generic PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
+
+TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic SYSTEM PRIVATE ${TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
+        # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries
+        # CMake Artifacts
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
+)

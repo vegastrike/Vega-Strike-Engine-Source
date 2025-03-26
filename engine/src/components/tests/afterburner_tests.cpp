@@ -25,8 +25,8 @@
 #include <gtest/gtest.h>
 #include <map>
 
-#include "afterburner.h"
-#include "afterburner_upgrade.h"
+#include "components/afterburner.h"
+#include "components/afterburner_upgrade.h"
 
 #include "cmd/unit_csv_factory.h"
 

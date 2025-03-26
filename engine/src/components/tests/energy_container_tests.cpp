@@ -27,8 +27,8 @@
 // #include <math.h>
 // #include <utility>
 
-#include "energy_container.h"
-#include "energy_consumer.h"
+#include "components/energy_container.h"
+#include "components/energy_consumer.h"
 #include "cmd/unit_csv_factory.h"
 
 void printContainer(EnergyContainer& container) {

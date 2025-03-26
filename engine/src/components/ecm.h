@@ -26,7 +26,7 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 class EnergyContainer;
 
@@ -42,7 +42,7 @@ public:
 
     // Component Methods
     void Load(std::string unit_key) override;
-    
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;

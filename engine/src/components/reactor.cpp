@@ -25,7 +25,7 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "reactor.h"
+#include "components/reactor.h"
 
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"

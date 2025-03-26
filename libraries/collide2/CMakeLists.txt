@@ -131,20 +131,6 @@ ADD_LIBRARY(vegastrike-OPcollide STATIC
         opcodetypes.h
         segmentcell.h
 )
-TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide SYSTEM PRIVATE ${TST_INCLUDES})
-TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
-        # VS engine headers
-        ${Vega_Root_SOURCE_DIR}
-        ${Vega_Root_SOURCE_DIR}/engine
-        ${Vega_Root_SOURCE_DIR}/engine/src
-        # Library Headers
-        ${Vega_Root_SOURCE_DIR}/libraries
-        # CMake Artifacts
-        ${Vega_Root_BINARY_DIR}
-        ${Vega_Root_BINARY_DIR}/src
-        ${Vega_Root_BINARY_DIR}/engine
-        ${Vega_Root_BINARY_DIR}/engine/src
-)
 
 #TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 SET_PROPERTY(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -160,3 +146,18 @@ IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC WINVER=0x0A00)
     TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
 ENDIF()
+
+TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide SYSTEM PRIVATE ${TST_INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
+        # VS engine headers
+        ${Vega_Root_SOURCE_DIR}
+        ${Vega_Root_SOURCE_DIR}/engine
+        ${Vega_Root_SOURCE_DIR}/engine/src
+        # Library Headers
+        ${Vega_Root_SOURCE_DIR}/libraries
+        # CMake Artifacts
+        ${Vega_Root_BINARY_DIR}
+        ${Vega_Root_BINARY_DIR}/src
+        ${Vega_Root_BINARY_DIR}/engine
+        ${Vega_Root_BINARY_DIR}/engine/src
+)

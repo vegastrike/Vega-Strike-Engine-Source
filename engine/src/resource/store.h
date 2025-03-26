@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "product.h"
+#include "resource/product.h"
 #include "resource/resource.h"
 
 

@@ -26,17 +26,6 @@
 #define VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/python.hpp>///module.hpp>
-
-//This takes care of the fact that several systems use the _POSIX_C_SOURCE
-//variable and don't set them to the same thing.
-//Python.h sets and uses it
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif //_POSIX_C_SOURCE
-
-#include <Python.h>
-
 #include <boost/version.hpp>
 
 #if defined (_MSC_VER) && _MSC_VER <= 1200
@@ -46,6 +35,7 @@
 #include <boost/python/object.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/call_method.hpp>
+#include <boost/python.hpp>///module.hpp>
 
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
