@@ -28,7 +28,7 @@
 #include "briefing.h"
 #include "cmd/unit_generic.h"
 #include "gfx_generic/mesh.h"
-#include "script/mission.h"
+#include "cmd/script/mission.h"
 #include "gfx/ani_texture.h"
 #include "gfx_generic/matrix.h"
 #include "src/universe.h"

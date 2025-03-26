@@ -134,10 +134,6 @@ ADD_LIBRARY(vegastrike-OPcollide STATIC
 
 #TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 SET_PROPERTY(TARGET vegastrike-OPcollide PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
-ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike-OPcollide ${TST_LIBS} GLUT::GLUT vegastrike_gfx_generic)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike-OPcollide PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
@@ -161,3 +157,8 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-OPcollide PRIVATE
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
 )
+
+IF (NEED_LINKING_AGAINST_LIBM)
+    TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
+ENDIF()
+TARGET_LINK_LIBRARIES(vegastrike-OPcollide ${TST_LIBS} GLUT::GLUT vegastrike_gfx_generic)

@@ -34,7 +34,7 @@
 
 #include "cmd/ai/order.h"
 #include "src/python/python_class.h"
-#include "script/mission.h"
+#include "cmd/script/mission.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/ikarus.h"
 #include "cmd/ai/missionscript.h"

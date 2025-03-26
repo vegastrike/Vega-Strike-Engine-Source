@@ -42,7 +42,7 @@
 #include "src/file_main.h"
 #include "src/universe_util.h"
 #include "cmd/unit_util.h"
-#include "script/mission.h"
+#include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/ai/fire.h"
 #include "cmd/ai/turretai.h"

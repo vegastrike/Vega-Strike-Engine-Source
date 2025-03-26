@@ -104,15 +104,6 @@ ADD_LIBRARY(vegastrike_cmd STATIC
 #TARGET_COMPILE_FEATURES(vegastrike_cmd PUBLIC cxx_std_11)
 SET_PROPERTY(TARGET vegastrike_cmd PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
-IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike_cmd m)
-ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike_cmd
-        ${TST_LIBS}
-        ${Boost_LIBRARIES}
-        ${Python3_LIBRARIES}
-)
-
 TARGET_COMPILE_DEFINITIONS(vegastrike_cmd PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
 IF (WIN32)
     TARGET_COMPILE_DEFINITIONS(vegastrike_cmd PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
@@ -127,26 +118,20 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_cmd PRIVATE
         ${Vega_Root_SOURCE_DIR}
         ${Vega_Root_SOURCE_DIR}/engine
         ${Vega_Root_SOURCE_DIR}/engine/src
-        ${Vega_Root_SOURCE_DIR}/engine/src/cmd
-        ${Vega_Root_SOURCE_DIR}/engine/src/components
-        ${Vega_Root_SOURCE_DIR}/engine/src/configuration
-        ${Vega_Root_SOURCE_DIR}/engine/src/damage
-        ${Vega_Root_SOURCE_DIR}/engine/src/gfx
-        ${Vega_Root_SOURCE_DIR}/engine/src/resource
-        ${Vega_Root_SOURCE_DIR}/engine/src/python
-        ${Vega_Root_SOURCE_DIR}/engine/src/python/base_computer
-        ${Vega_Root_SOURCE_DIR}/engine/src/python/config
         # Library Headers
         ${Vega_Root_SOURCE_DIR}/libraries
-        ${Vega_Root_SOURCE_DIR}/libraries/cmd
-        ${Vega_Root_SOURCE_DIR}/libraries/collide2
-        ${Vega_Root_SOURCE_DIR}/libraries/collide2/csgeom2
-        ${Vega_Root_SOURCE_DIR}/libraries/collide2/Ice
-        ${Vega_Root_SOURCE_DIR}/libraries/gfx_generic
-        ${Vega_Root_SOURCE_DIR}/libraries/root_generic
         # CMake Artifacts
         ${Vega_Root_BINARY_DIR}
         ${Vega_Root_BINARY_DIR}/src
         ${Vega_Root_BINARY_DIR}/engine
         ${Vega_Root_BINARY_DIR}/engine/src
+)
+
+IF (NEED_LINKING_AGAINST_LIBM)
+    TARGET_LINK_LIBRARIES(vegastrike_cmd m)
+ENDIF()
+TARGET_LINK_LIBRARIES(vegastrike_cmd
+        ${TST_LIBS}
+        ${Boost_LIBRARIES}
+        ${Python3_LIBRARIES}
 )
