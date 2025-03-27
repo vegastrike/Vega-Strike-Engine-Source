@@ -19,7 +19,8 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-ADD_LIBRARY(vegastrike-OPcollide STATIC
+ADD_LIBRARY(vegastrike-OPcollide OBJECT
+        $<TARGET_OBJECTS:vegastrike_gfx_generic>
         Ice/IceAABB.cpp
         Ice/IceAABB.h
         Ice/IceAxes.h
@@ -164,4 +165,3 @@ IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike-OPcollide PRIVATE m)
 ENDIF()
 TARGET_LINK_LIBRARIES(vegastrike-OPcollide PRIVATE ${TST_LIBS} GLUT::GLUT)
-TARGET_LINK_LIBRARIES(vegastrike-OPcollide PUBLIC vegastrike_gfx_generic)

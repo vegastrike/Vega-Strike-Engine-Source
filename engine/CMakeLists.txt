@@ -676,7 +676,13 @@ SET(VEGASTRIKE_SOURCES
 )
 
 IF (NOT DISABLE_CLIENT)
-    ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
+    ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE
+            $<TARGET_OBJECTS:vegastrike-engine_com>
+            $<TARGET_OBJECTS:vegastrike_gfx_generic>
+            $<TARGET_OBJECTS:vegastrike_root_generic>
+            $<TARGET_OBJECTS:vegastrike_cmd>
+            $<TARGET_OBJECTS:vegastrike-OPcollide>
+            ${VEGASTRIKE_SOURCES})
 
     #    TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_14)
     SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD 14)
@@ -716,11 +722,6 @@ IF (NOT DISABLE_CLIENT)
             ${VSE_TST_LIBS}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
-            $<TARGET_OBJECTS:vegastrike-engine_com>
-            vegastrike_gfx_generic
-            vegastrike_root_generic
-            vegastrike_cmd
-            vegastrike-OPcollide
     )
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -1191,12 +1192,15 @@ IF (USE_GTEST)
     ENDIF()
 
     ADD_LIBRARY(vegastrike-testing
-        ${LIBPYTHON}
-        ${LIBVS_LOGGING}
-        ${LIBCONFIG}
-        ${LIBDAMAGE}
-        ${LIBRESOURCE}
-        ${LIBCOMPONENT}
+            $<TARGET_OBJECTS:vegastrike_gfx_generic>
+            $<TARGET_OBJECTS:vegastrike_root_generic>
+            $<TARGET_OBJECTS:vegastrike_cmd>
+            ${LIBPYTHON}
+            ${LIBVS_LOGGING}
+            ${LIBCONFIG}
+            ${LIBDAMAGE}
+            ${LIBRESOURCE}
+            ${LIBCOMPONENT}
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
@@ -1212,7 +1216,7 @@ IF (USE_GTEST)
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD 14)
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD_REQUIRED TRUE)
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -1220,7 +1224,6 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC WINVER=0x0A00)
-        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     TARGET_LINK_LIBRARIES(
@@ -1230,9 +1233,6 @@ IF (USE_GTEST)
             ${Python3_LIBRARIES}
             gtest_main
             vegastrike-testing
-            vegastrike_gfx_generic
-            vegastrike_root_generic
-            vegastrike_cmd
     )
     TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)

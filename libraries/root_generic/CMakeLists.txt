@@ -19,7 +19,7 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-ADD_LIBRARY(vegastrike_root_generic STATIC
+ADD_LIBRARY(vegastrike_root_generic OBJECT
         atmospheric_fog_mesh.cpp
         atmospheric_fog_mesh.h
         configxml.cpp

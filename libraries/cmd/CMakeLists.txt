@@ -19,7 +19,7 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-ADD_LIBRARY(vegastrike_cmd STATIC
+ADD_LIBRARY(vegastrike_cmd OBJECT
         alphacurve.cpp
         alphacurve.h
         carrier.cpp
