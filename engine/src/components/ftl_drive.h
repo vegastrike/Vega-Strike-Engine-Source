@@ -38,7 +38,8 @@ class FtlDrive : public Component, public EnergyConsumer {
     // take it into account.
 public:
     FtlDrive();
-    FtlDrive(EnergyContainer *source);
+    explicit FtlDrive(EnergyContainer *source);
+    ~FtlDrive() override;
 
     void Enable();
     void Disable();
@@ -57,6 +58,10 @@ public:
     bool CanUpgrade(const std::string upgrade_key) const override;
 
     bool Upgrade(const std::string upgrade_key) override;
+
+    // EnergyConsumer Method(s)
+
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H

@@ -31,8 +31,11 @@ Cloak::Cloak() :
     EnergyConsumer(nullptr, false, 0)
 {
     type = ComponentType::Cloak;
-    _Downgrade();
+    downgrade_private();
 }
+
+Cloak::~Cloak()
+= default;
 
 
 // Component Overrides
@@ -41,7 +44,7 @@ void Cloak::Load(std::string unit_key) {
     SetConsumption(UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0));
 
     // Cloak
-    _Upgrade(unit_key);
+    upgrade_private(unit_key);
 }
 
 
@@ -77,7 +80,7 @@ bool Cloak::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool Cloak::Upgrade(const std::string upgrade_key) {
-    _Upgrade(upgrade_key);
+    upgrade_private(upgrade_key);
 
     return true;
 }
@@ -193,7 +196,18 @@ void Cloak::Deactivate() {
     status = CloakingStatus::decloaking;
 }
 
-void Cloak::_Downgrade() {
+double Cloak::Consume()
+{
+    // Unit is not capable of cloaking or damaged or just not cloaking
+    if (status == CloakingStatus::disabled ||
+            status == CloakingStatus::damaged ||
+            status == CloakingStatus::ready) {
+        return 0.0;
+    }
+    return EnergyConsumer::Consume();
+}
+
+void Cloak::downgrade_private() {
     Component::Downgrade();
     SetConsumption(0);
 
@@ -207,7 +221,7 @@ void Cloak::_Downgrade() {
 
 }
 
-void Cloak::_Upgrade(const std::string upgrade_key) {
+void Cloak::upgrade_private(const std::string upgrade_key) {
     Component::Upgrade(upgrade_key);
 
     SetConsumption(UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Energy", 0.0));

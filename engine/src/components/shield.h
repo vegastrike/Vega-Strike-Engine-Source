@@ -45,6 +45,7 @@ public:
     static int right;
 
     Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak, FacetConfiguration configuration = FacetConfiguration::four);
+    ~Shield() override;
 
     // Component Methods
     void Load(std::string unit_key) override;
@@ -70,6 +71,9 @@ public:
     void FullyCharge();
     void Decrease();
     void Zero();
+
+    // EnergyConsumer method(s)
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_SHIELD_H

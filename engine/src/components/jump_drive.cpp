@@ -42,6 +42,9 @@ JumpDrive::JumpDrive(EnergyContainer *source):
     type = ComponentType::JumpDrive;
 }
 
+JumpDrive::~JumpDrive()
+= default;
+
 
 int JumpDrive::Destination() const {
     return destination;
@@ -119,6 +122,12 @@ bool JumpDrive::Upgrade(const std::string upgrade_key) {
 
     Component::Upgrade(upgrade_key);
     return true;
+}
+
+double JumpDrive::Consume()
+{
+    return 0.0;
+    // return EnergyConsumer::Consume();
 }
 
 

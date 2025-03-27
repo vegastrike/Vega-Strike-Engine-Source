@@ -40,8 +40,7 @@ EnergyConsumerSource GetSource(const int source) {
 }
 
 EnergyConsumer::~EnergyConsumer()
-{
-}
+= default;
 
 EnergyConsumer::EnergyConsumer(EnergyContainer *source,
                                bool partial,

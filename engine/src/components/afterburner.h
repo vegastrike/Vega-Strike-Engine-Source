@@ -40,7 +40,7 @@ public:
 
     Resource<double> speed;
 
-    Afterburner(EnergyContainer *source = nullptr);
+    explicit Afterburner(EnergyContainer *source = nullptr);
 
     // Component Methods
     void Load(std::string unit_key) override;
@@ -55,6 +55,8 @@ public:
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+
+    double Consume() override;
 
     // TODO: virtual void Destroy(); and other functions
 };

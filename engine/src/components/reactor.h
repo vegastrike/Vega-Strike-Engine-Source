@@ -50,6 +50,7 @@ public:
             EnergyContainer *energy,
             EnergyContainer *ftl_energy,
             double conversion_ratio = 0.0001); // < 0.01 or very short flight
+    ~Reactor() override;
 
 
     void Load(std::string unit_key) override;
@@ -75,6 +76,9 @@ public:
     double Capacity() const;
     double MaxCapacity() const;
     void SetCapacity(double capacity);
+
+    // EnergyConsumer method(s)
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H

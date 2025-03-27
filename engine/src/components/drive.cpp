@@ -45,6 +45,9 @@ Drive::Drive(EnergyContainer *source):
     type = ComponentType::Drive;
 }
 
+Drive::~Drive()
+= default;
+
 
 // Component Methods
 void Drive::Load(std::string unit_key) {
@@ -231,6 +234,11 @@ void Drive::Repair() {
     max_roll_right.RepairFully();
 
     operational.RepairFully();
+}
+
+double Drive::Consume()
+{
+    return EnergyConsumer::Consume();
 }
 
 

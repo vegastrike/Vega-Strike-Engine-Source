@@ -49,6 +49,9 @@ Shield::Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak, Facet
     type = ComponentType::Shield;
 }
 
+Shield::~Shield()
+= default;
+
 
 // Component Methods
 void Shield::Load(std::string unit_key) {
@@ -403,4 +406,9 @@ void Shield::Zero() {
     for(auto& facet : facets) {
         facet = 0;
     }
+}
+
+double Shield::Consume()
+{
+    return EnergyConsumer::Consume();
 }

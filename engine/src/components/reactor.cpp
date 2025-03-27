@@ -50,6 +50,9 @@ Reactor::Reactor(EnergyContainer *source,
     type = ComponentType::Reactor;
 }
 
+Reactor::~Reactor()
+= default;
+
 
 void Reactor::Load(std::string unit_key) {
     Component::Load(unit_key);
@@ -155,4 +158,9 @@ void Reactor::SetCapacity(double capacity) {
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
     operational = 1.0;
+}
+
+double Reactor::Consume()
+{
+    return EnergyConsumer::Consume();
 }

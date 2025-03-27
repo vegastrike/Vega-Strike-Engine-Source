@@ -41,6 +41,9 @@ FtlDrive::FtlDrive(EnergyContainer *source):
     type = ComponentType::FtlDrive;
 }
 
+FtlDrive::~FtlDrive()
+= default;
+
 void FtlDrive::Enable() {
     enabled = true;
 }
@@ -88,5 +91,14 @@ bool FtlDrive::CanUpgrade(const std::string upgrade_key) const {
 
 bool FtlDrive::Upgrade(const std::string upgrade_key) {
     return false;
+}
+
+double FtlDrive::Consume()
+{
+    if (!enabled)
+    {
+        return 0.0;
+    }
+    return EnergyConsumer::Consume();
 }
 

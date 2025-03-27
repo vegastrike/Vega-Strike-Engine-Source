@@ -31,12 +31,13 @@
 class EnergyContainer;
 
 class JumpDrive : public Component, public EnergyConsumer {
-    int destination;    // 0 is probably some kind of /dev/null
+    int destination{};    // 0 is probably some kind of /dev/null
     double delay;
 
 public:
     JumpDrive();
-    JumpDrive(EnergyContainer *source);
+    explicit JumpDrive(EnergyContainer *source);
+    ~JumpDrive() override;
 
     int Destination() const;
     bool IsDestinationSet() const;
@@ -60,6 +61,9 @@ public:
     bool CanUpgrade(const std::string upgrade_key) const override;
 
     bool Upgrade(const std::string upgrade_key) override;
+
+    // EnergyConsumer method(s)
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_JUMP_DRIVE_H

@@ -39,6 +39,9 @@ ECM::ECM(EnergyContainer *source):
     type = ComponentType::ECM;
 }
 
+ECM::~ECM()
+= default;
+
 
 // Component Methods
 void ECM::Load(std::string unit_key) {

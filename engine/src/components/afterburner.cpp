@@ -29,8 +29,7 @@
 #include "configuration/configuration.h"
 
 Afterburner::~Afterburner()
-{
-}
+= default;
 
 Afterburner::Afterburner(EnergyContainer *source) :
     Component(0.0, 0.0, true, true), EnergyConsumer(source, false), thrust(1,0,1), speed(1,0,1) {
@@ -101,4 +100,9 @@ void Afterburner::Repair() {
     speed.RepairFully();
 
     operational.RepairFully();
+}
+
+double Afterburner::Consume()
+{
+    return EnergyConsumer::Consume();
 }

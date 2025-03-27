@@ -51,6 +51,9 @@ CRadar::CRadar():
     lock_cone = configuration()->computer_config.default_lock_cone;
 }
 
+CRadar::~CRadar()
+= default;
+
 // Component Methods
 void CRadar::Load(std::string unit_key) {
     Component::Load(unit_key);
@@ -271,4 +274,9 @@ bool CRadar::CanLock() const {
 
 bool CRadar::Tracking() const {
     return tracking_active;
+}
+
+double CRadar::Consume()
+{
+    return EnergyConsumer::Consume();
 }

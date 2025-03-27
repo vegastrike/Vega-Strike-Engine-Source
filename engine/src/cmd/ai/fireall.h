@@ -34,6 +34,7 @@ public:
     ~FireAllYouGot() override;
     FireAllYouGot();
     void Execute() override;
+    void Destructor() override;
 };
 }
 

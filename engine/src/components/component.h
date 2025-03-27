@@ -87,7 +87,7 @@ protected:
     bool installed = false;
     bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
-    virtual ~Component() = default;
+    virtual ~Component();
     ComponentType type = ComponentType::None;
 
     Component(double mass = 0,

@@ -41,13 +41,6 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include <boost/python/objects.hpp>
 #endif
 
-//This takes care of the fact that several systems use the _POSIX_C_SOURCE
-//variable and don't set them to the same thing.
-//Python.h sets and uses it
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif //_POSIX_C_SOURCE
-
 #include <Python.h>
 #include "src/python/python_class.h"
 #include "cmd/base.h"

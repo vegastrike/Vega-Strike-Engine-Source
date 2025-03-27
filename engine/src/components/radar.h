@@ -76,6 +76,7 @@ class CRadar : public Component, public EnergyConsumer {
     friend class Unit;
 public:
     CRadar();
+    ~CRadar() override;
 
 // Component Methods
     void Load(std::string unit_key) override;
@@ -119,6 +120,9 @@ public:
     bool Locked() const;
     bool CanLock() const;
     bool Tracking() const;
+
+    // EnergyConsumer method(s)
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H

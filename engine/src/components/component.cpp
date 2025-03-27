@@ -36,6 +36,9 @@ const std::string NAME = "Name";
 const std::string MASS = "Mass";
 const std::string VOLUME = "Volume";
 
+Component::~Component()
+= default;
+
 Component::Component(double mass, double volume, bool installed, bool integral):
                      upgrade_name(""),
                      description(""),

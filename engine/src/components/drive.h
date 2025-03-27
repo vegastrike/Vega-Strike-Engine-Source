@@ -75,7 +75,8 @@ public:
     Resource<double> max_roll_right;
 
 // Constructors
-    Drive(EnergyContainer *source = nullptr);
+    explicit Drive(EnergyContainer *source = nullptr);
+    ~Drive() override;
 
     // Component Methods
     void Load(std::string unit_key) override;
@@ -90,6 +91,8 @@ public:
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_H

@@ -38,7 +38,8 @@ class ECM : public Component, public EnergyConsumer {
     bool active;
 public:
     ECM();
-    ECM(EnergyContainer *source);
+    explicit ECM(EnergyContainer *source);
+    ~ECM() override;
 
     // Component Methods
     void Load(std::string unit_key) override;

@@ -40,5 +40,9 @@ void FireAllYouGot::Execute() {
     parent->Fire(ROLES::EVERYTHING_ELSE | ROLES::FIRE_GUNS | ROLES::FIRE_MISSILES, true);
 }
 
+void FireAllYouGot::Destructor()
+{
+    Order::Destructor();
+}
 }
 

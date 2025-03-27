@@ -27,11 +27,6 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 
-//Resets variable for use by python config.h
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif //_POSIX_C_SOURCE
-
 #include <Python.h>
 #include "src/hashtable.h"
 #include <string>
