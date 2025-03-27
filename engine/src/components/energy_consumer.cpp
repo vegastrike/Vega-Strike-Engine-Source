@@ -39,6 +39,10 @@ EnergyConsumerSource GetSource(const int source) {
     }
 }
 
+EnergyConsumer::~EnergyConsumer()
+{
+}
+
 EnergyConsumer::EnergyConsumer(EnergyContainer *source,
                                bool partial,
                                double consumption, bool infinite):

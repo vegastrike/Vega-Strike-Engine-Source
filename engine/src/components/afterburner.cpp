@@ -28,6 +28,10 @@
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
+Afterburner::~Afterburner()
+{
+}
+
 Afterburner::Afterburner(EnergyContainer *source) :
     Component(0.0, 0.0, true, true), EnergyConsumer(source, false), thrust(1,0,1), speed(1,0,1) {
     type = ComponentType::Afterburner;

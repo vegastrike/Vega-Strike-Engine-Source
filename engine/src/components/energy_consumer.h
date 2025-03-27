@@ -50,7 +50,7 @@ private:
 protected:
     bool infinite; // Connected to infinite power source. Ignore source field. Always work.
 public:
-    virtual ~EnergyConsumer() = default;
+    virtual ~EnergyConsumer();
     EnergyConsumer(EnergyContainer *source = nullptr, bool partial = false, double consumption = 0.0, bool infinite = false);
     bool CanConsume() const;
     virtual double Consume();

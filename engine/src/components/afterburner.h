@@ -33,6 +33,8 @@ class EnergyContainer;
 /** We split this class from Drive for one reason - it may use a different source. */
 class Afterburner : public Component, public EnergyConsumer {
 public:
+    ~Afterburner() override;
+
     //after burner acceleration max
     Resource<double> thrust;
 
@@ -54,7 +56,6 @@ public:
     void DamageByPercent(double percent) override;
     void Repair() override;
 
-    ~Afterburner() override = default;
     // TODO: virtual void Destroy(); and other functions
 };
 
