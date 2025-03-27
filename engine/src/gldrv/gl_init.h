@@ -54,14 +54,7 @@ extern "C"
 /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
  * count on that...  */
 
-#if defined (IRIX)
-// See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#include <gl.h>
-#include <glut.h>
-typedef void (*PFNGLLOCKARRAYSEXTPROC)( GLint first, GLsizei count );
-typedef void (*PFNGLUNLOCKARRAYSEXTPROC)( void );
-
-#elif !defined (_WIN32)
+#if !defined (_WIN32)
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>
 #include <glext.h>
