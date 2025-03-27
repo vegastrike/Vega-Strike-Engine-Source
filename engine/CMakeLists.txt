@@ -1224,24 +1224,21 @@ IF (USE_GTEST)
     ENDIF()
 
     TARGET_LINK_LIBRARIES(
-        ${TEST_NAME}
-        ${Boost_LIBRARIES}
-        ${Python3_LIBRARIES}
-        gtest_main
-        vegastrike-testing
-        vegastrike_gfx_generic
-        vegastrike_root_generic
-        vegastrike_cmd
-        Boost::log
-        Boost::log_setup
-        Boost::json
+            ${TEST_NAME}
+            ${VSE_TST_LIBS}
+            ${Boost_LIBRARIES}
+            ${Python3_LIBRARIES}
+            gtest_main
+            vegastrike-testing
+            vegastrike_gfx_generic
+            vegastrike_root_generic
+            vegastrike_cmd
     )
-    TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)
         TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
         TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC _WIN32_WINNT=0x0A00)
         TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC WINVER=0x0A00)
-        TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     FILE(
