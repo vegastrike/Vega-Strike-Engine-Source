@@ -71,6 +71,8 @@ ADD_LIBRARY(vegastrike_root_generic STATIC
 )
 
 #TARGET_COMPILE_FEATURES(vegastrike_root_generic PUBLIC cxx_std_11)
+SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY CXX_STANDARD_REQUIRED TRUE)
 SET_PROPERTY(TARGET vegastrike_root_generic PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike_root_generic PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
@@ -97,6 +99,6 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_root_generic PRIVATE
 )
 
 IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike_root_generic m)
+    TARGET_LINK_LIBRARIES(vegastrike_root_generic PRIVATE m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike_root_generic ${TST_LIBS} GLUT::GLUT)
+TARGET_LINK_LIBRARIES(vegastrike_root_generic PRIVATE ${TST_LIBS} GLUT::GLUT)

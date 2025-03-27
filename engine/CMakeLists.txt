@@ -529,6 +529,8 @@ ADD_LIBRARY(vegastrike_python SHARED
 )
 # Enable PIE for this library in a cross-platform-compatible way
 set_property(TARGET vegastrike_python PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_python PROPERTY CXX_STANDARD_REQUIRED TRUE)
 TARGET_INCLUDE_DIRECTORIES(vegastrike_python SYSTEM PRIVATE ${VSE_TST_INCLUDES})
 
 
@@ -559,6 +561,8 @@ ADD_LIBRARY(vegastrike-engine_com STATIC
 )
 
 #TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
+SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike-engine_com PROPERTY CXX_STANDARD_REQUIRED TRUE)
 set_property(TARGET vegastrike-engine_com PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike-engine_com PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
@@ -583,6 +587,23 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike-engine_com PRIVATE
         ${Vega_Root_BINARY_DIR}/engine/src
 )
 
+IF (NEED_LINKING_AGAINST_LIBM)
+    TARGET_LINK_LIBRARIES(vegastrike-engine_com PRIVATE m)
+ENDIF()
+TARGET_LINK_LIBRARIES(vegastrike-engine_com PRIVATE
+        OpenGL::GL
+        OpenGL::GLU
+        GLUT::GLUT
+        ${VSE_TST_LIBS}
+        ${Boost_LIBRARIES}
+        ${Python3_LIBRARIES}
+)
+TARGET_LINK_LIBRARIES(vegastrike-engine_com PUBLIC
+        vegastrike_gfx_generic
+        vegastrike_root_generic
+        vegastrike_cmd
+        vegastrike-OPcollide
+)
 
 SET(VEGASTRIKE_SOURCES
     ${VEGA_GL_H_PATH}
@@ -661,7 +682,9 @@ SET(VEGASTRIKE_SOURCES
 IF (NOT DISABLE_CLIENT)
     ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
 
-    #TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
+    #    TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_14)
+    SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD_REQUIRED TRUE)
 
     TARGET_COMPILE_DEFINITIONS(vegastrike-engine PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)
@@ -695,9 +718,6 @@ IF (NOT DISABLE_CLIENT)
             GLUT::GLUT
             ${VSE_TST_LIBS}
             vegastrike-engine_com
-            vegastrike-OPcollide
-            vegastrike_gfx_generic
-            vegastrike_root_generic
             vegastrike_cmd
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
@@ -1164,7 +1184,8 @@ IF (USE_GTEST)
     SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${Vega_Root_BINARY_DIR}/)
 
     #TARGET_COMPILE_FEATURES(${TEST_NAME} PUBLIC cxx_std_11)
-    set_property(TARGET ${TEST_NAME} PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+    SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET ${TEST_NAME} PROPERTY CXX_STANDARD_REQUIRED TRUE)
     IF (NEED_LINKING_AGAINST_LIBM)
         TARGET_LINK_LIBRARIES(${TEST_NAME} m)
     ENDIF()
@@ -1192,6 +1213,8 @@ IF (USE_GTEST)
             ${Vega_Root_BINARY_DIR}/engine/src
     )
     TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD_REQUIRED TRUE)
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
     IF (WIN32)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)

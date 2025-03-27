@@ -50,6 +50,8 @@ ADD_LIBRARY(vegastrike_gfx_generic STATIC
 )
 
 #TARGET_COMPILE_FEATURES(vegastrike_gfx_generic PUBLIC cxx_std_11)
+SET_PROPERTY(TARGET vegastrike_gfx_generic PROPERTY CXX_STANDARD 14)
+SET_PROPERTY(TARGET vegastrike_gfx_generic PROPERTY CXX_STANDARD_REQUIRED TRUE)
 SET_PROPERTY(TARGET vegastrike_gfx_generic PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 TARGET_COMPILE_DEFINITIONS(vegastrike_gfx_generic PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
@@ -75,6 +77,7 @@ TARGET_INCLUDE_DIRECTORIES(vegastrike_gfx_generic PRIVATE
         ${Vega_Root_BINARY_DIR}/engine/src
 )
 IF (NEED_LINKING_AGAINST_LIBM)
-    TARGET_LINK_LIBRARIES(vegastrike_gfx_generic m)
+    TARGET_LINK_LIBRARIES(vegastrike_gfx_generic PRIVATE m)
 ENDIF()
-TARGET_LINK_LIBRARIES(vegastrike_gfx_generic ${TST_LIBS} GLUT::GLUT vegastrike_root_generic)
+TARGET_LINK_LIBRARIES(vegastrike_gfx_generic PRIVATE ${TST_LIBS} GLUT::GLUT)
+TARGET_LINK_LIBRARIES(vegastrike_gfx_generic PUBLIC vegastrike_root_generic)
