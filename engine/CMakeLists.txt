@@ -544,7 +544,7 @@ TARGET_LINK_LIBRARIES(
 # Name must be witout the lib prefix
 SET_TARGET_PROPERTIES(vegastrike_python PROPERTIES PREFIX "")
 
-ADD_LIBRARY(vegastrike-engine_com STATIC
+ADD_LIBRARY(vegastrike-engine_com OBJECT
     ${VEGA_GL_H_PATH}
     ${VEGA_GLU_H_PATH}
     ${VEGA_GLEXT_H_PATH}
@@ -599,12 +599,6 @@ TARGET_LINK_LIBRARIES(vegastrike-engine_com PRIVATE
         ${VSE_TST_LIBS}
         ${Boost_LIBRARIES}
         ${Python3_LIBRARIES}
-)
-TARGET_LINK_LIBRARIES(vegastrike-engine_com PUBLIC
-        vegastrike_gfx_generic
-        vegastrike_root_generic
-        vegastrike_cmd
-        vegastrike-OPcollide
 )
 
 SET(VEGASTRIKE_SOURCES
@@ -720,10 +714,13 @@ IF (NOT DISABLE_CLIENT)
             OpenGL::GLU
             GLUT::GLUT
             ${VSE_TST_LIBS}
-            vegastrike-engine_com
-            vegastrike_cmd
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
+            $<TARGET_OBJECTS:vegastrike-engine_com>
+            vegastrike_gfx_generic
+            vegastrike_root_generic
+            vegastrike_cmd
+            vegastrike-OPcollide
     )
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
