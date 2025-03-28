@@ -71,6 +71,16 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
+          - FROM:     'fedora:41'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
+          - FROM:     'fedora:41'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
           - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
@@ -78,6 +88,16 @@ jobs:
             allow_failure: false
           - FROM:     'fedora:40'
             COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
+          - FROM:     'fedora:40'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
+          - FROM:     'fedora:40'
+            COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
