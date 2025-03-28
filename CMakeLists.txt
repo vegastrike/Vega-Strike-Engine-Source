@@ -44,7 +44,7 @@ IF (POLICY CMP0102)
 ENDIF ()
 
 IF (POLICY CMP0167)
-    CMAKE_POLICY (SET CMP0167 OLD)
+    CMAKE_POLICY (SET CMP0167 NEW)
 ENDIF ()
 
 # There are a number of custom CMake packages

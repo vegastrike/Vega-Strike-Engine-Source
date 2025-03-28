@@ -676,13 +676,7 @@ SET(VEGASTRIKE_SOURCES
 )
 
 IF (NOT DISABLE_CLIENT)
-    ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE
-            $<TARGET_OBJECTS:vegastrike-engine_com>
-            $<TARGET_OBJECTS:vegastrike_gfx_generic>
-            $<TARGET_OBJECTS:vegastrike_root_generic>
-            $<TARGET_OBJECTS:vegastrike_cmd>
-            $<TARGET_OBJECTS:vegastrike-OPcollide>
-            ${VEGASTRIKE_SOURCES})
+    ADD_EXECUTABLE(vegastrike-engine WIN32 MACOSX_BUNDLE ${VEGASTRIKE_SOURCES})
 
     #    TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_14)
     SET_PROPERTY(TARGET vegastrike-engine PROPERTY CXX_STANDARD 14)
@@ -722,6 +716,11 @@ IF (NOT DISABLE_CLIENT)
             ${VSE_TST_LIBS}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
+            $<TARGET_OBJECTS:vegastrike-engine_com>
+            vegastrike_gfx_generic
+            vegastrike_root_generic
+            vegastrike_cmd
+            vegastrike-OPcollide
     )
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -1191,16 +1190,13 @@ IF (USE_GTEST)
         TARGET_LINK_LIBRARIES(${TEST_NAME} m)
     ENDIF()
 
-    ADD_LIBRARY(vegastrike-testing
-            $<TARGET_OBJECTS:vegastrike_gfx_generic>
-            $<TARGET_OBJECTS:vegastrike_root_generic>
-            $<TARGET_OBJECTS:vegastrike_cmd>
-            ${LIBPYTHON}
-            ${LIBVS_LOGGING}
-            ${LIBCONFIG}
-            ${LIBDAMAGE}
-            ${LIBRESOURCE}
-            ${LIBCOMPONENT}
+    ADD_LIBRARY(vegastrike-testing OBJECT
+        ${LIBPYTHON}
+        ${LIBVS_LOGGING}
+        ${LIBCONFIG}
+        ${LIBDAMAGE}
+        ${LIBRESOURCE}
+        ${LIBCOMPONENT}
     )
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(vegastrike-testing PRIVATE
@@ -1228,11 +1224,18 @@ IF (USE_GTEST)
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME}
-            ${VSE_TST_LIBS}
+            ${OPENAL_LIBRARY}
+            ${Vorbis_LIBRARIES}
+            ${JPEG_LIBRARIES}
+            ${PNG_LIBRARIES}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
             gtest_main
-            vegastrike-testing
+            $<TARGET_OBJECTS:vegastrike-testing>
+            vegastrike_cmd
+            Boost::log
+            Boost::log_setup
+            Boost::json
     )
     TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)

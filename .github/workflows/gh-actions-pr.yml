@@ -41,8 +41,18 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
+          - FROM:     'linuxmintd/mint22-amd64'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
           - FROM:     'debian:bookworm'
             COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'OFF'
+            allow_failure: false
+          - FROM:     'debian:bookworm'
+            COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'OFF'
             allow_failure: false
@@ -61,6 +71,16 @@ jobs:
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: true
+          - FROM:     'fedora:41'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
+          - FROM:     'fedora:41'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            allow_failure: true
           - FROM:     'fedora:40'
             COMPILER: 'clang'
             OpenGL_GL_PREFERENCE: 'LEGACY'
@@ -68,6 +88,16 @@ jobs:
             allow_failure: false
           - FROM:     'fedora:40'
             COMPILER: 'clang'
+            OpenGL_GL_PREFERENCE: 'GLVND'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
+          - FROM:     'fedora:40'
+            COMPILER: 'gcc'
+            OpenGL_GL_PREFERENCE: 'LEGACY'
+            ENABLE_PIE: 'ON'
+            allow_failure: false
+          - FROM:     'fedora:40'
+            COMPILER: 'gcc'
             OpenGL_GL_PREFERENCE: 'GLVND'
             ENABLE_PIE: 'ON'
             allow_failure: false
@@ -122,9 +152,6 @@ jobs:
       - name: Test short SHA
         run: |
           echo "${SHORT_SHA}"
-
-      - name: Execute bootstrap
-        run:  sudo script/bootstrap
 
       - name: Build and Test
         env:
