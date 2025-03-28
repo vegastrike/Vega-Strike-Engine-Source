@@ -19,8 +19,7 @@
 
 MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-ADD_LIBRARY(vegastrike_gfx_generic OBJECT
-        $<TARGET_OBJECTS:vegastrike_root_generic>
+ADD_LIBRARY(vegastrike_gfx_generic STATIC
         texture_manager.cpp
         texture_manager.h
         boltdrawmanager.cpp
@@ -82,3 +81,4 @@ IF (NEED_LINKING_AGAINST_LIBM)
     TARGET_LINK_LIBRARIES(vegastrike_gfx_generic PRIVATE m)
 ENDIF()
 TARGET_LINK_LIBRARIES(vegastrike_gfx_generic PRIVATE ${TST_LIBS} GLUT::GLUT)
+TARGET_LINK_LIBRARIES(vegastrike_gfx_generic PUBLIC vegastrike_root_generic)
