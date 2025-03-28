@@ -1224,9 +1224,6 @@ IF (USE_GTEST)
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME}
-            OpenGL::GL
-            OpenGL::GLU
-            GLUT::GLUT
             ${OPENAL_LIBRARY}
             ${Vorbis_LIBRARIES}
             ${JPEG_LIBRARIES}
@@ -1238,6 +1235,9 @@ IF (USE_GTEST)
             vegastrike_gfx_generic
             vegastrike_root_generic
             vegastrike_cmd
+            Boost::log
+            Boost::log_setup
+            Boost::json
     )
     TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     IF (WIN32)
