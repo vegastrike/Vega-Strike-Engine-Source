@@ -102,7 +102,7 @@ public:
 
     QVector Transform(const QVector &v) const {
         Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
-        float cosphi = cos(T.k);
+        double cosphi = cos(T.k);
         return QVector(T.j * cosphi * cos(T.i), T.j * sin(T.k), T.j * cosphi * sin(T.i));
     }
 

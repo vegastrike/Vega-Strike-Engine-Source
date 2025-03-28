@@ -463,7 +463,8 @@ static void DownSampleTexture(unsigned char **newbuf,
             amask >>= 1, tshift++, hshift++;
         }
         int tmask = (1 << tshift) - 1;
-        *newbuf = (unsigned char *) malloc(newheight * newwidth * pixsize * sizeof(unsigned char));
+        *newbuf = static_cast<unsigned char *>(malloc(static_cast<size_t>(newheight) * static_cast<size_t>(newwidth)
+                * static_cast<size_t>(pixsize) * sizeof(unsigned char)));
         unsigned int temp[32 * 4];
         unsigned char *orow = (*newbuf);
         const unsigned char *irow = oldbuf;
@@ -510,7 +511,8 @@ static void DownSampleTexture(unsigned char **newbuf,
         //Specific purpose downsampler: 2x2 averaging
         //a) Very little overhead
         //b) Very common case (mipmap generation)
-        *newbuf = (unsigned char *) malloc(newheight * newwidth * pixsize * sizeof(unsigned char));
+        *newbuf = static_cast<unsigned char *>(malloc(static_cast<size_t>(newheight) * static_cast<size_t>(newwidth)
+                * static_cast<size_t>(pixsize) * sizeof(unsigned char)));
         unsigned char *orow = (*newbuf);
         int ostride = newwidth * pixsize;
         int istride = width * pixsize;

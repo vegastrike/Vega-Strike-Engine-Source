@@ -399,7 +399,8 @@ float globQueryShell(QVector st, QVector dir, float radius) {
 
 float globQuerySphere(QVector start, QVector end, QVector pos, float radius) {
     QVector st = start - pos;
-    if (st.MagnitudeSquared() < radius * radius) {
+    const double radius_temp = radius;
+    if (st.MagnitudeSquared() < radius_temp * radius_temp) {
         return 1.0e-6f;
     }
     return globQueryShell(st, end - start, radius);

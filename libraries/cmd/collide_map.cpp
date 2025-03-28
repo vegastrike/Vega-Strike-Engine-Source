@@ -118,7 +118,7 @@ public:
                 last_radius_key = key;
             }
         }
-        if (last_big_radius && fabs(key - last_big_radius_key) > 2 * cm->max_bolt_radius * simulation_atom_var) {
+        if (last_big_radius && fabs(key - last_big_radius_key) > 2.0 * cm->max_bolt_radius * simulation_atom_var) {
             last_big_radius = last_radius;
             last_big_radius_key = last_radius_key;
             last_radius = 0;
@@ -533,7 +533,8 @@ public:
         tempx *= tempx;
         tempy *= tempy;
         tempz *= tempz;
-        return (tempx + tempy + tempz) > radiussum * radiussum;
+        const double radius_sum_temp = radiussum;
+        return (tempx + tempy + tempz) > radius_sum_temp * radius_sum_temp;
     }
 
     static bool CheckCollision(Unit *a, const Collidable &aiter, Unit *b, const Collidable &biter) {

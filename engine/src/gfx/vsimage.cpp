@@ -955,7 +955,8 @@ VSError VSImage::WritePNG(unsigned char *data) {
         png_set_swap(png_ptr);
     }
 #endif
-    int stride = (this->img_depth / 8) * (this->img_alpha ? 4 : 3);
+    const uintmax_t stride = (static_cast<uintmax_t>(this->img_depth) / 8ULL)
+                            * (static_cast<uintmax_t>(this->img_alpha) ? 4ULL : 3ULL);
     png_byte **row_pointers = new png_byte *[this->sizeY];
     if (this->flip) {
         for (int i = this->sizeY - 1, j = 0; i >= 0; i--, ++j) {

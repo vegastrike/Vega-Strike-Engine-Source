@@ -159,7 +159,8 @@ void ddsDecompress(unsigned char *&RESTRICT buffer,
 
     sx = (width < 4) ? width : 4;
     sy = (height < 4) ? width : 4;
-    data = (unsigned char *) malloc(height * width * bpp);
+    data = static_cast<unsigned char *>(malloc(static_cast<size_t>(height)
+            * static_cast<size_t>(width) * static_cast<size_t>(bpp)));
     pos_out = data;
     pos_in = buffer;
     for (int y = 0; y < height; y += 4) {

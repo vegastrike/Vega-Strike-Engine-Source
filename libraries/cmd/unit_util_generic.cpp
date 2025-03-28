@@ -215,27 +215,27 @@ int getPhysicsPriority(Unit *un) {
             vs_config->getVariable("physics", "priorities", "no_enemies", "64"));
     static int INERT_PRIORITY = XMLSupport::parse_int(
             vs_config->getVariable("physics", "priorities", "inert", "64"));
-    static float _PLAYERTHREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
+    static double _PLAYERTHREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
             vs_config->getVariable("physics", "priorities", "playerthreat_distance_factor", "2"));
-    static float _THREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
+    static double _THREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
             vs_config->getVariable("physics", "priorities", "threat_distance_factor", "1"));
-    static float DYNAMIC_THROTTLE_MINFACTOR = XMLSupport::parse_float(
+    static double DYNAMIC_THROTTLE_MINFACTOR = XMLSupport::parse_float(
             vs_config->getVariable("physics", "priorities", "dynamic_throttle.mindistancefactor", "0.25"));
-    static float DYNAMIC_THROTTLE_MAXFACTOR = XMLSupport::parse_float(
+    static double DYNAMIC_THROTTLE_MAXFACTOR = XMLSupport::parse_float(
             vs_config->getVariable("physics", "priorities", "dynamic_throttle.maxdistancefactor", "4"));
-    static float DYNAMIC_THROTTLE_TARGETFPS = XMLSupport::parse_float(
+    static double DYNAMIC_THROTTLE_TARGETFPS = XMLSupport::parse_float(
             vs_config->getVariable("physics", "priorities", "dynamic_throttle.targetfps", "30"));
-    static float DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.f / DYNAMIC_THROTTLE_TARGETFPS;
-    static float DYNAMIC_THROTTLE_FACTOR = 1.f;
-    static float lastThrottleAdjust = 0;    // stephengtuggy 2020-07-26 -- Make this a double?
+    static double DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.0 / DYNAMIC_THROTTLE_TARGETFPS;
+    static double DYNAMIC_THROTTLE_FACTOR = 1.0;
+    static double lastThrottleAdjust = 0.0;
     if (UniverseUtil::GetGameTime() != lastThrottleAdjust) {
         lastThrottleAdjust = UniverseUtil::GetGameTime();
-        float newfactor = DYNAMIC_THROTTLE_FACTOR * DYNAMIC_THROTTLE_TARGETELAPSEDTIME / GetElapsedTime();
+        double newfactor = DYNAMIC_THROTTLE_FACTOR * DYNAMIC_THROTTLE_TARGETELAPSEDTIME / GetElapsedTime();
         newfactor = mymax(DYNAMIC_THROTTLE_MINFACTOR, mymin(DYNAMIC_THROTTLE_MAXFACTOR, newfactor));
         DYNAMIC_THROTTLE_FACTOR = (newfactor * GetElapsedTime() + DYNAMIC_THROTTLE_FACTOR) / (1.0 + GetElapsedTime());
     }
-    static float PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
-    static float THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+    static double PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+    static double THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
     Unit *parent = cockpit->GetParent();
     float gun_range = 0;
     float missile_range = 0;
@@ -335,10 +335,10 @@ int getPhysicsPriority(Unit *un) {
         float speed;
         un->getAverageGunSpeed(speed, gun_range, missile_range);
         double distance = UnitUtil::getDistance(un, targ);
-        if (distance <= 2 * gun_range * THREAT_DISTANCE_FACTOR) {
+        if (distance <= 2.0 * static_cast<double>(gun_range) * THREAT_DISTANCE_FACTOR) {
             return NOT_VISIBLE_COMBAT_HIGH;
         }
-        if (distance < 2 * missile_range * THREAT_DISTANCE_FACTOR) {
+        if (distance < 2.0 * static_cast<double>(missile_range) * THREAT_DISTANCE_FACTOR) {
             return NOT_VISIBLE_COMBAT_MEDIUM;
         }
         return NOT_VISIBLE_COMBAT_LOW;

@@ -134,16 +134,16 @@ void GFXVertexList::RefreshDisplayList() {
                 (changed & CHANGE_MUTABLE) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
         if (changed & HAS_INDEX) {
             GFXBindElementBuffer(display_list);
-            unsigned int tot = 0;
+            uintmax_t tot = 0;
             for (int i = 0; i < numlists; ++i) {
                 tot += offsets[i];
             }
-            unsigned int indexsize = (changed & INDEX_BYTE)
+            const uintmax_t index_size = (changed & INDEX_BYTE)
                     ? sizeof(char)
                     : ((changed & INDEX_SHORT)
                             ? sizeof(unsigned short)
                             : sizeof(unsigned int));
-            (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, tot * indexsize, &index.b[0],
+            (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, tot * index_size, &index.b[0],
                     (changed & CHANGE_MUTABLE) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
         }
         return;

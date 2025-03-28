@@ -653,7 +653,8 @@ string AnalyzeType(string &input, string &nebfile, float &radius) {
     }
     char ptr = *input.begin();
     string ip;
-    if (0 == sscanf(GetNebFile(input).c_str(), "%f", &radius)) {
+    int sscanf_result = sscanf(GetNebFile(input).c_str(), "%f", &radius);
+    if (0 == sscanf_result || EOF == sscanf_result) {
         radius = 100;
         ip = (input.c_str() + 1);
     } else {

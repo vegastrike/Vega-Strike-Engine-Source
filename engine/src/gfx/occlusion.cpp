@@ -64,8 +64,9 @@ class Occluder {
     float occlusionRating;
 
     void computeOcclusionRating() {
-        double distanceSq = (pos - light).MagnitudeSquared();
-        double maxSq = maxOcclusionDistance * maxOcclusionDistance;
+        const double distanceSq = (pos - light).MagnitudeSquared();
+        const double max_occlusion_distance_temp = maxOcclusionDistance;
+        const double maxSq = max_occlusion_distance_temp * max_occlusion_distance_temp;
         if (distanceSq >= maxSq) {
             occlusionRating = 0.f;
         } else {

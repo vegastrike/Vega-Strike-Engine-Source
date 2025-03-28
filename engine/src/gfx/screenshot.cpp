@@ -38,7 +38,8 @@ void Screenshot(const KBData &, KBSTATE state) {
         xywh[2] = g_game.x_resolution;
         xywh[3] = g_game.y_resolution;
         glGetIntegerv(GL_VIEWPORT, xywh);
-        unsigned char *tmp = (unsigned char *) malloc(xywh[2] * xywh[3] * 4 * sizeof(unsigned char));
+        unsigned char *tmp = static_cast<unsigned char *>(malloc(
+            static_cast<size_t>(xywh[2]) * static_cast<size_t>(xywh[3]) * 4 * sizeof(unsigned char)));
         //memset(tmp,0x7f,xywh[2]*xywh[3]*4*sizeof(char));
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ROW_LENGTH, xywh[2]);

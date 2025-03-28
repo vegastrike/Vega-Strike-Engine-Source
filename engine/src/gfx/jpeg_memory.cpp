@@ -218,7 +218,7 @@ void jpeg_decompress(unsigned char *dst, unsigned char *src, int size, int *w, i
 
     *w = cinfo.output_width;
     *h = cinfo.output_height;
-    line_size = cinfo.output_width * cinfo.output_components;
+    line_size = static_cast<size_t>(cinfo.output_width) * static_cast<size_t>(cinfo.output_components);
 
     dstcur = dst;
     for (y = 0; y < cinfo.output_height; y++) {

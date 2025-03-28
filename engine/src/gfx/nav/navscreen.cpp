@@ -973,22 +973,22 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_) 
  *         }
  */
     if (x_ != 0) {
-        float distance_yz = sqrt((vector.j * vector.j) + (vector.k * vector.k));
-        float current_angle = atan2(vector.k, vector.j);
+        double distance_yz = sqrt((vector.j * vector.j) + (vector.k * vector.k));
+        double current_angle = atan2(vector.k, vector.j);
         current_angle += x_;
         vector.j = cos(current_angle) * distance_yz;
         vector.k = sin(current_angle) * distance_yz;
     }
     if (y_ != 0) {
-        float distance_xz = sqrt((vector.i * vector.i) + (vector.k * vector.k));
-        float current_angle = atan2(vector.k, vector.i);
+        double distance_xz = sqrt((vector.i * vector.i) + (vector.k * vector.k));
+        double current_angle = atan2(vector.k, vector.i);
         current_angle += y_;
         vector.i = cos(current_angle) * distance_xz;
         vector.k = sin(current_angle) * distance_xz;
     }
     if (z_ != 0) {
-        float distance_xy = sqrt((vector.i * vector.i) + (vector.j * vector.j));
-        float current_angle = atan2(vector.j, vector.i);
+        double distance_xy = sqrt((vector.i * vector.i) + (vector.j * vector.j));
+        double current_angle = atan2(vector.j, vector.i);
         current_angle += z_;
         vector.i = cos(current_angle) * distance_xy;
         vector.j = sin(current_angle) * distance_xy;
@@ -1854,15 +1854,17 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale,
     double real_zoom_flat = 0.0;
 //float _l2 = log(2.0f);
     if (system_not_galaxy) {
-        real_zoom = zoom_s * zoom_s * zscale;
-        real_zoom_flat = zoom_s * zoom_s * zscale_flat;
+        const double zoom_s_tmp = zoom_s;
+        real_zoom = zoom_s_tmp * zoom_s_tmp * zscale;
+        real_zoom_flat = zoom_s_tmp * zoom_s_tmp * zscale_flat;
 //real_zoom = zoom_s*zscale;
 //real_zoom_flat = zoom_s*zscale_flat;
 ///		real_zoom = (log(zoom_s)/_l2)*zscale;
 ///		real_zoom_flat = (log(zoom_s)/_l2)*zscale_flat;
     } else {
-        real_zoom = zoom * zoom * zscale;
-        real_zoom_flat = zoom * zoom * zscale_flat;
+        const double zoom_tmp = zoom;
+        real_zoom = zoom_tmp * zoom_tmp * zscale;
+        real_zoom_flat = zoom_tmp * zoom_tmp * zscale_flat;
 //real_zoom = (log(zoom)/_l2)*zscale;
 //real_zoom_flat = (log(zoom)/_l2)*zscale_flat;
     }

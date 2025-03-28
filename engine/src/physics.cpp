@@ -99,7 +99,7 @@ void PhysicsSystem::Rotate(const Vector &axis) {
 }
 
 void PhysicsSystem::JettisonReactionMass(const Vector &Direction, float speed, float mass) {
-    NetForce += Direction * (speed * mass / GetElapsedTime());
+    NetForce += Direction * (static_cast<double>(speed) * static_cast<double>(mass) / GetElapsedTime());
 }
 
 void PhysicsSystem::JettisonMass(const Vector &Direction, float speed, float jmass) {

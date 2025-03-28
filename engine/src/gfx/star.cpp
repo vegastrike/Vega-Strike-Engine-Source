@@ -606,7 +606,8 @@ void Stars::ResetPosition(const QVector &cent) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 3; k++) {
-                pos[i * 9 + j * 3 + k].Set((i - 1) * spread, (j - 1) * spread, (k - 1) * spread);
+                const double spread_temp = spread;
+                pos[i * 9 + j * 3 + k].Set((i - 1) * spread_temp, (j - 1) * spread_temp, (k - 1) * spread_temp);
                 pos[i * 9 + j * 3 + k] += cent;
             }
         }
