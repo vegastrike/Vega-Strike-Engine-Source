@@ -1232,8 +1232,6 @@ IF (USE_GTEST)
             ${Python3_LIBRARIES}
             gtest_main
             $<TARGET_OBJECTS:vegastrike-testing>
-            vegastrike_gfx_generic
-            vegastrike_root_generic
             vegastrike_cmd
             Boost::log
             Boost::log_setup
