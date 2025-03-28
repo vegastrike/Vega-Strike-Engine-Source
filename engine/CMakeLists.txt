@@ -1224,6 +1224,9 @@ IF (USE_GTEST)
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME}
+            OpenGL::GL
+            OpenGL::GLU
+            GLUT::GLUT
             ${OPENAL_LIBRARY}
             ${Vorbis_LIBRARIES}
             ${JPEG_LIBRARIES}
