@@ -1190,7 +1190,7 @@ IF (USE_GTEST)
         TARGET_LINK_LIBRARIES(${TEST_NAME} m)
     ENDIF()
 
-    ADD_LIBRARY(vegastrike-testing
+    ADD_LIBRARY(vegastrike-testing OBJECT
         ${LIBPYTHON}
         ${LIBVS_LOGGING}
         ${LIBCONFIG}
@@ -1212,7 +1212,7 @@ IF (USE_GTEST)
             ${Vega_Root_BINARY_DIR}/engine
             ${Vega_Root_BINARY_DIR}/engine/src
     )
-    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
+    TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD 14)
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY CXX_STANDARD_REQUIRED TRUE)
     SET_PROPERTY(TARGET vegastrike-testing PROPERTY POSITION_INDEPENDENT_CODE TRUE)
@@ -1220,16 +1220,18 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC _WIN32_WINNT=0x0A00)
         TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC WINVER=0x0A00)
-        TARGET_COMPILE_DEFINITIONS(vegastrike-testing PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     TARGET_LINK_LIBRARIES(
             ${TEST_NAME}
-            ${VSE_TST_LIBS}
+            ${OPENAL_LIBRARY}
+            ${Vorbis_LIBRARIES}
+            ${JPEG_LIBRARIES}
+            ${PNG_LIBRARIES}
             ${Boost_LIBRARIES}
             ${Python3_LIBRARIES}
             gtest_main
-            vegastrike-testing
+            $<TARGET_OBJECTS:vegastrike-testing>
             vegastrike_gfx_generic
             vegastrike_root_generic
             vegastrike_cmd
