@@ -103,7 +103,7 @@ public:
     QVector Transform(const QVector &v) const {
         Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
         double cosphi = cos(T.k);
-        return QVector(T.j * cosphi * cos(T.i), T.j * sin(T.k), T.j * cosphi * sin(T.i));
+        return QVector(T.j * cosphi * cos(T.i), static_cast<double>(T.j) * sin(T.k), T.j * cosphi * sin(T.i));
     }
 
     QVector TransformNormal(const QVector &point, const QVector &n) const {
