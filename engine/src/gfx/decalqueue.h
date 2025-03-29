@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/aux_texture.h"
 
 #include <vector>

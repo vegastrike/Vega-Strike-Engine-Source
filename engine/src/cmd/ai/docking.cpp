@@ -25,13 +25,13 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 #include "docking.h"
-#include "xml_support.h"
-#include "config_xml.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "cmd/unit_generic.h"
 #include "warpto.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include <string>
 
 static void DockedScript(Unit *docker, Unit *base) {

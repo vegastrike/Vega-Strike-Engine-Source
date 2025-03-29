@@ -22,10 +22,10 @@
 #ifndef VEGA_STRIKE_ENGINE_MISSION_FILE_H
 #define VEGA_STRIKE_ENGINE_MISSION_FILE_H
 
-#include "central.h"
-#include "easydom.h"
-#include "general.h"
-#include "glob.h"
+#include "mission/include/central.h"
+#include "mission/include/easydom.h"
+#include "mission/include/general.h"
+#include <glob.h>
 #include <vector>
 #include <list>
 #include <string>

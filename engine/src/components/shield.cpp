@@ -24,10 +24,10 @@
 
 #include "shield.h"
 #include "ftl_drive.h"
-#include "cloak.h"
-#include "unit_csv_factory.h"
+#include "components/cloak.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "damage/damage.h"
 
 #include <boost/format.hpp>
@@ -39,39 +39,42 @@ int Shield::right = 3;
 
 static const Damage normal_damage = Damage(1.0,0.0);
 
-Shield::Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak, FacetConfiguration configuration) : 
+Shield::Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak, FacetConfiguration configuration) :
     Component(),
     EnergyConsumer(source, true, 0),
     DamageableLayer(2, configuration, 0.0, normal_damage, false),
-    ftl_drive(ftl_drive), cloak(cloak), 
-    regeneration(Resource<double>(0.0,0.0,0.0)), 
+    ftl_drive(ftl_drive), cloak(cloak),
+    regeneration(Resource<double>(0.0,0.0,0.0)),
     max_power(Resource<double>(1.0,0.0,1.0)) {
     type = ComponentType::Shield;
 }
+
+Shield::~Shield()
+= default;
 
 
 // Component Methods
 void Shield::Load(std::string unit_key) {
     Component::Load(unit_key);
-    
+
     // Load shield
     // Some basic shield variables
     // TODO: lib_damage figure out how leak and efficiency work
     //char leak = static_cast<char>(UnitCSVFactory::GetVariable(unit_key, "Shield_Leak", 0.0f) * 100);
     //double efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
-    
+
     const std::string regen_string = UnitCSVFactory::GetVariable(unit_key, "Shield_Recharge", std::string());
     regeneration = Resource<double>(regen_string);
 
     // We support 3 options:
-    // 1. Minimized shield_strength = x (single value). 
+    // 1. Minimized shield_strength = x (single value).
     // 2. New detailed shield (Front, back, left, right).
-    // 3. Old detailed (Front-left-top, ...). 4/2 facets converted to 4/2. 
+    // 3. Old detailed (Front-left-top, ...). 4/2 facets converted to 4/2.
 
     // Get shield count
     std::map<std::string, float> shield_sections{};
     std::vector<std::string> shield_string_values{};
-    
+
     const std::string shield_strength_string = UnitCSVFactory::GetVariable(unit_key, "shield", std::string());
     const std::string shield_facets_string = UnitCSVFactory::GetVariable(unit_key, "shield_facets", std::string());
 
@@ -91,9 +94,9 @@ void Shield::Load(std::string unit_key) {
     if(!shield_strength_string.empty()) {
         try {
             Resource<double> facet_strength = Resource<double>(shield_strength_string);
-            facets = std::vector<Resource<double>>(number_of_facets, 
+            facets = std::vector<Resource<double>>(number_of_facets,
                 facet_strength);
-            
+
             CalculatePercentOperational();
             return;
         } catch (std::invalid_argument const& ex) {
@@ -101,25 +104,25 @@ void Shield::Load(std::string unit_key) {
         } catch (std::out_of_range const& ex) {
             VS_LOG(error, (boost::format("%1%: %2% trying to convert shield_strength_string '%3%' to int") % __FUNCTION__ % ex.what() % shield_strength_string));
         }
-    } 
-    
+    }
+
     // Try new longform
-    if(!shield_facets_string.empty() && 
-       (number_of_facets == 4 || number_of_facets == 2)) { 
+    if(!shield_facets_string.empty() &&
+       (number_of_facets == 4 || number_of_facets == 2)) {
         std::vector<Resource<double>> shield_values{};
         std::string shield_keys[] = {"shield_front", "shield_back",
             "shield_left", "shield_right"};
-        
+
         // Using old form for loop to support 2/4 shields.
         for (int i = 0; i < number_of_facets; ++i) {
             // TODO: this can be taken out to a separate utility function, shared to hull, armor and shield
-            // also below in old form. 
+            // also below in old form.
             // Maybe. If we read numbers instead of strings... no need.
             const std::string shield_string_value = UnitCSVFactory::GetVariable(unit_key, shield_keys[i], std::string());
             if (shield_string_value.empty()) {
                 shield_values.push_back(Resource<double>(0.0));
                 continue;
-            } 
+            }
 
             try {
                 Resource<double> facet_strength = Resource<double>(shield_string_value);
@@ -136,7 +139,7 @@ void Shield::Load(std::string unit_key) {
         facets = shield_values;
         CalculatePercentOperational();
         return;
-    } 
+    }
 
     // Fallback to old shield_keys
     int shield_count = 0;
@@ -147,7 +150,7 @@ void Shield::Load(std::string unit_key) {
         for (auto &key : shield_keys) {
             std::string string_value = UnitCSVFactory::GetVariable(unit_key, key, std::string());
 
-            // If no shields present, we should break and go directly to end 
+            // If no shields present, we should break and go directly to end
             // of function
             if(string_value.empty()) {
                 break;
@@ -172,9 +175,9 @@ void Shield::Load(std::string unit_key) {
     number_of_facets = 0;
     facets.clear();
     operational = 0.0;
-}      
+}
 
-        
+
 
 void Shield::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // We always save in long form.
@@ -185,10 +188,10 @@ void Shield::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["shield_right"] = facets[3].Serialize();
 
     //TODO: lib_damage shield leak and efficiency
-    unit["Shield_Leak"] = std::to_string(0); 
-    unit["Shield_Efficiency"] = std::to_string(1); 
+    unit["Shield_Leak"] = std::to_string(0);
+    unit["Shield_Efficiency"] = std::to_string(1);
     unit["Shield_Recharge"] = regeneration.Serialize();
-} 
+}
 
 bool Shield::CanDowngrade() const {
     return installed && !integral;
@@ -201,7 +204,7 @@ bool Shield::Downgrade() {
 
     // Component
     Component::Downgrade();
-    
+
     facets.clear();
     return true;
 }
@@ -305,7 +308,7 @@ void Shield::Regenerate(const bool player_ship) {
     //approx
     //const float discharge_rate = (1 - (1 - discharge_per_second) * simulation_atom_var);
     //const float min_shield_discharge = configuration()->physics_config.min_shield_speeding_discharge;
-    
+
     // Some basic sanity checks first
     // No point in all this code if there are no shields.
     if (number_of_facets < 2 || TotalMaxLayerValue() == 0) {
@@ -327,10 +330,10 @@ void Shield::Regenerate(const bool player_ship) {
     /* A discussion of consumption
     * First, you set the consumption for 1 second (not atom_var)
     * Then you consume and get back actual consumption
-    * Finally, you adjust whatever used it to the value in question 
+    * Finally, you adjust whatever used it to the value in question
     */
 
-    // Shield Maintenance 
+    // Shield Maintenance
     // TODO: lib_damage restore efficiency by replacing with shield->efficiency
     //const double efficiency = 1;
 
@@ -358,7 +361,7 @@ void Shield::Regenerate(const bool player_ship) {
     SetConsumption(shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
     double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;
-    
+
     for (Resource<double> &facet : facets) {
         facet += regen;
     }
@@ -403,4 +406,9 @@ void Shield::Zero() {
     for(auto& facet : facets) {
         facet = 0;
     }
+}
+
+double Shield::Consume()
+{
+    return EnergyConsumer::Consume();
 }

@@ -26,7 +26,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "manifest.h"
+#include "resource/manifest.h"
 
 
 

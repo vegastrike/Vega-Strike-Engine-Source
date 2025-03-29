@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "gl_globals.h"
 #include <cstring>
 //#include "gl_globals.h"

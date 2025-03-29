@@ -25,15 +25,15 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "get_string.h"
-#include "vsfilesystem.h"
+#include "root_generic/vsfilesystem.h"
 
-#include <Python.h> 
+#include <Python.h>
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 
 
 
-const std::string GetString(const std::string function_name, 
+const std::string GetString(const std::string function_name,
                             const std::string module_name,
                             const std::string file_name,
                             PyObject* args) {
@@ -52,15 +52,15 @@ const std::string GetString(const std::string function_name,
         PyErr_Print();
         PyErr_Clear();
         return "Error: PyObject_GetAttrString is null";
-    } 
-    
+    }
+
     if(args == nullptr) {
         VS_LOG_AND_FLUSH(error, "Error: args is null");
         PyErr_Print();
         PyErr_Clear();
         return "Error: PyTuple_Pack is null";
-    } 
-    
+    }
+
     PyObject* pyResult = PyObject_CallObject(function, args);
 
     if(!pyResult) {
@@ -76,7 +76,7 @@ const std::string GetString(const std::string function_name,
 }
 
 
-const std::string GetString(const std::string function_name, 
+const std::string GetString(const std::string function_name,
                             const std::string module_name,
                             const std::string file_name,
                             const std::map<std::string, std::string>& cpp_map) {
@@ -86,6 +86,6 @@ const std::string GetString(const std::string function_name,
     }
 
     PyObject* args = PyTuple_Pack(1, dict.ptr());
-    
+
     return GetString(function_name, module_name, file_name, args);
 }

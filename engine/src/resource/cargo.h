@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
 #define VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
 
-#include "product.h"
+#include "resource/product.h"
 
 #include <string>
 

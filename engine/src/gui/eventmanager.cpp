@@ -21,10 +21,10 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "eventmanager.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 #include <algorithm>
 

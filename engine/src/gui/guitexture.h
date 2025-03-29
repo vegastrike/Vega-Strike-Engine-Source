@@ -25,7 +25,7 @@
 #include <string>
 #include "guidefs.h"
 
-#include "vegastrike.h"                 //For OpenGL/gl.h -> GLuint.
+#include "src/vegastrike.h"                 //For OpenGL/gl.h -> GLuint.
 
 //The GuiTexture class encapsulates an OpenGL 2D texture.
 //There is a cache so that a texture is only read and bound once.

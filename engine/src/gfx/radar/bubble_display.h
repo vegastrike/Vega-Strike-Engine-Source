@@ -29,7 +29,7 @@
 
 #include <queue>
 #include "sensor.h"
-#include "radar.h"
+#include "gfx/radar/radar.h"
 #include "dual_display.h"
 
 #include <memory>

@@ -26,39 +26,39 @@
 
 
 #include <math.h>
-#include "vegastrike.h"
-#include "planet.h"
-#include "gfxlib.h"
-#include "gfx/sphere.h"
-#include "collection.h"
-#include "ai/order.h"
-#include "gfxlib_struct.h"
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "src/vegastrike.h"
+#include "cmd/planet.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/sphere.h"
+#include "cmd/collection.h"
+#include "cmd/ai/order.h"
+#include "src/gfxlib_struct.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include <assert.h>
-#include "cont_terrain.h"
+#include "cmd/cont_terrain.h"
 #include "atmosphere.h"
-#include "atmospheric_fog_mesh.h"
+#include "root_generic/atmospheric_fog_mesh.h"
 
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
 #endif
 
 #include "collide2/CSopcodecollider.h"
-#include "images.h"
+#include "cmd/images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"
 #include "cmd/script/flightgroup.h"
 #include "gfx/ring.h"
-#include "alphacurve.h"
+#include "cmd/alphacurve.h"
 #include "gfx/vsimage.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "gfx/camera.h"
-#include "universe.h"
+#include "src/universe.h"
 #include "configuration/game_config.h"
-#include "planetary_orbit.h"
-#include "universe_util.h"
+#include "cmd/planetary_orbit.h"
+#include "src/universe_util.h"
 
 using std::endl;
 

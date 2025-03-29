@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_BUILDING_H
 #define VEGA_STRIKE_ENGINE_CMD_BUILDING_H
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 class Terrain;
 class ContinuousTerrain;

@@ -26,20 +26,20 @@
 
 
 #include "comm_ai.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "communication.h"
 #include "cmd/collection.h"
-#include "gfx/cockpit_generic.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "cmd/images.h"
-#include "configxml.h"
-#include "vs_globals.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/unit_util.h"
-#include "vs_random.h"
+#include "src/vs_random.h"
 #include "cmd/unit_find.h"
 #include "cmd/pilot.h"
-#include "universe_util.h"
-#include "universe.h"
+#include "src/universe_util.h"
+#include "src/universe.h"
 
 CommunicatingAI::CommunicatingAI(int ttype,
         int stype,

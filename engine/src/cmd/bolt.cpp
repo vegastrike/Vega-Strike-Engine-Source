@@ -27,22 +27,22 @@
 #include <string>
 #include <algorithm>
 
-#include "bolt.h"
+#include "cmd/bolt.h"
 
-#include "gfx/boltdrawmanager.h"
-#include "gfxlib.h"
-#include "gfx/mesh.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/boltdrawmanager.h"
+#include "src/gfxlib.h"
+#include "gfx_generic/mesh.h"
+#include "src/gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
-#include "audiolib.h"
-#include "config_xml.h"
+#include "src/audiolib.h"
+#include "src/config_xml.h"
 #include "gfx/camera.h"
-#include "options.h"
-#include "universe.h"
-#include "damageable.h"
-#include "vs_logging.h"
-#include "gfx/texture_manager.h"
+#include "root_generic/options.h"
+#include "src/universe.h"
+#include "cmd/damageable.h"
+#include "src/vs_logging.h"
+#include "gfx_generic/texture_manager.h"
 
 using std::vector;
 using std::string;

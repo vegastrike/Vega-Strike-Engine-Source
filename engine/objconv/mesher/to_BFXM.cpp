@@ -21,8 +21,8 @@
  */
 
 #include "PrecompiledHeaders/Converter.h"
-#include "mesh_io.h"
-#include "to_BFXM.h"
+#include "objconv/mesher/mesh_io.h"
+#include "objconv/mesher/to_BFXM.h"
 #include <cstring>  //We are using C style string functions here
 
 //#define fprintf aprintf

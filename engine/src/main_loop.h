@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_MAIN_LOOP_H
 #define VEGA_STRIKE_ENGINE_MAIN_LOOP_H
 
-#include "in.h"
+#include "src/in.h"
 #include "cmd/unit_generic.h"
 void bootstrap_draw(const std::string &message, Animation *SplashScreen = NULL);
 

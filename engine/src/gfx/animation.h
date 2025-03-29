@@ -23,15 +23,15 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_ANIMATION_H
 #define VEGA_STRIKE_ENGINE_GFX_ANIMATION_H
 
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 
 #include <stack>
 
-#include "quaternion.h"
+#include "gfx_generic/quaternion.h"
 
-#include "ani_texture.h"
+#include "gfx/ani_texture.h"
 
 namespace VSFileSystem {
 class VSFile;

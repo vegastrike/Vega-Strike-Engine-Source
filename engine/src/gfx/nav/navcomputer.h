@@ -22,8 +22,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H
 #define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H
 
-#include "navscreen.h"
-#include "navpath.h"
+#include "gfx/nav/navscreen.h"
+#include "gfx/nav/navpath.h"
 #include "gui/windowcontroller.h"
 #include "gui/simplepicker.h"
 

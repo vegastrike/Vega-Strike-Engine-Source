@@ -26,17 +26,17 @@
 
 
 #include "nebula.h"
-#include "vegastrike.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "src/vegastrike.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include <assert.h>
-#include "config_xml.h"
-#include "vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
 #include <sys/stat.h>
-#include "xml_support.h"
-#include "gfx/mesh.h"
+#include "root_generic/xml_support.h"
+#include "gfx_generic/mesh.h"
 #include "gfx/cockpit.h"
-#include "universe.h"
+#include "src/universe.h"
 
 #undef BOOST_NO_CWCHAR
 

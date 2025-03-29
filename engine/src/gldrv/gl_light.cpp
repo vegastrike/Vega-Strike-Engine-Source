@@ -24,11 +24,11 @@
 #include <stack>
 using std::stack;
 #include <assert.h>
-#include "vs_globals.h"
-#include "gfxlib.h"
+#include "root_generic/vs_globals.h"
+#include "src/gfxlib.h"
 #include "gl_light.h"
-#include "config_xml.h"
-#include "options.h"
+#include "src/config_xml.h"
+#include "root_generic/options.h"
 
 GLint GFX_MAX_LIGHTS = 8;
 GLint GFX_OPTIMAL_LIGHTS = 4;

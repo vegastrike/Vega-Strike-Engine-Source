@@ -26,18 +26,18 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H
 
-#include "images.h"
-#include "universe.h"
-#include "vegastrike.h"
+#include "cmd/images.h"
+#include "src/universe.h"
+#include "src/vegastrike.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "gfx/cockpit.h"
-#include "savegame.h"
-#include "config_xml.h"
-#include "xml_serializer.h"
-#include "audiolib.h"
-#include "vs_globals.h"
-#include "unit_const_cache.h"
+#include "root_generic/savegame.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_serializer.h"
+#include "src/audiolib.h"
+#include "root_generic/vs_globals.h"
+#include "cmd/unit_const_cache.h"
 #ifdef _MSC_VER
 #define strcasecmp stricmp
 #endif

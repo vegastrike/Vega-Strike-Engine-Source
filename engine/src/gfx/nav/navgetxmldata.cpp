@@ -25,7 +25,7 @@
  */
 
 
-#include "navgetxmldata.h"
+#include "gfx/nav/navgetxmldata.h"
 
 using std::string;
 

@@ -27,9 +27,9 @@
 
 #include "cmd/unit_generic.h"
 #include "loc_select.h"
-#include "gfxlib.h"
-#include "in_kb.h"
-#include "vs_globals.h"
+#include "src/gfxlib.h"
+#include "src/in_kb.h"
+#include "root_generic/vs_globals.h"
 #include <stdio.h>
 
 extern KBSTATE mouseButtonState;
@@ -201,19 +201,19 @@ void LocationSelect::Draw() {
                 zvalueXY = -1000;
             }
             LocalPosition.i = fabs(zvalueXY)
-                    * (((2 * DeltaPosition.i / g_game.x_resolution
-                            - 1) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
+                    * (((2.0 * DeltaPosition.i / g_game.x_resolution
+                            - 1.0) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
                             * tP.i)
-                            - (1
-                                    - (2 * DeltaPosition.j
+                            - (1.0
+                                    - (2.0 * DeltaPosition.j
                                             / g_game.y_resolution) * g_game.MouseSensitivityY * GFXGetYInvPerspective()
                                             * tP.j));
             LocalPosition.j = fabs(zvalueXY)
-                    * (((2 * DeltaPosition.i / g_game.x_resolution
-                            - 1) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
+                    * (((2.0 * DeltaPosition.i / g_game.x_resolution
+                            - 1.0) * g_game.MouseSensitivityX * GFXGetXInvPerspective()
                             * tQ.i)
-                            - (1
-                                    - (2 * DeltaPosition.j
+                            - (1.0
+                                    - (2.0 * DeltaPosition.j
                                             / g_game.y_resolution) * tQ.j * g_game.MouseSensitivityY
                                             * GFXGetYInvPerspective()));
             DeltaPosition = Vector(0, 0, 0);

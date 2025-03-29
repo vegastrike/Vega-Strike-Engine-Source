@@ -25,13 +25,13 @@
  */
 
 
-#include "sphere.h"
-#include "ani_texture.h"
-#include "vegastrike.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "xml_support.h"
+#include "gfx_generic/sphere.h"
+#include "gfx/ani_texture.h"
+#include "src/vegastrike.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/xml_support.h"
 #ifndef M_PI
 #define M_PI (3.1415926536F)
 #endif

@@ -25,12 +25,12 @@
  */
 
 
-#include "cockpit_gfx_utils.h"
+#include "gfx/cockpit_gfx_utils.h"
 
 #include "configuration/game_config.h"
 #include "configuration/configuration.h"
-#include "gfxlib.h"
-#include "vs_math.h"
+#include "src/gfxlib.h"
+#include "src/vs_math.h"
 
 VertexBuilder<> GetCross(const QVector &location, const Vector& cam_p,
                            const Vector& cam_q, const float& size) {

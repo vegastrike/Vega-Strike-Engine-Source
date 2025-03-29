@@ -30,7 +30,7 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 using boost::property_tree::ptree;
 

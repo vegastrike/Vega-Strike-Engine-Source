@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "product.h"
+#include "resource/product.h"
 
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
 

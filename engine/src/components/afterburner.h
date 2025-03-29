@@ -26,23 +26,25 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 class EnergyContainer;
 
 /** We split this class from Drive for one reason - it may use a different source. */
 class Afterburner : public Component, public EnergyConsumer {
 public:
+    ~Afterburner() override;
+
     //after burner acceleration max
     Resource<double> thrust;
 
     Resource<double> speed;
 
-    Afterburner(EnergyContainer *source = nullptr);
-    
+    explicit Afterburner(EnergyContainer *source = nullptr);
+
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -53,6 +55,9 @@ public:
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+
+    double Consume() override;
+
     // TODO: virtual void Destroy(); and other functions
 };
 

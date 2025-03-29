@@ -28,5 +28,5 @@
 #include <OgrePrerequisites.h>
 #endif
 
-#include "Standard.h"
-#include "../Converter.h"
+#include "objconv/mesher/PrecompiledHeaders/Standard.h"
+#include "objconv/mesher/Converter.h"

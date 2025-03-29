@@ -41,21 +41,40 @@ IF (EXPAT_FOUND)
         Modules/XMesh_to_Ogre.cpp
         Modules/Wavefront_to_BFXM.cpp
         PrecompiledHeaders/Converter.cpp
-        ${Vega_Strike_SOURCE_DIR}/engine/src/hashtable.cpp
-        ${Vega_Strike_SOURCE_DIR}/engine/src/xml_support.cpp
+        ${Vega_Root_SOURCE_DIR}/engine/src/hashtable.cpp
+        ${Vega_Root_SOURCE_DIR}/engine/src/xml_support.cpp
     )
 
     # Still need to add CEGUI and OGRE find packages
     #if have OGRE to_OgreMesh.cpp
 
     ADD_EXECUTABLE(mesher ${MESHER_SOURCES})
-    TARGET_INCLUDE_DIRECTORIES(mesher PUBLIC ${VS_INCLUDE_DIRS})
+    TARGET_INCLUDE_DIRECTORIES(mesher SYSTEM PRIVATE ${TST_INCLUDES})
+    TARGET_INCLUDE_DIRECTORIES(mesher PRIVATE
+            # VS engine headers
+            ${Vega_Root_SOURCE_DIR}
+            ${Vega_Root_SOURCE_DIR}/engine
+            ${Vega_Root_SOURCE_DIR}/engine/src
+            # Library Headers
+            ${Vega_Root_SOURCE_DIR}/libraries
+            # CMake Artifacts
+            ${Vega_Root_BINARY_DIR}
+            ${Vega_Root_BINARY_DIR}/src
+            ${Vega_Root_BINARY_DIR}/engine
+            ${Vega_Root_BINARY_DIR}/engine/src
+    )
+
     SET_TARGET_PROPERTIES(mesher PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-    TARGET_COMPILE_DEFINITIONS(mesher PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>" "$<$<CONFIG:Debug>:Py_DEBUG>")
+    SET_PROPERTY(TARGET mesher PROPERTY CXX_STANDARD 14)
+    SET_PROPERTY(TARGET mesher PROPERTY CXX_STANDARD_REQUIRED TRUE)
+    SET_PROPERTY(TARGET mesher PROPERTY CXX_EXTENSIONS ON)
+
+    TARGET_COMPILE_DEFINITIONS(mesher PUBLIC "BOOST_ALL_DYN_LINK" "$<$<CONFIG:Debug>:BOOST_DEBUG_PYTHON>")
     IF (WIN32)
         TARGET_COMPILE_DEFINITIONS(mesher PUBLIC BOOST_USE_WINAPI_VERSION=0x0A00)
         TARGET_COMPILE_DEFINITIONS(mesher PUBLIC _WIN32_WINNT=0x0A00)
         TARGET_COMPILE_DEFINITIONS(mesher PUBLIC WINVER=0x0A00)
+        TARGET_COMPILE_DEFINITIONS(mesher PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
     # OGRE already looked for by parent

@@ -26,7 +26,7 @@
 #ifndef __FACTION_XML_SERVER_CPP__
 #define __FACTION_XML_SERVER_CPP__
 
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 
 //by chuck starchaser
 /*

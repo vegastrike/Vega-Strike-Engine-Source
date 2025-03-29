@@ -23,4 +23,4 @@
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "Converter.h"
+#include "objconv/mesher/Converter.h"

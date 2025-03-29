@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H
 
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 #include "gfx/sprite.h"
 
 struct GFXColor;  // Edit from class to struct as defined in gfxlib_struct.

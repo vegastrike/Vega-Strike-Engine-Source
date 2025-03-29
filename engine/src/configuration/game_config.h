@@ -37,7 +37,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 namespace pt = boost::property_tree;
 

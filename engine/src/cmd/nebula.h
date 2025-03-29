@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_NEBULA_H
 #define VEGA_STRIKE_ENGINE_CMD_NEBULA_H
 
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 class Nebula : public Unit {
 public:

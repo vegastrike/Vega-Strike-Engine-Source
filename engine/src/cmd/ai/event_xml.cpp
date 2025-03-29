@@ -25,18 +25,18 @@
 
 
 #include "cmd/unit_generic.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "event_xml.h"
 #include <string>
 #include <vector>
 #include <list>
 #include <float.h>
 #include <assert.h>
-#include "vegastrike.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
-#include "configxml.h"
+#include "src/vegastrike.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/configxml.h"
 extern bool validateHardCodedScript(std::string s);
 //serves to run through a XML file that nests things for "and".
 

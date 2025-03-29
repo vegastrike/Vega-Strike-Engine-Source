@@ -39,7 +39,7 @@ extern float audio_atom_var;
 extern float SIMULATION_ATOM;
 extern float AUDIO_ATOM;
 
-#include "vs_math.h"
+#include "src/vs_math.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,7 +50,7 @@ extern float AUDIO_ATOM;
 #include <string.h>
 #include <limits.h>
 #include <stdarg.h>
-#include "debug_vs.h"
+#include "src/debug_vs.h"
 
 #if !defined(_WIN32)
 #   define GL_GLEXT_PROTOTYPES 1
@@ -75,14 +75,14 @@ extern float AUDIO_ATOM;
 #if !defined (NO_GFX)
 #   if defined(__APPLE__) && defined(__MACH__)
 #       define GL_GLEXT_FUNCTION_POINTERS 1
-#       include <gl.h>
-#       include <glu.h>
-#       include <glut.h>
+#       include <GL/gl.h>
+#       include <GL/glu.h>
+#       include <GL/glut.h>
 #   else //defined(__APPLE__) && defined(__MACH__)
 #       define __glext_h_
-#       include <gl.h>
-#       include <glu.h>
-#       include <glut.h>
+#       include <GL/gl.h>
+#       include <GL/glu.h>
+#       include <GL/glut.h>
 #       undef __glext_h_
 #   endif //defined(__APPLE__) && defined(__MACH__)
 #endif //NO_GFX

@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_STAR_XML_H
 #define VEGA_STRIKE_ENGINE_STAR_XML_H
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
 using namespace XMLSupport;
 

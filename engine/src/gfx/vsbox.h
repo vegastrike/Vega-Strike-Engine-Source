@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_BOX_H
 #define VEGA_STRIKE_ENGINE_GFX_BOX_H
 
-#include "mesh.h"
+#include "gfx_generic/mesh.h"
 
 class Box : public Mesh {
 private:

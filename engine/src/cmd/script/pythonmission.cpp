@@ -26,14 +26,15 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python.hpp>
+
 #include <Python.h>
 #include <math.h>
 #include "pythonmission.h"
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 #include <string>
-#include "python/init.h"
+#include "src/python/init.h"
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "cmd/container.h"
 
 PythonMissionBaseClass::PythonMissionBaseClass() {

@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GUI_GUI_DEFS_H
 #define VEGA_STRIKE_ENGINE_GUI_GUI_DEFS_H
 
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "gldrv/winsys.h"
 //Location in 2d.
 struct Point {

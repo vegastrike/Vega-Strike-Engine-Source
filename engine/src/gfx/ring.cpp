@@ -26,12 +26,12 @@
 
 
 #include "ring.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "vsfilesystem.h"
-#include "xml_support.h"
-#include "ani_texture.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/xml_support.h"
+#include "gfx/ani_texture.h"
 
 extern int pixelscalesize; //from sphere.cpp
 

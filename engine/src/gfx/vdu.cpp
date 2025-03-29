@@ -27,26 +27,26 @@
 /// Draws shield, armor, comm strings and animation, messages, manifest,
 /// target info, and objectives
 
-#include "vdu.h"
+#include "gfx/vdu.h"
 #include "cmd/unit_util.h"
-#include "hud.h"
-#include "vs_globals.h"
-#include "cockpit.h"
+#include "gfx/hud.h"
+#include "root_generic/vs_globals.h"
+#include "gfx/cockpit.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/script/msgcenter.h"
 #include "cmd/images.h"
 #include "cmd/planet.h"
 #include "cmd/beam.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "gfx/animation.h"
-#include "galaxy_gen.h"
-#include "universe_util.h"
-#include "vsfilesystem.h"
+#include "root_generic/galaxy_gen.h"
+#include "src/universe_util.h"
+#include "root_generic/vsfilesystem.h"
 #include "cmd/ai/communication.h"
-#include "universe.h"
-#include "mount_size.h"
-#include "weapon_info.h"
+#include "src/universe.h"
+#include "cmd/mount_size.h"
+#include "cmd/weapon_info.h"
 #include "configuration/configuration.h"
 #include "components/ship_functions.h"
 
@@ -632,10 +632,10 @@ static float TwoOfFour(float a, float b, float c, float d) {
 
 void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     float x, y, w, h;
-    
+
     GFXEnable(TEXTURE0);
     const bool invert_target_sprite = configuration()->graphics_config.hud.invert_target_sprite;
-    
+
     float armor_up = target->armor.Percent(Armor::front);
     float armor_down = target->armor.Percent(Armor::back);
     float armor_left = target->armor.Percent(Armor::right);
@@ -716,7 +716,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         double dist = DistanceTwoTargets(parent, target);
         double actual_range = dist;
         if ((target->isUnit() == Vega_UnitType::planet) && (target->CanDockWithMe(parent, 1) != -1)) {
-            dist -= target->rSize() * UniverseUtil::getPlanetRadiusPercent();
+            dist -= static_cast<double>(target->rSize()) * static_cast<double>(UniverseUtil::getPlanetRadiusPercent());
             if (dist < 0) {
                 newst += string("Docking: Ready");
             } else if (dist < target->rSize()) {
@@ -743,9 +743,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         static bool builtin_shields =
                 XMLSupport::parse_bool(vs_config->getVariable("graphics", "vdu_builtin_shields", "false"));
         if (builtin_shields) {
-            DrawShield(target->shield.Percent(Shield::front), 
-            target->shield.Percent(Shield::right), 
-            target->shield.Percent(Shield::left), 
+            DrawShield(target->shield.Percent(Shield::front),
+            target->shield.Percent(Shield::right),
+            target->shield.Percent(Shield::left),
             target->shield.Percent(Shield::back), x, y, w, h, false,
                     GFXColor(ishieldcolor[0], ishieldcolor[1], ishieldcolor[2], ishieldcolor[3]),
                     GFXColor(mshieldcolor[0], mshieldcolor[1], mshieldcolor[2], mshieldcolor[3]),
@@ -1317,11 +1317,11 @@ void VDU::DrawDamage(Unit *parent) {
     if (parent->pImage != nullptr) {
         // Integrated systems with percent working values
         // TODO: get labels from config
-        REPORTITEM( parent->ship_functions.Percent(Function::life_support), 1.0, print_percent_working, "Life Support"); 
-        REPORTITEM( parent->ship_functions.Percent(Function::fire_control), 1.0, print_percent_working, "Fire Control"); 
-        REPORTITEM( parent->ftl_drive.PercentOperational(), 1.0, print_percent_working, "SPEC Drive"); 
-        REPORTITEM( parent->ship_functions.Percent(Function::communications), 1.0, print_percent_working, "Comm"); 
-        
+        REPORTITEM( parent->ship_functions.Percent(Function::life_support), 1.0, print_percent_working, "Life Support");
+        REPORTITEM( parent->ship_functions.Percent(Function::fire_control), 1.0, print_percent_working, "Fire Control");
+        REPORTITEM( parent->ftl_drive.PercentOperational(), 1.0, print_percent_working, "SPEC Drive");
+        REPORTITEM( parent->ship_functions.Percent(Function::communications), 1.0, print_percent_working, "Comm");
+
         // Integrated system with boolean damage flags
         REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
         REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade

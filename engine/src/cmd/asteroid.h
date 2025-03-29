@@ -26,12 +26,12 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
 #define VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
 
-#include "gfx/quaternion.h"
-#include "gfx/vec.h"
-#include "gfx/matrix.h"
+#include "gfx_generic/quaternion.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/matrix.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 
 class Asteroid : public Unit {
 private:

@@ -26,7 +26,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 using std::string;
 //WARNING: Macro City ahead.  Please skip this section if you don't like macros.
 static const char *kNullUnitErrorMsg = "\nERROR: NULL Unit used in Python script; returning default value...";
@@ -118,7 +118,7 @@ static const char *kNullUnitErrorMsg = "\nERROR: NULL Unit used in Python script
 //End of Macro City
 class UnitWrapper : public UnitContainer {
 public:
-#include "python_unit_wrap.h"
+#include "src/python/python_unit_wrap.h"
 
 ///////////////////////////////MANUAL WRAP//////
 //WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
@@ -279,7 +279,7 @@ public:
         // 0 and above is set destination
         if(!unit->jump_drive.Installed()) {
             return -2;
-        } 
+        }
 
         return unit->jump_drive.Destination();
     }

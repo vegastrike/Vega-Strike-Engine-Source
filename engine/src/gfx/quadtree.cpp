@@ -24,14 +24,14 @@
  */
 
 
-#include "quadtree.h"
-#include "matrix.h"
-#include "aux_texture.h"
-#include "universe.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "gfx/quadtree.h"
+#include "gfx_generic/matrix.h"
+#include "gfx/aux_texture.h"
+#include "src/universe.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 
 const GFXVertex InitialVertices[4] = {
         GFXVertex(Vector(0, 0, 0), Vector(0, 1, 0), 0, 0),

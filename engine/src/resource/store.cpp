@@ -21,7 +21,7 @@
  */
 
 
-#include "store.h"
+#include "resource/store.h"
 
 
 Store::Store(std::vector<Product> stock, double cash):

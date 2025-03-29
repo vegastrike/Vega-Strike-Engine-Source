@@ -25,7 +25,7 @@
  */
 
 
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "cmd/unit_generic.h"
 #include "mission.h"
 #include "cmd/briefing.h"

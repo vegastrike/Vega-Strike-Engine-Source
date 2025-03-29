@@ -21,7 +21,7 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "simplepicker.h"
 

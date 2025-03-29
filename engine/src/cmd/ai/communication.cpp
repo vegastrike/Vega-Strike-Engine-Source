@@ -25,13 +25,13 @@
 
 
 #include "communication.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
+#include "src/config_xml.h"
 #include <assert.h>
-#include "audiolib.h"
-#include "options.h"
-#include "universe.h"
+#include "src/audiolib.h"
+#include "root_generic/options.h"
+#include "src/universe.h"
 
 using namespace XMLSupport;
 

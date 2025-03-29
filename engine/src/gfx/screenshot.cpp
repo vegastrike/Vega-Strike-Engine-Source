@@ -23,10 +23,10 @@
  */
 
 
-#include "in_kb.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "vsimage.h"
+#include "src/in_kb.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "gfx/vsimage.h"
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>
 
@@ -38,7 +38,8 @@ void Screenshot(const KBData &, KBSTATE state) {
         xywh[2] = g_game.x_resolution;
         xywh[3] = g_game.y_resolution;
         glGetIntegerv(GL_VIEWPORT, xywh);
-        unsigned char *tmp = (unsigned char *) malloc(xywh[2] * xywh[3] * 4 * sizeof(unsigned char));
+        unsigned char *tmp = static_cast<unsigned char *>(malloc(
+            static_cast<size_t>(xywh[2]) * static_cast<size_t>(xywh[3]) * 4 * sizeof(unsigned char)));
         //memset(tmp,0x7f,xywh[2]*xywh[3]*4*sizeof(char));
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ROW_LENGTH, xywh[2]);

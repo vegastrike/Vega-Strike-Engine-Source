@@ -20,20 +20,20 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include <vector>
-#include "beam.h"
-#include "unit_generic.h"
+#include "cmd/beam.h"
+#include "cmd/unit_generic.h"
 #include "gfx/aux_texture.h"
 #include "gfx/decalqueue.h"
 using std::vector;
-#include "audiolib.h"
-#include "configxml.h"
-#include "images.h"
-#include "mount_size.h"
-#include "weapon_info.h"
-#include "damageable.h"
-#include "universe.h"
+#include "src/audiolib.h"
+#include "root_generic/configxml.h"
+#include "cmd/images.h"
+#include "cmd/mount_size.h"
+#include "cmd/weapon_info.h"
+#include "cmd/damageable.h"
+#include "src/universe.h"
 
 #include <algorithm>
 #include <cmath>

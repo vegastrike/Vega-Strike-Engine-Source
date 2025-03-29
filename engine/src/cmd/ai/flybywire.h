@@ -27,7 +27,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_AI_FLY_BY_WIRE_H
 
 #include "order.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 namespace Orders {
 /**
  * This class attempts to match a given

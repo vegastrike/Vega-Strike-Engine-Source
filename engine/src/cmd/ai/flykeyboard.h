@@ -24,7 +24,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_FLY_KEYBOARD_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_FLY_KEYBOARD_H
 
-#include "in.h"
+#include "src/in.h"
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>
 #include "flybywire.h"

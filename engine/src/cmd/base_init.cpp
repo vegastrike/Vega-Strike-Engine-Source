@@ -42,10 +42,10 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #endif
 
 #include <Python.h>
-#include "python/python_class.h"
-#include "base.h"
-#include "base_util.h"
-#include "vsfilesystem.h"
+#include "src/python/python_class.h"
+#include "cmd/base.h"
+#include "cmd/base_util.h"
+#include "root_generic/vsfilesystem.h"
 
 static BoostPythonDictionary GetEventDataPython() {
     return BaseUtil::GetEventData();

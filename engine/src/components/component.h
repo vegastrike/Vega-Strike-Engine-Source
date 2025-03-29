@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -43,13 +43,13 @@ class Unit;
 
 // TODO: add complete list
 enum class ComponentType {
-    None, 
-    Dummy, 
+    None,
+    Dummy,
 
-    Hull, 
-    Armor, 
+    Hull,
+    Armor,
     Shield,
-    
+
     Afterburner,
     AfterburnerUpgrade,
     Drive,
@@ -62,9 +62,9 @@ enum class ComponentType {
     FtlCapacitor,
     Fuel,
 
-    Cloak, 
+    Cloak,
     Radar,
-    ECM, 
+    ECM,
     RepairBot,
     ShipFunctions
 
@@ -77,7 +77,7 @@ protected:
     std::string upgrade_name;   // Isometal Armor
     std::string upgrade_key;    // armor03__upgrades
     std::string description;    // Long text and picture. Taken from master_parts_list
-    
+
     double price = 0;
     double mass = 0;
     double volume = 0;
@@ -87,17 +87,18 @@ protected:
     bool installed = false;
     bool integral = false; // Part of the ship. Can't be upgraded/downgraded
 public:
+    virtual ~Component();
     ComponentType type = ComponentType::None;
 
-    Component(double mass = 0, 
-              double volume = 0, 
-              bool installed = false, 
+    Component(double mass = 0,
+              double volume = 0,
+              bool installed = false,
               bool integral = false);
 
     // Load from units dictionary
     // TODO: we should really switch the two parameters around.
-    virtual void Load(std::string unit_key);      
-    
+    virtual void Load(std::string unit_key);
+
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const = 0;
 
     // Handle the four cases of CanUpgrade/Upgrade/CanDowngrade/Downgrade
@@ -130,7 +131,7 @@ public:
     const std::string GetUpgradeName() const;
     const std::string GetUpgradeKey() const;
     const std::string GetDescription() const;
-    
+
     const double GetPrice() const;
     const double GetMass() const;
     const double GetVolume() const;

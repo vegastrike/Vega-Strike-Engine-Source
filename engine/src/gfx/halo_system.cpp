@@ -27,24 +27,24 @@
 
 #include <vector>
 #include <string>
-#include "vec.h"
-#include "matrix.h"
+#include "gfx_generic/vec.h"
+#include "gfx_generic/matrix.h"
 #include "cmd/unit_generic.h"
 #include "halo_system.h"
-#include "universe.h"
+#include "src/universe.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "vegastrike.h"
-#include "mesh.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "config_xml.h"
+#include "src/vegastrike.h"
+#include "gfx_generic/mesh.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "gfx/particle.h"
-#include "lin_time.h"
-#include "animation.h"
+#include "root_generic/lin_time.h"
+#include "gfx/animation.h"
 #include "car_assist.h"
-#include "cmd/collide2/CSopcodecollider.h"
-#include "options.h"
+#include "collide2/CSopcodecollider.h"
+#include "root_generic/options.h"
 #include "cmd/unit_collide.h"
 
 #define HALO_SMOOTHING_UP_FACTOR (0.02)

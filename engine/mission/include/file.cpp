@@ -23,7 +23,7 @@
 #if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
-#include "file.h"
+#include "mission/include/file.h"
 
 void FindMissions(char *path) {
     MISSIONS = FindFiles(path, EXT_MISSION);

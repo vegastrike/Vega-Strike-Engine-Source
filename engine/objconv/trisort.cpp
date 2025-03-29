@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <ctype.h>
 #include <math.h>
-#include "trisort.h"
+#include "objconv/trisort.h"
 
 #if defined(__APPLE__) && defined (__MACH__)
 #define sqrtf sqrt

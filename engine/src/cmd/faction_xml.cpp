@@ -29,12 +29,12 @@
 #include <string>
 #include <gnuhash.h>
 #include <expat.h>
-#include "vegastrike.h"
-#include "xml_support.h"
+#include "src/vegastrike.h"
+#include "root_generic/xml_support.h"
 #include <assert.h>
-#include "ai/communication.h"
+#include "cmd/ai/communication.h"
 #include "cmd/music.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "faction_factory.h"
 
 using namespace XMLSupport;

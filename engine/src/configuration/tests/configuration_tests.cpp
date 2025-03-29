@@ -25,7 +25,7 @@
 
 #include <gtest/gtest.h>
 #include "configuration/game_config.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 #include <string>
 

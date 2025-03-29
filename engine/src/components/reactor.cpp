@@ -25,9 +25,9 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "reactor.h"
+#include "components/reactor.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
 #include <iostream>
@@ -39,7 +39,7 @@ const std::string REACTOR_RECHARGE = "Reactor_Recharge";
 Reactor::Reactor(EnergyContainer *source,
                  EnergyContainer *energy,
                  EnergyContainer *ftl_energy,
-                 double conversion_ratio): 
+                 double conversion_ratio):
                  Component(0.0, 0.0, false),
                  EnergyConsumer(source, false),
                  capacity(0.0, 0.0, 0.0),
@@ -50,17 +50,20 @@ Reactor::Reactor(EnergyContainer *source,
     type = ComponentType::Reactor;
 }
 
+Reactor::~Reactor()
+= default;
+
 
 void Reactor::Load(std::string unit_key) {
     Component::Load(unit_key);
     capacity = Resource<double>(UnitCSVFactory::GetVariable(unit_key, REACTOR_RECHARGE, std::string("0.0")),
                                 configuration()->fuel.reactor_factor);
-    
+
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
     operational = capacity.Percent();
-}     
-    
+}
+
 void Reactor::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // TODO: This won't record damage to recharge
     unit[REACTOR_RECHARGE] = capacity.Serialize(configuration()->fuel.reactor_factor);
@@ -75,7 +78,7 @@ bool Reactor::Downgrade() {
     if(!CanDowngrade()) {
         return false;
     }
-    
+
     Component::Downgrade();
     capacity.SetMaxValue(0.0);
     atom_capacity = 0.0;
@@ -95,7 +98,7 @@ bool Reactor::Upgrade(const std::string upgrade_key) {
 
     Component::Upgrade(upgrade_key);
 
-    capacity = Resource<double>(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, std::string("0.0")), 
+    capacity = Resource<double>(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, std::string("0.0")),
                                 configuration()->fuel.reactor_factor);
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
@@ -110,7 +113,7 @@ void Reactor::Damage() {
 }
 
 void Reactor::DamageByPercent(double percent) {
-    capacity.DamageByPercent(percent); 
+    capacity.DamageByPercent(percent);
     atom_capacity = capacity.Value() * simulation_atom_var;
     operational = capacity.AdjustedValue() / capacity.MaxValue();
 }
@@ -137,7 +140,7 @@ void Reactor::Generate() {
         ZeroSource();
         return;
     }
-    
+
     double surplus = energy->Charge(atom_capacity * power);
     surplus = ftl_energy->Charge(atom_capacity * surplus);
 }
@@ -145,7 +148,7 @@ void Reactor::Generate() {
 double Reactor::Capacity() const {
     return capacity.Value();
 }
-    
+
 double Reactor::MaxCapacity() const {
     return capacity.MaxValue();
 }
@@ -155,4 +158,9 @@ void Reactor::SetCapacity(double capacity) {
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
     operational = 1.0;
+}
+
+double Reactor::Consume()
+{
+    return EnergyConsumer::Consume();
 }

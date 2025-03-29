@@ -23,9 +23,9 @@
 #include "gl_globals.h"
 #undef GL_STATE_CPP
 
-#include "gfxlib.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/gfxlib.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 #include <stack>
 
 #ifndef GL_CONSTANT_ALPHA

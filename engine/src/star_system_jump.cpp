@@ -20,25 +20,25 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
-#include "star_system.h"
+#include "src/vegastrike.h"
+#include "src/star_system.h"
 #include "cmd/planet.h"
-#include "lin_time.h"
-#include "hashtable.h"
+#include "root_generic/lin_time.h"
+#include "src/hashtable.h"
 #include "gfx/animation.h"
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "cmd/container.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include <assert.h>
 #include "gfx/cockpit.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "cmd/images.h"
 #include "cmd/script/flightgroup.h"
 #include <string>
 #include <vector>
 
-#include "options.h"
+#include "root_generic/options.h"
 
 void CacheJumpStar(bool destroy) {
     static Animation *cachedani = new Animation(game_options()->jumpgate.c_str(), true, .1, MIPMAP, false);

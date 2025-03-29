@@ -26,7 +26,7 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
 
 #include "component.h"
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 class EnergyContainer;
 
@@ -38,7 +38,8 @@ class FtlDrive : public Component, public EnergyConsumer {
     // take it into account.
 public:
     FtlDrive();
-    FtlDrive(EnergyContainer *source);
+    explicit FtlDrive(EnergyContainer *source);
+    ~FtlDrive() override;
 
     void Enable();
     void Disable();
@@ -46,8 +47,8 @@ public:
     bool Enabled() const;
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -57,6 +58,10 @@ public:
     bool CanUpgrade(const std::string upgrade_key) const override;
 
     bool Upgrade(const std::string upgrade_key) override;
+
+    // EnergyConsumer Method(s)
+
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H

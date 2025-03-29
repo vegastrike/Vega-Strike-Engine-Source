@@ -26,7 +26,7 @@
 
 
 #include "faction_factory.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "gfx/animation.h"
 
 #include <boost/property_tree/ptree.hpp>

@@ -22,13 +22,13 @@
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_HASHTABLE_3D_H
 #define VEGA_STRIKE_ENGINE_GLDRV_HASHTABLE_3D_H
 
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 #include <algorithm>
 #include <vector>
 #include <stdio.h>
 #include <assert.h>
-#include "linecollide.h"
-#include "vs_logging.h"
+#include "src/linecollide.h"
+#include "src/vs_logging.h"
 
 //#define COLLIDETABLESIZE sizeof(CTSIZ)
 //#define COLLIDETABLEACCURACY sizeof (CTACCURACY)

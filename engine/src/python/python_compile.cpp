@@ -26,18 +26,18 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 #include "cmd/unit_generic.h"
-#include "python_compile.h"
+#include "src/python/python_compile.h"
 #include <compile.h>
 #if ((PY_VERSION_HEX) < 0x030B0000)
 #include <eval.h>
 #endif
-#include "configxml.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "init.h"
-#include "universe_util.h"
-#include "in_kb_data.h"
-#include "vs_logging.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/python/init.h"
+#include "src/universe_util.h"
+#include "src/in_kb_data.h"
+#include "src/vs_logging.h"
 
 Hashtable<string, PyObject, 1023> compiled_python;
 

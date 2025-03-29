@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_HASHTABLE_H
 #define VEGA_STRIKE_ENGINE_HASHTABLE_H
 
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 #include <math.h>
 #include <string>
 #include <vector>

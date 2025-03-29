@@ -26,8 +26,8 @@
 
 
 #include <expat.h>
-#include "xml_support.h"
-#include "easydom.h"
+#include "mission/include/xml_support.h"
+#include "mission/include/easydom.h"
 
 #include <assert.h>    /// needed for assert() calls.
 

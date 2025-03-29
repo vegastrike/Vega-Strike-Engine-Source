@@ -28,12 +28,12 @@
 
 #include <string>
 #include <vector>
-#include "gfx/vec.h"
-#include "container.h"
-#include "../SharedPool.h"
+#include "gfx_generic/vec.h"
+#include "cmd/container.h"
+#include "src/SharedPool.h"
 #include "gfx/sprite.h"
 #include "gfx/animation.h"
-#include "cargo.h"
+#include "resource/cargo.h"
 
 struct DockingPorts {
     struct Type {
@@ -182,7 +182,7 @@ struct UnitImages {
     Animation *pExplosion = nullptr;
     float timeexplode = 0;
 
-    
+
 
 
 

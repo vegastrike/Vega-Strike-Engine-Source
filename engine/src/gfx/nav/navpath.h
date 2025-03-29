@@ -34,7 +34,7 @@
 #include <string>
 #include "criteria.h"
 
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 
 enum TopoColor { TOPO_WHITE, TOPO_GRAY, TOPO_BLACK };
 

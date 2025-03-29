@@ -24,9 +24,9 @@
 
 #include <vector>
 
-#include "facet_configuration.h"
-#include "core_vector.h"
-#include "damage.h"
+#include "damage/facet_configuration.h"
+#include "damage/core_vector.h"
+#include "damage/damage.h"
 #include "resource/resource.h"
 
 /**
@@ -37,7 +37,7 @@
 class DamageableLayer {
 protected:
     int layer; // The layer we're in, for recording damage
-    
+
     Damage vulnerabilities;
     // TODO: implement "shield leaks"
 
@@ -55,14 +55,14 @@ public:
             FacetConfiguration configuration,
             double health_template,
             Damage vulnerabilities = Damage(1.0,1.0),
-            bool core_layer = false, 
+            bool core_layer = false,
             double regeneration = 0.0);
 
     DamageableLayer() = delete;
 
     void DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage);
     void DealDamageComponent(int impacted_facet_index, int type, double &damage, double vulnerability, InflictedDamage &inflicted_damage);
-    
+
     int GetFacetIndex(const CoreVector &attack_vector) const;
 
     double TotalLayerValue() const;

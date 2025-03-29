@@ -22,9 +22,9 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "armor.h"
-#include "damage.h"
-#include "unit_csv_factory.h"
+#include "components/armor.h"
+#include "damage/damage.h"
+#include "cmd/unit_csv_factory.h"
 
 int Armor::front = 0;
 int Armor::back = 1;
@@ -33,8 +33,8 @@ int Armor::right = 3;
 
 static const Damage normal_and_phase_damage = Damage(1.0,1.0);
 
-Armor::Armor() : 
-    Component(), 
+Armor::Armor() :
+    Component(),
     DamageableLayer(1, FacetConfiguration::four, 1.0, normal_and_phase_damage, false) {
     type = ComponentType::Armor;
 }
@@ -45,18 +45,18 @@ void Armor::Load(std::string unit_key) {
     Component::Load(unit_key);
 
     facets.clear();
-    
+
     // Armor
     // We support 3 options:
-    // 1. Minimized armor = x (single value). 
+    // 1. Minimized armor = x (single value).
     // 2. New detailed armor (Front, back, left, right).
-    // 3. Old detailed (Front-left-top, ...). 8 facets converted to 4. 
+    // 3. Old detailed (Front-left-top, ...). 8 facets converted to 4.
     const std::string armor_single_value_string = UnitCSVFactory::GetVariable(unit_key, "armor", std::string());
 
     if(armor_single_value_string != "") {
         // Minimized
         Resource<double> armor_single_value = Resource<double>(armor_single_value_string);
-        facets = std::vector<Resource<double>>(number_of_facets, 
+        facets = std::vector<Resource<double>>(number_of_facets,
                 armor_single_value);
     } else {
         // Try new
@@ -76,13 +76,13 @@ void Armor::Load(std::string unit_key) {
 
         // Fallback to old
         if(!new_form) {
-            const std::string armor_keys[] = {"Armor_Front_Top_Left", 
+            const std::string armor_keys[] = {"Armor_Front_Top_Left",
                                               "Armor_Front_Top_Right",
-                                              "Armor_Front_Bottom_Left", 
+                                              "Armor_Front_Bottom_Left",
                                               "Armor_Front_Bottom_Right",
-                                              "Armor_Back_Top_Left", 
+                                              "Armor_Back_Top_Left",
                                               "Armor_Back_Top_Right",
-                                              "Armor_Back_Bottom_Left", 
+                                              "Armor_Back_Bottom_Left",
                                               "Armor_Back_Bottom_Right"};
 
             double old_armor_values[8];
@@ -103,7 +103,7 @@ void Armor::Load(std::string unit_key) {
             }
         }
     }
-}      
+}
 
 void Armor::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["armor_front"] = facets[0].Serialize();
@@ -123,7 +123,7 @@ bool Armor::Downgrade() {
 
     // Component
     Component::Downgrade();
-    
+
     facets.clear();
     return true;
 }

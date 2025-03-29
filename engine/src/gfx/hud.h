@@ -24,8 +24,8 @@
 #define VEGA_STRIKE_ENGINE_GFX_HUD_H
 
 #include <string>
-#include "vec.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
 class Texture;
 
 class TextPlane {

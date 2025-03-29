@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H
 
-#include "in.h"
+#include "src/in.h"
 #include "order.h"
 #include "event_xml.h"
 #include "communication.h"

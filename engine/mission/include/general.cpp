@@ -26,7 +26,7 @@
 #if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
-#include "general.h"
+#include "mission/include/general.h"
 #ifdef _WIN32
 #include <direct.h>
 #else

@@ -23,9 +23,9 @@
  */
 
 
-#include "vs_logging.h"
-#include "vs_exit.h"
-#include "vs_globals.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
+#include "root_generic/vs_globals.h"
 
 #include <string>
 #include <cstdint>

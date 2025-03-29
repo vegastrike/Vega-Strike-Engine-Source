@@ -25,6 +25,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
+
 #include <Python.h>
 #include "fire.h"
 #include <assert.h>

@@ -29,14 +29,14 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "gl_globals.h"
-#include "vs_globals.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "vegastrike.h"
-#include "config_xml.h"
-#include "gfxlib.h"
-#include "lin_time.h"
-#include "options.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "src/vegastrike.h"
+#include "src/config_xml.h"
+#include "src/gfxlib.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/options.h"
 
 using boost::algorithm::icontains;
 using VSFileSystem::UnknownFile;

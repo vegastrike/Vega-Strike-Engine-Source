@@ -28,7 +28,7 @@
 
 #include "order.h"
 #include "navigation.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
 /**
  * Loads a script from a given XML file

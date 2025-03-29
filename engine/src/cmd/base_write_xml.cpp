@@ -23,7 +23,7 @@
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "base.h"
+#include "cmd/base.h"
 #ifdef BASE_MAKER
 #ifdef BASE_XML
 #include <stdio.h>

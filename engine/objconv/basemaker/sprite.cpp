@@ -34,8 +34,8 @@
 #include <unistd.h>
 #endif
 
-#include "sprite.h"
-#include "base_maker_texture.h"
+#include "gfx/sprite.h"
+#include "objconv/basemaker/base_maker_texture.h"
 
 #ifndef M_PI_2
 # define M_PI_2 (1.57079632679489661923)

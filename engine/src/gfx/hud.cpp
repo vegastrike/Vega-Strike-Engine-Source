@@ -28,18 +28,18 @@
 
 
 #include <ctype.h>
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "cmd/unit_generic.h"
-#include "hud.h"
-#include "lin_time.h"
-#include "file_main.h"
+#include "gfx/hud.h"
+#include "root_generic/lin_time.h"
+#include "src/file_main.h"
 #include "gfx/aux_texture.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
 #include "cmd/base.h"
 //#include "glut.h"
-#include "universe.h"
+#include "src/universe.h"
 
 #include "gldrv/gl_globals.h"
 

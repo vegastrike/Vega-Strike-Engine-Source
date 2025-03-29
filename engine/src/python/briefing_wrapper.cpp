@@ -26,10 +26,10 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 #include <math.h>
-#include "python_class.h"
+#include "src/python/python_class.h"
 #include "cmd/briefing.h"
 #include "cmd/script/mission.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 
 namespace BriefingUtil {
 int addShip(string name, string faction, Vector vec) {

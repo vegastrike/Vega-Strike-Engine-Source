@@ -26,14 +26,14 @@
 #define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_H
 
 #include "gui/glut_support.h"
-#include "navscreenoccupied.h"
-#include "drawlist.h"
-#include "navitemtypes.h"
+#include "gfx/nav/navscreenoccupied.h"
+#include "gfx/nav/drawlist.h"
+#include "gfx/nav/navitemtypes.h"
 #include "gfx/masks.h"
-#include "navcomputer.h"
-#include "navpath.h"
+#include "gfx/nav/navcomputer.h"
+#include "gfx/nav/navpath.h"
 #include "gfx/hud.h"
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 
 #include <map>
 

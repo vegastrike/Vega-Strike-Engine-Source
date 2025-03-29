@@ -38,13 +38,12 @@
 
 #include <vector>
 
-#include "audiolib.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "vs_globals.h"
+#include "src/audiolib.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
 #include "al_globals.h"
-#include "options.h"
-#include "vs_logging.h"
+#include "root_generic/options.h"
+#include "src/vs_logging.h"
 
 #if 1
 #define AL_GET_PROC(name) ( alGetProcAddress( const_cast< ALubyte* > ( reinterpret_cast< const ALubyte* > (name) ) ) )

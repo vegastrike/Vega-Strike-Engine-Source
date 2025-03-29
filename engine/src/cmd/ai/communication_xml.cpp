@@ -27,11 +27,11 @@
 #include <vector>
 #include <string>
 #include <expat.h>
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include "communication.h"
 #include <assert.h>
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 
 static int unitlevel;
 using namespace XMLSupport;

@@ -25,12 +25,12 @@
  */
 
 
-#include "config_xml.h"
-#include "vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
 #include "turretai.h"
 #include "cmd/unit_generic.h"
 #include "cmd/role_bitmask.h"
-#include "universe.h"
+#include "src/universe.h"
 
 using namespace Orders;
 

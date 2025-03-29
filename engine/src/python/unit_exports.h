@@ -24,12 +24,12 @@
 // NO HEADER GUARD
 
 #define PY_SSIZE_T_CLEAN
-#include "python_class.h"
+#include "src/python/python_class.h"
 
 #include "cmd/container.h"
 #include <string>
-#include "init.h"
-#include "gfx/vec.h"
+#include "src/python/init.h"
+#include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
 #include <boost/version.hpp>
 
@@ -41,13 +41,13 @@ typedef boost::python::dict BoostPythonDictionary;
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif //BOOST_VERSION != 102800
 
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include "cmd/unit_util.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 #include "cmd/ai/fire.h"
 
-#include "unit_wrapper_class.h"
-#include "unit_from_to_python.h"
+#include "src/python/unit_wrapper_class.h"
+#include "src/python/unit_from_to_python.h"
 //void ExportUnit (boost::python::class_builder <UnitWrapper> &Class) {
 //ExportUnit1(Class);
 //ExportUnit2(Class);
@@ -96,7 +96,7 @@ void EXP_UN(boost::python::class_builder<UnitWrapper> &Class) {
 #define voidEXPORT_UTIL2(name, atype, a, btype, b) WRAPPED0( void, name, 0 )
 #define voidEXPORT_UTIL3(name, atype, a, btype, b, ctype, c) WRAPPED0( void, name, 0 )
 #define voidEXPORT_UTIL5(name, atype, a, btype, b, ctype, c, dtype, d, etype, e) WRAPPED0( void, name, 0 )
-#include "python_unit_wrap.h"
+#include "src/python/python_unit_wrap.h"
 #undef WRAPPED0
 #undef WRAPPED1
 #undef WRAPPED2
