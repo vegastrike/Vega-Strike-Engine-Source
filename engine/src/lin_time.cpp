@@ -63,8 +63,6 @@ double getNewTime() {
 #endif
 }
 
-class NetClient;
-
 int timecount;
 
 void inc_time_compression(const KBData &, KBSTATE a) {
@@ -88,20 +86,6 @@ void reset_time_compression(const KBData &, KBSTATE a) {
     }
 }
 
-void pause_key(const KBData &s, KBSTATE a) {
-    static bool paused = false;
-    if (a == PRESS) {
-        if (paused == false) {
-            timecompression = .0000001;
-            timecount = 0;
-            paused = true;
-        } else {
-            paused = false;
-            reset_time_compression(s, a);
-        }
-    }
-}
-
 float getTimeCompression() {
     return timecompression;
 }
@@ -113,7 +97,6 @@ void setTimeCompression(float tc) {
 
 bool toggle_pause() {
     static bool paused = false;
-    VS_LOG(debug, "toggle_pause() called in lin_time.cpp");
     if (paused) {
         VS_LOG(debug, "toggle_pause() in lin_time.cpp: Resuming (unpausing)");
         setTimeCompression(1);
