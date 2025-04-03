@@ -32,12 +32,6 @@
 #include "gfx/vec.h"
 #include <boost/version.hpp>
 
-#if BOOST_VERSION != 102800
-
-#else //defined (_MSC_VER) && _MSC_VER <= 1200
-#include <boost/python/detail/extension_class.hpp>
-#endif // defined (_MSC_VER) && _MSC_VER <= 1200
-
 class Python {
 public:
     static void init();
@@ -47,7 +41,6 @@ public:
 };
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-#if BOOST_VERSION != 102800
 /*
  *  typedef boost::tuples::tuple<double,double,double> python_wector;
  *  struct to_python <Vector> {
@@ -120,29 +113,6 @@ BOOST_PYTHON_TO_PYTHON_BY_VALUE(QVector,
                         x.j,
                 (double)
                         x.k)));
-#else //BOOST_VERSION != 102800
-inline PyObject * to_python( Vector vec )
-{
-    return to_python( boost::python::tuple( (double) vec.i, (double) vec.j, (double) vec.k ) );
-}
-inline PyObject * to_python( QVector vec )
-{
-    return to_python( boost::python::tuple( (double) vec.i, (double) vec.j, (double) vec.k ) );
-}
-
-inline Vector from_python( PyObject *p, boost::python::type< Vector >)
-{
-    Vector vec( 0, 0, 0 );
-    PyArg_ParseTuple( p, "fff", &vec.i, &vec.j, &vec.k );
-    return vec;
-}
-inline QVector from_python( PyObject *p, boost::python::type< QVector >)
-{
-    QVector vec( 0, 0, 0 );
-    PyArg_ParseTuple( p, "ddd", &vec.i, &vec.j, &vec.k );
-    return vec;
-}
-#endif //BOOST_VERSION != 102800
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 

@@ -30,14 +30,9 @@
 #include <boost/python.hpp>
 #include <string>
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
 typedef boost::python::dict BoostPythonDictionary;
-#else
-#include <boost/python/objects.hpp>
-typedef boost::python::dictionary BoostPythonDictionary;
-#endif
 
 #if defined (HAVE_PYTHON)
 namespace boost {
@@ -54,11 +49,7 @@ class dict;
 
 namespace BaseUtil {
 #if defined (HAVE_PYTHON)
-#if BOOST_VERSION != 102800
 typedef boost::python::dict Dictionary;
-#else
-typedef boost::python::dictionary           Dictionary;
-#endif
 #else
 typedef std::map< std::string, std::string >Dictionary;
 #endif

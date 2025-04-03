@@ -25,12 +25,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python.hpp>
-#if BOOST_VERSION != 102800
 typedef boost::python::dict BoostPythonDictionary;
-#else
-#include <boost/python/objects.hpp>
-typedef boost::python::dictionary BoostPythonDictionary;
-#endif
 
 #include "python_class.h"
 

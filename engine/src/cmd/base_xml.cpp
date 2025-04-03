@@ -26,11 +26,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 #include <boost/python.hpp>
-#if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
-#else
-#include <boost/python/objects.hpp>
-#endif
 
 #include <Python.h>
 #include <vector>

@@ -129,12 +129,8 @@ BOOST_PYTHON_MODULE(VS) {
 //WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
 
 //End of Macro City 2
-//#if BOOST_VERSION != 102800
         PYTHON_DEFINE_METHOD(Class, &UnitWrapper::equal, "__eq__");
         PYTHON_DEFINE_METHOD(Class, &UnitWrapper::notequal, "__ne__");
-//#else
-//Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
-//#endif
         DefineOddUnitFunctions(Class);
     PYTHON_END_CLASS(VS, UnitWrapper)
 

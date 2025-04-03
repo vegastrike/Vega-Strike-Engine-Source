@@ -27,19 +27,10 @@
 
 #include <boost/version.hpp>
 #include <boost/python.hpp>
-#if BOOST_VERSION != 102800
 typedef boost::python::dict BoostPythonDictionary;
-#else
-#include <boost/python/objects.hpp>
-typedef boost::python::dictionary BoostPythonDictionary;
-#endif
 #include <math.h>
-#if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
-#else
-#include <boost/python/objects.hpp>
-#endif
 
 #include <Python.h>
 #include "python/python_class.h"

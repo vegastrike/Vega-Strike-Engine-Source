@@ -29,7 +29,6 @@
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 
-#if BOOST_VERSION != 102800
 //#include <boost/python/converter/arg_from_python.hpp>
 
 #include "init.h"
@@ -90,22 +89,5 @@ struct default_result_converter::apply<Unit *> {
  */
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
-#else //BOOST_VERSION != 102800
-TO_PYTHON_SMART_POINTER( UnitWrapper );
-TO_PYTHON_SMART_POINTER( Cargo );
-
-PYTHON_INIT_GLOBALS( Unit, UnitWrapper )
-BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-inline PyObject*to_python( Unit*un )
-{
-    return to_python( UnitWrapper( un ) );
-}
-inline Unit * from_python( PyObject *p, boost::python::type< Unit* >)
-{
-    UnitWrapper uw = ( from_python( p, boost::python::type< UnitWrapper& > () ) );
-    return uw.GetUnit();
-}
-BOOST_PYTHON_END_CONVERSION_NAMESPACE
-#endif //BOOST_VERSION != 102800
 
 #endif //VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H
