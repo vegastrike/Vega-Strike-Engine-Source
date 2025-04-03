@@ -64,7 +64,6 @@
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
-#include "init.h"
 #include "vs_logging.h"
 #include "vega_py_run.h"
 
