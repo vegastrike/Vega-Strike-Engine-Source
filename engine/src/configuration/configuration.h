@@ -159,7 +159,7 @@ struct EjectConfig {
 
 struct Fuel {
     float afterburner_fuel_usage;
-    
+
 
     /* This used to be Lithium6constant.
      * There's some relevant context that's been removed from the original name of this variable "Lithium6constant" --
@@ -178,7 +178,7 @@ struct Fuel {
     float reactor_idle_efficiency{0.98F};
     float min_reactor_efficiency{0.00001F};
     double ecm_energy_cost{0.05F};
-    
+
     double megajoules_factor{100};
     double fuel_factor{60.0};   // Multiply fuel by this to get fuel by minutes
     double energy_factor{1.0};
@@ -193,7 +193,7 @@ struct Fuel {
     double shield_regeneration_factor{0.1};
 
     // 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled
-    EnergyConsumerSource drive_source{EnergyConsumerSource::Fuel}; 
+    EnergyConsumerSource drive_source{EnergyConsumerSource::Fuel};
     EnergyConsumerSource reactor_source{EnergyConsumerSource::Fuel};
     EnergyConsumerSource afterburner_source{EnergyConsumerSource::Fuel};
     EnergyConsumerSource jump_drive_source{EnergyConsumerSource::FTLEnergy};
@@ -381,7 +381,7 @@ struct PhysicsConfig {
     float percent_missile_match_target_velocity{1.0F};
     double game_speed{1.0};
     double game_accel{1.0};
-    double combat_mode_multiplier{100.0};
+    double combat_mode_multiplier{1000.0};
     float velocity_max{10000.0F};
     float max_player_rotation_rate{24.0F};
     float max_non_player_rotation_rate{360.0F};
