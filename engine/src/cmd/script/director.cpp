@@ -27,7 +27,6 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include "python/python_class.h"
