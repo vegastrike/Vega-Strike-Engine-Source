@@ -30,7 +30,6 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 #include "gfx/vec.h"
-#include <boost/version.hpp>
 
 class Python {
 public:

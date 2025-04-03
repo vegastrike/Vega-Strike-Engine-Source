@@ -26,7 +26,6 @@
 #define PY_SSIZE_T_CLEAN
 //#include <Python.h>
 
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 typedef boost::python::dict BoostPythonDictionary;
 

@@ -26,7 +26,6 @@
 #define VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 
 //#include <boost/python/converter/arg_from_python.hpp>

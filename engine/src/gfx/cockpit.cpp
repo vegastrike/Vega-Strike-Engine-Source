@@ -29,7 +29,6 @@
 /// Draws gauges, info strings, radar, ...
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>

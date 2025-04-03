@@ -31,7 +31,6 @@
 #include "init.h"
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
-#include <boost/version.hpp>
 
 #include <boost/python.hpp>
 typedef boost::python::dict BoostPythonDictionary;
