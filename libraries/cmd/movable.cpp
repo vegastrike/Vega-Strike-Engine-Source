@@ -784,7 +784,7 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     }
 }
 
-// If in Travel mode (non-combat), speed is limited to x100
+// If in Travel mode (non-combat), speed is limited to x1000
 double Movable::MaxSpeed() const {
     const double combat_mode_multiplier = configuration()->physics_config.combat_mode_multiplier;
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
