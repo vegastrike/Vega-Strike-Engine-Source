@@ -125,9 +125,6 @@ BOOST_PYTHON_MODULE(VS) {
     PYTHON_BEGIN_CLASS(VS, UnitWrapper, "Unit")
         PYTHON_DEFINE_METHOD(Class, &UnitWrapper::getSubUnits, "getSubUnits");
         ExportUnit(Class);
-//WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
-
-//End of Macro City 2
         PYTHON_DEFINE_METHOD(Class, &UnitWrapper::equal, "__eq__");
         PYTHON_DEFINE_METHOD(Class, &UnitWrapper::notequal, "__ne__");
         DefineOddUnitFunctions(Class);
