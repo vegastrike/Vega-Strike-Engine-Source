@@ -25,11 +25,12 @@
  */
 
 #include <cstdlib>
-
+#include "configuration/configuration.h"
 #include "src/vs_exit.h"
 #include "src/vs_logging.h"
 
 bool STATIC_VARS_DESTROYED = false;
+std::shared_ptr<vega_config::Config> vega_config::config = nullptr;
 
 void VSExit(int code) {
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();

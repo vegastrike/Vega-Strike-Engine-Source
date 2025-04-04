@@ -21,12 +21,14 @@
  */
 
 #include "root_generic/vs_globals.h"
+#include "configuration/configuration.h"
 #include <time.h>
 #include <stdio.h>
 
 /*
  * Globals
  */
+std::shared_ptr<vega_config::Config> vega_config::config = nullptr;
 game_data_t g_game;
 ForceFeedback *forcefeedback = nullptr;
 VegaConfig *vs_config = nullptr;

@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <boost/json/array.hpp>
 #include <boost/json/serialize.hpp>
+#include <boost/json/value_from.hpp>
 
 #include "root_generic/lin_time.h"
 #include "cmd/unit_const_cache.h"
@@ -909,10 +910,8 @@ void Unit::WriteUnit(const char *modifications) {
     }
 
     std::map<std::string, std::string> map = UnitToMap();
-    boost::json::value tmp;
-    boost::json::value_from(map, tmp);
     boost::json::array json_root_array;
-    json_root_array.emplace_back(tmp);
+    json_root_array.emplace_back(boost::json::value_from(map));
     std::string towrite = boost::json::serialize(json_root_array);
     f.Write(towrite.c_str(), towrite.length());
     f.Close();
