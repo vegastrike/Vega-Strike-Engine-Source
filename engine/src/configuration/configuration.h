@@ -34,6 +34,7 @@
 namespace vega_config {
     struct Config {
         explicit Config(const std::string& json_text);
+        explicit Config(const boost::filesystem::path& config_file_path);
 
         void load_config(const std::string& json_text);
         void load_config(const boost::filesystem::path& config_file_path);
@@ -108,6 +109,7 @@ namespace vega_config {
         int planet_detail_stack_count = 24;
         double reduced_vdus_width = 0.0;
         double reduced_vdus_height = 0.0;
+        int shield_detail_stack_count = 24;
         std::string shield_technique = "";
         std::string shield_texture = "shield.bmp";
         double star_body_radius = 0.33;

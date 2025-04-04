@@ -401,6 +401,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.reduced_vdus_height = boost::json::value_to<double>(reduced_vdus_height_result.value());
             }
 
+            const boost::system::result<const boost::json::value &> shield_detail_stack_count_result = graphics_object.try_at("shield_detail_stack_count");
+            if (shield_detail_stack_count_result.has_value()) {
+                graphics.shield_detail_stack_count = boost::json::value_to<int>(shield_detail_stack_count_result.value());
+            }
+
             const boost::system::result<const boost::json::value &> shield_technique_result = graphics_object.try_at("shield_technique");
             if (shield_technique_result.has_value()) {
                 graphics.shield_technique = boost::json::value_to<std::string>(shield_technique_result.value());
