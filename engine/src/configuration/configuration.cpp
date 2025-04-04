@@ -578,6 +578,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.hud.draw_blips_on_both_radar = boost::json::value_to<bool>(draw_blips_on_both_radar_result.value());
             }
 
+            const boost::system::result<const boost::json::value &> draw_rendered_crosshairs_result = hud_object.try_at("draw_rendered_crosshairs");
+            if (draw_rendered_crosshairs_result.has_value()) {
+                graphics.hud.draw_rendered_crosshairs = boost::json::value_to<bool>(draw_rendered_crosshairs_result.value());
+            }
+
             const boost::system::result<const boost::json::value &> draw_damage_sprite_result = hud_object.try_at("draw_damage_sprite");
             if (draw_damage_sprite_result.has_value()) {
                 graphics.hud.draw_damage_sprite = boost::json::value_to<bool>(draw_damage_sprite_result.value());
@@ -908,9 +913,9 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.hud.tac_target_length = boost::json::value_to<double>(tac_target_length_result.value());
             }
 
-            const boost::system::result<const boost::json::value &> tar_target_thickness_result = hud_object.try_at("tar_target_thickness");
-            if (tar_target_thickness_result.has_value()) {
-                graphics.hud.tar_target_thickness = boost::json::value_to<double>(tar_target_thickness_result.value());
+            const boost::system::result<const boost::json::value &> tac_target_thickness_result = hud_object.try_at("tac_target_thickness");
+            if (tac_target_thickness_result.has_value()) {
+                graphics.hud.tac_target_thickness = boost::json::value_to<double>(tac_target_thickness_result.value());
             }
 
             const boost::system::result<const boost::json::value &> text_background_alpha_result = hud_object.try_at("text_background_alpha");

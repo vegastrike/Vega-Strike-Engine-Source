@@ -148,6 +148,7 @@ namespace vega_config {
             bool draw_arrow_on_pan_target = false;
             bool draw_arrow_to_target = true;
             bool draw_blips_on_both_radar = false;
+            bool draw_rendered_crosshairs = true;
             bool draw_damage_sprite = true;
             bool draw_gravitational_objects = true;
             bool draw_line_to_itts = false;
@@ -214,7 +215,7 @@ namespace vega_config {
             bool switch_back_from_comms = true;
             double tac_target_foci = 0.5;
             double tac_target_length = 0.1;
-            double tar_target_thickness = 1.0;
+            double tac_target_thickness = 1.0;
             double text_background_alpha = 0.0625;
             bool top_view = false;
             bool untarget_beyond_cone = false;

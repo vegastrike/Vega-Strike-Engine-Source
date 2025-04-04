@@ -591,7 +591,7 @@ void DrawTacticalTargetBox(const Radar::Sensor& sensor)
 
         const float fudge = vega_config::config->graphics.hud.tac_target_length;
         const float foci = vega_config::config->graphics.hud.tac_target_foci;
-        glLineWidth( (int) vega_config::config->graphics.hud.tac_target_thickness);         //temp
+        glLineWidth( static_cast<float>(static_cast<int>(vega_config::config->graphics.hud.tac_target_thickness))); //temp
         Radar::Track track = sensor.CreateTrack(target, Loc);
         GFXColorf(sensor.GetColor(track));
 

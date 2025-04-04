@@ -1443,8 +1443,8 @@ void GameCockpit::Draw() {
     if (nav_current != universe_current) {
         AccessNavSystem()->Setup();
     }
-    const bool draw_any_boxes = vega_config::config->graphics.hud.draw_targeting_boxes;
-    const bool draw_boxes_inside_only = vega_config::config->graphics.hud.draw_targeting_boxes_inside;
+    const bool draw_any_boxes = vega_config::config->graphics.hud.draw_targetting_boxes;
+    const bool draw_boxes_inside_only = vega_config::config->graphics.hud.draw_targetting_boxes_inside;
     if (draw_any_boxes && screenshotkey == false && (draw_boxes_inside_only == false || view < CP_CHASE)) {
         Unit *player = GetParent();
         if (player) {
@@ -1875,8 +1875,8 @@ void GameCockpit::Draw() {
                 if ((view == CP_PAN
                         && !vega_config::config->graphics.hud.draw_arrow_on_pan_cam)
                         || (view == CP_PANTARGET
-                                && !vega_config::config->graphics.hud.draw_arrow_on_pan_target) || (view == CP_CHASE && !configuration()
-                        ->graphics_config
+                                && !vega_config::config->graphics.hud.draw_arrow_on_pan_target) || (view == CP_CHASE && !vega_config::config
+                        ->graphics
                         .hud
                         .draw_arrow_on_chase_cam)) {
                 } else {

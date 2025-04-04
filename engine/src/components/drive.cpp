@@ -1,7 +1,7 @@
 /*
  * drive.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -56,13 +56,13 @@ void Drive::Load(std::string unit_key) {
     static const double game_accel_speed = game_speed * game_accel;
 
     // Minimum drive capability for limp home (in %)
-    static const double minimal_drive_functionality = vega_config::config->components.fuel.minimum_drive;
+    static const double minimal_drive_functionality = vega_config::config->components.drive.minimum_drive;
 
     Component::Load(unit_key);
 
     // Consumer
     // We do not support all options here.
-    if(vega_config::config->components.fuel.drive_source == EnergyConsumerSource::Fuel) {
+    if (vega_config::config->components.drive.energy_source == "Fuel" || vega_config::config->components.drive.energy_source == "fuel") {
         SetConsumption(1.0);
     } else {
         SetConsumption(1.0);

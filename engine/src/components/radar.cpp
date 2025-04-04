@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -45,10 +45,10 @@ CRadar::CRadar():
         locked(false),
         can_lock(false),
         tracking_active(true) {
-    long default_max_range = vega_config::config->computer_config.default_max_range;
+    long default_max_range = vega_config::config->components.computer.default_max_range;
     max_range = Resource<long>(default_max_range,0,default_max_range);
-    tracking_cone = vega_config::config->computer_config.default_tracking_cone;
-    lock_cone = vega_config::config->computer_config.default_lock_cone;
+    tracking_cone = vega_config::config->components.computer.default_tracking_cone;
+    lock_cone = vega_config::config->components.computer.default_lock_cone;
 }
 
 CRadar::~CRadar()

@@ -144,7 +144,7 @@ VertexBuilder<> GetLockingIcon(const QVector &location, const Vector& cam_p,
     const bool bracket_inner_or_outer = vega_config::config->graphics.hud.rotating_bracket_inner;
     const float bracket_width = vega_config::config->graphics.hud.rotating_bracket_width;
 
-    const float bounded_r_size = std::max(r_size, vega_config::config->graphics.hud.min_lock_box_size);
+    const float bounded_r_size = std::max(static_cast<double>(r_size), vega_config::config->graphics.hud.min_lock_box_size);
     const float inner_distance = vega_config::config->graphics.hud.min_missile_bracket_size + (vega_config::config->graphics.hud.max_missile_bracket_size - vega_config::config->graphics.hud.min_missile_bracket_size) * lock_percent;
     const float outer_distance = inner_distance + vega_config::config->graphics.hud.rotating_bracket_size;
     const float bracket_distance = (bracket_inner_or_outer ? inner_distance : outer_distance);
