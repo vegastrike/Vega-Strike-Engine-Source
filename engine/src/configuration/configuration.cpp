@@ -26,6 +26,7 @@
 #include <iostream>
 #include <exception>
 #include <boost/json.hpp>
+#include <boost/json/object.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "configuration.h"
