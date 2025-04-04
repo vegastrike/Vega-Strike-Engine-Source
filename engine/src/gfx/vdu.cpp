@@ -1,7 +1,7 @@
 /*
  * vdu.cpp
  *
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -362,7 +362,11 @@ static void DrawShield(float fs,
             {innershield, middleshield, outershield},
             {innershield, middleshield, outershield}
     };
-    float shthresh[3] = { vega_config::config->graphics.hud.shield_vdu_thresh[0], vega_config::config->graphics.hud.shield_vdu_thresh[1], vega_config::config->graphics.hud.shield_vdu_thresh[2] };
+    float shthresh[3] = {
+                        static_cast<float>(vega_config::config->graphics.hud.shield_vdu_thresh0),
+                        static_cast<float>(vega_config::config->graphics.hud.shield_vdu_thresh1),
+                        static_cast<float>(vega_config::config->graphics.hud.shield_vdu_thresh2)
+    };
 
     float shtrans[3] = {1.0f, 1.0f, 1.0f};
     if (vega_config::config->graphics.hud.shield_vdu_fade) {
