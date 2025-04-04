@@ -1,7 +1,7 @@
 /**
  * energetic.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
+ * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -65,9 +65,9 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 
 float Energetic::getFuelUsage(bool afterburner) {
     if (afterburner) {
-        return vega_config::config->fuel.afterburner_fuel_usage;
+        return vega_config::config->components.fuel.afterburner_fuel_usage;
     }
-    return vega_config::config->fuel.normal_fuel_usage;
+    return vega_config::config->components.fuel.normal_fuel_usage;
 }
 
 
@@ -78,5 +78,5 @@ void Energetic::setEnergyRecharge(float enrech) {
 
 
 float Energetic::VSDPercent() {
-    return vega_config::config->fuel.vsd_mj_yield / 100;
+    return vega_config::config->components.fuel.vsd_mj_yield / 100;
 }

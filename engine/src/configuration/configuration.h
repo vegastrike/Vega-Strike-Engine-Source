@@ -226,7 +226,7 @@ namespace vega_config {
     struct {
 
         struct {
-            std::string energy_source = "energy";
+            std::string energy_source = "fuel";
 
         } afterburner;
 
@@ -299,6 +299,8 @@ namespace vega_config {
 
         struct {
             std::string energy_source = "energy";
+            double maintenance_factor = 0.1;
+            double regeneration_factor = 0.1;
 
         } shield;
 

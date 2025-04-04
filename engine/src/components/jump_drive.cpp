@@ -84,7 +84,7 @@ void JumpDrive::Load(std::string unit_key) {
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
     // Jump drive is unique - consumption and atom_consumption are identical
-    atom_consumption = consumption = energy * vega_config::config->fuel.jump_drive_factor;
+    atom_consumption = consumption = energy * vega_config::config->components.fuel.jump_drive_factor;
 
     // Jump Drive
     installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
@@ -94,7 +94,7 @@ void JumpDrive::Load(std::string unit_key) {
 void JumpDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Jump_Drive_Present"] = std::to_string(Installed());
     unit["Jump_Drive_Delay"] = std::to_string(delay);
-    unit["Outsystem_Jump_Cost"] = std::to_string(consumption / vega_config::config->fuel.jump_drive_factor);
+    unit["Outsystem_Jump_Cost"] = std::to_string(consumption / vega_config::config->components.fuel.jump_drive_factor);
 }
 
 bool JumpDrive::CanDowngrade() const {

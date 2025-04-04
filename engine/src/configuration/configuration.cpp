@@ -34,6 +34,9 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
+#include <vs_logging.h>
+#include <boost/format/format_fwd.hpp>
+#include <boost/program_options/errors.hpp>
 
 vega_config::Config::Config(const std::string& json_text) {
     load_config(json_text);
@@ -55,7 +58,7 @@ void vega_config::Config::load_config(const boost::filesystem::path& config_file
         }
         load_config(file_contents);
     } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCTION__ % e.what()));
     }
 }
 
@@ -1160,6 +1163,16 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::system::result<const boost::json::value &> energy_source_result = shield_object.try_at("energy_source");
             if (energy_source_result.has_value()) {
                 components.shield.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
+            }
+
+            const boost::system::result<const boost::json::value &> maintenance_factor_result = shield_object.try_at("maintenance_factor");
+            if (maintenance_factor_result.has_value()) {
+                components.shield.maintenance_factor = boost::json::value_to<double>(maintenance_factor_result.value());
+            }
+
+            const boost::system::result<const boost::json::value &> regeneration_factor_result = shield_object.try_at("regeneration_factor");
+            if (regeneration_factor_result.has_value()) {
+                components.shield.regeneration_factor = boost::json::value_to<double>(regeneration_factor_result.value());
             }
 
         }
@@ -2333,6 +2346,6 @@ void vega_config::Config::load_config(const std::string& json_text) {
     }
     catch (std::exception const& e)
     {
-        std::cerr << e.what() << std::endl;
+        VS_LOG(error, (boost::format("Error in %1%: '%2%'") % __FUNCTION__ % e.what()));
     }
 }

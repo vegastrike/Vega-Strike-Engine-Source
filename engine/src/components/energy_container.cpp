@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2023 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, Benjamen R. Meyer, Roy Falk and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -114,15 +114,15 @@ void EnergyContainer::Load(std::string unit_key) {
 
     switch(type) {
         case ComponentType::Fuel:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, std::string("0.0")), vega_config::config->fuel.fuel_factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FUEL_CAPACITY, std::string("0.0")), vega_config::config->components.fuel.factor);
         break;
 
         case ComponentType::Capacitor:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), vega_config::config->fuel.energy_factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, CAPACITOR, std::string("0.0")), vega_config::config->components.energy.factor);
         break;
 
         case ComponentType::FtlCapacitor:
-        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), vega_config::config->fuel.ftl_energy_factor);
+        level = Resource<double>(UnitCSVFactory::GetVariable(unit_key, FTL_CAPACITOR, std::string("0.0")), vega_config::config->components.ftl_energy.factor);
         break;
 
         default: // This really can't happen
@@ -136,15 +136,15 @@ void EnergyContainer::Load(std::string unit_key) {
 void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
     switch(type) {
         case ComponentType::Fuel:
-        unit[FUEL_CAPACITY] = level.Serialize(vega_config::config->fuel.fuel_factor);
+        unit[FUEL_CAPACITY] = level.Serialize(vega_config::config->components.fuel.factor);
         break;
 
         case ComponentType::Capacitor:
-        unit[CAPACITOR] = level.Serialize(vega_config::config->fuel.energy_factor);
+        unit[CAPACITOR] = level.Serialize(vega_config::config->components.energy.factor);
         break;
 
         case ComponentType::FtlCapacitor:
-        unit[FTL_CAPACITOR] = level.Serialize(vega_config::config->fuel.ftl_energy_factor);
+        unit[FTL_CAPACITOR] = level.Serialize(vega_config::config->components.ftl_energy.factor);
         break;
 
         default: // This really can't happen

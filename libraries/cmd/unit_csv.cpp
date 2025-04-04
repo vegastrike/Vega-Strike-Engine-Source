@@ -38,6 +38,9 @@
 #include "cmd/role_bitmask.h"
 #include "cmd/unit_csv.h"
 #include <algorithm>
+#include <boost/json/array.hpp>
+#include <boost/json/serialize.hpp>
+
 #include "root_generic/lin_time.h"
 #include "cmd/unit_const_cache.h"
 #include "src/vs_math.h"
@@ -906,8 +909,10 @@ void Unit::WriteUnit(const char *modifications) {
     }
 
     std::map<std::string, std::string> map = UnitToMap();
+    boost::json::value tmp;
+    boost::json::value_from(map, tmp);
     boost::json::array json_root_array;
-    json_root_array.emplace_back(boost::json::value_from(map));
+    json_root_array.emplace_back(tmp);
     std::string towrite = boost::json::serialize(json_root_array);
     f.Write(towrite.c_str(), towrite.length());
     f.Close();

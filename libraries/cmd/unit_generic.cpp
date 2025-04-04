@@ -456,7 +456,7 @@ void Unit::Init(const char *filename,
     if (unit_key == "") {
         // This is actually used for upgrade checks.
         bool istemplate = (string::npos != (string(filename).find(".template")));
-        if (!istemplate || (istemplate && vega_config::config->data_config.using_templates)) {
+        if (!istemplate || (istemplate && vega_config::config->data.using_templates)) {
             VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();

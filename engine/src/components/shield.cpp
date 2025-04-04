@@ -337,7 +337,7 @@ void Shield::Regenerate(const bool player_ship) {
     // TODO: lib_damage restore efficiency by replacing with shield->efficiency
     //const double efficiency = 1;
 
-    const double shield_maintenance_cost = TotalMaxLayerValue() * vega_config::config->fuel.shield_maintenance_factor;
+    const double shield_maintenance_cost = TotalMaxLayerValue() * vega_config::config->components.shield.maintenance_factor;
     SetConsumption(shield_maintenance_cost);
     const double actual_maintenance_percent = Consume();
     if(Percent() > actual_maintenance_percent) {
@@ -357,7 +357,7 @@ void Shield::Regenerate(const bool player_ship) {
         return;
     }
 
-    const double shield_regeneration_cost = regeneration.AdjustedValue() * vega_config::config->fuel.shield_regeneration_factor;
+    const double shield_regeneration_cost = regeneration.AdjustedValue() * vega_config::config->components.shield.regeneration_factor;
     SetConsumption(shield_regeneration_cost);
     const double actual_regeneration_percent = Consume();
     double regen = actual_regeneration_percent * regeneration.AdjustedValue() * simulation_atom_var;

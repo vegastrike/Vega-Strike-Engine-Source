@@ -191,8 +191,8 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
 
         // Eject cargo
-        const float cargo_eject_percent = vega_config::config->eject_config.eject_cargo_percent;
-        const uint32_t max_dump_cargo = vega_config::config->eject_config.max_dumped_cargo;
+        const float cargo_eject_percent = vega_config::config->physics.ejection.eject_cargo_percent;
+        const uint32_t max_dump_cargo = vega_config::config->physics.ejection.max_dumped_cargo;
         uint32_t dumped_cargo = 0;
 
         for (unsigned int i = 0; i < unit->numCargo(); ++i) {
@@ -205,9 +205,9 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
         // Eject Pilot
         // Can't use this as we can't reach negative hull damage
-//        const float hull_dam_to_eject = vega_config::config->eject_config.hull_damage_to_eject;
-        const float auto_eject_percent = vega_config::config->eject_config.auto_eject_percent;
-        const bool player_autoeject = vega_config::config->eject_config.player_auto_eject;
+//        const float hull_dam_to_eject = vega_config::config->physics.ejection.hull_damage_to_eject;
+        const float auto_eject_percent = vega_config::config->physics.ejection.auto_eject_percent;
+        const bool player_autoeject = vega_config::config->physics.ejection.player_auto_eject;
 
         if (shot_at_is_player) {
             if (player_autoeject

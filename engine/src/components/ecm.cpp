@@ -47,7 +47,7 @@ ECM::~ECM()
 void ECM::Load(std::string unit_key) {
     Component::Load(unit_key);
 
-    double consumption = vega_config::config->fuel.ecm_energy_cost * static_cast<double>(ecm);
+    double consumption = vega_config::config->components.fuel.ecm_energy_cost * static_cast<double>(ecm);
     SetConsumption(consumption);
 
     _upgrade(upgrade_key);
