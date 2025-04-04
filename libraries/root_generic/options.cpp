@@ -174,8 +174,8 @@ void vs_options::init() {
     rgb_pixel_format = vs_config->getVariable("graphics", "rgb_pixel_format", "undefined");
     gl_accelerated_visual = XMLSupport::parse_bool(vs_config->getVariable("graphics", "gl_accelerated_visual", "true"));
     z_pixel_format = XMLSupport::parse_int(vs_config->getVariable("graphics", "z_pixel_format", "24"));
-    x_resolution = configuration()->graphics2_config.resolution_x;
-    y_resolution = configuration()->graphics2_config.resolution_y;
+    x_resolution = vega_config::config->graphics.resolution_x;
+    y_resolution = vega_config::config->graphics.resolution_y;
     fullscreen = XMLSupport::parse_bool(vs_config->getVariable("graphics", "fullscreen", "false"));
     colordepth = XMLSupport::parse_int(vs_config->getVariable("graphics", "colordepth", "32"));
     glut_stencil = XMLSupport::parse_bool(vs_config->getVariable("graphics", "glut_stencil", "true"));

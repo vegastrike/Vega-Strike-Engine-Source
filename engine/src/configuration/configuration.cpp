@@ -39,6 +39,11 @@ vega_config::Config::Config(const std::string& json_text) {
     load_config(json_text);
 }
 
+vega_config::Config::Config(const boost::filesystem::path& config_file_path)
+{
+    load_config(config_file_path);
+}
+
 void vega_config::Config::load_config(const boost::filesystem::path& config_file_path) {
     try {
         std::ifstream config_file(config_file_path.string());
@@ -379,6 +384,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
             const boost::system::result<const boost::json::value &> num_times_to_draw_shine_result = graphics_object.try_at("num_times_to_draw_shine");
             if (num_times_to_draw_shine_result.has_value()) {
                 graphics.num_times_to_draw_shine = boost::json::value_to<int>(num_times_to_draw_shine_result.value());
+            }
+
+            const boost::system::result<const boost::json::value &> planet_detail_stack_count_result = graphics_object.try_at("planet_detail_stack_count");
+            if (planet_detail_stack_count_result.has_value()) {
+                graphics.planet_detail_stack_count = boost::json::value_to<int>(planet_detail_stack_count_result.value());
             }
 
             const boost::system::result<const boost::json::value &> reduced_vdus_width_result = graphics_object.try_at("reduced_vdus_width");
@@ -922,6 +932,22 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::system::result<const boost::json::value &> afterburner_value = components_object.try_at("afterburner");
         if (afterburner_value.has_value()) {
             boost::json::object afterburner_object = afterburner_value.value().get_object();
+            const boost::system::result<const boost::json::value &> energy_source_result = afterburner_object.try_at("energy_source");
+            if (energy_source_result.has_value()) {
+                components.afterburner.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
+            }
+
+        }
+
+
+        const boost::system::result<const boost::json::value &> cloak_value = components_object.try_at("cloak");
+        if (cloak_value.has_value()) {
+            boost::json::object cloak_object = cloak_value.value().get_object();
+            const boost::system::result<const boost::json::value &> energy_source_result = cloak_object.try_at("energy_source");
+            if (energy_source_result.has_value()) {
+                components.cloak.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
+            }
+
         }
 
 
@@ -949,6 +975,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::system::result<const boost::json::value &> drive_value = components_object.try_at("drive");
         if (drive_value.has_value()) {
             boost::json::object drive_object = drive_value.value().get_object();
+            const boost::system::result<const boost::json::value &> energy_source_result = drive_object.try_at("energy_source");
+            if (energy_source_result.has_value()) {
+                components.drive.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
+            }
+
             const boost::system::result<const boost::json::value &> non_combat_mode_multiplier_result = drive_object.try_at("non_combat_mode_multiplier");
             if (non_combat_mode_multiplier_result.has_value()) {
                 components.drive.non_combat_mode_multiplier = boost::json::value_to<int>(non_combat_mode_multiplier_result.value());
@@ -1062,6 +1093,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::system::result<const boost::json::value &> ftl_drive_value = components_object.try_at("ftl_drive");
         if (ftl_drive_value.has_value()) {
             boost::json::object ftl_drive_object = ftl_drive_value.value().get_object();
+            const boost::system::result<const boost::json::value &> energy_source_result = ftl_drive_object.try_at("energy_source");
+            if (energy_source_result.has_value()) {
+                components.ftl_drive.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
+            }
+
             const boost::system::result<const boost::json::value &> factor_result = ftl_drive_object.try_at("factor");
             if (factor_result.has_value()) {
                 components.ftl_drive.factor = boost::json::value_to<double>(factor_result.value());
@@ -1084,6 +1120,11 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::system::result<const boost::json::value &> jump_drive_value = components_object.try_at("jump_drive");
         if (jump_drive_value.has_value()) {
             boost::json::object jump_drive_object = jump_drive_value.value().get_object();
+            const boost::system::result<const boost::json::value &> energy_source_result = jump_drive_object.try_at("energy_source");
+            if (energy_source_result.has_value()) {
+                components.jump_drive.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
+            }
+
             const boost::system::result<const boost::json::value &> factor_result = jump_drive_object.try_at("factor");
             if (factor_result.has_value()) {
                 components.jump_drive.factor = boost::json::value_to<double>(factor_result.value());
@@ -1095,9 +1136,25 @@ void vega_config::Config::load_config(const std::string& json_text) {
         const boost::system::result<const boost::json::value &> reactor_value = components_object.try_at("reactor");
         if (reactor_value.has_value()) {
             boost::json::object reactor_object = reactor_value.value().get_object();
+            const boost::system::result<const boost::json::value &> energy_source_result = reactor_object.try_at("energy_source");
+            if (energy_source_result.has_value()) {
+                components.reactor.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
+            }
+
             const boost::system::result<const boost::json::value &> factor_result = reactor_object.try_at("factor");
             if (factor_result.has_value()) {
                 components.reactor.factor = boost::json::value_to<double>(factor_result.value());
+            }
+
+        }
+
+
+        const boost::system::result<const boost::json::value &> shield_value = components_object.try_at("shield");
+        if (shield_value.has_value()) {
+            boost::json::object shield_object = shield_value.value().get_object();
+            const boost::system::result<const boost::json::value &> energy_source_result = shield_object.try_at("energy_source");
+            if (energy_source_result.has_value()) {
+                components.shield.energy_source = boost::json::value_to<std::string>(energy_source_result.value());
             }
 
         }

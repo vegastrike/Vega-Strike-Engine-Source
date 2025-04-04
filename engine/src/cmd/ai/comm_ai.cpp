@@ -54,16 +54,16 @@ CommunicatingAI::CommunicatingAI(int ttype,
         randomresponse(randomresp),
         mood(mood) {
     if (appease > 665 && appease < 667) {
-        this->appease = configuration()->ai.ease_to_appease;
+        this->appease = vega_config::config->ai.ease_to_appease;
     }
     if ((anger > 665 && anger < 667) || (anger > -667 && anger < -665)) {
-        this->anger = configuration()->ai.ease_to_anger;
+        this->anger = vega_config::config->ai.ease_to_anger;
     }
     if (moodswingyness > 665 && moodswingyness < 667) {
-        this->moodswingyness = configuration()->ai.mood_swing_level;
+        this->moodswingyness = vega_config::config->ai.mood_swing_level;
     }
     if (randomresp > 665 && moodswingyness < 667) {
-        this->randomresponse = configuration()->ai.random_response_range;
+        this->randomresponse = vega_config::config->ai.random_response_range;
     }
 }
 
@@ -74,10 +74,10 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
                     relationship)]);
     std::vector<unsigned int>::const_iterator iend = n->edges.end();
     for (std::vector<unsigned int>::const_iterator i = n->edges.begin(); i != iend; ++i) {
-        if (c.fsm->nodes[*i].messagedelta >= configuration()->ai.lowest_positive_comm_choice && relationship >= 0) {
+        if (c.fsm->nodes[*i].messagedelta >= vega_config::config->ai.lowest_positive_comm_choice && relationship >= 0) {
             return true;
         }
-        if (c.fsm->nodes[*i].messagedelta <= configuration()->ai.lowest_negative_comm_choice && relationship < 0) {
+        if (c.fsm->nodes[*i].messagedelta <= vega_config::config->ai.lowest_negative_comm_choice && relationship < 0) {
             return true;
         }
     }
@@ -372,7 +372,7 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     NearestUnitLocator unitLocator;
 #ifdef VS_ENABLE_COLLIDE_KEY
     CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
-    const float unitRad = configuration()->graphics_config.hud.radar_search_extra_radius;
+    const float unitRad = vega_config::config->graphics.hud.radar_search_extra_radius;
     CollideMap::iterator iter = cm->lower_bound( wherewrapper );
     if (iter != cm->end() && (*iter)->radius > 0)
         if ( (*iter)->ref.unit != parent )

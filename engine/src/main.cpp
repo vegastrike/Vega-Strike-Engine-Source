@@ -305,9 +305,7 @@ int main(int argc, char *argv[]) {
     // Usually loaded from config.json
     std::string mission_name;
 
-    //this sets up the vegastrike config variable
-    setup_game_data();
-    //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
+    setup_game_data();  // TODO: Combine with vega_config::config settings object
     {
         std::pair<std::string, std::string> pair = ParseCommandLine(argc, argv);
         std::string subdir = pair.first;
@@ -317,27 +315,22 @@ int main(int argc, char *argv[]) {
         if (CONFIGFILE == nullptr) {
             CONFIGFILE = new char[42];
             snprintf(CONFIGFILE, 41, "vegastrike.config");
+            CONFIGFILE[41] = '\0';
         }
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths(CONFIGFILE, subdir);
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
+
+        boost::filesystem::path config_file_path{VSFileSystem::datadir + "/config.json"};
+        vega_config::config = std::make_shared<vega_config::Config>(config_file_path);
+        boost::filesystem::path config_file_path2{VSFileSystem::homedir + "/config.json"};
+        vega_config::config->load_config(config_file_path2);
     }
 
-    std::ifstream file("config.json");
-    std::string str;
-    std::string file_contents;
-    while (std::getline(file, str)) {
-        file_contents += str;
-        file_contents.push_back('\n');
-    }
-
-    vega_config::config = std::make_shared<vega_config::Config>(file_contents);
-    // now that the user config file has been loaded from disk, update the global configuration struct values
-    configuration()->OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0') {
-        g_game.vsdebug = configuration()->logging.vsdebug;
+        g_game.vsdebug = vega_config::config->logging.vsdebug;
     }
 
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
@@ -359,7 +352,7 @@ int main(int argc, char *argv[]) {
 
     // Override config with command line argument
     if (!mission_name.empty()) {
-        configuration()->game_start.default_mission = mission_name;
+        vega_config::config->game_start.default_mission = mission_name;
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
@@ -574,7 +567,7 @@ void bootstrap_main_loop() {
     // InitTime();
     if (LoadMission) {
         LoadMission = false;
-        active_missions.push_back(mission = new Mission(configuration()->game_start.default_mission.c_str()));
+        active_missions.push_back(mission = new Mission(vega_config::config->game_start.default_mission.c_str()));
 
         mission->initMission();
 
@@ -683,7 +676,7 @@ void bootstrap_main_loop() {
         FactionUtil::LoadContrabandLists();
         {
             std::vector<std::string> intro_lines;
-            boost::split(intro_lines, configuration()->game_start.introduction, boost::is_any_of("\n"));
+            boost::split(intro_lines, vega_config::config->game_start.introduction, boost::is_any_of("\n"));
 
             for(const std::string& line : intro_lines) {
                 UniverseUtil::IOmessage(0, "game", "all", line);

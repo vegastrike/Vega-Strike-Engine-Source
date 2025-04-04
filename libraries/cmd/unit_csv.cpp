@@ -282,7 +282,7 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
         }
     }
     unsigned char parity = 0;
-    bool half_sounds = configuration()->audio_config.every_other_mount;
+    bool half_sounds = vega_config::config->audio.every_other_mount;
     for (unsigned int a = first_new_mount; a < thus->mounts.size(); ++a) {
         if ((a & 1) == parity) {
             int b = a;
@@ -450,7 +450,7 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
 }
 
 void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
-    const float default_halo_activation = configuration()->graphics_config.default_engine_activation;
+    const float default_halo_activation = vega_config::config->graphics.default_engine_activation;
     string::size_type where, when;
     string::size_type ofs = 0;
     while ((where = lights.find('{', ofs)) != string::npos) {
@@ -744,7 +744,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     radar.Load(unit_key);
 
-    const static bool warp_energy_for_cloak = configuration()->warp_config.use_warp_energy_for_cloak;
+    const static bool warp_energy_for_cloak = vega_config::config->warp.use_warp_energy_for_cloak;
     cloak.SetSource((warp_energy_for_cloak ? &ftl_energy : &energy));
     cloak.Load(unit_key);
 
@@ -778,7 +778,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     if (pImage->explosion_type.get().length()) {
         cache_ani(pImage->explosion_type);
     } else {
-        const std::string expani = configuration()->graphics_config.explosion_animation;
+        const std::string expani = vega_config::config->graphics.explosion_animation;
         cache_ani(expani);
     }
     AddLights(this, xml, UnitCSVFactory::GetVariable(unit_key, "Light", std::string()));
@@ -787,12 +787,12 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         addShieldMesh(&xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
         meshdata.back() = xml.shieldmesh;
     } else {
-        const int shieldstacks = configuration()->graphics_config.shield_detail;
-        const std::string& shieldtex = configuration()->graphics_config.shield_texture;
-        const std::string& shieldtechnique = configuration()->graphics_config.shield_technique;
+        const int shield_stacks = vega_config::config->graphics.shield_detail_stack_count;
+        const std::string& shieldtex = vega_config::config->graphics.shield_texture;
+        const std::string& shieldtechnique = vega_config::config->graphics.shield_technique;
         meshdata.back() = new SphereMesh(rSize(),
-                shieldstacks,
-                shieldstacks,
+                shield_stacks,
+                shield_stacks,
                 shieldtex.c_str(),
                 shieldtechnique,
                 NULL,

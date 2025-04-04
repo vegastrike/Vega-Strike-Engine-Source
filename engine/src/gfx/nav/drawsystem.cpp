@@ -97,7 +97,7 @@ void NavigationSystem::DrawSystem() {
     systemname.col = GFXColor(1, 1, .7, 1);
     systemname.SetText(systemnamestring);
 //systemname.SetCharSize(1, 1);
-    const float background_alpha = configuration()->graphics_config.hud.text_background_alpha;
+    const float background_alpha = vega_config::config->graphics.hud.text_background_alpha;
     GFXColor tpbg = systemname.bgcol;
     bool automatte = (0 == tpbg.a);
     if (automatte) {

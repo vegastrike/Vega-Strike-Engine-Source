@@ -45,10 +45,10 @@ CRadar::CRadar():
         locked(false),
         can_lock(false),
         tracking_active(true) {
-    long default_max_range = configuration()->computer_config.default_max_range;
+    long default_max_range = vega_config::config->computer_config.default_max_range;
     max_range = Resource<long>(default_max_range,0,default_max_range);
-    tracking_cone = configuration()->computer_config.default_tracking_cone;
-    lock_cone = configuration()->computer_config.default_lock_cone;
+    tracking_cone = vega_config::config->computer_config.default_tracking_cone;
+    lock_cone = vega_config::config->computer_config.default_lock_cone;
 }
 
 CRadar::~CRadar()

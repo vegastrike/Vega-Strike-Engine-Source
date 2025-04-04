@@ -138,9 +138,9 @@ public:
         assert(player);
         assert(target);
 
-        const bool draw_significant_blips = configuration()->graphics_config.hud.draw_significant_blips;
-        const bool untarget_out_cone = configuration()->graphics_config.hud.untarget_beyond_cone;
-        const float min_radar_blip_size = configuration()->graphics_config.hud.min_radar_blip_size;
+        const bool draw_significant_blips = vega_config::config->graphics.hud.draw_significant_blips;
+        const bool untarget_out_cone = vega_config::config->graphics.hud.untarget_beyond_cone;
+        const float min_radar_blip_size = vega_config::config->graphics.hud.min_radar_blip_size;
 
         if (target != player) {
             const bool isCurrentTarget = (player->Target() == target);
@@ -187,8 +187,8 @@ const Sensor::TrackCollection &Sensor::FindTracksInRange() const {
     collection.clear();
 
     // Find all units within range
-    const float kMaxUnitRadius = configuration()->graphics_config.hud.radar_search_extra_radius;
-    const bool kDrawGravitationalObjects = configuration()->graphics_config.hud.draw_gravitational_objects;
+    const float kMaxUnitRadius = vega_config::config->graphics.hud.radar_search_extra_radius;
+    const bool kDrawGravitationalObjects = vega_config::config->graphics.hud.draw_gravitational_objects;
 
     UnitWithinRangeLocator<CollectRadarTracks> unitLocator(GetMaxRange(), kMaxUnitRadius);
     unitLocator.action.init(this, &collection, player);

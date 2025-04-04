@@ -65,9 +65,9 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 
 float Energetic::getFuelUsage(bool afterburner) {
     if (afterburner) {
-        return configuration()->fuel.afterburner_fuel_usage;
+        return vega_config::config->fuel.afterburner_fuel_usage;
     }
-    return configuration()->fuel.normal_fuel_usage;
+    return vega_config::config->fuel.normal_fuel_usage;
 }
 
 
@@ -78,5 +78,5 @@ void Energetic::setEnergyRecharge(float enrech) {
 
 
 float Energetic::VSDPercent() {
-    return configuration()->fuel.vsd_mj_yield / 100;
+    return vega_config::config->fuel.vsd_mj_yield / 100;
 }

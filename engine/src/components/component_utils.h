@@ -1,7 +1,7 @@
 /*
  * src/components/component_printer.h
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -39,6 +39,9 @@ EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
                            EnergyContainer* energy, EnergyContainer* ftl_energy);
 
 EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer* fuel,
+                                            EnergyContainer* energy, EnergyContainer* ftl_energy);
+
+EnergyContainer* GetSourceFromConfiguration(const std::string& energy_source, EnergyContainer* fuel,
                                             EnergyContainer* energy, EnergyContainer* ftl_energy);
 
 enum class YPR {

@@ -138,7 +138,7 @@ void Unit::SetNebula(Nebula *neb) {
 }
 
 bool Unit::InRange(const Unit *target, double &mm, bool cone, bool cap, bool lock) const {
-    const float capship_size = configuration()->physics_config.capship_size;
+    const float capship_size = vega_config::config->physics.capship_size;
 
     if (this == target || target->cloak.Cloaked()) {
         return false;
@@ -456,7 +456,7 @@ void Unit::Init(const char *filename,
     if (unit_key == "") {
         // This is actually used for upgrade checks.
         bool istemplate = (string::npos != (string(filename).find(".template")));
-        if (!istemplate || (istemplate && configuration()->data_config.using_templates)) {
+        if (!istemplate || (istemplate && vega_config::config->data_config.using_templates)) {
             VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();
@@ -594,13 +594,13 @@ static float tmpsqr(float x) {
 }
 
 float CloseEnoughCone(Unit *me) {
-    return configuration()->physics_config.near_autotrack_cone;
+    return vega_config::config->physics.near_autotrack_cone;
 }
 
 bool CloseEnoughToAutotrack(Unit *me, Unit *targ, float &cone) {
     if (targ) {
         const float close_enough_to_autotrack =
-                tmpsqr(configuration()->physics_config.close_enough_to_autotrack);
+                tmpsqr(vega_config::config->physics.close_enough_to_autotrack);
         float dissqr = (me->curr_physical_state.position.Cast()
                 - targ->curr_physical_state.position.Cast()).MagnitudeSquared();
         float movesqr = close_enough_to_autotrack
@@ -812,7 +812,7 @@ extern signed char ComputeAutoGuarantee(Unit *un);
 extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
 
 double howFarToJump() {
-    return configuration()->physics_config.distance_to_warp;
+    return vega_config::config->physics.distance_to_warp;
 }
 
 QVector SystemLocation(std::string system) {
@@ -863,7 +863,7 @@ static std::string NearestSystem(std::string currentsystem, QVector pos) {
                                         i->first.length()) == i->first
                                         && whereto.substr(i->first.length() + 1)
                                                 == j->first) {
-                                    tmp /= configuration()->physics_config.target_distance_to_warp_bonus;
+                                    tmp /= vega_config::config->physics.target_distance_to_warp_bonus;
                                 }
                             }
                         }
@@ -1004,8 +1004,8 @@ void TurnJumpOKLightOn(Unit *un, Cockpit *cp) {
 }
 
 bool Unit::jumpReactToCollision(Unit *smalle) {
-    const bool ai_jump_cheat = configuration()->ai.jump_without_energy;
-    const bool nojumpinSPEC = configuration()->physics_config.no_spec_jump;
+    const bool ai_jump_cheat = vega_config::config->ai.jump_without_energy;
+    const bool nojumpinSPEC = vega_config::config->physics.no_spec_jump;
     bool SPEC_interference = (nullptr != _Universe->isPlayerStarship(smalle)) ? smalle->ftl_drive.Enabled()
             && nojumpinSPEC : (nullptr != _Universe->isPlayerStarship(this)) && ftl_drive.Enabled()
             && nojumpinSPEC;
@@ -1068,7 +1068,7 @@ Cockpit *Unit::GetVelocityDifficultyMult(float &difficulty) const {
     difficulty = 1;
     Cockpit *player_cockpit = _Universe->isPlayerStarship(this);
     if ((player_cockpit) == nullptr) {
-        difficulty = pow(g_game.difficulty, configuration()->physics_config.difficulty_speed_exponent);
+        difficulty = pow(g_game.difficulty, vega_config::config->physics.difficulty_speed_exponent);
     }
     return player_cockpit;
 }
@@ -1135,8 +1135,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
     // TODO: take actual damage into account when damaging components.
     float deg = fabs(180 * atan2(vec.i, vec.k) / M_PI);
     float randnum = rand01();
-    const float inv_min_dam = 1.0F - configuration()->physics_config.min_damage;
-    const float inv_max_dam = 1.0F - configuration()->physics_config.max_damage;
+    const float inv_min_dam = 1.0F - vega_config::config->physics.min_damage;
+    const float inv_max_dam = 1.0F - vega_config::config->physics.max_damage;
     if (dam < inv_max_dam) {
         dam = inv_max_dam;
     }
@@ -1172,7 +1172,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
         damages |= Damages::COMPUTER_DAMAGED;
         return;
     }
-    if (rand01() < configuration()->physics_config.thruster_hit_chance) {
+    if (rand01() < vega_config::config->physics.thruster_hit_chance) {
         // This is fairly severe. One or two hits can disable the engine.
         // Note that retro can be damaged by both this and above.
         // Drive can also be damaged by code below - really computer.
@@ -3297,7 +3297,7 @@ void Unit::TurretFAW() {
     Unit *un;
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
         if (!CheckAccessory(un)) {
-            un->EnqueueAIFirst(new Orders::FireAt(configuration()->ai.firing_config.aggressivity));
+            un->EnqueueAIFirst(new Orders::FireAt(vega_config::config->ai.firing.aggressivity));
             un->EnqueueAIFirst(new Orders::FaceTarget(false, 3));
         }
         un->TurretFAW();

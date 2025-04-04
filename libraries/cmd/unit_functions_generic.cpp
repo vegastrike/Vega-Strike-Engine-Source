@@ -97,11 +97,11 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
     int killedCp = _Universe->whichPlayerStarship(killedUnit);
     int killerCp = killedCp;
     if (killedCp != -1) {
-        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, configuration()->ai.kill_factor);
+        UniverseUtil::adjustRelationModifierInt(killedCp, un->faction, vega_config::config->ai.kill_factor);
     } else {
         killerCp = _Universe->whichPlayerStarship(un);
         if (killerCp != -1) {
-            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, configuration()->ai.kill_factor);
+            UniverseUtil::adjustRelationModifierInt(killerCp, killedUnit->faction, vega_config::config->ai.kill_factor);
         }
     }
     int faction = killedUnit->faction;
@@ -114,7 +114,7 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
             }
             if (relation != 0.0F) {
                 if (killerCp != -1) {
-                    UniverseUtil::adjustRelationModifierInt(killerCp, i, configuration()->ai.friend_factor * relation);
+                    UniverseUtil::adjustRelationModifierInt(killerCp, i, vega_config::config->ai.friend_factor * relation);
                 }
             }
         }
@@ -151,13 +151,13 @@ void ScoreKill(Cockpit *cp, Unit *un, Unit *killedUnit) {
 
 
 float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false) {
-    const float friendly_autodist = configuration()->physics_config.friendly_auto_radius;
-    const float neutral_autodist = configuration()->physics_config.neutral_auto_radius;
-    const float hostile_autodist = configuration()->physics_config.hostile_auto_radius;
+    const float friendly_autodist = vega_config::config->physics.friendly_auto_radius;
+    const float neutral_autodist = vega_config::config->physics.neutral_auto_radius;
+    const float hostile_autodist = vega_config::config->physics.hostile_auto_radius;
     int upgradefaction = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
     if (un->isUnit() == Vega_UnitType::asteroid) {
-        return configuration()->physics_config.min_asteroid_distance;
+        return vega_config::config->physics.min_asteroid_distance;
     }
     if (un->isUnit() == Vega_UnitType::planet
             || (un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup())) {

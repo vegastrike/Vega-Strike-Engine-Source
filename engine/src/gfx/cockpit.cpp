@@ -370,7 +370,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return target->energy.Percent();
 
         case UnitImages<void>::WARPENERGY: {
-            const bool warpifnojump = configuration()->graphics_config.hud.display_warp_energy_if_no_jump_drive;
+            const bool warpifnojump = vega_config::config->graphics.hud.display_warp_energy_if_no_jump_drive;
             return (warpifnojump || target->jump_drive.Installed()) ? target->ftl_energy.Percent() : 0;
         }
         case UnitImages<void>::HULL:
@@ -446,7 +446,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         case UnitImages<void>::MAXKPS:
         case UnitImages<void>::MAXCOMBATKPS:
         case UnitImages<void>::MAXCOMBATABKPS: {
-            const bool use_relative_velocity = configuration()->graphics_config.hud.display_relative_velocity;
+            const bool use_relative_velocity = vega_config::config->graphics.hud.display_relative_velocity;
             float value;
             switch (stat) {
                 case UnitImages<void>::KPS:
@@ -958,18 +958,18 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
     }
     radarSprites[0] = radarSprites[1] = Pit[0] = Pit[1] = Pit[2] = Pit[3] = NULL;
 
-    draw_all_boxes = configuration()->graphics_config.hud.draw_all_target_boxes;
-    draw_line_to_target = configuration()->graphics_config.hud.draw_line_to_target;
-    draw_line_to_targets_target = configuration()->graphics_config.hud.draw_line_to_targets_target;
-    draw_line_to_itts = configuration()->graphics_config.hud.draw_line_to_itts;
-    always_itts = configuration()->graphics_config.hud.draw_always_itts;
-    steady_itts = configuration()->physics_config.steady_itts;
+    draw_all_boxes = vega_config::config->graphics.hud.draw_all_target_boxes;
+    draw_line_to_target = vega_config::config->graphics.hud.draw_line_to_target;
+    draw_line_to_targets_target = vega_config::config->graphics.hud.draw_line_to_targets_target;
+    draw_line_to_itts = vega_config::config->graphics.hud.draw_line_to_itts;
+    always_itts = vega_config::config->graphics.hud.draw_always_itts;
+    steady_itts = vega_config::config->physics.steady_itts;
     last_locktime = last_mlocktime = -FLT_MAX;
 
     radarDisplay = Radar::Factory(Radar::Type::NullDisplay);
 
     //Compute the screen limits. Used to display the arrow pointing to the selected target.
-    const float limit_y = configuration()->graphics_config.fov;
+    const float limit_y = vega_config::config->graphics.fov;
     smooth_fov = limit_y;
     projection_limit_y = limit_y;
     //The angle between the center of the screen and the border is half the fov.
@@ -1187,7 +1187,7 @@ int GameCockpit::Autopilot(Unit *target) {
                 QVector posB = un->LocalPosition();
                 bool movedatall = (posA - posB).Magnitude() > un->rSize();
                 if (autoMessage.length() == 0 && !movedatall) {
-                    autoMessage = configuration()->graphics_config.hud.already_near_message;
+                    autoMessage = vega_config::config->graphics.hud.already_near_message;
                     retauto = false;
                 } else if ((retauto || retautoA) && movedatall) {
                     if (autopan) {
@@ -1422,8 +1422,8 @@ QVector SystemLocation(std::string system);
 double howFarToJump();
 
 void GameCockpit::Draw() {
-    const bool draw_heading_marker = configuration()->graphics_config.draw_heading_marker;
-    const bool draw_star_destination_arrow = configuration()->graphics_config.hud.draw_star_direction;
+    const bool draw_heading_marker = vega_config::config->graphics.draw_heading_marker;
+    const bool draw_star_destination_arrow = vega_config::config->graphics.hud.draw_star_direction;
     static GFXColor destination_system_color = vs_config->getColor("destination_system_color");
     Vector destination_system_location(0, 0, 0);
     cockpit_time += GetElapsedTime();
@@ -1443,8 +1443,8 @@ void GameCockpit::Draw() {
     if (nav_current != universe_current) {
         AccessNavSystem()->Setup();
     }
-    const bool draw_any_boxes = configuration()->graphics_config.hud.draw_targeting_boxes;
-    const bool draw_boxes_inside_only = configuration()->graphics_config.hud.draw_targeting_boxes_inside;
+    const bool draw_any_boxes = vega_config::config->graphics.hud.draw_targeting_boxes;
+    const bool draw_boxes_inside_only = vega_config::config->graphics.hud.draw_targeting_boxes_inside;
     if (draw_any_boxes && screenshotkey == false && (draw_boxes_inside_only == false || view < CP_CHASE)) {
         Unit *player = GetParent();
         if (player) {
@@ -1649,13 +1649,13 @@ void GameCockpit::Draw() {
 
     Unit *un;
     float crosscenx = 0, crossceny = 0;
-    const bool crosshairs_on_chasecam = configuration()->graphics_config.hud.crosshairs_on_chase_cam;
-    const bool crosshairs_on_padlock = configuration()->graphics_config.hud.crosshairs_on_padlock;
+    const bool crosshairs_on_chasecam = vega_config::config->graphics.hud.crosshairs_on_chase_cam;
+    const bool crosshairs_on_padlock = vega_config::config->graphics.hud.crosshairs_on_padlock;
     if ((view == CP_FRONT)
             || (view == CP_CHASE && crosshairs_on_chasecam)
             || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && crosshairs_on_padlock)) {
         if (Panel.size() > 0 && Panel.front() && screenshotkey == false) {
-            const bool drawCrosshairs = configuration()->graphics_config.hud.draw_rendered_crosshairs;
+            const bool drawCrosshairs = vega_config::config->graphics.hud.draw_rendered_crosshairs;
             if (drawCrosshairs) {
                 float x, y, wid, hei;
                 Panel.front()->GetPosition(x, y);
@@ -1823,7 +1823,7 @@ void GameCockpit::Draw() {
             }
             //process VDU, damage VDU, targetting VDU
             //////////////////// DISPLAY CURRENT POSITION ////////////////////
-            if (configuration()->graphics_config.hud.debug_position) {
+            if (vega_config::config->graphics.hud.debug_position) {
                 TextPlane tp;
                 std::string str;
                 Unit *you = parent.GetUnit();
@@ -1870,12 +1870,12 @@ void GameCockpit::Draw() {
         //Draw the arrow to the target.
         {
             Unit *parent = NULL;
-            if (configuration()->graphics_config.hud.draw_arrow_to_target && (parent = this->parent.GetUnit())) {
+            if (vega_config::config->graphics.hud.draw_arrow_to_target && (parent = this->parent.GetUnit())) {
                 Radar::Sensor sensor(parent);
                 if ((view == CP_PAN
-                        && !configuration()->graphics_config.hud.draw_arrow_on_pan_cam)
+                        && !vega_config::config->graphics.hud.draw_arrow_on_pan_cam)
                         || (view == CP_PANTARGET
-                                && !configuration()->graphics_config.hud.draw_arrow_on_pan_target) || (view == CP_CHASE && !configuration()
+                                && !vega_config::config->graphics.hud.draw_arrow_on_pan_target) || (view == CP_CHASE && !configuration()
                         ->graphics_config
                         .hud
                         .draw_arrow_on_chase_cam)) {
@@ -2414,9 +2414,9 @@ void GameCockpit::SetupViewPort(bool clip) {
             CrossProduct(tmp, r, q);
             //Padlock block
             if (view == CP_VIEWTARGET) {
-                const float padlock_view_lag = configuration()->graphics_config.hud.padlock_view_lag;
+                const float padlock_view_lag = vega_config::config->graphics.hud.padlock_view_lag;
                 const float padlock_view_lag_inv = 1.0F / padlock_view_lag;
-                const float padlock_view_lag_fix = configuration()->graphics_config.hud.padlock_view_lag_fix_zone;
+                const float padlock_view_lag_fix = vega_config::config->graphics.hud.padlock_view_lag_fix_zone;
                 const float padlock_view_lag_fix_cos = (float) cos(padlock_view_lag_fix);
 
                 //pp,qq,rr <-- world-relative padlock target
@@ -2451,7 +2451,7 @@ void GameCockpit::SetupViewPort(bool clip) {
             un->UpdateHudMatrix(CP_TARGET);
             un->UpdateHudMatrix(CP_PANTARGET);
         }
-        if (view == CP_CHASE && !configuration()->graphics_config.hud.draw_unit_on_chase_cam) {
+        if (view == CP_CHASE && !vega_config::config->graphics.hud.draw_unit_on_chase_cam) {
         } else {
             ShoveCamBelowUnit(CP_CHASE, un, zoomfactor);
             //ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
