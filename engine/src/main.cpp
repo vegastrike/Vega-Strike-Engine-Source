@@ -92,6 +92,8 @@ Universe *_Universe;
 TextPlane *bs_tp = nullptr;
 char SERVER = 0;
 
+static std::shared_ptr<vega_config::Config> vega_config::config = nullptr;
+
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
 // legacy_data_dir_mode determines whether the application should require the data directory to be specified on the command-line or not
@@ -269,8 +271,6 @@ int main(int argc, char *argv[]) {
         boost::filesystem::current_path(program_directory_path);
     }
 
-//    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
-
     CONFIGFILE = nullptr;
     {
         char pwd[8192] = "";
@@ -314,15 +314,24 @@ int main(int argc, char *argv[]) {
         mission_name = pair.second;
 
         VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
-        if (CONFIGFILE == 0) {
+        if (CONFIGFILE == nullptr) {
             CONFIGFILE = new char[42];
-            sprintf(CONFIGFILE, "vegastrike.config");
+            snprintf(CONFIGFILE, 41, "vegastrike.config");
         }
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths(CONFIGFILE, subdir);
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
     }
 
+    std::ifstream file("config.json");
+    std::string str;
+    std::string file_contents;
+    while (std::getline(file, str)) {
+        file_contents += str;
+        file_contents.push_back('\n');
+    }
+
+    vega_config::config = std::make_shared<vega_config::Config>(file_contents);
     // now that the user config file has been loaded from disk, update the global configuration struct values
     configuration()->OverrideDefaultsWithUserConfiguration();
 
