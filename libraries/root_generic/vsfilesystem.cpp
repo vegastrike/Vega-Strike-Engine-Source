@@ -603,16 +603,16 @@ void InitDataDirectory() {
         version = fopen("Version.txt", "r");
     }
     if (version) {
-        string hsd;
+        std::string hsd;
         int c;
         while ((c = fgetc(version)) != EOF) {
             if (isspace(c)) {
                 break;
             }
-            hsd += (char) c;
+            hsd += static_cast<char>(c);
         }
         fclose(version);
-        if (hsd.length()) {
+        if (!hsd.empty()) {
             HOMESUBDIR = hsd;
             VS_LOG(info, (boost::format("Using %1% as the home directory") % hsd));
         }
@@ -843,11 +843,8 @@ void InitPaths(string conf, string subdir) {
     }
     /************************** Data and home directory settings *************************/
 
-    // Need to be first for win32. stephengtuggy 2021-09-10: O RLY? Let's try it the other way
     InitDataDirectory();
-    // #ifndef WIN32
     InitHomeDirectory();
-    // #endif
     LoadConfig(std::move(subdir));
     /*
       Paths relative to datadir or homedir (both should have the same structure)

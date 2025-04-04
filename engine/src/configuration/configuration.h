@@ -27,13 +27,16 @@
 #define VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
 
 #include <string>
+#include <boost/filesystem/path.hpp>
 
 #include "components/energy_consumer.h"
 
 namespace vega_config {
 	struct Config {
-		explicit Config(const std::string json_text);
+		explicit Config(const std::string& json_text);
 
+		void load_config(const std::string& json_text);
+		void load_config(const boost::filesystem::path & path);
 
 		struct {
 			double audio_atom = 0.05555555556;
