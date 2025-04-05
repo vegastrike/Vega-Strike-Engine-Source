@@ -1168,6 +1168,9 @@ IF (USE_GTEST)
         src/components/tests/drive_tests.cpp
         src/components/tests/afterburner_tests.cpp
         src/components/tests/jump_drive_tests.cpp
+            src/my_unit_test_environment.cpp
+            src/my_unit_test_environment.h
+            src/my_unit_test_main.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
