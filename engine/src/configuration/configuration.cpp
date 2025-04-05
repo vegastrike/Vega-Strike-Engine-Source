@@ -390,9 +390,9 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.num_times_to_draw_shine = boost::json::value_to<int>(*num_times_to_draw_shine_value_ptr);
             }
 
-            const boost::json::value * planet_detail_stack_count_value_ptr = graphics_object.if_contains("planet_detail_stack_count");
-            if (planet_detail_stack_count_value_ptr != nullptr) {
-                graphics.planet_detail_stack_count = boost::json::value_to<int>(*planet_detail_stack_count_value_ptr);
+            const boost::json::value * planet_detail_level_value_ptr = graphics_object.if_contains("planet_detail_level");
+            if (planet_detail_level_value_ptr != nullptr) {
+                graphics.planet_detail_level = boost::json::value_to<int>(*planet_detail_level_value_ptr);
             }
 
             const boost::json::value * reduced_vdus_width_value_ptr = graphics_object.if_contains("reduced_vdus_width");
@@ -405,9 +405,9 @@ void vega_config::Config::load_config(const std::string& json_text) {
                 graphics.reduced_vdus_height = boost::json::value_to<double>(*reduced_vdus_height_value_ptr);
             }
 
-            const boost::json::value * shield_detail_stack_count_value_ptr = graphics_object.if_contains("shield_detail_stack_count");
-            if (shield_detail_stack_count_value_ptr != nullptr) {
-                graphics.shield_detail_stack_count = boost::json::value_to<int>(*shield_detail_stack_count_value_ptr);
+            const boost::json::value * shield_detail_level_value_ptr = graphics_object.if_contains("shield_detail_level");
+            if (shield_detail_level_value_ptr != nullptr) {
+                graphics.shield_detail_level = boost::json::value_to<int>(*shield_detail_level_value_ptr);
             }
 
             const boost::json::value * shield_technique_value_ptr = graphics_object.if_contains("shield_technique");

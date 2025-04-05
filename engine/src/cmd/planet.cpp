@@ -287,7 +287,7 @@ Planet::Planet(QVector x,
         wormhole = anytrue;
     }
     if (!wormhole) {
-        const int stacks = vega_config::config->graphics.planet_detail_stack_count;
+        const int stacks = vega_config::config->graphics.planet_detail_level;
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
         meshdata.push_back(new SphereMesh(radius,
                 stacks,
@@ -498,7 +498,7 @@ void Planet::AddAtmosphere(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    const int stacks = vega_config::config->graphics.planet_detail_stack_count;
+    const int stacks = vega_config::config->graphics.planet_detail_level;
     meshdata.push_back(new SphereMesh(radius,
             stacks,
             stacks,
@@ -543,7 +543,7 @@ void Planet::AddCity(const std::string &texture,
     setMaterialSpecular(m, 0.0);
     setMaterialEmissive(m, daymaterialweight);
     m.power = 0.0;
-    const int stacks = vega_config::config->graphics.planet_detail_stack_count;
+    const int stacks = vega_config::config->graphics.planet_detail_level;
     meshdata.push_back(new CityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
             false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
     meshdata.back()->setEnvMap(GFXFALSE);
@@ -593,7 +593,7 @@ void Planet::AddRing(const std::string &texture,
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    int stacks = vega_config::config->graphics.planet_detail_stack_count;
+    int stacks = vega_config::config->graphics.planet_detail_level;
     if (slices > 0) {
         stacks = stacks;
         if (stacks < 3) {

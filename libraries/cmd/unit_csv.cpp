@@ -791,7 +791,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         addShieldMesh(&xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
         meshdata.back() = xml.shieldmesh;
     } else {
-        const int shield_stacks = vega_config::config->graphics.shield_detail_stack_count;
+        const int shield_stacks = vega_config::config->graphics.shield_detail_level;
         const std::string& shieldtex = vega_config::config->graphics.shield_texture;
         const std::string& shieldtechnique = vega_config::config->graphics.shield_technique;
         meshdata.back() = new SphereMesh(rSize(),

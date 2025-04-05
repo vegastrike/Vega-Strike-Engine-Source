@@ -107,10 +107,10 @@ namespace vega_config {
         double missile_explosion_radius_mult = 1.0;
         bool missile_sparkle = false;
         int num_times_to_draw_shine = 2;
-        int planet_detail_stack_count = 24;
+        int planet_detail_level = 24;
         double reduced_vdus_width = 0.0;
         double reduced_vdus_height = 0.0;
-        int shield_detail_stack_count = 24;
+        int shield_detail_level = 24;
         std::string shield_technique = "";
         std::string shield_texture = "shield.bmp";
         double star_body_radius = 0.33;
