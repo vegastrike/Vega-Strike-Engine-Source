@@ -1263,6 +1263,11 @@ IF (USE_GTEST)
         DESTINATION ${CMAKE_BINARY_DIR}/test_assets
     )
 
+    FILE(
+        COPY "src/configuration/tests/config.json"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    )
+
     INCLUDE(GoogleTest)
     gtest_discover_tests(${TEST_NAME})
 ENDIF (USE_GTEST)
