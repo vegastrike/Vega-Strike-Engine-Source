@@ -1095,8 +1095,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer,
 }
 
 void /*GFXDRVAPI*/ GFXDeleteTexture(const size_t handle) {
+    if (STATIC_VARS_DESTROYED) {
+        VS_LOG(trace, (boost::format("%1% aborting since STATIC_VARS_DESTROYED is true") % __FUNCTION__));
+        return;
+    }
     if (handle >= textures.size()) {
-        VS_LOG(error, (boost::format("GFXDeleteTexture(const size_t handle) called with invalid handle value %1%, which is greater than textures.size(): %2%")
+        VS_LOG(error, (boost::format("%1% called with invalid handle value %2%, which is greater than textures.size(): %3%")
+                % __FUNCTION__
                 % handle
                 % textures.size()));
         return;
