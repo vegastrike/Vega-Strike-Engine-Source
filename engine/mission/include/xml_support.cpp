@@ -36,7 +36,7 @@
 
 #include <assert.h>
 
-#include "xml_support.h"
+#include "./xml_support.h"
 
 string strtoupper(const string &foo) {
 

@@ -27,8 +27,8 @@
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_UTIL_H
 
 #include <string>
-#include "unit_generic.h"
-#include "images.h"
+#include "cmd/unit_generic.h"
+#include "cmd/images.h"
 using std::string;
 
 namespace UnitUtil {

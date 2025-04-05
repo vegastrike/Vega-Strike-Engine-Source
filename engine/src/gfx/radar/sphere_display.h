@@ -28,7 +28,7 @@
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H
 
 #include "sensor.h"
-#include "radar.h"
+#include "gfx/radar/radar.h"
 #include "dual_display.h"
 
 #include <memory>

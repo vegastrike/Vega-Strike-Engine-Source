@@ -23,7 +23,7 @@
 #define VEGA_STRIKE_ENGINE_STRINGPOOL_H
 
 #include <string>
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 
 #ifndef INITIAL_STRINGPOOL_SIZE
 #define INITIAL_STRINGPOOL_SIZE (1<<15)

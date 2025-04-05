@@ -24,11 +24,11 @@
  *  Force Feedback support by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include "force_feedback.h"
+#include "src/force_feedback.h"
 
-#include "vegastrike.h"
-#include "vsfilesystem.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/vsfilesystem.h"
+#include "root_generic/vs_globals.h"
 
 #define FF_DOIT 1
 

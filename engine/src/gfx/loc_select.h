@@ -25,10 +25,10 @@
  */
 // NO HEADER GUARD
 
-#include "vec.h"
+#include "gfx_generic/vec.h"
 
-#include "animation.h"
-#include "in_mouse.h"
+#include "gfx/animation.h"
+#include "src/in_mouse.h"
 class LocationSelect {
 protected:
     Transformation local_transformation;

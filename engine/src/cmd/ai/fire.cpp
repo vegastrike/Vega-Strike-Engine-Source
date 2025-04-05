@@ -25,21 +25,21 @@
 #include "flybywire.h"
 #include "navigation.h"
 #include "cmd/planet.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/role_bitmask.h"
 #include "cmd/ai/communication.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include <algorithm>
 #include "cmd/unit_find.h"
-#include "vs_random.h"
-#include "lin_time.h" //DEBUG ONLY
+#include "src/vs_random.h"
+#include "root_generic/lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
-#include "universe.h"
-#include "unit_util.h"
+#include "src/universe.h"
+#include "cmd/unit_util.h"
 
 extern int numprocessed;
 extern double targetpick;
@@ -134,12 +134,12 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
 
 void FireAt::ReInit(float aggressivitylevel) {
     lastmissiletime = UniverseUtil::GetGameTime() - 65536.;
-    missileprobability = configuration()->ai.firing_config.missile_probability;
+    missileprobability = vega_config::config->ai.firing.missile_probability;
     delay = 0;
     agg = aggressivitylevel;
     distance = 1;
     //JS --- spreading target switch times
-    lastchangedtarg = 0.0 - targrand.uniformInc(0, 1) * configuration()->ai.targeting_config.min_time_to_switch_targets;
+    lastchangedtarg = 0.0 - targrand.uniformInc(0, 1) * vega_config::config->ai.targeting.min_time_to_switch_targets;
     had_target = false;
 }
 
@@ -148,7 +148,7 @@ FireAt::FireAt(float aggressivitylevel) : CommunicatingAI(WEAPON, STARGET) {
 }
 
 FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET) {
-    ReInit(configuration()->ai.firing_config.aggressivity);
+    ReInit(vega_config::config->ai.firing.aggressivity);
 }
 
 void FireAt::SignalChosenTarget() {

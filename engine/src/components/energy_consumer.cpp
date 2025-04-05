@@ -25,7 +25,7 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "energy_consumer.h"
+#include "components/energy_consumer.h"
 
 double EnergyConsumer::simulation_atom_var = 0.1;
 
@@ -39,13 +39,16 @@ EnergyConsumerSource GetSource(const int source) {
     }
 }
 
-EnergyConsumer::EnergyConsumer(EnergyContainer *source, 
-                               bool partial, 
+EnergyConsumer::~EnergyConsumer()
+= default;
+
+EnergyConsumer::EnergyConsumer(EnergyContainer *source,
+                               bool partial,
                                double consumption, bool infinite):
                                consumption(consumption),
                                atom_consumption(consumption * simulation_atom_var),
-                               source(source), 
-                               partial(partial), 
+                               source(source),
+                               partial(partial),
                                infinite(false) {}
 
 bool EnergyConsumer::CanConsume() const {

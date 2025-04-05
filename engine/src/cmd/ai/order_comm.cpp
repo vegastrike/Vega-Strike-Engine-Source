@@ -27,7 +27,7 @@
 
 #include "order.h"
 #include "communication.h"
-#include "configxml.h"
+#include "root_generic/configxml.h"
 
 using std::list;
 using std::vector;

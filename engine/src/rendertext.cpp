@@ -25,8 +25,8 @@
 //Based on Aardarples rendertext
 #include "rendertext.h"
 
-#include "vegastrike.h"
-#include "cg_global.h"
+#include "src/vegastrike.h"
+#include "src/cg_global.h"
 #ifdef HAVE_SDL
 #include "SDL2/SDL.h"
 #endif

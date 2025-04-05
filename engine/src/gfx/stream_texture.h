@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "aux_texture.h"
+#include "gfx/aux_texture.h"
 
 class StreamTexture : public Texture {
     unsigned char *mutabledata;

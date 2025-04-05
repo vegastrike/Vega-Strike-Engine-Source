@@ -25,9 +25,15 @@
 
 #include <gtest/gtest.h>
 #include "configuration/game_config.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 #include <string>
+#include <configuration/configuration.h>
+
+TEST(load_config, Sanity) {
+    const boost::filesystem::path config_file_path{"./config.json"};
+    vega_config::config = std::make_shared<vega_config::Config>(config_file_path);
+}
 
 TEST(LoadConfig, Sanity) {
     // Test without configuration

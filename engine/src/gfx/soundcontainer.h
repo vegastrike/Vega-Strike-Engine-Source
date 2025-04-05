@@ -28,12 +28,12 @@
 
 #include <string>
 
-#include "soundcontainer_generic.h"
+#include "gfx_generic/soundcontainer_generic.h"
 
 /**
  * A reference to a soundfile that can be lazily loaded.
- * 
- * This abstract base class specifies the common interface 
+ *
+ * This abstract base class specifies the common interface
  * for all implementations of sound containers, see
  * concrete implementations for more details.
  */

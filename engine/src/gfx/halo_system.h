@@ -27,9 +27,9 @@
 #define VEGA_STRIKE_ENGINE_GFX_HALOSYSTEM_H
 
 #include <vector>
-#include <string> 
+#include <string>
 
-#include "matrix.h"
+#include "gfx_generic/matrix.h"
 class Mesh;
 struct GFXColor;
 class Unit;

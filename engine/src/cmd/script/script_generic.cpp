@@ -25,7 +25,7 @@
  */
 
 
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "cmd/unit_generic.h"
 #include "mission.h"
 

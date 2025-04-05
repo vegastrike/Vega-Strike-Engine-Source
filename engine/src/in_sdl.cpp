@@ -21,11 +21,11 @@
  */
 
 
-#include "in_joystick.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "in_kb_data.h"
-#include "vs_logging.h"
+#include "src/in_joystick.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/in_kb_data.h"
+#include "src/vs_logging.h"
 #include <assert.h>     /// needed for assert() calls.
 
 void DefaultJoyHandler(const KBData &, KBSTATE newState) // DELETE ME

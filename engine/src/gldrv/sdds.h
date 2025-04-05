@@ -21,7 +21,7 @@
  */
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_SDDS_H
 #define VEGA_STRIKE_ENGINE_GLDRV_SDDS_H
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 
 /*
  *       input is the compressed dxt file, already read in by vsimage.

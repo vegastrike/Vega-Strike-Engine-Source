@@ -24,8 +24,8 @@
 
 #include <vector>
 
-#include "product.h"
-#include "resource.h"
+#include "resource/product.h"
+#include "resource/resource.h"
 
 
 // A bit of hackery to keep the names separate for now.

@@ -24,14 +24,14 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include "cmd/unit_generic.h"
 #include "order.h"
 #include "cmd/collection.h"
 #include "communication.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 
 using std::vector;
 using std::list;

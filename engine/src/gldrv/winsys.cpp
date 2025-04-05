@@ -44,13 +44,13 @@
 
 #include "gl_globals.h"
 #include "winsys.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
-#include "options.h"
-#include "vs_exit.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
+#include "root_generic/options.h"
+#include "src/vs_exit.h"
 #include "configuration/configuration.h"
 
 #include "SDL2/SDL_video.h"
@@ -250,9 +250,9 @@ static bool setup_sdl_video_mode(int *argc, char **argv) {
     if (game_options()->gl_accelerated_visual) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-    width = configuration()->graphics2_config.resolution_x;
-    height = configuration()->graphics2_config.resolution_y;
-    const int screen_number = configuration()->graphics2_config.screen;
+    width = vega_config::config->graphics.resolution_x;
+    height = vega_config::config->graphics.resolution_y;
+    const int screen_number = vega_config::config->graphics.screen;
     SDL_Window *window = nullptr;
     if(screen_number == 0) {
         window = SDL_CreateWindow("Vega Strike", 0, 0, width, height, video_flags);

@@ -25,7 +25,7 @@
  */
 
 
-#include "navscreenoccupied.h"
+#include "gfx/nav/navscreenoccupied.h"
 
 #include "gfx/masks.h"
 

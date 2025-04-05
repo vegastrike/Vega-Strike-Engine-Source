@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_LIGHT_H
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_LIGHT_H
 
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "hashtable_3d.h"
 #include "gl_globals.h"
 extern GLint GFX_MAX_LIGHTS;

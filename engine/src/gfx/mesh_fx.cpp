@@ -25,8 +25,8 @@
  */
 
 
-#include "mesh.h"
-#include "lin_time.h"
+#include "gfx_generic/mesh.h"
+#include "root_generic/lin_time.h"
 #define MAXLOCALFX (6)
 static float startpotency = 20;
 static float endpotency = 4;

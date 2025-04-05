@@ -25,27 +25,27 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
-#include "occlusion.h"
+#include "gfx/occlusion.h"
 
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "vs_logging.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "camera.h"
-#include "universe.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
+#include "gfx/camera.h"
+#include "src/universe.h"
 
-#include "../gldrv/gl_globals.h"
-#include <physics.h>
+#include "gldrv/gl_globals.h"
+#include "src/physics.h"
 
 #include <limits>
 #include <set>
-#include "heap.h"
+#include "src/heap.h"
 
 namespace Occlusion {
 
@@ -64,8 +64,9 @@ class Occluder {
     float occlusionRating;
 
     void computeOcclusionRating() {
-        double distanceSq = (pos - light).MagnitudeSquared();
-        double maxSq = maxOcclusionDistance * maxOcclusionDistance;
+        const double distanceSq = (pos - light).MagnitudeSquared();
+        const double max_occlusion_distance_temp = maxOcclusionDistance;
+        const double maxSq = max_occlusion_distance_temp * max_occlusion_distance_temp;
         if (distanceSq >= maxSq) {
             occlusionRating = 0.f;
         } else {

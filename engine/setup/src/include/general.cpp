@@ -23,7 +23,7 @@
 /* This include has been designed to act independant of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
-#include "general.h"
+#include "setup/src/include/general.h"
 
 int RANDOMIZED = 0;
 
@@ -138,7 +138,7 @@ char *pre_chomp(char *line) {
  * If the second parameter is found, it is replaced with the third parameter
  */
 /*    --- Seems this function is not used at all.
-*char *replace(char *line, char *search, char *replace, int LENGTH) 
+*char *replace(char *line, char *search, char *replace, int LENGTH)
 *{
 *	int  dif, calc;
 *	char *ptr_new, *location;
@@ -147,18 +147,18 @@ char *pre_chomp(char *line) {
 *	chr_new = (char *) malloc (sizeof (char)*LENGTH);
 *	current = (char *) malloc (sizeof (char)*LENGTH);
 *	calc = strlen(line) - strlen(search) + strlen(replace);
-*    if (calc > LENGTH) 
+*    if (calc > LENGTH)
 *    {
 *        free(chr_new);
 *        free(current);
 *        return line;
 *    }
 *	strcpy(current, line);
-*	while ((location = strstr(current, search)) != nullptr) 
+*	while ((location = strstr(current, search)) != nullptr)
 *        {
 *		chr_new[0] = '\0';
 *		calc = strlen(current) - strlen(search) + strlen(replace);
-*                if (calc > LENGTH) 
+*                if (calc > LENGTH)
 *                {
 *                    strcpy(line, current);
 *                    free(current);
@@ -346,7 +346,7 @@ void btoa(char *dest, char *string) {
 #ifdef GLIB
 
 // Some handy wrappers for glib that help error handling which prevent segfaults
-char *GetString(GString *line) 
+char *GetString(GString *line)
 {
     if (line == 0)
         {

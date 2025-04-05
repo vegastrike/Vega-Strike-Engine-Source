@@ -22,8 +22,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hashtable.h"
-#include "base_maker_texture.h"
+#include "src/hashtable.h"
+#include "objconv/basemaker/base_maker_texture.h"
 #include <string.h>
 #include <stdio.h>
 #include <png.h>

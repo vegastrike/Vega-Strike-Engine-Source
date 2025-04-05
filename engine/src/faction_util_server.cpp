@@ -21,7 +21,7 @@
  */
 
 #include "cmd/unit_generic.h"
-#include "faction_generic.h"
+#include "root_generic/faction_generic.h"
 using namespace FactionUtil;
 
 Faction::~Faction() {

@@ -31,7 +31,7 @@
 #include "unit.h"
 #include <time.h>
 
-#include "collection.h"
+#include "cmd/collection.h"
 
 #define SIZE 60000
 

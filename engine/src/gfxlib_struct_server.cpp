@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 #include <stdlib.h>
 #include <string.h>
 

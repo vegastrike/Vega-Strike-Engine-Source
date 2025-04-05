@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "control.h"
 

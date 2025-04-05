@@ -42,27 +42,27 @@
 #include <stdlib.h>
 #endif
 
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 
-#include "audiolib.h"
-#include "universe.h"
-#include "star_system.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "lin_time.h"
-#include "collection.h"
-#include "unit_generic.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
-#include "music.h"
-#include "base.h"
+#include "src/audiolib.h"
+#include "src/universe.h"
+#include "src/star_system.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/lin_time.h"
+#include "cmd/collection.h"
+#include "cmd/unit_generic.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
+#include "cmd/music.h"
+#include "cmd/base.h"
 
-#include "python/python_compile.h"
+#include "src/python/python_compile.h"
 
 //To allow for loading in another thread, we must handle some AL vars ourselves...
 #include "aldrv/al_globals.h"
-#include "options.h"
+#include "root_generic/options.h"
 
 #define MAX_RECENT_HISTORY "5"
 
@@ -514,7 +514,7 @@ void Music::GotoSong(int whichlist, int whichsong, bool skip, int layer) {
         if (whichsong != NOLIST && whichlist != NOLIST && whichlist < (int) playlist.size() && whichsong
                 < (int) playlist[whichlist].size()) {
             if (muzak[(layer >= 0) ? layer : 0].lastlist != whichlist) {
-                if (configuration()->audio_config.shuffle_songs.clear_history_on_list_change) {
+                if (vega_config::config->audio.shuffle_songs_section.clear_history_on_list_change) {
                     std::list<std::string> &recent = muzak[(layer >= 0) ? layer : 0].recent_songs;
                     recent.clear();
                 }

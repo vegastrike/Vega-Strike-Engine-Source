@@ -28,10 +28,10 @@
 #include "flykeyboard.h"
 #include "cmd/unit_generic.h"
 #include "autodocking.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "vs_globals.h"
-#include "lin_time.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/lin_time.h"
 
 float FlyByKeyboard::clamp_axis(float v) {
     static int axis_scale = XMLSupport::parse_int(vs_config->getVariable("physics", "slide_start", "3"));

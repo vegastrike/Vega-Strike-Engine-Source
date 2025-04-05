@@ -53,7 +53,7 @@
 #endif
 
 #include "glut_support.h"
-#include "gfxlib_struct.h"
+#include "src/gfxlib_struct.h"
 
 #define DIR_TEXT "textures/gui/"
 

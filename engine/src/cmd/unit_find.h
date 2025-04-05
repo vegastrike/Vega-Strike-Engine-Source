@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_FIND_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_FIND_H
 
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 
 template<class Locator>
 void findObjectsFromPosition(CollideMap *cm,

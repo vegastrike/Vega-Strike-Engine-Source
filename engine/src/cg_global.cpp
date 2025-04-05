@@ -27,15 +27,15 @@
 
 #if defined (CG_SUPPORT)
 #define GLH_EXT_SINGLE_FILE 1
-#include "cg_global.h"
-#include "vs_globals.h"
+#include "src/cg_global.h"
+#include "root_generic/vs_globals.h"
 
 #include <glh/glh_extensions.h>
 // #include <iostream>
 #include <string>
 #include <shared/data_path.h>
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 // using std::string;
 

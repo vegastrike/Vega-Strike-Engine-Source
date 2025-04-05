@@ -23,13 +23,13 @@
 #include <png.h>
 #include "glut_support.h"
 #include "gfx/sprite.h"
-#include "vs_globals.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/aux_texture.h"
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "gfx/vsimage.h"
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "gldrv/gl_globals.h"
 using namespace VSFileSystem;
 

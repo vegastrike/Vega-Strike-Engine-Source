@@ -21,14 +21,14 @@
  */
 
 
-#include "cockpit.h"
-#include "xml_support.h"
-#include "gauge.h"
+#include "gfx/cockpit.h"
+#include "root_generic/xml_support.h"
+#include "gfx/gauge.h"
 #include <float.h>
-#include "hud.h"
-#include "vdu.h"
-#include "mesh.h"
-#include "configxml.h"
+#include "gfx/hud.h"
+#include "gfx/vdu.h"
+#include "gfx_generic/mesh.h"
+#include "root_generic/configxml.h"
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -397,7 +397,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                 }
             }
             break;
-        
+
         case UnitImages<void>::ARMOR4:
         case UnitImages<void>::ARMOR5:
         case UnitImages<void>::ARMOR6:

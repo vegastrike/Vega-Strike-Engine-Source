@@ -20,7 +20,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "resource.h"
+#include "resource/resource.h"
 
 #include <algorithm>
 #include <iostream>
@@ -29,7 +29,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "random_utils.h"
+#include "resource/random_utils.h"
 
 
 template<typename T>
@@ -97,7 +97,7 @@ Resource<T>::Resource(const std::string input, const T modifier, const T minimum
         return;
     }
 
-    std::vector<std::string> result; 
+    std::vector<std::string> result;
     boost::split(result, input, boost::is_any_of("/"));
 
     switch(result.size()) {
@@ -237,7 +237,7 @@ template<typename T>
 void Resource<T>::Destroy() {
     value_ = adjusted_max_value_ = min_value_;
 }
-    
+
 template<typename T>
 bool Resource<T>::Destroyed() const {
     return adjusted_max_value_ == min_value_;

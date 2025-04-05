@@ -22,10 +22,10 @@
 
 
 #include "gl_light.h"
-#include "options.h"
+#include "root_generic/options.h"
 #include <queue>
 #include <list>
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "gfx/occlusion.h"
 
 #include <vector>

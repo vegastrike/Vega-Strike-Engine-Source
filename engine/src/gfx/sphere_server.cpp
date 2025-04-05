@@ -25,7 +25,7 @@
  */
 
 
-#include "sphere.h"
+#include "gfx_generic/sphere.h"
 
 void SphereMesh::ProcessDrawQueue(int, int whichdrawqueue, bool zsort, const QVector &sortctr) {
 }

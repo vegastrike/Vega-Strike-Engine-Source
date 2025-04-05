@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_H
 
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 #include "gfx/radar/sensor.h"
 #include "gfx/radar/radar.h"
 

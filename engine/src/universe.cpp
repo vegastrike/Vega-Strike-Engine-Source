@@ -23,46 +23,45 @@
 
 #include <stdio.h>
 #include <fcntl.h>
-#include "gfxlib.h"
-#include "universe.h"
-#include "lin_time.h"
-#include "in.h"
+#include "src/gfxlib.h"
+#include "src/universe.h"
+#include "root_generic/lin_time.h"
+#include "src/in.h"
 #include "gfx/aux_texture.h"
-#include "profile.h"
+#include "src/profile.h"
 #include "gfx/cockpit.h"
-#include "galaxy_xml.h"
+#include "root_generic/galaxy_xml.h"
 #include <algorithm>
-#include "config_xml.h"
-#include "vs_globals.h"
-#include "xml_support.h"
-#include "audiolib.h"
+#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/audiolib.h"
 #include "cmd/script/mission.h"
-#include "in_kb.h"
-#include "in_kb_data.h"
-#include "in_main.h"
+#include "src/in_kb.h"
+#include "src/in_kb_data.h"
+#include "src/in_main.h"
 #if defined (__APPLE__)
 #import <sys/param.h>
 #endif
-#include "savegame.h"
+#include "root_generic/savegame.h"
 #include "gfx/screenshot.h"
-#include "universe_util.h"
-#include "star_system.h"
-#include "save_util.h"
+#include "src/universe_util.h"
+#include "src/star_system.h"
+#include "src/save_util.h"
 #include "cmd/csv.h"
 #include "cmd/role_bitmask.h"
-#include "universe_globals.h"
-#include "vs_logging.h"
+#include "root_generic/universe_globals.h"
+#include "src/vs_logging.h"
 
-#include "weapon_factory.h"
-#include "unit_csv_factory.h"
-#include "unit_json_factory.h"
-#include "unit_optimize_factory.h"
+#include "cmd/weapon_factory.h"
+#include "cmd/unit_csv_factory.h"
+#include "cmd/unit_json_factory.h"
+#include "cmd/unit_optimize_factory.h"
 
 #include <algorithm>
 #include <string>
 #include <vector>
 
-#include "options.h"
+#include "root_generic/options.h"
 
 // Using
 using namespace VSFileSystem;
@@ -428,12 +427,12 @@ void Universe::StartDraw() {
 
     //remove systems not recently visited?
     static int sorttime = 0;
-    if (configuration()->general_config.garbage_collect_frequency != 0) {
+    if (vega_config::config->general.garbage_collect_frequency != 0) {
         //don't want to delete something when there is something pending to jump therexo
         if (PendingJumpsEmpty()) {
-            if ((++sorttime) % configuration()->general_config.garbage_collect_frequency == 1) {
+            if ((++sorttime) % vega_config::config->general.garbage_collect_frequency == 1) {
                 SortStarSystems(star_system, _active_star_systems.back());
-                if (star_system.size() > configuration()->general_config.num_old_systems && configuration()->general_config.delete_old_systems) {
+                if (star_system.size() > vega_config::config->general.num_old_systems && vega_config::config->general.delete_old_systems) {
                     if (std::find(_active_star_systems.begin(), _active_star_systems.end(),
                             star_system.back()) == _active_star_systems.end()) {
                         delete star_system.back();
@@ -650,7 +649,7 @@ void Universe::UnloadStarSystem(StarSystem *s) {
 
 void Universe::Generate1(const char *file, const char *jumpback) {
     int count = 0;
-    if (configuration()->general_config.while_loading_star_system) {
+    if (vega_config::config->general.while_loading_star_system) {
         ss_generating(true);
     }
     VSFile f;

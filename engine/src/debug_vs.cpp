@@ -28,7 +28,7 @@
 #else
 #include <stdio.h>
 
-#include "hashtable.h"
+#include "src/hashtable.h"
 #if defined (_MSC_VER) && defined (_DEBUG)
 #include <crtdbg.h>
 #endif

@@ -28,22 +28,22 @@
 #include <cstdio>
 #include <cassert>
 #include <cstring>
-#include "lin_time.h"
+#include "root_generic/lin_time.h"
 #include "cmd/movable.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "in.h"
-#include "gfx/mesh.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "src/in.h"
+#include "gfx_generic/mesh.h"
 #include "gfx/sprite.h"
-#include "physics.h"
-#include "gfxlib.h"
+#include "src/physics.h"
+#include "src/gfxlib.h"
 #include "cmd/bolt.h"
 #include "gfx/loc_select.h"
 #include <string>
 #include "cmd/collection.h"
-#include "star_system.h"
+#include "src/star_system.h"
 #include "cmd/planet.h"
-#include "gfx/sphere.h"
+#include "gfx_generic/sphere.h"
 #include "gfx/coord_select.h"
 #include "cmd/building.h"
 #include "cmd/ai/fire.h"
@@ -51,7 +51,7 @@
 #include "cmd/ai/navigation.h"
 #include "cmd/beam.h"
 #include "gfx/halo.h"
-#include "gfx/matrix.h"
+#include "gfx_generic/matrix.h"
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/script.h"
@@ -59,32 +59,32 @@
 #include "gfx/aux_texture.h"
 #include "gfx/background.h"
 #include "cmd/music.h"
-#include "main_loop.h"
+#include "src/main_loop.h"
 #include "cmd/music.h"
-#include "audiolib.h"
+#include "src/audiolib.h"
 #include "cmd/nebula.h"
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 #include "cmd/script/mission.h"
-#include "xml_support.h"
-#include "config_xml.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "cmd/ai/missionscript.h"
 #include "cmd/enhancement.h"
 #include "cmd/cont_terrain.h"
 #include "cmd/script/flightgroup.h"
-#include "force_feedback.h"
-#include "universe_util.h"
-#include "save_util.h"
-#include "in_kb_data.h"
-#include "vs_random.h"
-#include "enhancement.h"
+#include "src/force_feedback.h"
+#include "src/universe_util.h"
+#include "src/save_util.h"
+#include "src/in_kb_data.h"
+#include "src/vs_random.h"
+#include "cmd/enhancement.h"
 
-#include "options.h"
+#include "root_generic/options.h"
 
 #include "audio/SceneManager.h"
 
 #ifndef NO_GFX
 #include "gldrv/gl_globals.h"
-#include "vs_exit.h"
+#include "src/vs_exit.h"
 #endif
 
 #define KEYDOWN(name, key) (name[key]&0x80)
@@ -176,7 +176,7 @@ static void SwitchVDUTo(VDU::VDU_MODE v) {
 
 void ExamineWhenTargetKey() {
     //if (game_options()->switchToTargetModeOnKey) {
-    if (configuration()->graphics_config.hud.switch_to_target_mode_on_key) {
+    if (vega_config::config->graphics.hud.switch_to_target_mode_on_key) {
         int view = 0;
         int examine = 0;
         for (; view < 2; ++view) {
@@ -262,7 +262,7 @@ void TextMessageKey(const KBData &, KBSTATE newState) {
 void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
-        if (configuration()->general_config.write_savegame_on_exit) {
+        if (vega_config::config->general.write_savegame_on_exit) {
             _Universe->WriteSaveGame(true);              //gotta do important stuff first
         }
         for (size_t i = 0; i < active_missions.size(); ++i) {
@@ -774,7 +774,7 @@ void IncrementStartupVariable() {
         var = getSaveData(0, "436457r1K3574r7uP71m35", 0);
         putSaveData(0, "436457r1K3574r7uP71m35", 0, var + 1);
     }
-    if (var <= configuration()->general_config.times_to_show_help_screen) {
+    if (var <= vega_config::config->general.times_to_show_help_screen) {
         GameCockpit::NavScreen(KBData(), PRESS);
     }          //HELP FIXME
 }
@@ -848,9 +848,10 @@ void createObjects(std::vector<std::string> &fighter0name,
             numf++;
             QVector pox(1000 + 150 * a, 100 * a, 100);
 
-            pox.i = fg->pos.i + s * fg_radius * 3;
-            pox.j = fg->pos.j + s * fg_radius * 3;
-            pox.k = fg->pos.k + s * fg_radius * 3;
+            const double tmp = static_cast<double>(s) * static_cast<double>(fg_radius) * 3.0;
+            pox.i = fg->pos.i + tmp;
+            pox.j = fg->pos.j + tmp;
+            pox.k = fg->pos.k + tmp;
             if (pox.i == pox.j && pox.j == pox.k && pox.k == 0) {
                 pox.i = rand() * 10000. / RAND_MAX - 5000;
                 pox.j = rand() * 10000. / RAND_MAX - 5000;

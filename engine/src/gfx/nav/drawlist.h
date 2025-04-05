@@ -29,12 +29,12 @@
 #include <stdlib.h>
 #include <string>
 #include "cmd/unit_generic.h"
-#include "navscreenoccupied.h"
+#include "gfx/nav/navscreenoccupied.h"
 #include "gui/glut_support.h"
 
 //#include "masks.h"
-#include "navscreen.h"
-#include "navitemtypes.h"
+#include "gfx/nav/navscreen.h"
+#include "gfx/nav/navitemtypes.h"
 
 class navdrawnode {
 public:

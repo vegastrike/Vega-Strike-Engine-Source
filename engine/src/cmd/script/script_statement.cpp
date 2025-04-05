@@ -27,22 +27,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <time.h>
-#include <ctype.h>
-#include <assert.h>
 #ifndef WIN32
 //this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
 
 #include <expat.h>
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "cmd/unit_generic.h"
 #include "mission.h"
-#include "easydom.h"
+#include "root_generic/easydom.h"
 
 void Mission::checkStatement(missionNode *node, int mode) {
     //no difference

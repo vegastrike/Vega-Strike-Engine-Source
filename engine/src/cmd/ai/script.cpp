@@ -26,20 +26,20 @@
 
 #include "script.h"
 #include "navigation.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 #include "flybywire.h"
 #include <stdio.h>
 #include <vector>
 #include <stack>
-#include "vsfilesystem.h"
-#include "vs_logging.h"
+#include "root_generic/vsfilesystem.h"
+#include "src/vs_logging.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
-#include "universe_util.h"
-#include "configxml.h"
-#include "universe.h"
-#include "vs_exit.h"
+#include "src/universe_util.h"
+#include "root_generic/configxml.h"
+#include "src/universe.h"
+#include "src/vs_exit.h"
 
 #include <assert.h>
 
@@ -811,8 +811,8 @@ void AIScript::LoadXML() {
         }
         if (_Universe->isPlayerStarship(parent->Target())) {
             double value;
-            static const double game_speed = configuration()->physics_config.game_speed;
-            static const double game_accel = configuration()->physics_config.game_accel;
+            static const double game_speed = vega_config::config->physics.game_speed;
+            static const double game_accel = vega_config::config->physics.game_accel;
             {
                 Unit *targ = parent->Target();
                 if (targ) {

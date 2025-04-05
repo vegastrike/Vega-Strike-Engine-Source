@@ -30,45 +30,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <time.h>
-#include <ctype.h>
-#include <assert.h>
 #ifndef WIN32
 //this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
 #include "cmd/unit_generic.h"
 #include <expat.h>
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #include "cmd/collection.h"
 #include "cmd/planet.h"
 #include "cmd/ai/order.h"
-#include "cmd/ai/aggressive.h"
-#include "cmd/ai/missionscript.h"
 #include "mission.h"
-#include "easydom.h"
-#include "msgcenter.h"
+#include "root_generic/easydom.h"
 #include "flightgroup.h"
-#include "vs_globals.h"
-#include "configxml.h"
-#include "gfx/cockpit_generic.h"
+#include "root_generic/vs_globals.h"
+#include "gfx_generic/cockpit_generic.h"
 #include "cmd/images.h"
-#include "savegame.h"
+#include "root_generic/savegame.h"
 #include "cmd/nebula.h"
-#include "hashtable.h"
-#include "flightgroup.h"
-#include "nebula.h"
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "cmd/pilot.h"
 #include "cmd/unit_util.h"
-#include "planet.h"
-#include "asteroid.h"
-#include "star_system.h"
-#include "universe.h"
-#include "vs_logging.h"
-#include "manifest.h"
+#include "cmd/asteroid.h"
+#include "src/star_system.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
+#include "resource/manifest.h"
 
 extern const vector<string> &ParseDestinations(const string &value);
 

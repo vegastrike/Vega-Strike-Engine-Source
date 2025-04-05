@@ -26,8 +26,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_UTILS_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_GFX_UTILS_H
 
-#include "vec.h"
-#include "gfxlib_struct.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
 
 enum class ShapeType {
     Box,

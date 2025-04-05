@@ -19,10 +19,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
-#include "macosx_math.h"
-#include "lin_time.h"
-#include "physics.h"
-#include "gfx/quaternion.h"
+#include "root_generic/macosx_math.h"
+#include "root_generic/lin_time.h"
+#include "src/physics.h"
+#include "gfx_generic/quaternion.h"
 
 PhysicsSystem::PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r) :
         mass(M),
@@ -99,7 +99,7 @@ void PhysicsSystem::Rotate(const Vector &axis) {
 }
 
 void PhysicsSystem::JettisonReactionMass(const Vector &Direction, float speed, float mass) {
-    NetForce += Direction * (speed * mass / GetElapsedTime());
+    NetForce += Direction * (static_cast<double>(speed) * static_cast<double>(mass) / GetElapsedTime());
 }
 
 void PhysicsSystem::JettisonMass(const Vector &Direction, float speed, float jmass) {

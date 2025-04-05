@@ -20,13 +20,13 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 
 #include "font.h"
 
 #include "guidefs.h"
-#include "vs_globals.h"
-#include "config_xml.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 //For some reason, the cumulative width of GLUT strings is smaller than the
 //actual width when they are painted.  If we add this factor to the reference
 //length of every GLUT character, things work a lot better.

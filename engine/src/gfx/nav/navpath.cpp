@@ -25,17 +25,17 @@
  */
 
 
-#include "vegastrike.h"
+#include "src/vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
 //For WIN32 debugging.
 #include <crtdbg.h>
 #endif
 
-#include "navpath.h"
+#include "gfx/nav/navpath.h"
 #include "gfx/cockpit.h"
-#include "navscreen.h"
-#include "configxml.h"
-#include "universe.h"
+#include "gfx/nav/navscreen.h"
+#include "root_generic/configxml.h"
+#include "src/universe.h"
 
 #include <vector>
 using std::vector;
@@ -53,7 +53,7 @@ using std::string;
 using std::endl;
 using std::pair;
 
-#include "vs_logging.h"
+#include "src/vs_logging.h"
 
 //*******************************************************************//
 ////

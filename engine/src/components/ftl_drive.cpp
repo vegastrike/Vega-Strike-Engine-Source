@@ -1,7 +1,7 @@
 /*
  * ftl_drive.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, Benjamen Meyer, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -24,10 +24,10 @@
 
 #include "ftl_drive.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-FtlDrive::FtlDrive() : 
+FtlDrive::FtlDrive() :
     Component(),
     EnergyConsumer(nullptr, false, 0),
     enabled(false) {
@@ -41,6 +41,9 @@ FtlDrive::FtlDrive(EnergyContainer *source):
     type = ComponentType::FtlDrive;
 }
 
+FtlDrive::~FtlDrive()
+= default;
+
 void FtlDrive::Enable() {
     enabled = true;
 }
@@ -48,7 +51,7 @@ void FtlDrive::Enable() {
 void FtlDrive::Disable() {
     enabled = false;
 }
-    
+
 void FtlDrive::Toggle() {
     enabled = !enabled;
 }
@@ -64,13 +67,13 @@ void FtlDrive::Load(std::string unit_key) {
 
     // Consumer
     double energy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
-    SetConsumption(energy * configuration()->fuel.ftl_drive_factor);
+    SetConsumption(energy * vega_config::config->components.ftl_drive.factor);
 
     // FTL Drive
-}      
+}
 
 void FtlDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["Warp_Usage_Cost"] = std::to_string(consumption  / configuration()->fuel.ftl_drive_factor);
+    unit["Warp_Usage_Cost"] = std::to_string(consumption  / vega_config::config->components.ftl_drive.factor);
 }
 
 // FTL drive is integrated and so cannot be upgraded/downgraded
@@ -88,5 +91,14 @@ bool FtlDrive::CanUpgrade(const std::string upgrade_key) const {
 
 bool FtlDrive::Upgrade(const std::string upgrade_key) {
     return false;
+}
+
+double FtlDrive::Consume()
+{
+    if (!enabled)
+    {
+        return 0.0;
+    }
+    return EnergyConsumer::Consume();
 }
 

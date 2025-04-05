@@ -27,10 +27,10 @@
 
 #include <stdlib.h>
 #include <vector>
-#include "collection.h"
+#include "cmd/collection.h"
 #include <assert.h>
 #ifndef LIST_TESTING
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #endif
 
 UnitCollection::UnitListNode::UnitListNode(Unit *unit) : unit(unit), next(NULL) {

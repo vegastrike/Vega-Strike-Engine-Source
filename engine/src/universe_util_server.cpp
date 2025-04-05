@@ -21,17 +21,17 @@
  */
 
 #include "cmd/script/mission.h"
-#include "universe_util.h"
+#include "src/universe_util.h"
 #include "universe_generic.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_factory.h"    //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "networking/netserver.h"
 #include <string>
-#include "lin_time.h"
-#include "load_mission.h"
-#include "configxml.h"
-#include "vs_globals.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/load_mission.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
 
 void SetStarSystemLoading(bool value) {
 }

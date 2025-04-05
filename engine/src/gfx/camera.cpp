@@ -23,21 +23,21 @@
  */
 
 
-#include "camera.h"
+#include "gfx/camera.h"
 #include "cmd/unit_generic.h" ///for GetUnit ();
-#include "matrix.h"
+#include "gfx_generic/matrix.h"
 
 //Remove GL specific stuff here
 
-#include "vs_globals.h"
-#include "audiolib.h"
-#include "lin_time.h"
+#include "root_generic/vs_globals.h"
+#include "src/audiolib.h"
+#include "root_generic/lin_time.h"
 
 #include <assert.h>     //needed for assert() calls
 //#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
 
-#include "vs_logging.h"
-#include "vs_exit.h"
+#include "src/vs_logging.h"
+#include "src/vs_exit.h"
 
 //const float PI=3.1415926536;
 

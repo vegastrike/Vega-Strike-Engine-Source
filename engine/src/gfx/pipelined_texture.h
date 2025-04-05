@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_PIPELINED_TEXTURE_H
 #define VEGA_STRIKE_ENGINE_GFX_PIPELINED_TEXTURE_H
 
-#include "aux_texture.h"
+#include "gfx/aux_texture.h"
 
 class PipelinedTexture : public Texture {
     int current;

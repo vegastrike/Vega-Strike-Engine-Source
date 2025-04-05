@@ -20,8 +20,8 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vs_globals.h"
-#include "configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/configxml.h"
 #include "cmd/unit_generic.h"
 
 VegaConfig *createVegaConfig(const char *file) {

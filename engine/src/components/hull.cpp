@@ -24,13 +24,13 @@
 
 #include "hull.h"
 
-#include "unit_csv_factory.h"
+#include "cmd/unit_csv_factory.h"
 
 static const Damage normal_and_phase_damage = Damage(1.0,1.0);
 
 
-Hull::Hull() : 
-    Component(), 
+Hull::Hull() :
+    Component(),
     DamageableLayer(0, FacetConfiguration::one, 0.0, normal_and_phase_damage, true) {
     type = ComponentType::Hull;
 }
@@ -39,11 +39,11 @@ Hull::Hull() :
 // Component Methods
 void Hull::Load(std::string unit_key) {
     Component::Load(unit_key);
-    
+
     Resource<double> temp_hull = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Hull", std::string()));
     facets.clear();
     facets.push_back(temp_hull);
-}   
+}
 
 void Hull::SaveToCSV(std::map<std::string, std::string>& unit) const {
     unit["Hull"] = facets[0].Serialize();
@@ -76,7 +76,7 @@ void Hull::Destroy() {
 double Hull::Get() {
     return facets[0].Value();
 }
-    
+
 double Hull::GetMax() {
     return facets[0].MaxValue();
 }

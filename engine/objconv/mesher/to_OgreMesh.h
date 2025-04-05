@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_OBJCONV_TO_OGREMESH_H
 #define VEGA_STRIKE_ENGINE_OBJCONV_TO_OGREMESH_H
 
-#include "to_BFXM.h"
+#include "objconv/mesher/to_BFXM.h"
 
 namespace OgreMeshConverter {
 void ConverterInit();      //Initializes the OgreMesh converter

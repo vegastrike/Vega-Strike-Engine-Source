@@ -29,8 +29,8 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H
 
 #include "component.h"
-#include "energy_container.h"
-#include "energy_consumer.h"
+#include "components/energy_container.h"
+#include "components/energy_consumer.h"
 #include "resource/resource.h"
 
 class EnergyManager;
@@ -50,10 +50,11 @@ public:
             EnergyContainer *energy,
             EnergyContainer *ftl_energy,
             double conversion_ratio = 0.0001); // < 0.01 or very short flight
+    ~Reactor() override;
 
 
-    void Load(std::string unit_key) override;      
-    
+    void Load(std::string unit_key) override;
+
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
     bool CanDowngrade() const override;
@@ -75,6 +76,9 @@ public:
     double Capacity() const;
     double MaxCapacity() const;
     void SetCapacity(double capacity);
+
+    // EnergyConsumer method(s)
+    double Consume() override;
 };
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H

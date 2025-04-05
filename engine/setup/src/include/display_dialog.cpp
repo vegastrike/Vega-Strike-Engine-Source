@@ -23,7 +23,7 @@
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "display.h"
+#include "setup/src/include/display.h"
 
 #ifdef CONSOLE
 #include <dialog.h>

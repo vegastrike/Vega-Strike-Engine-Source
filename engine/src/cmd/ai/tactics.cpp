@@ -25,8 +25,8 @@
 
 
 #include "tactics.h"
-#include "vegastrike.h"
-#include "vs_logging.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
 #include "cmd/unit_generic.h"
 
 void CloakFor::Execute() {

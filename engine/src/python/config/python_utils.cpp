@@ -30,8 +30,8 @@
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 
-//#include "vsfilesystem.h"
-//#include "vs_logging.h"
+//#include "root_generic/vsfilesystem.h"
+//#include "src/vs_logging.h"
 
 using namespace boost::python;
 using namespace boost::filesystem;
@@ -45,7 +45,7 @@ std::string GetPythonPath() {
     Py_Initialize();
     wchar_t* w_path_ptr = Py_GetPath();
     Py_Finalize();
-    
+
     std::wstring w_path_w( w_path_ptr );
     std::string path( w_path_w.begin(), w_path_w.end() );
 
@@ -142,7 +142,7 @@ PyObject* GetClassFromPython(
         Py_Finalize();
         // TODO: throw exception
         return nullptr;
-    } 
+    }
 
     PyObject* function = PyObject_GetAttrString(module,function_name.c_str());
     if(!function) {
@@ -151,9 +151,9 @@ PyObject* GetClassFromPython(
         Py_Finalize();
         // TODO: throw exception
         return nullptr;
-    } 
-    
-    
+    }
+
+
     PyObject* pyResult = PyObject_CallObject(function, nullptr);
     Py_Finalize();
 

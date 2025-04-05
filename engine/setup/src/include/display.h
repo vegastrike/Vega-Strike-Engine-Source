@@ -24,7 +24,7 @@
 #ifndef VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H
 #define VEGA_STRIKE_ENGINE_SETUP_DISPLAY_H
 
-#include "central.h"
+#include "setup/src/include/central.h"
 #include "version.h"
 
 void InitGraphics(int *, char ***);

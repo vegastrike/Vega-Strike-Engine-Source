@@ -22,7 +22,7 @@
  * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "manifest.h"
+#include "resource/manifest.h"
 
 #include <fstream>
 #include <sstream>
@@ -32,7 +32,7 @@
 #include <boost/json.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "random_utils.h"
+#include "resource/random_utils.h"
 #include "resource/json_utils.h"
 
 
@@ -44,7 +44,7 @@ Manifest::Manifest(std::string category) {
     Manifest& mpl = Manifest::MPL();
 
     auto predicate = [&category](Cargo c) {return c.GetCategory() == category;};
-    std::copy_if(mpl._items.begin(), mpl._items.end(), 
+    std::copy_if(mpl._items.begin(), mpl._items.end(),
              std::back_inserter(_items), predicate);
 }
 
@@ -66,7 +66,7 @@ Manifest::Manifest(int dummy) {
         if(ifs.fail()) {
             continue;
         }
-        
+
         std::stringstream buffer;
         buffer << ifs.rdbuf();
 
@@ -91,14 +91,14 @@ Manifest::Manifest(int dummy) {
             } catch (...) {
                 std::cerr << "Failed to parse " << item_value << std::endl;
             }
-            
+
         }
     }
 }
 
 Manifest& Manifest::MPL() {
     static Manifest mpl = Manifest(1);
-    
+
     return mpl;
 }
 
@@ -129,7 +129,7 @@ Cargo Manifest::GetRandomCargo(int quantity) {
         return Cargo();
     }
 
-    int index = randomInt(_items.size()-1); 
+    int index = randomInt(_items.size()-1);
     Cargo c = _items[index];
     c.SetQuantity(quantity);
     return c;
@@ -154,7 +154,7 @@ Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) {
 Manifest Manifest::GetCategoryManifest(std::string category) {
     Manifest manifest;
 
-    std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items), 
+    std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
             [category](Cargo c) {
         return c.GetCategory() == category;
     });
@@ -165,7 +165,7 @@ Manifest Manifest::GetCategoryManifest(std::string category) {
 Manifest Manifest::GetMissionManifest() {
     Manifest manifest;
 
-    std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items), 
+    std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
             [](Cargo c) {
         return c.name.find("mission") != std::string::npos;
     });

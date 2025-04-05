@@ -25,9 +25,9 @@
  */
 // NO HEADER GUARD
 
-#include "vec.h"
-#include "animation.h"
-#include "in_mouse.h"
+#include "gfx_generic/vec.h"
+#include "gfx/animation.h"
+#include "src/in_mouse.h"
 
 class CoordinateSelect {
 protected:

@@ -29,7 +29,7 @@ extern "C"
 {
 #endif
 
-//#include "vegastrike.h"
+//#include "src/vegastrike.h"
 
 /* Hack to fix compiling problem with old gl.h's, reported by Steve
  *  Baker <sjbaker1@airmail.net>.  Some old gl.h's don't include glext.h, but

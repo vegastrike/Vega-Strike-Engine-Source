@@ -24,15 +24,15 @@
  *  Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 #include <list>
-#include <lin_time.h>
-#include "vegastrike.h"
-#include "vs_globals.h"
-#include "vs_logging.h"
+#include "root_generic/lin_time.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_logging.h"
 
-#include "in_handler.h"
-#include "in_joystick.h"
-#include "config_xml.h"
-#include "in_mouse.h"
+#include "src/in_handler.h"
+#include "src/in_joystick.h"
+#include "src/config_xml.h"
+#include "src/in_mouse.h"
 #ifndef HAVE_SDL
 #include "gldrv/gl_include.h"
 #if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 13)
@@ -41,7 +41,7 @@
 #endif
 #endif
 
-#include "options.h"
+#include "root_generic/options.h"
 #include "SDL2/SDL_joystick.h"
 
 

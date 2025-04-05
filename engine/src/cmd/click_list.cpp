@@ -21,14 +21,14 @@
  */
 
 
-#include "gfxlib.h"
+#include "src/gfxlib.h"
 #include "click_list.h"
-#include "unit_generic.h"
-#include "vegastrike.h"
-#include "vs_globals.h"
+#include "cmd/unit_generic.h"
+#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
 #include "gfx/camera.h"
-#include "universe.h"
-// #include "vs_logging.h"
+#include "src/universe.h"
+// #include "src/vs_logging.h"
 
 extern Vector mouseline;
 extern vector<Vector> perplines;

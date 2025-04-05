@@ -26,13 +26,12 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <expat.h>
 #include <string>
 #include <gnuhash.h>
-#include "configxml.h"
-#include "xml_support.h"
-#include "easydom.h"
-#include "in_kb.h"
+#include "root_generic/configxml.h"
+#include "root_generic/xml_support.h"
+#include "root_generic/easydom.h"
+#include "src/in_kb.h"
 
 using std::string;
 

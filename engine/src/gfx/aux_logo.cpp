@@ -22,16 +22,16 @@
  */
 
 
-#include "gfx/vec.h"
+#include "gfx_generic/vec.h"
 #include "cmd/unit_generic.h"
 #include "vertex.h"
-#include "aux_logo.h"
-#include "aux_texture.h"
+#include "gfx/aux_logo.h"
+#include "gfx/aux_texture.h"
 #include <assert.h>
-#include "gfxlib.h"
-#include "vs_globals.h"
-#include "config_xml.h"
-#include "xml_support.h"
+#include "src/gfxlib.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "root_generic/xml_support.h"
 
 vector<Logo *> undrawn_logos;
 Hashtable<int, Logo, 257>Logo::decalHash;

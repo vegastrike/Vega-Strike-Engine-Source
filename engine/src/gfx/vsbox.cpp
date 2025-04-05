@@ -26,7 +26,7 @@
 
 
 #include "vsbox.h"
-#include "xml_support.h"
+#include "root_generic/xml_support.h"
 
 /*
  *  inline ostream &operator<<(ostrstream os, const Vector &obj) {

@@ -24,15 +24,15 @@
  *  Force Feedback support by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include "force_feedback.h"
+#include "src/force_feedback.h"
 
-#include "vegastrike.h"
-#include "vs_logging.h"
-#include "vs_globals.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
+#include "root_generic/vs_globals.h"
 
-#include "config_xml.h"
+#include "src/config_xml.h"
 #include "cmd/script/mission.h"
-#include "options.h"
+#include "root_generic/options.h"
 
 #define FF_DOIT 1
 

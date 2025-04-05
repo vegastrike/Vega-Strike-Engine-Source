@@ -24,9 +24,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_CAMERA_H
 #define VEGA_STRIKE_ENGINE_GFX_CAMERA_H
 
-#include "matrix.h"
-#include "gfxlib.h"
-#include "physics.h"
+#include "gfx_generic/matrix.h"
+#include "src/gfxlib.h"
+#include "src/physics.h"
 
 //class PlanetaryTransform; commented out by chuck_starchaser --never used
 #include "cmd/container.h"

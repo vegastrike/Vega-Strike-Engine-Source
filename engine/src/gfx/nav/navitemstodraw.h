@@ -71,7 +71,7 @@ void NavigationSystem::DrawCursor(float x, float y, float wid, float hei, const 
 //This draws the grid over the nav screen area
 //**********************************
 void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
-    if (!configuration()->graphics_config.hud.draw_nav_grid) {
+    if (!vega_config::config->graphics.hud.draw_nav_grid) {
         return;
     }
     GFXColorf(col);

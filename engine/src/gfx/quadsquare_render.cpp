@@ -26,7 +26,7 @@
 
 
 #include "quadsquare.h"
-#include "aux_texture.h"
+#include "gfx/aux_texture.h"
 
 float SphereTransformRenderlevel = 0;
 

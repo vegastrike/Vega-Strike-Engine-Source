@@ -25,7 +25,7 @@
  */
 // NO HEADER GUARD
 
-#include "gnuhash.h"
+#include "src/gnuhash.h"
 #include <vector>
 
 class Animation;

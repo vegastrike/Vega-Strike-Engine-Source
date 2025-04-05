@@ -22,7 +22,7 @@
 #ifndef VEGA_STRIKE_ENGINE_INHANDLER_H
 #define VEGA_STRIKE_ENGINE_INHANDLER_H
 
-#include "in_kb.h"
+#include "src/in_kb.h"
 //#include "cmd_unit.h"
 #include <map>
 #include <string>

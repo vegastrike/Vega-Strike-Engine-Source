@@ -26,7 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 #define VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 
-#include "macosx_math.h"
+#include "root_generic/macosx_math.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI (3.1415926536)
@@ -102,8 +102,8 @@ public:
 
     QVector Transform(const QVector &v) const {
         Vector T(v.i * scalex, r + v.j, v.k * scalez - .5 * M_PI);
-        float cosphi = cos(T.k);
-        return QVector(T.j * cosphi * cos(T.i), T.j * sin(T.k), T.j * cosphi * sin(T.i));
+        double cosphi = cos(T.k);
+        return QVector(T.j * cosphi * cos(T.i), static_cast<double>(T.j) * sin(T.k), T.j * cosphi * sin(T.i));
     }
 
     QVector TransformNormal(const QVector &point, const QVector &n) const {

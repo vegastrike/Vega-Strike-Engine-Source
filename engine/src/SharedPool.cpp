@@ -21,7 +21,7 @@
  */
 
 #include <string>
-#include "SharedPool.h"
+#include "src/SharedPool.h"
 
 template<typename T, typename RT>
 SharedPool<T, RT> *SharedPool<T, RT>::ms_singleton = 0;
