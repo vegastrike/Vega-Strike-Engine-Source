@@ -811,8 +811,8 @@ void AIScript::LoadXML() {
         }
         if (_Universe->isPlayerStarship(parent->Target())) {
             double value;
-            static const double game_speed = vega_config::config->physics.game_speed;
-            static const double game_accel = vega_config::config->physics.game_accel;
+            const double game_speed = vega_config::config->physics.game_speed;
+            const double game_accel = vega_config::config->physics.game_accel;
             {
                 Unit *targ = parent->Target();
                 if (targ) {

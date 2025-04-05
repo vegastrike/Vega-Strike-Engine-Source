@@ -51,12 +51,12 @@ Drive::~Drive()
 
 // Component Methods
 void Drive::Load(std::string unit_key) {
-    static const double game_speed = vega_config::config->physics.game_speed;
-    static const double game_accel = vega_config::config->physics.game_accel;
+    const double game_speed = vega_config::config->physics.game_speed;
+    const double game_accel = vega_config::config->physics.game_accel;
     static const double game_accel_speed = game_speed * game_accel;
 
     // Minimum drive capability for limp home (in %)
-    static const double minimal_drive_functionality = vega_config::config->components.drive.minimum_drive;
+    const double minimal_drive_functionality = vega_config::config->components.drive.minimum_drive;
 
     Component::Load(unit_key);
 
@@ -118,8 +118,8 @@ void Drive::Load(std::string unit_key) {
 
 
 void Drive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    static const double game_speed = vega_config::config->physics.game_speed;
-    static const double game_accel = vega_config::config->physics.game_accel;
+    const double game_speed = vega_config::config->physics.game_speed;
+    const double game_accel = vega_config::config->physics.game_accel;
     static const double game_accel_speed = 1/ (game_speed * game_accel);
     const double to_degrees = M_PI / 180;
     unit["Maneuver_Yaw"] = yaw.Serialize(to_degrees);

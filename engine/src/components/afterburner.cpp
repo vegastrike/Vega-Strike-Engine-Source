@@ -40,8 +40,8 @@ Afterburner::Afterburner(EnergyContainer *source) :
 
 // Component Methods
 void Afterburner::Load(std::string unit_key) {
-    static const double game_speed = vega_config::config->physics.game_speed;
-    static const double game_accel = vega_config::config->physics.game_accel;
+    const double game_speed = vega_config::config->physics.game_speed;
+    const double game_accel = vega_config::config->physics.game_accel;
     static const double game_accel_speed = game_speed * game_accel;
     Component::Load(unit_key);
 
@@ -55,8 +55,8 @@ void Afterburner::Load(std::string unit_key) {
 }
 
 void Afterburner::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    static const double game_speed = vega_config::config->physics.game_speed;
-    static const double game_accel = vega_config::config->physics.game_accel;
+    const double game_speed = vega_config::config->physics.game_speed;
+    const double game_accel = vega_config::config->physics.game_accel;
     static const double game_accel_speed = game_speed * game_accel;
     unit["Afterburner_Accel"] = thrust.Serialize(game_accel_speed);
     unit["Afterburner_Speed_Governor"] = speed.Serialize(game_speed);
