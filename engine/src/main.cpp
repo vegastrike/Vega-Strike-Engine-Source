@@ -318,11 +318,6 @@ int main(int argc, char *argv[]) {
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths(CONFIGFILE, subdir);
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
-
-        boost::filesystem::path config_file_path{VSFileSystem::datadir + "/config.json"};
-        vega_config::config = std::make_shared<vega_config::Config>(config_file_path);
-        boost::filesystem::path config_file_path2{VSFileSystem::homedir + "/config.json"};
-        vega_config::config->load_config(config_file_path2);
     }
 
 

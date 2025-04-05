@@ -69,6 +69,7 @@ struct dirent
 
 #include <string>
 #include <utility>
+#include "configuration/configuration.h"
 
 // from main.cpp
 extern bool legacy_data_dir_mode;
@@ -864,6 +865,11 @@ void InitPaths(string conf, string subdir) {
         Directories.emplace_back("");
         SubDirectories.push_back(vec);
     }
+
+    boost::filesystem::path config_file_path{VSFileSystem::datadir + "/config.json"};
+    vega_config::config = std::make_shared<vega_config::Config>(config_file_path);
+    boost::filesystem::path config_file_path2{VSFileSystem::homedir + "/config.json"};
+    vega_config::config->load_config(config_file_path2);
 
     game_options()->init();
 
