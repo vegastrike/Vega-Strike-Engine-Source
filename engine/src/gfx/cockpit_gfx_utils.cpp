@@ -3,7 +3,7 @@
 /*
  * cockpit_gfx_utils.cpp
  *
- * Copyright (C) 2020-2022 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
+ * Copyright (C) 2020-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy, and
  * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -192,11 +192,14 @@ VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector& ca
                             const Vector& cam_q, const Vector& cam_r,
                             const float& r_size, const float& lock_percent) {
     const float lock_line = vega_config::config->graphics.hud.lock_confirm_line_length;
-    const float diamond_size = vega_config::config->graphics.hud.diamond_size;
+    const double diamond_size = vega_config::config->graphics.hud.diamond_size;
     const float theta_speed = vega_config::config->graphics.hud.diamond_rotation_speed;
 
-    const float max = diamond_size * r_size * 0.75f * vega_config::config->graphics.hud.min_missile_bracket_size;
-    const float coord = vega_config::config->graphics.hud.min_missile_bracket_size + (vega_config::config->graphics.hud.max_missile_bracket_size - vega_config::config->graphics.hud.min_missile_bracket_size) * lock_percent;
+    const float max = diamond_size * r_size * 0.75 * vega_config::config->graphics.hud.min_missile_bracket_size;
+    const float coord = vega_config::config->graphics.hud.min_missile_bracket_size
+                        + (vega_config::config->graphics.hud.max_missile_bracket_size
+                        - vega_config::config->graphics.hud.min_missile_bracket_size)
+                        * lock_percent;
     const double rtot = 1.0 / sqrtf(2.0);
 
     //this causes the rotation!
