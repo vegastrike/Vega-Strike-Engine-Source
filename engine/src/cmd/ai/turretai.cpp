@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -76,10 +75,8 @@ void TurretAI::Execute() {
         }
     }
     if (targ) {
-        static float
-                dot_cutoff = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "TurretDotCutoff", ".4"));
-        static float missile_prob =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "TurretMissileProbability", ".05"));
+        const float dot_cutoff = vega_config::config->ai.firing.turret_dot_cutoff;
+        const float missile_prob = vega_config::config->ai.firing.turret_missile_probability;
         FaceTargetITTS::Execute();
         if (parent->getNumMounts() > 0) {
             Vector R(parent->GetTransformation().getR());

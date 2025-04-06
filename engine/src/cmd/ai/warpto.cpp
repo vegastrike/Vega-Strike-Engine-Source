@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,16 +30,15 @@
 #include "src/config_xml.h"
 
 float max_allowable_travel_time() {
-    static float mat = XMLSupport::parse_float(vs_config->getVariable("AI", "max_allowable_travel_time", "15"));
+    const float mat = vega_config::config->ai.max_allowable_travel_time;
     return mat;
 }
 
 bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
     //first let us decide whether the target is far enough to warrant using warp
     //double dist =UnitUtil::getSignificantDistance(parent,target);
-    static float tooclose = XMLSupport::parse_float(vs_config->getVariable("AI", "too_close_for_warp_tactic", "13000"));
-    static float tooclosefollowing =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "too_close_for_warp_in_formation", "1500"));
+    const float tooclose = vega_config::config->ai.too_close_for_warp_tactic;
+    const float tooclosefollowing = vega_config::config->ai.too_close_for_warp_in_formation;
     float toodamnclose = following ? tooclosefollowing : tooclose;
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
@@ -49,11 +47,9 @@ bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
         return true;
     } else if (timetolive > (max_allowable_travel_time())) {
         float mytime = SIMULATION_ATOM * 1.5;
-        static bool rampdown =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "autopilot_ramp_warp_down", "true"));
+        const bool rampdown = vega_config::config->physics.autopilot_ramp_warp_down;
         if (rampdown == false) {
-            static float warprampdowntime =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
+            const float warprampdowntime = vega_config::config->physics.warprampdowntime;
             mytime = warprampdowntime;
         }
         if (dist - parent->GetWarpVelocity().Magnitude() * mytime < toodamnclose) {
@@ -82,8 +78,8 @@ bool TargetWorthPursuing(Unit *parent, Unit *target) {
 
 static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, Unit *MatchSpeed = NULL) {
     Vector vel = parent->GetVelocity();
-    static float mindirveldot = XMLSupport::parse_float(vs_config->getVariable("AI", "warp_cone", ".8"));
-    static float mintarveldot = XMLSupport::parse_float(vs_config->getVariable("AI", "match_velocity_cone", "-.8"));
+    const float mindirveldot = vega_config::config->ai.warp_cone;
+    const float mintarveldot = vega_config::config->ai.match_velocity_cone;
     tarvel.Normalize();
     vel.Normalize();
     Vector dir = tarpos - parent->Position();
@@ -92,10 +88,8 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
     dir *= -1;
     float chasedot = dir.Dot(tarvel);
     if (dirveldot > mindirveldot) {
-        static float min_energy_to_enter_warp =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "min_energy_to_enter_warp", ".33"));
-        static float min_warpfield_to_enter_warp =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "min_warp_to_try", "1.5"));
+        const float min_energy_to_enter_warp = vega_config::config->ai.min_energy_to_enter_warp;
+        const float min_warpfield_to_enter_warp = vega_config::config->ai.min_warp_to_try;
         if ((parent->ftl_energy.Percent() > min_energy_to_enter_warp)
                 && (parent->GetMaxWarpFieldStrength(1) > min_warpfield_to_enter_warp)) {
             if (!parent->ftl_drive.Enabled()) {
@@ -106,7 +100,7 @@ static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, U
     } else {
         parent->ftl_drive.Disable();
     }
-    static bool domatch = XMLSupport::parse_bool(vs_config->getVariable("AI", "match_velocity_of_pursuant", "false"));
+    const bool domatch = vega_config::config->ai.match_velocity_of_pursuant;
     if (chasedot > mintarveldot || !domatch) {
         parent->computer.velocity_ref.SetUnit(NULL);
     } else {

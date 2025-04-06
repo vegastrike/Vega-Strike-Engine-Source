@@ -2,8 +2,7 @@
  * order.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -38,7 +37,7 @@ using std::list;
 
 //#define ORDERDEBUG  // FIXME ?
 void Order::Execute() {
-    static float airesptime = XMLSupport::parse_float(vs_config->getVariable("AI", "CommResponseTime", "3"));
+    const float airesptime = vega_config::config->ai.CommResponseTime;
     ProcessCommunicationMessages(airesptime, true);
     int completed = 0;
     unsigned int i = 0;

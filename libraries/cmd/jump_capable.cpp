@@ -2,8 +2,7 @@
  * jump_capable.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2021 Roy Falk and Stephen G. Tuggy
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Roy Falk and Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -149,16 +148,13 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         return false;
     }
     static float autopilot_term_distance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
+            vega_config::config->physics.auto_pilot_termination_distance;
     static float atd_no_enemies =
             XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance_no_enemies",
                     vs_config->getVariable("physics",
                             "auto_pilot_termination_distance",
                             "6000")));
-    static float autopilot_no_enemies_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("physics",
-                    "auto_pilot_no_enemies_distance_multiplier",
-                    "4"));
+    const float autopilot_no_enemies_multiplier = vega_config::config->physics.auto_pilot_no_enemies_distance_multiplier;
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
         failuremessage = err;
@@ -210,14 +206,14 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     bool ok = true;
 
     static bool teleport_autopilot =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "teleport_autopilot", "true"));
+            vega_config::config->physics.teleport_autopilot;
     bool unsafe = false;
     if ((!teleport_autopilot) && (!nanspace)) {
         if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Cloaked()) {
             bool ignore_friendlies = true;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
                 static bool canflythruplanets =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "can_auto_through_planets", "true"));
+                        vega_config::config->physics.can_auto_through_planets;
                 if ((!(un->isUnit() == Vega_UnitType::planet
                         && canflythruplanets)) && un->isUnit() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
@@ -256,7 +252,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
             if (UnitUtil::isAsteroid(un)) {
                 static float minasteroiddistance =
-                        XMLSupport::parse_float(vs_config->getVariable("physics", "min_asteroid_distance", "-100"));
+                        vega_config::config->physics.min_asteroid_distance;
                 if (UnitUtil::getDistance(unit, un) < minasteroiddistance) {
                     failuremessage = GenerateAutoError(unit, un);
                     return false;                     //no auto in roid field
@@ -287,7 +283,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             nowhere = true;
         }
         static bool auto_turn_towards =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "auto_turn_towards", "true"));
+                vega_config::config->physics.auto_turn_towards;
         if (auto_turn_towards) {
             for (int i = 0; i < 3; ++i) {
                 Vector methem(RealPosition(target).Cast() - sep.Cast());
@@ -315,9 +311,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                 docache = false;
             }
             static float insys_jump_ani_size =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_animation_size", "4"));
+                    vega_config::config->graphics.insys_jump_animation_size;
             static float insys_jump_ani_growth =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_animation_growth", ".99"));
+                    vega_config::config->graphics.insys_jump_animation_growth;
             UniverseUtil::playAnimationGrow(insys_jump_ani, RealPosition(unit),
                     unit->rSize() * insys_jump_ani_size, insys_jump_ani_growth);
 
@@ -326,7 +322,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             Vector p, q, r;
             unit->GetOrientation(p, q, r);
             static float sec =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "insys_jump_ani_second_ahead", "4"));
+                    vega_config::config->graphics.insys_jump_ani_second_ahead;
             UniverseUtil::playAnimationGrow(insys_jump_ani,
                     sep + unit->GetVelocity() * sec + v * unit->rSize(),
                     unit->rSize() * 8,
@@ -337,10 +333,10 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                     unit->rSize() * 16,
                     .97);
         }
-        static bool warptrail = XMLSupport::parse_bool(vs_config->getVariable("graphics", "warp_trail", "true"));
+        static bool warptrail = vega_config::config->graphics.warp_trail;
         if (warptrail && (!nowhere)) {
             static float warptrailtime =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_trail_time", "20"));
+                    vega_config::config->graphics.warp_trail_time;
             AddWarp(unit, RealPosition(unit), warptrailtime);
         }
         if (!nowhere) {
@@ -389,17 +385,17 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         bool count_negative_warp_units) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
-    static float smallwarphack = XMLSupport::parse_float(vs_config->getVariable("physics", "minwarpeffectsize", "100"));
+    static float smallwarphack = vega_config::config->physics.minwarpeffectsize;
     static float bigwarphack =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "maxwarpeffectsize", "10000000"));
+            vega_config::config->physics.maxwarpeffectsize;
     //Boundary between multiplier regions 1&2. 2 is "high" mult
-    static double warpregion1 = XMLSupport::parse_float(vs_config->getVariable("physics", "warpregion1", "5000000"));
+    static double warpregion1 = vega_config::config->physics.warpregion1;
     //Boundary between multiplier regions 0&1 0 is mult=1
-    static double warpregion0 = XMLSupport::parse_float(vs_config->getVariable("physics", "warpregion0", "5000"));
+    static double warpregion0 = vega_config::config->physics.warpregion0;
     //Mult at 1-2 boundary
-    static double warpcruisemult = XMLSupport::parse_float(vs_config->getVariable("physics", "warpcruisemult", "5000"));
+    static double warpcruisemult = vega_config::config->physics.warpcruisemult;
     //degree of curve
-    static double curvedegree = XMLSupport::parse_float(vs_config->getVariable("physics", "warpcurvedegree", "1.5"));
+    static double curvedegree = vega_config::config->physics.warpcurvedegree;
     //coefficient so as to agree with above
     static double upcurvek = warpcruisemult / pow((warpregion1 - warpregion0), curvedegree);
     //inverse fractional effect of ship vs real big object

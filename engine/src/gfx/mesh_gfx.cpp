@@ -249,8 +249,7 @@ Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string fa
     static FILTER fil =
             XMLSupport::parse_bool(vs_config->getVariable("graphics", "detail_texture_trilinear", "true")) ? TRILINEAR
                     : MIPMAP;
-    static bool factionalize_textures =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "faction_dependant_textures", "true"));
+    const bool factionalize_textures = vega_config::config->graphics.faction_dependant_textures;
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
     Texture *ret = NULL;
     string facplus = faction_prefix + filename;
@@ -313,8 +312,7 @@ void Mesh::setTextureCumulativeTime(double d) {
 }
 
 Texture *Mesh::TempGetTexture(MeshXML *xml, int index, std::string factionname) const {
-    static bool factionalize_textures =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "faction_dependant_textures", "true"));
+    const bool factionalize_textures = vega_config::config->graphics.faction_dependant_textures;
     string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
     Texture *tex = NULL;
     assert(index < (int) xml->decals.size());
@@ -609,7 +607,7 @@ void Mesh::ProcessZFarMeshes(bool nocamerasetup) {
         //clear Z buffer
         GFXClear(GFXFALSE, GFXTRUE, GFXFALSE);
 
-        static float far_margin = XMLSupport::parse_float(vs_config->getVariable("graphics", "mesh_far_percent", ".8"));
+        const float far_margin = vega_config::config->graphics.mesh_far_percent;
         if (!nocamerasetup) {
             _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, g_game.zfar * far_margin, 0);
         }
@@ -815,8 +813,7 @@ bool SetupSpecMapFirstPass(Texture **decal,
                     : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
 
-    static bool multitex_glowpass =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "multitexture_glowmaps", "true"));
+    const bool multitex_glowpass = vega_config::config->graphics.multitexture_glowmaps;
     if (polygon_offset) {
         float a, b;
         GFXGetPolygonOffset(&a, &b);
@@ -1028,10 +1025,7 @@ void SetupDamageMapThirdPass(Texture *decal, unsigned int mat, float polygon_off
 
 void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset, float NOT_USED_BUT_BY_HELPER = 3) {
     GFXDepthFunc(LEQUAL);     //By Klauss - restore original depth function
-    static bool force_write_to_depthmap =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                    "force_glowmap_restore_write_to_depthmap",
-                    "true"));
+    const bool force_write_to_depthmap = vega_config::config->graphics.force_glowmap_restore_write_to_depthmap;
     if (force_write_to_depthmap || write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
     }
@@ -1730,8 +1724,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         GFXDisable(TEXTURE1);
     }
     const GFXMaterial &mat = GFXGetMaterial(myMatNum);
-    static bool wantsplitpass1 =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "specmap_with_reflection", "false"));
+    const bool wantsplitpass1 = vega_config::config->graphics.specmap_with_reflection;
     bool splitpass1 =
             (wantsplitpass1 && getEnvMap()
                     && ((mat.sr != 0) || (mat.sg != 0)

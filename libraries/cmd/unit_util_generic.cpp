@@ -1,7 +1,7 @@
 /*
  * unit_util_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * This file is part of Vega Strike.
@@ -290,7 +290,7 @@ int getPhysicsPriority(Unit *un) {
                         "computerwarprampuptime",
                         "10")); //for the heck of it.  NOTE, variable also in unit_generic.cpp
         static float warprampdowntime =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "warprampdowntime", "0.5"));
+                vega_config::config->physics.warprampdowntime;
         float lowest_priority_time = SIM_QUEUE_SIZE * SIMULATION_ATOM;
 
         float time_ramped = compwarprampuptime - un->graphicOptions.RampCounter;
@@ -780,7 +780,7 @@ bool isDockableUnit(const Unit *my_unit) {
 
 bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
     static bool
-            superdock = XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_within_base_shield", "false"));
+            superdock = vega_config::config->physics.dock_within_base_shield;
     float dis =
             (un->isUnit() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
                     : UnitUtil::getDistance(

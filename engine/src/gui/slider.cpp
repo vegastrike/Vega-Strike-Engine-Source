@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -29,6 +29,7 @@
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "root_generic/xml_support.h"
+#include "configuration/configuration.h"
 
 //The Slider class controls the setting for a simple integer range.
 
@@ -176,7 +177,7 @@ void Slider::draw(void) {
 }
 
 bool Slider::processMouseDown(const InputEvent &event) {
-    static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
+    static int zoominc = vega_config::config->general.wheel_increment_lines;
     if (event.code == LEFT_MOUSE_BUTTON && m_thumbLength != NO_THUMB_LENGTH && hitTest(event.loc)) {
         if (m_vertical) {
             if (event.loc.y < m_thumbRect.origin.y) {

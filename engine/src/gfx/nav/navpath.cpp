@@ -2,9 +2,8 @@
  * navpath.cpp
  *
  * Copyright (C) 2003 Mike Byron
- * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy, and other
+ * Copyright (C) 2020-2025 pyramid3d, Roy Falk, Stephen G. Tuggy, and other
  * Vega Strike contributors.
- * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -308,7 +307,7 @@ bool NavPath::checkForCycles() const {
 bool NavPath::evaluate() {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
     path.clear();
-    static size_t max_size = XMLSupport::parse_int(vs_config->getVariable("graphics", "nav_max_search_size", "16384"));
+    static size_t max_size = vega_config::config->graphics.nav_max_search_size;
     if (!isComplete()) {
         return false;
     }

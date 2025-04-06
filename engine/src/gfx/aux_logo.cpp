@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2025 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, ashieh, griwodz, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -151,8 +151,8 @@ void Logo::ProcessDrawQueue() {
     if (!g_game.use_logos || draw_queue->empty()) {
         return;
     }
-    static float offs = XMLSupport::parse_float(vs_config->getVariable("graphics", "LogoOffset", "-1"));
-    static float scl = XMLSupport::parse_float(vs_config->getVariable("graphics", "LogoOffsetScale", "-4.0"));
+    const float offs = vega_config::config->graphics.LogoOffset;
+    const float scl = vega_config::config->graphics.LogoOffsetScale;
 
     GFXEnable(TEXTURE0);
     GFXEnable(TEXTURE1);

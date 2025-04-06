@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -305,7 +304,7 @@ NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::next() {
 
 bool checkedVisited(const std::string &n) {
     static bool dontbothervisiting =
-            !XMLSupport::parse_bool(vs_config->getVariable("graphics", "explore_for_map", "false"));
+            !vega_config::config->graphics.explore_for_map;
     if (dontbothervisiting) {
         return true;
     } else {

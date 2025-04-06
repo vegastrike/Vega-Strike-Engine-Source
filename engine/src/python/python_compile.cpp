@@ -1,7 +1,7 @@
 /*
  * python_compile.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -38,6 +38,7 @@
 #include "src/universe_util.h"
 #include "src/in_kb_data.h"
 #include "src/vs_logging.h"
+#include "configuration/configuration.h"
 
 Hashtable<string, PyObject, 1023> compiled_python;
 
@@ -107,7 +108,7 @@ void CompileRunPython(const std::string &filename) {
     InterpretPython(filename);
     Python::reseterrors();
 #else
-    static bool ndebug_libs = XMLSupport::parse_bool(vs_config->getVariable("AI", "compile_python", "true"));
+    static bool ndebug_libs = vega_config::config->ai.compile_python;
     if (ndebug_libs) {
         Python::reseterrors();
         PyObject * CompiledProgram = CompilePython(filename);

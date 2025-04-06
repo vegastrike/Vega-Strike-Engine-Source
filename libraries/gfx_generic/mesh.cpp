@@ -2,8 +2,7 @@
  * mesh.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -317,7 +316,7 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping) {
                 animFrames->size())));
         float adv = GetElapsedTime() * getFramesPerSecond();
         static float max_frames_skipped =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "mesh_animation_max_frames_skipped", "3"));
+                vega_config::config->graphics.mesh_animation_max_frames_skipped
         if (adv > max_frames_skipped) {
             adv = max_frames_skipped;
         }

@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -244,12 +244,8 @@ int FSM::getCommMessageMood(int curstate, float mood, float randomresponse, floa
 #endif
     vector<unsigned int> g;
     vector<unsigned int> b;
-    static float pos_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestPositiveCommChoice",
-            "0"));
-    static float neg_limit = XMLSupport::parse_float(vs_config->getVariable("AI",
-            "LowestNegativeCommChoice",
-            "-.00001"));
+    const float pos_limit = vega_config::config->ai.lowest_positive_comm_choice;
+    const float neg_limit = vega_config::config->ai.lowest_negative_comm_choice;
     for (unsigned int i = 0; i < n->edges.size(); i++) {
         float md = nodes[n->edges[i]].messagedelta;
         if (md >= pos_limit) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -29,34 +29,34 @@ extern VegaConfig *vs_config;
 void vs_options::init() {
     /* General Options */
     galaxy = vs_config->getVariable("general", "galaxy", "milky_way.xml");
-    command_interpretor = XMLSupport::parse_bool(vs_config->getVariable("general", "command_interpretor", "false"));
-    load_last_savegame = XMLSupport::parse_bool(vs_config->getVariable("general", "load_last_savegame", "false"));
-    debug_fs = XMLSupport::parse_int(vs_config->getVariable("general", "debug_fs", "0"));
-    simulation_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "simulation_atom", "0.1"));
-    audio_atom = XMLSupport::parse_floatf(vs_config->getVariable("general", "audio_atom", "0.05555555556"));
+    command_interpretor = vega_config::config->general.command_interpreter;
+    load_last_savegame = vega_config::config->general.load_last_savegame;
+    debug_fs = vega_config::config->general.debug_fs;
+    simulation_atom = vega_config::config->general.simulation_atom;
+    audio_atom = vega_config::config->general.audio_atom;
 
 
     /* Audio Options */
-    threadtime = XMLSupport::parse_int(vs_config->getVariable("audio", "threadtime", "1"));
+    threadtime = vega_config::config->audio.threadtime;
     missionvictorysong = vs_config->getVariable("audio", "missionvictorysong", "../music/victory.ogg");
-    Music = XMLSupport::parse_bool(vs_config->getVariable("audio", "Music", "true"));
-    sound_gain = XMLSupport::parse_floatf(vs_config->getVariable("audio", "sound_gain", ".5"));
-    audio_ref_distance = XMLSupport::parse_floatf(vs_config->getVariable("audio", "audio_ref_distance", "4000"));
-    audio_max_distance = XMLSupport::parse_floatf(vs_config->getVariable("audio", "audio_max_distance", "1000000"));
-    Doppler = XMLSupport::parse_bool(vs_config->getVariable("audio", "Doppler", "false"));
-    Positional = XMLSupport::parse_bool(vs_config->getVariable("audio", "Positional", "true"));
-    Volume = XMLSupport::parse_floatf(vs_config->getVariable("audio", "Volume", "100"));
-    DopplerScale = XMLSupport::parse_floatf(vs_config->getVariable("audio", "DopplerScale", "1"));
-    frequency = XMLSupport::parse_int(vs_config->getVariable("audio", "frequency", "48000"));
-    MaxSingleSounds = XMLSupport::parse_int(vs_config->getVariable("audio", "MaxSingleSounds", "8"));
-    MaxTotalSounds = XMLSupport::parse_int(vs_config->getVariable("audio", "MaxTotalSounds", "20"));
-    Sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "Sound", "true"));
-    ai_sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "ai_sound", "true"));
-    explosion_closeness = XMLSupport::parse_floatf(vs_config->getVariable("audio", "explosion_closeness", ".8"));
-    loss_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "loss_relationship", "-.1"));
-    victory_relationship = XMLSupport::parse_floatf(vs_config->getVariable("audio", "victory_relationship", ".5"));
-    time_between_music = XMLSupport::parse_floatf(vs_config->getVariable("audio", "time_between_music", "180"));
-    debris_time = XMLSupport::parse_floatf(vs_config->getVariable("physics", "debris_time", "500"));
+    Music = vega_config::config->audio.Music;
+    sound_gain = vega_config::config->audio.sound_gain;
+    audio_ref_distance = vega_config::config->audio.audio_ref_distance;
+    audio_max_distance = vega_config::config->audio.audio_max_distance;
+    Doppler = vega_config::config->audio.Doppler;
+    Positional = vega_config::config->audio.Positional;
+    Volume = vega_config::config->audio.Volume;
+    DopplerScale = vega_config::config->audio.DopplerScale;
+    frequency = vega_config::config->audio.frequency;
+    MaxSingleSounds = vega_config::config->audio.MaxSingleSounds;
+    MaxTotalSounds = vega_config::config->audio.MaxTotalSounds;
+    Sound = vega_config::config->audio.Sound;
+    ai_sound = vega_config::config->audio.ai_sound;
+    explosion_closeness = vega_config::config->audio.explosion_closeness;
+    loss_relationship = vega_config::config->audio.loss_relationship;
+    victory_relationship = vega_config::config->audio.victory_relationship;
+    time_between_music = vega_config::config->audio.time_between_music;
+    debris_time = vega_config::config->physics.debris_time;
     /* Cockpit Audio Options */
     comm = vs_config->getVariable("cockpitaudio", "comm", "vdu_c");
     scanning = vs_config->getVariable("cockpitaudio", "scanning", "vdu_c");
@@ -65,13 +65,13 @@ void vs_options::init() {
     view = vs_config->getVariable("cockpitaudio", "view", "vdu_b");
     repair = vs_config->getVariable("cockpitaudio", "repair", "vdu_a");
     manifest = vs_config->getVariable("cockpitaudio", "manifest", "vdu_a");
-    compress_max = XMLSupport::parse_int(vs_config->getVariable("cockpitaudio", "compress_max", "3"));
+    compress_max = vega_config::config->cockpitaudio.compress_max;
     compress_loop = vs_config->getVariable("cockpitaudio", "compress_loop", "compress_loop");
     compress_change = vs_config->getVariable("cockpitaudio", "compress_change", "compress_burst");
     compress_stop = vs_config->getVariable("cockpitaudio", "compress_stop", "compress_end");
-    compress_interval = XMLSupport::parse_int(vs_config->getVariable("cockpitaudio", "compress_interval", "3"));
+    compress_interval = vega_config::config->cockpitaudio.compress_interval;
 
-    comm_preload = XMLSupport::parse_bool(vs_config->getVariable("cockpitaudio", "comm_preload", "false"));
+    comm_preload = vega_config::config->cockpitaudio.comm_preload;
 
     /* Unit Audio Options */
     jumpleave = vs_config->getVariable("unitaudio", "jumpleave", "sfx43.wav");
@@ -82,33 +82,33 @@ void vs_options::init() {
 
     /* Graphics Options */
     jumpgate = vs_config->getVariable("graphics", "jumpgate", "warp.ani");
-    jumpanimationshrink = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpanimationshrink", ".95"));
-    jumpgatesize = XMLSupport::parse_float(vs_config->getVariable("graphics", "jumpgatesize", "1.75"));
-    camera_pan_speed = XMLSupport::parse_float(vs_config->getVariable("graphics", "camera_pan_speed", "0.0001"));
-    background = XMLSupport::parse_bool(vs_config->getVariable("graphics", "background", "true"));
-    cockpit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit", "true"));
+    jumpanimationshrink = vega_config::config->graphics.jumpanimationshrink
+    jumpgatesize = vega_config::config->graphics.jumpgatesize
+    camera_pan_speed = vega_config::config->graphics.camera_pan_speed
+    background = vega_config::config->graphics.background;
+    cockpit = vega_config::config->graphics.cockpit;
     disabled_cockpit_allowed =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "disabled_cockpit_allowed", "true"));
+            vega_config::config->graphics.disabled_cockpit_allowed;
     splash_screen = vs_config->getVariable("graphics", "splash_screen", "vega_splash.ani");
-    vbo = XMLSupport::parse_bool(vs_config->getVariable("graphics", "vbo", "false"));
-    num_near_stars = XMLSupport::parse_int(vs_config->getVariable("graphics", "num_near_stars", "1000"));
-    num_far_stars = XMLSupport::parse_int(vs_config->getVariable("graphics", "num_far_stars", "2000"));
-    star_spreading = XMLSupport::parse_float(vs_config->getVariable("graphics", "star_spreading", "30000"));
-    usePlanetAtmosphere = XMLSupport::parse_bool(vs_config->getVariable("graphics", "usePlanetAtmosphere", "true"));
-    usePlanetFog = XMLSupport::parse_bool(vs_config->getVariable("graphics", "usePlanetFog", "true"));
-    reflectivity = XMLSupport::parse_float(vs_config->getVariable("graphics", "reflectivity", ".2"));
-    hardware_cursor = XMLSupport::parse_bool(vs_config->getVariable("physics", "hardware_cursor", "false"));
+    vbo = vega_config::config->graphics.vbo;
+    num_near_stars = vega_config::config->graphics.num_near_stars;
+    num_far_stars = vega_config::config->graphics.num_far_stars;
+    star_spreading = vega_config::config->graphics.star_spreading
+    usePlanetAtmosphere = vega_config::config->graphics.usePlanetAtmosphere;
+    usePlanetFog = vega_config::config->graphics.usePlanetFog;
+    reflectivity = vega_config::config->graphics.reflectivity
+    hardware_cursor = vega_config::config->physics.hardware_cursor;
     always_make_smooth_cam = XMLSupport::parse_bool(vs_config->getVariable("graphics",
             "always_make_smooth_cam",
             "false"));     //Not used yet
-    precull_dist = XMLSupport::parse_float(vs_config->getVariable("graphics", "precull_dist", "500000000"));
+    precull_dist = vega_config::config->graphics.precull_dist;
     draw_near_stars_in_front_of_planets =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_near_stars_in_front_of_planets", "false"));
-    starblend = XMLSupport::parse_bool(vs_config->getVariable("graphics", "starblend", "true"));
+            vega_config::config->graphics.draw_near_stars_in_front_of_planets;
+    starblend = vega_config::config->graphics.starblend;
     sparkleenginesizerelativetoship =
-            XMLSupport::parse_floatf(vs_config->getVariable("graphics", "sparkleenginesizerelativetoship", "0.1875"));
-    sparkleabsolutespeed = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "sparkleabsolutespeed", ".02"));
-    engine_radii_scale = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "engine_radii_scale", ".4"));
+            vega_config::config->graphics.sparkleenginesizerelativetoship;
+    sparkleabsolutespeed = vega_config::config->graphics.sparkleabsolutespeed;
+    engine_radii_scale = vega_config::config->graphics.engine_radii_scale;
     engine_length_scale = XMLSupport::parse_floatf(vs_config->getVariable("graphics", "engine_length_scale", "1.25"));
     halos_by_velocity = XMLSupport::parse_bool(vs_config->getVariable("graphics", "halos_by_velocity", "false"));
     percent_afterburner_color_change =
@@ -219,11 +219,11 @@ void vs_options::init() {
 
 
     /* Terrain Options */
-    xscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "xscale", "1.0"));
-    yscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "yscale", "1.0"));
-    zscale = XMLSupport::parse_float(vs_config->getVariable("terrain", "zscale", "1.0"));
-    mass = XMLSupport::parse_float(vs_config->getVariable("terrain", "mass", "100.0"));
-    radius = XMLSupport::parse_float(vs_config->getVariable("terrain", "radius", "10000.0"));
+    xscale = vega_config::config->terrain.xscale;
+    yscale = vega_config::config->terrain.yscale;
+    zscale = vega_config::config->terrain.zscale;
+    mass = vega_config::config->terrain.mass;
+    radius = vega_config::config->terrain.radius;
 
     /* Player Options */
 
@@ -245,26 +245,26 @@ void vs_options::init() {
     warp_mouse_zone = XMLSupport::parse_int(vs_config->getVariable("joystick", "warp_mouse_zone", "100"));
 
     /* AI Options */
-    AllowCivilWar = XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowCivilWar", "false"));
-    CappedFactionRating = XMLSupport::parse_bool(vs_config->getVariable("AI", "CappedFactionRating", "true"));
+    AllowCivilWar = vega_config::config->ai.AllowCivilWar;
+    CappedFactionRating = vega_config::config->ai.CappedFactionRating;
     AllowNonplayerFactionChange =
-            XMLSupport::parse_bool(vs_config->getVariable("AI", "AllowNonplayerFactionChange", "false"));
-    min_relationship = XMLSupport::parse_float(vs_config->getVariable("AI", "min_relationship", "-20.0"));
+            vega_config::config->ai.AllowNonplayerFactionChange;
+    min_relationship = vega_config::config->ai.min_relationship;
     startDockedTo = vs_config->getVariable("AI", "startDockedTo", "MiningBase");
-    dockOnLoad = XMLSupport::parse_bool(vs_config->getVariable("AI", "dockOnLoad", "true"));
+    dockOnLoad = vega_config::config->ai.dockOnLoad;
 
     /* PhysicsConfig Options */
     Drone = vs_config->getVariable("physics", "Drone", "drone");
     max_missions = XMLSupport::parse_int(vs_config->getVariable("physics", "max_missions", "4"));
-    game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1.0"));
-    runtime_compactness = XMLSupport::parse_float(vs_config->getVariable("physics", "runtime_compactness", "1.0"));
-    autogen_compactness = XMLSupport::parse_float(vs_config->getVariable("physics", "autogen_compactness", "1.0"));
-    AsteroidDifficulty = XMLSupport::parse_float(vs_config->getVariable("physics", "AsteroidDifficulty", ".4"));
-    YearScale = XMLSupport::parse_float(vs_config->getVariable("physics", "YearScale", "10.0"));
+    game_speed = vega_config::config->physics.game_speed;
+    runtime_compactness = vega_config::config->physics.runtime_compactness;
+    autogen_compactness = vega_config::config->physics.autogen_compactness;
+    AsteroidDifficulty = vega_config::config->physics.AsteroidDifficulty;
+    YearScale = vega_config::config->physics.YearScale;
     game_speed_affects_autogen_systems =
             XMLSupport::parse_bool(vs_config->getVariable("physics", "game_speed_affects_autogen_systems", "false"));
-    star_system_scale = XMLSupport::parse_float(vs_config->getVariable("physics", "star_system_scale", "1.0"));
-    respawn_unit_size = XMLSupport::parse_float(vs_config->getVariable("physics", "respawn_unit_size", "400.0"));
+    star_system_scale = vega_config::config->physics.star_system_scale;
+    respawn_unit_size = vega_config::config->physics.respawn_unit_size;
     auto_pilot_planet_radius_percent =
             XMLSupport::parse_floatf(vs_config->getVariable("physics", "auto_pilot_planet_radius_percent", ".75"));
     campaigns = vs_config->getVariable("physics",

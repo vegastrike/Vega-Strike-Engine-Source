@@ -1,7 +1,7 @@
 /*
  * music.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * Evert Vorster, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -125,8 +125,8 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
     for (i = 0; i < MAXLIST; i++) {
         LoadMusic(vs_config->getVariable("audio", listvars[i], deflistvars[i]).c_str());
     }
-    soft_vol_up_latency = XMLSupport::parse_float(vs_config->getVariable("audio", "music_volume_up_latency", "15"));
-    soft_vol_down_latency = XMLSupport::parse_float(vs_config->getVariable("audio", "music_volume_down_latency", "2"));
+    soft_vol_up_latency = vega_config::config->audio.music_volume_up_latency;
+    soft_vol_down_latency = vega_config::config->audio.music_volume_down_latency;
     //Hardware volume = 1
     _SetVolume(1, true);
     //Software volume = from config
@@ -227,7 +227,7 @@ int Music::SelectTracks(int layer) {
     if (!game_options()->Music) {
         return 0;
     }
-    static bool random = XMLSupport::parse_bool(vs_config->getVariable("audio", "shuffle_songs", "true"));
+    const bool random = vega_config::config->audio.shuffle_songs;
     static size_t maxrecent =
             XMLSupport::parse_int(vs_config->getVariable("audio", "shuffle_songs.history_depth", MAX_RECENT_HISTORY));
     static std::string dj_script = vs_config->getVariable("sound", "dj_script", "modules/dj.py");
@@ -445,7 +445,7 @@ void Music::GotoSong(std::string mus, int layer) {
     if (!game_options()->Music) {
         return;
     }
-    static bool cross = XMLSupport::parse_bool(vs_config->getVariable("audio", "cross_fade_music", "true"));
+    const bool cross = vega_config::config->audio.cross_fade_music;
     if (cross && (muzak_count >= 2)) {
         if (layer < 0) {
             if (mus == muzak[muzak_cross_index].cur_song_file) {
@@ -551,7 +551,7 @@ void Music::_SkipRandSong(int whichlist, int layer) {
     }
     if (whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size()) {
         lastlist = whichlist;
-        static bool random = XMLSupport::parse_bool(vs_config->getVariable("audio", "shuffle_songs", "true"));
+        const bool random = vega_config::config->audio.shuffle_songs;
         if (playlist[whichlist].size()) {
             GotoSong(whichlist, random ? randInt(playlist[whichlist].size()) : playlist[whichlist].counter++
                     % playlist[whichlist].size(), true, layer);
@@ -584,7 +584,7 @@ void Music::_SkipRandList(int layer) {
         return;
     }
     for (unsigned int i = 0; i < playlist.size(); i++) {
-        static bool random = XMLSupport::parse_bool(vs_config->getVariable("audio", "shuffle_songs", "true"));
+        const bool random = vega_config::config->audio.shuffle_songs;
         if (!playlist[i].empty()) {
             GotoSong(i,
                     random ? randInt(playlist[i].size()) : playlist[i].counter++ % playlist[i].size(),
@@ -681,7 +681,7 @@ void Music::SetParent(Unit *parent) {
 }
 
 void Music::InitMuzak() {
-    muzak_count = XMLSupport::parse_int(vs_config->getVariable("audio", "music_layers", "1"));
+    muzak_count = vega_config::config->audio.music_layers;
     muzak = new Music[muzak_count];
 }
 
@@ -773,10 +773,8 @@ void Music::Mute(bool mute, int layer) {
         return;
     }
     if (muzak) {
-        static float muting_fadeout =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "music_muting_fadeout", "0.2"));
-        static float
-                muting_fadein = XMLSupport::parse_float(vs_config->getVariable("audio", "music_muting_fadeout", "0.5"));
+        const float muting_fadeout = vega_config::config->audio.music_muting_fadeout;
+        const float muting_fadein = vega_config::config->audio.music_muting_fadeout;
         if (layer < 0) {
             for (int i = 0; i < muzak_count; i++) {
                 if (mute) {

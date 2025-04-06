@@ -2,7 +2,7 @@
  * bolt.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -387,14 +387,12 @@ bool Bolt::Collide(Unit *target) {
         }
         enum Vega_UnitType type = target->isUnit();
         if (type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
-            static bool collideroids =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+            const bool collideroids = vega_config::config->physics.asteroid_weapon_collision;
             if (type != Vega_UnitType::asteroid || (!collideroids)) {
                 return false;
             }
         }
-        static bool
-                collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics", "JumpWeaponCollision", "false"));
+        const bool collidejump = vega_config::config->physics.jump_weapon_collision;
         if (type == Vega_UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
             return false;
         }

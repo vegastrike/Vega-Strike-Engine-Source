@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -82,25 +81,17 @@ void FlyByJoystick::JDecelKey( KBSTATE k, float, float, int )
 #endif
 
 void FlyByJoystick::Execute() {
-    static bool clamp_joystick_axes = XMLSupport::parse_bool(vs_config->getVariable("joystick", "clamp_axes", "true"));
-    static bool nonlinear_throttle_nav =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "nonlinear_throttle_nav", "true"));
-    static bool nonlinear_throttle_combat =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "nonlinear_throttle_combat", "false"));
-    static float
-            expfactorn = XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_expfactor_nav", "6.0"));
-    static float pfactorn = XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_pfactor_nav", "2.0"));
-    static float
-            expamountn = XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_expamount_nav", "1.0"));
-    static float pamountn = XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_pamount_nav", "0.0"));
-    static float expfactorc =
-            XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_expfactor_combat", "6.0"));
-    static float
-            pfactorc = XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_pfactor_combat", "2.0"));
-    static float expamountc =
-            XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_expamount_combat", "1.0"));
-    static float
-            pamountc = XMLSupport::parse_float(vs_config->getVariable("joystick", "nonlinear_pamount_combat", "0.0"));
+    const bool clamp_joystick_axes = vega_config::config->joystick.clamp_axes;
+    const bool nonlinear_throttle_nav = vega_config::config->joystick.nonlinear_throttle_nav;
+    const bool nonlinear_throttle_combat = vega_config::config->joystick.nonlinear_throttle_combat;
+    const float expfactorn = vega_config::config->joystick.nonlinear_expfactor_nav;
+    const float pfactorn = vega_config::config->joystick.nonlinear_pfactor_nav;
+    const float expamountn = vega_config::config->joystick.nonlinear_expamount_nav;
+    const float pamountn = vega_config::config->joystick.nonlinear_pamount_nav;
+    const float expfactorc = vega_config::config->joystick.nonlinear_expfactor_combat;
+    const float pfactorc = vega_config::config->joystick.nonlinear_pfactor_combat;
+    const float expamountc = vega_config::config->joystick.nonlinear_expamount_combat;
+    const float pamountc = vega_config::config->joystick.nonlinear_pamount_combat;
     desired_ang_velocity = Vector(0, 0, 0);
     for (unsigned int i = 0; i < this->whichjoystick.size(); i++) {
         int which_joystick = this->whichjoystick[i];

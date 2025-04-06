@@ -1,7 +1,7 @@
 /*
  * base_util.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -175,8 +175,7 @@ int Room(std::string text) {
         p_base_vs_sprite->texfile = file;
 #endif
         float tx = 0, ty = 0;
-        static bool
-                addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics", "offset_sprites_by_pos", "true"));
+        const bool addspritepos = vega_config::config->graphics.offset_sprites_by_pos;
         if (addspritepos) {
             p_base_vs_sprite->spr.GetPosition(tx, ty);
         }
@@ -867,9 +866,9 @@ const Dictionary &GetEventData() {
 
 float GetTextHeight(std::string text, Vector widheimult) {
     static bool force_highquality = true;
-    static bool use_bit = force_highquality
-            || XMLSupport::parse_bool(vs_config->getVariable("graphics", "high_quality_font", "false"));
-    static float font_point = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_point", "16"));
+    const bool use_bit = force_highquality
+            || vega_config::config->graphics.high_quality_font;
+    const float font_point = vega_config::config->graphics.font_point;
     return use_bit ? getFontHeight() : (font_point * 2 / g_game.y_resolution);
 }
 

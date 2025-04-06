@@ -2,8 +2,7 @@
  * planetary_orbit.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 Roy Falk, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -83,7 +82,7 @@ void PlanetaryOrbit::Execute() {
     }
     QVector origin(targetlocation);
     static float orbit_centroid_averaging =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "orbit_averaging", "16"));
+            vega_config::config->physics.orbit_averaging;
     float averaging = (float) orbit_centroid_averaging / (float) (parent->predicted_priority + 1.0f);
     if (averaging < 1.0f) {
         averaging = 1.0f;
@@ -187,7 +186,7 @@ void PlanetaryOrbit::Execute() {
     parent->Velocity = parent->cumulative_velocity =
             (((destination - parent->LocalPosition()) * (1. / simulation_atom_var)).Cast());
     static float Unreasonable_value =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "planet_ejection_stophack", "2000"));
+            vega_config::config->physics.planet_ejection_stophack;
     float v2 = parent->Velocity.Dot(parent->Velocity);
     if (v2 > Unreasonable_value * Unreasonable_value) {
         VS_LOG(debug,

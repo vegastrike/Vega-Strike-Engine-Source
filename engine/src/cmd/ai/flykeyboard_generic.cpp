@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,7 +33,7 @@
 #include "root_generic/lin_time.h"
 
 float FlyByKeyboard::clamp_axis(float v) {
-    static int axis_scale = XMLSupport::parse_int(vs_config->getVariable("physics", "slide_start", "3"));
+    const int axis_scale = vega_config::config->physics.slide_start;
     int as = parent->GetComputerData().slide_start;
     if (as == 0) {
         as = axis_scale;
@@ -52,7 +51,7 @@ float FlyByKeyboard::clamp_axis(float v) {
 }
 
 float FlyByKeyboard::reduce_axis(float v) {
-    static int axis_scale = XMLSupport::parse_int(vs_config->getVariable("physics", "slide_end", "2"));
+    const int axis_scale = vega_config::config->physics.slide_end;
     int as = parent->GetComputerData().slide_end;
     if (as == 0) {
         as = axis_scale;

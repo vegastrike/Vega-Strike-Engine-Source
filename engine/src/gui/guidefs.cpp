@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -25,9 +25,10 @@
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "guidefs.h"
+#include "configuration/configuration.h"
 
 GFXColor SaturatedColor(float r, float g, float b, float a) {
-    static float Saturation = XMLSupport::parse_float(vs_config->getVariable("graphics", "base_saturation", "1.0"));
+    static float Saturation = vega_config::config->graphics.base_saturation;
 
     return GFXColor((r * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,
             (g * Saturation * 3 + (r + b + g) * (1 - Saturation)) / 3,

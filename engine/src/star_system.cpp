@@ -1454,8 +1454,7 @@ unsigned int StarSystem::numContTerrain() {
 void StarSystem::UpdateMissiles() {
     //if false, missiles collide with rocks as units, but not harm them with explosions
     //FIXME that's how it's used now, but not really correct, as there could be separate AsteroidWeaponDamage for this
-    static bool collideroids =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+    const bool collideroids = vega_config::config->physics.asteroid_weapon_collision;
 
     //WARNING: This is a big performance problem...
     //...responsible for many hiccups.

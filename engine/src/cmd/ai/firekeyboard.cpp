@@ -1,7 +1,7 @@
 /*
  * firekeyboard.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -1013,7 +1013,7 @@ bool TargMission(Unit *me, Unit *target) {
 }
 
 bool TargAll(Unit *me, Unit *target) {
-    static bool can_target_sun = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_sun", "false"));
+    const bool can_target_sun = vega_config::config->graphics.can_target_sun;
     return (me->InRange(target, true,
             false)
             || me->InRange(target, true, true)) && (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(
@@ -1022,8 +1022,7 @@ bool TargAll(Unit *me, Unit *target) {
 }
 
 bool TargSig(Unit *me, Unit *target) {
-    static bool can_target_asteroid =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_asteroid", "true"));
+    const bool can_target_asteroid = vega_config::config->graphics.can_target_asteroid;
 
     bool ret =
             me->InRange(target, false,
@@ -1041,8 +1040,7 @@ bool TargSig(Unit *me, Unit *target) {
 extern Unit *getTopLevelOwner();
 
 bool TargUn(Unit *me, Unit *target) {
-    static bool
-            can_target_cargo = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_cargo", "false"));
+    const bool can_target_cargo = vega_config::config->graphics.can_target_cargo;
     int up = FactionUtil::GetUpgradeFaction();
     return me->InRange(target, true,
             false)
@@ -1093,7 +1091,7 @@ bool TargThreat(Unit *me, Unit *target) {
 }
 
 bool TargNear(Unit *me, Unit *target) {
-    static bool can_target_sun = XMLSupport::parse_bool(vs_config->getVariable("graphics", "can_target_sun", "false"));
+    const bool can_target_sun = vega_config::config->graphics.can_target_sun;
     return (me->getRelation(target) < 0
             || TargThreat(me,
                     target)
@@ -1373,11 +1371,9 @@ static bool SuperDock(Unit *parent, Unit *target) {
 }
 
 static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity) {
-    static float min_docking_relationship =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "min_docking_relationship", "-.002"));
-    static bool can_dock_to_enemy_base =
-            XMLSupport::parse_bool(vs_config->getVariable("AI", "can_dock_to_enemy_base", "true"));
-    static bool nojumpinSPEC = XMLSupport::parse_bool(vs_config->getVariable("physics", "noSPECJUMP", "true"));
+    const float min_docking_relationship = vega_config::config->ai.min_docking_relationship;
+    const bool can_dock_to_enemy_base = vega_config::config->ai.can_dock_to_enemy_base;
+    const bool nojumpinSPEC = vega_config::config->physics.noSPECJUMP;
     bool SPEC_interference = targ && parent && nojumpinSPEC
             && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
     unsigned char gender = 0;
@@ -1679,8 +1675,7 @@ void Arrested(Unit *parent) {
 static void ForceChangeTarget(Unit *parent) {
     Unit *curtarg = parent->Target();
     ChooseTargets(parent, TargUn, false);
-    static bool force_change_only_unit =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "target_null_if_no_unit", "false"));
+    const bool force_change_only_unit = vega_config::config->graphics.target_null_if_no_unit;
     if (parent->Target() == curtarg) {
         if (force_change_only_unit) {
             parent->Target(NULL);
@@ -1697,8 +1692,7 @@ int SelectDockPort(Unit *utdw, Unit *parent);
 
 void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
-    static bool allow_special_with_weapons =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+    const bool allow_special_with_weapons = vega_config::config->physics.special_and_normal_gun_combo;
     if (!allow_special_with_weapons) {
         parent->ToggleWeapon(false, true /*reverse*/ );
         parent->ToggleWeapon(false, false /*reverse*/ );
@@ -1737,8 +1731,7 @@ void FireKeyboard::Execute() {
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
-            static bool allow_special_with_weapons =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "special_and_normal_gun_combo", "true"));
+            const bool allow_special_with_weapons = vega_config::config->physics.special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal = false;
@@ -1819,8 +1812,7 @@ void FireKeyboard::Execute() {
     }
     if (f().targetukey == PRESS) {
         f().targetukey = DOWN;
-        static bool smart_targetting =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "smart_targetting_key", "true"));
+        const bool smart_targetting = vega_config::config->graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {
@@ -1900,8 +1892,7 @@ void FireKeyboard::Execute() {
     }
     if (f().rtargetukey == PRESS) {
         f().rtargetukey = DOWN;
-        static bool smart_targetting =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "smart_targetting_key", "true"));
+        const bool smart_targetting = vega_config::config->graphics.smart_targetting_key;
         Unit *tmp = parent->Target();
         bool sysobj = false;
         if (tmp) {
@@ -1923,7 +1914,7 @@ void FireKeyboard::Execute() {
         parent->TargetTurret(parent->Target());
         f().turretaikey = DOWN;
     }
-    static bool noturretai = XMLSupport::parse_bool(vs_config->getVariable("AI", "no_turret_ai", "false"));
+    const bool noturretai = vega_config::config->ai.no_turret_ai;
     static int taicounter = 0;
     if (f().turretoffkey == PRESS || (noturretai && taicounter++ % 128 == 0)) {
         parent->DisableTurretAI();
@@ -2178,7 +2169,7 @@ void FireKeyboard::Execute() {
             cp->EjectDock();
         }              //use specialized ejectdock in the future
     }
-    static bool actually_arrest = XMLSupport::parse_bool(vs_config->getVariable("AI", "arrest_energy_zero", "false"));
+    const bool actually_arrest = vega_config::config->ai.arrest_energy_zero;
     if (actually_arrest && parent->reactor.Capacity() == 0) {
         Arrested(parent);
     }

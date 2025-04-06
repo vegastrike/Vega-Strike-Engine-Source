@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -27,6 +27,8 @@
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "gldrv/gl_globals.h"
+#include "configuration/configuration.h"
+
 const size_t PaintText::END_LINE = 1000000;           //Draw to the end.
 extern bool useStroke();
 //This function allows a number of formatting characters.  Here are the rules:
@@ -202,7 +204,7 @@ static float drawChars(const string &str,
         glLineWidth(font.strokeWidth());
     } else {
         static bool setRasterPos =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "set_raster_text_color", "true"));
+                vega_config::config->graphics.set_raster_text_color;
         if (setRasterPos) {
             glRasterPos2f(inRasterPos / (g_game.x_resolution / 2), 0);
         }
@@ -712,7 +714,7 @@ void PaintText::calcLayout(void) {
     m_horizontalScaling = m_font.horizontalScaling();
     //Max line width in character reference space.
     static double
-            font_width_hack = XMLSupport::parse_float(vs_config->getVariable("graphics", "font_width_hack", "0.925"));
+            font_width_hack = vega_config::config->graphics.font_width_hack;
     const float maxLineWidth = m_rect.size.width * font_width_hack / m_horizontalScaling;
     //The temporary global state for the layout operation.
     //Make sure this gets initialized at the beginning of an operation.

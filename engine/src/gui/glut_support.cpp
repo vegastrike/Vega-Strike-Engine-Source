@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 David Ranger, Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -83,7 +83,7 @@ float word_length(const char *str) {
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-    static float rescale_font = XMLSupport::parse_float(vs_config->getVariable("graphics", "gui_font_scale", ".75"));
+    static float rescale_font = vega_config::config->graphics.gui_font_scale;
     float font_size_float = rescale_font * 5. / 100;
 
     int cur;

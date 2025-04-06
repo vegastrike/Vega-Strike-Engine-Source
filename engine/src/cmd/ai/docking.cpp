@@ -1,7 +1,7 @@
 /*
  * docking.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -60,7 +60,7 @@ DockingOps::DockingOps(Unit *unitToDockWith, Order *ai, bool physically_dock, bo
     facedtarget = false;
     physicallyDock = true;
     port = -1;
-    static float temptimer = XMLSupport::parse_float(vs_config->getVariable("physics", "docking_time", "10"));
+    const float temptimer = vega_config::config->physics.docking_time;
     timer = temptimer;
 }
 
@@ -209,7 +209,7 @@ bool DockingOps::DockToTarget(Unit *utdw) {
         }
     } else if (diss <= 1.2 * rad * rad) {
         timer += SIMULATION_ATOM;
-        static float tmp = XMLSupport::parse_float(vs_config->getVariable("physics", "docking_time", "10"));
+        const float tmp = vega_config::config->physics.docking_time;
         if (timer >= 1.5 * tmp) {
             if (physicallyDock) {
                 return parent->Dock(utdw);
@@ -226,7 +226,7 @@ bool DockingOps::PerformDockingOperations(Unit *utdw) {
     timer -= SIMULATION_ATOM;
     bool isplanet = utdw->isUnit() == Vega_UnitType::planet;
     if (timer < 0) {
-        static float tmp = XMLSupport::parse_float(vs_config->getVariable("physics", "un_docking_time", "180"));
+        const float tmp = vega_config::config->physics.un_docking_time;
         timer = tmp;
         EnqueueOrder(new ChangeHeading(parent->Position() * 2 - utdw->Position(), 4, 1, true));
         if (physicallyDock) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, chuck_starchaser, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, chuck_starchaser, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -296,7 +296,7 @@ bool shouldreflect(string r) {
 
 void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &attributes) {
     static bool use_detail_texture =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "use_detail_texture", "true"));
+            vega_config::config->graphics.use_detail_texture;
     //static bool flatshadeit=false;
     AttributeList::const_iterator iter;
     float flotsize = 1;
@@ -328,7 +328,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                     }
                 }
                 static float detailscale =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "detail_texture_scale", "1"));
+                        vega_config::config->graphics.detail_texture_scale
                 if (detailPlanes.size() < 6) {
                     detailPlanes.push_back(vec * detailscale);
                 }
@@ -526,10 +526,7 @@ void Mesh::beginElement(MeshXML *xml, const string &name, const AttributeList &a
                             if (!ind.empty()) {
                                 texindex = XMLSupport::parse_int(ind);
                             }
-                            static bool per_pixel_lighting =
-                                    XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                                            "per_pixel_lighting",
-                                            "true"));
+                            const bool per_pixel_lighting = vega_config::config->graphics.per_pixel_lighting;
                             if ((texindex == 0) || per_pixel_lighting) {
                                 while (xml->decals.size() <= texindex) {
                                     xml->decals.push_back(MeshXML::ZeTexture());

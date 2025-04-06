@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -94,21 +94,16 @@ static bool beamCheckCollision(QVector pos, float len, const Collidable &un) {
 
 void Beam::RecalculateVertices(const Matrix &trans) {
     GFXColorVertex *beam = (vlist->BeginMutate(0))->colors;
-    static float fadelocation = XMLSupport::parse_float(vs_config->getVariable("graphics", "BeamFadeoutLength", ".8"));
-    static float hitfadelocation =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "BeamFadeoutHitLength", ".95"));
-    static float scoopangle =
+    const float fade_location = vega_config::config->graphics.beam_fadeout_length;
+    const float hit_fade_location = vega_config::config->graphics.beam_fadeout_hit_length;
+    const float scoop_angle =
             //In radians - the /2 is because of the way in which we check against the cone.
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_fov", "0.5")) / 2;
-    static float scooptanangle = (float) tan(scoopangle);
-    static bool scoop = XMLSupport::parse_bool(vs_config->getVariable("graphics", "tractor.scoop", "true"));
-    static float scoopa =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "tractor.scoop_alpha_multiplier", "2.5"));
-    static int radslices =
-            XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-                    | 1;         //Must be odd
-    static int longslices =
-            XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+            vega_config::config->physics.tractor.scoop_fov / 2.0;
+    const float scoop_tan_angle = tan(scoop_angle);
+    const bool scoop = vega_config::config->physics.tractor.scoop;
+    const float scoopa = vega_config::config->physics.tractor.scoop_alpha_multiplier;
+    const int rad_slices = vega_config::config->physics.tractor.scoop_rad_slices | 1;        //Must be odd
+    const int long_slices = vega_config::config->physics.tractor.scoop_long_slices;
     const float fadeinlength = 4;
     const bool tractor = (damagerate < 0 && phasedamage > 0);
     const bool repulsor = (damagerate > 0 && phasedamage < 0);
@@ -118,13 +113,13 @@ void Beam::RecalculateVertices(const Matrix &trans) {
             ? (curlength < range ? curlength - speed * simulation_atom_var * (1 - interpolation_blend_factor)
                     : range)
             : curlength;
-    float fadelen = (impact == ALIVE) ? len * fadelocation : len * hitfadelocation;
+    float fadelen = (impact == ALIVE) ? len * fade_location : len * hit_fade_location;
     const bool doscoop = (scoop && (tractor || repulsor));
-    float fadetex = leftex + (righttex - leftex) * fadelocation;
+    float fadetex = leftex + (righttex - leftex) * fade_location;
     const float touchtex = leftex - fadeinlength * .5 * texturestretch;
     float thick = curthick != thickness ? curthick - radialspeed * simulation_atom_var
             * (1 - interpolation_blend_factor) : thickness;
-    float ethick = (thick / ((thickness > 0) ? thickness : 1.0f)) * (doscoop ? curlength * scooptanangle : 0);
+    float ethick = (thick / ((thickness > 0) ? thickness : 1.0f)) * (doscoop ? curlength * scoop_tan_angle : 0);
     const float invfadelen = thick * fadeinlength;
     const float invfadealpha = std::max(0.0f, std::min(1.0f, 1.0f - std::sqrt(invfadelen / len)));
     const float fadealpha = std::max(0.0f, std::min(1.0f, 1.0f - std::sqrt(fadelen / len)));
@@ -142,15 +137,15 @@ void Beam::RecalculateVertices(const Matrix &trans) {
         const float xyalpha = std::max(0.0f, fabs(z * r));
         const float xzalpha = std::max(0.0f, fabs(y * r)) * 0.5f;
         const float yzalpha = std::max(0.0f, fabs(x * r)) * 0.5f;
-        const float lislices = (longslices > 0) ? 1.0f / longslices : 0.0f;
-        const float rislices = (radslices > 0) ? 1.0f / radslices : 0.0f;
+        const float lislices = (long_slices > 0) ? 1.0f / long_slices : 0.0f;
+        const float rislices = (rad_slices > 0) ? 1.0f / rad_slices : 0.0f;
         const float bxyalpha = xyalpha * lislices;
         const float bxzalpha = xzalpha * rislices;
         const float byzalpha = yzalpha * rislices;
         const float zs = lislices * (fadelen - invfadelen);
         const float ths = lislices * ethick * 1.2f;
-        const float rim1 = (radslices - 1) * rislices * 2;
-        for (int i = 0; i < longslices; i++) {
+        const float rim1 = (rad_slices - 1) * rislices * 2;
+        for (int i = 0; i < long_slices; i++) {
             float f = i * lislices;
             float xa = std::max(0.0f, 1.0f - std::sqrt(f)) * byzalpha * scoopa;
             float ya = std::max(0.0f, 1.0f - std::sqrt(f)) * bxzalpha * scoopa;
@@ -165,7 +160,7 @@ void Beam::RecalculateVertices(const Matrix &trans) {
             }
             if (i > 1) {
                 if (ya > 0.03) {
-                    for (int j = -radslices / 2; j <= radslices / 2; j++) {
+                    for (int j = -rad_slices / 2; j <= rad_slices / 2; j++) {
                         float y = j * 2 * th * rislices;
                         float f = 1.0f - fabs(rim1 * j * rislices);
                         float sf = sqrt(f);
@@ -183,7 +178,7 @@ void Beam::RecalculateVertices(const Matrix &trans) {
                     }
                 }
                 if (xa > 0.03) {
-                    for (int j = -radslices / 2; j <= radslices / 2; j++) {
+                    for (int j = -rad_slices / 2; j <= rad_slices / 2; j++) {
                         float x = j * 2 * th * rislices;
                         float f = 1.0f - fabs(rim1 * j * rislices);
                         float sf = sqrt(f);
@@ -358,10 +353,8 @@ Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit 
     impact = ALIVE;
     owner = own;
     numframes = 0;
-    static int radslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-            | 1;    //Must be odd
-    static int
-            longslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    const int rad_slices = vega_config::config->physics.tractor.scoop_rad_slices | 1;        //Must be odd
+    const int long_slices = vega_config::config->physics.tractor.scoop_long_slices;
     lastlength = 0;
     curlength = simulation_atom_var * speed;
     lastthick = 0;
@@ -371,7 +364,7 @@ Beam::Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit 
     }
     static GFXVertexList *_vlist = 0;
     if (!_vlist) {
-        int numvertex = float_to_int(std::max(48, ((4 * radslices) + 1) * longslices * 4));
+        int numvertex = float_to_int(std::max(48, ((4 * rad_slices) + 1) * long_slices * 4));
         GFXColorVertex *beam =
                 new GFXColorVertex[numvertex];         //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
 //        memset( beam, 0, sizeof (*beam)*numvertex );
@@ -407,10 +400,8 @@ void Beam::Reinitialize() {
 
     impact = ALIVE;
     numframes = 0;
-    static int radslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_rad_slices", "10"))
-            | 1;    //Must be odd
-    static int
-            longslices = XMLSupport::parse_int(vs_config->getVariable("graphics", "tractor.scoop_long_slices", "10"));
+    const int rad_slices = vega_config::config->physics.tractor.scoop_rad_slices | 1;        //Must be odd
+    const int long_slices = vega_config::config->physics.tractor.scoop_long_slices;
     lastlength = 0;
     curlength = simulation_atom_var * speed;
     lastthick = 0;
@@ -420,7 +411,7 @@ void Beam::Reinitialize() {
     }
     static GFXVertexList *_vlist = 0;
     if (!_vlist) {
-        int numvertex = float_to_int(std::max(48, ((4 * radslices) + 1) * longslices * 4));
+        int numvertex = float_to_int(std::max(48, ((4 * rad_slices) + 1) * long_slices * 4));
         GFXColorVertex *beam =
                 new GFXColorVertex[numvertex];         //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
 //        memset( beam, 0, sizeof (*beam)*numvertex );
@@ -450,64 +441,53 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
     QVector end(center + direction.Scale(curlength));
     enum Vega_UnitType type = target->isUnit();
     if (target == owner || type == Vega_UnitType::nebula || type == Vega_UnitType::asteroid) {
-        static bool collideroids =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "AsteroidWeaponCollision", "false"));
+        const bool collideroids = vega_config::config->physics.asteroid_weapon_collision;
         if (type != Vega_UnitType::asteroid || (!collideroids)) {
             return false;
         }
     }
-    static bool collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics", "JumpWeaponCollision", "false"));
+    const bool collidejump = vega_config::config->physics.jump_weapon_collision;
     if (type == Vega_UnitType::planet && (!collidejump) && !target->GetDestinations().empty()) {
         return false;
     }
-    //A bunch of needed config variables - its best to have them here, so that they're loaded the
+    //A bunch of needed config variables - it's best to have them here, so that they're loaded the
     //very first time Collide() is called. That way, we avoid hiccups.
-    static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics", "percent_to_tractor", ".1"));
+    const float nbig = vega_config::config->physics.tractor.percent_to_tractor;
     int upgradesfaction = FactionUtil::GetUpgradeFaction();
-    static int cargofaction = FactionUtil::GetFactionIndex("cargo");
-    static bool c_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.cargo.force_push", "true"));
-    static bool c_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.cargo.force_in", "true"));
-    static bool u_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.upgrade.force_push", "true"));
-    static bool u_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.upgrade.force_in", "true"));
-    static bool f_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.faction.force_push", "true"));
-    static bool f_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.faction.force_in", "true"));
-    static bool d_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.disabled.force_push", "true"));
-    static bool d_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.disabled.force_in", "true"));
-    static bool o_fp = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.others.force_push", "false"));
-    static bool o_fi = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.others.force_in", "false"));
-    static bool scoop = XMLSupport::parse_bool(vs_config->getVariable("physics", "tractor.scoop", "true"));
-    static float scoopangle =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.scoop_angle", "0.5"));     //In radians
-    static float scoopcosangle = (float) cos(scoopangle);
-    static float maxrelspeed =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.max_relative_speed", "150"));
-    static float c_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance_own_rsize", "1.5"));
-    static float c_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance_tgt_rsize", "1.1"));
-    static float c_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.cargo.distance", "0"));
-    static float u_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.ugprade.distance_own_rsize", "1.5"));
-    static float u_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.upgrade.distance_tgt_rsize", "1.1"));
-    static float u_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.upgrade.distance", "0"));
-    static float f_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance_own_rsize", "2.2"));
-    static float f_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance_tgt_rsize", "2.2"));
-    static float f_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.faction.distance", "0"));
-    static float o_ors_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance_own_rsize", "1.1"));
-    static float o_trs_m =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance_tgt_rsize", "1.1"));
-    static float o_o = XMLSupport::parse_float(vs_config->getVariable("physics", "tractor.others.distance", "0"));
+    const int cargofaction = FactionUtil::GetFactionIndex("cargo");
+    const bool c_fp = vega_config::config->physics.tractor.cargo.force_push;
+    const bool c_fi = vega_config::config->physics.tractor.cargo.force_in;
+    const bool u_fp = vega_config::config->physics.tractor.upgrade.force_push;
+    const bool u_fi = vega_config::config->physics.tractor.upgrade.force_in;
+    const bool f_fp = vega_config::config->physics.tractor.faction.force_push;
+    const bool f_fi = vega_config::config->physics.tractor.faction.force_in;
+    const bool d_fp = vega_config::config->physics.tractor.disabled.force_push;
+    const bool d_fi = vega_config::config->physics.tractor.disabled.force_in;
+    const bool o_fp = vega_config::config->physics.tractor.others.force_push;
+    const bool o_fi = vega_config::config->physics.tractor.others.force_in;
+    const bool scoop = vega_config::config->physics.tractor.scoop;
+    const float scoop_angle = vega_config::config->physics.tractor.scoop_angle;      //In radians
+    const float scoop_cos_angle = cos(scoop_angle);
+    const float max_rel_speed = vega_config::config->physics.tractor.max_relative_speed;
+    const float c_ors_m = vega_config::config->physics.tractor.cargo.distance_own_rsize;
+    const float c_trs_m = vega_config::config->physics.tractor.cargo.distance_tgt_rsize;
+    const float c_o = vega_config::config->physics.tractor.cargo.distance;
+    const float u_ors_m = vega_config::config->physics.tractor.ugprade.distance_own_rsize;
+    const float u_trs_m = vega_config::config->physics.tractor.upgrade.distance_tgt_rsize;
+    const float u_o = vega_config::config->physics.tractor.upgrade.distance;
+    const float f_ors_m = vega_config::config->physics.tractor.faction.distance_own_rsize;
+    const float f_trs_m = vega_config::config->physics.tractor.faction.distance_tgt_rsize;
+    const float f_o = vega_config::config->physics.tractor.faction.distance;
+    const float o_ors_m = vega_config::config->physics.tractor.others.distance_own_rsize;
+    const float o_trs_m = vega_config::config->physics.tractor.others.distance_tgt_rsize;
+    const float o_o = vega_config::config->physics.tractor.others.distance;
     bool tractor = (damagerate < 0 && phasedamage > 0);
     bool repulsor = (damagerate > 0 && phasedamage < 0);
     if (scoop && (tractor || repulsor)) {
         QVector d2(target->Position() - center);
         d2.Normalize();
         float angle = this->direction * d2;
-        if (angle > scoopcosangle) {
+        if (angle > scoop_cos_angle) {
             end = center + d2 * curlength;
             direction = end - center;
             direction.Normalize();
@@ -547,7 +527,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                 //The current hack - using the target's sim_atom_multiplier, only prevents
                 //aberrations from becoming obvious, but it's not entirely correct.
                 float relspeed = target->GetVelocity() * direction.Cast();
-                if (relspeed < maxrelspeed) {
+                if (relspeed < max_rel_speed) {
                     //Modulate force on little mass objects, so they don't slingshot right past you
                     target->ApplyForce(direction
                             * (appldam
@@ -585,7 +565,7 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         c = &tmp;
                         tmp.SetName("Space_Salvage");
                         tmp.SetCategory("Uncategorized_Cargo");
-                        static float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
+                        const float spacejunk = parse_float(vs_config->getVariable("cargo", "space_junk_price", "10"));
                         tmp.SetPrice(spacejunk);
                         tmp.SetQuantity(1);
                         tmp.SetMass(.001);
@@ -593,15 +573,15 @@ bool Beam::Collide(Unit *target, Unit *firer, Unit *superunit) {
                         if (target->faction != upgradesfaction) {
                             tmp.SetName(target->name);
                             tmp.SetCategory("starships");
-                            static float starshipprice =
+                            const float starshipprice =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
                                             "junk_starship_price",
                                             "100000"));
-                            static float starshipmass =
+                            const float starshipmass =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
                                             "junk_starship_mass",
                                             "50"));
-                            static float starshipvolume =
+                            const float starshipvolume =
                                     XMLSupport::parse_float(vs_config->getVariable("cargo",
                                             "junk_starship_volume",
                                             "1500"));
@@ -688,7 +668,7 @@ void Beam::ProcessDrawQueue() {
     GFXDisable(CULLFACE);     //don't want lighting on this baby
     GFXDisable(DEPTHWRITE);
     GFXPushBlendMode();
-    static bool blendbeams = XMLSupport::parse_bool(vs_config->getVariable("graphics", "BlendGuns", "true"));
+    const bool blendbeams = vega_config::config->graphics.blend_guns;
     GFXBlendMode(ONE, blendbeams ? ONE : ZERO);
 
     GFXEnable(TEXTURE0);
@@ -767,8 +747,7 @@ void Beam::UpdatePhysics(const Transformation &trans,
     cumulative_transformation.Compose(trans, m);
     cumulative_transformation.to_matrix(cumulative_transformation_matrix);
     bool possible = AdjustMatrix(cumulative_transformation_matrix, Vector(0, 0, 0), targ, speed, false, tracking_cone);
-    static bool firemissingautotrackers =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "fire_missing_autotrackers", "true"));
+    const bool firemissingautotrackers = vega_config::config->physics.fire_missing_autotrackers;
     if (targ && possible == false && !firemissingautotrackers) {
         Destabilize();
     }

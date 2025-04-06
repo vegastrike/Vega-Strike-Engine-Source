@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -105,7 +104,7 @@ using std::pair;
 
 void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
     if (numhits == 0) {
-        static int snumhits = XMLSupport::parse_int(vs_config->getVariable("AI", "ContrabandMadness", "5"));
+        const int snumhits = vega_config::config->ai.contraband_madness;
         numhits = snumhits;
     }
     CommunicationMessage hit(un, parent, NULL, 0);
@@ -117,13 +116,10 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
 
 void AllUnitsCloseAndEngage(Unit *un, int faction) {
     Unit *ally;
-    static float contraband_assist_range =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "contraband_assist_range", "50000"));
+    const float contraband_assist_range = vega_config::config->physics.contraband_assist_range;
     float relation = 0;
-    static float
-            minrel = XMLSupport::parse_float(vs_config->getVariable("AI", "max_faction_contraband_relation", "-.05"));
-    static float
-            adj = XMLSupport::parse_float(vs_config->getVariable("AI", "faction_contraband_relation_adjust", "-.025"));
+    const float minrel = vega_config::config->ai.max_faction_contraband_relation;
+    const float adj = vega_config::config->ai.faction_contraband_relation_adjust;
     float delta;
     int cp = _Universe->whichPlayerStarship(un);
     if (cp != -1) {
@@ -198,8 +194,7 @@ static int InList(std::string item, Unit *un) {
 }
 
 void CommunicatingAI::UpdateContrabandSearch() {
-    static unsigned int contraband_search_batch_update =
-            XMLSupport::parse_int(vs_config->getVariable("AI", "num_contraband_scans_per_search", "10"));
+    const unsigned int contraband_search_batch_update = vega_config::config->ai.num_contraband_scans_per_search;
     for (unsigned int rep = 0; rep < contraband_search_batch_update; ++rep) {
         Unit *u = contraband_searchee.GetUnit();
         if (u && (u->faction != parent->faction)) {
@@ -208,12 +203,8 @@ void CommunicatingAI::UpdateContrabandSearch() {
                 if (u->GetCargo(which_cargo_item).GetQuantity() > 0) {
                     int which_carg_item_bak = which_cargo_item;
                     std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
-                    static bool use_hidden_cargo_space =
-                            XMLSupport::parse_bool(vs_config->getVariable("physics", "use_hidden_cargo_space", "true"));
-                    static float speed_course_change =
-                            XMLSupport::parse_float(vs_config->getVariable("AI",
-                                    "PercentageSpeedChangeToStopSearch",
-                                    "1"));
+                    const bool use_hidden_cargo_space = vega_config::config->physics.use_hidden_cargo_space;
+                    const float speed_course_change = vega_config::config->ai.percentage_speed_change_to_stop_search;
                     if (u->CourseDeviation(SpeedAndCourse, u->GetVelocity()) > speed_course_change) {
                         unsigned char gender;
                         std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
@@ -420,10 +411,9 @@ int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *u
             return 0;
         }
     } else {
-        static float moodmul = XMLSupport::parse_float(vs_config->getVariable("AI", "MoodAffectsRespose", "0"));
-        static float angermul = XMLSupport::parse_float(vs_config->getVariable("AI", "AngerAffectsRespose", "1"));
-        static float staticrelmul =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "StaticRelationshipAffectsResponse", "1"));
+        const float moodmul = vega_config::config->ai.mood_affects_response;
+        const float angermul = vega_config::config->ai.anger_affects_response;
+        const float staticrelmul = vega_config::config->ai.static_relationship_affects_response;
         return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
                 un) + staticrelmul
                 * UnitUtil::getFactionRelation(parent, un));

@@ -2,10 +2,8 @@
  * unit_xml.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
- * Copyright (C) 2025 Benjamen R. Meyer
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, Benjamen R. Meyer,
+ * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -126,7 +124,7 @@ int GetModeFromName(const char *input_buffer) {
 extern bool CheckAccessory(Unit *);
 
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg) {
-    static bool forceit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "forceOneOneShieldBlend", "true"));
+    static bool forceit = vega_config::config->graphics.forceOneOneShieldBlend;
     xml->shieldmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
     if (xml->shieldmesh && forceit) {
         xml->shieldmesh->SetBlendMode(ONE, ONE, true);

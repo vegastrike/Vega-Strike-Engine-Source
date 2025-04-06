@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Copyright (C) 2001-2025 Daniel Horn, Mike Byron, pyramid3d,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -30,6 +30,7 @@
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
 #include "root_generic/xml_support.h"
+#include "configuration/configuration.h"
 
 //The StaticDisplay class is used to show something on a window.
 //Right now, it only supports text, but could be expanded to support
@@ -90,7 +91,7 @@ bool StaticDisplay::processCommand(const EventCommandId &command, Control *contr
 
 //Process wheel events for scrolling.
 bool StaticDisplay::processMouseDown(const InputEvent &event) {
-    static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
+    static int zoominc = vega_config::config->general.wheel_increment_lines;
     if (m_scroller) {
         if (event.code == WHEELUP_MOUSE_BUTTON) {
             if (hitTest(event.loc)) {

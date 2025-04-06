@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -236,8 +236,8 @@ int parseMountSizes(const char *str) {
 
 void DealPossibleJumpDamage(Unit *un) {
     static double jump_damage_multiplier =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "jump_damage_multiplier", ".1"));
-    static double max_damage = XMLSupport::parse_float(vs_config->getVariable("physics", "max_jump_damage", "100"));
+            vega_config::config->physics.jump_damage_multiplier;
+    static double max_damage = vega_config::config->physics.max_jump_damage
 
     // Also damage multiplier
     double chance_to_damage = randomDouble() - 0.01;

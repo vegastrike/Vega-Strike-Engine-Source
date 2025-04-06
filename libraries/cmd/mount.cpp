@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -58,9 +58,9 @@ Mount::Mount() {
     processed = Mount::PROCESSED;
     sound = -1;
     last_sound_refire_time = 0.0;
-    static float xyscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_xyscale", "1"));
+    static float xyscalestat = vega_config::config->graphics.weapon_xyscale;
 
-    static float zscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_zscale", "1"));
+    static float zscalestat = vega_config::config->graphics.weapon_zscale;
     xyscale = xyscalestat;
     zscale = zscalestat;
 }
@@ -101,9 +101,9 @@ Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscal
     maxfunctionality = maxfunc;
     static WeaponInfo wi(WEAPON_TYPE::BEAM);
     size = as_integer(MOUNT_SIZE::NOWEAP);
-    static float xyscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_xyscale", "1"));
+    static float xyscalestat = vega_config::config->graphics.weapon_xyscale
 
-    static float zscalestat = XMLSupport::parse_float(vs_config->getVariable("graphics", "weapon_zscale", "1"));
+    static float zscalestat = vega_config::config->graphics.weapon_zscale
     if (xyscale == -1) {
         xyscale = xyscalestat;
     }
@@ -245,7 +245,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         target = NULL;
     }
     static bool lock_disrupted_by_false_fire =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "out_of_arc_fire_disrupts_lock", "false"));
+            vega_config::config->physics.out_of_arc_fire_disrupts_lock;
     if (lock_disrupted_by_false_fire) {
         time_to_lock = type->lock_time;
     }
@@ -265,7 +265,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         tmp.to_matrix(mat);
         mat.p = Transform(mat, (type->offset + Vector(0, 0, zscale)).Cast());
         static bool firemissingautotrackers =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "fire_missing_autotrackers", "true"));
+                vega_config::config->physics.fire_missing_autotrackers;
         if (autotrack && NULL != target) {
             if (!AdjustMatrix(mat, velocity, target, type->speed, autotrack >= 2, trackingcone)) {
                 if (!firemissingautotrackers) {
@@ -284,7 +284,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
             }
         } else {
             static bool reduce_beam_ammo =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "reduce_beam_ammo", "0"));
+                    vega_config::config->physics.reduce_beam_ammo;
             if (ammo > 0 && reduce_beam_ammo) {
                 ammo--;
             }
@@ -315,7 +315,7 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
             }
             case WEAPON_TYPE::PROJECTILE:
                 static bool match_speed_with_target =
-                        XMLSupport::parse_float(vs_config->getVariable("physics", "match_speed_with_target", "true"));
+                        vega_config::config->physics.match_speed_with_target
                 string skript = /*string("ai/script/")+*/ type->file + string(".xai");
                 VSError err = LookForFile(skript, AiFile);
                 if (err <= Ok) {
@@ -424,10 +424,10 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 break;
         }
         static bool use_separate_sound =
-                XMLSupport::parse_bool(vs_config->getVariable("audio", "high_quality_weapon", "true"));
+                vega_config::config->audio.high_quality_weapon;
         static bool ai_use_separate_sound =
-                XMLSupport::parse_bool(vs_config->getVariable("audio", "ai_high_quality_weapon", "false"));
-        static bool ai_sound = XMLSupport::parse_bool(vs_config->getVariable("audio", "ai_sound", "true"));
+                vega_config::config->audio.ai_high_quality_weapon;
+        static bool ai_sound = vega_config::config->audio.ai_sound;
         Cockpit *cp;
         bool ips = ((cp = _Universe->isPlayerStarshipVoid(owner)) != NULL);
         double distancesqr = (tmp.position - AUDListenerLocation()).MagnitudeSquared();
@@ -438,11 +438,11 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                                 "max_range_to_hear_weapon_fire",
                                 "100000"));
         static float weapon_gain =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "weapon_gain", ".25"));
+                vega_config::config->audio.weapon_gain
         static float exterior_weapon_gain =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "exterior_weapon_gain", ".35"));
+                vega_config::config->audio.exterior_weapon_gain
         static float min_weapon_sound_refire =
-                XMLSupport::parse_float(vs_config->getVariable("audio", "min_weapon_sound_refire", ".2"));
+                vega_config::config->audio.min_weapon_sound_refire
         float curtime = realTime();
         bool tooquick = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
         if (!tooquick) {

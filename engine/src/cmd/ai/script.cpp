@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2025 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -776,7 +776,7 @@ void AIScript::endElement(const string &name) {
 }
 
 void AIScript::LoadXML() {
-    static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI", "debug_level", "0"));
+    const int aidebug = vega_config::config->ai.debug_level;
     using namespace AiXml;
     using namespace VSFileSystem;
     string full_filename = filename;

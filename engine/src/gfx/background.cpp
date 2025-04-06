@@ -2,8 +2,7 @@
  * background.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * This file is part of Vega Strike.
  *
@@ -48,8 +47,7 @@ Background::Background(const char *file,
         : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
     static string starspritetextures = vs_config->getVariable("graphics", "far_stars_sprite_texture", "");
-    static float starspritesize =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "far_stars_sprite_size", "2"));
+    const float starspritesize = vega_config::config->graphics.far_stars_sprite_size;
     if (starspritetextures.length() == 0) {
         stars =
                 new PointStarVlist(numstars, 200 /*spread*/,
@@ -371,7 +369,7 @@ void Background::Draw() {
                 }
                 const int numpasses = 1;
                 static float edge_fixup =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "background_edge_fixup", "0"));
+                        vega_config::config->graphics.background_edge_fixup;
                 const float ms = 0.f, Ms = 1.f - edge_fixup / tex->boundSizeX;
                 const float mt = 0.f, Mt = 1.f - edge_fixup / tex->boundSizeY;
                 const float _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
@@ -486,7 +484,7 @@ void Background::Draw() {
     GFXDisable(DEPTHWRITE);
     GFXBlendMode(ONE, ONE);
     static float background_velocity_scale =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "background_star_streak_velocity_scale", "0"));
+            vega_config::config->graphics.background_star_streak_velocity_scale;
     stars->DrawAll(QVector(0, 0, 0), _Universe->AccessCamera()->GetVelocity().Scale(
             background_velocity_scale), _Universe->AccessCamera()->GetAngularVelocity(), true, true);
     GFXBlendMode(ONE, ZERO);

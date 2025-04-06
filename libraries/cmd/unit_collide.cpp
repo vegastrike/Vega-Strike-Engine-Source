@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -63,7 +62,7 @@ void Unit::RemoveFromSystem() {
                 activeStarSystem = _Universe->activeStarSystem();
             }
             static bool collidemap_sanity_check =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "collidemap_sanity_check", "false"));
+                    vega_config::config->physics.collidemap_sanity_check;
             if (collidemap_sanity_check) {
                 if (0) {
                     CollideMap::iterator i;
@@ -240,7 +239,7 @@ bool Unit::InsideCollideTree(Unit *smaller,
     }
     un_iter i;
     static float
-            rsizelim = XMLSupport::parse_float(vs_config->getVariable("physics", "smallest_subunit_to_collide", ".2"));
+            rsizelim = vega_config::config->physics.smallest_subunit_to_collide;
     Vega_UnitType bigtype = bigasteroid ? Vega_UnitType::asteroid : bigger->isUnit();
     Vega_UnitType smalltype = smallasteroid ? Vega_UnitType::asteroid : smaller->isUnit();
     if (bigger->SubUnits.empty() == false
@@ -304,7 +303,7 @@ bool Unit::Collide(Unit *target) {
     Vega_UnitType targetisUnit = target->isUnit();
     Vega_UnitType thisisUnit = this->isUnit();
     static float
-            NEBULA_SPACE_DRAG = XMLSupport::parse_float(vs_config->getVariable("physics", "nebula_space_drag", "0.01"));
+            NEBULA_SPACE_DRAG = vega_config::config->physics.nebula_space_drag;
     if (targetisUnit == Vega_UnitType::nebula) {
         //why? why not?
         this->Velocity *= (1 - NEBULA_SPACE_DRAG);
@@ -436,7 +435,7 @@ Unit *Unit::rayCollide(const QVector &start, const QVector &end, Vector &norm, f
     }
     QVector st(InvTransform(cumulative_transformation_matrix, start));
     QVector ed(InvTransform(cumulative_transformation_matrix, end));
-    static bool sphere_test = XMLSupport::parse_bool(vs_config->getVariable("physics", "sphere_collision", "true"));
+    static bool sphere_test = vega_config::config->physics.sphere_collision;
     distance = querySphereNoRecurse(start, end);
     if (distance > 0.0f || (this->colTrees && this->colTrees->colTree(this, this->GetWarpVelocity()) && !sphere_test)) {
         Vector coord;

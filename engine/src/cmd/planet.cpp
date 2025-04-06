@@ -2,9 +2,8 @@
  * planet.cpp
  *
  * Copyright (C) 2001-2019 Daniel Horn and other Vega Strike contributors
- * Copyright (C) 2020-2021 pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2020-2025 pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -127,7 +126,7 @@ Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius) {
     if (f.min_alpha != 0 || f.max_alpha != 255 || f.concavity != 0 || f.focus != .5 || f.tail_mode_start != -1
             || f.tail_mode_end != -1) {
         const int
-                rez = XMLSupport::parse_int(vs_config->getVariable("graphics", "atmosphere_texture_resolution", "512"));
+                rez = vega_config::config->graphics.atmosphere_texture_resolution;
         unsigned char *tex = (unsigned char *) malloc(sizeof(char) * rez * 4);
         for (int i = 0; i < rez; ++i) {
             tex[i * 4] = 255;
@@ -426,7 +425,7 @@ void Planet::InitPlanet(QVector x,
     this->gravity = gravity;
     const float densityOfRock = vega_config::config->physics.density_of_rock;
     const float densityOfJumpPoint = vega_config::config->physics.density_of_jump_point;
-    //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
+    //const float massofplanet = vega_config::config->physics.mass_of_planet;
     hull.Set((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint));
     this->Mass =
             (4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000));

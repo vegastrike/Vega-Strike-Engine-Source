@@ -197,17 +197,12 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
     if (autoLandingExcludeList.find(tname) != autoLandingExcludeList.end()) {
         return;
     }
-    static float lessthan = XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingDockDistance", "50"));
-    static float
-            warnless = XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingWarningDistance", "350"));
-    static float AutoLandingMoveDistance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingMoveDistance", "50"));
-    static float
-            moveout = XMLSupport::parse_float(vs_config->getVariable("physics", "AutoLandingDisplaceDistance", "50"));
-    static float
-            autorad = XMLSupport::parse_float(vs_config->getVariable("physics", "unit_default_autodock_radius", "0"));
-    static bool adjust_unit_radius =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "use_unit_autodock_radius", "false"));
+    const float lessthan = vega_config::config->physics.AutoLandingDockDistance;
+    const float warnless = vega_config::config->physics.AutoLandingWarningDistance;
+    const float AutoLandingMoveDistance = vega_config::config->physics.AutoLandingMoveDistance;
+    const float moveout = vega_config::config->physics.AutoLandingDisplaceDistance;
+    const float autorad = vega_config::config->physics.unit_default_autodock_radius;
+    const bool adjust_unit_radius = vega_config::config->physics.use_unit_autodock_radius;
     float rsize = target->isPlanet() ? target->rSize() : (autorad + (adjust_unit_radius ? target->rSize() : 0));
     QVector diffvec = un->Position() - target->Position();
     float dist = diffvec.Magnitude() - un->rSize() - rsize;
@@ -287,8 +282,7 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
 }
 
 void GameCockpit::AutoLanding() {
-    static bool autolanding_enable =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "AutoLandingEnable", "false"));
+    const bool autolanding_enable = vega_config::config->physics.AutoLandingEnable;
     if (autolanding_enable) {
         Unit *player = GetParent();
         if (player == NULL) {
@@ -315,10 +309,9 @@ void GameCockpit::AutoLanding() {
 
 
 float GameCockpit::LookupUnitStat(int stat, Unit *target) {
-    static float game_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "game_speed", "1"));
-    static bool
-            display_in_meters = XMLSupport::parse_bool(vs_config->getVariable("physics", "display_in_meters", "true"));
-    static bool lie = XMLSupport::parse_bool(vs_config->getVariable("physics", "game_speed_lying", "true"));
+    const float game_speed = vega_config::config->physics.game_speed;
+    const bool display_in_meters = vega_config::config->physics.display_in_meters;
+    const bool lie = vega_config::config->physics.game_speed_lying;
     static float fpsval = 0;
     const float fpsmax = 1;
     static float numtimes = fpsmax;
@@ -404,8 +397,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
         }
         case UnitImages<void>::LOCK: {
             float distance;
-            static float
-                    locklight_time = XMLSupport::parse_float(vs_config->getVariable("graphics", "locklight_time", "1"));
+            const float locklight_time = vega_config::config->graphics.locklight_time;
             bool res = false;
             if ((tmpunit = target->GetComputerData().threat.GetUnit())) {
                 res = tmpunit->cosAngleTo(target, distance, FLT_MAX, FLT_MAX) > .95;
@@ -416,8 +408,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return (res || ((UniverseUtil::GetGameTime() - last_locktime) < locklight_time)) ? 1.0f : 0.0f;
         }
         case UnitImages<void>::MISSILELOCK: {
-            static float
-                    locklight_time = XMLSupport::parse_float(vs_config->getVariable("graphics", "locklight_time", "1"));
+            const float locklight_time = vega_config::config->graphics.locklight_time;
             bool res = target->graphicOptions.missilelock;
             if (res) {
                 last_mlocktime = UniverseUtil::GetGameTime();
@@ -425,8 +416,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
             return (res || ((UniverseUtil::GetGameTime() - last_mlocktime) < locklight_time)) ? 1.0f : 0.0f;
         }
         case UnitImages<void>::COLLISION: {
-            static double collidepanic =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "collision_inertial_time", "1.25"));
+            const double collidepanic = vega_config::config->physics.collision_inertial_time;
             return (getNewTime() - TimeOfLastCollision) < collidepanic;
         }
         case UnitImages<void>::ECM:
@@ -534,8 +524,7 @@ float GameCockpit::LookupUnitStat(int stat, Unit *target) {
                     abletoautopilot = (target->ftl_drive.Enabled());
                 } else {
                     abletoautopilot = (target->AutoPilotTo(target, false) ? 1 : 0);
-                    static float no_auto_light_below =
-                            XMLSupport::parse_float(vs_config->getVariable("physics", "no_auto_light_below", "2000"));
+                    const float no_auto_light_below = vega_config::config->physics.no_auto_light_below;
                     Unit *targtarg = target->Target();
                     if (targtarg) {
                         if ((target->Position() - targtarg->Position()).Magnitude() - targtarg->rSize()
@@ -947,7 +936,7 @@ GameCockpit::GameCockpit(const char *file, Unit *parent, const std::string &pilo
         text(NULL) {
     autoMessageTime = 0;
     editingTextMessage = false;
-    static int headlag = XMLSupport::parse_int(vs_config->getVariable("graphics", "head_lag", "10"));
+    const int headlag = vega_config::config->graphics.head_lag;
     int i;
     for (i = 0; i < headlag; i++) {
         headtrans.push_back(Matrix());
@@ -1167,7 +1156,7 @@ void GameCockpit::Respawn(const KBData &, KBSTATE k) {
 
 //SAME AS IN COCKPIT BUT ADDS SETVIEW and ACCESSCAMERA -> ~ DUPLICATE CODE
 int GameCockpit::Autopilot(Unit *target) {
-    static bool autopan = XMLSupport::parse_bool(vs_config->getVariable("graphics", "pan_on_auto", "true"));
+    const bool autopan = vega_config::config->graphics.pan_on_auto;
     int retauto = 0;
     if (target) {
         if (enableautosound.sound < 0) {
@@ -1195,14 +1184,8 @@ int GameCockpit::Autopilot(Unit *target) {
                         Vector P(1, 0, 0), Q(0, 1, 0), R(0, 0, 1);
                         Vector uP, uQ, uR;
                         un->GetOrientation(uP, uQ, uR);
-                        static float auto_side_bias =
-                                XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                        "autopilot_side_bias",
-                                        "1.1"));
-                        static float auto_front_bias =
-                                XMLSupport::parse_float(vs_config->getVariable("graphics",
-                                        "autopilot_front_bias",
-                                        "1.65"));
+                        const float auto_side_bias = vega_config::config->graphics.autopilot_side_bias;
+                        const float auto_front_bias = vega_config::config->graphics.autopilot_front_bias;
                         P += uP * auto_side_bias + uR * auto_front_bias;
                         P.Normalize();
                         R = P.Cross(Q);
@@ -1232,8 +1215,8 @@ int GameCockpit::Autopilot(Unit *target) {
 extern void reset_time_compression(const KBData &, KBSTATE a);
 
 void GameCockpit::Shake(float amt, int dtype) {
-    static float shak = XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_shake", "3"));
-    static float shak_max = XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_shake_max", "20"));
+    static float shak = vega_config::config->graphics.cockpit_shake;
+    static float shak_max = vega_config::config->graphics.cockpit_shake_max;
     shakin += shak;
     if (shakin > shak_max) {
         shakin = shak_max;
@@ -1276,7 +1259,7 @@ static void DrawDamageFlash(int dtype) {
         if (aflashes[i]) {
             GFXPushBlendMode();
             static bool damage_flash_alpha =
-                    XMLSupport::parse_bool(vs_config->getVariable("graphics", "damage_flash_alpha", "true"));
+                    vega_config::config->graphics.damage_flash_alpha;
             if (damage_flash_alpha) {
                 GFXBlendMode(SRCALPHA, INVSRCALPHA);
             } else {
@@ -1472,7 +1455,7 @@ void GameCockpit::Draw() {
                     destination_system_location = delta.Cast();
                     Vector P, Q, R;
                     static float nav_symbol_size =
-                            XMLSupport::parse_float(vs_config->getVariable("graphics", "nav_symbol_size", ".25"));
+                            vega_config::config->graphics.nav_symbol_size;
                     AccessCamera()->GetPQR(P, Q, R);
 
                     GFXColor4f(destination_system_color.r,
@@ -1529,26 +1512,26 @@ void GameCockpit::Draw() {
                 VectorAndPositionToMatrix(headtrans.back(), -P, Q, R, QVector(0, 0, 0));
                 static float theta = 0, wtheta = 0;
                 static float shake_speed =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_speed", "50"));
+                        vega_config::config->graphics.shake_speed;
                 static float shake_reduction =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_reduction", "8"));
+                        vega_config::config->graphics.shake_reduction;
                 static float shake_limit =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_limit", "25"));
+                        vega_config::config->graphics.shake_limit;
                 static float shake_mag =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "shake_magnitude", "0.3"));
+                        vega_config::config->graphics.shake_magnitude;
                 static float drift_limit =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_drift_limit", "1.00"));
+                        vega_config::config->graphics.cockpit_drift_limit;
                 static float drift_amount =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_drift_amount", "0.15"));
+                        vega_config::config->graphics.cockpit_drift_amount;
                 static float drift_ref_accel =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_drift_ref_accel", "100"));
+                        vega_config::config->graphics.cockpit_drift_ref_accel;
 
                 static float warp_shake_mag =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_shake_magnitude", "0.125"));
+                        vega_config::config->graphics.warp_shake_magnitude;
                 static float warp_shake_speed =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_shake_speed", "70"));
+                        vega_config::config->graphics.warp_shake_speed;
                 static float warp_shake_ref =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_shake_ref", "2000"));
+                        vega_config::config->graphics.warp_shake_ref;
                 if (warp_shake_ref <= 0) {
                     warp_shake_ref = 1;
                 }
@@ -1636,9 +1619,9 @@ void GameCockpit::Draw() {
     }
     GFXHudMode(true);
     static float damage_flash_length =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "damage_flash_length", ".1"));
+            vega_config::config->graphics.damage_flash_length;
     static bool
-            damage_flash_first = XMLSupport::parse_bool(vs_config->getVariable("graphics", "flash_behind_hud", "true"));
+            damage_flash_first = vega_config::config->graphics.flash_behind_hud;
     if (view < CP_CHASE && damage_flash_first && getNewTime() - shake_time < damage_flash_length) {
         DrawDamageFlash(shake_type);
     }
@@ -1673,28 +1656,28 @@ void GameCockpit::Draw() {
 
     RestoreViewPort();
 
-    static bool blend_panels = XMLSupport::parse_bool(vs_config->getVariable("graphics", "blend_panels", "false"));
-    static bool blend_cockpit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "blend_cockpit", "false"));
+    static bool blend_panels = vega_config::config->graphics.blend_panels;
+    static bool blend_cockpit = vega_config::config->graphics.blend_cockpit;
     static bool drawChaseVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_chase_cam", "false"));
+            vega_config::config->graphics.draw_vdus_from_chase_cam;
     static bool drawPanVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_panning_cam", "false"));
+            vega_config::config->graphics.draw_vdus_from_panning_cam;
     static bool drawTgtVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_target_cam", "false"));
+            vega_config::config->graphics.draw_vdus_from_target_cam;
     static bool drawPadVDU =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_vdus_from_padlock_cam", "false"));
+            vega_config::config->graphics.draw_vdus_from_padlock_cam;
 
     static bool drawChasecp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_chase_cam", "false"));
+            vega_config::config->graphics.draw_cockpit_from_chase_cam;
     static bool drawPancp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_panning_cam", "false"));
+            vega_config::config->graphics.draw_cockpit_from_panning_cam;
     static bool drawTgtcp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_target_cam", "false"));
+            vega_config::config->graphics.draw_cockpit_from_target_cam;
     static bool drawPadcp =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_cockpit_from_padlock_cam", "false"));
+            vega_config::config->graphics.draw_cockpit_from_padlock_cam;
 
     static float
-            AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics", "AlphaTestCutoff", ".8"));
+            AlphaTestingCutoff = vega_config::config->graphics.AlphaTestCutoff;
     if (blend_cockpit) {
         GFXAlphaTest(ALWAYS, 0);
         GFXBlendMode(SRCALPHA, INVSRCALPHA);
@@ -1947,7 +1930,7 @@ void GameCockpit::Draw() {
                 }
                 GFXColorf(textcol);
                 static bool show_died_text =
-                        XMLSupport::parse_bool(vs_config->getVariable("graphics", "show_respawn_text", "false"));
+                        vega_config::config->graphics.show_respawn_text;
                 if (show_died_text) {
                     text->Draw(
                             "#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
@@ -1955,7 +1938,7 @@ void GameCockpit::Draw() {
                 GFXColor4f(1, 1, 1, 1);
 
                 static float min_die_time =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "death_scene_time", "4"));
+                        vega_config::config->graphics.death_scene_time;
                 if (dietime > min_die_time) {
                     static std::string death_menu_script = vs_config->getVariable("graphics", "death_menu_script", "");
                     if (death_menu_script.empty()) {
@@ -1993,13 +1976,13 @@ void GameCockpit::Draw() {
     //CommandInterpretor.renderconsole();
     //}
     GFXAlphaTest(ALWAYS, 0);
-    static bool mouseCursor = XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor", "false"));
+    static bool mouseCursor = vega_config::config->joystick.mouse_cursor;
     static bool mousecursor_pancam =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor_pancam", "false"));
+            vega_config::config->joystick.mouse_cursor_pancam;
     static bool mousecursor_pantgt =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor_pantgt", "false"));
+            vega_config::config->joystick.mouse_cursor_pantgt;
     static bool mousecursor_chasecam =
-            XMLSupport::parse_bool(vs_config->getVariable("joystick", "mouse_cursor_chasecam", "true"));
+            vega_config::config->joystick.mouse_cursor_chasecam;
     if (mouseCursor && screenshotkey == false) {
         if ((view == CP_PAN
                 && !mousecursor_pancam)
@@ -2122,7 +2105,7 @@ string GameCockpit::getsoundfile(string sound) {
 void SetStartupView(Cockpit *);
 
 void GameCockpit::UpdAutoPilot() {
-    static bool autopan = XMLSupport::parse_bool(vs_config->getVariable("graphics", "pan_on_auto", "true"));
+    static bool autopan = vega_config::config->graphics.pan_on_auto;
     if (autopilot_time != 0) {
         autopilot_time -= SIMULATION_ATOM;
         {
@@ -2131,7 +2114,7 @@ void GameCockpit::UpdAutoPilot() {
                 Vector origP = Vector(1, 0, 0);
 
                 static float rotspd =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "autopilot_rotation_speed", ".15"));
+                        vega_config::config->graphics.autopilot_rotation_speed;
 
                 static float curtime = 0;
                 curtime += SIMULATION_ATOM;
@@ -2144,7 +2127,7 @@ void GameCockpit::UpdAutoPilot() {
                 origR.Normalize();
                 AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0, 0, 0));                 //hack
                 static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                        vega_config::config->graphics.inital_zoom_factor;
                 zoomfactor = initialzoom;
             }
         }
@@ -2182,11 +2165,8 @@ void SwitchUnits2(Unit *nw) {
         nw->DisableTurretAI();
 
         static bool LoadNewCockpit =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics", "UnitSwitchCockpitChange", "false"));
-        static bool DisCockpit =
-                XMLSupport::parse_bool(vs_config->getVariable("graphics",
-                        "SwitchCockpitToDefaultOnUnitSwitch",
-                        "false"));
+                vega_config::config->graphics.UnitSwitchCockpitChange;
+        const bool DisCockpit = vega_config::config->graphics.SwitchCockpitToDefaultOnUnitSwitch;
         if (nw->getCockpit().length() > 0 || DisCockpit) {
             _Universe->AccessCockpit()->Init(nw->getCockpit().c_str(), LoadNewCockpit == false);
         }
@@ -2332,7 +2312,7 @@ static void ShoveCamBelowUnit(int cam, Unit *un, float zoomfactor) {
     Vector p, q, r;
     _Universe->AccessCamera(cam)->GetOrientation(p, q, r);
     static float
-            ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics", "shove_camera_down", ".3"));
+            ammttoshovecam = vega_config::config->graphics.shove_camera_down;
     _Universe->AccessCamera(cam)->SetPosition(
             unpos - (r - ammttoshovecam * q).Cast() * (un->rSize() + g_game.znear * 2) * zoomfactor,
             un->GetWarpVelocity(),

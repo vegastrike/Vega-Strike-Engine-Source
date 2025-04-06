@@ -1271,7 +1271,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             // TODO: lib_damage shield.recharge *= dam;
         } else if (randnum >= .5) {
             /*static float mindam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "min_recharge_shot_damage", "0.5"));
+                    vega_config::config->physics.min_recharge_shot_damage
             if (dam < mindam) {
                 dam = mindam;
             }
@@ -1280,7 +1280,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
             reactor.Damage();
         } else if (randnum >= .2) {
             static float mindam =
-                    XMLSupport::parse_float(vs_config->getVariable("physics", "min_maxenergy_shot_damage", "0.2"));
+                    vega_config::config->physics.min_maxenergy_shot_damage
             if (dam < mindam) {
                 dam = mindam;
             }
@@ -1309,11 +1309,8 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
 
     if (docked & (DOCKING_UNITS)) {
         static float survival =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "survival_chance_on_base_death", "0.1"));
-        static float player_survival =
-                XMLSupport::parse_float(vs_config->getVariable("physics",
-                        "player_survival_chance_on_base_death",
-                        "1.0"));
+                vega_config::config->physics.survival_chance_on_base_death
+        const float player_survival = vega_config::config->physics.player_survival_chance_on_base_death;
         static int i_survival = float_to_int((RAND_MAX * survival));
         static int i_player_survival = float_to_int((RAND_MAX * player_survival));
 
@@ -1396,7 +1393,7 @@ void Unit::UnRef() {
 }
 
 float Unit::ExplosionRadius() {
-    static float expsize = XMLSupport::parse_float(vs_config->getVariable("graphics", "explosion_size", "3"));
+    static float expsize = vega_config::config->graphics.explosion_size
     return expsize * rSize();
 }
 
@@ -1476,9 +1473,9 @@ const Unit *loadUnitByCache(std::string name, int faction) {
 }
 
 bool DestroySystem(float hull_percent, float numhits) {
-    static float damage_chance = XMLSupport::parse_float(vs_config->getVariable("physics", "damage_chance", ".005"));
+    static float damage_chance = vega_config::config->physics.damage_chance
     static float guaranteed_chance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "definite_damage_chance", ".1"));
+            vega_config::config->physics.definite_damage_chance
     float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
     if (numhits > 1) {
         chance = pow(chance, numhits);
@@ -1488,9 +1485,9 @@ bool DestroySystem(float hull_percent, float numhits) {
 
 bool DestroyPlayerSystem(float hull_percent, float numhits) {
     static float
-            damage_chance = XMLSupport::parse_float(vs_config->getVariable("physics", "damage_player_chance", ".5"));
+            damage_chance = vega_config::config->physics.damage_player_chance
     static float guaranteed_chance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "definite_damage_chance", ".1"));
+            vega_config::config->physics.definite_damage_chance
     float chance = 1 - (damage_chance * (guaranteed_chance + hull_percent));
     if (numhits > 1) {
         chance = pow(chance, numhits);
@@ -1524,10 +1521,10 @@ void Unit::TargetTurret(Unit *targ) {
 }
 
 void WarpPursuit(Unit *un, StarSystem *sourcess, std::string destination) {
-    static bool AINotUseJump = XMLSupport::parse_bool(vs_config->getVariable("physics", "no_ai_jump_points", "false"));
+    static bool AINotUseJump = vega_config::config->physics.no_ai_jump_points;
     if (AINotUseJump) {
         static float seconds_per_parsec =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "seconds_per_parsec", "10"));
+                vega_config::config->physics.seconds_per_parsec
         float ttime =
                 (SystemLocation(sourcess->getFileName()) - SystemLocation(destination)).Magnitude()
                         * seconds_per_parsec;
@@ -1768,7 +1765,7 @@ bool Unit::Explode(bool drawit, float timeit) {
 }
 
 float Unit::ExplodingProgress() const {
-    static float debrisTime = XMLSupport::parse_float(vs_config->getVariable("physics", "debris_time", "500"));
+    static float debrisTime = vega_config::config->physics.debris_time
     return std::min(pImage->timeexplode / debrisTime, 1.0f);
 }
 
@@ -1973,10 +1970,10 @@ void rechargeShip(Unit *unit, unsigned int cockpit) {
     }
 
     // Refueling fee
-    static float refueling_fee = XMLSupport::parse_float(vs_config->getVariable("general", "fuel_docking_fee", "0"));
+    static float refueling_fee = vega_config::config->general.fuel_docking_fee
     _Universe->AccessCockpit(cockpit)->credits -= refueling_fee;
 
-    static float docking_fee = XMLSupport::parse_float(vs_config->getVariable("general", "docking_fee", "0"));
+    static float docking_fee = vega_config::config->general.docking_fee
     _Universe->AccessCockpit(cockpit)->credits -= docking_fee;
 }
 
@@ -2132,9 +2129,9 @@ bool Unit::UnDock(Unit *utdw) {
             pImage->DockedTo.SetUnit(NULL);
             Velocity = utdw->Velocity;
             static float
-                    launch_speed = XMLSupport::parse_float(vs_config->getVariable("physics", "launch_speed", "-1"));
+                    launch_speed = vega_config::config->physics.launch_speed
             static bool auto_turn_towards =
-                    XMLSupport::parse_bool(vs_config->getVariable("physics", "undock_turn_away", "true"));
+                    vega_config::config->physics.undock_turn_away;
 
             if (launch_speed > 0) {
                 computer.set_speed = launch_speed;
@@ -2557,7 +2554,7 @@ bool Unit::Downgrade(const Unit *downgradeor,
 
 double ComputeMinDowngradePercent() {
     static float MyPercentMin =
-            XMLSupport::parse_float(vs_config->getVariable("general", "remove_downgrades_less_than_percent", ".9"));
+            vega_config::config->general.remove_downgrades_less_than_percent
     return MyPercentMin;
 }
 
@@ -2797,7 +2794,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     percentage = 0;
 
     static bool
-            csv_cell_null_check = XMLSupport::parse_bool(vs_config->getVariable("data", "empty_cell_check", "true"));
+            csv_cell_null_check = vega_config::config->data.empty_cell_check;
     int numave = 0;
     bool cancompletefully = true;
     bool can_be_redeemed = false;
@@ -2873,7 +2870,7 @@ bool Unit::UpAndDownGrade(const Unit *up,
     /*if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name, up->faction, "Reactor_Recharge"))
         STDUPGRADE(recharge, up->recharge, templ->recharge, 0);*/
-    static bool unittable = XMLSupport::parse_bool(vs_config->getVariable("physics", "UnitTable", "false"));
+    static bool unittable = vega_config::config->physics.UnitTable;
     //Uncommon fields (capacities... rates... etc...)
     if (!csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data(upgrade_name,
@@ -2895,11 +2892,11 @@ bool Unit::UpAndDownGrade(const Unit *up,
 
 
     //DO NOT CHANGE see unit_customize.cpp
-    static float lc = XMLSupport::parse_float(vs_config->getVariable("physics", "lock_cone", ".8"));
+    static float lc = vega_config::config->physics.lock_cone
     //DO NOT CHANGE! see unit.cpp:258
-    static float tc = XMLSupport::parse_float(vs_config->getVariable("physics", "autotracking", ".93"));
+    static float tc = vega_config::config->physics.autotracking
     static bool use_template_maxrange =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "use_upgrade_template_maxrange", "true"));
+            vega_config::config->physics.use_upgrade_template_maxrange;
 
     //NO CLUE FOR BELOW
     if (downgrade) {
@@ -3049,7 +3046,7 @@ int Unit::RepairUpgrade() {
     damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "component_based_upgrades", "false"));
+            vega_config::config->physics.component_based_upgrades;
     if (ComponentBasedUpgrades) {
         for (unsigned int i = 0; i < numCargo(); ++i) {
             if (GetCargo(i).GetCategory().find(DamagedCategory) == 0) {
@@ -3182,7 +3179,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
     const Unit *templ = NULL;
     const Unit *downgradelimit = NULL;
     static bool staticrem =
-            XMLSupport::parse_bool(vs_config->getVariable("general", "remove_impossible_downgrades", "true"));
+            vega_config::config->general.remove_impossible_downgrades;
     static float MyPercentMin = ComputeMinDowngradePercent();
     int upgrfac = FactionUtil::GetUpgradeFaction();
     for (unsigned int i = 0; i < mylist.size(); ++i) {
@@ -3274,7 +3271,7 @@ vector<CargoColor> &Unit::FilterDowngradeList(vector<CargoColor> &mylist, bool d
 
 vector<CargoColor> &Unit::FilterUpgradeList(vector<CargoColor> &mylist) {
     static bool filtercargoprice =
-            XMLSupport::parse_bool(vs_config->getVariable("cargo", "filter_expensive_cargo", "false"));
+            vega_config::config->cargo.filter_expensive_cargo;
     if (filtercargoprice) {
         Cockpit *cp = _Universe->isPlayerStarship(this);
         if (cp) {
@@ -3356,11 +3353,11 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
             else if (maxprice > minprice + .01) {
                 float renormprice = (baseprice - minprice) / (maxprice - minprice);
                 static float maxpricequantadj =
-                        XMLSupport::parse_float(vs_config->getVariable("cargo", "max_price_quant_adj", "5"));
+                        vega_config::config->cargo.max_price_quant_adj
                 static float minpricequantadj =
-                        XMLSupport::parse_float(vs_config->getVariable("cargo", "min_price_quant_adj", "1"));
+                        vega_config::config->cargo.min_price_quant_adj
                 static float
-                        powah = XMLSupport::parse_float(vs_config->getVariable("cargo", "price_quant_adj_power", "1"));
+                        powah = vega_config::config->cargo.price_quant_adj_power
                 renormprice = pow(renormprice, powah);
                 renormprice *= (maxpricequantadj - minpricequantadj);
                 renormprice += 1;
@@ -3371,7 +3368,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
                     }
                 }
             }
-            static float minprice = XMLSupport::parse_float(vs_config->getVariable("cargo", "min_cargo_price", "0.01"));
+            static float minprice = vega_config::config->cargo.min_cargo_price
             if (c.GetPrice() < minprice) {
                 c.SetPrice(minprice);
             }
@@ -3384,7 +3381,7 @@ void Unit::ImportPartList(const std::string &category, float price, float priced
 std::string Unit::massSerializer(const XMLType &input, void *mythis) {
     Unit *un = (Unit *) mythis;
     float mass = un->Mass;
-    static bool usemass = XMLSupport::parse_bool(vs_config->getVariable("physics", "use_cargo_mass", "true"));
+    static bool usemass = vega_config::config->physics.use_cargo_mass;
     for (unsigned int i = 0; i < un->cargo.size(); ++i) {
         if (un->cargo[i].GetQuantity() > 0) {
             if (usemass) {
@@ -3521,8 +3518,8 @@ bool isWeapon(std::string name) {
 // TODO: move this to RepairBot
 void Unit::Repair() {
     // TODO: everything below here needs to go when we're done with lib_components
-    static float repairtime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidTime", "180"));
-    static float checktime = XMLSupport::parse_float(vs_config->getVariable("physics", "RepairDroidCheckTime", "5"));
+    static float repairtime = vega_config::config->physics.RepairDroidTime
+    static float checktime = vega_config::config->physics.RepairDroidCheckTime
     if ((repairtime <= 0) || (checktime <= 0)) {
         return;
     }
@@ -3588,11 +3585,11 @@ void Unit::Repair() {
     unsigned int numg = (1 + UnitImages<void>::NUMGAUGES + MAXVDUS);
     unsigned int which = vsrandom.genrand_int31() % numg;
     static float hud_repair_quantity =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "hud_repair_unit", ".25"));
+            vega_config::config->physics.hud_repair_unit
 
     if (mounts.size()) {
         static float mount_repair_quantity =
-                XMLSupport::parse_float(vs_config->getVariable("physics", "mount_repair_unit", ".25"));
+                vega_config::config->physics.mount_repair_unit
         unsigned int i = vsrandom.genrand_int31() % mounts.size();
         if (mounts[i].functionality < mounts[i].maxfunctionality) {
             mounts[i].functionality += mount_repair_quantity;
@@ -3848,7 +3845,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
     float difficulty;
     Cockpit *player_cockpit = GetVelocityDifficultyMult(difficulty);
     static float EXTRA_CARGO_SPACE_DRAG =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "extra_space_drag_for_cargo", "0.005"));
+            vega_config::config->physics.extra_space_drag_for_cargo
     if (EXTRA_CARGO_SPACE_DRAG > 0) {
         int upgfac = FactionUtil::GetUpgradeFaction();
         if ((this->faction == upgfac) || (this->name == "eject") || (this->name == "Pilot")) {
@@ -3884,7 +3881,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             }
         }
     }
-    static float SPACE_DRAG = XMLSupport::parse_float(vs_config->getVariable("physics", "unit_space_drag", "0.000000"));
+    static float SPACE_DRAG = vega_config::config->physics.unit_space_drag
 
     if (SPACE_DRAG > 0) {
         Velocity = Velocity * (1 - SPACE_DRAG);
@@ -3910,7 +3907,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             if (increase_locking && (dist_sqr_to_target < mounts[i].type->range * mounts[i].type->range)) {
                 mounts[i].time_to_lock -= simulation_atom_var;
                 static bool ai_lock_cheat =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "ai_lock_cheat", "true"));
+                        vega_config::config->physics.ai_lock_cheat;
                 if (!player_cockpit) {
                     if (ai_lock_cheat) {
                         mounts[i].time_to_lock = -1;
@@ -3919,15 +3916,9 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                     int LockingPlay = LockingSound;
 
                     //enables spiffy wc2 torpedo music, default to normal though
-                    static bool LockTrumpsMusic =
-                            XMLSupport::parse_bool(vs_config->getVariable("unitaudio",
-                                    "locking_trumps_music",
-                                    "false"));
+                    const bool LockTrumpsMusic = vega_config::config->unitaudio.locking_trumps_music;
                     //enables spiffy wc2 torpedo music, default to normal though
-                    static bool TorpLockTrumpsMusic =
-                            XMLSupport::parse_bool(vs_config->getVariable("unitaudio",
-                                    "locking_torp_trumps_music",
-                                    "false"));
+                    const bool TorpLockTrumpsMusic = vega_config::config->unitaudio.locking_torp_trumps_music;
                     if (mounts[i].type->lock_time > 0) {
                         static string LockedSoundName = vs_config->getVariable("unitaudio", "locked", "locked.wav");
                         static int LockedSound = AUDCreateSoundWAV(LockedSoundName, false);
@@ -4052,11 +4043,11 @@ void Unit::UpdatePhysics3(const Transformation &trans,
             superunit);
     //can a unit get to another system without jumping?.
     static bool warp_is_interstellar =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "warp_is_interstellar", "false"));
+            vega_config::config->physics.warp_is_interstellar;
     if (warp_is_interstellar
             && (curr_physical_state.position.MagnitudeSquared() > howFarToJump() * howFarToJump() && !isSubUnit())) {
         static bool direct =
-                XMLSupport::parse_bool(vs_config->getVariable("physics", "direct_interstellar_journey", "true"));
+                vega_config::config->physics.direct_interstellar_journey;
         bool jumpDirect = false;
         if (direct) {
             Cockpit *cp = _Universe->isPlayerStarship(this);

@@ -1,7 +1,7 @@
 /*
  * base_interface.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -69,10 +69,9 @@ static unsigned int &getMouseButtonMask() {
 
 static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
     int xrez = g_game.x_resolution;
-    static int
-            whentodouble = XMLSupport::parse_int(vs_config->getVariable("joystick", "double_mouse_position", "1280"));
-    static float factor = XMLSupport::parse_float(vs_config->getVariable("joystick", "double_mouse_factor", "2"));
-    if (xrez >= whentodouble) {
+    const int when_to_double = vega_config::config->joystick.double_mouse_position;
+    const float factor = vega_config::config->joystick.double_mouse_factor;
+    if (xrez >= when_to_double) {
         x -= g_game.x_resolution / 2;
         y -= g_game.y_resolution / 2;
         if (invert) {
@@ -137,8 +136,8 @@ static void CalculateRealXAndY(int xbeforecalc, int ybeforecalc, float *x, float
 #define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
 
 static void SetupViewport() {
-    static int base_max_width = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_width", "0"));
-    static int base_max_height = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_height", "0"));
+    const int base_max_width = vega_config::config->graphics.bases.max_width;
+    const int base_max_height = vega_config::config->graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         int xrez = mymin(g_game.x_resolution, base_max_width);
         int yrez = mymin(g_game.y_resolution, base_max_height);
@@ -174,7 +173,7 @@ void BaseInterface::Room::BaseObj::Draw(BaseInterface *base) {
 }
 
 static FILTER BlurBases() {
-    static bool blur_bases = XMLSupport::parse_bool(vs_config->getVariable("graphics", "blur_bases", "true"));
+    const bool blur_bases = vega_config::config->graphics.blur_bases;
     return blur_bases ? BILINEAR : NEAREST;
 }
 
@@ -252,8 +251,7 @@ void BaseInterface::Room::BaseVSMovie::SetTime(float t) {
 }
 
 void BaseInterface::Room::BaseVSSprite::Draw(BaseInterface *base) {
-    static float AlphaTestingCutoff =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_alpha_test_cutoff", "0"));
+    const float AlphaTestingCutoff = vega_config::config->graphics.bases.alpha_test_cutoff;
     GFXAlphaTest(GREATER, AlphaTestingCutoff);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXEnable(TEXTURE0);
@@ -311,7 +309,7 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     if (un) {
         GFXHudMode(GFXFALSE);
         float tmp = g_game.fov;
-        static float standard_fov = XMLSupport::parse_float(vs_config->getVariable("graphics", "base_fov", "90"));
+        const float standard_fov = vega_config::config->graphics.bases.fov;
         g_game.fov = standard_fov;
         float tmp1 = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
@@ -385,29 +383,20 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
     //<var name="base_locationmarker_textcolor_g" value="1.0"/>
     //<var name="base_locationmarker_textcolor_b" value="1.0"/>
     //<var name="base_drawlocationborders" value="false"/>
-    static bool enable_markers =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_enable_locationmarkers", "false"));
-    static bool
-            draw_text = XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_draw_locationtext", "false"));
-    static bool draw_always =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_locationmarker_drawalways", "false"));
-    static float y_lower =
+    const bool enable_markers = vega_config::config->graphics.bases.enable_location_markers;
+    const bool draw_text = vega_config::config->graphics.bases.draw_location_text;
+    const bool draw_always = vega_config::config->graphics.bases.location_marker_draw_always;
+    static const float y_lower =
             -0.9;           //shows the offset on the lower edge of the screen (for the textline there) -> Should be defined globally somewhere
-    static float base_text_background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_text_background_alpha", "0.0625"));
+    const float base_text_background_alpha = vega_config::config->graphics.bases.text_background_alpha;
     if (enable_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        static float text_offset_x =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_x", "0"));
-        static float text_offset_y =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_y", "0"));
-        static float text_color_r =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textcolor_r", "1"));
-        static float text_color_g =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textcolor_g", "1"));
-        static float text_color_b =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textcolor_b", "1"));
+        const float text_offset_x = vega_config::config->graphics.bases.location_marker_text_offset_x;
+        const float text_offset_y = vega_config::config->graphics.bases.location_marker_text_offset_y;
+        const float text_color_r = vega_config::config->graphics.bases.location_marker_text_color_r;
+        const float text_color_g = vega_config::config->graphics.bases.locationmarker_textcolor_g;
+        const float text_color_b = vega_config::config->graphics.bases.locationmarker_textcolor_b;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 if ((links[i]->alpha < 1) || (draw_always)) {
@@ -487,17 +476,13 @@ void BaseInterface::Room::Draw(BaseInterface *base) {
         //for i
     }     //enable_markers
 
-    static bool draw_borders =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_drawlocationborders", "false"));
-    static bool debug_markers =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_enable_debugmarkers", "false"));
+    const bool draw_borders = vega_config::config->graphics.bases.draw_location_borders;
+    const bool debug_markers = vega_config::config->graphics.bases.enable_debug_markers;
     if (draw_borders || debug_markers) {
         float x, y, text_wid, text_hei;
         //get offset from config;
-        static float text_offset_x =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_x", "0"));
-        static float text_offset_y =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_textoffset_y", "0"));
+        const float text_offset_x = vega_config::config->graphics.bases.location_marker_text_offset_x;
+        const float text_offset_y = vega_config::config->graphics.bases.location_marker_text_offset_y;
         for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
             if (links[i]) {
                 //Debug marker
@@ -576,8 +561,8 @@ BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::strin
 void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
     int tmpx = g_game.x_resolution;
     int tmpy = g_game.y_resolution;
-    static int base_max_width = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_width", "0"));
-    static int base_max_height = XMLSupport::parse_int(vs_config->getVariable("graphics", "base_max_height", "0"));
+    const int base_max_width = vega_config::config->graphics.bases.max_width;
+    const int base_max_height = vega_config::config->graphics.bases.max_height;
     if (base_max_width && base_max_height) {
         if (base_max_width < tmpx) {
             g_game.x_resolution = base_max_width;
@@ -586,8 +571,7 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
             g_game.y_resolution = base_max_height;
         }
     }
-    static float base_text_background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_text_background_alpha", "0.0625"));
+    const float base_text_background_alpha = vega_config::config->graphics.bases.text_background_alpha;
     GFXColor tmpbg = text.bgcol;
     bool automatte = (0 == tmpbg.a);
     if (automatte) {
@@ -650,7 +634,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;
     }
     curtime += GetElapsedTime() / getTimeCompression();
-    static float delay = XMLSupport::parse_float(vs_config->getVariable("graphics", "text_delay", ".05"));
+    const float delay = vega_config::config->graphics.text_delay;
     if ((std::find(active_talks.begin(), active_talks.end(),
             this) == active_talks.end())
             || (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
@@ -670,8 +654,8 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
     if (curchar < message.size()) {
-        static float inbetween = XMLSupport::parse_float(vs_config->getVariable("graphics", "text_speed", ".025"));
-        if (curtime > inbetween) {
+        const float in_between = vega_config::config->graphics.text_speed;
+        if (curtime > in_between) {
             base->othtext.SetText(message.substr(0, ++curchar));
             curtime = 0;
         }
@@ -898,10 +882,8 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
         curtext.col = GFXColor(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
-    static bool draw_always =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "base_locationmarker_drawalways", "false"));
-    static float defined_distance =
-            fabs(XMLSupport::parse_float(vs_config->getVariable("graphics", "base_locationmarker_distance", "0.5")));
+    const bool draw_always = vega_config::config->graphics.bases.location_marker_draw_always;
+    const float defined_distance = fabs(vega_config::config->graphics.bases.location_marker_distance);
     if (!draw_always) {
         float cx, cy;
         float dist_cur2link;
@@ -1074,8 +1056,7 @@ void BaseInterface::InitCallbacks() {
     winsys_set_passive_motion_func(PassiveMouseOverWin);
     CurrentBase = this;
     CallComp = false;
-    static bool simulate_while_at_base =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "simulate_while_docked", "false"));
+    const bool simulate_while_at_base = vega_config::config->physics.simulate_while_docked;
     if (!(simulate_while_at_base || _Universe->numPlayers() > 1)) {
         GFXLoop(base_main_loop);
     }
@@ -1288,8 +1269,7 @@ extern void abletodock(int dock);
 void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        static bool
-                auto_undock_var = XMLSupport::parse_bool(vs_config->getVariable("physics", "AutomaticUnDock", "true"));
+        const bool auto_undock_var = vega_config::config->physics.auto_undock;
         bool auto_undock = auto_undock_var;
         Unit *bas = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
@@ -1331,7 +1311,7 @@ inline QVector randyVector(float min, float max) {
 void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        XMLSupport::parse_bool(vs_config->getVariable("physics", "AutomaticUnDock", "true"));
+        vega_config::config->physics.AutomaticUnDock;
         Unit *bas = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
         if (playa && bas) {
@@ -1349,8 +1329,7 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                         + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
-                static float
-                        velmul = XMLSupport::parse_float(vs_config->getVariable("physics", "eject_cargo_speed", "1"));
+                const float velmul = vega_config::config->physics.eject_cargo_speed;
                 playa->SetVelocity(bas->Velocity * velmul + randyVector(-.25, .25).Cast());
             }
             playa->UnDock(bas);
@@ -1513,8 +1492,7 @@ void BaseInterface::Draw() {
 
     float x, y;
     glViewport(0, 0, g_game.x_resolution, g_game.y_resolution);
-    static float base_text_background_alpha =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "base_text_background_alpha", "0.0625"));
+    const float base_text_background_alpha = vega_config::config->graphics.bases.text_background_alpha;
 
     curtext.GetCharSize(x, y);
     curtext.SetPos(-.99, -1 + (y * 1.5));

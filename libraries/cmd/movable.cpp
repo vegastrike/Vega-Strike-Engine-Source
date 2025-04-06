@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Roy Falk, ministerofinformation,
+ * Copyright (C) 2020-2025 Roy Falk, ministerofinformation,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -742,12 +742,12 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
     }
 
     static bool must_afterburn_to_buzz =
-            XMLSupport::parse_bool(vs_config->getVariable("audio", "buzzing_needs_afterburner", "false"));
+            vega_config::config->audio.buzzing_needs_afterburner;
     if (_Universe->isPlayerStarship(unit) != NULL) {
         static int playerengine = AUDCreateSound(vs_config->getVariable("unitaudio",
                 "player_afterburner",
                 "sfx10.wav"), true);
-        static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
+        static float enginegain = vega_config::config->audio.afterburner_gain;
         if (afterburn != AUDIsPlaying(playerengine)) {
             if (afterburn) {
                 AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
@@ -756,9 +756,9 @@ void Movable::Thrust(const Vector &amt1, bool afterburn) {
             }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {
-        static float buzzingtime = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_time", "5"));
+        static float buzzingtime = vega_config::config->audio.buzzing_time;
         static float
-                buzzingdistance = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_distance", "5"));
+                buzzingdistance = vega_config::config->audio.buzzing_distance;
         static float lastbuzz = getNewTime();
         Unit *playa = _Universe->AccessCockpit()->GetParent();
         if (playa) {

@@ -1,7 +1,7 @@
 /*
  * intelligent.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, Roy Falk, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -264,7 +264,7 @@ void Intelligent::SetTurretAI() {
     Unit *unit = static_cast<Unit *>(this);
 
     unit->turretstatus = 2;
-    static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI", "independent_turrets", "false"));
+    static bool talkinturrets = vega_config::config->ai.independent_turrets;
     if (talkinturrets) {
         Unit *un;
         for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {

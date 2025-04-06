@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 hellcatv, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2025 hellcatv, ace123, surfdargent, klaussfreire,
  * jacks, pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -142,9 +142,9 @@ void NavigationSystem::Setup() {
 
     path_view = PATH_ON;
     static bool start_sys_ortho =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "system_map_ortho_view", "false"));
+            vega_config::config->graphics.system_map_ortho_view;
     static bool start_sec_ortho =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "sector_map_ortho_view", "false"));
+            vega_config::config->graphics.sector_map_ortho_view;
     system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
     galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
     system_multi_dimensional = 1;
@@ -172,7 +172,7 @@ void NavigationSystem::Setup() {
     mouse_x_previous = (-1 + float(mousex) / (.5 * g_game.x_resolution));
     mouse_y_previous = (1 + float(-1 * mousey) / (.5 * g_game.y_resolution));
 
-    static int max_map_nodes = XMLSupport::parse_int(vs_config->getVariable("graphics", "max_map_nodes", "256000"));
+    static int max_map_nodes = vega_config::config->graphics.max_map_nodes;
     systemIter.init(UniverseUtil::getSystemFile(), max_map_nodes);
     sectorIter.init(systemIter);
     systemselectionindex = 0;
@@ -182,7 +182,7 @@ void NavigationSystem::Setup() {
     setFocusedSystemIndex(0);
 
     static int time_to_helpscreen =
-            XMLSupport::parse_int(vs_config->getVariable("general", "times_to_show_help_screen", "3"));
+            vega_config::config->general.times_to_show_help_screen;
     buttonstates = 0;
     if (getSaveData(0, "436457r1K3574r7uP71m35", 0) <= time_to_helpscreen) {
         whattodraw = 0;
@@ -387,9 +387,9 @@ void NavigationSystem::Draw() {
     //**********************************
     Vector p, q, r;
     static float zrange =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_nav_zrange", "10"));
+            vega_config::config->graphics.cockpit_nav_zrange;
     static float zfloor =
-            XMLSupport::parse_float(vs_config->getVariable("graphics", "cockpit_nav_zfloor", "0.1"));
+            vega_config::config->graphics.cockpit_nav_zfloor;
     _Universe->AccessCamera()->GetOrientation(p, q, r);
     _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
             GFXTRUE,
@@ -1119,7 +1119,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
     a_label.SetText(label);
     static bool nav_button_labels =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_button_labels", "true"));
+            vega_config::config->graphics.draw_nav_button_labels;
     if (nav_button_labels) {
         const float background_alpha = vega_config::config->graphics.hud.text_background_alpha;
         GFXColor tpbg = a_label.bgcol;
@@ -1581,7 +1581,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
                     mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
         static float wheel_zoom_level =
-                XMLSupport::parse_float(vs_config->getVariable("graphics", "wheel_zoom_amount", "0.1"));
+                vega_config::config->graphics.wheel_zoom_amount;
         if (system_vs_galaxy) {
             if (mouse_wentdown[3]) {
                 zoom_s += wheel_zoom_level;
@@ -1592,7 +1592,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             }
             //if(zoom < 1.0)
             //zoom = 1.0;
-//static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
+//const float zoommax = vega_config::config->graphics.nav_zoom_max;
             if (zoom_s < 1.2) {
                 zoom_s = 1.2;
             }
@@ -1609,7 +1609,7 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
             }
             //if(zoom < 1.0)
             //zoom = 1.0;
-//static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
+//const float zoommax = vega_config::config->graphics.nav_zoom_max;
             if (zoom < .5) {
                 zoom = .5;
             }

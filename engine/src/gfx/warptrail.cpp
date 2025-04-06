@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -94,7 +93,7 @@ struct WarpTrail {
         Vector p, q, r;
         r = (end - start).Cast();
         r.Normalize();
-        static double stretch = XMLSupport::parse_float(vs_config->getVariable("graphics", "warp_trail_stretch", "300"));
+        const double stretch = vega_config::config->graphics.warp_trail_stretch;
         r *= un->rSize() * stretch;
         q = Vector(0, 1, 0);
         p = r.Cross(q);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -45,8 +45,7 @@ extern int numprocessed;
 extern double targetpick;
 
 static bool NoDockWithClear() {
-    static bool nodockwithclear =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "dock_with_clear_planets", "true"));
+    const bool nodockwithclear = vega_config::config->physics.dock_with_clear_planets;
     return nodockwithclear;
 }
 
@@ -289,23 +288,14 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
         rangetotarget = .5 * gunrange;
     }
     if (gunrange <= 0) {
-        static float mountless_gunrange =
-                XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MountlessGunRange", "300000000"));
+        const float mountless_gunrange = vega_config::config->ai.targeting.mountless_gun_range;
         gunrange = mountless_gunrange;
     }     //probably a mountless capship. 50000 is chosen arbitrarily
     float inertial_priority = 0;
     {
-        static float mass_inertial_priority_cutoff =
-                XMLSupport::parse_float(vs_config->getVariable("AI",
-                        "Targetting",
-                        "MassInertialPriorityCutoff",
-                        "5000"));
+        const float mass_inertial_priority_cutoff = vega_config::config->ai.targeting.mass_inertial_priority_cutoff;
         if (me->getMass() > mass_inertial_priority_cutoff) {
-            static float mass_inertial_priority_scale =
-                    XMLSupport::parse_float(vs_config->getVariable("AI",
-                            "Targetting",
-                            "MassInertialPriorityScale",
-                            ".0000001"));
+            const float mass_inertial_priority_scale = vega_config::config->ai.targeting.mass_inertial_priority_scale;
             Vector normv(me->GetVelocity());
             float Speed = me->GetVelocity().Magnitude();
             normv *= Speed ? 1.0f / Speed : 1.0f;
@@ -315,8 +305,7 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
                     mass_inertial_priority_scale * (.5 + .5 * (normv.Dot(ourToThem))) * me->getMass() * Speed;
         }
     }
-    static float
-            threat_weight = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "ThreatWeight", ".5"));
+    const float threat_weight = vega_config::config->ai.targeting.threat_weight;
     float threat_priority = (me->Threat() == targ) ? threat_weight : 0;
     threat_priority += (targ->Target() == me) ? threat_weight : 0;
     float role_priority01 = ((float) *rolepriority) / 31.;
@@ -483,10 +472,8 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     float gunspeed, gunrange, missilerange;
     parent->getAverageGunSpeed(gunspeed, gunrange, missilerange);
     static float targettimer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
-    static float mintimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinTimeToSwitchTargets", "3"));
-    static float minnulltimetoswitch =
-            XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "MinNullTimeToSwitchTargets", "5"));
+    const float mintimetoswitch = vega_config::config->ai.targeting.min_time_to_switch_targets;
+    const float minnulltimetoswitch = vega_config::config->ai.targeting.min_null_time_to_switch_targets;
     static int minnumpollers =
             float_to_int(XMLSupport::parse_float(vs_config->getVariable("AI",
                     "Targetting",
@@ -551,8 +538,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     for (; (su = *subun) != NULL; ++subun) {
         static unsigned int inert = ROLES::getRole("INERT");
         static unsigned int pointdef = ROLES::getRole("POINTDEF");
-        static bool assignpointdef =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "Targetting", "AssignPointDef", "true"));
+        const bool assignpointdef = vega_config::config->ai.targeting.assign_point_def;
         if ((su->getAttackPreferenceChar() != pointdef) || assignpointdef) {
             if (su->getAttackPreferenceChar() != inert) {
                 AssignTBin(su, tbin);
@@ -572,8 +558,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
                     "Targetting",
                     "search_extra_radius",
                     "1000"));                 //Maximum target radius that is guaranteed to be detected
-    static char maxrolepriority =
-            XMLSupport::parse_int(vs_config->getVariable("AI", "Targetting", "search_max_role_priority", "16"));
+    const char maxrolepriority = vega_config::config->ai.targeting.search_max_role_priority;
     static int maxtargets = XMLSupport::parse_int(vs_config->getVariable("AI",
             "Targetting",
             "search_max_candidates",
@@ -589,8 +574,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     double pretable = queryTime();
     unitLocator.action.init(this, parent, gunrange, &tbin, maxranges, maxrolepriority, maxtargets);
     static int gcounter = 0;
-    static int
-            min_rechoose_interval = XMLSupport::parse_int(vs_config->getVariable("AI", "min_rechoose_interval", "128"));
+    const int min_rechoose_interval = vega_config::config->ai.min_rechoose_interval;
     if (curtarg) {
         if (gcounter++ < min_rechoose_interval || rand() / 8 < RAND_MAX / 9) {
             //in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
@@ -680,7 +664,7 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     if (targ == parent->Target()) {
         distance = dist;
     }
-    static float firewhen = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "InWeaponRange", "1.2"));
+    const float firewhen = vega_config::config->ai.firing.in_weapon_range;
     static float fireangle_minagg =
             (float) cos(M_PI * XMLSupport::parse_float(vs_config->getVariable("AI",
                     "Firing",
@@ -703,12 +687,10 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
         if (Cockpit::tooManyAttackers()) {
             Cockpit *player = _Universe->isPlayerStarship(targ);
             if (player) {
-                static int max_attackers =
-                        XMLSupport::parse_int(vs_config->getVariable("AI", "max_player_attackers", "0"));
+                const int max_attackers = vega_config::config->ai.max_player_attackers;
                 int attackers = player->number_of_attackers;
                 if (attackers > max_attackers && max_attackers > 0) {
-                    static float attacker_switch_time =
-                            XMLSupport::parse_float(vs_config->getVariable("AI", "attacker_switch_time", "15"));
+                    const float attacker_switch_time = vega_config::config->ai.attacker_switch_time;
                     int curtime =
                             (int) fmod(floor(UniverseUtil::GetGameTime() / attacker_switch_time), (float) (1 << 24));
                     int seed = ((((size_t) parent) & 0xffffffff) ^ curtime);
@@ -736,12 +718,11 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
     if (un) {
         firebitm = (1 << un->getUnitRoleChar());
 
-        static bool AlwaysFireAutotrackers =
-                XMLSupport::parse_bool(vs_config->getVariable("AI", "AlwaysFireAutotrackers", "true"));
+        const bool always_fire_autotrackers = vega_config::config->ai.always_fire_autotrackers;
         if (shouldfire) {
             firebitm |= ROLES::FIRE_GUNS;
         }
-        if (AlwaysFireAutotrackers && !shouldfire) {
+        if (always_fire_autotrackers && !shouldfire) {
             firebitm |= ROLES::FIRE_GUNS;
             firebitm |= ROLES::FIRE_ONLY_AUTOTRACKERS;
         }
@@ -753,7 +734,7 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
 }
 
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
-    static float missiledelay = XMLSupport::parse_float(vs_config->getVariable("AI", "MissileGunDelay", "4"));
+    const float missiledelay = vega_config::config->ai.missile_gun_delay;
     //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
     bool fire_missile = lockmissile && rand() < RAND_MAX * missileprobability * SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
@@ -782,8 +763,7 @@ bool FireAt::isJumpablePlanet(Unit *targ) {
 using std::string;
 
 void FireAt::PossiblySwitchTarget(bool unused) {
-    static float
-            targettime = XMLSupport::parse_float(vs_config->getVariable("AI", "Targetting", "TimeUntilSwitch", "20"));
+    const float targettime = vega_config::config->ai.targeting.time_until_switch;
     if ((targettime <= 0) || (vsrandom.uniformInc(0, 1) < simulation_atom_var / targettime)) {
         bool ct = true;
         Flightgroup *fg;
@@ -806,26 +786,19 @@ void FireAt::Execute() {
     done = tmp;
     Unit *targ;
     if (parent->isUnit() == Vega_UnitType::unit) {
-        static float
-                cont_update_time = XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandUpdateTime", "1"));
+        const float cont_update_time = vega_config::config->ai.contraband_update_time;
         //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
         if (rand() < RAND_MAX * SIMULATION_ATOM / cont_update_time) {
             UpdateContrabandSearch();
         }
-        static float
-                cont_initiate_time = XMLSupport::parse_float(vs_config->getVariable("AI", "CommInitiateTime", "300"));
+        const float cont_initiate_time = vega_config::config->ai.comm_initiate_time;
         //Or here?
         if ((float) rand() < ((float) RAND_MAX * (SIMULATION_ATOM / cont_initiate_time))) {
-            static float contraband_initiate_time =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandInitiateTime", "3000"));
-            static float comm_to_player =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "CommToPlayerPercent", ".05"));
-            static float comm_to_target =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "CommToTargetPercent", ".25"));
-            static float contraband_to_player =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandToPlayerPercent", ".98"));
-            static float contraband_to_target =
-                    XMLSupport::parse_float(vs_config->getVariable("AI", "ContrabandToTargetPercent", "0.001"));
+            const float contraband_initiate_time = vega_config::config->ai.contraband_initiate_time;
+            const float comm_to_player = vega_config::config->ai.comm_to_player_percent;
+            const float comm_to_target = vega_config::config->ai.comm_to_target_percent;
+            const float contraband_to_player = vega_config::config->ai.contraband_to_player_percent;
+            const float contraband_to_target = vega_config::config->ai.contraband_to_target_percent;
 
             unsigned int modulo = ((unsigned int) (contraband_initiate_time / cont_initiate_time));
             if (modulo < 1) {

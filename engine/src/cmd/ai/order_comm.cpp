@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2001-2002 Daniel Horn
  * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (c) 2019-2025 Stephen G. Tuggy, and other Vega Strike Contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -63,10 +62,8 @@ void Order::Communicate(const CommunicationMessage &c) {
     }
     if ((un = newC->sender.GetUnit())) {
         if (un != parent) {
-            static bool talk_more_helps =
-                    XMLSupport::parse_bool(vs_config->getVariable("AI", "talking_faster_helps", "true"));
-            static float
-                    talk_factor = XMLSupport::parse_float(vs_config->getVariable("AI", "talk_relation_factor", ".5"));
+            const bool talk_more_helps = vega_config::config->ai.talking_faster_helps;
+            const float talk_factor = vega_config::config->ai.talk_relation_factor;
             if (talk_more_helps || !already_communicated) {
                 AdjustRelationTo(un, newC->getDeltaRelation() * talk_factor);
             }

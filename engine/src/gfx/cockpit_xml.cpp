@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -293,11 +293,11 @@ string getRes(string inp) {
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
     static bool cockpit_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "cockpit_smooth_texture", "false"));
+            vega_config::config->graphics.cockpit_smooth_texture;
     static bool panel_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "panel_smooth_texture", "true"));
+            vega_config::config->graphics.panel_smooth_texture;
     static bool crosshair_smooth =
-            XMLSupport::parse_bool(vs_config->getVariable("graphics", "crosshair_smooth_texture", "true"));
+            vega_config::config->graphics.crosshair_smooth_texture;
     AttributeList::const_iterator iter;
     Gauge::DIRECTION tmpdir = Gauge::GAUGE_UP;
     VSSprite **newsprite = NULL;

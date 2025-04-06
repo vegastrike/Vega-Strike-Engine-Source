@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * Copyright (C) 2001-2025 Daniel Horn, ace123, surfdargent, klaussfreire,
  * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -232,7 +232,7 @@ bool Animation::CalculateOrientation(Matrix &result) {
     QVector pos(Position());
     float hei = height;
     float wid = width;
-    static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable("graphics", "HaloOffset", ".1"));
+    const float HaloOffset = vega_config::config->graphics.HaloOffset;
     bool retval =
             ::CalculateOrientation(pos,
                     camp,
@@ -460,7 +460,7 @@ void Animation::Draw() {
         Vector camp, camq, camr;
         QVector pos(Position());
 
-        static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable("graphics", "HaloOffset", ".1"));
+        const float HaloOffset = vega_config::config->graphics.HaloOffset;
 
         /**/
         //Why do all this if we can use ::CalculateOrientation?

@@ -2,9 +2,8 @@
  * cockpit_generic.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -166,7 +165,7 @@ void Cockpit::Delete() {
 }
 
 void Cockpit::RestoreGodliness() {
-    static float maxgodliness = XMLSupport::parse_float(vs_config->getVariable("physics", "player_godliness", "0"));
+    static float maxgodliness = vega_config::config->physics.player_godliness;
     godliness = maxgodliness;
     if (godliness > maxgodliness) {
         godliness = maxgodliness;
@@ -180,7 +179,7 @@ void Cockpit::InitStatic() {
 
 bool Cockpit::unitInAutoRegion(Unit *un) {
     static float autopilot_term_distance =
-            XMLSupport::parse_float(vs_config->getVariable("physics", "auto_pilot_termination_distance", "6000"));
+            vega_config::config->physics.auto_pilot_termination_distance;
     Unit *targ = autopilot_target.GetUnit();
     if (targ) {
         return UnitUtil::getSignificantDistance(un, targ)
@@ -191,7 +190,7 @@ bool Cockpit::unitInAutoRegion(Unit *un) {
 }
 
 static float getInitialZoomFactor() {
-    static float inizoom = XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+    static float inizoom = vega_config::config->graphics.inital_zoom_factor
     return inizoom;
 }
 
@@ -202,7 +201,7 @@ Cockpit::Cockpit(const char *file, Unit *parent, const std::string &pilot_name)
         viewport_offset(0),
         zoomfactor(getInitialZoomFactor()),
         savegame(new SaveGame(pilot_name)) {
-    //static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
+    //const int headlag = vega_config::config->graphics.head_lag;
     //int i;
     partial_number_of_attackers = -1;
     number_of_attackers = 0;
@@ -314,7 +313,7 @@ int Cockpit::Autopilot(Unit *target) {
                 //SetView (CP_PAN);
                 un->AutoPilotTo(target, false);
                 static bool face_target_on_auto =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "face_on_auto", "false"));
+                        vega_config::config->physics.face_on_auto;
                 if (face_target_on_auto) {
                     FaceTarget(un);
                 }
@@ -330,7 +329,7 @@ int Cockpit::Autopilot(Unit *target) {
                  *                                                     averagetime*autospeed/(numave));
                  */
                 static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                        vega_config::config->graphics.inital_zoom_factor
                 zoomfactor = initialzoom;
                 static float autotime = XMLSupport::parse_float(vs_config->getVariable("physics",
                         "autotime",
@@ -371,7 +370,7 @@ void SwitchUnits(Unit *ol, Unit *nw) {
 
 static void SwitchUnitsTurret(Unit *ol, Unit *nw) {
     static bool FlyStraightInTurret =
-            XMLSupport::parse_bool(vs_config->getVariable("physics", "ai_pilot_when_in_turret", "true"));
+            vega_config::config->physics.ai_pilot_when_in_turret;
     if (FlyStraightInTurret) {
         SwitchUnits(ol, nw);
     } else {
@@ -433,7 +432,7 @@ bool Cockpit::tooManyAttackers() {
 }
 
 void Cockpit::updateAttackers() {
-    static int max_attackers = XMLSupport::parse_int(vs_config->getVariable("AI", "max_player_attackers", "0"));
+    static int max_attackers = vega_config::config->ai.max_player_attackers;
     if (max_attackers == 0) {
         return;
     }
@@ -560,14 +559,11 @@ bool Cockpit::Update() {
             }
         }
     }
-    static bool autoclear = XMLSupport::parse_bool(vs_config->getVariable("AI", "autodock", "false"));
+    static bool autoclear = vega_config::config->ai.autodock;
     if (autoclear && par) {
         Unit *targ = par->Target();
         if (targ) {
-            static float autopilot_term_distance =
-                    XMLSupport::parse_float(vs_config->getVariable("physics",
-                            "auto_pilot_termination_distance",
-                            "6000"));
+            const float autopilot_term_distance = vega_config::config->physics.auto_pilot_termination_distance;
             float doubled = dockingdistance(targ, par);
             if (((targ->isUnit() != Vega_UnitType::planet
                     && doubled < autopilot_term_distance)
@@ -597,14 +593,14 @@ bool Cockpit::Update() {
             parentturret.SetUnit(NULL);
 
             static float initialzoom =
-                    XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                    vega_config::config->graphics.inital_zoom_factor
             zoomfactor = initialzoom;
             static int index = 0;
             switchunit[_Universe->CurrentCockpit()] = 0;
             static bool switch_nonowned_units =
-                    XMLSupport::parse_bool(vs_config->getVariable("AI", "switch_nonowned_units", "true"));
+                    vega_config::config->ai.switch_nonowned_units;
 //switch_nonowned_units = true;
-            //static bool switch_to_fac=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_to_whole_faction","true"));
+            //const bool switch_to_fac = vega_config::config->ai.switch_to_whole_faction;
 
             Unit *un;
             bool found = false;
@@ -701,7 +697,7 @@ bool Cockpit::Update() {
         if (respawnunit.size() > _Universe->CurrentCockpit()) {
             if (respawnunit[_Universe->CurrentCockpit()]) {
                 static float initialzoom =
-                        XMLSupport::parse_float(vs_config->getVariable("graphics", "inital_zoom_factor", "2.25"));
+                        vega_config::config->graphics.inital_zoom_factor
                 zoomfactor = initialzoom;
 
                 parentturret.SetUnit(NULL);
@@ -748,7 +744,7 @@ bool Cockpit::Update() {
                 CopySavedShips(savegame->GetCallsign(), whichcp, packedInfo, true);
                 bool actually_have_save = false;
                 static bool persistent_on_load =
-                        XMLSupport::parse_bool(vs_config->getVariable("physics", "persistent_on_load", "true"));
+                        vega_config::config->physics.persistent_on_load;
                 if (savegame->GetStarSystem() != "") {
                     actually_have_save = true;
                     newsystem = savegame->GetStarSystem() + ".system";

@@ -2,8 +2,7 @@
  * pilot.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2025 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,8 +35,8 @@
 #include <vector>
 
 Pilot::Pilot(int faction) {
-    static float reaction = XMLSupport::parse_float(vs_config->getVariable("AI", "Firing", "ReactionTime", ".2"));
-    static float ran = XMLSupport::parse_float(vs_config->getVariable("AI", "DefaultRank", ".01"));
+    const float reaction = vega_config::config->ai.firing.reaction_time;
+    const float ran = vega_config::config->ai.default_rank;
     this->rank = ran;
 
     this->reaction_time = reaction;
@@ -58,8 +57,7 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
         float rel = UnitUtil::getRelationToFaction(parent, faction);         /* What the bloody hell? */
         bool abovezero = (*i).second + rel < 0;
         if (!abovezero) {
-            static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+            const float slowrel = vega_config::config->ai.slow_diplomacy_for_enemies;
             factor *= slowrel;
         }
         (*i).second += factor;
@@ -67,11 +65,10 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
             parent->aistate->ChooseTarget();
         }
     } else {
-        static float lessrel = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationEnemy", "-.05"));
+        const float lessrel = vega_config::config->ai.unknown_relation_enemy;
         bool abovezero = (*i).second < lessrel;
         if (!abovezero) {
-            static float
-                    slowrel = XMLSupport::parse_float(vs_config->getVariable("AI", "SlowDiplomacyForEnemies", ".25"));
+            const float slowrel = vega_config::config->ai.slow_diplomacy_for_enemies;
             factor *= slowrel;
         }
         (*i).second += factor;
@@ -83,7 +80,7 @@ float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float fac
 }
 
 void Pilot::DoHit(Unit *parent, void *aggressor, int faction) {
-    static float hitcost = XMLSupport::parse_float(vs_config->getVariable("AI", "UnknownRelationHitCost", ".01"));
+    const float hitcost = vega_config::config->ai.unknown_relation_hit_cost;
     if (hitcost) {
         adjustSpecificRelationship(parent, aggressor, hitcost, faction);
         int whichCp = _Universe->whichPlayerStarship(parent);
@@ -131,8 +128,7 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
                 }
             }
             if (good) {
-                static float goodness_for_nocargo =
-                        XMLSupport::parse_float(vs_config->getVariable("AI", "pirate_bonus_for_empty_hold", ".75"));
+                const float goodness_for_nocargo = vega_config::config->ai.pirate_bonus_for_empty_hold;
                 rel += goodness_for_nocargo;
             }
         }

@@ -1,7 +1,7 @@
 /*
  * director_generic.cpp
  *
- * Copyright (C) 2001-2023 Daniel Horn, pyramid3d, Nachum Barcohen, Roy Falk,
+ * Copyright (C) 2001-2025 Daniel Horn, pyramid3d, Nachum Barcohen, Roy Falk,
  * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * This file is part of Vega Strike.
@@ -455,8 +455,8 @@ void Mission::DirectorStart(missionNode *node) {
     VS_LOG(trace, "DIRECTOR START");
 
     static int st_debuglevel = atoi(vs_config->getVariable("interpreter", "debuglevel", "0").c_str());
-    static bool st_start_game = XMLSupport::parse_bool(vs_config->getVariable("interpreter", "startgame", "true"));
-    static bool st_do_trace = XMLSupport::parse_bool(vs_config->getVariable("interpreter", "trace", "false"));
+    const bool st_start_game = vega_config::config->interpreter.startgame;
+    const bool st_do_trace = vega_config::config->interpreter.trace;
 
     debuglevel = st_debuglevel;
     start_game = st_start_game;
